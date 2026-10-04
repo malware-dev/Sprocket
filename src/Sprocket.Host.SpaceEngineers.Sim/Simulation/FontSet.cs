@@ -35,11 +35,13 @@ namespace Sprocket.Sim.Simulation
             return this;
         }
 
+        /// <inheritdoc />
         public Vector2 MeasurePixels(string font, string text, float scale)
         {
             return For(font).MeasurePixels(font, text, scale);
         }
 
+        /// <inheritdoc />
         public float LineHeightPixels(string font, float scale)
         {
             return For(font).LineHeightPixels(font, scale);

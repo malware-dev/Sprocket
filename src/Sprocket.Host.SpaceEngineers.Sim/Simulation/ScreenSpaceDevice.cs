@@ -106,6 +106,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public int Measured { get; private set; }
 
+        /// <inheritdoc />
         public Vector2 MeasureText(string font, StringBuilder text, float scale)
         {
             if (Fonts == null || text == null)
@@ -143,11 +144,13 @@ namespace Sprocket.Sim.Simulation
             return false;
         }
 
+        /// <inheritdoc />
         public Vector2 NormalizedToPixels(Vector2 position)
         {
             return new Vector2(position.X * ViewportSize.X, position.Y * ViewportSize.Y);
         }
 
+        /// <inheritdoc />
         public Vector2 NormalizedSizeToPixels(Vector2 size)
         {
             return new Vector2(size.X * ViewportSize.X, size.Y * ViewportSize.Y);
@@ -197,6 +200,7 @@ namespace Sprocket.Sim.Simulation
             return bytes[at] << 24 | bytes[at + 1] << 16 | bytes[at + 2] << 8 | bytes[at + 3];
         }
 
+        /// <inheritdoc />
         public void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
             MyScreenSpaceLayer layer)
         {
@@ -211,6 +215,7 @@ namespace Sprocket.Sim.Simulation
             });
         }
 
+        /// <inheritdoc />
         public void DrawText(string font, string text, Vector2 position, float scale, Color color,
             MyGuiDrawAlignEnum align, float maxWidth, MyScreenSpaceLayer layer)
         {

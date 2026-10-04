@@ -228,6 +228,7 @@ namespace Sprocket.Host.SpaceEngineers
             Told.Say("read " + _backups.All.Count + " backups");
         }
 
+        /// <inheritdoc />
         public override void LoadData()
         {
             // Static because Space Engineers constructs a session component and hands it to nothing: a terminal
@@ -711,6 +712,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _marks.Draw(MyAPIGateway.Session.ElapsedPlayTime);
         }
 
+        /// <inheritdoc />
         public override void UpdateAfterSimulation()
         {
             if (MyAPIGateway.Session == null)
@@ -821,6 +823,7 @@ namespace Sprocket.Host.SpaceEngineers
             _carrier.Write(_backups.Write());
         }
 
+        /// <inheritdoc />
         protected override void UnloadData()
         {
             if (MyAPIGateway.TerminalControls != null)

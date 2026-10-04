@@ -29,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly VentGas _gas = new VentGas();
 
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyAirVent;
@@ -40,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithProperty(Air, "has air")
@@ -56,6 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithAction("depressurize", "depressurize", "is-empty", "Depressurize_On").Lasting();
         }
 
+        /// <inheritdoc />
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
         {
             value = default(EntityValue);
@@ -104,6 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <inheritdoc />
         public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             var vent = block as IMyAirVent;
@@ -125,6 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <inheritdoc />
         public Status StatusOf(IMyTerminalBlock block)
         {
             var vent = block as IMyAirVent;
@@ -234,6 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 : Trouble.Waiting(Cause.VentNoOxygen);
         }
 
+        /// <inheritdoc />
         public bool IsBusy(IMyTerminalBlock block)
         {
             var vent = block as IMyAirVent;
@@ -246,6 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
         }
 
+        /// <inheritdoc />
         public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return GridEntity.Unestimated;

@@ -61,6 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         public IList<Literal> Values => _values;
 
+        /// <inheritdoc />
         public override bool IsEmpty => _values.Count == 0;
 
         /// <summary>

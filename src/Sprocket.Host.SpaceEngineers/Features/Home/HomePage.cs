@@ -56,6 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// </remarks>
         public override string Title => Editor.World.Name;
 
+        /// <inheritdoc />
         public override string CustomName => Editor.World.Name;
 
         /// <summary>The construct's own history: logic systems and installations made and taken out.</summary>
@@ -98,10 +99,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// </remarks>
         public override bool CanRename => Editor.World.CanRename;
 
+        /// <inheritdoc />
         public override string NameAbout => Editor.Texts.SystemsNameAbout;
 
+        /// <inheritdoc />
         public override bool NameRequired => true;
 
+        /// <inheritdoc />
         public override void Rename(string name)
         {
             var wanted = (name ?? "").Trim();
@@ -111,6 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Editor.World.Rename(wanted);
         }
 
+        /// <inheritdoc />
         public override void Heading(List<HeadingPart> parts)
         {
             base.Heading(parts);

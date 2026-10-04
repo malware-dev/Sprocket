@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class GameSlots : ISlots
     {
+        /// <inheritdoc />
         public IMyToolbar Of(IMyTerminalBlock block)
         {
             if (block == null)
@@ -39,6 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return provider.GetToolbar(0);
         }
 
+        /// <inheritdoc />
         public IMyToolbar Of(IMyTerminalBlock block, int index)
         {
             if (block == null || index < 0)
@@ -51,23 +53,27 @@ namespace Sprocket.Host.SpaceEngineers.World
             return provider.GetToolbar(index);
         }
 
+        /// <inheritdoc />
         public void Parameters(IMyToolbar toolbar, int slot, List<TerminalActionParameter> into)
         {
             if (toolbar != null)
                 toolbar.GetParameters(slot, into);
         }
 
+        /// <inheritdoc />
         public bool Write(IMyToolbar toolbar, int slot, MyToolbarItemInfo item,
             List<TerminalActionParameter> parameters)
         {
             return toolbar != null && toolbar.BeginChanges().Set(slot, item, parameters).Apply();
         }
 
+        /// <inheritdoc />
         public bool Exists(long entityId)
         {
             return MyAPIGateway.Entities != null && MyAPIGateway.Entities.EntityExists(entityId);
         }
 
+        /// <inheritdoc />
         public bool Clear(IMyToolbar toolbar, int slot)
         {
             return toolbar != null && toolbar.BeginChanges().Clear(slot).Apply();
@@ -473,6 +479,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <inheritdoc />
         public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
             IList<Primitive> types)
         {
@@ -541,6 +548,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _given = given;
             }
 
+            /// <inheritdoc />
             public override void Give()
             {
                 if (_given == null)
@@ -564,6 +572,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _value = value;
             }
 
+            /// <inheritdoc />
             public override void Give()
             {
                 _property.SetValue(_block, _value);
@@ -590,12 +599,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _text = text;
             }
 
+            /// <inheritdoc />
             public override void Give()
             {
                 _property.SetValue(_block, new StringBuilder(_text));
             }
         }
 
+        /// <inheritdoc />
         public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             if (block == null)

@@ -8,6 +8,7 @@ namespace Sprocket.Sim.Shell
     /// </summary>
     public sealed class App : Application
     {
+        /// <inheritdoc />
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);

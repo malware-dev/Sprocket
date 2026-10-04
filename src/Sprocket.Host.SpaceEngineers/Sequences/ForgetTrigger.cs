@@ -35,18 +35,22 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _eventId = moment == null ? null : moment.EventId;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.ForgetTrigger;
 
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return Gone(system, _going) && (_part == null || system.FindPart(_part.Id) == null);
         }
 
+        /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
             return Holds(system, _going, _sources, _eventId);
         }
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             _at = system.IndexOfTrigger(_going);
@@ -76,6 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _partAt = system.ForgetPart(_part);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             if (_part != null)

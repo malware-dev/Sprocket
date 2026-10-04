@@ -286,6 +286,7 @@ namespace Sprocket.Sim.Shell
             _surface.InvalidateVisual();
         }
 
+        /// <inheritdoc />
         protected override void OnTextInput(TextCompositionEventArgs e)
         {
             base.OnTextInput(e);
@@ -297,6 +298,7 @@ namespace Sprocket.Sim.Shell
             Wake();
         }
 
+        /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);

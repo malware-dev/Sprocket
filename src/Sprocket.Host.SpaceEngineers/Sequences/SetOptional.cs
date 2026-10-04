@@ -12,25 +12,31 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
+        /// <inheritdoc />
         public override Change Change => _now ? Change.Optional : Change.Required;
 
+        /// <inheritdoc />
         public override bool Changes => _part.Optional != _now;
 
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return _part.Optional == _now && system.FindPart(_part.Id) == _part;
         }
 
+        /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
             return _part.Optional != _now && system.FindPart(_part.Id) == _part;
         }
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             _part.Optional = _now;
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             _part.Optional = !_now;

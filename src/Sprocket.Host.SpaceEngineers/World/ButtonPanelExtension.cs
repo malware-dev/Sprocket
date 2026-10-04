@@ -35,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return toolbar == null ? 0 : toolbar.SlotCount;
         }
 
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyButtonPanel;
@@ -65,6 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<TerminalActionParameter> _read = new List<TerminalActionParameter>();
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             // What is written on the panel for somebody standing in front of it to read, which is a
@@ -72,6 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             kind.Hiding("ButtonName");
         }
 
+        /// <inheritdoc />
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
         {
             // Answered by the listener, which is the only thing that knows a press happened.
@@ -79,6 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <inheritdoc />
         public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return false;
@@ -98,6 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             return Trouble.None;
         }
+        /// <inheritdoc />
         public Status StatusOf(IMyTerminalBlock block)
         {
             var panel = block as IMyButtonPanel;
@@ -114,6 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Status.Of(Condition.NotWired);
         }
 
+        /// <inheritdoc />
         public bool IsBusy(IMyTerminalBlock block)
         {
             return false;
@@ -125,6 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
         }
 
+        /// <inheritdoc />
         public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return GridEntity.Unestimated;

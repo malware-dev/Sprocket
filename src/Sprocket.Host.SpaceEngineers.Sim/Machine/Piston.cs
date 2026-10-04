@@ -129,6 +129,7 @@ sealed class Piston : Fitting
         }
     }
 
+    /// <inheritdoc />
     public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Extend")
@@ -141,6 +142,7 @@ sealed class Piston : Fitting
             base.Perform(actionId, values);
     }
 
+    /// <inheritdoc />
     public override void Tick()
     {
         if (!Enabled || !Attached || _speed == 0)

@@ -165,6 +165,7 @@ sealed class Rotor : Fitting
             _angle += turn;
     }
 
+    /// <inheritdoc />
     public override void Tick()
     {
         if (!Enabled || Held || Locked || !Attached || Torque <= 0f || _speed == 0)

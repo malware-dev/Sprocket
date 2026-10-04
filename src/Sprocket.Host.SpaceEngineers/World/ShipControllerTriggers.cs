@@ -12,11 +12,13 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     sealed class ShipControllerTriggers : ITriggers
     {
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyShipController;
         }
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             IMyToolbar hotbar = Toolbars.Of(block, 1);

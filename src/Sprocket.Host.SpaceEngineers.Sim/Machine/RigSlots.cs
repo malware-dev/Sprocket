@@ -24,6 +24,7 @@ sealed class RigSlots : ISlots
         _rig = rig;
     }
 
+    /// <inheritdoc />
     public IMyToolbar Of(IMyTerminalBlock block)
     {
         if (block == null)
@@ -46,6 +47,7 @@ sealed class RigSlots : ISlots
         return index == 0 ? Of(block) : null;
     }
 
+    /// <inheritdoc />
     public void Parameters(IMyToolbar toolbar, int slot, List<TerminalActionParameter> into)
     {
         var rigs = toolbar as Toolbar;
@@ -53,6 +55,7 @@ sealed class RigSlots : ISlots
             rigs.Parameters(slot, into);
     }
 
+    /// <inheritdoc />
     public bool Write(IMyToolbar toolbar, int slot, MyToolbarItemInfo item,
         List<TerminalActionParameter> parameters)
     {
@@ -67,6 +70,7 @@ sealed class RigSlots : ISlots
         return changes.Apply();
     }
 
+    /// <inheritdoc />
     public bool Offers(IMyTerminalBlock block, string actionId)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -78,6 +82,7 @@ sealed class RigSlots : ISlots
         return false;
     }
 
+    /// <inheritdoc />
     public void Offered(IMyTerminalBlock block, List<Offer> into)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -90,6 +95,7 @@ sealed class RigSlots : ISlots
         }
     }
 
+    /// <inheritdoc />
     public void Settable(IMyTerminalBlock block, List<Offer> into)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -102,6 +108,7 @@ sealed class RigSlots : ISlots
         }
     }
 
+    /// <inheritdoc />
     public bool Set(IMyTerminalBlock block, string propertyId, Literal value)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -113,6 +120,7 @@ sealed class RigSlots : ISlots
         return false;
     }
 
+    /// <inheritdoc />
     public bool Holds(IMyTerminalBlock block, string propertyId, Literal value)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -172,6 +180,7 @@ sealed class RigSlots : ISlots
             _sets = sets;
         }
 
+        /// <inheritdoc />
         public override void Give()
         {
             if (_sets)
@@ -185,6 +194,7 @@ sealed class RigSlots : ISlots
         }
     }
 
+    /// <inheritdoc />
     public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -217,6 +227,7 @@ sealed class RigSlots : ISlots
         return _rig.HasGrid(entityId);
     }
 
+    /// <inheritdoc />
     public bool Clear(IMyToolbar toolbar, int slot)
     {
         var rigs = toolbar as Toolbar;

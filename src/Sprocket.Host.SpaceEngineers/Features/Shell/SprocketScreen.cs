@@ -102,6 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             SkipTransition = true;
         }
 
+        /// <inheritdoc />
         protected override void OnOpened()
         {
             _unit.Showing = true;
@@ -218,6 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             screen.Script = StatusApp.Id;
         }
 
+        /// <inheritdoc />
         protected override void OnHandleInput()
         {
             IMyInput input = MyAPIGateway.Input;
@@ -291,6 +293,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
         }
 
+        /// <inheritdoc />
         protected override void OnDraw(float transitionAlpha)
         {
             _graphics.Begin();

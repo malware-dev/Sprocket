@@ -37,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         const string IsIn = "is-retracted";
         const string There = "is-there";
 
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyPistonBase;
@@ -48,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithProperty(Out, "extended")
@@ -105,6 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 : number.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
+        /// <inheritdoc />
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
         {
             value = default(EntityValue);
@@ -241,6 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Trouble.None;
         }
 
+        /// <inheritdoc />
         public Status StatusOf(IMyTerminalBlock block)
         {
             var piston = block as IMyPistonBase;
@@ -258,6 +262,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Status.None;
         }
 
+        /// <inheritdoc />
         public bool IsBusy(IMyTerminalBlock block)
         {
             var piston = block as IMyPistonBase;

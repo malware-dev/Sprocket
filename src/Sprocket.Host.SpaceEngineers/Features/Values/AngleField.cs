@@ -143,6 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
                 _field = field;
             }
 
+            /// <inheritdoc />
             public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
             {
                 if (key == MyKeys.Up || key == MyKeys.Down)

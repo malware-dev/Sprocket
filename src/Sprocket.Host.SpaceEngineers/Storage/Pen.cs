@@ -271,6 +271,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _fresh = false;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             return _text.ToString();

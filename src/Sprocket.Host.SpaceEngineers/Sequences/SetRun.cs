@@ -14,15 +14,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _now = now;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.Step;
 
+        /// <inheritdoc />
         public override bool Changes => _was != _now;
 
+        /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
             Put(sequence, _now);
         }
 
+        /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
             Put(sequence, _was);

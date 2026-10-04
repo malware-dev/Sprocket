@@ -43,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         static readonly string[] Ways = { "directly", "clockwise", "counter-clockwise" };
 
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyMotorStator;
@@ -100,6 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             // A hinge's lock is its own, and a hinge goes the short way whatever it is told.
@@ -179,6 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return speed;
         }
 
+        /// <inheritdoc />
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
         {
             value = default(EntityValue);
@@ -211,6 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <inheritdoc />
         public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             var rotor = block as IMyMotorStator;
@@ -341,11 +345,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 : Trouble.Waiting(Cause.RotorHeld);
         }
 
+        /// <inheritdoc />
         public Status StatusOf(IMyTerminalBlock block)
         {
             return Status.None;
         }
 
+        /// <inheritdoc />
         public bool IsBusy(IMyTerminalBlock block)
         {
             var rotor = block as IMyMotorStator;

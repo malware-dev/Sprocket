@@ -24,26 +24,32 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _does = does;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.Trigger;
 
+        /// <inheritdoc />
         public override bool Changes => _start.Changes || _does.Changes;
 
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return _does.Undoable(system) && _start.Undoable(system);
         }
 
+        /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
             return _start.Redoable(system);
         }
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             _start.Apply(system);
             _does.Apply(system);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             _does.Undo(system);

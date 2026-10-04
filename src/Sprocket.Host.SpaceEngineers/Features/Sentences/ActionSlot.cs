@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The action itself, or null while nothing valid has been chosen.</summary>
         public EntityAction Action { get; private set; }
 
+        /// <inheritdoc />
         public override bool IsEmpty => Action == null;
     }
 }

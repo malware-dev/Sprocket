@@ -23,14 +23,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _steps.Add(steps[i]);
         }
 
+        /// <inheritdoc />
         public override Change Change => _change;
 
+        /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
             for (var i = 0; i < _steps.Count; i++)
                 sequence.Steps.Insert(_index + i, _steps[i]);
         }
 
+        /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
             for (var i = _steps.Count - 1; i >= 0; i--)

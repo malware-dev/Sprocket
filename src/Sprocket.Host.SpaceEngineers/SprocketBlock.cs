@@ -27,11 +27,13 @@ namespace Sprocket.Host.SpaceEngineers
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_MyProgrammableBlock), useEntityUpdate: false)]
     public class SprocketBlock : MyGameLogicComponent
     {
+        /// <inheritdoc />
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             NeedsUpdate = MyEntityUpdateEnum.BEFORE_NEXT_FRAME;
         }
 
+        /// <inheritdoc />
         public override void UpdateOnceBeforeFrame()
         {
             if (MyAPIGateway.Utilities == null)

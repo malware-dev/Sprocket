@@ -6,11 +6,13 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>An event controller's two triggers: the game runs the first slot of every page when its condition is met, and the second when it no longer is.</summary>
     sealed class EventControllerTriggers : ITriggers
     {
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyEventControllerBlock;
         }
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithTrigger(new ToolbarSlot(1, 0, 1), "has its condition met")

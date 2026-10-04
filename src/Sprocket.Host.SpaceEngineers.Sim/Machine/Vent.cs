@@ -64,6 +64,7 @@ sealed class Vent : Fitting
             || actionId == "Depressurize_Off" || base.Offers(actionId);
     }
 
+    /// <inheritdoc />
     public override void Offered(List<Offer> into)
     {
         into.Add(new Offer("Depressurize", "Depressurize On/Off"));
@@ -79,6 +80,7 @@ sealed class Vent : Fitting
         base.Carried(into);
     }
 
+    /// <inheritdoc />
     public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Depressurize_On")
@@ -98,6 +100,7 @@ sealed class Vent : Fitting
         base.Perform(actionId, values);
     }
 
+    /// <inheritdoc />
     public override void Tick()
     {
         if (!Enabled)

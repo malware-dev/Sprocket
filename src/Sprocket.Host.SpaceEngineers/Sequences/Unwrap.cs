@@ -20,14 +20,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
+        /// <inheritdoc />
         public override Change Change => _change;
 
+        /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
             for (var i = _lines.Count - 1; i >= 0; i--)
                 sequence.Steps.RemoveAt(_lines[i]);
         }
 
+        /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
             for (var i = 0; i < _lines.Count; i++)

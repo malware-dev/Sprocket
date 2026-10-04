@@ -163,6 +163,7 @@ namespace Sprocket.Sim.Simulation
             }
         }
 
+        /// <inheritdoc />
         protected override void OnRender(DrawingContext context)
         {
             Paint(context, RenderSize);
@@ -258,6 +259,7 @@ namespace Sprocket.Sim.Simulation
                 _context = context;
             }
 
+            /// <inheritdoc />
             public void Dispose()
             {
                 if (_context != null)

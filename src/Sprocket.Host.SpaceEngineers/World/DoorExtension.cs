@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public const string Shut = "shut";
         public const string Moving = "moving";
 
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyDoor;
@@ -33,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithProperty(Open, "open")
@@ -73,6 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _door.OnDoorClosed += Moved;
             }
 
+            /// <inheritdoc />
             public void Dispose()
             {
                 _door.OnDoorOpened -= Moved;
@@ -85,6 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <inheritdoc />
         public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
         {
             value = default(EntityValue);
@@ -110,6 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <inheritdoc />
         public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             var door = block as IMyDoor;
@@ -134,11 +139,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Nothing: nothing known about this block says why it would not finish.</summary>
 
+        /// <inheritdoc />
         public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
         {
             return Trouble.None;
         }
 
+        /// <inheritdoc />
         public Status StatusOf(IMyTerminalBlock block)
         {
             var door = block as IMyDoor;
@@ -156,6 +163,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Status.None;
         }
 
+        /// <inheritdoc />
         public bool IsBusy(IMyTerminalBlock block)
         {
             var door = block as IMyDoor;
@@ -168,6 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
         }
 
+        /// <inheritdoc />
         public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
         {
             return GridEntity.Unestimated;

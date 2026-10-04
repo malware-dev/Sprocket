@@ -14,11 +14,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_GravityGenerator), useEntityUpdate: false)]
     public class GravityBlock : MyGameLogicComponent
     {
+        /// <inheritdoc />
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             NeedsUpdate = MyEntityUpdateEnum.BEFORE_NEXT_FRAME;
         }
 
+        /// <inheritdoc />
         public override void UpdateOnceBeforeFrame()
         {
             // The buttons belong to a terminal, and a dedicated server has none.

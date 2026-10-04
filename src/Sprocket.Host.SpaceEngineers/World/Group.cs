@@ -22,11 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         [XmlElement("parameter")]
         public List<Parameter> Parameters = new List<Parameter>();
 
+        /// <inheritdoc />
         public override int Span
         {
             get { return Parameters.Count; }
         }
 
+        /// <inheritdoc />
         public override string Kind
         {
             get { return Sort ?? ""; }

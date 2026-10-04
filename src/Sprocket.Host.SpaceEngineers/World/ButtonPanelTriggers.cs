@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     sealed class ButtonPanelTriggers : ITriggers
     {
+        /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
         {
             return block is IMyButtonPanel;

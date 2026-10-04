@@ -1430,6 +1430,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _reconciled = int.MinValue;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             _block.IsWorkingChanged -= Working;

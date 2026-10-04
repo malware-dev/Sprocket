@@ -24,10 +24,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _taken = taken;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.TakeOver;
 
+        /// <inheritdoc />
         public override bool Changes => true;
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             _made.Apply(system);
@@ -35,6 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _from.ReplaceTrigger(_taken, null);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             _from.PutTriggerBack(_at, _taken);

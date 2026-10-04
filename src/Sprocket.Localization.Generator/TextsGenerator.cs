@@ -19,6 +19,7 @@ namespace Sprocket.Localization.Generator
     [Generator]
     public sealed class TextsGenerator : IIncrementalGenerator
     {
+        /// <inheritdoc />
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var files = context.AdditionalTextsProvider
@@ -171,11 +172,13 @@ namespace Sprocket.Localization.Generator
                 return other != null && Prefix == other.Prefix && Namespace == other.Namespace && Runtime == other.Runtime;
             }
 
+            /// <inheritdoc />
             public override bool Equals(object obj)
             {
                 return Equals(obj as Settings);
             }
 
+            /// <inheritdoc />
             public override int GetHashCode()
             {
                 return (Prefix + "|" + Namespace + "|" + Runtime).GetHashCode();

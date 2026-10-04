@@ -24,15 +24,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _to = to;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.MoveBranch;
 
+        /// <inheritdoc />
         public override bool Changes => _from != _to;
 
+        /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
             Move(sequence, _from, _to);
         }
 
+        /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
             Move(sequence, _to, _from);

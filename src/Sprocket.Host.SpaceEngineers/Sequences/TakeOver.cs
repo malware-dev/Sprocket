@@ -35,16 +35,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _keptAt = new List<ToolbarSlot>(keptAt);
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.TakeOver;
 
+        /// <inheritdoc />
         public override bool Changes => true;
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             _made.Apply(system);
             Put(_kept, _keptAt);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             Put(_had, _hadAt);
@@ -57,6 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return Holding(_kept) && _made.Undoable(system);
         }
 
+        /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
             return Holding(_had) && _made.Redoable(system);

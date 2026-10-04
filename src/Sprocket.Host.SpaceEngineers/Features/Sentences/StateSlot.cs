@@ -19,6 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>Whether the test is for the blocks being in it rather than not.</summary>
         public bool Holds { get; private set; }
 
+        /// <inheritdoc />
         public override bool IsEmpty => Moment == null;
     }
 }

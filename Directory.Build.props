@@ -6,4 +6,8 @@
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
         <NeutralLanguage>en-US</NeutralLanguage>
     </PropertyGroup>
+    <!-- Every member the code offers outside its type is documented, and CS1591 says where one is not. -->
+    <PropertyGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests'))">
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
 </Project>

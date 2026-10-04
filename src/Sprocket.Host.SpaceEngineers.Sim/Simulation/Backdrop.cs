@@ -20,6 +20,7 @@ namespace Sprocket.Sim.Simulation
     /// </remarks>
     public sealed class Backdrop : FrameworkElement
     {
+        /// <inheritdoc />
         protected override void OnRender(DrawingContext context)
         {
             Paint(context, RenderSize);

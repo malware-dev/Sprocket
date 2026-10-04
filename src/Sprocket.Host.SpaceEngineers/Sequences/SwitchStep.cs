@@ -16,13 +16,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _off = off;
         }
 
+        /// <inheritdoc />
         public override Change Change => _off ? Change.PauseStep : Change.ResumeStep;
 
+        /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
             Put(sequence, _off);
         }
 
+        /// <inheritdoc />
         public override void Undo(Sequence sequence)
         {
             Put(sequence, !_off);

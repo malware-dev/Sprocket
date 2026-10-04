@@ -487,8 +487,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>The column keeps the width it will have on its own, so nothing in it is measured again as the window widens.</remarks>
         sealed class Cut : ContentControl
         {
+            /// <inheritdoc />
             protected override bool Clips => true;
 
+            /// <inheritdoc />
             protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
             {
                 if (Content == null)
@@ -498,6 +500,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return new Vector2(0f, Content.DesiredSize.Y);
             }
 
+            /// <inheritdoc />
             protected override void ArrangeContent(RectangleF bounds)
             {
                 if (Content != null)

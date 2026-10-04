@@ -24,17 +24,22 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _edit = edit;
         }
 
+        /// <inheritdoc />
         public override Change Change => _edit.Change;
 
+        /// <inheritdoc />
         public override bool Changes => _edit.Changes;
 
+        /// <inheritdoc />
         public override bool ChangesShape => _edit.ChangesShape;
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             _edit.Apply(_sequence);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             _edit.Undo(_sequence);

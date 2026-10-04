@@ -39,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _eventId = moment == null ? null : moment.EventId;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.Target;
 
         /// <summary>Whether it does something else: a sequence run the same way again is no change.</summary>
@@ -55,16 +56,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return _trigger.Does == _now && Holds(system, _trigger, _sources, _eventId);
         }
 
+        /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
             return _trigger.Does == _was && Holds(system, _trigger, _sources, _eventId);
         }
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             // Already there the first time, and put back by this on the way forward again.
@@ -74,6 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _trigger.Does = _now;
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             _trigger.Does = _was;

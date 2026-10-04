@@ -54,6 +54,7 @@ sealed class Door : Fitting
             || base.Offers(actionId);
     }
 
+    /// <inheritdoc />
     public override void Offered(List<Offer> into)
     {
         into.Add(new Offer("Open", "Open/Closed"));
@@ -62,6 +63,7 @@ sealed class Door : Fitting
         base.Offered(into);
     }
 
+    /// <inheritdoc />
     public override void Perform(string actionId, IList<Literal> values)
     {
         if (actionId == "Open_On")
@@ -116,6 +118,7 @@ sealed class Door : Fitting
     public int Listeners => (_opened == null ? 0 : _opened.GetInvocationList().Length)
         + (_closed == null ? 0 : _closed.GetInvocationList().Length);
 
+    /// <inheritdoc />
     public override void Tick()
     {
         if (!Enabled)

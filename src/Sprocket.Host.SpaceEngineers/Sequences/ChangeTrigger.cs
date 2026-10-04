@@ -40,8 +40,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _nowEvent = now.EventId;
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.When;
 
+        /// <inheritdoc />
         public override bool Changes
         {
             get
@@ -58,21 +60,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return Holds(system, _now, _nowSources, _nowEvent);
         }
 
+        /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
             return Holds(system, _was, _wasSources, _wasEvent);
         }
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             system.ReplaceTrigger(_was, _now);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             system.ReplaceTrigger(_now, _was);

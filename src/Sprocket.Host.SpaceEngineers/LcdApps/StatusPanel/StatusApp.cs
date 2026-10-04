@@ -79,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// </remarks>
         public new IMyCubeBlock Block => (IMyCubeBlock)base.Block;
 
+        /// <inheritdoc />
         public override void Run()
         {
             base.Run();

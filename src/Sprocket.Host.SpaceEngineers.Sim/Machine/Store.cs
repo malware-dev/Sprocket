@@ -60,23 +60,27 @@ sealed class Store : MyModStorageComponentBase
     /// <summary>Where this is being kept, for the line at the bottom of the window.</summary>
     public string Where => _folder.Length == 0 ? "nowhere - nothing is being saved" : _folder;
 
+    /// <inheritdoc />
     public override string GetValue(Guid key)
     {
         string held;
         return _held.TryGetValue(key, out held) ? held : null;
     }
 
+    /// <inheritdoc />
     public override void SetValue(Guid key, string value)
     {
         _held[key] = value;
         Wrote(key, value);
     }
 
+    /// <inheritdoc />
     public override bool RemoveValue(Guid key)
     {
         return _held.Remove(key);
     }
 
+    /// <inheritdoc />
     public override bool TryGetValue(Guid key, out string value)
     {
         return _held.TryGetValue(key, out value);

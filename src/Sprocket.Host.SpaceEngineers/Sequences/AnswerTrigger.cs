@@ -45,10 +45,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _nowAt = new List<ToolbarSlot>(nowAt);
         }
 
+        /// <inheritdoc />
         public override Change Change => Change.PickButton;
 
+        /// <inheritdoc />
         public override bool Changes => true;
 
+        /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
             if (_part == null)
@@ -70,6 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _made.Apply(system);
         }
 
+        /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
             if (_made != null)

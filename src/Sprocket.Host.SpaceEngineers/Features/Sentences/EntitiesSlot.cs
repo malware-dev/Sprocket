@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </remarks>
         public bool RequiresAll { get; private set; }
 
+        /// <inheritdoc />
         public override bool IsEmpty => Entities.Count == 0;
     }
 }
