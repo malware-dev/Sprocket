@@ -405,13 +405,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     : called.Name);
             }
 
-            var opens = step as If;
-            if (opens != null)
-                return "if " + Tested(bindings, opens.Test, through);
-
-            var branch = step as Else;
+            var branch = step as Branch;
             if (branch != null)
-                return branch.Test == null ? "otherwise" : "otherwise if " + Tested(bindings, branch.Test, through);
+            {
+                if (branch.Test == null)
+                    return "otherwise";
+
+                return (step is If ? "if " : "otherwise if ") + Tested(bindings, branch.Test, through);
+            }
 
             if (step is EndIf)
                 return "";

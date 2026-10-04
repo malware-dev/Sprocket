@@ -1,6 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>What an <see cref="If" /> or an <see cref="Else" /> tests, changed; an otherwise given a test becomes an otherwise if.</summary>
+    /// <summary>What a <see cref="Branch" /> tests, changed; an otherwise given a test becomes an otherwise if.</summary>
     sealed class SetTest : SequenceEdit
     {
         readonly int _index;
@@ -29,11 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         void Put(Sequence sequence, Comparison test)
         {
-            var opens = sequence.Steps[_index] as If;
-            if (opens != null)
-                opens.Test = test;
-
-            var branch = sequence.Steps[_index] as Else;
+            var branch = sequence.Steps[_index] as Branch;
             if (branch != null)
                 branch.Test = test;
         }

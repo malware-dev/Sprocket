@@ -21,7 +21,9 @@ Four projects of code, and the first one is the mod:
   put there by the page that shows it.
 - **`src/Lumel`** is the UI framework, a shared project the mod imports, so its files compile into the
   mod's own assembly. It knows nothing of Sprocket, so any other mod can import it as it is. Its files
-  are globbed in the same way.
+  are globbed in the same way. **A piece of UI with nothing of Sprocket in it - a control, a layout, a
+  drawing primitive - goes in Lumel, with its colors and sizes as properties; `Features/Look` holds
+  Sprocket's own palette, sizes and styles, which it hands to them.**
 - **`src/Sprocket.Host.SpaceEngineers.Sim`** is the harness. It references the mod and drives it over
   blocks it makes up, answering the game's own interfaces.
 - **`src/Sprocket.Localization.Generator`** writes the mod's `Texts` class from its `MyTexts.resx` at

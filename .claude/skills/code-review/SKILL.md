@@ -104,16 +104,18 @@ Then the structural questions, in this order, because the early ones invalidate 
    is wrong with a sequence and which step. `IBlockExtension` holds knowledge about a kind of block.
    `Offer` is what a block declares. `Field` is what a value asks for. `Features/Sentences/` decides how a
    sentence is composed. The tell is the feeling of designing a way to carry information from A to B.
-2. **Does anything new run every tick?** It must answer both: is this worth a tick, and can the same
+2. **Does every new type belong where it was put?** A UI type that names nothing of Sprocket belongs in
+   Lumel; see sprocket-standards.
+3. **Does anything new run every tick?** It must answer both: is this worth a tick, and can the same
    thing be had at a lower cadence. `Interval` is how a cadence is expressed. A reading behind a
    short-circuit is cheap and the comment should say so; a reading on its own is not.
-3. **The same sentence in two places.** Two views carrying one sentence is the symptom. Where a
+4. **The same sentence in two places.** Two views carrying one sentence is the symptom. Where a
    phrase is written is not a finding: the text is legacy and due a complete rework, done on the
    screens rather than string by string - see `docs/Wording.md`.
-4. **Member order**: constants, fields, constructors, properties, methods. A field among the
+5. **Member order**: constants, fields, constructors, properties, methods. A field among the
    properties is the common slip.
-5. **Names**: a word, not a description, and no role suffixes.
-6. **What the tests do not cover**, said out loud. The harness models no gas, no power and no
+6. **Names**: a word, not a description, and no role suffixes.
+7. **What the tests do not cover**, said out loud. The harness models no gas, no power and no
    conveyors, so anything resting on those is proved in the game or not at all.
 
 ## When the subject is the whole codebase

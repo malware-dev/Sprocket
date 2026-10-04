@@ -312,7 +312,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (act == null || act.IsOff || !Lasts(bindings, act, through))
                     continue;
 
-                var next = After(sequence, i);
+                var next = sequence.After(i);
                 if (next >= steps.Count || !(steps[next] is Await))
                     return new SequenceFault(SequenceProblem.Unawaited, i);
             }
@@ -320,33 +320,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return SequenceFault.None;
         }
 
-        /// <summary>The step a run goes on to from the one at <paramref name="at" />: past what is switched off, and out of a branch past the end of its if.</summary>
-        static int After(Sequence sequence, int at)
-        {
-            var steps = sequence.Steps;
-            var next = at + 1;
-            while (next < steps.Count)
-            {
-                var step = steps[next];
-                if ((step.IsOff && step is If) || step is Else)
-                    next = sequence.EndOf(next) + 1;
-                else if (step.IsOff || step is EndIf)
-                    next++;
-                else
-                    break;
-            }
-
-            return next;
-        }
-
-        /// <summary>The test an <see cref="If" /> or <see cref="Else" /> makes, or null for every other step and a plain <c>else</c>.</summary>
+        /// <summary>The test a <see cref="Branch" /> makes, or null for every other step and an <c>else</c>.</summary>
         static Comparison TestOf(Step step)
         {
-            var opens = step as If;
-            if (opens != null)
-                return opens.Test;
-
-            var branch = step as Else;
+            var branch = step as Branch;
             return branch == null ? null : branch.Test;
         }
 

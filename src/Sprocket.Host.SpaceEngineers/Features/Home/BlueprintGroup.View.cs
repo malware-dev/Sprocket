@@ -9,7 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
     partial class BlueprintGroup
     {
         const float Gutter = 32f;
-        const float RailWidth = 2f;
 
         StatusRow _heading;
         Rail _rail;
@@ -25,11 +24,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Children.Add(new StatusRow().As(out _heading));
             Children.Add(new HStack
             {
-                Padding = new Thickness((Gutter - RailWidth) / 2f, 0f, 0f, 0f),
-                Spacing = (Gutter - RailWidth) / 2f,
+                Padding = new Thickness((Gutter - Sizes.Rail) / 2f, 0f, 0f, 0f),
+                Spacing = (Gutter - Sizes.Rail) / 2f,
                 Children =
                 {
-                    new Rail { Placement = Fixed.Wide(RailWidth) }.As(out _rail),
+                    new Rail(Sizes.Rail, Sizes.RailTurn, Palette.Line) { Placement = Fixed.Wide(Sizes.Rail) }.As(out _rail),
                     new VStack
                     {
                         Placement = Flex.Grow,

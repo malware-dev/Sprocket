@@ -11,7 +11,6 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
-using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
@@ -25,8 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     {
         const float Indent = 32f;
         const float RailIn = 6f;
-        const float RailWidth = 2f;
-        const float Foot = 12f;
 
         // Half the room the list leaves between its rows, so the rails of two rows meet in the middle of it.
         const float Reach = 4f;
@@ -189,10 +186,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var level = 0; level < Depth; level++)
             {
                 var x = _sentence.Bounds.X + level * Indent + RailIn;
-                var ends = level >= Through;
-                g.Fill(new RectangleF(x, top, RailWidth, (ends ? middle + RailWidth : bottom) - top), Palette.Line);
-                if (ends)
-                    g.Fill(new RectangleF(x, middle, Foot, RailWidth), Palette.Line);
+                if (level >= Through)
+                    Rail.Turning(g, x, top, middle, Sizes.Rail, Sizes.RailTurn, Palette.Line);
+                else
+                    Rail.Down(g, x, top, bottom, Sizes.Rail, Palette.Line);
             }
         }
 

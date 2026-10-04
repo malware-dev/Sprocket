@@ -128,6 +128,47 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return at;
         }
 
+        /// <summary>The lines opening each branch of the <see cref="If" /> at <paramref name="open" />, in order, its own first.</summary>
+        /// <remarks>Walks the if's lines, so it is asked when the if is changed or moved, never on a tick.</remarks>
+        public List<int> Branches(int open)
+        {
+            var lines = new List<int>();
+            for (var at = open; at < _steps.Count && !(_steps[at] is EndIf); at = BranchAfter(at))
+                lines.Add(at);
+
+            return lines;
+        }
+
+        /// <summary>The line of the <see cref="Else" /> of the <see cref="If" /> at <paramref name="open" /> that tests nothing, which comes last, or -1 where it has none.</summary>
+        public int Otherwise(int open)
+        {
+            var end = EndOf(open);
+            var last = -1;
+            for (var at = open; at < end; at = BranchAfter(at))
+                last = at;
+
+            var branch = last > open ? _steps[last] as Branch : null;
+            return branch != null && branch.Test == null ? last : -1;
+        }
+
+        /// <summary>The line a run goes on to from the step at <paramref name="at" />: past what is switched off, and out of a branch past the end of its if.</summary>
+        public int After(int at)
+        {
+            var next = at + 1;
+            while (next < _steps.Count)
+            {
+                var step = _steps[next];
+                if ((step.IsOff && step is If) || step is Else)
+                    next = EndOf(next) + 1;
+                else if (step.IsOff || step is EndIf)
+                    next++;
+                else
+                    break;
+            }
+
+            return next;
+        }
+
         /// <summary>The <see cref="If" /> that the <see cref="Else" /> or <see cref="EndIf" /> at <paramref name="at" /> belongs to, or -1.</summary>
         public int OpenOf(int at)
         {

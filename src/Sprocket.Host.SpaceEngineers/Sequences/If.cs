@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
@@ -10,18 +8,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// One line among the sequence's lines, as every step is: its branch is the lines after it, and they are counted as
     /// any others. The script writes it as a block.
     /// </remarks>
-    public sealed class If : Step
+    public sealed class If : Branch
     {
         /// <summary>An <c>if</c> testing <paramref name="test" />.</summary>
-        public If(Comparison test)
+        public If(Comparison test) : base(test)
         {
-            Test = test;
         }
-
-        /// <summary>What it tests.</summary>
-        public Comparison Test { get; set; }
-
-        /// <inheritdoc />
-        public override IList<string> Targets => Test.Targets;
     }
 }

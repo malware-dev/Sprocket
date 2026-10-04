@@ -41,64 +41,44 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         void Move(Sequence sequence, int from, int to)
         {
             var steps = sequence.Steps;
-            var openers = new List<Step>();
+            var lines = sequence.Branches(_open);
+            var end = sequence.EndOf(_open);
+            var openers = new List<Branch>();
             var tests = new List<Comparison>();
             var notes = new List<string>();
             var bodies = new List<List<Step>>();
 
-            var at = _open;
-            while (at < steps.Count && !(steps[at] is EndIf))
+            for (var b = 0; b < lines.Count; b++)
             {
-                var next = sequence.BranchAfter(at);
-                openers.Add(steps[at]);
-                tests.Add(Test(steps[at]));
-                notes.Add(steps[at].Annotation);
+                var opener = (Branch)steps[lines[b]];
+                openers.Add(opener);
+                tests.Add(opener.Test);
+                notes.Add(opener.Annotation);
 
                 var body = new List<Step>();
-                for (var i = at + 1; i < next; i++)
+                var next = b + 1 < lines.Count ? lines[b + 1] : end;
+                for (var i = lines[b] + 1; i < next; i++)
                     body.Add(steps[i]);
 
                 bodies.Add(body);
-                at = next;
             }
 
             Shift(tests, from, to);
             Shift(notes, from, to);
             Shift(bodies, from, to);
 
-            for (var i = at - 1; i >= _open; i--)
+            for (var i = end - 1; i >= _open; i--)
                 steps.RemoveAt(i);
 
             var line = _open;
             for (var b = 0; b < openers.Count; b++)
             {
-                Put(openers[b], tests[b]);
+                openers[b].Test = tests[b];
                 openers[b].Annotation = notes[b];
                 steps.Insert(line++, openers[b]);
                 for (var i = 0; i < bodies[b].Count; i++)
                     steps.Insert(line++, bodies[b][i]);
             }
-        }
-
-        static Comparison Test(Step opener)
-        {
-            var opens = opener as If;
-            if (opens != null)
-                return opens.Test;
-
-            var branch = opener as Else;
-            return branch == null ? null : branch.Test;
-        }
-
-        static void Put(Step opener, Comparison test)
-        {
-            var opens = opener as If;
-            if (opens != null)
-                opens.Test = test;
-
-            var branch = opener as Else;
-            if (branch != null)
-                branch.Test = test;
         }
 
         static void Shift<T>(List<T> list, int from, int to)

@@ -450,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 row.Adds.Add(new Adder(texts.SequenceOtherwiseIf, texts.SequenceOtherwiseIfAbout,
                     Changes(Cmd.AddBranch, delegate { AddBranch(index); })));
-                if (Last(index) < 0)
+                if (_sequence.Otherwise(_sequence.OpenOf(index)) < 0)
                     row.Adds.Add(new Adder(texts.SequenceOtherwise, texts.SequenceOtherwiseAbout,
                         Changes(Cmd.AddBranch, delegate { AddLast(index); })));
             }
@@ -532,14 +532,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Gives a step's row the parts of its sentence, each pressed to open the question it was answered with.</summary>
         void Word(StepRow row, Step step)
         {
-            var opens = step as If;
-            if (opens != null)
-            {
-                Tested(row, step, opens.Test);
-                return;
-            }
-
-            var branch = step as Else;
+            var branch = step as Branch;
             if (branch != null)
             {
                 if (branch.Test != null)
@@ -631,12 +624,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (step is Wait)
                 return StepKind.Wait;
 
-            if (step is If)
-                return StepKind.If;
-
-            var branch = step as Else;
+            var branch = step as Branch;
             if (branch != null)
-                return branch.Test == null ? StepKind.Otherwise : StepKind.OtherwiseIf;
+                return step is If ? StepKind.If : branch.Test == null ? StepKind.Otherwise : StepKind.OtherwiseIf;
 
             if (step is EndIf)
                 return StepKind.End;
@@ -725,7 +715,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var origin = Editor.Depth;
             Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
             {
-                var last = Last(end);
+                var last = _sequence.Otherwise(_sequence.OpenOf(end));
                 Editor.Do(_sequence, new AddStep(Change.AddBranch, last < 0 ? end : last, new Else(test)));
                 Editor.UnwindTo(origin);
             }));
@@ -746,21 +736,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddLast(int end)
         {
             Editor.Do(_sequence, new AddStep(Change.AddBranch, end, new Else(null)));
-        }
-
-        /// <summary>The otherwise of the if closed at <paramref name="end" />, or -1 where it has none.</summary>
-        int Last(int end)
-        {
-            var at = _sequence.OpenOf(end);
-            while (at >= 0 && at < end)
-            {
-                at = _sequence.BranchAfter(at);
-                var branch = at < end ? _sequence.Steps[at] as Else : null;
-                if (branch != null && branch.Test == null)
-                    return at;
-            }
-
-            return -1;
         }
 
         /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed.</summary>
@@ -922,7 +897,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Remove(int index)
         {
             var step = _sequence.Steps[index];
-            if (!(step is If) && !(step is Else))
+            if (!(step is Branch))
             {
                 RemoveStep(index);
                 return;
@@ -952,19 +927,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <remarks>A branch's steps join the branch before it.</remarks>
         void Unwrap(int index, bool whole)
         {
-            var lines = new List<int>();
-            var steps = new List<Step>();
-            lines.Add(index);
+            var lines = whole ? _sequence.Branches(index) : new List<int> { index };
             if (whole)
-            {
-                var at = index;
-                while (at < _sequence.Steps.Count && !(_sequence.Steps[at] is EndIf))
-                {
-                    at = _sequence.BranchAfter(at);
-                    lines.Add(at);
-                }
-            }
+                lines.Add(_sequence.EndOf(index));
 
+            var steps = new List<Step>();
             for (var i = 0; i < lines.Count; i++)
                 steps.Add(_sequence.Steps[lines[i]]);
 
@@ -1001,24 +968,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (from < 0 || from >= _keys.Count || !(_keys[from] is Else))
                 return null;
 
-            var open = _sequence.OpenOf(_sequence.EndOf(_shown[from]));
+            var open = _sequence.OpenOf(_shown[from]);
+            var branches = _sequence.Branches(open);
+            var otherwise = _sequence.Otherwise(open);
+            var end = _sequence.EndOf(open);
             var span = _rows[_keys[from]].Carries + 1;
             var allowed = new List<int>();
             for (var r = 0; r < _keys.Count; r++)
             {
-                if (r >= from && r < from + span)
+                if (r >= from && r < from + span || !(_keys[r] is Step))
                     continue;
 
-                // The line opening a branch, or the row closing the if where the last branch can be an otherwise if.
-                var step = _keys[r] as Step;
+                // The line opening a branch, up to the otherwise, or the row closing the if where it has none.
                 var line = _shown[r];
-                var opens = line == open || step is Else && _sequence.OpenOf(_sequence.EndOf(line)) == open;
-                var closes = step is EndIf && _sequence.OpenOf(line) == open && Last(line) < 0;
-                if (step == null || !opens && !closes)
+                if (!branches.Contains(line) && (line != end || otherwise >= 0))
                     continue;
 
                 allowed.Add(r < from ? r : r - span);
-                if (step is Else && ((Else)step).Test == null)
+                if (line == otherwise)
                     break;
             }
 
@@ -1032,7 +999,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Reorder(int from, int to)
         {
             var line = _shown[from];
-            var open = _sequence.OpenOf(_sequence.EndOf(line));
+            var open = _sequence.OpenOf(line);
             var last = from + _rows[_keys[from]].Carries;
             var others = _shown.Count - (last - from + 1);
             if (open < 0 || to < 0 || to > others)
@@ -1042,10 +1009,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // stands where the line opening the next one does.
             var before = to == others ? _sequence.Steps.Count : _shown[to < from ? to : to + last - from + 1];
 
-            var branches = new List<int>();
-            for (var at = open; at < _sequence.Steps.Count && !(_sequence.Steps[at] is EndIf); at = _sequence.BranchAfter(at))
-                branches.Add(at);
-
+            var branches = _sequence.Branches(open);
             var target = before == _sequence.EndOf(open) ? branches.Count : branches.IndexOf(before);
             if (target < 0)
                 return;
@@ -1055,8 +1019,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (target > source)
                 target--;
 
-            var plain = _sequence.Steps[branches[branches.Count - 1]] as Else;
-            var limit = plain != null && plain.Test == null ? branches.Count - 2 : branches.Count - 1;
+            var limit = _sequence.Otherwise(open) >= 0 ? branches.Count - 2 : branches.Count - 1;
             if (target > limit || target == source)
                 return;
 
