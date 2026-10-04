@@ -21,7 +21,7 @@ namespace Sprocket.Sim.Machine;
 /// rather than a smaller set of its own. What is behind them is made up - a door that takes a
 /// second to open, a vent that fills - which is the part a real ship supplies by being a ship.
 /// </remarks>
-abstract class Fitting
+public abstract class Fitting
 {
     readonly SerializableDefinitionId _definition;
     readonly string _display;

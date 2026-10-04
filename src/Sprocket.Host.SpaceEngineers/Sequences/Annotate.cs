@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What a system says about itself: a blueprint's description.</summary>
-    sealed class Annotate : SystemEdit
+    public sealed class Annotate : SystemEdit
     {
         readonly string _was;
         readonly string _now;

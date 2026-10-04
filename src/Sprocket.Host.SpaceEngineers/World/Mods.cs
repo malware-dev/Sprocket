@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// something to do twice, let alone on a tick.
     /// </para>
     /// </remarks>
-    static class Mods
+    public static class Mods
     {
         const string File = "Data/SprocketDefinitions.xml";
 

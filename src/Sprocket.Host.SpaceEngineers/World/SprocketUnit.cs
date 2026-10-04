@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// with a line in the log, so an unclaimed key works perfectly all session and vanishes on save.
         /// </para>
         /// </remarks>
-        internal static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
+        public static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
         static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
 

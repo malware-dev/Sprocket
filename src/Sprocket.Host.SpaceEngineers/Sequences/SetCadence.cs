@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// The trigger itself rather than the sequence it runs, because a system has several and the
     /// one being changed is the one whose row was pressed.
     /// </remarks>
-    sealed class SetCadence : SystemEdit
+    public sealed class SetCadence : SystemEdit
     {
         readonly EveryTrigger _trigger;
         readonly int _was;

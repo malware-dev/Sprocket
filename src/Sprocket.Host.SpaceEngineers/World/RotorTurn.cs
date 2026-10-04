@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// changed on, and a beat before anything is called stopped.
     /// </para>
     /// </remarks>
-    sealed class RotorTurn
+    public sealed class RotorTurn
     {
         const float Stir = 0.0005f;
 

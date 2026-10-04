@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// that tried to say both would say neither well.
     /// </para>
     /// </remarks>
-    struct SequenceFault
+    public struct SequenceFault
     {
         /// <summary>What <see cref="Step" /> holds when the line at fault is the one that starts it.</summary>
         public const int Trigger = -1;

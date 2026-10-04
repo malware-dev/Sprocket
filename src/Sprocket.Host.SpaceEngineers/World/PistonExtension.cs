@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// reached the limit it is running towards. Extending and retracting run it to whichever limit it
     /// already has, and are finished when the piston says it is out or in.
     /// </remarks>
-    sealed class PistonExtension : IBlockExtension
+    public sealed class PistonExtension : IBlockExtension
     {
         /// <summary>Moving to a position, which is Sprocket's own and waits until it gets there.</summary>
         public const string MoveTo = "move-to";

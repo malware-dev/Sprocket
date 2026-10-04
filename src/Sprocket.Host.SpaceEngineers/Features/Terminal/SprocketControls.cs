@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     /// hands back through a callback that carries no state of the mod's. They die with the mod's load.
     /// </para>
     /// </remarks>
-    static class SprocketControls
+    public static class SprocketControls
     {
         const string CustomData = "CustomData";
 

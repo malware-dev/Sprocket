@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// Handed back once, when they say they are done, rather than written into the sequence as the
     /// picking goes along. There is therefore a moment where an answer exists and can be refused.
     /// </remarks>
-    sealed class PickAnswer
+    public sealed class PickAnswer
     {
         readonly List<long> _targets = new List<long>();
         readonly List<Literal> _values = new List<Literal>();

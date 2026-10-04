@@ -9,7 +9,7 @@ using Sprocket.Sim.Simulation;
 
 namespace Sprocket.Sim
 {
-    static class Program
+    public static class Program
     {
         [STAThread]
         static void Main(string[] args)

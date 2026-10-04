@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// change to what every existing file means.
     /// </para>
     /// </remarks>
-    static class Keywords
+    public static class Keywords
     {
         static readonly string[] Names =
         {

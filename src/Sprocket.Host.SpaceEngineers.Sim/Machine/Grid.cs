@@ -16,7 +16,7 @@ namespace Sprocket.Sim.Machine;
 /// something on and grinding it off, which is how a program comes to refer to a block that is no
 /// longer there.
 /// </remarks>
-sealed class Grid
+public sealed class Grid
 {
     readonly List<Fitting> _fitted = new List<Fitting>();
     readonly Dictionary<Fitting, IMySlimBlock> _slim = new Dictionary<Fitting, IMySlimBlock>();

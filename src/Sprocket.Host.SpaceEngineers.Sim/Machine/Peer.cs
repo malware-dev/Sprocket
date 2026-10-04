@@ -34,7 +34,7 @@ public sealed class Peer
     public bool IsHeadless { get; }
 
     /// <summary>What listens on each channel on this machine.</summary>
-    internal Dictionary<ushort, List<Action<ushort, byte[], ulong, bool>>> Handlers { get; } =
+    public Dictionary<ushort, List<Action<ushort, byte[], ulong, bool>>> Handlers { get; } =
         new Dictionary<ushort, List<Action<ushort, byte[], ulong, bool>>>();
 
     /// <inheritdoc />

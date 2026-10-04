@@ -22,7 +22,7 @@ namespace Sprocket.Sim.Machine;
 /// refusing to start over.
 /// </para>
 /// </remarks>
-sealed class Store : MyModStorageComponentBase
+public sealed class Store : MyModStorageComponentBase
 {
     readonly Dictionary<Guid, string> _held = new Dictionary<Guid, string>();
     readonly string _folder;

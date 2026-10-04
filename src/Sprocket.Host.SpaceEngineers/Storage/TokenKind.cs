@@ -2,7 +2,7 @@
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>What a piece of script text is, before anything knows what it means.</summary>
-    enum TokenKind
+    public enum TokenKind
     {
         /// <summary>Nothing left.</summary>
         End,

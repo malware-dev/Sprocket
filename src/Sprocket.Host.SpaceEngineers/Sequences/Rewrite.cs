@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// does; all this carries is which sequence it is about.
     /// </para>
     /// </remarks>
-    sealed class Rewrite : SystemEdit
+    public sealed class Rewrite : SystemEdit
     {
         readonly Sequence _sequence;
         readonly SequenceEdit _edit;

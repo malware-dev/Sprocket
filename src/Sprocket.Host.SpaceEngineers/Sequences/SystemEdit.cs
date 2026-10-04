@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// trigger that does one plain thing runs no sequence at all. These are walked back from the
     /// system's screen, which is where they are made.
     /// </remarks>
-    abstract class SystemEdit : Edit<AutomationSystem>
+    public abstract class SystemEdit : Edit<AutomationSystem>
     {
         /// <summary>
         /// Whether that trigger is still in the system, saying what it was left saying.

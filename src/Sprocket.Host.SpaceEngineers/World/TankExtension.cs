@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Its fill is sampled: a tank has no events. The game lands a filling tank exactly on full, so
     /// full is a comparison and needs no band.
     /// </remarks>
-    sealed class TankExtension : IBlockExtension
+    public sealed class TankExtension : IBlockExtension
     {
         /// <summary>Stockpiling until full, which is Sprocket's own and waits until the tank is full.</summary>
         public const string Stockpile = "stockpile";

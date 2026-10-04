@@ -22,7 +22,7 @@ namespace Sprocket.Sim.Machine;
 /// at most, its own lock and its own head.
 /// </para>
 /// </remarks>
-sealed class Rotor : Fitting
+public sealed class Rotor : Fitting
 {
     const float Short = 0.00005f;
 

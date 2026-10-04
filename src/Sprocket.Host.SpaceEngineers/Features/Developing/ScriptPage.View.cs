@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Developing
 {
-    sealed partial class ScriptPage
+    public sealed partial class ScriptPage
     {
         Label _problem;
         HStack _spacer;

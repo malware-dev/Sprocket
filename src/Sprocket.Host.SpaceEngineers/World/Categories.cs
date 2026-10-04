@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// the game adds a spelling whenever it adds a part. What they have in common is the whole
         /// of what they are - something added, and the thing added is a head or a top part.
         /// </remarks>
-        internal static bool Builds(string id)
+        public static bool Builds(string id)
         {
             if (string.IsNullOrEmpty(id))
                 return false;

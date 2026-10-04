@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// The await after the step follows what it now does: one is put in where it takes time to finish,
     /// and the one there is taken out where it does not.
     /// </remarks>
-    sealed class ChangeStep : SequenceEdit
+    public sealed class ChangeStep : SequenceEdit
     {
         readonly int _index;
         readonly List<string> _wasTargets;

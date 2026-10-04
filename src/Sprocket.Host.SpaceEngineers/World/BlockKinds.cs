@@ -16,14 +16,14 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// what it can do affordable: a definition declares the same actions whichever one of it is asked, so
     /// the question is put once however many of them are on the ship.
     /// </remarks>
-    sealed class BlockKinds
+    public sealed class BlockKinds
     {
-        internal const string SwitchOn = "on";
-        internal const string SwitchOff = "off";
+        public const string SwitchOn = "on";
+        public const string SwitchOff = "off";
 
         /// <summary>What Sprocket's own members and moments are qualified by: <c>ext.close</c>.</summary>
         /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
-        internal const string Own = "ext";
+        public const string Own = "ext";
 
         const string GamePrefix = "MyObjectBuilder_";
 
@@ -474,7 +474,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// block has to hand it. The prefix is the game's noise, it says nothing to a person, and the
         /// language leaves it out - the same spelling a part's <c>expects</c> has always used.
         /// </remarks>
-        internal static string Sort(string definition)
+        public static string Sort(string definition)
         {
             if (definition == null)
                 return "";
@@ -492,7 +492,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// a kind some other world invented, and it is left exactly as it was found. One that already
         /// carries the prefix is left alone too, so a program saved with it still finds its blocks.
         /// </remarks>
-        internal static string Definition(string sort)
+        public static string Definition(string sort)
         {
             if (string.IsNullOrEmpty(sort) || sort.IndexOf('/') < 0)
                 return sort ?? "";

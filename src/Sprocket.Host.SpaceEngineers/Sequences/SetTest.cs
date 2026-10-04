@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What a <see cref="Branch" /> tests, changed; an otherwise given a test becomes an otherwise if.</summary>
-    sealed class SetTest : SequenceEdit
+    public sealed class SetTest : SequenceEdit
     {
         readonly int _index;
         readonly Comparison _was;

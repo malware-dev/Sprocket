@@ -29,18 +29,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool Listed => List != null;
 
         /// <summary>The list this sits in, or null while it is off the rota.</summary>
-        internal List<Shift> List;
+        public List<Shift> List;
 
         /// <summary>Where in <see cref="List" /> it sits, so it can be taken out without a search.</summary>
-        internal int Index;
+        public int Index;
 
         /// <summary>Whether this is done once and then taken off, rather than every time it comes round.</summary>
-        internal bool Once;
+        public bool Once;
 
         /// <summary>The tick a shift done once falls due on.</summary>
-        internal int At;
+        public int At;
 
         /// <summary>The tick this was last done on, so nothing moved during a tick is done twice in it.</summary>
-        internal int Ran;
+        public int Ran;
     }
 }

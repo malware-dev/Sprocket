@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     /// <c>LogicSystemPage.View.cs</c>, and nothing else is; this half is what it knows, what it says and what it
     /// does.
     /// </remarks>
-    sealed partial class LogicSystemPage : EditorPage
+    public sealed partial class LogicSystemPage : EditorPage
     {
         const int JustRanTicks = 10;
 

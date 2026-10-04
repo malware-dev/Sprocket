@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A logic system just made, in the program already; undone, it goes, and redone, it comes back where it stood.</summary>
-    sealed class MakeSystem : ProgramEdit
+    public sealed class MakeSystem : ProgramEdit
     {
         readonly AutomationSystem _system;
 

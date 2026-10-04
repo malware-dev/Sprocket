@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Values Values { get; } = new Values();
 
         /// <summary>What this world knows about kinds of block, for whatever holds a block and no entity.</summary>
-        internal BlockExtensions Extensions
+        public BlockExtensions Extensions
         {
             get { return _extensions; }
         }
@@ -389,7 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// screenshot, so the only honest proof is a count - which a test takes before and after six
         /// hundred idle ticks.
         /// </remarks>
-        internal int Matched { get; private set; }
+        public int Matched { get; private set; }
 
         public GridEntity Match(IList<EntityKey> keys, out int matched)
         {

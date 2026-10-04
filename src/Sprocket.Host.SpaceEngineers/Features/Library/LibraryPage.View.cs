@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
-    sealed partial class LibraryPage
+    public sealed partial class LibraryPage
     {
         TextBox _search;
         VStack _list;

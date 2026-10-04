@@ -14,7 +14,7 @@ namespace Sprocket.Sim.Machine;
 /// the same frame.
 /// </para>
 /// </remarks>
-static class Clock
+public static class Clock
 {
     /// <summary>How many frames the harness has run.</summary>
     public static int Frame { get; private set; }

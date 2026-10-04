@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// it is. This is for a block the game runs in a known way: a timer runs every slot when it goes off, so it offers one
     /// trigger rather than ninety that all mean the same.
     /// </remarks>
-    interface ITriggers
+    public interface ITriggers
     {
         /// <summary>Whether this is about <paramref name="block" />.</summary>
         bool Claims(IMyTerminalBlock block);

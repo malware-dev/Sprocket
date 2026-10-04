@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// empties and refills between two ticks is invisible. That bound was accepted knowingly; it is worth
     /// remembering that the vent is the block it bites.
     /// </remarks>
-    sealed class AirVentExtension : IBlockExtension
+    public sealed class AirVentExtension : IBlockExtension
     {
         const float Emptied = 0.05f;
 

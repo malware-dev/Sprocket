@@ -59,6 +59,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Meaningless without the kind. See <see cref="Values" /> and <see cref="Literal" />.</summary>
-        internal long Bits { get; private set; }
+        public long Bits { get; private set; }
     }
 }

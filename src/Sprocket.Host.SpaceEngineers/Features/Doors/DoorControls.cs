@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
     /// a callback that carries no state of the mod's. They die with the mod's load.
     /// </para>
     /// </remarks>
-    static class DoorControls
+    public static class DoorControls
     {
         const string Id = "Sprocket_AutoClose";
 

@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// thing a player can mend. It happens once as a world comes up.
     /// </para>
     /// </remarks>
-    static partial class Told
+    public static partial class Told
     {
         const string Ours = "[Sprocket] ";
 

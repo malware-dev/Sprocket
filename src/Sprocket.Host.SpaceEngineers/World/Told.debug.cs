@@ -7,10 +7,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     // A .debug.cs file, so this is compiled into local builds only and never packed for the game. A
     // static, which the mod does not have: this one exists only where the harness runs one screen at a
     // time, and the game's own log is a static too.
-    static partial class Told
+    public static partial class Told
     {
         /// <summary>Every line said since the process began, without the prefix the game's log gives it.</summary>
-        internal static readonly List<string> Lines = new List<string>();
+        public static readonly List<string> Lines = new List<string>();
 
         static partial void Heard(string what)
         {

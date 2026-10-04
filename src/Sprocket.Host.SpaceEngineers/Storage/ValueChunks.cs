@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// a chunk is never copied: growing is adding another one. Finding a value is a shift and a mask.
     /// </para>
     /// </remarks>
-    sealed class ValueChunks
+    public sealed class ValueChunks
     {
         const int Shift = 8;
 

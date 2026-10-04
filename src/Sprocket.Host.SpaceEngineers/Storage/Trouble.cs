@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// Only the first of each is kept, the same as the parser does, and the line is worked out only for
     /// that one. A warning never stops a program being saved; trouble does.
     /// </remarks>
-    sealed class Trouble
+    public sealed class Trouble
     {
         readonly string _script;
         readonly List<Owed> _owed = new List<Owed>();

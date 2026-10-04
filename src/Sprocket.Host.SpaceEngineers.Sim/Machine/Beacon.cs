@@ -12,7 +12,7 @@ namespace Sprocket.Sim.Machine;
 /// both of them <c>Radius</c>. A rig that only had lights on it could not tell whether the one
 /// category the id lands in was chosen or merely inherited.
 /// </remarks>
-sealed class Beacon : Fitting
+public sealed class Beacon : Fitting
 {
     public Beacon(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)

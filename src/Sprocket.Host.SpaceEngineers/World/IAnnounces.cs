@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// extension that knows which of the game's own events the block raises, and marked on each moment it covers - see
     /// <see cref="EntityKind.Announced" />.
     /// </remarks>
-    interface IAnnounces
+    public interface IAnnounces
     {
         /// <summary>Tells <paramref name="told" /> each time <paramref name="block" /> may have changed, until the answer is disposed.</summary>
         /// <remarks>Told on the game's main thread, from the block's own update, where nothing else of Sprocket's is running.</remarks>

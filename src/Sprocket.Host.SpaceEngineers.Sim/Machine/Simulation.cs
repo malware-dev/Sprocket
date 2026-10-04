@@ -20,7 +20,7 @@ namespace Sprocket.Sim.Machine;
 /// Deliberately separate from any window, so the whole editor can be driven from a test without one.
 /// </para>
 /// </remarks>
-sealed class Simulation
+public sealed class Simulation
 {
     const int SaveEvery = 60;
 
@@ -62,13 +62,13 @@ sealed class Simulation
     /// which is what a restart is, and the only way to catch the harness losing something the game
     /// would have kept.
     /// </remarks>
-    internal static Simulation On(Store store)
+    public static Simulation On(Store store)
     {
         return new Simulation(store, Rig.Demo());
     }
 
     /// <summary>A rig somebody else fitted, for a test that is about particular blocks.</summary>
-    internal static Simulation On(Rig rig)
+    public static Simulation On(Rig rig)
     {
         return new Simulation(Store.Nowhere(), rig);
     }
@@ -80,7 +80,7 @@ sealed class Simulation
     /// What cut and paste does: the program travels in the block's own storage, the construct keeps
     /// its slots, and the arrival is given a new id - so every slot names a block that is gone.
     /// </remarks>
-    internal static Simulation Pasted(Store store)
+    public static Simulation Pasted(Store store)
     {
         return new Simulation(store, Rig.Demo(101));
     }
@@ -151,7 +151,7 @@ sealed class Simulation
     public List<string> Log => Told.Lines.GetRange(_saidBefore, Told.Lines.Count - _saidBefore);
 
     /// <summary>The construct itself, for a test that has to weld, grind or cut the power.</summary>
-    internal Rig Machine => _rig;
+    public Rig Machine => _rig;
 
     /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
     public string Where => _store.Where;

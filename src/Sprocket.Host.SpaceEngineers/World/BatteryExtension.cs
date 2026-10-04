@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Its charge is sampled. The game moves it on once every hundred frames and lands it exactly on
     /// the battery's capacity when it gets there, so full is a comparison and needs no band.
     /// </remarks>
-    sealed class BatteryExtension : IBlockExtension
+    public sealed class BatteryExtension : IBlockExtension
     {
         /// <summary>Recharging until full, which is Sprocket's own and waits until the battery is full.</summary>
         public const string Recharge = "recharge";

@@ -216,7 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>How many times the chrome has written what the screen says onto its controls, for a test to hold still.</summary>
-        internal int Wires => _wires;
+        public int Wires => _wires;
 
         /// <summary>Why the name in hand cannot be given as it stands, or empty when it can or none is.</summary>
         /// <remarks>
@@ -448,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// The windows first, top down, since each one owns what it covers and a modal one owns everything; then, while the
         /// name in hand cannot be given, only the box it is in; then the screen.
         /// </remarks>
-        internal Element Under(Vector2 point)
+        public Element Under(Vector2 point)
         {
             bool stopped;
             var windowed = _windows.Under(point, out stopped);

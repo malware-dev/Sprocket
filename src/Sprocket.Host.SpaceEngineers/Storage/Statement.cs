@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// is missing itself.
     /// </para>
     /// </remarks>
-    sealed class Statement
+    public sealed class Statement
     {
         static readonly Statement[] Nothing = new Statement[0];
 

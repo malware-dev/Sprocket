@@ -7,7 +7,7 @@ using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
-    sealed partial class BlueprintPage
+    public sealed partial class BlueprintPage
     {
         RichText _description;
         HStack _troubled;

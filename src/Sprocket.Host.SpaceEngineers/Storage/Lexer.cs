@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// somebody else's machine.
     /// </para>
     /// </remarks>
-    sealed class Lexer
+    public sealed class Lexer
     {
         TextPtr _ptr;
 

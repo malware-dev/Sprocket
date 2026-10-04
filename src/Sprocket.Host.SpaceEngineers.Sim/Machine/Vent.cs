@@ -8,7 +8,7 @@ using VentStatus = SpaceEngineers.Game.ModAPI.Ingame.VentStatus;
 namespace Sprocket.Sim.Machine;
 
 /// <summary>An air vent on the rig, which takes time to fill and to empty.</summary>
-sealed class Vent : Fitting
+public sealed class Vent : Fitting
 {
     const int CycleTicks = 90;
 

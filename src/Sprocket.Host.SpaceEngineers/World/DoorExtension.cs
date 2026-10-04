@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// door has got to. Sprocket needs the difference: "close the inner door" is finished when the door is
     /// shut, not when the order was given.
     /// </remarks>
-    sealed class DoorExtension : IBlockExtension, IAnnounces
+    public sealed class DoorExtension : IBlockExtension, IAnnounces
     {
         public const string Open = "open";
         public const string Shut = "shut";

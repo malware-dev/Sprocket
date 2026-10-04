@@ -4,7 +4,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>An event controller's two triggers: the game runs the first slot of every page when its condition is met, and the second when it no longer is.</summary>
-    sealed class EventControllerTriggers : ITriggers
+    public sealed class EventControllerTriggers : ITriggers
     {
         /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)

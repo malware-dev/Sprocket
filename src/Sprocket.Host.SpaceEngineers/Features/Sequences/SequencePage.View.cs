@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
-    sealed partial class SequencePage
+    public sealed partial class SequencePage
     {
         SequenceBar _bar;
         StepList _steps;

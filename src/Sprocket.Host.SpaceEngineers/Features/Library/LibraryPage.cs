@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
     /// only something done on this page or a change to the program brings about. The elements it is drawn with are declared
     /// in <c>LibraryPage.View.cs</c>.
     /// </remarks>
-    sealed partial class LibraryPage : EditorPage
+    public sealed partial class LibraryPage : EditorPage
     {
         const int OnConstruct = 0;
         const int Lost = 1;

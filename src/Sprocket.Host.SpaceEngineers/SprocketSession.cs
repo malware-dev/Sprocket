@@ -140,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// keeping it": a display drawn on a client has no program to read, and saying the construct has
         /// no automation would be a lie in the one place a person would believe it.
         /// </remarks>
-        internal static bool Runs => IsServer;
+        public static bool Runs => IsServer;
 
         /// <summary>
         /// Every Sprocket mechanically connected to this block, in no particular order.
@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// what a player means by "this ship" - so a display on a rotor head lists the Sprocket in the
         /// hull. Filled into a list the caller owns, because this is asked on a cadence forever.
         /// </remarks>
-        internal static void OnConstruct(IMyCubeBlock block, List<SprocketUnit> into)
+        public static void OnConstruct(IMyCubeBlock block, List<SprocketUnit> into)
         {
             into.Clear();
 
@@ -646,7 +646,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// opens it at once, holding it the way a client would, so nobody else can edit it meanwhile.
         /// </para>
         /// </remarks>
-        internal static void Open(IMyTerminalBlock block)
+        public static void Open(IMyTerminalBlock block)
         {
             if (_current == null || block == null)
                 return;

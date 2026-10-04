@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Whether a construct may leave a part unfilled.</summary>
-    sealed class SetOptional : SystemEdit
+    public sealed class SetOptional : SystemEdit
     {
         readonly Part _part;
         readonly bool _now;

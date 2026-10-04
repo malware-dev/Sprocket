@@ -104,7 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string Declared { get; private set; }
 
         /// <summary>What a list calls it, where that is not what a sentence calls it.</summary>
-        internal void List(string words)
+        public void List(string words)
         {
             Named = Capitalised(words);
         }
@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What the terminal view lists, whether or not the organized one has replaced it. An
         /// extension's entry is Sprocket's; one the block declares and nothing has reworded is this.
         /// </remarks>
-        public bool Unaltered { get; internal set; }
+        public bool Unaltered { get; set; }
 
         /// <summary>Whether this is left out of the list somebody chooses from.</summary>
         /// <remarks>
@@ -197,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// said outright by an extension for anything Sprocket invented, which has no game id to ask
         /// about.
         /// </remarks>
-        public Category Category { get; internal set; }
+        public Category Category { get; set; }
 
         /// <summary>Leaves this out of the list somebody chooses from.</summary>
         public void Hide()
@@ -247,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What type each value of one of the game's actions is taken as, or null for anything else.</summary>
-        internal IList<Primitive> Primitives
+        public IList<Primitive> Primitives
         {
             get { return _takes; }
         }
@@ -365,7 +365,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What may be typed into a box for a value of this kind.</summary>
-        internal static Entry Entered(ValueKind kind)
+        public static Entry Entered(ValueKind kind)
         {
             switch (kind)
             {

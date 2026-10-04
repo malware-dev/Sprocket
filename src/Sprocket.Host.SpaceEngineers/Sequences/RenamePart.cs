@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A slot's new name, everywhere its system names it.</summary>
-    sealed class RenamePart : SystemEdit
+    public sealed class RenamePart : SystemEdit
     {
         readonly Part _part;
         readonly string _was;

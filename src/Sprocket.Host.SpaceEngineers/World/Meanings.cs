@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// They stay in the terminal view, where they are what the block declares.
     /// </para>
     /// </remarks>
-    static class Meanings
+    public static class Meanings
     {
         public static void Settle(EntityKind kind, IMyTerminalBlock block)
         {

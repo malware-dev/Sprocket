@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Keyed on the interface, like an extension, so everything shaped like a door shares the door's
     /// answer. Anything not named is pending.
     /// </remarks>
-    static class Evaluations
+    public static class Evaluations
     {
         public static Evaluation Of(IMyTerminalBlock block)
         {

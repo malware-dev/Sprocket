@@ -7,7 +7,7 @@ using VRage.ObjectBuilders;
 namespace Sprocket.Sim.Machine;
 
 /// <summary>A sound block on the rig, which writes down each sound it is told to play.</summary>
-sealed class Speaker : Fitting
+public sealed class Speaker : Fitting
 {
     static readonly string[] Sounds = { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" };
 

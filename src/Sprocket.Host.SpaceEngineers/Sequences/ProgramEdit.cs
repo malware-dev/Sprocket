@@ -6,7 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Walked back from the home screen, which is where these are made. A logic system taken out cannot hold the way back to
     /// itself, so the program holds it.
     /// </remarks>
-    abstract class ProgramEdit : Edit<Automation>
+    public abstract class ProgramEdit : Edit<Automation>
     {
         /// <summary>Where <paramref name="system" /> stands among the program's systems, or -1.</summary>
         protected static int IndexOf(Automation program, AutomationSystem system)

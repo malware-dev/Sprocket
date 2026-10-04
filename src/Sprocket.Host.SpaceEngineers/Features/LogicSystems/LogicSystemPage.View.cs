@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
-    sealed partial class LogicSystemPage
+    public sealed partial class LogicSystemPage
     {
         HStack _using;
         Label _usingLead;

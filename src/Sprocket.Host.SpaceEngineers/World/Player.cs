@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Values;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>The person at the screen, as far as Sprocket needs to know them.</summary>
-    static class Player
+    public static class Player
     {
         const char MarksFrom = '';
 

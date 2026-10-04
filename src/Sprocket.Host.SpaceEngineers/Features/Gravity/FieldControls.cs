@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
     /// a callback that carries no state of the mod's. They die with the mod's load.
     /// </para>
     /// </remarks>
-    static class FieldControls
+    public static class FieldControls
     {
         const string Depth = "Depth";
 

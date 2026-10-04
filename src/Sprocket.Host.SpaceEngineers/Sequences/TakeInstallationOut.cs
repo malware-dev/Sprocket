@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Takes one installation out of its logic system; undone, it stands where it stood, with the blocks it had.</summary>
-    sealed class TakeInstallationOut : ProgramEdit
+    public sealed class TakeInstallationOut : ProgramEdit
     {
         readonly AutomationSystem _system;
         readonly SystemInstance _instance;

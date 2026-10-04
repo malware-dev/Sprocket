@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// hotbar key runs its slot on the page the pilot has open; the target lock runs the first slot of every page when it is
     /// gained and the second when it is lost. Nothing runs the build toolbar of itself, so it offers no trigger.
     /// </remarks>
-    sealed class ShipControllerTriggers : ITriggers
+    public sealed class ShipControllerTriggers : ITriggers
     {
         /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)

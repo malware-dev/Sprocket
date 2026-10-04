@@ -673,7 +673,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// willing they say they are to accept one.
         /// </para>
         /// </remarks>
-        internal static TerminalActionParameter Given(Literal given)
+        public static TerminalActionParameter Given(Literal given)
         {
             if (given.Kind == ValueKind.Flag)
                 return TerminalActionParameter.Get(given.Flag);

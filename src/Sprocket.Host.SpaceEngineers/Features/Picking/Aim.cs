@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// One for every page a trigger is made or changed on, so what it does is chosen the same way wherever it is met. It opens
     /// on what the trigger does already, and a new sequence where it does nothing yet, which is what a trigger usually does.
     /// </remarks>
-    sealed class Aim
+    public sealed class Aim
     {
         const string One = "one";
         const string New = "new";

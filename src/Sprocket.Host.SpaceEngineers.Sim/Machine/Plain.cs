@@ -12,7 +12,7 @@ namespace Sprocket.Sim.Machine;
 /// is working, and the two actions that change the first. A light is exactly that and nothing more,
 /// which is worth having on the rig: most of a ship is.
 /// </remarks>
-sealed class Plain : Fitting
+public sealed class Plain : Fitting
 {
     public Plain(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)

@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// The game runs the slot at the button's own place in the toolbar, across pages where a panel has more buttons than a
     /// page has slots.
     /// </remarks>
-    sealed class ButtonPanelTriggers : ITriggers
+    public sealed class ButtonPanelTriggers : ITriggers
     {
         /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)

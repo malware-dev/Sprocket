@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    sealed class MoveStep : SequenceEdit
+    public sealed class MoveStep : SequenceEdit
     {
         readonly int _from;
         readonly int _to;

@@ -1,7 +1,7 @@
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    sealed class Rename : SequenceEdit
+    public sealed class Rename : SequenceEdit
     {
         readonly string _was;
         readonly string _now;

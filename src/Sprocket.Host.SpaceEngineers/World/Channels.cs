@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// two, and it is the only place that knows both.
     /// </para>
     /// </remarks>
-    static class Channels
+    public static class Channels
     {
         /// <summary>
         /// The colour <paramref name="count" /> values starting at <paramref name="from" /> make,

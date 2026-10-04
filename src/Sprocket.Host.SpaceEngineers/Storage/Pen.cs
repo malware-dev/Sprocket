@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// either. Quoting is mechanical here too - see <see cref="Keywords.Bare" /> - because a writer
     /// that decides per call is a writer that gets one call wrong.
     /// </remarks>
-    sealed class Pen
+    public sealed class Pen
     {
         const string Indent = "    ";
 

@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// strip it is drawn in is declared in <c>PickPage.View.cs</c>, and shared with the page before or after it in the same
     /// pick; this half is what it asks and what each answer does.
     /// </remarks>
-    sealed partial class PickPage : EditorPage
+    public sealed partial class PickPage : EditorPage
     {
         /// <summary>What a test's choice starts with where it is for its blocks not being in the state it names.</summary>
         public const string Not = "!";
@@ -250,7 +250,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public PickStrip Strip => _strip;
 
         /// <summary>Whether anything here differs from what was chosen when it opened: the blocks, what is done to them, any or all, or the values.</summary>
-        internal bool Moved
+        public bool Moved
         {
             get
             {
@@ -481,20 +481,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>
         /// <remarks>Built first all the same, because the page after carries on from the stages this one asks.</remarks>
-        internal void GoOn()
+        public void GoOn()
         {
             _goesOn = true;
         }
 
         /// <summary>Says whether this page is being opened straight onto, rather than paged to.</summary>
-        internal void Arrived(bool straight)
+        public void Arrived(bool straight)
         {
             _straight = straight;
         }
 
         /// <inheritdoc />
         /// <remarks>A picker arriving on screen reads what the blocks are doing now rather than what they were doing when it was last looked at.</remarks>
-        internal override void Resay()
+        public override void Resay()
         {
             base.Resay();
             _looked.Restart();

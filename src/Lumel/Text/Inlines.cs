@@ -11,7 +11,7 @@ namespace Lumel.Text
     ///     two on both sides make strong and one makes emphasis, and <c>_</c> inside a word is only a
     ///     character.
     /// </remarks>
-    static class Inlines
+    public static class Inlines
     {
         /// <summary>Adds the runs <paramref name="text" /> holds to <paramref name="runs" />.</summary>
         public static void Parse(string text, IList<Run> runs)

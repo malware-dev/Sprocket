@@ -12,7 +12,7 @@ namespace Sprocket.Sim.Content
     /// <c>MyTexts.&lt;culture&gt;-&lt;subculture&gt;.resx</c>, each replacing what it repeats. The files are the ones
     /// the mod ships, copied beside the harness.
     /// </remarks>
-    sealed class ResxTexts : ITextSource
+    public sealed class ResxTexts : ITextSource
     {
         readonly Dictionary<string, string> _texts = new Dictionary<string, string>(StringComparer.Ordinal);
 

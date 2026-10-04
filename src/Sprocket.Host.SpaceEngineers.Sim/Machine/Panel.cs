@@ -13,7 +13,7 @@ namespace Sprocket.Sim.Machine;
 /// the reason Sprocket writes its action into a slot at all, so the rig keeps it: pressing an empty
 /// button is a press nobody hears.
 /// </remarks>
-sealed class Panel : Fitting
+public sealed class Panel : Fitting
 {
     Action<int> _pressed;
 

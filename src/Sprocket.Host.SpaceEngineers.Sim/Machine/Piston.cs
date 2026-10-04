@@ -17,7 +17,7 @@ namespace Sprocket.Sim.Machine;
 /// speed towards it. Load, what it is pushing and how hard are not here, so a piston on the rig always
 /// arrives. The travel is a large piston's, nought to ten metres at up to five a second.
 /// </remarks>
-sealed class Piston : Fitting
+public sealed class Piston : Fitting
 {
     const float Lowest = 0f;
     const float Highest = 10f;

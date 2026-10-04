@@ -231,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>What is wrong with <paramref name="sequence" />, letting whatever is at fault speak for itself where it can.</summary>
-        internal static string Problem(Texts texts, SequenceFault fault, Sequence sequence)
+        public static string Problem(Texts texts, SequenceFault fault, Sequence sequence)
         {
             if (fault.Problem == SequenceProblem.EmptySlot)
                 return Template.Fill(texts.ProblemEmptySlot, "slot", fault.Which);
@@ -249,7 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
-        internal static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
+        public static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
         {
             // A trigger's own act has no steps to count, and no name.
             var problem = Problem(texts, fault, sequence);

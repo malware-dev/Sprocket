@@ -22,7 +22,7 @@ namespace Sprocket.Sim.Machine;
 /// offers only a switch because that is all the mod knows about lights.
 /// </para>
 /// </remarks>
-sealed class Rig
+public sealed class Rig
 {
     readonly Grid _grid = new Grid("Test Rig");
 

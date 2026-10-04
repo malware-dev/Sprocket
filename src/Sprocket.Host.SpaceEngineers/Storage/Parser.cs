@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// is read in its right place and the first trouble reported is the one that matters.
     /// </para>
     /// </remarks>
-    sealed class Parser
+    public sealed class Parser
     {
         readonly Lexer _lexer;
         readonly Reading _reading = new Reading();

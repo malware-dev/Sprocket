@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// period that fits twice into how late it is, and never faster than ten.
     /// </para>
     /// </remarks>
-    struct Hold
+    public struct Hold
     {
         readonly int _since;
         readonly int _expected;

@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// It comes back where it was. A trigger put back on the end would reorder the list somebody is looking at, which
     /// reads as a second change rather than as the first one being undone.
     /// </remarks>
-    sealed class ForgetTrigger : SystemEdit
+    public sealed class ForgetTrigger : SystemEdit
     {
         readonly Trigger _going;
         readonly Part _part;

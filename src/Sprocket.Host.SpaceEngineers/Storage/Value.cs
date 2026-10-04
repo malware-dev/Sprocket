@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// A list value does not own its items; it names where they are - see <see cref="Reading.Items" />.
     /// </para>
     /// </remarks>
-    struct Value
+    public struct Value
     {
         public static readonly Value None = new Value(ValueForm.Identifier);
 

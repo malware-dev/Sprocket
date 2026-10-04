@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     /// stand on says why instead. The elements it is drawn with are declared in <c>SequencePage.View.cs</c>, and
     /// nothing else is; this half is what it knows, what it says and what it does.
     /// </remarks>
-    sealed partial class SequencePage : EditorPage
+    public sealed partial class SequencePage : EditorPage
     {
         const int JustRanTicks = 10;
 

@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string DisplayName { get; private set; }
 
         /// <summary>How far Sprocket has checked this kind, which is pending until somebody says otherwise.</summary>
-        public Evaluation Evaluation { get; internal set; }
+        public Evaluation Evaluation { get; set; }
 
         /// <summary>
         /// Names a picture of this kind, or empty for none.
@@ -208,7 +208,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether this kind keeps the block's own member out of that list.</summary>
-        internal bool Hides(string gameId)
+        public bool Hides(string gameId)
         {
             for (var i = 0; i < _hidden.Count; i++)
             {
@@ -254,7 +254,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Sprocket's word for one of the block's own members, where it has one.</summary>
-        internal bool Renames(string gameId, bool sets, out string word)
+        public bool Renames(string gameId, bool sets, out string word)
         {
             for (var i = 0; i < _renamed.Count; i++)
             {

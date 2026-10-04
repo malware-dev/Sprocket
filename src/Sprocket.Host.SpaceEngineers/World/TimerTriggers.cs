@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>A timer block's one trigger: it goes off, and the game runs every slot of its toolbar.</summary>
-    sealed class TimerTriggers : ITriggers
+    public sealed class TimerTriggers : ITriggers
     {
         /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)

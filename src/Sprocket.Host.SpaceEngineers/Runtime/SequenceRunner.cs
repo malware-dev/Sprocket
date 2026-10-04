@@ -119,20 +119,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>What was wrong with the program for this sequence when it was last built, or none.</summary>
         /// <remarks>Set by the runner of the whole program when the program or its wiring changes, and on no tick.</remarks>
-        internal SequenceFault Found { get; private set; }
+        public SequenceFault Found { get; private set; }
 
         /// <summary>What an open editor last saw gone, or possibly swapped, among the blocks this names, or none.</summary>
-        internal SequenceFault Looked { get; set; }
+        public SequenceFault Looked { get; set; }
 
         /// <summary>The one of its system this runs on, or null where the system has none.</summary>
-        internal SystemInstance Instance => _instance;
+        public SystemInstance Instance => _instance;
 
         /// <summary>What is known to be wrong with this sequence on the one of its system it runs on, or none.</summary>
         /// <remarks>
         /// Read, never worked out: what a run met, what an open editor saw, what the program said when it was built, and
         /// what the blocks of a step being waited on said. The worst news first, because a line can only say one thing.
         /// </remarks>
-        internal SequenceFault Fault
+        public SequenceFault Fault
         {
             get
             {
@@ -469,7 +469,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// means, and counting it would report a door somebody opened ten times as ten refusals. One
         /// already running skips, which is counted, because the press or the moment was real.
         /// </remarks>
-        internal void Triggered(GridWorld world, Bindings bindings, int tick)
+        public void Triggered(GridWorld world, Bindings bindings, int tick)
         {
             _bindings = bindings;
             _tick = tick;
@@ -994,7 +994,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Asks the blocks being waited on whether they can finish, for an open editor to show, changing nothing about the run.</summary>
-        internal void Glance()
+        public void Glance()
         {
             if (IsWaiting && _outstanding.Count > 0 && _bindings != null)
                 Troubled();
@@ -1009,7 +1009,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Takes what the program says is wrong, now it has been built again, forgetting what the last run met.</summary>
-        internal void Checked(SequenceFault found)
+        public void Checked(SequenceFault found)
         {
             Found = found;
             _met = SequenceFault.None;
@@ -1127,7 +1127,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>How many times an act has been worked out.</summary>
         /// <remarks>Counted so it can be shown that a run repeating what it asks works nothing out again.</remarks>
-        internal int Compilations { get; private set; }
+        public int Compilations { get; private set; }
 
         /// <summary>
         /// What an act comes to, worked out the first time it is asked after anything it rests on has

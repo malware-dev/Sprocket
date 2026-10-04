@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
     /// half is what it knows, what it says and what it does.
     /// </para>
     /// </remarks>
-    sealed partial class HomePage : EditorPage
+    public sealed partial class HomePage : EditorPage
     {
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
 

@@ -12,7 +12,7 @@ namespace Sprocket.Sim.Machine;
 /// about lights applies to it as it does in the game: the colour and radius setters written beside the
 /// light's own values are left to the terminal view.
 /// </remarks>
-sealed class Lamp : Fitting
+public sealed class Lamp : Fitting
 {
     public Lamp(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)

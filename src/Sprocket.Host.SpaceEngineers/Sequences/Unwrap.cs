@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Takes out lines that need not stand together as one edit: an if's own lines, leaving the steps in it where they are.</summary>
-    sealed class Unwrap : SequenceEdit
+    public sealed class Unwrap : SequenceEdit
     {
         readonly Change _change;
         readonly List<int> _lines = new List<int>();

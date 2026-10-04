@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
-    partial class SystemGroup
+    public partial class SystemGroup
     {
         const float Gutter = 32f;
 

@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// id, because a stack is only of any interest while what it is about still exists.
     /// </para>
     /// </remarks>
-    sealed class History<T> where T : class
+    public sealed class History<T> where T : class
     {
         const int Depth = 50;
 

@@ -31,10 +31,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         bool _blueprint;
 
         /// <summary>Told whenever a sequence or one of this system comes or goes. See <see cref="Automation.Reshaped" />.</summary>
-        internal Action Reshaped;
+        public Action Reshaped;
 
         /// <summary>Told whenever the system is switched on, so the program is checked for the start it is given. See <see cref="Automation.Starts" />.</summary>
-        internal Action Started;
+        public Action Started;
 
         void Reshape()
         {
@@ -187,7 +187,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Those are different triggers, and an edit that could only change fields could not
         /// answer the question the player was asked.
         /// </remarks>
-        internal void ReplaceTrigger(Trigger was, Trigger now)
+        public void ReplaceTrigger(Trigger was, Trigger now)
         {
             for (var i = 0; i < _triggers.Count; i++)
             {
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Where a trigger sits among the others, or -1.</summary>
-        internal int IndexOfTrigger(Trigger trigger)
+        public int IndexOfTrigger(Trigger trigger)
         {
             for (var i = 0; i < _triggers.Count; i++)
             {
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// For undo. One that came back on the end would reorder the list somebody is looking at,
         /// which reads as a second change rather than as the first one being taken back.
         /// </remarks>
-        internal void PutTriggerBack(int at, Trigger trigger)
+        public void PutTriggerBack(int at, Trigger trigger)
         {
             if (trigger == null)
                 return;
@@ -270,7 +270,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Forgets everything that started a sequence, for when the sequence itself goes.</summary>
-        internal void DropTriggersFor(int number)
+        public void DropTriggersFor(int number)
         {
             for (var i = _triggers.Count - 1; i >= 0; i--)
             {
@@ -583,7 +583,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return instance;
         }
 
-        internal void Add(Sequence sequence)
+        public void Add(Sequence sequence)
         {
             _sequences.Add(sequence);
             sequence.System = this;
@@ -591,7 +591,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Used(sequence.Number);
         }
 
-        internal bool Remove(Sequence sequence)
+        public bool Remove(Sequence sequence)
         {
             if (!_sequences.Remove(sequence))
                 return false;
@@ -628,7 +628,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Records that a sequence number has been used, so it is never handed out again.</summary>
-        internal void Used(int number)
+        public void Used(int number)
         {
             if (number > _lastSequence)
                 _lastSequence = number;

@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// system exists the moment somebody builds something and has no name until they care to
     /// give it one - and in the meantime it still has to be called something on screen.
     /// </remarks>
-    static class SystemSummary
+    public static class SystemSummary
     {
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>The first of a system's sequences, or of its triggers' own acts, with something wrong with it on <paramref name="instance" />, and what, or null where none has.</summary>
         /// <remarks>A lookup per run: what is wrong is found where it happens and kept by each run's runner.</remarks>
-        internal static Sequence Failing(AutomationRunner runner, AutomationSystem system, SystemInstance instance,
+        public static Sequence Failing(AutomationRunner runner, AutomationSystem system, SystemInstance instance,
             out SequenceFault fault)
         {
             var sequences = system.Sequences;

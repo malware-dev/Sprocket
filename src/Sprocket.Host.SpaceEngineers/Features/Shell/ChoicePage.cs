@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// so there is never an answer to offer, refuse or explain. The elements it is drawn with are declared in
     /// <c>ChoicePage.View.cs</c>, and nothing else is; this half is what it asks and what each answer does.
     /// </remarks>
-    sealed partial class ChoicePage : EditorPage
+    public sealed partial class ChoicePage : EditorPage
     {
         readonly string _title;
         readonly List<Option> _options = new List<Option>();

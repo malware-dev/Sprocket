@@ -77,13 +77,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         public bool IsState => State.Length > 0;
 
         /// <summary>Says the block announces this.</summary>
-        internal void Announce()
+        public void Announce()
         {
             Announced = true;
         }
 
         /// <summary>Gives the moment the words a test reads it in, being in it and not.</summary>
-        internal void Read(string state, string unstate)
+        public void Read(string state, string unstate)
         {
             State = state;
             Unstate = unstate;

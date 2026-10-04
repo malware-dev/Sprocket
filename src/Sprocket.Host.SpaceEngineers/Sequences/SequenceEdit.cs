@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <remarks>
     /// Walked back from the sequence's own screen, which is where every one of these is made.
     /// </remarks>
-    abstract class SequenceEdit : Edit<Sequence>
+    public abstract class SequenceEdit : Edit<Sequence>
     {
     }
 }

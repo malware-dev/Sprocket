@@ -20,7 +20,7 @@ namespace Sprocket.Sim.Machine;
 /// payload is the only record of which sequence a button runs.
 /// </para>
 /// </remarks>
-static class Wiring
+public static class Wiring
 {
     /// <summary>This store's own key, which is the harness's business and never Sprocket's.</summary>
     public static readonly Guid Key = new Guid("A7E3C1D0-9B42-4F58-8E16-3C7D5A2B9F04");

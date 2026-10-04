@@ -3,7 +3,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>One piece of script text, with whatever it carries.</summary>
-    struct Token
+    public struct Token
     {
         public Token(TokenKind kind, int at, StringSegment text = default(StringSegment), long whole = 0,
             double real = 0, Keyword keyword = Keyword.None) : this()

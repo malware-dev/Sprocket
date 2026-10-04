@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <b>Never change it.</b> A surface stores the script it was given by this name, so a new one
         /// reads as a surface asking for a script that does not exist.
         /// </remarks>
-        internal const string Id = "Sprocket_Status";
+        public const string Id = "Sprocket_Status";
 
         const float DesignHeight = 320f;
 

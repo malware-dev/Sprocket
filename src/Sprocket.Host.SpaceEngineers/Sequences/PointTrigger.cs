@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Answering "run a new sequence" makes one, so this carries it, and undoing takes it away again.
     /// </para>
     /// </remarks>
-    sealed class PointTrigger : SystemEdit
+    public sealed class PointTrigger : SystemEdit
     {
         readonly Automation _program;
         readonly Trigger _trigger;

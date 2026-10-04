@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// least see the problem: <c>IsButtonAssigned</c> says which buttons are wired, so an unassigned button
     /// can be explained rather than silently doing nothing.
     /// </remarks>
-    sealed class ButtonPanelExtension : IBlockExtension
+    public sealed class ButtonPanelExtension : IBlockExtension
     {
         /// <summary>How many buttons a panel has.</summary>
         /// <remarks>Its toolbar's slot count, which is the game's own answer to the same question.</remarks>

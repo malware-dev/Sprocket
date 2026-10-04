@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// A struct, so asking a statement for a list's items makes nothing. An empty one is what a position
     /// that holds no list answers, and it never reads its backing list.
     /// </remarks>
-    struct ValueRange
+    public struct ValueRange
     {
         readonly ValueChunks _all;
         readonly int _from;

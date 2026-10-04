@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// is its own, beside the rotor's.
     /// </para>
     /// </remarks>
-    sealed class RotorExtension : IBlockExtension
+    public sealed class RotorExtension : IBlockExtension
     {
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
         public const string RotateTo = "rotate-to";

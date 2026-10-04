@@ -9,7 +9,7 @@ using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;
 namespace Sprocket.Sim.Machine;
 
 /// <summary>A battery on the rig, which fills on a recharge while power is coming in.</summary>
-sealed class Battery : Fitting
+public sealed class Battery : Fitting
 {
     const float Capacity = 3f;
 

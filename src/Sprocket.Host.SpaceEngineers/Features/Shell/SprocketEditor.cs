@@ -271,13 +271,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>
         /// For a question that is small enough to hang over the screen.
         /// </remarks>
-        internal void Ask(string question)
+        public void Ask(string question)
         {
             _screen.Ask(question, false);
         }
 
         /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
-        internal void Ask(string question, Arguments arguments)
+        public void Ask(string question, Arguments arguments)
         {
             _screen.Ask(question, arguments, false);
         }
@@ -291,26 +291,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// whether to switch a sequence on, whether to replace a program - belongs to no control
         /// and goes in the middle, which is <see cref="Ask(string)" />.
         /// </remarks>
-        internal void AskHere(string question)
+        public void AskHere(string question)
         {
             _screen.Ask(question, true);
         }
 
         /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
-        internal void AskHere(string question, Arguments arguments)
+        public void AskHere(string question, Arguments arguments)
         {
             _screen.Ask(question, arguments, true);
         }
 
         /// <summary>Adds a way to answer, in the order they are offered.</summary>
         /// <remarks>The answer that does what was asked about comes first and the one that does not second, as Yes and No stand in the game's own message boxes.</remarks>
-        internal void Answer(string text, Action chosen)
+        public void Answer(string text, Action chosen)
         {
             Answer(text, chosen, false);
         }
 
         /// <summary>An answer that finishes the page on top, the way its own way on does.</summary>
-        internal void AnswerPrimary(string text, bool byDefault)
+        public void AnswerPrimary(string text, bool byDefault)
         {
             Answer(text, delegate { Current.Primary(); }, byDefault);
         }
@@ -322,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Said here rather than inferred from the order, because the order is what reads best and
         /// the default is what is safe, and those are not the same question.
         /// </remarks>
-        internal void Answer(string text, Action chosen, bool byDefault)
+        public void Answer(string text, Action chosen, bool byDefault)
         {
             var command = Refuses(Cmd.Answer) ? null : new Relay(delegate { Reply(chosen); });
             _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
@@ -618,7 +618,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
-        internal List<Field> Fields(IList<long> entityIds, string actionId, Form form)
+        public List<Field> Fields(IList<long> entityIds, string actionId, Form form)
         {
             return Vocabulary.Fields(_world, entityIds, actionId, form);
         }
@@ -693,20 +693,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public GridWorld World => _world;
 
-        internal Automation Program => _program;
+        public Automation Program => _program;
 
-        internal AutomationRunner Runner => _runner;
+        public AutomationRunner Runner => _runner;
 
-        internal EditorPage Current => _stack[_stack.Count - 1];
+        public EditorPage Current => _stack[_stack.Count - 1];
 
         /// <summary>How deep the stack is, for a run of questions to return to.</summary>
-        internal int Depth => _stack.Count;
+        public int Depth => _stack.Count;
 
         /// <summary>
         /// Drops every page above the given depth, so answering the last question
         /// lands back where the run started rather than walking out through it.
         /// </summary>
-        internal void UnwindTo(int depth)
+        public void UnwindTo(int depth)
         {
             while (_stack.Count > depth && _stack.Count > 1)
                 _stack.RemoveAt(_stack.Count - 1);
@@ -740,13 +740,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
 
-        internal void Push(EditorPage page)
+        public void Push(EditorPage page)
         {
             _stack.Add(page);
             _structureDirty = true;
         }
 
-        internal void Pop()
+        public void Pop()
         {
             if (_stack.Count <= 1)
                 return;
@@ -848,7 +848,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
         /// <remarks>The only way anything changes a sequence.</remarks>
-        internal void Do(Sequence sequence, SequenceEdit edit)
+        public void Do(Sequence sequence, SequenceEdit edit)
         {
             Do(sequence, edit, false);
         }
@@ -860,7 +860,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Typing a name arrives one letter at a time. Fifty entries all saying "renaming"
         /// would be a stack somebody has to press through rather than a way back.
         /// </remarks>
-        internal void Do(Sequence sequence, SequenceEdit edit, bool coalesce)
+        public void Do(Sequence sequence, SequenceEdit edit, bool coalesce)
         {
             if (!_sequenceHistory.Did(sequence, edit, coalesce))
                 return;
@@ -870,7 +870,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Makes a change to a system and remembers how to take it back.</summary>
         /// <remarks>The only way anything changes a trigger.</remarks>
-        internal void Do(AutomationSystem system, SystemEdit edit)
+        public void Do(AutomationSystem system, SystemEdit edit)
         {
             if (!_systemHistory.Did(system, edit, false))
                 return;
@@ -880,7 +880,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
         /// <remarks>Walked back from the home screen.</remarks>
-        internal void Do(ProgramEdit edit)
+        public void Do(ProgramEdit edit)
         {
             if (!_constructHistory.Did(_program, edit, false))
                 return;
@@ -906,98 +906,98 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Invalidate();
         }
 
-        internal bool CanUndo(Sequence sequence)
+        public bool CanUndo(Sequence sequence)
         {
             return _sequenceHistory.CanUndo(sequence);
         }
 
-        internal string UndoLabel(Sequence sequence)
+        public string UndoLabel(Sequence sequence)
         {
             return ChangeText.Of(Texts, _sequenceHistory.Undoes(sequence));
         }
 
-        internal void Undo(Sequence sequence)
+        public void Undo(Sequence sequence)
         {
             Walked(_sequenceHistory.Undo(sequence));
         }
 
-        internal bool CanRedo(Sequence sequence)
+        public bool CanRedo(Sequence sequence)
         {
             return _sequenceHistory.CanRedo(sequence);
         }
 
-        internal string RedoLabel(Sequence sequence)
+        public string RedoLabel(Sequence sequence)
         {
             return ChangeText.Of(Texts, _sequenceHistory.Redoes(sequence));
         }
 
-        internal void Redo(Sequence sequence)
+        public void Redo(Sequence sequence)
         {
             Walked(_sequenceHistory.Redo(sequence));
         }
 
-        internal bool CanUndo(AutomationSystem system)
+        public bool CanUndo(AutomationSystem system)
         {
             return _systemHistory.CanUndo(system);
         }
 
-        internal string UndoLabel(AutomationSystem system)
+        public string UndoLabel(AutomationSystem system)
         {
             return ChangeText.Of(Texts, _systemHistory.Undoes(system));
         }
 
-        internal void Undo(AutomationSystem system)
+        public void Undo(AutomationSystem system)
         {
             Walked(_systemHistory.Undo(system));
         }
 
-        internal bool CanRedo(AutomationSystem system)
+        public bool CanRedo(AutomationSystem system)
         {
             return _systemHistory.CanRedo(system);
         }
 
-        internal string RedoLabel(AutomationSystem system)
+        public string RedoLabel(AutomationSystem system)
         {
             return ChangeText.Of(Texts, _systemHistory.Redoes(system));
         }
 
-        internal void Redo(AutomationSystem system)
+        public void Redo(AutomationSystem system)
         {
             Walked(_systemHistory.Redo(system));
         }
 
         /// <summary>Whether there is a change to the program as a whole to walk back.</summary>
-        internal bool CanUndoConstruct()
+        public bool CanUndoConstruct()
         {
             return _constructHistory.CanUndo(_program);
         }
 
         /// <summary>What walking back the last change to the program as a whole undoes, as the undo arrow names it.</summary>
-        internal string UndoLabelConstruct()
+        public string UndoLabelConstruct()
         {
             return ChangeText.Of(Texts, _constructHistory.Undoes(_program));
         }
 
         /// <summary>Walks back the last change to the program as a whole.</summary>
-        internal void UndoConstruct()
+        public void UndoConstruct()
         {
             Walked(_constructHistory.Undo(_program));
         }
 
         /// <summary>Whether there is a change to the program as a whole to walk forward again.</summary>
-        internal bool CanRedoConstruct()
+        public bool CanRedoConstruct()
         {
             return _constructHistory.CanRedo(_program);
         }
 
         /// <summary>What walking forward again does, as the redo arrow names it.</summary>
-        internal string RedoLabelConstruct()
+        public string RedoLabelConstruct()
         {
             return ChangeText.Of(Texts, _constructHistory.Redoes(_program));
         }
 
         /// <summary>Walks forward again the last change to the program as a whole that was walked back.</summary>
-        internal void RedoConstruct()
+        public void RedoConstruct()
         {
             Walked(_constructHistory.Redo(_program));
         }
@@ -1122,7 +1122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
-        internal void ForgetSequence(Sequence sequence)
+        public void ForgetSequence(Sequence sequence)
         {
             _sequenceHistory.Forget(sequence);
 
@@ -1254,7 +1254,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// does not check either: the check belongs where the way in is put on a screen, so there is one place to
         /// read rather than two that can disagree.
         /// </remarks>
-        internal void ShowScript()
+        public void ShowScript()
         {
             // Also the way to a program's text that would not read, which is mended there whether or not developer mode is on.
             // Offered from every screen including this one, where it is already lit. Pressing it there
@@ -1266,7 +1266,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Opens the library: the world's backups, and the blueprints.</summary>
-        internal void OpenLibrary()
+        public void OpenLibrary()
         {
             Push(new LibraryPage(this));
         }
@@ -1284,7 +1284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// action, so somebody who genuinely wants to retreat still has somewhere to
         /// press.
         /// </remarks>
-        internal void StartSequence(AutomationSystem system, Trigger trigger)
+        public void StartSequence(AutomationSystem system, Trigger trigger)
         {
             // Where to unwind to once the questions are answered. The system's screen is
             // already underneath - the starters live on it now - so everything the questions
@@ -1360,7 +1360,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// button they want starts there. A sequence made this way is what the copy button makes
         /// too, which is why the way to say what starts it is already on its screen.
         /// </remarks>
-        internal void NewSequence(AutomationSystem system)
+        public void NewSequence(AutomationSystem system)
         {
             var sequence = _program.AddSequence(system);
             sequence.Name = Name(sequence);
@@ -1371,14 +1371,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Opens <paramref name="page" /> on something just made and given a name of its own, with that name in hand to be given.</summary>
         /// <remarks>A made-up name, "Sequence 3", is one somebody means to replace, so the box is open for it before anything else is pressed.</remarks>
-        internal void PushNamed(EditorPage page)
+        public void PushNamed(EditorPage page)
         {
             page.NameOnArrival = true;
             Push(page);
         }
 
         /// <summary>Opens <paramref name="page" /> on something just made, with its name in hand; left without anything done to it, it goes again.</summary>
-        internal void PushMade(EditorPage page)
+        public void PushMade(EditorPage page)
         {
             page.Made();
             PushNamed(page);
@@ -1441,7 +1441,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// The toolbar slot answering the picked trigger on each picked block: the trigger's own, or one of the slots a trigger
         /// that stands for many runs; slot 0 where what was picked is no trigger.
         /// </summary>
-        internal List<ToolbarSlot> Pressed(PickAnswer answer)
+        public List<ToolbarSlot> Pressed(PickAnswer answer)
         {
             var picked = ToolbarSlot.Of(answer.Chosen);
             var at = new List<ToolbarSlot>();
@@ -1489,7 +1489,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// One question at a time. Taking a button empties the trigger slot of the blockset that had it; nothing is taken until
         /// every question is answered, and leaving any of them alone leaves the part as it was.
         /// </remarks>
-        internal void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
+        public void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
             Action fill)
         {
             Filling(system, part, chosen, blocks, at, fill, new List<Occupant>());
@@ -1744,7 +1744,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// the buttons are free is answered - see <see cref="Answering" />. In a system it names the variable holding the
         /// first button picked, defined at that answer too.
         /// </remarks>
-        internal MomentTrigger Starter(AutomationSystem system, PickAnswer answer, RequiredTrigger keeping)
+        public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, RequiredTrigger keeping)
         {
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
@@ -1825,7 +1825,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The blocks <paramref name="answer" /> picked, as the construct declares them, each with the toolbar slot its press is answered on; the first of them, or null.</summary>
-        internal GridEntity Picked(PickAnswer answer, List<string> declared, List<ToolbarSlot> at)
+        public GridEntity Picked(PickAnswer answer, List<string> declared, List<ToolbarSlot> at)
         {
             var pressed = Pressed(answer);
             GridEntity first = null;
@@ -2097,7 +2097,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// it belongs to each instance - so the same sentence acts on the port airlock's door in one and the starboard's in
         /// another.
         /// </remarks>
-        internal List<string> Named(AutomationSystem system, IList<long> blocks)
+        public List<string> Named(AutomationSystem system, IList<long> blocks)
         {
             SystemInstance instance = system.IsBlueprint ? StandIn(system) : null;
 
@@ -2122,7 +2122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// blocks, as the construct declares them.
         /// </summary>
         /// <remarks>A name that is not a part, or a part the stand-in leaves empty, comes through as it is.</remarks>
-        internal List<string> Seen(AutomationSystem system, IList<string> names)
+        public List<string> Seen(AutomationSystem system, IList<string> names)
         {
             return SystemInstance.Through(StandIn(system), names);
         }
@@ -2131,7 +2131,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// The instance of <paramref name="system" /> whose blocks the editor shows, and picks blocks
         /// through: the one last chosen, or the first.
         /// </summary>
-        internal SystemInstance StandIn(AutomationSystem system)
+        public SystemInstance StandIn(AutomationSystem system)
         {
             if (system == null)
                 return null;
@@ -2143,7 +2143,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Gives <paramref name="system" /> slots and a first installation where it has none: a logic system keeps at least one.</summary>
         /// <remarks>The script still reads a system without slots, or a system blueprint with no installation, from an older save or the script page.</remarks>
-        internal void Installed(AutomationSystem system)
+        public void Installed(AutomationSystem system)
         {
             if (system == null)
                 return;
@@ -2164,7 +2164,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Adds another installation of <paramref name="system" />, named by the first number free, and shows the system through it.</summary>
-        internal SystemInstance Another(AutomationSystem system)
+        public SystemInstance Another(AutomationSystem system)
         {
             var name = SystemSummary.NewInstanceName(Texts, system);
             SystemInstance made = system.AddInstance();
@@ -2175,7 +2175,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Shows <paramref name="system" /> through <paramref name="instance" />'s blocks from now on.</summary>
-        internal void Choose(AutomationSystem system, SystemInstance instance)
+        public void Choose(AutomationSystem system, SystemInstance instance)
         {
             if (system == null || instance == null)
                 return;
@@ -2208,7 +2208,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// questions. A sequence deleted from its own screen still asks: that is work somebody can
         /// see, and its way back would be on a screen that went with it.
         /// </remarks>
-        internal void Forget(AutomationSystem system, Trigger trigger)
+        public void Forget(AutomationSystem system, Trigger trigger)
         {
             Do(system, new ForgetTrigger(system, trigger));
         }
@@ -2230,7 +2230,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// on the page after, so the picker goes straight on to that page, where the action was made.
         /// </para>
         /// </remarks>
-        internal void ChangeTrigger(AutomationSystem system, Trigger trigger, Opening opens, bool action)
+        public void ChangeTrigger(AutomationSystem system, Trigger trigger, Opening opens, bool action)
         {
             // Back to the screen the row is on, which is where the answer lands.
             var origin = _stack.Count;
@@ -2320,7 +2320,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// what to say about the gap is the control's, and it can already see that fewer came back than
         /// the sentence claims.
         /// </remarks>
-        internal List<long> Blocks(AutomationSystem system, IList<string> names)
+        public List<long> Blocks(AutomationSystem system, IList<string> names)
         {
             var seen = Seen(system, names);
             var found = new List<long>();
@@ -2359,7 +2359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// where it is, which is the honest result and the one a person can see.
         /// </para>
         /// </remarks>
-        internal void StopNow(Sequence sequence)
+        public void StopNow(Sequence sequence)
         {
             if (Elsewhere != null)
             {
@@ -2372,7 +2372,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 state.Interrupt(Stopper.Hand, 0);
         }
 
-        internal void RunNow(Sequence sequence)
+        public void RunNow(Sequence sequence)
         {
             if (Elsewhere != null)
             {
@@ -2405,7 +2405,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// sequence goes when it does, which is what <see cref="ForgetSequence" /> is for.
         /// </para>
         /// </remarks>
-        internal void DeleteSequence(Sequence sequence)
+        public void DeleteSequence(Sequence sequence)
         {
             Deleting(Texts.SequenceDeleteQuestion, SequenceText.Called(Texts, sequence),
                 Texts.DeleteFinal, null, delegate { TakeOut(sequence); });
@@ -2416,7 +2416,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// A blueprint only once its name is typed, in a box whose way on is dead until it is: every logic system made from
         /// it goes with it, which is too much to lose to a press that landed on the wrong answer.
         /// </remarks>
-        internal void DeleteSystem(AutomationSystem system)
+        public void DeleteSystem(AutomationSystem system)
         {
             Deleting(Texts.DeleteSystem, system.Name, Texts.DeleteSystemGoes, null, delegate
             {
@@ -2426,7 +2426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Puts the blueprint <paramref name="system" /> in the library as it is now.</summary>
-        internal void Shelve(AutomationSystem system)
+        public void Shelve(AutomationSystem system)
         {
             Stamp(true);
             Shelf.Keep(system);
@@ -2434,7 +2434,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Asks before deleting <paramref name="volume" /> from the library.</summary>
-        internal void Unshelve(Volume volume)
+        public void Unshelve(Volume volume)
         {
             Deleting(Texts.LibraryForgetQuestion, volume.State == VolumeState.Read ? volume.Name : volume.File, Texts.DeleteFinal, null, delegate
             {
@@ -2444,7 +2444,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Asks before forgetting <paramref name="backup" />, the automation of a construct that is gone.</summary>
-        internal void ForgetBackup(Backup backup)
+        public void ForgetBackup(Backup backup)
         {
             Deleting(Texts.LibraryForgetLostQuestion, backup.Name, Texts.DeleteFinal, null, delegate
             {
@@ -2457,7 +2457,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Puts the blueprint <paramref name="volume" /> from the library on the construct as a logic system with its first
         /// installation, answering what was wrong with it, or empty.
         /// </summary>
-        internal string PutOn(Volume volume)
+        public string PutOn(Volume volume)
         {
             var trouble = ProgramText.AddBlueprint(volume.Text, _program, _world.Values);
             if (trouble.Length > 0)
@@ -2478,7 +2478,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// A blueprint of its own because it has an identity of its own: changing either never touches the other. It is named
         /// with the first number no blueprint here or in the library has, and is by whoever made the copy.
         /// </remarks>
-        internal AutomationSystem Copy(string text, out string trouble)
+        public AutomationSystem Copy(string text, out string trouble)
         {
             var trial = new Automation();
             trouble = ProgramText.Load(text, trial, _world.Values);
@@ -2532,14 +2532,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether storage keeps a copy of the blueprint <paramref name="system" />, as it is or older.</summary>
-        internal bool Stored(AutomationSystem system)
+        public bool Stored(AutomationSystem system)
         {
             return Shelf != null && Shelf.Find(system.Identity) != null;
         }
 
         /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
         /// <remarks>Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.</remarks>
-        internal void AskTakeOff(AutomationSystem system)
+        public void AskTakeOff(AutomationSystem system)
         {
             var arguments = new Arguments();
             arguments.Set("named", system.Name);
@@ -2554,7 +2554,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// installations, bringing the blueprint up to date.
         /// </summary>
         /// <remarks>One with no blueprint in the library is deleted instead, by <see cref="DeleteSystem" />: taking it off would lose it.</remarks>
-        internal void TakeOff(AutomationSystem system)
+        public void TakeOff(AutomationSystem system)
         {
             if (!Stored(system))
                 return;
@@ -2569,7 +2569,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Asks before taking <paramref name="instance" />, one of the installations of <paramref name="system" />, out of it.</summary>
         /// <remarks>A logic system keeps at least one installation, so its only one is never taken out: the logic system goes instead.</remarks>
-        internal void DeleteInstance(AutomationSystem system, SystemInstance instance)
+        public void DeleteInstance(AutomationSystem system, SystemInstance instance)
         {
             if (system.Instances.Count <= 1)
                 return;
@@ -2587,7 +2587,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Switches <paramref name="system" /> on or off; a blueprint off only after asking, since that stops every logic system made from it.</summary>
-        internal void SwitchSystem(AutomationSystem system, bool on)
+        public void SwitchSystem(AutomationSystem system, bool on)
         {
             if (on || !system.IsBlueprint || system.Instances.Count == 0)
             {
@@ -2620,14 +2620,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// An installation keeps its own setting while its blueprint is off, so the blueprint switched back on starts exactly
         /// the ones that were on; its switch cannot be pressed meanwhile.
         /// </remarks>
-        internal void SwitchInstance(AutomationSystem system, SystemInstance instance, bool on)
+        public void SwitchInstance(AutomationSystem system, SystemInstance instance, bool on)
         {
             if (system.Enabled)
                 instance.Enabled = on;
         }
 
         /// <summary>What pressing the switch of <paramref name="system" /> would do, said as a note on it.</summary>
-        internal string SwitchAbout(AutomationSystem system)
+        public string SwitchAbout(AutomationSystem system)
         {
             if (!system.IsBlueprint)
                 return StatusRow.Switching(Texts, true, system.Enabled);
@@ -2636,21 +2636,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Takes <paramref name="sequence" /> out of the program without asking, and any page showing it.</summary>
-        internal void TakeOut(Sequence sequence)
+        public void TakeOut(Sequence sequence)
         {
             _program.RemoveSequence(sequence);
             ForgetSequence(sequence);
         }
 
         /// <summary>Takes <paramref name="system" /> out of the program without asking, with everything in it and any page showing it.</summary>
-        internal void TakeOut(AutomationSystem system)
+        public void TakeOut(AutomationSystem system)
         {
             Drop(system);
         }
 
         /// <summary>Takes <paramref name="instance" /> out of <paramref name="system" /> without asking.</summary>
         /// <remarks>For a question already answered, or for one made a moment ago that was left without anything done to it.</remarks>
-        internal void TakeOut(AutomationSystem system, SystemInstance instance)
+        public void TakeOut(AutomationSystem system, SystemInstance instance)
         {
             system.RemoveInstance(instance);
             _standIns.Remove(system.Id);
@@ -2665,7 +2665,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Named like any other new sequence rather than after the one it came from: a script may run a
         /// sequence by its name, so a copied name would leave that name meaning two sequences.
         /// </remarks>
-        internal void Duplicate(Sequence sequence)
+        public void Duplicate(Sequence sequence)
         {
             var copy = _program.Duplicate(sequence);
             copy.Name = Name(copy);

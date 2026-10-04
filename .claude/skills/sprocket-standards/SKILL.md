@@ -44,8 +44,10 @@ replaces one of Keen's only wins inside the assembly making it, and the harness 
 assembly. Anything the mod needs the harness to answer differently is an interface or it is nothing.
 
 **A `.debug.cs` file is compiled locally, left out of what is packed and ignored by the analysers.**
-That is the only way the mod grants its internals to the tests: the whitelist bans
-`InternalsVisibleTo` outright, so a mod that shipped it would refuse to load.
+It holds what only the harness needs, such as `Told.debug.cs` keeping every line the mod has said.
+
+**Nothing is internal.** A mod is one assembly with no friends, so internal hides nothing; a type or
+member is public or private, and the `Sprocket.Standards` analyzer reports anything else as STD001.
 
 ## The compiler ceiling
 

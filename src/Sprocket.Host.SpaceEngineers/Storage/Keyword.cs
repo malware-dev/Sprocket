@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <see cref="None" /> is zero, so an identifier that is nobody's keyword is the default answer.
     /// </para>
     /// </remarks>
-    enum Keyword
+    public enum Keyword
     {
         None = 0,
 

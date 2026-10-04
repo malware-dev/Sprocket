@@ -17,7 +17,7 @@ namespace Sprocket.Sim.Fakes
     /// and the mod casts between them.
     /// </para>
     /// </remarks>
-    static class Pretend
+    public static class Pretend
     {
         /// <summary>
         /// How many questions the mod has asked the game, in total.
@@ -33,10 +33,10 @@ namespace Sprocket.Sim.Fakes
         /// (see Serially) and this is never shipped.
         /// </para>
         /// </remarks>
-        internal static int Asked;
+        public static int Asked;
 
         /// <summary>One generator, because each one keeps a cache of the types it has made.</summary>
-        internal static readonly ProxyGenerator Generator = new ProxyGenerator();
+        public static readonly ProxyGenerator Generator = new ProxyGenerator();
 
         public static Stand<T> To<T>() where T : class
         {
@@ -44,7 +44,7 @@ namespace Sprocket.Sim.Fakes
         }
     }
 
-    sealed class Stand<T> where T : class
+    public sealed class Stand<T> where T : class
     {
         readonly List<Type> _also = new List<Type>();
         readonly Dictionary<string, Func<object[], object>> _answers =

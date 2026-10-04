@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What the two stores say between them, whatever the two files happen to contain.</summary>
-        internal static Settings From(string global, string world)
+        public static Settings From(string global, string world)
         {
             MyIni everywhere = Parse(global, "global");
             MyIni here = Parse(world, "world");

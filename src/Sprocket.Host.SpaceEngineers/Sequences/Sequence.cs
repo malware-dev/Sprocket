@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <see cref="AutomationSystem.NextSequenceNumber" /> - and never changed afterwards, so a rename
         /// cannot unwire anything.
         /// </remarks>
-        public int Number { get; internal set; }
+        public int Number { get; set; }
 
         /// <summary>Whether this is what the runtime makes to do a trigger's own act, which has no number and is no sequence of the program.</summary>
         public bool IsAlone => Number <= 0;
@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public IList<Step> Steps => _steps;
 
         /// <summary>The system this belongs to.</summary>
-        public AutomationSystem System { get; internal set; }
+        public AutomationSystem System { get; set; }
 
         /// <summary>
         /// Whether it may run on <paramref name="instance" />: its system switched on, and that one switched on.

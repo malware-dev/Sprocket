@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// lists, which is the other half of keeping every run unbroken.
     /// </para>
     /// </remarks>
-    sealed class Reading
+    public sealed class Reading
     {
         readonly ValueChunks _values = new ValueChunks();
         readonly ValueChunks _items = new ValueChunks();

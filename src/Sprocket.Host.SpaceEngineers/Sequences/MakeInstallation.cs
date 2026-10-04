@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>An installation just made, in its logic system already; undone, it goes, and redone, it comes back where it stood.</summary>
-    sealed class MakeInstallation : ProgramEdit
+    public sealed class MakeInstallation : ProgramEdit
     {
         readonly AutomationSystem _system;
         readonly SystemInstance _instance;

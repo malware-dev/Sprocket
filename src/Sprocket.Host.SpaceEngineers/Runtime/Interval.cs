@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// readonly field would be copied to be asked and the answer would never be kept.
     /// </para>
     /// </remarks>
-    struct Interval
+    public struct Interval
     {
         readonly int _every;
 

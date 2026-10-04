@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// and is left needing another. One edit, because it is one answer to one question; undoing it puts the trigger back
     /// where it was.
     /// </remarks>
-    sealed class TakeOverTrigger : SystemEdit
+    public sealed class TakeOverTrigger : SystemEdit
     {
         readonly SystemEdit _made;
         readonly AutomationSystem _from;

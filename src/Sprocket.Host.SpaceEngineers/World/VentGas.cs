@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// working for ever.
     /// </para>
     /// </remarks>
-    sealed class VentGas
+    public sealed class VentGas
     {
         const float Trickle = 1f;
 

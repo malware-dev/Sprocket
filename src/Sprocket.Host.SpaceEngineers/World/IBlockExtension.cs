@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// ask whether it is one of several - the first two needs in the catalogue. Until those exist, a flag
     /// per answer says the same things in the sentences an airlock actually uses.
     /// </remarks>
-    interface IBlockExtension
+    public interface IBlockExtension
     {
         bool Claims(IMyTerminalBlock block);
 

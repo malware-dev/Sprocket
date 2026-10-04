@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    sealed partial class ChoicePage
+    public sealed partial class ChoicePage
     {
         Label _empty;
         VStack _answers;

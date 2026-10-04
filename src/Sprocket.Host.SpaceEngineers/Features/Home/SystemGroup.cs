@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
     /// <summary>A logic system's heading on the home page, its installations, and the way to add another.</summary>
     /// <remarks>The elements it is drawn with are declared in <c>SystemGroup.View.cs</c>, and nothing else is.</remarks>
-    partial class SystemGroup : VStack
+    public partial class SystemGroup : VStack
     {
         readonly SprocketEditor _editor;
         readonly HomePage _page;

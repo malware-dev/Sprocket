@@ -1,7 +1,7 @@
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    sealed class SetWait : SequenceEdit
+    public sealed class SetWait : SequenceEdit
     {
         readonly int _index;
         readonly int _was;

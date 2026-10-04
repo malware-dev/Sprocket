@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// programmable block's run take text and declare it, so they need nothing here.
     /// </para>
     /// </remarks>
-    static class Known
+    public static class Known
     {
         const string Real = "single";
 

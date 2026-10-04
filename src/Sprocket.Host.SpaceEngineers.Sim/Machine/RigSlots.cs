@@ -15,7 +15,7 @@ namespace Sprocket.Sim.Machine;
 /// back nothing at all - silently, which is the worst way for it to fail. This answers the same calls
 /// over the rig's own slots instead.
 /// </remarks>
-sealed class RigSlots : ISlots
+public sealed class RigSlots : ISlots
 {
     readonly Rig _rig;
 

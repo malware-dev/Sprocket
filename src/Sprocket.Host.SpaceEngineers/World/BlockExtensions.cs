@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// remembers what it saw - a vent moving gas, a rotor at an angle - and that memory is about the
     /// blocks of one construct in one world. Held by the world, it goes when the world goes.
     /// </remarks>
-    sealed class BlockExtensions
+    public sealed class BlockExtensions
     {
         readonly IBlockExtension[] _all =
         {

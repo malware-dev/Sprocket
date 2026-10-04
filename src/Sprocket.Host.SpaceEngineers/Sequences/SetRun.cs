@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Which sequence a step runs or stops, changed.</summary>
-    sealed class SetRun : SequenceEdit
+    public sealed class SetRun : SequenceEdit
     {
         readonly int _index;
         readonly int _was;

@@ -27,7 +27,7 @@ namespace Sprocket.Sim.Driving
     {
         /// <summary>The page of the sequence the editor is on, its view made.</summary>
         /// <remarks>Asks the page for its view first, which is what makes it where nothing has drawn the page yet.</remarks>
-        internal static SequencePage Sentence(this SprocketEditor editor)
+        public static SequencePage Sentence(this SprocketEditor editor)
         {
             var page = editor.Current as SequencePage
                        ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a sequence's page.");
@@ -40,11 +40,11 @@ namespace Sprocket.Sim.Driving
             Within(editor.Sentence().View).OfType<Button>().Where(b => b.Text.StartsWith(StatusRow.Plus, StringComparison.Ordinal)).ToList();
 
         /// <summary>The picking page the editor is on, or an exception naming the screen.</summary>
-        internal static PickPage Picking(this SprocketEditor editor) =>
+        public static PickPage Picking(this SprocketEditor editor) =>
             editor.Current as PickPage ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not picking.");
 
         /// <summary>The page of the blueprint the editor is on, its view made.</summary>
-        internal static BlueprintPage Blueprint(this SprocketEditor editor)
+        public static BlueprintPage Blueprint(this SprocketEditor editor)
         {
             var page = editor.Current as BlueprintPage
                        ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a blueprint's page.");

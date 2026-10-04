@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
-    sealed partial class HomePage
+    public sealed partial class HomePage
     {
         Label _heading;
         Label _empty;

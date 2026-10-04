@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// One edit rather than two, because it is one answer to one question; undoing it puts the other blockset's slot back.
     /// </para>
     /// </remarks>
-    sealed class TakeOver : SystemEdit
+    public sealed class TakeOver : SystemEdit
     {
         readonly SystemEdit _made;
         readonly SystemInstance _from;

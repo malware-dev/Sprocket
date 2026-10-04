@@ -154,27 +154,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>How many times the program has been checked.</summary>
         /// <remarks>Counted so it can be shown that a program nothing changes is checked once.</remarks>
-        internal int Checks { get; private set; }
+        public int Checks { get; private set; }
 
         /// <summary>How many times an open editor's look has looked at the construct.</summary>
         /// <remarks>Counted so it can be shown that an idle editor looks at nothing.</remarks>
-        internal int Looks { get; private set; }
+        public int Looks { get; private set; }
 
         /// <summary>How many times the runners have been matched to the program.</summary>
         /// <remarks>Counted so it can be shown that an ordinary tick matches nothing.</remarks>
-        internal int Reconciled { get; private set; }
+        public int Reconciled { get; private set; }
 
         /// <summary>The world this program runs in.</summary>
-        internal GridWorld World => _world;
+        public GridWorld World => _world;
 
         /// <summary>The program being run.</summary>
-        internal Automation Program => _automation;
+        public Automation Program => _automation;
 
         /// <summary>What the program's declarations point at, as last resolved on a tick.</summary>
-        internal Bindings Current => _bindings;
+        public Bindings Current => _bindings;
 
         /// <summary>The rota this program's sequences are on.</summary>
-        internal Rota Rota => _rota;
+        public Rota Rota => _rota;
 
         /// <summary>
         /// Live state for a sequence on the first of its system, or null if never ticked.
@@ -259,17 +259,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Counts up whenever what <see cref="Missing" /> answers may have changed, so a reader asks again only then.</summary>
-        internal int MissingStamp => _missingStamp;
+        public int MissingStamp => _missingStamp;
 
         /// <summary>Says a poller now finds a block it watches gone, or back, or the pollers themselves changed.</summary>
-        internal void MissingChanged()
+        public void MissingChanged()
         {
             _missingStamp++;
         }
 
         /// <summary>Whether a block that something about <paramref name="sequence" /> watches on <paramref name="instance" /> is no longer on the construct.</summary>
         /// <remarks>Walks every poller, so it is read through <see cref="MissingStamp" /> rather than on every look.</remarks>
-        internal bool Missing(Sequence sequence, SystemInstance instance)
+        public bool Missing(Sequence sequence, SystemInstance instance)
         {
             foreach (var pair in _pollers)
             {
@@ -292,7 +292,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// A sequence switched off lets it go by, and one already running counts it as skipped; see
         /// <see cref="SequenceRunner.Triggered" />. A stop is nothing happening where the sequence is not running.
         /// </remarks>
-        internal void Fire(AutomationSystem system, Trigger trigger, SystemInstance instance)
+        public void Fire(AutomationSystem system, Trigger trigger, SystemInstance instance)
         {
             var run = trigger.Does as Run;
             if (run != null)
@@ -759,7 +759,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// A logic system of its own as a whole, and one of a blueprint's alone, so the port airlock missing a door leaves
         /// the front one working. Never switched back on here: starting a machine again is somebody's decision.
         /// </remarks>
-        internal void Faulted(Sequence sequence, SystemInstance instance, SequenceFault fault)
+        public void Faulted(Sequence sequence, SystemInstance instance, SequenceFault fault)
         {
             var system = sequence.System;
             if (system == null || !system.Enabled)

@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Playing is not waited for. A dedicated server plays no sound at all and nothing tells a mod when
     /// one has finished, so there is nothing to wait on.
     /// </remarks>
-    sealed class SoundExtension : IBlockExtension
+    public sealed class SoundExtension : IBlockExtension
     {
         /// <summary>Playing a chosen sound, which is Sprocket's own.</summary>
         public const string Play = "play";

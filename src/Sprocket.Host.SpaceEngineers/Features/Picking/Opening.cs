@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// Which column a picker opens on: the one standing for the part pressed to open it, with the
     /// caret in the first thing in it to type into.
     /// </summary>
-    enum Opening
+    public enum Opening
     {
         /// <summary>The blocks, and the box that narrows them.</summary>
         Blocks,

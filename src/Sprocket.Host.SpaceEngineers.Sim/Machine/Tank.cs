@@ -14,7 +14,7 @@ namespace Sprocket.Sim.Machine;
 /// It carries no resource components, as no block on the rig does, so the gas it is given cannot be
 /// read and a tank with none coming in says nothing about it here.
 /// </remarks>
-sealed class Tank : Fitting
+public sealed class Tank : Fitting
 {
     const int FillTicks = 120;
 

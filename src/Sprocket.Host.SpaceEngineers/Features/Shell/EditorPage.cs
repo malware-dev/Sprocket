@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// A page makes its view once, is built again when the shape of the screen changes, and brings what it shows up to
     /// date in place every tick. Making controls afresh on every tick is exactly what a screen cannot afford.
     /// </remarks>
-    abstract class EditorPage
+    public abstract class EditorPage
     {
         Interval _asked = new Interval(Second);
 
@@ -121,10 +121,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public virtual string CustomName => "";
 
         /// <summary>Whether the page opens with its name in hand to be given, once, as it is first shown.</summary>
-        internal bool NameOnArrival { get; set; }
+        public bool NameOnArrival { get; set; }
 
         /// <summary>Whether the page was opened on something made as it opened, which is taken back if left untouched.</summary>
-        internal bool IsMade { get; private set; }
+        public bool IsMade { get; private set; }
 
         /// <summary>Whether what the page was opened on is as it was made, so taking it back loses nothing.</summary>
         public virtual bool Untouched => false;
@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Marks the page as opened on something just made, and notes how it stands, for <see cref="Untouched" /> to compare with.</summary>
-        internal void Made()
+        public void Made()
         {
             IsMade = true;
             Remember();
@@ -333,7 +333,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// A page is built again when the screen is rebuilt, so everything it only says on a cadence has to be said
         /// again at once - a row whose words arrive a second after it appears is a row that appears blank.
         /// </remarks>
-        internal virtual void Resay()
+        public virtual void Resay()
         {
             _asked.Restart();
         }

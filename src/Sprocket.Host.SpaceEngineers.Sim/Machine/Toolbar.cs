@@ -17,7 +17,7 @@ namespace Sprocket.Sim.Machine;
 /// mod both reads and writes it.
 /// </para>
 /// </remarks>
-sealed class Toolbar : IMyToolbar
+public sealed class Toolbar : IMyToolbar
 {
     readonly MyToolbarItemInfo[] _items;
     readonly bool[] _filled;

@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// The timer's own picker. A trigger on a block picks the block and what happens to it; this picks the rate, and the
     /// column saying what the trigger does is the same one, so it is chosen the same way whichever kind of trigger it is.
     /// </remarks>
-    sealed class TimerPage : EditorPage
+    public sealed class TimerPage : EditorPage
     {
         readonly Aim _aim;
         readonly Action<int> _done;
@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Goes straight on to the page after this one as soon as this is built.</summary>
-        internal void GoOn()
+        public void GoOn()
         {
             _goesOn = true;
         }

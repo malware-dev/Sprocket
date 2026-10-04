@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// Facts only. This works out which state a sequence is in and what is wrong with it; what those
     /// read as belongs to <see cref="SequenceText" />, so the words for one thing live in one place.
     /// </remarks>
-    static class SequenceSummary
+    public static class SequenceSummary
     {
         public static bool References(Sequence sequence, string name)
         {

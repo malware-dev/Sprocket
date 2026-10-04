@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// starts it.
     /// </para>
     /// </remarks>
-    sealed class ChangeTrigger : SystemEdit
+    public sealed class ChangeTrigger : SystemEdit
     {
         readonly MomentTrigger _was;
         readonly MomentTrigger _now;

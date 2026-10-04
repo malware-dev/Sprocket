@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What a part says about itself.</summary>
-    sealed class AnnotatePart : SystemEdit
+    public sealed class AnnotatePart : SystemEdit
     {
         readonly Part _part;
         readonly string _was;

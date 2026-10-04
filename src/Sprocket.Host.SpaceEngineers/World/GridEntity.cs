@@ -7,8 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>One block, answering the small set of questions every block can answer.</summary>
     public sealed class GridEntity
     {
-        internal const string OnProperty = "on";
-        internal const string WorkingProperty = "working";
+        public const string OnProperty = "on";
+        public const string WorkingProperty = "working";
 
         /// <summary>What a block answers when it cannot say how long something will take.</summary>
         public const int Unestimated = -1;
@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly EntityKind _kind;
         readonly IBlockExtension _extension;
 
-        internal GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
+        public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
         {
             _block = block;
             _kind = kind;

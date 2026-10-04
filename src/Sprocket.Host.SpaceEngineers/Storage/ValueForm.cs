@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// keys - and nowhere else, so keeping them apart is what lets the language have a vector before the
     /// model has anywhere to put one.
     /// </remarks>
-    enum ValueForm
+    public enum ValueForm
     {
         /// <summary>A name: a bare word that is nobody's keyword, or anything in single quotes.</summary>
         Identifier,

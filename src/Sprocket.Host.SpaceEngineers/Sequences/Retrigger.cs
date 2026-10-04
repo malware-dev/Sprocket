@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// editor can reach a trigger that is not in the system.
     /// </para>
     /// </remarks>
-    sealed class Retrigger : SystemEdit
+    public sealed class Retrigger : SystemEdit
     {
         readonly SystemEdit _start;
         readonly SystemEdit _does;

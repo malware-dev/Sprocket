@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// spelling, which is the part that has to agree.
     /// </para>
     /// </remarks>
-    static class ValueLine
+    public static class ValueLine
     {
         /// <summary>Reads every value on the line, in order, appending them.</summary>
         public static void Read(string said, List<Literal> into)

@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     /// mode the panel's words and slots are written, for everyone who fills a blockset made from the blueprint. The elements it
     /// is drawn with are declared in <c>BlueprintPage.View.cs</c>.
     /// </remarks>
-    sealed partial class BlueprintPage : EditorPage
+    public sealed partial class BlueprintPage : EditorPage
     {
         readonly AutomationSystem _system;
         readonly List<Part> _parts = new List<Part>();

@@ -15,7 +15,7 @@ namespace Sprocket.Sim.Machine;
 /// The reason the mod reads a door's status rather than its switch: "close the inner door" is
 /// finished when the door is shut, and a door that shut instantly would never let that be wrong.
 /// </remarks>
-sealed class Door : Fitting
+public sealed class Door : Fitting
 {
     const int TravelTicks = 45;
 

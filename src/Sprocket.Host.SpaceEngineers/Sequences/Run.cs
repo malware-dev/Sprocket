@@ -40,6 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// the system is still being read. Empty everywhere else, including in everything Sprocket
         /// writes, because the writer writes the number.
         /// </remarks>
-        internal string Named { get; set; }
+        public string Named { get; set; }
     }
 }

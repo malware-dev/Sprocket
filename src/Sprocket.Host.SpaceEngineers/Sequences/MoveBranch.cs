@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// The lines that open the branches stay where they stand and take the tests in their new order, so the if keeps what
     /// belongs to the whole of it, its switch among them. An otherwise comes last and is not moved.
     /// </remarks>
-    sealed class MoveBranch : SequenceEdit
+    public sealed class MoveBranch : SequenceEdit
     {
         readonly int _open;
         readonly int _from;

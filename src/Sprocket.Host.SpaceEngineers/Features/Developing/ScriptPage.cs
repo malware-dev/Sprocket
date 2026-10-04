@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
     /// answer a question nobody asked. The listing it is drawn on is declared in <c>ScriptPage.View.cs</c>.
     /// </para>
     /// </remarks>
-    sealed partial class ScriptPage : EditorPage
+    public sealed partial class ScriptPage : EditorPage
     {
         string _shown;
         string _trouble = "";

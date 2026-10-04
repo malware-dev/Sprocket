@@ -9,7 +9,7 @@ namespace Sprocket.Sim.Machine;
 /// Here because a trigger is any toolbar slot, not a button: a timer's slots are triggers exactly as a panel's are, and
 /// nothing about the timer declares them. The countdown is left out; a test says when it goes off.
 /// </remarks>
-sealed class TimerBlock : Fitting
+public sealed class TimerBlock : Fitting
 {
     /// <summary>The slots a timer block's toolbar has.</summary>
     const int Slots = 9;

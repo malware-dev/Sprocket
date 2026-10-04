@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>How many shifts have been done, all told.</summary>
         /// <remarks>Counted so what an idle world costs can be measured rather than guessed at.</remarks>
-        internal int Done { get; private set; }
+        public int Done { get; private set; }
 
         /// <summary>How many shifts are on the rota.</summary>
         /// <remarks>Kept as shifts join and leave rather than counted, because the session asks it on every tick.</remarks>

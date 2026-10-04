@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// already recovering from a mistake. It is answered by a round-trip test per edit rather
     /// than by being careful: apply it, undo it, and the thing must equal what it was.
     /// </remarks>
-    abstract class Edit<T>
+    public abstract class Edit<T>
     {
         /// <summary>What this did, as it will be offered back.</summary>
         public abstract Change Change { get; }

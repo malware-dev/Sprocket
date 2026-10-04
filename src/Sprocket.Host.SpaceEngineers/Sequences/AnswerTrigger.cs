@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// One edit, because picking a button is one answer: undoing it takes back the trigger it made and the part with it,
     /// or puts back the buttons a part picked again had.
     /// </remarks>
-    sealed class AnswerTrigger : SystemEdit
+    public sealed class AnswerTrigger : SystemEdit
     {
         readonly SystemEdit _made;
         readonly SystemInstance _instance;

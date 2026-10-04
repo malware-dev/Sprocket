@@ -11,7 +11,7 @@ namespace Sprocket.Sim.Simulation
     /// compared byte for byte: the format is part of what the frames mean, and it must not be
     /// something the game could change underneath them. Invariant culture for the same reason.
     /// </remarks>
-    static class Shown
+    public static class Shown
     {
         public static string Say(Vector2 value)
         {

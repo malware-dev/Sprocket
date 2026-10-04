@@ -50,13 +50,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!-- The harness is a tool, and its own behaviour is worth a test or two: that a rig's wiring
-             survives a restart, for one, which is a thing only it can get wrong. -->
-        <InternalsVisibleTo Include="Sprocket.Host.SpaceEngineers.Presentation.Tests" />
-        <InternalsVisibleTo Include="Sprocket.Core.Tests" />
-    </ItemGroup>
-
-    <ItemGroup>
         <!-- Impersonates the game's interfaces at runtime, so the harness answers the dozen members
              the mod reads instead of implementing the several hundred it does not. Harness only. -->
         <PackageReference Include="Castle.Core" Version="5.1.1" />
@@ -82,9 +75,6 @@
         mod stopped reaching for the game's statics directly. What it asks of the game now arrives
         through two interfaces - IScreenSpace for the screen, ISlots for the toolbars - and the harness
         answers both. A recorded frame is what it writes down instead of drawing.
-
-        Internals come with it: Visibility.debug.cs in the mod names this assembly, which is a file the
-        game never sees.
     -->
     <ItemGroup>
         <ProjectReference Include="..\Sprocket.Host.SpaceEngineers\Sprocket.Host.SpaceEngineers.csproj" />
