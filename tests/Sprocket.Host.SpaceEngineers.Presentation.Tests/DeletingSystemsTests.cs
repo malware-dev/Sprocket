@@ -30,9 +30,8 @@ public class DeletingSystemsTests
         Assert.True(Button(sim).Toolbar.TryGetItem(0, out _), "the trigger never took the button");
 
         sim.Editor.RootHeadings().Single().Deletes!.Execute();
-        var asking = sim.Editor.Asking!;
-        asking.Box.Insert("Airlock");
-        asking.Take();
+        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
+        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         for (var i = 0; i < 5; i++)
             sim.Tick();
 
@@ -53,7 +52,7 @@ public class DeletingSystemsTests
         // Asked as the one going, and told that the blueprint and the rest are kept.
         sim.Editor.RootRows()[1].Deletes!.Execute();
         Assert.StartsWith(sim.Texts.DeleteInstance, sim.Editor.Question());
-        Assert.EndsWith("The " + system.Name + " logic system and its other installations are kept. This cannot be undone.",
+        Assert.EndsWith("The " + system.Name + " logic system and its other installations are kept.",
             sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
@@ -91,38 +90,95 @@ public class DeletingSystemsTests
     }
 
     /// <summary>
-    /// A blueprint goes only once its name is typed, whatever its case, since every logic system made from it goes too; a
-    /// press on the way on before then does nothing.
+    /// A logic system's own screen has a bin too, which asks the same plain question and leaves for the home screen once it has
+    /// gone; undo there puts it back whole, installations and all, and redo takes it out again.
     /// </summary>
     [Fact]
-    public void ABlueprintGoesOnlyOnceItsNameIsTyped()
+    public void ADeletedLogicSystemComesBackWithUndo()
     {
         var sim = Blueprinted();
         var system = sim.Editor.Program.Systems.Single();
         sim.Editor.OpenBlueprintSystem(0);
         sim.Tick();
 
-        Assert.Equal(sim.Texts.SystemDeleteBlueprint, sim.Editor.Screen.DeleteAbout);
+        Assert.Equal(sim.Texts.SystemDelete, sim.Editor.Screen.DeleteAbout);
         sim.Editor.Screen.Deletes!.Execute();
-        var asking = sim.Editor.Asking!;
-
-        asking.Take();
-        sim.Tick();
-        Assert.Same(system, sim.Editor.Program.Systems.Single());
-
-        asking.Box.SelectAll();
-        asking.Box.Insert("Airloc");
-        asking.Take();
-        sim.Tick();
-        Assert.Same(system, sim.Editor.Program.Systems.Single());
-
-        asking.Box.SelectAll();
-        asking.Box.Insert(system.Name.ToUpperInvariant());
-        asking.Take();
+        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
+        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
 
         Assert.Empty(sim.Editor.Program.Systems);
-        Assert.Empty(sim.Editor.RootRows());
+        Assert.Equal(sim.Texts.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
+
+        sim.Editor.Screen.Undo!.Execute();
+        sim.Tick();
+
+        Assert.Same(system, sim.Editor.Program.Systems.Single());
+        Assert.Equal(2, system.Instances.Count);
+        Assert.Single(sim.Editor.Program.Sequences);
+        Assert.True(Button(sim).Toolbar.TryGetItem(0, out _), "the button was not wired again");
+
+        sim.Editor.Screen.Redo!.Execute();
+        sim.Tick();
+        Assert.Empty(sim.Editor.Program.Systems);
+    }
+
+    /// <summary>A deleted installation comes back with undo, with the blocks it had.</summary>
+    [Fact]
+    public void ADeletedInstallationComesBackWithUndo()
+    {
+        var sim = Blueprinted();
+        var system = sim.Editor.Program.Systems.Single();
+        var second = system.Instances[1];
+
+        sim.Editor.RootRows()[1].Deletes!.Execute();
+        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        sim.Tick();
+        Assert.Single(system.Instances);
+
+        sim.Editor.Screen.Undo!.Execute();
+        sim.Tick();
+        Assert.Equal(2, system.Instances.Count);
+        Assert.Same(second, system.Instances[1]);
+    }
+
+    /// <summary>A logic system just added goes with undo, and comes back with redo.</summary>
+    [Fact]
+    public void AnAddedLogicSystemGoesWithUndo()
+    {
+        var sim = Built();
+        sim.Editor.NewSystem("Hangar");
+        sim.Tick();
+        sim.Editor.PressPrimary();
+        sim.Editor.GoToRoot();
+        sim.Tick();
+        Assert.Equal(2, sim.Editor.Program.Systems.Count);
+
+        Assert.Equal(sim.Texts.ChangeAddSystem, sim.Editor.Screen.UndoText);
+        sim.Editor.Screen.Undo!.Execute();
+        sim.Tick();
+        Assert.Single(sim.Editor.Program.Systems);
+
+        sim.Editor.Screen.Redo!.Execute();
+        sim.Tick();
+        Assert.Equal(2, sim.Editor.Program.Systems.Count);
+    }
+
+    /// <summary>Undo stands down once the deleted logic system's button has been taken by another, so the button is never claimed twice.</summary>
+    [Fact]
+    public void UndoStandsDownWhereItsButtonWasTaken()
+    {
+        var sim = Built();
+        sim.Editor.RootHeadings().Single().Deletes!.Execute();
+        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        sim.Tick();
+        Assert.True(sim.Editor.Screen.Undo != null && sim.Editor.CanUndoConstruct());
+
+        sim.Editor.NewButtonSystem("Hangar");
+        sim.Editor.GoToRoot();
+        sim.Tick();
+
+        Assert.NotEqual(sim.Texts.ChangeDeleteSystem, sim.Editor.Screen.UndoText);
     }
 
     /// <summary>A lent editor, which may only look, offers no bin.</summary>

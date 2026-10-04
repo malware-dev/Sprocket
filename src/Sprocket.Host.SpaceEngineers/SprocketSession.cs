@@ -14,6 +14,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Features.Gravity;
+using Sprocket.Host.SpaceEngineers.Features.Doors;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -54,6 +55,8 @@ namespace Sprocket.Host.SpaceEngineers
         readonly FieldMarks _marks = new FieldMarks();
 
         readonly Rota _rota = new Rota();
+
+        AutoClose _doors;
 
         SprocketScreen _screen;
         long _open;
@@ -106,6 +109,10 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>The field boxes a gravity generator's fit is showing, or null outside a session.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: the gravity generator's buttons reach the session only through statics.</remarks>
         public static FieldMarks Marks => _current == null ? null : _current._marks;
+
+        /// <summary>Every door's auto-close delay, or null outside a session.</summary>
+        /// <remarks>Static for the reason <see cref="Texts" /> is: a door's slider and its own component reach the session only through statics.</remarks>
+        public static AutoClose Doors => _current == null ? null : _current._doors;
 
         /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: a block's own component reads it as it makes the terminal controls.</remarks>
@@ -175,6 +182,7 @@ namespace Sprocket.Host.SpaceEngineers
         {
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
             MyAPIGateway.TerminalControls.CustomControlGetter += FieldControls.Arrange;
+            MyAPIGateway.TerminalControls.CustomControlGetter += DoorControls.Arrange;
 
             if (IsServer)
                 FindBackups();
@@ -230,8 +238,10 @@ namespace Sprocket.Host.SpaceEngineers
             Speak();
 
             _handover = new Handover(Found, Given, Refused, Changed, Stored);
-            _channel = Handover.Carry(NetworkChannel.Create(GetType())).Build();
+            _doors = new AutoClose(_rota, Frame);
+            _channel = AutoClose.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
+            _doors.Listen(_channel);
 
             Told.Say(IsServer
                 ? "this machine runs the Sprockets"
@@ -720,7 +730,8 @@ namespace Sprocket.Host.SpaceEngineers
             if (IsServer && _reclaiming.Due(frame))
                 _handover.Reclaim(Connected);
 
-            if (_units.Count == 0)
+            // The rota holds a door's coming close as well as the Sprockets' work, so it runs while either is there.
+            if (_units.Count == 0 && _rota.Count == 0)
                 return;
 
             foreach (KeyValuePair<long, SprocketUnit> unit in _units)
@@ -729,6 +740,12 @@ namespace Sprocket.Host.SpaceEngineers
             // After every Sprocket has ticked, so each one's bindings are current when the rota calls
             // its sequences.
             _rota.Run(frame);
+        }
+
+        /// <summary>The frame the game is on, which is what the rota counts in.</summary>
+        static int Frame()
+        {
+            return MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
         }
 
         /// <summary>Whether the player with <paramref name="id" /> is connected to this server.</summary>
@@ -810,6 +827,7 @@ namespace Sprocket.Host.SpaceEngineers
             {
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;
                 MyAPIGateway.TerminalControls.CustomControlGetter -= FieldControls.Arrange;
+                MyAPIGateway.TerminalControls.CustomControlGetter -= DoorControls.Arrange;
             }
 
             if (_gameTexts != null && MyAPIGateway.Gui != null)
@@ -826,6 +844,9 @@ namespace Sprocket.Host.SpaceEngineers
             foreach (KeyValuePair<long, SprocketUnit> unit in _units)
                 unit.Value.Dispose();
 
+            if (_doors != null)
+                _doors.Dispose();
+
             if (_channel != null)
                 _channel.Dispose();
 
@@ -835,6 +856,7 @@ namespace Sprocket.Host.SpaceEngineers
             _copy = null;
             _channel = null;
             _handover = null;
+            _doors = null;
             _settings = null;
             _current = null;
         }

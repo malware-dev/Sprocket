@@ -40,6 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int _next;
         int _last;
         bool _started;
+        int _count;
 
         /// <summary>A place in the turn for something new.</summary>
         /// <remarks>
@@ -57,18 +58,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         internal int Done { get; private set; }
 
         /// <summary>How many shifts are on the rota.</summary>
-        public int Count
-        {
-            get
-            {
-                var count = _each.Count;
-                for (var i = 0; i < Ten; i++)
-                    count += _tens[i].Count;
-                for (var i = 0; i < Hundred; i++)
-                    count += _hundreds[i].Count;
-                return count;
-            }
-        }
+        /// <remarks>Kept as shifts join and leave rather than counted, because the session asks it on every tick.</remarks>
+        public int Count => _count;
 
         /// <summary>Looks at a shift once every period, on its place, until told otherwise.</summary>
         public void Every(Shift shift, int period)
@@ -112,6 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             list.RemoveAt(last);
 
             shift.List = null;
+            _count--;
         }
 
         /// <summary>Does everything due from the tick after the last one run up to this one.</summary>
@@ -168,6 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             shift.List = list;
             shift.Index = list.Count;
             list.Add(shift);
+            _count++;
         }
 
         static int Place(int tick, int period)

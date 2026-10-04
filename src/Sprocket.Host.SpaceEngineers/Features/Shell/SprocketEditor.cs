@@ -91,9 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How many times the screen has been built from its page, which a screen standing still never adds to.</summary>
         public int Rebuilds { get; private set; }
 
-        /// <summary>The box a blueprint's name is typed into to delete it, where one has been asked for.</summary>
-        public Prompt Asking => _asking;
-
         /// <summary>What the person at the editor needs told above whatever page is showing, or null for nothing.</summary>
         public Notice Notice => _notice;
 
@@ -483,7 +480,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         bool _told;
 
-        Prompt _asking;
 
         /// <summary>
         /// Whether a press of <paramref name="kind" /> would be the edit that replaces a program Sprocket could not read.
@@ -519,7 +515,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.None:
                 case Cmd.Back:
                 case Cmd.Answer:
-                case Cmd.Refresh:
                 case Cmd.Expand:
                 case Cmd.Resolve:
                 case Cmd.Mend:
@@ -729,7 +724,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             switch (kind)
             {
                 case Cmd.Back:
-                case Cmd.Refresh:
                 case Cmd.Expand:
                 case Cmd.OpenSystem:
                 case Cmd.OpenSequence:
@@ -850,6 +844,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
 
+        readonly History<Automation> _constructHistory = new History<Automation>();
+
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
         /// <remarks>The only way anything changes a sequence.</remarks>
         internal void Do(Sequence sequence, SequenceEdit edit)
@@ -877,6 +873,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         internal void Do(AutomationSystem system, SystemEdit edit)
         {
             if (!_systemHistory.Did(system, edit, false))
+                return;
+
+            Settled(edit);
+        }
+
+        /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
+        /// <remarks>Walked back from the home screen.</remarks>
+        internal void Do(ProgramEdit edit)
+        {
+            if (!_constructHistory.Did(_program, edit, false))
                 return;
 
             Settled(edit);
@@ -958,6 +964,42 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         internal void Redo(AutomationSystem system)
         {
             Walked(_systemHistory.Redo(system));
+        }
+
+        /// <summary>Whether there is a change to the program as a whole to walk back.</summary>
+        internal bool CanUndoConstruct()
+        {
+            return _constructHistory.CanUndo(_program);
+        }
+
+        /// <summary>What walking back the last change to the program as a whole undoes, as the undo arrow names it.</summary>
+        internal string UndoLabelConstruct()
+        {
+            return ChangeText.Of(Texts, _constructHistory.Undoes(_program));
+        }
+
+        /// <summary>Walks back the last change to the program as a whole.</summary>
+        internal void UndoConstruct()
+        {
+            Walked(_constructHistory.Undo(_program));
+        }
+
+        /// <summary>Whether there is a change to the program as a whole to walk forward again.</summary>
+        internal bool CanRedoConstruct()
+        {
+            return _constructHistory.CanRedo(_program);
+        }
+
+        /// <summary>What walking forward again does, as the redo arrow names it.</summary>
+        internal string RedoLabelConstruct()
+        {
+            return ChangeText.Of(Texts, _constructHistory.Redoes(_program));
+        }
+
+        /// <summary>Walks forward again the last change to the program as a whole that was walked back.</summary>
+        internal void RedoConstruct()
+        {
+            Walked(_constructHistory.Redo(_program));
         }
 
         /// <summary>Whatever a step back or forward changed, once it has changed it.</summary>
@@ -1056,11 +1098,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         void Drop(AutomationSystem system)
         {
+            _program.RemoveSystem(system);
+            Gone(system);
+        }
+
+        /// <summary>Lets go of everything the editor kept about <paramref name="system" />, which has just been taken out of the program.</summary>
+        void Gone(AutomationSystem system)
+        {
             var sequences = system.Sequences;
             for (var i = sequences.Count - 1; i >= 0; i--)
                 ForgetSequence(sequences[i]);
 
-            _program.RemoveSystem(system);
             _systemHistory.Forget(system);
             _standIns.Remove(system.Id);
 
@@ -1128,7 +1176,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
-            _screen.Refresh = page.CanRefresh ? Act(Cmd.Refresh, Look) : null;
             _screen.Library = page.Library;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
             _screen.SwitchAbout = page.SwitchAbout;
@@ -1171,20 +1218,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = false;
         }
 
-
-        /// <summary>
-        /// Everything the host learns by looking, read again.
-        /// </summary>
-        /// <remarks>
-        /// What a screen says about which buttons are wired is a reading, taken when the screen opened.
-        /// On a server somebody else may have re-pointed a slot since, and nothing tells Sprocket, so
-        /// this is how a person says "look again".
-        /// </remarks>
-        void Look()
-        {
-            World.LookAgain();
-            Invalidate();
-        }
 
         /// <summary>
         /// Rebuilds the screen-level actions, replacing the previous set outright.
@@ -2136,6 +2169,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var name = SystemSummary.NewInstanceName(Texts, system);
             SystemInstance made = system.AddInstance();
             made.Name = name;
+            Do(new MakeInstallation(system, made));
             Choose(system, made);
             return made;
         }
@@ -2384,22 +2418,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         internal void DeleteSystem(AutomationSystem system)
         {
-            if (!system.IsBlueprint)
+            Deleting(Texts.DeleteSystem, system.Name, Texts.DeleteSystemGoes, null, delegate
             {
-                Deleting(Texts.DeleteSystem, system.Name, Texts.DeleteFinal, null, delegate { Drop(system); });
-                return;
-            }
-
-            _asking = new Prompt(Texts.DeleteConfirm);
-            _asking.Ask(Template.Fill(Texts.DeleteBlueprint, "name", system.Name), "", null,
-                delegate(string typed) { return string.Equals(typed.Trim(), system.Name, StringComparison.OrdinalIgnoreCase); },
-                delegate
-                {
-                    var drop = Act(Cmd.DeleteSystem, delegate { Drop(system); });
-                    if (drop != null)
-                        drop.Execute();
-                },
-                Windows, Input);
+                Do(new TakeSystemOut(system, Change.DeleteSystem));
+                Gone(system);
+            });
         }
 
         /// <summary>Puts the blueprint <paramref name="system" /> in the library as it is now.</summary>
@@ -2540,9 +2563,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (!Shelf.Holds(system))
                 Shelf.Keep(system);
 
-            Drop(system);
-            _program.Edited();
-            _program.Rewire();
+            Do(new TakeSystemOut(system, Change.TakeOffSystem));
+            Gone(system);
         }
 
         /// <summary>Asks before taking <paramref name="instance" />, one of the installations of <paramref name="system" />, out of it.</summary>
@@ -2557,7 +2579,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var arguments = new Arguments();
             arguments.Set("name", system.Name);
 
-            Deleting(Texts.DeleteInstance, named, Texts.DeleteInstanceKept, arguments, delegate { TakeOut(system, instance); });
+            Deleting(Texts.DeleteInstance, named, Texts.DeleteInstanceKept, arguments, delegate
+            {
+                Do(new TakeInstallationOut(system, instance));
+                _standIns.Remove(system.Id);
+            });
         }
 
         /// <summary>Switches <paramref name="system" /> on or off; a blueprint off only after asking, since that stops every logic system made from it.</summary>

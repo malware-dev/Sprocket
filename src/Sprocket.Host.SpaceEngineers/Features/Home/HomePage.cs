@@ -58,8 +58,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         public override string CustomName => Editor.World.Name;
 
-        /// <summary>Which of the logic systems nothing starts is read from the toolbars.</summary>
-        public override bool CanRefresh => true;
+        /// <summary>The construct's own history: logic systems and installations made and taken out.</summary>
+        public override bool HasHistory => true;
+
+        /// <summary>Not for a copy lent to look at, which changes nothing.</summary>
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndoConstruct();
+
+        /// <inheritdoc />
+        public override string UndoText => Editor.UndoLabelConstruct();
+
+        /// <inheritdoc />
+        public override void Undo()
+        {
+            Editor.UndoConstruct();
+        }
+
+        /// <inheritdoc />
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedoConstruct();
+
+        /// <inheritdoc />
+        public override string RedoText => Editor.RedoLabelConstruct();
+
+        /// <inheritdoc />
+        public override void Redo()
+        {
+            Editor.RedoConstruct();
+        }
 
         /// <inheritdoc />
         public override ICommand Library => Editor.Act(Cmd.LoadSystem, Editor.OpenLibrary);
@@ -275,6 +299,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             system.Namespace = Editor.Author;
             system.Enabled = false;
             Editor.Blueprinted(system);
+            Editor.Do(new MakeSystem(system));
 
             Editor.PushMade(new LogicSystemPage(Editor, system));
         }

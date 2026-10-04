@@ -39,10 +39,6 @@
     <value>Redo {action}</value>
     <comment>Note on the redo arrow. {action} is what redoing does again, such as "rename".</comment>
   </data>
-  <data name="Sprocket.Chrome.Refresh" xml:space="preserve">
-    <value>Refresh: pick up blocks and buttons changed since this screen opened.</value>
-    <comment>Note on the button that reads the blocks again.</comment>
-  </data>
 
   <data name="Sprocket.Rename.Empty" xml:space="preserve">
     <value>Give it a name first</value>
@@ -190,16 +186,16 @@ Renaming it here renames the grid.</value>
     <value>Delete this logic system?</value>
     <comment>Asked before a logic system is deleted, with its name under it.</comment>
   </data>
-  <data name="Sprocket.Delete.Blueprint" xml:space="preserve">
-    <value>This deletes the {name} logic system and every installation of it, and cannot be undone. Type {name} to go ahead.</value>
-    <comment>Over the box a logic system's name is typed into to delete it; the button beside the box does nothing until the name is typed. {name} is the logic system's name.</comment>
+  <data name="Sprocket.Delete.SystemGoes" xml:space="preserve">
+    <value>Its installations go with it.</value>
+    <comment>Said on the answer that deletes a logic system.</comment>
   </data>
   <data name="Sprocket.Delete.Instance" xml:space="preserve">
     <value>Delete only this installation?</value>
     <comment>Asked before one of the logic systems made from a blueprint is deleted, with its name under it. Only that one goes.</comment>
   </data>
   <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
-    <value>The **{name}** logic system and its other installations are kept. This cannot be undone.</value>
+    <value>The **{name}** logic system and its other installations are kept.</value>
     <comment>Said on the answer that deletes one installation of a logic system. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
@@ -220,16 +216,12 @@ Renaming it here renames the grid.</value>
     <comment>Note on a logic system's name, in the heading of its own screen.</comment>
   </data>
   <data name="Sprocket.System.Delete" xml:space="preserve">
-    <value>Delete this logic system</value>
+    <value>Delete this logic system, and every installation of it</value>
     <comment>Note on the bin in the header of a logic system's screen.</comment>
   </data>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
     <value>Delete this installation</value>
     <comment>The bin on an installation's row.</comment>
-  </data>
-  <data name="Sprocket.System.DeleteBlueprint" xml:space="preserve">
-    <value>Delete this logic system, and every installation of it</value>
-    <comment>Note on the bin in the header of a logic system's screen.</comment>
   </data>
   <data name="Sprocket.System.EditPanel" xml:space="preserve">
     <value>Edit configuration panel</value>
@@ -1665,6 +1657,26 @@ Renaming it here renames the grid.</value>
     <value>moving a branch</value>
     <comment>Named after Undo and Redo.</comment>
   </data>
+  <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
+    <value>deleting a logic system</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
+    <value>taking a logic system off</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.DeleteInstallation" xml:space="preserve">
+    <value>deleting an installation</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddSystem" xml:space="preserve">
+    <value>adding a logic system</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
+    <value>adding an installation</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
   <data name="Sprocket.Systems.Default" xml:space="preserve">
     <value>Logic system {number}</value>
     <comment>The name a new logic system is given; {number} is the first free one.</comment>
@@ -1714,6 +1726,18 @@ Renaming it here renames the grid.</value>
 
 For half a minute, a red box shows what it has to cover, and a white box how far it reaches.</value>
     <comment>The game's message when the fitted field would be larger than the generator can make it. {needed} and {reached} are sizes, width by height by depth in metres.</comment>
+  </data>
+  <data name="Sprocket.Terminal.AutoClose" xml:space="preserve">
+    <value>Auto-close</value>
+    <comment>Slider in a door's terminal that sets how long the door stays open before it closes by itself.</comment>
+  </data>
+  <data name="Sprocket.Terminal.AutoCloseAbout" xml:space="preserve">
+    <value>Closes the door by itself this long after it finishes opening. All the way to the left is off.</value>
+    <comment>Note on that slider.</comment>
+  </data>
+  <data name="Sprocket.Terminal.AutoCloseOff" xml:space="preserve">
+    <value>Off</value>
+    <comment>Beside that slider where it is all the way to the left, and the door never closes by itself.</comment>
   </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Changed {time}</value>

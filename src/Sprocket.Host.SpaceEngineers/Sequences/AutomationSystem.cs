@@ -537,6 +537,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
+        /// <summary>Puts a removed installation back where it stood, <paramref name="at" />, as the installation it was.</summary>
+        /// <remarks>For undo: the blocks it was filled with, and its number, come back with it.</remarks>
+        public void PutBack(SystemInstance instance, int at)
+        {
+            if (instance == null || _instances.Contains(instance))
+                return;
+
+            _instances.Insert(at < 0 || at > _instances.Count ? _instances.Count : at, instance);
+            Reshape();
+        }
+
         /// <summary>The instance of this system called <paramref name="name" />, or null.</summary>
         public SystemInstance FindInstance(string name)
         {

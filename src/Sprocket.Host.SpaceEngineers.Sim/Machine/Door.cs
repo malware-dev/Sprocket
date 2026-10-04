@@ -24,6 +24,7 @@ sealed class Door : Fitting
 
     Action<IMyDoor>? _opened;
     Action<IMyDoor>? _closed;
+    Action<bool>? _changed;
 
     public Door(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
@@ -31,13 +32,15 @@ sealed class Door : Fitting
         Fit(Pretend.To<IMyDoor>()
             .Gives("Status", () => Status)
             .Gives("OpenRatio", () => (float)_progress / TravelTicks)
-            .Does("OpenDoor", () => { _opening = true; Told("open"); return null; })
-            .Does("CloseDoor", () => { _opening = false; Told("close"); return null; })
-            .Does("ToggleDoor", () => { _opening = !_opening; Told("toggle"); return null; })
+            .Does("OpenDoor", () => { Command(true, "open"); return null; })
+            .Does("CloseDoor", () => { Command(false, "close"); return null; })
+            .Does("ToggleDoor", () => { Command(!_opening, "toggle"); return null; })
             .Does("add_OnDoorOpened", handler => { _opened += (Action<IMyDoor>)handler[0]; })
             .Does("remove_OnDoorOpened", handler => { _opened -= (Action<IMyDoor>)handler[0]; })
             .Does("add_OnDoorClosed", handler => { _closed += (Action<IMyDoor>)handler[0]; })
-            .Does("remove_OnDoorClosed", handler => { _closed -= (Action<IMyDoor>)handler[0]; }));
+            .Does("remove_OnDoorClosed", handler => { _closed -= (Action<IMyDoor>)handler[0]; })
+            .Does("add_DoorStateChanged", handler => { _changed += (Action<bool>)handler[0]; })
+            .Does("remove_DoorStateChanged", handler => { _changed -= (Action<bool>)handler[0]; }));
     }
 
     /// <summary>Whether the door raises the game's own events on finishing, as every door in the game does.</summary>
@@ -63,15 +66,13 @@ sealed class Door : Fitting
     {
         if (actionId == "Open_On")
         {
-            _opening = true;
-            Told("open");
+            Command(true, "open");
             return;
         }
 
         if (actionId == "Open_Off")
         {
-            _opening = false;
-            Told("close");
+            Command(false, "close");
             return;
         }
 
@@ -89,8 +90,8 @@ sealed class Door : Fitting
     public void ForceOpen()
     {
         var was = _progress;
+        Command(true, null);
         _progress = TravelTicks;
-        _opening = true;
 
         if (was != TravelTicks && Announces)
             _opened?.Invoke((IMyDoor)Block);
@@ -130,7 +131,26 @@ sealed class Door : Fitting
         {
             _progress--;
             if (_progress == 0 && Announces)
+            {
+                _changed?.Invoke(false);
                 _closed?.Invoke((IMyDoor)Block);
+            }
         }
+    }
+
+    /// <summary>Throws the door's switch, telling the journal <paramref name="told" /> where there is one.</summary>
+    /// <remarks>
+    /// As every door in the game does, it raises <c>DoorStateChanged</c> as it is told to open, and again only once it has
+    /// finished closing.
+    /// </remarks>
+    void Command(bool opening, string? told)
+    {
+        var was = _opening;
+        _opening = opening;
+        if (told != null)
+            Told(told);
+
+        if (opening && !was && Announces)
+            _changed?.Invoke(true);
     }
 }

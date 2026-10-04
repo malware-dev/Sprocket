@@ -29,9 +29,6 @@
   <data name="Sprocket.Chrome.Redo" xml:space="preserve">
     <value>Gjør om {action}</value>
   </data>
-  <data name="Sprocket.Chrome.Refresh" xml:space="preserve">
-    <value>Oppdater: hent blokker og knapper som er endret siden denne skjermen ble åpnet.</value>
-  </data>
 
   <data name="Sprocket.Rename.Empty" xml:space="preserve">
     <value>Gi den et navn først</value>
@@ -146,14 +143,14 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Delete.System" xml:space="preserve">
     <value>Slette dette logikksystemet?</value>
   </data>
-  <data name="Sprocket.Delete.Blueprint" xml:space="preserve">
-    <value>Dette sletter logikksystemet {name} og hver installasjon av det, og kan ikke angres. Skriv {name} for å fortsette.</value>
+  <data name="Sprocket.Delete.SystemGoes" xml:space="preserve">
+    <value>Installasjonene går med det.</value>
   </data>
   <data name="Sprocket.Delete.Instance" xml:space="preserve">
     <value>Slette bare denne installasjonen?</value>
   </data>
   <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
-    <value>Logikksystemet **{name}** og de andre installasjonene av det beholdes. Dette kan ikke angres.</value>
+    <value>Logikksystemet **{name}** og de andre installasjonene av det beholdes.</value>
   </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
     <value>Behold det</value>
@@ -169,13 +166,10 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Navnet på dette logikksystemet.</value>
   </data>
   <data name="Sprocket.System.Delete" xml:space="preserve">
-    <value>Slett dette logikksystemet</value>
+    <value>Slett dette logikksystemet, og hver installasjon av det</value>
   </data>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
     <value>Slett denne installasjonen</value>
-  </data>
-  <data name="Sprocket.System.DeleteBlueprint" xml:space="preserve">
-    <value>Slett dette logikksystemet, og hver installasjon av det</value>
   </data>
   <data name="Sprocket.System.EditPanel" xml:space="preserve">
     <value>Rediger konfigurasjonspanelet</value>
@@ -1267,6 +1261,21 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
     <value>flytting av en gren</value>
   </data>
+  <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
+    <value>sletting av et logikksystem</value>
+  </data>
+  <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
+    <value>fjerning av et logikksystem</value>
+  </data>
+  <data name="Sprocket.Change.DeleteInstallation" xml:space="preserve">
+    <value>sletting av en installasjon</value>
+  </data>
+  <data name="Sprocket.Change.AddSystem" xml:space="preserve">
+    <value>tillegg av et logikksystem</value>
+  </data>
+  <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
+    <value>tillegg av en installasjon</value>
+  </data>
   <data name="Sprocket.Systems.Default" xml:space="preserve">
     <value>Logikksystem {number}</value>
   </data>
@@ -1304,6 +1313,15 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Feltet er så stort som denne generatoren tillater, og dekker likevel ikke alt: det trenger {needed}, og når {reached}.
 
 I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor langt det når.</value>
+  </data>
+  <data name="Sprocket.Terminal.AutoClose" xml:space="preserve">
+    <value>Autolukking</value>
+  </data>
+  <data name="Sprocket.Terminal.AutoCloseAbout" xml:space="preserve">
+    <value>Lukker døren av seg selv så lenge etter at den er ferdig med å åpne seg. Helt til venstre er av.</value>
+  </data>
+  <data name="Sprocket.Terminal.AutoCloseOff" xml:space="preserve">
+    <value>Av</value>
   </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Endret {time}</value>

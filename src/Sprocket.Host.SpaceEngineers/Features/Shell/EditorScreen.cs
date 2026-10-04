@@ -24,7 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         int _revision;
         string _subtitle = "";
-        ICommand _refresh;
         ICommand _library;
         ICommand _flip;
         bool _switchIsOn;
@@ -92,18 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
                 return false;
             }
-        }
-
-        /// <summary>Reads everything the host can only learn by looking, and says so on screen.</summary>
-        /// <remarks>
-        /// Every screen has one, because everything a screen shows about what is wired was read at some moment and nothing
-        /// tells Sprocket when a slot changes - least of all when the person who changed it is another player on the same
-        /// ship.
-        /// </remarks>
-        public ICommand Refresh
-        {
-            get { return _refresh; }
-            set { Set(ref _refresh, value); }
         }
 
         /// <summary>Opens the blueprint library, or null on a screen that does not offer it.</summary>

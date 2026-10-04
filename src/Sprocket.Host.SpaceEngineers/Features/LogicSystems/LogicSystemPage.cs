@@ -94,9 +94,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override string SwitchAbout => Editor.SwitchAbout(_system);
 
-        /// <summary>Which button starts each sequence, and which nothing starts, is read from the toolbars.</summary>
-        public override bool CanRefresh => true;
-
         /// <summary>The logic system just made is as it was made: its name, what it says about itself, its switch, and nothing in it.</summary>
         /// <remarks>A sequence made in it and left untouched has gone already, since its page was left first.</remarks>
         public override bool Untouched => _system.Name == _madeName && _system.Annotation == _madeAbout
@@ -106,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override ICommand Deletes => Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(_system); });
 
         /// <inheritdoc />
-        public override string DeleteAbout => _system.IsBlueprint ? Editor.Texts.SystemDeleteBlueprint : Editor.Texts.SystemDelete;
+        public override string DeleteAbout => Editor.Texts.SystemDelete;
 
         /// <summary>What starts this system's sequences is the system's to walk back.</summary>
         /// <remarks>

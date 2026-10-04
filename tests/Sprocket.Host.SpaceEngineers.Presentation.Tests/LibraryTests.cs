@@ -310,7 +310,7 @@ public class LibraryTests
         Assert.Null(heading.BinMark);
         Assert.Equal(rig.Texts.LibraryDeletes, heading.DeleteText);
         heading.Deletes!.Execute();
-        Assert.NotNull(rig.Editor.Asking);
+        Assert.StartsWith(rig.Texts.DeleteSystem, rig.Editor.Question());
         rig.Editor.Unask();
 
         rig.Shelf.Keep(blueprint);
@@ -332,6 +332,13 @@ public class LibraryTests
         rig.Tick();
 
         Assert.Empty(rig.Editor.Program.Systems);
+
+        // Taken off, it comes back with undo; the library's copy stays either way.
+        Assert.Equal(rig.Texts.ChangeTakeOffSystem, rig.Editor.Screen.UndoText);
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Same(blueprint, Assert.Single(rig.Editor.Program.Systems));
+        Assert.True(rig.Shelf.Holds(blueprint));
     }
 
     /// <summary>A copy is a logic system of its own: a new identity, the next free name, and its first installation.</summary>

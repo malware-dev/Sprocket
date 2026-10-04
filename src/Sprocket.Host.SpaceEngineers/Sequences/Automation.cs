@@ -670,6 +670,28 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
+        /// <summary>Puts a removed system back where it stood, <paramref name="at" />, as the system it was, with its sequences.</summary>
+        /// <remarks>For undo: its runners, its pages and the toolbar slots it claims all hold or name the system itself.</remarks>
+        public void PutBack(AutomationSystem system, int at)
+        {
+            if (system == null || _systems.Contains(system))
+                return;
+
+            _systems.Insert(at < 0 || at > _systems.Count ? _systems.Count : at, system);
+
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                if (!_sequences.Contains(sequences[i]))
+                    _sequences.Add(sequences[i]);
+            }
+
+            system.Reshaped = Reshape;
+            system.Started = Start;
+            Reshape();
+            Wiring++;
+        }
+
         /// <summary>
         /// Puts a removed sequence back, as the sequence it was.
         /// </summary>

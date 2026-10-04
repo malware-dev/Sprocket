@@ -1,0 +1,101 @@
+using System.Collections.Generic;
+using Sandbox.ModAPI;
+using Sandbox.ModAPI.Interfaces.Terminal;
+using VRage.Utils;
+using Sprocket.Host.SpaceEngineers.Localization;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Doors
+{
+    /// <summary>The slider on a door that sets how long it stays open before it closes by itself.</summary>
+    /// <remarks>
+    /// Controls belong to one block type each, and the game ties <c>IMyDoor</c> to the plain door alone, so each family of
+    /// door is given a slider of its own, made once per mod load off the first door of that family to come alive; see
+    /// <see cref="DoorBlock" /> for why no earlier.
+    /// <para>
+    /// Static because the controls are: one set per block type for the whole game, which the terminal hands back through
+    /// a callback that carries no state of the mod's. They die with the mod's load.
+    /// </para>
+    /// </remarks>
+    static class DoorControls
+    {
+        const string Id = "Sprocket_AutoClose";
+
+        const string Open = "Open";
+
+        /// <summary>Makes the slider for doors of type <typeparamref name="TBlock" /> once, in <paramref name="texts" />, which the game keeps for the session.</summary>
+        public static void DoOnce<TBlock>(Texts texts)
+        {
+            if (Made<TBlock>.Done)
+                return;
+
+            Made<TBlock>.Done = true;
+
+            var slider = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlSlider, TBlock>(Id);
+            slider.Title = MyStringId.GetOrCompute(texts.TerminalAutoClose);
+            slider.Tooltip = MyStringId.GetOrCompute(texts.TerminalAutoCloseAbout);
+            slider.SupportsMultipleBlocks = true;
+            slider.Visible = _ => true;
+            slider.Enabled = _ => true;
+            slider.SetLogLimits(CloseDelay.Least, CloseDelay.Most);
+            slider.Getter = block => CloseDelay.Stored(block);
+            slider.Setter = Set;
+            slider.Writer = (block, text) => text.Append(CloseDelay.Written(CloseDelay.Stored(block), texts.TerminalAutoCloseOff));
+
+            MyAPIGateway.TerminalControls.AddControl<TBlock>(slider);
+        }
+
+        /// <summary>Moves the slider to stand under the door's open switch, in the list of controls a door is about to show.</summary>
+        /// <remarks>
+        /// The terminal's <c>CustomControlGetter</c>, as for the automation button. The slider is found by its id, being a
+        /// different control for each family of door. Where the switch is missing, it goes last.
+        /// </remarks>
+        public static void Arrange(IMyTerminalBlock block, List<IMyTerminalControl> controls)
+        {
+            if (!(block is IMyDoor))
+                return;
+
+            IMyTerminalControl slider = null;
+            for (var i = 0; i < controls.Count; i++)
+            {
+                if (controls[i].Id == Id)
+                {
+                    slider = controls[i];
+                    controls.RemoveAt(i);
+                    break;
+                }
+            }
+
+            if (slider == null)
+                return;
+
+            var at = controls.Count;
+            for (var i = 0; i < controls.Count; i++)
+            {
+                if (controls[i].Id == Open)
+                {
+                    at = i + 1;
+                    break;
+                }
+            }
+
+            controls.Insert(at, slider);
+        }
+
+        static void Set(IMyTerminalBlock block, float value)
+        {
+            var door = block as IMyDoor;
+            var doors = SprocketSession.Doors;
+            if (door != null && doors != null)
+                doors.Set(door, CloseDelay.FromSlider(value));
+        }
+
+        /// <summary>Whether the slider has been made for doors of type <typeparamref name="TBlock" />.</summary>
+        static class Made<TBlock>
+        {
+            /// <summary>Whether the slider has been made.</summary>
+            /// <remarks>One flag for each family of door is what this type is for, static for the reason the controls are.</remarks>
+            // ReSharper disable once StaticMemberInGenericType
+            public static bool Done;
+        }
+    }
+}

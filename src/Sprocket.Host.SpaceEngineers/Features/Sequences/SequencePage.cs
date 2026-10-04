@@ -66,9 +66,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override bool Edits => true;
 
-        /// <summary>Whether anything starts the sequence is read from the toolbars.</summary>
-        public override bool CanRefresh => true;
-
         /// <summary>The switch is its system's, which is also what keeps the sequence from being changed while it may run.</summary>
         public override bool CanSwitch => _sequence.System != null;
 

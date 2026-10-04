@@ -11,7 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Answer,
         Primary,
         Rename,
-        Refresh,
         Switch,
         Expand,
         Resolve,

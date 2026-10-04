@@ -1,5 +1,6 @@
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
@@ -421,6 +422,110 @@ public class UndoTests
 
         var other = new Automation().AddSystem();
         Assert.False(edit.Undoable(other));
+    }
+
+    /// <summary>Two logic systems, each with a sequence and two installations, to take things out of and put back.</summary>
+    static Automation Construct()
+    {
+        var program = new Automation();
+        foreach (var name in new[] { "Airlock", "Hangar" })
+        {
+            var system = program.AddSystem();
+            system.Name = name;
+            system.IsBlueprint = true;
+            program.AddSequence(system);
+            system.AddInstance().Name = "Installation 1";
+            system.AddInstance().Name = "Installation 2";
+        }
+
+        return program;
+    }
+
+    static string Written(Automation program) => ProgramText.Save(program, new Values());
+
+    /// <summary>A logic system taken out and put back is the same system, where it stood, and the program reads as it did.</summary>
+    [Fact]
+    public void TakingASystemOutComesBackWhereItStood()
+    {
+        var program = Construct();
+        var before = Written(program);
+        var airlock = program.Systems[0];
+
+        var edit = new TakeSystemOut(airlock, Change.DeleteSystem);
+        edit.Apply(program);
+        Assert.Single(program.Systems);
+        Assert.True(edit.Undoable(program));
+
+        edit.Undo(program);
+        Assert.Same(airlock, program.Systems[0]);
+        Assert.Equal(before, Written(program));
+    }
+
+    /// <summary>An installation taken out and put back is the same installation, where it stood.</summary>
+    [Fact]
+    public void TakingAnInstallationOutComesBackWhereItStood()
+    {
+        var program = Construct();
+        var before = Written(program);
+        var system = program.Systems[1];
+        var first = system.Instances[0];
+
+        var edit = new TakeInstallationOut(system, first);
+        edit.Apply(program);
+        Assert.Single(system.Instances);
+        Assert.False(edit.Redoable(program));
+
+        edit.Undo(program);
+        Assert.Same(first, system.Instances[0]);
+        Assert.Equal(before, Written(program));
+    }
+
+    /// <summary>A logic system just made goes with undo and comes back where it stood with redo.</summary>
+    [Fact]
+    public void MakingASystemGoesAndComesBack()
+    {
+        var program = Construct();
+        var before = Written(program);
+        var made = program.AddSystem();
+        made.Name = "Cargo";
+        made.IsBlueprint = true;
+        made.AddInstance().Name = "Installation 1";
+        var after = Written(program);
+
+        var edit = new MakeSystem(made);
+        edit.Apply(program);
+        Assert.Equal(after, Written(program));
+
+        edit.Undo(program);
+        Assert.Equal(before, Written(program));
+        Assert.True(edit.Redoable(program));
+
+        edit.Apply(program);
+        Assert.Equal(after, Written(program));
+    }
+
+    /// <summary>An installation just made goes with undo and comes back with redo; the only installation is never undone away.</summary>
+    [Fact]
+    public void MakingAnInstallationGoesAndComesBack()
+    {
+        var program = Construct();
+        var system = program.Systems[0];
+        var before = Written(program);
+        var made = system.AddInstance();
+        made.Name = "Installation 3";
+        var after = Written(program);
+
+        var edit = new MakeInstallation(system, made);
+        edit.Apply(program);
+        edit.Undo(program);
+        Assert.Equal(before, Written(program));
+
+        edit.Apply(program);
+        Assert.Equal(after, Written(program));
+
+        system.RemoveInstance(system.Instances[0]);
+        system.RemoveInstance(system.Instances[0]);
+        Assert.False(edit.Undoable(program));
     }
 
     /// <summary>
