@@ -100,6 +100,9 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Systems.Heading" xml:space="preserve">
     <value>Logikksystemer</value>
   </data>
+  <data name="Sprocket.Systems.Installations" xml:space="preserve">
+    <value>Installasjoner</value>
+  </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
     <value>**Biblioteket**: logikksystemene på denne konstruksjonen, plantegningene i lageret, og automatiseringen til konstruksjoner som er tapt.</value>
   </data>

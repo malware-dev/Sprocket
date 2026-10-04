@@ -1,6 +1,7 @@
 using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
@@ -12,10 +13,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         StatusRow _heading;
         Spine _spine;
+        Label _installations;
         Button _another;
         VStack _list;
 
-        /// <summary>Makes the group's heading, a row of its own that opens the logic system, and under it its rows and the way to add another, set in by a gutter with a spine down it.</summary>
+        /// <summary>Makes the group's heading, a row of its own that opens the logic system, and under it its installations, headed, and the way to add another, set in by a gutter with a spine down it.</summary>
         void CreateView()
         {
             Spacing = 8f;
@@ -34,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                         Placement = Flex.Grow,
                         Children =
                         {
+                            new Label { Style = Styles.SubHeading }.As(out _installations),
                             new VStack { Spacing = 8f }.As(out _list),
                             new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _another) } }
                         }

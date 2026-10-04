@@ -99,6 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Locked = only ? texts.SystemsKeepsOne : "";
             }
 
+            _installations.Text = texts.SystemsInstallations.ToUpperInvariant();
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
             _another.Tip = Tip.For(_another.Tip, texts.SystemsAddAnotherAbout, _named);
         }

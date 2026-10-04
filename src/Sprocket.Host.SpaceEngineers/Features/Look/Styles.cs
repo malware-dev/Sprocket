@@ -223,6 +223,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, Padding = new Thickness(4f, 8f, 0f, 8f) }
         };
 
+        /// <summary>A heading within a section, a size down from the section's own, over the part of it that it names.</summary>
+        public static readonly TextStyle SubHeading = new TextStyle(Heading)
+        {
+            Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
+        };
+
         /// <summary>The same, following other content, with room above it so it reads as the start of what comes after.</summary>
         public static readonly TextStyle NextHeading = new TextStyle(Heading)
         {

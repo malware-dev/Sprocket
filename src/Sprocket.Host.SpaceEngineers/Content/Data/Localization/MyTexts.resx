@@ -129,6 +129,10 @@ Renaming it here renames the grid.</value>
     <value>Logic systems</value>
     <comment>Heading over the logic systems on the home screen; shown in capitals.</comment>
   </data>
+  <data name="Sprocket.Systems.Installations" xml:space="preserve">
+    <value>Installations</value>
+    <comment>Heading over a logic system's installations on the home screen, under the logic system; shown in capitals.</comment>
+  </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
     <value>The **library**: the logic systems on this construct, the blueprints in storage, and the automation of constructs that are lost.</value>
     <comment>Note on the button above.</comment>
