@@ -25,6 +25,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         int _revision;
         string _subtitle = "";
         ICommand _library;
+        ICommand _help;
+        bool _browses;
+        ICommand _stepsBack;
+        ICommand _stepsForward;
         ICommand _flip;
         bool _switchIsOn;
         string _switchAbout;
@@ -98,6 +102,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _library; }
             set { Set(ref _library, value); }
+        }
+
+        /// <summary>Opens the codex at this screen's entry, or null on a screen that has none.</summary>
+        public ICommand Help
+        {
+            get { return _help; }
+            set { Set(ref _help, value); }
+        }
+
+        /// <summary>Whether this screen moves through a history of its own, as the codex does.</summary>
+        public bool Browses
+        {
+            get { return _browses; }
+            set { Set(ref _browses, value); }
+        }
+
+        /// <summary>Steps back in this screen's own history, or null where there is nowhere to step back to.</summary>
+        public ICommand StepsBack
+        {
+            get { return _stepsBack; }
+            set { Set(ref _stepsBack, value); }
+        }
+
+        /// <summary>Steps forward in this screen's own history, or null where there is nowhere to step forward to.</summary>
+        public ICommand StepsForward
+        {
+            get { return _stepsForward; }
+            set { Set(ref _stepsForward, value); }
         }
 
         /// <summary>Switches this screen's subject the other way, or null when it has no such switch.</summary>

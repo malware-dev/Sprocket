@@ -42,6 +42,9 @@ namespace Lumel.Layout
             }
         }
 
+        /// <summary>Each line centers what it holds down.</summary>
+        protected override Align Aligns => Align.Center;
+
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -188,7 +191,10 @@ namespace Lumel.Layout
                 any = true;
 
                 var size = Size(i);
-                child.Arrange(new RectangleF(x, y + (tall - size.Y) * 0.5f, size.X, size.Y));
+                float at;
+                float length;
+                Span(child, false, y, tall, float.NaN, size.Y, out at, out length);
+                child.Arrange(new RectangleF(x, at, size.X, length));
                 x += size.X;
             }
         }

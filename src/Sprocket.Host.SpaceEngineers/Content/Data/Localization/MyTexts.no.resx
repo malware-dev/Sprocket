@@ -1509,4 +1509,116 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Sequence.StopNone" xml:space="preserve">
     <value>Dette systemet har ingen annen sekvens å stoppe.</value>
   </data>
+  <data name="Sprocket.Codex.More" xml:space="preserve">
+    <value>Trykk for å lese mer.</value>
+  </data>
+  <data name="Sprocket.Codex.LogicSystem.Name" xml:space="preserve">
+    <value>Logikksystem</value>
+  </data>
+  <data name="Sprocket.Codex.LogicSystem.Summary" xml:space="preserve">
+    <value>En navngitt bit automasjon: hva som skjer, og blokkene det trenger.</value>
+  </data>
+  <data name="Sprocket.Codex.LogicSystem.Page" xml:space="preserve">
+    <value>Et logikksystem holder sekvenser, stegene som gjør jobben, og utløserne som starter dem. Det navngir aldri en ekte blokk. I stedet ber det om blokkene sine gjennom plasser: en luftsluse ber om en indre dør, en ytre dør og en ventil.
+
+## Sette det i arbeid
+
+Et logikksystem arbeider på ekte blokker gjennom [installasjonene](#installation) sine. Hver installasjon fyller plassene med egne blokker, så ett logikksystem kan drive hver luftsluse på et skip. Et logikksystem har alltid minst én installasjon.
+
+## Endre det
+
+Trykk på et logikksystem for å åpne skjermen dets, der sekvensene og utløserne lages og endres. En endring når alle installasjonene på én gang.
+
+Bryteren slår av hele logikksystemet, med alle installasjonene.
+
+## Ta vare på det
+
+**Lag plantegning** legger en kopi i biblioteket, så den kan settes på andre konstruksjoner eller gis til andre spillere.</value>
+  </data>
+  <data name="Sprocket.Codex.Installation.Name" xml:space="preserve">
+    <value>Installasjon</value>
+  </data>
+  <data name="Sprocket.Codex.Installation.Summary" xml:space="preserve">
+    <value>Et sett med blokker et logikksystem arbeider på.</value>
+  </data>
+  <data name="Sprocket.Codex.Installation.Page" xml:space="preserve">
+    <value>Logikksystemet sier hva som skjer; hver installasjon sier hvilke blokker det skjer med. Det finnes bare ett [logikksystem](#logic-system): alle installasjonene kjører det samme.
+
+## Ett logikksystem, mange installasjoner
+
+Et luftslusesystem kan ha tre installasjoner, én for hver luftsluse på skipet. Hver fyller logikksystemets plasser med egne blokker: sin egen indre dør, sin egen ytre dør, sin egen ventil, sine egne utløsere. Alle tre gjør det samme, hver med sin egen luftsluse, og hver kjører for seg: å kjøre én luftsluse lar de to andre være som de er.
+
+Endres logikksystemet, endres alle installasjonene på én gang. Rett et steg i luftslusen, og hver luftsluse får rettelsen.
+
+## Lage og endre en
+
+**+ installasjon** under et logikksystem legger til en, og åpner konfigurasjonspanelet for å velge blokkene. Trykk på en installasjon for å åpne det samme panelet igjen og bytte blokker og utløsere.
+
+Hver installasjon har sin egen bryter, så én luftsluse kan slås av mens de andre fortsetter å virke. Et logikksystem har alltid minst én installasjon; den siste kan ikke slettes.
+
+## Når en blokk mangler
+
+Er en blokk som en installasjon bruker borte, blir installasjonens rad rød, og det blir logikksystemets også. En sekvens som kommer til den manglende blokken, stopper der. Trykk på installasjonen for å åpne konfigurasjonspanelet, der en annen blokk kan fylle plassen. En valgfri plass er unntaket: stegene som bruker den hoppes over i stedet.
+
+## Må ikke forveksles med
+
+En plantegning er en kopi av selve logikksystemet, lagret i biblioteket. Å installere en plantegning på en annen konstruksjon gir den konstruksjonen logikksystemet, med sin første installasjon.</value>
+  </data>
+  <data name="Sprocket.Codex.Help" xml:space="preserve">
+    <value>Hva denne skjermen er til, i kodeksen</value>
+  </data>
+  <data name="Sprocket.Codex.Back" xml:space="preserve">
+    <value>Tilbake til forrige oppslag</value>
+  </data>
+  <data name="Sprocket.Codex.Forward" xml:space="preserve">
+    <value>Fram til neste oppslag</value>
+  </data>
+  <data name="Sprocket.Codex.Close" xml:space="preserve">
+    <value>Lukk kodeksen</value>
+  </data>
+  <data name="Sprocket.Codex.Home.Name" xml:space="preserve">
+    <value>Startskjermen</value>
+  </data>
+  <data name="Sprocket.Codex.Home.Summary" xml:space="preserve">
+    <value>Alle logikksystemene på denne konstruksjonen, med installasjonene sine.</value>
+  </data>
+  <data name="Sprocket.Codex.Home.Page" xml:space="preserve">
+    <value>Dette oppslaget er ikke skrevet ennå.</value>
+  </data>
+  <data name="Sprocket.Codex.Sequence.Name" xml:space="preserve">
+    <value>Sekvens</value>
+  </data>
+  <data name="Sprocket.Codex.Sequence.Summary" xml:space="preserve">
+    <value>En liste med steg et logikksystem utfører i rekkefølge.</value>
+  </data>
+  <data name="Sprocket.Codex.Sequence.Page" xml:space="preserve">
+    <value>Dette oppslaget er ikke skrevet ennå.</value>
+  </data>
+  <data name="Sprocket.Codex.ConfigurationPanel.Name" xml:space="preserve">
+    <value>Konfigurasjonspanel</value>
+  </data>
+  <data name="Sprocket.Codex.ConfigurationPanel.Summary" xml:space="preserve">
+    <value>Der en installasjons blokker og utløsere velges.</value>
+  </data>
+  <data name="Sprocket.Codex.ConfigurationPanel.Page" xml:space="preserve">
+    <value>Dette oppslaget er ikke skrevet ennå.</value>
+  </data>
+  <data name="Sprocket.Codex.Library.Name" xml:space="preserve">
+    <value>Bibliotek</value>
+  </data>
+  <data name="Sprocket.Codex.Library.Summary" xml:space="preserve">
+    <value>Plantegninger tatt vare på til andre konstruksjoner, og verdens sikkerhetskopier.</value>
+  </data>
+  <data name="Sprocket.Codex.Library.Page" xml:space="preserve">
+    <value>Dette oppslaget er ikke skrevet ennå.</value>
+  </data>
+  <data name="Sprocket.Codex.Picking.Name" xml:space="preserve">
+    <value>Velge blokker</value>
+  </data>
+  <data name="Sprocket.Codex.Picking.Summary" xml:space="preserve">
+    <value>Å velge blokkene et steg eller en plass bruker, og hva som gjøres med dem.</value>
+  </data>
+  <data name="Sprocket.Codex.Picking.Page" xml:space="preserve">
+    <value>Dette oppslaget er ikke skrevet ennå.</value>
+  </data>
 </root>

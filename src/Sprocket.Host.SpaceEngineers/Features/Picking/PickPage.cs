@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -194,6 +195,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
         public override string Title => _said ?? _title;
+
+        /// <inheritdoc />
+        public override string Help => Terms.Picking;
 
         /// <inheritdoc />
         /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>

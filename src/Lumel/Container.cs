@@ -23,6 +23,41 @@ namespace Lumel
         /// <inheritdoc />
         protected override Thickness Inset => _padding;
 
+        /// <summary>Where this places a child whose <see cref="Element.Align" /> leaves an axis to it, on every axis it does not stack along.</summary>
+        /// <remarks>Declared by every container, so a child that says nothing is placed by a rule this container chose.</remarks>
+        protected abstract Align Aligns { get; }
+
+        /// <summary>Where <paramref name="child" /> goes on one axis of the room from <paramref name="start" />, <paramref name="room" /> long.</summary>
+        /// <remarks>
+        /// <paramref name="given" /> is a length the child's placement fixes, or NaN; <paramref name="desired" /> is the length it
+        /// asked for. A fixed length is kept; otherwise a stretched child takes the room and any other takes what it asked for,
+        /// and a length of nothing, or more than the room, takes the room.
+        /// </remarks>
+        protected void Span(Element child, bool across, float start, float room, float given, float desired, out float at,
+            out float length)
+        {
+            var edges = Edges(child.Align, across);
+            if (edges == Align.Default)
+                edges = Edges(Aligns, across);
+
+            var low = (edges & (Align.Left | Align.Top)) != 0;
+            var high = (edges & (Align.Right | Align.Bottom)) != 0;
+            var stretched = low == high && edges != Align.Center;
+
+            length = !float.IsNaN(given) ? given : stretched ? room : desired;
+            if (length <= 0f || length > room)
+                length = room;
+
+            at = low || stretched ? start : high ? start + room - length : start + (room - length) * 0.5f;
+        }
+
+        /// <summary>What <paramref name="align" /> says about one axis: its edges there, else <see cref="Lumel.Align.Center" /> where set, else nothing.</summary>
+        static Align Edges(Align align, bool across)
+        {
+            var edges = align & (across ? Align.Wide : Align.Tall);
+            return edges != Align.Default ? edges : align & Align.Center;
+        }
+
         /// <summary>The collection this holds its children in, which asks it whether it can place each child and tells it of every change.</summary>
         protected Collection Hold()
         {

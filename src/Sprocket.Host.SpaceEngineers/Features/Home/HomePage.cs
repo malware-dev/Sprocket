@@ -1,3 +1,5 @@
+using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
@@ -34,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
 
         int _shape;
+        string _headingSaid;
 
         Keyed<AutomationSystem, SystemGroup> _groups;
 
@@ -61,6 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         /// <summary>The construct's own history: logic systems and installations made and taken out.</summary>
         public override bool HasHistory => true;
+
+        /// <inheritdoc />
+        public override string Help => Terms.Home;
 
         /// <summary>Not for a copy lent to look at, which changes nothing.</summary>
         public override bool CanUndo => Editor.Holder == null && Editor.CanUndoConstruct();
@@ -289,7 +295,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             _groups.Show(_systems);
 
-            _heading.Text = texts.SystemsHeading.ToUpperInvariant();
+            var heading = Terms.Link(texts.SystemsHeading.ToUpperInvariant(), Terms.LogicSystem);
+            if (heading != _headingSaid)
+            {
+                _headingSaid = heading;
+                _heading.Document = Markdown.Parse(heading);
+                Editor.Codex.Wire(_heading, Editor.OpenCodex);
+            }
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
 

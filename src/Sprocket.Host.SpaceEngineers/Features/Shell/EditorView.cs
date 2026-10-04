@@ -56,6 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Switch _switch;
         readonly Button _done;
         readonly Glyph _close;
+        readonly Glyph _help;
+        readonly Glyph _stepBack;
+        readonly Glyph _stepForward;
         readonly Button _library;
         readonly Glyph _run;
         readonly Glyph _delete;
@@ -69,6 +72,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly Relay _undoes;
         readonly Relay _redoes;
+        readonly Relay _helps;
+        readonly Relay _stepsBack;
+        readonly Relay _stepsForward;
         readonly Relay _libraries;
         readonly Relay _flips;
         readonly Relay _dones;
@@ -109,6 +115,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _undoes = new Relay(() => Run(_editor.Screen.Undo));
             _redoes = new Relay(() => Run(_editor.Screen.Redo));
+            _helps = new Relay(() => Run(_editor.Screen.Help));
+            _stepsBack = new Relay(() => Run(_editor.Screen.StepsBack));
+            _stepsForward = new Relay(() => Run(_editor.Screen.StepsForward));
             _libraries = new Relay(() => Run(_editor.Screen.Library));
             _flips = new Relay(() => Run(_editor.Screen.Flip));
             _dones = new Relay(() => Run(_editor.Screen.Primary));
@@ -135,9 +144,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 Children =
                                 {
                                     new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
+                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = _stepsBack }.As(out _stepBack),
+                                    new Glyph { Symbol = Symbols.Right, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = _stepsForward }.As(out _stepForward),
                                     _title,
                                     // Quietest first, and Done or the close cross last: the row stands against the right edge, so a
                                     // control's place depends only on what stands to its right, and the last cannot be moved by anything.
+                                    new Glyph { Symbol = "?", Style = Styles.Help, Placement = Fixed.Size(32f, 32f), Command = _helps }.As(out _help),
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
@@ -631,10 +643,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var texts = _editor.Texts;
 
             // The first screen has nowhere to go back to, so it closes, with the cross at the far right where a close button stands.
-            _back.IsVisible = screen.CanGoBack;
-            _back.Tip = Tip.For(_back.Tip, screen.CanGoBack ? texts.ChromeBack : null);
-            _close.IsVisible = !screen.CanGoBack;
-            _close.Tip = Tip.For(_close.Tip, screen.CanGoBack ? null : texts.ChromeClose);
+            // A screen with a history of its own, the codex, steps through it at the left like a browser and closes at the right.
+            var closes = !screen.CanGoBack || screen.Browses;
+            _back.IsVisible = screen.CanGoBack && !screen.Browses;
+            _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.ChromeBack : null);
+            _close.IsVisible = closes;
+            _close.Tip = Tip.For(_close.Tip, !closes ? null : screen.Browses ? texts.CodexClose : texts.ChromeClose);
+
+            _stepBack.IsVisible = screen.Browses;
+            _stepsBack.CanExecute = screen.StepsBack != null;
+            _stepBack.Tip = Tip.For(_stepBack.Tip, screen.Browses ? texts.CodexBack : null);
+            _stepForward.IsVisible = screen.Browses;
+            _stepsForward.CanExecute = screen.StepsForward != null;
+            _stepForward.Tip = Tip.For(_stepForward.Tip, screen.Browses ? texts.CodexForward : null);
+
+            _help.IsVisible = screen.Help != null;
+            _helps.CanExecute = screen.Help != null;
+            _help.Tip = Tip.For(_help.Tip, screen.Help == null ? null : texts.CodexHelp);
 
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);

@@ -1128,7 +1128,7 @@ namespace Lumel.Text
             g.PushClip(new RectangleF(view.X, view.Y, _gutter, view.Height));
             for (var i = 0; i < _numbers.Count; i++)
             {
-                g.DrawText(_font, _numbers[i], new Vector2(edge, y), _fontSize, NumberColor, Align.Right);
+                g.DrawText(_font, _numbers[i], new Vector2(edge, y), _fontSize, NumberColor, TextAlign.Right);
                 y += _fontSize;
             }
 

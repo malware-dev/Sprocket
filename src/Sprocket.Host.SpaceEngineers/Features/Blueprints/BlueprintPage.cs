@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -55,6 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <inheritdoc />
         public override bool Edits => true;
+
+        /// <inheritdoc />
+        public override string Help => Terms.ConfigurationPanel;
 
         /// <inheritdoc />
         public override string CustomName => Title;

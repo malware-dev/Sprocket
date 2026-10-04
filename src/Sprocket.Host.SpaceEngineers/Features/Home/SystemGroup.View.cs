@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         StatusRow _heading;
         Spine _spine;
-        Label _installations;
+        RichText _installations;
         Button _another;
         VStack _list;
 
@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new Label { Style = Styles.SubHeading }.As(out _installations),
+                            new RichText { Style = Styles.SubHeadingTerm }.As(out _installations),
                             new VStack { Spacing = 8f }.As(out _list),
                             new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _another) } }
                         }

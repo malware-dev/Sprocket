@@ -35,6 +35,9 @@ namespace Lumel
             }
         }
 
+        /// <summary>The content fills the room.</summary>
+        protected override Align Aligns => Align.Fill;
+
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -48,8 +51,16 @@ namespace Lumel
         /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
-            if (_content != null && _content.IsVisible)
-                _content.Arrange(bounds);
+            if (_content == null || !_content.IsVisible)
+                return;
+
+            float x;
+            float wide;
+            float y;
+            float tall;
+            Span(_content, true, bounds.X, bounds.Width, float.NaN, _content.DesiredSize.X, out x, out wide);
+            Span(_content, false, bounds.Y, bounds.Height, float.NaN, _content.DesiredSize.Y, out y, out tall);
+            _content.Arrange(new RectangleF(x, y, wide, tall));
         }
 
         /// <inheritdoc />

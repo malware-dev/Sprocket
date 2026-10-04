@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
@@ -28,6 +29,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly ICommand _takesOff;
 
         readonly ICommand _deletes;
+
+        string _installationsSaid;
 
         readonly ICommand _shelves;
 
@@ -99,7 +102,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Locked = only ? texts.SystemsKeepsOne : "";
             }
 
-            _installations.Text = texts.SystemsInstallations.ToUpperInvariant();
+            var installations = Terms.Link(texts.SystemsInstallations.ToUpperInvariant(), Terms.Installation);
+            if (installations != _installationsSaid)
+            {
+                _installationsSaid = installations;
+                _installations.Document = Markdown.Parse(installations);
+                _editor.Codex.Wire(_installations, _editor.OpenCodex);
+            }
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
             _another.Tip = Tip.For(_another.Tip, texts.SystemsAddAnotherAbout, _named);
         }

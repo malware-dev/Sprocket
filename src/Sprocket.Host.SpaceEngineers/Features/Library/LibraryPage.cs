@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -47,6 +48,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         /// <inheritdoc />
         public override string Title => Editor.Texts.SystemsLoad;
+
+        /// <inheritdoc />
+        public override string Help => Terms.Library;
 
         /// <inheritdoc />
         public override bool ScrollsItself => true;

@@ -199,21 +199,23 @@ namespace Lumel.Layout
                 _entries[index] = Resolve(child.Placement);
         }
 
-        /// <summary>Puts a child at <paramref name="at" /> along the line, <paramref name="size" /> long.</summary>
+        /// <summary>A column stretches what it holds across; a row centers it down.</summary>
+        protected override Align Aligns => _runsAcross ? Align.Center : Align.Wide;
+
+        /// <summary>Puts a child at <paramref name="at" /> along the line, <paramref name="size" /> long, and across it as the child's alignment says.</summary>
         void Place(Element child, Entry entry, float at, float size, RectangleF bounds)
         {
+            float from;
+            float length;
             if (!_runsAcross)
             {
-                child.Arrange(new RectangleF(bounds.X, at, Given(entry.Across, bounds.Width), size));
+                Span(child, true, bounds.X, bounds.Width, entry.Across, child.DesiredSize.X, out from, out length);
+                child.Arrange(new RectangleF(from, at, length, size));
                 return;
             }
 
-            var height = Given(entry.Across, child.DesiredSize.Y);
-            var y = height > 0f && height < bounds.Height
-                ? bounds.Y + (bounds.Height - height) * 0.5f
-                : bounds.Y;
-
-            child.Arrange(new RectangleF(at, y, size, height > 0f ? height : bounds.Height));
+            Span(child, false, bounds.Y, bounds.Height, entry.Across, child.DesiredSize.Y, out from, out length);
+            child.Arrange(new RectangleF(at, from, size, length));
         }
 
         Entry Resolve(IPlacement placement)

@@ -44,7 +44,7 @@ sealed class Recording(RectangleF area) : IGraphics
     {
     }
 
-    public void DrawText(string font, string text, Vector2 position, float size, Color color, Align align)
+    public void DrawText(string font, string text, Vector2 position, float size, Color color, TextAlign align)
     {
     }
 }

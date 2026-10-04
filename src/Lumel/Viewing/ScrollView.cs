@@ -166,6 +166,9 @@ namespace Lumel.Viewing
         /// <remarks>Always: what it holds runs past its edges.</remarks>
         protected override bool Clips => true;
 
+        /// <summary>The content stretches across, and scrolls down from the top.</summary>
+        protected override Align Aligns => Align.Wide | Align.Top;
+
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -221,8 +224,10 @@ namespace Lumel.Viewing
         /// <summary>Places the content at the height it is scrolled to, inside <paramref name="bounds" /> less the bar.</summary>
         void Place(RectangleF bounds)
         {
-            Content.Arrange(new RectangleF(bounds.X, bounds.Y - _rail.Offset, Rail.Room(bounds.Width, _barWidth),
-                _rail.Extent));
+            float x;
+            float wide;
+            Span(Content, true, bounds.X, Rail.Room(bounds.Width, _barWidth), float.NaN, Content.DesiredSize.X, out x, out wide);
+            Content.Arrange(new RectangleF(x, bounds.Y - _rail.Offset, wide, _rail.Extent));
         }
 
         /// <inheritdoc />

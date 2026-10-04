@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
@@ -93,6 +94,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <inheritdoc />
         public override string SwitchAbout => Editor.SwitchAbout(_system);
+
+        /// <inheritdoc />
+        public override string Help => Terms.LogicSystem;
 
         /// <summary>The logic system just made is as it was made: its name, what it says about itself, its switch, and nothing in it.</summary>
         /// <remarks>A sequence made in it and left untouched has gone already, since its page was left first.</remarks>

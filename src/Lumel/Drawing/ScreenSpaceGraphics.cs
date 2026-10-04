@@ -167,18 +167,18 @@ namespace Lumel.Drawing
         /// <inheritdoc />
         public void DrawText(string font, string text, Vector2 position, float size, Color color)
         {
-            DrawText(font, text, position, size, color, Align.Left);
+            DrawText(font, text, position, size, color, TextAlign.Left);
         }
 
         /// <inheritdoc />
         public void DrawText(string font, string text, Vector2 position, float size, Color color,
-            Align align)
+            TextAlign align)
         {
             if (string.IsNullOrEmpty(text))
                 return;
 
             // Always the top, because a position in the layout is the top of the run.
-            var placed = align == Align.Right
+            var placed = align == TextAlign.Right
                 ? MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_TOP
                 : MyGuiDrawAlignEnum.HORISONTAL_LEFT_AND_VERTICAL_TOP;
 

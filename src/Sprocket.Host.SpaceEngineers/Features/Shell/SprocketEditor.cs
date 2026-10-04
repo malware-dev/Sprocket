@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
 using Sprocket.Host.SpaceEngineers.Features.Home;
@@ -60,6 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _runner = runner;
             Texts = texts;
             Ago = new Ago(texts);
+            Codex = new Terms(texts);
 
             // What each system says as the editor finds it, so only what changes from here on is dated.
             var systems = _program.Systems;
@@ -78,6 +80,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>What the editor says, in the player's language.</summary>
         public Texts Texts { get; }
+
+        /// <summary>The codex, in <see cref="Texts" />.</summary>
+        public Terms Codex { get; }
 
         /// <summary>How long ago something happened, in <see cref="Texts" />.</summary>
         public Ago Ago { get; }
@@ -524,6 +529,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.OpenTrigger:
                 case Cmd.LoadSystem:
                 case Cmd.ShowScript:
+                case Cmd.OpenCodex:
                 case Cmd.RunNow:
                 case Cmd.StopNow:
                 case Cmd.TriggerTarget:
@@ -730,6 +736,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.PageOn:
                 case Cmd.PageBack:
                 case Cmd.ShowScript:
+                case Cmd.OpenCodex:
                 case Cmd.Shelve:
                 case Cmd.Unshelve:
                 case Cmd.ForgetBackup:
@@ -1177,6 +1184,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
             _screen.Library = page.Library;
+            _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, page.ShowHelp) : null;
+            _screen.Browses = page.Browses;
+            _screen.StepsBack = page.CanStepBack ? Act(Cmd.OpenCodex, page.StepBack) : null;
+            _screen.StepsForward = page.CanStepForward ? Act(Cmd.OpenCodex, page.StepForward) : null;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 
@@ -1254,6 +1265,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// does not check either: the check belongs where the way in is put on a screen, so there is one place to
         /// read rather than two that can disagree.
         /// </remarks>
+        /// <summary>Opens the codex at <paramref name="term" />, on top of the screen it was asked for from.</summary>
+        public void OpenCodex(Term term)
+        {
+            var open = Act(Cmd.OpenCodex, delegate { Push(new CodexPage(this, term)); });
+            if (open != null)
+                open.Execute();
+        }
+
         void ShowScript()
         {
             // Also the way to a program's text that would not read, which is mended there whether or not developer mode is on.

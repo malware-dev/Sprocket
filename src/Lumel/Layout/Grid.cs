@@ -69,6 +69,9 @@ namespace Lumel.Layout
             }
         }
 
+        /// <summary>A cell stretches what it holds across and centers it down.</summary>
+        protected override Align Aligns => Align.Wide | Align.Center;
+
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -165,16 +168,14 @@ namespace Lumel.Layout
 
                 var width = Span(_widths, cell.Column, cell.Columns, _columnSpacing);
                 var height = Span(_heights, cell.Row, cell.Rows, _rowSpacing);
-                var tall = Given(cell.Height, cell.Element.DesiredSize.Y);
 
-                var y = _ys[cell.Row];
-                if (tall > 0f && tall <= height)
-                {
-                    y += (height - tall) * 0.5f;
-                    height = tall;
-                }
-
-                cell.Element.Arrange(new RectangleF(_xs[cell.Column], y, Given(cell.Width, width), height));
+                float x;
+                float wide;
+                float y;
+                float tall;
+                Span(cell.Element, true, _xs[cell.Column], width, cell.Width, cell.Element.DesiredSize.X, out x, out wide);
+                Span(cell.Element, false, _ys[cell.Row], height, cell.Height, cell.Element.DesiredSize.Y, out y, out tall);
+                cell.Element.Arrange(new RectangleF(x, y, wide, tall));
             }
         }
 

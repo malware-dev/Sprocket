@@ -19,6 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
         };
 
+        /// <summary>The sentence that opens a page of reading, set apart from what follows in the bright ink.</summary>
+        public static readonly TextStyle Lead = new TextStyle(Name)
+        {
+            Base = { Padding = new Thickness(20f, 4f) }
+        };
+
         /// <summary>The name of something listed inside a group, a size under the group's own.</summary>
         public static readonly TextStyle InnerName = new TextStyle(Name)
         {
@@ -215,6 +221,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly RichTextStyle Section = new RichTextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint, StrongColor = Palette.Ink }
+        };
+
+        /// <summary>A section's name, in capitals, over what it heads, where the name is a term in the codex.</summary>
+        public static readonly RichTextStyle HeadingTerm = new RichTextStyle(Section)
+        {
+            Base = { EmphasisColor = Palette.Ink, Padding = new Thickness(4f, 8f, 0f, 8f) }
+        };
+
+        /// <summary>The same, a size down, heading part of a section.</summary>
+        public static readonly RichTextStyle SubHeadingTerm = new RichTextStyle(HeadingTerm)
+        {
+            Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
         };
 
         /// <summary>A section's name, in capitals, over what it heads.</summary>
@@ -503,6 +521,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted },
             Hot = { Background = Palette.PanelHot, Tint = Palette.Ink },
             Disabled = { Tint = Palette.Dim }
+        };
+
+        /// <summary>The question mark that opens the codex, an icon drawn from the lettering, which the symbol font has no mark for.</summary>
+        public static readonly GlyphStyle Help = new GlyphStyle(Icon)
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 28f }
+        };
+
+        /// <summary>A term in the codex's margin, which moves the codex there when pressed.</summary>
+        public static readonly ButtonStyle CodexEntry = new ButtonStyle(Plain)
+        {
+            Base = { FontSize = 20f, Padding = new Thickness(12f, 6f) }
+        };
+
+        /// <summary>The term in the codex's margin that is being read.</summary>
+        public static readonly ButtonStyle CodexEntryShown = new ButtonStyle(CodexEntry)
+        {
+            Base = { Color = Palette.Ink, Background = Palette.Panel },
+            Hot = { Background = Palette.PanelHot }
         };
 
         /// <summary>The mark a drop-down line ends with, smaller than a symbol pressed on its own.</summary>

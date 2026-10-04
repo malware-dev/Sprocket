@@ -1987,4 +1987,142 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>This system has no other sequence to stop.</value>
     <comment>Said in place of the list of sequences to stop where the system has no other sequence.</comment>
   </data>
+  <data name="Sprocket.Codex.More" xml:space="preserve">
+    <value>Press to read more.</value>
+    <comment>Last line of the note on a codex term, under the sentence that says what it is.</comment>
+  </data>
+  <data name="Sprocket.Codex.LogicSystem.Name" xml:space="preserve">
+    <value>Logic system</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.LogicSystem.Summary" xml:space="preserve">
+    <value>A named piece of automation: what happens, and the blocks it needs.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.LogicSystem.Page" xml:space="preserve">
+    <value>A logic system holds sequences, the steps that do the work, and the triggers that start them. It never names a real block. It asks for its blocks through slots instead: an airlock asks for an inner door, an outer door and a vent.
+
+## Putting it to work
+
+A logic system works on real blocks through its [installations](#installation). Each installation fills the slots with blocks of its own, so one logic system can run every airlock on a ship. A logic system always has at least one installation.
+
+## Changing it
+
+Pressing a logic system opens its screen, where its sequences and triggers are made and changed. A change reaches every installation at once.
+
+Its switch turns the whole logic system off, every installation with it.
+
+## Keeping it
+
+**Make blueprint** keeps a copy in the library, so it can be put on other constructs or given to other players.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite. [words](#id) links to the entry id; keep the id, translate the words.</comment>
+  </data>
+  <data name="Sprocket.Codex.Installation.Name" xml:space="preserve">
+    <value>Installation</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.Installation.Summary" xml:space="preserve">
+    <value>A set of blocks a logic system works on.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.Installation.Page" xml:space="preserve">
+    <value>The logic system says what happens; each installation says which blocks it happens to. There is only ever one [logic system](#logic-system): every installation runs the same one.
+
+## One logic system, many installations
+
+An airlock logic system can have three installations, one for each airlock on the ship. Each fills the logic system's slots with blocks of its own: its own inner door, its own outer door, its own vent, its own triggers. All three do the same thing, each to its own airlock, and each runs on its own: cycling one airlock leaves the other two as they are.
+
+Changing the logic system changes all of its installations at once. Fix a step in the airlock, and every airlock gets the fix.
+
+## Making and changing one
+
+**+ installation** under a logic system adds one, and opens the configuration panel to choose its blocks. Pressing an installation opens the same panel again, to swap its blocks and triggers.
+
+Each installation has a switch of its own, so one airlock can be turned off while the others keep working. A logic system always has at least one installation; the last one cannot be deleted.
+
+## When a block is missing
+
+If a block an installation uses is gone, the installation's row turns red, and so does its logic system's. A sequence that reaches the missing block stops there. Pressing the installation opens its configuration panel, where another block can fill the slot. A slot marked optional is the exception: the steps that use it are skipped instead.
+
+## Not to be confused with
+
+A blueprint is a copy of the logic system itself, kept in the library. Installing a blueprint on another construct gives that construct the logic system, with its first installation.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite. [words](#id) links to the entry id; keep the id, translate the words.</comment>
+  </data>
+  <data name="Sprocket.Codex.Help" xml:space="preserve">
+    <value>What this screen is for, in the codex</value>
+    <comment>Note on the question mark in a screen's heading.</comment>
+  </data>
+  <data name="Sprocket.Codex.Back" xml:space="preserve">
+    <value>Back to the entry before</value>
+    <comment>Note on the codex's step back.</comment>
+  </data>
+  <data name="Sprocket.Codex.Forward" xml:space="preserve">
+    <value>Forward to the entry after</value>
+    <comment>Note on the codex's step forward.</comment>
+  </data>
+  <data name="Sprocket.Codex.Close" xml:space="preserve">
+    <value>Close the codex</value>
+    <comment>Note on the cross that closes the codex, back to the screen it was opened from.</comment>
+  </data>
+  <data name="Sprocket.Codex.Home.Name" xml:space="preserve">
+    <value>The home screen</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.Home.Summary" xml:space="preserve">
+    <value>Every logic system on this construct, and its installations.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.Home.Page" xml:space="preserve">
+    <value>This entry is still to be written.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite; a placeholder until the entry is written.</comment>
+  </data>
+  <data name="Sprocket.Codex.Sequence.Name" xml:space="preserve">
+    <value>Sequence</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.Sequence.Summary" xml:space="preserve">
+    <value>A list of steps a logic system carries out in order.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.Sequence.Page" xml:space="preserve">
+    <value>This entry is still to be written.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite; a placeholder until the entry is written.</comment>
+  </data>
+  <data name="Sprocket.Codex.ConfigurationPanel.Name" xml:space="preserve">
+    <value>Configuration panel</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.ConfigurationPanel.Summary" xml:space="preserve">
+    <value>Where an installation's blocks and triggers are chosen.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.ConfigurationPanel.Page" xml:space="preserve">
+    <value>This entry is still to be written.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite; a placeholder until the entry is written.</comment>
+  </data>
+  <data name="Sprocket.Codex.Library.Name" xml:space="preserve">
+    <value>Library</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.Library.Summary" xml:space="preserve">
+    <value>Blueprints kept for other constructs, and the world's backups.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.Library.Page" xml:space="preserve">
+    <value>This entry is still to be written.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite; a placeholder until the entry is written.</comment>
+  </data>
+  <data name="Sprocket.Codex.Picking.Name" xml:space="preserve">
+    <value>Picking blocks</value>
+    <comment>A codex entry's title.</comment>
+  </data>
+  <data name="Sprocket.Codex.Picking.Summary" xml:space="preserve">
+    <value>Choosing the blocks a step or a slot uses, and what is done to them.</value>
+    <comment>One sentence saying what the term is: the note on it, and the lead of its page.</comment>
+  </data>
+  <data name="Sprocket.Codex.Picking.Page" xml:space="preserve">
+    <value>This entry is still to be written.</value>
+    <comment>A codex entry's page, after its lead, in markdown-lite; a placeholder until the entry is written.</comment>
+  </data>
 </root>

@@ -15,6 +15,7 @@ namespace Lumel
         public const float Unbounded = 1000000f;
 
         Action<Element, IPlacement> _admit;
+        Align _align;
         bool _arrangeDirty = true;
         RectangleF _arrangedTo;
         ICommand _command;
@@ -37,6 +38,20 @@ namespace Lumel
 
         /// <summary>Set when this is added to another element's children. Null while it is loose.</summary>
         public Element Parent => _parent;
+
+        /// <summary>Where this sits in the room its holder gives it; <see cref="Lumel.Align.Default" /> leaves that to the holder.</summary>
+        public Align Align
+        {
+            get { return _align; }
+            set
+            {
+                if (_align == value)
+                    return;
+
+                _align = value;
+                InvalidateArrange();
+            }
+        }
 
         /// <summary>How whatever holds this is asked to place it, or null for the holder's own default.</summary>
         /// <remarks>Throws, leaving the placement as it was, when the holder cannot place this that way.</remarks>

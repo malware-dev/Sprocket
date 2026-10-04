@@ -33,6 +33,9 @@ namespace Lumel.Viewing
         /// <remarks>Always: what it holds is shown only as far as it has opened.</remarks>
         protected override bool Clips => true;
 
+        /// <summary>The content stretches across, and down it stands on the bottom edge, where what is on show ends.</summary>
+        protected override Align Aligns => Align.Wide | Align.Bottom;
+
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -53,8 +56,10 @@ namespace Lumel.Viewing
             // Full height, bottom-aligned to what is on show, with the hidden part above the top edge.
             var height = Content.DesiredSize.Y;
 
-            Content.Arrange(new RectangleF(bounds.X, bounds.Y + bounds.Height - height,
-                bounds.Width, height));
+            float x;
+            float wide;
+            Span(Content, true, bounds.X, bounds.Width, float.NaN, Content.DesiredSize.X, out x, out wide);
+            Content.Arrange(new RectangleF(x, bounds.Y + bounds.Height - height, wide, height));
         }
 
         /// <inheritdoc />

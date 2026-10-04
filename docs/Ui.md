@@ -79,6 +79,23 @@ lives in the child's `Placement`, and each container reads the placement interfa
 - **A container keeps what it works out in entries of its own**, never in the placement, since a
   placement may be shared by many elements.
 
+## Alignment
+
+`Align` says where an element sits in the room its holder gives it. It is one flags value, read one axis
+at a time:
+
+- **An axis whose edges are named goes by them.** One edge pins the element to it; both stretch it.
+  `Wide` is `Left | Right`, `Tall` is `Top | Bottom`, `Fill` is all four.
+- **An axis with no edge named is centered where `Center` is set,** so `Left | Center` is left and
+  centered down.
+- **Otherwise the holder decides.** `Default` is 0 and adds nothing: `Left | Default` is `Left`.
+- **A holder ignores the axis it stacks along.**
+
+Every container declares how it places a child that says nothing, as `Aligns`, which `Container` makes
+abstract: a column `Wide`, a row `Center`, a grid cell `Wide | Center`, a flow line `Center`, content
+`Fill`, a scroll view `Wide | Top`, a reveal `Wide | Bottom`. A length the child's placement fixes is
+kept whatever the alignment.
+
 ## HStack and VStack
 
 Children in a line, across or down. A child whose placement asks to grow is given a share of the
@@ -193,7 +210,6 @@ framework never learns what a command means to the application.
 ## Open
 
 - Margin: on every element, or in placement.
-- Alignment of a child inside the room it is given, across a stack and inside a grid cell.
 - The name of the `As` extension.
 - What a property the view sets on an element does when a style's state later changes the same
   property: whether the state wins, or the view's value is kept.

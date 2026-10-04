@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -65,6 +66,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <inheritdoc />
         public override bool Edits => true;
+
+        /// <inheritdoc />
+        public override string Help => Terms.Sequence;
 
         /// <summary>The switch is its system's, which is also what keeps the sequence from being changed while it may run.</summary>
         public override bool CanSwitch => _sequence.System != null;

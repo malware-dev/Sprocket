@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
     public sealed partial class HomePage
     {
-        Label _heading;
+        RichText _heading;
         Label _empty;
         VStack _list;
         Button _new;
@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             {
                 Children =
                 {
-                    new Label { Style = Styles.Heading }.As(out _heading),
+                    new RichText { Style = Styles.HeadingTerm }.As(out _heading),
                     new Label { Style = Styles.Empty, Wraps = true }.As(out _empty),
                     new VStack().As(out _list),
                     new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _new) } }

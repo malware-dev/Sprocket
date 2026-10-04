@@ -25,6 +25,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         NewSystem,
         LoadSystem,
         OpenSystem,
+        /// <summary>Opening the codex, or moving within it.</summary>
+        OpenCodex,
         AddInstance,
         ChooseInstance,
         DeleteSystem,

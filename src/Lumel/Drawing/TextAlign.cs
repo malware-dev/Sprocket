@@ -2,7 +2,7 @@
 namespace Lumel.Drawing
 {
     /// <summary>Which end of a run of text a position names.</summary>
-    public enum Align
+    public enum TextAlign
     {
         /// <summary>The position is where the run starts.</summary>
         Left,

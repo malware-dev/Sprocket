@@ -172,6 +172,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What opens the blueprint library from this page, or null where it is not offered.</summary>
         public virtual ICommand Library => null;
 
+        /// <summary>The codex entry about this screen, by the id a link names it by, or null where the screen has none.</summary>
+        public virtual string Help => null;
+
+        /// <summary>Opens the codex at the entry <see cref="Help" /> names.</summary>
+        public virtual void ShowHelp()
+        {
+            var term = Editor.Codex.Find(Help);
+            if (term != null)
+                Editor.OpenCodex(term);
+        }
+
+        /// <summary>Whether this page moves through a history of its own: a step back and a step forward at the start of its heading, and a cross at the end that closes it.</summary>
+        public virtual bool Browses => false;
+
+        /// <summary>Whether there is somewhere in this page's own history to step back to.</summary>
+        public virtual bool CanStepBack => false;
+
+        /// <summary>Steps back in this page's own history.</summary>
+        public virtual void StepBack()
+        {
+        }
+
+        /// <summary>Whether there is somewhere in this page's own history to step forward to.</summary>
+        public virtual bool CanStepForward => false;
+
+        /// <summary>Steps forward in this page's own history.</summary>
+        public virtual void StepForward()
+        {
+        }
+
         /// <summary>
         /// Whether this page's subject can be switched on and off.
         /// </summary>
