@@ -35,8 +35,10 @@
     <CompilerVisibleProperty Include="RootNamespace" />
     <CompilerVisibleProperty Include="LocalizationPrefix" />
     <CompilerVisibleProperty Include="LocalizationNamespace" />
+    <!-- Built first, and loaded from the copy it keeps for loading; see the generator's project. -->
     <ProjectReference Include="..\Sprocket.Localization.Generator\Sprocket.Localization.Generator.csproj"
-                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+                      ReferenceOutputAssembly="false" />
+    <Analyzer Include="..\Sprocket.Localization.Generator\bin\Loaded\Sprocket.Localization.Generator.dll" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Mal.Mdk2.ModAnalyzers" Version="2.1.16">

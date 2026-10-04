@@ -23,9 +23,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     public partial class StepRow : HStack
     {
         const float Indent = 32f;
-        const float RailIn = 6f;
+        const float SpineIn = 6f;
 
-        // Half the room the list leaves between its rows, so the rails of two rows meet in the middle of it.
+        // Half the room the list leaves between its rows, so the spines of two rows meet in the middle of it.
         const float Reach = 4f;
 
         readonly List<Label> _joins = new List<Label>();
@@ -51,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>How many ifs it stands inside, which is how far its sentence is indented.</summary>
         public int Depth { get; set; }
 
-        /// <summary>How many of its rails go on to the row below it; the rest end at it, as the last step of their branch.</summary>
+        /// <summary>How many of its spines go on to the row below it; the rest end at it, as the last step of their branch.</summary>
         public int Through { get; set; }
 
         /// <summary>How many rows after it are carried with it: the rest of the if, for the row that opens one.</summary>
@@ -174,8 +174,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         : Palette.None;
         }
 
-        /// <summary>Draws the row, then a rail down the indent for each if it stands in, which is what ties a branch's steps to the line opening it.</summary>
-        /// <remarks>Drawn through the room either side of the row, so the rails of the rows in one branch are one line; a rail that ends here turns in towards the step.</remarks>
+        /// <summary>Draws the row, then a spine down the indent for each if it stands in, which is what ties a branch's steps to the line opening it.</summary>
+        /// <remarks>Drawn through the room either side of the row, so the spines of the rows in one branch are one line; a spine that ends here turns in towards the step.</remarks>
         protected override void DrawContent(IGraphics g)
         {
             base.DrawContent(g);
@@ -185,11 +185,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var bottom = Bounds.Y + Bounds.Height + Reach;
             for (var level = 0; level < Depth; level++)
             {
-                var x = _sentence.Bounds.X + level * Indent + RailIn;
+                var x = _sentence.Bounds.X + level * Indent + SpineIn;
                 if (level >= Through)
-                    Rail.Turning(g, x, top, middle, Sizes.Rail, Sizes.RailTurn, Palette.Line);
+                    Spine.Turning(g, x, top, middle, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
                 else
-                    Rail.Down(g, x, top, bottom, Sizes.Rail, Palette.Line);
+                    Spine.Down(g, x, top, bottom, Sizes.Spine, Palette.Line);
             }
         }
 

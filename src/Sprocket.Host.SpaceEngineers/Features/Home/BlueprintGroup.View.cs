@@ -11,11 +11,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         const float Gutter = 32f;
 
         StatusRow _heading;
-        Rail _rail;
+        Spine _spine;
         Button _another;
         VStack _list;
 
-        /// <summary>Makes the group's heading, a row of its own that opens the blueprint, and under it its rows and the way to add another, set in by a gutter with a rail down it.</summary>
+        /// <summary>Makes the group's heading, a row of its own that opens the blueprint, and under it its rows and the way to add another, set in by a gutter with a spine down it.</summary>
         void CreateView()
         {
             Spacing = 8f;
@@ -24,11 +24,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Children.Add(new StatusRow().As(out _heading));
             Children.Add(new HStack
             {
-                Padding = new Thickness((Gutter - Sizes.Rail) / 2f, 0f, 0f, 0f),
-                Spacing = (Gutter - Sizes.Rail) / 2f,
+                Padding = new Thickness((Gutter - Sizes.Spine) / 2f, 0f, 0f, 0f),
+                Spacing = (Gutter - Sizes.Spine) / 2f,
                 Children =
                 {
-                    new Rail(Sizes.Rail, Sizes.RailTurn, Palette.Line) { Placement = Fixed.Wide(Sizes.Rail) }.As(out _rail),
+                    new Spine(Sizes.Spine, Sizes.SpineTurn, Palette.Line) { Placement = Fixed.Wide(Sizes.Spine) }.As(out _spine),
                     new VStack
                     {
                         Placement = Flex.Grow,
@@ -41,8 +41,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 }
             });
 
-            // Turned in at the way to add another, the last line the rail runs past.
-            _rail.Ends = _another;
+            // Turned in at the way to add another, the last line the spine runs past.
+            _spine.Ends = _another;
         }
     }
 }

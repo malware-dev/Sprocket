@@ -17,4 +17,22 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
   </ItemGroup>
+  <!--
+      The copy the mod loads, apart from the build output: a language server holds whatever generator it
+      loaded open, so it loads this one, and the copy is replaced only where the generator built differs,
+      by content rather than by date. An ordinary build leaves it alone; a change to the generator itself
+      is the one time it is written, and the language server has to let go of it for that.
+  -->
+  <Target Name="CopyForLoading" AfterTargets="Build">
+    <PropertyGroup>
+      <GeneratorCopy>$(MSBuildThisFileDirectory)bin\Loaded\$(TargetFileName)</GeneratorCopy>
+    </PropertyGroup>
+    <GetFileHash Files="@(IntermediateAssembly->'%(FullPath)')">
+      <Output TaskParameter="Hash" PropertyName="BuiltHash" />
+    </GetFileHash>
+    <GetFileHash Files="$(GeneratorCopy)" Condition="Exists('$(GeneratorCopy)')">
+      <Output TaskParameter="Hash" PropertyName="LoadedHash" />
+    </GetFileHash>
+    <Copy SourceFiles="@(IntermediateAssembly)" DestinationFiles="$(GeneratorCopy)" Condition="'$(BuiltHash)' != '$(LoadedHash)'" />
+  </Target>
 </Project>

@@ -8,14 +8,14 @@ namespace Lumel.Controls
     /// <see cref="Ends" />.
     /// </summary>
     /// <remarks>
-    /// The turn is drawn past the rail's own width, into the room between the gutter and what it holds. Something that draws
-    /// its own share of a longer rail - one row of many - draws it with <see cref="Down" /> and <see cref="Turning" />, so every
-    /// stretch of a rail looks the same.
+    /// The turn is drawn past the spine's own width, into the room between the gutter and what it holds. Something that draws
+    /// its own share of a longer spine - one row of many - draws it with <see cref="Down" /> and <see cref="Turning" />, so every
+    /// stretch of a spine looks the same.
     /// </remarks>
-    public class Rail : Element
+    public class Spine : Element
     {
-        /// <summary>A rail <paramref name="thickness" /> wide in <paramref name="color" />, turning in by <paramref name="turn" />.</summary>
-        public Rail(float thickness, float turn, Color color)
+        /// <summary>A spine <paramref name="thickness" /> wide in <paramref name="color" />, turning in by <paramref name="turn" />.</summary>
+        public Spine(float thickness, float turn, Color color)
         {
             Thickness = thickness;
             Turn = turn;
@@ -31,16 +31,16 @@ namespace Lumel.Controls
         /// <summary>The colour of the line.</summary>
         public Color Color { get; set; }
 
-        /// <summary>The element the rail turns in at, or null for a line the whole height of the rail.</summary>
+        /// <summary>The element the spine turns in at, or null for a line the whole height of the spine.</summary>
         public Element Ends { get; set; }
 
-        /// <summary>Draws a stretch of rail <paramref name="thickness" /> wide at <paramref name="x" />, from <paramref name="top" /> to <paramref name="bottom" />.</summary>
+        /// <summary>Draws a stretch of spine <paramref name="thickness" /> wide at <paramref name="x" />, from <paramref name="top" /> to <paramref name="bottom" />.</summary>
         public static void Down(IGraphics g, float x, float top, float bottom, float thickness, Color color)
         {
             g.Fill(new RectangleF(x, top, thickness, bottom - top), color);
         }
 
-        /// <summary>Draws the last stretch of a rail at <paramref name="x" />, from <paramref name="top" /> to where it turns in by <paramref name="turn" /> at <paramref name="at" />.</summary>
+        /// <summary>Draws the last stretch of a spine at <paramref name="x" />, from <paramref name="top" /> to where it turns in by <paramref name="turn" /> at <paramref name="at" />.</summary>
         public static void Turning(IGraphics g, float x, float top, float at, float thickness, float turn, Color color)
         {
             Down(g, x, top, at + thickness, thickness, color);

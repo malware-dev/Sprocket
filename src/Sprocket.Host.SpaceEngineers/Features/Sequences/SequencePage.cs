@@ -414,7 +414,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     depth++;
             }
 
-            // A rail goes on to the next row where that row stands as far in, and ends here where it does not.
+            // A spine goes on to the next row where that row stands as far in, and ends here where it does not.
             for (var i = 0; i < _keys.Count; i++)
             {
                 var row = _rows[_keys[i]];

@@ -31,10 +31,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>How short a scrollbar's thumb may get.</summary>
         public const float Thumb = 34f;
 
-        /// <summary>The width of a rail down a gutter: a blueprint's installations, an if's branches.</summary>
-        public const float Rail = 2f;
+        /// <summary>The width of a spine down a gutter: a blueprint's installations, an if's branches.</summary>
+        public const float Spine = 2f;
 
-        /// <summary>How far a rail turns in at its end, towards the last thing it runs beside.</summary>
-        public const float RailTurn = 12f;
+        /// <summary>How far a spine turns in at its end, towards the last thing it runs beside.</summary>
+        public const float SpineTurn = 12f;
     }
 }

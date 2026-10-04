@@ -167,6 +167,20 @@ is recorded travels with whatever it explains, saved state included.
 **A fallback stays, short and plain.** For a cause that really is not known: "Stopped for an unknown
 reason." Removing a message is never the fix for a bad one.
 
+**How Sprocket tells somebody something - one surface each, and a new message is a new case of one of
+these, never a new mechanism:**
+
+- *Something wrong with a sequence:* `SequenceFault` + `SequenceProblem`, naming the step. A fault is
+  red and counted as broken; `IsWarning` makes it amber and counted as a remark. Worded in
+  `SequenceText`.
+- *What a sequence is doing:* `SequenceStatus`, said in plain words beside when it last ran. Nothing
+  wrong. A run stopped from outside is one of these.
+- *A message about the screen, not about a sequence:* the banner's `Notice`, at `NoticeLevel.Info` or
+  `Problem`.
+- *Why a logic system was switched off:* `Halt`, worded by `SequenceText.Stopped`.
+- *Knowledge about a kind of block:* `IBlockExtension`. *What a block offers:* `Offer`. *What a value
+  asks for:* `Field`.
+
 ## The language's spec is `docs/Language.md`
 
 **It holds the current truth of the script language and nothing else.** What the language is right
