@@ -9,21 +9,20 @@ using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Lumel;
 using Lumel.Input;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
     /// <summary>
-    /// The logic systems on this construct, and the blueprints some of them are made from. The front door.
+    /// The logic systems on this construct, each with its installations. The front door.
     /// </summary>
     /// <remarks>
     /// Not a list of sequences. Nobody built a procedure - they built an airlock, and that is what they
     /// came back to look at.
     /// <para>
-    /// A logic system of its own is one row. Making a blueprint of it is the act that brings the
-    /// blueprint into view: it is named then, and it heads the logic systems made from it, so the idea
-    /// arrives when somebody reaches for it rather than before they have made anything.
+    /// A logic system is written against slots, and each installation says which blocks fill them, from the moment it
+    /// is made: the logic and where it is installed are two things from the first minute, so a second installation is
+    /// one more row and nothing changes shape.
     /// </para>
     /// <para>
     /// The elements it is drawn with are declared in <c>HomePage.View.cs</c>, and nothing else is; this
@@ -34,13 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
     {
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
 
-        readonly List<AutomationSystem> _own = new List<AutomationSystem>();
-        readonly List<AutomationSystem> _blueprints = new List<AutomationSystem>();
-
         int _shape;
 
-        Keyed<AutomationSystem, StatusRow> _rows;
-        Keyed<AutomationSystem, BlueprintGroup> _groups;
+        Keyed<AutomationSystem, SystemGroup> _groups;
 
         /// <summary>The root of the editor built on <paramref name="editor" />.</summary>
         public HomePage(SprocketEditor editor) : base(editor)
@@ -112,6 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             // Arriving at the construct's own list is the moment somebody wants to know how everything on it stands.
             Editor.Runner.Look();
+            Installed();
             Collect();
             _shape = Shape();
             Show(true);
@@ -128,6 +124,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             var shape = Shape();
             var reshaped = shape != _shape;
+            if (reshaped)
+            {
+                Installed();
+                shape = Shape();
+            }
+
             _shape = shape;
 
             Show(reshaped);
@@ -222,13 +224,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             Editor.Push(new BlueprintPage(Editor, system, false));
         }
 
-        /// <summary>Gives the two buttons their presses, keeps the rows and groups by system, and fills the view from the systems as they are.</summary>
+        /// <summary>Gives the button its press, keeps the groups by system, and fills the view from the systems as they are.</summary>
         protected override void ViewCreated()
         {
             _new.Command = Editor.Act(Cmd.NewSystem, Make);
-
-            _rows = new Keyed<AutomationSystem, StatusRow>(_plainRows.Children, Own);
-            _groups = new Keyed<AutomationSystem, BlueprintGroup>(_blueprintGroups.Children, system => new BlueprintGroup(Editor, this, system));
+            _groups = new Keyed<AutomationSystem, SystemGroup>(_list.Children, system => new SystemGroup(Editor, this, system));
 
             Show(true);
         }
@@ -236,7 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>Brings the view up to the systems, and to what they are called where <paramref name="reshaped" />; nothing before the view is made.</summary>
         void Show(bool reshaped)
         {
-            if (_rows == null)
+            if (_groups == null)
                 return;
 
             var texts = Editor.Texts;
@@ -247,89 +247,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             if (reshaped)
                 Arrange(texts);
 
-            for (var i = 0; i < _own.Count; i++)
-            {
-                var system = _own[i];
-                Live(_rows[system], system, system.First, system.Enabled, system.Halt, recount, reshaped, texts);
-            }
-
-            for (var i = 0; i < _blueprints.Count; i++)
-                _groups[_blueprints[i]].Live(recount, reshaped, texts);
+            for (var i = 0; i < _systems.Count; i++)
+                _groups[_systems[i]].Live(recount, reshaped, texts);
         }
 
-        /// <summary>Puts a row or a group in place for each system, and gives everything its words.</summary>
+        /// <summary>Puts a group in place for each logic system, and gives everything its words.</summary>
         /// <remarks>Walks the systems' blocks for their names, which is why it runs only when the systems change or the page is come back to.</remarks>
         void Arrange(Texts texts)
         {
             _new.Text = StatusRow.Plus + texts.SystemsNew;
             _new.Tip = Tip.For(_new.Tip, texts.SystemsNewAbout);
 
-            _own.Clear();
-            _blueprints.Clear();
-            for (var i = 0; i < _systems.Count; i++)
-                (_systems[i].IsBlueprint ? _blueprints : _own).Add(_systems[i]);
+            _groups.Show(_systems);
 
-            _rows.Show(_own);
-            _groups.Show(_blueprints);
-
-            _plainHeading.Text = texts.SystemsPlainHeading.ToUpperInvariant();
-            _blueprintsHeading.Text = texts.SystemsBlueprintsHeading.ToUpperInvariant();
+            _heading.Text = texts.SystemsHeading.ToUpperInvariant();
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
 
-            for (var i = 0; i < _own.Count; i++)
-            {
-                var row = _rows[_own[i]];
-                row.Summary = SystemSummary.Describe(texts, Editor.Runner.Bindings, _own[i]);
-
-                // Said in words on the row, where it cannot be missed. Making a blueprint is how one logic
-                // system becomes several, and a way to do that nobody finds is the problem this row solves.
-                row.ButtonText = texts.SystemsMakeBlueprint;
-                row.ButtonAbout = texts.SystemsMakeBlueprintAbout;
-
-                row.About = texts.SystemsOpenAbout;
-                row.AboutArguments.Set("name", row.Summary);
-                row.DeleteText = texts.SystemDelete;
-            }
-
-            for (var i = 0; i < _blueprints.Count; i++)
-                _groups[_blueprints[i]].Arrange(texts);
+            for (var i = 0; i < _systems.Count; i++)
+                _groups[_systems[i]].Arrange(texts);
         }
 
-        /// <summary>The row of a logic system of its own: opened by pressing it, switched by its switch, and made a blueprint of by its button.</summary>
-        StatusRow Own(AutomationSystem system)
-        {
-            return new StatusRow
-            {
-                Opens = Editor.Act(Cmd.OpenSystem, delegate { Open(system); }),
-                Flips = Editor.Act(Cmd.EnableSystem, delegate { Editor.SwitchSystem(system, !system.Enabled); }),
-                Offers = Editor.Act(Cmd.MakeBlueprint, delegate { Made(system); }),
-                Deletes = Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(system); }),
-                AboutArguments = new Arguments(),
-                SwitchGovernsAll = true
-            };
-        }
-
-        /// <summary>Makes a logic system, numbered, and opens it with its name in hand to be given.</summary>
+        /// <summary>Makes a logic system, numbered, with its first installation, and opens it with its name in hand to be given.</summary>
         void Make()
         {
             var system = Editor.Program.AddSystem(Editor.Texts.SystemsDefault);
             system.Namespace = Editor.Author;
             system.Enabled = false;
+            Editor.Blueprinted(system);
 
             Editor.PushMade(new LogicSystemPage(Editor, system));
         }
 
-        /// <summary>Makes a blueprint of a logic system, and opens it to be written: the blueprint keeps the system's name, and so does the first logic system made from it.</summary>
-        void Made(AutomationSystem system)
+        /// <summary>Gives every logic system on the construct that lacks them its slots and a first installation.</summary>
+        /// <remarks>The editor shows only the one shape, so a logic system is given that shape when the construct's list sees it.</remarks>
+        void Installed()
         {
-            var first = Editor.Blueprinted(system);
-            if (first == null)
-                return;
-
-            first.Name = system.Name;
-            Editor.Choose(system, first);
-            Editor.Push(new BlueprintPage(Editor, system, true));
+            var systems = Editor.Program.Systems;
+            for (var i = 0; i < systems.Count; i++)
+            {
+                if (!systems[i].IsBlueprint || systems[i].Instances.Count == 0)
+                    Editor.Installed(systems[i]);
+            }
         }
 
         /// <summary>Opens what <paramref name="system" /> does, on the logic system screen.</summary>

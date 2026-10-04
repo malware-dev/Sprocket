@@ -778,6 +778,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 page.Unmake();
         }
 
+        /// <summary>Goes back a page as Done, where the page lets it go, keeping what it was opened on whether or not anything was done to it.</summary>
+        /// <remarks>Done says the thing is wanted, so only <see cref="Leave" />, which is Back, takes back something made and left untouched.</remarks>
+        public void Finish()
+        {
+            if (Current.Leaving())
+                Pop();
+        }
+
         /// <summary>The shape of the screen has changed and must be rebuilt.</summary>
         public void Invalidate()
         {
@@ -1268,8 +1276,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         MomentTrigger made = Starter(system, answer, null);
                         Unless(system, made, answer, null, delegate(Occupant taken)
                         {
-                            if (taken != null)
+                            if (Shares(taken, system))
+                            {
+                                made = RequiredTrigger.Named(taken.Trigger.Part);
+                                system.ReplaceTrigger(taken.Trigger, null);
+                                _program.Edited();
+                                _program.Rewire();
+                            }
+                            else if (taken != null)
+                            {
                                 Release(taken);
+                            }
 
                             var answering = Answering(system, made, answer, null);
                             if (answering != null)
@@ -1341,8 +1358,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>
         /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,
         /// and the one written last silently wins, so it is asked before it happens rather than found afterwards on a row that
-        /// has gone quiet. Taking a button empties the trigger slot of the blockset that had it, which then needs another, or
-        /// takes out the system's trigger that had it; either way the button is written, whatever its slot holds by then.
+        /// has gone quiet. Taking a button from another installation empties the trigger slot that had it there, which then needs
+        /// another; taking it from a trigger in the same installation takes that trigger out and its slot over; either way the
+        /// button is written, whatever its slot holds by then.
         /// <para>
         /// Only where the construct is what announces the moment. Two sequences both watching the inner door close is an
         /// ordinary way to build and costs nothing: Sprocket does that watching, and it can watch for two.
@@ -1600,7 +1618,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var sequence = holder.System.FindSequence(holder.Trigger.Runs);
             arguments.Set("sequence", sequence == null ? "" : sequence.HasName ? sequence.Name : SequenceText.DefaultName(Texts, sequence.Number));
             arguments.Set("blockset", holder.System.IsBlueprint && holder.Instance != null
-                ? SystemSummary.DescribeInstance(Texts, _runner.Bindings, holder.System, holder.Instance)
+                ? SystemSummary.DescribeInstanceOf(Texts, _runner.Bindings, holder.System, holder.Instance)
                 : holder.System.Name);
             AskHere(holder.Trigger.Acts != null ? Texts.ButtonActs : holder.Trigger.Stops ? Texts.ButtonStops : Texts.ButtonStarts,
                 arguments);
@@ -1631,6 +1649,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _program.Edited();
             _program.Rewire();
+        }
+
+        /// <summary>Whether <paramref name="taken" /> is another trigger in the installation of <paramref name="system" /> being edited.</summary>
+        /// <remarks>
+        /// Then the button stays in the slot it is in: the trigger that had it gives that slot up and goes, and the trigger taking
+        /// the button takes the slot. Emptying the slot is for another installation, which goes on needing a button of its own.
+        /// </remarks>
+        bool Shares(Occupant taken, AutomationSystem system)
+        {
+            return taken != null && taken.Trigger != null && system.IsBlueprint && taken.System == system && taken.Instance == StandIn(system);
         }
 
         /// <summary>Does <paramref name="made" /> and takes <paramref name="holder" />'s button, as one edit.</summary>
@@ -1948,7 +1976,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (system.IsBlueprint)
                 return system.First;
 
+            var name = SystemSummary.NewInstanceName(Texts, system);
             var first = system.AddInstance();
+            first.Name = name;
             system.IsBlueprint = true;
 
             var named = new List<string>();
@@ -1983,7 +2013,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var slot = system.Free(panel == null ? declared.Name : Called(panel));
                 var part = system.PartFor(slot);
                 part.IsTrigger = true;
-                part.Optional = true;
 
                 first.Fill(slot, new[] { declared.Block }, new[] { declared.At });
 
@@ -2079,31 +2108,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return chosen ?? system.First;
         }
 
-        /// <summary>Adds another logic system made from <paramref name="system" />, named for it with the first number free from two.</summary>
-        internal SystemInstance Another(AutomationSystem system)
+        /// <summary>Gives <paramref name="system" /> slots and a first installation where it has none: a logic system keeps at least one.</summary>
+        /// <remarks>The script still reads a system without slots, or a system blueprint with no installation, from an older save or the script page.</remarks>
+        internal void Installed(AutomationSystem system)
         {
-            for (var number = 2; ; number++)
+            if (system == null)
+                return;
+
+            if (!system.IsBlueprint)
             {
-                var name = system.Name + " " + number;
-                if (system.FindInstance(name) == null)
-                    return Another(system, name);
+                Blueprinted(system);
+                return;
             }
+
+            if (system.Instances.Count > 0)
+                return;
+
+            var name = SystemSummary.NewInstanceName(Texts, system);
+            system.AddInstance().Name = name;
+            _program.Edited();
+            _program.Rewire();
         }
 
-        /// <summary>
-        /// Adds another instance of a blueprint, called <paramref name="name" />, and shows the blueprint
-        /// through it; or null where the name is empty or one of them already has it.
-        /// </summary>
-        /// <remarks>
-        /// Shown through the new one because the next thing to do is say which blocks it uses, and every
-        /// part of it is empty until somebody does.
-        /// </remarks>
-        internal SystemInstance Another(AutomationSystem system, string name)
+        /// <summary>Adds another installation of <paramref name="system" />, named by the first number free, and shows the system through it.</summary>
+        internal SystemInstance Another(AutomationSystem system)
         {
-            name = Naming.Clean(name);
-            if (name.Length == 0 || system.FindInstance(name) != null)
-                return null;
-
+            var name = SystemSummary.NewInstanceName(Texts, system);
             SystemInstance made = system.AddInstance();
             made.Name = name;
             Choose(system, made);
@@ -2205,6 +2235,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     MomentTrigger made = Starter(system, answer, keeping);
                     Unless(system, made, answer, moment, delegate(Occupant taken)
                     {
+                        if (Shares(taken, system))
+                        {
+                            var taking = RequiredTrigger.Named(taken.Trigger.Part);
+                            var moved = new ChangeTrigger(moment, taking);
+                            Aimed(system, taking, aim, origin, false,
+                                new TakeOverTrigger(Answering(system, taking, answer, moved) ?? moved, system, taken.Trigger));
+                            return;
+                        }
+
                         // A button picked again for a button trigger answers the same trigger part, so the trigger is kept:
                         // its toolbar slots name it.
                         if (keeping != null && made is RequiredTrigger && system.IsBlueprint)
@@ -2392,8 +2431,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Puts the blueprint <paramref name="volume" /> from the library on the construct, with no installation yet,
-        /// answering what was wrong with it, or empty.
+        /// Puts the blueprint <paramref name="volume" /> from the library on the construct as a logic system with its first
+        /// installation, answering what was wrong with it, or empty.
         /// </summary>
         internal string PutOn(Volume volume)
         {
@@ -2401,6 +2440,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (trouble.Length > 0)
                 return trouble;
 
+            Installed(_program.FindSystem(volume.Identity));
             _program.Edited();
             _program.Rewire();
             Invalidate();
@@ -2408,8 +2448,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Puts a copy of the blueprint written as <paramref name="text" /> on the construct, as a blueprint of its own with no
-        /// installation, answering it; or null, with what was wrong in <paramref name="trouble" />.
+        /// Puts a copy of the logic system written as <paramref name="text" /> on the construct, as a logic system of its own with
+        /// its first installation, answering it; or null, with what was wrong in <paramref name="trouble" />.
         /// </summary>
         /// <remarks>
         /// A blueprint of its own because it has an identity of its own: changing either never touches the other. It is named
@@ -2439,10 +2479,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (trouble.Length > 0)
                 return null;
 
+            var made = _program.FindSystem(copy.Identity);
+            Installed(made);
             _program.Edited();
             _program.Rewire();
             Invalidate();
-            return _program.FindSystem(copy.Identity);
+            return made;
         }
 
         /// <summary><paramref name="name" /> with the first number from 2 that no system here and no blueprint in the library is called.</summary>
@@ -2472,7 +2514,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return Shelf != null && Shelf.Find(system.Identity) != null;
         }
 
-        /// <summary>Asks before taking the blueprint <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
+        /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
         /// <remarks>Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.</remarks>
         internal void AskTakeOff(AutomationSystem system)
         {
@@ -2485,13 +2527,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Takes the blueprint <paramref name="system" />, which has no installation and is in storage, off the construct, bringing
-        /// the stored copy up to date.
+        /// Takes the logic system <paramref name="system" />, whose blueprint is in the library, off the construct with its
+        /// installations, bringing the blueprint up to date.
         /// </summary>
-        /// <remarks>One that is not in storage is deleted instead, by <see cref="DeleteSystem" />: taking it off would lose it.</remarks>
+        /// <remarks>One with no blueprint in the library is deleted instead, by <see cref="DeleteSystem" />: taking it off would lose it.</remarks>
         internal void TakeOff(AutomationSystem system)
         {
-            if (system.Instances.Count > 0 || !Stored(system))
+            if (!Stored(system))
                 return;
 
             Stamp(true);
@@ -2503,11 +2545,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _program.Rewire();
         }
 
-        /// <summary>Asks before taking <paramref name="instance" />, one of the logic systems made from a blueprint, out of it.</summary>
-        /// <remarks>The blueprint stays, the last one taken or not: it goes only from its own logic system screen, by name.</remarks>
+        /// <summary>Asks before taking <paramref name="instance" />, one of the installations of <paramref name="system" />, out of it.</summary>
+        /// <remarks>A logic system keeps at least one installation, so its only one is never taken out: the logic system goes instead.</remarks>
         internal void DeleteInstance(AutomationSystem system, SystemInstance instance)
         {
-            var named = SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instance);
+            if (system.Instances.Count <= 1)
+                return;
+
+            var named = SystemSummary.DescribeInstanceOf(Texts, _runner.Bindings, system, instance);
 
             var arguments = new Arguments();
             arguments.Set("name", system.Name);
@@ -2603,11 +2648,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Names a new sequence the way the game names a new block.
+        /// Names a new sequence by the first free number, counting on from the sequences its system already has.
         /// </summary>
         /// <remarks>
-        /// The first free number in the system rather than a running count, so deleting the second of
-        /// three and adding another gives "Sequence 2" back.
+        /// So the number says which one it is: beside "Cycle" a new one is "Sequence 2", never "Sequence 1".
         /// <para>
         /// Stored from here on, and never re-derived, so renaming one cannot renumber another.
         /// </para>
@@ -2631,7 +2675,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (owner == null)
                 return SequenceText.DefaultName(Texts, 1);
 
-            for (var number = 1; ; number++)
+            // The sequence being named is already among them.
+            for (var number = owner.Sequences.Count; ; number++)
             {
                 var wanted = SequenceText.DefaultName(Texts, number);
 

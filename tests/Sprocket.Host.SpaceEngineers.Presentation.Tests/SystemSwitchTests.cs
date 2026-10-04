@@ -29,7 +29,10 @@ public class SystemSwitchTests
         Assert.Null(sim.Editor.Triggers()[0].Deletes);
         Assert.False(page.CanUndo);
 
+        // A logic system with installations asks before it stops them.
         sim.Editor.Screen.Flip!.Execute();
+        sim.Tick();
+        sim.Editor.PressChoice("Switch them off");
         sim.Tick();
 
         Assert.True(page.Editable);
@@ -54,6 +57,8 @@ public class SystemSwitchTests
 
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
+        sim.Editor.PressChoice("Switch them off");
+        sim.Tick();
 
         Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.NotEqual("Turn the system off to edit.", chip.Tip?.Text));
     }
@@ -75,8 +80,8 @@ public class SystemSwitchTests
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
 
-        Assert.StartsWith("Switch off the Airlock blueprint?", sim.Editor.Question());
-        Assert.Contains("Airlock 2", sim.Editor.Question());
+        Assert.StartsWith("Switch off the Airlock logic system?", sim.Editor.Question());
+        Assert.Contains("Installation 2", sim.Editor.Question());
 
         sim.Editor.PressChoice("Keep them running");
         sim.Tick();
@@ -109,7 +114,7 @@ public class SystemSwitchTests
         sim.Tick();
 
         var question = sim.Editor.Question();
-        Assert.Contains("\n- Airlock 2\n- Extra 1\n- Extra 2\n- and 3 more", question);
+        Assert.Contains("\n- Installation 2\n- Extra 1\n- Extra 2\n- and 3 more", question);
         Assert.DoesNotContain("Extra 3", question);
     }
 
@@ -124,7 +129,7 @@ public class SystemSwitchTests
 
         var row = sim.Editor.RootRows()[0];
         Assert.True(row.SwitchIsOn);
-        Assert.Equal("Switch the blueprint on first", row.SwitchLocked);
+        Assert.Equal("Switch the logic system on first", row.SwitchLocked);
 
         row.Flips!.Execute();
         sim.Editor.Tick(1001);
@@ -144,7 +149,6 @@ public class SystemSwitchTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows()[0].Offers!.Execute();
         sim.Editor.GoToRoot();
         sim.Tick();
 

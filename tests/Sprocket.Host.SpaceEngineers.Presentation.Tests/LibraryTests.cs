@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Sim.Machine;
@@ -87,6 +86,31 @@ public class LibraryTests
         Assert.StartsWith("Lost ", rows[1].Problem);
         Assert.StartsWith("Changed ", rows[2].Status);
         Assert.True(rows[0].Chosen);
+    }
+
+    /// <summary>
+    /// A logic system's heading offers to make its blueprint, offers nothing while the library's copy is the same, and offers
+    /// to update it once the logic system has changed.
+    /// </summary>
+    [Fact]
+    public void TheHeadingMakesAndUpdatesTheBlueprint()
+    {
+        var rig = Blueprinted();
+        var system = rig.Editor.Program.Systems[0];
+        var heading = Assert.Single(rig.Editor.RootHeadings());
+        Assert.Equal(rig.Texts.SystemsMakeBlueprint, heading.ButtonText);
+
+        heading.Offers!.Execute();
+        rig.Tick();
+        Assert.True(rig.Shelf.Holds(system));
+        Assert.Null(Assert.Single(rig.Editor.RootHeadings()).Offers);
+
+        system.Name = "Airlock Mk II";
+        rig.Editor.Invalidate();
+        rig.Tick();
+        heading = Assert.Single(rig.Editor.RootHeadings());
+        Assert.Equal(rig.Texts.SystemsUpdateBlueprint, heading.ButtonText);
+        Assert.NotNull(heading.Offers);
     }
 
     /// <summary>A blueprint put in the library is a file of its own holding the blueprint as written, named in the index, and reads back.</summary>
@@ -221,9 +245,9 @@ public class LibraryTests
         Assert.Equal("[shields]", rig.Folder.Files["DefenseShields.cfg"]);
     }
 
-    /// <summary>A blueprint put on a construct from the library arrives as it was kept, with no installation, and only once.</summary>
+    /// <summary>A blueprint put on a construct from the library arrives as it was kept, as a logic system with its first installation, and only once.</summary>
     [Fact]
-    public void ABlueprintFromTheLibraryArrivesWithNoInstallation()
+    public void ABlueprintFromTheLibraryArrivesWithItsFirstInstallation()
     {
         var made = Blueprinted();
         var blueprint = made.Editor.Program.Systems[0];
@@ -241,7 +265,7 @@ public class LibraryTests
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.True(arrived.IsBlueprint);
         Assert.Equal(blueprint.Identity, arrived.Identity);
-        Assert.Empty(arrived.Instances);
+        Assert.Equal("Installation 1", Assert.Single(arrived.Instances).Name);
         Assert.Equal(blueprint.Parts.Select(p => p.Id), arrived.Parts.Select(p => p.Id));
         Assert.Equal(blueprint.Sequences.Count, arrived.Sequences.Count);
 
@@ -250,15 +274,15 @@ public class LibraryTests
     }
 
     /// <summary>
-    /// A blueprint comes off the construct only once nothing there uses it, and only where storage has a copy, which is brought
-    /// up to date as it goes.
+    /// A logic system comes off the construct, installations and all, only where the library has its blueprint, which is
+    /// brought up to date as it goes.
     /// </summary>
     [Fact]
-    public void ABlueprintTakenOffBringsItsStoredCopyUpToDate()
+    public void ALogicSystemTakenOffBringsItsBlueprintUpToDate()
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        Unused(rig, blueprint);
+        Assert.Equal(2, blueprint.Instances.Count);
 
         rig.Editor.TakeOff(blueprint);
         Assert.Single(rig.Editor.Program.Systems);
@@ -273,15 +297,14 @@ public class LibraryTests
     }
 
     /// <summary>
-    /// The home screen offers a blueprint nothing uses a minus where storage keeps a copy, which asks before taking it off,
-    /// and a bin that deletes it, by its typed name, where this is the only copy.
+    /// The home screen offers a logic system a minus where the library has its blueprint, which asks before taking it off with
+    /// its installations, and a bin that deletes it, by its typed name, where this is the only copy.
     /// </summary>
     [Fact]
-    public void TheHomeScreenOffersAMinusOnlyWhereStorageKeepsACopy()
+    public void TheHomeScreenOffersAMinusOnlyWhereTheLibraryHasItsBlueprint()
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        Unused(rig, blueprint);
 
         var heading = Assert.Single(rig.Editor.RootHeadings());
         Assert.Null(heading.BinMark);
@@ -311,9 +334,9 @@ public class LibraryTests
         Assert.Empty(rig.Editor.Program.Systems);
     }
 
-    /// <summary>A copy of a blueprint is a blueprint of its own: a new identity, the next free name, and no installation.</summary>
+    /// <summary>A copy is a logic system of its own: a new identity, the next free name, and its first installation.</summary>
     [Fact]
-    public void ACopyOfABlueprintIsABlueprintOfItsOwn()
+    public void ACopyIsALogicSystemOfItsOwn()
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
@@ -326,7 +349,7 @@ public class LibraryTests
         Assert.NotEqual(blueprint.Identity, copy.Identity);
         Assert.Equal("Airlock 2", copy.Name);
         Assert.True(copy.IsBlueprint);
-        Assert.Empty(copy.Instances);
+        Assert.Equal("Installation 1", Assert.Single(copy.Instances).Name);
         Assert.Equal(2, blueprint.Instances.Count);
         Assert.Equal("Airlock 3", rig.Editor.Copy(ProgramText.Blueprint(blueprint), out trouble)!.Name);
     }
@@ -357,16 +380,6 @@ public class LibraryTests
         Assert.Contains("Airlock", backup.Program);
     }
 
-    /// <summary>Takes every installation of <paramref name="blueprint" /> out, leaving the home screen showing it unused.</summary>
-    static void Unused(Simulation rig, AutomationSystem blueprint)
-    {
-        while (blueprint.Instances.Count > 0)
-            rig.Editor.TakeOut(blueprint, blueprint.Instances[0]);
-
-        rig.Editor.GoToRoot();
-        rig.Tick();
-    }
-
     /// <summary>A logic system with a button, made a blueprint, with a second installation made from it.</summary>
     static Simulation Blueprinted()
     {
@@ -375,7 +388,6 @@ public class LibraryTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows()[0].Offers!.Execute();
         sim.Editor.GoToRoot();
         sim.Tick();
 

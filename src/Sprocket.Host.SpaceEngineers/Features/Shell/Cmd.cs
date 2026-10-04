@@ -27,7 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         LoadSystem,
         OpenSystem,
         AddInstance,
-        MakeBlueprint,
         ChooseInstance,
         DeleteSystem,
         DeleteInstance,

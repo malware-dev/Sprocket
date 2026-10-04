@@ -11,9 +11,9 @@ using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
-    /// <summary>A blueprint's heading on the home page, its installations, and the way to add another.</summary>
-    /// <remarks>The elements it is drawn with are declared in <c>BlueprintGroup.View.cs</c>, and nothing else is.</remarks>
-    partial class BlueprintGroup : VStack
+    /// <summary>A logic system's heading on the home page, its installations, and the way to add another.</summary>
+    /// <remarks>The elements it is drawn with are declared in <c>SystemGroup.View.cs</c>, and nothing else is.</remarks>
+    partial class SystemGroup : VStack
     {
         readonly SprocketEditor _editor;
         readonly HomePage _page;
@@ -29,8 +29,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         readonly ICommand _deletes;
 
+        readonly ICommand _shelves;
+
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>
-        public BlueprintGroup(SprocketEditor editor, HomePage page, AutomationSystem system)
+        public SystemGroup(SprocketEditor editor, HomePage page, AutomationSystem system)
         {
             _editor = editor;
             _page = page;
@@ -43,32 +45,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Mark = Symbols.Blueprint;
             _takesOff = editor.Act(Cmd.TakeOff, delegate { editor.AskTakeOff(system); });
             _deletes = editor.Act(Cmd.DeleteSystem, delegate { editor.DeleteSystem(system); });
+            _shelves = editor.Act(Cmd.Shelve, delegate { editor.Shelve(system); });
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(Cmd.AddInstance, delegate { page.Another(system); });
             _rows = new Keyed<SystemInstance, StatusRow>(_list.Children, Made);
         }
 
-        /// <summary>The row over the installations of the blueprint, which opens it.</summary>
+        /// <summary>The row over the installations of the logic system, which opens it.</summary>
         public StatusRow Heading => _heading;
 
         /// <summary>The line under the installations that adds another.</summary>
         public Button Adds => _another;
 
-        /// <summary>Puts a row in place for each installation of the blueprint, and gives everything its words.</summary>
+        /// <summary>Puts a row in place for each installation of the logic system, and gives everything its words.</summary>
         public void Arrange(Texts texts)
         {
             _named.Set("name", _system.Name);
             _heading.Summary = _system.Name;
             _heading.About = texts.SystemsEditBlueprint;
 
-            // A blueprint in storage is taken off the construct, with a minus; one that is not is deleted, with a bin, since this
-            // is its only copy. Either only once nothing on the construct uses it.
-            var used = _system.Instances.Count > 0;
+            // A logic system with a blueprint in the library is taken off the construct, with a minus; one without is deleted,
+            // with a bin, since this is its only copy. Its installations go with it either way.
             var stored = _editor.Stored(_system);
             _heading.BinMark = stored ? Symbols.Minus : null;
-            _heading.Deletes = used ? null : stored ? _takesOff : _deletes;
+            _heading.Deletes = stored ? _takesOff : _deletes;
             _heading.DeleteText = stored ? texts.LibraryTakeOff : texts.LibraryDeletes;
-            _heading.Locked = used ? texts.SystemsRemoveFirst : "";
+
+            // The library's own button, here as well: the blueprint is the logic system's copy in the library, made the first
+            // time and brought up to date after, and with nothing to bring up to date there is nothing to offer.
+            var shelf = _editor.Shelf;
+            _heading.Offers = shelf == null || stored && shelf.Holds(_system) ? null : _shelves;
+            _heading.ButtonText = stored ? texts.SystemsUpdateBlueprint : texts.SystemsMakeBlueprint;
+            _heading.ButtonAbout = stored ? texts.SystemsUpdateBlueprintAbout : texts.SystemsMakeBlueprintAbout;
 
             _keys.Clear();
             var instances = _system.Instances;
@@ -77,13 +85,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             _rows.Show(_keys);
 
+            // A logic system keeps at least one installation, so the only one's bin says so rather than deleting it.
+            var only = instances.Count == 1;
             for (var n = 0; n < instances.Count; n++)
             {
-                var row = _rows[instances[n]];
-                row.Summary = SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instances[n]);
+                var instance = instances[n];
+                var row = _rows[instance];
+                row.Summary = SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instance);
                 row.About = texts.SystemsOpenInstanceAbout;
                 row.AboutArguments.Set("name", row.Summary);
+                row.Deletes = only ? null : _editor.Act(Cmd.DeleteInstance, delegate { _editor.DeleteInstance(_system, instance); });
                 row.DeleteText = texts.SystemDeleteInstallation;
+                row.Locked = only ? texts.SystemsKeepsOne : "";
             }
 
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
@@ -101,8 +114,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <summary>
-        /// Marks the heading as the installations of the blueprint are: broken where any is, warned where any is, running where
-        /// any is; and its switch as the blueprint's.
+        /// Marks the heading as the installations of the logic system are: broken where any is, warned where any is, running where
+        /// any is; and its switch as the logic system's.
         /// </summary>
         /// <remarks>Read from the rows below, which have just been brought up to date, so nothing is asked of the runner twice.</remarks>
         void Loudest(bool shown, Texts texts)
@@ -137,14 +150,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Show(texts);
         }
 
-        /// <summary>The row of <paramref name="instance" />, one of the installations of the blueprint.</summary>
+        /// <summary>The row of <paramref name="instance" />, one of the installations of the logic system.</summary>
         StatusRow Made(SystemInstance instance)
         {
             var row = new StatusRow
             {
                 Depth = 1,
                 Opens = _editor.Act(Cmd.OpenSystem, delegate { _page.Open(_system, instance); }),
-                Deletes = _editor.Act(Cmd.DeleteInstance, delegate { _editor.DeleteInstance(_system, instance); }),
                 AboutArguments = new Arguments()
             };
 

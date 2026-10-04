@@ -288,25 +288,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var live = Live(entry.Identity);
             var volume = shelf == null ? null : shelf.Find(entry.Identity);
             var system = live ?? entry.Read;
-            var uses = live == null ? 0 : live.Instances.Count;
             var free = Editor.Holder == null;
 
             _here.IsVisible = true;
             _switch.IsOn = live != null;
-            _flips.CanExecute = free && (live != null ? uses == 0 : system != null);
+            _flips.CanExecute = free && system != null;
             _switch.Tip = Tip.For(_switch.Tip, live == null
                 ? texts.LibraryPutOn
-                : uses == 0
-                    ? volume != null ? texts.LibraryTakeOff : texts.LibraryDeletes
-                    : uses == 1
-                        ? texts.LibraryHeldOne
-                        : Template.Fill(texts.LibraryHeld, "count", uses.ToString(CultureInfo.InvariantCulture)));
+                : volume != null ? texts.LibraryTakeOff : texts.LibraryDeletes);
 
             var same = live != null && volume != null && shelf.Holds(live);
             _keep.IsVisible = live != null && shelf != null;
-            _keep.Text = volume == null ? texts.LibrarySave : texts.LibraryUpdate;
+            _keep.Text = volume == null ? texts.SystemsMakeBlueprint : texts.SystemsUpdateBlueprint;
             _keeps.CanExecute = !same;
-            _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame : volume == null ? texts.LibrarySaveAbout : texts.LibraryUpdateAbout);
+            _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
 
             _copy.Text = texts.LibraryCopy;
             _copies.CanExecute = free && system != null;
@@ -335,7 +330,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Say(_firstHeading, _first, texts.BlueprintParts, _names);
 
             _names.Clear();
-            for (var i = 0; live != null && i < uses; i++)
+            for (var i = 0; live != null && i < live.Instances.Count; i++)
                 _names.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, live, live.Instances[i]));
 
             Say(_secondHeading, _second, texts.LibraryInstallationsHeading, _names);

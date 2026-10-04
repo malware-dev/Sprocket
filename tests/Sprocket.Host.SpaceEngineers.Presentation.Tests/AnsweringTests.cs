@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class AnsweringTests
 {
     const string LeavingASystem =
-        "60 196 type Airlock enter 60 163 200 384 560 340 1394 72 70 175 "
+        "60 196 type Airlock enter 60 265 200 384 560 340 1394 72 70 175 "
         + "150 203 type Tug 200 360 800 565 1316 201 1316 319 enter 25 62 25 62";
 
     [Fact]

@@ -85,7 +85,7 @@ public class ButtonWiringTests
         sim.Editor.PressPrimary();
         sim.Tick();
 
-        Assert.Equal("Airlock Button already starts Sequence 1 on Airlock.", sim.Editor.Question());
+        Assert.Equal("Airlock Button already starts Sequence 1 on Installation 1 of Airlock.", sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.ButtonTakeOver);
         Tick(sim);
@@ -139,7 +139,6 @@ public class ButtonWiringTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows()[0].Offers!.Execute();
         sim.Editor.GoToRoot();
         sim.Tick();
 

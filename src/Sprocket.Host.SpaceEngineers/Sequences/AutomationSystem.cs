@@ -505,12 +505,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public IReadOnlyList<SystemInstance> Uses => IsBlueprint ? (IReadOnlyList<SystemInstance>)_instances : _self;
 
         /// <summary>
-        /// Adds another of this system, named after the system and its number.
+        /// Adds another installation of this system, numbered one past the highest.
         /// </summary>
         /// <remarks>
-        /// It is not given a name. What it is called - Airlock 1, Airlock 2, the way the game
-        /// says Interior Light 4 - is worked out from the system and the number, so a system
-        /// that only learns its own name later takes its children with it.
+        /// The number is what tells it from the others within the system, and nothing more: what it is called is given by
+        /// whoever adds it.
         /// </remarks>
         public SystemInstance AddInstance()
         {

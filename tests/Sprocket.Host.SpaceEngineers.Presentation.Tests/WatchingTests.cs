@@ -39,7 +39,10 @@ public class WatchingTests
         Assert.False(screen.Shows("+ task"), "add button still offered while locked");
         Assert.Equal(adders, screen.TopOf(screen.Text(editor.Sentence().LockedText)), 3);
 
+        // A logic system with installations asks before it stops them.
         editor.SwitchSystem(false);
+        screen.Run(5);
+        editor.PressChoice("Switch them off");
         screen.Run(5);
 
         Assert.Equal(parked, Places(screen));

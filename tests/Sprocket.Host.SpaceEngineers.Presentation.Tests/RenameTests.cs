@@ -189,9 +189,10 @@ public class RenameTests
             .Select(d => d.Where.Height)
             .First();
 
-    /// <summary>A caret is a two-wide bar, and it is only ever drawn into a box being typed in.</summary>
+    /// <summary>Whether a box holds the keyboard, which is what the box being up is.</summary>
+    /// <remarks>Asked of the keyboard rather than read off the drawing: a caret is a two-wide bar, and so is the spine beside a logic system's installations.</remarks>
     static bool IsEditing(Screen screen) =>
-        screen.Drawings.Any(d => !d.IsText && d.Where.Width == 2 && d.Where.Height > 20);
+        screen.Editor.Input.Focused is Lumel.Text.TextBox;
 
     static string Say(float value) =>
         value.ToString("0.##", CultureInfo.InvariantCulture);

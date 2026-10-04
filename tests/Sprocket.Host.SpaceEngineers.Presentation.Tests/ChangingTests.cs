@@ -577,7 +577,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("Airlock Button already starts Sequence 1 on Airlock.", screen.Editor.Question());
+        Assert.Equal("Airlock Button already starts Sequence 1 on Installation 1 of Airlock.", screen.Editor.Question());
 
         // And leaving it alone leaves everything as it was: no second trigger, and no sequence made
         // for one.
@@ -590,8 +590,8 @@ public class ChangingTests
     }
 
     /// <summary>
-    /// Saying so anyway goes through, which is what a warning is rather than a refusal; in a logic system the trigger that
-    /// had the button goes, since its variable holds that button.
+    /// Saying so anyway goes through, which is what a warning is rather than a refusal; in the same installation the trigger
+    /// that had the button goes, and the one taking it takes its slot.
     /// </summary>
     [Fact]
     public void TakingItAnywayIsAllowed()
@@ -606,8 +606,10 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        var took = Assert.Single(System(screen).Triggers);
+        var took = Assert.IsType<RequiredTrigger>(Assert.Single(System(screen).Triggers));
         Assert.True(took.IsAbout(screen.Editor.Program.Sequences[1]));
+        Assert.Equal("Airlock Button", took.Part);
+        Assert.Single(System(screen).Parts, part => part.IsTrigger);
     }
 
     /// <summary>
@@ -636,7 +638,7 @@ public class ChangingTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Equal("Airlock Button already starts Sequence 1 on Airlock.", screen.Editor.Question());
+        Assert.Equal("Airlock Button already starts Sequence 1 on Installation 1 of Airlock.", screen.Editor.Question());
 
         screen.Editor.PressChoice("Leave it alone");
         screen.Run(2);
@@ -679,7 +681,7 @@ public class ChangingTests
     }
 
     /// <summary>
-    /// Taking the button over takes out the logic system's trigger that had it, and walks back.
+    /// Taking the button over takes out the trigger in the same installation that had it, and walks back.
     /// </summary>
     /// <remarks>
     /// The answer decides which trigger keeps the button, because the construct cannot hold both and

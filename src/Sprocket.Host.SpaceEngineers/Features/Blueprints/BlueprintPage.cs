@@ -47,7 +47,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>The blockset whose blocks fill the slots, or, in edit mode, the panel itself.</summary>
-        public override string Title => _editing ? Editor.Texts.BlueprintPanel : Blockset == null ? _system.Name : Blockset.Name;
+        public override string Title => _editing
+            ? Editor.Texts.BlueprintPanel
+            : Blockset == null
+                ? _system.Name
+                : SystemSummary.DescribeInstance(Editor.Texts, Editor.Runner.Bindings, _system, Blockset);
 
         /// <inheritdoc />
         public override bool Edits => true;
@@ -87,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.BlueprintNameAbout;
 
-        /// <summary>A blueprint has to be called something, since it is told from the others by its name.</summary>
+        /// <summary>An installation has to be called something, since it is told from the others by its name.</summary>
         public override bool NameRequired => true;
 
         /// <summary>While the blueprint is being written, whose way back is the system's own, since a blueprint is a system.</summary>

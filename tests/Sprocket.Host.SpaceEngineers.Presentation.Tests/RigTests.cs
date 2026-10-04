@@ -48,10 +48,11 @@ public class RigTests
         Assert.Contains("Sprocket_Trigger", store.GetValue(Wiring.Key));
 
         // And what the program says about it: the construct starts this, which is what the game's
-        // own arrangement is. A "when" here would be Sprocket claiming it watches the button.
+        // own arrangement is, through the trigger slot the installation fills with the button. A "when" here
+        // would be Sprocket claiming it watches the button.
         var program = store.GetValue(SprocketUnit.ProgramKey);
-        Assert.Contains("let 'Airlock Button 1' = 'Airlock Button':toolbar(1, 1, 1)\n", program);
-        Assert.Contains("on 'Airlock Button 1' then run 1", program);
+        Assert.Contains("on 'Airlock Button' then run 1", program);
+        Assert.Contains("'Airlock Button' = [ 'Airlock Button':toolbar(1, 1, 1) ]", program);
         Assert.DoesNotContain("when ", program);
 
 
@@ -137,7 +138,7 @@ public class RigTests
             sim.Tick();
 
         var pressed = Assert.IsType<RequiredTrigger>(sim.Editor.Program.Sequences[0].Trigger);
-        var at = sim.Editor.Program.FindTriggerRef(pressed.Part)!.At;
+        var at = sim.Editor.Program.Systems[0].First!.Positions(pressed.Part)![0];
         Assert.Equal(1, at.Slot);
         Assert.True(timer.Toolbar.Holds(0), "the timer's slot was not written");
 

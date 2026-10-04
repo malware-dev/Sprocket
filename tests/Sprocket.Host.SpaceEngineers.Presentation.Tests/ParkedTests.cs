@@ -28,9 +28,12 @@ public class ParkedTests
         screen.Editor.PressPrimary();
         screen.Editor.GoToRoot();
 
+        // Sprocket stops an installation, not the logic system over every installation of it.
         var system = screen.Editor.Program.Systems[0];
-        system.Enabled = false;
-        system.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, Trouble.None, "Airlock Inner Door");
+        var installation = system.First!;
+        system.Enabled = true;
+        installation.Enabled = false;
+        installation.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, Trouble.None, "Airlock Inner Door");
         return screen.Run(120);
     }
 
@@ -80,7 +83,7 @@ public class ParkedTests
         screen.Editor.RootRows()[0].Flips!.Execute();
         screen.Run(120);
 
-        Assert.Null(screen.Editor.Program.Systems[0].Halt);
+        Assert.Null(screen.Editor.Program.Systems[0].First!.Halt);
         Assert.False(screen.Editor.RootRows()[0].Parked);
         Assert.Equal("", screen.Editor.RootRows()[0].Problem);
         Assert.False(screen.Shows(Why), "the words stayed after it was switched on");

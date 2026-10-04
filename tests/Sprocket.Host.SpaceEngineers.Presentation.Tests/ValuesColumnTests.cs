@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ValuesColumnTests
 {
-    const string ALight = "60 196 type Airlock enter 60 163 200 384 560 340 1394 72 70 175 200 485";
+    const string ALight = "60 196 type Airlock enter 60 265 200 384 560 340 1394 72 70 175 200 485";
 
     const string SetRadius = "800 653";
     const string SetColour = "800 565";

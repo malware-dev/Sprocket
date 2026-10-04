@@ -6,31 +6,33 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>Logic systems thrown away from the home page, each after asking, the toolbar slots their triggers took let go of.</summary>
 public class DeletingSystemsTests
 {
-    /// <summary>A logic system's bin asks first, and keeping it keeps everything.</summary>
+    /// <summary>A logic system keeps at least one installation: the only one's bin says so, and asking to delete it does nothing.</summary>
     [Fact]
-    public void KeepingItKeepsIt()
+    public void TheOnlyInstallationIsKept()
     {
         var sim = Built();
+        var system = sim.Editor.Program.Systems.Single();
+        var row = sim.Editor.RootRows().Single();
 
-        sim.Editor.RootRows()[0].Deletes!.Execute();
-        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
+        Assert.Null(row.Deletes);
+        Assert.Equal(sim.Texts.SystemsKeepsOne, row.Locked);
 
-        sim.Editor.PressChoice(sim.Texts.DeleteKeep);
-        sim.Tick();
-
-        Assert.Single(sim.Editor.Program.Systems);
-        Assert.Single(sim.Editor.RootRows());
+        sim.Editor.DeleteInstance(system, system.Instances[0]);
+        Assert.Equal("", sim.Editor.Question());
+        Assert.Single(system.Instances);
     }
 
-    /// <summary>Deleting a logic system takes it out with its sequences, and lets go of the button its trigger was wired to.</summary>
+    /// <summary>Deleting a logic system from its heading takes its installations with it, and lets go of the button its trigger was wired to.</summary>
     [Fact]
     public void DeletingItLetsGoOfItsButton()
     {
         var sim = Built();
         Assert.True(Button(sim).Toolbar.TryGetItem(0, out _), "the trigger never took the button");
 
-        sim.Editor.RootRows()[0].Deletes!.Execute();
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        sim.Editor.RootHeadings().Single().Deletes!.Execute();
+        var asking = sim.Editor.Asking!;
+        asking.Box.Insert("Airlock");
+        asking.Take();
         for (var i = 0; i < 5; i++)
             sim.Tick();
 
@@ -51,7 +53,7 @@ public class DeletingSystemsTests
         // Asked as the one going, and told that the blueprint and the rest are kept.
         sim.Editor.RootRows()[1].Deletes!.Execute();
         Assert.StartsWith(sim.Texts.DeleteInstance, sim.Editor.Question());
-        Assert.EndsWith("The " + system.Name + " blueprint and its other installations are kept. This cannot be undone.",
+        Assert.EndsWith("The " + system.Name + " logic system and its other installations are kept. This cannot be undone.",
             sim.Editor.Question());
 
         sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
@@ -63,25 +65,20 @@ public class DeletingSystemsTests
     }
 
     /// <summary>
-    /// The blueprint stays when the last one made from it goes: still a blueprint, still offering another, and still
-    /// one once the program is saved and read again.
+    /// One of two installations goes, and the one left is kept: its bin says so, and it is still there once the program is
+    /// saved and read again.
     /// </summary>
     [Fact]
-    public void TheBlueprintStaysWithNoneMadeFromIt()
+    public void TheLastInstallationStays()
     {
         var sim = Blueprinted();
-        for (var i = 0; i < 2; i++)
-        {
-            sim.Editor.RootRows()[0].Deletes!.Execute();
-            sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
-            sim.Tick();
-        }
+        sim.Editor.RootRows()[1].Deletes!.Execute();
+        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        sim.Tick();
 
         var system = sim.Editor.Program.Systems.Single();
-        Assert.Empty(system.Instances);
-        Assert.True(system.IsBlueprint);
-        Assert.Empty(sim.Editor.RootRows());
-        Assert.Single(sim.Editor.RootAdds());
+        Assert.Single(system.Instances);
+        Assert.Null(sim.Editor.RootRows().Single().Deletes);
 
         var store = Store.Nowhere();
         sim.Unit.Written(out var program, out _);
@@ -89,28 +86,8 @@ public class DeletingSystemsTests
         var reread = Simulation.On(store);
         reread.Tick();
 
-        Assert.True(reread.Editor.Program.Systems.Single().IsBlueprint);
-        Assert.Empty(reread.Editor.RootRows());
-        Assert.Single(reread.Editor.RootAdds());
-    }
-
-    /// <summary>A logic system's own screen has a bin too, which asks the same question and leaves for the home page once it has gone.</summary>
-    [Fact]
-    public void ALogicSystemIsDeletedFromItsOwnScreen()
-    {
-        var sim = Built();
-        sim.Editor.RootRows()[0].Opens!.Execute();
-        sim.Tick();
-
-        Assert.Equal(sim.Texts.SystemDelete, sim.Editor.Screen.DeleteAbout);
-        sim.Editor.Screen.Deletes!.Execute();
-        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
-
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
-        sim.Tick();
-
-        Assert.Empty(sim.Editor.Program.Systems);
-        Assert.Empty(sim.Editor.RootRows());
+        Assert.Single(reread.Editor.Program.Systems.Single().Instances);
+        Assert.Single(reread.Editor.RootRows());
     }
 
     /// <summary>
@@ -180,7 +157,6 @@ public class DeletingSystemsTests
     static Simulation Blueprinted()
     {
         var sim = Built();
-        sim.Editor.RootRows()[0].Offers!.Execute();
         sim.Editor.GoToRoot();
         sim.Tick();
 

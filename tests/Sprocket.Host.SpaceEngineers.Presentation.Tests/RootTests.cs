@@ -9,64 +9,53 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>The root, drawn by its own view: rows kept by the system they show, and presses that go the editor's way.</summary>
 public class RootTests
 {
-    /// <summary>Another logic system adds one row, and the row already there is the same row.</summary>
+    /// <summary>Another logic system adds one group, and the group already there is the same group.</summary>
     [Fact]
-    public void ANewSystemKeepsTheRowsAlreadyShown()
+    public void ANewSystemKeepsTheGroupsAlreadyShown()
     {
         var sim = Simulation.Fresh();
         Built(sim, "Airlock");
-        var airlock = sim.Editor.RootRows().Single();
+        var airlock = sim.Editor.RootHeadings().Single();
 
         Repeating(sim, "Hangar");
-        var rows = sim.Editor.RootRows();
+        var headings = sim.Editor.RootHeadings();
 
-        Assert.Equal(2, rows.Count);
-        Assert.Same(airlock, rows[0]);
-        Assert.Equal("Hangar", rows[1].Summary);
+        Assert.Equal(2, headings.Count);
+        Assert.Same(airlock, headings[0]);
+        Assert.Equal(new[] { "Airlock", "Hangar" }, sim.Editor.RootHeadingNames());
     }
 
-    /// <summary>A logic system made a blueprint leaves the rows of its own for the blueprint's group, and the others stay as they were.</summary>
+    /// <summary>One list, in the program's order: each logic system its heading, its installation under it, and a way to add another.</summary>
     [Fact]
-    public void ABlueprintTakesItsRowAndLeavesTheRest()
+    public void EachLogicSystemStandsWithItsInstallations()
     {
         var sim = Simulation.Fresh();
         Built(sim, "Airlock");
         Repeating(sim, "Hangar");
-        var hangar = sim.Editor.RootRows()[1];
 
-        sim.Editor.RootRows()[0].Offers!.Execute();
-        sim.Editor.GoToRoot();
-        sim.Tick();
-
-        var rows = sim.Editor.RootRows();
-        Assert.Same(hangar, rows[0]);
-        Assert.Equal(new[] { "Airlock" }, sim.Editor.RootHeadingNames());
-        Assert.Equal("Airlock", rows[1].Summary);
-        Assert.Equal(2, rows.Count);
-        Assert.Single(sim.Editor.RootAdds());
+        Assert.Equal(new[] { "Airlock", "Hangar" }, sim.Editor.RootHeadingNames());
+        Assert.Equal(new[] { "Installation 1", "Installation 1" }, sim.Editor.RootRows().Select(row => row.Summary));
+        Assert.Equal(2, sim.Editor.RootAdds().Count);
     }
 
     /// <summary>
-    /// Every row's switch is for its one logic system, of its own or made from a blueprint, and its note says
-    /// so in the words for one thing rather than the words for a system over everything in it.
+    /// Every installation's switch is for its one installation, and its note says so in the words for one thing rather than the
+    /// words for a system over everything in it.
     /// </summary>
     [Fact]
-    public void EachSwitchIsForItsOneLogicSystem()
+    public void EachSwitchIsForItsOneInstallation()
     {
         var sim = Simulation.Fresh();
         Built(sim, "Airlock");
         Repeating(sim, "Hangar");
 
-        sim.Editor.RootRows()[0].Offers!.Execute();
-        sim.Editor.GoToRoot();
-        sim.Tick();
-
-        // On, so its one shows the switch as it stands: a blueprint switched off shows every one of it off.
-        sim.Editor.Program.Systems.First(system => system.IsBlueprint).Enabled = true;
+        // On, so each installation shows its switch as it stands: a logic system switched off shows every one of it off.
+        foreach (var system in sim.Editor.Program.Systems)
+            system.Enabled = true;
         sim.Tick();
 
         var rows = sim.Editor.RootRows();
-        Assert.Equal(sim.Texts.RowSwitchSystemOff, rows[0].SwitchPart.Tip?.Text);
+        Assert.Equal(sim.Texts.RowSwitchOff, rows[0].SwitchPart.Tip?.Text);
         Assert.Equal(sim.Texts.RowSwitchOff, rows[1].SwitchPart.Tip?.Text);
     }
 

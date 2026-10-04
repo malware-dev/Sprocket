@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
-    partial class BlueprintGroup
+    partial class SystemGroup
     {
         const float Gutter = 32f;
 
@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         Button _another;
         VStack _list;
 
-        /// <summary>Makes the group's heading, a row of its own that opens the blueprint, and under it its rows and the way to add another, set in by a gutter with a spine down it.</summary>
+        /// <summary>Makes the group's heading, a row of its own that opens the logic system, and under it its rows and the way to add another, set in by a gutter with a spine down it.</summary>
         void CreateView()
         {
             Spacing = 8f;

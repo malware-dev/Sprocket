@@ -158,14 +158,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         }
 
         /// <inheritdoc />
-        public override void Heading(List<HeadingPart> parts)
-        {
-            base.Heading(parts);
-            if (_system.IsBlueprint)
-                parts[0].After = Editor.Texts.SystemBlueprint;
-        }
-
-        /// <inheritdoc />
         public override void Switch(bool on)
         {
             Editor.SwitchSystem(_system, on);

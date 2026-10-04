@@ -183,7 +183,7 @@ public class HandoverTests : IDisposable
         {
             copy.Editor.Holder = "Bert";
             copy.Editor.Tick(1);
-            copy.Editor.RootRows()[0].Opens!.Execute();
+            copy.Editor.RootHeadings()[0].Opens!.Execute();
             copy.Editor.Tick(1);
 
             Assert.NotEmpty(copy.Editor.Triggers());
@@ -577,7 +577,7 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             copy.Editor.Tick(1);
-            copy.Editor.RootRows()[0].Opens!.Execute();
+            copy.Editor.RootHeadings()[0].Opens!.Execute();
             copy.Editor.Tick(1);
             copy.Editor.PressStart("when");
             copy.Editor.PressBlock("Airlock Button");

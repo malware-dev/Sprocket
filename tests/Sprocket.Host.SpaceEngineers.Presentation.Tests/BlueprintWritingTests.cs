@@ -172,29 +172,29 @@ public class BlueprintWritingTests
         Assert.Equal("", part.Annotation);
         Assert.Equal("", editor.Parts()[0].About.Text);
         Assert.Null(editor.Input.Focused);
-        Assert.False(part.Optional);
+        Assert.True(part.Optional);
     }
 
-    /// <summary>Making a slot required is a step back of its own; a trigger slot is made optional.</summary>
+    /// <summary>Making a slot optional is a step back of its own; every slot starts required, a trigger slot too.</summary>
     [Fact]
-    public void MakingASlotRequiredIsOneStepBack()
+    public void MakingASlotOptionalIsOneStepBack()
     {
         var screen = Writing();
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
-        Assert.True(part.Optional);
+        Assert.False(part.Optional);
 
         editor.Parts()[0].Required.Command!.Execute();
         screen.Run(5);
-        Assert.False(part.Optional);
+        Assert.True(part.Optional);
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
-        Assert.True(part.Optional);
+        Assert.False(part.Optional);
     }
 
 
-    /// <summary>A blueprint just made from a logic system with a button, its configuration panel open to be set up.</summary>
+    /// <summary>A logic system with a button, its configuration panel open to be set up.</summary>
     static Screen Writing()
     {
         var screen = Screen.Fresh();
@@ -203,7 +203,9 @@ public class BlueprintWritingTests
         editor.GoToRoot();
         screen.Run(5);
 
-        editor.RootRows()[0].Offers!.Execute();
+        editor.OpenBlueprintSystem(0);
+        screen.Run(5);
+        editor.EditPanel();
         screen.Run(5);
         Assert.True(editor.Blueprint().IsEditing);
         return screen;

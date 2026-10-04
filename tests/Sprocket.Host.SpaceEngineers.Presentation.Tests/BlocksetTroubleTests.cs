@@ -89,7 +89,6 @@ public class BlocksetTroubleTests
         sim.Editor.GoToRoot();
         sim.Tick();
 
-        sim.Editor.RootRows()[0].Offers!.Execute();
         sim.Editor.GoToRoot();
         sim.Tick();
 

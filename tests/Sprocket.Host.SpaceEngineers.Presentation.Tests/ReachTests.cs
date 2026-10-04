@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ReachTests
 {
-    const string OpenThePicker = "60 196 type Airlock enter 60 163";
+    const string OpenThePicker = "60 196 type Airlock enter 60 265";
 
     const string Older = "sprocket 1\nblock|entity1|MyObjectBuilder_ButtonPanel/ButtonPanelLarge|i:21,t:B\n";
 
@@ -57,8 +57,8 @@ public class ReachTests
     {
         var root = Screen.Fresh("60 200 type Airlock enter 25 62".Split(' '));
 
-        // A row that is both, which is the only kind where the two can disagree: a system's own row
-        // carries no command, so pressing one has never done anything but work its switch.
+        // A row that is both, which is the only kind where the two can disagree: a logic system's heading opens it and
+        // carries its switch.
         var sequence = Switchable(root);
         Assert.NotNull(sequence.Opens);
         Assert.False(sequence.SwitchIsOn);
@@ -335,6 +335,6 @@ public class ReachTests
 
     /// <summary>The one row on the root that both leads somewhere and carries a switch.</summary>
     static StatusRow Switchable(Screen screen) =>
-        screen.Editor.RootRows()
+        screen.Editor.RootHeadings()
             .First(row => row.Flips != null && row.Opens != null);
 }

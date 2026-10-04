@@ -1,6 +1,8 @@
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 
@@ -382,6 +384,25 @@ public class InstanceTests
 
         var added = system.AddInstance();
 
+        Assert.Equal(5, added.Number);
+    }
+
+    /// <summary>
+    /// An installation's name and its number are unrelated: the name counts on from the installations there are, the number
+    /// from the highest.
+    /// </summary>
+    [Fact]
+    public void AnInstallationsNameIsNotItsNumber()
+    {
+        var program = new Automation();
+        var system = program.AddSystem();
+        system.IsBlueprint = true;
+        system.Restore(4, "Port airlock");
+
+        var name = SystemSummary.NewInstanceName(new Texts(), system);
+        var added = system.AddInstance();
+
+        Assert.Equal("Installation 2", name);
         Assert.Equal(5, added.Number);
     }
 }

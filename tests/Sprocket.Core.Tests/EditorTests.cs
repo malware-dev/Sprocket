@@ -330,16 +330,17 @@ public class EditorTests
         ship.Tick();
 
         var system = ship.Automation.Systems[0];
+        var installation = system.First!;
         var step = Assert.IsType<Act>(ship.Automation.Sequences[0].Steps[0]);
         var trigger = Assert.IsType<RequiredTrigger>(Assert.Single(system.Triggers));
 
-        Assert.Empty(system.Parts);
+        Assert.False(system.FindPart(step.Targets[0])!.IsTrigger);
         Assert.Equal("Airlock Light", step.Targets[0]);
-        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(step.Targets[0])!.Name);
+        Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(installation.FilledWith(step.Targets[0])![0])!.Name);
 
-        var button = ship.Automation.FindTriggerRef(trigger.Part)!;
-        Assert.Equal("Airlock Button", ship.Runner.Bindings.Entity(button.Block)!.Name);
-        Assert.Equal(1, button.At.Slot);
+        Assert.True(system.FindPart(trigger.Part)!.IsTrigger);
+        Assert.Equal("Airlock Button", ship.Runner.Bindings.Entity(installation.FilledWith(trigger.Part)![0])!.Name);
+        Assert.Equal(1, installation.Positions(trigger.Part)![0].Slot);
     }
 
     /// <summary>The same block picked again is the same variable, not a second one for the same block.</summary>
@@ -366,57 +367,45 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Making a blueprint asks nothing: the blueprint keeps the logic system's name, and so does the first
-    /// made from it. It opens, and on the construct's own list that logic system then stands under it.
+    /// A new logic system has its first installation from the start, with no name of its own, and stands on the construct's
+    /// own list as its heading with that installation under it.
     /// </summary>
     [Fact]
-    public void MakingABlueprintKeepsTheSystemsName()
+    public void ANewLogicSystemHasItsFirstInstallation()
     {
         var ship = Build();
         var editor = ship.Editor;
-        var row = OneLogicSystem(ship);
-
-        Assert.Equal("Make blueprint", row.ButtonText);
-
-        row.Offers!.Execute();
-        Assert.False(editor.Screen.HasQuestion, "making a blueprint asked something");
-        ship.Tick();
+        OneLogicSystem(ship);
 
         var system = ship.Automation.Systems[0];
         Assert.True(system.IsBlueprint);
         Assert.Equal("Airlock", system.Name);
-        Assert.Equal("Airlock", system.First!.Name);
-        Assert.NotNull(editor.Blueprint());
+        Assert.Equal("Installation 1", Assert.Single(system.Instances).Name);
 
-        editor.GoToRoot();
-        ship.Tick();
-
-        Assert.Contains("Airlock", editor.RootHeadingNames());
-        Assert.Equal("Airlock", editor.RootRows()[0].Summary);
+        Assert.Equal(new[] { "Airlock" }, editor.RootHeadingNames());
+        Assert.Equal("Installation 1", Assert.Single(editor.RootRows()).Summary);
         Assert.Equal("+ installation", editor.RootAdds().Single().Text);
     }
 
 
-    /// <summary>Another logic system made from a blueprint is numbered from two, the first number free.</summary>
+    /// <summary>Another installation is named by the first number free, counting on from those there are.</summary>
     [Fact]
-    public void AnotherFromABlueprintIsNumbered()
+    public void AnotherInstallationIsNumbered()
     {
         var ship = Build();
         var editor = ship.Editor;
-        OneLogicSystem(ship).Offers!.Execute();
-        editor.GoToRoot();
-        ship.Tick();
+        OneLogicSystem(ship);
 
         editor.AddInstallation(0);
         ship.Tick();
 
-        // Opened on the blueprint through the new one, which has blocks to be given.
-        Assert.Equal("Airlock 2", editor.Blueprint().Title);
+        // Opened on the logic system through the new one, which has blocks to be given.
+        Assert.Equal("Installation 2", editor.Blueprint().Title);
         Assert.False(editor.Blueprint().IsEditing);
 
         var system = ship.Automation.Systems[0];
         Assert.Equal(2, system.Instances.Count);
-        Assert.Equal("Airlock 2", system.Instances[1].Name);
+        Assert.Equal("Installation 2", system.Instances[1].Name);
 
         // Something done to it, switched off, so it stays when the panel is left.
         ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = false;
@@ -424,10 +413,43 @@ public class EditorTests
 
         editor.GoToRoot();
         ship.Tick();
-        Assert.Equal("Airlock 2", editor.RootRows()[1].Summary);
+        Assert.Equal("Installation 2", editor.RootRows()[1].Summary);
 
         editor.AddInstallation(0);
-        Assert.Equal("Airlock 3", system.Instances[2].Name);
+        Assert.Equal("Installation 3", system.Instances[2].Name);
+        Assert.Equal("Installation 3", editor.Blueprint().Title);
+    }
+
+    /// <summary>Done keeps what was just made, left untouched or not; only Back takes it back.</summary>
+    [Fact]
+    public void DoneKeepsWhatWasJustMade()
+    {
+        var ship = Build();
+        var editor = ship.Editor;
+        OneLogicSystem(ship);
+        var system = ship.Automation.Systems[0];
+
+        editor.AddInstallation(0);
+        ship.Tick();
+        editor.PressPrimary();
+        ship.Tick();
+        Assert.Equal(2, system.Instances.Count);
+
+        editor.GoToRoot();
+        ship.Tick();
+        editor.NewUntouchedSystem();
+        ship.Tick();
+        editor.PressPrimary();
+        ship.Tick();
+        Assert.Equal(2, ship.Automation.Systems.Count);
+
+        editor.GoToRoot();
+        ship.Tick();
+        editor.NewUntouchedSystem();
+        ship.Tick();
+        editor.Back();
+        ship.Tick();
+        Assert.Equal(2, ship.Automation.Systems.Count);
     }
 
     /// <summary>Adding another and backing straight out adds nothing; giving it a name of its own keeps it.</summary>
@@ -436,9 +458,7 @@ public class EditorTests
     {
         var ship = Build();
         var editor = ship.Editor;
-        OneLogicSystem(ship).Offers!.Execute();
-        editor.GoToRoot();
-        ship.Tick();
+        OneLogicSystem(ship);
         var system = ship.Automation.Systems[0];
 
         editor.AddInstallation(0);
@@ -462,18 +482,21 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A blueprint's sentences show the blocks of one of the logic systems made from it: another shows
-    /// nothing until its parts are filled, and then shows its own.
+    /// A logic system's sentences show the blocks of one of its installations: another shows nothing until its slots are
+    /// filled, and then shows its own.
     /// </summary>
     [Fact]
-    public void ABlueprintIsEditedThroughTheBlocksOfOneMadeFromIt()
+    public void ALogicSystemIsEditedThroughTheBlocksOfOneInstallation()
     {
         var ship = Build();
         var editor = ship.Editor;
-        OneLogicSystem(ship).Offers!.Execute();
+        OneLogicSystem(ship);
+        editor.OpenBlueprintSystem(0);
+        ship.Tick();
+        editor.EditPanel();
         ship.Tick();
 
-        // Straight onto the configuration panel to be set up, through the one it was made of.
+        // The configuration panel, being set up, through the first installation.
         Assert.True(editor.Blueprint().IsEditing);
         Assert.Equal(editor.Texts.BlueprintPanel, editor.Blueprint().Title);
         Assert.Single(Assert.Single(editor.Parts()).Blocks);
@@ -483,7 +506,7 @@ public class EditorTests
         editor.AddInstallation(0);
         ship.Tick();
 
-        Assert.Equal("Airlock 2", editor.Blueprint().Title);
+        Assert.Equal("Installation 2", editor.Blueprint().Title);
         Assert.Empty(editor.Parts()[0].Blocks);
 
         // Something done to it, switched off, so it stays when the panel is left.
@@ -495,7 +518,7 @@ public class EditorTests
         ship.Tick();
         editor.OpenBlueprintSystem(0);
         ship.Tick();
-        Assert.Equal("Airlock 2", editor.UsingName());
+        Assert.Equal("Installation 2", editor.UsingName());
         Assert.Empty(Assert.IsType<EntitiesSlot>(editor.Triggers()[0].Starts[0]).Entities);
 
         // Filled with a button of its own, it names that one.
@@ -523,7 +546,7 @@ public class EditorTests
         ship.Tick();
 
         Assert.Single(editor.Parts()[0].Blocks);
-        var cargo = ship.Automation.Systems[0].FindInstance("Airlock 2")!;
+        var cargo = ship.Automation.Systems[0].Instances[1];
         Assert.Single(cargo.Filled);
         Assert.Empty(ship.Automation.Systems[0].Instances[0].Filled);
     }
@@ -550,9 +573,8 @@ public class EditorTests
         Assert.Empty(system.Parts);
         ship.Tick();
 
+        // Arriving at the construct's list gives it slots and a first installation.
         ship.Editor.GoToRoot();
-        ship.Tick();
-        ship.Editor.RootRows()[0].Offers!.Execute();
         ship.Tick();
 
         Assert.True(system.IsBlueprint);
@@ -564,17 +586,19 @@ public class EditorTests
         Assert.Equal(new[] { button }, system.First!.FilledWith(buttonSlot));
         Assert.Equal(1, system.First!.Positions(buttonSlot)![0].Slot);
         Assert.Equal(new[] { door }, system.First!.FilledWith(doorSlot));
+
+        ship.Editor.RootRows()[0].Opens!.Execute();
+        ship.Tick();
         Assert.Equal(2, ship.Editor.Parts().Count);
 
     }
 
-    /// <summary>A logic system with a trigger, and its row on the construct's own list.</summary>
-    static StatusRow OneLogicSystem(Ship ship)
+    /// <summary>A logic system with a trigger, and the editor back on the construct's own list.</summary>
+    static void OneLogicSystem(Ship ship)
     {
         StartOnTheButton(ship.Editor);
         ship.Editor.GoToRoot();
         ship.Tick();
-        return ship.Editor.RootRows()[0];
     }
 
     static void StartOnTheButton(SprocketEditor editor)
@@ -989,21 +1013,22 @@ public class EditorTests
         editor.Back();
         ship.Tick();
 
-        // On the ship's list: the system's own row carries its switch.
-        var heading = editor.RootRows()
-            .First(e => e.Depth == 0);
+        // On the ship's list: the system's own heading carries its switch.
+        var heading = editor.RootHeadings()[0];
 
         Assert.NotNull(heading.Flips);
         Assert.True(heading.SwitchIsOn);
 
+        // A logic system with installations asks before it stops them.
         heading.Flips!.Execute();
+        ship.Tick();
+        editor.PressChoice("Switch them off");
         ship.Tick();
 
         Assert.False(system.Enabled);
         Assert.True(system.First!.Enabled);
         Assert.False(sequence.CanRun(sequence.System.First));
-        Assert.False(editor.RootRows()
-            .First(e => e.Depth == 0).SwitchIsOn);
+        Assert.False(editor.RootHeadings()[0].SwitchIsOn);
     }
 
     /// <summary>A sequence's row has no switch: the system's is the one switch for everything in it.</summary>
@@ -1102,15 +1127,13 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A new sequence takes the first free number in its system, not a running count.
+    /// A new sequence takes the first free number counting on from the sequences its system already has.
     /// </summary>
     /// <remarks>
-    /// So deleting the second of three and adding another gives "Sequence 2" back, rather than a
-    /// fourth number for a third sequence. The numbering is per system because that is the list it
-    /// has to be told apart in.
+    /// So the number says which one it is. The numbering is per system because that is the list it has to be told apart in.
     /// </remarks>
     [Fact]
-    public void ANewSequenceTakesTheFirstFreeNumber()
+    public void ANewSequenceCountsOnFromThoseThereAre()
     {
         var ship = Build();
         StartOnTheButton(ship.Editor);
@@ -1120,12 +1143,12 @@ public class EditorTests
         AnotherOnTheButton(ship);
         Assert.Equal("Sequence 2", ship.Editor.Screen.CustomName());
 
-        // The first one goes, so its number is free again.
+        // The first one goes; one is left, so the count starts at two, which is taken.
         var system = ship.Automation.Systems[0];
         ship.Automation.RemoveSequence(system.Sequences[0]);
 
         AnotherOnTheButton(ship);
-        Assert.Equal("Sequence 1", ship.Editor.Screen.CustomName());
+        Assert.Equal("Sequence 3", ship.Editor.Screen.CustomName());
     }
 
     /// <summary>
@@ -1987,7 +2010,7 @@ public class EditorTests
         Assert.Single(ship.Automation.Sequences);
 
         // A copy is made the same way, and goes the same way.
-        editor.RootRows()[0].Opens!.Execute();
+        editor.RootHeadings()[0].Opens!.Execute();
         ship.Tick();
         editor.Rows().Single(row => row.Copies != null).Copies!.Execute();
         ship.Tick();

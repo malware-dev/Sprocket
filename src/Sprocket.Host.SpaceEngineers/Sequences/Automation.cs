@@ -406,16 +406,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// The first <paramref name="numbered" /> nobody is using.
+        /// The first <paramref name="numbered" /> nobody is using, counting on from the systems there are.
         /// </summary>
         /// <remarks>
-        /// The first free number rather than a running count, so deleting the second of three and
-        /// adding another gives "Logic system 2" back - the same rule a new sequence is named by, and the
-        /// same rule the game names a block by.
+        /// So the number says which one it is: beside "Airlock" a new one is "Logic system 2", never "Logic system 1". The
+        /// same rule a new sequence is named by.
         /// </remarks>
         string FreeName(string numbered)
         {
-            for (var number = 1; ; number++)
+            for (var number = _systems.Count + 1; ; number++)
             {
                 var wanted = numbered.Replace("{number}", number.ToString(CultureInfo.InvariantCulture));
 

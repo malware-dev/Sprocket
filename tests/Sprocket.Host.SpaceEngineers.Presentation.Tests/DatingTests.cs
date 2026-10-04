@@ -58,7 +58,7 @@ public class DatingTests
     {
         var rig = Two();
         var hangar = rig.Editor.Program.Systems[1];
-        rig.Editor.RootRows().Single(row => row.Summary == "Hangar").Opens!.Execute();
+        rig.Editor.RootHeadings().Single(heading => heading.Summary == "Hangar").Opens!.Execute();
         rig.Tick();
 
         rig.Editor.Screen.Heading[0].Renames!("Bay");

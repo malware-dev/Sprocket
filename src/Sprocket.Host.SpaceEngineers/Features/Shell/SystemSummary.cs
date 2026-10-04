@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -45,15 +46,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return Template.Fill(texts.SystemsNumbered, "number", system.Id.ToString());
         }
 
-        /// <summary>What one of a system is called: Airlock 1, or whatever it was renamed to.</summary>
+        /// <summary>What an installation of a system is called.</summary>
+        /// <remarks>Every installation is named as it is made; one read from a program that names none is called by its place among them.</remarks>
         public static string DescribeInstance(Texts texts, Bindings bindings, AutomationSystem system,
             SystemInstance instance)
         {
             if (instance.HasName)
                 return instance.Name;
 
-            var numbered = Template.Fill(texts.SystemsInstance, "number", instance.Number.ToString());
-            return Template.Fill(numbered, "name", Describe(texts, bindings, system));
+            var at = 0;
+            var instances = system.Instances;
+            while (at < instances.Count && instances[at] != instance)
+                at++;
+
+            return Template.Fill(texts.SystemsInstance, "number", (at + 1).ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>The name a new installation of <paramref name="system" /> is given: the first number free, counting on from the installations there are.</summary>
+        /// <remarks>Unrelated to the installation's own number, which only tells it from the others.</remarks>
+        public static string NewInstanceName(Texts texts, AutomationSystem system)
+        {
+            var instances = system.Instances;
+            for (var number = instances.Count + 1; ; number++)
+            {
+                var wanted = Template.Fill(texts.SystemsInstance, "number", number.ToString(CultureInfo.InvariantCulture));
+                var taken = false;
+                for (var i = 0; i < instances.Count && !taken; i++)
+                    taken = instances[i].Name == wanted;
+
+                if (!taken)
+                    return wanted;
+            }
+        }
+
+        /// <summary>What an installation is called where it does not stand under its system, as in a question: Installation 1 of Airlock.</summary>
+        public static string DescribeInstanceOf(Texts texts, Bindings bindings, AutomationSystem system, SystemInstance instance)
+        {
+            var named = Template.Fill(texts.SystemsInstanceOf, "installation", DescribeInstance(texts, bindings, system, instance));
+            return Template.Fill(named, "name", Describe(texts, bindings, system));
         }
 
         /// <summary>

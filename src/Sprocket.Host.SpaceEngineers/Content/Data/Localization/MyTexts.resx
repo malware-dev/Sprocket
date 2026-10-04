@@ -92,16 +92,16 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Note on a logic system's switch when it is on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
-    <value>Switch on every installation of this blueprint</value>
-    <comment>Note on a blueprint's switch when it is off. Each of them runs where its own switch is on.</comment>
+    <value>Switch on every installation of this logic system</value>
+    <comment>Note on a logic system's switch when it is off. Each installation runs where its own switch is on.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
-    <value>Switch the blueprint on first</value>
-    <comment>Note on an installation's switch while its blueprint is switched off, when it cannot be pressed.</comment>
+    <value>Switch the logic system on first</value>
+    <comment>Note on an installation's switch while its logic system is switched off, when it cannot be pressed.</comment>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
-    <value>Switch off every installation of this blueprint</value>
-    <comment>Note on a blueprint's switch when it is on.</comment>
+    <value>Switch off every installation of this logic system</value>
+    <comment>Note on a logic system's switch when it is on.</comment>
   </data>
 
   <data name="Sprocket.Systems.Title" xml:space="preserve">
@@ -121,10 +121,6 @@ Renaming it here renames the grid.</value>
     <value>Start a new logic system on this construct.</value>
     <comment>Note on the button above.</comment>
   </data>
-  <data name="Sprocket.Systems.OpenAbout" xml:space="preserve">
-    <value>Open **{name}** to see and change what it does.</value>
-    <comment>Note on a logic system's row on the home screen; {name} is the system.</comment>
-  </data>
   <data name="Sprocket.Systems.OpenInstanceAbout" xml:space="preserve">
     <value>Open **{name}** to choose the blocks it uses.</value>
     <comment>Note on the row of a logic system made from a blueprint, on the home screen; {name} is the system.</comment>
@@ -133,16 +129,12 @@ Renaming it here renames the grid.</value>
     <value>Library</value>
     <comment>Button that opens the library, which holds the backups and the blueprints. Also the library's heading.</comment>
   </data>
-  <data name="Sprocket.Systems.PlainHeading" xml:space="preserve">
+  <data name="Sprocket.Systems.Heading" xml:space="preserve">
     <value>Logic systems</value>
-    <comment>Heading over the logic systems of their own on the home screen; shown in capitals.</comment>
-  </data>
-  <data name="Sprocket.Systems.BlueprintsHeading" xml:space="preserve">
-    <value>Blueprints</value>
-    <comment>Heading over the blueprints on the home screen, under the logic systems of their own; shown in capitals.</comment>
+    <comment>Heading over the logic systems on the home screen; shown in capitals.</comment>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>The **library**: the blueprints on this construct and in storage, and the automation of constructs that are lost.</value>
+    <value>The **library**: the logic systems on this construct, the blueprints in storage, and the automation of constructs that are lost.</value>
     <comment>Note on the button above.</comment>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
@@ -151,28 +143,31 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Systems.MakeBlueprint" xml:space="preserve">
     <value>Make blueprint</value>
-    <comment>Button on a logic system's row that makes it a blueprint.</comment>
+    <comment>Button on a logic system's heading on the home screen, and in the library, that keeps a copy of it in the library, as a blueprint.</comment>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Turn this into a **blueprint**, so it can be installed again on other blocks.
-This one becomes its first installation.</value>
+    <value>Keep a copy of this logic system in the library, as a **blueprint**. It goes wherever you go.</value>
+    <comment>Note on the button above.</comment>
+  </data>
+  <data name="Sprocket.Systems.UpdateBlueprint" xml:space="preserve">
+    <value>Update blueprint</value>
+    <comment>The same button once the library holds a blueprint of the logic system, which then brings that blueprint up to date.</comment>
+  </data>
+  <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
+    <value>Put this logic system in place of its blueprint in the library.</value>
     <comment>Note on the button above.</comment>
   </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
-    <value>Opens the **{name}** blueprint, to change what starts its sequences and what they do. Every installation of it changes with it.</value>
-    <comment>Note on the row over the logic systems made from a blueprint. {name} is the blueprint's name.</comment>
-  </data>
-  <data name="Sprocket.Systems.LibraryUnbuilt" xml:space="preserve">
-    <value>Not built yet. Blueprints will be imported and exported here.</value>
-    <comment>Said on the blueprint library while it is not built.</comment>
+    <value>Opens the **{name}** logic system, to change what starts its sequences and what they do. Every installation of it changes with it.</value>
+    <comment>Note on a logic system's heading on the home screen, and on its name in the heading of an installation's screen. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installation</value>
     <comment>Adds another installation of a blueprint: its blocks, chosen on the configuration panel. Shown after a plus, as the last line under a blueprint.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
-    <value>Install the **{name}** blueprint on another set of blocks, and choose which blocks it uses.</value>
-    <comment>Note on the row above. {name} is the blueprint's name.</comment>
+    <value>Install the **{name}** logic system on another set of blocks, and choose which blocks it uses.</value>
+    <comment>Note on the row above. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Systems.Running" xml:space="preserve">
     <value>running</value>
@@ -183,8 +178,12 @@ This one becomes its first installation.</value>
     <comment>What a logic system is called when it has no name and its blocks share none. {number} is its number.</comment>
   </data>
   <data name="Sprocket.Systems.Instance" xml:space="preserve">
-    <value>{name} {number}</value>
-    <comment>What one of the logic systems made from a blueprint is called when it has no name of its own. {name} is the blueprint's, {number} which one it is.</comment>
+    <value>Installation {number}</value>
+    <comment>The name a new installation of a logic system is given, the first included. {number} is the first number free, counting on from the installations there are; it is not the installation's own number.</comment>
+  </data>
+  <data name="Sprocket.Systems.InstanceOf" xml:space="preserve">
+    <value>{installation} of {name}</value>
+    <comment>An installation named where it does not stand under its logic system, as in a question. {installation} is the installation's name, {name} the logic system's.</comment>
   </data>
 
   <data name="Sprocket.Delete.System" xml:space="preserve">
@@ -192,16 +191,16 @@ This one becomes its first installation.</value>
     <comment>Asked before a logic system is deleted, with its name under it.</comment>
   </data>
   <data name="Sprocket.Delete.Blueprint" xml:space="preserve">
-    <value>This deletes the {name} blueprint and every installation of it, and cannot be undone. Type {name} to go ahead.</value>
-    <comment>Over the box a blueprint's name is typed into to delete it; the button beside the box does nothing until the name is typed. {name} is the blueprint's name.</comment>
+    <value>This deletes the {name} logic system and every installation of it, and cannot be undone. Type {name} to go ahead.</value>
+    <comment>Over the box a logic system's name is typed into to delete it; the button beside the box does nothing until the name is typed. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Delete.Instance" xml:space="preserve">
     <value>Delete only this installation?</value>
     <comment>Asked before one of the logic systems made from a blueprint is deleted, with its name under it. Only that one goes.</comment>
   </data>
   <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
-    <value>The **{name}** blueprint and its other installations are kept. This cannot be undone.</value>
-    <comment>Said on the answer that deletes one of the logic systems made from a blueprint. {name} is the blueprint's name.</comment>
+    <value>The **{name}** logic system and its other installations are kept. This cannot be undone.</value>
+    <comment>Said on the answer that deletes one installation of a logic system. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
     <value>Keep it</value>
@@ -220,10 +219,6 @@ This one becomes its first installation.</value>
     <value>This logic system's name.</value>
     <comment>Note on a logic system's name, in the heading of its own screen.</comment>
   </data>
-  <data name="Sprocket.System.Blueprint" xml:space="preserve">
-    <value>blueprint</value>
-    <comment>Said after a blueprint's name in the heading of its screen.</comment>
-  </data>
   <data name="Sprocket.System.Delete" xml:space="preserve">
     <value>Delete this logic system</value>
     <comment>Note on the bin in the header of a logic system's screen.</comment>
@@ -233,24 +228,24 @@ This one becomes its first installation.</value>
     <comment>The bin on an installation's row.</comment>
   </data>
   <data name="Sprocket.System.DeleteBlueprint" xml:space="preserve">
-    <value>Delete this blueprint, and every installation of it</value>
-    <comment>Note on the bin in the header of a blueprint's logic system screen.</comment>
+    <value>Delete this logic system, and every installation of it</value>
+    <comment>Note on the bin in the header of a logic system's screen.</comment>
   </data>
   <data name="Sprocket.System.EditPanel" xml:space="preserve">
     <value>Edit configuration panel</value>
     <comment>Button on a blueprint's logic system screen that opens the panel its blocks are chosen on, to set up its slots and description.</comment>
   </data>
   <data name="Sprocket.System.EditPanelAbout" xml:space="preserve">
-    <value>Set up the description and slots everyone filling in this blueprint sees.</value>
-    <comment>Note on the button that opens a blueprint's configuration panel.</comment>
+    <value>Set up the description and slots everyone filling in this logic system sees.</value>
+    <comment>Note on the button that opens a logic system's configuration panel.</comment>
   </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
     <value>Using the blocks of</value>
     <comment>Leads the name of the logic system whose blocks every sentence on the screen names: the system's own, or for a blueprint a list of the blocksets made from it.</comment>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
-    <value>Pick an installation of this blueprint, to see its blocks in the sentences below.</value>
-    <comment>Note on the list of logic systems made from a blueprint, on the blueprint's logic system screen.</comment>
+    <value>Pick an installation of this logic system, to see its blocks in the sentences below.</value>
+    <comment>Note on the list of a logic system's installations, on its screen.</comment>
   </data>
   <data name="Sprocket.System.Triggers" xml:space="preserve">
     <value>Triggers</value>
@@ -713,8 +708,8 @@ This one becomes its first installation.</value>
     <comment>A rate a timer fires at. {name} is its word, such as steady; {ticks} how many ticks apart.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
-    <value>This blueprint's name.</value>
-    <comment>Note on a blueprint's name at the head of its screen.</comment>
+    <value>This installation's name.</value>
+    <comment>Note on an installation's name at the head of its screen.</comment>
   </data>
   <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
     <value>Slots</value>
@@ -725,11 +720,11 @@ This one becomes its first installation.</value>
     <comment>Heading of a blueprint's configuration panel while it is being set up: the slots and words everyone filling a blockset made from the blueprint sees.</comment>
   </data>
   <data name="Sprocket.Blueprint.PanelFor" xml:space="preserve">
-    <value>for {name} blueprint</value>
-    <comment>After "Configuration panel" in its heading. {name} is the blueprint's name.</comment>
+    <value>for {name}</value>
+    <comment>After "Configuration panel" in its heading. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Blueprint.PanelAbout" xml:space="preserve">
-    <value>Shown to anyone setting up, or changing, something made from this blueprint.</value>
+    <value>Shown to anyone setting up, or changing, an installation of this logic system.</value>
     <comment>Under the heading of a configuration panel being set up.</comment>
   </data>
   <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
@@ -741,12 +736,12 @@ This one becomes its first installation.</value>
     <comment>Beside the heading over a blockset's slots. {count} is how many slots that need a block have none, always more than one.</comment>
   </data>
   <data name="Sprocket.Blueprint.FromLead" xml:space="preserve">
-    <value>made from</value>
-    <comment>Before the blueprint's name in the heading of a logic system made from it; the name opens the blueprint.</comment>
+    <value>of</value>
+    <comment>Before the logic system's name in the heading of an installation's screen, after the installation's name.</comment>
   </data>
   <data name="Sprocket.Blueprint.FromAfter" xml:space="preserve">
-    <value>blueprint</value>
-    <comment>After the blueprint's name in that heading, or empty for nothing.</comment>
+    <value></value>
+    <comment>After the logic system's name in that heading, or empty for nothing.</comment>
   </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} was lost.</value>
@@ -757,19 +752,19 @@ This one becomes its first installation.</value>
     <comment>Heading over the box a blueprint's description is written in.</comment>
   </data>
   <data name="Sprocket.Blueprint.DescriptionHint" xml:space="preserve">
-    <value>What this blueprint does, and what whoever fills it in needs to know.</value>
-    <comment>In the empty box a blueprint's description is written in.</comment>
+    <value>What this logic system does, and what whoever fills it in needs to know.</value>
+    <comment>In the empty box a logic system's description is written in.</comment>
   </data>
   <data name="Sprocket.Blueprint.AboutHint" xml:space="preserve">
     <value>What this slot is for.</value>
     <comment>In the empty box what a slot is for is written in.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameBoxAbout" xml:space="preserve">
-    <value>The slot's name, as everyone filling in this blueprint sees it.</value>
+    <value>The slot's name, as everyone filling in this logic system sees it.</value>
     <comment>Note on the box a slot's name is typed into.</comment>
   </data>
   <data name="Sprocket.Blueprint.RequiredAbout" xml:space="preserve">
-    <value>Whether an installation of this blueprint may leave this slot empty.</value>
+    <value>Whether an installation of this logic system may leave this slot empty.</value>
     <comment>Note on the switch between required and optional.</comment>
   </data>
   <data name="Sprocket.Writing.Preview" xml:space="preserve">
@@ -859,8 +854,8 @@ This one becomes its first installation.</value>
     <comment>The answer that leaves the logic system switched off.</comment>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffQuestion" xml:space="preserve">
-    <value>Switch off the **{name}** blueprint?</value>
-    <comment>Asked before a blueprint is switched off. {name} is the blueprint's name.</comment>
+    <value>Switch off the **{name}** logic system?</value>
+    <comment>Asked before a logic system with installations is switched off. {name} is the logic system's name.</comment>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffStops" xml:space="preserve">
     <value>This stops every installation of it on this construct:</value>
@@ -1737,8 +1732,8 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Line in the library over the blueprints on the construct it was opened on. {name} is the construct.</comment>
   </data>
   <data name="Sprocket.Library.NoneHere" xml:space="preserve">
-    <value>No blueprints on this construct.</value>
-    <comment>Said in the library where the construct has no blueprint.</comment>
+    <value>No logic systems on this construct.</value>
+    <comment>Said in the library where the construct has no logic system.</comment>
   </data>
   <data name="Sprocket.Library.NoInstallations" xml:space="preserve">
     <value>No installations</value>
@@ -1785,40 +1780,16 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Beside the switch in the library that puts the chosen blueprint on the construct, or takes it off.</comment>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
-    <value>Put this blueprint on this construct, ready for its first installation.</value>
+    <value>Put this blueprint on this construct as a logic system, with its first installation.</value>
     <comment>Note on the switch in the library, where the blueprint is not on the construct.</comment>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
-    <value>Take this blueprint off this construct. Its copy in storage is kept, brought up to date.</value>
-    <comment>Note on the switch in the library, and on the minus of a blueprint on the home screen, where the blueprint has no installation and is in storage.</comment>
-  </data>
-  <data name="Sprocket.Library.HeldOne" xml:space="preserve">
-    <value>1 installation on this construct. Remove it from the home screen first.</value>
-    <comment>Note on the switch in the library, which cannot be pressed while the blueprint has an installation.</comment>
-  </data>
-  <data name="Sprocket.Library.Held" xml:space="preserve">
-    <value>{count} installations on this construct. Remove them from the home screen first.</value>
-    <comment>Note on the switch in the library, which cannot be pressed while the blueprint has installations. {count} is how many, always more than one.</comment>
-  </data>
-  <data name="Sprocket.Library.Save" xml:space="preserve">
-    <value>Save to storage</value>
-    <comment>Button in the library that keeps a copy of the chosen blueprint for every world.</comment>
-  </data>
-  <data name="Sprocket.Library.SaveAbout" xml:space="preserve">
-    <value>Keep a copy in storage. It goes wherever you go.</value>
-    <comment>Note on the button that saves a blueprint to the library.</comment>
-  </data>
-  <data name="Sprocket.Library.Update" xml:space="preserve">
-    <value>Update stored copy</value>
-    <comment>Button in the library that puts the blueprint on the construct in place of the copy in storage.</comment>
-  </data>
-  <data name="Sprocket.Library.UpdateAbout" xml:space="preserve">
-    <value>Put this blueprint in place of the stored copy.</value>
-    <comment>Note on the button that updates the library's copy of a blueprint.</comment>
+    <value>Take this logic system off this construct, with its installations. Its blueprint in the library is kept, brought up to date.</value>
+    <comment>Note on the switch in the library, and on the minus of a logic system on the home screen, where its blueprint is in the library.</comment>
   </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
-    <value>The stored copy is the same as this one.</value>
-    <comment>Note on the update button, which cannot be pressed while the copies are the same.</comment>
+    <value>The blueprint in the library is the same as this logic system.</value>
+    <comment>Note on the update button in the library, which cannot be pressed while the two are the same.</comment>
   </data>
   <data name="Sprocket.Library.By" xml:space="preserve">
     <value>By {name}</value>
@@ -1840,9 +1811,9 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Logic systems</value>
     <comment>Heading in the library over the logic systems a lost construct had.</comment>
   </data>
-  <data name="Sprocket.Systems.RemoveFirst" xml:space="preserve">
-    <value>Remove its installations first, then take it off the construct.</value>
-    <comment>Note on the quiet minus of a blueprint on the home screen, while it has installations.</comment>
+  <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
+    <value>A logic system keeps at least one installation.</value>
+    <comment>Note on the quiet bin of a logic system's only installation, which cannot be deleted.</comment>
   </data>
   <data name="Sprocket.Library.Unreadable" xml:space="preserve">
     <value>This copy will not read.</value>
@@ -1865,24 +1836,24 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Button in the library that puts a copy of the chosen blueprint on the construct, as a blueprint of its own.</comment>
   </data>
   <data name="Sprocket.Library.CopyAbout" xml:space="preserve">
-    <value>Put a copy on this construct, as a blueprint of its own: changing the copy leaves this one as it is.</value>
-    <comment>Note on the button that makes a copy of a blueprint.</comment>
+    <value>Put a copy on this construct, as a logic system of its own: changing the copy leaves this one as it is.</value>
+    <comment>Note on the button that makes a copy.</comment>
   </data>
   <data name="Sprocket.Library.CopyName" xml:space="preserve">
     <value>{name} {number}</value>
     <comment>What a copy of a blueprint is called. {name} is the blueprint copied, {number} the first number from 2 nothing is called yet.</comment>
   </data>
   <data name="Sprocket.Library.Deletes" xml:space="preserve">
-    <value>Delete this blueprint. It is not in storage, so this is its only copy.</value>
-    <comment>Note on the bin of a blueprint on the home screen, and on the switch in the library, where the blueprint has no installation and is not in storage.</comment>
+    <value>Delete this logic system, with its installations. It has no blueprint in the library, so this is its only copy.</value>
+    <comment>Note on the bin of a logic system on the home screen, and on the switch in the library, where it has no blueprint in the library.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffQuestion" xml:space="preserve">
-    <value>Take this blueprint off this construct?</value>
-    <comment>Asked before taking a blueprint in storage off the construct; its name follows.</comment>
+    <value>Take this logic system off this construct?</value>
+    <comment>Asked before taking a logic system whose blueprint is in the library off the construct; its name follows.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffKept" xml:space="preserve">
-    <value>Its copy in storage is kept, brought up to date.</value>
-    <comment>Under the question about taking a blueprint off the construct.</comment>
+    <value>Its installations go with it. Its blueprint in the library is kept, brought up to date.</value>
+    <comment>Under the question about taking a logic system off the construct.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
     <value>Keep it</value>

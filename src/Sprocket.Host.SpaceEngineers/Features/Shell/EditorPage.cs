@@ -263,11 +263,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What has to happen before the header's button can be pressed, said as its note while it cannot.</summary>
         public virtual string PrimaryWaits => "";
 
-        /// <summary>Does what the header's button says; on a page that edits, that is leaving it as going back does.</summary>
+        /// <summary>Does what the header's button says; on a page that edits, that is leaving it, keeping what it was opened on.</summary>
         public virtual void Primary()
         {
             if (Edits)
-                Editor.Leave();
+                Editor.Finish();
         }
 
         /// <summary>Brings the page to the shape the program is in now, whenever the screen is built.</summary>

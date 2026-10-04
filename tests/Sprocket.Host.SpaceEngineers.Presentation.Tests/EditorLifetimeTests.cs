@@ -41,6 +41,6 @@ public class EditorLifetimeTests
 
         Assert.True(sim.Unit.HasEditor);
         Assert.Same(editor, sim.Unit.Editor);
-        Assert.Contains(editor.RootRows(), row => row.Summary == "Airlock");
+        Assert.Contains("Airlock", editor.RootHeadingNames());
     }
 }

@@ -321,30 +321,32 @@ public class ProblemTests
 
 
     /// <summary>
-    /// A system with a sequence that cannot work is switched off, says why, and mending it does not switch it back on.
+    /// An installation with a sequence that cannot work is switched off, says why, and mending it does not switch it back on.
     /// </summary>
     /// <remarks>
     /// Starting it again stays somebody's decision, which is switching it on.
     /// </remarks>
     [Fact]
-    public void ABrokenSystemIsSwitchedOff()
+    public void ABrokenInstallationIsSwitchedOff()
     {
         var ship = Build();
         var system = ship.Sequence.System;
+        var installation = system.First!;
 
         ship.Rig.CannotStart(ship.Sequence);
         ship.Runner.Tick(600);
         ship.Editor.Tick(600);
 
-        Assert.False(system.Enabled);
-        Assert.Equal(SequenceProblem.NeverTriggered, system.Halt!.Problem);
+        Assert.False(installation.Enabled);
+        Assert.Equal(SequenceProblem.NeverTriggered, installation.Halt!.Problem);
 
         ship.Rig.CanStart(ship.Sequence);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
-        Assert.False(system.Enabled);
-        Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.", SequenceText.Stopped(new Texts(), system.Halt, system));
+        Assert.False(installation.Enabled);
+        Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.",
+            SequenceText.Stopped(new Texts(), installation.Halt, system));
     }
 
     /// <summary>A step's own trouble marks the step, and only the step.</summary>

@@ -55,7 +55,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>The lines under each blueprint on the root that add another installation, one for each blueprint.</summary>
         public static List<Button> RootAdds(this SprocketEditor editor) =>
-            Within(Root(editor).View).OfType<BlueprintGroup>().Select(group => group.Adds).ToList();
+            Within(Root(editor).View).OfType<SystemGroup>().Select(group => group.Adds).ToList();
 
         /// <summary>Adds another installation of the blueprint number <paramref name="group" /> on the root, by pressing its line.</summary>
         public static void AddInstallation(this SprocketEditor editor, int group) =>
@@ -67,7 +67,15 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Opens what the blueprint under the root's heading number <paramref name="group" /> does, by pressing that heading.</summary>
         public static void OpenBlueprintSystem(this SprocketEditor editor, int group) =>
-            Within(Root(editor).View).OfType<BlueprintGroup>().ElementAt(group).Heading.Opens!.Execute();
+            Within(Root(editor).View).OfType<SystemGroup>().ElementAt(group).Heading.Opens!.Execute();
+
+        /// <summary>Opens the configuration panel of the logic system the editor is on, to be written, by pressing its button.</summary>
+        public static void EditPanel(this SprocketEditor editor)
+        {
+            var page = editor.Current as LogicSystemPage
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a logic system's page.");
+            Within(page.View).OfType<Button>().First(button => button.Text == editor.Texts.SystemEditPanel).Command!.Execute();
+        }
 
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
         public static List<PartRow> Parts(this SprocketEditor editor) =>
@@ -145,7 +153,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>The rows over each blueprint's logic systems on the root, one for each blueprint.</summary>
         public static List<StatusRow> RootHeadings(this SprocketEditor editor) =>
-            Within(Root(editor).View).OfType<BlueprintGroup>().Select(group => group.Heading).ToList();
+            Within(Root(editor).View).OfType<SystemGroup>().Select(group => group.Heading).ToList();
 
         /// <summary>The names the root's headings say, one for each blueprint.</summary>
         public static List<string> RootHeadingNames(this SprocketEditor editor) =>
@@ -167,6 +175,10 @@ namespace Sprocket.Sim.Driving
             PressButton(editor, editor.Texts.SystemsNew);
             editor.Screen.Heading[0].Renames!(name);
         }
+
+        /// <summary>Presses New logic system and leaves the numbered one it makes as it is, untouched.</summary>
+        public static void NewUntouchedSystem(this SprocketEditor editor) =>
+            PressButton(editor, editor.Texts.SystemsNew);
 
         /// <summary>Makes a system with the custom name whose one trigger is the Airlock Button being pressed, and leaves the editor on the sequence it starts.</summary>
         public static void NewButtonSystem(this SprocketEditor editor, string name)
@@ -362,14 +374,14 @@ namespace Sprocket.Sim.Driving
         /// <summary>The way back on a screen that carries one, which is screen furniture.</summary>
         public static EditorScreen Steps(this SprocketEditor editor) => editor.Screen;
 
-        /// <summary>Opens a row of that list, by where it sits.</summary>
+        /// <summary>Opens a row of that list, by where it sits: on the home screen, a logic system by its heading.</summary>
         /// <remarks>
         /// By position rather than by name, because the names on these rows are the target's words and a
         /// test that matched on them would be asserting about English on its way somewhere else.
         /// </remarks>
         public static void PressRow(this SprocketEditor editor, int row)
         {
-            var rows = editor.Current is HomePage ? editor.RootRows() : editor.Rows();
+            var rows = editor.Current is HomePage ? editor.RootHeadings() : editor.Rows();
             rows[row].Opens!.Execute();
         }
 
