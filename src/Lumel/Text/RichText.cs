@@ -1,12 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Lumel.Drawing;
+using Lumel.Images;
 using VRage.Game;
 using VRageMath;
 
 namespace Lumel.Text
 {
-    /// <summary>A document, wrapped to the room it is given: its headings, paragraphs, list items and rules, each run set apart as its kind says.</summary>
+    /// <summary>A document, wrapped to the room it is given: its headings, paragraphs, list items, rules, tables and images, each run set apart as its kind says.</summary>
     /// <remarks>
     ///     Laid out when the document, its sizes or the room change, into pieces that each draw in one call;
     ///     drawing measures nothing. Colors are read as it draws, so changing one lays out nothing. A document
@@ -23,8 +25,11 @@ namespace Lumel.Text
 
         readonly StringBuilder _probe = new StringBuilder(64);
 
+        readonly List<float> _wides = new List<float>();
+
         Document _document;
         Arguments _arguments;
+        IImageCatalog _images;
         string _font = MyFontEnum.White;
         string _codeFont = MyFontEnum.White;
         float _fontSize = 24f;
@@ -84,6 +89,20 @@ namespace Lumel.Text
                 if (_arguments != null)
                     _arguments.Changed += Relayout;
 
+                Relayout();
+            }
+        }
+
+        /// <summary>Where the pictures the document's images name are found, or null for the surface's own: an image whose picture is not found says its description instead.</summary>
+        public IImageCatalog Images
+        {
+            get { return _images; }
+            set
+            {
+                if (_images == value)
+                    return;
+
+                _images = value;
                 Relayout();
             }
         }
@@ -221,8 +240,11 @@ namespace Lumel.Text
             for (var i = 0; i < _pieces.Count; i++)
             {
                 var piece = _pieces[i];
-                g.DrawText(piece.Font, piece.Text, new Vector2(room.X + piece.At.X, room.Y + piece.At.Y), piece.Size,
-                    ColorOf(piece.Tone));
+                if (piece.Image != null)
+                    piece.Image.Draw(g, new RectangleF(room.X + piece.At.X, room.Y + piece.At.Y, piece.Box.X, piece.Box.Y), Color.White);
+                else
+                    g.DrawText(piece.Font, piece.Text, new Vector2(room.X + piece.At.X, room.Y + piece.At.Y), piece.Size,
+                        ColorOf(piece.Tone));
             }
         }
 
@@ -287,6 +309,12 @@ namespace Lumel.Text
                     continue;
                 }
 
+                if (block.Kind == BlockKind.Table)
+                {
+                    Table(g, block, width, ref y, ref widest);
+                    continue;
+                }
+
                 var size = block.Kind == BlockKind.Heading ? HeadingSize(block.Level) : _fontSize;
                 var start = 0f;
 
@@ -303,19 +331,134 @@ namespace Lumel.Text
                         _pieces.Add(new Piece { Text = block.Level + ".", At = new Vector2(0f, y), Font = _font, Size = size, Tone = Tone.Plain });
                 }
 
-                Flow(g, block, start, size, width, ref y, ref widest);
-                y += size;
+                Flow(g, block, start, size, width, Alignment.Left, ref y, ref widest);
             }
 
             _laidOut = new Vector2(widest, y);
         }
 
-        /// <summary>Lays one block's runs out from <paramref name="start" />, wrapping at <paramref name="width" />.</summary>
-        void Flow(IGraphics g, Block block, float start, float size, float width, ref float y, ref float widest)
+        /// <summary>Lays a table out from line <paramref name="y" />, a row at a time, moving <paramref name="y" /> below it.</summary>
+        /// <remarks>
+        ///     Each column is as wide as its widest cell on one line, a gap of one indent apart. Spare width is
+        ///     shared among the starred columns by their stars; with none starred the table is only as wide as it
+        ///     needs. A table too wide for its room takes the width back from its widest columns, whose cells then
+        ///     wrap. A heading row is drawn in the heading color, with a rule under it.
+        /// </remarks>
+        void Table(IGraphics g, Block table, float width, ref float y, ref float widest)
         {
-            var heading = block.Kind == BlockKind.Heading;
+            var count = table.Columns.Count;
+            var gap = _indent;
+            Widths(g, table, width, gap);
+
+            var across = gap * (count - 1);
+            for (var c = 0; c < count; c++)
+                across += _wides[c];
+
+            for (var r = 0; r < table.Blocks.Count; r++)
+            {
+                var row = table.Blocks[r];
+                var bottom = y + _fontSize;
+                var x = 0f;
+
+                for (var c = 0; c < count && c < row.Blocks.Count; c++)
+                {
+                    var line = y;
+                    var right = x + _wides[c];
+                    var ignored = 0f;
+
+                    Flow(g, row.Blocks[c], x, _fontSize, right, table.Columns[c].Align, ref line, ref ignored);
+                    if (line > bottom)
+                        bottom = line;
+
+                    x = right + gap;
+                }
+
+                y = bottom;
+
+                if (row.Level == 1)
+                {
+                    _marks.Add(new Mark { Where = new RectangleF(0f, y + gap * 0.25f, across, 1f) });
+                    y += gap * 0.5f;
+                }
+            }
+
+            if (across > widest)
+                widest = across;
+        }
+
+        /// <summary>Fills <see cref="_wides" /> with how wide each of a table's columns is laid out within <paramref name="width" />, <paramref name="gap" /> apart.</summary>
+        void Widths(IGraphics g, Block table, float width, float gap)
+        {
+            var count = table.Columns.Count;
+            _wides.Clear();
+            for (var c = 0; c < count; c++)
+                _wides.Add(0f);
+
+            for (var r = 0; r < table.Blocks.Count; r++)
+            {
+                var row = table.Blocks[r];
+                for (var c = 0; c < count && c < row.Blocks.Count; c++)
+                {
+                    var pieces = _pieces.Count;
+                    var line = 0f;
+                    var natural = 0f;
+
+                    Flow(g, row.Blocks[c], 0f, _fontSize, Unbounded, Alignment.Left, ref line, ref natural);
+                    _pieces.RemoveRange(pieces, _pieces.Count - pieces);
+
+                    if (natural > _wides[c])
+                        _wides[c] = natural;
+                }
+            }
+
+            if (width >= Unbounded)
+                return;
+
+            var across = gap * (count - 1);
+            var shares = 0;
+            for (var c = 0; c < count; c++)
+            {
+                across += _wides[c];
+                shares += table.Columns[c].Shares;
+            }
+
+            if (across < width && shares > 0)
+            {
+                var spare = width - across;
+                for (var c = 0; c < count; c++)
+                    _wides[c] += spare * table.Columns[c].Shares / shares;
+            }
+
+            var over = across - width;
+            var least = _fontSize * 3f;
+            while (over > 0.5f)
+            {
+                var broadest = 0;
+                for (var c = 1; c < count; c++)
+                {
+                    if (_wides[c] > _wides[broadest])
+                        broadest = c;
+                }
+
+                var given = Math.Min(over, _wides[broadest] - least);
+                if (given <= 0f)
+                    break;
+
+                _wides[broadest] -= given;
+                over -= given;
+            }
+        }
+
+        /// <summary>Lays one block's runs out from line <paramref name="y" /> and <paramref name="start" />, wrapping at <paramref name="width" />, each line set against the side <paramref name="align" /> says; moves <paramref name="y" /> below the last line.</summary>
+        /// <remarks>A line is as tall as <paramref name="size" />, or as its tallest image, and everything on it stands on its foot.</remarks>
+        void Flow(IGraphics g, Block block, float start, float size, float width, Alignment align, ref float y, ref float widest)
+        {
+            var heading = block.Kind == BlockKind.Heading || block.Kind == BlockKind.Cell && block.Level == 1;
             var x = start;
             var empty = true;
+            var line = _pieces.Count;
+            var tall = size;
+            var pictured = false;
 
             for (var r = 0; r < block.Runs.Count; r++)
             {
@@ -324,9 +467,43 @@ namespace Lumel.Text
                 if (run.IsBreak)
                 {
                     End(g, y, true, ref x, ref widest);
-                    y += size;
+                    Settle(line, x, width, align, y, tall, pictured);
+                    line = _pieces.Count;
+                    y += tall;
+                    tall = size;
+                    pictured = false;
                     x = start;
                     empty = true;
+                    continue;
+                }
+
+                var images = _images ?? g.Images;
+                var shown = run as ImageRun;
+                var image = shown != null && images != null ? images.Find(shown.Picture.Name) : null;
+                if (image != null)
+                {
+                    var box = SizeOf(shown.Picture, image, size);
+                    End(g, y, false, ref x, ref widest);
+
+                    if (!empty && width < Unbounded && x + box.X > width)
+                    {
+                        Trim(g, line, ref x);
+                        Settle(line, x, width, align, y, tall, pictured);
+                        line = _pieces.Count;
+                        y += tall;
+                        tall = size;
+                        x = start;
+                    }
+
+                    _pieces.Add(new Piece { Image = image, At = new Vector2(x, y), Box = box });
+                    pictured = true;
+                    x += box.X;
+                    if (x > widest)
+                        widest = x;
+                    if (box.Y > tall)
+                        tall = box.Y;
+
+                    empty = false;
                     continue;
                 }
 
@@ -342,8 +519,13 @@ namespace Lumel.Text
                 {
                     if (text[i] == ' ')
                     {
-                        if (!empty && _piece.Length > 0)
+                        if (!empty)
+                        {
+                            if (_piece.Length == 0)
+                                Begin(x, font, size, tone);
+
                             _piece.Append(' ');
+                        }
 
                         i++;
                         continue;
@@ -359,17 +541,16 @@ namespace Lumel.Text
                     if (!empty && width < Unbounded && !Fits(g, text, i, end, font, size, x, width))
                     {
                         End(g, y, true, ref x, ref widest);
-                        y += size;
+                        Settle(line, x, width, align, y, tall, pictured);
+                        line = _pieces.Count;
+                        y += tall;
+                        tall = size;
+                        pictured = false;
                         x = start;
                     }
 
                     if (_piece.Length == 0)
-                    {
-                        _pieceX = x;
-                        _pieceFont = font;
-                        _pieceSize = size;
-                        _pieceTone = tone;
-                    }
+                        Begin(x, font, size, tone);
 
                     _piece.Append(text, i, end - i);
                     empty = false;
@@ -378,6 +559,80 @@ namespace Lumel.Text
             }
 
             End(g, y, true, ref x, ref widest);
+            Settle(line, x, width, align, y, tall, pictured);
+            y += tall;
+        }
+
+        /// <summary>How big an image of <paramref name="picture" /> is drawn: as written, a side not written taken from <paramref name="image" />'s shape, and as tall as a line of <paramref name="size" /> where neither is written.</summary>
+        static Vector2 SizeOf(Picture picture, IImageSource image, float size)
+        {
+            var width = picture.Width;
+            var height = picture.Height;
+
+            if (float.IsNaN(width) && float.IsNaN(height))
+                height = size;
+
+            if (float.IsNaN(width))
+                width = Shape.WidthFor(image.Size, height);
+            else if (float.IsNaN(height))
+                height = Shape.HeightFor(image.Size, width);
+
+            return new Vector2(width, height);
+        }
+
+        /// <summary>Starts a piece at <paramref name="x" />.</summary>
+        void Begin(float x, string font, float size, Tone tone)
+        {
+            _pieceX = x;
+            _pieceFont = font;
+            _pieceSize = size;
+            _pieceTone = tone;
+        }
+
+        /// <summary>Drops the spaces ending the last piece of the line that starts at piece <paramref name="first" />, moving <paramref name="x" /> back to where its words end.</summary>
+        /// <remarks>For a line that breaks before an image, whose words were ended before it was known the image would not fit.</remarks>
+        void Trim(IGraphics g, int first, ref float x)
+        {
+            var last = _pieces.Count - 1;
+            if (last < first || _pieces[last].Image != null)
+                return;
+
+            var piece = _pieces[last];
+            var words = piece.Text.TrimEnd(' ');
+            if (words.Length == piece.Text.Length)
+                return;
+
+            piece.Text = words;
+            _pieces[last] = piece;
+
+            _probe.Clear();
+            _probe.Append(words);
+            x = piece.At.X + g.MeasureText(piece.Font, _probe, piece.Size).X;
+        }
+
+        /// <summary>
+        ///     Sets the pieces of the line from piece <paramref name="first" />, ending at <paramref name="end" />, on the foot
+        ///     of a line <paramref name="tall" /> high from <paramref name="top" />, and against the side of the room up to
+        ///     <paramref name="width" /> that <paramref name="align" /> says; <paramref name="pictured" /> is whether an image stands on it.
+        /// </summary>
+        void Settle(int first, float end, float width, Alignment align, float top, float tall, bool pictured)
+        {
+            var shift = 0f;
+            if (align != Alignment.Left && width < Unbounded && end < width)
+                shift = align == Alignment.Center ? (width - end) * 0.5f : width - end;
+
+            // A line of words alone, set from the left, is where it was laid already: the common case, so it
+            // costs nothing.
+            if (shift == 0f && !pictured)
+                return;
+
+            for (var i = first; i < _pieces.Count; i++)
+            {
+                var piece = _pieces[i];
+                piece.At.X += shift;
+                piece.At.Y = top + tall - (piece.Image != null ? piece.Box.Y : piece.Size);
+                _pieces[i] = piece;
+            }
         }
 
         /// <summary>Whether the word from <paramref name="start" /> to <paramref name="end" /> fits on the line after the piece being built.</summary>
@@ -426,7 +681,7 @@ namespace Lumel.Text
             Heading
         }
 
-        /// <summary>Words drawn in one call.</summary>
+        /// <summary>Words or an image, drawn in one call.</summary>
         struct Piece
         {
             public string Text;
@@ -434,9 +689,15 @@ namespace Lumel.Text
             public string Font;
             public float Size;
             public Tone Tone;
+
+            /// <summary>The picture an image draws, or null for words.</summary>
+            public IImageSource Image;
+
+            /// <summary>How big an image is drawn.</summary>
+            public Vector2 Box;
         }
 
-        /// <summary>A rule, or a bullet's mark; a rule reaches across whatever width the text is given.</summary>
+        /// <summary>A rule, a bullet's mark, or the rule under a table's heading row; a rule between blocks reaches across whatever width the text is given.</summary>
         struct Mark
         {
             public RectangleF Where;

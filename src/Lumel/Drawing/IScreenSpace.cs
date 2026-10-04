@@ -33,6 +33,9 @@ namespace Lumel.Drawing
         void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
             MyScreenSpaceLayer layer);
 
+        /// <summary>How big <paramref name="material" />'s picture was made, in its own pixels, or zero for a material this cannot draw.</summary>
+        Vector2 TextureSize(MyStringId material);
+
         /// <summary>
         ///     Draws one run of text at <paramref name="position" />, placed about it as <paramref name="align" /> says.
         /// </summary>

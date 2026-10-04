@@ -1,6 +1,10 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Lumel.Drawing;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
@@ -23,6 +27,8 @@ namespace Sprocket.Sim.Simulation
     {
         readonly List<DrawCommand> _commands = new List<DrawCommand>();
         readonly List<Rectangle> _scissors = new List<Rectangle>();
+        readonly Dictionary<string, Vector2> _textureSizes = new Dictionary<string, Vector2>();
+        readonly LcdSprites _sprites = new LcdSprites();
 
         public ScreenSpaceDevice()
         {
@@ -145,6 +151,50 @@ namespace Sprocket.Sim.Simulation
         public Vector2 NormalizedSizeToPixels(Vector2 size)
         {
             return new Vector2(size.X * ViewportSize.X, size.Y * ViewportSize.Y);
+        }
+
+        /// <summary>How big the picture of <paramref name="material" /> is, read from the picture the canvas would draw.</summary>
+        /// <remarks>
+        /// The same pictures the canvas draws: a block's, by the two shapes of name a block picture comes in, or
+        /// a text panel's sprite. Each is read once; a machine with neither the game nor the cache knows none.
+        /// </remarks>
+        public Vector2 TextureSize(MyStringId material)
+        {
+            string name = material.String;
+            Vector2 size;
+            if (_textureSizes.TryGetValue(name, out size))
+                return size;
+
+            string png;
+            if (name.StartsWith(Icons.Prefix, StringComparison.Ordinal) || name.IndexOf('/') >= 0)
+            {
+                string relative = BlockArt.PathFor(name.StartsWith(Icons.Prefix, StringComparison.Ordinal) ? name.Substring(Icons.Prefix.Length) : name);
+                png = relative == null ? null : GameImages.TryResolve(relative);
+            }
+            else
+                png = _sprites.Resolve(name);
+
+            size = png == null ? Vector2.Zero : PictureSize(png);
+            _textureSizes.Add(name, size);
+            return size;
+        }
+
+        /// <summary>The width and height a PNG's header gives.</summary>
+        static Vector2 PictureSize(string png)
+        {
+            using (var file = File.OpenRead(png))
+            {
+                var header = new byte[24];
+                if (file.Read(header, 0, header.Length) < header.Length)
+                    return Vector2.Zero;
+
+                return new Vector2(BigEndian(header, 16), BigEndian(header, 20));
+            }
+        }
+
+        static int BigEndian(byte[] bytes, int at)
+        {
+            return bytes[at] << 24 | bytes[at + 1] << 16 | bytes[at + 2] << 8 | bytes[at + 3];
         }
 
         public void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,

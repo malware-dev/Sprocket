@@ -1,9 +1,11 @@
+using Lumel.Images;
 using VRage.Utils;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look
 {
     /// <summary>
-    /// Turns core's name for a kind of thing into the material that draws it.
+    /// Turns core's name for a kind of thing into the picture that draws it.
     /// </summary>
     /// <remarks>
     /// One function, on purpose. Today it makes a name up and the backend behind it keeps a table of
@@ -20,7 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// </remarks>
         public const string Prefix = "Sprocket_Block_";
 
-        public static MyStringId MaterialFor(string name)
+        /// <summary>The picture of the kind called <paramref name="name" />, of a size not known: wherever one is shown, its placement sizes it.</summary>
+        public static IImageSource PictureFor(string name)
+        {
+            return new Sprite(MaterialFor(name), Vector2.Zero);
+        }
+
+        static MyStringId MaterialFor(string name)
         {
             // A slash means it is the game's own block definition id, and the screen-space API resolves
             // one to that block's picture by itself. Anything without a slash is a word made up by a host

@@ -1,6 +1,7 @@
 using Lumel.Layout;
 using Sprocket.Sim.Machine;
 using VRage.Utils;
+using VRageMath;
 using Xunit;
 using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -12,11 +13,11 @@ public class BlockNameTests
 {
     static readonly MyStringId Picture = MyStringId.GetOrCompute("Picture");
 
-    /// <summary>An image draws its material across the room its placement gives it.</summary>
+    /// <summary>An image draws its picture across the room its placement gives it.</summary>
     [Fact]
-    public void AnImageDrawsItsMaterialAcrossItsBounds()
+    public void AnImageDrawsItsPictureAcrossItsBounds()
     {
-        var image = new Image { Material = Picture, Placement = Fixed.Size(24f, 24f) };
+        var image = new Image { Source = new Sprite(Picture, Vector2.Zero), Placement = Fixed.Size(24f, 24f) };
         var easel = new Easel(new VStack { Children = { new HStack { Children = { image } } } }, 400f, 200f);
 
         var drawn = easel.Sprites.Single(sprite => sprite.Material == Picture);
@@ -25,9 +26,9 @@ public class BlockNameTests
         Assert.True(drawn.Destination.Width > 0);
     }
 
-    /// <summary>An image given no material draws nothing.</summary>
+    /// <summary>An image given no picture draws nothing.</summary>
     [Fact]
-    public void AnImageWithNoMaterialDrawsNothing()
+    public void AnImageWithNoPictureDrawsNothing()
     {
         var easel = new Easel(new VStack { Children = { new HStack { Children = { new Image { Placement = Fixed.Size(24f, 24f) } } } } }, 400f, 200f);
 

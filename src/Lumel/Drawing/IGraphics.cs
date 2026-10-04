@@ -1,4 +1,5 @@
 using System.Text;
+using Lumel.Images;
 using VRage.Utils;
 using VRageMath;
 
@@ -13,6 +14,9 @@ namespace Lumel.Drawing
     {
         /// <summary>The drawable area, in UI units.</summary>
         Vector2 Size { get; }
+
+        /// <summary>The pictures this can draw, found by the names written for them, or null where it knows none.</summary>
+        IImageCatalog Images { get; }
 
         /// <summary>Restricts drawing to <paramref name="bounds" />, intersected with whatever clip is already in effect.</summary>
         /// <remarks>Every call is matched by a <see cref="PopClip" />.</remarks>

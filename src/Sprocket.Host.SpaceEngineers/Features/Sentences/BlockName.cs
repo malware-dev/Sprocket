@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 _art = value;
                 _icon.IsVisible = !string.IsNullOrEmpty(value);
                 if (_icon.IsVisible)
-                    _icon.Material = Icons.MaterialFor(value);
+                    _icon.Source = Icons.PictureFor(value);
             }
         }
 

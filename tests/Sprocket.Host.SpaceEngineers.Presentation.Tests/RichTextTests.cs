@@ -131,6 +131,57 @@ public class RichTextTests
         Assert.Contains(easel.Written, c => c.Text.Contains("*Test* rig"));
     }
 
+    /// <summary>A table with a starred column fills its room, the right-aligned column against the right edge.</summary>
+    [Fact]
+    public void AStarredColumnTakesTheSpareWidth()
+    {
+        var (text, easel) = Laid("| | |\n|:-*|--:|\n| Power cells | 450 |", Wide);
+
+        Assert.Equal(Wide, text.DesiredSize.X);
+        Assert.True(Word(easel, "450").Position.X > Wide * 0.6f * easel.Pixels, "the price is not near the right edge");
+    }
+
+    /// <summary>A table with no star is only as wide as its cells and the gaps between them.</summary>
+    [Fact]
+    public void ATableWithNoStarHugsItsCells()
+    {
+        var (text, _) = Laid("| | |\n|:--|--:|\n| Ice | 2 |", Wide);
+
+        Assert.True(text.DesiredSize.X < Wide / 2f, "the table spread across its room");
+    }
+
+    /// <summary>A heading row's cells take the heading color.</summary>
+    [Fact]
+    public void AHeadingRowTakesTheHeadingColor()
+    {
+        var (_, easel) = Laid("| Item | Price |\n|--|--|\n| Ice | 2 |", Wide);
+
+        Assert.Equal(Bright, Word(easel, "Item").Color);
+        Assert.Equal(Body, Word(easel, "Ice").Color);
+    }
+
+    /// <summary>A table too wide for its room narrows its widest column, whose cell wraps, and the row grows to hold it.</summary>
+    [Fact]
+    public void ATooWideTableWrapsItsWidestColumn()
+    {
+        var (_, easel) = Laid("| | |\n|--|--|\n| one two three four five six seven eight nine ten eleven twelve | Next |\n| Below | x |", Wide);
+
+        var lines = easel.Written.Where(c => c.Position.Y < Word(easel, "Below").Position.Y).Select(c => c.Position.Y).Distinct().Count();
+        Assert.True(lines > 1, "the long cell did not wrap");
+        Assert.Equal(Word(easel, "Next").Position.Y, easel.Written.Min(c => c.Position.Y));
+    }
+
+    /// <summary>A slot in a cell takes its words from the arguments.</summary>
+    [Fact]
+    public void ASlotInACellIsFilled()
+    {
+        var named = new Arguments();
+        named.Set("price", "12 SC");
+        var (_, easel) = Laid(Template.Read("| | |\n|--|--:|\n| Whiskey | {price} |"), Wide, named);
+
+        Assert.Equal(Body, Word(easel, "12 SC").Color);
+    }
+
     static (RichText, Easel) Laid(string markdown, float wide) => Laid(Markdown.Parse(markdown), wide, null);
 
     static (RichText, Easel) Laid(Document document, float wide, Arguments? arguments)

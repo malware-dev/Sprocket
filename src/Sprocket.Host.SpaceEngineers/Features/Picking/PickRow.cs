@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_art != Icon)
             {
                 _art = Icon;
-                _picture.Material = Icons.MaterialFor(Icon ?? "");
+                _picture.Source = Icons.PictureFor(Icon ?? "");
                 _picture.Tint = string.IsNullOrEmpty(Icon) ? Palette.None : Color.White;
             }
 

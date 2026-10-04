@@ -1,6 +1,7 @@
 using System.Text;
 using Lumel;
 using Lumel.Drawing;
+using Lumel.Images;
 using VRage.Utils;
 using VRageMath;
 
@@ -17,6 +18,8 @@ sealed class Counting : IGraphics
     public long Characters { get; private set; }
 
     public Vector2 Size => new Vector2(1440f, 1080f);
+
+    public IImageCatalog? Images => null;
 
     /// <summary>Starts both counts again.</summary>
     public void Reset()

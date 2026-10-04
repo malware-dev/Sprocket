@@ -172,6 +172,68 @@ public class MarkdownTests
         Assert.Equal("**one**\n# two", Words(blocks[0]));
     }
 
+    /// <summary>A table has the columns its delimiter row describes, a heading row, and rows of cells that hold words.</summary>
+    [Fact]
+    public void ATableHasColumnsAndRows()
+    {
+        var table = Assert.Single(Markdown.Parse("| Item | Price |\n|:---*|**---:|\n| Power cells | **450 SC** |\n| Ice | 2 SC |").Blocks);
+
+        Assert.Equal(BlockKind.Table, table.Kind);
+        Assert.Equal(new[] { Alignment.Left, Alignment.Right }, table.Columns.Select(c => c.Align));
+        Assert.Equal(new[] { 1, 2 }, table.Columns.Select(c => c.Shares));
+        Assert.Equal(3, table.Blocks.Count);
+        Assert.Equal(1, table.Blocks[0].Level);
+        Assert.Equal("Item", Words(table.Blocks[0].Blocks[0]));
+        Assert.Equal(BlockKind.Cell, table.Blocks[1].Blocks[1].Kind);
+        Assert.Equal(RunKind.Strong, table.Blocks[1].Blocks[1].Runs[0].Kind);
+        Assert.Equal("2 SC", Words(table.Blocks[2].Blocks[1]));
+    }
+
+    /// <summary>A heading row of empty cells is no heading, and a row with too few or too many cells has as many as there are columns.</summary>
+    [Fact]
+    public void RowsFitTheColumns()
+    {
+        var table = Assert.Single(Markdown.Parse("| | |\n|--|:-:|\n| one |\n| a | b | dropped |").Blocks);
+
+        Assert.Equal(Alignment.Center, table.Columns[1].Align);
+        Assert.Equal(2, table.Blocks.Count);
+        Assert.All(table.Blocks, row => Assert.Equal(0, row.Level));
+        Assert.All(table.Blocks, row => Assert.Equal(2, row.Blocks.Count));
+        Assert.Equal("", Words(table.Blocks[0].Blocks[1]));
+        Assert.Equal("b", Words(table.Blocks[1].Blocks[1]));
+    }
+
+    /// <summary>A table can start straight after the words that introduce it, and ends at a blank line or the first line with no pipe.</summary>
+    [Fact]
+    public void ATableFollowsWordsAndEnds()
+    {
+        var blocks = Markdown.Parse("Prices today\nper unit\n| | |\n|--|--|\n| a | b |\nno pipe here\n\n| x |").Blocks;
+
+        Assert.Equal(new[] { BlockKind.Paragraph, BlockKind.Table, BlockKind.Paragraph, BlockKind.Paragraph }, blocks.Select(b => b.Kind));
+        Assert.Equal("Prices today\nper unit", Words(blocks[0]));
+        Assert.Equal("no pipe here", Words(blocks[2]));
+        Assert.Equal("| x |", Words(blocks[3]));
+    }
+
+    /// <summary>Pipes without a delimiter row under them are the words they are, and an escaped pipe stays in its cell.</summary>
+    [Fact]
+    public void PipesWithoutADelimiterRowAreWords()
+    {
+        Assert.Equal(BlockKind.Paragraph, Assert.Single(Markdown.Parse("| a | b |\n| -- | x |").Blocks).Kind);
+
+        var table = Assert.Single(Markdown.Parse("| | |\n|--|--|\n| a \\| b | c |").Blocks);
+        Assert.Equal("a | b", Words(table.Blocks[0].Blocks[0]));
+    }
+
+    /// <summary>A delimiter row under a list item is the item's words, because only a paragraph's last line can head a table.</summary>
+    [Fact]
+    public void AListItemHeadsNoTable()
+    {
+        var blocks = Markdown.Parse("- a | b\n|--|--|").Blocks;
+
+        Assert.Equal(BlockKind.Bullet, Assert.Single(blocks).Kind);
+    }
+
     /// <summary>The words of a block, with its line breaks as newlines.</summary>
     static string Words(Block block) =>
         string.Concat(block.Runs.Select(r => r.IsBreak ? "\n" : r.Text));

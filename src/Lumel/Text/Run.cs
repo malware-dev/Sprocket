@@ -1,8 +1,8 @@
-
 namespace Lumel.Text
 {
     /// <summary>A stretch of words inside a block that are all set apart the same way, a slot whose words are given later, or a line break.</summary>
-    public sealed class Run
+    /// <remarks>An image is an <see cref="ImageRun" />.</remarks>
+    public class Run
     {
         /// <summary>A line break.</summary>
         public static readonly Run Break = new Run("", RunKind.Break);

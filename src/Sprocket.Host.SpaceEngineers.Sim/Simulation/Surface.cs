@@ -37,6 +37,7 @@ namespace Sprocket.Sim.Simulation
         readonly GlyphAtlas _atlas;
         readonly Dictionary<string, Brush> _brushes = new Dictionary<string, Brush>();
         readonly Dictionary<string, BitmapSource> _art = new Dictionary<string, BitmapSource>();
+        readonly LcdSprites _sprites = new LcdSprites();
         readonly SeFontMetrics _symbols;
         readonly GlyphAtlas _symbolAtlas;
 
@@ -368,7 +369,7 @@ namespace Sprocket.Sim.Simulation
                 // stopped drawing anything else in its place, so nothing here should whisper about it.
                 // Two shapes, both of them block pictures: a definition id, which the game resolves to
                 // that block's own picture by itself, and a prefixed word from a host with no blocks to
-                // ask. See Icons.MaterialFor, which decides which one a kind gets.
+                // ask. See Icons.PictureFor, which decides which one a kind gets.
                 bool prefixed = material.StartsWith(Icons.Prefix, StringComparison.Ordinal);
                 if (prefixed || material.IndexOf('/') >= 0)
                 {
@@ -381,6 +382,14 @@ namespace Sprocket.Sim.Simulation
                         Shrink(context, art, destination);
                         return;
                     }
+                }
+
+                // A text panel's sprite, which the game's screen space draws by its name as well.
+                BitmapSource sprite = SpriteFor(material);
+                if (sprite != null)
+                {
+                    DrawTinted(context, sprite, destination, command.Color);
+                    return;
                 }
 
                 DrawMissing(context, destination, material);
@@ -623,24 +632,50 @@ namespace Sprocket.Sim.Simulation
                 return art;
 
             string relative = BlockArt.PathFor(name);
-            string png = relative == null ? null : SafeResolve(relative);
+            string png = relative == null ? null : GameImages.TryResolve(relative);
 
             art = png == null ? null : new BitmapImage(new Uri(png, UriKind.Absolute));
             _art.Add(name, art);
             return art;
         }
 
-        static string SafeResolve(string relative)
+        BitmapSource SpriteFor(string name)
         {
+            var key = "sprite:" + name;
+            BitmapSource sprite;
+            if (_art.TryGetValue(key, out sprite))
+                return sprite;
+
+            string png = _sprites.Resolve(name);
+            sprite = png == null ? null : new BitmapImage(new Uri(png, UriKind.Absolute));
+            _art.Add(key, sprite);
+            return sprite;
+        }
+
+        /// <summary>Draws a sprite into <paramref name="destination" />, tinted as the game tints one.</summary>
+        /// <remarks>
+        /// The game multiplies a sprite by its color. White leaves the picture as it was made, which is how
+        /// logos and posters are drawn; any other color here paints the sprite's shape in it, which is exact
+        /// for the white shapes and icons that are tinted in practice and only near for a colored picture.
+        /// </remarks>
+        static void DrawTinted(DrawingContext context, BitmapSource sprite, Rect destination, Color tint)
+        {
+            context.PushOpacity(tint.A / 255d);
             try
             {
-                return GameImages.Resolve(relative);
+                if (tint.R >= 250 && tint.G >= 250 && tint.B >= 250)
+                {
+                    context.DrawImage(sprite, destination);
+                    return;
+                }
+
+                context.PushOpacityMask(new ImageBrush(sprite) { Viewport = destination, ViewportUnits = BrushMappingMode.Absolute });
+                context.DrawRectangle(new SolidColorBrush(Ink.FromRgb(tint.R, tint.G, tint.B)), null, destination);
+                context.Pop();
             }
-            catch (Exception)
+            finally
             {
-                // A decoder that will not run is a reason to show the initial, not a reason to stop
-                // drawing the screen.
-                return null;
+                context.Pop();
             }
         }
 

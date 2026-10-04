@@ -51,6 +51,22 @@ namespace Sprocket.Sim.Content
             return cached;
         }
 
+        /// <summary>
+        /// The same as <see cref="Resolve" />, or null where the decoder will not run: for a picture something
+        /// can be drawn in place of, and a reason to draw that rather than to stop drawing.
+        /// </summary>
+        public static string TryResolve(string relativePath)
+        {
+            try
+            {
+                return Resolve(relativePath);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         /// <summary>Where the decoded copy of <paramref name="relativePath" /> lives, whether or not it exists.</summary>
         public static string CachedPath(string relativePath)
         {

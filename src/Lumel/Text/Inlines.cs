@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace Lumel.Text
 {
-    /// <summary>Reads the words inside one block of markdown-lite into runs: strong, emphasis, code spans, escapes and line breaks.</summary>
+    /// <summary>Reads the words inside one block of markdown-lite into runs: strong, emphasis, code spans, images, escapes and line breaks.</summary>
     /// <remarks>
     ///     Strong and emphasis follow CommonMark's delimiter runs: a run of <c>*</c> or <c>_</c> opens or
     ///     closes by what stands either side of it, a closer takes the nearest opener of its own character,
@@ -67,6 +68,19 @@ namespace Lumel.Text
                     pieces.Add(new Piece { Kind = PieceKind.Code, Text = Code(text.Substring(i + ticks, close - i - ticks)) });
                     i = close + ticks;
                     continue;
+                }
+
+                if (c == '!' && i + 1 < text.Length && text[i + 1] == '[')
+                {
+                    int end;
+                    var image = Image(text, i, out end);
+                    if (image != null)
+                    {
+                        Flush(pieces, words);
+                        pieces.Add(image);
+                        i = end;
+                        continue;
+                    }
                 }
 
                 if (c == '*' || c == '_')
@@ -212,6 +226,14 @@ namespace Lumel.Text
                     continue;
                 }
 
+                if (piece.Kind == PieceKind.Image)
+                {
+                    Add(runs, words, kind);
+                    var stressed = (strong > 0 ? RunKind.Strong : RunKind.Plain) | (emphasis > 0 ? RunKind.Emphasis : RunKind.Plain);
+                    runs.Add(new ImageRun(((ImagePiece)piece).Picture, piece.Text, stressed));
+                    continue;
+                }
+
                 var text = piece.Kind == PieceKind.Delimiter ? new string(piece.Mark, piece.Left) : piece.Text;
                 if (text.Length == 0)
                     continue;
@@ -248,6 +270,87 @@ namespace Lumel.Text
 
             pieces.Add(new Piece { Kind = PieceKind.Words, Text = words.ToString() });
             words.Clear();
+        }
+
+        /// <summary>The image written at <paramref name="at" /> as <c>![words](name)</c> or <c>![words](name =size)</c>, and where it ends; null where none is written there.</summary>
+        /// <remarks>The words in the brackets are only words, read for nothing, as an image's description.</remarks>
+        static ImagePiece Image(string text, int at, out int end)
+        {
+            end = at;
+
+            var close = Bracket(text, at + 2, ']');
+            if (close < 0 || close + 1 >= text.Length || text[close + 1] != '(')
+                return null;
+
+            var shut = Bracket(text, close + 2, ')');
+            if (shut < 0)
+                return null;
+
+            var inside = text.Substring(close + 2, shut - close - 2).Trim();
+            var space = inside.IndexOf(' ');
+            var picture = space < 0 ? inside : inside.Substring(0, space);
+            if (picture.Length == 0)
+                return null;
+
+            var width = float.NaN;
+            var height = float.NaN;
+            if (space >= 0 && !IsSize(inside.Substring(space + 1).Trim(), out width, out height))
+                return null;
+
+            end = shut + 1;
+            return new ImagePiece
+            {
+                Kind = PieceKind.Image,
+                Text = text.Substring(at + 2, close - at - 2),
+                Picture = new Picture(picture, width, height)
+            };
+        }
+
+        /// <summary>Whether <paramref name="text" /> is an image's size: <c>=WxH</c>, or <c>=W</c>, <c>=Wx</c> or <c>=xH</c> for one side, each a number above zero.</summary>
+        static bool IsSize(string text, out float width, out float height)
+        {
+            width = float.NaN;
+            height = float.NaN;
+
+            if (text.Length < 2 || text[0] != '=')
+                return false;
+
+            var by = text.IndexOf('x');
+            var across = by < 0 ? text.Substring(1) : text.Substring(1, by - 1);
+            var down = by < 0 ? "" : text.Substring(by + 1);
+
+            return (across.Length > 0 || down.Length > 0)
+                   && (across.Length == 0 || IsNumber(across, out width))
+                   && (down.Length == 0 || IsNumber(down, out height));
+        }
+
+        static bool IsNumber(string text, out float number)
+        {
+            if (float.TryParse(text, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out number) && number > 0f)
+                return true;
+
+            number = float.NaN;
+            return false;
+        }
+
+        /// <summary>Where <paramref name="closer" /> next stands from <paramref name="from" />, or -1 where another bracket or a line's end comes first.</summary>
+        /// <remarks>
+        ///     Stopping at the next bracket is what keeps reading linear: an image left unclosed is given up at the
+        ///     next one rather than searched for to the end of the text, which a run of them would do for each.
+        /// </remarks>
+        static int Bracket(string text, int from, char closer)
+        {
+            for (var i = from; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (c == closer)
+                    return i;
+
+                if (c == '[' || c == ']' || c == '(' || c == ')' || c == '\n')
+                    return -1;
+            }
+
+            return -1;
         }
 
         static int Count(string text, int from, char c)
@@ -307,11 +410,12 @@ namespace Lumel.Text
             Words,
             Code,
             Break,
-            Delimiter
+            Delimiter,
+            Image
         }
 
         /// <summary>One cut of the text, and where the spans it sits in begin and end.</summary>
-        sealed class Piece
+        class Piece
         {
             public PieceKind Kind;
             public string Text = "";
@@ -331,6 +435,13 @@ namespace Lumel.Text
 
             /// <summary>How much deeper in emphasis spans this piece is than the one before it.</summary>
             public int EmphasisDelta;
+        }
+
+        /// <summary>An image, whose words are its description.</summary>
+        sealed class ImagePiece : Piece
+        {
+            /// <summary>What the image shows.</summary>
+            public Picture Picture;
         }
     }
 }

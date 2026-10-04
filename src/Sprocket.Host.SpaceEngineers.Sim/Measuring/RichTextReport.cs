@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -49,6 +50,10 @@ public static class RichTextReport
         Row(report, device, graphics, "stress, unbounded", Mixed(400), Element.Unbounded);
         Row(report, device, graphics, "stress, 2000 wide", Mixed(400), 2000f);
         Row(report, device, graphics, "one long paragraph", Paragraph(8000), Room);
+        Row(report, device, graphics, "price table", PriceList(20), Room);
+        Row(report, device, graphics, "long table", PriceList(400), Room);
+        Row(report, device, graphics, "long table, narrow", PriceList(400), 160f);
+        Row(report, device, graphics, "icons in text", Icons(400), Room);
         report.AppendLine();
 
         report.AppendLine("Pathological marks, read only.");
@@ -59,6 +64,10 @@ public static class RichTextReport
         Parse(report, "unclosed openers", Repeat(" *a", 30000));
         Parse(report, "nested to the hilt", Repeat("*a ", 15000) + Repeat("a* ", 15000));
         Parse(report, "code ticks unclosed", Repeat("`a ", 30000));
+        Parse(report, "images unclosed", Repeat("![a](b ", 30000));
+        Parse(report, "brackets unclosed", Repeat("![a ", 30000));
+        Parse(report, "pipes, no table", Repeat("a | b | c\n", 20000));
+        Parse(report, "table rows", "| a | b |\n|--|--|\n" + Repeat("| a | b |\n", 20000));
         report.AppendLine();
 
         Headroom(report, graphics);
@@ -193,12 +202,41 @@ public static class RichTextReport
         return text.ToString();
     }
 
-    static int Characters(Document document)
+    /// <summary>A price list as a table, the names' column taking the spare width, with an icon in each row.</summary>
+    static string PriceList(int rows)
+    {
+        var text = new StringBuilder("| | Item | Price |\n|--|:---*|---:|\n");
+        for (var i = 0; i < rows; i++)
+            text.Append("| ![](IconEnergy) | Power cell ").Append(i).Append(" | **").Append(i * 7).Append(" SC** |\n");
+
+        return text.ToString();
+    }
+
+    /// <summary>Sentences with an icon in each, a taller picture now and then.</summary>
+    static string Icons(int sentences)
+    {
+        var text = new StringBuilder();
+        for (var i = 0; i < sentences; i++)
+        {
+            text.Append("The ![](IconOxygen) vent fills the room, and the ![](IconEnergy) battery holds its charge.\n");
+            if (i % 10 == 9)
+                text.Append("![](LCD_SoF_CosmicTeam_Landscape =x96)\n\n");
+        }
+
+        return text.ToString();
+    }
+
+    static int Characters(Document document) => Characters(document.Blocks);
+
+    static int Characters(IList<Block> blocks)
     {
         var count = 0;
-        foreach (var block in document.Blocks)
-        foreach (var run in block.Runs)
-            count += run.Text.Length;
+        foreach (var block in blocks)
+        {
+            count += Characters(block.Blocks);
+            foreach (var run in block.Runs)
+                count += run.Text.Length;
+        }
 
         return count;
     }

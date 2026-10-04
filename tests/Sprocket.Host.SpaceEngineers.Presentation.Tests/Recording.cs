@@ -1,6 +1,7 @@
 using System.Text;
 using Lumel;
 using Lumel.Drawing;
+using Lumel.Images;
 using VRage.Utils;
 using VRageMath;
 
@@ -12,6 +13,8 @@ sealed class Recording(RectangleF area) : IGraphics
     public List<RectangleF> Fills { get; } = new List<RectangleF>();
 
     public Vector2 Size => new Vector2(area.Width, area.Height);
+
+    public IImageCatalog? Images => null;
 
     public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
 

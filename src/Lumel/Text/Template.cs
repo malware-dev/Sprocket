@@ -34,15 +34,7 @@ namespace Lumel.Text
 
             var runs = new List<Run>();
             foreach (var block in document.Blocks)
-            {
-                runs.Clear();
-                foreach (var run in block.Runs)
-                    Unmarked(run, names, runs);
-
-                block.Runs.Clear();
-                foreach (var run in runs)
-                    block.Runs.Add(run);
-            }
+                SplitSlots(block, names, runs);
 
             return document;
         }
@@ -110,11 +102,26 @@ namespace Lumel.Text
             return i > start ? i : -1;
         }
 
+        /// <summary>Splits the slots marked in <paramref name="block" />'s runs, and in the blocks it holds, out into runs of their own; <paramref name="runs" /> is room to work in.</summary>
+        static void SplitSlots(Block block, List<string> names, List<Run> runs)
+        {
+            foreach (var inner in block.Blocks)
+                SplitSlots(inner, names, runs);
+
+            runs.Clear();
+            foreach (var run in block.Runs)
+                Unmarked(run, names, runs);
+
+            block.Runs.Clear();
+            foreach (var run in runs)
+                block.Runs.Add(run);
+        }
+
         /// <summary>Adds <paramref name="run" /> to <paramref name="runs" />, split into its words and the slots marked in it.</summary>
         static void Unmarked(Run run, List<string> names, List<Run> runs)
         {
             var text = run.Text;
-            if (run.IsBreak || text.IndexOf(Mark) < 0)
+            if (run.IsBreak || run is ImageRun || text.IndexOf(Mark) < 0)
             {
                 runs.Add(run);
                 return;

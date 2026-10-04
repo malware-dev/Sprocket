@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Lumel.Images;
 using Sandbox.ModAPI;
 using VRage.Utils;
 using VRageMath;
@@ -77,8 +78,13 @@ namespace Lumel.Drawing
             _layer = layer;
             _fill = fill;
             _referenceHeight = referenceHeight;
+            Images = new ScreenSpaceImages(screenSpace);
             Begin();
         }
+
+        /// <inheritdoc />
+        /// <remarks>Each picture is looked up once for as long as this lives.</remarks>
+        public IImageCatalog Images { get; }
 
         /// <summary>The whole window in UI units, which extends past <see cref="Size" /> on a screen wider than 4:3.</summary>
         /// <remarks>The game's own cursor reaches the edges of this, not of <see cref="Size" />.</remarks>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 
 namespace Lumel.Text
@@ -6,8 +7,14 @@ namespace Lumel.Text
     /// <remarks>
     ///     Markdown-lite is CommonMark's headings (<c>#</c> to <c>######</c>), rules (<c>---</c>, <c>***</c>,
     ///     <c>___</c>, spaced or not), one level of lists (<c>-</c>, <c>*</c> or <c>+</c>, and <c>1.</c> or
-    ///     <c>1)</c>), strong and emphasis with <c>*</c> and <c>_</c>, code spans and backslash escapes. A
-    ///     single newline is a line break and a blank line ends a block. Anything else reads as the text it is.
+    ///     <c>1)</c>), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans and backslash
+    ///     escapes. A single newline is a line break and a blank line ends a block. Anything else reads as the
+    ///     text it is.
+    ///     <para>
+    ///         A table's delimiter row may give a column a star for each share it takes of the width the table
+    ///         has to spare; a table with no star is as wide as its cells. A heading row of empty cells is no
+    ///         heading at all, which is how a table without one is written.
+    ///     </para>
     /// </remarks>
     public static class Markdown
     {
@@ -21,6 +28,7 @@ namespace Lumel.Text
             var lines = source.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
             var open = new StringBuilder();
             Block current = null;
+            Block table = null;
 
             for (var i = 0; i < lines.Length; i++)
             {
@@ -29,7 +37,19 @@ namespace Lumel.Text
                 if (line.Length == 0)
                 {
                     Close(document, ref current, open);
+                    table = null;
                     continue;
+                }
+
+                if (table != null)
+                {
+                    if (line.IndexOf('|') >= 0)
+                    {
+                        Row(table, line, 0);
+                        continue;
+                    }
+
+                    table = null;
                 }
 
                 int level;
@@ -64,6 +84,14 @@ namespace Lumel.Text
                     Close(document, ref current, open);
                     current = new Block(BlockKind.Numbered, level);
                     open.Append(rest);
+                    continue;
+                }
+
+                List<Column> columns;
+                if (current != null && current.Kind == BlockKind.Paragraph && IsDelimiterRow(line, out columns) &&
+                    Cells(LastLine(open)).Count == columns.Count)
+                {
+                    table = Table(document, ref current, open, columns);
                     continue;
                 }
 
@@ -107,6 +135,139 @@ namespace Lumel.Text
             document.Blocks.Add(current);
             current = null;
             open.Clear();
+        }
+
+        /// <summary>The last line of the paragraph being read.</summary>
+        static string LastLine(StringBuilder open)
+        {
+            var text = open.ToString();
+            return text.Substring(text.LastIndexOf('\n') + 1);
+        }
+
+        /// <summary>A table of <paramref name="columns" />, its heading row the last line of the paragraph being read, and the lines before that left a paragraph.</summary>
+        /// <remarks>As GitHub's own reader does, so a table can start straight after the words that introduce it.</remarks>
+        static Block Table(Document document, ref Block current, StringBuilder open, List<Column> columns)
+        {
+            var heading = LastLine(open);
+
+            if (heading.Length < open.Length)
+            {
+                open.Length -= heading.Length + 1;
+                Close(document, ref current, open);
+            }
+            else
+            {
+                current = null;
+                open.Clear();
+            }
+
+            var table = new Block(BlockKind.Table);
+            for (var i = 0; i < columns.Count; i++)
+                table.Columns.Add(columns[i]);
+
+            document.Blocks.Add(table);
+
+            var cells = Cells(heading);
+            for (var i = 0; i < cells.Count; i++)
+            {
+                if (cells[i].Trim().Length > 0)
+                {
+                    Row(table, heading, 1);
+                    break;
+                }
+            }
+
+            return table;
+        }
+
+        /// <summary>Adds the row written as <paramref name="line" /> to <paramref name="table" />, with as many cells as it has columns: missing ones empty, extra ones dropped.</summary>
+        static void Row(Block table, string line, int level)
+        {
+            var row = new Block(BlockKind.Row, level);
+            var cells = Cells(line);
+
+            for (var i = 0; i < table.Columns.Count; i++)
+            {
+                var cell = new Block(BlockKind.Cell, level);
+                Inlines.Parse(i < cells.Count ? cells[i].Trim() : "", cell.Runs);
+                row.Blocks.Add(cell);
+            }
+
+            table.Blocks.Add(row);
+        }
+
+        /// <summary>The cells of a table row: the text between its pipes, with a pipe at either end belonging to neither, and an escaped pipe kept in its cell.</summary>
+        static List<string> Cells(string line)
+        {
+            var cells = new List<string>();
+            var from = line.Length > 0 && line[0] == '|' ? 1 : 0;
+            var cell = new StringBuilder();
+
+            for (var i = from; i < line.Length; i++)
+            {
+                var c = line[i];
+                if (c == '\\' && i + 1 < line.Length && line[i + 1] == '|')
+                {
+                    cell.Append("\\|");
+                    i++;
+                    continue;
+                }
+
+                if (c == '|')
+                {
+                    cells.Add(cell.ToString());
+                    cell.Clear();
+                    continue;
+                }
+
+                cell.Append(c);
+            }
+
+            if (cell.Length > 0 || line.Length == 0 || line[line.Length - 1] != '|')
+                cells.Add(cell.ToString());
+
+            return cells;
+        }
+
+        /// <summary>Whether <paramref name="line" /> is a table's delimiter row: in each cell dashes, a colon at either end for where the column's cells sit, and a star for each share of the spare width the column takes.</summary>
+        static bool IsDelimiterRow(string line, out List<Column> columns)
+        {
+            columns = null;
+
+            // Asked of every line under a paragraph, so the first character turns nearly all of them away
+            // before the line is searched.
+            var first = line[0];
+            if (first != '|' && first != '-' && first != ':' && first != '*' || line.IndexOf('|') < 0 || line.IndexOf('-') < 0)
+                return false;
+
+            var cells = Cells(line);
+            var found = new List<Column>(cells.Count);
+
+            for (var i = 0; i < cells.Count; i++)
+            {
+                var cell = cells[i].Trim();
+                var shares = 0;
+                var marks = new StringBuilder(cell.Length);
+                for (var j = 0; j < cell.Length; j++)
+                {
+                    if (cell[j] == '*')
+                        shares++;
+                    else
+                        marks.Append(cell[j]);
+                }
+
+                var bare = marks.ToString();
+                var left = bare.Length > 0 && bare[0] == ':';
+                var right = bare.Length > 1 && bare[bare.Length - 1] == ':';
+                var dashes = bare.Substring(left ? 1 : 0, bare.Length - (left ? 1 : 0) - (right ? 1 : 0));
+                if (dashes.Length == 0 || dashes.Trim('-').Length != 0)
+                    return false;
+
+                found.Add(new Column(left && right ? Alignment.Center : right ? Alignment.Right : Alignment.Left, shares));
+            }
+
+            columns = found;
+            return true;
         }
 
         /// <summary>Three or more of one of <c>-</c>, <c>*</c> or <c>_</c>, and nothing else but spaces.</summary>

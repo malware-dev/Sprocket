@@ -55,6 +55,17 @@ public class RichTextBudgetTests
             $"{small.PerCharacter:0.0} per character at 50 sentences, {large.PerCharacter:0.0} at 5000");
     }
 
+    /// <summary>A table measures each character a bounded number of times, however many rows it has.</summary>
+    [Fact]
+    public void TableLayoutGrowsWithItsRows()
+    {
+        var small = Measuring(PriceList(20), Room);
+        var large = Measuring(PriceList(2000), Room);
+
+        Assert.True(large.PerCharacter < small.PerCharacter * 1.2f,
+            $"{small.PerCharacter:0.0} per character at 20 rows, {large.PerCharacter:0.0} at 2000");
+    }
+
     /// <summary>Reading markdown allocates in proportion to its length, whatever its marks do.</summary>
     [Theory]
     [InlineData("plain")]
@@ -92,12 +103,27 @@ public class RichTextBudgetTests
         var text = Laid(graphics, Markdown.Parse(Styled(200)), Room);
 
         graphics.Reset();
-        var before = GC.GetAllocatedBytesForCurrentThread();
+        var allocated = 0L;
 
-        for (var i = 0; i < 100; i++)
-            Frame(graphics, text, Room);
+        // A collection inside the loop makes the count include the unused part of the thread's allocation
+        // context, up to 8 KB, which is no allocation at all; one that lands there anyway, from another
+        // test's thread, voids the count and it is taken again.
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
 
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            var collections = GC.CollectionCount(0);
+            var before = GC.GetAllocatedBytesForCurrentThread();
+
+            for (var i = 0; i < 100; i++)
+                Frame(graphics, text, Room);
+
+            allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+            if (GC.CollectionCount(0) == collections)
+                break;
+        }
 
         Assert.Equal(0, graphics.Calls);
         Assert.Equal(0L, allocated);
@@ -130,12 +156,31 @@ public class RichTextBudgetTests
         var document = Markdown.Parse(markdown);
         Laid(graphics, document, room);
 
-        var characters = 0;
-        foreach (var block in document.Blocks)
-        foreach (var run in block.Runs)
-            characters += run.Text.Length;
+        return new Cost { PerCharacter = graphics.Characters / (float)Characters(document.Blocks) };
+    }
 
-        return new Cost { PerCharacter = graphics.Characters / (float)characters };
+    /// <summary>How many characters the runs of <paramref name="blocks" /> hold, and of the blocks inside them.</summary>
+    static int Characters(IList<Block> blocks)
+    {
+        var count = 0;
+        foreach (var block in blocks)
+        {
+            count += Characters(block.Blocks);
+            foreach (var run in block.Runs)
+                count += run.Text.Length;
+        }
+
+        return count;
+    }
+
+    /// <summary>A price list as a table: a heading row, then <paramref name="rows" /> items, the names' column taking the spare width.</summary>
+    static string PriceList(int rows)
+    {
+        var text = new StringBuilder("| Item | Price |\n|:---*|---:|\n");
+        for (var i = 0; i < rows; i++)
+            text.Append("| Power cell ").Append(i).Append(" | **").Append(i * 7).Append(" SC** |\n");
+
+        return text.ToString();
     }
 
     static float Parsing(string source)

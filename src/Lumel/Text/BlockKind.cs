@@ -17,6 +17,15 @@ namespace Lumel.Text
         Numbered,
 
         /// <summary>A line across, dividing what is above from what is below.</summary>
-        Rule
+        Rule,
+
+        /// <summary>Rows of cells in columns: its blocks are its rows, and its columns say how each sits.</summary>
+        Table,
+
+        /// <summary>One row of a table: its blocks are its cells, one for each column; level 1 for the heading row.</summary>
+        Row,
+
+        /// <summary>One cell of a table's row, holding words; level 1 in the heading row.</summary>
+        Cell
     }
 }

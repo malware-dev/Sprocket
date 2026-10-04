@@ -66,6 +66,12 @@ namespace Lumel.Drawing
         }
 
         /// <inheritdoc />
+        public Vector2 TextureSize(MyStringId material)
+        {
+            return MyScreenSpaceSprite.GetTextureSize(material);
+        }
+
+        /// <inheritdoc />
         public void DrawText(string font, string text, Vector2 position, float scale, Color color,
             MyGuiDrawAlignEnum align, float maxWidth, MyScreenSpaceLayer layer)
         {
