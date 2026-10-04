@@ -26,6 +26,7 @@ namespace Lumel.Text
         readonly StringBuilder _probe = new StringBuilder(64);
 
         readonly List<float> _wides = new List<float>();
+        readonly List<Spot> _spots = new List<Spot>();
 
         Document _document;
         Arguments _arguments;
@@ -40,6 +41,8 @@ namespace Lumel.Text
         float _indent = 24f;
         Alignment _alignment;
         bool _fit;
+        Action<Link> _follow;
+        Link _pressed;
 
         bool _stale = true;
         float _laidOutFor = -1f;
@@ -51,6 +54,7 @@ namespace Lumel.Text
         string _pieceFont;
         float _pieceSize;
         Tone _pieceTone;
+        Link _pieceLink;
 
         /// <summary>An empty document in white, with lines 24 units tall.</summary>
         public RichText()
@@ -225,6 +229,28 @@ namespace Lumel.Text
         /// <summary>The color of rules and of a bullet's mark.</summary>
         public Color RuleColor { get; set; }
 
+        /// <summary>The color of a link's words, or null to draw them as emphasized words are.</summary>
+        public Color? LinkColor { get; set; }
+
+        /// <summary>The fill behind a link's words, or null for none.</summary>
+        public Color? LinkFill { get; set; }
+
+        /// <summary>What a press on a link does, given the link; null leaves links as words that take no press.</summary>
+        /// <remarks>With it set, the text takes the pointer only where a link is, and a press anywhere else reaches what is beneath it.</remarks>
+        public Action<Link> Follow
+        {
+            get { return _follow; }
+            set
+            {
+                _follow = value;
+                _pressed = null;
+            }
+        }
+
+        /// <summary>What the pointer resting on a link says, given the link, or null to say what the text's own <see cref="Element.Tip" /> says.</summary>
+        /// <remarks>Asked while the pointer rests on a link, so a tip it hands back is one made once and kept.</remarks>
+        public Func<Link, Tip> LinkTip { get; set; }
+
         /// <summary>Room held clear between the edge and the text.</summary>
         public Thickness Padding
         {
@@ -241,6 +267,58 @@ namespace Lumel.Text
 
         /// <inheritdoc />
         protected override Thickness Inset => _padding;
+
+        /// <inheritdoc />
+        protected override bool TakesPointer => _follow != null && _spots.Count > 0;
+
+        /// <summary>The link whose words stand at <paramref name="point" />, in the coordinates <see cref="Element.Holds" /> takes, or null for none.</summary>
+        /// <remarks>Looked for among the links' own places, worked out when the text was laid out, so asking costs no layout.</remarks>
+        public Link LinkAt(Vector2 point)
+        {
+            var room = ContentBounds;
+            var x = point.X - room.X;
+            var y = point.Y - room.Y;
+
+            for (var i = 0; i < _spots.Count; i++)
+            {
+                var where = _spots[i].Where;
+                if (x >= where.X && x <= where.X + where.Width && y >= where.Y && y <= where.Y + where.Height)
+                    return _spots[i].Link;
+            }
+
+            return null;
+        }
+
+        /// <inheritdoc />
+        public override Tip TipAt(Vector2 point)
+        {
+            var link = LinkTip == null ? null : LinkAt(point);
+            return link == null ? Tip : LinkTip(link) ?? Tip;
+        }
+
+        /// <inheritdoc />
+        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        {
+            _pressed = LinkAt(point);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>Follows the link the press began on, where it also ends on it.</remarks>
+        public override void OnPointerUp(Vector2 point)
+        {
+            var pressed = _pressed;
+            _pressed = null;
+
+            if (pressed != null && _follow != null && LinkAt(point) == pressed)
+                _follow(pressed);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>Only a link, where links can be followed, so that a press anywhere else reaches what is beneath the text.</remarks>
+        protected override bool Hits(Vector2 point)
+        {
+            return _follow == null ? base.Hits(point) : LinkAt(point) != null;
+        }
 
         /// <inheritdoc />
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
@@ -270,6 +348,15 @@ namespace Lumel.Text
                 g.Fill(new RectangleF(room.X + where.X, room.Y + where.Y, where.Width, where.Height), RuleColor);
             }
 
+            if (LinkFill.HasValue)
+            {
+                for (var i = 0; i < _spots.Count; i++)
+                {
+                    var where = _spots[i].Where;
+                    g.Fill(new RectangleF(room.X + where.X, room.Y + where.Y, where.Width, where.Height), LinkFill.Value);
+                }
+            }
+
             for (var i = 0; i < _pieces.Count; i++)
             {
                 var piece = _pieces[i];
@@ -291,6 +378,8 @@ namespace Lumel.Text
                     return EmphasisColor;
                 case Tone.Heading:
                     return HeadingColor;
+                case Tone.Link:
+                    return LinkColor ?? EmphasisColor;
                 default:
                     return Color;
             }
@@ -353,6 +442,7 @@ namespace Lumel.Text
         {
             _pieces.Clear();
             _marks.Clear();
+            _spots.Clear();
 
             var y = 0f;
             var widest = 0f;
@@ -409,6 +499,13 @@ namespace Lumel.Text
                 widest = width;
 
             _laidOut = new Vector2(widest, y);
+
+            for (var i = 0; i < _pieces.Count; i++)
+            {
+                var piece = _pieces[i];
+                if (piece.Link != null)
+                    _spots.Add(new Spot { Where = new RectangleF(piece.At.X, piece.At.Y, piece.Box.X, piece.Box.Y), Link = piece.Link });
+            }
         }
 
         /// <summary>Lays a table out from line <paramref name="y" />, a row at a time, moving <paramref name="y" /> below it.</summary>
@@ -586,7 +683,10 @@ namespace Lumel.Text
                     continue;
                 }
 
-                var tone = heading ? Tone.Heading
+                var linked = run as LinkRun;
+                var link = linked == null ? null : linked.Link;
+                var tone = link != null ? Tone.Link
+                    : heading ? Tone.Heading
                     : (run.Kind & RunKind.Strong) != 0 ? Tone.Strong
                     : (run.Kind & RunKind.Emphasis) != 0 ? Tone.Emphasis
                     : Tone.Plain;
@@ -600,8 +700,13 @@ namespace Lumel.Text
                     {
                         if (!empty)
                         {
+                            // A link's piece ends at its last word, so that its fill and the room that presses it
+                            // stop there too.
+                            if (_piece.Length > 0 && _pieceLink != link)
+                                End(g, y, false, ref x, ref widest);
+
                             if (_piece.Length == 0)
-                                Begin(x, font, size, tone);
+                                Begin(x, font, size, tone, link);
 
                             _piece.Append(' ');
                         }
@@ -614,7 +719,7 @@ namespace Lumel.Text
                     if (end < 0)
                         end = text.Length;
 
-                    if (_piece.Length > 0 && (_pieceTone != tone || _pieceFont != font))
+                    if (_piece.Length > 0 && (_pieceTone != tone || _pieceFont != font || _pieceLink != link))
                         End(g, y, false, ref x, ref widest);
 
                     if (!empty && width < Unbounded && !Fits(g, text, i, end, font, size, x, width))
@@ -629,7 +734,7 @@ namespace Lumel.Text
                     }
 
                     if (_piece.Length == 0)
-                        Begin(x, font, size, tone);
+                        Begin(x, font, size, tone, link);
 
                     _piece.Append(text, i, end - i);
                     empty = false;
@@ -660,12 +765,13 @@ namespace Lumel.Text
         }
 
         /// <summary>Starts a piece at <paramref name="x" />.</summary>
-        void Begin(float x, string font, float size, Tone tone)
+        void Begin(float x, string font, float size, Tone tone, Link link)
         {
             _pieceX = x;
             _pieceFont = font;
             _pieceSize = size;
             _pieceTone = tone;
+            _pieceLink = link;
         }
 
         /// <summary>Drops the spaces ending the last piece of the line that starts at piece <paramref name="first" />, moving <paramref name="x" /> back to where its words end.</summary>
@@ -681,12 +787,14 @@ namespace Lumel.Text
             if (words.Length == piece.Text.Length)
                 return;
 
-            piece.Text = words;
-            _pieces[last] = piece;
-
             _probe.Clear();
             _probe.Append(words);
-            x = piece.At.X + g.MeasureText(piece.Font, _probe, piece.Size).X;
+
+            piece.Text = words;
+            piece.Box.X = g.MeasureText(piece.Font, _probe, piece.Size).X;
+            _pieces[last] = piece;
+
+            x = piece.At.X + piece.Box.X;
         }
 
         /// <summary>
@@ -739,7 +847,7 @@ namespace Lumel.Text
                 return;
 
             var advance = g.MeasureText(_pieceFont, _piece, _pieceSize).X;
-            _pieces.Add(new Piece { Text = _piece.ToString(), At = new Vector2(_pieceX, y), Font = _pieceFont, Size = _pieceSize, Tone = _pieceTone });
+            _pieces.Add(new Piece { Text = _piece.ToString(), At = new Vector2(_pieceX, y), Font = _pieceFont, Size = _pieceSize, Tone = _pieceTone, Link = _pieceLink, Box = new Vector2(advance, _pieceSize) });
             _piece.Clear();
 
             x = _pieceX + advance;
@@ -757,7 +865,8 @@ namespace Lumel.Text
             Plain,
             Strong,
             Emphasis,
-            Heading
+            Heading,
+            Link
         }
 
         /// <summary>Words or an image, drawn in one call.</summary>
@@ -772,8 +881,18 @@ namespace Lumel.Text
             /// <summary>The picture an image draws, or null for words.</summary>
             public IImageSource Image;
 
-            /// <summary>How big an image is drawn.</summary>
+            /// <summary>The link the words are part of, or null.</summary>
+            public Link Link;
+
+            /// <summary>How big the piece is drawn: an image's size, or the words' width and their line's height.</summary>
             public Vector2 Box;
+        }
+
+        /// <summary>Where one piece of a link's words stands, for finding the link under the pointer.</summary>
+        struct Spot
+        {
+            public RectangleF Where;
+            public Link Link;
         }
 
         /// <summary>A rule, a bullet's mark, or the rule under a table's heading row; a rule between blocks reaches across whatever width the text is given.</summary>

@@ -7,13 +7,18 @@ namespace Lumel.Text
     /// <remarks>
     ///     Markdown-lite is CommonMark's headings (<c>#</c> to <c>######</c>), rules (<c>---</c>, <c>***</c>,
     ///     <c>___</c>, spaced or not), one level of lists (<c>-</c>, <c>*</c> or <c>+</c>, and <c>1.</c> or
-    ///     <c>1)</c>), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans and backslash
-    ///     escapes. A single newline is a line break and a blank line ends a block. Anything else reads as the
-    ///     text it is.
+    ///     <c>1)</c>), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans, images
+    ///     (<c>![description](name)</c>), links (<c>[words](target)</c>) and backslash escapes. A single newline
+    ///     is a line break and a blank line ends a block. Anything else reads as the text it is.
     ///     <para>
     ///         A table's delimiter row may give a column a star for each share it takes of the width the table
     ///         has to spare; a table with no star is as wide as its cells. A heading row of empty cells is no
     ///         heading at all, which is how a table without one is written.
+    ///     </para>
+    ///     <para>
+    ///         An image is as tall as its line unless <c>=WxH</c>, <c>=W</c> or <c>=xH</c> after its name says
+    ///         otherwise, a side not given following the picture's shape. A link's target is a string only the
+    ///         host reads, and holds no spaces.
     ///     </para>
     /// </remarks>
     public static class Markdown

@@ -28,6 +28,7 @@ public static class RichTextReport
     const int Windows = 7;
     const float Room = 512f;
 
+    /// <summary>Every timing, as tables to print.</summary>
     public static string Render()
     {
         var device = new ScreenSpaceDevice();
@@ -54,6 +55,7 @@ public static class RichTextReport
         Row(report, device, graphics, "long table", PriceList(400), Room);
         Row(report, device, graphics, "long table, narrow", PriceList(400), 160f);
         Row(report, device, graphics, "icons in text", Icons(400), Room);
+        Row(report, device, graphics, "links in text", Linked(400), Room);
         report.AppendLine();
 
         report.AppendLine("Pathological marks, read only.");
@@ -66,6 +68,8 @@ public static class RichTextReport
         Parse(report, "code ticks unclosed", Repeat("`a ", 30000));
         Parse(report, "images unclosed", Repeat("![a](b ", 30000));
         Parse(report, "brackets unclosed", Repeat("![a ", 30000));
+        Parse(report, "links unclosed", Repeat("[a](b ", 30000));
+        Parse(report, "brackets only", Repeat("[a] ", 30000));
         Parse(report, "pipes, no table", Repeat("a | b | c\n", 20000));
         Parse(report, "table rows", "| a | b |\n|--|--|\n" + Repeat("| a | b |\n", 20000));
         report.AppendLine();
@@ -222,6 +226,16 @@ public static class RichTextReport
             if (i % 10 == 9)
                 text.Append("![](LCD_SoF_CosmicTeam_Landscape =x96)\n\n");
         }
+
+        return text.ToString();
+    }
+
+    /// <summary>Sentences with a link in each, the way a page of the codex reads.</summary>
+    static string Linked(int sentences)
+    {
+        var text = new StringBuilder();
+        for (var i = 0; i < sentences; i++)
+            text.Append("Each [logic system](#logic-system) holds its [installations](#installation), and runs them in turn.\n");
 
         return text.ToString();
     }

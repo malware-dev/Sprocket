@@ -1,7 +1,7 @@
 namespace Lumel.Text
 {
     /// <summary>A stretch of words inside a block that are all set apart the same way, a slot whose words are given later, or a line break.</summary>
-    /// <remarks>An image is an <see cref="ImageRun" />.</remarks>
+    /// <remarks>An image is an <see cref="ImageRun" />, and a link's words are a <see cref="LinkRun" />.</remarks>
     public class Run
     {
         /// <summary>A line break.</summary>
@@ -14,7 +14,8 @@ namespace Lumel.Text
             Kind = kind;
         }
 
-        Run(RunKind kind, string slot)
+        /// <summary>A slot for the argument named <paramref name="slot" />, whose words are set apart as <paramref name="kind" /> says.</summary>
+        protected Run(RunKind kind, string slot)
             : this("", kind)
         {
             Slot = slot;

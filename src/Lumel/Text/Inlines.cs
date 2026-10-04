@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Lumel.Text
 {
-    /// <summary>Reads the words inside one block of markdown-lite into runs: strong, emphasis, code spans, images, escapes and line breaks.</summary>
+    /// <summary>Reads the words inside one block of markdown-lite into runs: strong, emphasis, code spans, images, links, escapes and line breaks.</summary>
     /// <remarks>
     ///     Strong and emphasis follow CommonMark's delimiter runs: a run of <c>*</c> or <c>_</c> opens or
     ///     closes by what stands either side of it, a closer takes the nearest opener of its own character,
@@ -78,6 +78,19 @@ namespace Lumel.Text
                     {
                         Flush(pieces, words);
                         pieces.Add(image);
+                        i = end;
+                        continue;
+                    }
+                }
+
+                if (c == '[')
+                {
+                    int end;
+                    var link = Link(text, i, out end);
+                    if (link != null)
+                    {
+                        Flush(pieces, words);
+                        pieces.Add(link);
                         i = end;
                         continue;
                     }
@@ -234,6 +247,14 @@ namespace Lumel.Text
                     continue;
                 }
 
+                if (piece.Kind == PieceKind.Link)
+                {
+                    Add(runs, words, kind);
+                    var stressed = (strong > 0 ? RunKind.Strong : RunKind.Plain) | (emphasis > 0 ? RunKind.Emphasis : RunKind.Plain);
+                    runs.Add(new LinkRun(((LinkPiece)piece).To, piece.Text, stressed));
+                    continue;
+                }
+
                 var text = piece.Kind == PieceKind.Delimiter ? new string(piece.Mark, piece.Left) : piece.Text;
                 if (text.Length == 0)
                     continue;
@@ -301,9 +322,60 @@ namespace Lumel.Text
             return new ImagePiece
             {
                 Kind = PieceKind.Image,
-                Text = text.Substring(at + 2, close - at - 2),
+                Text = Unescaped(text, at + 2, close),
                 Picture = new Picture(picture, width, height)
             };
+        }
+
+        /// <summary>The link written at <paramref name="at" /> as <c>[words](target)</c>, and where it ends; null where none is written there.</summary>
+        /// <remarks>A target holds no spaces, as a link destination in CommonMark does not; the words are only words.</remarks>
+        static LinkPiece Link(string text, int at, out int end)
+        {
+            end = at;
+
+            var close = Bracket(text, at + 1, ']');
+            if (close < 0 || close + 1 >= text.Length || text[close + 1] != '(')
+                return null;
+
+            var shut = Bracket(text, close + 2, ')');
+            if (shut < 0)
+                return null;
+
+            var target = text.Substring(close + 2, shut - close - 2).Trim();
+            if (target.Length == 0)
+                return null;
+
+            for (var i = 0; i < target.Length; i++)
+            {
+                if (IsSpace(target[i]))
+                    return null;
+            }
+
+            end = shut + 1;
+            return new LinkPiece
+            {
+                Kind = PieceKind.Link,
+                Text = Unescaped(text, at + 1, close),
+                To = new Link(target)
+            };
+        }
+
+        /// <summary>The text from <paramref name="from" /> up to <paramref name="to" />, each escaped punctuation mark only the mark.</summary>
+        static string Unescaped(string text, int from, int to)
+        {
+            if (text.IndexOf('\\', from, to - from) < 0)
+                return text.Substring(from, to - from);
+
+            var words = new StringBuilder(to - from);
+            for (var i = from; i < to; i++)
+            {
+                if (text[i] == '\\' && i + 1 < to && IsAsciiPunctuation(text[i + 1]))
+                    i++;
+
+                words.Append(text[i]);
+            }
+
+            return words.ToString();
         }
 
         /// <summary>Whether <paramref name="text" /> is an image's size: <c>=WxH</c>, or <c>=W</c>, <c>=Wx</c> or <c>=xH</c> for one side, each a number above zero.</summary>
@@ -333,16 +405,22 @@ namespace Lumel.Text
             return false;
         }
 
-        /// <summary>Where <paramref name="closer" /> next stands from <paramref name="from" />, or -1 where another bracket or a line's end comes first.</summary>
+        /// <summary>Where <paramref name="closer" /> next stands from <paramref name="from" />, or -1 where another bracket or a line's end comes first; an escaped character is stepped over.</summary>
         /// <remarks>
-        ///     Stopping at the next bracket is what keeps reading linear: an image left unclosed is given up at the
-        ///     next one rather than searched for to the end of the text, which a run of them would do for each.
+        ///     Stopping at the next bracket is what keeps reading linear: an image or a link left unclosed is given
+        ///     up at the next one rather than searched for to the end of the text, which a run of them would do for each.
         /// </remarks>
         static int Bracket(string text, int from, char closer)
         {
             for (var i = from; i < text.Length; i++)
             {
                 var c = text[i];
+                if (c == '\\' && i + 1 < text.Length && IsAsciiPunctuation(text[i + 1]))
+                {
+                    i++;
+                    continue;
+                }
+
                 if (c == closer)
                     return i;
 
@@ -411,7 +489,8 @@ namespace Lumel.Text
             Code,
             Break,
             Delimiter,
-            Image
+            Image,
+            Link
         }
 
         /// <summary>One cut of the text, and where the spans it sits in begin and end.</summary>
@@ -442,6 +521,13 @@ namespace Lumel.Text
         {
             /// <summary>What the image shows.</summary>
             public Picture Picture;
+        }
+
+        /// <summary>A link, whose words are what it says.</summary>
+        sealed class LinkPiece : Piece
+        {
+            /// <summary>Where the link leads.</summary>
+            public Link To;
         }
     }
 }

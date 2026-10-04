@@ -164,9 +164,6 @@ namespace Lumel
         /// <summary>What of this lets presses, the hover and the keyboard pass through to what is beneath it.</summary>
         public InputTransparency InputTransparency { get; set; }
 
-        /// <summary>Whether this has something to say while the pointer rests on it.</summary>
-        bool Says => Tip != null;
-
         /// <summary>How thick <see cref="Edge" /> is drawn.</summary>
         public float EdgeThickness { get; set; }
 
@@ -405,7 +402,14 @@ namespace Lumel
                     return found;
             }
 
-            return Says ? this : null;
+            return TipAt(point) != null ? this : null;
+        }
+
+        /// <summary>What this says while the pointer rests on it at <paramref name="point" />: its <see cref="Tip" />, unless it says something different in different places.</summary>
+        /// <remarks>Asked while the pointer rests on this, so whatever an override hands back is made once and kept, as a tip always is.</remarks>
+        public virtual Tip TipAt(Vector2 point)
+        {
+            return Tip;
         }
 
         /// <summary>Whether <paramref name="point" /> is inside <see cref="Bounds" />.</summary>

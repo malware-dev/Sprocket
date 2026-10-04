@@ -480,7 +480,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var wanted = Under(Pointer);
 
             var speaker = SayingAt(Pointer);
-            var tip = speaker == null ? null : speaker.Tip;
+            var tip = speaker == null ? null : speaker.TipAt(Pointer);
             _saying = tip == null ? null : tip.Document;
             _sayingArguments = tip == null ? null : tip.Arguments;
 

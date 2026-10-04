@@ -127,6 +127,9 @@ namespace Lumel.Text
                 return;
             }
 
+            var linked = run as LinkRun;
+            var link = linked == null ? null : linked.Link;
+
             var i = 0;
             while (i < text.Length)
             {
@@ -134,16 +137,23 @@ namespace Lumel.Text
                 var end = start < 0 ? -1 : text.IndexOf(Unmark, start);
                 if (end < 0)
                 {
-                    runs.Add(new Run(text.Substring(i), run.Kind));
+                    runs.Add(Words(text.Substring(i), run.Kind, link));
                     return;
                 }
 
                 if (start > i)
-                    runs.Add(new Run(text.Substring(i, start - i), run.Kind));
+                    runs.Add(Words(text.Substring(i, start - i), run.Kind, link));
 
-                runs.Add(Run.Slotted(names[int.Parse(text.Substring(start + 1, end - start - 1))], run.Kind));
+                var name = names[int.Parse(text.Substring(start + 1, end - start - 1))];
+                runs.Add(link == null ? Run.Slotted(name, run.Kind) : LinkRun.Slotted(link, name, run.Kind));
                 i = end + 1;
             }
+        }
+
+        /// <summary>The words <paramref name="text" />, as words of <paramref name="link" /> where there is one.</summary>
+        static Run Words(string text, RunKind kind, Link link)
+        {
+            return link == null ? new Run(text, kind) : new LinkRun(link, text, kind);
         }
     }
 }
