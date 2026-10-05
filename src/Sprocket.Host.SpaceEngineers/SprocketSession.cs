@@ -207,15 +207,13 @@ namespace Sprocket.Host.SpaceEngineers
 
         /// <summary>Reads the world's backups out of its carrier, once, as the world starts.</summary>
         /// <remarks>
-        /// Backups that will not read, or a world with more than one carrier, are logged and never written over: the
-        /// backups go on being taken this session, and are not kept.
+        /// Backups that will not read are logged and never written over: the backups go on being taken this session, and are
+        /// not kept.
         /// </remarks>
         void FindBackups()
         {
-            Carrier found;
-            var trouble = Carrier.Find(out found);
-            if (trouble.Length == 0 && found != null)
-                trouble = _backups.Read(found.Text);
+            var found = Carrier.Find();
+            var trouble = found == null ? "" : _backups.Read(found.Text);
 
             if (trouble.Length > 0)
             {

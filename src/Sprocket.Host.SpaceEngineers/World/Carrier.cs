@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using VRage.Game.Entity;
@@ -24,6 +24,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// another key reads as a world with no backups.
         /// </remarks>
         static readonly Guid Key = new Guid("24B4675F-1A0D-410A-8044-BFD7124C8588");
+
+        /// <summary>The world variable that holds the carrier's entity id.</summary>
+        /// <remarks>
+        /// One number, so its going to every client that joins costs nothing; the backups stay in the carrier, which reaches
+        /// no client. Never to change: another name leaves every world's carrier unfound.
+        /// </remarks>
+        const string Variable = "sprocket.carrier";
 
         readonly IMyEntity _entity;
 
@@ -54,24 +61,22 @@ namespace Sprocket.Host.SpaceEngineers.World
             _entity.Storage[Key] = text;
         }
 
-        /// <summary>Finds the world's carrier, answering what was wrong where there is more than one.</summary>
+        /// <summary>The world's carrier: the entity the world's variable names, where it holds the backups' key, or null for a world with no backups yet.</summary>
         /// <remarks>
-        /// One pass over the world's top-level entities - grids, characters, floating objects, asteroids and planets, never
-        /// blocks - once, as the world loads. None found is a world with no backups yet.
+        /// A saved world loads its own variables, but a new one starts with those of the world the game ran before it, so the
+        /// id can name nothing or another world's entity; the key is what is trusted.
         /// </remarks>
-        public static string Find(out Carrier carrier)
+        public static Carrier Find()
         {
-            carrier = null;
-            var found = new HashSet<IMyEntity>();
-            MyAPIGateway.Entities.GetEntities(found, e => e.Storage != null && e.Storage.ContainsKey(Key));
-
-            if (found.Count > 1)
-                return "the world has " + found.Count + " carriers of backups, where it should have one";
-
-            foreach (var entity in found)
-                carrier = new Carrier(entity);
-
-            return "";
+            string said;
+            long id;
+            IMyEntity entity;
+            return MyAPIGateway.Utilities.GetVariable(Variable, out said)
+                   && long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out id)
+                   && MyAPIGateway.Entities.TryGetEntityById(id, out entity)
+                   && entity.Storage != null && entity.Storage.ContainsKey(Key)
+                ? new Carrier(entity)
+                : null;
         }
 
         /// <summary>Makes the world's carrier, holding nothing yet.</summary>
@@ -83,6 +88,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             entity.Storage = new MyModStorageComponent();
             entity.Storage[Key] = "";
             MyAPIGateway.Entities.AddEntity(entity);
+
+            // As text, the one kind of variable the save takes without question. Made during a save, it still lands in it: the
+            // save holds the live variables and writes them out once it has been built.
+            MyAPIGateway.Utilities.SetVariable(Variable, entity.EntityId.ToString(CultureInfo.InvariantCulture));
             return new Carrier(entity);
         }
     }
