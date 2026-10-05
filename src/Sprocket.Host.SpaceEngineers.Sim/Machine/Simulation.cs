@@ -156,22 +156,18 @@ public sealed class Simulation
     /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
     public string Where => _store.Where;
 
-    /// <summary>Takes the construct's backup, as the world saving does, saying it was taken at <paramref name="saved" />.</summary>
+    /// <summary>Takes the construct's backup, as losing its automation does, saying it was taken at <paramref name="saved" />.</summary>
     public void BackUp(DateTime saved)
     {
         _unit.Persist();
-        _unit.BackUp(_backups, saved, false);
+        _unit.BackUp(_backups, saved, _shelf);
     }
 
-    /// <summary>Writes the program and the wiring out now, whatever the clock says, and takes the backup.</summary>
+    /// <summary>Writes the program and the wiring out now, whatever the clock says.</summary>
     public void Save()
     {
         _unit.Persist();
         _store.SetValue(Wiring.Key, Wiring.Save(_rig));
-
-        // And the backup, which the world saving takes too.
-        if (!_unit.Lost)
-            _unit.BackUp(_backups, DateTime.UtcNow, false);
     }
 
     /// <summary>
@@ -198,7 +194,7 @@ public sealed class Simulation
 
             // As the session does: nothing holds the automation after this, so its backup is taken from it now.
             if (_unit.Lost)
-                _unit.BackUp(_backups, DateTime.UtcNow, true);
+                _unit.BackUp(_backups, DateTime.UtcNow, _shelf);
         }
 
         _rig.Tick();

@@ -1,4 +1,3 @@
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
@@ -36,7 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
 
         int _shape;
-        string _headingSaid;
 
         Keyed<AutomationSystem, SystemGroup> _groups;
 
@@ -264,6 +262,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             _new.Command = Editor.Act(Cmd.NewSystem, Make);
             _groups = new Keyed<AutomationSystem, SystemGroup>(_list.Children, system => new SystemGroup(Editor, this, system));
+            Editor.Codex.Wire(_heading, Editor.OpenCodex);
 
             Show(true);
         }
@@ -295,13 +294,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             _groups.Show(_systems);
 
-            var heading = Terms.Link(texts.SystemsHeading.ToUpperInvariant(), Terms.LogicSystem);
-            if (heading != _headingSaid)
-            {
-                _headingSaid = heading;
-                _heading.Document = Markdown.Parse(heading);
-                Editor.Codex.Wire(_heading, Editor.OpenCodex);
-            }
+            _heading.Markdown = Terms.Link(texts.SystemsHeading.ToUpperInvariant(), Terms.LogicSystem);
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
 

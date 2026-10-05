@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
 
                 _box.Text = said;
                 if (_previewing.IsVisible)
-                    _previewed.Document = Markdown.Parse(said);
+                    _previewed.Markdown = said;
             }
         }
 
@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public void Preview(bool showing)
         {
             if (showing)
-                _previewed.Document = Markdown.Parse(_box.Text);
+                _previewed.Markdown = _box.Text;
 
             _previewing.IsVisible = showing;
             _box.IsVisible = !showing;

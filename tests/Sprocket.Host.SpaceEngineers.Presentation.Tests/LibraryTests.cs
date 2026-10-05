@@ -1,7 +1,9 @@
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -17,8 +19,8 @@ public class LibraryTests
     public void BackupsReadBackWhatTheyWrite()
     {
         var written = new Backups();
-        written.Take("Hangar\nAirlock", Saved, new long[] { 118, 119 }, "sprocket 1 alpha 10\n\nsystem ...\n", "");
-        written.Take("Lost Ship", Saved.AddHours(1), new long[] { 7 }, "p", "switched off\n");
+        written.Take("Hangar\nAirlock", Saved, new long[] { 118, 119 }, "sprocket 1 alpha 10\n\nsystem ...\n");
+        written.Take("Lost Ship", Saved.AddHours(1), new long[] { 7 }, "p");
 
         var read = new Backups();
         Assert.Equal("", read.Read(written.Write()));
@@ -29,19 +31,19 @@ public class LibraryTests
         Assert.Equal(Saved, read.All[0].Saved);
         Assert.Equal(new long[] { 118, 119 }, read.All[0].Grids);
         Assert.Equal("sprocket 1 alpha 10\n\nsystem ...\n", read.All[0].Program);
-        Assert.Equal("switched off\n", read.All[1].Switches);
+        Assert.Equal("p", read.All[1].Program);
     }
 
     /// <summary>Backups that will not read are taken not at all, and say what was wrong.</summary>
     [Theory]
     [InlineData("")]
     [InlineData("backups 2\n")]
-    [InlineData("backups 1\nbackup 2026-10-02T14:30:00.0000000Z 1 7 4 1 0\nShip")]
-    [InlineData("backups 1\nbackup tomorrow 1 7 4 1 0\nShipp\n")]
+    [InlineData("backups 1\nbackup 2026-10-02T14:30:00.0000000Z 1 7 4 1\nShip")]
+    [InlineData("backups 1\nbackup tomorrow 1 7 4 1\nShipp\n")]
     public void BackupsThatWillNotReadAreNotTaken(string text)
     {
         var backups = new Backups();
-        backups.Take("Kept", Saved, new long[] { 1 }, "p", "");
+        backups.Take("Kept", Saved, new long[] { 1 }, "p");
 
         Assert.NotEqual("", backups.Read(text));
         Assert.False(backups.Intact);
@@ -53,13 +55,65 @@ public class LibraryTests
     public void ABackupIsTakenAgainForTheSameConstruct()
     {
         var backups = new Backups();
-        backups.Take("Ship", Saved, new long[] { 1, 2 }, "first", "");
-        backups.Take("Ship renamed", Saved.AddHours(1), new long[] { 2, 3 }, "second", "");
+        backups.Take("Ship", Saved, new long[] { 1, 2 }, "first");
+        backups.Take("Ship renamed", Saved.AddHours(1), new long[] { 2, 3 }, "second");
 
         var backup = Assert.Single(backups.All);
         Assert.Equal("Ship renamed", backup.Name);
         Assert.Equal("second", backup.Program);
         Assert.Equal(new long[] { 2, 3 }, backup.Grids);
+    }
+
+    /// <summary>A lost construct whose every logic system has its equal in the library leaves no backup: the library has it all.</summary>
+    [Fact]
+    public void ALostConstructTheLibraryHoldsLeavesNoBackup()
+    {
+        var rig = Blueprinted();
+        rig.Editor.Stamp(true);
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+
+        rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
+
+        Assert.Empty(rig.Backups.All);
+    }
+
+    /// <summary>A lost construct's backup holds only the logic systems the library has no equal of, without their installations.</summary>
+    [Fact]
+    public void ALostConstructsBackupHoldsOnlyWhatTheLibraryLacks()
+    {
+        var rig = Blueprinted();
+        var kept = rig.Editor.Program.Systems[0];
+        rig.Editor.NewSystem("Hangar");
+        rig.Editor.GoToRoot();
+        rig.Tick();
+        rig.Editor.Stamp(true);
+        rig.Shelf.Keep(kept);
+
+        rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
+
+        var backup = Assert.Single(rig.Backups.All);
+        var read = new Automation();
+        Assert.Equal("", ProgramText.Load(backup.Program, read, new Values()));
+        var system = Assert.Single(read.Systems);
+        Assert.Equal("Hangar", system.Name);
+        Assert.Empty(system.Instances);
+    }
+
+    /// <summary>The library lists a lost construct whose grids are still in the world: a backup is only taken as the automation is lost.</summary>
+    [Fact]
+    public void TheLibraryListsALostConstructWhoseGridsRemain()
+    {
+        var rig = Blueprinted();
+        rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
+        Assert.Single(rig.Backups.All);
+
+        rig.Editor.GoToRoot();
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        Assert.Contains(page.Rows.OfType<StatusRow>(), r => r.Problem != null && r.Problem.StartsWith("Lost "));
     }
 
     /// <summary>
@@ -72,7 +126,7 @@ public class LibraryTests
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
         rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
-        rig.Backups.Take("Lost Ship", Saved, new long[] { 424242 }, "p", "");
+        rig.Backups.Take("Lost Ship", Saved, new long[] { 424242 }, "p");
 
         rig.Editor.GoToRoot();
         rig.Editor.OpenLibrary();

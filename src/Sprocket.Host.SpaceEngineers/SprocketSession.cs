@@ -597,7 +597,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (unit.Lost)
             {
                 // Taken now, from what it was running, because nothing holds the automation after this.
-                unit.BackUp(_backups, DateTime.UtcNow, true);
+                unit.BackUp(_backups, DateTime.UtcNow, _shelf);
                 _units.Remove(was);
                 if (_shown == unit && _screen != null)
                     _screen.CloseNow();
@@ -797,7 +797,6 @@ namespace Sprocket.Host.SpaceEngineers
                     continue;
 
                 Spread(unit);
-                unit.BackUp(_backups, DateTime.UtcNow, false);
             }
 
             _saving.Clear();

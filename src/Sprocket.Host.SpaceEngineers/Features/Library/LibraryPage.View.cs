@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         Button _keep;
         Button _copy;
         Label _line;
-        Label _about;
+        RichText _about;
         Label _trouble;
         Label _firstHeading;
         Label _first;
@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                                         }
                                     }.As(out _here),
                                     new Label { Style = Styles.Detail }.As(out _line),
-                                    new Label { Style = Styles.Empty, Wraps = true }.As(out _about),
+                                    new RichText { Style = Styles.LibraryAbout, IsVisible = false }.As(out _about),
                                     new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _trouble),
                                     new Label { Style = Styles.Heading }.As(out _firstHeading),
                                     new Label { Style = Styles.Detail, Wraps = true }.As(out _first),

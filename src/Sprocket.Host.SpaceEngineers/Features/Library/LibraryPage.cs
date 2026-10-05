@@ -12,7 +12,6 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
-using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
@@ -128,7 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Narrow();
         }
 
-        /// <summary>Lists the constructs whose every grid is gone from the world, where this machine keeps the backups.</summary>
+        /// <summary>Lists the constructs whose automation was lost, where this machine keeps the backups: a backup is only taken as it is lost.</summary>
         void ListLost(Texts texts)
         {
             var backups = Editor.Backups;
@@ -138,9 +137,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var all = backups.All;
             for (var i = 0; i < all.Count; i++)
             {
-                if (!Gone(all[i]))
-                    continue;
-
                 var backup = all[i];
                 var row = new StatusRow
                 {
@@ -320,7 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             _line.Text = Made(texts, system);
             _line.IsVisible = _line.Text.Length > 0;
-            _about.Text = system.Annotation;
+            _about.Markdown = system.Annotation;
             _about.IsVisible = system.Annotation.Length > 0;
 
             _names.Clear();
@@ -518,18 +514,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         static string Time(DateTime utc)
         {
             return utc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-        }
-
-        /// <summary>Whether none of the grids <paramref name="backup" /> was taken of is still in the world.</summary>
-        static bool Gone(Backup backup)
-        {
-            for (var i = 0; i < backup.Grids.Count; i++)
-            {
-                if (Toolbars.Exists(backup.Grids[i]))
-                    return false;
-            }
-
-            return true;
         }
 
         /// <summary>One row of the list, and what it stands for.</summary>

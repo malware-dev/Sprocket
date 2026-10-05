@@ -29,6 +29,7 @@ namespace Lumel.Text
         readonly List<Spot> _spots = new List<Spot>();
 
         Document _document;
+        string _markdown;
         Arguments _arguments;
         IImageCatalog _images;
         string _font = MyFontEnum.White;
@@ -77,7 +78,22 @@ namespace Lumel.Text
                     return;
 
                 _document = value;
+                _markdown = null;
                 Relayout();
+            }
+        }
+
+        /// <summary>The markdown-lite the document was read from, or null where the document was given as one; read again only when it changes.</summary>
+        public string Markdown
+        {
+            get { return _markdown; }
+            set
+            {
+                if (value == _markdown)
+                    return;
+
+                Document = value == null ? null : Text.Markdown.Parse(value);
+                _markdown = value;
             }
         }
 

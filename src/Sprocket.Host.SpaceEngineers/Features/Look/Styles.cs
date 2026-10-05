@@ -83,6 +83,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
+        /// <summary>What the author of a blueprint wrote about it, in the library under its name.</summary>
+        public static readonly RichTextStyle LibraryAbout = new RichTextStyle(Description)
+        {
+            Base = { Padding = new Thickness(8f, 8f, 0f, 0f) }
+        };
+
         /// <summary>What the author of a blueprint wrote about one of its slots, under the slot's name.</summary>
         public static readonly RichTextStyle SlotDescription = new RichTextStyle(Description)
         {

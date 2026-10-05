@@ -114,6 +114,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return pen.ToString();
         }
 
+        /// <summary>The blueprints <paramref name="systems" /> written out together, as a backup keeps them: no blocks, and no installations.</summary>
+        public static string Blueprints(IList<AutomationSystem> systems)
+        {
+            var pen = new Pen();
+            pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
+            pen.End();
+            for (var i = 0; i < systems.Count; i++)
+                WriteSystem(pen, systems[i], true);
+
+            return pen.ToString();
+        }
+
         /// <summary>What <paramref name="system" /> says, written out alone without when it last changed: what tells whether it has.</summary>
         public static string Said(AutomationSystem system)
         {

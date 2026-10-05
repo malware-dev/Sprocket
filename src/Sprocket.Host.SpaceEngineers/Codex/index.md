@@ -20,8 +20,8 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `step` | Step | Not written; not in the game yet |
 | `slot` | Slot | Written; not in the game yet. Uses a `[!WARNING]` aside, which needs the tagged quote issue |
 | `signal` | Signal | Written; not in the game yet |
-| `blueprint` | Blueprint | Written; not in the game yet. Its player note needs the tagged quote issue, and its taking-off section waits on the issue *Taking a logic system off a construct asks before it changes the blueprint* |
-| `construct` | Construct | Written; not in the game yet. Describes the automation surviving the loss of every programmable block, which waits on the issue *A construct's automation survives losing every programmable block* |
+| `blueprint` | Blueprint | Written; not in the game yet. Its player note needs the tagged quote issue |
+| `construct` | Construct | Written; not in the game yet |
 
 ## Marks
 

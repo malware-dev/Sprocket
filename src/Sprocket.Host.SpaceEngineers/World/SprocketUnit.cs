@@ -1234,34 +1234,37 @@ namespace Sprocket.Host.SpaceEngineers.World
             // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
             // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
             storage.SetValue(StateKey, state);
-
-            KeptProgram = program;
-            KeptState = state;
         }
 
-        /// <summary>The program as <see cref="Persist" /> last wrote it, or null before it has; what a backup is taken from as the world saves.</summary>
-        public string KeptProgram { get; private set; }
-
-        /// <summary>What was switched off as <see cref="Persist" /> last wrote it, or null before it has.</summary>
-        public string KeptState { get; private set; }
-
-        /// <summary>
-        /// Takes the construct's backup into <paramref name="backups" />, from what <see cref="Persist" /> last wrote or, where
-        /// <paramref name="fresh" /> is set, from what this holds now.
-        /// </summary>
-        /// <remarks>A construct with no automation, or one whose program would not read, leaves its backup as it was.</remarks>
-        public void BackUp(Backups backups, DateTime saved, bool fresh)
+        /// <summary>Keeps a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
+        /// <remarks>
+        /// A logic system whose blueprint in <paramref name="shelf" /> has the same identity and the same change date is left out,
+        /// since the library has it already; where that is every one, no backup is kept. Only the logic systems are kept: their
+        /// installations stay behind with their blocks.
+        /// </remarks>
+        public void BackUp(Backups backups, DateTime saved, Shelf shelf)
         {
-            if (!_program.Intact || _program.Systems.Count == 0)
+            if (!_program.Intact)
                 return;
 
-            string program = KeptProgram;
-            string state = KeptState;
-            if (fresh || program == null)
-                Written(out program, out state);
+            // Whatever was changed a moment ago is dated before it is compared.
+            if (_editor != null)
+                _editor.Stamp(true);
+
+            var unkept = new List<AutomationSystem>();
+            var systems = _program.Systems;
+            for (var i = 0; i < systems.Count; i++)
+            {
+                var kept = shelf.Find(systems[i].Identity);
+                if (kept == null || kept.Changed != systems[i].Changed)
+                    unkept.Add(systems[i]);
+            }
+
+            if (unkept.Count == 0)
+                return;
 
             _world.GridIds(_backedGrids);
-            backups.Take(_world.Name, saved, _backedGrids, program, state);
+            backups.Take(_world.Name, saved, _backedGrids, ProgramText.Blueprints(unkept));
         }
 
         /// <summary>

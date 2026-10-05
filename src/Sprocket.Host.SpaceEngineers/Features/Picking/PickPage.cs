@@ -1497,19 +1497,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
-        /// <remarks>A comparer object rather than a <c>Comparison</c> delegate, which Space Engineers does not whitelist.</remarks>
-        sealed class NameOrder : IComparer<GridEntity>
-        {
-            public int Compare(GridEntity a, GridEntity b)
-            {
-                // Neither can be null: the only lists sorted with this are the world's own entities.
-                // ReSharper disable PossibleNullReferenceException
-                var byName = string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
-                return byName != 0 ? byName : a.Id.CompareTo(b.Id);
-                // ReSharper restore PossibleNullReferenceException
-            }
-        }
-
         sealed class SaidOrder : IComparer<EntityAction>
         {
             readonly bool _declared;

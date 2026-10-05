@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -39,6 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>Something the sentence names that is no longer on the construct.</summary>
         public const string Missing = "something that's gone";
+
+        static readonly NameOrder ByName = new NameOrder();
 
 
         /// <summary>The word a trigger's line opens with, for a trigger of <paramref name="kind" /> started by <paramref name="parts" /> parts.</summary>
@@ -236,12 +239,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <remarks>The trigger's words as the trigger's row says them, so a slot and the trigger it answers read alike.</remarks>
         public static void Triggers(GridWorld world, IList<long> entityIds, IList<string> triggers, List<Mention> into)
         {
-            for (var i = 0; i < entityIds.Count; i++)
+            var entities = Found(world, entityIds);
+            var order = InOrder(entities);
+            for (var k = 0; k < order.Length; k++)
             {
-                if (i > 0)
+                if (k > 0)
                     into.Add(new Mention(", ", null));
 
-                var entity = world.FindEntity(entityIds[i]);
+                var i = order[k];
+                var entity = entities[i];
                 into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
                 if (i < triggers.Count && !string.IsNullOrEmpty(triggers[i]))
                     into.Add(new Mention(triggers[i], null));
@@ -262,13 +268,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var joiner = requiresAll ? " and " : " or ";
             var named = entityIds.Count > 2 ? 2 : entityIds.Count;
+            var entities = Found(world, entityIds);
+            var order = InOrder(entities);
 
             for (var i = 0; i < named; i++)
             {
                 if (i > 0)
                     into.Add(new Mention(entityIds.Count == 2 ? joiner : ", ", null));
 
-                var entity = world.FindEntity(entityIds[i]);
+                var entity = entities[order[i]];
                 into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
             }
 
@@ -289,14 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (entityIds.Count == 0)
                 return Empty;
 
-            var names = new List<string>(Said);
-            for (var i = 0; i < entityIds.Count && i < Said; i++)
-            {
-                var entity = world.FindEntity(entityIds[i]);
-                names.Add(entity == null ? Missing : entity.Name);
-            }
-
-            return Joined(names, entityIds.Count, requiresAll);
+            return Joined(Found(world, entityIds), requiresAll);
         }
 
         /// <summary>
@@ -311,19 +312,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (refs.Count == 0)
                 return Empty;
 
+            var entities = new List<GridEntity>(refs.Count);
+            for (var i = 0; i < refs.Count; i++)
+                entities.Add(bindings.Entity(refs[i]));
+
+            return Joined(entities, requiresAll);
+        }
+
+        /// <summary>The blocks <paramref name="entityIds" /> as the world finds them, null for one it does not.</summary>
+        static List<GridEntity> Found(GridWorld world, IList<long> entityIds)
+        {
+            var entities = new List<GridEntity>(entityIds.Count);
+            for (var i = 0; i < entityIds.Count; i++)
+                entities.Add(world.FindEntity(entityIds[i]));
+
+            return entities;
+        }
+
+        /// <summary>The order <paramref name="entities" /> are named in, as places in it, by <see cref="NameOrder" />.</summary>
+        static int[] InOrder(List<GridEntity> entities)
+        {
+            var order = new int[entities.Count];
+            for (var i = 0; i < order.Length; i++)
+                order[i] = i;
+
+            if (order.Length > 1)
+                Array.Sort(order, new PlaceOrder(entities));
+
+            return order;
+        }
+
+        /// <summary>The first <see cref="Said" /> of <paramref name="entities" /> by name, in the order they are named, and how many more there are.</summary>
+        static string Joined(List<GridEntity> entities, bool requiresAll)
+        {
+            var order = InOrder(entities);
+            var count = entities.Count;
             var names = new List<string>(Said);
-            for (var i = 0; i < refs.Count && i < Said; i++)
+            for (var i = 0; i < count && i < Said; i++)
             {
-                var entity = bindings.Entity(refs[i]);
+                var entity = entities[order[i]];
                 names.Add(entity == null ? Missing : entity.Name);
             }
 
-            return Joined(names, refs.Count, requiresAll);
-        }
-
-        /// <summary>The first <see cref="Said" /> of <paramref name="count" /> blocks by <paramref name="names" />, and how many more there are.</summary>
-        static string Joined(List<string> names, int count, bool requiresAll)
-        {
             var joiner = requiresAll ? " and " : " or ";
 
             if (count == 1)
@@ -446,5 +476,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return "(" + slot.GetType().Name + ")";
         }
 
+        /// <summary>Places in a list of blocks, by the blocks in them; two blocks that are both gone keep the order they were picked in.</summary>
+        sealed class PlaceOrder : IComparer<int>
+        {
+            readonly List<GridEntity> _entities;
+
+            public PlaceOrder(List<GridEntity> entities)
+            {
+                _entities = entities;
+            }
+
+            public int Compare(int x, int y)
+            {
+                var byBlock = ByName.Compare(_entities[x], _entities[y]);
+                return byBlock != 0 ? byBlock : x.CompareTo(y);
+            }
+        }
     }
 }

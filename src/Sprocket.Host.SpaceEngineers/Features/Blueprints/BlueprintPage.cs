@@ -36,7 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         string _madeName;
         bool _madeOn;
         int _shape = -1;
-        string _described;
         Element _focused;
         Keyed<Part, PartRow> _partRows;
 
@@ -317,16 +316,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 : null;
         }
 
-        /// <summary>Shows what the blueprint's author wrote about it, parsed again only when it has changed.</summary>
+        /// <summary>Shows what the blueprint's author wrote about it.</summary>
         void Describe()
         {
             var said = _system.Annotation;
             _description.IsVisible = said.Length > 0 && !_editing;
-            if (ReferenceEquals(said, _described))
-                return;
-
-            _described = said;
-            _description.Document = Markdown.Parse(said);
+            _description.Markdown = said;
         }
 
         /// <summary>Puts the description in its box while the blueprint is being written, leaving alone a box being typed in.</summary>

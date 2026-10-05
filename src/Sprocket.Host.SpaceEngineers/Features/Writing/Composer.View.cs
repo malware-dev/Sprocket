@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                 Children =
                 {
                     new Label { Style = Styles.Markup, Text = written, Placement = Fixed.Wide(190f) },
-                    new RichText { Style = Styles.Example, Document = Markdown.Parse(written), Placement = Flex.Grow }
+                    new RichText { Style = Styles.Example, Markdown = written, Placement = Flex.Grow }
                 }
             };
         }

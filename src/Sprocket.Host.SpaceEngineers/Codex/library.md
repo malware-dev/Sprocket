@@ -21,7 +21,7 @@ The blueprint page explains each of these.
 
 ## Lost constructs
 
-When every grid of a construct is gone, its automation stays in the library, with when it was last saved and the logic systems it had. Lost constructs are kept in the world, so another world's library doesn't show them.
+When a construct loses its last programmable block, its automation stays in the library, with when it was lost and the logic systems it had. Only the logic systems the library doesn't already have are kept: one whose blueprint is the same is left to the blueprint. Lost constructs are kept in the world, so another world's library doesn't show them.
 
 Each of its logic systems works like a blueprint. It can be put on this construct, copied, or kept in storage with `Make blueprint`, so that every world can use it. Its installations stayed with the lost construct, so when it is put on this construct it comes with one new installation to fill.
 

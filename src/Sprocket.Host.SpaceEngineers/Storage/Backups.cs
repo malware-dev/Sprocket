@@ -7,14 +7,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>Every construct's backup in the world, and the text they are kept as.</summary>
     /// <remarks>
-    /// One backup per construct, taken again each time the world saves; one whose construct is gone stays until somebody
-    /// deletes it. Where they are kept is not this type's business - see <c>Carrier</c>.
+    /// One backup per construct, taken as it loses its automation, and kept until somebody deletes it. Where they are kept
+    /// is not this type's business - see <c>Carrier</c>.
     /// <para>
-    /// The text is a line saying what it is, then each backup as a line of numbers followed by its name, program and
-    /// switches written out at the lengths that line gives, so nothing inside them needs escaping:
+    /// The text is a line saying what it is, then each backup as a line of numbers followed by its name and program
+    /// written out at the lengths that line gives, so nothing inside them needs escaping:
     /// <code>
     /// backups 1
-    /// backup 2026-10-02T14:30:00.0000000Z 2 118 119 14 5021 0
+    /// backup 2026-10-02T14:30:00.0000000Z 2 118 119 14 5021
     /// Hangar Airlocksprocket 1 alpha 10 ...
     /// </code>
     /// </para>
@@ -45,13 +45,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Takes the backup of the construct made of <paramref name="grids" /> again, or takes its first.</summary>
-        public void Take(string name, DateTime saved, IList<long> grids, string program, string switches)
+        public void Take(string name, DateTime saved, IList<long> grids, string program)
         {
             var had = Of(grids);
             if (had != null)
-                had.Retake(name, saved, grids, program, switches);
+                had.Retake(name, saved, grids, program);
             else
-                _all.Add(new Backup(name, saved, grids, program, switches));
+                _all.Add(new Backup(name, saved, grids, program));
         }
 
         /// <summary>Forgets <paramref name="backup" />, which is no longer kept from the next save on.</summary>
@@ -72,9 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 for (var g = 0; g < backup.Grids.Count; g++)
                     text.Append(' ').Append(backup.Grids[g].ToString(CultureInfo.InvariantCulture));
 
-                text.Append(' ').Append(backup.Name.Length).Append(' ').Append(backup.Program.Length).Append(' ')
-                    .Append(backup.Switches.Length).Append('\n');
-                text.Append(backup.Name).Append(backup.Program).Append(backup.Switches).Append('\n');
+                text.Append(' ').Append(backup.Name.Length).Append(' ').Append(backup.Program.Length).Append('\n');
+                text.Append(backup.Name).Append(backup.Program).Append('\n');
             }
 
             return text.ToString();
@@ -118,7 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (words.Length < 2
                     || !DateTime.TryParse(words[0], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out saved)
                     || !int.TryParse(words[1], NumberStyles.None, CultureInfo.InvariantCulture, out grids)
-                    || words.Length != 2 + grids + 3)
+                    || words.Length != 2 + grids + 2)
                 {
                     return "a backup's line will not read: " + line;
                 }
@@ -135,19 +134,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 int name;
                 int program;
-                int switches;
                 if (!int.TryParse(words[2 + grids], NumberStyles.None, CultureInfo.InvariantCulture, out name)
                     || !int.TryParse(words[3 + grids], NumberStyles.None, CultureInfo.InvariantCulture, out program)
-                    || !int.TryParse(words[4 + grids], NumberStyles.None, CultureInfo.InvariantCulture, out switches)
-                    || at + name + program + switches + 1 > text.Length
-                    || text[at + name + program + switches] != '\n')
+                    || at + name + program + 1 > text.Length
+                    || text[at + name + program] != '\n')
                 {
                     return "a backup's lengths do not match what follows: " + line;
                 }
 
-                into.Add(new Backup(text.Substring(at, name), saved, ids, text.Substring(at + name, program),
-                    text.Substring(at + name + program, switches)));
-                at += name + program + switches + 1;
+                into.Add(new Backup(text.Substring(at, name), saved, ids, text.Substring(at + name, program)));
+                at += name + program + 1;
             }
 
             return "";

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
@@ -88,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 return;
 
             _lead.Text = Term.Summary;
-            _body.Document = Markdown.Parse(Term.Page);
+            _body.Markdown = Term.Page;
 
             var terms = Editor.Codex.All;
             for (var i = 0; i < _listed.Count; i++)

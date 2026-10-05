@@ -23,7 +23,7 @@ The copy opens at once, ready to be changed.
 
 ## Taking it off
 
-Switching `On this construct` off takes the logic system and its installations off this construct, after asking. A logic system that has no blueprint is deleted instead, since it is the only copy.
+Switching `On this construct` off takes the logic system and its installations off this construct, after asking. If the logic system was changed after its blueprint, it also asks whether to bring the blueprint up to date. A logic system that has no blueprint is deleted instead, since it is the only copy.
 
 ## Each construct keeps its own
 

@@ -26,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly List<Mention> _pieces = new List<Mention>();
 
         float _wide = PartList.Widest;
-        string _said = "";
 
         /// <summary>A part saying nothing yet, whose description's guide opens in <paramref name="windows" />.</summary>
         public PartRow(Func<WindowLayer> windows)
@@ -46,16 +45,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>What the author wrote about the part beyond its name, as markup read into rich text, or empty.</summary>
         public string Described
         {
-            get { return _said; }
+            get { return _about.Markdown ?? ""; }
             set
             {
                 var said = value ?? "";
-                if (said != _said)
-                {
-                    _said = said;
-                    _about.Document = Markdown.Parse(said);
-                }
-
+                _about.Markdown = said;
                 _about.IsVisible = said.Length != 0 && !Editing;
             }
         }
@@ -77,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _name.IsVisible = !value;
-                _about.IsVisible = !value && _said.Length != 0;
+                _about.IsVisible = !value && Described.Length != 0;
                 _blocks.IsVisible = !value;
                 _problem.IsVisible = !value && _problem.Text.Length != 0;
                 _nameBox.IsVisible = value;

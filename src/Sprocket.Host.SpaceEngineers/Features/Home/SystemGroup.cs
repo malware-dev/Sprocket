@@ -30,8 +30,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         readonly ICommand _deletes;
 
-        string _installationsSaid;
-
         readonly ICommand _shelves;
 
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>
@@ -51,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _shelves = editor.Act(Cmd.Shelve, delegate { editor.Shelve(system); });
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(Cmd.AddInstance, delegate { page.Another(system); });
+            editor.Codex.Wire(_installations, editor.OpenCodex);
             _rows = new Keyed<SystemInstance, StatusRow>(_list.Children, Made);
         }
 
@@ -102,13 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Locked = only ? texts.SystemsKeepsOne : "";
             }
 
-            var installations = Terms.Link(texts.SystemsInstallations.ToUpperInvariant(), Terms.Installation);
-            if (installations != _installationsSaid)
-            {
-                _installationsSaid = installations;
-                _installations.Document = Markdown.Parse(installations);
-                _editor.Codex.Wire(_installations, _editor.OpenCodex);
-            }
+            _installations.Markdown = Terms.Link(texts.SystemsInstallations.ToUpperInvariant(), Terms.Installation);
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
             _another.Tip = Tip.For(_another.Tip, texts.SystemsAddAnotherAbout, _named);
         }

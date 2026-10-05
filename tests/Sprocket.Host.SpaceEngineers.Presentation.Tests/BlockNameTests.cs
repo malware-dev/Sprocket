@@ -95,8 +95,21 @@ public class BlockNameTests
         SentenceText.Entities(sim.World, ids, requiresAll, pieces);
 
         Assert.Equal(SentenceText.Entities(sim.World, ids, requiresAll), string.Concat(pieces.Select(piece => piece.Text)));
-        Assert.Null(pieces[0].Icon);
+        Assert.All(pieces.Where(piece => piece.Text == SentenceText.Missing), piece => Assert.Null(piece.Icon));
         Assert.All(pieces.Where(piece => piece.Text == "Airlock Button"), piece => Assert.False(string.IsNullOrEmpty(piece.Icon)));
+    }
+
+    /// <summary>A selection names its blocks by name, whatever order they were picked in, and a block that is gone last.</summary>
+    [Fact]
+    public void BlocksAreNamedByName()
+    {
+        var sim = Built();
+        var named = sim.World.Entities.GroupBy(entity => entity.Name).Select(group => group.First())
+            .OrderBy(entity => entity.Name, StringComparer.OrdinalIgnoreCase).Take(2).ToList();
+        Assert.Equal(2, named.Count);
+
+        Assert.Equal(named[0].Name + " and " + named[1].Name, SentenceText.Entities(sim.World, new List<long> { named[1].Id, named[0].Id }, true));
+        Assert.Equal(named[0].Name + " or " + SentenceText.Missing, SentenceText.Entities(sim.World, new List<long> { -1, named[0].Id }, false));
     }
 
     /// <summary>A part that says new words over the same blocks keeps the elements it had.</summary>

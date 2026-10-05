@@ -14,6 +14,35 @@ public class RichTextTests
     static readonly Color Body = new Color(162, 195, 205);
     static readonly Color Bright = new Color(220, 245, 253);
 
+    /// <summary>Markdown given again as it was is not read again; different markdown is.</summary>
+    [Fact]
+    public void TheSameMarkdownIsReadOnce()
+    {
+        var text = new RichText { Markdown = "Made from **Airlock**" };
+        var read = text.Document;
+
+        text.Markdown = string.Concat("Made from ", "**Airlock**");
+        Assert.Same(read, text.Document);
+
+        text.Markdown = "Made from **Hangar**";
+        Assert.NotSame(read, text.Document);
+    }
+
+    /// <summary>A document given as one has no markdown, and the markdown it replaced is read again when given again.</summary>
+    [Fact]
+    public void ADocumentGivenForgetsTheMarkdown()
+    {
+        var text = new RichText { Markdown = "Made from **Airlock**" };
+        var given = Markdown.Parse("Other");
+
+        text.Document = given;
+        Assert.Null(text.Markdown);
+
+        text.Markdown = "Made from **Airlock**";
+        Assert.NotSame(given, text.Document);
+        Assert.Equal("Made from **Airlock**", text.Markdown);
+    }
+
     /// <summary>Strong words take the strong color and the words around them the body color.</summary>
     [Fact]
     public void StrongWordsTakeTheStrongColor()
