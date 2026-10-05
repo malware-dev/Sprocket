@@ -25,7 +25,12 @@ Switching it off stops anything running and leaves the blocks as they are. When 
 
 ## Real blocks, kept as slots
 
-The blocks you pick become [slots](#slot), such as *the inner door*. **Using the blocks of**, at the top of the logic system's screen, chooses whose blocks the steps show.
+The blocks you pick become [slots](#slot). There are two kinds:
+
+- A **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
+- A **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
+
+**Using the blocks of**, at the top of the logic system's screen, chooses whose blocks the steps show.
 
 ## More than one airlock
 
@@ -35,7 +40,7 @@ On the home screen, press **+ installation** under the logic system, and fill it
 
 The configuration panel is where an installation gets its blocks. It opens when you press **+ installation**, or an installation on the home screen. It lists every slot, the blocks that fill it, and how many slots still need a block.
 
-There are two kinds of slot. A block slot holds the blocks a sequence acts on or watches, such as the doors and the vent. A signal slot holds a block and the toolbar slot that sends the signal, such as the airlock's button. That toolbar slot is set up for you, and you are asked first if it already does something else.
+Filling a signal slot sets up the block's toolbar slot for you, and you are asked first if it already does something else.
 
 Anyone who receives your blueprint has never seen your construct, so the panel is their only guide. **Edit configuration panel**, on the logic system's screen, sets what it tells them:
 
