@@ -14,7 +14,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `installation` | Installation | Written |
 | `sequence` | Sequence | Not written |
 | `configuration-panel` | Configuration panel | Written; says the logic system must be off to set it up, until the issue *The configuration panel can be set up while its logic system runs* is done |
-| `library` | Library | Not written |
+| `library` | Library | Written; describes lost constructs as the issue *A lost construct's logic systems can be put on another construct* plans them, and is checked again when that and the library rework are done |
 | `picking` | Picking blocks | Not written |
 | `trigger` | Trigger | Not written; not in the game yet |
 | `step` | Step | Not written; not in the game yet |
