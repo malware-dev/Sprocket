@@ -28,3 +28,5 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 - **Sequence:** only tasks marked with the clock wait for their block; a run step waits for the
   sequence it runs; a signal that comes while the sequence is running is skipped and counted; a run
   saved halfway carries on from the same step after a reload.
+- **Trigger:** a trigger can start on a signal, when a block changes (for example a door finishing
+  closing), or at a set time; only the first needs a toolbar slot.
