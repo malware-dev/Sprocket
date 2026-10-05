@@ -15,7 +15,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `sequence` | Sequence | Not written |
 | `configuration-panel` | Configuration panel | Written; says the logic system must be off to set it up, until the issue *The configuration panel can be set up while its logic system runs* is done |
 | `library` | Library | Written; describes lost constructs as the issue *A lost construct's logic systems can be put on another construct* plans them, and is checked again when that and the library rework are done |
-| `picking` | Picking blocks | Not written |
+| `picking` | Picking blocks | Not written; a first draft exists, held back to be written with sequence, trigger and step |
 | `trigger` | Trigger | Not written; not in the game yet |
 | `step` | Step | Not written; not in the game yet |
 | `slot` | Slot | Written; not in the game yet. Uses a `[!WARNING]` aside, which needs the tagged quote issue |
@@ -38,6 +38,10 @@ The game's fonts have no bold or italic face, so each mark has one job:
   saved halfway carries on from the same step after a reload.
 - **Trigger:** a trigger can start on a signal, when a block changes (for example a door finishing
   closing), or at a set time; only the first needs a toolbar slot.
+- **Picking:** covers more than blocks, for example what is done to them, signals, values and
+  sequences; its name in the game may become *Picking*. A search stays for every list opened from
+  the same screen until that screen is left, which waits on the issue *A picker's search is kept for
+  the screen it was opened from, until that screen is left*.
 - **Blueprint:** sharing a blueprint with another player from inside a world is planned; when it
   exists, the blueprint page's player note gains it beside copying the files by hand.
 - **Home:** opens with the logo as an image named `sprocket-mark`. The logo is to be added as an
