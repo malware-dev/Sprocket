@@ -21,7 +21,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `slot` | Slot | Written; not in the game yet. Uses a `[!WARNING]` aside, which needs the tagged quote issue |
 | `signal` | Signal | Written; not in the game yet |
 | `blueprint` | Blueprint | Not written; not in the game yet |
-| `construct` | Construct | Not written; not in the game yet |
+| `construct` | Construct | Written; not in the game yet. Describes the automation surviving the loss of every programmable block, which waits on the issue *A construct's automation survives losing every programmable block* |
 
 ## Marks
 
