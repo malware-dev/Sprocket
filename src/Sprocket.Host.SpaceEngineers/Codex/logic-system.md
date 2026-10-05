@@ -38,7 +38,7 @@ On the home screen, press **+ installation** under the logic system, and fill it
 
 ## The configuration panel
 
-The configuration panel is where an installation gets its blocks. It opens when you press **+ installation**, or an installation on the home screen. It lists every slot, the blocks that fill it, and how many slots still need a block.
+The configuration panel is where an installation gets its blocks and signals. It opens when you press **+ installation**, or an installation on the home screen. It lists every slot, the blocks that fill it, and how many slots still need a block.
 
 Filling a signal slot sets up the block's toolbar slot for you, and you are asked first if it already does something else.
 
