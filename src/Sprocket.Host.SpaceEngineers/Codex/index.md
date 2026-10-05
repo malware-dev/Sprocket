@@ -18,7 +18,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `picking` | Picking blocks | Not written |
 | `trigger` | Trigger | Not written; not in the game yet |
 | `step` | Step | Not written; not in the game yet |
-| `slot` | Slot | Not written; not in the game yet |
+| `slot` | Slot | Written; not in the game yet. Uses a `[!WARNING]` aside, which needs the tagged quote issue |
 | `signal` | Signal | Not written; not in the game yet |
 | `blueprint` | Blueprint | Not written; not in the game yet |
 | `construct` | Construct | Not written; not in the game yet |
