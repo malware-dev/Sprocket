@@ -9,7 +9,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 
 | Id | Name | Page |
 |---|---|---|
-| `home` | The home screen | Not written |
+| `home` | The home screen | Written; an introduction to the automation. Waits on the logo |
 | `logic-system` | Logic system | Written |
 | `installation` | Installation | Written |
 | `sequence` | Sequence | Not written |
