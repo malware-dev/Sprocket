@@ -1,21 +1,29 @@
-The logic system says what happens; each installation says which blocks it happens to. There is only ever one [logic system](#logic-system): every installation runs the same one.
+An installation is one place a [logic system](#logic-system) runs, such as one airlock among several. It fills the logic system's [slots](#slot) with blocks of its own, for example its own doors, vent and button.
 
-## One logic system, many installations
+## Many installations, one logic system
 
-An airlock logic system can have three installations, one for each airlock on the ship. Each fills the logic system's slots with blocks of its own: its own inner door, its own outer door, its own vent, its own button. All three do the same thing, each to its own airlock, and each runs on its own: cycling one airlock leaves the other two as they are.
+An airlock logic system can have one installation for each airlock on the ship. All of them run the same [sequences](#sequence) and [triggers](#trigger), each on its own blocks. Cycling one airlock leaves the others as they are.
 
-Changing the logic system changes all of its installations at once. Fix a step in the airlock, and every airlock gets the fix.
+A change to the logic system reaches every installation at once. Fix a step, and every airlock gets the fix.
 
-## Making and changing one
+## Adding one
 
-**+ installation** under a logic system adds one, and opens the configuration panel to choose its blocks. Pressing an installation opens the same panel again, to swap its blocks and signals.
+Every logic system starts with one installation, named *Installation 1*. To add another, press **+ installation** under the logic system on the [home screen](#home). Its [configuration panel](#configuration-panel) opens, where you name it and fill its slots.
 
-Each installation has a switch of its own, so one airlock can be turned off while the others keep working. A logic system always has at least one installation; the last one cannot be deleted.
+Pressing an installation's row opens its configuration panel again, to rename it or change its blocks.
 
-## When a block is missing
+## Its switch
 
-If a block an installation uses is gone, the installation's row turns red, and so does its logic system's. A sequence that reaches the missing block stops there. Pressing the installation opens its configuration panel, where another block can fill the slot. A slot marked optional is the exception: the steps that use it are skipped instead.
+Each installation has a switch of its own, so one airlock can be switched off while the others keep working. A new installation starts switched on.
 
-## Not to be confused with
+The logic system's switch stands above them. Switching the logic system off stops all its installations. Switching it on again starts the ones whose own switch is on, and leaves the others off. While the logic system is off, the installations' switches can't be pressed.
 
-A blueprint is a copy of the logic system itself, kept in the library. Installing a blueprint on another construct gives that construct the logic system, with its first installation.
+## Its row
+
+On the home screen, each installation has a row under its logic system. The row lights green while one of its sequences runs, and red when it needs mending. The logic system's heading turns red if any of its installations does.
+
+When a sequence can't carry on, only that installation is switched off, and its row says why. The other installations keep running.
+
+## Removing one
+
+The bin on an installation's row deletes it, after asking. The logic system and its other installations are kept. A logic system keeps at least one installation, so the bin of the last one can't be pressed.

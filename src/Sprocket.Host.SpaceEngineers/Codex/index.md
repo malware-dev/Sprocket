@@ -11,7 +11,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 |---|---|---|
 | `home` | The home screen | Not written |
 | `logic-system` | Logic system | Written |
-| `installation` | Installation | Written; repeats much of the logic system page, and is to be cut back to what only installations have |
+| `installation` | Installation | Written |
 | `sequence` | Sequence | Not written |
 | `configuration-panel` | Configuration panel | Not written |
 | `library` | Library | Not written |
