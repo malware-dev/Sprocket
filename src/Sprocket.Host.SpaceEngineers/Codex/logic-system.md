@@ -45,8 +45,7 @@ Filling a signal slot sets up the block's toolbar slot for you, and you are aske
 Anyone who receives your blueprint has never seen your construct, so the panel is their only guide. **Edit configuration panel**, on the logic system's screen, sets what it tells them:
 
 - a description of the logic system, with formatting such as headings and lists,
-- each slot's name, and what it is for,
-- whether a slot is required or optional.
+- each slot's name, and what it is for.
 
 A slot starts with the name of the block you picked, such as *Airlock Inner Door 2*. Rename it *Inner door* and describe it as the door on the pressurized side, and whoever fills it gets it right the first time.
 
@@ -54,7 +53,7 @@ A slot starts with the name of the block you picked, such as *Airlock Inner Door
 
 On the home screen, a row lights green while it runs and red when it needs mending. Open it to see why.
 
-If a sequence cannot carry on, for example because a block is gone or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the configuration panel, and switch the installation on again. Steps that use an empty optional slot are skipped instead.
+If a sequence cannot carry on, for example because a block is gone or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the configuration panel, and switch the installation on again.
 
 ## Keeping and sharing it
 

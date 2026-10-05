@@ -9,7 +9,7 @@ A slot is a named place in a [logic system](#logic-system), such as *the inner d
 
 Slots are filled on the installation's [configuration panel](#configuration-panel). Each slot shows its name and what it is for, as whoever made the logic system wrote them.
 
-Press a slot to [pick](#picking) what fills it. Only blocks of the right kind are offered. A slot made from a door takes doors, and one made from a vent takes vents. If nothing on this [construct](#construct) fits, the slot says so.
+Press a slot to [pick](#picking) what fills it. Only blocks of the right kind are offered. A slot made from a door takes doors, and one made from a vent takes vents. If nothing on this [construct](#construct) fits, the list says so.
 
 - A block slot can be filled with one block or several.
 - A signal slot needs a block and the toolbar slot on it that sends the signal. That toolbar slot is set up for you, and you are asked first if it already does something else.
@@ -25,9 +25,10 @@ The block you picked fills the slot for the installation chosen under **Using th
 > [!WARNING]
 > When you remove the last step or trigger that uses a given block or signal, its slot disappears from the configuration panel, with its name and what it is for. Picking another block in its place makes a new slot, which every installation has to fill again. To change which block a slot holds, fill it again on the configuration panel instead.
 
-## Required or optional
+## Name and description
 
-Each slot has a name, a line saying what it is for, and whether it is required or optional. These are set once, for every installation, with **Edit configuration panel**.
+Each slot's name, and a line saying what it is for, are set once, for every installation, with **Edit configuration panel**.
 
-- A **required** slot must be filled. When a sequence reaches a required slot that is empty, or whose block is gone, the installation is switched off and its row says why.
-- An **optional** slot may be left empty. Steps that use it are then skipped.
+## An empty slot
+
+When a sequence reaches a slot that is empty, or whose block is gone, the installation is switched off and its row says why.
