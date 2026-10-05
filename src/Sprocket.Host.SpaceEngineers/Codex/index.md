@@ -23,6 +23,14 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `blueprint` | Blueprint | Not written; not in the game yet |
 | `construct` | Construct | Not written; not in the game yet |
 
+## Marks
+
+The game's fonts have no bold or italic face, so each mark has one job:
+
+- `code` (a monospace face) for anything on screen that is pressed or read, such as `+ installation`.
+- `**strong**` (orange) for the lead of a list item or a key distinction, used sparingly.
+- `*emphasis*` (brighter) for names typed by a player or shown by the game, such as *Cycle Out*.
+
 ## Owed to pages not yet written
 
 - **Sequence:** only tasks marked with the clock wait for their block; a run step waits for the

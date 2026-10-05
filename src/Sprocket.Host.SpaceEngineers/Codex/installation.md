@@ -8,7 +8,7 @@ A change to the logic system reaches every installation at once. Fix a step, and
 
 ## Adding one
 
-Every logic system starts with one installation, named *Installation 1*. To add another, press **+ installation** under the logic system on the [home screen](#home). Its [configuration panel](#configuration-panel) opens, where you name it and fill its slots.
+Every logic system starts with one installation, named *Installation 1*. To add another, press `+ installation` under the logic system on the [home screen](#home). Its [configuration panel](#configuration-panel) opens, where you name it and fill its slots.
 
 Pressing an installation's row opens its configuration panel again, to rename it or change its blocks.
 
