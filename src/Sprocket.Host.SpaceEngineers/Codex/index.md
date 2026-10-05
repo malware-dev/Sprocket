@@ -13,7 +13,7 @@ issue *Each codex entry is a file of its own in a Codex folder* connects the two
 | `logic-system` | Logic system | Written |
 | `installation` | Installation | Written |
 | `sequence` | Sequence | Not written |
-| `configuration-panel` | Configuration panel | Not written |
+| `configuration-panel` | Configuration panel | Written; says the logic system must be off to set it up, until the issue *The configuration panel can be set up while its logic system runs* is done |
 | `library` | Library | Not written |
 | `picking` | Picking blocks | Not written |
 | `trigger` | Trigger | Not written; not in the game yet |
