@@ -33,7 +33,10 @@ public static class RichShot
             HeadingColor = Palette.Ink,
             RuleColor = Palette.Line,
             BlockSpacing = 12f,
-            Indent = 24f
+            Indent = 24f,
+            Quotes = new QuoteStyles(
+                new QuoteStyle("note", bar: Palette.Accent, fill: Palette.Panel),
+                new QuoteStyle("warning", bar: Palette.Notice, fill: Palette.NoticeWash, color: Palette.Ink))
         }
     };
 

@@ -40,6 +40,15 @@ namespace Lumel.Text
         /// <summary>Where the lines sit across the room, or null to leave it to the layers beneath.</summary>
         public Alignment? Alignment { get; set; }
 
+        /// <summary>The color of a link's words, or null to leave it to the layers beneath.</summary>
+        public Color? LinkColor { get; set; }
+
+        /// <summary>The fill behind a link's words, or null to leave it to the layers beneath.</summary>
+        public Color? LinkFill { get; set; }
+
+        /// <summary>The looks tagged quotes take, or null to leave them to the layers beneath.</summary>
+        public QuoteStyles Quotes { get; set; }
+
         /// <inheritdoc />
         public override void Neutral(Element element)
         {
@@ -81,6 +90,15 @@ namespace Lumel.Text
 
             if (Alignment.HasValue)
                 text.Alignment = Lumel.Text.Alignment.Left;
+
+            if (LinkColor.HasValue)
+                text.LinkColor = null;
+
+            if (LinkFill.HasValue)
+                text.LinkFill = null;
+
+            if (Quotes != null)
+                text.Quotes = null;
         }
 
         /// <inheritdoc />
@@ -124,6 +142,15 @@ namespace Lumel.Text
 
             if (Alignment.HasValue)
                 text.Alignment = Alignment.Value;
+
+            if (LinkColor.HasValue)
+                text.LinkColor = LinkColor.Value;
+
+            if (LinkFill.HasValue)
+                text.LinkFill = LinkFill.Value;
+
+            if (Quotes != null)
+                text.Quotes = Quotes;
         }
 
         /// <inheritdoc />
@@ -141,6 +168,9 @@ namespace Lumel.Text
             BlockSpacing = null;
             Indent = null;
             Alignment = null;
+            LinkColor = null;
+            LinkFill = null;
+            Quotes = null;
         }
 
         /// <inheritdoc />
@@ -183,6 +213,15 @@ namespace Lumel.Text
 
             if (!Alignment.HasValue)
                 Alignment = other.Alignment;
+
+            if (!LinkColor.HasValue)
+                LinkColor = other.LinkColor;
+
+            if (!LinkFill.HasValue)
+                LinkFill = other.LinkFill;
+
+            if (Quotes == null)
+                Quotes = other.Quotes;
         }
     }
 }

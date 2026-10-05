@@ -7,7 +7,7 @@ namespace Lumel.Text
     /// <remarks>
     ///     Markdown-lite is CommonMark's headings (<c>#</c> to <c>######</c>), rules (<c>---</c>, <c>***</c>,
     ///     <c>___</c>, spaced or not), one level of lists (<c>-</c>, <c>*</c> or <c>+</c>, and <c>1.</c> or
-    ///     <c>1)</c>), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans, images
+    ///     <c>1)</c>), quotes (<c>&gt;</c>, one level), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans, images
     ///     (<c>![description](name)</c>), links (<c>[words](target)</c>) and backslash escapes. A single newline
     ///     is a line break and a blank line ends a block. Anything else reads as the text it is.
     ///     <para>
@@ -20,6 +20,10 @@ namespace Lumel.Text
     ///         otherwise, a side not given following the picture's shape. A link's target is a string only the
     ///         host reads, and holds no spaces.
     ///     </para>
+    ///     <para>
+    ///         A quote whose first line is only <c>[!name]</c> is tagged with that name, which the host may give a
+    ///         look of its own; the tag is never shown, and a quote whose tag has no look is drawn as any other.
+    ///     </para>
     /// </remarks>
     public static class Markdown
     {
@@ -31,84 +35,7 @@ namespace Lumel.Text
                 return document;
 
             var lines = source.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-            var open = new StringBuilder();
-            Block current = null;
-            Block table = null;
-
-            for (var i = 0; i < lines.Length; i++)
-            {
-                var line = lines[i].Trim();
-
-                if (line.Length == 0)
-                {
-                    Close(document, ref current, open);
-                    table = null;
-                    continue;
-                }
-
-                if (table != null)
-                {
-                    if (line.IndexOf('|') >= 0)
-                    {
-                        Row(table, line, 0);
-                        continue;
-                    }
-
-                    table = null;
-                }
-
-                int level;
-                string rest;
-
-                if (IsRule(line))
-                {
-                    Close(document, ref current, open);
-                    document.Blocks.Add(new Block(BlockKind.Rule));
-                    continue;
-                }
-
-                if (IsHeading(line, out level, out rest))
-                {
-                    Close(document, ref current, open);
-                    current = new Block(BlockKind.Heading, level);
-                    open.Append(rest);
-                    Close(document, ref current, open);
-                    continue;
-                }
-
-                if (IsBullet(line, out rest))
-                {
-                    Close(document, ref current, open);
-                    current = new Block(BlockKind.Bullet);
-                    open.Append(rest);
-                    continue;
-                }
-
-                if (IsNumbered(line, out level, out rest))
-                {
-                    Close(document, ref current, open);
-                    current = new Block(BlockKind.Numbered, level);
-                    open.Append(rest);
-                    continue;
-                }
-
-                List<Column> columns;
-                if (current != null && current.Kind == BlockKind.Paragraph && IsDelimiterRow(line, out columns) &&
-                    Cells(LastLine(open)).Count == columns.Count)
-                {
-                    table = Table(document, ref current, open, columns);
-                    continue;
-                }
-
-                if (current == null)
-                    current = new Block(BlockKind.Paragraph);
-                else
-                    open.Append('\n');
-
-                open.Append(line);
-            }
-
-            Close(document, ref current, open);
+            Read(lines, 0, lines.Length, document.Blocks, false);
             return document;
         }
 
@@ -131,13 +58,153 @@ namespace Lumel.Text
             return escaped.ToString();
         }
 
-        static void Close(Document document, ref Block current, StringBuilder open)
+        /// <summary>Reads <paramref name="lines" /> from <paramref name="from" /> up to <paramref name="to" /> into <paramref name="blocks" />; inside a quote, a line starting with <c>&gt;</c> is only words.</summary>
+        static void Read(string[] lines, int from, int to, IList<Block> blocks, bool quoted)
+        {
+            var open = new StringBuilder();
+            Block current = null;
+            Block table = null;
+
+            for (var i = from; i < to; i++)
+            {
+                var line = lines[i].Trim();
+
+                if (line.Length == 0)
+                {
+                    Close(blocks, ref current, open);
+                    table = null;
+                    continue;
+                }
+
+                if (table != null)
+                {
+                    if (line.IndexOf('|') >= 0)
+                    {
+                        Row(table, line, 0);
+                        continue;
+                    }
+
+                    table = null;
+                }
+
+                if (!quoted && line[0] == '>')
+                {
+                    Close(blocks, ref current, open);
+                    i = Quote(lines, i, to, blocks) - 1;
+                    continue;
+                }
+
+                int level;
+                string rest;
+
+                if (IsRule(line))
+                {
+                    Close(blocks, ref current, open);
+                    blocks.Add(new Block(BlockKind.Rule));
+                    continue;
+                }
+
+                if (IsHeading(line, out level, out rest))
+                {
+                    Close(blocks, ref current, open);
+                    current = new Block(BlockKind.Heading, level);
+                    open.Append(rest);
+                    Close(blocks, ref current, open);
+                    continue;
+                }
+
+                if (IsBullet(line, out rest))
+                {
+                    Close(blocks, ref current, open);
+                    current = new Block(BlockKind.Bullet);
+                    open.Append(rest);
+                    continue;
+                }
+
+                if (IsNumbered(line, out level, out rest))
+                {
+                    Close(blocks, ref current, open);
+                    current = new Block(BlockKind.Numbered, level);
+                    open.Append(rest);
+                    continue;
+                }
+
+                List<Column> columns;
+                if (current != null && current.Kind == BlockKind.Paragraph && IsDelimiterRow(line, out columns) &&
+                    Cells(LastLine(open)).Count == columns.Count)
+                {
+                    table = Table(blocks, ref current, open, columns);
+                    continue;
+                }
+
+                if (current == null)
+                    current = new Block(BlockKind.Paragraph);
+                else
+                    open.Append('\n');
+
+                open.Append(line);
+            }
+
+            Close(blocks, ref current, open);
+        }
+
+        /// <summary>Reads the quote whose lines start at <paramref name="from" />, up to the first line before <paramref name="to" /> that does not start with <c>&gt;</c>, into <paramref name="blocks" />; answers where that line is.</summary>
+        /// <remarks>Each line loses its <c>&gt;</c> and one space after it. A first line that is only <c>[!name]</c> is the quote's tag rather than its words.</remarks>
+        static int Quote(string[] lines, int from, int to, IList<Block> blocks)
+        {
+            var end = from;
+            while (end < to)
+            {
+                var line = lines[end].Trim();
+                if (line.Length == 0 || line[0] != '>')
+                    break;
+
+                end++;
+            }
+
+            var inner = new string[end - from];
+            for (var i = 0; i < inner.Length; i++)
+            {
+                var line = lines[from + i].Trim();
+                inner[i] = line.Length > 1 && line[1] == ' ' ? line.Substring(2) : line.Substring(1);
+            }
+
+            string tag = null;
+            var first = 0;
+            if (inner.Length > 0 && IsTag(inner[0].Trim(), out tag))
+                first = 1;
+
+            var quote = new Block(tag);
+            Read(inner, first, inner.Length, quote.Blocks, true);
+            blocks.Add(quote);
+            return end;
+        }
+
+        /// <summary>Whether <paramref name="line" /> is a quote's tag, <c>[!name]</c>, the name letters, digits, <c>-</c> and <c>_</c>.</summary>
+        static bool IsTag(string line, out string tag)
+        {
+            tag = null;
+            if (line.Length < 4 || line[0] != '[' || line[1] != '!' || line[line.Length - 1] != ']')
+                return false;
+
+            for (var i = 2; i < line.Length - 1; i++)
+            {
+                var c = line[i];
+                if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
+                    return false;
+            }
+
+            tag = line.Substring(2, line.Length - 3);
+            return true;
+        }
+
+        static void Close(IList<Block> blocks, ref Block current, StringBuilder open)
         {
             if (current == null)
                 return;
 
             Inlines.Parse(open.ToString(), current.Runs);
-            document.Blocks.Add(current);
+            blocks.Add(current);
             current = null;
             open.Clear();
         }
@@ -151,14 +218,14 @@ namespace Lumel.Text
 
         /// <summary>A table of <paramref name="columns" />, its heading row the last line of the paragraph being read, and the lines before that left a paragraph.</summary>
         /// <remarks>As GitHub's own reader does, so a table can start straight after the words that introduce it.</remarks>
-        static Block Table(Document document, ref Block current, StringBuilder open, List<Column> columns)
+        static Block Table(IList<Block> blocks, ref Block current, StringBuilder open, List<Column> columns)
         {
             var heading = LastLine(open);
 
             if (heading.Length < open.Length)
             {
                 open.Length -= heading.Length + 1;
-                Close(document, ref current, open);
+                Close(blocks, ref current, open);
             }
             else
             {
@@ -170,7 +237,7 @@ namespace Lumel.Text
             for (var i = 0; i < columns.Count; i++)
                 table.Columns.Add(columns[i]);
 
-            document.Blocks.Add(table);
+            blocks.Add(table);
 
             var cells = Cells(heading);
             for (var i = 0; i < cells.Count; i++)

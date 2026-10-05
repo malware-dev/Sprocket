@@ -26,6 +26,9 @@ namespace Lumel.Text
         Row,
 
         /// <summary>One cell of a table's row, holding words; level 1 in the heading row.</summary>
-        Cell
+        Cell,
+
+        /// <summary>Blocks set apart as quoted: its blocks are what it holds, and its tag, where it has one, names how it looks.</summary>
+        Quote
     }
 }

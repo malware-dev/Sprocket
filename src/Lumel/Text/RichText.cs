@@ -8,7 +8,7 @@ using VRageMath;
 
 namespace Lumel.Text
 {
-    /// <summary>A document, wrapped to the room it is given: its headings, paragraphs, list items, rules, tables and images, each run set apart as its kind says.</summary>
+    /// <summary>A document, wrapped to the room it is given: its headings, paragraphs, list items, rules, tables, quotes and images, each run set apart as its kind says.</summary>
     /// <remarks>
     ///     Laid out when the document, its sizes or the room change, into pieces that each draw in one call;
     ///     drawing measures nothing. Colors are read as it draws, so changing one lays out nothing. A document
@@ -41,6 +41,7 @@ namespace Lumel.Text
         float _indent = 24f;
         Alignment _alignment;
         bool _fit;
+        QuoteStyles _quotes;
         Action<Link> _follow;
         Link _pressed;
 
@@ -251,6 +252,20 @@ namespace Lumel.Text
         /// <remarks>Asked while the pointer rests on a link, so a tip it hands back is one made once and kept.</remarks>
         public Func<Link, Tip> LinkTip { get; set; }
 
+        /// <summary>The looks tagged quotes take, or null for every quote to look alike.</summary>
+        public QuoteStyles Quotes
+        {
+            get { return _quotes; }
+            set
+            {
+                if (_quotes == value)
+                    return;
+
+                _quotes = value;
+                Relayout();
+            }
+        }
+
         /// <summary>Room held clear between the edge and the text.</summary>
         public Thickness Padding
         {
@@ -343,9 +358,9 @@ namespace Lumel.Text
             {
                 var where = _marks[i].Where;
                 if (_marks[i].Across)
-                    where.Width = room.Width;
+                    where.Width = room.Width - where.X;
 
-                g.Fill(new RectangleF(room.X + where.X, room.Y + where.Y, where.Width, where.Height), RuleColor);
+                g.Fill(new RectangleF(room.X + where.X, room.Y + where.Y, where.Width, where.Height), _marks[i].Color ?? RuleColor);
             }
 
             if (LinkFill.HasValue)
@@ -364,7 +379,7 @@ namespace Lumel.Text
                     piece.Image.Draw(g, new RectangleF(room.X + piece.At.X, room.Y + piece.At.Y, piece.Box.X, piece.Box.Y), Color.White);
                 else
                     g.DrawText(piece.Font, piece.Text, new Vector2(room.X + piece.At.X, room.Y + piece.At.Y), piece.Size,
-                        ColorOf(piece.Tone));
+                        piece.Tone == Tone.Plain && piece.Ink.HasValue ? piece.Ink.Value : ColorOf(piece.Tone));
             }
         }
 
@@ -453,47 +468,7 @@ namespace Lumel.Text
                 return;
             }
 
-            var body = _fontSize * _scale;
-            var indent = _indent * _scale;
-
-            for (var b = 0; b < _document.Blocks.Count; b++)
-            {
-                var block = _document.Blocks[b];
-
-                if (b > 0)
-                    y += _spacing * _scale;
-
-                if (block.Kind == BlockKind.Rule)
-                {
-                    _marks.Add(new Mark { Where = new RectangleF(0f, y + body * 0.5f, 0f, 1f), Across = true });
-                    y += body;
-                    continue;
-                }
-
-                if (block.Kind == BlockKind.Table)
-                {
-                    Table(g, block, width, ref y, ref widest);
-                    continue;
-                }
-
-                var size = block.Kind == BlockKind.Heading ? HeadingSize(block.Level) : body;
-                var start = 0f;
-
-                if (block.Kind == BlockKind.Bullet || block.Kind == BlockKind.Numbered)
-                {
-                    start = indent;
-
-                    if (block.Kind == BlockKind.Bullet)
-                    {
-                        var side = size / 5f;
-                        _marks.Add(new Mark { Where = new RectangleF((indent - side) * 0.5f, y + (size - side) * 0.5f, side, side) });
-                    }
-                    else
-                        _pieces.Add(new Piece { Text = block.Level + ".", At = new Vector2(0f, y), Font = _font, Size = size, Tone = Tone.Plain });
-                }
-
-                Flow(g, block, start, size, width, _alignment, ref y, ref widest);
-            }
+            Stack(g, _document.Blocks, 0f, width, ref y, ref widest);
 
             if (_alignment != Alignment.Left && width < Unbounded && widest < width)
                 widest = width;
@@ -508,6 +483,94 @@ namespace Lumel.Text
             }
         }
 
+        /// <summary>Lays <paramref name="blocks" /> out one under another from line <paramref name="y" />, between <paramref name="left" /> and <paramref name="width" />, moving <paramref name="y" /> below the last.</summary>
+        void Stack(IGraphics g, IList<Block> blocks, float left, float width, ref float y, ref float widest)
+        {
+            var body = _fontSize * _scale;
+            var indent = _indent * _scale;
+
+            for (var b = 0; b < blocks.Count; b++)
+            {
+                var block = blocks[b];
+
+                if (b > 0)
+                    y += _spacing * _scale;
+
+                if (block.Kind == BlockKind.Rule)
+                {
+                    _marks.Add(new Mark { Where = new RectangleF(left, y + body * 0.5f, 0f, 1f), Across = true });
+                    y += body;
+                    continue;
+                }
+
+                if (block.Kind == BlockKind.Table)
+                {
+                    Table(g, block, left, width, ref y, ref widest);
+                    continue;
+                }
+
+                if (block.Kind == BlockKind.Quote)
+                {
+                    Quote(g, block, left, width, ref y, ref widest);
+                    continue;
+                }
+
+                var size = block.Kind == BlockKind.Heading ? HeadingSize(block.Level) : body;
+                var start = left;
+
+                if (block.Kind == BlockKind.Bullet || block.Kind == BlockKind.Numbered)
+                {
+                    start = left + indent;
+
+                    if (block.Kind == BlockKind.Bullet)
+                    {
+                        var side = size / 5f;
+                        _marks.Add(new Mark { Where = new RectangleF(left + (indent - side) * 0.5f, y + (size - side) * 0.5f, side, side) });
+                    }
+                    else
+                        _pieces.Add(new Piece { Text = block.Level + ".", At = new Vector2(left, y), Font = _font, Size = size, Tone = Tone.Plain });
+                }
+
+                Flow(g, block, start, size, width, _alignment, ref y, ref widest);
+            }
+        }
+
+        /// <summary>Lays a quote out from line <paramref name="y" />, its blocks set in from a bar down its edge at <paramref name="left" />, moving <paramref name="y" /> below it.</summary>
+        /// <remarks>
+        ///     A quote looks as the style its tag finds says, part by part, and as any other quote for whatever the
+        ///     style leaves alone or where its tag finds none. A fill reaches across the room behind it, with a
+        ///     little room above and below its words.
+        /// </remarks>
+        void Quote(IGraphics g, Block quote, float left, float width, ref float y, ref float widest)
+        {
+            var style = _quotes == null ? null : _quotes.Find(quote.Tag);
+            var body = _fontSize * _scale;
+            var top = y;
+            var behind = _marks.Count;
+            var first = _pieces.Count;
+            var filled = style != null && style.Fill.HasValue;
+            var margin = filled ? body * 0.25f : 0f;
+
+            y += margin;
+            Stack(g, quote.Blocks, left + _indent * _scale, filled && width < Unbounded ? width - _indent * _scale * 0.5f : width, ref y, ref widest);
+            y += margin;
+
+            if (filled)
+                _marks.Insert(behind, new Mark { Where = new RectangleF(left, top, 0f, y - top), Across = true, Color = style.Fill });
+
+            _marks.Add(new Mark { Where = new RectangleF(left, top, Math.Max(1f, body / 8f), y - top), Color = style == null ? null : style.Bar });
+
+            if (style == null || !style.Color.HasValue)
+                return;
+
+            for (var i = first; i < _pieces.Count; i++)
+            {
+                var piece = _pieces[i];
+                piece.Ink = style.Color;
+                _pieces[i] = piece;
+            }
+        }
+
         /// <summary>Lays a table out from line <paramref name="y" />, a row at a time, moving <paramref name="y" /> below it.</summary>
         /// <remarks>
         ///     Each column is as wide as its widest cell on one line, a gap of one indent apart. Spare width is
@@ -516,19 +579,20 @@ namespace Lumel.Text
         ///     wrap. A heading row is drawn in the heading color, with a rule under it. A table narrower than its
         ///     room stands where <see cref="Alignment" /> says.
         /// </remarks>
-        void Table(IGraphics g, Block table, float width, ref float y, ref float widest)
+        void Table(IGraphics g, Block table, float from, float width, ref float y, ref float widest)
         {
             var count = table.Columns.Count;
             var gap = _indent * _scale;
-            Widths(g, table, width, gap);
+            var room = width >= Unbounded ? Unbounded : width - from;
+            Widths(g, table, room, gap);
 
             var across = gap * (count - 1);
             for (var c = 0; c < count; c++)
                 across += _wides[c];
 
-            var left = 0f;
-            if (_alignment != Alignment.Left && width < Unbounded && across < width)
-                left = _alignment == Alignment.Center ? (width - across) * 0.5f : width - across;
+            var left = from;
+            if (_alignment != Alignment.Left && room < Unbounded && across < room)
+                left += _alignment == Alignment.Center ? (room - across) * 0.5f : room - across;
 
             for (var r = 0; r < table.Blocks.Count; r++)
             {
@@ -886,6 +950,9 @@ namespace Lumel.Text
 
             /// <summary>How big the piece is drawn: an image's size, or the words' width and their line's height.</summary>
             public Vector2 Box;
+
+            /// <summary>The color plain words take in place of the text's own, as a quote's style gives it, or null.</summary>
+            public Color? Ink;
         }
 
         /// <summary>Where one piece of a link's words stands, for finding the link under the pointer.</summary>
@@ -895,11 +962,14 @@ namespace Lumel.Text
             public Link Link;
         }
 
-        /// <summary>A rule, a bullet's mark, or the rule under a table's heading row; a rule between blocks reaches across whatever width the text is given.</summary>
+        /// <summary>A rule, a bullet's mark, the rule under a table's heading row, or a quote's bar or fill; one that reaches across fills the room from where it starts.</summary>
         struct Mark
         {
             public RectangleF Where;
             public bool Across;
+
+            /// <summary>The mark's own color, as a quote's style gives it, or null for the rule color.</summary>
+            public Color? Color;
         }
     }
 }
