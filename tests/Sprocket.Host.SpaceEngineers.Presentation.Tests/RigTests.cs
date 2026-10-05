@@ -591,7 +591,7 @@ public class RigTests
 
         rig.Editor.PressStart("when");
         rig.Editor.PressBlock("Inside Button");
-        rig.Editor.PressChoice("is pressed");
+        rig.Editor.PressChoice("button 1 is pressed");
         rig.Editor.PressChoice(sequence.Name);
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
@@ -839,7 +839,7 @@ public class RigTests
         rig.Editor.Back();
         rig.Editor.PressStart("when");
         rig.Editor.PressBlock("Airlock Button");
-        rig.Editor.PressChoice("is pressed");
+        rig.Editor.PressChoice("button 1 is pressed");
         rig.Editor.PressPrimary();
         rig.Editor.PressChoice("Take it over");
 

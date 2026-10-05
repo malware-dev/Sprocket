@@ -300,13 +300,13 @@ public class EditorTests
 
         editor.PressWhen(0);
         editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
+        editor.PressChoice("button 1 is pressed");
         editor.PressPrimary();
         ship.Tick();
 
         var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(1, Assert.Single(Pressed.Where(ship.Automation, ship.Automation.Systems[0], pressed.Part)!).Slot);
-        Assert.Equal("When Airlock Button is pressed", editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", editor.Says(0));
 
         // One trigger for the sequence, not the old one left beside the new.
         Assert.Single(ship.Automation.Systems[0].Triggers);
@@ -533,8 +533,8 @@ public class EditorTests
         Assert.NotEmpty(editor.Offered());
         Assert.All(editor.Offered(), row => Assert.Contains("Button", row.Secondary));
         editor.PressBlock("Airlock Button");
-        Assert.True(editor.HasChoice("is pressed"));
-        editor.PressChoice("is pressed");
+        Assert.True(editor.HasChoice("button 1 is pressed"));
+        editor.PressChoice("button 1 is pressed");
 
         ship.Tick();
         editor.PressPrimary();
@@ -1167,7 +1167,7 @@ public class EditorTests
         ship.Editor.PressRow(0);
         ship.Editor.PressStart("when");
         ship.Editor.PressBlock("Airlock Button");
-        ship.Editor.PressChoice("is pressed");
+        ship.Editor.PressChoice("button 1 is pressed");
         ship.Editor.PressPrimary();
 
         // That button is already spoken for, which is asked about before anything else - and here
@@ -1469,7 +1469,7 @@ public class EditorTests
         Assert.Null(editor.Screen.Primary);
 
         // What happens, and then beside it what the trigger does.
-        editor.PressChoice("is pressed");
+        editor.PressChoice("button 1 is pressed");
         var stages = editor.Pick().Stages;
         Assert.Equal(3, stages.Count);
         Assert.Contains(stages[2].Entries(), e => e.Text == "A new sequence" && e.IsChosen);
@@ -1763,7 +1763,7 @@ public class EditorTests
         Assert.Equal("When something happens", editor.Screen.Title());
 
         editor.PressBlock("Airlock Button");
-        editor.PressChoice("is pressed");
+        editor.PressChoice("button 1 is pressed");
 
         // Both stages are one screen now, and the starters are no longer a screen at all, so
         // one step back reaches the system and a second reaches the ship. Leaving a picker that
@@ -1815,7 +1815,7 @@ public class EditorTests
 
         Assert.Equal("Airlock", editor.Screen.Title());
         Assert.Equal("Let me out", editor.Rows()[0].Summary);
-        Assert.Equal("When Airlock Button is pressed", editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", editor.Says(0));
         Assert.Equal("then run Let me out", editor.Doing(0));
     }
 

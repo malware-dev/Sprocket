@@ -149,7 +149,7 @@ public class BlueprintWritingTests
 
         var row = Assert.Single(editor.Parts());
         Assert.Single(row.Blocks);
-        Assert.EndsWith("is pressed", Assert.Single(row.Triggers));
+        Assert.EndsWith("button 1 is pressed", Assert.Single(row.Triggers));
     }
 
     /// <summary>A step back taken while a box holds the keyboard takes back what was typed in it, and nothing before it.</summary>

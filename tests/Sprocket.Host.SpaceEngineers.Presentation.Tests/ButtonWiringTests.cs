@@ -47,7 +47,7 @@ public class ButtonWiringTests
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();
         sim.Editor.PressBlock("Port Button");
-        sim.Editor.PressChoice("is pressed");
+        sim.Editor.PressChoice("button 1 is pressed");
         sim.Editor.PressPrimary();
         sim.Tick();
 
@@ -81,7 +81,7 @@ public class ButtonWiringTests
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();
         sim.Editor.PressBlock("Airlock Button");
-        sim.Editor.PressChoice("is pressed");
+        sim.Editor.PressChoice("button 1 is pressed");
         sim.Editor.PressPrimary();
         sim.Tick();
 
@@ -156,7 +156,7 @@ public class ButtonWiringTests
         sim.Editor.Parts()[0].Fills!.Execute();
         sim.Tick();
         sim.Editor.PressBlock(block);
-        sim.Editor.PressChoice("is pressed");
+        sim.Editor.PressChoice("button 1 is pressed");
         sim.Editor.PressPrimary();
         Tick(sim);
     }

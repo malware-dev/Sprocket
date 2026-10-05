@@ -186,7 +186,7 @@ namespace Sprocket.Sim.Driving
             editor.NewSystem(name);
             editor.PressStart(editor.Texts.SystemWhen);
             editor.PressBlock("Airlock Button");
-            editor.PressChoice("is pressed");
+            editor.PressChoice("button 1 is pressed");
             editor.PressPrimary();
         }
 

@@ -32,7 +32,7 @@ public class PaperTargetTests
         editor.PressBlock("Airlock Button");
         Note(seen, ship);
 
-        editor.PressChoice("is pressed");
+        editor.PressChoice("button 1 is pressed");
         editor.PressPrimary();
         Note(seen, ship);
 

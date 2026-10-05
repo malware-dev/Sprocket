@@ -183,7 +183,7 @@ public class SettingTests
         screen.Editor.NewSystem("Power");
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Standby Battery");
         screen.Editor.PressChoice("Set Charge Mode");

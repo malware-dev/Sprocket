@@ -37,7 +37,7 @@ public class TargetTests
         screen.Editor.NewSystem("Airlock");
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Run(2);
 
         var does = screen.Editor.Pick().Stages[2];
@@ -89,7 +89,7 @@ public class TargetTests
 
         Assert.Equal(2, screen.Editor.Pick().Stages.Count);
 
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         Assert.Equal(3, screen.Editor.Pick().Stages.Count);
     }
 

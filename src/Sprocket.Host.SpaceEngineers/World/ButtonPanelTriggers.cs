@@ -18,8 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             return block is IMyButtonPanel;
         }
 
-        /// <summary>"button 2 is pressed" on a panel with several, and plain "is pressed" on a panel with one.</summary>
-        /// <remarks>Saying which button on a panel with one would be saying something nobody needs to know.</remarks>
+        /// <summary>"button 2 is pressed": every button by its number, on a panel with one button as on a panel with several.</summary>
+        /// <remarks>The same trigger reads the same whatever panel it is on, so installations filled from different panels agree.</remarks>
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             IMyToolbar toolbar = Toolbars.Of(block, 1);
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var button = 0; button < buttons; button++)
             {
                 var at = new ToolbarSlot(1, button / toolbar.SlotCount + 1, button % toolbar.SlotCount + 1);
-                kind.WithTrigger(at, buttons == 1 ? "is pressed" : "button " + (button + 1) + " is pressed");
+                kind.WithTrigger(at, "button " + (button + 1) + " is pressed");
             }
         }
     }

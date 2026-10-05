@@ -80,7 +80,7 @@ public class OpeningTests
         screen.Run(2);
         screen.Do("type", "pre");
 
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Screen.Title());
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Screen.Title());
         Assert.Equal("pre", Stage(screen, 1).NarrowText);
     }
 

@@ -194,7 +194,7 @@ public class ChangingTests
         Trigger was = System(screen).Triggers[0];
         screen.Editor.PressDoes(0);
 
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Screen.Title());
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Screen.Title());
         Assert.Equal("", screen.Editor.Screen.Question);
 
         var does = screen.Editor.Pick().Stages[2];
@@ -256,7 +256,7 @@ public class ChangingTests
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
     }
 
@@ -395,7 +395,7 @@ public class ChangingTests
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
 
         screen.Editor.Steps().Redo!.Execute();
@@ -474,7 +474,7 @@ public class ChangingTests
 
         var back = Assert.IsType<RequiredTrigger>(System(screen).Triggers[0]);
         Assert.Equal(1, Assert.Single(Pressed.Where(screen.Editor.Program, System(screen), back.Part)!).Slot);
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
 
         // And forward again, into the same change rather than a rebuilt one that reads the same.
         Assert.Equal("changing when it runs", screen.Editor.Steps().RedoText);
@@ -573,7 +573,7 @@ public class ChangingTests
 
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -600,7 +600,7 @@ public class ChangingTests
 
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Take it over");
         screen.Run(2);
@@ -634,7 +634,7 @@ public class ChangingTests
         screen.Editor.PressWhen(1);
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -664,7 +664,7 @@ public class ChangingTests
         screen.Editor.PressWhen(1);
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Take it over");
         screen.Run(2);
@@ -676,7 +676,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal(2, System(screen).Triggers.Count);
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
     }
 
@@ -704,20 +704,20 @@ public class ChangingTests
         screen.Editor.PressWhen(1);
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressChoice("is pressed");
+        screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressPrimary();
         screen.Editor.PressChoice("Take it over");
         screen.Run(2);
 
         Assert.Single(System(screen).Triggers);
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("taking a button over", screen.Editor.Steps().UndoText);
 
 
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
     }
 
@@ -738,7 +738,7 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal("", screen.Editor.Screen.Question);
-        Assert.Equal("When Airlock Button is pressed", screen.Editor.Says(0));
+        Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
     }
 
     /// <summary>
@@ -785,7 +785,7 @@ public class ChangingTests
 
         Assert.NotNull(screen.Editor.Sentence());
         Assert.False(screen.Shows("Airlock Button"));
-        Assert.False(screen.Shows("is pressed"));
+        Assert.False(screen.Shows("button 1 is pressed"));
         Assert.DoesNotContain("When", screen.Words);
     }
 }

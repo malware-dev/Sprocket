@@ -89,7 +89,7 @@ public class BlocksetTriggerTests
 
         sim.Editor.PressStart("when");
         sim.Editor.PressBlock("Inside Button");
-        sim.Editor.PressChoice("is pressed");
+        sim.Editor.PressChoice("button 1 is pressed");
         sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
         sim.Editor.PressChoice("Open");

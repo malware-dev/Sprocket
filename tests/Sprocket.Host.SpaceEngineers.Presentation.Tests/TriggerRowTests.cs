@@ -18,7 +18,7 @@ public class TriggerRowTests
     {
         var sim = Built();
 
-        Assert.Equal(new[] { "When", "Airlock Button", "is pressed", "then run", "Sequence 1" }, Said(sim.Editor.Triggers()[0]));
+        Assert.Equal(new[] { "When", "Airlock Button", "button 1 is pressed", "then run", "Sequence 1" }, Said(sim.Editor.Triggers()[0]));
     }
 
     /// <summary>Each part is pressed by its own command, the one that opens the question it was answered with.</summary>

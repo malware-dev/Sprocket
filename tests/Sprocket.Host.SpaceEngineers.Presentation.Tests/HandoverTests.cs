@@ -581,7 +581,7 @@ public class HandoverTests : IDisposable
             copy.Editor.Tick(1);
             copy.Editor.PressStart("when");
             copy.Editor.PressBlock("Airlock Button");
-            copy.Editor.PressChoice("is pressed");
+            copy.Editor.PressChoice("button 1 is pressed");
             copy.Editor.PressPrimary();
             hers.Keep(_block, copy);
         });

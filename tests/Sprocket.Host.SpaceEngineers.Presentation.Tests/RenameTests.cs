@@ -76,7 +76,7 @@ public class RenameTests
         screen.Run(5);
         Assert.Equal(tall, Header(screen));
 
-        editor.PressChoice("is pressed");
+        editor.PressChoice("button 1 is pressed");
         screen.Run(5);
         Assert.Equal(tall, Header(screen));
     }
