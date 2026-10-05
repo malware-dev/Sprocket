@@ -1,1 +1,1 @@
-The automation for one job, such as an airlock, and the blocks it works on.
+The automation for one job, such as an airlock: what happens, what starts it, and which blocks it uses.

@@ -1,1 +1,1 @@
-A list of steps a logic system carries out in order.
+A list of steps that run from top to bottom. A trigger or another sequence starts it.

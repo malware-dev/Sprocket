@@ -1,1 +1,1 @@
-Blueprints kept for other constructs, and the world's backups.
+Your blueprints, the logic systems on this construct, and the automation kept from constructs that were lost.

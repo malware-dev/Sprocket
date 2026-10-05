@@ -1,1 +1,1 @@
-What starts a sequence or stops one, for example a signal, a block reaching a state, or a set interval.
+What starts or stops a sequence, or does a single task, for example when a signal arrives, a door finishes closing, or a set time passes.

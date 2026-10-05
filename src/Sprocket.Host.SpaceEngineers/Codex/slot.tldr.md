@@ -1,1 +1,1 @@
-A place in a logic system that each installation fills, either with blocks or with a signal.
+A named place in a logic system, such as the inner door, that each installation fills with its own blocks or signal. Slots let one logic system run on many sets of blocks.

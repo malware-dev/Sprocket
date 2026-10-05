@@ -1,1 +1,1 @@
-Choosing the blocks a step or a slot uses, and what is done to them.
+Choosing the blocks a step, trigger or slot uses, and what is done to them or checked on them.
