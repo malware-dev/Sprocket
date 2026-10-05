@@ -47,7 +47,7 @@ Anyone who receives your blueprint has never seen your construct, so the panel i
 - a description of the logic system, with formatting such as headings and lists,
 - each slot's name, and what it is for.
 
-A slot starts with the name of the block you picked, such as *Airlock Inner Door 2*. Rename it *Inner door* and describe it as the door on the pressurized side, and whoever fills it gets it right the first time.
+A slot starts with the name of the block you picked, such as *Interior Door 2*. Rename it *Inner door* and describe it as the door on the pressurized side, and whoever fills it gets it right the first time.
 
 ## When something goes wrong
 
