@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     {
         string _lead = "";
         string _after = "";
+        string _mark;
         string _text;
         string _name = "";
         Action<string> _renames;
@@ -62,6 +63,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _after; }
             set { Set(ref _after, value ?? ""); }
+        }
+
+        /// <summary>The symbol drawn before this part, saying what kind of thing it names, or null for none.</summary>
+        public string Mark
+        {
+            get { return _mark; }
+            set { Set(ref _mark, value); }
         }
 
         /// <summary>What this part reads as. Never empty.</summary>

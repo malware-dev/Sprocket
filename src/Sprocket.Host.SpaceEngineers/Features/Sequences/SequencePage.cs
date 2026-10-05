@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
@@ -206,6 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override void Heading(List<HeadingPart> parts)
         {
             var does = new HeadingPart("");
+            does.Mark = Symbols.Sequence;
             does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.Renames = Editor.Renaming(Rename, null);

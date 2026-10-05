@@ -504,6 +504,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             return new StatusRow
             {
+                Mark = Symbols.Sequence,
                 Opens = Editor.Act(Cmd.OpenSequence, delegate { Editor.Push(new SequencePage(Editor, sequence)); }),
                 Copies = Editor.Act(Cmd.DuplicateSequence, delegate { Editor.Duplicate(sequence); }),
                 Runs = Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(sequence); }),

@@ -123,6 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 shape = shape * 2 + (string.IsNullOrEmpty(heading[i].Lead) ? 0 : 1);
                 shape = shape * 2 + (string.IsNullOrEmpty(heading[i].After) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(heading[i].Mark) ? 0 : 1);
             }
 
             return shape;
@@ -151,6 +152,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (i > 0 && !lead)
                     Children.Add(part.Join);
 
+                if (!string.IsNullOrEmpty(heading[i].Mark))
+                {
+                    part.Mark.Symbol = heading[i].Mark;
+                    Children.Add(part.Mark);
+                }
+
                 if (lead)
                     Children.Add(part.Lead);
 
@@ -170,6 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         sealed class Part
         {
             public readonly Glyph Join;
+            public readonly Glyph Mark;
             public readonly Label Lead;
             public readonly HStack Plate;
             public readonly Label Name;
@@ -183,6 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Renames = new Relay(() => row.Rename(index));
 
                 Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = Fixed.Size(32f, 32f) };
+                Mark = new Glyph { Style = Styles.Join, Placement = Fixed.Size(32f, 32f), Padding = EditorView.LevelWithCapitals };
                 Lead = new Label { Style = Styles.TitleLead };
                 After = new Label { Style = Styles.TitleLead };
 

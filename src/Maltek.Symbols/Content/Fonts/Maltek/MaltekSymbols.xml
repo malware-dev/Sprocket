@@ -33,6 +33,7 @@
 <glyph ch="w" code="0077" bm="0" origin="256,128" size="64x64" aw="63" lsb="0" />
 <glyph ch="e" code="0065" bm="0" origin="320,128" size="64x64" aw="63" lsb="0" />
 <glyph ch="b" code="0062" bm="0" origin="384,128" size="64x64" aw="63" lsb="0" />
+<glyph ch="q" code="0071" bm="0" origin="448,128" size="64x64" aw="63" lsb="0" />
 </glyphs>
 <kernpairs>
 </kernpairs>

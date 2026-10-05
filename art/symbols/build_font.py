@@ -494,6 +494,25 @@ def blueprint():
     return [sheet], panes
 
 
+def steps():
+    """
+    Sequence: three steps, taken in order down the arrow beside them.
+
+    The steps are the bars, one under another like the rows of a sequence's screen; the arrow says
+    they are gone through from the top, which is what tells a sequence from a plain list. Drawn at the
+    blueprint's lighter line, because three bars at the set's stroke close their gaps into a block at row size.
+    """
+    left, right = 0.44, 0.84
+    line = 0.094
+    return [
+        stroke((left, 0.24), (right, 0.24), line),
+        stroke((left, 0.50), (right, 0.50), line),
+        stroke((left, 0.76), (right, 0.76), line),
+        stroke((0.22, 0.18), (0.22, 0.60), line),
+        head((0.22, 0.82), (0.22, 0.58), 0.24),
+    ]
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -530,6 +549,8 @@ GLYPHS = [
     # "p" and "a", "u" and "s" are taken; "e" is the one letter of the word left.
     ("e", "pause", lambda: solid(pause())),
     ("b", "blueprint", lambda: blueprint()),
+    # "s" is refresh's; "q" is the next letter of the word nothing else wanted.
+    ("q", "sequence", lambda: solid(steps())),
 ]
 
 
