@@ -2,13 +2,13 @@ The logic system says what happens; each installation says which blocks it happe
 
 ## One logic system, many installations
 
-An airlock logic system can have three installations, one for each airlock on the ship. Each fills the logic system's slots with blocks of its own: its own inner door, its own outer door, its own vent, its own triggers. All three do the same thing, each to its own airlock, and each runs on its own: cycling one airlock leaves the other two as they are.
+An airlock logic system can have three installations, one for each airlock on the ship. Each fills the logic system's slots with blocks of its own: its own inner door, its own outer door, its own vent, its own button. All three do the same thing, each to its own airlock, and each runs on its own: cycling one airlock leaves the other two as they are.
 
 Changing the logic system changes all of its installations at once. Fix a step in the airlock, and every airlock gets the fix.
 
 ## Making and changing one
 
-**+ installation** under a logic system adds one, and opens the configuration panel to choose its blocks. Pressing an installation opens the same panel again, to swap its blocks and triggers.
+**+ installation** under a logic system adds one, and opens the configuration panel to choose its blocks. Pressing an installation opens the same panel again, to swap its blocks and signals.
 
 Each installation has a switch of its own, so one airlock can be turned off while the others keep working. A logic system always has at least one installation; the last one cannot be deleted.
 

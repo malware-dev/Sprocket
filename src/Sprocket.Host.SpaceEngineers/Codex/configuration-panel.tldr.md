@@ -1,1 +1,1 @@
-Where an installation's blocks and triggers are chosen.
+Where an installation's slots are filled with blocks and signals.
