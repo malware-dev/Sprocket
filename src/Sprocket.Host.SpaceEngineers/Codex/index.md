@@ -38,3 +38,5 @@ The game's fonts have no bold or italic face, so each mark has one job:
   saved halfway carries on from the same step after a reload.
 - **Trigger:** a trigger can start on a signal, when a block changes (for example a door finishing
   closing), or at a set time; only the first needs a toolbar slot.
+- **Blueprint:** sharing a blueprint with another player from inside a world is planned; when it
+  exists, the blueprint page's player note gains it beside copying the files by hand.
