@@ -21,7 +21,7 @@ Because the blocks are kept apart from the job, one logic system can run every a
 
 A logic system can only be changed while it is switched off, so a half-built sequence never starts by accident. A new one starts switched off.
 
-Switching it off stops anything running and leaves the blocks as they are. When you leave a changed logic system that is still off, Sprocket asks whether to switch it on.
+Switching it off stops anything running and leaves the blocks as they are. When you leave a changed logic system that is still off, you are asked whether to switch it on.
 
 ## Real blocks, kept as slots
 
@@ -35,7 +35,7 @@ On the home screen, press **+ installation** under the logic system, and fill it
 
 The configuration panel is where an installation gets its blocks. It opens when you press **+ installation**, or an installation on the home screen. It lists every slot, the blocks that fill it, and how many slots still need a block.
 
-There are two kinds of slot. A block slot holds the blocks a sequence acts on or watches, such as the doors and the vent. A signal slot holds a block and the toolbar slot that sends the signal, such as the airlock's button. Sprocket sets up that toolbar slot itself, and asks first if it already does something else.
+There are two kinds of slot. A block slot holds the blocks a sequence acts on or watches, such as the doors and the vent. A signal slot holds a block and the toolbar slot that sends the signal, such as the airlock's button. That toolbar slot is set up for you, and you are asked first if it already does something else.
 
 Anyone who receives your blueprint has never seen your construct, so the panel is their only guide. **Edit configuration panel**, on the logic system's screen, sets what it tells them:
 
@@ -49,7 +49,7 @@ A slot starts with the name of the block you picked, such as *Airlock Inner Door
 
 On the home screen, a row lights green while it runs and red when it needs mending. Open it to see why.
 
-If a sequence cannot carry on, for example because a block is gone or a slot is empty, Sprocket switches that installation off and says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the configuration panel, and switch the installation on again. Steps that use an empty optional slot are skipped instead.
+If a sequence cannot carry on, for example because a block is gone or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the configuration panel, and switch the installation on again. Steps that use an empty optional slot are skipped instead.
 
 ## Keeping and sharing it
 
