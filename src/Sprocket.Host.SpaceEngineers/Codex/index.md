@@ -40,3 +40,6 @@ The game's fonts have no bold or italic face, so each mark has one job:
   closing), or at a set time; only the first needs a toolbar slot.
 - **Blueprint:** sharing a blueprint with another player from inside a world is planned; when it
   exists, the blueprint page's player note gains it beside copying the files by hand.
+- **Home:** opens with the logo as an image named `sprocket-mark`. The logo is to be added as an
+  in-game LCD image; whether that is enough for the codex to draw it, or it also needs a material,
+  is for whoever adds it to find out.
