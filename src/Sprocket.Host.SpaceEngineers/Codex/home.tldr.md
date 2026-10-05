@@ -1,1 +1,1 @@
-The first screen: every logic system on this construct with its installations, their switches, and whether each is running or needs mending.
+The first screen, listing every logic system on this construct, and an introduction to how the automation works.
