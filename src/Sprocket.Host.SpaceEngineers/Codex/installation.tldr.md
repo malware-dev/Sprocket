@@ -1,1 +1,1 @@
-One place a logic system runs, such as one airlock among several, with its own blocks, its own signals and its own switch.
+One place a logic system runs, such as one airlock among several, with its own blocks and signals. It can be switched off without affecting the others.
