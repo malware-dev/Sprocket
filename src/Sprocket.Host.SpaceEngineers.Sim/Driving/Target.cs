@@ -289,9 +289,10 @@ namespace Sprocket.Sim.Driving
             throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
         }
 
-        /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen.</summary>
+        /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer, a choice, or an option or block in a picker.</summary>
         public static bool HasChoice(this SprocketEditor editor, string text) =>
-            editor.Choices().Any(r => r.Text == text)
+            editor.Screen.Answers.Any(e => e.Text == text)
+            || editor.Choices().Any(r => r.Text == text)
             || editor.Stages().Any(p => p.Choices().Any(e => e.Text == text) || p.Entries().Any(e => e.Text == text));
 
         /// <summary>The answers on a question's page, in the order they are offered, or none where the page asks nothing.</summary>

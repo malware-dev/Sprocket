@@ -1812,7 +1812,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Note on the switch in the library, where the blueprint is not on the construct.</comment>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
-    <value>Take this logic system off this construct, with its installations. Its blueprint in the library is kept, brought up to date.</value>
+    <value>Take this logic system off this construct, with its installations. Its blueprint stays in the library.</value>
     <comment>Note on the switch in the library, and on the minus of a logic system on the home screen, where its blueprint is in the library.</comment>
   </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
@@ -1880,8 +1880,20 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Asked before taking a logic system whose blueprint is in the library off the construct; its name follows.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffKept" xml:space="preserve">
-    <value>Its installations go with it. Its blueprint in the library is kept, brought up to date.</value>
+    <value>Its installations go with it. Its blueprint stays in the library.</value>
     <comment>Under the question about taking a logic system off the construct.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffChanged" xml:space="preserve">
+    <value>Its installations go with it. It was changed after its blueprint in the library: bring the blueprint up to date as well?</value>
+    <comment>Under the question about taking a logic system off the construct, where it was changed after its blueprint in the library.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffUpdate" xml:space="preserve">
+    <value>Take it off, and update the blueprint</value>
+    <comment>Answer that takes the logic system off and brings its blueprint in the library up to date.</comment>
+  </data>
+  <data name="Sprocket.Library.TakeOffLeave" xml:space="preserve">
+    <value>Take it off, and leave the blueprint</value>
+    <comment>Answer that takes the logic system off and leaves its blueprint in the library as it was.</comment>
   </data>
   <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
     <value>Keep it</value>

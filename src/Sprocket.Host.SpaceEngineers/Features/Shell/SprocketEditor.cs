@@ -2557,29 +2557,52 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
-        /// <remarks>Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.</remarks>
+        /// <remarks>
+        /// Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.
+        /// Where the logic system was changed after its blueprint in the library, the question also asks whether the blueprint
+        /// is brought up to date; otherwise the blueprint is left as it is, unasked.
+        /// </remarks>
         public void AskTakeOff(AutomationSystem system)
         {
+            Stamp(true);
+
             var arguments = new Arguments();
             arguments.Set("named", system.Name);
 
-            Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffKept, arguments);
+            if (!ChangedSince(system))
+            {
+                Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffKept, arguments);
+                Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
+                Answer(Texts.LibraryTakeOffConfirm, delegate { TakeOff(system, false); });
+                return;
+            }
+
+            Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffChanged, arguments);
             Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
-            Answer(Texts.LibraryTakeOffConfirm, delegate { TakeOff(system); });
+            Answer(Texts.LibraryTakeOffUpdate, delegate { TakeOff(system, true); });
+            Answer(Texts.LibraryTakeOffLeave, delegate { TakeOff(system, false); });
+        }
+
+        /// <summary>Whether the logic system <paramref name="system" /> was changed after its blueprint in the library was.</summary>
+        /// <remarks>By the dates alone, which say which copy was changed last and nothing about what either was made from.</remarks>
+        public bool ChangedSince(AutomationSystem system)
+        {
+            var copy = Shelf == null ? null : Shelf.Find(system.Identity);
+            return copy != null && system.Changed.HasValue && (!copy.Changed.HasValue || system.Changed.Value > copy.Changed.Value);
         }
 
         /// <summary>
         /// Takes the logic system <paramref name="system" />, whose blueprint is in the library, off the construct with its
-        /// installations, bringing the blueprint up to date.
+        /// installations, bringing the blueprint up to date first where <paramref name="update" /> says so.
         /// </summary>
         /// <remarks>One with no blueprint in the library is deleted instead, by <see cref="DeleteSystem" />: taking it off would lose it.</remarks>
-        public void TakeOff(AutomationSystem system)
+        public void TakeOff(AutomationSystem system, bool update)
         {
             if (!Stored(system))
                 return;
 
             Stamp(true);
-            if (!Shelf.Holds(system))
+            if (update && !Shelf.Holds(system))
                 Shelf.Keep(system);
 
             Do(new TakeSystemOut(system, Change.TakeOffSystem));

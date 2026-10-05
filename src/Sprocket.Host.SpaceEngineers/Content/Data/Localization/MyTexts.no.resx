@@ -1378,7 +1378,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>Legg denne plantegningen på denne konstruksjonen som et logikksystem, med den første installasjonen.</value>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
-    <value>Ta dette logikksystemet av denne konstruksjonen, med installasjonene. Plantegningen i biblioteket beholdes, oppdatert.</value>
+    <value>Ta dette logikksystemet av denne konstruksjonen, med installasjonene. Plantegningen blir værende i biblioteket.</value>
   </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
     <value>Plantegningen i biblioteket er den samme som dette logikksystemet.</value>
@@ -1429,7 +1429,16 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>Ta dette logikksystemet av denne konstruksjonen?</value>
   </data>
   <data name="Sprocket.Library.TakeOffKept" xml:space="preserve">
-    <value>Installasjonene går med det. Plantegningen i biblioteket beholdes, oppdatert.</value>
+    <value>Installasjonene går med det. Plantegningen blir værende i biblioteket.</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffChanged" xml:space="preserve">
+    <value>Installasjonene går med det. Det er endret etter plantegningen i biblioteket: skal plantegningen også oppdateres?</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffUpdate" xml:space="preserve">
+    <value>Ta den av, og oppdater plantegningen</value>
+  </data>
+  <data name="Sprocket.Library.TakeOffLeave" xml:space="preserve">
+    <value>Ta den av, og la plantegningen være</value>
   </data>
   <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
     <value>Behold den</value>
