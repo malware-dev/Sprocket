@@ -35,6 +35,8 @@ On the home screen, press **+ installation** under the logic system, and fill it
 
 The configuration panel is where an installation gets its blocks. It opens when you press **+ installation**, or an installation on the home screen. It lists every slot, the blocks that fill it, and how many slots still need a block.
 
+A slot can also hold a signal. You choose the block, and which of its toolbar slots sends the signal. Sprocket sets up that toolbar slot itself, and asks first if it already does something else.
+
 Anyone who receives your blueprint has never seen your construct, so the panel is their only guide. **Edit configuration panel**, on the logic system's screen, sets what it tells them:
 
 - a description of the logic system, with formatting such as headings and lists,
