@@ -49,6 +49,7 @@ namespace Lumel.Text
         string _strongFont;
         string _emphasisFont;
         string _strongEmphasisFont;
+        string _headingFont;
         float _fontSize = 24f;
         float _heading1 = 24f;
         float _heading2 = 24f;
@@ -219,6 +220,20 @@ namespace Lumel.Text
                     return;
 
                 _strongEmphasisFont = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>Which face headings and a table's heading row are drawn in, or null for the strong face, which makes every heading bold.</summary>
+        public string HeadingFont
+        {
+            get { return _headingFont; }
+            set
+            {
+                if (_headingFont == value)
+                    return;
+
+                _headingFont = value;
                 Relayout();
             }
         }
@@ -939,7 +954,7 @@ namespace Lumel.Text
                     : (run.Kind & RunKind.Emphasis) != 0 ? Tone.Emphasis
                     : Tone.Plain;
                 var code = (run.Kind & RunKind.Code) != 0;
-                var font = code ? _codeFont : FaceOf(run.Kind);
+                var font = code ? _codeFont : heading ? HeadingFaceOf(run.Kind) : FaceOf(run.Kind);
                 var text = run.Slot == null ? run.Text : _arguments == null ? "" : _arguments.Of(run.Slot);
                 var i = 0;
 
@@ -1011,6 +1026,19 @@ namespace Lumel.Text
                 height = Shape.HeightFor(image.Size, width);
 
             return new Vector2(width, height);
+        }
+
+        /// <summary>The face words of <paramref name="kind" /> are drawn in within a heading or a table's heading row.</summary>
+        /// <remarks>
+        ///     Without a heading face of its own, a heading is strong throughout, so its emphasized words take the face of
+        ///     words both strong and emphasized. Given one, the heading's plain words take it and the rest keep their own.
+        /// </remarks>
+        string HeadingFaceOf(RunKind kind)
+        {
+            if (_headingFont == null)
+                return FaceOf(kind | RunKind.Strong);
+
+            return (kind & (RunKind.Strong | RunKind.Emphasis)) == 0 ? _headingFont : FaceOf(kind);
         }
 
         /// <summary>The face words of <paramref name="kind" /> are drawn in, other than code, falling back to the nearest face that is set.</summary>

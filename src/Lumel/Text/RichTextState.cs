@@ -31,6 +31,9 @@ namespace Lumel.Text
         /// <summary>The font words both strong and emphasized are set in, or null to leave it to the layers beneath.</summary>
         public string StrongEmphasisFont { get; set; }
 
+        /// <summary>The font headings and a table's heading row are set in, or null to leave it to the layers beneath.</summary>
+        public string HeadingFont { get; set; }
+
         /// <summary>How tall a first-level heading's line is, or null to leave it to the layers beneath.</summary>
         public float? Heading1Size { get; set; }
 
@@ -105,6 +108,9 @@ namespace Lumel.Text
 
             if (StrongEmphasisFont != null)
                 text.StrongEmphasisFont = null;
+
+            if (HeadingFont != null)
+                text.HeadingFont = null;
 
             if (Heading1Size.HasValue)
                 text.Heading1Size = NeutralFontSize;
@@ -182,6 +188,9 @@ namespace Lumel.Text
             if (StrongEmphasisFont != null)
                 text.StrongEmphasisFont = StrongEmphasisFont;
 
+            if (HeadingFont != null)
+                text.HeadingFont = HeadingFont;
+
             if (Heading1Size.HasValue)
                 text.Heading1Size = Heading1Size.Value;
 
@@ -237,6 +246,7 @@ namespace Lumel.Text
             StrongFont = null;
             EmphasisFont = null;
             StrongEmphasisFont = null;
+            HeadingFont = null;
             Heading1Size = null;
             Heading2Size = null;
             Heading3Size = null;
@@ -284,6 +294,9 @@ namespace Lumel.Text
 
             if (StrongEmphasisFont == null)
                 StrongEmphasisFont = other.StrongEmphasisFont;
+
+            if (HeadingFont == null)
+                HeadingFont = other.HeadingFont;
 
             if (!Heading1Size.HasValue)
                 Heading1Size = other.Heading1Size;

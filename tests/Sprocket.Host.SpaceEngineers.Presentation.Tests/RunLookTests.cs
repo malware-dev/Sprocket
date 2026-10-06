@@ -46,6 +46,40 @@ public class RunLookTests
         Assert.Equal(MyFontEnum.White, Word(easel, "slanted").Font);
     }
 
+    /// <summary>A heading at every level, and a table's heading row, are strong throughout: their words in the strong face, emphasized ones in the face for both.</summary>
+    [Theory]
+    [InlineData("# Title *slanted*")]
+    [InlineData("### Title *slanted*")]
+    [InlineData("| Title *slanted* |\n|--|\n| plain |")]
+    public void AHeadingIsStrongThroughout(string markdown)
+    {
+        var easel = Laid(markdown, text =>
+        {
+            text.StrongFont = "Bold";
+            text.EmphasisFont = "Italic";
+            text.StrongEmphasisFont = "BoldItalic";
+        });
+
+        Assert.Equal("Bold", Word(easel, "Title").Font);
+        Assert.Equal("BoldItalic", Word(easel, "slanted").Font);
+    }
+
+    /// <summary>A heading face of its own takes the heading's plain words, and strong and emphasized words in it keep their own faces.</summary>
+    [Fact]
+    public void AHeadingFaceTakesItsPlainWords()
+    {
+        var easel = Laid("# Title *slanted*\n\nplain", text =>
+        {
+            text.HeadingFont = "Display";
+            text.StrongFont = "Bold";
+            text.EmphasisFont = "Italic";
+        });
+
+        Assert.Equal("Display", Word(easel, "Title").Font);
+        Assert.Equal("Italic", Word(easel, "slanted").Font);
+        Assert.Equal(MyFontEnum.White, Word(easel, "plain").Font);
+    }
+
     /// <summary>A link is underlined in its own color, under its own words: the line runs across the space inside it and stops at its last word.</summary>
     [Fact]
     public void ALinkIsUnderlinedAcrossItsWordsOnly()
