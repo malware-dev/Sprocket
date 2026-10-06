@@ -950,8 +950,9 @@ public class AirlockTests
 
     /// <summary>A <c>when</c> looks no more often than the runner allows, whatever it asks for.</summary>
     /// <remarks>
-    /// Held to every thirty ticks, a vent switched on on tick 40 is seen on tick 61, as it is by a <c>when</c> that asks for
-    /// thirty. Nothing announces a block being switched on, which is what leaves the cadence to decide.
+    /// Held to every thirty ticks, a full vent switched back on on tick 40, which finishes filling there, is seen on tick 61,
+    /// as it is by a <c>when</c> that asks for thirty. Nothing announces a vent filling, which is what leaves the cadence to
+    /// decide.
     /// </remarks>
     [Fact]
     public void AWhenIsHeldToTheQuickestLook()
@@ -960,7 +961,7 @@ public class AirlockTests
         a.Runner.QuickestLook = 30;
         var system = a.Automation.Systems[0];
 
-        var on = new WhenTrigger("switched-on");
+        var on = new WhenTrigger("filled");
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(on);
@@ -1063,8 +1064,140 @@ public class AirlockTests
 
         Assert.Equal(["Inner Door:close"], a.Log);
 
-        // One for finishing opening and one for finishing closing.
-        Assert.Equal(2, a.Outer.Listeners);
+        // One each for finishing opening, finishing closing, and being told to move.
+        Assert.Equal(3, a.Outer.Listeners);
+    }
+
+    /// <summary>A door starting to open is seen on the tick after it is told to, whatever the <c>when</c> asks for.</summary>
+    [Fact]
+    public void ADoorStartingToOpenIsSeenOnTheTickAfter()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var opening = new WhenTrigger("opening");
+        opening.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        opening.IntervalTicks = 600;
+        opening.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(opening);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Outer.Perform("Open_On", null!);
+        a.Log.Clear();
+        a.Tick();
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+    }
+
+    /// <summary>A door somebody else starts closing is seen within the <c>when</c>'s cadence, since nothing announces it.</summary>
+    [Fact]
+    public void ADoorStartingToCloseIsSeenWithinTheCadence()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var closing = new WhenTrigger("closing");
+        closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(closing);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Outer.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Outer.Perform("Open_Off", null!);
+        a.Log.Clear();
+        a.Tick(10);
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+    }
+
+    /// <summary>A door told to close while it is still opening starts closing then.</summary>
+    [Fact]
+    public void ADoorTurnedBackStartsClosing()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var closing = new WhenTrigger("closing");
+        closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(closing);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Outer.Perform("Open_On", null!);
+        a.Tick(20);
+        a.Log.Clear();
+
+        a.Outer.Perform("Open_Off", null!);
+        a.Log.Clear();
+        a.Tick(10);
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+    }
+
+    /// <summary>A shut door is not looked at for starting to close, only by the look every hundred ticks; an open one is, on the cadence.</summary>
+    [Fact]
+    public void AShutDoorIsNotLookedAtForStartingToClose()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var closing = new WhenTrigger("closing");
+        closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(closing);
+        a.Automation.Edited();
+        a.Tick(10);
+
+        var before = a.Outer.StatusReads;
+        a.Tick(300);
+        var shut = a.Outer.StatusReads - before;
+
+        a.Outer.ForceOpen();
+        a.Tick(10);
+        before = a.Outer.StatusReads;
+        a.Tick(300);
+        var open = a.Outer.StatusReads - before;
+
+        Assert.True(shut * 5 < open, $"read {shut} times shut against {open} times open over 300 ticks");
+    }
+
+    /// <summary>A door Sprocket itself closes is seen starting to close on the tick after, whatever the <c>when</c> asks for.</summary>
+    [Fact]
+    public void ADoorSprocketClosesIsSeenStartingToCloseAtOnce()
+    {
+        var a = Build();
+        var system = a.Automation.Systems[0];
+
+        var opened = new WhenTrigger("opened");
+        opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        opened.Does = Do("close", a.Ref(a.Seen(a.Outer)));
+        system.AddTrigger(opened);
+
+        var closing = new WhenTrigger("closing");
+        closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        closing.IntervalTicks = 600;
+        closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(closing);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Outer.Perform("Open_On", null!);
+        a.Tick(48);
+
+        Assert.True(a.Log.Contains("Outer Door:close"), string.Join(", ", a.Log));
+        Assert.Contains("Inner Door:close", a.Log);
+        Assert.True(a.Log.IndexOf("Inner Door:close") - a.Log.IndexOf("Outer Door:close") <= 1, string.Join(", ", a.Log));
     }
 
     /// <summary>A moment whose announcement never comes is still seen, by the look every hundred ticks.</summary>
@@ -1106,7 +1239,7 @@ public class AirlockTests
         system.AddTrigger(opened);
         a.Automation.Edited();
         a.Tick(3);
-        Assert.Equal(2, a.Outer.Listeners);
+        Assert.Equal(3, a.Outer.Listeners);
 
         system.ReplaceTrigger(opened, null);
         a.Automation.Edited();
@@ -1116,9 +1249,9 @@ public class AirlockTests
 
     /// <summary>A <c>when</c> that says how often it looks looks that often, and fires on the look that sees the moment.</summary>
     /// <remarks>
-    /// Its first look is on the first tick after it is made, which is tick 1, and every thirtieth tick after that; so a vent
-    /// switched on on tick 40 is seen on tick 61, where one left to the default of ten would be seen on tick 41. Nothing
-    /// announces a block being switched on, which is what leaves the cadence to decide.
+    /// Its first look is on the first tick after it is made, which is tick 1, and every thirtieth tick after that; so a full
+    /// vent switched back on on tick 40, which finishes filling there, is seen on tick 61, where one left to the default of
+    /// ten would be seen on tick 41. Nothing announces a vent filling, which is what leaves the cadence to decide.
     /// </remarks>
     [Fact]
     public void AWhenLooksAsOftenAsItSays()
@@ -1126,7 +1259,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var on = new WhenTrigger("switched-on");
+        var on = new WhenTrigger("filled");
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.IntervalTicks = 30;
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));

@@ -4,15 +4,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// <summary>What a press is for, which decides whether a copy lent to look at may make it and whether it changes the program.</summary>
     public enum Cmd
     {
+        /// <summary>No press at all.</summary>
         None = 0,
 
         // Screen furniture. One of each per screen.
+        /// <summary>Going back a screen.</summary>
         Back,
+
+        /// <summary>Answering a question a screen asks.</summary>
         Answer,
+
+        /// <summary>The screen's main press, such as Done.</summary>
         Primary,
+
+        /// <summary>Renaming what the screen's heading names.</summary>
         Rename,
+
+        /// <summary>Switching the screen's subject on or off.</summary>
         Switch,
+
+        /// <summary>Opening or choosing a row to see more of it.</summary>
         Expand,
+
+        /// <summary>Putting a program in place of one that would not read, once told what that costs.</summary>
         Resolve,
 
         /// <summary>Switches a step off, or back on.</summary>
@@ -22,78 +36,188 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Mend,
 
         // The list screens.
+        /// <summary>Making a new logic system.</summary>
         NewSystem,
+
+        /// <summary>Opening the library.</summary>
         LoadSystem,
+
+        /// <summary>Opening a logic system.</summary>
         OpenSystem,
+
         /// <summary>Opening the codex, or moving within it.</summary>
         OpenCodex,
+
+        /// <summary>Adding an installation to a logic system.</summary>
         AddInstance,
+
+        /// <summary>Choosing which installation of a logic system a screen shows.</summary>
         ChooseInstance,
+
+        /// <summary>Deleting a logic system.</summary>
         DeleteSystem,
+
+        /// <summary>Deleting an installation.</summary>
         DeleteInstance,
+
+        /// <summary>Opening a blueprint's configuration panel.</summary>
         EditBlueprint,
+
+        /// <summary>Answering a slot with the blocks chosen for it.</summary>
         FillPart,
+
+        /// <summary>Making a slot optional, or required again.</summary>
         MakeOptional,
+
+        /// <summary>Starting a sequence that something happening runs.</summary>
         StartWhen,
+
+        /// <summary>Starting a sequence that a clock runs.</summary>
         StartEvery,
+
+        /// <summary>Opening a sequence.</summary>
         OpenSequence,
+
+        /// <summary>Making a new sequence.</summary>
         NewSequence,
 
         // Triggers.
+        /// <summary>Opening a trigger.</summary>
         OpenTrigger,
+
+        /// <summary>Changing what a trigger does.</summary>
         TriggerTarget,
+
+        /// <summary>Deleting a trigger.</summary>
         DeleteTrigger,
 
         // A logic system's switch, and one of a blueprint's.
+        /// <summary>Switching a logic system on or off.</summary>
         EnableSystem,
+
+        /// <summary>Switching an installation on or off.</summary>
         EnableInstance,
 
         // A sequence.
+        /// <summary>Deleting a sequence.</summary>
         DeleteSequence,
+
+        /// <summary>Copying a sequence.</summary>
         DuplicateSequence,
+
+        /// <summary>Running a sequence by hand, at once.</summary>
         RunNow,
 
+        /// <summary>Stopping a running sequence by hand.</summary>
         StopNow,
+
+        /// <summary>Taking the last change back.</summary>
         Undo,
+
+        /// <summary>Making a change taken back again.</summary>
         Redo,
+
+        /// <summary>Adding a step that has a block do something.</summary>
         AddAction,
+
+        /// <summary>Adding a wait.</summary>
         AddWait,
+
+        /// <summary>Adding a step that runs another sequence.</summary>
         AddRun,
+
+        /// <summary>Adding a step that stops another sequence.</summary>
         AddStop,
+
+        /// <summary>Adding an if.</summary>
         AddIf,
+
+        /// <summary>Adding a branch to an if.</summary>
         AddBranch,
+
+        /// <summary>Changing one of the values in a step, such as how long a wait lasts.</summary>
         StepSlot,
+
+        /// <summary>Moving a step to another place in its sequence.</summary>
         MoveStep,
+
+        /// <summary>Deleting a step.</summary>
         DeleteStep,
 
         // Picking.
+        /// <summary>Picking a block.</summary>
         PickEntity,
+
+        /// <summary>Picking what a block does or is waited for.</summary>
         PickChoice,
+
+        /// <summary>Typing into the block search.</summary>
         NarrowEntities,
+
+        /// <summary>Typing into the search over what can be done or waited for.</summary>
         NarrowChoices,
+
+        /// <summary>Typing into the search over kinds of block.</summary>
         NarrowKinds,
+
+        /// <summary>Listing what a block does in Sprocket's own words.</summary>
         ShowOrganized,
+
+        /// <summary>Listing what a block does in the game's terminal words.</summary>
         ShowTerminal,
+
+        /// <summary>Showing blocks of every kind.</summary>
         AnyKind,
+
+        /// <summary>Showing blocks of one kind.</summary>
         OneKind,
+
+        /// <summary>Having any one of the chosen blocks start a trigger.</summary>
         RequireAny,
+
+        /// <summary>Having a trigger wait for all of the chosen blocks.</summary>
         RequireAll,
+
+        /// <summary>Having a trigger run its sequence.</summary>
         TriggerRuns,
+
+        /// <summary>Having a trigger stop its sequence.</summary>
         TriggerStops,
+
+        /// <summary>Having a trigger have a block do one thing.</summary>
         TriggerDoes,
+
+        /// <summary>Going on to the next page of a list.</summary>
         PageOn,
+
+        /// <summary>Going back to the previous page of a list.</summary>
         PageBack,
 
         // The library. Keeping a blueprint for every world and forgetting a lost construct change no program, so a copy
         // lent to look at may do both.
+        /// <summary>Putting a blueprint in the library, or bringing it up to date there.</summary>
         Shelve,
+
+        /// <summary>Deleting a blueprint from the library.</summary>
         Unshelve,
+
+        /// <summary>Putting a library blueprint on the construct.</summary>
         PutOn,
+
+        /// <summary>Taking a logic system off the construct.</summary>
         TakeOff,
+
+        /// <summary>Forgetting the backup of a lost construct.</summary>
         ForgetBackup,
 
+        /// <summary>Putting a logic system's blueprint in the library in the place of the logic system, which changes the program.</summary>
+        Renew,
+
         // A list of answers.
+        /// <summary>Picking one of a list of answers.</summary>
         Choice,
+
+        /// <summary>Answering with what was typed into the box under a list of answers.</summary>
         ChoiceTaken,
 
         /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>

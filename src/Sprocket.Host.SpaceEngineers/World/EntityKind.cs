@@ -20,6 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<EntityAction> _actions = new List<EntityAction>();
         readonly List<string> _hidden = new List<string>();
 
+        /// <summary>A kind of block, <paramref name="id" />, called <paramref name="displayName" />, with nothing described yet.</summary>
         public EntityKind(string id, string displayName)
         {
             Id = id;
@@ -51,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string Icon { get; private set; }
 
+        /// <summary>Gives the kind the picture <paramref name="icon" />.</summary>
         public EntityKind WithIcon(string icon)
         {
             Icon = icon;
@@ -66,6 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Situations. These gate steps and guard interlocks, and nothing else.</summary>
         public IList<EntityState> States => _states;
 
+        /// <summary>What a block of this kind can be told to do.</summary>
         public IList<EntityAction> Actions => _actions;
 
         /// <summary>Declares something that can be read off this kind.</summary>
@@ -81,6 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return WithProperty(id, ValueKind.Flag, label);
         }
 
+        /// <summary>The reading <paramref name="propertyId" />, or null where the kind has none.</summary>
         public EntityProperty FindProperty(string propertyId)
         {
             for (var i = 0; i < _properties.Count; i++)
@@ -91,6 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
+        /// <summary>Adds the moment <paramref name="id" />: <paramref name="propertyId" /> crossing <paramref name="edge" />, read as <paramref name="text" />.</summary>
         public EntityKind WithEvent(string id, string propertyId, Edge edge, string text)
         {
             _events.Add(new EntityEvent(id, propertyId, edge, text));
@@ -108,6 +113,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityKind Announced()
         {
             _events[_events.Count - 1].Announce();
+            return this;
+        }
+
+        /// <summary>Says the moment added last is looked for on a cadence, and <paramref name="reason" /> why: the game announces neither it nor anything that rules it out.</summary>
+        public EntityKind Looked(string reason)
+        {
+            _events[_events.Count - 1].Look(reason);
+            return this;
+        }
+
+        /// <summary>Says the moment added last cannot happen while <paramref name="propertyId" /> reads true, and the block announces when that changes - see <see cref="EntityEvent.RuledOutBy" />.</summary>
+        public EntityKind RuledOutBy(string propertyId)
+        {
+            _events[_events.Count - 1].RuleOutBy(propertyId);
             return this;
         }
 
@@ -295,6 +314,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>The moment <paramref name="eventId" />, or null where the kind has none.</summary>
         public EntityEvent FindEvent(string eventId)
         {
             for (var i = 0; i < _events.Count; i++)
@@ -321,6 +341,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
+        /// <summary>The state <paramref name="stateId" />, or null where the kind has none.</summary>
         public EntityState FindState(string stateId)
         {
             for (var i = 0; i < _states.Count; i++)

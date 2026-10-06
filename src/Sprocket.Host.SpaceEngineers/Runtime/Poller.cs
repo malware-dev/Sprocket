@@ -20,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// every hundred ticks in case an announcement never comes; how often the program asked for is set aside. What is
     /// announced only prompts the look, which reads the blocks as ever.
     /// </para>
+    /// <para>
+    /// <b>So is a moment ruled out on every watched block,</b> one the block does not announce but which cannot happen
+    /// while a reading it does announce holds: a door cannot start closing while it is shut. Once a block is out of that
+    /// reading, the moment is looked for on its cadence until the block is back in it. See
+    /// <see cref="EntityEvent.RuledOutBy" />.
+    /// </para>
     /// </remarks>
     public sealed class Poller
     {
@@ -47,6 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int _watchedBindings = -1;
         int _watchedEdits = -1;
         bool _announced;
+        bool _possible;
 
         int _all = -1;
         int _due = -1;
@@ -160,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Puts the next look on the rota: on its place where the cadence is one the rota keeps, and on the tick it falls due otherwise.</summary>
         void Schedule()
         {
-            var cadence = _announced && Cadence < Backstop ? Backstop : Cadence;
+            var cadence = _announced && !_possible && Cadence < Backstop ? Backstop : Cadence;
             if (cadence == Rota.Each || cadence == Rota.Ten || cadence == Rota.Hundred)
                 _rota.Every(_shift, cadence);
             else if (_trigger is EveryTrigger && _due >= 0)
@@ -178,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Listens to every watched block that announces the moment, and marks whether all of them do.
+        /// Listens to every watched block that announces the moment, or when it is ruled out, and marks whether all of them do.
         /// </summary>
         /// <remarks>Done again only where the blocks the names point at, or the program, have changed since.</remarks>
         void Listen()
@@ -197,7 +204,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var entity = _bindings.Entity(sources[i]);
                 var definition = entity == null ? null : when.Moment(entity.Kind);
-                var listening = definition != null && definition.Announced ? entity.Listen(_heard) : null;
+                var heard = definition != null && (definition.Announced || definition.RuledOutBy.Length > 0);
+                var listening = heard ? entity.Listen(_heard) : null;
                 if (listening == null)
                 {
                     all = false;
@@ -223,6 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>How many times it fires on this look.</summary>
         int Sampled(GridWorld world)
         {
+            _possible = false;
             var when = _trigger as WhenTrigger;
             if (when != null)
                 return when.RequiresAll ? (SampleWhenAll(world, when) ? 1 : 0) : SampleWhen(world, when);
@@ -277,6 +286,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (definition == null)
                     continue;
 
+                Mark(world, entity, definition);
                 var now = entity.Flag(world.Values, definition.PropertyId);
                 if (now)
                     anyTrue = true;
@@ -302,6 +312,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Live = anyTrue;
             Missed(anyMissing);
             return fired;
+        }
+
+        /// <summary>Notes where <paramref name="entity" /> could reach <paramref name="moment" /> unannounced: one it does not announce, and nothing rules out now.</summary>
+        void Mark(GridWorld world, GridEntity entity, EntityEvent moment)
+        {
+            if (_possible || moment.Announced)
+                return;
+
+            if (moment.RuledOutBy.Length == 0 || !entity.Flag(world.Values, moment.RuledOutBy))
+                _possible = true;
         }
 
         /// <summary>Lets go of what it read of any block it no longer watches.</summary>
@@ -349,6 +369,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
+                Mark(world, entity, definition);
                 var wanted = definition.Edge == Edge.Rising;
                 if (entity.Flag(world.Values, definition.PropertyId) != wanted)
                     all = false;

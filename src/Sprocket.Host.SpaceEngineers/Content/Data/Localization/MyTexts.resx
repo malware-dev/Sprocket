@@ -153,6 +153,14 @@ Renaming it here renames the grid.</value>
     <value>Update blueprint</value>
     <comment>The same button once the library holds a blueprint of the logic system, which then brings that blueprint up to date.</comment>
   </data>
+  <data name="Sprocket.Systems.UpdateFromLibrary" xml:space="preserve">
+    <value>Update from library</value>
+    <comment>The same button where the blueprint in the library was changed after the logic system, which then puts the blueprint in the logic system's place.</comment>
+  </data>
+  <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
+    <value>The blueprint in the library was changed after this logic system. Put it in this logic system's place.</value>
+    <comment>Note on the button above.</comment>
+  </data>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
     <value>Put this logic system in place of its blueprint in the library.</value>
     <comment>Note on the button above.</comment>
@@ -1665,6 +1673,10 @@ Renaming it here renames the grid.</value>
     <value>deleting a logic system</value>
     <comment>Named after Undo and Redo.</comment>
   </data>
+  <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
+    <value>updating a logic system from the library</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
   <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
     <value>taking a logic system off</value>
     <comment>Named after Undo and Redo.</comment>
@@ -1902,6 +1914,38 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
     <value>Take it off</value>
     <comment>Answer to the question about taking a blueprint off the construct that takes it off.</comment>
+  </data>
+  <data name="Sprocket.Library.RenewQuestion" xml:space="preserve">
+    <value>Update this logic system from the library?</value>
+    <comment>Asked before putting a logic system's blueprint in the library in the place of the logic system; its name follows.</comment>
+  </data>
+  <data name="Sprocket.Library.RenewReplaced" xml:space="preserve">
+    <value>It is replaced by its blueprint in the library. Its installations keep their blocks in every slot the blueprint still has.</value>
+    <comment>Under the question about updating a logic system from the library.</comment>
+  </data>
+  <data name="Sprocket.Library.RenewConfirm" xml:space="preserve">
+    <value>Update</value>
+    <comment>Answer to the question about updating a logic system from the library that updates it.</comment>
+  </data>
+  <data name="Sprocket.Library.RenewKeep" xml:space="preserve">
+    <value>Keep it</value>
+    <comment>Answer to the question about updating a logic system from the library that leaves it as it is.</comment>
+  </data>
+  <data name="Sprocket.Library.UpdateQuestion" xml:space="preserve">
+    <value>Update the blueprint in the library?</value>
+    <comment>Asked before putting a logic system in place of its blueprint in the library; its name follows.</comment>
+  </data>
+  <data name="Sprocket.Library.UpdateReplaced" xml:space="preserve">
+    <value>The blueprint is replaced by this logic system as it is now.</value>
+    <comment>Under the question about updating a blueprint.</comment>
+  </data>
+  <data name="Sprocket.Library.UpdateConfirm" xml:space="preserve">
+    <value>Update</value>
+    <comment>Answer to the question about updating a blueprint that updates it.</comment>
+  </data>
+  <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
+    <value>Keep the blueprint</value>
+    <comment>Answer to the question about updating a blueprint that leaves the blueprint as it is.</comment>
   </data>
   <data name="Sprocket.Blueprint.NameTaken" xml:space="preserve">
     <value>Another slot is already called {name}.</value>

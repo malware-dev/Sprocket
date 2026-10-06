@@ -22,9 +22,16 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const float Filled = 0.95f;
 
+        /// <summary>The reading of a vent whose room is full and no longer filling.</summary>
         public const string Air = "air";
+
+        /// <summary>The reading of a vent whose room is empty and no longer emptying.</summary>
         public const string Empty = "empty";
+
+        /// <summary>The reading of how much air the room holds.</summary>
         public const string Level = "level";
+
+        /// <summary>The reading of a vent whose room is airtight.</summary>
         public const string Sealed = "sealed";
 
         readonly VentGas _gas = new VentGas();
@@ -49,7 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithProperty(Level, ValueKind.Real, "oxygen level")
                 .WithProperty(Sealed, "airtight")
                 .WithEvent("filled", Air, Edge.Rising, "finishes filling").Reading("has air", "has no air")
+                .Looked("A vent raises no event of its own, and nothing it announces rules a room's air in or out.")
                 .WithEvent("emptied", Empty, Edge.Rising, "finishes emptying").Reading("is empty", "is not empty")
+                .Looked("A vent raises no event of its own, and nothing it announces rules a room's air in or out.")
                 .WithState("has-air", Air, true, "has air")
                 .WithState("is-empty", Empty, true, "is empty")
                 .WithState("is-sealed", Sealed, true, "is airtight")

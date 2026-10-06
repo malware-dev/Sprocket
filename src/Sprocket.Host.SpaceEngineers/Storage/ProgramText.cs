@@ -52,7 +52,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "yyyy'-'MM'-'dd"
         };
 
+        /// <summary>The program <paramref name="program" /> written out, as the block keeps it.</summary>
         public static string Save(Automation program, Values values)
+        {
+            return Save(program, values, null);
+        }
+
+        /// <summary>
+        /// The program <paramref name="program" /> written out with <paramref name="with" /> in the place of the system of its
+        /// identity, that system's instances keeping their answers to every slot <paramref name="with" /> uses.
+        /// </summary>
+        /// <remarks>For putting a newer copy of a system blueprint in the place of the one on the construct.</remarks>
+        public static string Replacing(Automation program, Values values, AutomationSystem with)
+        {
+            return Save(program, values, with);
+        }
+
+        /// <summary>The program written out, with <paramref name="with" /> in the place of the system of its identity where it is not null.</summary>
+        static string Save(Automation program, Values values, AutomationSystem with)
         {
             var pen = new Pen();
             pen.Note(program.Annotation);
@@ -89,18 +106,58 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                WriteSystem(pen, systems[i], true);
+                WriteSystem(pen, Written(systems[i], with), true);
 
             // After every system, because an instance names the system it is one of and a reader
             // should have met it by then.
             for (var i = 0; i < systems.Count; i++)
             {
+                var written = Written(systems[i], with);
                 var instances = systems[i].Instances;
                 for (var n = 0; n < instances.Count; n++)
-                    WriteInstance(pen, program, systems[i], instances[n]);
+                    WriteInstance(pen, program, written, instances[n], written != systems[i]);
             }
 
             return pen.ToString();
+        }
+
+        /// <summary><paramref name="with" /> where it is the same system as <paramref name="system" />, by its identity, and <paramref name="system" /> otherwise.</summary>
+        static AutomationSystem Written(AutomationSystem system, AutomationSystem with)
+        {
+            return with != null && with.Identity == system.Identity ? with : system;
+        }
+
+        /// <summary>
+        /// Reads from the whole program <paramref name="text" /> only the system <paramref name="identity" /> and its instances
+        /// into <paramref name="program" />, which does not hold that system, answering what was wrong, or empty.
+        /// </summary>
+        /// <remarks>
+        /// For putting a system in the place of another of its identity: the rest of <paramref name="text" /> is what
+        /// <paramref name="program" /> holds already, and is checked by reading the whole of it first.
+        /// </remarks>
+        public static string ReadOne(string text, Guid identity, Automation program)
+        {
+            var parser = new Parser(text);
+            var constructs = parser.Read();
+            var read = new Trouble(text, parser.Trouble);
+            var id = identity.ToString("D");
+
+            for (var i = 0; i < constructs.Count; i++)
+            {
+                var construct = constructs[i];
+                if (construct.Key == Keyword.System && construct.Text(construct.Says(0, Keyword.Blueprint) ? 1 : 0) == id)
+                    ReadSystem(construct, program, read);
+            }
+
+            for (var i = 0; i < constructs.Count; i++)
+            {
+                var construct = constructs[i];
+                if (construct.Key == Keyword.Instance && construct.Text(2) == id)
+                    ReadInstance(construct, program, read);
+            }
+
+            read.Settle();
+            return read.What;
         }
 
         /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library keeps it.</summary>
@@ -868,7 +925,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// One use of a system blueprint, on this construct. It sits outside the blueprint rather than inside it,
         /// because the blueprint is what is shared and which of somebody's blocks answer its slots is not.
         /// </remarks>
-        static void WriteInstance(Pen pen, Automation program, AutomationSystem system, SystemInstance instance)
+        /// <summary>
+        /// Writes <paramref name="instance" /> of <paramref name="system" />; where <paramref name="replacing" />, it is an
+        /// instance of another copy of the system, and keeps only its answers to the slots <paramref name="system" /> uses.
+        /// </summary>
+        static void WriteInstance(Pen pen, Automation program, AutomationSystem system, SystemInstance instance, bool replacing)
         {
             pen.Blank();
             pen.Note(instance.Annotation);
@@ -878,7 +939,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (instance.HasName)
                 pen.Says(Keyword.As).Word(instance.Name);
 
-            var parts = Sorted(system, instance);
+            var parts = Sorted(system, instance, replacing);
             if (parts.Count == 0)
             {
                 pen.End();
@@ -911,16 +972,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// keys back in whatever order it likes, and a save that differs every time is one that gets
         /// written every time and reads as a change in a diff.
         /// </remarks>
-        static List<string> Sorted(AutomationSystem system, SystemInstance instance)
+        static List<string> Sorted(AutomationSystem system, SystemInstance instance, bool replacing)
         {
             var used = new List<string>();
             system.Acted(used);
 
+            // An answer to a slot the system declares nothing about is kept as it is, except for an instance of another copy
+            // of the system, where it answers a slot the copy has done away with.
             var parts = new List<string>();
             foreach (var slot in instance.Filled)
             {
                 Part part = system.FindPart(slot);
-                if (part == null || used.Contains(slot))
+                if (used.Contains(slot) || part == null && !replacing)
                     parts.Add(slot);
             }
 

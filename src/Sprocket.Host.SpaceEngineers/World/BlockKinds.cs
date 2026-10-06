@@ -18,7 +18,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class BlockKinds
     {
+        /// <summary>The action that switches a block on.</summary>
         public const string SwitchOn = "on";
+
+        /// <summary>The action that switches a block off.</summary>
         public const string SwitchOff = "off";
 
         /// <summary>What Sprocket's own members and moments are qualified by: <c>ext.close</c>.</summary>
@@ -31,12 +34,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Catalogue _catalogue;
         readonly BlockExtensions _extensions;
 
+        /// <summary>The kinds of block, described from <paramref name="extensions" /> and what <paramref name="catalogue" /> says of each block's actions.</summary>
         public BlockKinds(Catalogue catalogue, BlockExtensions extensions)
         {
             _catalogue = catalogue;
             _extensions = extensions;
         }
 
+        /// <summary>The kind of <paramref name="block" />, described the first time a block of that type is asked about and kept.</summary>
         public EntityKind For(IMyTerminalBlock block)
         {
             string id = block.BlockDefinition.TypeIdString + "/" + block.BlockDefinition.SubtypeName;
@@ -73,8 +78,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block is IMyFunctionalBlock)
             {
                 kind.WithProperty(GridEntity.OnProperty, "switched on")
-                    .WithEvent("switched-on", GridEntity.OnProperty, Edge.Rising, "is switched on").Reading("is on", "is off")
-                    .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off").Reading("is off", "is on")
+                    .WithEvent("switched-on", GridEntity.OnProperty, Edge.Rising, "is switched on").Reading("is on", "is off").Announced()
+                    .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off").Reading("is off", "is on").Announced()
                     .WithState("is-on", GridEntity.OnProperty, true, "is on")
                     .WithState("is-off", GridEntity.OnProperty, false, "is off")
                     .WithAction(SwitchOn, "switch on", "is-on", "OnOff_On")

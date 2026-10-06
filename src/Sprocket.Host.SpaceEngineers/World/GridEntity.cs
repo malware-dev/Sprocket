@@ -7,7 +7,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>One block, answering the small set of questions every block can answer.</summary>
     public sealed class GridEntity
     {
+        /// <summary>The reading of whether a block is switched on.</summary>
         public const string OnProperty = "on";
+
+        /// <summary>The reading of whether a block is working, as the game judges it.</summary>
         public const string WorkingProperty = "working";
 
         /// <summary>What a block answers when it cannot say how long something will take.</summary>
@@ -16,7 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly IMyTerminalBlock _block;
         readonly EntityKind _kind;
         readonly IBlockExtension _extension;
+        readonly List<Action> _hearing = new List<Action>();
 
+        /// <summary><paramref name="block" />, of <paramref name="kind" />, answered for where it can be by <paramref name="extension" />.</summary>
         public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
         {
             _block = block;
@@ -32,10 +37,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public IMyTerminalBlock Block => _block;
 
+        /// <summary>The block's id in the game.</summary>
         public long Id => _block.EntityId;
 
+        /// <summary>The block's name, as the player gave it.</summary>
         public string Name => _block.CustomName;
 
+        /// <summary>What kind of block it is.</summary>
         public EntityKind Kind => _kind;
 
         /// <summary>
@@ -93,6 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether it can do anything at all: built, powered and switched on.</summary>
         public bool IsWorking => _block.IsWorking;
 
+        /// <summary>What the block reads for <paramref name="propertyId" />, or false where it has no such reading.</summary>
         public EntityValue GetValue(string propertyId)
         {
             EntityValue told;
@@ -134,16 +143,27 @@ namespace Sprocket.Host.SpaceEngineers.World
             return values.Flag(property == null ? ValueKind.Flag : property.Kind, GetValue(propertyId));
         }
 
+        /// <summary>Tells the block to do <paramref name="actionId" />.</summary>
         public void Invoke(string actionId)
         {
             Invoke(actionId, null);
         }
 
         /// <summary>Tells <paramref name="told" /> each time this block may have changed, until the answer is disposed; null where it says nothing.</summary>
+        /// <remarks>
+        /// Told as the block announces a change, as it is switched on or off, which every functional block announces, and as
+        /// Sprocket itself asks the block for anything.
+        /// </remarks>
         public IDisposable Listen(Action told)
         {
             var announces = _extension as IAnnounces;
-            return announces == null ? null : announces.Listen(_block, told);
+            var listening = announces == null ? null : announces.Listen(_block, told);
+            var functional = _block as IMyFunctionalBlock;
+            if (listening == null && functional == null)
+                return null;
+
+            _hearing.Add(told);
+            return new Hearing(this, told, listening, functional);
         }
 
         /// <summary>Whether a step asking this block for <paramref name="action" /> would be lost: it is waited for, and the block is switched off.</summary>
@@ -196,6 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Toolbars.Prepare(_block, action.Id, action.Form, values, action.Primitives);
         }
 
+        /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="values" />.</summary>
         public void Invoke(string actionId, IList<Literal> values)
         {
             Invoke(actionId, values, Form.Native);
@@ -208,6 +229,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// that went looking for whatever answered to its id could find the wrong one.
         /// </remarks>
         public void Invoke(string actionId, IList<Literal> values, Form form)
+        {
+            Perform(actionId, values, form);
+
+            // What Sprocket asks of a block is a change it need not wait for the block to announce.
+            for (var i = 0; i < _hearing.Count; i++)
+                _hearing[i]();
+        }
+
+        void Perform(string actionId, IList<Literal> values, Form form)
         {
             // The block's own members are named by the block's ids, so those go straight to the game.
             if (form == Form.Value)
@@ -249,6 +279,41 @@ namespace Sprocket.Host.SpaceEngineers.World
             var entry = _kind.FindAction(actionId, Form.Native);
             if (entry != null && entry.GameActionId != null)
                 Toolbars.Perform(_block, entry.GameActionId, values);
+        }
+
+        /// <summary>A listener to this block, until disposed.</summary>
+        sealed class Hearing : IDisposable
+        {
+            readonly GridEntity _entity;
+            readonly Action _told;
+            readonly IDisposable _listening;
+            readonly IMyFunctionalBlock _functional;
+
+            public Hearing(GridEntity entity, Action told, IDisposable listening, IMyFunctionalBlock functional)
+            {
+                _entity = entity;
+                _told = told;
+                _listening = listening;
+                _functional = functional;
+                if (_functional != null)
+                    _functional.EnabledChanged += Switched;
+            }
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+                _entity._hearing.Remove(_told);
+                if (_listening != null)
+                    _listening.Dispose();
+
+                if (_functional != null)
+                    _functional.EnabledChanged -= Switched;
+            }
+
+            void Switched(IMyTerminalBlock block)
+            {
+                _told();
+            }
         }
     }
 }

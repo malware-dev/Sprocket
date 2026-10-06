@@ -1056,6 +1056,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (edit == null)
                 return;
 
+            // A logic system swapped back or forth comes with its own date, so what is said of it is what it says now, and
+            // nothing reads it as changed since.
+            var replaced = edit as ReplaceSystem;
+            var standing = replaced == null ? null : _program.FindSystem(replaced.Identity);
+            if (standing != null)
+                _said[standing.Identity] = ProgramText.Said(standing);
+
             _program.Edited();
             _program.Rewire();
             Invalidate();
@@ -1350,7 +1357,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Opens the library: the world's backups, and the blueprints.</summary>
         public void OpenLibrary()
         {
-            Push(new LibraryPage(this));
+            Push(new LibraryPage(this, Guid.Empty));
+        }
+
+        /// <summary>Opens the library with the blueprint <paramref name="identity" /> chosen.</summary>
+        public void OpenLibrary(Guid identity)
+        {
+            Push(new LibraryPage(this, identity));
         }
 
         /// <summary>
@@ -2645,6 +2658,90 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
             Answer(Texts.LibraryTakeOffUpdate, delegate { TakeOff(system, true); });
             Answer(Texts.LibraryTakeOffLeave, delegate { TakeOff(system, false); });
+        }
+
+        /// <summary>Asks before putting the logic system <paramref name="system" /> in place of its blueprint in the library; keeping the blueprint is the answer Enter takes.</summary>
+        public void AskUpdate(AutomationSystem system)
+        {
+            Stamp(true);
+
+            var arguments = new Arguments();
+            arguments.Set("named", system.Name);
+
+            Ask(Texts.LibraryUpdateQuestion + "\n\n**{named}**\n\n" + Texts.LibraryUpdateReplaced, arguments);
+            Answer(Texts.LibraryUpdateKeep, delegate { }, true);
+            Answer(Texts.LibraryUpdateConfirm, delegate { Shelve(system); });
+        }
+
+        /// <summary>Asks before putting the blueprint of <paramref name="system" /> in the library in its place; keeping it is the answer Enter takes.</summary>
+        public void AskRenew(AutomationSystem system)
+        {
+            Stamp(true);
+
+            var arguments = new Arguments();
+            arguments.Set("named", system.Name);
+
+            Ask(Texts.LibraryRenewQuestion + "\n\n**{named}**\n\n" + Texts.LibraryRenewReplaced, arguments);
+            Answer(Texts.LibraryRenewKeep, delegate { }, true);
+            Answer(Texts.LibraryRenewConfirm, delegate { Renew(system); });
+        }
+
+        /// <summary>
+        /// Puts the blueprint of <paramref name="system" /> in the library in its place, its installations keeping their blocks in
+        /// every slot the blueprint still uses, answering what was wrong, or empty.
+        /// </summary>
+        /// <remarks>
+        /// Its runs end, as they do when a logic system goes, and each installation stays switched as it was. The whole
+        /// program as it would stand is read first, because a text with an error in it is trusted in no part.
+        /// </remarks>
+        public string Renew(AutomationSystem system)
+        {
+            var volume = Shelf == null ? null : Shelf.Find(system.Identity);
+            if (volume == null)
+                return "";
+
+            AutomationSystem copy;
+            var trouble = ProgramText.Lone(volume.Text, _world.Values, out copy);
+            if (trouble.Length > 0)
+                return trouble;
+
+            var text = ProgramText.Replacing(_program, _world.Values, copy);
+            trouble = ProgramText.Load(text, new Automation(), _world.Values);
+            if (trouble.Length > 0)
+                return trouble;
+
+            Stamp(true);
+
+            // Read in beside the rest of the program, then set aside, so that the edit is the swap of the two alone.
+            var at = 0;
+            while (at < _program.Systems.Count && _program.Systems[at] != system)
+                at++;
+
+            _program.RemoveSystem(system);
+            trouble = ProgramText.ReadOne(text, system.Identity, _program);
+            var fresh = _program.FindSystem(system.Identity);
+            if (fresh != null)
+                _program.RemoveSystem(fresh);
+
+            _program.PutBack(system, at);
+            if (trouble.Length > 0 || fresh == null)
+                return trouble;
+
+            fresh.Enabled = system.Enabled;
+            var instances = fresh.Instances;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                var was = system.FindInstance(instances[i].Number);
+                if (was != null)
+                    instances[i].Enabled = was.Enabled;
+            }
+
+            // Said as it is, so its date stays the library's and nothing reads it as changed since.
+            _said[fresh.Identity] = ProgramText.Said(fresh);
+
+            Do(new ReplaceSystem(system, fresh, Change.UpdateFromLibrary));
+            Gone(system);
+            return "";
         }
 
         /// <summary>Whether the logic system <paramref name="system" /> was changed after its blueprint in the library was.</summary>

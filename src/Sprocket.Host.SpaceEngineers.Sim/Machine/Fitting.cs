@@ -52,6 +52,7 @@ public abstract class Fitting
     /// </remarks>
     public Action<long, string>? Performs;
 
+    /// <summary>A block, <paramref name="id" />, called <paramref name="name" />, of the block type <paramref name="type" /> and <paramref name="subtype" />, shown as <paramref name="display" />.</summary>
     protected Fitting(long id, string name, MyObjectBuilderType type, string subtype, string display)
     {
         Id = id;
@@ -60,8 +61,10 @@ public abstract class Fitting
         _display = display;
     }
 
+    /// <summary>The block's id.</summary>
     public long Id { get; private set; }
 
+    /// <summary>The block's name.</summary>
     public string Name { get; set; }
 
     /// <summary>
@@ -84,12 +87,16 @@ public abstract class Fitting
 
             for (var i = 0; i < _watching.Count; i++)
                 _watching[i](Block);
+
+            for (var i = 0; i < _switching.Count; i++)
+                _switching[i]((IMyTerminalBlock)Block);
         }
     }
 
     bool _enabled = true;
 
     readonly List<Action<IMyCubeBlock>> _watching = new List<Action<IMyCubeBlock>>();
+    readonly List<Action<IMyTerminalBlock>> _switching = new List<Action<IMyTerminalBlock>>();
 
     /// <summary>What the mod holds: the block, as the game's own interface.</summary>
     public IMyTerminalBlock Block { get; private set; }
@@ -97,6 +104,7 @@ public abstract class Fitting
     /// <summary>The toolbar this block carries, or null where it carries none.</summary>
     public Toolbar Toolbar { get; protected set; }
 
+    /// <summary>The grid the block is on, or null before it is welded to one.</summary>
     public IMyCubeGrid Grid { get; set; }
 
     /// <summary>Whether the block has been ground off, which closes it as the game closes a block it removes.</summary>
@@ -116,12 +124,14 @@ public abstract class Fitting
     /// </remarks>
     public List<string> Journal { get; set; }
 
+    /// <summary>Writes <paramref name="action" /> into the journal, as the block being told to do it.</summary>
     protected void Told(string action)
     {
         if (Journal != null)
             Journal.Add(Name + ":" + action);
     }
 
+    /// <summary>What mods keep on the block.</summary>
     public MyModStorageComponentBase Storage { get; set; }
 
     /// <summary>A moment of the rig running, which for most blocks is nothing at all.</summary>
@@ -129,6 +139,7 @@ public abstract class Fitting
     {
     }
 
+    /// <summary>Makes the block answer as <typeparamref name="T" />, with <paramref name="stand" /> saying how, on top of what every block answers.</summary>
     protected void Fit<T>(Stand<T> stand) where T : class, IMyTerminalBlock
     {
         Block = Shared(stand).Done();
@@ -157,6 +168,8 @@ public abstract class Fitting
             .Gives("IsWorking", () => Enabled)
             .Does("add_IsWorkingChanged", args => Watch((Action<IMyCubeBlock>)args[0], true))
             .Does("remove_IsWorkingChanged", args => Watch((Action<IMyCubeBlock>)args[0], false))
+            .Does("add_EnabledChanged", args => { _switching.Add((Action<IMyTerminalBlock>)args[0]); })
+            .Does("remove_EnabledChanged", args => { _switching.Remove((Action<IMyTerminalBlock>)args[0]); })
             .Gives("Enabled", () => Enabled)
             .Takes("Enabled", value =>
             {

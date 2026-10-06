@@ -18,9 +18,20 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class DoorExtension : IBlockExtension, IAnnounces
     {
+        /// <summary>The reading of a door all the way open.</summary>
         public const string Open = "open";
+
+        /// <summary>The reading of a door all the way shut.</summary>
         public const string Shut = "shut";
+
+        /// <summary>The reading of a door on its way either way.</summary>
         public const string Moving = "moving";
+
+        /// <summary>The reading of a door on its way open.</summary>
+        public const string Opening = "opening";
+
+        /// <summary>The reading of a door on its way shut.</summary>
+        public const string Closing = "closing";
 
         /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
@@ -40,9 +51,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             kind.WithProperty(Open, "open")
                 .WithProperty(Shut, "shut")
                 .WithProperty(Moving, "moving")
+                .WithProperty(Opening, "opening")
+                .WithProperty(Closing, "closing")
                 .WithEvent("opened", Open, Edge.Rising, "finishes opening").Announced().Reading("is open", "is not open")
                 .WithEvent("closed", Shut, Edge.Rising, "finishes closing").Announced().Reading("is closed", "is not closed")
-                .WithState("is-open", Open, true, "is open")
+                .WithEvent("opening", Opening, Edge.Rising, "starts opening").Announced().Reading("is opening", "is not opening")
+                .WithEvent("closing", Closing, Edge.Rising, "starts closing").Reading("is closing", "is not closing");
+
+            // Every door says when it is told to open; only a hangar door says when it is told to close. Any other door is
+            // looked at for starting to close only between starting to open and having closed, which it does say.
+            if (block is IMyAirtightHangarDoor)
+                kind.Announced();
+            else
+                kind.RuledOutBy(Shut);
+
+            kind.WithState("is-open", Open, true, "is open")
                 .WithState("is-shut", Shut, true, "is shut")
                 .WithState("is-moving", Moving, true, "is moving")
                 .WithAction("open", "open", "is-open", "Open_On").Lasting()
@@ -50,10 +73,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .Renaming("Open", false, "reverse");
         }
 
-        /// <summary>Told when the door finishes opening or closing, which every door raises from its own update.</summary>
+        /// <summary>Told when the door finishes opening or closing, which every door raises from its own update, as it is told to open, and, for a hangar door, as it is told to close.</summary>
         /// <remarks>
         /// Each family of door raises these itself, and a plain door may raise "closed" as a world loads with it shut; a
-        /// look finds nothing changed and nothing fires.
+        /// look finds nothing changed and nothing fires. A door's state-changed event comes as it is told to open and again
+        /// once it has closed, never as it is told to close; a hangar door's properties-changed event comes as it is told to
+        /// do either.
         /// </remarks>
         public IDisposable Listen(IMyTerminalBlock block, Action told)
         {
@@ -66,13 +91,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             readonly IMyDoor _door;
             readonly Action _told;
+            readonly bool _hangar;
 
             public Listening(IMyDoor door, Action told)
             {
                 _door = door;
                 _told = told;
+                _hangar = door is IMyAirtightHangarDoor;
                 _door.OnDoorOpened += Moved;
                 _door.OnDoorClosed += Moved;
+                _door.OnDoorStateChanged += Turned;
+                if (_hangar)
+                    _door.PropertiesChanged += Changed;
             }
 
             /// <inheritdoc />
@@ -80,9 +110,22 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 _door.OnDoorOpened -= Moved;
                 _door.OnDoorClosed -= Moved;
+                _door.OnDoorStateChanged -= Turned;
+                if (_hangar)
+                    _door.PropertiesChanged -= Changed;
             }
 
             void Moved(IMyDoor door)
+            {
+                _told();
+            }
+
+            void Turned(IMyDoor door, bool open)
+            {
+                _told();
+            }
+
+            void Changed(IMyTerminalBlock block)
             {
                 _told();
             }
@@ -108,6 +151,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case Moving:
                     value = EntityValue.Of(door.Status == DoorStatus.Opening
                         || door.Status == DoorStatus.Closing);
+                    return true;
+                case Opening:
+                    value = EntityValue.Of(door.Status == DoorStatus.Opening);
+                    return true;
+                case Closing:
+                    value = EntityValue.Of(door.Status == DoorStatus.Closing);
                     return true;
             }
 

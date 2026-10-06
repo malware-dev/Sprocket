@@ -258,22 +258,22 @@ public class RotaTests
     /// A block's change is seen when the trigger's place comes round, and it fires then.
     /// </summary>
     /// <remarks>
-    /// The sequence's runner joins the rota first and takes place 0, and the trigger's watch takes place 1, so a door
-    /// switched on after tick 23 is seen on tick 31. Nothing announces a block being switched on, which is what leaves its place
-    /// to decide.
+    /// The sequence's runner joins the rota first and takes place 0, and the trigger's watch takes place 1, so a full vent
+    /// switched back on after tick 23, which finishes filling there, is seen on tick 31. Nothing announces a vent filling,
+    /// which is what leaves its place to decide.
     /// </remarks>
     [Fact]
     public void ATriggerFiresWhenItsPlaceComesRound()
     {
         var ship = new Rigged();
         var automation = new Automation();
-        var door = ship.Door(1, "Door");
+        var vent = ship.Vent(1, "Vent");
         var lamp = ship.Light(2, "Lamp");
 
-        door.Enabled = false;
+        vent.Enabled = false;
 
-        var on = new WhenTrigger("switched-on");
-        on.Sources.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
+        var on = new WhenTrigger("filled");
+        on.Sources.Add(automation.Declare(ship.World, ship.Entity(vent.Id)).Name);
         var sequence = automation.AddSequence(on);
         Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
 
@@ -285,7 +285,7 @@ public class RotaTests
             runner.Tick(frame + 1);
         }
 
-        door.Enabled = true;
+        vent.Enabled = true;
         while (frame < 100 && runner.Get(sequence)!.FiredCount == 0)
         {
             ship.Tick();

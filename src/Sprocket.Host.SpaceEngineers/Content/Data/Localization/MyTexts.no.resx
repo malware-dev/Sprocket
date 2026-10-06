@@ -121,6 +121,12 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
     <value>Erstatt plantegningen i biblioteket med dette logikksystemet.</value>
   </data>
+  <data name="Sprocket.Systems.UpdateFromLibrary" xml:space="preserve">
+    <value>Oppdater fra biblioteket</value>
+  </data>
+  <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
+    <value>Plantegningen i biblioteket ble endret etter dette logikksystemet. Sett den inn i stedet for dette logikksystemet.</value>
+  </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
     <value>Åpner logikksystemet **{name}**, for å endre hva som starter sekvensene og hva de gjør. Hver installasjon av det endres med det.</value>
   </data>
@@ -1267,6 +1273,9 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
     <value>sletting av et logikksystem</value>
   </data>
+  <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
+    <value>oppdatering av et logikksystem fra biblioteket</value>
+  </data>
   <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
     <value>fjerning av et logikksystem</value>
   </data>
@@ -1445,6 +1454,30 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
     <value>Ta den av</value>
+  </data>
+  <data name="Sprocket.Library.RenewQuestion" xml:space="preserve">
+    <value>Oppdatere dette logikksystemet fra biblioteket?</value>
+  </data>
+  <data name="Sprocket.Library.RenewReplaced" xml:space="preserve">
+    <value>Det erstattes av plantegningen sin i biblioteket. Installasjonene beholder blokkene sine i alle plasser plantegningen fortsatt har.</value>
+  </data>
+  <data name="Sprocket.Library.RenewConfirm" xml:space="preserve">
+    <value>Oppdater</value>
+  </data>
+  <data name="Sprocket.Library.RenewKeep" xml:space="preserve">
+    <value>Behold det</value>
+  </data>
+  <data name="Sprocket.Library.UpdateQuestion" xml:space="preserve">
+    <value>Oppdatere plantegningen i biblioteket?</value>
+  </data>
+  <data name="Sprocket.Library.UpdateReplaced" xml:space="preserve">
+    <value>Plantegningen erstattes av dette logikksystemet slik det er nå.</value>
+  </data>
+  <data name="Sprocket.Library.UpdateConfirm" xml:space="preserve">
+    <value>Oppdater</value>
+  </data>
+  <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
+    <value>Behold plantegningen</value>
   </data>
   <data name="Sprocket.Blueprint.NameTaken" xml:space="preserve">
     <value>En annen plass heter allerede {name}.</value>

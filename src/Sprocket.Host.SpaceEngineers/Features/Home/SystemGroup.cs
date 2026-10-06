@@ -31,6 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly ICommand _deletes;
 
         readonly ICommand _shelves;
+        readonly ICommand _renews;
 
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>
         public SystemGroup(SprocketEditor editor, HomePage page, AutomationSystem system)
@@ -46,7 +47,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Mark = Symbols.Blueprint;
             _takesOff = editor.Act(Cmd.TakeOff, delegate { editor.AskTakeOff(system); });
             _deletes = editor.Act(Cmd.DeleteSystem, delegate { editor.DeleteSystem(system); });
-            _shelves = editor.Act(Cmd.Shelve, delegate { editor.Shelve(system); });
+            _renews = editor.Act(Cmd.Renew, delegate { editor.AskRenew(system); });
+            _shelves = editor.Act(Cmd.Shelve, delegate
+            {
+                // Updating replaces the blueprint, so it asks first; making one shows it where it now is.
+                if (editor.Stored(system))
+                {
+                    editor.AskUpdate(system);
+                    return;
+                }
+
+                editor.Shelve(system);
+                editor.OpenLibrary(system.Identity);
+            });
             _heading.AboutArguments = _named;
             _another.Command = editor.Act(Cmd.AddInstance, delegate { page.Another(system); });
             editor.Codex.Wire(_installations, editor.OpenCodex);
@@ -74,11 +87,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.DeleteText = stored ? texts.LibraryTakeOff : texts.LibraryDeletes;
 
             // The library's own button, here as well: the blueprint is the logic system's copy in the library, made the first
-            // time and brought up to date after, and with nothing to bring up to date there is nothing to offer.
+            // time and brought up to date after. Where the blueprint was changed after the logic system, the logic system is
+            // brought up to date from it instead, and with the two the same there is nothing to offer.
             var shelf = _editor.Shelf;
-            _heading.Offers = shelf == null || stored && shelf.Holds(_system) ? null : _shelves;
-            _heading.ButtonText = stored ? texts.SystemsUpdateBlueprint : texts.SystemsMakeBlueprint;
-            _heading.ButtonAbout = stored ? texts.SystemsUpdateBlueprintAbout : texts.SystemsMakeBlueprintAbout;
+            var newer = stored && !_editor.ChangedSince(_system);
+            _heading.Offers = shelf == null || stored && shelf.Holds(_system) ? null : newer ? _renews : _shelves;
+            _heading.ButtonText = !stored ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
+            _heading.ButtonAbout = !stored ? texts.SystemsMakeBlueprintAbout
+                : newer ? texts.SystemsUpdateFromLibraryAbout : texts.SystemsUpdateBlueprintAbout;
 
             _keys.Clear();
             var instances = _system.Instances;

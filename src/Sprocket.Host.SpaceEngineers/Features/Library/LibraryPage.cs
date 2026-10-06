@@ -36,10 +36,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         Entry _chosen;
         string _refused = "";
+        Guid _opening;
 
-        /// <summary>The library, in the editor <paramref name="editor" />.</summary>
-        public LibraryPage(SprocketEditor editor) : base(editor)
+        /// <summary>The library, in the editor <paramref name="editor" />, with the blueprint <paramref name="opening" /> chosen first, or the first one where that is empty.</summary>
+        public LibraryPage(SprocketEditor editor, Guid opening) : base(editor)
         {
+            _opening = opening;
             _flips = new Relay(Flip);
             _keeps = new Relay(Keep);
             _copies = new Relay(Copy);
@@ -119,9 +121,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Entry again = null;
             for (var i = 0; i < _entries.Count && again == null; i++)
             {
-                if (_entries[i].Same(was))
+                if (_opening != Guid.Empty ? _entries[i].Identity == _opening : _entries[i].Same(was))
                     again = _entries[i];
             }
+
+            _opening = Guid.Empty;
 
             Choose(again ?? (_entries.Count > 0 ? _entries[0] : null));
             Narrow();
@@ -298,10 +302,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 : volume != null ? texts.LibraryTakeOff : texts.LibraryDeletes);
 
             var same = live != null && volume != null && shelf.Holds(live);
+            var newer = live != null && volume != null && !same && !Editor.ChangedSince(live);
             _keep.IsVisible = live != null && shelf != null;
-            _keep.Text = volume == null ? texts.SystemsMakeBlueprint : texts.SystemsUpdateBlueprint;
+            _keep.Text = volume == null ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _keeps.CanExecute = !same;
-            _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
+            _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame
+                : newer ? texts.SystemsUpdateFromLibraryAbout
+                : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
 
             _copy.Text = texts.LibraryCopy;
             _copies.CanExecute = free && system != null;
@@ -408,8 +415,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         void Keep()
         {
             var live = _chosen == null ? null : Live(_chosen.Identity);
-            if (live != null)
+            if (live == null)
+                return;
+
+            // Either update replaces something, so it asks first: the blueprint where the logic system is the newer, and the
+            // logic system where the blueprint is.
+            if (!Editor.Stored(live))
                 Run(Cmd.Shelve, delegate { Editor.Shelve(live); });
+            else if (Editor.ChangedSince(live))
+                Run(Cmd.Shelve, delegate { Editor.AskUpdate(live); });
+            else
+                Run(Cmd.Renew, delegate { Editor.AskRenew(live); });
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>

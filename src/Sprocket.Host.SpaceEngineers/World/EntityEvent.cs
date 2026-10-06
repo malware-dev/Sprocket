@@ -16,6 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityEvent
     {
+        /// <summary>The moment <paramref name="id" />: <paramref name="propertyId" /> crossing <paramref name="edge" />, read in a sentence as <paramref name="text" />.</summary>
         public EntityEvent(string id, string propertyId, Edge edge, string text)
         {
             Id = id;
@@ -55,6 +56,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>See <see cref="IAnnounces" />. Set by the extension that knows the block raises it.</remarks>
         public bool Announced { get; private set; }
 
+        /// <summary>The flag that, while it reads true, rules this moment out, so the block need not be looked at then; empty where nothing does.</summary>
+        /// <remarks>
+        /// For a moment the block does not announce, where it does announce when the moment becomes possible: a door
+        /// says when it starts opening and when it has closed, and only between the two can it start closing. While every
+        /// block watched reads this true, the moment is looked for only when one of them announces a change; otherwise on
+        /// its cadence.
+        /// </remarks>
+        public string RuledOutBy { get; private set; } = "";
+
+        /// <summary>Why this moment is looked for on a cadence, where the block neither announces it nor anything that rules it out; empty where it is watched another way.</summary>
+        public string LookedBecause { get; private set; } = "";
+
         /// <summary>The property on the entity this event watches.</summary>
         public string PropertyId { get; private set; }
 
@@ -80,6 +93,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Announce()
         {
             Announced = true;
+        }
+
+        /// <summary>Says <paramref name="propertyId" />, while it reads true, rules this moment out.</summary>
+        public void RuleOutBy(string propertyId)
+        {
+            RuledOutBy = propertyId;
+        }
+
+        /// <summary>Says this moment is looked for on a cadence, and <paramref name="reason" /> why nothing better is possible.</summary>
+        public void Look(string reason)
+        {
+            LookedBecause = reason;
         }
 
         /// <summary>Gives the moment the words a test reads it in, being in it and not.</summary>

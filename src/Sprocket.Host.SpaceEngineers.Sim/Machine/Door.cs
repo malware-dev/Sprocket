@@ -25,7 +25,9 @@ public sealed class Door : Fitting
     Action<IMyDoor>? _opened;
     Action<IMyDoor>? _closed;
     Action<bool>? _changed;
+    Action<IMyDoor, bool>? _turned;
 
+    /// <summary>A shut door, <paramref name="id" />, called <paramref name="name" />, of the block type <paramref name="type" /> and <paramref name="subtype" />, shown as <paramref name="display" />.</summary>
     public Door(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
@@ -40,7 +42,9 @@ public sealed class Door : Fitting
             .Does("add_OnDoorClosed", handler => { _closed += (Action<IMyDoor>)handler[0]; })
             .Does("remove_OnDoorClosed", handler => { _closed -= (Action<IMyDoor>)handler[0]; })
             .Does("add_DoorStateChanged", handler => { _changed += (Action<bool>)handler[0]; })
-            .Does("remove_DoorStateChanged", handler => { _changed -= (Action<bool>)handler[0]; }));
+            .Does("remove_DoorStateChanged", handler => { _changed -= (Action<bool>)handler[0]; })
+            .Does("add_OnDoorStateChanged", handler => { _turned += (Action<IMyDoor, bool>)handler[0]; })
+            .Does("remove_OnDoorStateChanged", handler => { _turned -= (Action<IMyDoor, bool>)handler[0]; }));
     }
 
     /// <summary>Whether the door raises the game's own events on finishing, as every door in the game does.</summary>
@@ -99,24 +103,30 @@ public sealed class Door : Fitting
             _opened?.Invoke((IMyDoor)Block);
     }
 
+    /// <summary>How many times the mod has read the door's status, for a test of how often it looks.</summary>
+    public int StatusReads { get; private set; }
+
     /// <summary>What the game would report of this door, which is what the mod reads.</summary>
+    /// <remarks>
+    /// The game's own rule: the switch first, then how far the door has got, so a door told to close reads as closing at
+    /// once unless it is already shut, and one told to open reads as opening unless it is already open.
+    /// </remarks>
     public DoorStatus Status
     {
         get
         {
-            if (_progress >= TravelTicks)
-                return DoorStatus.Open;
+            StatusReads++;
+            if (_opening)
+                return _progress >= TravelTicks ? DoorStatus.Open : DoorStatus.Opening;
 
-            if (_progress <= 0)
-                return DoorStatus.Closed;
-
-            return _opening ? DoorStatus.Opening : DoorStatus.Closing;
+            return _progress <= 0 ? DoorStatus.Closed : DoorStatus.Closing;
         }
     }
 
-    /// <summary>How many are listening for the door to finish opening or closing.</summary>
+    /// <summary>How many are listening for the door to finish opening or closing, or to be told to move.</summary>
     public int Listeners => (_opened == null ? 0 : _opened.GetInvocationList().Length)
-        + (_closed == null ? 0 : _closed.GetInvocationList().Length);
+        + (_closed == null ? 0 : _closed.GetInvocationList().Length)
+        + (_turned == null ? 0 : _turned.GetInvocationList().Length);
 
     /// <inheritdoc />
     public override void Tick()
@@ -136,6 +146,7 @@ public sealed class Door : Fitting
             if (_progress == 0 && Announces)
             {
                 _changed?.Invoke(false);
+                _turned?.Invoke((IMyDoor)Block, false);
                 _closed?.Invoke((IMyDoor)Block);
             }
         }
@@ -154,6 +165,9 @@ public sealed class Door : Fitting
             Told(told);
 
         if (opening && !was && Announces)
+        {
             _changed?.Invoke(true);
+            _turned?.Invoke((IMyDoor)Block, true);
+        }
     }
 }

@@ -1,3 +1,4 @@
+using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -157,14 +158,117 @@ public class LibraryTests
         heading.Offers!.Execute();
         rig.Tick();
         Assert.True(rig.Shelf.Holds(system));
+        rig.Editor.GoToRoot();
+        rig.Tick();
         Assert.Null(Assert.Single(rig.Editor.RootHeadings()).Offers);
 
+        // Renamed, and changed after its blueprint, as an edit on the screen stamps it.
         system.Name = "Airlock Mk II";
+        system.Changed = DateTime.UtcNow.AddMinutes(1);
         rig.Editor.Invalidate();
         rig.Tick();
         heading = Assert.Single(rig.Editor.RootHeadings());
         Assert.Equal(rig.Texts.SystemsUpdateBlueprint, heading.ButtonText);
         Assert.NotNull(heading.Offers);
+    }
+
+    /// <summary>Making a blueprint from the home screen opens the library with that blueprint chosen.</summary>
+    [Fact]
+    public void MakingABlueprintOpensTheLibraryAtIt()
+    {
+        var rig = Blueprinted();
+        var copy = rig.Editor.Copy(ProgramText.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
+        Assert.True(copy != null, trouble);
+        rig.Editor.GoToRoot();
+        rig.Tick();
+
+        var made = rig.Editor.RootHeadings().Single(h => h.Summary == copy.Name);
+        made.Offers!.Execute();
+        rig.Tick();
+
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        var chosen = Assert.Single(page.Rows.OfType<StatusRow>(), r => r.Chosen);
+        Assert.Equal(copy.Name, chosen.Summary);
+        Assert.NotEqual("Airlock", chosen.Summary);
+    }
+
+    /// <summary>Where the library's blueprint was changed after the logic system, the home screen and the library offer to update the logic system from it.</summary>
+    [Fact]
+    public void ANewerBlueprintIsOfferedToTheLogicSystem()
+    {
+        var rig = Newer();
+
+        var heading = Assert.Single(rig.Editor.RootHeadings());
+        Assert.Equal(rig.Texts.SystemsUpdateFromLibrary, heading.ButtonText);
+        Assert.NotNull(heading.Offers);
+
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        var update = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateFromLibrary);
+        Assert.True(update.Command!.CanExecute);
+    }
+
+    /// <summary>
+    /// Updating a logic system from the library asks first, then puts the blueprint in its place: its installations stay, with
+    /// their blocks and their switches, and the update can be undone.
+    /// </summary>
+    [Fact]
+    public void UpdatingFromTheLibraryKeepsTheInstallations()
+    {
+        var rig = Newer();
+        var was = rig.Editor.Program.Systems[0];
+        var filled = was.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList();
+        var switched = was.Instances.Select(i => i.Enabled).ToList();
+
+        Assert.Single(rig.Editor.RootHeadings()).Offers!.Execute();
+        rig.Tick();
+        Assert.Contains(rig.Texts.LibraryRenewReplaced, rig.Editor.Question());
+        rig.Editor.PressChoice(rig.Texts.LibraryRenewConfirm);
+        rig.Tick();
+
+        var now = Assert.Single(rig.Editor.Program.Systems);
+        Assert.Equal("Airlock Mk II", now.Name);
+        Assert.Equal(was.Identity, now.Identity);
+        Assert.Equal(filled, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
+        Assert.Equal(switched, now.Instances.Select(i => i.Enabled).ToList());
+        Assert.True(rig.Shelf.Holds(now));
+        Assert.Null(Assert.Single(rig.Editor.RootHeadings()).Offers);
+
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Equal("Airlock", Assert.Single(rig.Editor.Program.Systems).Name);
+        Assert.Equal(rig.Texts.SystemsUpdateFromLibrary, Assert.Single(rig.Editor.RootHeadings()).ButtonText);
+    }
+
+    /// <summary>Updating a blueprint asks first, and keeping the blueprint leaves it as it was.</summary>
+    [Fact]
+    public void UpdatingABlueprintAsksFirst()
+    {
+        var rig = Blueprinted();
+        var system = rig.Editor.Program.Systems[0];
+        system.Changed = Saved;
+        rig.Shelf.Keep(system);
+
+        system.Name = "Airlock Mk II";
+        system.Changed = Saved.AddDays(1);
+        rig.Editor.Invalidate();
+        rig.Tick();
+
+        Assert.Single(rig.Editor.RootHeadings()).Offers!.Execute();
+        rig.Tick();
+        Assert.Contains(rig.Texts.LibraryUpdateReplaced, rig.Editor.Question());
+        rig.Editor.PressChoice(rig.Texts.LibraryUpdateKeep);
+        rig.Tick();
+        Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
+
+        Assert.Single(rig.Editor.RootHeadings()).Offers!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryUpdateConfirm);
+        rig.Tick();
+        Assert.Equal("Airlock Mk II", Assert.Single(rig.Shelf.All).Name);
     }
 
     /// <summary>A blueprint put in the library is a file of its own holding the blueprint as written, named in the index, and reads back.</summary>
@@ -487,6 +591,62 @@ public class LibraryTests
         Assert.True(rig.Unit.Lost);
         var backup = Assert.Single(rig.Backups.All);
         Assert.Contains("Airlock", backup.Program);
+    }
+
+    /// <summary>
+    /// A slot the library's newer blueprint has done away with loses its blocks in every installation as the logic system is
+    /// updated from it, and the slots it still has keep theirs.
+    /// </summary>
+    [Fact]
+    public void UpdatingFromTheLibraryDropsTheBlocksOfASlotItNoLongerHas()
+    {
+        var rig = Newer();
+        var system = rig.Editor.Program.Systems[0];
+
+        // The logic system on the construct gains a slot its blueprint in the library lacks: the inner door, which a step
+        // closes, answered in every installation.
+        var door = rig.Editor.Program.Declare(rig.Editor.World, rig.Editor.World.FindEntity(2)!).Name;
+        system.PartFor("Inner").Expects.Add("Door");
+        foreach (var instance in system.Instances)
+            instance.Fill("Inner", new[] { door });
+
+        var close = new Act("close");
+        close.Targets.Add("Inner");
+        system.Sequences[0].Steps.Add(close);
+        rig.Editor.Program.Edited();
+        system.Changed = Saved;
+        rig.Editor.Stamp(true);
+        system.Changed = Saved;
+        rig.Editor.Invalidate();
+        rig.Tick();
+        Assert.All(system.Instances, i => Assert.NotNull(i.FilledWith("Inner")));
+        var kept = system.Instances.Select(i => string.Join(",", i.Filled.Where(s => s != "Inner").OrderBy(s => s))).ToList();
+
+        rig.Editor.AskRenew(system);
+        rig.Editor.PressChoice(rig.Texts.LibraryRenewConfirm);
+        rig.Tick();
+
+        var now = Assert.Single(rig.Editor.Program.Systems);
+        Assert.Null(now.FindPart("Inner"));
+        Assert.All(now.Instances, i => Assert.Null(i.FilledWith("Inner")));
+        Assert.Equal(kept, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
+    }
+
+    /// <summary>The same, whose blueprint in the library is a newer copy, renamed Airlock Mk II.</summary>
+    static Simulation Newer()
+    {
+        var rig = Blueprinted();
+        var system = rig.Editor.Program.Systems[0];
+        system.Name = "Airlock Mk II";
+        system.Changed = Saved.AddDays(1);
+        rig.Shelf.Keep(system);
+
+        system.Name = "Airlock";
+        system.Changed = Saved;
+        rig.Editor.Stamp(true);
+        rig.Editor.Invalidate();
+        rig.Tick();
+        return rig;
     }
 
     /// <summary>A logic system with a button, made a blueprint, with a second installation made from it.</summary>

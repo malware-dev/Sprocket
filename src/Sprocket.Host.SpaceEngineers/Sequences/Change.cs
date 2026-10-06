@@ -96,6 +96,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Adding a logic system.</summary>
         AddSystem,
         /// <summary>Adding an installation.</summary>
-        AddInstallation
+        AddInstallation,
+        /// <summary>Putting a logic system's blueprint in the library in the place of the logic system.</summary>
+        UpdateFromLibrary
     }
 }

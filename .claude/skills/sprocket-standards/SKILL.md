@@ -153,6 +153,23 @@ because the slower two periods are not guaranteed to land on exact multiples - w
 on what else is in the game's component list. A shift counting how often it was called is measuring
 server load and calling it time.
 
+## Watching what a block does
+
+A moment a `when` waits for is watched in one of three ways, and a new moment uses one of them, never a mechanism of
+its own:
+
+- **Announced** (`EntityKind.Announced`): the game raises an event when the moment may have happened, and the block's
+  extension listens through `IAnnounces`. Looked for on the tick after, with a backstop look every hundred ticks.
+- **Ruled out** (`EntityKind.RuledOutBy`): the game does not announce the moment, but does announce a reading that rules
+  it out. Looked for on its cadence only while a watched block is outside that reading, otherwise as if announced. A
+  door starting to close is the case: it can only between starting to open and having closed.
+- **Looked for** (`EntityKind.Looked`, with its reason): the `when`'s own cadence through the rota, where neither of the
+  others exists.
+
+**An event first.** A look only where the game has no event, and only while the moment is possible. Never wrap or
+replace the game's own terminal actions to learn of a change: another mod doing the same collides. What Sprocket asks
+of a block prompts a look by itself (`GridEntity.Invoke`).
+
 ## What Sprocket tells a person
 
 **Every word on screen is clear, concise and unconfusing.** The fewest words that still say what
