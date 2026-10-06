@@ -30,6 +30,7 @@ namespace Sprocket.Sim.Simulation
 
         Vector2 _at;
 
+        /// <summary>The editor on a ship of its own.</summary>
         public EditorScene() : this(new Ship())
         {
         }
@@ -75,6 +76,7 @@ namespace Sprocket.Sim.Simulation
         public void Speak(string culture)
         {
             _ship.Texts.Book.Load(new ResxTexts(ResxTexts.Beside, culture));
+            _ship.Texts.Book.Pages = new CodexFiles(CodexFiles.Beside, culture);
             _ship.Editor.Invalidate();
             Tick();
         }
@@ -331,6 +333,7 @@ namespace Sprocket.Sim.Simulation
             _view.TakeClose();
         }
 
+        /// <summary>Brings the editor up to date and draws it into <paramref name="g" />.</summary>
         public void Draw(ScreenSpaceGraphics g)
         {
             _view.Update();

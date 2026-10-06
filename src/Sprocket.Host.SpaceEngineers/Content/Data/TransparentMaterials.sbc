@@ -4,9 +4,10 @@
         <!--
             The editor draws sprites by material id, and these are the ones it needs to exist.
 
-            The textures are the game's own, so this mod ships no art. That is not only about size: the cursor
-            a player already knows is the right cursor to draw, and there is no id to reach it by, because
-            GuiTextures.sbc never names it. Declaring a material pointing at the same file is the way to it.
+            The textures are the game's own wherever the game has one: the cursor a player already knows is the
+            right cursor to draw, and there is no id to reach it by, because GuiTextures.sbc never names it.
+            Declaring a material pointing at the same file is the way to it. The logo and the shadow a floating
+            window casts are this mod's own.
         -->
 
         <!-- Flat white, tinted to whatever colour is asked for. Blank rather than an LCD square, so a colour
@@ -52,6 +53,58 @@
             <NeedSort>false</NeedSort>
             <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
             <Texture>Textures\GUI\HueScale.png</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
+        <!-- The logo, which the codex's home page opens with. The sprite twin of the LCD image, premultiplied. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Mark</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\Sprites\Sprocket_Mark.dds</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
+        <!-- The shadow a floating window casts, drawn as a nine-slice. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Shadow</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\Sprites\Sprocket_Shadow.dds</Texture>
             <Reflectivity>0</Reflectivity>
             <UseAtlas>false</UseAtlas>
             <UVOffset>

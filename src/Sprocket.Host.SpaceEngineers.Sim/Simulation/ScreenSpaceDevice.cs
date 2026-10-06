@@ -30,6 +30,7 @@ namespace Sprocket.Sim.Simulation
         readonly Dictionary<string, Vector2> _textureSizes = new Dictionary<string, Vector2>();
         readonly LcdSprites _sprites = new LcdSprites();
 
+        /// <summary>A 1920 by 1080 window, its 4:3 safe area at the left.</summary>
         public ScreenSpaceDevice()
         {
             SafeArea = new RectangleF(0f, 0f, 1440f, 1080f);
@@ -45,11 +46,13 @@ namespace Sprocket.Sim.Simulation
         /// <summary>The whole window, which is wider than the safe area on anything but a 4:3 monitor.</summary>
         public Vector2 ViewportSize { get; set; }
 
+        /// <summary>How wide and tall text is in each face, or null to measure nothing.</summary>
         public IFontMetrics Fonts { get; set; }
 
         /// <summary>This frame's calls, in the order they were made.</summary>
         public IList<DrawCommand> Commands => _commands;
 
+        /// <summary>Forgets the last frame's calls and clips, for a new frame.</summary>
         public void BeginFrame()
         {
             _commands.Clear();
@@ -201,7 +204,7 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <inheritdoc />
-        public void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
+        public void DrawSprite(MyStringId material, Rectangle destination, Rectangle? source, Color color, float rotation,
             MyScreenSpaceLayer layer)
         {
             _commands.Add(new DrawCommand
@@ -210,6 +213,7 @@ namespace Sprocket.Sim.Simulation
                 Layer = layer,
                 Material = material,
                 Destination = destination,
+                Source = source,
                 Color = color,
                 Rotation = rotation
             });

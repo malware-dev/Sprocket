@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Sprocket.Localization.Generator
 {
-    /// <summary>What the generator reports about a file of texts.</summary>
+    /// <summary>What the generators report about a file of texts or a codex.</summary>
     static class Problems
     {
         const string Category = "Localization";
@@ -28,6 +28,26 @@ namespace Sprocket.Localization.Generator
 
         public static readonly DiagnosticDescriptor Missing = new DiagnosticDescriptor(
             "LOC006", "Translation lacks a text the original has", "{0} has no translation in {1}",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Untitled = new DiagnosticDescriptor(
+            "LOC007", "Codex page has no title", "{0} has no heading to name it, a line starting \"# \"",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unpaired = new DiagnosticDescriptor(
+            "LOC008", "Codex term is half written", "{0} has no {1} beside it",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Dead = new DiagnosticDescriptor(
+            "LOC009", "Codex link leads nowhere", "{0} links to #{1}, which has no page",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unclosed = new DiagnosticDescriptor(
+            "LOC010", "Codex box is never closed", "{0} opens a box here that no line of only ::: closes",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Pressless = new DiagnosticDescriptor(
+            "LOC011", "Codex tooltip holds a link", "{0} holds a link here, and nothing in a tooltip can be pressed",
             Category, DiagnosticSeverity.Warning, true);
     }
 }

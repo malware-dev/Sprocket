@@ -1,0 +1,113 @@
+using System;
+using Lumel.Drawing;
+using VRageMath;
+
+namespace Lumel.Controls
+{
+    /// <summary>The handle something is dragged by, such as a row or a window: six small squares, two across and three down.</summary>
+    /// <remarks>It takes the pointer itself while it can be carried, and says where it went.</remarks>
+    public class Grip : Element
+    {
+        const int Across = 2;
+        const int Down = 3;
+
+        float _square = 3f;
+        float _gap = 3f;
+
+        /// <summary>A grip that cannot be carried yet, drawn in white, its squares 3 units on a side and 3 apart.</summary>
+        public Grip()
+        {
+            Color = Color.White;
+        }
+
+        /// <summary>Raised with where the pointer is when the grip is taken hold of.</summary>
+        public event Action<Vector2> Taken;
+
+        /// <summary>Raised with where the pointer is as the grip is carried.</summary>
+        public event Action<Vector2> Carried;
+
+        /// <summary>Raised with where the pointer is when the grip is let go of.</summary>
+        public event Action<Vector2> Dropped;
+
+        /// <summary>The color of its squares.</summary>
+        public Color Color { get; set; }
+
+        /// <summary>Whether it can be taken hold of now.</summary>
+        public bool CanCarry { get; set; }
+
+        /// <summary>How long a side of each square is, in UI units.</summary>
+        public float Square
+        {
+            get { return _square; }
+            set
+            {
+                if (_square == value)
+                    return;
+
+                _square = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <summary>The room between one square and the next, in UI units.</summary>
+        public float Gap
+        {
+            get { return _gap; }
+            set
+            {
+                if (_gap == value)
+                    return;
+
+                _gap = value;
+                InvalidateMeasure();
+            }
+        }
+
+        /// <inheritdoc />
+        protected override bool TakesPointer => CanCarry;
+
+        /// <inheritdoc />
+        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        {
+            var taken = Taken;
+            if (taken != null)
+                taken(point);
+        }
+
+        /// <inheritdoc />
+        public override void OnPointerMove(Vector2 point)
+        {
+            var carried = Carried;
+            if (carried != null)
+                carried(point);
+        }
+
+        /// <inheritdoc />
+        public override void OnPointerUp(Vector2 point)
+        {
+            var dropped = Dropped;
+            if (dropped != null)
+                dropped(point);
+        }
+
+        /// <inheritdoc />
+        protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
+        {
+            return new Vector2(Across * _square + (Across - 1) * _gap, Down * _square + (Down - 1) * _gap);
+        }
+
+        /// <inheritdoc />
+        protected override void DrawContent(IGraphics g)
+        {
+            var width = Across * _square + (Across - 1) * _gap;
+            var height = Down * _square + (Down - 1) * _gap;
+
+            var left = ContentBounds.X + (ContentBounds.Width - width) * 0.5f;
+            var top = ContentBounds.Y + (ContentBounds.Height - height) * 0.5f;
+
+            for (var x = 0; x < Across; x++)
+            for (var y = 0; y < Down; y++)
+                g.Fill(new RectangleF(left + x * (_square + _gap), top + y * (_square + _gap), _square, _square), Color);
+        }
+    }
+}

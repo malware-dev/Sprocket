@@ -9,11 +9,10 @@ if every character is the same width. The game ships a monospace face already an
 pleasant to read at this size.
 
 The letterforms are Roboto Mono, by the Roboto Mono Project Authors, under the SIL Open Font
-License 1.1. See OFL.txt beside this file, which ships with the mod because the licence says
+License 1.1. See OFL.txt beside this file, which ships with the mod because the license says
 it must: a bitmap cut from a font is a modified version of it, and every copy has to carry the
-notice and the licence. The authors reserved no font name, so this could have kept theirs. It
-does not, because the name in a font definition is a lookup key rather than a byline, and the
-rasterising is ours to answer for rather than theirs.
+notice and the license. It is named by what it is, because the name in a font definition is a
+lookup key rather than a byline.
 
 The output is a page PNG and an XNA bitmapfont XML. The PNG still has to be encoded to DDS
 before the game will load it - see art/symbols/FontTool, which does that and knows the format
@@ -27,10 +26,14 @@ Windows already has.
 
 import math
 import os
+import sys
 import xml.sax.saxutils as esc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
+sys.path.insert(0, os.path.join(HERE, ".."))
+
+import vanilla_characters
 FONTS = os.path.join(ROOT, "src", "Maltek.Mono", "Content", "Fonts", "Maltek")
 
 SOURCE = os.path.join(HERE, "RobotoMono-Regular.ttf")
@@ -61,29 +64,24 @@ CELL_HEIGHT = 45
 # measured, which is what 34 corrects.
 BASELINE_IN_CELL = 34
 
+# How far down the game draws a glyph's cell: its left side bearing and its height offset, added.
+# The baseline above was measured with a bearing of -7 and no offset, so each glyph's height offset
+# takes its own bearing back off and puts -7 in its place: the cell's width, which follows the widest
+# character covered, then moves nothing up or down.
+TOP = -7
+
 # The advance and the room either side of it are measured from the face rather than declared, so
 # that SIZE is the only number to change and the cell cannot be left too small for the ink.
 
-# What the face covers, as the game's own default face declares it.
-#
-# Taken from the SDK's Options.txt, which is what Keen cut FontDataPA from. Whatever of these
-# Roboto Mono has is included and the rest is simply absent - the point is to cover what the rest
-# of the editor can draw, so that text reading correctly beside a listing reads correctly inside
-# one.
-RANGES = [
-    (0x0020, 0x02FF),
-    (0x0400, 0x04FF),
-    (0x2000, 0x2043),
-    (0x2045, 0x20FF),
-    (0x2122, 0x2122),
-    (0x2212, 0x2212),
-]
+# What the face covers is exactly what the game's own Latin-script face can draw: the list in
+# art/vanilla-characters.txt, read from FontDataPA. Text that reads correctly anywhere else in the
+# game reads correctly in this face too, and nothing is carried that the game could not show.
 
 # The private use area is left empty on purpose, and the space is left for it.
 #
 # Space Engineers keeps its own imagery there: the controller buttons at E001-E027 and the marks
 # at E030-E053 in the default face, and a modder's much larger set in the game's monospace one,
-# including the colour squares at E100-E2FF. None of it is letterforms and none of it can be cut
+# including the color squares at E100-E2FF. None of it is letterforms and none of it can be cut
 # from a typeface - it is drawn by hand, and fitting it to a fixed advance is drawing it again.
 #
 # So these codepoints stay unassigned rather than being designed away. Anything that lands on one
@@ -134,7 +132,7 @@ def wanted(face):
     for table in TTFont(SOURCE)["cmap"].tables:
         has |= set(table.cmap.keys())
 
-    return [c for first, last in RANGES for c in range(first, last + 1) if c in has]
+    return [c for c in vanilla_characters.read() if c in has]
 
 
 def drawn(face, advance, bearing, cell_width):
@@ -250,8 +248,8 @@ def main():
 
     for code, x, y in entries:
         lines.append(
-            '<glyph ch=%s code="%04X" bm="0" origin="%d,%d" size="%dx%d" aw="%d" lsb="%d" />'
-            % (esc.quoteattr(chr(code)), code, x, y, cell_width, CELL_HEIGHT, advance, -bearing))
+            '<glyph ch=%s code="%04X" bm="0" origin="%d,%d" size="%dx%d" aw="%d" lsb="%d" ho="%d" />'
+            % (esc.quoteattr(chr(code)), code, x, y, cell_width, CELL_HEIGHT, advance, -bearing, TOP + bearing))
 
     lines += ['</glyphs>', '<kernpairs>', '</kernpairs>', '</font>', '']
 

@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Sim.Content;
 
 namespace Sprocket.Sim.Machine;
 
@@ -44,6 +45,7 @@ public sealed class Simulation
 
     int _frame;
 
+    /// <summary>The demo rig, saving as a construct named "prototype".</summary>
     public Simulation() : this(new Store("prototype"), Rig.Demo())
     {
     }
@@ -91,6 +93,7 @@ public sealed class Simulation
         _rig = rig;
         _shelf = new Shelf(_folder, delegate { });
         _saidBefore = Told.Lines.Count;
+        _texts.Book.Pages = new CodexFiles(CodexFiles.Beside, "");
 
         // Before the unit, which reads the program out of this the moment it is built.
         _rig.Install();
@@ -141,10 +144,13 @@ public sealed class Simulation
     /// <summary>What the editor says; loading a language into its book says it in that language.</summary>
     public Texts Texts => _texts;
 
+    /// <summary>The editor on the rig's programmable block.</summary>
     public SprocketEditor Editor => _unit.Editor;
 
+    /// <summary>The blocks the automation sees.</summary>
     public GridWorld World => _unit.World;
 
+    /// <summary>What runs the automation's sequences.</summary>
     public AutomationRunner Runner => _unit.Runner;
 
     /// <summary>What the mod has written to the game's log since this began.</summary>

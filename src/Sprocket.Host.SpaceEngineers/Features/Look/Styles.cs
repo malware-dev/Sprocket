@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Styling;
 using VRage.Game;
 using Lumel.Controls;
+using Lumel.Drawing;
 using Lumel.Images;
 using Lumel.Text;
 using Lumel.Viewing;
@@ -13,16 +14,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// <summary>How the views converted to the size scale look.</summary>
     public static class Styles
     {
+        /// <summary>How far a floating window's shadow reaches out from its edge.</summary>
+        public const float ShadowSpread = 24f;
+
         /// <summary>A name, or a sentence that is the point of where it stands.</summary>
         public static readonly TextStyle Name = new TextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
-        };
-
-        /// <summary>The sentence that opens a page of reading, set apart from what follows in the bright ink.</summary>
-        public static readonly TextStyle Lead = new TextStyle(Name)
-        {
-            Base = { Padding = new Thickness(20f, 4f) }
         };
 
         /// <summary>The name of something listed inside a group, a size under the group's own.</summary>
@@ -37,20 +35,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Muted, Padding = new Thickness(8f, 8f, 0f, 0f) }
         };
 
-        /// <summary>The note beside the pointer: quiet words, strong ones in the strong color and emphasized ones bright.</summary>
+        /// <summary>The note beside the pointer: quiet words, strong ones bold and emphasized ones italic.</summary>
         public static readonly RichTextStyle Tip = new RichTextStyle
         {
             Base =
             {
                 Font = MyFontEnum.White,
+                StrongFont = Lettering.Bold,
+                EmphasisFont = Lettering.Italic,
+                StrongEmphasisFont = Lettering.BoldItalic,
                 CodeFont = Lettering.Mono,
                 FontSize = 20f,
                 Heading1Size = 24f,
                 Heading2Size = 20f,
                 Heading3Size = 20f,
                 Color = Palette.Muted,
-                StrongColor = Palette.Strong,
-                EmphasisColor = Palette.Ink,
+                StrongColor = Palette.Muted,
+                EmphasisColor = Palette.Muted,
+                LinkColor = Palette.Link,
                 HeadingColor = Palette.Ink,
                 RuleColor = Palette.Line,
                 BlockSpacing = 8f,
@@ -61,25 +63,49 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
+        /// <summary>The looks a box in a description or the codex can ask for: <c>warning</c> for what can go wrong, <c>player</c> for a note on the player's own computer.</summary>
+        public static readonly BoxStyles Boxes = new BoxStyles(
+            new BoxStyle("warning", bar: Palette.Notice, fill: Palette.NoticeWash, color: Palette.Ink),
+            new BoxStyle("player", bar: Palette.Accent, fill: Palette.Panel));
+
         /// <summary>What the author of a blueprint wrote about it, read by whoever fills it in.</summary>
         public static readonly RichTextStyle Description = new RichTextStyle
         {
             Base =
             {
                 Font = MyFontEnum.White,
+                StrongFont = Lettering.Bold,
+                EmphasisFont = Lettering.Italic,
+                StrongEmphasisFont = Lettering.BoldItalic,
                 CodeFont = Lettering.Mono,
                 FontSize = 20f,
-                Heading1Size = 24f,
-                Heading2Size = 20f,
-                Heading3Size = 20f,
+                Heading1Size = 40f,
+                Heading2Size = 32f,
+                Heading3Size = 24f,
                 Color = Palette.Muted,
-                StrongColor = Palette.Strong,
-                EmphasisColor = Palette.Ink,
+                StrongColor = Palette.Muted,
+                EmphasisColor = Palette.Muted,
+                LinkColor = Palette.Link,
                 HeadingColor = Palette.Ink,
                 RuleColor = Palette.Line,
                 BlockSpacing = 8f,
+                RuledHeadings = 2,
                 Indent = 20f,
-                Padding = new Thickness(20f, 4f)
+                Padding = new Thickness(20f, 4f),
+                Boxes = Boxes
+            }
+        };
+
+        /// <summary>A page of the codex, set in the reading face.</summary>
+        public static readonly RichTextStyle Codex = new RichTextStyle(Description)
+        {
+            Base =
+            {
+                Font = Lettering.Sans,
+                StrongFont = Lettering.SansBold,
+                EmphasisFont = Lettering.SansItalic,
+                StrongEmphasisFont = Lettering.SansBoldItalic,
+                Padding = new Thickness(20f, 24f)
             }
         };
 
@@ -99,6 +125,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Heading2Size = 16f,
                 Heading3Size = 16f,
                 Color = Palette.Faint,
+                StrongColor = Palette.Faint,
+                EmphasisColor = Palette.Faint,
                 BlockSpacing = 4f,
                 Indent = 16f,
                 Padding = new Thickness(0f)
@@ -120,6 +148,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Lettering.Mono, FontSize = 16f, Color = Palette.Faint }
         };
 
+        /// <summary>The codex's window: the page's own color, edged, with nothing veiled behind it.</summary>
+        public static readonly WindowStyle CodexWindow = new WindowStyle
+        {
+            Base = { Background = Palette.Page, Edge = Palette.Line }
+        };
+
+        /// <summary>The shadow a floating window casts.</summary>
+        public static readonly NineSlice Shadow = new NineSlice(Materials.Shadow, 64, 24);
+
+        /// <summary>How far a floating window's shadow lies from it, as if lit from the top left.</summary>
+        public static readonly VRageMath.Vector2 ShadowOffset = new VRageMath.Vector2(6f, 10f);
+
         /// <summary>A dialog: a panel in the middle of the screen, with the screen veiled behind it.</summary>
         public static readonly WindowStyle Dialog = new WindowStyle
         {
@@ -132,11 +172,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
+                StrongFont = Lettering.Bold,
+                EmphasisFont = Lettering.Italic,
+                StrongEmphasisFont = Lettering.BoldItalic,
                 CodeFont = Lettering.Mono,
                 FontSize = 24f,
                 Color = Palette.Ink,
-                StrongColor = Palette.Strong,
+                StrongColor = Palette.Ink,
                 EmphasisColor = Palette.Ink,
+                LinkColor = Palette.Link,
                 BlockSpacing = 8f,
                 Indent = 24f
             }
@@ -232,7 +276,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A section's name, in capitals, over what it heads, where the name is a term in the codex.</summary>
         public static readonly RichTextStyle HeadingTerm = new RichTextStyle(Section)
         {
-            Base = { EmphasisColor = Palette.Ink, Padding = new Thickness(4f, 8f, 0f, 8f) }
+            Base = { EmphasisColor = Palette.Ink, LinkColor = Palette.Link, Padding = new Thickness(4f, 8f, 0f, 8f) }
         };
 
         /// <summary>The same, a size down, heading part of a section.</summary>

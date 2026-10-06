@@ -37,14 +37,14 @@ namespace Sprocket.Sim.Simulation
 
             _device = new ScreenSpaceDevice();
 
-            // The letters are a stand-in, because the game's own widths need the game. The mod's own two
+            // The letters are a stand-in, because the game's own widths need the game. The mod's own
             // faces are not: they are in the build output, so they are measured exactly and a frame
             // reproduces on a machine that has never had Space Engineers.
-            string maltek = Path.Combine(AppContext.BaseDirectory, "Content", "Fonts", "Maltek");
+            var fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"));
+            foreach (var font in ModFonts.All)
+                fonts = fonts.And(font, Ours(font));
 
-            _device.Fonts = new FontSet(new FallbackFonts(_device, "Segoe UI"))
-                .And(Lettering.Mono, Ours(maltek, "MaltekMono"))
-                .And(Symbols.Font, Ours(maltek, "MaltekSymbols"));
+            _device.Fonts = fonts;
 
             _device.Install();
 
@@ -57,12 +57,13 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>
-        IFontMetrics Ours(string folder, string name)
+        IFontMetrics Ours(string name)
         {
             return SeFontMetrics.LoadFrom(
-                _device, Path.Combine(folder, name + ".xml"), "the mod's own content", true);
+                _device, Path.Combine(ModFonts.Folder, name + ".xml"), "the mod's own content", true);
         }
 
+        /// <summary>The editor being drawn.</summary>
         public EditorScene Scene => _scene;
 
         /// <summary>The last frame's calls. Beginning a frame empties it, so this is never a history.</summary>
@@ -71,18 +72,19 @@ namespace Sprocket.Sim.Simulation
         /// <summary>How many times anything has asked for the width of a string. See the device.</summary>
         public int Measured => _device.Measured;
 
-        /// <summary>How tall a line of this font stands at a scale the game was handed, in the units the screen lays out in.</summary>
         /// <summary>How tall one line of <paramref name="font" /> is in the font's own units.</summary>
         public int LineUnits(string font)
         {
             return _device.LineUnits(font);
         }
 
+        /// <summary>How tall a line of this font stands at a scale the game was handed, in the units the screen lays out in.</summary>
         public float LineHeight(string font, float scale)
         {
             return _device.LineHeight(font, scale) / (_height / ScreenSpaceGraphics.GameReferenceHeight);
         }
 
+        /// <summary>Draws one frame of the editor, the last frame's calls forgotten.</summary>
         public void Draw()
         {
             _device.BeginFrame();

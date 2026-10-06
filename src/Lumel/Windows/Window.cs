@@ -1,3 +1,4 @@
+using Lumel.Drawing;
 using VRageMath;
 
 namespace Lumel.Windows
@@ -19,6 +20,11 @@ namespace Lumel.Windows
         public virtual Vector2 Room(RectangleF area)
         {
             return new Vector2(area.Width, area.Height);
+        }
+
+        /// <summary>Draws whatever lies under the window and outside it, such as a shadow, before the window itself: nothing, unless a kind of window says otherwise.</summary>
+        public virtual void DrawBehind(IGraphics g)
+        {
         }
 
         /// <summary>Where the window stands in <paramref name="area" /> at <paramref name="size" />: in the middle, unless a kind of window says otherwise.</summary>

@@ -17,6 +17,18 @@ namespace Lumel.Text
     /// </remarks>
     public class RichText : Element, IPadded, ITextual
     {
+        /// <summary>How far down a line a link's underline lies unless a style says otherwise, as a fraction of the line's height: just under the words of the game's own faces.</summary>
+        public const float UnderlineDrop = 0.85f;
+
+        /// <summary>How thick the line under a link's words is unless a style says otherwise: a hairline, the same under every link.</summary>
+        public const float Hairline = 1f;
+
+        /// <summary>How far the box behind code reaches past its words on either side unless a style says otherwise, in UI units.</summary>
+        public const float CodeRoom = 4f;
+
+        /// <summary>The box behind code unless a style says otherwise: a faint wash of white, lighter than whatever it lies on.</summary>
+        public static readonly Color CodeWash = new Color(255, 255, 255, 10);
+
         Thickness _padding;
         readonly List<Piece> _pieces = new List<Piece>();
         readonly List<Mark> _marks = new List<Mark>();
@@ -34,15 +46,20 @@ namespace Lumel.Text
         IImageCatalog _images;
         string _font = MyFontEnum.White;
         string _codeFont = MyFontEnum.White;
+        string _strongFont;
+        string _emphasisFont;
+        string _strongEmphasisFont;
         float _fontSize = 24f;
         float _heading1 = 24f;
         float _heading2 = 24f;
         float _heading3 = 24f;
         float _spacing;
+        int _ruled;
         float _indent = 24f;
+        float _codeInset = CodeRoom;
         Alignment _alignment;
         bool _fit;
-        QuoteStyles _quotes;
+        BoxStyles _boxes;
         Action<Link> _follow;
         Link _pressed;
 
@@ -57,10 +74,14 @@ namespace Lumel.Text
         float _pieceSize;
         Tone _pieceTone;
         Link _pieceLink;
+        bool _pieceCode;
 
         /// <summary>An empty document in white, with lines 24 units tall.</summary>
         public RichText()
         {
+            UnderlineAt = UnderlineDrop;
+            LinkUnderline = Hairline;
+            CodeFill = CodeWash;
             Color = Color.White;
             StrongColor = Color.White;
             EmphasisColor = Color.White;
@@ -132,7 +153,7 @@ namespace Lumel.Text
             }
         }
 
-        /// <summary>Which face everything but code is drawn in.</summary>
+        /// <summary>Which face everything but code and strong or emphasized words is drawn in.</summary>
         public string Font
         {
             get { return _font; }
@@ -156,6 +177,48 @@ namespace Lumel.Text
                     return;
 
                 _codeFont = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>Which face strong words are drawn in, or null for <see cref="Font" />; strong code stays in <see cref="CodeFont" />.</summary>
+        public string StrongFont
+        {
+            get { return _strongFont; }
+            set
+            {
+                if (_strongFont == value)
+                    return;
+
+                _strongFont = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>Which face emphasized words are drawn in, or null for <see cref="Font" />; emphasized code stays in <see cref="CodeFont" />.</summary>
+        public string EmphasisFont
+        {
+            get { return _emphasisFont; }
+            set
+            {
+                if (_emphasisFont == value)
+                    return;
+
+                _emphasisFont = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>Which face words both strong and emphasized are drawn in, or null for <see cref="StrongFont" />, then <see cref="EmphasisFont" />.</summary>
+        public string StrongEmphasisFont
+        {
+            get { return _strongEmphasisFont; }
+            set
+            {
+                if (_strongEmphasisFont == value)
+                    return;
+
+                _strongEmphasisFont = value;
                 Relayout();
             }
         }
@@ -188,11 +251,25 @@ namespace Lumel.Text
             set { Resize(ref _heading3, value); }
         }
 
-        /// <summary>The room between one block and the next.</summary>
+        /// <summary>The room between one block and the next; twice that above a heading that is not the first.</summary>
         public float BlockSpacing
         {
             get { return _spacing; }
             set { Resize(ref _spacing, value); }
+        }
+
+        /// <summary>The deepest level of heading drawn with a rule under it, from 1, or zero for none.</summary>
+        public int RuledHeadings
+        {
+            get { return _ruled; }
+            set
+            {
+                if (_ruled == value)
+                    return;
+
+                _ruled = value;
+                Relayout();
+            }
         }
 
         /// <summary>How far a list item's words stand in from its mark.</summary>
@@ -252,6 +329,29 @@ namespace Lumel.Text
         /// <summary>The fill behind a link's words, or null for none.</summary>
         public Color? LinkFill { get; set; }
 
+        /// <summary>The box behind code, or null for none.</summary>
+        public Color? CodeFill { get; set; }
+
+        /// <summary>How far the box behind code reaches past its words on either side, in UI units; the words beside it stand clear of it.</summary>
+        public float CodeInset
+        {
+            get { return _codeInset; }
+            set
+            {
+                if (_codeInset == value)
+                    return;
+
+                _codeInset = value;
+                Relayout();
+            }
+        }
+
+        /// <summary>How thick the line under a link's words is, in UI units, or 0 for none.</summary>
+        public float LinkUnderline { get; set; }
+
+        /// <summary>How far down a line a link's underline lies, as a fraction of the line's height from its top.</summary>
+        public float UnderlineAt { get; set; }
+
         /// <summary>What a press on a link does, given the link; null leaves links as words that take no press.</summary>
         /// <remarks>With it set, the text takes the pointer only where a link is, and a press anywhere else reaches what is beneath it.</remarks>
         public Action<Link> Follow
@@ -268,16 +368,16 @@ namespace Lumel.Text
         /// <remarks>Asked while the pointer rests on a link, so a tip it hands back is one made once and kept.</remarks>
         public Func<Link, Tip> LinkTip { get; set; }
 
-        /// <summary>The looks tagged quotes take, or null for every quote to look alike.</summary>
-        public QuoteStyles Quotes
+        /// <summary>What the attributes a box names ask for, or null for boxes to change nothing.</summary>
+        public BoxStyles Boxes
         {
-            get { return _quotes; }
+            get { return _boxes; }
             set
             {
-                if (_quotes == value)
+                if (_boxes == value)
                     return;
 
-                _quotes = value;
+                _boxes = value;
                 Relayout();
             }
         }
@@ -388,9 +488,24 @@ namespace Lumel.Text
                 }
             }
 
+            if (LinkUnderline > 0f)
+            {
+                var ink = ColorOf(Tone.Link);
+                var thick = LinkUnderline * _scale;
+                for (var i = 0; i < _spots.Count; i++)
+                {
+                    var where = _spots[i].Where;
+                    g.Fill(new RectangleF(room.X + where.X, room.Y + where.Y + where.Height * UnderlineAt, where.Width, thick), ink);
+                }
+            }
+
+            var inset = _codeInset * _scale;
             for (var i = 0; i < _pieces.Count; i++)
             {
                 var piece = _pieces[i];
+                if (piece.Code && CodeFill.HasValue)
+                    g.Fill(new RectangleF(room.X + piece.At.X - inset, room.Y + piece.At.Y + _scale, piece.Box.X + inset * 2f, piece.Box.Y - _scale * 2f), CodeFill.Value);
+
                 if (piece.Image != null)
                     piece.Image.Draw(g, new RectangleF(room.X + piece.At.X, room.Y + piece.At.Y, piece.Box.X, piece.Box.Y), Color.White);
                 else
@@ -484,7 +599,7 @@ namespace Lumel.Text
                 return;
             }
 
-            Stack(g, _document.Blocks, 0f, width, ref y, ref widest);
+            Stack(g, _document.Blocks, 0f, width, _alignment, ref y, ref widest);
 
             if (_alignment != Alignment.Left && width < Unbounded && widest < width)
                 widest = width;
@@ -499,8 +614,8 @@ namespace Lumel.Text
             }
         }
 
-        /// <summary>Lays <paramref name="blocks" /> out one under another from line <paramref name="y" />, between <paramref name="left" /> and <paramref name="width" />, moving <paramref name="y" /> below the last.</summary>
-        void Stack(IGraphics g, IList<Block> blocks, float left, float width, ref float y, ref float widest)
+        /// <summary>Lays <paramref name="blocks" /> out one under another from line <paramref name="y" />, between <paramref name="left" /> and <paramref name="width" />, their lines set where <paramref name="align" /> says, moving <paramref name="y" /> below the last.</summary>
+        void Stack(IGraphics g, IList<Block> blocks, float left, float width, Alignment align, ref float y, ref float widest)
         {
             var body = _fontSize * _scale;
             var indent = _indent * _scale;
@@ -510,7 +625,7 @@ namespace Lumel.Text
                 var block = blocks[b];
 
                 if (b > 0)
-                    y += _spacing * _scale;
+                    y += _spacing * _scale * (block.Kind == BlockKind.Heading ? 2f : 1f);
 
                 if (block.Kind == BlockKind.Rule)
                 {
@@ -521,13 +636,19 @@ namespace Lumel.Text
 
                 if (block.Kind == BlockKind.Table)
                 {
-                    Table(g, block, left, width, ref y, ref widest);
+                    Table(g, block, left, width, align, ref y, ref widest);
                     continue;
                 }
 
                 if (block.Kind == BlockKind.Quote)
                 {
-                    Quote(g, block, left, width, ref y, ref widest);
+                    Quote(g, block, left, width, align, ref y, ref widest);
+                    continue;
+                }
+
+                if (block.Kind == BlockKind.Box)
+                {
+                    Box(g, block, left, width, align, ref y, ref widest);
                     continue;
                 }
 
@@ -547,42 +668,89 @@ namespace Lumel.Text
                         _pieces.Add(new Piece { Text = block.Level + ".", At = new Vector2(left, y), Font = _font, Size = size, Tone = Tone.Plain });
                 }
 
-                Flow(g, block, start, size, width, _alignment, ref y, ref widest);
+                Flow(g, block, start, size, width, align, ref y, ref widest);
+
+                if (block.Kind == BlockKind.Heading && block.Level <= _ruled)
+                {
+                    var under = _spacing * _scale * 0.5f;
+                    _marks.Add(new Mark { Where = new RectangleF(left, y + under, 0f, 1f), Across = true });
+                    y += under + 1f;
+                }
             }
         }
 
-        /// <summary>Lays a quote out from line <paramref name="y" />, its blocks set in from a bar down its edge at <paramref name="left" />, moving <paramref name="y" /> below it.</summary>
-        /// <remarks>
-        ///     A quote looks as the style its tag finds says, part by part, and as any other quote for whatever the
-        ///     style leaves alone or where its tag finds none. A fill reaches across the room behind it, with a
-        ///     little room above and below its words.
-        /// </remarks>
-        void Quote(IGraphics g, Block quote, float left, float width, ref float y, ref float widest)
+        /// <summary>Lays a quote out from line <paramref name="y" />, its blocks set in from a bar down its edge at <paramref name="left" /> in the rule color, moving <paramref name="y" /> below it.</summary>
+        void Quote(IGraphics g, Block quote, float left, float width, Alignment align, ref float y, ref float widest)
         {
-            var style = _quotes == null ? null : _quotes.Find(quote.Tag);
-            var body = _fontSize * _scale;
+            var top = y;
+            Stack(g, quote.Blocks, left + _indent * _scale, width, align, ref y, ref widest);
+            _marks.Add(new Mark { Where = new RectangleF(left, top, Math.Max(1f, _fontSize * _scale / 8f), y - top) });
+        }
+
+        /// <summary>Lays a box out from line <paramref name="y" /> as the attributes it names ask, moving <paramref name="y" /> below it.</summary>
+        /// <remarks>
+        ///     <c>left</c>, <c>center</c> and <c>right</c> set where its lines sit. Each other name the host gives a style
+        ///     sets what that style sets, a later name over an earlier one, and a name it gives none changes nothing. A bar
+        ///     sets the box in from its edge as a quote is set in; a fill reaches across the room behind it, with a little
+        ///     room above and below; a color is its plain words', strong, emphasized and linked words keeping theirs. Its
+        ///     color and alignment reach the boxes inside it, which is how a box inside a box and one box naming both come
+        ///     to the same.
+        /// </remarks>
+        void Box(IGraphics g, Block box, float left, float width, Alignment align, ref float y, ref float widest)
+        {
+            Color? bar = null;
+            Color? fill = null;
+            Color? color = null;
+            var inner = align;
+            for (var i = 0; i < box.Names.Count; i++)
+            {
+                var name = box.Names[i];
+                if (string.Equals(name, "left", StringComparison.OrdinalIgnoreCase))
+                    inner = Alignment.Left;
+                else if (string.Equals(name, "center", StringComparison.OrdinalIgnoreCase))
+                    inner = Alignment.Center;
+                else if (string.Equals(name, "right", StringComparison.OrdinalIgnoreCase))
+                    inner = Alignment.Right;
+
+                var style = _boxes == null ? null : _boxes.Find(name);
+                if (style == null)
+                    continue;
+
+                bar = style.Bar ?? bar;
+                fill = style.Fill ?? fill;
+                color = style.Color ?? color;
+            }
+
             var top = y;
             var behind = _marks.Count;
             var first = _pieces.Count;
-            var filled = style != null && style.Fill.HasValue;
-            var margin = filled ? body * 0.25f : 0f;
+            var indent = _indent * _scale;
+            var margin = fill.HasValue ? _fontSize * _scale * 0.25f : 0f;
 
             y += margin;
-            Stack(g, quote.Blocks, left + _indent * _scale, filled && width < Unbounded ? width - _indent * _scale * 0.5f : width, ref y, ref widest);
+            Stack(g, box.Blocks, bar.HasValue || fill.HasValue ? left + indent : left,
+                fill.HasValue && width < Unbounded ? width - indent * 0.5f : width, inner, ref y, ref widest);
             y += margin;
 
-            if (filled)
-                _marks.Insert(behind, new Mark { Where = new RectangleF(left, top, 0f, y - top), Across = true, Color = style.Fill });
+            if (fill.HasValue)
+                _marks.Insert(behind, new Mark { Where = new RectangleF(left, top, 0f, y - top), Across = true, Color = fill });
 
-            _marks.Add(new Mark { Where = new RectangleF(left, top, Math.Max(1f, body / 8f), y - top), Color = style == null ? null : style.Bar });
+            if (bar.HasValue)
+                _marks.Add(new Mark { Where = new RectangleF(left, top, Math.Max(1f, _fontSize * _scale / 8f), y - top), Color = bar });
 
-            if (style == null || !style.Color.HasValue)
+            if (inner != Alignment.Left && width < Unbounded && width > widest)
+                widest = width;
+
+            if (!color.HasValue)
                 return;
 
             for (var i = first; i < _pieces.Count; i++)
             {
                 var piece = _pieces[i];
-                piece.Ink = style.Color;
+                if (piece.Ink.HasValue)
+                    continue;
+
+                piece.Ink = color;
                 _pieces[i] = piece;
             }
         }
@@ -593,9 +761,9 @@ namespace Lumel.Text
         ///     shared among the starred columns by their stars; with none starred the table is only as wide as it
         ///     needs. A table too wide for its room takes the width back from its widest columns, whose cells then
         ///     wrap. A heading row is drawn in the heading color, with a rule under it. A table narrower than its
-        ///     room stands where <see cref="Alignment" /> says.
+        ///     room stands where <paramref name="align" /> says.
         /// </remarks>
-        void Table(IGraphics g, Block table, float from, float width, ref float y, ref float widest)
+        void Table(IGraphics g, Block table, float from, float width, Alignment align, ref float y, ref float widest)
         {
             var count = table.Columns.Count;
             var gap = _indent * _scale;
@@ -607,8 +775,8 @@ namespace Lumel.Text
                 across += _wides[c];
 
             var left = from;
-            if (_alignment != Alignment.Left && room < Unbounded && across < room)
-                left += _alignment == Alignment.Center ? (room - across) * 0.5f : room - across;
+            if (align != Alignment.Left && room < Unbounded && across < room)
+                left += align == Alignment.Center ? (room - across) * 0.5f : room - across;
 
             for (var r = 0; r < table.Blocks.Count; r++)
             {
@@ -770,7 +938,8 @@ namespace Lumel.Text
                     : (run.Kind & RunKind.Strong) != 0 ? Tone.Strong
                     : (run.Kind & RunKind.Emphasis) != 0 ? Tone.Emphasis
                     : Tone.Plain;
-                var font = (run.Kind & RunKind.Code) != 0 ? _codeFont : _font;
+                var code = (run.Kind & RunKind.Code) != 0;
+                var font = code ? _codeFont : FaceOf(run.Kind);
                 var text = run.Slot == null ? run.Text : _arguments == null ? "" : _arguments.Of(run.Slot);
                 var i = 0;
 
@@ -781,12 +950,12 @@ namespace Lumel.Text
                         if (!empty)
                         {
                             // A link's piece ends at its last word, so that its fill and the room that presses it
-                            // stop there too.
-                            if (_piece.Length > 0 && _pieceLink != link)
+                            // stop there too; so does code's, so that its box does.
+                            if (_piece.Length > 0 && (_pieceLink != link || _pieceCode != code))
                                 End(g, y, false, ref x, ref widest);
 
                             if (_piece.Length == 0)
-                                Begin(x, font, size, tone, link);
+                                Begin(x, font, size, tone, link, code);
 
                             _piece.Append(' ');
                         }
@@ -799,10 +968,10 @@ namespace Lumel.Text
                     if (end < 0)
                         end = text.Length;
 
-                    if (_piece.Length > 0 && (_pieceTone != tone || _pieceFont != font || _pieceLink != link))
+                    if (_piece.Length > 0 && (_pieceTone != tone || _pieceFont != font || _pieceLink != link || _pieceCode != code))
                         End(g, y, false, ref x, ref widest);
 
-                    if (!empty && width < Unbounded && !Fits(g, text, i, end, font, size, x, width))
+                    if (!empty && width < Unbounded && !Fits(g, text, i, end, font, size, code, x, width))
                     {
                         End(g, y, true, ref x, ref widest);
                         Settle(line, x, width, align, y, tall, pictured);
@@ -814,7 +983,7 @@ namespace Lumel.Text
                     }
 
                     if (_piece.Length == 0)
-                        Begin(x, font, size, tone, link);
+                        Begin(x, font, size, tone, link, code);
 
                     _piece.Append(text, i, end - i);
                     empty = false;
@@ -844,10 +1013,26 @@ namespace Lumel.Text
             return new Vector2(width, height);
         }
 
-        /// <summary>Starts a piece at <paramref name="x" />.</summary>
-        void Begin(float x, string font, float size, Tone tone, Link link)
+        /// <summary>The face words of <paramref name="kind" /> are drawn in, other than code, falling back to the nearest face that is set.</summary>
+        string FaceOf(RunKind kind)
         {
-            _pieceX = x;
+            var strong = (kind & RunKind.Strong) != 0;
+            var emphasized = (kind & RunKind.Emphasis) != 0;
+
+            if (strong && emphasized)
+                return _strongEmphasisFont ?? _strongFont ?? _emphasisFont ?? _font;
+
+            if (strong)
+                return _strongFont ?? _font;
+
+            return emphasized ? _emphasisFont ?? _font : _font;
+        }
+
+        /// <summary>Starts a piece at <paramref name="x" />; code starts its words past its box's room.</summary>
+        void Begin(float x, string font, float size, Tone tone, Link link, bool code)
+        {
+            _pieceX = code ? x + _codeInset * _scale : x;
+            _pieceCode = code;
             _pieceFont = font;
             _pieceSize = size;
             _pieceTone = tone;
@@ -874,7 +1059,7 @@ namespace Lumel.Text
             piece.Box.X = g.MeasureText(piece.Font, _probe, piece.Size).X;
             _pieces[last] = piece;
 
-            x = piece.At.X + piece.Box.X;
+            x = piece.At.X + piece.Box.X + (piece.Code ? _codeInset * _scale : 0f);
         }
 
         /// <summary>
@@ -904,14 +1089,15 @@ namespace Lumel.Text
 
         /// <summary>Whether the word from <paramref name="start" /> to <paramref name="end" /> fits on the line after the piece being built.</summary>
         /// <remarks>Measures the piece with the word on it, because the game spaces a string as a whole and a sum of its words' widths is short of it.</remarks>
-        bool Fits(IGraphics g, string text, int start, int end, string font, float size, float x, float width)
+        bool Fits(IGraphics g, string text, int start, int end, string font, float size, bool code, float x, float width)
         {
             _probe.Clear();
             _probe.Append(_piece);
             _probe.Append(text, start, end - start);
 
-            var from = _piece.Length > 0 ? _pieceX : x;
-            return from + g.MeasureText(font, _probe, size).X <= width;
+            var room = code ? _codeInset * _scale : 0f;
+            var from = _piece.Length > 0 ? _pieceX : x + room;
+            return from + g.MeasureText(font, _probe, size).X + room <= width;
         }
 
         /// <summary>Ends the piece being built at line <paramref name="y" />, moving <paramref name="x" /> past it; a piece that ends a line drops its trailing spaces.</summary>
@@ -927,10 +1113,10 @@ namespace Lumel.Text
                 return;
 
             var advance = g.MeasureText(_pieceFont, _piece, _pieceSize).X;
-            _pieces.Add(new Piece { Text = _piece.ToString(), At = new Vector2(_pieceX, y), Font = _pieceFont, Size = _pieceSize, Tone = _pieceTone, Link = _pieceLink, Box = new Vector2(advance, _pieceSize) });
+            _pieces.Add(new Piece { Text = _piece.ToString(), At = new Vector2(_pieceX, y), Font = _pieceFont, Size = _pieceSize, Tone = _pieceTone, Link = _pieceLink, Code = _pieceCode, Box = new Vector2(advance, _pieceSize) });
             _piece.Clear();
 
-            x = _pieceX + advance;
+            x = _pieceX + advance + (_pieceCode ? _codeInset * _scale : 0f);
             if (x > widest)
                 widest = x;
         }
@@ -964,6 +1150,9 @@ namespace Lumel.Text
             /// <summary>The link the words are part of, or null.</summary>
             public Link Link;
 
+            /// <summary>Whether the words are code, drawn on a box of their own.</summary>
+            public bool Code;
+
             /// <summary>How big the piece is drawn: an image's size, or the words' width and their line's height.</summary>
             public Vector2 Box;
 
@@ -984,7 +1173,7 @@ namespace Lumel.Text
             public RectangleF Where;
             public bool Across;
 
-            /// <summary>The mark's own color, as a quote's style gives it, or null for the rule color.</summary>
+            /// <summary>The mark's own color, as a box's style gives it, or null for the rule color.</summary>
             public Color? Color;
         }
     }

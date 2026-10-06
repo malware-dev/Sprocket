@@ -1,35 +1,106 @@
 using Lumel;
-using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {
-    /// <summary>A term the codex explains: its name, the sentence that says what it is, and the page that explains it.</summary>
+    /// <summary>A term the codex explains: its page, whose first heading is its name, and the tooltip that says what it is.</summary>
+    /// <remarks>
+    /// Its page is <c>&lt;id&gt;.md</c> and its tooltip <c>&lt;id&gt;.tldr.md</c>, both read from the pages the book holds. The page
+    /// is read again each time it is asked for, so a page being written shows as it now stands; the tooltip is read once and
+    /// kept until the language changes, since a link asks for it on every frame the pointer rests there. The name is the page's first heading of the first
+    /// level. A page that opens with it gives it up as its title; a page with something before it keeps it where it is.
+    /// </remarks>
     public sealed class Term
     {
-        /// <summary>The term <paramref name="id" />, called <paramref name="name" />, whose preview ends in <paramref name="more" />.</summary>
-        public Term(string id, string name, string summary, string page, string more)
+        const string Title = "# ";
+
+        readonly Texts _texts;
+
+        string _summary;
+        Tip _preview;
+
+        /// <summary>The term <paramref name="id" />, whose page is in the book <paramref name="texts" /> hold.</summary>
+        public Term(string id, Texts texts)
         {
             Id = id;
-            Name = name;
-            Summary = summary;
-            Page = page;
-            Preview = new Tip("**" + Markdown.Escape(name) + "**\n\n" + summary + "\n\n*" + more + "*");
+            _texts = texts;
         }
 
         /// <summary>What a link names the term by, as in <c>[installations](#installation)</c>.</summary>
         public string Id { get; }
 
-        /// <summary>The term, as the page's title and the preview's first line say it.</summary>
-        public string Name { get; }
+        /// <summary>The term, as its page's first heading of the first level says it, or its id where the page has none.</summary>
+        public string Name
+        {
+            get
+            {
+                string name;
+                Read(out name);
+                return name;
+            }
+        }
 
-        /// <summary>One sentence saying what the term is: the preview under the pointer, and the page's lead.</summary>
-        public string Summary { get; }
+        /// <summary>The page, in markdown-lite, without its title where it opens with one.</summary>
+        public string Page
+        {
+            get
+            {
+                string name;
+                return Read(out name);
+            }
+        }
 
-        /// <summary>The rest of the page, in markdown-lite, after the lead.</summary>
-        public string Page { get; }
+        /// <summary>What the term is, in a sentence or two of markdown-lite: the preview under the pointer.</summary>
+        public string Summary => _summary ?? (_summary = Find(Id + ".tldr.md").Trim());
 
-        /// <summary>The note on a link to this term: its name, its sentence, and that pressing it reads more.</summary>
+        /// <summary>The note on a link to this term: what it is, and that pressing it reads more.</summary>
         /// <remarks>Made once and kept, because a link's note is asked for on every frame the pointer rests on it.</remarks>
-        public Tip Preview { get; }
+        public Tip Preview => _preview ?? (_preview = new Tip(Summary + "\n\n*" + _texts.CodexMore + "*"));
+
+        /// <summary>Lets go of the tooltip kept in the language that was spoken, so the next reading is in the one spoken now.</summary>
+        public void Reword()
+        {
+            _summary = null;
+            _preview = null;
+        }
+
+        /// <summary>The page as it shows, read now, and its <paramref name="name" />: <see cref="Page" /> and <see cref="Name" /> from one reading.</summary>
+        public string Read(out string name)
+        {
+            var page = Find(Id + ".md").Replace("\r\n", "\n").TrimStart('\n');
+            if (page.StartsWith(Title))
+            {
+                var end = page.IndexOf('\n');
+                if (end < 0)
+                    end = page.Length;
+
+                name = page.Substring(Title.Length, end - Title.Length).Trim();
+                return page.Substring(end).TrimStart('\n');
+            }
+
+            name = Heading(page) ?? Id;
+            return page;
+        }
+
+        /// <summary>The words of the first heading of the first level in <paramref name="page" />, or null where there is none.</summary>
+        static string Heading(string page)
+        {
+            var lines = page.Split('\n');
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (line.StartsWith(Title))
+                    return line.Substring(Title.Length).Trim();
+            }
+
+            return null;
+        }
+
+        /// <summary>The file <paramref name="name" /> among the book's pages, or empty where there is none.</summary>
+        string Find(string name)
+        {
+            var pages = _texts.Book.Pages;
+            return (pages == null ? null : pages.Find(name)) ?? "";
+        }
     }
 }

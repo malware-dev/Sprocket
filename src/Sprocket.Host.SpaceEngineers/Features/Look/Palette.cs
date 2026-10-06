@@ -53,16 +53,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <remarks>Contrast 4.5:1 against <see cref="Panel" />, the floor for the smallest text on these screens.</remarks>
         public static readonly Color Faint = new Color(133, 161, 169);
 
+        /// <summary>How dark a floating window's shadow lies at its darkest: black, about two parts in three opaque.</summary>
+        /// <remarks>Chosen rather than sampled.</remarks>
+        public static readonly Color Shadow = new Color(0, 0, 0, 170);
+
         /// <summary>What a dialog lays over the screen behind it: <see cref="Page" />, three parts in five opaque.</summary>
         /// <remarks>Chosen rather than sampled.</remarks>
         public static readonly Color Veil = new Color(20, 27, 32, 153);
 
-        /// <summary>Words given strong importance.</summary>
+        /// <summary>The words of a link, wherever one stands.</summary>
         /// <remarks>
-        ///     Chosen rather than sampled: the hue opposite <see cref="Ink" />'s, 15°, at full saturation and 72%
-        ///     lightness, so it reads as more important than Ink rather than as a quieter shade of the same blue.
+        ///     Chosen rather than sampled: a cyan of the same family as the game's own pale link blue, purer and
+        ///     brighter so it stands clear of <see cref="Muted" /> body text, and cool so it never reads as a warning.
         /// </remarks>
-        public static readonly Color Strong = new Color(255, 147, 112);
+        public static readonly Color Link = new Color(79, 195, 247);
 
         /// <summary>DarkBlueBackground_focus.png: the fill of the control in hand.</summary>
         /// <remarks>Pale, so anything wearing it takes dark text.</remarks>

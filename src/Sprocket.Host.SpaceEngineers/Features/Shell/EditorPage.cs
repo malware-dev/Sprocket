@@ -21,11 +21,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         const int Second = 60;
 
+        /// <summary>A page of <paramref name="editor" />.</summary>
         protected EditorPage(SprocketEditor editor)
         {
             Editor = editor;
         }
 
+        /// <summary>The editor this page is part of.</summary>
         protected SprocketEditor Editor { get; private set; }
 
         /// <summary>
@@ -89,6 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             parts[0].Name = CustomName;
         }
 
+        /// <summary>The words under the heading, or empty for none.</summary>
         public virtual string Subtitle => "";
 
         /// <summary>Whether the heading's words have changed since this was last asked, which clears it.</summary>
@@ -129,6 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether what the page was opened on is as it was made, so taking it back loses nothing.</summary>
         public virtual bool Untouched => false;
 
+        /// <summary>Whether the name in the heading can be changed from here.</summary>
         public virtual bool CanRename => false;
 
         /// <summary>What the name in the heading is and what renaming it does, in markdown-lite, said where the pointer rests on it; null for nothing.</summary>
@@ -189,32 +193,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Editor.OpenCodex(term);
         }
 
-        /// <summary>Whether this page moves through a history of its own: a step back and a step forward at the start of its heading, and a cross at the end that closes it.</summary>
-        public virtual bool Browses => false;
-
-        /// <summary>Whether there is somewhere in this page's own history to step back to.</summary>
-        public virtual bool CanStepBack => false;
-
-        /// <summary>Steps back in this page's own history.</summary>
-        public virtual void StepBack()
-        {
-        }
-
-        /// <summary>Whether there is somewhere in this page's own history to step forward to.</summary>
-        public virtual bool CanStepForward => false;
-
-        /// <summary>Steps forward in this page's own history.</summary>
-        public virtual void StepForward()
-        {
-        }
-
         /// <summary>
         /// Whether this page's subject can be switched on and off.
         /// </summary>
         public virtual bool CanSwitch => false;
 
+        /// <summary>Whether this page's subject is switched on.</summary>
         public virtual bool SwitchIsOn => false;
 
+        /// <summary>Switches this page's subject on, or off.</summary>
         public virtual void Switch(bool on) { }
 
         /// <summary>What pressing the switch would do, said as a note on it, or null for none.</summary>
@@ -268,16 +255,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>A screen with a history of its own. Which things are in it is the page's business.</remarks>
         public virtual bool HasHistory => false;
 
+        /// <summary>Whether there is a change on this screen to take back.</summary>
         public virtual bool CanUndo => false;
 
+        /// <summary>What taking the last change back would undo, said on the undo button.</summary>
         public virtual string UndoText => "";
 
+        /// <summary>Takes the last change on this screen back.</summary>
         public virtual void Undo() { }
 
+        /// <summary>Whether there is a change taken back on this screen to make again.</summary>
         public virtual bool CanRedo => false;
 
+        /// <summary>What making the last change again would redo, said on the redo button.</summary>
         public virtual string RedoText => "";
 
+        /// <summary>Makes the last change taken back on this screen again.</summary>
         public virtual void Redo() { }
 
         /// <summary>Whether the page changes something, and so is finished with Done as well as left by going back.</summary>
@@ -349,6 +342,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
+        /// Says this page has just been built and has told nobody anything yet.
+        /// </summary>
+        /// <remarks>
+        /// A page is built again when the screen is rebuilt, so everything it only says on a cadence has to be said
+        /// again at once - a row whose words arrive a second after it appears is a row that appears blank.
+        /// </remarks>
+        public virtual void Resay()
+        {
+            _asked.Restart();
+        }
+
+        /// <summary>
         /// True about once a second, for facts too dear to work out on a tick.
         /// </summary>
         /// <remarks>
@@ -362,18 +367,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// same tick is told no and whatever depended on it silently does not happen.
         /// </para>
         /// </remarks>
-        /// <summary>
-        /// Says this page has just been built and has told nobody anything yet.
-        /// </summary>
-        /// <remarks>
-        /// A page is built again when the screen is rebuilt, so everything it only says on a cadence has to be said
-        /// again at once - a row whose words arrive a second after it appears is a row that appears blank.
-        /// </remarks>
-        public virtual void Resay()
-        {
-            _asked.Restart();
-        }
-
         protected bool SecondPassed()
         {
             var now = Editor.CurrentTick;

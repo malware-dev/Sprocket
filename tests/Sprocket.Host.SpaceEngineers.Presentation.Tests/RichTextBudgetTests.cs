@@ -66,6 +66,17 @@ public class RichTextBudgetTests
             $"{small.PerCharacter:0.0} per character at 20 rows, {large.PerCharacter:0.0} at 2000");
     }
 
+    /// <summary>Boxes measure each character a bounded number of times, however many blocks they hold or however deep they nest.</summary>
+    [Fact]
+    public void BoxLayoutGrowsWithItsBlocks()
+    {
+        var small = Measuring(Boxed(20), Room);
+        var large = Measuring(Boxed(2000), Room);
+
+        Assert.True(large.PerCharacter < small.PerCharacter * 1.2f,
+            $"{small.PerCharacter:0.0} per character at 20 paragraphs, {large.PerCharacter:0.0} at 2000");
+    }
+
     /// <summary>Reading markdown allocates in proportion to its length, whatever its marks do.</summary>
     [Theory]
     [InlineData("plain")]
@@ -73,6 +84,9 @@ public class RichTextBudgetTests
     [InlineData("openers")]
     [InlineData("nested")]
     [InlineData("mixed")]
+    [InlineData("fences unclosed")]
+    [InlineData("fences closing nothing")]
+    [InlineData("fences nested")]
     public void ParsingGrowsWithTheText(string shape)
     {
         var small = Parsing(Source(shape, 500));
@@ -86,6 +100,9 @@ public class RichTextBudgetTests
     [InlineData("closers")]
     [InlineData("openers")]
     [InlineData("nested")]
+    [InlineData("fences unclosed")]
+    [InlineData("fences closing nothing")]
+    [InlineData("fences nested")]
     public void ParsingPathologicalMarksStaysLinear(string shape)
     {
         var clock = System.Diagnostics.Stopwatch.StartNew();
@@ -232,7 +249,23 @@ public class RichTextBudgetTests
         return text.ToString();
     }
 
-    /// <summary>Markdown built to stress the emphasis matcher, <paramref name="marks" /> marks long.</summary>
+    /// <summary>Paragraphs in boxes nested three deep, the innermost centered, <paramref name="paragraphs" /> in all.</summary>
+    static string Boxed(int paragraphs)
+    {
+        var text = new StringBuilder();
+        for (var i = 0; i < paragraphs; i += 10)
+        {
+            text.Append("::: warning\n::: player\n::: center\n");
+            for (var j = 0; j < 10; j++)
+                text.Append("The airlock cycles when the `door` shuts, then it vents.\n\n");
+
+            text.Append(":::\n:::\n:::\n\n");
+        }
+
+        return text.ToString();
+    }
+
+    /// <summary>Markdown built to stress the emphasis matcher and the box reader, <paramref name="marks" /> marks long.</summary>
     static string Source(string shape, int marks)
     {
         var text = new StringBuilder();
@@ -251,6 +284,15 @@ public class RichTextBudgetTests
                     break;
                 case "mixed":
                     text.Append(i % 3 == 0 ? "**a " : i % 3 == 1 ? "_b_ " : "c** ");
+                    break;
+                case "fences unclosed":
+                    text.Append("::: a\n");
+                    break;
+                case "fences closing nothing":
+                    text.Append(":::\n");
+                    break;
+                case "fences nested":
+                    text.Append(i < marks / 2 ? "::: a\n" : ":::\n");
                     break;
                 default:
                     text.Append("word ");

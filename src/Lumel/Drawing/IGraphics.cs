@@ -15,6 +15,9 @@ namespace Lumel.Drawing
         /// <summary>The drawable area, in UI units.</summary>
         Vector2 Size { get; }
 
+        /// <summary>The whole screen in the same units, reaching past the drawable area on either side of a screen wider than it.</summary>
+        RectangleF ScreenBounds { get; }
+
         /// <summary>The pictures this can draw, found by the names written for them, or null where it knows none.</summary>
         IImageCatalog Images { get; }
 
@@ -34,6 +37,9 @@ namespace Lumel.Drawing
 
         /// <summary>Draws <paramref name="material" /> to fill <paramref name="destination" />, rotated about its center.</summary>
         void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation);
+
+        /// <summary>Draws the part <paramref name="source" /> of <paramref name="material" />'s picture, in the picture's own pixels, to fill <paramref name="destination" />.</summary>
+        void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color);
 
         /// <summary>Fills <paramref name="destination" /> with flat <paramref name="color" />, rotated about its center.</summary>
         void Fill(RectangleF destination, Color color, float rotation = 0f);

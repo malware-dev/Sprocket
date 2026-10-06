@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {
     /// <summary>Every term the codex explains, in the language the editor speaks.</summary>
+    /// <remarks>Each term's page and tooltip are files in the mod's <c>Data\Codex</c>, named by its id.</remarks>
     public sealed class Terms
     {
         /// <summary>The home screen.</summary>
@@ -29,28 +30,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Picking blocks.</summary>
         public const string Picking = "picking";
 
-        readonly List<Term> _all;
+        /// <summary>The term for a trigger.</summary>
+        public const string Trigger = "trigger";
 
-        /// <summary>The codex in <paramref name="texts" />.</summary>
+        /// <summary>The term for a step.</summary>
+        public const string Step = "step";
+
+        /// <summary>The term for a slot.</summary>
+        public const string Slot = "slot";
+
+        /// <summary>The term for a signal.</summary>
+        public const string Signal = "signal";
+
+        /// <summary>The term for a blueprint.</summary>
+        public const string Blueprint = "blueprint";
+
+        /// <summary>The term for a construct.</summary>
+        public const string Construct = "construct";
+
+        readonly List<Term> _all = new List<Term>();
+
+        /// <summary>The codex in <paramref name="texts" />, whose book holds its pages.</summary>
         public Terms(Texts texts)
         {
-            _all = new List<Term>
+            var ids = new[]
             {
-                new Term(Home, texts.CodexHomeName, texts.CodexHomeSummary, texts.CodexHomePage, texts.CodexMore),
-                new Term(LogicSystem, texts.CodexLogicSystemName, texts.CodexLogicSystemSummary, texts.CodexLogicSystemPage,
-                    texts.CodexMore),
-                new Term(Installation, texts.CodexInstallationName, texts.CodexInstallationSummary, texts.CodexInstallationPage,
-                    texts.CodexMore),
-                new Term(Sequence, texts.CodexSequenceName, texts.CodexSequenceSummary, texts.CodexSequencePage, texts.CodexMore),
-                new Term(ConfigurationPanel, texts.CodexConfigurationPanelName, texts.CodexConfigurationPanelSummary,
-                    texts.CodexConfigurationPanelPage, texts.CodexMore),
-                new Term(Library, texts.CodexLibraryName, texts.CodexLibrarySummary, texts.CodexLibraryPage, texts.CodexMore),
-                new Term(Picking, texts.CodexPickingName, texts.CodexPickingSummary, texts.CodexPickingPage, texts.CodexMore)
+                Home, LogicSystem, Installation, Sequence, ConfigurationPanel, Library, Picking, Trigger, Step, Slot, Signal,
+                Blueprint, Construct
             };
+
+            for (var i = 0; i < ids.Length; i++)
+                _all.Add(new Term(ids[i], texts));
         }
 
         /// <summary>Every term, in the order the codex's margin lists them.</summary>
         public IReadOnlyList<Term> All => _all;
+
+        /// <summary>Lets every term go of the tooltip kept in the language that was spoken.</summary>
+        public void Reword()
+        {
+            for (var i = 0; i < _all.Count; i++)
+                _all[i].Reword();
+        }
 
         /// <summary>The term called <paramref name="id" />, or null where the codex has none.</summary>
         public Term Find(string id)

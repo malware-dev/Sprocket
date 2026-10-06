@@ -59,10 +59,10 @@ namespace Lumel.Drawing
         }
 
         /// <inheritdoc />
-        public void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
+        public void DrawSprite(MyStringId material, Rectangle destination, Rectangle? source, Color color, float rotation,
             MyScreenSpaceLayer layer)
         {
-            MyScreenSpaceSprite.DrawPixels(material, destination, null, color, rotation, layer);
+            MyScreenSpaceSprite.DrawPixels(material, destination, source, color, rotation, layer);
         }
 
         /// <inheritdoc />

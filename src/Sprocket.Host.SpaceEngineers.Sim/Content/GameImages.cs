@@ -67,6 +67,33 @@ namespace Sprocket.Sim.Content
             }
         }
 
+        /// <summary>
+        /// A path to the DDS <paramref name="source" />, which is not the game's, as a PNG cached under
+        /// <paramref name="relativePath" />, or null where it will not decode.
+        /// </summary>
+        /// <remarks>Decoded again whenever the source is newer than the copy, since a mod's own art changes as it is worked on.</remarks>
+        public static string ResolveFile(string source, string relativePath)
+        {
+            string cached = CachedPath(relativePath);
+            if (File.Exists(cached) && File.GetLastWriteTimeUtc(cached) >= File.GetLastWriteTimeUtc(source))
+                return cached;
+
+            try
+            {
+                DdsImage.Pixels pixels = DdsImage.Read(source);
+                if (pixels == null)
+                    return null;
+
+                Directory.CreateDirectory(Path.GetDirectoryName(cached));
+                Write(pixels, cached);
+                return cached;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         /// <summary>Where the decoded copy of <paramref name="relativePath" /> lives, whether or not it exists.</summary>
         public static string CachedPath(string relativePath)
         {

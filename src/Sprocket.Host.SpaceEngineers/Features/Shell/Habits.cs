@@ -11,5 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     {
         /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
         public bool ShowsTerminal;
+
+        /// <summary>Where the codex's window was last moved to, in UI units, or null where it has not been moved.</summary>
+        public VRageMath.Vector2? CodexAt;
     }
 }

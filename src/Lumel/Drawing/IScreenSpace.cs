@@ -28,9 +28,10 @@ namespace Lumel.Drawing
         void PopScissor(MyScreenSpaceLayer layer);
 
         /// <summary>
-        ///     Draws <paramref name="material" /> stretched over <paramref name="destination" />, tinted and rotated.
+        ///     Draws <paramref name="source" /> of <paramref name="material" />'s picture, in its own pixels, or all of it
+        ///     where that is null, stretched over <paramref name="destination" />, tinted and rotated.
         /// </summary>
-        void DrawSprite(MyStringId material, Rectangle destination, Color color, float rotation,
+        void DrawSprite(MyStringId material, Rectangle destination, Rectangle? source, Color color, float rotation,
             MyScreenSpaceLayer layer);
 
         /// <summary>How big <paramref name="material" />'s picture was made, in its own pixels, or zero for a material this cannot draw.</summary>

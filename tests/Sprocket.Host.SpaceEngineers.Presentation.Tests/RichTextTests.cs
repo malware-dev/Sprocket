@@ -14,6 +14,38 @@ public class RichTextTests
     static readonly Color Body = new Color(162, 195, 205);
     static readonly Color Bright = new Color(220, 245, 253);
 
+    /// <summary>A heading that is not the first stands further from what is above it than one paragraph does from another.</summary>
+    [Fact]
+    public void AHeadingHasMoreRoomAbove()
+    {
+        var (_, easel) = Laid("One\n\nTwo\n\n# Three\n\nFour", Wide);
+
+        var paragraphs = Word(easel, "Two").Position.Y - Word(easel, "One").Position.Y;
+        var heading = Word(easel, "Three").Position.Y - Word(easel, "Two").Position.Y;
+        Assert.True(heading > paragraphs, "the heading has no more room above it than a paragraph");
+    }
+
+    /// <summary>Headings down to the ruled level have a rule under them, and deeper ones none.</summary>
+    /// <remarks>Drawn at a full screen's size, where a rule one unit thick is at least a pixel.</remarks>
+    [Fact]
+    public void RuledHeadingsHaveARuleUnder()
+    {
+        var text = new RichText
+        {
+            Document = Markdown.Parse("## Ruled\n\n### Not"),
+            FontSize = 20f,
+            BlockSpacing = 8f,
+            RuleColor = Color.Orange,
+            RuledHeadings = 2,
+            Placement = Fixed.Wide(Wide)
+        };
+        var easel = new Easel(new VStack { Children = { text } }, 1920f, 1080f);
+
+        var rule = Assert.Single(easel.Sprites, s => s.Color == Color.Orange).Destination;
+        Assert.True(rule.Y > Word(easel, "Ruled").Position.Y, "the rule is not under the heading");
+        Assert.True(rule.Y < Word(easel, "Not").Position.Y, "the rule is not between the two headings");
+    }
+
     /// <summary>Markdown given again as it was is not read again; different markdown is.</summary>
     [Fact]
     public void TheSameMarkdownIsReadOnce()

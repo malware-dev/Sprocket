@@ -84,6 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The codex, in <see cref="Texts" />.</summary>
         public Terms Codex { get; }
 
+        /// <summary>The codex's window, made the first time the codex is opened, or null before then.</summary>
+        public CodexWindow CodexWindow { get; private set; }
+
         /// <summary>How long ago something happened, in <see cref="Texts" />.</summary>
         public Ago Ago { get; }
 
@@ -146,6 +149,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
+        /// <summary>Who is editing, by player name: the namespace a logic system copied in is made by; empty where nobody is named.</summary>
         public string Author
         {
             get { return _author; }
@@ -699,10 +703,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public GridWorld World => _world;
 
+        /// <summary>The automation being edited.</summary>
         public Automation Program => _program;
 
+        /// <summary>What runs the automation's sequences.</summary>
         public AutomationRunner Runner => _runner;
 
+        /// <summary>The page on top: the screen showing, or the question asked over it.</summary>
         public EditorPage Current => _stack[_stack.Count - 1];
 
         /// <summary>The screen the questions on top of the stack are asked for: the topmost page that is not one.</summary>
@@ -762,12 +769,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
 
+        /// <summary>Shows <paramref name="page" /> over the current one.</summary>
         public void Push(EditorPage page)
         {
             _stack.Add(page);
             _structureDirty = true;
         }
 
+        /// <summary>Goes back to the page under the current one, where there is one.</summary>
         public void Pop()
         {
             if (_stack.Count <= 1)
@@ -928,61 +937,73 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Invalidate();
         }
 
+        /// <summary>Whether there is a change to <paramref name="sequence" /> to take back.</summary>
         public bool CanUndo(Sequence sequence)
         {
             return _sequenceHistory.CanUndo(sequence);
         }
 
+        /// <summary>What taking back the last change to <paramref name="sequence" /> would undo, in words.</summary>
         public string UndoLabel(Sequence sequence)
         {
             return ChangeText.Of(Texts, _sequenceHistory.Undoes(sequence));
         }
 
+        /// <summary>Takes the last change to <paramref name="sequence" /> back.</summary>
         public void Undo(Sequence sequence)
         {
             Walked(_sequenceHistory.Undo(sequence));
         }
 
+        /// <summary>Whether there is a change to <paramref name="sequence" /> taken back to make again.</summary>
         public bool CanRedo(Sequence sequence)
         {
             return _sequenceHistory.CanRedo(sequence);
         }
 
+        /// <summary>What making the last change to <paramref name="sequence" /> again would redo, in words.</summary>
         public string RedoLabel(Sequence sequence)
         {
             return ChangeText.Of(Texts, _sequenceHistory.Redoes(sequence));
         }
 
+        /// <summary>Makes the last change to <paramref name="sequence" /> taken back again.</summary>
         public void Redo(Sequence sequence)
         {
             Walked(_sequenceHistory.Redo(sequence));
         }
 
+        /// <summary>Whether there is a change to <paramref name="system" /> to take back.</summary>
         public bool CanUndo(AutomationSystem system)
         {
             return _systemHistory.CanUndo(system);
         }
 
+        /// <summary>What taking back the last change to <paramref name="system" /> would undo, in words.</summary>
         public string UndoLabel(AutomationSystem system)
         {
             return ChangeText.Of(Texts, _systemHistory.Undoes(system));
         }
 
+        /// <summary>Takes the last change to <paramref name="system" /> back.</summary>
         public void Undo(AutomationSystem system)
         {
             Walked(_systemHistory.Undo(system));
         }
 
+        /// <summary>Whether there is a change to <paramref name="system" /> taken back to make again.</summary>
         public bool CanRedo(AutomationSystem system)
         {
             return _systemHistory.CanRedo(system);
         }
 
+        /// <summary>What making the last change to <paramref name="system" /> again would redo, in words.</summary>
         public string RedoLabel(AutomationSystem system)
         {
             return ChangeText.Of(Texts, _systemHistory.Redoes(system));
         }
 
+        /// <summary>Makes the last change to <paramref name="system" /> taken back again.</summary>
         public void Redo(AutomationSystem system)
         {
             Walked(_systemHistory.Redo(system));
@@ -1200,9 +1221,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
             _screen.Library = page.Library;
             _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, page.ShowHelp) : null;
-            _screen.Browses = page.Browses;
-            _screen.StepsBack = page.CanStepBack ? Act(Cmd.OpenCodex, page.StepBack) : null;
-            _screen.StepsForward = page.CanStepForward ? Act(Cmd.OpenCodex, page.StepForward) : null;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 
@@ -1272,6 +1290,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.ShowActions(_actionBar);
         }
 
+        /// <summary>Opens the codex's window at <paramref name="term" />, beside whatever screen is showing.</summary>
+        public void OpenCodex(Term term)
+        {
+            var open = Act(Cmd.OpenCodex, delegate
+            {
+                if (CodexWindow == null)
+                    CodexWindow = new CodexWindow(this);
+
+                CodexWindow.Go(term);
+                if (Windows != null)
+                    Windows.Open(CodexWindow);
+            });
+
+            if (open != null)
+                open.Execute();
+        }
+
+        /// <summary>Has every word the editor shows read again in the language now spoken, the codex's included.</summary>
+        /// <remarks>An open codex window is made again at the page it showed, since its words were set when it was made.</remarks>
+        public void Reword()
+        {
+            Codex.Reword();
+
+            var codex = CodexWindow;
+            if (codex != null)
+            {
+                CodexWindow = null;
+                if (Windows != null && Windows.IsOpen(codex))
+                {
+                    Windows.Close(codex);
+                    if (codex.Term != null)
+                        OpenCodex(codex.Term);
+                }
+            }
+
+            Invalidate();
+        }
+
         /// <summary>
         /// Opens the listing of what this construct's automation is saved as.
         /// </summary>
@@ -1280,14 +1336,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// does not check either: the check belongs where the way in is put on a screen, so there is one place to
         /// read rather than two that can disagree.
         /// </remarks>
-        /// <summary>Opens the codex at <paramref name="term" />, on top of the screen it was asked for from.</summary>
-        public void OpenCodex(Term term)
-        {
-            var open = Act(Cmd.OpenCodex, delegate { Push(new CodexPage(this, term)); });
-            if (open != null)
-                open.Execute();
-        }
-
         void ShowScript()
         {
             // Also the way to a program's text that would not read, which is mended there whether or not developer mode is on.
@@ -2406,6 +2454,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 state.Interrupt(Stopper.Hand, 0);
         }
 
+        /// <summary>Runs <paramref name="sequence" /> by hand, at once, where it is or on the construct <see cref="Elsewhere" /> runs it on.</summary>
         public void RunNow(Sequence sequence)
         {
             if (Elsewhere != null)

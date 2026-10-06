@@ -2,6 +2,7 @@ using System;
 using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Styling;
+using Lumel.Viewing;
 using VRage.Input;
 using VRageMath;
 
@@ -418,6 +419,31 @@ namespace Lumel
             }
 
             return TipAt(point) != null ? this : null;
+        }
+
+        /// <summary>What a wheel turned at <paramref name="point" /> moves: the innermost scroll that holds the point and can move, or null.</summary>
+        /// <remarks>
+        ///     Separate from <see cref="Under" />, because a wheel moves a list wherever the pointer is on it, where a press
+        ///     reaches only what takes one: the words of a page take no press, and the page is still what the wheel turns.
+        /// </remarks>
+        public IScrolls WheelAt(Vector2 point)
+        {
+            if (_hidden)
+                return null;
+
+            point = Local(point);
+            if (!Holds(point))
+                return null;
+
+            for (var i = VisualChildCount - 1; i >= 0; i--)
+            {
+                var found = GetVisualChild(i).WheelAt(point);
+                if (found != null)
+                    return found;
+            }
+
+            var scrolls = this as IScrolls;
+            return scrolls != null && scrolls.CanScroll ? scrolls : null;
         }
 
         /// <summary>What this says while the pointer rests on it at <paramref name="point" />: its <see cref="Tip" />, unless it says something different in different places.</summary>

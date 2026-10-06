@@ -57,8 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Button _done;
         readonly Glyph _close;
         readonly Glyph _help;
-        readonly Glyph _stepBack;
-        readonly Glyph _stepForward;
         readonly Button _library;
         readonly Glyph _run;
         readonly Glyph _delete;
@@ -73,8 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Relay _undoes;
         readonly Relay _redoes;
         readonly Relay _helps;
-        readonly Relay _stepsBack;
-        readonly Relay _stepsForward;
         readonly Relay _libraries;
         readonly Relay _flips;
         readonly Relay _dones;
@@ -116,8 +112,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _undoes = new Relay(() => Run(_editor.Screen.Undo));
             _redoes = new Relay(() => Run(_editor.Screen.Redo));
             _helps = new Relay(() => Run(_editor.Screen.Help));
-            _stepsBack = new Relay(() => Run(_editor.Screen.StepsBack));
-            _stepsForward = new Relay(() => Run(_editor.Screen.StepsForward));
             _libraries = new Relay(() => Run(_editor.Screen.Library));
             _flips = new Relay(() => Run(_editor.Screen.Flip));
             _dones = new Relay(() => Run(_editor.Screen.Primary));
@@ -144,8 +138,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 Children =
                                 {
                                     new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
-                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = _stepsBack }.As(out _stepBack),
-                                    new Glyph { Symbol = Symbols.Right, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = _stepsForward }.As(out _stepForward),
                                     _title,
                                     // Quietest first, and Done or the close cross last: the row stands against the right edge, so a
                                     // control's place depends only on what stands to its right, and the last cannot be moved by anything.
@@ -342,10 +334,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _input.PointerUp(point);
         }
 
-        /// <summary>Moves whatever is under <paramref name="point" /> by <paramref name="amount" />, if anything there can move.</summary>
+        /// <summary>Scrolls whatever is under <paramref name="point" /> by <paramref name="amount" />, if anything there can scroll.</summary>
         /// <remarks>
         /// While something hangs open, only what is open moves, for the same reason nothing behind it is pressed: a wheel that
-        /// reached through took the rows out from under a pointer that was on the list hanging over them.
+        /// reached through took the rows out from under a pointer that was on the list hanging over them. A floating window
+        /// hangs over nothing: the wheel scrolls what is in it where the pointer is on it, and the screen anywhere else.
         /// </remarks>
         public void ScrollBy(Vector2 point, float amount)
         {
@@ -355,8 +348,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_windows.Count > 0)
             {
                 bool stopped;
-                Scroll(_windows.Under(point, out stopped), amount);
-                return;
+                var over = _windows.WheelAt(point, out stopped);
+                if (stopped || !_windows.Floats)
+                {
+                    if (over != null)
+                        over.ScrollBy(amount);
+
+                    return;
+                }
             }
 
             if (_shownPage == null || !_shownPage.ScrollsItself)
@@ -365,7 +364,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
-            Scroll(_root.Under(point), amount);
+            var under = _root.WheelAt(point);
+            if (under != null)
+                under.ScrollBy(amount);
         }
 
         /// <summary>A key going down, answering whether anything took it.</summary>
@@ -643,19 +644,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var texts = _editor.Texts;
 
             // The first screen has nowhere to go back to, so it closes, with the cross at the far right where a close button stands.
-            // A screen with a history of its own, the codex, steps through it at the left like a browser and closes at the right.
-            var closes = !screen.CanGoBack || screen.Browses;
-            _back.IsVisible = screen.CanGoBack && !screen.Browses;
+            var closes = !screen.CanGoBack;
+            _back.IsVisible = screen.CanGoBack;
             _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.ChromeBack : null);
             _close.IsVisible = closes;
-            _close.Tip = Tip.For(_close.Tip, !closes ? null : screen.Browses ? texts.CodexClose : texts.ChromeClose);
-
-            _stepBack.IsVisible = screen.Browses;
-            _stepsBack.CanExecute = screen.StepsBack != null;
-            _stepBack.Tip = Tip.For(_stepBack.Tip, screen.Browses ? texts.CodexBack : null);
-            _stepForward.IsVisible = screen.Browses;
-            _stepsForward.CanExecute = screen.StepsForward != null;
-            _stepForward.Tip = Tip.For(_stepForward.Tip, screen.Browses ? texts.CodexForward : null);
+            _close.Tip = Tip.For(_close.Tip, !closes ? null : texts.ChromeClose);
 
             _help.IsVisible = screen.Help != null;
             _helps.CanExecute = screen.Help != null;
@@ -855,18 +848,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Moves the nearest thing at or above <paramref name="from" /> that has anywhere to go.</summary>
-        static void Scroll(Element from, float amount)
-        {
-            for (var at = from; at != null; at = at.Parent)
-            {
-                var scroll = at as IScrolls;
-                if (scroll == null || !scroll.CanScroll)
-                    continue;
-
-                scroll.ScrollBy(amount);
-                return;
-            }
-        }
 
         /// <summary>Carries out <paramref name="command" />, where there is one that can be.</summary>
         static void Run(ICommand command)

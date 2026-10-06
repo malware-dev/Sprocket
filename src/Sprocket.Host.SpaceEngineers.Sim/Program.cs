@@ -2,6 +2,7 @@ using System.IO;
 using System;
 using System.Globalization;
 using System.Text;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Measuring;
 using Sprocket.Sim.Shell;
@@ -9,6 +10,7 @@ using Sprocket.Sim.Simulation;
 
 namespace Sprocket.Sim
 {
+    /// <summary>The harness's entry point: a window to drive the editor in, or a picture, a dump, a profile or a suite from the command line.</summary>
     public static class Program
     {
         [STAThread]
@@ -67,13 +69,16 @@ namespace Sprocket.Sim
             }
 
             // A markdown file drawn by the rich text element, in the game's font, for looking at what it can do:
-            // --rich <file.md> <picture.png> <width> [tip] [strong=RRGGBB] [emphasis=RRGGBB] [align=left|center|right] [fit=<height>]
+            // --rich <file.md> <picture.png> <width> [tip|description|codex] [strong=RRGGBB] [emphasis=RRGGBB] [link=RRGGBB] [align=left|center|right] [fit=<height>]
             if (args.Length > 3 && args[0] == "--rich")
             {
                 var wide = float.Parse(args[3], CultureInfo.InvariantCulture);
-                var tip = Array.IndexOf(args, "tip") > 3;
-                var size = RichShot.Save(args[2], File.ReadAllText(args[1]), wide, tip, Hex(args, "strong="),
-                    Hex(args, "emphasis="), Aligned(args), Number(args, "fit="));
+                var style = Array.IndexOf(args, "tip") > 3 ? Styles.Tip
+                    : Array.IndexOf(args, "codex") > 3 ? Styles.Codex
+                    : Array.IndexOf(args, "description") > 3 ? Styles.Description
+                    : null;
+                var size = RichShot.Save(args[2], File.ReadAllText(args[1]), wide, style, Hex(args, "strong="), Hex(args, "emphasis="),
+                    Hex(args, "link="), Aligned(args), Number(args, "fit="));
                 Console.WriteLine("wrote " + args[2] + "   " + size.X.ToString(CultureInfo.InvariantCulture) + "x"
                                   + size.Y.ToString(CultureInfo.InvariantCulture));
                 return;

@@ -89,6 +89,8 @@ namespace Sprocket.Host.SpaceEngineers
 
         GameTexts _gameTexts;
 
+        GameCodex _codex;
+
         /// <summary>
         /// What the player asked for, read the first time anything wants to know.
         /// </summary>
@@ -256,6 +258,8 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
 
             _gameTexts = new GameTexts(Path.Combine(ModContext.ModPath, "Data", "Localization"));
+            _codex = new GameCodex(ModContext.ModItem);
+            _texts.Book.Pages = _codex;
             Relanguage();
             MyAPIGateway.Gui.GuiControlRemoved += Closed;
         }
@@ -276,6 +280,7 @@ namespace Sprocket.Host.SpaceEngineers
         void Relanguage()
         {
             _gameTexts.Load(MyAPIGateway.Session.Config.Language);
+            _codex.Load(MyAPIGateway.Session.Config.Language);
             _texts.Book.Load(_gameTexts);
 
             foreach (KeyValuePair<long, SprocketUnit> unit in _units)

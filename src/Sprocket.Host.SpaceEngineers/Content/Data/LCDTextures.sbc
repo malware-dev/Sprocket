@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <LCDTextures>
+        <!-- The logo, offered among a panel's images. The game names it from the texts by LocalizationId, which
+             finds this mod's own once a world has loaded them. -->
+        <LCDTextureDefinition>
+            <Id>
+                <TypeId>LCDTextureDefinition</TypeId>
+                <SubtypeId>Sprocket_Mark</SubtypeId>
+            </Id>
+            <LocalizationId>Sprocket.Lcd.Mark</LocalizationId>
+            <TexturePath>Textures\Models\Sprocket_Mark.dds</TexturePath>
+            <SpritePath>Textures\Sprites\Sprocket_Mark.dds</SpritePath>
+        </LCDTextureDefinition>
+    </LCDTextures>
+</Definitions>

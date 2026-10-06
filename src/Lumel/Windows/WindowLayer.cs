@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Lumel.Drawing;
 using Lumel.Layout;
+using Lumel.Viewing;
 using VRageMath;
 
 namespace Lumel.Windows
@@ -12,6 +13,21 @@ namespace Lumel.Windows
 
         /// <summary>How many windows are open.</summary>
         public int Count => _open.Count;
+
+        /// <summary>Whether every open window is a floating one, which leaves the screen beneath free to use around it.</summary>
+        public bool Floats
+        {
+            get
+            {
+                for (var i = 0; i < _open.Count; i++)
+                {
+                    if (!(_open[i] is FloatingWindow))
+                        return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>The window opened last, which is drawn over the rest, or null where none is open.</summary>
         public Window Top => _open.Count > 0 ? _open[_open.Count - 1] : null;
@@ -51,7 +67,7 @@ namespace Lumel.Windows
         }
 
         /// <summary>Lays out and draws every open window over <paramref name="area" />, each modal one over a backdrop covering everything beneath it.</summary>
-        /// <remarks>A window is as wide as its placement says where it says, and otherwise as wide as it asks, up to the area.</remarks>
+        /// <remarks>A window is as wide and as tall as its placement says where it says, and otherwise as it asks, up to the area.</remarks>
         public void Draw(IGraphics g, RectangleF area)
         {
             for (var i = 0; i < _open.Count; i++)
@@ -62,16 +78,25 @@ namespace Lumel.Windows
                     g.Fill(area, window.Backdrop);
 
                 var sized = window.Placement as ISized;
-                var held = sized != null && !float.IsNaN(sized.Width);
+                var wide = sized != null && !float.IsNaN(sized.Width);
+                var tall = sized != null && !float.IsNaN(sized.Height);
+
+                var floating = window as FloatingWindow;
+                if (floating != null)
+                    floating.Screen = g.ScreenBounds;
 
                 var room = window.Room(area);
-                window.Measure(g, new Vector2(held ? sized.Width : room.X, room.Y));
+                window.Measure(g, new Vector2(wide ? sized.Width : room.X, tall ? sized.Height : room.Y));
 
                 var size = window.DesiredSize;
-                if (held)
+                if (tall)
+                    size.Y = sized.Height;
+
+                if (wide)
                     size.X = sized.Width;
 
                 window.Arrange(window.Place(area, size));
+                window.DrawBehind(g);
                 window.Draw(g);
             }
         }
@@ -84,7 +109,7 @@ namespace Lumel.Windows
             for (var i = _open.Count - 1; i >= 0; i--)
             {
                 var window = _open[i];
-                if (window.Under(point) != null || !(window is Popup))
+                if (On(window, point) || !(window is Popup))
                     break;
 
                 _open.RemoveAt(i);
@@ -94,13 +119,14 @@ namespace Lumel.Windows
             return closed;
         }
 
-        /// <summary>What a press at <paramref name="point" /> reaches in the windows, or null; <paramref name="stopped" /> says whether a modal window keeps it from the screen beneath.</summary>
+        /// <summary>What a press at <paramref name="point" /> reaches in the windows, or null; <paramref name="stopped" /> says whether a window there, or a modal one, keeps it from the screen beneath.</summary>
+        /// <remarks>A window keeps every press on it to itself, where something in it takes the press or not.</remarks>
         public Element Under(Vector2 point, out bool stopped)
         {
             for (var i = _open.Count - 1; i >= 0; i--)
             {
                 var hit = _open[i].Under(point);
-                if (hit != null)
+                if (hit != null || On(_open[i], point))
                 {
                     stopped = true;
                     return hit;
@@ -117,13 +143,30 @@ namespace Lumel.Windows
             return null;
         }
 
+        /// <summary>What a wheel turned at <paramref name="point" /> moves in the windows, or null; <paramref name="stopped" /> says whether a window there, or a modal one, keeps it from the screen beneath.</summary>
+        public IScrolls WheelAt(Vector2 point, out bool stopped)
+        {
+            for (var i = _open.Count - 1; i >= 0; i--)
+            {
+                var window = _open[i];
+                if (On(window, point) || window.IsModal)
+                {
+                    stopped = true;
+                    return window.WheelAt(point);
+                }
+            }
+
+            stopped = false;
+            return null;
+        }
+
         /// <summary>What the pointer at <paramref name="point" /> rests on in the windows that has something to say, or null; <paramref name="stopped" /> as for <see cref="Under" />.</summary>
         public Element SayingAt(Vector2 point, out bool stopped)
         {
             for (var i = _open.Count - 1; i >= 0; i--)
             {
                 var found = _open[i].SayingAt(point);
-                if (found != null || _open[i].IsModal)
+                if (found != null || On(_open[i], point) || _open[i].IsModal)
                 {
                     stopped = true;
                     return found;
@@ -132,6 +175,12 @@ namespace Lumel.Windows
 
             stopped = false;
             return null;
+        }
+
+        /// <summary>Whether <paramref name="point" /> is on <paramref name="window" />: anywhere in it, whether or not what is there takes input.</summary>
+        static bool On(Window window, Vector2 point)
+        {
+            return window.IsVisible && window.Bounds.Contains(point);
         }
     }
 }

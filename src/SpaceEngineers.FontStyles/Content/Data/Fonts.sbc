@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Fonts>
+        <!--
+            Bold, italic and bold italic styles of the game's own face, for text that sets strong and emphasized words
+            apart by their shape.
+
+            The letterforms are Keen Software House's, cut from space_engineers.ttf in the Space Engineers Mod SDK, in
+            exactly the layout of the game's FontDataPA: the same line, baseline and spacing, so a word in one of these
+            styles stands where the same word in the game's face would.
+
+            A mod of its own, for any display mod to require rather than carry: two mods carrying their own copies
+            would declare the same subtype and disagree about what is in it.
+        -->
+        <Font>
+            <Id>
+                <TypeId>FontDefinition</TypeId>
+                <SubtypeId>SpaceEngineersBold</SubtypeId>
+            </Id>
+            <Path>Fonts\SpaceEngineers\SpaceEngineersBold.xml</Path>
+        </Font>
+        <Font>
+            <Id>
+                <TypeId>FontDefinition</TypeId>
+                <SubtypeId>SpaceEngineersItalic</SubtypeId>
+            </Id>
+            <Path>Fonts\SpaceEngineers\SpaceEngineersItalic.xml</Path>
+        </Font>
+        <Font>
+            <Id>
+                <TypeId>FontDefinition</TypeId>
+                <SubtypeId>SpaceEngineersBoldItalic</SubtypeId>
+            </Id>
+            <Path>Fonts\SpaceEngineers\SpaceEngineersBoldItalic.xml</Path>
+        </Font>
+    </Fonts>
+</Definitions>

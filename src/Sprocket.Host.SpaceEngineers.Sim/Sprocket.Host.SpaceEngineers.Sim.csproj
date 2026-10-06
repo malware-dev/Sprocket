@@ -36,8 +36,8 @@
         of the harness showing symbols the game does not have.
     -->
     <ItemGroup>
-        <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*">
-            <Link>Content\Fonts\Maltek\%(RecursiveDir)%(Filename)%(Extension)</Link>
+        <None Include="..\Maltek.Symbols\Content\Fonts\Maltek\**\*;..\Maltek.Mono\Content\Fonts\Maltek\**\*;..\Maltek.Sans\Content\Fonts\Maltek\**\*;..\SpaceEngineers.FontStyles\Content\Fonts\SpaceEngineers\**\*">
+            <Link>Content\Fonts\Mod\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
@@ -45,6 +45,24 @@
     <ItemGroup>
         <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\Localization\*.resx">
             <Link>Content\Localization\%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <!-- The mod's own LCD images and materials and their pictures, which the harness draws as the game does. -->
+    <ItemGroup>
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\LCDTextures*.sbc;..\Sprocket.Host.SpaceEngineers\Content\Data\TransparentMaterials*.sbc">
+            <Link>Content\Mod\Data\%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Textures\**\*.dds">
+            <Link>Content\Mod\Textures\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <!-- The codex's pages and tooltips, one folder per language. -->
+    <ItemGroup>
+        <None Include="..\Sprocket.Host.SpaceEngineers\Content\Data\Codex\**\*.md">
+            <Link>Content\Codex\%(RecursiveDir)%(Filename)%(Extension)</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

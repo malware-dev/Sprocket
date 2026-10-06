@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
+using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
 using VRageMath;
@@ -9,7 +10,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>Windows over a screen: placed by the layer, drawn over what is beneath, and a modal one keeping input for itself.</summary>
+/// <summary>Windows over a screen: placed by the layer, drawn over what is beneath, keeping what is on them to themselves, and a modal one keeping all input.</summary>
 public class WindowLayerTests
 {
     static readonly RectangleF Area = new RectangleF(0f, 0f, 1000f, 800f);
@@ -159,6 +160,31 @@ public class WindowLayerTests
         layer.Open(window);
         layer.Draw(new Recording(Area), Area);
         return (layer, window, button);
+    }
+
+    /// <summary>Over a window holding nothing that takes input, a press, a resting pointer and a wheel all stop at the window; beside it, none do.</summary>
+    [Fact]
+    public void AWindowKeepsWhatIsOnItToItself()
+    {
+        var layer = new WindowLayer();
+        var window = new FloatingWindow { Placement = Fixed.Size(200f, 100f), Content = new Label { Text = "Words" } };
+        layer.Open(window);
+        layer.Draw(new Recording(Area), Area);
+
+        var on = new Vector2(window.Bounds.X + 20f, window.Bounds.Y + 20f);
+        var beside = new Vector2(window.Bounds.X - 20f, window.Bounds.Y - 20f);
+
+        layer.Under(on, out var pressed);
+        layer.SayingAt(on, out var said);
+        layer.WheelAt(on, out var turned);
+        Assert.True(pressed, "a press went through");
+        Assert.True(said, "the pointer's note came from beneath");
+        Assert.True(turned, "the wheel went through");
+
+        layer.Under(beside, out pressed);
+        layer.SayingAt(beside, out said);
+        layer.WheelAt(beside, out turned);
+        Assert.False(pressed || said || turned, "something beside the window stopped at it");
     }
 
     static Vector2 Middle(Element element) =>

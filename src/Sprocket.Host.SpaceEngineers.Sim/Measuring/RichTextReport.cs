@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using Sandbox.ModAPI;
 using Lumel;
@@ -33,7 +34,11 @@ public static class RichTextReport
     {
         var device = new ScreenSpaceDevice();
         var game = SeFontMetrics.Load(device);
-        device.Fonts = game ?? (IFontMetrics)new FallbackFonts(device, "Segoe UI");
+        var fonts = new FontSet(game ?? (IFontMetrics)new FallbackFonts(device, "Segoe UI"));
+        foreach (var font in ModFonts.All)
+            fonts = fonts.And(font, SeFontMetrics.LoadFrom(device, Path.Combine(ModFonts.Folder, font + ".xml"), "the mod's own content", true));
+
+        device.Fonts = fonts;
         device.Install();
         var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
 
@@ -56,6 +61,9 @@ public static class RichTextReport
         Row(report, device, graphics, "long table, narrow", PriceList(400), 160f);
         Row(report, device, graphics, "icons in text", Icons(400), Room);
         Row(report, device, graphics, "links in text", Linked(400), Room);
+        Row(report, device, graphics, "code in text", Coded(400), Room);
+        Row(report, device, graphics, "boxes", Boxed(400, true), Room);
+        Row(report, device, graphics, "same, unboxed", Boxed(400, false), Room);
         report.AppendLine();
 
         report.AppendLine("Pathological marks, read only.");
@@ -72,6 +80,9 @@ public static class RichTextReport
         Parse(report, "brackets only", Repeat("[a] ", 30000));
         Parse(report, "pipes, no table", Repeat("a | b | c\n", 20000));
         Parse(report, "table rows", "| a | b |\n|--|--|\n" + Repeat("| a | b |\n", 20000));
+        Parse(report, "fences unclosed", Repeat("::: a\n", 20000));
+        Parse(report, "fences closing none", Repeat(":::\n", 20000));
+        Parse(report, "fences nested", Repeat("::: a\n", 10000) + Repeat(":::\n", 10000));
         report.AppendLine();
 
         Headroom(report, graphics);
@@ -236,6 +247,35 @@ public static class RichTextReport
         var text = new StringBuilder();
         for (var i = 0; i < sentences; i++)
             text.Append("Each [logic system](#logic-system) holds its [installations](#installation), and runs them in turn.\n");
+
+        return text.ToString();
+    }
+
+    /// <summary>Sentences with code in each, the way a page of the codex names what is on the screen.</summary>
+    static string Coded(int sentences)
+    {
+        var text = new StringBuilder();
+        for (var i = 0; i < sentences; i++)
+            text.Append("Press `+ installation`, pick `Airlock 1 Outer Door`, then `Open` it and `Close` it again.\n");
+
+        return text.ToString();
+    }
+
+    /// <summary>Paragraphs in boxes nested three deep, the innermost centered, the way a codex page sets a note apart; or, where <paramref name="fenced" /> is false, the same paragraphs with no boxes, to tell what the boxes cost.</summary>
+    static string Boxed(int paragraphs, bool fenced)
+    {
+        var text = new StringBuilder();
+        for (var i = 0; i < paragraphs; i += 10)
+        {
+            if (fenced)
+                text.Append("::: warning\n::: player\n::: center\n");
+
+            for (var j = 0; j < 10; j++)
+                text.Append("The airlock cycles when the inner door shuts, then the vent empties the room.\n\n");
+
+            if (fenced)
+                text.Append(":::\n:::\n:::\n\n");
+        }
 
         return text.ToString();
     }

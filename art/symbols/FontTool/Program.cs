@@ -24,8 +24,23 @@ namespace Maltek.FontTool
             if (args.Length < 2)
             {
                 Console.Error.WriteLine("usage: FontTool <page.png> <page.dds>");
+                Console.Error.WriteLine("       FontTool --straight <image.png> <image.dds>");
                 Console.Error.WriteLine("       FontTool --check <page.dds> <back.png>");
                 return 2;
+            }
+
+            // An LCD's own image is the one texture the game keeps with straight alpha: the TexturePath files
+            // in LCDTextures.sbc are straight, and their SpritePath twins premultiplied like every font page.
+            var straight = args[0] == "--straight";
+            if (straight)
+            {
+                if (args.Length < 3)
+                {
+                    Console.Error.WriteLine("usage: FontTool --straight <image.png> <image.dds>");
+                    return 2;
+                }
+
+                args = new[] { args[1], args[2] };
             }
 
             // Reading it back is worth a command of its own. A page with the premultiply the wrong way
@@ -62,7 +77,7 @@ namespace Maltek.FontTool
 
             try
             {
-                Convert(source, target);
+                Convert(source, target, straight);
                 return 0;
             }
             catch (Exception error)
@@ -120,19 +135,20 @@ namespace Maltek.FontTool
             }
         }
 
-        static void Convert(string source, string target)
+        static void Convert(string source, string target, bool straight)
         {
             ScratchImage image = TexHelper.Instance.LoadFromWICFile(source, WIC_FLAGS.IGNORE_SRGB);
 
             try
             {
-                TexMetadata meta = image.GetMetadata();
-
-                // Straight in, premultiplied out. The page is authored the way anything sane is authored,
-                // and this is the one place that has to know the game wants it the other way.
-                ScratchImage premultiplied = image.PremultiplyAlpha(TEX_PMALPHA_FLAGS.DEFAULT);
-                image.Dispose();
-                image = premultiplied;
+                // Premultiplied unless --straight. The page is authored with straight alpha, and this is the one
+                // place that has to know the game wants it the other way.
+                if (!straight)
+                {
+                    ScratchImage premultiplied = image.PremultiplyAlpha(TEX_PMALPHA_FLAGS.DEFAULT);
+                    image.Dispose();
+                    image = premultiplied;
+                }
 
                 // A full chain, because the game draws these small. Without mips a symbol shrunk to a
                 // third of its cell samples whichever texels it lands on, which is how a ring becomes a

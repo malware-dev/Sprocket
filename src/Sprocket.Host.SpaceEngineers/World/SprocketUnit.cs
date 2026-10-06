@@ -1357,7 +1357,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Reword()
         {
             if (_editor != null)
-                _editor.Invalidate();
+                _editor.Reword();
         }
 
         /// <summary>Keeps the automation in another programmable block on the construct, now that the hero is gone, answering whether it moved.</summary>

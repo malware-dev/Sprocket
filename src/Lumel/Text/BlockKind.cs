@@ -28,7 +28,10 @@ namespace Lumel.Text
         /// <summary>One cell of a table's row, holding words; level 1 in the heading row.</summary>
         Cell,
 
-        /// <summary>Blocks set apart as quoted: its blocks are what it holds, and its tag, where it has one, names how it looks.</summary>
-        Quote
+        /// <summary>Blocks set apart as quoted: its blocks are what it holds.</summary>
+        Quote,
+
+        /// <summary>Blocks the host lays out as the attributes the box names ask: its blocks are what it holds.</summary>
+        Box
     }
 }

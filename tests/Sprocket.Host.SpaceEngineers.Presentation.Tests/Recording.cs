@@ -14,6 +14,8 @@ sealed class Recording(RectangleF area) : IGraphics
 
     public Vector2 Size => new Vector2(area.Width, area.Height);
 
+    public RectangleF ScreenBounds => area;
+
     public IImageCatalog? Images => null;
 
     public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
@@ -37,6 +39,10 @@ sealed class Recording(RectangleF area) : IGraphics
     }
 
     public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
+    {
+    }
+
+    public void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color)
     {
     }
 

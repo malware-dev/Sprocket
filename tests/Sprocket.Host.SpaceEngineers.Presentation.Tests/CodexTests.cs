@@ -1,6 +1,9 @@
+using System.IO;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Home;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using VRageMath;
 using Xunit;
@@ -9,105 +12,160 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 public class CodexTests
 {
-    static Simulation Home()
-    {
-        var sim = Simulation.Fresh();
-        sim.Tick();
-        return sim;
-    }
-
-    /// <summary>The question mark on the home screen opens the codex at the home screen's entry, which Back cannot leave but the cross closes.</summary>
+    /// <summary>The question mark on the home screen opens the codex's window at the home screen's entry, beside the home screen, which stays.</summary>
     [Fact]
     public void TheQuestionMarkOpensTheScreensEntry()
     {
-        var sim = Home();
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
 
-        sim.Editor.Screen.Help!.Execute();
-        sim.Tick();
+        editor.Screen.Help!.Execute();
+        screen.Do("tick", "3");
 
-        var page = Assert.IsType<CodexPage>(sim.Editor.Current);
-        Assert.Equal(Terms.Home, page.Term.Id);
-        Assert.True(sim.Editor.Screen.Browses);
-        Assert.Null(sim.Editor.Screen.StepsBack);
-        Assert.Null(sim.Editor.Screen.StepsForward);
-
-        sim.Editor.Back();
-        sim.Tick();
-        Assert.IsType<HomePage>(sim.Editor.Current);
+        var codex = editor.CodexWindow!;
+        Assert.True(editor.Windows!.IsOpen(codex));
+        Assert.Equal(Terms.Home, codex.Term!.Id);
+        Assert.False(codex.CanStepBack);
+        Assert.False(codex.CanStepForward);
+        Assert.IsType<HomePage>(editor.Current);
     }
 
-    /// <summary>The codex keeps a history of its own: moving on drops what was stepped back from, and closing it from any depth leads home in one press.</summary>
+    /// <summary>The codex keeps a history of its own: moving on drops what was stepped back from, and closing it leaves the screen as it was.</summary>
     [Fact]
     public void TheCodexStepsThroughAHistoryOfItsOwn()
     {
-        var sim = Home();
-        var codex = sim.Editor.Codex;
-        sim.Editor.OpenCodex(codex.Find(Terms.LogicSystem)!);
-        sim.Tick();
-        var page = Assert.IsType<CodexPage>(sim.Editor.Current);
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        var terms = editor.Codex;
+        editor.OpenCodex(terms.Find(Terms.LogicSystem)!);
+        var codex = editor.CodexWindow!;
 
-        page.Go(codex.Find(Terms.Installation));
-        page.Go(codex.Find(Terms.Sequence));
-        sim.Tick();
-        Assert.Equal(Terms.Sequence, page.Term.Id);
+        codex.Go(terms.Find(Terms.Installation));
+        codex.Go(terms.Find(Terms.Sequence));
+        Assert.Equal(Terms.Sequence, codex.Term!.Id);
 
-        sim.Editor.Screen.StepsBack!.Execute();
-        sim.Editor.Screen.StepsBack!.Execute();
-        sim.Tick();
-        Assert.Equal(Terms.LogicSystem, page.Term.Id);
-        Assert.Null(sim.Editor.Screen.StepsBack);
+        codex.StepBack();
+        codex.StepBack();
+        Assert.Equal(Terms.LogicSystem, codex.Term!.Id);
+        Assert.False(codex.CanStepBack);
 
-        sim.Editor.Screen.StepsForward!.Execute();
-        sim.Tick();
-        Assert.Equal(Terms.Installation, page.Term.Id);
+        codex.StepForward();
+        Assert.Equal(Terms.Installation, codex.Term!.Id);
 
-        page.Go(codex.Find(Terms.Library));
-        sim.Tick();
-        Assert.Null(sim.Editor.Screen.StepsForward);
+        codex.Go(terms.Find(Terms.Library));
+        Assert.False(codex.CanStepForward);
 
-        sim.Editor.Back();
-        sim.Tick();
-        Assert.IsType<HomePage>(sim.Editor.Current);
+        codex.Close();
+        screen.Do("tick", "3");
+        Assert.False(editor.Windows!.IsOpen(codex));
+        Assert.IsType<HomePage>(editor.Current);
     }
 
-    /// <summary>The codex lists every term in its margin, and pressing one moves there as a step forward, with no question mark of its own.</summary>
+    /// <summary>The codex's contents show in place of the page, and choosing a term there moves to it as a step forward.</summary>
     [Fact]
-    public void TheMarginListsEveryTermAndMovesThere()
+    public void TheContentsListEveryTermAndMoveThere()
     {
-        var sim = Home();
-        sim.Editor.OpenCodex(sim.Editor.Codex.Find(Terms.Installation)!);
-        sim.Tick();
-        var page = Assert.IsType<CodexPage>(sim.Editor.Current);
-        Assert.Null(sim.Editor.Screen.Help);
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.Installation)!);
+        var codex = editor.CodexWindow!;
 
-        page.Go(sim.Editor.Codex.Find(Terms.Library));
-        sim.Tick();
-        Assert.Equal(Terms.Library, page.Term.Id);
+        codex.List(true);
+        Assert.True(codex.IsListing);
 
-        sim.Editor.Screen.StepsBack!.Execute();
-        sim.Tick();
-        Assert.Equal(Terms.Installation, page.Term.Id);
+        codex.Go(editor.Codex.Find(Terms.Library));
+        Assert.False(codex.IsListing);
+        Assert.Equal(Terms.Library, codex.Term!.Id);
+
+        codex.StepBack();
+        Assert.Equal(Terms.Installation, codex.Term!.Id);
     }
 
-    /// <summary>The first point on the screen where a link sits, and the text it sits in.</summary>
-    static Vector2 FirstLink(Screen screen, out RichText text)
+    /// <summary>On a screen with no room beside the editor, the codex first stands inside it, against its right edge.</summary>
+    [Fact]
+    public void TheCodexFirstStandsAgainstTheEditorsRightEdge()
     {
-        for (var y = 0; y < 400; y += 2)
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.Home)!);
+        screen.Do("tick", "3");
+
+        var window = editor.CodexWindow!.Bounds;
+        var page = editor.Current.View!.Bounds;
+        Assert.True(window.Width > 0f, "the codex was not laid out");
+        Assert.InRange(window.X + window.Width - (page.X + page.Width), -40f, 40f);
+        Assert.True(window.X > page.X, "the codex does not stand inside the editor");
+    }
+
+    /// <summary>Dragged by its title bar, the codex moves with the pointer, and is found where it was left when it opens again.</summary>
+    [Fact]
+    public void TheCodexIsMovedByItsTitleBarAndStaysWhereItWasLeft()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.Home)!);
+        screen.Do("tick", "3");
+
+        var codex = editor.CodexWindow!;
+        var before = codex.Bounds;
+        var x = (int)(before.X + before.Width * 0.5f);
+        var y = (int)(before.Y + 24f);
+        screen.Do("drag", x.ToString(), y.ToString(), (x - 200).ToString(), (y + 50).ToString(), "tick", "3");
+
+        Assert.Equal(before.X - 200f, codex.Bounds.X, 1f);
+        Assert.Equal(before.Y + 50f, codex.Bounds.Y, 1f);
+        Assert.Equal(new Vector2(before.X - 200f, before.Y + 50f), editor.Habits.CodexAt);
+
+        codex.Close();
+        editor.OpenCodex(editor.Codex.Find(Terms.Library)!);
+        screen.Do("tick", "3");
+        Assert.Equal(before.X - 200f, codex.Bounds.X, 1f);
+    }
+
+    /// <summary>The wheel turned over the codex's page scrolls the page, not the screen beneath it.</summary>
+    [Fact]
+    public void TheWheelOverTheCodexScrollsItsPage()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.LogicSystem)!);
+        screen.Do("tick", "3");
+
+        var codex = editor.CodexWindow!;
+        var page = Assert.Single(codex.Within().OfType<Lumel.Viewing.ScrollView>());
+        Assert.True(page.CanScroll, "the page is short enough not to scroll");
+
+        var at = codex.Bounds;
+        var x = (int)(at.X + at.Width * 0.5f);
+        var y = (int)(at.Y + at.Height * 0.5f);
+        screen.Do("scroll", x.ToString(), y.ToString(), "300", "tick", "3");
+
+        Assert.True(page.Scrolled > 0f, "the page did not move");
+    }
+
+    /// <summary>Nothing beneath the codex's window is reached through it: the pointer anywhere on it rests on the window and is kept from the screen under it.</summary>
+    [Fact]
+    public void NothingIsReachedThroughTheCodex()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.LogicSystem)!);
+        screen.Do("tick", "3");
+
+        var codex = editor.CodexWindow!;
+        for (var y = codex.Bounds.Y + 1f; y < codex.Bounds.Y + codex.Bounds.Height; y += 7f)
         {
-            for (var x = 0; x < 2000; x += 2)
+            for (var x = codex.Bounds.X + 1f; x < codex.Bounds.X + codex.Bounds.Width; x += 7f)
             {
                 var point = new Vector2(x, y);
-                if (screen.Scene.Under(point) is RichText rich && rich.LinkAt(point) != null)
-                {
-                    text = rich;
-                    return point;
-                }
+                editor.Windows!.Under(point, out var stopped);
+                Assert.True(stopped, "the pointer at " + x + ", " + y + " was not kept from the screen beneath the codex");
+
+                var under = screen.Scene.Under(point);
+                if (under != null)
+                    Assert.True(Within(under, codex), "the pointer at " + x + ", " + y + " reached " + under.GetType().Name + " beneath the codex");
             }
         }
-
-        text = null!;
-        Assert.Fail("no link on the screen");
-        return default;
     }
 
     /// <summary>The home screen's heading is a link to the logic system's entry: resting on it shows the term's preview, and pressing it opens the codex there.</summary>
@@ -122,8 +180,7 @@ public class CodexTests
 
         screen.Do(((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", "3");
 
-        var page = Assert.IsType<CodexPage>(screen.Scene.Editor.Current);
-        Assert.Equal(Terms.LogicSystem, page.Term.Id);
+        Assert.Equal(Terms.LogicSystem, screen.Scene.Editor.CodexWindow!.Term!.Id);
     }
 
     /// <summary>A link inside a codex page moves the codex on to its term, as a step forward in the codex's own history.</summary>
@@ -134,14 +191,67 @@ public class CodexTests
         var editor = screen.Scene.Editor;
         editor.OpenCodex(editor.Codex.Find(Terms.LogicSystem)!);
         screen.Do("tick", "3");
+        var codex = editor.CodexWindow!;
 
-        // The margin is buttons, so the first link on the screen is the page's own.
-        var at = FirstLink(screen, out _);
+        var at = FirstLink(screen, out var text, codex);
+        var target = text.LinkAt(at)!.Target;
         screen.Do(((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", "3");
 
-        var page = Assert.IsType<CodexPage>(editor.Current);
-        Assert.Equal(Terms.Installation, page.Term.Id);
-        Assert.NotNull(editor.Screen.StepsBack);
+        Assert.Equal(target, "#" + codex.Term!.Id);
+        Assert.NotEqual(Terms.LogicSystem, codex.Term!.Id);
+        Assert.True(codex.CanStepBack);
+    }
+
+    /// <summary>Every term the codex lists has its page, opening with its title, and its tooltip in the files the mod ships.</summary>
+    [Fact]
+    public void EveryTermHasItsPageAndTooltip()
+    {
+        var sim = Simulation.Fresh();
+
+        foreach (var term in sim.Editor.Codex.All)
+        {
+            Assert.True(term.Name != term.Id, term.Id + " has no page, or a page without its title");
+            Assert.False(string.IsNullOrWhiteSpace(term.Page), term.Id + " has nothing on its page after its title");
+            Assert.False(string.IsNullOrWhiteSpace(term.Summary), term.Id + " has no tooltip");
+        }
+    }
+
+    /// <summary>The codex is read in the language the editor speaks: its titles, its pages and its tooltips.</summary>
+    [Fact]
+    public void TheCodexIsReadInTheEditorsLanguage()
+    {
+        var sim = Simulation.Fresh();
+        sim.Texts.Book.Pages = new CodexFiles(CodexFiles.Beside, "no");
+
+        var term = new Terms(sim.Texts).Find(Terms.LogicSystem)!;
+
+        Assert.Equal("Logikksystem", term.Name);
+        Assert.StartsWith("Et **logikksystem**", term.Summary);
+        Assert.Contains("[konstruksjonen](#construct)", term.Page);
+    }
+
+    /// <summary>Every attribute a codex page's boxes ask for, in every language, is markdown-lite's own or one the codex gives a look.</summary>
+    [Fact]
+    public void EveryBoxInTheCodexAsksForSomethingItHas()
+    {
+        var native = new[] { "left", "center", "right" };
+        foreach (var page in Directory.GetFiles(CodexFiles.Beside, "*.md", SearchOption.AllDirectories))
+        {
+            foreach (var name in Names(Markdown.Parse(File.ReadAllText(page)).Blocks))
+            {
+                Assert.True(native.Contains(name, StringComparer.OrdinalIgnoreCase) || Styles.Boxes.Find(name) != null,
+                    Path.GetFileName(page) + " asks for " + name + ", which nothing gives a look");
+            }
+        }
+    }
+
+    /// <summary>A page a translation lacks is read in English.</summary>
+    [Fact]
+    public void APageATranslationLacksIsReadInEnglish()
+    {
+        var pages = new CodexFiles(CodexFiles.Beside, "xx");
+
+        Assert.StartsWith("# Logic system", pages.Find("logic-system.md"));
     }
 
     /// <summary>Every link in every codex page names a term the codex has, so no page leads nowhere.</summary>
@@ -161,4 +271,41 @@ public class CodexTests
             }
         }
     }
+
+    /// <summary>The first point on the screen where a link sits inside <paramref name="inside" />, or anywhere where that is null, and the text it sits in.</summary>
+    static Vector2 FirstLink(Screen screen, out RichText text, Lumel.Element? inside = null)
+    {
+        for (var y = 0; y < 1080; y += 2)
+        {
+            for (var x = 0; x < 2000; x += 2)
+            {
+                var point = new Vector2(x, y);
+                if (screen.Scene.Under(point) is RichText rich && rich.LinkAt(point) != null && (inside == null || Within(rich, inside)))
+                {
+                    text = rich;
+                    return point;
+                }
+            }
+        }
+
+        text = null!;
+        Assert.Fail("no link on the screen");
+        return default;
+    }
+
+    /// <summary>Whether <paramref name="element" /> is <paramref name="outer" /> or inside it.</summary>
+    static bool Within(Lumel.Element element, Lumel.Element outer)
+    {
+        for (var at = element; at != null; at = at.Parent)
+        {
+            if (at == outer)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Every attribute the boxes in <paramref name="blocks" /> name, inside quotes and other boxes too.</summary>
+    static IEnumerable<string> Names(IList<Block> blocks) =>
+        blocks.SelectMany(block => block.Names.Concat(Names(block.Blocks)));
 }

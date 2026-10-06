@@ -26,6 +26,9 @@ namespace Sprocket.Host.SpaceEngineers.Localization
             Load(null);
         }
 
+        /// <summary>Where the codex's pages and tooltips are read in the language loaded, by file name, or null where there are none.</summary>
+        public ITextSource Pages { get; set; }
+
         /// <summary>Reads every text from <paramref name="source" />, or goes back to the texts as written where it is null.</summary>
         public void Load(ITextSource source)
         {

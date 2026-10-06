@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,7 +8,7 @@ namespace Lumel.Text
     /// <remarks>
     ///     Markdown-lite is CommonMark's headings (<c>#</c> to <c>######</c>), rules (<c>---</c>, <c>***</c>,
     ///     <c>___</c>, spaced or not), one level of lists (<c>-</c>, <c>*</c> or <c>+</c>, and <c>1.</c> or
-    ///     <c>1)</c>), quotes (<c>&gt;</c>, one level), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans, images
+    ///     <c>1)</c>), quotes (<c>&gt;</c>, one level), boxes (<c>:::</c>), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans, images
     ///     (<c>![description](name)</c>), links (<c>[words](target)</c>) and backslash escapes. A single newline
     ///     is a line break and a blank line ends a block. Anything else reads as the text it is.
     ///     <para>
@@ -21,12 +22,23 @@ namespace Lumel.Text
     ///         host reads, and holds no spaces.
     ///     </para>
     ///     <para>
-    ///         A quote whose first line is only <c>[!name]</c> is tagged with that name, which the host may give a
-    ///         look of its own; the tag is never shown, and a quote whose tag has no look is drawn as any other.
+    ///         A line of three or more <c>:</c> and then names opens a box, and a line of only <c>:</c> closes the
+    ///         innermost one; what is between is the box's blocks. The names are attributes, letters, digits,
+    ///         <c>-</c> and <c>_</c>. <c>left</c>, <c>center</c> and <c>right</c> set where the box's lines sit, and
+    ///         every other name means what the host says it does; a box inside a box adds its own to those around
+    ///         it. A box never closed runs to the end, and a closing line with no box open is words. Boxes nest
+    ///         <see cref="Deepest" /> deep at most; a fence that would open one deeper is words.
     ///     </para>
     /// </remarks>
     public static class Markdown
     {
+        /// <summary>How many boxes deep a document can nest.</summary>
+        /// <remarks>
+        ///     Reading a box and laying it out each go one call deeper per box, so a document that could nest without limit
+        ///     could run the stack out, which takes the game down.
+        /// </remarks>
+        public const int Deepest = 16;
+
         /// <summary>The document <paramref name="source" /> describes.</summary>
         public static Document Parse(string source)
         {
@@ -35,7 +47,7 @@ namespace Lumel.Text
                 return document;
 
             var lines = source.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-            Read(lines, 0, lines.Length, document.Blocks, false);
+            Read(lines, 0, lines.Length, document.Blocks, false, 0, Pairs(lines));
             return document;
         }
 
@@ -58,8 +70,8 @@ namespace Lumel.Text
             return escaped.ToString();
         }
 
-        /// <summary>Reads <paramref name="lines" /> from <paramref name="from" /> up to <paramref name="to" /> into <paramref name="blocks" />; inside a quote, a line starting with <c>&gt;</c> is only words.</summary>
-        static void Read(string[] lines, int from, int to, IList<Block> blocks, bool quoted)
+        /// <summary>Reads <paramref name="lines" /> from <paramref name="from" /> up to <paramref name="to" /> into <paramref name="blocks" />, <paramref name="boxed" /> boxes deep, their fences paired as <paramref name="closes" /> says; inside a quote, a line starting with <c>&gt;</c> is only words.</summary>
+        static void Read(string[] lines, int from, int to, IList<Block> blocks, bool quoted, int boxed, int[] closes)
         {
             var open = new StringBuilder();
             Block current = null;
@@ -87,10 +99,18 @@ namespace Lumel.Text
                     table = null;
                 }
 
+                List<string> names;
+                if (boxed < Deepest && IsFence(line, out names) && names.Count > 0)
+                {
+                    Close(blocks, ref current, open);
+                    i = Box(lines, i, to, blocks, quoted, names, boxed, closes) - 1;
+                    continue;
+                }
+
                 if (!quoted && line[0] == '>')
                 {
                     Close(blocks, ref current, open);
-                    i = Quote(lines, i, to, blocks) - 1;
+                    i = Quote(lines, i, to, blocks, boxed) - 1;
                     continue;
                 }
 
@@ -149,8 +169,8 @@ namespace Lumel.Text
         }
 
         /// <summary>Reads the quote whose lines start at <paramref name="from" />, up to the first line before <paramref name="to" /> that does not start with <c>&gt;</c>, into <paramref name="blocks" />; answers where that line is.</summary>
-        /// <remarks>Each line loses its <c>&gt;</c> and one space after it. A first line that is only <c>[!name]</c> is the quote's tag rather than its words.</remarks>
-        static int Quote(string[] lines, int from, int to, IList<Block> blocks)
+        /// <remarks>Each line loses its <c>&gt;</c> and one space after it.</remarks>
+        static int Quote(string[] lines, int from, int to, IList<Block> blocks, int boxed)
         {
             var end = from;
             while (end < to)
@@ -169,32 +189,118 @@ namespace Lumel.Text
                 inner[i] = line.Length > 1 && line[1] == ' ' ? line.Substring(2) : line.Substring(1);
             }
 
-            string tag = null;
-            var first = 0;
-            if (inner.Length > 0 && IsTag(inner[0].Trim(), out tag))
-                first = 1;
-
-            var quote = new Block(tag);
-            Read(inner, first, inner.Length, quote.Blocks, true);
+            var quote = new Block(BlockKind.Quote);
+            Read(inner, 0, inner.Length, quote.Blocks, true, boxed, Pairs(inner));
             blocks.Add(quote);
             return end;
         }
 
-        /// <summary>Whether <paramref name="line" /> is a quote's tag, <c>[!name]</c>, the name letters, digits, <c>-</c> and <c>_</c>.</summary>
-        static bool IsTag(string line, out string tag)
+        /// <summary>Reads the box opened at <paramref name="from" /> asking for <paramref name="names" />, up to the fence that closes it or <paramref name="to" />, into <paramref name="blocks" />; answers where reading goes on.</summary>
+        /// <remarks>The fence closing it is the one <paramref name="closes" /> pairs it with, so a box inside it closes first.</remarks>
+        static int Box(string[] lines, int from, int to, IList<Block> blocks, bool quoted, List<string> names, int boxed, int[] closes)
         {
-            tag = null;
-            if (line.Length < 4 || line[0] != '[' || line[1] != '!' || line[line.Length - 1] != ']')
-                return false;
+            var close = closes[from];
+            var end = close >= 0 && close < to ? close : to;
 
-            for (var i = 2; i < line.Length - 1; i++)
+            var box = new Block(names);
+            Read(lines, from + 1, end, box.Blocks, quoted, boxed + 1, closes);
+            blocks.Add(box);
+            return end < to ? end + 1 : to;
+        }
+
+        /// <summary>For each line of <paramref name="lines" /> that opens a box, the line of the fence that closes it, or -1 where none does; null where no line opens one.</summary>
+        /// <remarks>
+        ///     One pass, pairing each closing fence with the innermost box still open, so finding where a box ends costs
+        ///     nothing however deep boxes nest. A closing fence with no box open pairs with nothing, and is words.
+        /// </remarks>
+        static int[] Pairs(string[] lines)
+        {
+            int[] closes = null;
+            List<int> open = null;
+
+            for (var i = 0; i < lines.Length; i++)
             {
-                var c = line[i];
-                if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
-                    return false;
+                var fence = FenceOf(lines[i]);
+                if (fence == Fence.Opens)
+                {
+                    if (closes == null)
+                    {
+                        closes = new int[lines.Length];
+                        for (var j = 0; j < closes.Length; j++)
+                            closes[j] = -1;
+
+                        open = new List<int>();
+                    }
+
+                    open.Add(i);
+                }
+                else if (fence == Fence.Closes && open != null && open.Count > 0)
+                {
+                    closes[open[open.Count - 1]] = i;
+                    open.RemoveAt(open.Count - 1);
+                }
             }
 
-            tag = line.Substring(2, line.Length - 3);
+            return closes;
+        }
+
+        /// <summary>What <paramref name="line" /> is as a fence, read in place: as <see cref="IsFence" /> reads it, without making its names.</summary>
+        static Fence FenceOf(string line)
+        {
+            var start = 0;
+            var end = line.Length;
+            while (start < end && char.IsWhiteSpace(line[start]))
+                start++;
+
+            while (end > start && char.IsWhiteSpace(line[end - 1]))
+                end--;
+
+            if (end - start < 3 || line[start] != ':' || line[start + 1] != ':' || line[start + 2] != ':')
+                return Fence.None;
+
+            var at = start + 3;
+            while (at < end && line[at] == ':')
+                at++;
+
+            var named = false;
+            for (; at < end; at++)
+            {
+                var c = line[at];
+                if (c == ' ' || c == '\t')
+                    continue;
+
+                if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
+                    return Fence.None;
+
+                named = true;
+            }
+
+            return named ? Fence.Opens : Fence.Closes;
+        }
+
+        /// <summary>Whether <paramref name="line" /> is a box's fence: three or more <c>:</c>, then the names it asks for, letters, digits, <c>-</c> and <c>_</c>, or none where it closes a box.</summary>
+        static bool IsFence(string line, out List<string> names)
+        {
+            names = null;
+            if (line.Length < 3 || line[0] != ':' || line[1] != ':' || line[2] != ':')
+                return false;
+
+            var at = 3;
+            while (at < line.Length && line[at] == ':')
+                at++;
+
+            var words = line.Substring(at).Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            for (var w = 0; w < words.Length; w++)
+            {
+                var word = words[w];
+                for (var i = 0; i < word.Length; i++)
+                {
+                    if (!char.IsLetterOrDigit(word[i]) && word[i] != '-' && word[i] != '_')
+                        return false;
+                }
+            }
+
+            names = new List<string>(words);
             return true;
         }
 
@@ -420,6 +526,14 @@ namespace Lumel.Text
             number = int.Parse(line.Substring(0, digits));
             rest = line.Substring(digits + 2).Trim();
             return true;
+        }
+
+        /// <summary>What a line is as a fence.</summary>
+        enum Fence
+        {
+            None,
+            Opens,
+            Closes
         }
     }
 }

@@ -19,6 +19,8 @@ sealed class Counting : IGraphics
 
     public Vector2 Size => new Vector2(1440f, 1080f);
 
+    public RectangleF ScreenBounds => new RectangleF(0f, 0f, 1440f, 1080f);
+
     public IImageCatalog? Images => null;
 
     /// <summary>Starts both counts again.</summary>
@@ -52,6 +54,10 @@ sealed class Counting : IGraphics
     }
 
     public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
+    {
+    }
+
+    public void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color)
     {
     }
 

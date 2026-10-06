@@ -58,5 +58,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// </para>
         /// </remarks>
         public const string Mono = "MaltekMono";
+
+        /// <summary>The Maltek proportional face, for reading prose.</summary>
+        /// <remarks>
+        /// Cut to the same line height and baseline as the game's own faces and <see cref="Mono" />, from Inter. A subtype
+        /// declared by the Maltek Sans mod.
+        /// </remarks>
+        public const string Sans = "MaltekSans";
+
+        /// <summary>The bold weight of <see cref="Sans" />, for strong words.</summary>
+        public const string SansBold = "MaltekSansBold";
+
+        /// <summary>The italic of <see cref="Sans" />, for emphasized words.</summary>
+        public const string SansItalic = "MaltekSansItalic";
+
+        /// <summary>The bold italic of <see cref="Sans" />, for words both strong and emphasized.</summary>
+        public const string SansBoldItalic = "MaltekSansBoldItalic";
+
+        /// <summary>The game's own face in bold, for strong words.</summary>
+        /// <remarks>
+        /// Cut from the game's own outline in exactly the layout of its face, so a bold word stands where the same word
+        /// would. A subtype declared by the Space Engineers Font Styles mod.
+        /// </remarks>
+        public const string Bold = "SpaceEngineersBold";
+
+        /// <summary>The game's own face in italic, for emphasized words.</summary>
+        public const string Italic = "SpaceEngineersItalic";
+
+        /// <summary>The game's own face in bold italic, for words both strong and emphasized.</summary>
+        public const string BoldItalic = "SpaceEngineersBoldItalic";
     }
 }

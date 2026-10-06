@@ -22,6 +22,15 @@ namespace Lumel.Text
         /// <summary>The font code is set in, or null to leave it to the layers beneath.</summary>
         public string CodeFont { get; set; }
 
+        /// <summary>The font strong words are set in, or null to leave it to the layers beneath.</summary>
+        public string StrongFont { get; set; }
+
+        /// <summary>The font emphasized words are set in, or null to leave it to the layers beneath.</summary>
+        public string EmphasisFont { get; set; }
+
+        /// <summary>The font words both strong and emphasized are set in, or null to leave it to the layers beneath.</summary>
+        public string StrongEmphasisFont { get; set; }
+
         /// <summary>How tall a first-level heading's line is, or null to leave it to the layers beneath.</summary>
         public float? Heading1Size { get; set; }
 
@@ -33,6 +42,9 @@ namespace Lumel.Text
 
         /// <summary>The room between one block and the next, or null to leave it to the layers beneath.</summary>
         public float? BlockSpacing { get; set; }
+
+        /// <summary>The deepest level of heading drawn with a rule under it, or null to leave it to the layers beneath.</summary>
+        public int? RuledHeadings { get; set; }
 
         /// <summary>How far a list item's words stand in from its mark, or null to leave it to the layers beneath.</summary>
         public float? Indent { get; set; }
@@ -46,8 +58,20 @@ namespace Lumel.Text
         /// <summary>The fill behind a link's words, or null to leave it to the layers beneath.</summary>
         public Color? LinkFill { get; set; }
 
-        /// <summary>The looks tagged quotes take, or null to leave them to the layers beneath.</summary>
-        public QuoteStyles Quotes { get; set; }
+        /// <summary>The box behind code, or null to leave it to the layers beneath.</summary>
+        public Color? CodeFill { get; set; }
+
+        /// <summary>How far the box behind code reaches past its words, or null to leave it to the layers beneath.</summary>
+        public float? CodeInset { get; set; }
+
+        /// <summary>How thick the line under a link's words is, or null to leave it to the layers beneath.</summary>
+        public float? LinkUnderline { get; set; }
+
+        /// <summary>How far down a line a link's underline lies, as a fraction of its height, or null to leave it to the layers beneath.</summary>
+        public float? UnderlineAt { get; set; }
+
+        /// <summary>What the attributes a box names ask for, or null to leave them to the layers beneath.</summary>
+        public BoxStyles Boxes { get; set; }
 
         /// <inheritdoc />
         public override void Neutral(Element element)
@@ -73,6 +97,15 @@ namespace Lumel.Text
             if (CodeFont != null)
                 text.CodeFont = MyFontEnum.White;
 
+            if (StrongFont != null)
+                text.StrongFont = null;
+
+            if (EmphasisFont != null)
+                text.EmphasisFont = null;
+
+            if (StrongEmphasisFont != null)
+                text.StrongEmphasisFont = null;
+
             if (Heading1Size.HasValue)
                 text.Heading1Size = NeutralFontSize;
 
@@ -84,6 +117,9 @@ namespace Lumel.Text
 
             if (BlockSpacing.HasValue)
                 text.BlockSpacing = 0f;
+
+            if (RuledHeadings.HasValue)
+                text.RuledHeadings = 0;
 
             if (Indent.HasValue)
                 text.Indent = NeutralFontSize;
@@ -97,8 +133,20 @@ namespace Lumel.Text
             if (LinkFill.HasValue)
                 text.LinkFill = null;
 
-            if (Quotes != null)
-                text.Quotes = null;
+            if (CodeFill.HasValue)
+                text.CodeFill = RichText.CodeWash;
+
+            if (CodeInset.HasValue)
+                text.CodeInset = RichText.CodeRoom;
+
+            if (LinkUnderline.HasValue)
+                text.LinkUnderline = RichText.Hairline;
+
+            if (UnderlineAt.HasValue)
+                text.UnderlineAt = RichText.UnderlineDrop;
+
+            if (Boxes != null)
+                text.Boxes = null;
         }
 
         /// <inheritdoc />
@@ -125,6 +173,15 @@ namespace Lumel.Text
             if (CodeFont != null)
                 text.CodeFont = CodeFont;
 
+            if (StrongFont != null)
+                text.StrongFont = StrongFont;
+
+            if (EmphasisFont != null)
+                text.EmphasisFont = EmphasisFont;
+
+            if (StrongEmphasisFont != null)
+                text.StrongEmphasisFont = StrongEmphasisFont;
+
             if (Heading1Size.HasValue)
                 text.Heading1Size = Heading1Size.Value;
 
@@ -136,6 +193,9 @@ namespace Lumel.Text
 
             if (BlockSpacing.HasValue)
                 text.BlockSpacing = BlockSpacing.Value;
+
+            if (RuledHeadings.HasValue)
+                text.RuledHeadings = RuledHeadings.Value;
 
             if (Indent.HasValue)
                 text.Indent = Indent.Value;
@@ -149,8 +209,20 @@ namespace Lumel.Text
             if (LinkFill.HasValue)
                 text.LinkFill = LinkFill.Value;
 
-            if (Quotes != null)
-                text.Quotes = Quotes;
+            if (CodeFill.HasValue)
+                text.CodeFill = CodeFill.Value;
+
+            if (CodeInset.HasValue)
+                text.CodeInset = CodeInset.Value;
+
+            if (LinkUnderline.HasValue)
+                text.LinkUnderline = LinkUnderline.Value;
+
+            if (UnderlineAt.HasValue)
+                text.UnderlineAt = UnderlineAt.Value;
+
+            if (Boxes != null)
+                text.Boxes = Boxes;
         }
 
         /// <inheritdoc />
@@ -162,15 +234,23 @@ namespace Lumel.Text
             HeadingColor = null;
             RuleColor = null;
             CodeFont = null;
+            StrongFont = null;
+            EmphasisFont = null;
+            StrongEmphasisFont = null;
             Heading1Size = null;
             Heading2Size = null;
             Heading3Size = null;
             BlockSpacing = null;
+            RuledHeadings = null;
             Indent = null;
             Alignment = null;
             LinkColor = null;
             LinkFill = null;
-            Quotes = null;
+            CodeFill = null;
+            CodeInset = null;
+            LinkUnderline = null;
+            UnderlineAt = null;
+            Boxes = null;
         }
 
         /// <inheritdoc />
@@ -196,6 +276,15 @@ namespace Lumel.Text
             if (CodeFont == null)
                 CodeFont = other.CodeFont;
 
+            if (StrongFont == null)
+                StrongFont = other.StrongFont;
+
+            if (EmphasisFont == null)
+                EmphasisFont = other.EmphasisFont;
+
+            if (StrongEmphasisFont == null)
+                StrongEmphasisFont = other.StrongEmphasisFont;
+
             if (!Heading1Size.HasValue)
                 Heading1Size = other.Heading1Size;
 
@@ -207,6 +296,9 @@ namespace Lumel.Text
 
             if (!BlockSpacing.HasValue)
                 BlockSpacing = other.BlockSpacing;
+
+            if (!RuledHeadings.HasValue)
+                RuledHeadings = other.RuledHeadings;
 
             if (!Indent.HasValue)
                 Indent = other.Indent;
@@ -220,8 +312,20 @@ namespace Lumel.Text
             if (!LinkFill.HasValue)
                 LinkFill = other.LinkFill;
 
-            if (Quotes == null)
-                Quotes = other.Quotes;
+            if (!CodeFill.HasValue)
+                CodeFill = other.CodeFill;
+
+            if (!CodeInset.HasValue)
+                CodeInset = other.CodeInset;
+
+            if (!LinkUnderline.HasValue)
+                LinkUnderline = other.LinkUnderline;
+
+            if (!UnderlineAt.HasValue)
+                UnderlineAt = other.UnderlineAt;
+
+            if (Boxes == null)
+                Boxes = other.Boxes;
         }
     }
 }

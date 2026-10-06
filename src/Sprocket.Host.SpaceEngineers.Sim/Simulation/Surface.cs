@@ -38,11 +38,8 @@ namespace Sprocket.Sim.Simulation
         readonly Dictionary<string, Brush> _brushes = new Dictionary<string, Brush>();
         readonly Dictionary<string, BitmapSource> _art = new Dictionary<string, BitmapSource>();
         readonly LcdSprites _sprites = new LcdSprites();
-        readonly SeFontMetrics _symbols;
-        readonly GlyphAtlas _symbolAtlas;
-
-        readonly SeFontMetrics _mono;
-        readonly GlyphAtlas _monoAtlas;
+        readonly Dictionary<string, SeFontMetrics> _ours = new Dictionary<string, SeFontMetrics>();
+        readonly Dictionary<string, GlyphAtlas> _ourPages = new Dictionary<string, GlyphAtlas>();
 
         ScreenSpaceGraphics _graphics;
 
@@ -104,6 +101,7 @@ namespace Sprocket.Sim.Simulation
             return new Point((window.X - Viewport.X) / scale, (window.Y - Viewport.Y) / scale);
         }
 
+        /// <summary>A surface measuring with the game's font data where it is installed, and drawing with the font mods' own faces.</summary>
         public Surface()
         {
             // Two different jobs, deliberately kept apart. The game's font data decides how wide a run is,
@@ -118,23 +116,19 @@ namespace Sprocket.Sim.Simulation
             _exact = SeFontMetrics.Load(_device);
             _atlas = _exact == null ? null : GlyphAtlas.Load(_exact.PageFile);
 
-            // The symbol font is ours, so it is simply there - no cache, no game, no fallback. A missing
-            // one is a broken build rather than a machine without Space Engineers, and it should look
-            // like a fault instead of quietly drawing nothing.
-            string here = AppContext.BaseDirectory;
-            string maltek = Path.Combine(here, "Content", "Fonts", "Maltek");
+            // The font mods' faces are copied beside the harness, so they are simply there - no cache, no game, no
+            // fallback. A missing one is a broken build rather than a machine without Space Engineers, and it should
+            // look like a fault instead of quietly drawing nothing.
+            var fonts = new FontSet((IFontMetrics)_exact ?? _shapes);
+            foreach (var font in ModFonts.All)
+            {
+                var metrics = SeFontMetrics.LoadFrom(_device, Path.Combine(ModFonts.Folder, font + ".xml"), "the mod's own content", true);
+                _ours[font] = metrics;
+                _ourPages[font] = GlyphAtlas.FromDds(Path.Combine(ModFonts.Folder, font + "-0.dds"));
+                fonts = fonts.And(font, metrics);
+            }
 
-            _symbols = SeFontMetrics.LoadFrom(
-                _device, Path.Combine(maltek, "MaltekSymbols.xml"), "the mod's own content", true);
-            _symbolAtlas = GlyphAtlas.FromDds(Path.Combine(maltek, "MaltekSymbols-0.dds"));
-
-            _mono = SeFontMetrics.LoadFrom(
-                _device, Path.Combine(maltek, "MaltekMono.xml"), "the mod's own content", true);
-            _monoAtlas = GlyphAtlas.FromDds(Path.Combine(maltek, "MaltekMono-0.dds"));
-
-            _device.Fonts = new FontSet((IFontMetrics)_exact ?? _shapes)
-                .And(Symbols.Font, _symbols)
-                .And(Lettering.Mono, _mono);
+            _device.Fonts = fonts;
             _device.Install();
             Focusable = true;
         }
@@ -390,7 +384,7 @@ namespace Sprocket.Sim.Simulation
                 BitmapSource sprite = SpriteFor(material);
                 if (sprite != null)
                 {
-                    DrawTinted(context, sprite, destination, command.Color);
+                    DrawTinted(context, command.Source.HasValue ? Part(material, sprite, command.Source.Value) : sprite, destination, command.Color);
                     return;
                 }
 
@@ -478,13 +472,16 @@ namespace Sprocket.Sim.Simulation
             // A face of ours falls back to nothing rather than to a desktop typeface: a symbol drawn as
             // the letter its codepoint happens to be is worse than a gap, and a listing drawn in a
             // proportional stand-in would say the columns line up when they do not.
-            bool ours = command.Font == Symbols.Font || command.Font == Lettering.Mono;
-
-            SeFontMetrics metrics = command.Font == Symbols.Font ? _symbols
-                : command.Font == Lettering.Mono ? _mono : _exact;
-
-            GlyphAtlas page = command.Font == Symbols.Font ? _symbolAtlas
-                : command.Font == Lettering.Mono ? _monoAtlas : _atlas;
+            SeFontMetrics metrics;
+            GlyphAtlas page;
+            bool ours = _ours.TryGetValue(command.Font ?? "", out metrics);
+            if (ours)
+                page = _ourPages[command.Font];
+            else
+            {
+                metrics = _exact;
+                page = _atlas;
+            }
 
             string text = metrics == null ? command.Text : metrics.AsDrawn(command.Text);
 
@@ -639,6 +636,19 @@ namespace Sprocket.Sim.Simulation
             art = png == null ? null : new BitmapImage(new Uri(png, UriKind.Absolute));
             _art.Add(name, art);
             return art;
+        }
+
+        /// <summary>The part <paramref name="source" /> of <paramref name="sprite" />, in its own pixels, cut once and kept.</summary>
+        BitmapSource Part(string name, BitmapSource sprite, Rectangle source)
+        {
+            var key = "part:" + name + ":" + source.X + "," + source.Y + "," + source.Width + "," + source.Height;
+            BitmapSource part;
+            if (_art.TryGetValue(key, out part))
+                return part;
+
+            part = new CroppedBitmap(sprite, new Int32Rect(source.X, source.Y, source.Width, source.Height));
+            _art.Add(key, part);
+            return part;
         }
 
         BitmapSource SpriteFor(string name)

@@ -33,12 +33,22 @@ namespace Lumel.Drawing
         /// </remarks>
         public const float TopSideBearing = 3f * 23f / 18f;
 
+        // Body, bold, italic, bold italic and code: the faces a paragraph switches between.
+        const int RecentFonts = 5;
+
         readonly ClipStack _clip = new ClipStack();
 
         readonly MyStringId _fill;
 
         readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
         readonly Dictionary<string, float> _lifts = new Dictionary<string, float>();
+
+        // The fonts last drawn in, by reference, with their line and lift: a paragraph with bold and italic words switches
+        // font at every one of them, and each switch would otherwise hash the font's name twice, on every frame.
+        readonly string[] _recentFonts = new string[RecentFonts];
+        readonly float[] _recentLines = new float[RecentFonts];
+        readonly float[] _recentLifts = new float[RecentFonts];
+        int _recentNext;
 
         readonly StringBuilder _nothing = new StringBuilder();
         readonly MyScreenSpaceLayer _layer;
@@ -155,7 +165,20 @@ namespace Lumel.Drawing
             if (target.Width <= 0 || target.Height <= 0)
                 return;
 
-            _screenSpace.DrawSprite(material, target, color, rotation, _layer);
+            _screenSpace.DrawSprite(material, target, null, color, rotation, _layer);
+        }
+
+        /// <inheritdoc />
+        public void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color)
+        {
+            if (destination.Width <= 0f || destination.Height <= 0f || source.Width <= 0 || source.Height <= 0)
+                return;
+
+            var target = ToPixels(Transformed(destination));
+            if (target.Width <= 0 || target.Height <= 0)
+                return;
+
+            _screenSpace.DrawSprite(material, target, source, color, 0f, _layer);
         }
 
         /// <inheritdoc />
@@ -219,6 +242,7 @@ namespace Lumel.Drawing
             {
                 _lines.Clear();
                 _lastFont = null;
+                Array.Clear(_recentFonts, 0, RecentFonts);
             }
 
             _scale = scale;
@@ -252,16 +276,24 @@ namespace Lumel.Drawing
         {
             if (!ReferenceEquals(font, _lastFont))
             {
-                float line;
-                if (!_lines.TryGetValue(font, out line))
-                {
-                    line = _screenSpace.MeasureText(font, _nothing, _fontScale).Y / _scale;
-                    _lines[font] = line;
-                }
-
                 _lastFont = font;
-                _lastLine = line;
-                _lastLift = Lift(font);
+                if (!Recall(font))
+                {
+                    float line;
+                    if (!_lines.TryGetValue(font, out line))
+                    {
+                        line = _screenSpace.MeasureText(font, _nothing, _fontScale).Y / _scale;
+                        _lines[font] = line;
+                    }
+
+                    _lastLine = line;
+                    _lastLift = Lift(font);
+
+                    _recentFonts[_recentNext] = font;
+                    _recentLines[_recentNext] = _lastLine;
+                    _recentLifts[_recentNext] = _lastLift;
+                    _recentNext = (_recentNext + 1) % RecentFonts;
+                }
             }
 
             return _lastLine > 0f ? size / _lastLine : 0f;
@@ -273,6 +305,22 @@ namespace Lumel.Drawing
         ///     alike, so a run <c>size</c> tall is drawn <c>size</c> times this too low. Nothing for a font
         ///     whose line cannot be read. Kept per font, since reading one opens its file.
         /// </remarks>
+        /// <summary>Takes <paramref name="font" />'s line and lift from the fonts last drawn in, answering whether it was one of them.</summary>
+        bool Recall(string font)
+        {
+            for (var i = 0; i < RecentFonts; i++)
+            {
+                if (!ReferenceEquals(_recentFonts[i], font))
+                    continue;
+
+                _lastLine = _recentLines[i];
+                _lastLift = _recentLifts[i];
+                return true;
+            }
+
+            return false;
+        }
+
         float Lift(string font)
         {
             if (font == null)
