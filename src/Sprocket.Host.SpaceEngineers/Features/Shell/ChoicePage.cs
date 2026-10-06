@@ -33,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <inheritdoc />
         public override string Title => _title;
 
+        /// <inheritdoc />
+        public override bool Asks => true;
+
         /// <summary>What the question is about, which a choice page says for as long as it is up.</summary>
         /// <remarks>
         /// Set when the page is made and never after, because the header holds its size for the life of a screen: a

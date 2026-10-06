@@ -46,6 +46,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override string Title => Editor.Texts.PickHowOftenQuestion;
 
         /// <inheritdoc />
+        public override bool Asks => true;
+
+        /// <inheritdoc />
         public override string PrimaryText => _aim.Outcome != Outcome.One ? Editor.Texts.ChromeDone : "";
 
         /// <inheritdoc />

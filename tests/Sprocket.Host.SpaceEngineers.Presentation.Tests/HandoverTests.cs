@@ -226,12 +226,10 @@ public class HandoverTests : IDisposable
         Assert.Empty(_atServer.Stored);
     }
 
-    /// <summary>How somebody works in the editor, the kind filter among it, outlives a rebuild.</summary>
+    /// <summary>How somebody works in the editor outlives a rebuild.</summary>
     [Fact]
     public void HabitsCarryOnThroughARebuild()
     {
-        _sim.Unit.Editor.Habits.Doing.Kind = "Door";
-        _sim.Unit.Editor.Habits.Doing.Blocks = "Air";
         _sim.Unit.Editor.ShowsTerminal = true;
 
         string program;
@@ -240,8 +238,6 @@ public class HandoverTests : IDisposable
         SprocketUnit rebuilt = null!;
         _wire.As(_server, () => rebuilt = _sim.Unit.Rebuilt(program, "", null, new Rota()));
 
-        Assert.Equal("Door", rebuilt.Editor.Habits.Doing.Kind);
-        Assert.Equal("Air", rebuilt.Editor.Habits.Doing.Blocks);
         Assert.True(rebuilt.Editor.ShowsTerminal);
     }
 

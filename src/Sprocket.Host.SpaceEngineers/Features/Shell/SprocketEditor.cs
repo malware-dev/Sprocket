@@ -705,6 +705,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         public EditorPage Current => _stack[_stack.Count - 1];
 
+        /// <summary>The screen the questions on top of the stack are asked for: the topmost page that is not one.</summary>
+        public EditorPage Opener
+        {
+            get
+            {
+                for (var i = _stack.Count - 1; i > 0; i--)
+                {
+                    if (!_stack[i].Asks)
+                        return _stack[i];
+                }
+
+                return _stack[0];
+            }
+        }
+
         /// <summary>How deep the stack is, for a run of questions to return to.</summary>
         public int Depth => _stack.Count;
 

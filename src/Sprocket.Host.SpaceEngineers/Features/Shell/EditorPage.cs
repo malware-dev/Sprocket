@@ -175,6 +175,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The codex entry about this screen, by the id a link names it by, or null where the screen has none.</summary>
         public virtual string Help => null;
 
+        /// <summary>Whether this page is a question asked for the screen under it, rather than a screen of its own.</summary>
+        public virtual bool Asks => false;
+
+        /// <summary>What was last typed into the block search of a picker opened from this screen, kept while the screen is open.</summary>
+        public string Search { get; set; } = "";
+
         /// <summary>Opens the codex at the entry <see cref="Help" /> names.</summary>
         public virtual void ShowHelp()
         {

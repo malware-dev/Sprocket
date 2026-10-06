@@ -9,19 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// </remarks>
     public sealed class Habits
     {
-        /// <summary>How the picker for what starts a sequence was last narrowed.</summary>
-        public readonly Filter When = new Filter();
-
-        /// <summary>How the picker for what a step does was last narrowed.</summary>
-        public readonly Filter Doing = new Filter();
-
         /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
         public bool ShowsTerminal;
-
-        /// <summary>The filter for one of the two pickers.</summary>
-        public Filter For(bool forEvents)
-        {
-            return forEvents ? When : Doing;
-        }
     }
 }

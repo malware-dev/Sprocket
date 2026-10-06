@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<long> _filteredIds = new List<long>();
         readonly HashSet<long> _wasShown = new HashSet<long>();
         readonly List<EntityKind> _kinds = new List<EntityKind>();
-        readonly Filter _filter;
+        readonly EditorPage _screen;
         readonly List<EntityKind> _shownKinds = new List<EntityKind>();
         readonly List<string> _kindKeys = new List<string>();
         readonly List<string> _names = new List<string>();
@@ -83,12 +83,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _chosen;
         Form _chosenForm;
         bool _all;
-        string _blockSearch;
-        string _kind;
+        string _kind = "";
         string _narrowedSearch;
         string _narrowedKind;
-        string _kindSearch;
-        string _whatSearch;
+        string _kindSearch = "";
+        string _whatSearch = "";
         string _said;
         string _saidChosen = "";
         int _saidOffered;
@@ -163,11 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _all = all;
             _done = done;
 
-            _filter = editor.Habits.For(forEvents);
-            _kind = _filter.Kind;
-            _blockSearch = _filter.Blocks;
-            _kindSearch = _filter.Kinds;
-            _whatSearch = _filter.Choices;
+            _screen = editor.Opener;
 
             for (var i = 0; i < targets.Count; i++)
             {
@@ -177,20 +172,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>
-        /// <remarks>
-        /// Narrowed afresh each time rather than the way the last pick was left, since the blocks a slot is offered are already
-        /// only the ones it can take, and a kind remembered from choosing what a step does would hide them.
-        /// </remarks>
         public PickPage(SprocketEditor editor, string title, IList<long> targets, Func<GridEntity, bool> fits,
             Action<PickAnswer> done)
             : this(editor, title, false, targets, "", Form.Native, done)
         {
             _fits = fits;
-            _filter = new Filter();
-            _kind = "";
-            _blockSearch = "";
-            _kindSearch = "";
-            _whatSearch = "";
         }
 
         /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
@@ -198,6 +184,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <inheritdoc />
         public override string Help => Terms.Picking;
+
+        /// <inheritdoc />
+        public override bool Asks => true;
 
         /// <inheritdoc />
         /// <remarks>Nothing where what the trigger does goes on to a page of its own.</remarks>
@@ -775,7 +764,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     : Template.Fill(texts.PickSomePicked, "count", _selection.Count.ToString(CultureInfo.InvariantCulture));
 
             // Always offered, never conditioned on how long the list is.
-            _blocks.NarrowText = _blockSearch;
+            _blocks.NarrowText = _screen.Search;
 
             // Off the whole catalogue, not the rows shown: narrowing must not take the picture column away and shuffle every
             // row sideways.
@@ -812,8 +801,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void FillFilters()
         {
-            // A kind remembered from an earlier picker may not be on this construct at all, and one that is not would hide
-            // every block with nothing on screen to say why.
+            // A kind whose last block has gone from the construct would hide every block with nothing on screen to say why.
             if (_kind.Length > 0 && !HasKind(_kind))
                 SetKind("");
 
@@ -879,7 +867,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var narrow = Editor.Act(Cmd.NarrowKinds, delegate
             {
                 _kindSearch = said;
-                _filter.Kinds = said;
                 Editor.Invalidate();
             });
 
@@ -974,8 +961,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _matched.Clear();
             for (var i = 0; i < _names.Count; i++)
             {
-                // What is chosen stays listed whatever the search, as a chosen block does: a search kept from an earlier
-                // picker must not hide the answer this one opened with.
+                // What is chosen stays listed whatever the search, as a chosen block does, so a search never hides the
+                // answer this picker opened with.
                 if (EntityQuery.MatchesText(_names[i], _whatSearch) || _ids[i] == _chosen)
                     _matched.Add(i);
             }
@@ -1334,13 +1321,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             EntityQuery.KindsPresent(_candidates, _kinds);
 
             _wasShown.Clear();
-            if (_blockSearch == _narrowedSearch && _kind == _narrowedKind)
+            if (_screen.Search == _narrowedSearch && _kind == _narrowedKind)
             {
                 for (var i = 0; i < _filteredIds.Count; i++)
                     _wasShown.Add(_filteredIds[i]);
             }
 
-            _narrowedSearch = _blockSearch;
+            _narrowedSearch = _screen.Search;
             _narrowedKind = _kind;
 
             _filtered.Clear();
@@ -1349,7 +1336,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var entity = _candidates[i];
                 if (!_wasShown.Contains(entity.Id) && !Contains(_selection, entity.Id)
-                    && !EntityQuery.Matches(entity, _blockSearch, _kind))
+                    && !EntityQuery.Matches(entity, _screen.Search, _kind))
                     continue;
 
                 _filtered.Add(entity);
@@ -1447,13 +1434,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void OnBlockSearch(string value)
         {
             value = value ?? "";
-            if (value == _blockSearch)
+            if (value == _screen.Search)
                 return;
 
             var narrow = Editor.Act(Cmd.NarrowEntities, delegate
             {
-                _blockSearch = value;
-                _filter.Blocks = value;
+                _screen.Search = value;
                 Editor.Invalidate();
             });
 
@@ -1470,7 +1456,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var narrow = Editor.Act(Cmd.NarrowChoices, delegate
             {
                 _whatSearch = value;
-                _filter.Choices = value;
                 Editor.Invalidate();
             });
 
@@ -1478,11 +1463,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 narrow.Execute();
         }
 
-        /// <summary>Narrows the blocks to one kind, kept where it outlives this page so the next picker of its sort opens the same way.</summary>
+        /// <summary>Narrows the blocks to one kind.</summary>
         void SetKind(string kindId)
         {
             _kind = kindId ?? "";
-            _filter.Kind = _kind;
             Editor.Invalidate();
         }
 
