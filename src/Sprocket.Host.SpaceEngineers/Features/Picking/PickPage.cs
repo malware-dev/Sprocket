@@ -82,6 +82,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         string _chosen;
         Form _chosenForm;
+        string _dropped = "";
+        Form _droppedForm;
         bool _all;
         string _kind = "";
         string _narrowedSearch;
@@ -945,14 +947,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 note = note.Length == 0 ? texts.PickShared : Template.Fill(Template.Fill(texts.PickNoteAndShared, "shared", texts.PickShared), "note", note);
 
             // A choice the blocks can no longer honor is dropped rather than left showing, so Done never appears over a
-            // sentence that could not run.
-            var chosen = _chosen;
-            if (At(chosen, _chosenForm) < 0)
+            // sentence that could not run. It is kept aside until something else is chosen, and blocks that honor it again
+            // bring it back, so a detour through other blocks loses nothing: a step's own action comes back with its values.
+            if (_chosen.Length > 0 && At(_chosen, _chosenForm) < 0)
             {
-                chosen = "";
+                _dropped = _chosen;
+                _droppedForm = _chosenForm;
                 _chosen = "";
                 _chosenForm = Form.Native;
             }
+            else if (_chosen.Length == 0 && _dropped.Length > 0 && At(_dropped, _droppedForm) >= 0)
+            {
+                _chosen = _dropped;
+                _chosenForm = _droppedForm;
+                _dropped = "";
+            }
+
+            var chosen = _chosen;
 
             _what.Note = note;
             _what.NarrowText = _whatSearch;
@@ -1421,6 +1432,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _chosen = id;
             _chosenForm = form;
+            _dropped = "";
             Editor.Invalidate();
         }
 

@@ -88,6 +88,9 @@ namespace Sprocket.Sim.Driving
         /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
         public static void PressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Alone, 1);
 
+        /// <summary>Presses a block's row twice in quick succession, which takes that block alone and finishes where nothing is left to ask.</summary>
+        public static void DoublePressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Alone, 2);
+
         /// <summary>
         /// Ticks a block's box, which takes it as well as whatever was already taken.
         /// </summary>
@@ -287,6 +290,14 @@ namespace Sprocket.Sim.Driving
             }
 
             throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
+        }
+
+        /// <summary>Presses what a picker's column offers as <paramref name="text" /> twice in quick succession, which chooses it and moves on.</summary>
+        public static void DoublePressChoice(this SprocketEditor editor, string text)
+        {
+            var entry = editor.Stages().SelectMany(pane => pane.Entries()).FirstOrDefault(e => e.Text == text)
+                        ?? throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
+            entry.Pick(Held.Alone, 2);
         }
 
         /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer, a choice, or an option or block in a picker.</summary>

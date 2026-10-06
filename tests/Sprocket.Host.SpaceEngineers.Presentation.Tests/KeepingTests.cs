@@ -61,4 +61,82 @@ public class KeepingTests
 
         Assert.True(screen.Shows("#FF8800"), "the picker opened on no colour");
     }
+
+    /// <summary>A double press on other blocks that offer the step's action finishes at once, keeping the value.</summary>
+    [Fact]
+    public void ADoublePressOnOtherBlocksFinishesWithTheValue()
+    {
+        var screen = OnTheBlocks();
+
+        screen.Editor.DoublePressBlock("Cockpit Light");
+        screen.Run(2);
+
+        Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
+        var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Assert.Equal(new[] { "Cockpit Light" }, act.Targets);
+        Assert.Equal(5.0, Assert.Single(act.Values).Number);
+    }
+
+    /// <summary>Blocks that do not offer the step's action leave nothing chosen, and nothing to finish with.</summary>
+    [Fact]
+    public void BlocksWithoutTheActionClearIt()
+    {
+        var screen = OnTheBlocks();
+
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Run(2);
+
+        Assert.Equal("\u2026 Airlock Inner Door", screen.Editor.Screen.Title());
+        Assert.False(screen.Editor.Current.CanPrimary, "the picker would finish with nothing chosen");
+        Assert.False(screen.Shows("Radius (0.1 - 20)"), "the values column still asks for the radius");
+    }
+
+    /// <summary>Back on blocks that offer the step's action, the action is chosen again and holds its value.</summary>
+    [Fact]
+    public void ReturningToBlocksThatOfferTheActionBringsItBack()
+    {
+        var screen = OnTheBlocks();
+
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Run(2);
+        screen.Editor.PressBlock("Cockpit Light");
+        screen.Run(2);
+
+        Assert.Equal("Set Radius on Cockpit Light", screen.Editor.Screen.Title());
+        Assert.True(screen.Shows("5.0"), "the value did not come back with the action");
+
+        screen.Editor.DoublePressBlock("Cockpit Light");
+        screen.Run(2);
+
+        Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
+        var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Assert.Equal(5.0, Assert.Single(act.Values).Number);
+    }
+
+    /// <summary>An action chosen in place of the step's asks for its own values: a double press on it goes to them rather than finishing.</summary>
+    [Fact]
+    public void AnotherActionAsksForItsValues()
+    {
+        var screen = OnTheBlocks();
+
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Run(2);
+        screen.Editor.PressBlock("Cockpit Light");
+        screen.Run(2);
+        screen.Editor.DoublePressChoice("Set Falloff");
+        screen.Run(2);
+
+        Assert.Equal("Set Falloff on Cockpit Light", screen.Editor.Screen.Title());
+        Assert.True(screen.Shows("Falloff (0 - 2)"), "the values column asks for nothing");
+        Assert.False(screen.Shows("5.0"), "the radius's value was given to the falloff");
+    }
+
+    /// <summary>The radius step, with the picker opened on its blocks.</summary>
+    static Screen OnTheBlocks()
+    {
+        var screen = Screen.Fresh(ARadiusStep.Split(' '));
+        screen.Editor.StepRows()[0].Slots[1].Opens!.Execute();
+        screen.Run(2);
+        return screen;
+    }
 }
