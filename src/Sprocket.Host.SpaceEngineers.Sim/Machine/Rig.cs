@@ -239,11 +239,19 @@ public sealed class Rig
         return Weld(new Door(id, name, Type<MyObjectBuilder_Door>(), "LargeBlockDoor", "Door"));
     }
 
+    /// <summary>A hangar door, named, with the game's own type behind it, which announces starting to move either way.</summary>
+    public Door HangarDoor(long id, string name)
+    {
+        return Weld(new Door(id, name, Type<MyObjectBuilder_AirtightHangarDoor>(), "AirtightHangarDoor", "Hangar Door"));
+    }
+
+    /// <summary>A rotor, named, with the game's own type behind it.</summary>
     public Rotor Rotor(long id, string name)
     {
         return Weld(new Rotor(id, name, Type<MyObjectBuilder_MotorStator>(), "LargeStator", "Rotor"));
     }
 
+    /// <summary>An air vent, named, with the game's own type behind it.</summary>
     public Vent Vent(long id, string name)
     {
         return Weld(new Vent(id, name, Type<MyObjectBuilder_AirVent>(), "SmallAirVent", "Air Vent"));
@@ -312,6 +320,7 @@ public sealed class Rig
             "Sound Block"));
     }
 
+    /// <summary>An interior light, named, with the game's own type behind it.</summary>
     public Lamp Light(long id, string name)
     {
         return Weld(new Lamp(id, name, Type<MyObjectBuilder_InteriorLight>(),
@@ -388,6 +397,7 @@ public sealed class Rig
         }
     }
 
+    /// <summary>A moment of the rig running: the clock moves on, and every block on every grid has its moment.</summary>
     public void Tick()
     {
         Clock.Tick();

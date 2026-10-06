@@ -38,6 +38,12 @@ sealed class Rigged
         return Rig.Door(id, name);
     }
 
+    /// <summary>A hangar door on the construct.</summary>
+    public Door HangarDoor(long id, string name)
+    {
+        return Rig.HangarDoor(id, name);
+    }
+
     public Vent Vent(long id, string name)
     {
         return Rig.Vent(id, name);

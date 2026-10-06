@@ -73,4 +73,72 @@ public class WatchingTests
 
         Assert.Equal(switched + 1, frame);
     }
+
+    /// <summary>
+    /// A hangar door somebody else starts closing is seen on the tick after, whatever the <c>when</c> asks for, since a
+    /// hangar door announces starting to move either way.
+    /// </summary>
+    [Fact]
+    public void AHangarDoorStartingToCloseIsSeenOnTheTickAfter()
+    {
+        var ship = new Rigged();
+        var automation = new Automation();
+        var hangar = ship.HangarDoor(1, "Hangar");
+        var lamp = ship.Light(2, "Lamp");
+        hangar.ForceOpen();
+
+        var closing = new WhenTrigger("closing");
+        closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
+        closing.IntervalTicks = 600;
+        var sequence = automation.AddSequence(closing);
+        var act = new Act(BlockKinds.SwitchOn);
+        act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        sequence.Steps.Add(act);
+
+        var runner = new AutomationRunner(automation, ship.World);
+        var frame = 0;
+        for (; frame < 23; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame + 1);
+        }
+
+        hangar.Perform("Open_Off", null!);
+        var told = frame;
+        while (frame < 100 && runner.Get(sequence)!.FiredCount == 0)
+        {
+            ship.Tick();
+            runner.Tick(++frame);
+        }
+
+        Assert.Equal(told + 1, frame);
+    }
+
+    /// <summary>A hangar door's <c>when</c> listens for it starting to move, and deleting the <c>when</c> stops all of it.</summary>
+    [Fact]
+    public void AHangarDoorIsLetGoOf()
+    {
+        var ship = new Rigged();
+        var automation = new Automation();
+        var hangar = ship.HangarDoor(1, "Hangar");
+        var lamp = ship.Light(2, "Lamp");
+
+        var closing = new WhenTrigger("closing");
+        closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
+        var sequence = automation.AddSequence(closing);
+        var act = new Act(BlockKinds.SwitchOn);
+        act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        sequence.Steps.Add(act);
+
+        var runner = new AutomationRunner(automation, ship.World);
+        runner.Tick(1);
+        runner.Tick(2);
+        Assert.Equal(4, hangar.Listeners);
+
+        automation.RemoveSequence(sequence);
+        automation.Edited();
+        runner.Tick(3);
+        runner.Tick(4);
+        Assert.Equal(0, hangar.Listeners);
+    }
 }

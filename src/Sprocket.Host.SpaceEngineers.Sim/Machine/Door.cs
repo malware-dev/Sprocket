@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
+using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using VRage.ObjectBuilders;
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
@@ -26,12 +27,17 @@ public sealed class Door : Fitting
     Action<IMyDoor>? _closed;
     Action<bool>? _changed;
     Action<IMyDoor, bool>? _turned;
+    Action<IMyTerminalBlock>? _moving;
 
     /// <summary>A shut door, <paramref name="id" />, called <paramref name="name" />, of the block type <paramref name="type" /> and <paramref name="subtype" />, shown as <paramref name="display" />.</summary>
+    /// <remarks>
+    /// Welded as a hangar door, it answers as one, and announces starting to move either way through
+    /// <c>PropertiesChanged</c>, as a hangar door in the game does.
+    /// </remarks>
     public Door(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
-        Fit(Pretend.To<IMyDoor>()
+        var door = Pretend.To<IMyDoor>()
             .Gives("Status", () => Status)
             .Gives("OpenRatio", () => (float)_progress / TravelTicks)
             .Does("OpenDoor", () => { Command(true, "open"); return null; })
@@ -44,10 +50,19 @@ public sealed class Door : Fitting
             .Does("add_DoorStateChanged", handler => { _changed += (Action<bool>)handler[0]; })
             .Does("remove_DoorStateChanged", handler => { _changed -= (Action<bool>)handler[0]; })
             .Does("add_OnDoorStateChanged", handler => { _turned += (Action<IMyDoor, bool>)handler[0]; })
-            .Does("remove_OnDoorStateChanged", handler => { _turned -= (Action<IMyDoor, bool>)handler[0]; }));
+            .Does("remove_OnDoorStateChanged", handler => { _turned -= (Action<IMyDoor, bool>)handler[0]; });
+
+        if (type == new MyObjectBuilderType(typeof(MyObjectBuilder_AirtightHangarDoor)))
+        {
+            door.Also<IMyAirtightHangarDoor>()
+                .Does("add_PropertiesChanged", handler => { _moving += (Action<IMyTerminalBlock>)handler[0]; })
+                .Does("remove_PropertiesChanged", handler => { _moving -= (Action<IMyTerminalBlock>)handler[0]; });
+        }
+
+        Fit(door);
     }
 
-    /// <summary>Whether the door raises the game's own events on finishing, as every door in the game does.</summary>
+    /// <summary>Whether the door raises the game's own events as it starts and finishes moving, as every door in the game does.</summary>
     /// <remarks>Off for a test about a door whose announcement never comes, which is what the backstop look is for.</remarks>
     public bool Announces { get; set; } = true;
 
@@ -123,10 +138,11 @@ public sealed class Door : Fitting
         }
     }
 
-    /// <summary>How many are listening for the door to finish opening or closing, or to be told to move.</summary>
+    /// <summary>How many are listening for the door to finish opening or closing, to be told to move, or to start moving.</summary>
     public int Listeners => (_opened == null ? 0 : _opened.GetInvocationList().Length)
         + (_closed == null ? 0 : _closed.GetInvocationList().Length)
-        + (_turned == null ? 0 : _turned.GetInvocationList().Length);
+        + (_turned == null ? 0 : _turned.GetInvocationList().Length)
+        + (_moving == null ? 0 : _moving.GetInvocationList().Length);
 
     /// <inheritdoc />
     public override void Tick()
@@ -155,7 +171,7 @@ public sealed class Door : Fitting
     /// <summary>Throws the door's switch, telling the journal <paramref name="told" /> where there is one.</summary>
     /// <remarks>
     /// As every door in the game does, it raises <c>DoorStateChanged</c> as it is told to open, and again only once it has
-    /// finished closing.
+    /// finished closing. A hangar door also raises <c>PropertiesChanged</c> as it is told to move either way.
     /// </remarks>
     void Command(bool opening, string? told)
     {
@@ -169,5 +185,8 @@ public sealed class Door : Fitting
             _changed?.Invoke(true);
             _turned?.Invoke((IMyDoor)Block, true);
         }
+
+        if (opening != was && Announces)
+            _moving?.Invoke(Block);
     }
 }
