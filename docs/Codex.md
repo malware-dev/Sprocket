@@ -8,10 +8,14 @@ that names the term in `**strong**`. Both are in `src/Sprocket.Host.SpaceEnginee
 the codex as written, and a translation is a folder named for its culture, such as `no`. A file a
 translation lacks is read in English.
 
-A term is in the game once `Features/Codex/Terms.cs` lists it. The build reports a page without its
-heading (LOC007), either file of a term without the other (LOC008), a link to a term with no page
-(LOC009), a box never closed (LOC010), a link in a tooltip, where nothing can be pressed (LOC011), and a
-translation missing a file or holding a stray one (LOC006, LOC005).
+A term is in the game once the codex's `index` lists it. The index is a plain list beside the language
+folders, one id a line in the order the margin lists them, where a line starting with `#` is a comment,
+and every language reads the same one. The build reports a page without its heading (LOC007), either file
+of a term without the other (LOC008), a link to a term with no page (LOC009), a box never closed (LOC010),
+a link in a tooltip, where nothing can be pressed (LOC011), a translation missing a file or holding a stray
+one (LOC006, LOC005), a codex with no index (LOC012), an id the index lists with no page (LOC013), a page
+the index leaves out (LOC014), and an id listed twice (LOC015). A term a screen links to by name, and the
+index leaves out, is said in the game's log as the codex is read.
 
 | Id | Name | Page |
 |---|---|---|

@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {
     /// <summary>Every term the codex explains, in the language the editor speaks.</summary>
-    /// <remarks>Each term's page and tooltip are files in the mod's <c>Data\Codex</c>, named by its id.</remarks>
+    /// <remarks>
+    /// The terms, and their order, are the ids in the file <c>index</c> at the root of the mod's <c>Data\Codex</c>: one id a line,
+    /// where a line starting with <c>#</c> is a comment. Each term's page and tooltip are files in each language's folder, named
+    /// by its id. The index is read when the terms are first asked for, and again once the pages are read from somewhere else.
+    /// </remarks>
     public sealed class Terms
     {
         /// <summary>The home screen.</summary>
@@ -30,41 +36,42 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Picking blocks.</summary>
         public const string Picking = "picking";
 
-        /// <summary>The term for a trigger.</summary>
-        public const string Trigger = "trigger";
+        const string Index = "index";
 
-        /// <summary>The term for a step.</summary>
-        public const string Step = "step";
+        /// <summary>The terms a screen links to by name, which the index has to list.</summary>
+        static readonly string[] Linked = { Home, LogicSystem, Installation, Sequence, ConfigurationPanel, Library, Picking };
 
-        /// <summary>The term for a slot.</summary>
-        public const string Slot = "slot";
-
-        /// <summary>The term for a signal.</summary>
-        public const string Signal = "signal";
-
-        /// <summary>The term for a blueprint.</summary>
-        public const string Blueprint = "blueprint";
-
-        /// <summary>The term for a construct.</summary>
-        public const string Construct = "construct";
-
+        readonly Texts _texts;
         readonly List<Term> _all = new List<Term>();
+        ITextSource _read;
+        string _trouble = "";
 
-        /// <summary>The codex in <paramref name="texts" />, whose book holds its pages.</summary>
+        /// <summary>The codex in <paramref name="texts" />, whose book holds its pages and its index.</summary>
         public Terms(Texts texts)
         {
-            var ids = new[]
-            {
-                Home, LogicSystem, Installation, Sequence, ConfigurationPanel, Library, Picking, Trigger, Step, Slot, Signal,
-                Blueprint, Construct
-            };
-
-            for (var i = 0; i < ids.Length; i++)
-                _all.Add(new Term(ids[i], texts));
+            _texts = texts;
         }
 
         /// <summary>Every term, in the order the codex's margin lists them.</summary>
-        public IReadOnlyList<Term> All => _all;
+        public IReadOnlyList<Term> All
+        {
+            get
+            {
+                Ready();
+                return _all;
+            }
+        }
+
+        /// <summary>What is wrong with the index, said in the game's log as it is read, or empty where nothing is.</summary>
+        /// <remarks>The build reports the rest: an id with no page, an id listed twice, and a page the index leaves out.</remarks>
+        public string Trouble
+        {
+            get
+            {
+                Ready();
+                return _trouble;
+            }
+        }
 
         /// <summary>Lets every term go of the tooltip kept in the language that was spoken.</summary>
         public void Reword()
@@ -76,13 +83,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The term called <paramref name="id" />, or null where the codex has none.</summary>
         public Term Find(string id)
         {
-            for (var i = 0; i < _all.Count; i++)
-            {
-                if (_all[i].Id == id)
-                    return _all[i];
-            }
-
-            return null;
+            Ready();
+            return Listed(id);
         }
 
         /// <summary>The term a link's target names, as in <c>#installation</c>, or null where it names none.</summary>
@@ -92,10 +94,65 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             if (string.IsNullOrEmpty(target) || target[0] != '#')
                 return null;
 
+            Ready();
             for (var i = 0; i < _all.Count; i++)
             {
                 var id = _all[i].Id;
                 if (target.Length == id.Length + 1 && string.CompareOrdinal(target, 1, id, 0, id.Length) == 0)
+                    return _all[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>Reads the index, where the pages have come to be read from somewhere it has not been read from yet.</summary>
+        /// <remarks>
+        /// A term the index lists twice is listed once; a term a screen links to and the index leaves out is said in the log, since
+        /// the screen's help then opens nothing.
+        /// </remarks>
+        void Ready()
+        {
+            var pages = _texts.Book.Pages;
+            if (pages == null || pages == _read)
+                return;
+
+            _read = pages;
+            _all.Clear();
+
+            var trouble = new StringBuilder();
+            var index = pages.Find(Index);
+            if (index == null)
+            {
+                trouble.Append("the codex has no index");
+            }
+            else
+            {
+                var lines = index.Split('\n');
+                for (var i = 0; i < lines.Length; i++)
+                {
+                    var id = lines[i].Trim();
+                    if (id.Length > 0 && id[0] != '#' && Listed(id) == null)
+                        _all.Add(new Term(id, _texts));
+                }
+            }
+
+            for (var i = 0; i < Linked.Length; i++)
+            {
+                if (Listed(Linked[i]) == null)
+                    trouble.Append(trouble.Length > 0 ? "; " : "").Append("the index leaves out ").Append(Linked[i]).Append(", which a screen links to");
+            }
+
+            _trouble = trouble.ToString();
+            if (_trouble.Length > 0)
+                Told.Say("codex: " + _trouble);
+        }
+
+        /// <summary>The term called <paramref name="id" /> among those read, or null where there is none.</summary>
+        Term Listed(string id)
+        {
+            for (var i = 0; i < _all.Count; i++)
+            {
+                if (_all[i].Id == id)
                     return _all[i];
             }
 

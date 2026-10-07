@@ -7,8 +7,9 @@ namespace Sprocket.Sim.Content
 {
     /// <summary>The codex's pages and tooltips read straight out of the folders the mod ships, the way <c>GameCodex</c> reads them.</summary>
     /// <remarks>
-    /// Under <c>&lt;culture&gt;-&lt;subculture&gt;</c>, then <c>&lt;culture&gt;</c>, then <c>en</c>, the first that has the file. The files
-    /// are the ones the mod ships, copied beside the harness.
+    /// Under <c>&lt;culture&gt;-&lt;subculture&gt;</c>, then <c>&lt;culture&gt;</c>, then <c>en</c>, then the codex's own folder, which
+    /// keeps what every language shares, the first that has the file. The files are the ones the mod ships, copied beside the
+    /// harness.
     /// </remarks>
     public sealed class CodexFiles : ITextSource
     {
@@ -27,6 +28,7 @@ namespace Sprocket.Sim.Content
             }
 
             _folders.Add(Path.Combine(folder, "en"));
+            _folders.Add(folder);
         }
 
         /// <summary>The folder the mod's codex is copied to beside the harness.</summary>

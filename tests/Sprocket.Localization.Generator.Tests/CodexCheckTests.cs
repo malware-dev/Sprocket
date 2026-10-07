@@ -5,17 +5,18 @@ using Xunit;
 
 namespace Sprocket.Localization.Generator.Tests;
 
-/// <summary>The codex check: every page titled and beside its tooltip, every link leading to a page, every translation whole.</summary>
+/// <summary>The codex check: every page titled, beside its tooltip and in the index, every link leading to a page, every translation whole.</summary>
 public class CodexCheckTests
 {
     const string English = "Content/Data/Codex/en/";
     const string Norwegian = "Content/Data/Codex/no/";
+    const string Index = "Content/Data/Codex/index";
 
     /// <summary>A codex whose every term is whole, in both languages, is reported for nothing and writes nothing.</summary>
     [Fact]
     public void AWholeCodexIsQuiet()
     {
-        var run = Run(Whole(English).Concat(Whole(Norwegian)).ToArray());
+        var run = Run(Whole(English).Concat(Whole(Norwegian)).Append(Listing("a", "b")).ToArray());
 
         Assert.Empty(run.Diagnostics);
         Assert.Empty(run.GeneratedTrees);
@@ -25,7 +26,7 @@ public class CodexCheckTests
     [Fact]
     public void APageWithoutItsTitleIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "No title here.")).Append((English + "c.tldr.md", "C.")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "No title here.")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
 
         Assert.Equal("LOC007", Assert.Single(run.Diagnostics).Id);
     }
@@ -34,7 +35,7 @@ public class CodexCheckTests
     [Fact]
     public void HalfATermIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "# C\n")).Append((English + "d.tldr.md", "D.")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n")).Append((English + "d.tldr.md", "D.")).Append(Listing("a", "b", "c")).ToArray());
 
         Assert.Equal(new[] { "LOC008", "LOC008" }, run.Diagnostics.Select(d => d.Id));
     }
@@ -43,7 +44,7 @@ public class CodexCheckTests
     [Fact]
     public void ALinkToNoPageIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "# C\n\nSee [nothing](#nothing).")).Append((English + "c.tldr.md", "C.")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n\nSee [nothing](#nothing).")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
 
         var dead = Assert.Single(run.Diagnostics);
         Assert.Equal("LOC009", dead.Id);
@@ -54,7 +55,7 @@ public class CodexCheckTests
     [Fact]
     public void ABoxNeverClosedIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "# C\n\n::: warning\n::: center\nx\n:::\nstill open")).Append((English + "c.tldr.md", "C.")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n\n::: warning\n::: center\nx\n:::\nstill open")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
 
         var unclosed = Assert.Single(run.Diagnostics);
         Assert.Equal("LOC010", unclosed.Id);
@@ -65,7 +66,7 @@ public class CodexCheckTests
     [Fact]
     public void ALinkInATooltipIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "# C\n")).Append((English + "c.tldr.md", "A **C** is shown ![mark](logo).\nSee [a](#a).")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n")).Append((English + "c.tldr.md", "A **C** is shown ![mark](logo).\nSee [a](#a).")).Append(Listing("a", "b", "c")).ToArray());
 
         var pressless = Assert.Single(run.Diagnostics);
         Assert.Equal("LOC011", pressless.Id);
@@ -77,7 +78,7 @@ public class CodexCheckTests
     public void ATranslationThatIsNotWholeIsReported()
     {
         var run = Run(Whole(English).Concat(Whole(Norwegian).Where(f => !f.Path.EndsWith("b.md")))
-            .Append((Norwegian + "x.md", "# X\n")).Append((Norwegian + "x.tldr.md", "X.")).ToArray());
+            .Append((Norwegian + "x.md", "# X\n")).Append((Norwegian + "x.tldr.md", "X.")).Append(Listing("a", "b")).ToArray());
 
         Assert.Contains(run.Diagnostics, d => d.Id == "LOC006" && d.GetMessage().StartsWith("b.md"));
         Assert.Contains(run.Diagnostics, d => d.Id == "LOC005" && d.GetMessage().StartsWith("x.md"));
@@ -87,9 +88,51 @@ public class CodexCheckTests
     [Fact]
     public void ALanguageWithNoCodexLacksEveryFile()
     {
-        var run = Run(Whole(English).Append(("Content/Data/Localization/MyTexts.no.resx", "<root />")).ToArray());
+        var run = Run(Whole(English).Append(("Content/Data/Localization/MyTexts.no.resx", "<root />")).Append(Listing("a", "b")).ToArray());
 
         Assert.Equal(4, run.Diagnostics.Count(d => d.Id == "LOC006"));
+    }
+
+    /// <summary>A codex with no index shows no term, which is reported.</summary>
+    [Fact]
+    public void ACodexWithNoIndexIsReported()
+    {
+        var run = Run(Whole(English).ToArray());
+
+        Assert.Equal("LOC012", Assert.Single(run.Diagnostics).Id);
+    }
+
+    /// <summary>An id the index lists with no page is reported on its line, past the comments and blank lines before it.</summary>
+    [Fact]
+    public void AnIdWithNoPageIsReported()
+    {
+        var run = Run(Whole(English).Append((Index, "# The terms.\na\n\nb\nnothing\n")).ToArray());
+
+        var unpaged = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC013", unpaged.Id);
+        Assert.Equal(4, unpaged.Location.GetLineSpan().StartLinePosition.Line);
+    }
+
+    /// <summary>A page the index does not list is reported, since the codex never shows it.</summary>
+    [Fact]
+    public void APageTheIndexLacksIsReported()
+    {
+        var run = Run(Whole(English).Append(Listing("a")).ToArray());
+
+        var unlisted = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC014", unlisted.Id);
+        Assert.StartsWith("b.md", unlisted.GetMessage());
+    }
+
+    /// <summary>An id the index lists a second time is reported on the second line.</summary>
+    [Fact]
+    public void AnIdListedTwiceIsReported()
+    {
+        var run = Run(Whole(English).Append((Index, "a\r\nb\r\na\r\n")).ToArray());
+
+        var twice = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC015", twice.Id);
+        Assert.Equal(2, twice.Location.GetLineSpan().StartLinePosition.Line);
     }
 
     /// <summary>Markdown outside a codex folder is no business of the check.</summary>
@@ -109,6 +152,9 @@ public class CodexCheckTests
         (folder + "b.md", "# B\n\nBack to [a](#a)."),
         (folder + "b.tldr.md", "A **b** is another.")
     };
+
+    /// <summary>The codex's index, listing <paramref name="ids" /> in that order.</summary>
+    static (string Path, string Text) Listing(params string[] ids) => (Index, string.Join("\n", ids) + "\n");
 
     static GeneratorDriverRunResult Run(params (string Path, string Text)[] files)
     {

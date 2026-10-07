@@ -8,8 +8,9 @@ namespace Sprocket.Host.SpaceEngineers.Localization
     /// <summary>The codex's pages and tooltips, read out of a mod's <c>Data\Codex</c> in the language loaded.</summary>
     /// <remarks>
     /// A file is looked for under the language's culture and subculture, then its culture, then <c>en</c>, the language the
-    /// codex is written in, so a page a translation lacks is read in English. It is read from the mod's folder each time it is
-    /// asked for; whoever needs one kept keeps it.
+    /// codex is written in, so a page a translation lacks is read in English, and last in the codex's own folder, which keeps
+    /// what every language shares, such as the index. It is read from the mod's folder each time it is asked for; whoever needs
+    /// one kept keeps it.
     /// </remarks>
     public sealed class GameCodex : ITextSource
     {
@@ -24,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Localization
         {
             _mod = mod;
             _folders.Add(Folder + Original + "/");
+            _folders.Add(Folder);
         }
 
         /// <summary>Reads in <paramref name="language" /> from here on.</summary>
@@ -42,6 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Localization
             }
 
             _folders.Add(Folder + Original + "/");
+            _folders.Add(Folder);
         }
 
         /// <inheritdoc />

@@ -49,5 +49,21 @@ namespace Sprocket.Localization.Generator
         public static readonly DiagnosticDescriptor Pressless = new DiagnosticDescriptor(
             "LOC011", "Codex tooltip holds a link", "{0} holds a link here, and nothing in a tooltip can be pressed",
             Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unindexed = new DiagnosticDescriptor(
+            "LOC012", "Codex has no index", "The codex {0} is in has no index, a file named index beside its language folders, so it shows no term",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unpaged = new DiagnosticDescriptor(
+            "LOC013", "Codex index lists a term with no page", "The index lists {0}, which has no page",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unlisted = new DiagnosticDescriptor(
+            "LOC014", "Codex page is not in the index", "{0} is not in the index, so the codex never shows it",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Twice = new DiagnosticDescriptor(
+            "LOC015", "Codex index lists a term twice", "The index lists {0} again here",
+            Category, DiagnosticSeverity.Warning, true);
     }
 }

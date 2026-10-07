@@ -3,6 +3,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Machine;
 using VRageMath;
@@ -202,6 +203,57 @@ public class CodexTests
         Assert.True(codex.CanStepBack);
     }
 
+    /// <summary>The codex lists the terms the shipped index lists, in its order, and finds nothing wrong with it.</summary>
+    [Fact]
+    public void TheCodexListsWhatItsIndexLists()
+    {
+        var sim = Simulation.Fresh();
+        var index = File.ReadAllLines(Path.Combine(CodexFiles.Beside, "index"))
+            .Select(line => line.Trim()).Where(line => line.Length > 0 && line[0] != '#');
+
+        Assert.Equal(index, sim.Editor.Codex.All.Select(term => term.Id));
+        Assert.Equal("", sim.Editor.Codex.Trouble);
+    }
+
+    /// <summary>The index decides which terms there are and their order, past its comments, blank lines and an id given twice.</summary>
+    [Fact]
+    public void TheIndexOrdersTheTerms()
+    {
+        var sim = Simulation.Fresh();
+        sim.Texts.Book.Pages = new Pages("index", "# The terms.\nlibrary\n\nhome\r\nlibrary\n");
+
+        var terms = new Terms(sim.Texts);
+
+        Assert.Equal(new[] { Terms.Library, Terms.Home }, terms.All.Select(term => term.Id));
+    }
+
+    /// <summary>A term a screen links to that the index leaves out is said, since that screen's help opens nothing.</summary>
+    [Fact]
+    public void ATermAScreenLinksToIsMissedWhenTheIndexLeavesItOut()
+    {
+        var sim = Simulation.Fresh();
+        sim.Texts.Book.Pages = new Pages("index", "home\n");
+
+        var terms = new Terms(sim.Texts);
+
+        Assert.Null(terms.Find(Terms.Library));
+        Assert.Contains("the index leaves out library", terms.Trouble);
+        Assert.DoesNotContain("leaves out home", terms.Trouble);
+    }
+
+    /// <summary>A codex with no index has no terms, and says so.</summary>
+    [Fact]
+    public void ACodexWithNoIndexSaysSo()
+    {
+        var sim = Simulation.Fresh();
+        sim.Texts.Book.Pages = new Pages();
+
+        var terms = new Terms(sim.Texts);
+
+        Assert.Empty(terms.All);
+        Assert.StartsWith("the codex has no index", terms.Trouble);
+    }
+
     /// <summary>Every term the codex lists has its page, opening with its title, and its tooltip in the files the mod ships.</summary>
     [Fact]
     public void EveryTermHasItsPageAndTooltip()
@@ -303,6 +355,20 @@ public class CodexTests
         }
 
         return false;
+    }
+
+    /// <summary>A codex's files held in memory, by name.</summary>
+    sealed class Pages : ITextSource
+    {
+        readonly Dictionary<string, string> _files = new Dictionary<string, string>();
+
+        public Pages(params string[] pairs)
+        {
+            for (var i = 0; i + 1 < pairs.Length; i += 2)
+                _files[pairs[i]] = pairs[i + 1];
+        }
+
+        public string? Find(string key) => _files.TryGetValue(key, out var text) ? text : null;
     }
 
     /// <summary>Every attribute the boxes in <paramref name="blocks" /> name, inside quotes and other boxes too.</summary>

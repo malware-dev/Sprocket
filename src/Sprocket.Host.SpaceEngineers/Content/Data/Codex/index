@@ -1,0 +1,15 @@
+# The terms the codex explains, in the order its contents list them: one id a line, and a line starting with # is a
+# comment. A term's page is <id>.md and its tooltip <id>.tldr.md, in the folder of each language.
+home
+logic-system
+installation
+sequence
+configuration-panel
+library
+picking
+trigger
+step
+slot
+signal
+blueprint
+construct
