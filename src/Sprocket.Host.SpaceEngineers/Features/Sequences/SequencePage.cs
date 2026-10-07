@@ -987,12 +987,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>
         /// Where the row at <paramref name="from" /> may land, counted among the rows it does not carry: for an otherwise if, right
-        /// above each line opening a branch of its if, the if's own included, up to the otherwise or the end; anywhere for the rest.
+        /// above each line opening a branch of its if, the if's own included, up to the otherwise or the end; for the rest, every
+        /// gap but the one just under the end of a branch.
         /// </summary>
         IList<int> Landings(int from)
         {
-            if (from < 0 || from >= _keys.Count || !(_keys[from] is Else))
+            if (from < 0 || from >= _keys.Count)
                 return null;
+
+            if (!(_keys[from] is Else))
+                return Gaps(from);
 
             var open = _sequence.OpenOf(_shown[from]);
             var branches = _sequence.Branches(open);
@@ -1016,6 +1020,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             return allowed;
+        }
+
+        /// <summary>Every gap between the rows the row at <paramref name="from" /> does not carry, but the one just under the end of a branch.</summary>
+        /// <remarks>
+        /// The end of a branch stands where the line after it does, so the gap under it is the same place as the gap above it:
+        /// a row dropped there would land at the end of the branch, and opening both would show two places that are one.
+        /// </remarks>
+        List<int> Gaps(int from)
+        {
+            var span = _rows[_keys[from]].Carries + 1;
+            var gaps = new List<int>();
+            var above = 0;
+            object last = null;
+            for (var r = 0; r <= _keys.Count; r++)
+            {
+                if (r < _keys.Count && r >= from && r < from + span)
+                    continue;
+
+                // An end row is the one key that is no step.
+                if (last == null || last is Step)
+                    gaps.Add(above);
+
+                if (r == _keys.Count)
+                    break;
+
+                last = _keys[r];
+                above++;
+            }
+
+            return gaps;
         }
 
         /// <summary>

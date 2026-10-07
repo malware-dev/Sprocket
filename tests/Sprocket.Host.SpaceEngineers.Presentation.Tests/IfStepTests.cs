@@ -225,6 +225,21 @@ public class IfStepTests
         Assert.IsType<EndIf>(sequence.Steps[3]);
     }
 
+    /// <summary>
+    /// A step carried through an if is offered every gap but the one just under the end of a branch, which is the same place
+    /// as the gap above that end, and so never opens a space it cannot be dropped in.
+    /// </summary>
+    [Fact]
+    public void AStepIsNotOfferedTheGapUnderTheEndOfABranch()
+    {
+        var rig = Chain(out _, out _, out _);
+        var list = (StepList)rig.Editor.StepRows()[0].Parent!;
+
+        // Rows: if, wait 60, end, otherwise if, wait 120, end, otherwise, wait 30, end, closing. Carrying wait 120, the
+        // others are counted without it: the gaps under the three ends are 3, 5 and 8.
+        Assert.Equal(new[] { 0, 1, 2, 4, 6, 7, 9 }, list.Landings!(4));
+    }
+
     /// <summary>An otherwise if dragged above its if becomes the if, with its steps, and the if becomes an otherwise if.</summary>
     [Fact]
     public void ABranchDraggedAboveTheIfBecomesIt()
@@ -254,7 +269,7 @@ public class IfStepTests
     [InlineData(6)]
     public void ABranchStaysInsideItsIfAndAboveItsOtherwise(int to)
     {
-        var rig = Chain(out var sequence, out var first, out var second);
+        var rig = Chain(out var sequence, out _, out var second);
         var before = sequence.Steps.ToList();
         var list = (StepList)rig.Editor.StepRows()[0].Parent!;
 
@@ -274,9 +289,6 @@ public class IfStepTests
 
         // Above the if, or where it stands now, right above the otherwise.
         Assert.Equal(new[] { 0, 3 }, list.Landings!(3));
-
-        // A step lands anywhere.
-        Assert.Null(list.Landings!(1));
     }
 
     /// <summary>if A { wait 60 } otherwise if B { wait 120 } otherwise { wait 30 }, on the screen.</summary>
