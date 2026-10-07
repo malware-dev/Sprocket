@@ -65,7 +65,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             var at = 0;
             for (var i = 0; i < fields.Count; i++)
             {
-                into.Add(fields[i].Wording(Said(values, at, fields[i].Covers)));
+                // A value left out is the one the action does without it, which an optional field starts with.
+                var said = Said(values, at, fields[i].Covers);
+                into.Add(said.Length == 0 && !fields[i].Needed && fields[i].Default != null
+                    ? fields[i].Default
+                    : fields[i].Wording(said));
                 at += fields[i].Covers;
             }
         }

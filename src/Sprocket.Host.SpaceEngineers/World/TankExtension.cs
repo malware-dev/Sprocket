@@ -88,6 +88,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             return tank.FilledRatio <= 0.0 ? Status.Of(Condition.Empty) : Status.None;
         }
 
+        /// <inheritdoc />
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return false;
+        }
+
         /// <summary>
         /// Why this tank will not fill, or null while it might.
         /// </summary>
@@ -95,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Stockpile switched off is its own answer: whatever switched it has overruled the step, and
         /// a tank that is not stockpiling hands its gas on as fast as it takes it in.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             var tank = block as IMyGasTank;
             if (tank == null || stateId != IsFull || tank.FilledRatio >= 1.0)

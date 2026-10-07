@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<Field> _fields = new List<Field>();
         readonly List<string> _filled = new List<string>();
 
+        /// <summary>The values <paramref name="values" />, asked for by <paramref name="fields" />, pressed to <paramref name="opens" />.</summary>
         public ValuesSlot(IList<Literal> values, IList<Field> fields, ICommand opens) : base(opens)
         {
             for (var i = 0; i < values.Count; i++)
@@ -59,10 +60,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             get { return _sample; }
         }
 
+        /// <summary>The values the action was given, in order.</summary>
         public IList<Literal> Values => _values;
 
+        /// <summary>Whether every field shows the word a sentence leaves out, so the slot says nothing the action does not anyway.</summary>
+        public bool Quiet
+        {
+            get
+            {
+                for (var i = 0; i < _filled.Count; i++)
+                {
+                    if (_fields[i].Quiet == null || _filled[i] != _fields[i].Quiet)
+                        return false;
+                }
+
+                return _filled.Count > 0;
+            }
+        }
+
         /// <inheritdoc />
-        public override bool IsEmpty => _values.Count == 0;
+        public override bool IsEmpty
+        {
+            get
+            {
+                for (var i = 0; i < _filled.Count; i++)
+                {
+                    if (_filled[i].Length > 0)
+                        return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// What each value asks for, one per value the action wants.

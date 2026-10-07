@@ -368,6 +368,9 @@ public sealed class Rig
         // Every toolbar read and write the mod makes, answered over this rig's own slots.
         Toolbars.Use(new RigSlots(this));
 
+        // And every reading of a vent's gas, over this rig's own vents.
+        VentGas.Use(new RigGas(this));
+
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()
             .Does("GetGroup", arguments =>
             {

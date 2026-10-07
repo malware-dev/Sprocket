@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 using SpaceEngineers.Game.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -34,6 +35,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The reading of a vent whose room is airtight.</summary>
         public const string Sealed = "sealed";
 
+        /// <summary>The action that fills the room, which may be told to carry on where there is no more oxygen to give.</summary>
+        public const string Pressurize = "pressurize";
+
+        /// <summary>The action that empties the room, which may be told to carry on where the air has nowhere to go.</summary>
+        public const string Depressurize = "depressurize";
+
+        /// <summary>What a stuck room told to fill or empty does: wait until it gets there.</summary>
+        public const long Hold = 0;
+
+        /// <summary>What a stuck room told to fill or empty does: carry on once the gas has nowhere to come from or go to.</summary>
+        public const long MoveOn = 1;
+
         readonly VentGas _gas = new VentGas();
 
         /// <inheritdoc />
@@ -63,8 +76,33 @@ namespace Sprocket.Host.SpaceEngineers.World
                 .WithState("is-empty", Empty, true, "is empty")
                 .WithState("is-sealed", Sealed, true, "is airtight")
                 .WithState("is-leaking", Sealed, false, "is not airtight")
-                .WithAction("pressurize", "pressurize", "has-air", "Depressurize_Off").Lasting()
-                .WithAction("depressurize", "depressurize", "is-empty", "Depressurize_On").Lasting();
+                .WithAction(Pressurize, "pressurize", "has-air", "Depressurize_Off").Lasting().Asking(Stuck(
+                    "**Hold** waits until the room is full. Where there is no more oxygen to give, as when the tanks are "
+                    + "empty, that wait never ends.\n\n**Move on** carries on once the room will fill no further, with what "
+                    + "air it has. A room that is not airtight always holds: carrying on would open it to the leak."))
+                .WithAction(Depressurize, "depressurize", "is-empty", "Depressurize_On").Lasting().Asking(Stuck(
+                    "**Hold** waits until the room is empty. Where its air has nowhere to go, as when the tanks are full, "
+                    + "that wait never ends.\n\n**Move on** carries on once the room will empty no further, and what comes "
+                    + "next, such as an outer door opening, lets the rest of the air out."));
+        }
+
+        /// <summary>
+        /// What a room told to fill or empty does when it is stuck: hold, waiting until it gets there, or move on, carrying on
+        /// once the gas has nowhere to come from or go to. <paramref name="about" /> says which is which for the action.
+        /// </summary>
+        /// <remarks>
+        /// Full tanks are the common case, and an airlock waiting on them never lets anybody out. Holding is what the action
+        /// does anyway, so a sentence leaves it out, and says "or move on" where it moves on.
+        /// </remarks>
+        static Field Stuck(string about)
+        {
+            var field = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { Literal.Of(MoveOn).Said, Literal.Of(Hold).Said });
+            field.Entry = Entry.Whole;
+            field.Default = "hold";
+            field.Quiet = "hold";
+            field.Lead = "or";
+            field.About = about;
+            return field;
         }
 
         /// <inheritdoc />
@@ -123,13 +161,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (vent == null)
                 return false;
 
-            if (actionId == "pressurize")
+            if (actionId == Pressurize)
             {
                 vent.Depressurize = false;
                 return true;
             }
 
-            if (actionId == "depressurize")
+            if (actionId == Depressurize)
             {
                 vent.Depressurize = true;
                 return true;
@@ -172,28 +210,60 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// two directions fail for different reasons and a person can act on either one, so they
         /// are said apart rather than as one word.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             var vent = block as IMyAirVent;
             if (vent == null || !vent.IsWorking)
                 return Trouble.None;
 
+            // What a step told to move on lets pass is no trouble to it: it is done.
             if (stateId == "is-empty")
-                return Emptying(vent);
+            {
+                var emptying = Emptying(vent);
+                return Passes(emptying, actionId, values) ? Trouble.None : emptying;
+            }
 
-            return stateId == "has-air" ? Filling(vent) : Trouble.None;
+            if (stateId == "has-air")
+            {
+                var filling = Filling(vent);
+                return Passes(filling, actionId, values) ? Trouble.None : filling;
+            }
+
+            return Trouble.None;
         }
 
         /// <summary>
-        /// Why the room will not empty, or null while it still might.
+        /// Whether a room told to fill or empty, and to move on, has done what it was told short of the state: once all that
+        /// keeps it from full is that there is no more oxygen to give, or from empty that the air has nowhere to go.
         /// </summary>
-        /// <remarks>
-        /// Told to fill instead is its own answer and not a silence. Two sequences share one vent -
-        /// a cycle out and a cycle in - and the one that has been overruled is left waiting for a
-        /// state nothing is heading towards any more.
-        /// </remarks>
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            var vent = block as IMyAirVent;
+            if (vent == null || !vent.IsWorking)
+                return false;
+
+            if (actionId == Depressurize)
+                return Passes(Emptying(vent), actionId, values);
+
+            return actionId == Pressurize && Passes(Filling(vent), actionId, values);
+        }
+
         /// <summary>
-        /// The same, for a screen rather than for a step.
+        /// Whether <paramref name="trouble" /> is one a step told <paramref name="values" /> lets pass: nothing to move the gas
+        /// with, where it was told to move on.
+        /// </summary>
+        /// <remarks>A room that is not airtight never passes: carrying on would open it to the leak.</remarks>
+        static bool Passes(Trouble trouble, string actionId, IList<Literal> values)
+        {
+            if (values == null || values.Count == 0 || values[0].Kind != ValueKind.Integer || values[0].Whole != MoveOn)
+                return false;
+
+            return actionId == Depressurize ? trouble.Cause == Cause.VentNowhere
+                : actionId == Pressurize && trouble.Cause == Cause.VentNoOxygen;
+        }
+
+        /// <summary>
+        /// Why the room will not finish what the vent is set to do, for a screen rather than for a step.
         /// </summary>
         /// <remarks>
         /// Reads the gas without keeping a clock on it. Drawing a status must not move the timing
@@ -218,6 +288,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 : Trouble.Waiting(Cause.VentNoOxygen);
         }
 
+        /// <summary>
+        /// Why the room will not empty, or null while it still might.
+        /// </summary>
+        /// <remarks>
+        /// Told to fill instead is its own answer and not a silence. Two sequences share one vent -
+        /// a cycle out and a cycle in - and the one that has been overruled is left waiting for a
+        /// state nothing is heading towards any more.
+        /// </remarks>
         Trouble Emptying(IMyAirVent vent)
         {
             if (vent.GetOxygenLevel() <= Emptied)

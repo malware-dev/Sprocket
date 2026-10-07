@@ -197,11 +197,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Why this block cannot reach <paramref name="stateId" />, or null while it might.
+        /// Why this block cannot reach <paramref name="stateId" /> as <paramref name="actionId" /> told it with
+        /// <paramref name="values" />, or null while it might.
         /// </summary>
-        public Trouble Trouble(string stateId)
+        public Trouble Trouble(string actionId, IList<Literal> values, string stateId)
         {
-            return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, stateId);
+            return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, actionId, values, stateId);
+        }
+
+        /// <summary>
+        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="values" />, though the
+        /// state that action leads to does not hold.
+        /// </summary>
+        public bool Done(string actionId, IList<Literal> values)
+        {
+            return _extension != null && _extension.Done(_block, actionId, values);
         }
 
         /// <summary>

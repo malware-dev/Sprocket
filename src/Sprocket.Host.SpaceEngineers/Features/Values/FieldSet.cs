@@ -365,8 +365,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             var color = _wanted[at].Edits == Editor.Colour;
 
             var label = color ? "" : Label(at);
+            var about = _wanted[at].About;
             if (label.Length > 0)
-                Place(new Label { Style = Styles.ValueLabel, Text = label }, at, 0, 1);
+            {
+                var named = new Label { Style = Styles.ValueLabel, Text = label };
+                if (!string.IsNullOrEmpty(about))
+                    named.Tip = Tip.For(named.Tip, about);
+
+                Place(named, at, 0, 1);
+            }
+
+            if (!string.IsNullOrEmpty(about))
+                element.Tip = Tip.For(element.Tip, about);
 
             if (color)
                 Place(element, at, 0, 3);

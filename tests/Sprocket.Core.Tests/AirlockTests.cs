@@ -1,4 +1,7 @@
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Values;
 using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
@@ -115,6 +118,133 @@ public class AirlockTests
 
         a.Runner = new AutomationRunner(a.Automation, a.World);
         return a;
+    }
+
+    /// <summary>
+    /// Emptying a room asks with a switch whether to hold or move on when it is stuck, and a step told nothing holds.
+    /// </summary>
+    [Fact]
+    public void EmptyingARoomAsksWhatToDoWhereItsAirHasNowhereToGo()
+    {
+        var ship = new Rigged();
+        var vent = ship.Vent(1, "Vent");
+        var action = ship.Entity(vent.Id).Kind.FindAction(AirVentExtension.Depressurize, Form.Native)!;
+
+        var fields = new List<Field>();
+        action.Fields(fields);
+        var field = Assert.Single(fields);
+        Assert.Equal(Editor.Chosen, field.Edits);
+        Assert.Equal(new[] { "move on", "hold" }, field.Words);
+        Assert.False(field.Needed);
+
+        var shown = new List<string>();
+        Channels.Shown(new Literal[0], fields, shown);
+        Assert.Equal(new[] { "hold" }, shown);
+
+        shown.Clear();
+        Channels.Shown(new[] { Literal.Of(AirVentExtension.MoveOn) }, fields, shown);
+        Assert.Equal(new[] { "move on" }, shown);
+        Assert.False(string.IsNullOrEmpty(field.About));
+
+        // Holding is what the action does anyway, so a sentence leaves it out; moving on is said.
+        Assert.True(new ValuesSlot(new Literal[0], fields, null).Quiet);
+        Assert.True(new ValuesSlot(new[] { Literal.Of(AirVentExtension.Hold) }, fields, null).Quiet);
+        var movesOn = new ValuesSlot(new[] { Literal.Of(AirVentExtension.MoveOn) }, fields, null);
+        Assert.False(movesOn.Quiet);
+        Assert.Equal("or move on", SentenceText.Given(movesOn));
+    }
+
+    /// <summary>A step told to carry on is written with the value that says so, and reads back with it.</summary>
+    [Fact]
+    public void ARoomToldToCarryOnIsWrittenAndReadSo()
+    {
+        var a = Build();
+        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+
+        var saved = ProgramText.Save(a.Automation, a.World.Values);
+        Assert.Contains("call ext.depressurize on [ ", saved);
+        Assert.Contains(" ] with 1", saved);
+
+        var after = new Automation();
+        Assert.Equal("", ProgramText.Load(saved, after, a.World.Values));
+        var told = Assert.IsType<Act>(after.Sequences[0].Steps[2]);
+        Assert.Equal(AirVentExtension.MoveOn, Assert.Single(told.Values).Whole);
+    }
+
+    /// <summary>A room whose air has nowhere to go holds the cycle, says why, and keeps the outer door shut.</summary>
+    [Fact]
+    public void ARoomWhoseAirHasNowhereToGoHoldsTheCycleAndSaysSo()
+    {
+        var a = Build();
+        a.Inner.ForceOpen();
+        a.Vent.Nowhere = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Press();
+        a.Tick(400);
+
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+        Assert.True(a.State.IsRunning);
+        a.Runner.Look();
+        var fault = SequenceSummary.Fault(a.State);
+        Assert.Equal(SequenceProblem.Stuck, fault.Problem);
+        Assert.Equal(Cause.VentNowhere, fault.Because.Cause);
+    }
+
+    /// <summary>A room told to carry on where its air has nowhere to go counts as empty, and the outer door opens.</summary>
+    [Fact]
+    public void ARoomToldToCarryOnOpensTheOuterDoorWhenItsAirHasNowhereToGo()
+    {
+        var a = Build();
+        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        a.Inner.ForceOpen();
+        a.Vent.Nowhere = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Press();
+        a.Tick(200);
+
+        Assert.Equal(["Inner Door:close", "Airlock Vent:depressurize", "Outer Door:open"], a.Log);
+        a.Runner.Look();
+        Assert.NotEqual(SequenceProblem.Stuck, SequenceSummary.Fault(a.State).Problem);
+    }
+
+    /// <summary>A room told to carry on that has somewhere to put its air empties first, as any room does.</summary>
+    [Fact]
+    public void ARoomToldToCarryOnStillEmptiesWhereItCan()
+    {
+        var a = Build();
+        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        a.Inner.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Press();
+        a.Tick(70);
+        Assert.Contains("Airlock Vent:depressurize", a.Log);
+        Assert.DoesNotContain("Outer Door:open", a.Log);
+
+        a.Tick(200);
+        Assert.Contains("Outer Door:open", a.Log);
+    }
+
+    /// <summary>A room told to wait where its air has nowhere to go is held as one told nothing is.</summary>
+    [Fact]
+    public void ARoomToldToWaitHoldsTheCycle()
+    {
+        var a = Build();
+        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.Hold));
+        a.Inner.ForceOpen();
+        a.Vent.Nowhere = true;
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Press();
+        a.Tick(400);
+
+        Assert.DoesNotContain("Outer Door:open", a.Log);
     }
 
     [Fact]
@@ -1438,6 +1568,70 @@ public class AirlockTests
         a.Tick(60 + 2 * Rota.Ten);
 
         Assert.Equal(DoorStatus.Open, a.Outer.Status);
+    }
+
+    /// <summary>A room told to move on where there is no more oxygen to give counts as full, and the inner door opens.</summary>
+    [Fact]
+    public void ARoomToldToMoveOnOpensTheInnerDoorWithNoOxygenToGive()
+    {
+        var a = Emptied();
+        var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
+        ((Act)letMeIn.Steps[4]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        a.Vent.Dry = true;
+        a.Automation.Edited();
+        a.Tick();
+
+        a.Runner.Call(letMeIn);
+        a.Tick(300);
+
+        Assert.Equal(DoorStatus.Open, a.Inner.Status);
+    }
+
+    /// <summary>A room told to hold where there is no more oxygen to give keeps the inner door shut.</summary>
+    [Fact]
+    public void ARoomToldToHoldKeepsTheInnerDoorShutWithNoOxygenToGive()
+    {
+        var a = Emptied();
+        var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
+        ((Act)letMeIn.Steps[4]).Values.Add(Literal.Of(AirVentExtension.Hold));
+        a.Vent.Dry = true;
+        a.Automation.Edited();
+        a.Tick();
+
+        a.Runner.Call(letMeIn);
+        a.Tick(300);
+
+        Assert.NotEqual(DoorStatus.Open, a.Inner.Status);
+    }
+
+    /// <summary>A room that is not airtight holds even where it was told to move on: moving on would open it to the leak.</summary>
+    [Fact]
+    public void ALeakingRoomHoldsEvenWhereToldToMoveOn()
+    {
+        var a = Emptied();
+        var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
+        ((Act)letMeIn.Steps[4]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        a.Vent.Leaking = true;
+        a.Automation.Edited();
+        a.Tick();
+
+        a.Runner.Call(letMeIn);
+        a.Tick(300);
+
+        Assert.NotEqual(DoorStatus.Open, a.Inner.Status);
+        a.Runner.Look();
+        Assert.Equal(Cause.VentNotAirtight, SequenceSummary.Fault(a.Runner.Get(letMeIn)!).Because.Cause);
+    }
+
+    /// <summary>An airlock whose room is empty and whose outer door is open, as somebody arriving from outside finds it.</summary>
+    static Airlock Emptied()
+    {
+        var a = Build();
+        a.Vent.Perform("Depressurize_On", new Literal[0]);
+        a.Outer.ForceOpen();
+        a.Tick(120);
+        a.Log.Clear();
+        return a;
     }
 
     [Fact]

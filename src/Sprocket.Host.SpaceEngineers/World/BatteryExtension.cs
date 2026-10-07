@@ -89,6 +89,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             return battery.HasCapacityRemaining ? Status.None : Status.Of(Condition.Empty);
         }
 
+        /// <inheritdoc />
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return false;
+        }
+
         /// <summary>
         /// Why this battery will not fill, or null while it might.
         /// </summary>
@@ -96,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Set to another mode is its own answer: whatever set it has overruled the step, and nothing
         /// is heading towards full any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             var battery = block as IMyBatteryBlock;
             if (battery == null || stateId != IsFull || Charged(battery))

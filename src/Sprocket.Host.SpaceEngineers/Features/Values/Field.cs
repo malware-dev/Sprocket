@@ -75,6 +75,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
         /// <summary>What a sentence says straight after this value, or null for nothing: the "°" in "90°".</summary>
         public string Unit;
 
+        /// <summary>
+        /// The word a sentence leaves out, or null where it says every one.
+        /// </summary>
+        /// <remarks>
+        /// For the choice that is what the action does anyway: a stuck room holds unless it is told otherwise, so
+        /// "depressurize Airlock Vent" says it, and only "or move on" is worth the words.
+        /// </remarks>
+        public string Quiet;
+
+        /// <summary>What the field is about, said where it is filled in, or null for nothing more than its name.</summary>
+        public string About;
+
         /// <summary>What may be typed into the box.</summary>
         /// <remarks>
         /// Beside the bounds rather than read from them, because a bound says how long the whole part

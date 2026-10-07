@@ -1,3 +1,5 @@
+using Lumel;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 using Xunit;
@@ -141,6 +143,20 @@ public class FieldTests
         form.Judge();
 
         Assert.Equal("Value 2 has to be between 0 and 255.", form.Wrong);
+    }
+
+    /// <summary>What a field is about is told where it is filled in, on its name and on the field itself; a field about nothing more tells nothing.</summary>
+    [Fact]
+    public void AFieldSaysWhatItIsAboutWhereItIsFilledIn()
+    {
+        var about = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { "1", "0" });
+        about.About = "**Hold** waits.";
+        var form = new FieldSet();
+        form.Show(new[] { about, Field.Called("speed") }, new string[0], new Hsv[0], new Texts());
+
+        Assert.NotNull(((Element)form.Fields[0]).Tip);
+        Assert.Null(((Element)form.Fields[1]).Tip);
+        Assert.NotNull(Assert.Single(form.Within().OfType<Label>(), l => l.Text == "when stuck").Tip);
     }
 
     /// <summary>Nothing is held against what is typed until finishing is tried.</summary>

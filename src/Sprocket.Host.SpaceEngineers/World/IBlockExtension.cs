@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public interface IBlockExtension
     {
+        /// <summary>Whether this extension knows <paramref name="block" />'s kind of block.</summary>
         bool Claims(IMyTerminalBlock block);
 
         /// <summary>
@@ -48,8 +49,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         void Describe(EntityKind kind, IMyTerminalBlock block);
 
+        /// <summary>Reads the reading <paramref name="propertyId" /> of <paramref name="block" />, answering whether it is one this declares.</summary>
         bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value);
 
+        /// <summary>Does the action <paramref name="actionId" /> to <paramref name="block" /> with <paramref name="values" />, answering whether it is one this declares.</summary>
         bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values);
 
         /// <summary>
@@ -60,6 +63,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// browser is for.
         /// </remarks>
         Status StatusOf(IMyTerminalBlock block);
+
+        /// <summary>
+        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="values" />, though the
+        /// state that action leads to does not hold.
+        /// </summary>
+        /// <remarks>
+        /// False for nearly everything, which leaves the state to say. It is for an action that can be told to settle for
+        /// less: a vent told to carry on where the air has nowhere to go has done what it was told once that is all that
+        /// keeps the room from empty. Asked of a block a sequence is held waiting on, on the cadence of
+        /// <see cref="TroubleWith" /> and never on a tick.
+        /// </remarks>
+        bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values);
 
         /// <summary>
         /// Why this block will not finish what it was told to do, or null while it might.
@@ -74,8 +89,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// not want the same thing of it: an airlock's vent is asked to empty a room by one and to
         /// fill it by another, and what is wrong is a different answer for each of them.
         /// </para>
+        /// <para>
+        /// <paramref name="actionId" /> and <paramref name="values" /> are what the step told it, since what stands in its
+        /// way can depend on that: a vent told to carry on where the air has nowhere to go has nothing in its way there.
+        /// </para>
         /// </remarks>
-        Trouble TroubleWith(IMyTerminalBlock block, string stateId);
+        Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId);
 
         /// <summary>
         /// Whether this block is doing something <em>right now</em>, which is not whether it works.

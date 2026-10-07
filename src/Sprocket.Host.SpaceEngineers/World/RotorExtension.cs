@@ -307,6 +307,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 rotor.TargetVelocityRPM = 0f;
         }
 
+        /// <inheritdoc />
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return false;
+        }
+
         /// <summary>
         /// Why the rotor is not getting to its angle, or nothing while it still might.
         /// </summary>
@@ -316,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// answer worth giving up on - it was set by the turn, so nought means something else has
         /// been at it and nothing is heading for the angle any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             var rotor = block as IMyMotorStator;
             if (rotor == null || stateId != There || AtLimit(rotor))

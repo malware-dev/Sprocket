@@ -115,7 +115,7 @@ public class PistonTests
 
         ship.World.Invoke(entity, PistonExtension.Extend);
 
-        Assert.Equal("cannot move - it has no head", TroubleText.Of(new Texts(), entity.Trouble("is-extended")));
+        Assert.Equal("cannot move - it has no head", TroubleText.Of(new Texts(), entity.Trouble(PistonExtension.Extend, new Literal[0], "is-extended")));
     }
 
     /// <summary>Runs the one act on the piston, and counts the frames until the step after it runs.</summary>

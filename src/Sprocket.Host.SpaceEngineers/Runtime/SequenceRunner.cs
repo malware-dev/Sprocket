@@ -88,8 +88,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return _actedOn;
         }
 
+        /// <summary>The sequence this runs.</summary>
         public Sequence Sequence => _sequence;
 
+        /// <summary>Whether a run of it is under way.</summary>
         public bool IsRunning { get; private set; }
 
         /// <summary>What stopped the last run from outside before it finished, or none.</summary>
@@ -206,7 +208,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     // Switched off, unpowered or broken on the way: it gets no further until somebody sees to it.
                     var entity = compiled.Entities[t];
-                    if (!Reached(_owner.World, entity, doing.LeadsToStateId) && entity.Stalls(doing))
+                    var reached = Reached(_owner.World, entity, doing.LeadsToStateId);
+                    if (!reached && entity.Stalls(doing))
                     {
                         if (!_stuck.Exists)
                             _stuck = new SequenceFault(SequenceProblem.Stalled, _sequence.Steps.IndexOf(_outstanding[i]), Trouble.None, entity.Name);
@@ -214,7 +217,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         continue;
                     }
 
-                    Trouble said = compiled.Entities[t].Trouble(doing.LeadsToStateId);
+                    // Done what it was told short of the state, which only the block can say; the step is settled there.
+                    if (!reached && entity.Done(doing.Id, compiled.Values[t]))
+                    {
+                        Finish(_outstanding[i], entity);
+                        continue;
+                    }
+
+                    Trouble said = entity.Trouble(doing.Id, compiled.Values[t], doing.LeadsToStateId);
                     if (said.Ends)
                         return said;
 
@@ -249,8 +259,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
+        /// <summary>The tick the last run started on.</summary>
         public int LastFiredTick { get; private set; }
 
+        /// <summary>How many runs have started.</summary>
         public int FiredCount { get; private set; }
 
         /// <summary>
@@ -265,6 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public int SkippedCount { get; private set; }
 
+        /// <summary>The tick the trigger last fired while the sequence was already running.</summary>
         public int LastSkippedTick { get; private set; }
 
         /// <summary>
@@ -523,6 +536,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _holding = false;
 
             _outstanding.Clear();
+            _finished.Clear();
             _started.Clear();
 
             // Backwards to the await before this step, because that is the span an await covers. An
@@ -608,6 +622,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _waitUntil = -1;
             _holding = false;
             _outstanding.Clear();
+            _finished.Clear();
             _started.Clear();
             _rota.Leave(_busy);
             _rota.Leave(_sampling);
@@ -669,11 +684,36 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (state == null)
                     continue;
 
-                if (!state.Holds(world.Values, entity.GetValue(state.PropertyId)))
+                if (!state.Holds(world.Values, entity.GetValue(state.PropertyId)) && !Finished(step, entity))
                     return false;
             }
 
             return true;
+        }
+
+        /// <summary>The blocks each act waited on has said it is done with, short of the state the act leads to.</summary>
+        /// <remarks>
+        /// Found on the cadence troubles are asked on, and kept so the tick can read it: a block is asked whether it is done
+        /// once a second, and the answer is good until the act is done again or the run ends.
+        /// </remarks>
+        readonly Dictionary<Act, List<GridEntity>> _finished = new Dictionary<Act, List<GridEntity>>();
+
+        /// <summary>Keeps that <paramref name="entity" /> has done what <paramref name="act" /> told it.</summary>
+        void Finish(Act act, GridEntity entity)
+        {
+            List<GridEntity> by;
+            if (!_finished.TryGetValue(act, out by))
+                _finished[act] = by = new List<GridEntity>();
+
+            if (!by.Contains(entity))
+                by.Add(entity);
+        }
+
+        /// <summary>Whether <paramref name="entity" /> has said it is done with what <paramref name="act" /> told it.</summary>
+        bool Finished(Act act, GridEntity entity)
+        {
+            List<GridEntity> by;
+            return _finished.Count > 0 && _finished.TryGetValue(act, out by) && by.Contains(entity);
         }
 
         void Start(GridWorld world, int tick)
@@ -863,6 +903,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     }
 
                     _outstanding.Clear();
+                    _finished.Clear();
                     _started.Clear();
                     _holding = false;
                     _stuck = SequenceFault.None;
@@ -1071,6 +1112,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             if (!step.HasAction)
                 return;
+
+            // Done again, so what its blocks said of the last time is no answer for this one.
+            _finished.Remove(step);
 
             var compiled = Compile(step);
             for (var i = 0; i < compiled.Entities.Count; i++)

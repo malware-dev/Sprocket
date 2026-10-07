@@ -494,12 +494,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // in a list of steps and the values are the detail.
             var fields = new List<Field>();
             named.Fields(fields);
-            var given = SentenceText.Given(new ValuesSlot(step.Values, fields, null));
+            var slot = new ValuesSlot(step.Values, fields, null);
+            var given = SentenceText.Given(slot);
 
             if (step.Sets)
                 return SentenceText.Setting(named.Named, blocks, given);
 
-            return step.Values.Count == 0 ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
+            return step.Values.Count == 0 || slot.Quiet ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
         }
     }
 }

@@ -113,7 +113,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return false;
+        }
+
+        /// <inheritdoc />
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             return Trouble.None;
         }

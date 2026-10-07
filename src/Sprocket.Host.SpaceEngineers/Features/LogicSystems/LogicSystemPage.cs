@@ -633,7 +633,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            row.Does.Add(new ValuesSlot(act.Values, fields, Does(trigger, Opening.Values)));
+            var given = new ValuesSlot(act.Values, fields, Does(trigger, Opening.Values));
+            if (!given.Quiet)
+                row.Does.Add(given);
         }
 
         ICommand Does(Trigger trigger, Opening opens)

@@ -25,7 +25,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Moving to a position, which is Sprocket's own and waits until it gets there.</summary>
         public const string MoveTo = "move-to";
 
+        /// <summary>The action that extends the piston all the way.</summary>
         public const string Extend = "extend";
+
+        /// <summary>The action that retracts the piston all the way.</summary>
         public const string Retract = "retract";
 
         const float Hair = 0.0001f;
@@ -202,6 +205,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 piston.Velocity = 0f;
         }
 
+        /// <inheritdoc />
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return false;
+        }
+
         /// <summary>
         /// Why the piston is not getting where it was sent, or nothing while it still might.
         /// </summary>
@@ -210,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// by what sent it, so a speed of nought or the wrong way round means something else has been at
         /// it and nothing is heading there any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             var piston = block as IMyPistonBase;
             if (piston == null)

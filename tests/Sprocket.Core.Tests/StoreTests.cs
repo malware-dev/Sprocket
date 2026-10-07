@@ -61,7 +61,7 @@ public class StoreTests
 
         ship.World.Invoke(entity, BatteryExtension.Recharge);
 
-        var trouble = entity.Trouble("is-full");
+        var trouble = entity.Trouble(BatteryExtension.Recharge, new Literal[0], "is-full");
         Assert.Equal("cannot charge - no power coming in", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
@@ -76,7 +76,7 @@ public class StoreTests
         ship.World.Invoke(entity, BatteryExtension.Recharge);
         battery.Perform("Discharge_On");
 
-        Assert.True(entity.Trouble("is-full").Ends);
+        Assert.True(entity.Trouble(BatteryExtension.Recharge, new Literal[0], "is-full").Ends);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class StoreTests
 
         ship.World.Invoke(entity, BatteryExtension.Recharge);
 
-        Assert.False(entity.Trouble("is-full").Exists);
+        Assert.False(entity.Trouble(BatteryExtension.Recharge, new Literal[0], "is-full").Exists);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public class StoreTests
 
         ship.World.Invoke(entity, TankExtension.Stockpile);
 
-        var trouble = entity.Trouble("is-full");
+        var trouble = entity.Trouble(TankExtension.Stockpile, new Literal[0], "is-full");
         Assert.Equal("cannot fill - it is switched off or has no power", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
@@ -153,7 +153,7 @@ public class StoreTests
         ship.World.Invoke(entity, TankExtension.Stockpile);
         tank.Perform("Stockpile_Off");
 
-        Assert.True(entity.Trouble("is-full").Ends);
+        Assert.True(entity.Trouble(TankExtension.Stockpile, new Literal[0], "is-full").Ends);
     }
 
     /// <summary>Runs the one act on the block, and counts the frames until the step after it runs.</summary>

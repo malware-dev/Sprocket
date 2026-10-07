@@ -602,7 +602,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            row.Slots.Add(new ValuesSlot(act.Values, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Values); })));
+            var given = new ValuesSlot(act.Values, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Values); }));
+            if (!given.Quiet)
+                row.Slots.Add(given);
         }
 
         /// <summary>

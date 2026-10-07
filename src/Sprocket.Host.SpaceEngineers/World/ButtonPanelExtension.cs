@@ -97,8 +97,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// mod can fill a slot.
         /// </remarks>
 
+        /// <inheritdoc />
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        {
+            return false;
+        }
+
         /// <summary>Nothing: nothing known about this block says why it would not finish.</summary>
-        public Trouble TroubleWith(IMyTerminalBlock block, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
         {
             return Trouble.None;
         }

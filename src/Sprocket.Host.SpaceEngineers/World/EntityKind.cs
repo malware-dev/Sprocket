@@ -251,6 +251,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Gives the action added last the values it asks for, each asked for by its field.</summary>
+        /// <remarks>For one that stands in for a member of the game's own and is given values the game's member takes none of.</remarks>
+        public EntityKind Asking(params Field[] asks)
+        {
+            _actions[_actions.Count - 1].Asking(asks);
+            return this;
+        }
+
         /// <summary>Says that reaching the state of the action added last takes time.</summary>
         public EntityKind Lasting()
         {

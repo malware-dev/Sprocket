@@ -12,15 +12,19 @@ public sealed class Vent : Fitting
 {
     const int CycleTicks = 90;
 
+    /// <summary>The oxygen a working vent moves either way, measured in game.</summary>
+    const float Rate = 300f;
+
     int _progress = CycleTicks;
     bool _pressurizing = true;
 
+    /// <summary>A vent, <paramref name="id" /> and <paramref name="name" />, of the game's type and subtype, called <paramref name="display" />.</summary>
     public Vent(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
         Fit(Pretend.To<IMyAirVent>()
             .Gives("Status", () => Status)
-            .Gives("CanPressurize", () => true)
+            .Gives("CanPressurize", () => !Leaking)
             .Gives("Depressurize", () => !_pressurizing)
             .Takes("Depressurize", value =>
             {
@@ -32,6 +36,21 @@ public sealed class Vent : Fitting
             // vent is working first. A rig that answered anyway would hide exactly that.
             .Does("GetOxygenLevel", () => Enabled ? (float)_progress / CycleTicks : 0f));
     }
+
+    /// <summary>Whether the construct has nowhere to put the room's air, as with its tanks full, so an emptying stops short.</summary>
+    public bool Nowhere { get; set; }
+
+    /// <summary>Whether the construct has no oxygen to give, as with its tanks empty, so a filling stops short.</summary>
+    public bool Dry { get; set; }
+
+    /// <summary>Whether the room is not airtight, so it never fills.</summary>
+    public bool Leaking { get; set; }
+
+    /// <summary>The oxygen it is being given, which it fills the room with; none where there is none to give.</summary>
+    public float In => Enabled && _pressurizing && _progress < CycleTicks && !Dry && !Leaking ? Rate : 0f;
+
+    /// <summary>The oxygen it is passing on, which it empties the room into; none where there is nowhere to put it.</summary>
+    public float Out => Enabled && !_pressurizing && _progress > 0 && !Nowhere ? Rate : 0f;
 
     /// <summary>
     /// What the game would report for a vent in a sealed room.
@@ -106,9 +125,9 @@ public sealed class Vent : Fitting
         if (!Enabled)
             return;
 
-        if (_pressurizing && _progress < CycleTicks)
+        if (_pressurizing && _progress < CycleTicks && !Dry && !Leaking)
             _progress++;
-        else if (!_pressurizing && _progress > 0)
+        else if (!_pressurizing && _progress > 0 && !Nowhere)
             _progress--;
     }
 }

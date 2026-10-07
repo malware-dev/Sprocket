@@ -1,10 +1,6 @@
 using System.Collections.Generic;
-using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
-using VRage.Game;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRage.Utils;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -23,9 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </para>
     /// <para>
     /// Measured in game: 300 in while filling, 0 within one sample of finishing, 300 out while
-    /// emptying. The readings are what the resource distributor granted rather than what the vent
-    /// asked for, which is why a construct with no oxygen reads as not working rather than as
-    /// working for ever.
+    /// emptying. What reads it is an <see cref="IGasMeter" />.
     /// </para>
     /// </remarks>
     public sealed class VentGas
@@ -34,10 +28,21 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const int Beat = 10;
 
-        static readonly MyDefinitionId Oxygen =
-            new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), MyStringHash.GetOrCompute("Oxygen"));
+        /// <summary>What reads the gas: the game's components, or what the harness put in their place.</summary>
+        /// <remarks>
+        /// <b>Static because the block vocabulary is,</b> as <see cref="Toolbars" /> is: the extensions are made by a
+        /// registry with no instance to hand anything to. It holds a reference to an ordinary object rather than being one.
+        /// </remarks>
+        static IGasMeter _meter = new GameGasMeter();
 
         readonly Dictionary<long, int> _stopped = new Dictionary<long, int>();
+
+        /// <summary>Puts something else behind every reading of a vent's gas.</summary>
+        /// <remarks>For the harness, which answers it over the vents it makes up.</remarks>
+        public static void Use(IGasMeter meter)
+        {
+            _meter = meter ?? new GameGasMeter();
+        }
 
         /// <summary>
         /// Whether the vent is moving gas the way <paramref name="emptying" /> asks, right now.
@@ -81,8 +86,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return false;
 
             int last;
-            if (!_stopped.TryGetValue(vent.EntityId, out last) || flow > Trickle || frame < last)
+            var seen = _stopped.TryGetValue(vent.EntityId, out last);
+            if (flow > Trickle || (seen && frame < last))
                 last = frame;
+            else if (!seen)
+                // Idle the first time it is looked at: nothing says it moved gas a moment ago, so it has stopped.
+                last = frame - Beat;
 
             _stopped[vent.EntityId] = last;
             return frame - last < Beat;
@@ -96,15 +105,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What it is being given, which is how a vent fills a room.</summary>
         public float In(IMyAirVent vent)
         {
-            var sink = vent.Components.Get<MyResourceSinkComponent>();
-            return sink == null ? -1f : sink.CurrentInputByType(Oxygen);
+            return _meter.In(vent);
         }
 
         /// <summary>What it is passing on, which is how a vent empties one.</summary>
         public float Out(IMyAirVent vent)
         {
-            var source = vent.Components.Get<MyResourceSourceComponent>();
-            return source == null ? -1f : source.CurrentOutputByType(Oxygen);
+            return _meter.Out(vent);
         }
     }
 }
