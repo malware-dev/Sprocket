@@ -1,6 +1,6 @@
 # Plass
 
-En plass er et navngitt sted i et [logikksystem](#logic-system), som *den indre døra*. [Stegene](#step) og [utløserne](#trigger) i logikksystemet bruker plassen, og hver [installasjon](#installation) fyller den med sine egne blokker. Slik kan ett logikksystem kjøre alle luftslusene på et skip.
+En plass er et navngitt sted i et ![](mark:logic-system) [logikksystem](#logic-system), som *den indre døra*. [Stegene](#step) og [utløserne](#trigger) i logikksystemet bruker plassen, og hver ![](mark:installation) [installasjon](#installation) fyller den med sine egne blokker. Slik kan ett logikksystem kjøre alle luftslusene på et skip.
 
 ## To slags
 

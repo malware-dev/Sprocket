@@ -33,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Add("awaited", Symbols.Awaited);
             Add("value", Symbols.Value);
             Add("block", Symbols.Block);
+            Add("blueprint", Symbols.Blueprint);
+            Add("logic-system", Symbols.LogicSystem);
+            Add("installation", Symbols.Installation);
         }
 
         /// <inheritdoc />

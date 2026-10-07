@@ -465,33 +465,65 @@ def pause():
                  (0.5 + half, 0.5 + half), (0.5 + half - bar, 0.5 + half))]
 
 
+def chip(pin_width=0.065):
+    """
+    The pieces of a two-sided chip: a body and three pins along its left side and three along its right.
+
+    Two sides rather than four, because the gaps between the pins are what make it a chip at row size, and on four sides
+    they close up into a gear.
+    """
+    half_wide, half_tall = 0.17, 0.27
+    pins, pin_length = 3, 0.12
+    shapes = [poly((0.5 - half_wide, 0.5 - half_tall), (0.5 + half_wide, 0.5 - half_tall),
+                   (0.5 + half_wide, 0.5 + half_tall), (0.5 - half_wide, 0.5 + half_tall))]
+    step = 2 * half_tall / (pins + 1)
+    for i in range(1, pins + 1):
+        y = 0.5 - half_tall + step * i
+        shapes.append(stroke((0.5 - half_wide - pin_length, y), (0.5 - half_wide + 0.01, y), pin_width))
+        shapes.append(stroke((0.5 + half_wide - 0.01, y), (0.5 + half_wide + pin_length, y), pin_width))
+    return shapes
+
+
+def chip_at(cx, cy, grow=0.0):
+    """The logic system's chip, smaller, about (cx, cy), every part grown by <grow> on all sides."""
+    half_wide, half_tall, pin, pin_width = 0.15, 0.23, 0.10, 0.065
+    parts = [poly((cx - half_wide - grow, cy - half_tall - grow), (cx + half_wide + grow, cy - half_tall - grow),
+                  (cx + half_wide + grow, cy + half_tall + grow), (cx - half_wide - grow, cy + half_tall + grow))]
+    step = 2 * half_tall / 4
+    for i in range(1, 4):
+        y = cy - half_tall + step * i
+        parts.append(stroke((cx - half_wide - pin - grow, y), (cx - half_wide + 0.01, y), pin_width + 2 * grow))
+        parts.append(stroke((cx + half_wide - 0.01, y), (cx + half_wide + pin + grow, y), pin_width + 2 * grow))
+    return parts
+
+
+def installed():
+    """
+    Installation: the logic system's chip in front of another of the same, one of however many.
+
+    The chip behind is drawn darker rather than fainter, so it is solid and never reads as a shadow, and only a little
+    darker, so the two read as one kind. The gap between them follows the front chip's own outline, pins and all.
+    """
+    offset, gap = 0.16, 0.05
+    cx, cy = 0.5 - offset / 2, 0.5 + offset / 2
+    return [], chip_at(cx, cy, gap), chip_at(cx, cy), chip_at(cx + offset, cy - offset)
+
+
+def logic():
+    """Logic system: a chip, solid. The working thing a blueprint is the mould of."""
+    return chip()
+
+
 def blueprint():
     """
-    Blueprint: a sheet ruled into four, the drawing a logic system is made from.
+    Blueprint: the logic system's chip cut out of a solid square, the mould the chip is made from.
 
-    Solid, with the four panes taken back out, so the rules and the edge are one weight and one
-    shape. Drawn at the duplicate's lighter line rather than the set's, for the same reason: it is a
-    frame inside a frame, and the set's stroke closes the panes up into a blob at row size.
+    The chip is cut at its full size, inside a thin rim, and with broader pins than the logic system's own: the cut-out is
+    what has to read at row size, and a chip shrunk to leave a wide rim closes up into a dot.
     """
-    line = 0.094
-    near, far = 0.20, 0.80
-    half = line / 2
-
-    sheet = poly((near, near), (far, near), (far, far), (near, far))
-    (left, top), (right, bottom) = sheet[0], sheet[2]
-    mid_x = (left + right) / 2
-    mid_y = (top + bottom) / 2
-
-    # Set out from the sheet after it is placed, as the duplicate's opening is, so the edge and the
-    # rules come out the same weight.
-    panes = [
-        raw((left + line, top + line), (mid_x - half, top + line), (mid_x - half, mid_y - half), (left + line, mid_y - half)),
-        raw((mid_x + half, top + line), (right - line, top + line), (right - line, mid_y - half), (mid_x + half, mid_y - half)),
-        raw((left + line, mid_y + half), (mid_x - half, mid_y + half), (mid_x - half, bottom - line), (left + line, bottom - line)),
-        raw((mid_x + half, mid_y + half), (right - line, mid_y + half), (right - line, bottom - line), (mid_x + half, bottom - line)),
-    ]
-
-    return [sheet], panes
+    half = 0.34
+    square = poly((0.5 - half, 0.5 - half), (0.5 + half, 0.5 - half), (0.5 + half, 0.5 + half), (0.5 - half, 0.5 + half))
+    return [square], chip(0.085)
 
 
 def steps():
@@ -634,8 +666,18 @@ GLYPHS = [
     ("k", "clock", lambda: clock()),
     # Every letter of the word is taken in lower case.
     ("B", "block", lambda: cube()),
+    # Every letter of "logic" is taken; "y" is the first of "system" left.
+    ("y", "logic system", lambda: solid(logic())),
+    # Every letter of the word is taken in lower case.
+    ("I", "installation", lambda: installed()),
 ]
 
+
+# How a glyph's shapes behind are drawn, as a part of the color the glyph is drawn in.
+#
+# Darker and solid, never fainter: a part drawn faint lets whatever is behind the glyph through and reads as a shadow.
+# The game multiplies a font page's own color by the color text is drawn in, so this darkens with any tint.
+BEHIND = 0.78
 
 # What every mark is drawn to fill, as a fraction of the cell.
 #
@@ -690,13 +732,16 @@ def fitted(make):
     return made
 
 
-def ink(shapes, holes, over=()):
+def ink(shapes, holes, over=(), behind=()):
     """Where a set of shapes actually puts ink, at the oversampled size, with any drawn back over the holes."""
     from PIL import Image, ImageDraw
 
     size = CELL * OVER
     page = Image.new("L", (size, size), 0)
     draw = ImageDraw.Draw(page)
+
+    for shape in behind:
+        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
     for shape in shapes:
         draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
@@ -712,7 +757,8 @@ def ink(shapes, holes, over=()):
 
 def render(glyph):
     """
-    One glyph as an alpha image, drawn oversized, centred on its own ink, and averaged down.
+    One glyph, drawn oversized, centred on its own ink, and averaged down: how much of each pixel it covers, and how
+    bright that ink is, which is full for every shape but those drawn behind.
 
     <b>Centred on what it drew, not on where it was drawn.</b> Each symbol is a handful of
     polygons written by hand in a unit square, and no two of them fill it the same way - the up
@@ -729,31 +775,37 @@ def render(glyph):
     made = fitted(glyph)
     shapes, holes = made[0], made[1]
     over = made[2] if len(made) > 2 else ()
+    behind = made[3] if len(made) > 3 else ()
     size = CELL * OVER
-    page = Image.new("L", (size, size), 0)
-    draw = ImageDraw.Draw(page)
 
-    for shape in shapes:
-        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
-
-    for hole in holes:
-        draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
-
-    for shape in over:
-        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
-
-    ink = page.getbbox()
-    if ink is not None:
-        left, top, right, bottom = ink
-        middled = Image.new("L", (size, size), 0)
-        middled.paste(page.crop(ink),
-                      ((size - (right - left)) // 2, (size - (bottom - top)) // 2))
-        page = middled
+    # Coverage, and brightness already multiplied by it, drawn alike but for the shapes behind.
+    cover = Image.new("L", (size, size), 0)
+    bright = Image.new("L", (size, size), 0)
+    for page, dim in ((cover, 255), (bright, int(round(255 * BEHIND)))):
+        draw = ImageDraw.Draw(page)
+        for shape in behind:
+            draw.polygon([(x * size, y * size) for (x, y) in shape], fill=dim)
+        for shape in shapes:
+            draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
+        for hole in holes:
+            draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
+        for shape in over:
+            draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
     # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL.
+    ink = cover.getbbox()
     side = size * EXTENT / FILL
     edge = (size - side) / 2.0
-    return page.resize((CELL, CELL), Image.BOX, box=(edge, edge, edge + side, edge + side))
+    done = []
+    for page in (cover, bright):
+        if ink is not None:
+            left, top, right, bottom = ink
+            middled = Image.new("L", (size, size), 0)
+            middled.paste(page.crop(ink), ((size - (right - left)) // 2, (size - (bottom - top)) // 2))
+            page = middled
+        done.append(page.resize((CELL, CELL), Image.BOX, box=(edge, edge, edge + side, edge + side)))
+
+    return done[0], done[1]
 
 
 def main():
@@ -773,14 +825,18 @@ def main():
 
     for i, (ch, label, glyph) in enumerate(GLYPHS):
         x, y = (i % across) * CELL, (i // across) * CELL
-        alpha = render(glyph)
+        alpha, bright = render(glyph)
 
-        cell = Image.new("RGBA", (CELL, CELL), (255, 255, 255, 0))
-        cell.putalpha(alpha)
-        white = Image.new("RGBA", (CELL, CELL), (255, 255, 255, 255))
-        white.putalpha(alpha)
+        # The page is straight alpha, so the color is the brightness without the coverage folded into it: white for
+        # every shape but those drawn behind.
+        color = Image.eval(bright, lambda v: v)
+        a, b = alpha.load(), color.load()
+        for py in range(CELL):
+            for px in range(CELL):
+                b[px, py] = min(255, (b[px, py] * 255 + a[px, py] // 2) // a[px, py]) if a[px, py] else 255
 
-        page.paste(white, (x, y))
+        cell = Image.merge("RGBA", (color, color, color, alpha))
+        page.paste(cell, (x, y))
         entries.append((ch, label, x, y))
 
     os.makedirs(FONTS, exist_ok=True)

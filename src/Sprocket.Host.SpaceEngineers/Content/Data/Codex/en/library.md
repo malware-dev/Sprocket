@@ -1,6 +1,6 @@
 # Library
 
-The library holds the [logic systems](#logic-system) on this [construct](#construct), the automation of constructs that are lost, and your [blueprints](#blueprint). Open it with `Library` on the [home screen](#home).
+The library holds the ![](mark:logic-system) [logic systems](#logic-system) on this [construct](#construct), the automation of constructs that are lost, and your ![](mark:blueprint) [blueprints](#blueprint). Open it with `Library` on the [home screen](#home).
 
 It lists, from top to bottom:
 
@@ -12,7 +12,7 @@ The first two are under `On your constructs`. Type in the search box to show onl
 
 ## A logic system or a blueprint
 
-Choose one to see who made it and when it last changed, its description from the [configuration panel](#configuration-panel), and its [installations](#installation) on this construct.
+Choose one to see who made it and when it last changed, its description from the [configuration panel](#configuration-panel), and its ![](mark:installation) [installations](#installation) on this construct.
 
 - `On this construct` puts it on this construct, or takes it off.
 - `Make blueprint` keeps a copy in storage, and `Update blueprint` brings that copy up to date.

@@ -1,6 +1,6 @@
 # Installasjon
 
-En installasjon er ett sted et [logikksystem](#logic-system) kjører, som én luftsluse blant flere. Den fyller [plassene](#slot) til logikksystemet med sine egne blokker, for eksempel sine egne dører, sin egen ventil og sin egen knapp.
+En installasjon er ett sted et ![](mark:logic-system) [logikksystem](#logic-system) kjører, som én luftsluse blant flere. Den fyller [plassene](#slot) til logikksystemet med sine egne blokker, for eksempel sine egne dører, sin egen ventil og sin egen knapp.
 
 ## Mange installasjoner, ett logikksystem
 

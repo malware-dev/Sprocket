@@ -1,6 +1,6 @@
 # Bibliotek
 
-Biblioteket holder [logikksystemene](#logic-system) på denne [konstruksjonen](#construct), automasjonen til konstruksjoner som er tapt, og [plantegningene](#blueprint) dine. Åpne det med `Bibliotek` på [startskjermen](#home).
+Biblioteket holder ![](mark:logic-system) [logikksystemene](#logic-system) på denne [konstruksjonen](#construct), automasjonen til konstruksjoner som er tapt, og ![](mark:blueprint) [plantegningene](#blueprint) dine. Åpne det med `Bibliotek` på [startskjermen](#home).
 
 Det viser, ovenfra og ned:
 
@@ -12,7 +12,7 @@ De to første står under `På konstruksjonene dine`. Skriv i søkefeltet for å
 
 ## Et logikksystem eller en plantegning
 
-Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen fra [konfigurasjonspanelet](#configuration-panel), og [installasjonene](#installation) på denne konstruksjonen.
+Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen fra [konfigurasjonspanelet](#configuration-panel), og ![](mark:installation) [installasjonene](#installation) på denne konstruksjonen.
 
 - `På denne konstruksjonen` setter det på denne konstruksjonen, eller tar det av.
 - `Lag plantegning` tar vare på en kopi i lageret, og `Oppdater plantegning` oppdaterer den kopien.

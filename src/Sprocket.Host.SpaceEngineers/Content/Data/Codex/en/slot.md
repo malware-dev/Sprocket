@@ -1,6 +1,6 @@
 # Slot
 
-A slot is a named place in a [logic system](#logic-system), such as *the inner door*. The logic system's [steps](#step) and [triggers](#trigger) use the slot, and each [installation](#installation) fills it with blocks of its own. This is how one logic system can run every airlock on a ship.
+A slot is a named place in a ![](mark:logic-system) [logic system](#logic-system), such as *the inner door*. The logic system's [steps](#step) and [triggers](#trigger) use the slot, and each ![](mark:installation) [installation](#installation) fills it with blocks of its own. This is how one logic system can run every airlock on a ship.
 
 ## Two kinds
 

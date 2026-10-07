@@ -49,7 +49,9 @@ mention.
 A term with a kind icon carries it where the page sets the term apart: beside its link, and where it is
 named in bold, such as `![](mark:signal) **signal slot**`. Running text stays plain. The icon is an image
 whose locator is `mark:` and the kind, which the editor draws from Maltek Symbols at three quarters of the
-line: `sequence`, `signal`, `block`, `action`, `awaited` and `value`. Its words are left empty, so a host
+line: `sequence`, `signal`, `block`, `blueprint`, `logic-system`, `installation`, `action`, `awaited` and
+`value`. A logic system's icon is a chip, its blueprint's is that chip cut out of a square, the mould it is made
+from, and an installation's is the chip in front of a darker one, one of however many. Its words are left empty, so a host
 that knows no such locator draws nothing in its place. A page's title carries none, since the title is the
 term's name.
 

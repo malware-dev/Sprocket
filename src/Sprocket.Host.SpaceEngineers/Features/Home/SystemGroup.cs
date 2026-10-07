@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Opens = editor.Act(Cmd.OpenSystem, delegate { page.Open(system); });
             _heading.Flips = editor.Act(Cmd.EnableSystem, delegate { editor.SwitchSystem(system, !system.Enabled); });
             _heading.SwitchGovernsAll = true;
-            _heading.Mark = Symbols.Blueprint;
+            _heading.Mark = Symbols.LogicSystem;
             _takesOff = editor.Act(Cmd.TakeOff, delegate { editor.AskTakeOff(system); });
             _deletes = editor.Act(Cmd.DeleteSystem, delegate { editor.DeleteSystem(system); });
             _renews = editor.Act(Cmd.Renew, delegate { editor.AskRenew(system); });
@@ -174,6 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             var row = new StatusRow
             {
+                Mark = Symbols.Installation,
                 Depth = 1,
                 Opens = _editor.Act(Cmd.OpenSystem, delegate { _page.Open(_system, instance); }),
                 AboutArguments = new Arguments()

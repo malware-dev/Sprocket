@@ -12,11 +12,11 @@ Each button or toolbar slot sends a signal of its own, so one block can start se
 
 ## Setting one up
 
-A signal reaches a [logic system](#logic-system) through a signal [slot](#slot), which holds the block and the toolbar slot that sends it. When the signal slot is filled, that toolbar slot is set up for you, and shows `Automation Signal`. If it already does something else, you are asked whether to take it over, replacing what it did, or leave it alone.
+A signal reaches a ![](mark:logic-system) [logic system](#logic-system) through a signal [slot](#slot), which holds the block and the toolbar slot that sends it. When the signal slot is filled, that toolbar slot is set up for you, and shows `Automation Signal`. If it already does something else, you are asked whether to take it over, replacing what it did, or leave it alone.
 
 ## When a signal arrives
 
-A signal starts its trigger only for the [installation](#installation) whose signal slot holds it, so the port airlock's button cycles only the port airlock. A signal that arrives while the installation is switched off, or while the ![](mark:sequence) [sequence](#sequence) it starts is already running, is skipped. The sequence counts how often that happens.
+A signal starts its trigger only for the ![](mark:installation) [installation](#installation) whose signal slot holds it, so the port airlock's button cycles only the port airlock. A signal that arrives while the installation is switched off, or while the ![](mark:sequence) [sequence](#sequence) it starts is already running, is skipped. The sequence counts how often that happens.
 
 ## When the toolbar slot is changed
 

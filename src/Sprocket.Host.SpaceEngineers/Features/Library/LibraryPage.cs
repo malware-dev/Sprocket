@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
                 here++;
                 var system = systems[i];
-                var row = new StatusRow { Mark = Symbols.Blueprint, Summary = system.Name, Depth = 1 };
+                var row = new StatusRow { Mark = Symbols.LogicSystem, Summary = system.Name, Depth = 1 };
                 row.Status = Installations(texts, system.Instances.Count);
                 Add(new Entry { Section = OnConstruct, Identity = system.Identity }, row);
             }

@@ -1,6 +1,6 @@
 # Configuration panel
 
-The configuration panel is where an [installation](#installation) gets its blocks and ![](mark:signal) [signals](#signal). Each installation has its own. It is also where whoever made the [logic system](#logic-system) explains it, so that someone who has never seen it can install it.
+The configuration panel is where an ![](mark:installation) [installation](#installation) gets its blocks and ![](mark:signal) [signals](#signal). Each installation has its own. It is also where whoever made the ![](mark:logic-system) [logic system](#logic-system) explains it, so that someone who has never seen it can install it.
 
 ## Opening it
 
@@ -30,7 +30,7 @@ The installation's switch is on the panel as well, so you can switch it on as so
 
 Whoever makes a logic system sets up what its configuration panel says. `Edit configuration panel`, on the logic system's screen, opens it for that. The logic system must be switched off first.
 
-- **The description** says what the logic system does and what whoever installs it needs to know. It can have headings, lists, and bold or italic text, and is also shown beside the [blueprint](#blueprint) in the library.
+- **The description** says what the logic system does and what whoever installs it needs to know. It can have headings, lists, and bold or italic text, and is also shown beside the ![](mark:blueprint) [blueprint](#blueprint) in the library.
 - **Each slot's name** is what everyone filling it sees. Two slots can't have the same name.
 - **Each slot's line on what it is for** tells them which of their blocks to choose.
 

@@ -1,6 +1,6 @@
 # Konfigurasjonspanel
 
-Konfigurasjonspanelet er der en [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det er også der den som laget [logikksystemet](#logic-system), forklarer det, så noen som aldri har sett det, kan installere det.
+Konfigurasjonspanelet er der en ![](mark:installation) [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det er også der den som laget ![](mark:logic-system) [logikksystemet](#logic-system), forklarer det, så noen som aldri har sett det, kan installere det.
 
 ## Åpne det
 
@@ -30,7 +30,7 @@ Bryteren til installasjonen er også på panelet, så du kan slå den på så sn
 
 Den som lager et logikksystem, bestemmer hva konfigurasjonspanelet sier. `Rediger konfigurasjonspanelet`, på skjermen til logikksystemet, åpner det for dette. Logikksystemet må være slått av først.
 
-- **Beskrivelsen** sier hva logikksystemet gjør, og hva den som installerer det, trenger å vite. Den kan ha overskrifter, lister og fet eller kursiv tekst, og vises også ved siden av [plantegningen](#blueprint) i biblioteket.
+- **Beskrivelsen** sier hva logikksystemet gjør, og hva den som installerer det, trenger å vite. Den kan ha overskrifter, lister og fet eller kursiv tekst, og vises også ved siden av ![](mark:blueprint) [plantegningen](#blueprint) i biblioteket.
 - **Navnet på hver plass** er det alle som fyller den, ser. To plasser kan ikke ha samme navn.
 - **Linja om hva hver plass er til** forteller dem hvilke av blokkene sine de skal velge.
 

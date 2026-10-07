@@ -1,6 +1,6 @@
 # Installation
 
-An installation is one place a [logic system](#logic-system) runs, such as one airlock among several. It fills the logic system's [slots](#slot) with blocks of its own, for example its own doors, vent and button.
+An installation is one place a ![](mark:logic-system) [logic system](#logic-system) runs, such as one airlock among several. It fills the logic system's [slots](#slot) with blocks of its own, for example its own doors, vent and button.
 
 ## Many installations, one logic system
 

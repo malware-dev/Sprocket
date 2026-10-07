@@ -15,6 +15,9 @@ public class MarkImagesTests
     [InlineData("mark:awaited")]
     [InlineData("mark:value")]
     [InlineData("mark:block")]
+    [InlineData("mark:blueprint")]
+    [InlineData("mark:logic-system")]
+    [InlineData("mark:installation")]
     public void EachKindsMarkIsFound(string locator)
     {
         var marks = new MarkImages(new Nothing());

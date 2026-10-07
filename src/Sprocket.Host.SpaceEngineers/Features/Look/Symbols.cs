@@ -78,8 +78,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Two bars: held where it is and passed over, until it is let go again.</summary>
         public const string Pause = "e";
 
-        /// <summary>A sheet ruled into four: a blueprint, the drawing logic systems are made from.</summary>
+        /// <summary>A logic system's chip cut out of a square: a blueprint, the mould logic systems are made from.</summary>
         public const string Blueprint = "b";
+
+        /// <summary>A chip with its pins along two sides: a logic system, the working thing a blueprint is the mould of.</summary>
+        public const string LogicSystem = "y";
+
+        /// <summary>The logic system's chip in front of a darker one: an installation, one of however many of a logic system.</summary>
+        public const string Installation = "I";
 
         /// <summary>Three steps beside an arrow down: a sequence, steps taken in order.</summary>
         public const string Sequence = "q";
