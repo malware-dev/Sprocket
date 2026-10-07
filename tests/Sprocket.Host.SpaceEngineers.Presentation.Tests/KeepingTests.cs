@@ -19,7 +19,7 @@ public class KeepingTests
     const string AColourStep = "60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
         + "70 175 200 485 800 565 1049 374 type #FF8800 enter";
 
-    const string Again = "270 182";
+    const string Again = "208 182";
 
     const string Done = "1394 72";
 

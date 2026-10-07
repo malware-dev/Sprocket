@@ -24,17 +24,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             new SoundExtension()
         };
 
-        readonly ITriggers[] _triggers =
+        readonly ISignals[] _triggers =
         {
-            new ButtonPanelTriggers(),
-            new TimerTriggers(),
-            new SensorTriggers(),
-            new EventControllerTriggers(),
-            new ShipControllerTriggers()
+            new ButtonPanelSignals(),
+            new TimerSignals(),
+            new SensorSignals(),
+            new EventControllerSignals(),
+            new ShipControllerSignals()
         };
 
-        /// <summary>What <paramref name="block" />'s toolbar slots mean as triggers, or null where each is a trigger of its own.</summary>
-        public ITriggers TriggersFor(IMyTerminalBlock block)
+        /// <summary>What signals <paramref name="block" />'s toolbar slots send, or null where each sends one of its own.</summary>
+        public ISignals SignalsFor(IMyTerminalBlock block)
         {
             for (var i = 0; i < _triggers.Length; i++)
             {
@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
+        /// <summary>The extension that knows <paramref name="block" />, or null where none does.</summary>
         public IBlockExtension For(IMyTerminalBlock block)
         {
             for (var i = 0; i < _all.Length; i++)

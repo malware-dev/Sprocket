@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class Bindings
     {
-        static readonly TriggerRef[] NoTriggers = new TriggerRef[0];
+        static readonly SignalRef[] NoSignals = new SignalRef[0];
 
         readonly Dictionary<string, GridEntity> _bound = new Dictionary<string, GridEntity>();
         readonly Dictionary<string, RefState> _states = new Dictionary<string, RefState>();
@@ -54,20 +54,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _world = world.Revision;
             _program = program.Revision;
-            Resolve(world, program.Refs, program.TriggerRefs);
+            Resolve(world, program.Refs, program.SignalRefs);
         }
 
         /// <summary>Resolves every declaration against the world as it is now, unconditionally.</summary>
         public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs)
         {
-            Resolve(world, refs, NoTriggers);
+            Resolve(world, refs, NoSignals);
         }
 
         /// <summary>
-        /// The same, and each trigger variable to the block its slot is on, so a trigger names its block wherever blocks are
+        /// The same, and each signal variable to the block its slot is on, so a signal names its block wherever blocks are
         /// asked after.
         /// </summary>
-        public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<TriggerRef> triggers)
+        public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<SignalRef> signals)
         {
             Revision++;
             _bound.Clear();
@@ -107,13 +107,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     world.Renumber(found, declared.Keys);
             }
 
-            for (var i = 0; i < triggers.Count; i++)
+            for (var i = 0; i < signals.Count; i++)
             {
                 GridEntity panel;
-                if (_bound.TryGetValue(triggers[i].Block, out panel))
-                    _bound[triggers[i].Name] = panel;
+                if (_bound.TryGetValue(signals[i].Block, out panel))
+                    _bound[signals[i].Name] = panel;
 
-                _states[triggers[i].Name] = State(triggers[i].Block);
+                _states[signals[i].Name] = State(signals[i].Block);
             }
         }
 
@@ -130,6 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return _bound.TryGetValue(name, out entity) ? entity : null;
         }
 
+        /// <summary>How surely the variable <paramref name="name" /> was found on the construct, or lost where it was not.</summary>
         public RefState State(string name)
         {
             RefState state;

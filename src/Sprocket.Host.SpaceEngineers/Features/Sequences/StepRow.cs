@@ -132,7 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             for (var i = 0; i < Slots.Count; i++)
             {
-                _chips[i].WaitsTip = texts.MemberWaits;
+                _chips[i].Texts = texts;
                 _chips[i].Tip = Tip.For(_chips[i].Tip, Slots[i].Opens == null ? Why() : About(texts, Slots[i]));
                 Part(i, Slots[i], world);
             }

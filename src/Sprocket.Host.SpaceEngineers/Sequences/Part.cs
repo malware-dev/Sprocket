@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     {
         readonly List<string> _expects = new List<string>();
 
+        /// <summary>A required slot called <paramref name="id" />, expecting any block.</summary>
         public Part(string id)
         {
             Id = id;
@@ -27,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public bool Optional { get; set; }
 
         /// <summary>Whether this part is a trigger, answered by toolbar slots on its blocks rather than by the blocks alone.</summary>
-        public bool IsTrigger { get; set; }
+        public bool IsSignal { get; set; }
 
         /// <summary>
         /// The block types that may fill this part, or none for anything.

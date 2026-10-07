@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             // A required trigger that names nothing: whatever answers it is on the ship's toolbars
             // and not in the system, so there is nothing to name and the line says that.
-            return trigger is RequiredTrigger ? "When something on this construct starts it" : SentenceText.Empty;
+            return trigger is SignalTrigger ? "When something on this construct starts it" : SentenceText.Empty;
         }
 
 
@@ -117,6 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
+        /// <summary>What <paramref name="status" /> is said as, in <paramref name="texts" />.</summary>
         public static string Status(Texts texts, SequenceStatus status)
         {
             if (status == SequenceStatus.Off)
@@ -381,6 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return row;
         }
 
+        /// <summary>What <paramref name="problem" /> is said as, in <paramref name="texts" />.</summary>
         public static string Problem(Texts texts, SequenceProblem problem)
         {
             if (problem == SequenceProblem.MissingSource)

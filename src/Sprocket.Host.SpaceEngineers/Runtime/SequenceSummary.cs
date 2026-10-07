@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public static class SequenceSummary
     {
+        /// <summary>Whether <paramref name="sequence" /> names the variable or slot <paramref name="name" />, in what starts it or in a step.</summary>
         public static bool References(Sequence sequence, string name)
         {
             return Automation.References(sequence, name);
@@ -83,9 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!triggers[i].Stops)
                     starts++;
 
-                // A trigger part left unanswered is said by Empty; whether the slots it is given answer is the
+                // A signal part left unanswered is said by Empty; whether the slots it is given answer is the
                 // construct's to say below. One that names no part yet is somebody still building it.
-                var required = triggers[i] as RequiredTrigger;
+                var required = triggers[i] as SignalTrigger;
                 if (required != null)
                 {
                     if (required.Sources.Count > 0)
@@ -156,6 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return tick - state.LastFiredTick;
         }
 
+        /// <summary>What <paramref name="sequence" /> is doing, as <paramref name="state" /> says it runs and its switch allows.</summary>
         public static SequenceStatus Status(Sequence sequence, SequenceRunner state)
         {
             // What is happening outranks what is allowed to happen. A parked sequence somebody has

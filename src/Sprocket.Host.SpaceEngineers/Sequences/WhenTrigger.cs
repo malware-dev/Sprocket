@@ -9,10 +9,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <remarks>
     /// For the moments the game announces to nobody. Sprocket reads the blocks every tick and fires
     /// on the edge, which is the expensive way and the only way there is - so it is what a moment
-    /// gets when the construct cannot raise it. See <see cref="RequiredTrigger" /> for the rest.
+    /// gets when the construct cannot raise it. See <see cref="SignalTrigger" /> for the rest.
     /// </remarks>
     public sealed class WhenTrigger : MomentTrigger
     {
+        /// <summary>A trigger started when a block reaches the moment <paramref name="eventId" />.</summary>
         public WhenTrigger(string eventId) : base(eventId)
         {
         }

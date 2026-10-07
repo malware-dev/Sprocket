@@ -19,25 +19,27 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// from a system somebody sent; the editor always says which block it meant.
     /// </para>
     /// </remarks>
-    public sealed class RequiredTrigger : MomentTrigger
+    public sealed class SignalTrigger : MomentTrigger
     {
-        public RequiredTrigger() : base("")
+        /// <summary>A trigger started by a signal, named by no slot or variable yet.</summary>
+        public SignalTrigger() : base("")
         {
         }
 
-        public RequiredTrigger(string eventId) : base(eventId)
+        /// <summary>A trigger started by the signal <paramref name="eventId" />.</summary>
+        public SignalTrigger(string eventId) : base(eventId)
         {
         }
 
-        /// <summary>The trigger that is the trigger part <paramref name="part" />, answered in each instance by its toolbar slots.</summary>
-        public static RequiredTrigger Named(string part)
+        /// <summary>The trigger that is the signal part <paramref name="part" />, answered in each instance by its toolbar slots.</summary>
+        public static SignalTrigger Named(string part)
         {
-            var trigger = new RequiredTrigger();
+            var trigger = new SignalTrigger();
             trigger.Sources.Add(part);
             return trigger;
         }
 
-        /// <summary>The trigger part this is, or empty where it names none.</summary>
+        /// <summary>The signal part this is, or empty where it names none.</summary>
         public string Part => Sources.Count > 0 ? Sources[0] : "";
     }
 }

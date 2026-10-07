@@ -1406,7 +1406,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         {
                             if (Shares(taken, system))
                             {
-                                made = RequiredTrigger.Named(taken.Trigger.Part);
+                                made = SignalTrigger.Named(taken.Trigger.Part);
                                 system.ReplaceTrigger(taken.Trigger, null);
                                 _program.Edited();
                                 _program.Rewire();
@@ -1486,7 +1486,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>
         /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,
         /// and the one written last silently wins, so it is asked before it happens rather than found afterwards on a row that
-        /// has gone quiet. Taking a button from another installation empties the trigger slot that had it there, which then needs
+        /// has gone quiet. Taking a button from another installation empties the signal slot that had it there, which then needs
         /// another; taking it from a trigger in the same installation takes that trigger out and its slot over; either way the
         /// button is written, whatever its slot holds by then.
         /// <para>
@@ -1506,7 +1506,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void Unless(AutomationSystem system, MomentTrigger made, PickAnswer answer, Trigger except, Action<Occupant> then,
             Action otherwise)
         {
-            if (!(made is RequiredTrigger))
+            if (!(made is SignalTrigger))
             {
                 then(null);
                 return;
@@ -1577,11 +1577,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>
         /// Fills <paramref name="part" /> of <paramref name="chosen" /> with the blocks <paramref name="blocks" /> by
-        /// <paramref name="fill" />, asking first where it is a trigger part and something else already answers one of the
+        /// <paramref name="fill" />, asking first where it is a signal part and something else already answers one of the
         /// toolbar slots <paramref name="at" /> it is given.
         /// </summary>
         /// <remarks>
-        /// One question at a time. Taking a button empties the trigger slot of the blockset that had it; nothing is taken until
+        /// One question at a time. Taking a button empties the signal slot of the blockset that had it; nothing is taken until
         /// every question is answered, and leaving any of them alone leaves the part as it was.
         /// </remarks>
         public void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
@@ -1593,7 +1593,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
             Action fill, List<Occupant> taking)
         {
-            var trigger = part.IsTrigger && at != null ? TriggerOf(system, part.Id) : null;
+            var trigger = part.IsSignal && at != null ? TriggerOf(system, part.Id) : null;
             var holder = trigger == null ? null : Holding(blocks, at, trigger, chosen, taking);
             if (holder != null)
             {
@@ -1617,13 +1617,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Wired(blocks);
         }
 
-        /// <summary>The trigger that is the trigger part <paramref name="part" /> of <paramref name="system" />, or null.</summary>
-        static RequiredTrigger TriggerOf(AutomationSystem system, string part)
+        /// <summary>The trigger that is the signal part <paramref name="part" /> of <paramref name="system" />, or null.</summary>
+        static SignalTrigger TriggerOf(AutomationSystem system, string part)
         {
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                var trigger = triggers[i] as RequiredTrigger;
+                var trigger = triggers[i] as SignalTrigger;
                 if (trigger != null && trigger.Part == part)
                     return trigger;
             }
@@ -1637,7 +1637,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             public GridEntity Panel;
             public ToolbarSlot At;
             public AutomationSystem System;
-            public RequiredTrigger Trigger;
+            public SignalTrigger Trigger;
             public SystemInstance Instance;
 
             public bool Same(Occupant other)
@@ -1672,7 +1672,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     var triggers = each.Triggers;
                     for (var i = 0; i < triggers.Count; i++)
                     {
-                        var other = triggers[i] as RequiredTrigger;
+                        var other = triggers[i] as SignalTrigger;
                         if (other == null)
                             continue;
 
@@ -1753,7 +1753,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Takes <paramref name="holder" />'s toolbar slot out of the trigger slot of the blockset that had it, which then needs
+        /// Takes <paramref name="holder" />'s toolbar slot out of the signal slot of the blockset that had it, which then needs
         /// another, or takes out a system's trigger, whose variable holds only that button.
         /// </summary>
         void Release(Occupant holder)
@@ -1801,7 +1801,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return new TakeOver(made, holder.Instance, holder.Trigger.Part, kept, keptAt);
         }
 
-        /// <summary>What answers <paramref name="holder" />'s trigger part in its blockset once its toolbar slot is taken out.</summary>
+        /// <summary>What answers <paramref name="holder" />'s signal part in its blockset once its toolbar slot is taken out.</summary>
         void Kept(Occupant holder, List<string> kept, List<ToolbarSlot> keptAt)
         {
             var part = holder.Trigger.Part;
@@ -1834,17 +1834,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>
         /// The one place the two arrangements are told apart, and nobody is asked: picking a button means the construct
         /// already announces it and Sprocket wires a slot, picking a door means Sprocket watches for it. See
-        /// <see cref="Vocabulary.Starter" />. In a system blueprint a button names a trigger slot, new or, picked again for
+        /// <see cref="Vocabulary.Starter" />. In a system blueprint a button names a signal slot, new or, picked again for
         /// <paramref name="keeping" />, that trigger's own; the slot is taken and answered once the question of whether
         /// the buttons are free is answered - see <see cref="Answering" />. In a system it names the variable holding the
         /// first button picked, defined at that answer too.
         /// </remarks>
-        public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, RequiredTrigger keeping)
+        public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, SignalTrigger keeping)
         {
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
 
-            if (!(made is RequiredTrigger))
+            if (!(made is SignalTrigger))
             {
                 var named = Named(system, answer.Targets);
                 for (var i = 0; i < named.Count; i++)
@@ -1854,7 +1854,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
 
             if (keeping != null && system.IsBlueprint)
-                return RequiredTrigger.Named(keeping.Part);
+                return SignalTrigger.Named(keeping.Part);
 
             var declared = new List<string>();
             var at = new List<ToolbarSlot>();
@@ -1863,29 +1863,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return made;
 
             if (!system.IsBlueprint)
-                return RequiredTrigger.Named(TriggerName(declared[0], at[0]));
+                return SignalTrigger.Named(SignalName(declared[0], at[0]));
 
             if (StandIn(system) == null)
                 return made;
 
             var called = declared.Count == 1 ? Called(first) : first.Kind.DisplayName;
-            return RequiredTrigger.Named(system.Free(called));
+            return SignalTrigger.Named(system.Free(called));
         }
 
         /// <summary>
         /// What the variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names is called: its
         /// own name where there is one, and the block's with the slot's number after it otherwise.
         /// </summary>
-        string TriggerName(string block, ToolbarSlot at)
+        string SignalName(string block, ToolbarSlot at)
         {
-            var held = _program.FindTriggerRef(block, at);
+            var held = _program.FindSignalRef(block, at);
             return held != null
                 ? held.Name
                 : _program.Free(block + " " + at.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture));
         }
 
         /// <summary>
-        /// The edit that answers the trigger part <paramref name="made" /> names in the blockset shown with the buttons
+        /// The edit that answers the signal part <paramref name="made" /> names in the blockset shown with the buttons
         /// <paramref name="answer" /> picked, taking the part where it is new, around <paramref name="then" />; null where
         /// <paramref name="made" /> names no part or nothing was picked.
         /// </summary>
@@ -1896,7 +1896,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         SystemEdit Answering(AutomationSystem system, MomentTrigger made, PickAnswer answer, SystemEdit then)
         {
-            var required = made as RequiredTrigger;
+            var required = made as SignalTrigger;
             if (required == null)
                 return null;
 
@@ -1908,7 +1908,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (!system.IsBlueprint)
             {
-                _program.DeclareTrigger(declared[0], at[0], required.Part);
+                _program.DeclareSignal(declared[0], at[0], required.Part);
                 return then;
             }
 
@@ -1916,7 +1916,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (instance == null)
                 return null;
 
-            return new AnswerTrigger(then, system, instance, required.Part, Type(first.Kind), declared, at);
+            return new AnswerSignal(then, system, instance, required.Part, Type(first.Kind), declared, at);
         }
 
         /// <summary>The blocks <paramref name="answer" /> picked, as the construct declares them, each with the toolbar slot its press is answered on; the first of them, or null.</summary>
@@ -2096,7 +2096,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </summary>
         /// <remarks>
         /// A system names the program's variables, and a blueprint its own slots: so each block the system acts on becomes a
-        /// slot, and each trigger it is started by a trigger slot, called what the block is called now. Every step and trigger
+        /// slot, and each trigger it is started by a signal slot, called what the block is called now. Every step and trigger
         /// that named the variable names the slot, and the first instance answers it with that variable.
         /// </remarks>
         public SystemInstance Blueprinted(AutomationSystem system)
@@ -2115,8 +2115,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var slots = new Dictionary<string, string>();
             for (var i = 0; i < named.Count; i++)
             {
-                // What starts a trigger is named too, and becomes a trigger slot below.
-                if (_program.FindTriggerRef(named[i]) != null)
+                // What starts a trigger is named too, and becomes a signal slot below.
+                if (_program.FindSignalRef(named[i]) != null)
                     continue;
 
                 GridEntity entity = _runner.Bindings.Entity(named[i]);
@@ -2132,15 +2132,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                var needed = triggers[i] as RequiredTrigger;
-                var declared = needed == null ? null : _program.FindTriggerRef(needed.Part);
+                var needed = triggers[i] as SignalTrigger;
+                var declared = needed == null ? null : _program.FindSignalRef(needed.Part);
                 if (declared == null || slots.ContainsKey(needed.Part))
                     continue;
 
                 GridEntity panel = _runner.Bindings.Entity(declared.Block);
                 var slot = system.Free(panel == null ? declared.Name : Called(panel));
                 var part = system.PartFor(slot);
-                part.IsTrigger = true;
+                part.IsSignal = true;
 
                 first.Fill(slot, new[] { declared.Block }, new[] { declared.At });
 
@@ -2360,22 +2360,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Blocks(system, moment.Sources), Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)), Form.Native,
                 delegate(PickAnswer answer)
                 {
-                    var keeping = moment as RequiredTrigger;
+                    var keeping = moment as SignalTrigger;
                     MomentTrigger made = Starter(system, answer, keeping);
                     Unless(system, made, answer, moment, delegate(Occupant taken)
                     {
                         if (Shares(taken, system))
                         {
-                            var taking = RequiredTrigger.Named(taken.Trigger.Part);
+                            var taking = SignalTrigger.Named(taken.Trigger.Part);
                             var moved = new ChangeTrigger(moment, taking);
                             Aimed(system, taking, aim, origin, false,
                                 new TakeOverTrigger(Answering(system, taking, answer, moved) ?? moved, system, taken.Trigger));
                             return;
                         }
 
-                        // A button picked again for a button trigger answers the same trigger part, so the trigger is kept:
+                        // A button picked again for a button trigger answers the same signal part, so the trigger is kept:
                         // its toolbar slots name it.
-                        if (keeping != null && made is RequiredTrigger && system.IsBlueprint)
+                        if (keeping != null && made is SignalTrigger && system.IsBlueprint)
                         {
                             var refill = Answering(system, made, answer, null);
                             if (refill != null)

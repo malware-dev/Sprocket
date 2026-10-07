@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Does what was picked, and takes the button it was given out of the trigger slot of the blockset that had it.
+    /// Does what was picked, and takes the button it was given out of the signal slot of the blockset that had it.
     /// </summary>
     /// <remarks>
     /// A toolbar slot holds one thing, so two triggers naming one button is a state the construct cannot be put into. The
@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<string> _kept;
         readonly List<ToolbarSlot> _keptAt;
 
-        /// <summary>Does <paramref name="made" />, leaving trigger part <paramref name="part" /> of <paramref name="from" /> answered by <paramref name="kept" /> at <paramref name="keptAt" /> alone.</summary>
+        /// <summary>Does <paramref name="made" />, leaving signal part <paramref name="part" /> of <paramref name="from" /> answered by <paramref name="kept" /> at <paramref name="keptAt" /> alone.</summary>
         public TakeOver(SystemEdit made, SystemInstance from, string part, IList<string> kept, IList<ToolbarSlot> keptAt)
         {
             _made = made;

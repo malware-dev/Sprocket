@@ -18,7 +18,7 @@ public class ScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 1 alpha 10\n\n";
+    const string Version = "sprocket 1 alpha 11\n\n";
 
     const string Head = Version + "system \"" + Identity + "\" as ";
 
@@ -152,7 +152,7 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "sprocket 1 alpha 10\n" +
+            "sprocket 1 alpha 11\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
@@ -196,7 +196,7 @@ public class ScriptTests
         var panel = new EntityRef("panel1", "ButtonPanel/ButtonPanelLarge");
         panel.Keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(74857693847562937L)));
         program.Restore(panel);
-        program.DeclareTrigger("panel1", new ToolbarSlot(1, 1, 4), "button");
+        program.DeclareSignal("panel1", new ToolbarSlot(1, 1, 4), "button");
 
         var system = program.AddSystem();
         system.Identity = new Guid(Identity);
@@ -208,12 +208,12 @@ public class ScriptTests
         close.Targets.Add("inner");
         sequence.Steps.Add(close);
 
-        var pressed = RequiredTrigger.Named("button");
+        var pressed = SignalTrigger.Named("button");
         pressed.Does = new Run(sequence.Number);
         system.AddTrigger(pressed);
 
         const string written =
-            "sprocket 1 alpha 10\n" +
+            "sprocket 1 alpha 11\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934 ]\n" +
             "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 74857693847562937 ]\n" +
@@ -254,9 +254,9 @@ public class ScriptTests
     /// A system with no identity, or one that is not a GUID, is trouble and is not read.
     /// </summary>
     [Theory]
-    [InlineData("sprocket 1 alpha 10\n\nsystem Airlock {\n}\n")]
-    [InlineData("sprocket 1 alpha 10\n\nsystem \"airlock\" as Airlock {\n}\n")]
-    [InlineData("sprocket 1 alpha 10\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 11\n\nsystem Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 11\n\nsystem \"airlock\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 11\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
     public void ASystemWithoutAnIdentityIsTrouble(string text)
     {
         var after = new Automation();
@@ -523,7 +523,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            Blueprint + "MalTek.Airlock {\n    required slot inside\n    optional slot button expects trigger\n    " + line
+            Blueprint + "MalTek.Airlock {\n    required slot inside\n    optional slot button expects signal\n    " + line
             + "\n\n    sequence 1 {\n    }\n}\n", after));
 
         Assert.False(after.Intact);
@@ -596,22 +596,22 @@ public class ScriptTests
         program.AddSequence(system);
 
         var inside = system.PartFor("inside");
-        inside.IsTrigger = true;
+        inside.IsSignal = true;
         inside.Annotation = "The call button inside.";
-        var insideTrigger = RequiredTrigger.Named("inside");
+        var insideTrigger = SignalTrigger.Named("inside");
         insideTrigger.Does = new Run(1);
         system.AddTrigger(insideTrigger);
 
         var outside = system.PartFor("outside");
-        outside.IsTrigger = true;
+        outside.IsSignal = true;
         outside.Optional = true;
-        var outsideTrigger = RequiredTrigger.Named("outside");
+        var outsideTrigger = SignalTrigger.Named("outside");
         outsideTrigger.Does = new Run(1);
         system.AddTrigger(outsideTrigger);
 
         var text = Save(program);
         Assert.Contains(
-            "    # The call button inside.\n    required slot inside expects trigger\n    optional slot outside expects trigger\n",
+            "    # The call button inside.\n    required slot inside expects signal\n    optional slot outside expects signal\n",
             text);
         Assert.Contains("    on inside then run 1\n\n    on outside then run 1\n", text);
 
@@ -620,16 +620,16 @@ public class ScriptTests
 
         var read = after.Systems[0];
         Assert.Equal(2, read.Triggers.Count);
-        Assert.All(read.Triggers, t => Assert.Equal(1, Assert.IsType<RequiredTrigger>(t).Runs));
-        Assert.Equal("inside", ((RequiredTrigger)read.Triggers[0]).Part);
+        Assert.All(read.Triggers, t => Assert.Equal(1, Assert.IsType<SignalTrigger>(t).Runs));
+        Assert.Equal("inside", ((SignalTrigger)read.Triggers[0]).Part);
         Assert.Equal("The call button inside.", read.FindPart("inside")!.Annotation);
-        Assert.True(read.FindPart("inside")!.IsTrigger);
+        Assert.True(read.FindPart("inside")!.IsSignal);
         Assert.False(read.FindPart("inside")!.Optional);
         Assert.True(read.FindPart("outside")!.Optional);
     }
 
     /// <summary>
-    /// An instance answers a trigger slot with host functions written in place, or with variables holding what one gave back,
+    /// An instance answers a signal slot with host functions written in place, or with variables holding what one named,
     /// and they come back as written.
     /// </summary>
     [Fact]
@@ -641,7 +641,7 @@ public class ScriptTests
 
         var after = new Automation();
         Assert.Equal("", Load(Version + written + "\n"
-            + "system blueprint \"" + Identity + "\" as MalTek.Airlock {\n    optional slot button expects trigger\n\n"
+            + "system blueprint \"" + Identity + "\" as MalTek.Airlock {\n    optional slot button expects signal\n\n"
             + "    on button then run 1\n\n    sequence 1 {\n    }\n}\n\n"
             + "instance 1 of MalTek.Airlock {\n    button = [ panel1:toolbar(1, 1, 4), panel2:toolbar(1, 2, 3), halt ]\n}\n", after));
 
@@ -658,7 +658,7 @@ public class ScriptTests
         Assert.Contains("    button = [ panel1:toolbar(1, 1, 4), panel2:toolbar(1, 2, 3), halt ]\n", text);
     }
 
-    /// <summary>A trigger slot answered by anything but a trigger is trouble, and so is a slot for a block answered by one.</summary>
+    /// <summary>A signal slot answered by anything but a signal is trouble, and so is a slot for a block answered by one.</summary>
     [Theory]
     [InlineData("button = [ panel1 ]")]
     [InlineData("button = [ panel1:toolbar(1, 1) ]")]
@@ -671,12 +671,12 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(Version + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet halt = panel1:toolbar(1, 1, 2)\n\n"
-            + "system blueprint \"" + Identity + "\" as MalTek.Airlock {\n    required slot inner\n    optional slot button expects trigger\n\n"
+            + "system blueprint \"" + Identity + "\" as MalTek.Airlock {\n    required slot inner\n    optional slot button expects signal\n\n"
             + "    on button then run 1\n\n    sequence 1 {\n    }\n}\n\ninstance 1 of MalTek.Airlock {\n    " + line + "\n}\n", after));
         Assert.False(after.Intact);
     }
 
-    /// <summary>A system names its triggers as it names its blocks: by the variables above that hold them.</summary>
+    /// <summary>A system names its signals as it names its blocks: by the variables above that hold them.</summary>
     [Fact]
     public void ASystemIsStartedByATriggerVariable()
     {
@@ -685,14 +685,14 @@ public class ScriptTests
             + "let button = panel1:toolbar(1, 1, 4)\n\n"
             + "system \"" + Identity + "\" as MalTek.Airlock {\n    on button then run 1\n\n    sequence 1 {\n    }\n}\n", after));
 
-        var started = Assert.IsType<RequiredTrigger>(Assert.Single(after.Systems[0].Triggers));
+        var started = Assert.IsType<SignalTrigger>(Assert.Single(after.Systems[0].Triggers));
         Assert.Equal("button", started.Part);
-        var held = after.FindTriggerRef("button")!;
+        var held = after.FindSignalRef("button")!;
         Assert.Equal("panel1", held.Block);
         Assert.Equal(4, held.At.Slot);
     }
 
-    /// <summary>A trigger variable that is not one, or is used before it is defined, is trouble, and so is a trigger variable named as a block.</summary>
+    /// <summary>A signal variable that is not one, or is used before it is defined, is trouble, and so is a signal variable named as a block.</summary>
     [Theory]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    on button then run 1\n")]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n", "    on panel1 then run 1\n")]
@@ -743,7 +743,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.Equal("", Load(Blueprint + "MalTek.Airlock {\n    required slot outer\n    required slot light\n"
-            + "    optional slot open expects trigger\n    optional slot dim expects trigger\n    optional slot halt expects trigger\n\n"
+            + "    optional slot open expects signal\n    optional slot dim expects signal\n    optional slot halt expects signal\n\n"
             + "    on open then call ext.open on [ outer ]\n"
             + "    on dim then set Radius on [ light ] to 4.5\n"
             + "    on halt then stop 'Cycle'\n\n"
@@ -792,7 +792,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            Blueprint + "MalTek.Airlock {\n    required slot outer\n    optional slot button expects trigger\n    " + line
+            Blueprint + "MalTek.Airlock {\n    required slot outer\n    optional slot button expects signal\n    " + line
             + "\n\n    sequence 1 {\n    }\n}\n", after));
 
         Assert.False(after.Intact);
@@ -1212,7 +1212,7 @@ public class ScriptTests
     [Fact]
     public void APathAmongABlocksKeysComesBackAsWritten()
     {
-        const string written = "sprocket 1 alpha 10\n\nlet door1 = block 'Door/LargeBlockDoor' "
+        const string written = "sprocket 1 alpha 11\n\nlet door1 = block 'Door/LargeBlockDoor' "
             + "[ 74857693847562934, [ (0 2 -1), (3 0 0) ], \"Hangar Door\" ]\n\n"
             + Using;
 
@@ -1233,7 +1233,7 @@ public class ScriptTests
     public void AListThatIsNotCellsIsTrouble(string key)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 1 alpha 10\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 11\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1242,7 +1242,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            "sprocket 1 alpha 10\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
+            "sprocket 1 alpha 11\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
 
         Assert.False(after.Intact);
     }
@@ -1378,7 +1378,7 @@ public class ScriptTests
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 1 alpha 10\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 11\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1393,7 +1393,7 @@ public class ScriptTests
     public void ASaveFromAnotherVersionIsTurnedAwayAndNotWrittenBack()
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 10", "sprocket 2"), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 11", "sprocket 2"), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -1410,14 +1410,14 @@ public class ScriptTests
     /// say something, rather than deep in the file where it cannot.
     /// </remarks>
     [Theory]
-    [InlineData("sprocket 1 alpha 9")]
-    [InlineData("sprocket 1 alpha 11")]
+    [InlineData("sprocket 1 alpha 10")]
+    [InlineData("sprocket 1 alpha 12")]
     [InlineData("sprocket 1")]
 
     public void ASaveFromAnotherDraftOfTheFormatIsRefused(string head)
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 10", head), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 11", head), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);

@@ -472,7 +472,7 @@ public class ChangingTests
         screen.Editor.Steps().Undo!.Execute();
         screen.Run(2);
 
-        var back = Assert.IsType<RequiredTrigger>(System(screen).Triggers[0]);
+        var back = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
         Assert.Equal(1, Assert.Single(Pressed.Where(screen.Editor.Program, System(screen), back.Part)!).Slot);
         Assert.Equal("When Airlock Button button 1 is pressed", screen.Editor.Says(0));
 
@@ -606,10 +606,10 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        var took = Assert.IsType<RequiredTrigger>(Assert.Single(System(screen).Triggers));
+        var took = Assert.IsType<SignalTrigger>(Assert.Single(System(screen).Triggers));
         Assert.True(took.IsAbout(screen.Editor.Program.Sequences[1]));
         Assert.Equal("Airlock Button", took.Part);
-        Assert.Single(System(screen).Parts, part => part.IsTrigger);
+        Assert.Single(System(screen).Parts, part => part.IsSignal);
     }
 
     /// <summary>
@@ -645,7 +645,7 @@ public class ChangingTests
 
         // Untouched: it still waits for the door it was given, and no slot was made for the button.
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Says(1));
-        Assert.DoesNotContain(System(screen).Parts, part => part.IsTrigger && part.Id != "Airlock Button");
+        Assert.DoesNotContain(System(screen).Parts, part => part.IsSignal && part.Id != "Airlock Button");
     }
 
     /// <summary>Changing a trigger onto a button another trigger has is one step back, which brings the other back with it.</summary>

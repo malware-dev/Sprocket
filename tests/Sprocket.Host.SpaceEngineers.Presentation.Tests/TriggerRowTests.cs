@@ -86,7 +86,7 @@ public class TriggerRowTests
     {
         var sim = Built();
         var row = sim.Editor.Triggers()[0];
-        var bin = row.Within().OfType<Glyph>().Single();
+        var bin = row.Within().OfType<Glyph>().Single(glyph => glyph.Symbol == Symbols.Delete);
         Assert.True(bin.IsVisible);
 
         row.Deletes = null;

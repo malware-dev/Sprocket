@@ -50,7 +50,7 @@ public class ProblemTests
     public void AnUnfinishedTriggerIsNotReported()
     {
         var ship = Build();
-        ((RequiredTrigger)ship.Sequence.Trigger).Sources.Clear();
+        ((SignalTrigger)ship.Sequence.Trigger).Sources.Clear();
         ship.Sequence.Steps.Clear();
 
         ship.Rig.CannotStart(ship.Sequence);
@@ -303,13 +303,13 @@ public class ProblemTests
     }
 
     /// <summary>
-    /// Makes the system a blueprint, its trigger slot required, and leaves the slot unanswered in its first instance, and
+    /// Makes the system a blueprint, its signal slot required, and leaves the slot unanswered in its first instance, and
     /// answers the slot: a system's trigger is a variable, which always holds its button.
     /// </summary>
     static string Unanswer(Ship ship)
     {
         var first = ship.Editor.Blueprinted(ship.Sequence.System);
-        var part = ((RequiredTrigger)ship.Sequence.Trigger).Part;
+        var part = ((SignalTrigger)ship.Sequence.Trigger).Part;
         ship.Sequence.System.FindPart(part)!.Optional = false;
         first.Clear(part);
 

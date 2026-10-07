@@ -470,14 +470,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Authored(row, part);
 
             row.Name = part.Id;
+            row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
+            row.MarkTip = part.IsSignal ? Editor.Texts.BlueprintSignalSlot : Editor.Texts.BlueprintBlockSlot;
             row.Described = part.Annotation;
             row.Optional = part.Optional ? Editor.Texts.BlueprintOptional : null;
             row.Blocks.Clear();
-            row.Triggers.Clear();
+            row.Signals.Clear();
             _gone.Clear();
 
             var filled = chosen == null ? null : chosen.FilledWith(part.Id);
-            var at = chosen == null || !part.IsTrigger ? null : chosen.Positions(part.Id);
+            var at = chosen == null || !part.IsSignal ? null : chosen.Positions(part.Id);
             if (filled != null)
             {
                 for (var i = 0; i < filled.Count; i++)
@@ -488,8 +490,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         row.Blocks.Add(block.Id);
                         if (at != null)
                         {
-                            var answers = i < at.Count ? block.Kind.Trigger(at[i]) : null;
-                            row.Triggers.Add(answers == null ? "" : answers.Text);
+                            var answers = i < at.Count ? block.Kind.Signal(at[i]) : null;
+                            row.Signals.Add(answers == null ? "" : answers.Text);
                         }
                     }
                     else if (_gone.Count == 0)
@@ -560,14 +562,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     targets.Add(block.Id);
             }
 
-            if (part.IsTrigger)
+            if (part.IsSignal)
             {
-                // A trigger slot is a block and one of its toolbar slots, picked as a trigger's are.
+                // A signal slot is a block and one of its toolbar slots, picked as a trigger's signal is.
                 var positions = chosen.Positions(part.Id);
                 var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
                 Editor.Push(new PickPage(Editor, part.Id, true, targets, pressed, Form.Native,
                     delegate(PickAnswer answer) { Answered(part, chosen, answer); },
-                    admits: Triggering, triggersOnly: true));
+                    admits: Signaling, signalsOnly: true));
                 return;
             }
 
@@ -575,8 +577,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 delegate(PickAnswer answer) { Filled(part, chosen, answer.Targets); }));
         }
 
-        /// <summary>Answers trigger slot <paramref name="part" /> for <paramref name="chosen" /> with the trigger <paramref name="answer" /> picked on each of its blocks, and goes back to the blueprint.</summary>
-        /// <remarks>Only a trigger answers a trigger slot; anything else picked leaves the picker open.</remarks>
+        /// <summary>Answers signal slot <paramref name="part" /> for <paramref name="chosen" /> with the signal <paramref name="answer" /> picked on each of its blocks, and goes back to the blueprint.</summary>
+        /// <remarks>Only a signal answers a signal slot; anything else picked leaves the picker open.</remarks>
         void Answered(Part part, SystemInstance chosen, PickAnswer answer)
         {
             if (ToolbarSlot.Of(answer.Chosen) == null)
@@ -595,8 +597,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             });
         }
 
-        /// <summary>Whether <paramref name="block" /> has a trigger: something the construct itself does to start a step.</summary>
-        static bool Triggering(GridEntity block)
+        /// <summary>Whether <paramref name="block" /> sends a signal: something the construct itself does to start a trigger.</summary>
+        static bool Signaling(GridEntity block)
         {
             var events = block.Kind.Events;
             for (var i = 0; i < events.Count; i++)
@@ -652,7 +654,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             });
         }
 
-        /// <summary>The parts the system's sentences use, in the order the system declares them.</summary>
+        /// <summary>The parts the system's sentences use: the block slots, then the signal slots, each in order of their names.</summary>
+        /// <remarks>
+        /// The order follows from the slots themselves, so it is the same however they were made, and a slot renamed moves to
+        /// its place.
+        /// </remarks>
         void Collect()
         {
             _parts.Clear();
@@ -664,6 +670,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 if (_used.Contains(parts[i].Id))
                     _parts.Add(parts[i]);
             }
+
+            _parts.Sort(ByKind);
+        }
+
+        /// <summary>Block slots before signal slots, and each kind by name, letters compared without their case.</summary>
+        static int ByKind(Part one, Part other)
+        {
+            if (one.IsSignal != other.IsSignal)
+                return one.IsSignal ? 1 : -1;
+
+            var named = string.Compare(one.Id, other.Id, StringComparison.OrdinalIgnoreCase);
+            return named != 0 ? named : string.CompareOrdinal(one.Id, other.Id);
         }
 
         /// <summary>What the page is built from that can change under it, as one number: how many of it, and which is chosen.</summary>

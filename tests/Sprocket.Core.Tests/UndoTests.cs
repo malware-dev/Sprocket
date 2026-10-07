@@ -67,7 +67,7 @@ public class UndoTests
                     .Append(onEvent.RequiresAll ? " all of " : " any of ")
                     .Append(string.Join("+", onEvent.Sources));
                 break;
-            case RequiredTrigger needed:
+            case SignalTrigger needed:
                 text.Append(" required ").Append(needed.EventId)
                     .Append(" of ").Append(string.Join("+", needed.Sources));
                 break;
@@ -241,7 +241,7 @@ public class UndoTests
         Sequence sequence = Build();
         var was = (MomentTrigger)sequence.Trigger;
 
-        var now = new RequiredTrigger(new ToolbarSlot(1, 1, 1).EventId);
+        var now = new SignalTrigger(new ToolbarSlot(1, 1, 1).EventId);
         now.Sources.Add("call");
 
         RoundTrip(sequence, new ChangeTrigger(was, now));
@@ -270,7 +270,7 @@ public class UndoTests
     }
 
     /// <summary>
-    /// Deleting a trigger the construct answers takes its trigger part and what each instance answered it with, and undoing
+    /// Deleting a trigger the construct answers takes its signal part and what each instance answered it with, and undoing
     /// puts all three back as they were.
     /// </summary>
     [Fact]
@@ -284,8 +284,8 @@ public class UndoTests
         sequence.Steps.Add(StepFor("open", "outer"));
 
         var part = system.PartFor("call");
-        part.IsTrigger = true;
-        var trigger = RequiredTrigger.Named("call");
+        part.IsSignal = true;
+        var trigger = SignalTrigger.Named("call");
         trigger.Does = new Run(sequence.Number);
         system.AddTrigger(trigger);
         system.First!.Fill("call", new[] { "panel1" }, new[] { new ToolbarSlot(1, 1, 4) });
@@ -305,7 +305,7 @@ public class UndoTests
         Assert.Equal(4, system.First.Positions("call")![0].Slot);
     }
 
-    /// <summary>Deleting one of two triggers on the same trigger slot leaves the slot and its answer to the other.</summary>
+    /// <summary>Deleting one of two triggers on the same signal slot leaves the slot and its answer to the other.</summary>
     [Fact]
     public void DeletingATriggerKeepsASlotAnotherNames()
     {
@@ -317,11 +317,11 @@ public class UndoTests
         sequence.Steps.Add(StepFor("open", "outer"));
 
         var part = system.PartFor("call");
-        part.IsTrigger = true;
-        var runs = RequiredTrigger.Named("call");
+        part.IsSignal = true;
+        var runs = SignalTrigger.Named("call");
         runs.Does = new Run(sequence.Number);
         system.AddTrigger(runs);
-        var stops = RequiredTrigger.Named("call");
+        var stops = SignalTrigger.Named("call");
         stops.Does = new Run(sequence.Number, true);
         system.AddTrigger(stops);
         system.First!.Fill("call", new[] { "panel1" }, new[] { new ToolbarSlot(1, 1, 4) });

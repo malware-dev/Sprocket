@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// Asked of the whole selection, because the moment has to arrive the same way for all of
         /// them: a trigger that was half watched and half answered would fire twice for some of its
         /// blocks and not at all for the rest. A mixed selection is treated as watched, which is the
-        /// one that reports itself honestly - see <c>RequiredTrigger</c>.
+        /// one that reports itself honestly - see <c>SignalTrigger</c>.
         /// </para>
         /// </remarks>
         public static MomentTrigger Starter(List<EntityEvent> events, string eventId, bool all)
@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < events.Count; i++)
             {
                 if (events[i].Id == eventId && events[i].Answered)
-                    return new RequiredTrigger(eventId);
+                    return new SignalTrigger(eventId);
             }
 
             var when = new WhenTrigger(eventId);
@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static string EventOf(Automation program, Bindings bindings, AutomationSystem system, MomentTrigger moment,
             SystemInstance through)
         {
-            var required = moment as RequiredTrigger;
+            var required = moment as SignalTrigger;
             if (required == null)
                 return moment.EventId;
 
@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return "";
 
             GridEntity block = bindings == null ? null : bindings.Entity(blocks[0]);
-            EntityEvent stands = block == null ? null : block.Kind.Trigger(positions[0]);
+            EntityEvent stands = block == null ? null : block.Kind.Signal(positions[0]);
             return stands != null ? stands.Id : positions[0].EventId;
         }
 
@@ -249,6 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
+        /// <summary>Every block in <paramref name="world" /> with anything to offer: a moment to be watched where <paramref name="forEvents" />, and an action otherwise.</summary>
         public static List<GridEntity> Capable(GridWorld world, bool forEvents)
         {
             var result = new List<GridEntity>();

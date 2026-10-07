@@ -15,33 +15,59 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     public enum Keyword
     {
+        /// <summary>No keyword: a word the format gives no meaning to.</summary>
         None = 0,
 
+        /// <summary>The first statement of a program, saying which format it is written in.</summary>
         Sprocket,
+        /// <summary>One actual block on the program's construct.</summary>
         Block,
+        /// <summary>A logic system, or a system blueprint after <c>blueprint</c>.</summary>
         System,
+        /// <summary>One use of a system blueprint on the construct.</summary>
         Instance,
+        /// <summary>Which system blueprint an instance uses.</summary>
         Of,
+        /// <summary>A sequence of steps.</summary>
         Sequence,
+        /// <summary>A trigger started by a moment a block reaches.</summary>
         When,
+        /// <summary>A trigger started by a clock, or how often a watched moment is looked for.</summary>
         Every,
+        /// <summary>What a trigger does, after what starts it.</summary>
         Then,
+        /// <summary>Which trigger a saved run belongs to.</summary>
         Trigger,
+        /// <summary>The value a step sets.</summary>
         To,
+        /// <summary>A step or trigger that runs a sequence.</summary>
         Run,
+        /// <summary>A step that sets a value on some blocks.</summary>
         Set,
 
+        /// <summary>A trigger started by a signal, the blocks a step acts on, or a flag that holds.</summary>
         On,
+        /// <summary>A flag that does not hold, such as a block's switch.</summary>
         Off,
+        /// <summary>A moment watched on every one of the blocks named.</summary>
         All,
+        /// <summary>A moment watched on any one of the blocks named.</summary>
         Any,
+        /// <summary>A step that waits a length of time.</summary>
         Wait,
+        /// <summary>A step that waits for a sequence it started to finish.</summary>
         Await,
+        /// <summary>A slot every instance has to fill.</summary>
         Required,
+        /// <summary>What may fill a slot.</summary>
         Expects,
+        /// <summary>What a variable holds, or what answers a slot in an instance.</summary>
         Equals,
+        /// <summary>When a logic system was last changed.</summary>
         Changed,
+        /// <summary>The name something is called by.</summary>
         As,
+        /// <summary>The highest sequence number a logic system has given out, kept where that sequence is gone.</summary>
         Last,
 
         /// <summary>A run that was under way when the world was written out.</summary>
@@ -81,6 +107,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Else,
 
         /// <summary>The test that a member equals a value.</summary>
-        EqualTo
+        EqualTo,
+
+        /// <summary>What a slot expects where a signal answers it: a signal, named by the place it is sent from.</summary>
+        Signal
     }
 }

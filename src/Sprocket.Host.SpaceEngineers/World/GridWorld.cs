@@ -51,6 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool _stale = true;
         int _revision;
 
+        /// <summary>The construct <paramref name="anchor" /> is on, read when it is first asked about.</summary>
         public GridWorld(IMyTerminalBlock anchor)
         {
             _anchor = anchor;
@@ -151,8 +152,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>Whether there is a grid to rename.</summary>
         public bool CanRename => _anchor != null && _anchor.CubeGrid != null;
 
+        /// <summary>Calls the grid the program runs on <paramref name="name" />.</summary>
         public void Rename(string name)
         {
             IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
@@ -180,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (slot < 0 || !toolbar.TryGetItem(slot, out present))
                 return false;
 
-            if (TriggerAction.IsOurs(present))
+            if (SignalAction.IsOurs(present))
                 return _anchor != null && present.BlockEntityId != _anchor.EntityId && Toolbars.Exists(present.BlockEntityId);
 
             return true;
@@ -228,6 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         bool _asked;
 
+        /// <summary>Asks for the construct to be looked at again on the next tick.</summary>
         public void LookAgain()
         {
             _asked = true;
@@ -385,6 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public int Matched { get; private set; }
 
+        /// <summary>The block the first of <paramref name="keys" /> that finds one finds, with which key it was in <paramref name="matched" />, or null where none does.</summary>
         public GridEntity Match(IList<EntityKey> keys, out int matched)
         {
             Matched++;
@@ -435,6 +440,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
+        /// <summary>The block <paramref name="entityId" />, or null where it is not on the construct.</summary>
         public GridEntity FindEntity(long entityId)
         {
             if (_stale)

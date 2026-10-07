@@ -2,7 +2,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>One slot on one of a block's toolbars: which toolbar, which page and which slot, each counted from 1.</summary>
     /// <remarks>
-    /// What answers a trigger, together with the block it is on. Which toolbar is the game's own order of a block's
+    /// Where a signal is sent from, together with the block it is on. Which toolbar is the game's own order of a block's
     /// toolbars; the first is the one a player sets up by hand.
     /// </remarks>
     public sealed class ToolbarSlot

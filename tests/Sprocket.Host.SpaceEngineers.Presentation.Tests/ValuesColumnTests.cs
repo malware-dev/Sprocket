@@ -123,7 +123,7 @@ public class ValuesColumnTests
     [Fact]
     public void PressingAStepsValuesOpensItsPickerOnThem()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 474 192");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 508 192");
 
         Assert.Equal("Set Radius on Airlock Light", screen.Ended);
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised");
@@ -135,8 +135,8 @@ public class ValuesColumnTests
     /// Leaving asks about any change: a value, or what is done, as well as the blocks.
     /// </summary>
     [Theory]
-    [InlineData("474 192 type 7 escape")]
-    [InlineData("270 182 800 565")]
+    [InlineData("508 192 type 7 escape")]
+    [InlineData("208 182 800 565")]
     public void LeavingAsksAboutAnyChange(string change)
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");
@@ -149,7 +149,7 @@ public class ValuesColumnTests
     [Fact]
     public void LeavingAsksNothingWhereNothingChanged()
     {
-        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 474 192 escape");
+        var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter 508 192 escape");
 
         Assert.False(screen.Scene.IsQuestioning, "leaving asked about 5 shown as 5.0");
         Assert.Equal("Sequence 1", screen.Ended);

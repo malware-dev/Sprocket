@@ -258,7 +258,7 @@ public class EditorTests
         var ship = Build();
         StartOnTheButton(ship.Editor);
 
-        var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
+        var pressed = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Single(pressed.Sources);
         Assert.Equal(1, Assert.Single(Pressed.Where(ship.Automation, ship.Automation.Systems[0], pressed.Part)!).Slot);
 
@@ -304,7 +304,7 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        var pressed = Assert.IsType<RequiredTrigger>(ship.Automation.Sequences[0].Trigger);
+        var pressed = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(1, Assert.Single(Pressed.Where(ship.Automation, ship.Automation.Systems[0], pressed.Part)!).Slot);
         Assert.Equal("When Airlock Button button 1 is pressed", editor.Says(0));
 
@@ -314,7 +314,7 @@ public class EditorTests
 
     /// <summary>
     /// A block picked for a logic system's sentence is a variable of the program's, named after the block, and a button
-    /// picked to start it is a trigger variable on that button.
+    /// picked to start it is a signal variable on that button.
     /// </summary>
     [Fact]
     public void APickedBlockIsAVariable()
@@ -332,13 +332,13 @@ public class EditorTests
         var system = ship.Automation.Systems[0];
         var installation = system.First!;
         var step = Assert.IsType<Act>(ship.Automation.Sequences[0].Steps[0]);
-        var trigger = Assert.IsType<RequiredTrigger>(Assert.Single(system.Triggers));
+        var trigger = Assert.IsType<SignalTrigger>(Assert.Single(system.Triggers));
 
-        Assert.False(system.FindPart(step.Targets[0])!.IsTrigger);
+        Assert.False(system.FindPart(step.Targets[0])!.IsSignal);
         Assert.Equal("Airlock Light", step.Targets[0]);
         Assert.Equal("Airlock Light", ship.Runner.Bindings.Entity(installation.FilledWith(step.Targets[0])![0])!.Name);
 
-        Assert.True(system.FindPart(trigger.Part)!.IsTrigger);
+        Assert.True(system.FindPart(trigger.Part)!.IsSignal);
         Assert.Equal("Airlock Button", ship.Runner.Bindings.Entity(installation.FilledWith(trigger.Part)![0])!.Name);
         Assert.Equal(1, installation.Positions(trigger.Part)![0].Slot);
     }
@@ -529,7 +529,7 @@ public class EditorTests
         editor.Parts()[0].Fills!.Execute();
         ship.Tick();
 
-        // A trigger slot's pick offers only blocks with triggers, and of a block only its triggers.
+        // A signal slot's pick offers only blocks that send signals, and of a block only its signals.
         Assert.NotEmpty(editor.Offered());
         Assert.All(editor.Offered(), row => Assert.Contains("Button", row.Secondary));
         editor.PressBlock("Airlock Button");
@@ -581,8 +581,8 @@ public class EditorTests
         Assert.Equal(2, system.Parts.Count);
         var buttonSlot = Assert.Single(pressed.Sources);
         var doorSlot = Assert.Single(close.Targets);
-        Assert.True(system.FindPart(buttonSlot)!.IsTrigger);
-        Assert.False(system.FindPart(doorSlot)!.IsTrigger);
+        Assert.True(system.FindPart(buttonSlot)!.IsSignal);
+        Assert.False(system.FindPart(doorSlot)!.IsSignal);
         Assert.Equal(new[] { button }, system.First!.FilledWith(buttonSlot));
         Assert.Equal(1, system.First!.Positions(buttonSlot)![0].Slot);
         Assert.Equal(new[] { door }, system.First!.FilledWith(doorSlot));

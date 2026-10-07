@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (extension != null)
                 extension.Describe(kind, block);
 
-            Triggers(kind, block, _extensions.TriggersFor(block));
+            Signals(kind, block, _extensions.SignalsFor(block));
 
             kind.WithProperty(GridEntity.WorkingProperty, "working")
                 .WithState("is-working", GridEntity.WorkingProperty, true, "is working")
@@ -101,12 +101,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             return kind;
         }
 
-        /// <summary>Adds the block's triggers: as <paramref name="layout" /> says they run, or every slot of every toolbar it has, by where it is.</summary>
+        /// <summary>Adds the block's signals: as <paramref name="layout" /> says they run, or every slot of every toolbar it has, by where it is.</summary>
         /// <remarks>
-        /// A trigger is a toolbar slot, whatever block it is on, so a block nothing knows about offers its slots all the same.
+        /// A signal is sent from a toolbar slot, whatever block it is on, so a block nothing knows about offers its slots all the same.
         /// Asked once per block type, which has the same toolbars whichever block is asked.
         /// </remarks>
-        static void Triggers(EntityKind kind, IMyTerminalBlock block, ITriggers layout)
+        static void Signals(EntityKind kind, IMyTerminalBlock block, ISignals layout)
         {
             if (layout != null)
             {
@@ -126,13 +126,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                     for (var s = 1; s <= toolbar.SlotCount; s++)
                     {
                         var at = new ToolbarSlot(t, p, s);
-                        kind.WithTrigger(at, Placed(at, toolbars, toolbar.PageCount));
+                        kind.WithSignal(at, Placed(at, toolbars, toolbar.PageCount));
                     }
                 }
             }
         }
 
-        /// <summary>A trigger named by where its slot is, saying no more of the place than the block has to tell apart.</summary>
+        /// <summary>A signal named by where its slot is, saying no more of the place than the block has to tell apart.</summary>
         static string Placed(ToolbarSlot at, int toolbars, int pages)
         {
             if (toolbars > 1)

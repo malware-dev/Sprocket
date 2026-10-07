@@ -3,14 +3,14 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Answers a trigger part in one blockset with the buttons picked, taking the part where the system has none by that
+    /// Answers a signal part in one blockset with the buttons picked, taking the part where the system has none by that
     /// name, and does what was picked with it.
     /// </summary>
     /// <remarks>
     /// One edit, because picking a button is one answer: undoing it takes back the trigger it made and the part with it,
     /// or puts back the buttons a part picked again had.
     /// </remarks>
-    public sealed class AnswerTrigger : SystemEdit
+    public sealed class AnswerSignal : SystemEdit
     {
         readonly SystemEdit _made;
         readonly SystemInstance _instance;
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <paramref name="nowAt" />, a new part expecting <paramref name="type" /> where there is none, then does
         /// <paramref name="made" /> where there is one.
         /// </summary>
-        public AnswerTrigger(SystemEdit made, AutomationSystem system, SystemInstance instance, string name, string type,
+        public AnswerSignal(SystemEdit made, AutomationSystem system, SystemInstance instance, string name, string type,
             IList<string> now, IList<ToolbarSlot> nowAt)
         {
             _made = made;
@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (_part == null)
             {
                 _part = system.PartFor(_name);
-                _part.IsTrigger = true;
+                _part.IsSignal = true;
                 if (_type.Length > 0)
                     _part.Expects.Add(_type);
             }

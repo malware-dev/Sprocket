@@ -26,12 +26,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
         readonly List<EntityRef> _refs = new List<EntityRef>();
-        readonly List<TriggerRef> _triggerRefs = new List<TriggerRef>();
+        readonly List<SignalRef> _signalRefs = new List<SignalRef>();
 
         // Every name in a program is looked up here while it is read, so a scan of the lists would make reading
         // quadratic in the size of the program.
         readonly Dictionary<string, EntityRef> _refsByName = new Dictionary<string, EntityRef>();
-        readonly Dictionary<string, TriggerRef> _triggerRefsByName = new Dictionary<string, TriggerRef>();
+        readonly Dictionary<string, SignalRef> _signalRefsByName = new Dictionary<string, SignalRef>();
 
         int _nextSequenceId = 1;
         int _nextSystemId = 1;
@@ -151,7 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public IReadOnlyList<EntityRef> Refs => _refs;
 
         /// <summary>Every trigger this program names as a variable: a slot on a block's toolbar, which a system starts a step from with <c>on</c>.</summary>
-        public IReadOnlyList<TriggerRef> TriggerRefs => _triggerRefs;
+        public IReadOnlyList<SignalRef> SignalRefs => _signalRefs;
 
         /// <summary>
         /// Bumped whenever a declaration is added, removed or re-pointed.
@@ -269,41 +269,41 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// The variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, declared where there
         /// is none, named <paramref name="called" /> as a block's variable is.
         /// </summary>
-        public TriggerRef DeclareTrigger(string block, ToolbarSlot at, string called)
+        public SignalRef DeclareSignal(string block, ToolbarSlot at, string called)
         {
-            var declared = FindTriggerRef(block, at);
+            var declared = FindSignalRef(block, at);
             if (declared != null)
                 return declared;
 
-            return Restore(new TriggerRef(Free(called), block, at));
+            return Restore(new SignalRef(Free(called), block, at));
         }
 
-        /// <summary>Puts back a trigger variable read from storage.</summary>
-        public TriggerRef Restore(TriggerRef declared)
+        /// <summary>Puts back a signal variable read from storage.</summary>
+        public SignalRef Restore(SignalRef declared)
         {
-            _triggerRefs.Add(declared);
-            if (!_triggerRefsByName.ContainsKey(declared.Name))
-                _triggerRefsByName.Add(declared.Name, declared);
+            _signalRefs.Add(declared);
+            if (!_signalRefsByName.ContainsKey(declared.Name))
+                _signalRefsByName.Add(declared.Name, declared);
 
             Revision++;
             Wiring++;
             return declared;
         }
 
-        /// <summary>The trigger variable called <paramref name="name" />, or null.</summary>
-        public TriggerRef FindTriggerRef(string name)
+        /// <summary>The signal variable called <paramref name="name" />, or null.</summary>
+        public SignalRef FindSignalRef(string name)
         {
-            TriggerRef found;
-            return _triggerRefsByName.TryGetValue(name, out found) ? found : null;
+            SignalRef found;
+            return _signalRefsByName.TryGetValue(name, out found) ? found : null;
         }
 
-        /// <summary>The trigger variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, or null.</summary>
-        public TriggerRef FindTriggerRef(string block, ToolbarSlot at)
+        /// <summary>The signal variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, or null.</summary>
+        public SignalRef FindSignalRef(string block, ToolbarSlot at)
         {
-            for (var i = 0; i < _triggerRefs.Count; i++)
+            for (var i = 0; i < _signalRefs.Count; i++)
             {
-                if (_triggerRefs[i].Block == block && _triggerRefs[i].At.Same(at))
-                    return _triggerRefs[i];
+                if (_signalRefs[i].Block == block && _signalRefs[i].At.Same(at))
+                    return _signalRefs[i];
             }
 
             return null;
@@ -312,7 +312,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether a variable, of either sort, is called <paramref name="name" />.</summary>
         public bool Names(string name)
         {
-            return FindRef(name) != null || FindTriggerRef(name) != null;
+            return FindRef(name) != null || FindSignalRef(name) != null;
         }
 
         /// <summary><paramref name="called" />, numbered where a variable already has it: Door, Door 2.</summary>
@@ -330,7 +330,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// runs it: the blocks, in <paramref name="blocks" />, and the slot on each, in <paramref name="at" />.
         /// </summary>
         /// <remarks>
-        /// An instance answers a blueprint's trigger slot; a system's trigger is a variable of the program's own. Both
+        /// An instance answers a blueprint's signal slot; a system's signal is a variable of the program's own. Both
         /// lists are cleared first, and stay empty where nothing answers it.
         /// </remarks>
         public void Answers(AutomationSystem system, SystemInstance instance, string trigger, List<string> blocks,
@@ -352,7 +352,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 return;
             }
 
-            var declared = FindTriggerRef(trigger);
+            var declared = FindSignalRef(trigger);
             if (declared == null)
                 return;
 
@@ -462,6 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return sequence;
         }
 
+        /// <summary>The logic system numbered <paramref name="id" />, or null where there is none.</summary>
         public AutomationSystem FindSystem(int id)
         {
             for (var i = 0; i < _systems.Count; i++)
@@ -512,6 +513,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return AddSequence(system, null);
         }
 
+        /// <summary>A new sequence in <paramref name="system" />, or in the last logic system where it is null, started by <paramref name="trigger" />.</summary>
         public Sequence AddSequence(AutomationSystem system, Trigger trigger)
         {
             if (system == null)
@@ -626,6 +628,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return made;
         }
 
+        /// <summary>Takes <paramref name="sequence" /> out of the program, with everything that started it.</summary>
         public void RemoveSequence(Sequence sequence)
         {
             _sequences.Remove(sequence);
@@ -646,9 +649,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 RemoveSystem(_systems[i]);
 
             _refs.Clear();
-            _triggerRefs.Clear();
+            _signalRefs.Clear();
             _refsByName.Clear();
-            _triggerRefsByName.Clear();
+            _signalRefsByName.Clear();
             Annotation = "";
         }
 
@@ -712,6 +715,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Wiring++;
         }
 
+        /// <summary>The sequence numbered <paramref name="id" />, or null where there is none.</summary>
         public Sequence FindSequence(int id)
         {
             for (var i = 0; i < _sequences.Count; i++)
@@ -722,6 +726,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return null;
         }
 
+        /// <summary>Whether <paramref name="sequence" /> names the variable or slot <paramref name="name" />, in what starts it or in a step.</summary>
         public static bool References(Sequence sequence, string name)
         {
             var moment = sequence.Trigger as MomentTrigger;

@@ -48,7 +48,7 @@ public class RigTests
         Assert.Contains("Sprocket_Trigger", store.GetValue(Wiring.Key));
 
         // And what the program says about it: the construct starts this, which is what the game's
-        // own arrangement is, through the trigger slot the installation fills with the button. A "when" here
+        // own arrangement is, through the signal slot the installation fills with the button. A "when" here
         // would be Sprocket claiming it watches the button.
         var program = store.GetValue(SprocketUnit.ProgramKey);
         Assert.Contains("on 'Airlock Button' then run 1", program);
@@ -61,7 +61,7 @@ public class RigTests
 
         // A button is a moment the construct announces, so what the editor wrote is a required
         // trigger naming that button - and that is the half the toolbars have to keep.
-        var pressed = Assert.IsType<RequiredTrigger>(reopened.Editor.Program.Sequences[0].Trigger);
+        var pressed = Assert.IsType<SignalTrigger>(reopened.Editor.Program.Sequences[0].Trigger);
         Assert.Single(pressed.Sources);
     }
 
@@ -111,7 +111,7 @@ public class RigTests
     }
 
     /// <summary>
-    /// A timer's toolbar slot is a trigger as a button is: picked to start a sequence, its slot is written, and the timer
+    /// A timer's toolbar slot sends a signal as a button does: picked to start a sequence, its slot is written, and the timer
     /// going off runs the sequence.
     /// </summary>
     [Fact]
@@ -137,7 +137,7 @@ public class RigTests
         for (var i = 0; i < 5; i++)
             sim.Tick();
 
-        var pressed = Assert.IsType<RequiredTrigger>(sim.Editor.Program.Sequences[0].Trigger);
+        var pressed = Assert.IsType<SignalTrigger>(sim.Editor.Program.Sequences[0].Trigger);
         var at = sim.Editor.Program.Systems[0].First!.Positions(pressed.Part)![0];
         Assert.Equal(1, at.Slot);
         Assert.True(timer.Toolbar.Holds(0), "the timer's slot was not written");
@@ -190,7 +190,7 @@ public class RigTests
         Assert.Contains("Outer Door:open", rig.Log);
     }
 
-    /// <summary>A trigger slot's picker offers a block's triggers and nothing else it can do.</summary>
+    /// <summary>A signal slot's picker offers a block's signals and nothing else it can do.</summary>
 
     [Fact]
     public void ATriggerSlotOffersOnlyTriggers()
@@ -219,7 +219,7 @@ public class RigTests
         Assert.DoesNotContain(sim.Editor.Offered(), row => row.Text == "Inner Door");
         sim.Editor.PressBlock("Cycle Timer");
         Assert.True(sim.Editor.HasChoice("goes off"));
-        Assert.False(sim.Editor.HasChoice("is switched on"), "a moment Sprocket watches was offered as a trigger");
+        Assert.False(sim.Editor.HasChoice("is switched on"), "a moment Sprocket watches was offered as a signal");
     }
 
     /// <summary>
@@ -290,7 +290,7 @@ public class RigTests
     }
 
     /// <summary>
-    /// A button whose trigger acts on two blocks itself is Sprocket's to run, keyed by its trigger part, and each blockset's
+    /// A button whose trigger acts on two blocks itself is Sprocket's to run, keyed by its signal part, and each blockset's
     /// button acts on that blockset's blocks.
     /// </summary>
     [Fact]
@@ -336,7 +336,7 @@ public class RigTests
 
         MyToolbarItemInfo held;
         Assert.True(port.Toolbar.TryGetItem(0, out held), "the port button holds nothing");
-        Assert.True(TriggerAction.IsOurs(held), "two doors went into the slot as the game's own action");
+        Assert.True(SignalAction.IsOurs(held), "two doors went into the slot as the game's own action");
 
         rig.Forget();
         sim.Press("Port Button");
@@ -466,7 +466,7 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 1 alpha 10\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
+        var program = "sprocket 1 alpha 11\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
 
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));
@@ -530,8 +530,8 @@ public class RigTests
         // What the program before this one wrote into the button, and never took back.
         Panel button = Named(rig, "Airlock Button");
         Toolbar.Changes changes = button.Toolbar.Changing();
-        changes.Set(0, MyToolbarItemInfo.BlockAction(rig.Machine.Sprocket.Id, TriggerAction.ActionId),
-            TriggerAction.Argument("00000000-0000-0000-0000-000000000000/1/1"));
+        changes.Set(0, MyToolbarItemInfo.BlockAction(rig.Machine.Sprocket.Id, SignalAction.ActionId),
+            SignalAction.Argument("00000000-0000-0000-0000-000000000000/1/1"));
         Assert.True(changes.Apply());
 
         Airlock(rig.Editor);
@@ -545,7 +545,7 @@ public class RigTests
             rig.Tick();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
-        Assert.Single(((RequiredTrigger)sequence.System.Triggers[0]).Sources);
+        Assert.Single(((SignalTrigger)sequence.System.Triggers[0]).Sources);
 
         // Written over, and never taken for somebody else's wiring.
         Assert.Contains(rig.Log, line => line.StartsWith("wired slot 0", StringComparison.Ordinal));
@@ -575,8 +575,8 @@ public class RigTests
         foreach (var name in new[] { "Airlock Button", "Inside Button" })
         {
             Toolbar.Changes changes = Named(rig, name).Toolbar.Changing();
-            changes.Set(0, MyToolbarItemInfo.BlockAction(rig.Machine.Sprocket.Id, TriggerAction.ActionId),
-                TriggerAction.Argument("00000000-0000-0000-0000-000000000000/1/1"));
+            changes.Set(0, MyToolbarItemInfo.BlockAction(rig.Machine.Sprocket.Id, SignalAction.ActionId),
+                SignalAction.Argument("00000000-0000-0000-0000-000000000000/1/1"));
             Assert.True(changes.Apply());
         }
 
@@ -630,7 +630,7 @@ public class RigTests
 
         MyToolbarItemInfo held;
         Assert.True(Named(rig, "Airlock Button").Toolbar.TryGetItem(0, out held), "the button holds nothing");
-        Assert.True(TriggerAction.IsOurs(held), "the button holds the game's own action");
+        Assert.True(SignalAction.IsOurs(held), "the button holds the game's own action");
 
         rig.Machine.Log.Clear();
         rig.Press("Airlock Button");
@@ -664,7 +664,7 @@ public class RigTests
         for (var i = 0; i < 5; i++)
             rig.Tick();
 
-        var trigger = (RequiredTrigger)sequence.System.Triggers[0];
+        var trigger = (SignalTrigger)sequence.System.Triggers[0];
         var filled = Pressed.By(rig.Editor.Program, sequence.System, trigger.Part)!.ToList();
 
         // Somebody points the button at the other door instead.
@@ -905,7 +905,7 @@ public class RigTests
         Sequence sequence = pasted.Editor.Program.Sequences[0];
 
         // Still says what starts it, and the construct agrees that something does.
-        var pressed = Assert.IsType<RequiredTrigger>(sequence.Trigger);
+        var pressed = Assert.IsType<SignalTrigger>(sequence.Trigger);
         Assert.Single(pressed.Sources);
         Assert.True(pasted.World.CanStart(sequence, sequence.System.First), "the trigger was reported as unstartable");
 

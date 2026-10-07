@@ -4,8 +4,8 @@ A slot is a named place in a [logic system](#logic-system), such as *the inner d
 
 ## Two kinds
 
-- A **block slot** holds the blocks a step acts on or watches, for example a door, or every light in the airlock.
-- A **signal slot** holds a block and the toolbar slot on it that sends the [signal](#signal), for example a button panel and one of its buttons.
+- A ![](mark:block) **block slot** holds the blocks a step acts on or watches, for example a door, or every light in the airlock.
+- A ![](mark:signal) **signal slot** holds a block and the toolbar slot on it that sends the ![](mark:signal) [signal](#signal), for example a button panel and one of its buttons.
 
 ## Filling a slot
 

@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Children =
                 {
                     // Before its word, as it stands before a member's name: running another sequence lasts until it finishes.
-                    new Glyph { Symbol = Symbols.Finish, Style = Styles.Waits, IsVisible = false }.As(out _leadWaits),
+                    new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false }.As(out _leadWaits),
                     new Label { Style = Styles.Phrase }.As(out _lead)
                 }
             }.As(out _sentence));

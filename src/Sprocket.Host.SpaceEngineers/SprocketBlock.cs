@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
 
             var texts = SprocketSession.Texts;
-            TriggerAction.Register(texts);
+            SignalAction.Register(texts);
 
             // The button belongs to a terminal, and a dedicated server has none.
             if (!MyAPIGateway.Utilities.IsDedicated)

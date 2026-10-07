@@ -46,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public string Name { get; set; }
 
+        /// <summary>Whether somebody has named it.</summary>
         public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>What somebody wrote above it, or empty.</summary>
@@ -82,6 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         readonly Dictionary<string, string> _notes = new Dictionary<string, string>();
 
+        /// <summary>The slots it fills.</summary>
         public IEnumerable<string> Filled => _fills.Keys;
 
         /// <summary>Whether no slot has been filled.</summary>
@@ -94,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Blocks(slot, entities);
         }
 
-        /// <summary>Answers a trigger with toolbar slots: the slot <paramref name="at" /> on each block of <paramref name="entities" />, in the same order.</summary>
+        /// <summary>Answers a signal slot with toolbar slots: the slot <paramref name="at" /> on each block of <paramref name="entities" />, in the same order.</summary>
         public void Fill(string slot, IList<string> entities, IList<ToolbarSlot> at)
         {
             Blocks(slot, entities);
@@ -132,6 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 chosen.Add(entities[i]);
         }
 
+        /// <summary>Leaves <paramref name="slot" /> unfilled, forgetting what filled it and what was written above it.</summary>
         public void Clear(string slot)
         {
             _fills.Remove(slot);
@@ -180,6 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _positions[now] = positions;
         }
 
+        /// <summary>What fills <paramref name="slot" />, or null where nothing does.</summary>
         public IList<string> FilledWith(string slot)
         {
             List<string> chosen;

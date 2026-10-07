@@ -1,6 +1,7 @@
 using System;
 using Lumel;
 using Lumel.Controls;
+using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Windows;
@@ -13,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     partial class PartRow
     {
         VStack _column;
+        Glyph _mark;
         Label _name;
         TextBox _nameBox;
         Label _refusal;
@@ -43,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 8f,
                         Children =
                         {
+                            new Glyph { Style = Styles.Waits }.As(out _mark),
                             new Label { Style = Styles.Name }.As(out _name),
                             // Hidden, as the switch below is.
                             new Label { Style = Styles.Detail, IsVisible = false }.As(out _optional)

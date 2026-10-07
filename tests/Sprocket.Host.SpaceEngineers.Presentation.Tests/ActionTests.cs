@@ -1,4 +1,5 @@
 using Lumel.Controls;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -195,6 +196,7 @@ public class ActionTests
         Assert.Contains(shares, What(screen).Note);
     }
 
+    /// <summary>What a step waits for is marked by the clock, and anything else a block is told to do by the bolt.</summary>
     [Fact]
     public void WhatAStepWaitsForIsMarked()
     {
@@ -205,11 +207,11 @@ public class ActionTests
         screen.Run(2);
 
         var entries = What(screen).Entries();
-        Assert.True(entries.Single(entry => entry.Text == "Open").Waits, "opening a door is not marked");
-        Assert.False(entries.Single(entry => entry.Text == "Switch on").Waits, "switching on is marked, and holds nothing");
+        Assert.Equal(Symbols.Awaited, entries.Single(entry => entry.Text == "Open").Mark);
+        Assert.Equal(Symbols.Action, entries.Single(entry => entry.Text == "Switch on").Mark);
     }
 
-    /// <summary>A step's member is marked in its sentence as it is in the picker: what the step waits for, and nothing else.</summary>
+    /// <summary>A step's member is marked in its sentence as it is in the picker: the clock for what the step waits for, the bolt for the rest.</summary>
     [Fact]
     public void WhatAStepWaitsForIsMarkedInItsSentence()
     {
@@ -231,8 +233,8 @@ public class ActionTests
         var opens = rows[0].Within().OfType<MemberName>().Single();
         var switches = rows[1].Within().OfType<MemberName>().Single();
 
-        Assert.True(opens.Waits, "opening a door is not marked");
-        Assert.False(switches.Waits, "switching on is marked, and holds nothing");
+        Assert.Equal(Symbols.Awaited, opens.Mark);
+        Assert.Equal(Symbols.Action, switches.Mark);
     }
 
     /// <summary>The tab answers where it is drawn, which nothing else on this screen proves.</summary>

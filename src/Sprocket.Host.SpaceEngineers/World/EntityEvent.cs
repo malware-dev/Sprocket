@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Text = text;
         }
 
-        /// <summary>A trigger: one the construct answers through the toolbar slot <paramref name="at" />, which its id names, with no reading behind it at all.</summary>
+        /// <summary>A signal: one the construct sends from the toolbar slot <paramref name="at" />, which its id names, with no reading behind it at all.</summary>
         public EntityEvent(Sequences.ToolbarSlot at, string text)
         {
             Id = at.EventId;

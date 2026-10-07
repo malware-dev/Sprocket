@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return false;
 
             MyToolbarItemInfo held;
-            if (!toolbar.TryGetItem(button, out held) || held.ActionId != TriggerAction.ActionId)
+            if (!toolbar.TryGetItem(button, out held) || held.ActionId != SignalAction.ActionId)
                 return false;
 
             _read.Clear();

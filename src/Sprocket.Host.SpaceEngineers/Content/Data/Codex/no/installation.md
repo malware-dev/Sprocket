@@ -4,7 +4,7 @@ En installasjon er ett sted et [logikksystem](#logic-system) kjører, som én lu
 
 ## Mange installasjoner, ett logikksystem
 
-Et logikksystem for luftsluser kan ha én installasjon for hver luftsluse på skipet. Alle kjører de samme [sekvensene](#sequence) og [utløserne](#trigger), hver på sine egne blokker. Sluser du gjennom én luftsluse, blir de andre stående som de er.
+Et logikksystem for luftsluser kan ha én installasjon for hver luftsluse på skipet. Alle kjører de samme ![](mark:sequence) [sekvensene](#sequence) og [utløserne](#trigger), hver på sine egne blokker. Sluser du gjennom én luftsluse, blir de andre stående som de er.
 
 En endring i logikksystemet når alle installasjonene med én gang. Rett et steg, og alle luftslusene får rettelsen.
 

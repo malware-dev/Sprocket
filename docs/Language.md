@@ -99,13 +99,14 @@ say. A member or moment in no namespace the host has is an error.
 colon, the function's name, and its values in parentheses. The host says which functions it offers,
 which values each takes, and what each gives back. The language knows only the shape.
 
-What a host function gives back has a type. `trigger` is the type of what starts a step with `on`, so
-a slot that expects `trigger` is answered by a host function that gives one back.
+What a host function gives back has a type. A `signal` names a signal by the place it is sent from, a
+place the host offers, and is what starts a step with `on`. A slot that expects `signal` is answered by a
+host function that names one.
 
 A host function is a value, written wherever a value of the type it gives back is taken.
 
 ```
-# Gearbox's toolbar function gives back a trigger: a place on the block's toolbar,
+# Gearbox's toolbar function names a signal: the one sent from a place on the block's toolbar,
 # by toolbar, page and position, each counted from 1
 let button = panel1:toolbar(1, 1, 4)
 ```
@@ -193,11 +194,11 @@ required slot hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 optional slot lamp expects InteriorLight
 
 # The call button
-optional slot button expects trigger
+optional slot button expects signal
 ```
 
 `required slot <name> expects <what>` asks the construct for it. `expects` names what may fill the
-slot: a block's type, or `trigger` for a slot answered by a host function that gives back a trigger. A
+slot: a block's type, or `signal` for a slot answered by a host function that names a signal. A
 block's type is a game type id with the `MyObjectBuilder_` prefix dropped, a quoted `'Type/Subtype'`
 for one exact block, or a list of either.
 
@@ -216,12 +217,12 @@ on halt then stop 1
 on open then call Gearbox.open on [ outer ]
 ```
 
-`on <trigger> then <step>` starts the step each time the trigger is used. In a system the trigger is a
-variable holding what a host function gave back; in a system blueprint it is a slot that expects
-`trigger`. A trigger starts one step. Two `on`s that reach the same trigger, whether by naming it or through
+`on <signal> then <step>` starts the step each time the signal is sent. In a system the signal is a
+variable holding what a host function named; in a system blueprint it is a slot that expects
+`signal`. A signal starts one step. Two `on`s that reach the same signal, whether by naming it or through
 what an instance answers their slots with, are an error.
 
-A trigger is always something the construct does. A state a block reaches, such as a door having
+A signal always comes from something done on the construct. A state a block reaches, such as a door having
 closed, is watched with `when`.
 
 ```
@@ -419,7 +420,7 @@ A variable names something on the program's construct once, so that the rest of 
 name instead of the full definition behind it.
 
 `let <name> = <value>` defines a variable, holding something on the program's construct, like a block
-or a trigger. A variable is defined once, before anything uses it, and every system and instance in
+or a signal. A variable is defined once, before anything uses it, and every system and instance in
 the file may use it.
 
 ```
@@ -427,7 +428,7 @@ let door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, [ (3 0 -2) ], "Airl
 let door2 = block 'Door/LargeBlockDoor' [ 74857693847562935, [ (0 2 -1), (1 0 0) ], "Hangar Door" ]
 let panel1 = block 'ButtonPanel/ButtonPanel' [ 74857693847562937, "Airlock Button" ]
 
-# A trigger on the panel above: a host function called on the variable that holds it
+# A signal from the panel above: a host function called on the variable that holds it
 let button = panel1:toolbar(1, 1, 4)
 ```
 
@@ -455,9 +456,9 @@ instance <n> of <system blueprint> [as '<name>'] {
 ```
 
 `<slot> = [ <answers> ]` says what on the program's construct answers a slot of the system blueprint:
-variables holding blocks, or, for a slot that expects `trigger`, host functions written in place, or
-variables holding what one gave back. More than one may answer a slot, and more than one answer to a
-trigger means any of them starts it. An instance that leaves a required slot unanswered is missing
+variables holding blocks, or, for a slot that expects `signal`, host functions written in place, or
+variables holding what one named. More than one may answer a slot, and more than one answer to a
+slot that expects `signal` means any of them starts it. An instance that leaves a required slot unanswered is missing
 it.
 
 ```

@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         readonly Dictionary<Step, Statement> _written = new Dictionary<Step, Statement>();
         readonly HashSet<string> _taken = new HashSet<string>(StringComparer.Ordinal);
 
+        /// <summary>The trouble with <paramref name="script" />, starting from <paramref name="already" /> where something was wrong before it was read.</summary>
         public Trouble(string script, string already)
         {
             _script = script;
@@ -33,12 +34,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The first thing that read but looks like a mistake, or empty.</summary>
         public string Warning { get; private set; } = "";
 
+        /// <summary>Says <paramref name="what" /> is wrong, where nothing was before.</summary>
         public void Say(string what)
         {
             if (What.Length == 0)
                 What = what;
         }
 
+        /// <summary>Says <paramref name="what" /> is wrong with the line of <paramref name="at" />, where nothing was before.</summary>
         public void Say(Statement at, string what)
         {
             if (What.Length == 0)
@@ -57,6 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     + ") already starts something; a toolbar slot holds one action.");
         }
 
+        /// <summary>Says the line of <paramref name="at" /> reads but looks like a mistake, <paramref name="what" />, where nothing did before.</summary>
         public void Warn(Statement at, string what)
         {
             if (Warning.Length == 0)
@@ -78,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         /// <summary>
         /// Says <paramref name="at" /> names <paramref name="name" />, a slot of the system blueprint <paramref name="system" />:
-        /// a trigger slot where <paramref name="trigger" /> says so, and a slot for a block otherwise.
+        /// a signal slot where <paramref name="trigger" /> says so, and a slot for a block otherwise.
         /// </summary>
         /// <remarks>Judged by <see cref="Settle" />, once the whole script is read, because a slot may be written below what names it.</remarks>
         public void Owes(Statement at, string name, AutomationSystem system, bool trigger)
@@ -100,10 +104,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var part = owed.System.FindPart(owed.Name);
                 if (part == null)
                     Say(owed.At, "no slot called '" + owed.Name + "'.");
-                else if (part.IsTrigger && !owed.Trigger)
-                    Say(owed.At, "'" + owed.Name + "' is a trigger slot; expected a slot for a block.");
-                else if (!part.IsTrigger && owed.Trigger)
-                    Say(owed.At, "'" + owed.Name + "' is a slot for a block; expected a trigger slot.");
+                else if (part.IsSignal && !owed.Trigger)
+                    Say(owed.At, "'" + owed.Name + "' is a signal slot; expected a slot for a block.");
+                else if (!part.IsSignal && owed.Trigger)
+                    Say(owed.At, "'" + owed.Name + "' is a slot for a block; expected a signal slot.");
             }
         }
 

@@ -513,6 +513,79 @@ def steps():
     ]
 
 
+def pulse():
+    """
+    Signal: one square pulse, low, high and low again.
+
+    The shape a signal has on any trace of one: nothing, then something for a moment, then nothing. Square
+    like the rest of the set, and wider than it is tall, because a pulse is read along its line. Drawn at the
+    sequence's lighter line, which it sits beside on a trigger's row.
+    """
+    low, high = 0.66, 0.34
+    return [path([(0.12, low), (0.36, low), (0.36, high), (0.64, high), (0.64, low), (0.88, low)], 0.094)]
+
+
+def bolt():
+    """
+    Action: a lightning bolt, something a block is told to do.
+
+    The mark every interface already uses for a quick action, and one shape: a thing done rather than a thing
+    read. An action that can be waited on shows the clock in its place, so a row carries one mark.
+    """
+    return [poly((0.60, 0.10), (0.26, 0.56), (0.47, 0.56), (0.38, 0.90), (0.74, 0.42), (0.53, 0.42), (0.62, 0.10))]
+
+
+def query():
+    """
+    Value: "=?", what something on a block is equal to.
+
+    A value is what a block can be asked and what it can be set to. Every picture of one tried before this -
+    a slider, a gauge, a field, a scale - read as something else first; an equals sign asking a question
+    reads as nothing but itself. The question mark is squared like the rest of the set, at the lighter line.
+    """
+    line = 0.094
+    return [
+        stroke((0.10, 0.42), (0.40, 0.42), line),
+        stroke((0.10, 0.58), (0.40, 0.58), line),
+        path([(0.54, 0.34), (0.54, 0.22), (0.86, 0.22), (0.86, 0.48), (0.70, 0.48), (0.70, 0.64)], line),
+        poly((0.65, 0.72), (0.75, 0.72), (0.75, 0.82), (0.65, 0.82)),
+    ]
+
+
+def clock():
+    """
+    Awaitable: a clock face, its hands at three.
+
+    Something that takes time, which is what a wait on it is for. A ring, with the hands put back inside the
+    hole once it is cut, so they are the same ink as the rim. Drawn at the blueprint's lighter line, with the
+    hands short of the rim: at the set's stroke the hands fill the face and it reads as a chart, not a clock.
+    """
+    line = 0.094
+    hands = [path([(0.5, 0.33), (0.5, 0.5), (0.63, 0.5)], line)]
+    return [circle(0.34)], [circle(0.34 - line)], hands
+
+
+def hexagon(r):
+    """A regular hexagon standing on a corner, in unit coordinates before any fitting."""
+    return [(0.5 + r * math.cos(math.radians(a)), 0.5 + r * math.sin(math.radians(a))) for a in (-90, -30, 30, 90, 150, 210)]
+
+
+def cube():
+    """
+    Block: a cube seen corner on, at the lighter line.
+
+    The kind of thing a block slot holds and a watched moment is about, where no block in particular is meant;
+    a block that is named keeps the game's own picture of it. The rim is one shape with its inside cut out, so
+    it has no joins, and the three edges inside are put back over the hole, ending at the rim.
+    """
+    line = 0.094
+    r = 0.36
+    inner = (r * math.cos(math.radians(30)) - line) / math.cos(math.radians(30))
+    top, right, _, bottom, _, left = hexagon(inner)
+    middle = (0.5, 0.5)
+    return [poly(*hexagon(r))], [poly(*hexagon(inner))], [path([left, middle, right], line), stroke(middle, bottom, line)]
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -551,6 +624,16 @@ GLYPHS = [
     ("b", "blueprint", lambda: blueprint()),
     # "s" is refresh's; "q" is the next letter of the word nothing else wanted.
     ("q", "sequence", lambda: solid(steps())),
+    # "s", "g" and "a" are taken; "n" is the next letter of the word.
+    ("n", "signal", lambda: solid(pulse())),
+    # "a", "c", "t" and "o" are taken; "i" is left.
+    ("i", "action", lambda: solid(bolt())),
+    # "v", "a", "u" and "e" are taken; "l" is left.
+    ("l", "value", lambda: solid(query())),
+    # "c" and "o" are taken; "k" is left.
+    ("k", "clock", lambda: clock()),
+    # Every letter of the word is taken in lower case.
+    ("B", "block", lambda: cube()),
 ]
 
 
@@ -591,8 +674,7 @@ def fitted(make):
 
     _fit = 1.0
     for _ in range(2):
-        shapes, holes = make()
-        drawn = ink(shapes, holes)
+        drawn = ink(*make())
         if drawn is None:
             _fit = 1.0
             return make()
@@ -608,8 +690,8 @@ def fitted(make):
     return made
 
 
-def ink(shapes, holes):
-    """Where a set of shapes actually puts ink, at the oversampled size."""
+def ink(shapes, holes, over=()):
+    """Where a set of shapes actually puts ink, at the oversampled size, with any drawn back over the holes."""
     from PIL import Image, ImageDraw
 
     size = CELL * OVER
@@ -621,6 +703,9 @@ def ink(shapes, holes):
 
     for hole in holes:
         draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
+
+    for shape in over:
+        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
     return page.getbbox()
 
@@ -641,7 +726,9 @@ def render(glyph):
 
     from PIL import Image, ImageDraw
 
-    shapes, holes = fitted(glyph)
+    made = fitted(glyph)
+    shapes, holes = made[0], made[1]
+    over = made[2] if len(made) > 2 else ()
     size = CELL * OVER
     page = Image.new("L", (size, size), 0)
     draw = ImageDraw.Draw(page)
@@ -651,6 +738,9 @@ def render(glyph):
 
     for hole in holes:
         draw.polygon([(x * size, y * size) for (x, y) in hole], fill=0)
+
+    for shape in over:
+        draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
     ink = page.getbbox()
     if ink is not None:

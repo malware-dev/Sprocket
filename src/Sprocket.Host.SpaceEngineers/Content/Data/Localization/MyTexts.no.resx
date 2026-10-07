@@ -202,7 +202,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>hver</value>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Legg til en utløser som starter ved et trykk på en knapp eller verktøylinje, eller når en verdi på en blokk endres.</value>
+    <value>Legg til en utløser som starter på et signal fra en blokks verktøylinje, eller når en verdi på en blokk endres.</value>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
     <value>Start en sekvens om og om igjen, med et fast tidsintervall.</value>
@@ -496,6 +496,27 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Pick.Partial" xml:space="preserve">
     <value>Støtten for denne blokken er bare delvis ferdig, så noe av det den tilbyr kan fortsatt være doblet, mangle eller ha rare navn.</value>
+  </data>
+  <data name="Sprocket.Member.Action" xml:space="preserve">
+    <value>Noe blokken blir bedt om å gjøre.</value>
+  </data>
+  <data name="Sprocket.Member.Value" xml:space="preserve">
+    <value>Noe blokken blir spurt om: hva en av verdiene dens er.</value>
+  </data>
+  <data name="Sprocket.Member.Signal" xml:space="preserve">
+    <value>Et signal blokken sender fra verktøylinjen sin.</value>
+  </data>
+  <data name="Sprocket.Member.Moment" xml:space="preserve">
+    <value>Noe som skjer med blokken, som automasjonen følger med på.</value>
+  </data>
+  <data name="Sprocket.Blueprint.BlockSlot" xml:space="preserve">
+    <value>En blokkplass: blokkene stegene virker på eller følger med på.</value>
+  </data>
+  <data name="Sprocket.Blueprint.SignalSlot" xml:space="preserve">
+    <value>En signalplass: en blokk, og verktøylinjeplassen på den som sender signalet.</value>
+  </data>
+  <data name="Sprocket.Member.Sequence" xml:space="preserve">
+    <value>En sekvens: steg som tas i rekkefølge.</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette tar tid å fullføre. Sekvensen venter til det er gjort før den går videre til neste steg.</value>
@@ -1301,7 +1322,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Holder automasjonen</value>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
-    <value>Automasjon: utløser</value>
+    <value>Automasjonssignal</value>
   </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automasjonen i denne blokken kan ikke redigeres.</value>

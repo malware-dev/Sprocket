@@ -33,9 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 10;
+        const int Draft = 11;
 
-        /// <summary>The host function this host answers a trigger with: a slot on a block's toolbar.</summary>
+        /// <summary>The host function this host names a signal with: a slot on a block's toolbar.</summary>
         /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Slot" />.</remarks>
         public const string Toolbar = "toolbar";
 
@@ -97,11 +97,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             // After the blocks, since each is on one of them.
-            var held = program.TriggerRefs;
+            var held = program.SignalRefs;
             for (var i = 0; i < held.Count; i++)
             {
                 if (triggers.Contains(held[i].Name))
-                    WriteTriggerRef(pen, held[i]);
+                    WriteSignalRef(pen, held[i]);
             }
 
             var systems = program.Systems;
@@ -237,7 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (trouble.Length > 0)
                 return trouble;
 
-            if (trial.Systems.Count != 1 || !trial.Systems[0].IsBlueprint || trial.Refs.Count > 0 || trial.TriggerRefs.Count > 0
+            if (trial.Systems.Count != 1 || !trial.Systems[0].IsBlueprint || trial.Refs.Count > 0 || trial.SignalRefs.Count > 0
                 || trial.Systems[0].Instances.Count > 0)
                 return "expected one system blueprint and nothing else.";
 
@@ -251,7 +251,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </summary>
         /// <remarks>
         /// A system names variables in its steps and triggers; a blueprint names only its slots, and its instances name the
-        /// variables answering them. A trigger variable names the block it is on.
+        /// variables answering them. A signal variable names the block it is on.
         /// </remarks>
         static void Used(Automation program, HashSet<string> blocks, HashSet<string> triggers)
         {
@@ -265,7 +265,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     system.Acted(named);
                     for (var n = 0; n < named.Count; n++)
                     {
-                        if (program.FindTriggerRef(named[n]) != null)
+                        if (program.FindSignalRef(named[n]) != null)
                             triggers.Add(named[n]);
                         else
                             blocks.Add(named[n]);
@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         for (var f = 0; f < filled.Count; f++)
                         {
                             blocks.Add(filled[f]);
-                            var declared = at == null || f >= at.Count ? null : program.FindTriggerRef(filled[f], at[f]);
+                            var declared = at == null || f >= at.Count ? null : program.FindSignalRef(filled[f], at[f]);
                             if (declared != null)
                                 triggers.Add(declared.Name);
                         }
@@ -292,7 +292,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
             }
 
-            var held = program.TriggerRefs;
+            var held = program.SignalRefs;
             for (var i = 0; i < held.Count; i++)
             {
                 if (triggers.Contains(held[i].Name))
@@ -529,7 +529,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary><c>let button = panel1:toolbar(1, 1, 4)</c>: a trigger, the slot this host answers one with, on a block above.</summary>
-        static void WriteTriggerRef(Pen pen, TriggerRef declared)
+        static void WriteSignalRef(Pen pen, SignalRef declared)
         {
             pen.Note(declared.Annotation);
             pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Slot(declared.Block, declared.At);
@@ -565,7 +565,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!Trigger(statement, statement.ValueAt(2), program, trouble, out block, out at))
                     return;
 
-                var trigger = new TriggerRef(name.Word, block, at);
+                var trigger = new SignalRef(name.Word, block, at);
                 trigger.Annotation = statement.Annotation;
                 program.Restore(trigger);
                 return;
@@ -863,8 +863,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Note(part.Annotation);
             pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Slot).Word(part.Id);
 
-            if (part.IsTrigger)
-                pen.Says(Keyword.Expects).Says(Keyword.Trigger);
+            if (part.IsSignal)
+                pen.Says(Keyword.Expects).Says(Keyword.Signal);
             else if (part.Expects.Count == 1)
                 pen.Says(Keyword.Expects).Word(part.Expects[0]);
             else if (part.Expects.Count > 1)
@@ -906,8 +906,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             var one = statement.ValueAt(3);
-            if (one.Says(Keyword.Trigger))
-                part.IsTrigger = true;
+            if (one.Says(Keyword.Signal))
+                part.IsSignal = true;
             else if (one.Form == ValueForm.List)
                 Names(statement, 3, part.Expects, trouble, "expected a block type or a list of them after 'expects'.");
             else if (Named(one))
@@ -1081,7 +1081,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 instance.Note(inner.Head, inner.Annotation);
 
-                if (part.IsTrigger)
+                if (part.IsSignal)
                 {
                     Answered(inner, system, instance, program, trouble);
                     continue;
@@ -1102,7 +1102,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>button = [ panel1:toolbar(1, 1, 4) ]</c>: the triggers that answer a trigger slot in one use of a blueprint, each
+        /// <c>button = [ panel1:toolbar(1, 1, 4) ]</c>: the signals that answer a signal slot in one use of a blueprint, each
         /// written in place or named by a variable above.
         /// </summary>
         static void Answered(Statement statement, AutomationSystem system, SystemInstance instance, Automation program,
@@ -1115,7 +1115,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 if (Named(items[i]))
                 {
-                    var declared = program.FindTriggerRef(items[i].Word);
+                    var declared = program.FindSignalRef(items[i].Word);
                     if (declared == null)
                     {
                         trouble.Say(statement, "no variable '" + items[i].Word + "' holding a trigger above this line.");
@@ -1149,13 +1149,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             instance.Fill(statement.Head, blocks, at);
         }
 
-        /// <summary>A trigger slot's answers as a list, each by the variable holding it where there is one, or written in place on its block.</summary>
+        /// <summary>A signal slot's answers as a list, each by the variable holding it where there is one, or written in place on its block.</summary>
         static void Slots(Pen pen, Automation program, IList<string> blocks, IList<ToolbarSlot> at)
         {
             pen.OpenList();
             for (var i = 0; blocks != null && i < blocks.Count && i < at.Count; i++)
             {
-                var declared = program.FindTriggerRef(blocks[i], at[i]);
+                var declared = program.FindSignalRef(blocks[i], at[i]);
                 if (declared != null)
                     pen.Word(declared.Name);
                 else
@@ -1463,7 +1463,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Blank();
             pen.Note(trigger.Annotation);
 
-            var needed = trigger as RequiredTrigger;
+            var needed = trigger as SignalTrigger;
             if (needed != null)
             {
                 pen.Start(Keyword.On).Word(needed.Part).Says(Keyword.Then);
@@ -1518,7 +1518,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             for (var i = 0; when != null && i < when.Sources.Count; i++)
                 Uses(statement, when.Sources[i], system, program, false, trouble);
 
-            var needed = trigger as RequiredTrigger;
+            var needed = trigger as SignalTrigger;
             if (needed != null)
             {
                 Uses(statement, needed.Part, system, program, true, trouble);
@@ -1531,10 +1531,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         /// <summary>
         /// Trouble where the trigger <paramref name="needed" /> names already starts something: a slot of a system blueprint
-        /// another <c>on</c> names, or the toolbar slot a system's trigger variable holds.
+        /// another <c>on</c> names, or the toolbar slot a system's signal variable holds.
         /// </summary>
         /// <remarks>A toolbar slot holds one action, so a second <c>on</c> on it could never be wired.</remarks>
-        static void Takes(Statement statement, RequiredTrigger needed, AutomationSystem system, Automation program, Trouble trouble)
+        static void Takes(Statement statement, SignalTrigger needed, AutomationSystem system, Automation program, Trouble trouble)
         {
             if (system.IsBlueprint)
             {
@@ -1544,7 +1544,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            var declared = program.FindTriggerRef(needed.Part);
+            var declared = program.FindSignalRef(needed.Part);
             if (declared != null)
                 trouble.Takes(statement, declared.Block, declared.At);
         }
@@ -1555,7 +1555,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                var needed = triggers[i] as RequiredTrigger;
+                var needed = triggers[i] as SignalTrigger;
                 if (needed != null && needed.Part == slot)
                     return true;
             }
@@ -1597,14 +1597,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Key == Keyword.Every)
                 return Every(statement, trouble);
 
-            // on button then run 1: the trigger button, a variable of a system's or a trigger slot of a blueprint's.
+            // on button then run 1: the signal button, a variable of a system's or a signal slot of a blueprint's.
             if (!Named(statement.ValueAt(0)) || !statement.Says(1, Keyword.Then))
             {
                 trouble.Say(statement, "expected on <trigger> then <step>.");
                 return null;
             }
 
-            return RequiredTrigger.Named(statement.Word(0));
+            return SignalTrigger.Named(statement.Word(0));
         }
 
         static Trigger When(Statement statement, Trouble trouble)
@@ -2182,7 +2182,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            if (trigger ? program.FindTriggerRef(name) == null : program.FindRef(name) == null)
+            if (trigger ? program.FindSignalRef(name) == null : program.FindRef(name) == null)
                 trouble.Say(statement, "no variable '" + name + "' holding " + (trigger ? "a trigger" : "a block") + " above this line.");
         }
     }

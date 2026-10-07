@@ -119,7 +119,7 @@ public class ButtonWiringTests
         Assert.Null(KeyIn(four));
 
         var system = sim.Editor.Program.Systems[0];
-        var trigger = (RequiredTrigger)system.Triggers[0];
+        var trigger = (SignalTrigger)system.Triggers[0];
         Assert.Equal(1, system.Instances[0].Positions(trigger.Part)![0].Slot);
         Assert.Equal(3, system.Instances[1].Positions(trigger.Part)![0].Slot);
         Assert.Contains(":toolbar(1, 1, 3) ]", ProgramText.Save(sim.Editor.Program, sim.World.Values));
@@ -172,7 +172,7 @@ public class ButtonWiringTests
     /// <summary>The key Sprocket's action in one of the panel's slots carries, the first by default, or null where it holds something else.</summary>
     static string? KeyIn(Panel panel, int slot = 0)
     {
-        if (!panel.Toolbar.TryGetItem(slot, out var present) || !TriggerAction.IsOurs(present))
+        if (!panel.Toolbar.TryGetItem(slot, out var present) || !SignalAction.IsOurs(present))
             return null;
 
         var parameters = new List<TerminalActionParameter>();

@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public PartRow(Func<WindowLayer> windows)
         {
             Blocks = new List<long>();
-            Triggers = new List<string>();
+            Signals = new List<string>();
             CreateView(windows);
         }
 
@@ -40,6 +40,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             get { return _name.Text; }
             set { _name.Text = value; }
+        }
+
+        /// <summary>The mark of what kind of slot it is: the block, or the signal.</summary>
+        public string Mark
+        {
+            get { return _mark.Symbol; }
+            set { _mark.Symbol = value; }
+        }
+
+        /// <summary>What the mark says while the pointer rests on it.</summary>
+        public string MarkTip
+        {
+            set { _mark.Tip = Lumel.Tip.For(_mark.Tip, value); }
         }
 
         /// <summary>What the author wrote about the part beyond its name, as markup read into rich text, or empty.</summary>
@@ -129,8 +142,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The blocks the chosen logic system fills the part with, by entity id; none where it is empty.</summary>
         public List<long> Blocks { get; }
 
-        /// <summary>For a trigger slot, what each of <see cref="Blocks" /> does that answers it, in the same order: "button 2 is pressed"; none for any other slot.</summary>
-        public List<string> Triggers { get; }
+        /// <summary>For a signal slot, what each of <see cref="Blocks" /> does that answers it, in the same order: "button 2 is pressed"; none for any other slot.</summary>
+        public List<string> Signals { get; }
 
         /// <summary>What pressing the blocks does, which is choosing others, or null where they cannot be changed.</summary>
         public ICommand Fills
@@ -160,8 +173,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public void Show(GridWorld world)
         {
             _pieces.Clear();
-            if (Triggers.Count == Blocks.Count && Blocks.Count > 0)
-                SentenceText.Triggers(world, Blocks, Triggers, _pieces);
+            if (Signals.Count == Blocks.Count && Blocks.Count > 0)
+                SentenceText.Signals(world, Blocks, Signals, _pieces);
             else
                 SentenceText.Entities(world, Blocks, true, _pieces);
 

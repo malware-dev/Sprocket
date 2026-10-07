@@ -1,1 +1,1 @@
-En **sekvens** er en liste med steg som kjører ovenfra og ned, som å lukke én dør, tømme luftslusen for luft og åpne den andre. Et logikksystem kan ha flere, én for hver ting det gjør.
+En ![](mark:sequence) **sekvens** er en liste med steg som kjører ovenfra og ned, som å lukke én dør, tømme luftslusen for luft og åpne den andre. Et logikksystem kan ha flere, én for hver ting det gjør.

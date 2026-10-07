@@ -4,8 +4,8 @@ En plass er et navngitt sted i et [logikksystem](#logic-system), som *den indre 
 
 ## To slags
 
-- En **blokkplass** holder blokkene et steg virker på eller følger med på, for eksempel en dør, eller alle lysene i luftslusen.
-- En **signalplass** holder en blokk og verktøylinjeplassen på den som sender [signalet](#signal), for eksempel et knappepanel og en av knappene.
+- En ![](mark:block) **blokkplass** holder blokkene et steg virker på eller følger med på, for eksempel en dør, eller alle lysene i luftslusen.
+- En ![](mark:signal) **signalplass** holder en blokk og verktøylinjeplassen på den som sender ![](mark:signal) [signalet](#signal), for eksempel et knappepanel og en av knappene.
 
 ## Fylle en plass
 

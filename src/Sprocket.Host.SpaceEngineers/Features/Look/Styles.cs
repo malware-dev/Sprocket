@@ -882,7 +882,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot }
         };
 
-        /// <summary>The mark of something done that a step waits for.</summary>
+        /// <summary>A mark beside words, muted: the kind of thing they name, or which way a folded column opens.</summary>
         public static readonly GlyphStyle Waits = new GlyphStyle
         {
             Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted }

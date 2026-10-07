@@ -8,17 +8,17 @@ namespace Sprocket.Sim.Driving
     {
         /// <summary>
         /// The trigger that is button <paramref name="button" /> of the block <paramref name="declared" />, not yet added to
-        /// <paramref name="system" />: a trigger variable of <paramref name="program" /> for a system, or a trigger slot
+        /// <paramref name="system" />: a signal variable of <paramref name="program" /> for a system, or a signal slot
         /// answered in its first instance for a system blueprint.
         /// </summary>
-        public static RequiredTrigger On(Automation program, AutomationSystem system, string declared, int button = 1)
+        public static SignalTrigger On(Automation program, AutomationSystem system, string declared, int button = 1)
         {
             var at = new ToolbarSlot(1, 1, button);
             if (!system.IsBlueprint)
-                return RequiredTrigger.Named(program.DeclareTrigger(declared, at, declared + " " + button).Name);
+                return SignalTrigger.Named(program.DeclareSignal(declared, at, declared + " " + button).Name);
 
             var part = system.TakeTrigger(system.First, new[] { declared }, new[] { at }, "Button Panel", "");
-            return RequiredTrigger.Named(part);
+            return SignalTrigger.Named(part);
         }
 
         /// <summary>The toolbar slots answering the trigger <paramref name="part" /> of <paramref name="system" /> in its first use, or null where none does.</summary>

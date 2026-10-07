@@ -3,8 +3,8 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
-    /// <summary>A sensor's two triggers: the game runs the first slot of every page when it starts detecting, and the second when it stops.</summary>
-    public sealed class SensorTriggers : ITriggers
+    /// <summary>A sensor's two signals: the game runs the first slot of every page when it starts detecting, and the second when it stops.</summary>
+    public sealed class SensorSignals : ISignals
     {
         /// <inheritdoc />
         public bool Claims(IMyTerminalBlock block)
@@ -15,8 +15,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <inheritdoc />
         public void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithTrigger(new ToolbarSlot(1, 0, 1), "detects something")
-                .WithTrigger(new ToolbarSlot(1, 0, 2), "stops detecting");
+            kind.WithSignal(new ToolbarSlot(1, 0, 1), "detects something")
+                .WithSignal(new ToolbarSlot(1, 0, 2), "stops detecting");
         }
     }
 }

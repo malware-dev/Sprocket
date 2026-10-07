@@ -131,14 +131,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Adds a trigger, a moment the construct answers through the toolbar slot <paramref name="at" /> - see
+        /// Adds a signal, a moment the construct sends from the toolbar slot <paramref name="at" /> - see
         /// <see cref="EntityEvent.Answered" />.
         /// </summary>
         /// <remarks>
         /// No property, because there is nothing to read: what makes it happen is a slot on this
         /// block's own toolbar, and what it runs is what that slot was given.
         /// </remarks>
-        public EntityKind WithTrigger(Sequences.ToolbarSlot at, string text)
+        public EntityKind WithSignal(Sequences.ToolbarSlot at, string text)
         {
             _events.Add(new EntityEvent(at, text));
             return this;
@@ -325,8 +325,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             return null;
         }
 
-        /// <summary>The trigger the one toolbar slot <paramref name="at" /> is among, or null where none of this kind's is.</summary>
-        public EntityEvent Trigger(Sequences.ToolbarSlot at)
+        /// <summary>The signal the one toolbar slot <paramref name="at" /> is among, or null where none of this kind's is.</summary>
+        public EntityEvent Signal(Sequences.ToolbarSlot at)
         {
             for (var i = 0; i < _events.Count; i++)
             {

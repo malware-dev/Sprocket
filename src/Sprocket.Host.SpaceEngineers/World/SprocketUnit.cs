@@ -12,7 +12,7 @@ using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 // The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
-// way TriggerAction does, because the Ingame namespaces collide with the mod-side ones.
+// way SignalAction does, because the Ingame namespaces collide with the mod-side ones.
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -236,8 +236,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether anything has asked for the editor yet, and so made one.</summary>
         public bool HasEditor => _editor != null;
 
+        /// <summary>The construct it runs on.</summary>
         public GridWorld World => _world;
 
+        /// <summary>What runs its program.</summary>
         public AutomationRunner Runner => _runner;
 
         int _reconciled = -1;
@@ -286,14 +288,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the trigger part.
+        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the signal part.
         /// </summary>
         /// <remarks>
         /// By the part's name, because a trigger has no number and its part is what each instance answers. Renaming the part
         /// changes what is wanted, and the slot is written again with the rest of the wiring. Marked <c>part:</c>, because a
         /// part may be called anything, a sequence's number and <c>2/stop</c> among it.
         /// </remarks>
-        static string KeyOf(AutomationSystem system, SystemInstance instance, RequiredTrigger trigger)
+        static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
         {
             return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/part:" + trigger.Part;
         }
@@ -362,7 +364,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 var triggers = system.Triggers;
                 for (var t = 0; t < triggers.Count; t++)
                 {
-                    var needed = triggers[t] as RequiredTrigger;
+                    var needed = triggers[t] as SignalTrigger;
                     var alone = needed == null ? null : _runner.Alone(system, needed);
                     for (var n = 0; alone != null && n < instances.Count; n++)
                     {
@@ -547,15 +549,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!triggers[i].IsAbout(sequence))
                     continue;
 
-                var needed = triggers[i] as RequiredTrigger;
+                var needed = triggers[i] as SignalTrigger;
                 if (needed != null)
-                    WantedForTrigger(into, system, instance, sequence, needed);
+                    WantedForSignal(into, system, instance, sequence, needed);
             }
         }
 
         /// <summary>The toolbar slots <paramref name="instance" /> answers <paramref name="needed" /> with, each a want.</summary>
-        void WantedForTrigger(List<Want> into, AutomationSystem system, SystemInstance instance,
-            Sequence sequence, RequiredTrigger needed)
+        void WantedForSignal(List<Want> into, AutomationSystem system, SystemInstance instance,
+            Sequence sequence, SignalTrigger needed)
         {
             var blocks = _answering;
             var positions = _answeringAt;
@@ -619,7 +621,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (trigger.Stops)
                 return KeyOf(system, instance, sequence, true);
 
-            var needed = trigger as RequiredTrigger;
+            var needed = trigger as SignalTrigger;
             return needed != null && needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence);
         }
 
@@ -688,7 +690,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                if (!(triggers[i] is RequiredTrigger) || !triggers[i].IsAbout(sequence))
+                if (!(triggers[i] is SignalTrigger) || !triggers[i].IsAbout(sequence))
                     continue;
 
                 var wanted = Wanting(system, instance, sequence, triggers[i]);
@@ -772,7 +774,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                var needed = triggers[i] as RequiredTrigger;
+                var needed = triggers[i] as SignalTrigger;
                 if (needed == null || !needed.IsAbout(sequence))
                     continue;
 
@@ -864,8 +866,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (Mine(present) && Understood(toolbar, want.Slot))
                     continue;
 
-                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId),
-                        TriggerAction.Argument(want.Key)))
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId),
+                        SignalAction.Argument(want.Key)))
                 {
                     Told.Say("the write was refused mending slot " + want.Slot);
                     continue;
@@ -960,7 +962,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId), TriggerAction.Argument(want.Key)))
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
                 {
                     Told.Say("the write was refused for slot " + want.Slot);
                     continue;
@@ -1003,7 +1005,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         bool Mine(MyToolbarItemInfo present)
         {
-            return TriggerAction.IsOurs(present) && present.BlockEntityId == _block.EntityId;
+            return SignalAction.IsOurs(present) && present.BlockEntityId == _block.EntityId;
         }
 
         /// <summary>
@@ -1021,7 +1023,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         bool Orphaned(MyToolbarItemInfo present)
         {
-            return TriggerAction.IsOurs(present)
+            return SignalAction.IsOurs(present)
                 && present.BlockEntityId != _block.EntityId
                 && !Toolbars.Exists(present.BlockEntityId);
         }
@@ -1057,6 +1059,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Toolbars.Of(block, toolbar);
         }
 
+        /// <summary>Runs its program for the game's frame <paramref name="frame" />, and keeps the toolbars it owns as it wants them.</summary>
         public void Tick(int frame)
         {
             // A copy leaves the toolbars to the machine that keeps the Sprocket, which is the one that
@@ -1128,7 +1131,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (toolbar.TryGetItem(want.Slot, out present) && Asked(toolbar, present, want))
                     continue;
 
-                if (!Toolbars.Write(toolbar, want.Slot, TriggerAction.Slot(_block.EntityId), TriggerAction.Argument(want.Key)))
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
                 {
                     Told.Say("the write was refused for slot " + want.Slot);
                     continue;

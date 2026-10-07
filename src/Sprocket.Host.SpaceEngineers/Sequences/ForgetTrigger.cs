@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// Takes a trigger out of a system, with the trigger slot it names and what each instance answered it with, where no
+    /// Takes a trigger out of a system, with the signal slot it names and what each instance answered it with, where no
     /// other trigger names that slot.
     /// </summary>
     /// <remarks>
@@ -23,11 +23,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<string> _sources;
         readonly string _eventId;
 
+        /// <summary>Takes <paramref name="going" /> out of <paramref name="system" />, with the signal slot it names where nothing else names it.</summary>
         public ForgetTrigger(AutomationSystem system, Trigger going)
         {
             _going = going;
 
-            var needed = going as RequiredTrigger;
+            var needed = going as SignalTrigger;
             _part = needed == null || Shared(system, needed) ? null : system.FindPart(needed.Part);
 
             var moment = going as MomentTrigger;
@@ -101,12 +102,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Whether another trigger of <paramref name="system" /> names the slot <paramref name="needed" /> names.</summary>
-        static bool Shared(AutomationSystem system, RequiredTrigger needed)
+        static bool Shared(AutomationSystem system, SignalTrigger needed)
         {
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                var other = triggers[i] as RequiredTrigger;
+                var other = triggers[i] as SignalTrigger;
                 if (other != null && other != needed && other.Part == needed.Part)
                     return true;
             }
@@ -114,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return false;
         }
 
-        /// <summary>What one instance answered the trigger part with.</summary>
+        /// <summary>What one instance answered the signal part with.</summary>
 
         sealed class Answer
         {

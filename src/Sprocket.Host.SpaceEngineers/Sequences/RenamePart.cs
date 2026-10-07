@@ -7,6 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _was;
         readonly string _now;
 
+        /// <summary>Calls <paramref name="part" /> <paramref name="now" />.</summary>
         public RenamePart(Part part, string now)
         {
             _part = part;
@@ -17,8 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override Change Change => Change.RenameSlot;
 
-        /// <summary>Only what the slot is called changes, and its box already says it.</summary>
-        public override bool ChangesShape => false;
+        /// <summary>The configuration panel lists its slots in order of their names, so a slot renamed may move.</summary>
+        public override bool ChangesShape => true;
 
         /// <inheritdoc />
         public override bool Changes => _was != _now;

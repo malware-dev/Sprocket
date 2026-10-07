@@ -7,17 +7,17 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
-    /// <summary>One member of a block as it is shown wherever it is named: its marks, then its words.</summary>
+    /// <summary>One member of a block as it is shown wherever it is named: the mark of its kind, then its words.</summary>
     public class MemberName : HStack, ITextual
     {
-        readonly Glyph _waits;
+        readonly Glyph _mark;
         readonly Label _name;
 
-        /// <summary>A member with no words and no marks yet.</summary>
+        /// <summary>A member with no words and no mark yet.</summary>
         public MemberName()
         {
             Spacing = 8f;
-            Children.Add(new Glyph { Symbol = Symbols.Finish, Style = Styles.Waits, IsVisible = false }.As(out _waits));
+            Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false }.As(out _mark));
             Children.Add(new Label().As(out _name));
         }
 
@@ -28,17 +28,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             set { _name.Text = value; }
         }
 
-        /// <summary>Whether the member is something that has to happen, which a step waits for.</summary>
-        public bool Waits
+        /// <summary>The mark of what kind of member it is, one of <see cref="Symbols" />, or empty for none.</summary>
+        public string Mark
         {
-            get { return _waits.IsVisible; }
-            set { _waits.IsVisible = value; }
+            get { return _mark.IsVisible ? _mark.Symbol : ""; }
+            set
+            {
+                _mark.IsVisible = !string.IsNullOrEmpty(value);
+                if (_mark.IsVisible)
+                    _mark.Symbol = value;
+            }
         }
 
-        /// <summary>The note over the waits mark.</summary>
-        public string WaitsTip
+        /// <summary>The note over the mark.</summary>
+        public string MarkTip
         {
-            set { _waits.Tip = Tip.For(_waits.Tip, value); }
+            set { _mark.Tip = Tip.For(_mark.Tip, value); }
         }
 
         /// <summary>Whether the words take all the room given and run onto further lines where they are wider.</summary>

@@ -25,6 +25,18 @@ public class RunStepTests
         Assert.DoesNotContain(offered, text => text.Contains(first.Name));
     }
 
+    /// <summary>Each sequence offered is marked as a sequence.</summary>
+    [Fact]
+    public void TheSequencesOfferedAreMarked()
+    {
+        var rig = Two(out _, out _);
+
+        rig.Editor.PressStart(rig.Texts.SequenceRun);
+        rig.Tick();
+
+        Assert.All(rig.Editor.Choices(), row => Assert.Equal(Symbols.Sequence, row.Mark));
+    }
+
     /// <summary>Running another sequence adds the step and a wait for it after it, as one step back.</summary>
     [Fact]
     public void RunningOneAddsTheStepAndAWaitForIt()
@@ -116,7 +128,7 @@ public class RunStepTests
     /// <summary>Whether a visible mark of something a step waits for stands anywhere in <paramref name="element" />.</summary>
     static bool Waits(Lumel.Element element) =>
         element.Within().OfType<Lumel.Images.Glyph>()
-            .Any(glyph => glyph.IsVisible && glyph.Symbol == Symbols.Finish);
+            .Any(glyph => glyph.IsVisible && glyph.Symbol == Symbols.Awaited);
 
     /// <summary>A system with two sequences, switched off so they can be edited, with the first one's screen open.</summary>
     static Simulation Two(out Sequence first, out Sequence second)

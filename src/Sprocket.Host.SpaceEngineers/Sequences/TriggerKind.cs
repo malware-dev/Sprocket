@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>A length of time went by.</summary>
         Every,
 
-        /// <summary>Something on the construct says so: a button, a timer, a sensor.</summary>
-        Required
+        /// <summary>A signal, sent from a place the construct offers: a button, a timer, a sensor.</summary>
+        Signal
     }
 }

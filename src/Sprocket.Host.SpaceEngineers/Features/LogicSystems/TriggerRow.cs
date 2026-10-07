@@ -96,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             for (var i = 0; i < Does.Count; i++)
             {
-                _does[i].WaitsTip = texts.MemberWaits;
+                _does[i].Texts = texts;
                 _does[i].Tip = Tip.For(_does[i].Tip, Does[i].Opens == null ? Why() : Doing(texts, Does[i]));
 
                 // Before the part is shown, which is what records it as shown: a join is worked out only for a

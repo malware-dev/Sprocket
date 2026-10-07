@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // on the same layer. The scissor is pushed onto whatever layer this names, so the two must agree
             // or clipping silently does nothing.
             _screen = new GameScreenSpace();
-            _graphics = new ScreenSpaceGraphics(_screen, MyScreenSpaceLayer.BelowHud, Materials.Fill, new ScreenSpaceImages(_screen));
+            _graphics = new ScreenSpaceGraphics(_screen, MyScreenSpaceLayer.BelowHud, Materials.Fill, new MarkImages(new ScreenSpaceImages(_screen)));
 
             // Off, and the view draws its own cross instead. The harness lays its controls down before it
             // calls the mod - MyGuiScreenModHost.Draw is base.Draw then OnDraw - so the first opaque thing

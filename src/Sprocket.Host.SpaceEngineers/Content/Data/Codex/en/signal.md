@@ -16,7 +16,7 @@ A signal reaches a [logic system](#logic-system) through a signal [slot](#slot),
 
 ## When a signal arrives
 
-A signal starts its trigger only for the [installation](#installation) whose signal slot holds it, so the port airlock's button cycles only the port airlock. A signal that arrives while the installation is switched off, or while the [sequence](#sequence) it starts is already running, is skipped. The sequence counts how often that happens.
+A signal starts its trigger only for the [installation](#installation) whose signal slot holds it, so the port airlock's button cycles only the port airlock. A signal that arrives while the installation is switched off, or while the ![](mark:sequence) [sequence](#sequence) it starts is already running, is skipped. The sequence counts how often that happens.
 
 ## When the toolbar slot is changed
 

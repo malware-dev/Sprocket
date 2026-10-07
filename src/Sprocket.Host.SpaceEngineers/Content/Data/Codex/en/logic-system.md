@@ -4,8 +4,8 @@ A logic system automates one job, for example an airlock, a hangar door or a dri
 
 ## What it is made of
 
-- [Sequences](#sequence) say what happens, step by step.
-- [Triggers](#trigger) say when, for example when a [signal](#signal) arrives, a door finishes closing or a set time passes.
+- ![](mark:sequence) [Sequences](#sequence) say what happens, step by step.
+- [Triggers](#trigger) say when, for example when a ![](mark:signal) [signal](#signal) arrives, a door finishes closing or a set time passes.
 - [Installations](#installation) say which blocks take part, for example the doors and the vent, and the blocks that send its signals.
 
 Because the blocks are kept apart from the job, one logic system can run every airlock on your ship.
@@ -14,7 +14,7 @@ Because the blocks are kept apart from the job, one logic system can run every a
 
 1. On the home screen, press `+ logic system`, and name it *Airlock* on its heading.
 2. Under `Sequences`, press `+ sequence`, and name it *Cycle Out*.
-3. Press `+ task`, [pick](#picking) the inner door, and choose the `close` with the clock beside it. The [sequence](#sequence) page explains the clock.
+3. Press `+ task`, [pick](#picking) the inner door, and choose the `close` with the clock beside it. The ![](mark:sequence) [sequence](#sequence) page explains the clock.
 4. Add `depressurize` for the vent and `open` for the outer door the same way.
 5. Go back. Under `Triggers`, press `+ when`, pick the airlock's button, and have it run *Cycle Out*.
 6. Leave the screen, and switch the logic system on when asked.
@@ -29,8 +29,8 @@ Switching it off stops anything running and leaves the blocks as they are. When 
 
 The blocks you pick become [slots](#slot). There are two kinds:
 
-- A **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
-- A **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
+- A ![](mark:block) **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
+- A ![](mark:signal) **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
 
 `Using the blocks of`, at the top of the logic system's screen, chooses whose blocks the steps show.
 

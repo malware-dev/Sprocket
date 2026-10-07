@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// it would be Sprocket inventing a signal the game does not have.
     /// <para>
     /// So the sources and the moment live here, shared, and the two below differ only in how the
-    /// moment reaches Sprocket - see <see cref="WhenTrigger" /> and <see cref="RequiredTrigger" />.
+    /// moment reaches Sprocket - see <see cref="WhenTrigger" /> and <see cref="SignalTrigger" />.
     /// Everything that resolves what a trigger names, or renames it, or asks what it reads as, works
     /// on this and never has to know which.
     /// </para>
@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     {
         readonly List<string> _sources = new List<string>();
 
+        /// <summary>A trigger started by the moment <paramref name="eventId" />, with no blocks named yet.</summary>
         protected MomentTrigger(string eventId)
         {
             EventId = eventId;

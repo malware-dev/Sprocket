@@ -21,10 +21,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return -1;
         }
 
-        /// <summary>Whether any installation of <paramref name="system" /> answers a trigger slot with a toolbar slot another installation in <paramref name="program" /> answers now.</summary>
+        /// <summary>Whether any installation of <paramref name="system" /> answers a signal slot with a toolbar slot another installation in <paramref name="program" /> answers now.</summary>
         /// <remarks>
         /// Asked before something taken out is put back: its buttons were let go of, and one taken since by something else
-        /// would end up claimed twice, which starts neither. A walk of the program's trigger slots, with no toolbar read.
+        /// would end up claimed twice, which starts neither. A walk of the program's signal slots, with no toolbar read.
         /// </remarks>
         protected static bool Clashes(Automation program, AutomationSystem system)
         {
@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var parts = system.Parts;
             for (var p = 0; p < parts.Count; p++)
             {
-                if (!parts[p].IsTrigger)
+                if (!parts[p].IsSignal)
                     continue;
 
                 var blocks = instance.FilledWith(parts[p].Id);
@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return false;
         }
 
-        /// <summary>Whether an installation in <paramref name="program" /> other than <paramref name="except" /> answers a trigger slot with the toolbar slot <paramref name="at" /> of <paramref name="block" />.</summary>
+        /// <summary>Whether an installation in <paramref name="program" /> other than <paramref name="except" /> answers a signal slot with the toolbar slot <paramref name="at" /> of <paramref name="block" />.</summary>
         static bool Answered(Automation program, SystemInstance except, string block, ToolbarSlot at)
         {
             var systems = program.Systems;
@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
                     for (var p = 0; p < parts.Count; p++)
                     {
-                        if (!parts[p].IsTrigger)
+                        if (!parts[p].IsSignal)
                             continue;
 
                         var blocks = instances[i].FilledWith(parts[p].Id);

@@ -43,7 +43,15 @@ Each mark has one job:
 - `**strong**` (bold) for the lead of a list item or a key distinction, used sparingly.
 - `*emphasis*` (italic) for names typed by a player or shown by the game, such as *Cycle Out*.
 
-A link is underlined, in the link color, the same everywhere.
+A link is underlined, in the link color, the same everywhere. A term is linked once on a page, at its first
+mention.
+
+A term with a kind icon carries it where the page sets the term apart: beside its link, and where it is
+named in bold, such as `![](mark:signal) **signal slot**`. Running text stays plain. The icon is an image
+whose locator is `mark:` and the kind, which the editor draws from Maltek Symbols at three quarters of the
+line: `sequence`, `signal`, `block`, `action`, `awaited` and `value`. Its words are left empty, so a host
+that knows no such locator draws nothing in its place. A page's title carries none, since the title is the
+term's name.
 
 A box, `::: names` up to a line of only `:::`, sets blocks apart. `left`, `center` and `right` are
 markdown-lite's own; the codex gives `warning` a look for what can go wrong, and `player` one for a

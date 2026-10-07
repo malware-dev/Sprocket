@@ -14,6 +14,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _given.Tint = Palette.Live;
         }
 
+        /// <summary>The mark of what kind of thing the answer names, one of the symbols, or empty for none.</summary>
+        public string Mark
+        {
+            get { return _mark.IsVisible ? _mark.Symbol : ""; }
+            set
+            {
+                _mark.IsVisible = !string.IsNullOrEmpty(value);
+                if (_mark.IsVisible)
+                    _mark.Symbol = value;
+            }
+        }
+
+        /// <summary>What the mark says while the pointer rests on it.</summary>
+        public string MarkTip
+        {
+            set { _mark.Tip = Lumel.Tip.For(_mark.Tip, value); }
+        }
+
         /// <summary>What the answer says.</summary>
         public string Text
         {

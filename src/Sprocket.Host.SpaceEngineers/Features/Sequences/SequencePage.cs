@@ -864,6 +864,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     continue;
 
                 page.Add(SequenceText.Called(texts, other), other.Number == current, delegate { chosen(other.Number); });
+                page.MarkLast(Symbols.Sequence, MarkText.Note(texts, Symbols.Sequence));
             }
 
             return page;

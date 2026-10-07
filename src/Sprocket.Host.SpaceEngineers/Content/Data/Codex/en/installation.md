@@ -4,7 +4,7 @@ An installation is one place a [logic system](#logic-system) runs, such as one a
 
 ## Many installations, one logic system
 
-An airlock logic system can have one installation for each airlock on the ship. All of them run the same [sequences](#sequence) and [triggers](#trigger), each on its own blocks. Cycling one airlock leaves the others as they are.
+An airlock logic system can have one installation for each airlock on the ship. All of them run the same ![](mark:sequence) [sequences](#sequence) and [triggers](#trigger), each on its own blocks. Cycling one airlock leaves the others as they are.
 
 A change to the logic system reaches every installation at once. Fix a step, and every airlock gets the fix.
 

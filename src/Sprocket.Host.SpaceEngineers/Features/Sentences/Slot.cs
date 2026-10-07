@@ -7,6 +7,7 @@ using Lumel.Text;
 using VRage.Game;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -23,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<Mention> _said = new List<Mention>();
 
         bool _empty;
-        string _waitsTip;
+        Texts _texts;
         string _font = MyFontEnum.White;
         float _fontSize = TextState.NeutralFontSize;
         Color _color = Color.White;
@@ -37,21 +38,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The color of the line along the bottom.</summary>
         public Color Underline { get; set; }
 
-        /// <summary>The note over the waits mark of a member it says.</summary>
-        public string WaitsTip
+        /// <summary>The texts the notes over the marks of the members it says are in.</summary>
+        public Texts Texts
         {
-            get { return _waitsTip; }
+            get { return _texts; }
             set
             {
-                if (_waitsTip == value)
+                if (_texts == value)
                     return;
 
-                _waitsTip = value;
+                _texts = value;
                 for (var i = 0; i < Children.Count && i < _said.Count; i++)
                 {
                     var member = Children[i] as MemberName;
                     if (member != null)
-                        member.WaitsTip = _said[i].Waits ? value : null;
+                        member.MarkTip = Noted(_said[i].Mark);
                 }
             }
         }
@@ -183,8 +184,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 {
                     var member = (MemberName)Children[i];
                     member.Name = piece.Text;
-                    member.Waits = piece.Waits;
-                    member.WaitsTip = piece.Waits ? WaitsTip : null;
+                    member.Mark = piece.Mark;
+                    member.MarkTip = Noted(piece.Mark);
                     continue;
                 }
 
@@ -198,6 +199,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 Children.Remove(Children[Children.Count - 1]);
 
             Dress();
+        }
+
+        /// <summary>What <paramref name="mark" /> says while the pointer rests on it, in the texts given, or null before they are.</summary>
+        string Noted(string mark)
+        {
+            return _texts == null ? null : MarkText.Note(_texts, mark);
         }
 
         /// <summary>Whether <paramref name="child" /> is the element that says <paramref name="piece" />: a block's, a member's, or words.</summary>

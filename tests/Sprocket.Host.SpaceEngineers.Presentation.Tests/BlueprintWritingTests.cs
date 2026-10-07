@@ -133,7 +133,7 @@ public class BlueprintWritingTests
         Assert.Equal("Not renamed: a slot needs a name.", editor.Parts()[0].Refusal);
     }
 
-    /// <summary>A trigger slot being filled in names the trigger on its block that answers it, not only the block.</summary>
+    /// <summary>A signal slot being filled in names the trigger on its block that answers it, not only the block.</summary>
     [Fact]
     public void ATriggerSlotNamesTheTriggerOnItsBlock()
     {
@@ -149,7 +149,7 @@ public class BlueprintWritingTests
 
         var row = Assert.Single(editor.Parts());
         Assert.Single(row.Blocks);
-        Assert.EndsWith("button 1 is pressed", Assert.Single(row.Triggers));
+        Assert.EndsWith("button 1 is pressed", Assert.Single(row.Signals));
     }
 
     /// <summary>A step back taken while a box holds the keyboard takes back what was typed in it, and nothing before it.</summary>
@@ -175,7 +175,7 @@ public class BlueprintWritingTests
         Assert.True(part.Optional);
     }
 
-    /// <summary>Making a slot optional is a step back of its own; every slot starts required, a trigger slot too.</summary>
+    /// <summary>Making a slot optional is a step back of its own; every slot starts required, a signal slot too.</summary>
     [Fact]
     public void MakingASlotOptionalIsOneStepBack()
     {

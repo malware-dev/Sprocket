@@ -4,6 +4,7 @@ using System.Text;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Values;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
@@ -53,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // A required trigger with slots names its block, so it reads like any other moment: how
             // it reaches Sprocket is not what the sentence is about. Only one naming nothing has to
             // say that out loud, because it has nothing else to show.
-            return kind == TriggerKind.Required && parts == 0
+            return kind == TriggerKind.Signal && parts == 0
                 ? "When something on this construct starts it"
                 : "When";
         }
@@ -101,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
         public static void InTrigger(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
-            if (!Blocks(world, slot, into) && !Member(slot, into))
+            if (!Blocks(world, slot, into) && !Marked(world, slot, into))
                 into.Add(new Mention(InTrigger(world, slot), null));
         }
 
@@ -228,16 +229,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
         public static void InStep(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
-            if (!Blocks(world, slot, into) && !Member(slot, into))
+            if (!Blocks(world, slot, into) && !Marked(world, slot, into))
                 into.Add(new Mention(InStep(world, slot), null));
         }
 
         /// <summary>
-        /// Each of the blocks <paramref name="entityIds" />, each followed by what it does that answers a trigger: "Airlock
-        /// Button button 2 is pressed".
+        /// Each of the blocks <paramref name="entityIds" />, each followed by the signal it sends: "Airlock Button button 2 is
+        /// pressed".
         /// </summary>
-        /// <remarks>The trigger's words as the trigger's row says them, so a slot and the trigger it answers read alike.</remarks>
-        public static void Triggers(GridWorld world, IList<long> entityIds, IList<string> triggers, List<Mention> into)
+        /// <remarks>The signal's words as a trigger's row says them, so a slot and the trigger its signal starts read alike.</remarks>
+        public static void Signals(GridWorld world, IList<long> entityIds, IList<string> signals, List<Mention> into)
         {
             var entities = Found(world, entityIds);
             var order = InOrder(entities);
@@ -249,8 +250,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var i = order[k];
                 var entity = entities[i];
                 into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
-                if (i < triggers.Count && !string.IsNullOrEmpty(triggers[i]))
-                    into.Add(new Mention(triggers[i], null));
+                if (i < signals.Count && !string.IsNullOrEmpty(signals[i]))
+                    into.Add(new Mention(" " + signals[i], null));
             }
         }
 
@@ -418,15 +419,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return true;
         }
 
-        /// <summary>Adds the member <paramref name="slot" /> holds to <paramref name="into" />, where it holds one.</summary>
-        static bool Member(SentenceSlot slot, List<Mention> into)
+        /// <summary>
+        /// Adds what <paramref name="slot" /> names to <paramref name="into" /> under the mark of its kind, where it names
+        /// something that has one: something a block does, a moment, a test, or a sequence.
+        /// </summary>
+        static bool Marked(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
-            var action = slot as ActionSlot;
-            if (action == null || action.Action == null)
+            var mark = MarkOf(slot);
+            if (mark == null)
                 return false;
 
-            into.Add(Mention.Member(action.Action.Sets ? action.Action.Named : action.Action.Text, action.Action.Lasts));
+            into.Add(Mention.Member(Of(world, slot), mark));
             return true;
+        }
+
+        /// <summary>The mark of what <paramref name="slot" /> names, or null where it names nothing that has one.</summary>
+        static string MarkOf(SentenceSlot slot)
+        {
+            var action = slot as ActionSlot;
+            if (action != null)
+                return action.Action == null ? null : MarkText.Of(action.Action);
+
+            var happening = slot as EventSlot;
+            if (happening != null)
+                return happening.Event == null ? null : MarkText.Of(happening.Event);
+
+            var state = slot as StateSlot;
+            if (state != null)
+                return state.Moment == null ? null : Symbols.Value;
+
+            var sequence = slot as SequenceSlot;
+            if (sequence != null)
+                return sequence.IsEmpty ? null : Symbols.Sequence;
+
+            return null;
         }
 
         static string Of(GridWorld world, SentenceSlot slot)

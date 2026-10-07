@@ -585,7 +585,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (trigger is EveryTrigger)
                 return TriggerKind.Every;
 
-            return trigger is WhenTrigger ? TriggerKind.When : TriggerKind.Required;
+            return trigger is WhenTrigger ? TriggerKind.When : TriggerKind.Signal;
         }
 
         EntityEvent Happening(MomentTrigger moment)

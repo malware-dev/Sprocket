@@ -16,7 +16,7 @@ Et signal når et [logikksystem](#logic-system) gjennom en [signalplass](#slot),
 
 ## Når et signal kommer
 
-Et signal starter utløseren bare for den [installasjonen](#installation) der signalplassen holder det, så knappen til babord luftsluse sluser bare babord luftsluse. Et signal som kommer mens installasjonen er slått av, eller mens [sekvensen](#sequence) det starter allerede kjører, hoppes over. Sekvensen teller hvor ofte det skjer.
+Et signal starter utløseren bare for den [installasjonen](#installation) der signalplassen holder det, så knappen til babord luftsluse sluser bare babord luftsluse. Et signal som kommer mens installasjonen er slått av, eller mens ![](mark:sequence) [sekvensen](#sequence) det starter allerede kjører, hoppes over. Sekvensen teller hvor ofte det skjer.
 
 ## Når verktøylinjeplassen endres
 

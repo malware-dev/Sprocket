@@ -8,6 +8,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Values;
@@ -57,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<int> _matched = new List<int>();
         readonly List<Form> _forms = new List<Form>();
         readonly List<int> _groups = new List<int>();
-        readonly List<bool> _waits = new List<bool>();
+        readonly List<string> _marks = new List<string>();
         readonly List<bool> _sets = new List<bool>();
         readonly List<Readiness> _ready = new List<Readiness>();
         readonly List<string> _why = new List<string>();
@@ -78,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Field> _givenFields = new List<Field>();
         readonly Func<GridEntity, bool> _fits;
         readonly Func<GridEntity, bool> _admits;
-        readonly bool _triggersOnly;
+        readonly bool _signalsOnly;
 
         string _chosen;
         Form _chosenForm;
@@ -121,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>
         /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
         /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
-        /// them. <paramref name="triggersOnly" /> offers only what the construct does to start something, for a trigger slot.
+        /// them. <paramref name="signalsOnly" /> offers only what the construct does to start something, for a signal slot.
         /// <paramref name="forTests" /> offers what an if can test: the states its blocks can be in or not, each a choice of
         /// its own marked with <see cref="Not" /> for not, and their values. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
         /// not have is dropped later, where it is.
@@ -130,12 +131,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> values = null,
             Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
-            bool triggersOnly = false, bool forTests = false)
+            bool signalsOnly = false, bool forTests = false)
             : base(editor)
         {
             _forTests = forTests;
             _admits = admits;
-            _triggersOnly = triggersOnly;
+            _signalsOnly = signalsOnly;
             _opens = opens;
             _aim = aim;
             if (aim != null)
@@ -913,7 +914,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _ids.Clear();
             _forms.Clear();
             _groups.Clear();
-            _waits.Clear();
+            _marks.Clear();
             _sets.Clear();
             _ready.Clear();
             _why.Clear();
@@ -927,10 +928,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var events = Vocabulary.EventsOf(Editor.World, _selection);
                 for (var i = 0; i < events.Count; i++)
                 {
-                    if (_triggersOnly && !events[i].Answered)
+                    if (_signalsOnly && !events[i].Answered)
                         continue;
 
                     _names.Add(events[i].Text);
+                    _marks.Add(MarkText.Of(events[i]));
 
                     _ids.Add(events[i].Id);
                     _sets.Add(false);
@@ -1017,7 +1019,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.Many = false;
                 row.HasPicture = false;
                 row.Secondary = "";
-                row.WaitsTip = texts.MemberWaits;
 
                 if (at < 0)
                 {
@@ -1025,7 +1026,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     row.IsHeading = true;
                     row.IsWithheld = false;
                     row.IsChosen = false;
-                    row.Waits = false;
+                    row.Mark = "";
                     row.Status = "";
                     row.Why = null;
                     row.Show();
@@ -1042,7 +1043,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.Why = row.IsWithheld ? _why[at] : null;
                 row.Status = ReadinessText.Tag(Editor.Texts, ready);
                 row.IsChosen = _ids[at] == chosen && form == _chosenForm;
-                row.Waits = _waits.Count > at && _waits[at];
+                row.Mark = _marks.Count > at ? _marks[at] : "";
+                row.MarkTip = MarkText.Note(texts, row.Mark);
                 row.Show();
             }
 
@@ -1093,7 +1095,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ids.Add(one.Id);
                 _forms.Add(Form.Value);
                 _groups.Add(0);
-                _waits.Add(false);
+                _marks.Add(Symbols.Value);
                 _sets.Add(true);
                 _ready.Add(one.Readiness);
                 _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
@@ -1107,7 +1109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _ids.Add(id);
             _forms.Add(Form.Native);
             _groups.Add(0);
-            _waits.Add(false);
+            _marks.Add(Symbols.Value);
             _sets.Add(false);
             _ready.Add(Readiness.Ready);
             _why.Add(null);
@@ -1148,7 +1150,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ids.Add(one.Id);
                 _forms.Add(one.Form);
                 _groups.Add(group);
-                _waits.Add(one.Lasts);
+                _marks.Add(MarkText.Of(one));
                 _sets.Add(one.Sets);
                 _ready.Add(one.Readiness);
                 _why.Add(ReadinessText.Why(Editor.Texts, one.Why));

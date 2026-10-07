@@ -456,7 +456,7 @@ public abstract class Fitting
 
         // A block's own action, which the game performs itself. Nothing of Sprocket's is involved and
         // the slot carries no argument.
-        if (held.ActionId != TriggerAction.ActionId)
+        if (held.ActionId != SignalAction.ActionId)
         {
             if (Performs != null)
                 Performs(held.BlockEntityId, held.ActionId);

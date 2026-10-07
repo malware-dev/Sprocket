@@ -22,11 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "sprocket", "block", "system", "instance", "of", "sequence",
             "when", "every", "then", "trigger", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
-            "running", "step", "stop", "call", "with", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "=="
+            "running", "step", "stop", "call", "with", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
+            "signal"
         };
 
         static readonly Keyword[][] ByLength = Bucket();
 
+        /// <summary>How <paramref name="keyword" /> is spelled.</summary>
         public static string Name(Keyword keyword)
         {
             return Names[(int)keyword];
@@ -56,6 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return Keyword.None;
         }
 
+        /// <summary>Whether <paramref name="word" /> is spelled as a keyword, and so is quoted where it is a name.</summary>
         public static bool Taken(string word)
         {
             return !string.IsNullOrEmpty(word) && Find(new StringSegment(word)) != Keyword.None;

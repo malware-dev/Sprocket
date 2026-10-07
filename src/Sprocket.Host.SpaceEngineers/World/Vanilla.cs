@@ -38,6 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<Entry> _entries = new List<Entry>();
 
+        /// <summary>Every slot read that does something, in the order they were read.</summary>
         public IReadOnlyList<Entry> Entries => _entries;
 
         /// <summary>
@@ -64,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 for (var slot = 0; slot < toolbar.SlotCount; slot++)
                 {
                     MyToolbarItemInfo held;
-                    if (!toolbar.TryGetItem(slot, out held) || TriggerAction.IsOurs(held))
+                    if (!toolbar.TryGetItem(slot, out held) || SignalAction.IsOurs(held))
                         continue;
 
                     if (held.Kind != MyToolbarItemKind.BlockAction

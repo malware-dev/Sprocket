@@ -42,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 Reshaped();
         }
 
+        /// <summary>An empty logic system numbered <paramref name="id" />, known everywhere as <paramref name="identity" />.</summary>
         public AutomationSystem(int id, Guid identity)
         {
             Id = id;
@@ -142,6 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             set { _changed = value.HasValue ? ToSecond(value.Value) : (DateTime?)null; }
         }
 
+        /// <summary>Whether somebody has named it.</summary>
         public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>
@@ -161,6 +163,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public string Annotation { get; set; }
 
+        /// <summary>Its sequences, in the order they were made.</summary>
         public IReadOnlyList<Sequence> Sequences => _sequences;
 
         /// <summary>
@@ -172,6 +175,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public IReadOnlyList<Trigger> Triggers => _triggers;
 
+        /// <summary>Adds <paramref name="trigger" /> to its triggers, where there is one.</summary>
         public void AddTrigger(Trigger trigger)
         {
             if (trigger != null)
@@ -327,6 +331,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
+        /// <summary>The slot called <paramref name="name" />, or null where it has none.</summary>
         public Part FindPart(string name)
         {
             for (var i = 0; i < _parts.Count; i++)
@@ -417,14 +422,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// A new trigger part, answered in <paramref name="instance" /> by the slot <paramref name="at" /> on each block of
+        /// A new signal part, answered in <paramref name="instance" /> by the slot <paramref name="at" /> on each block of
         /// <paramref name="declared" />, and called <paramref name="called" /> as a picked block's part is.
         /// </summary>
         public string TakeTrigger(SystemInstance instance, IList<string> declared, IList<ToolbarSlot> at, string called, string type)
         {
             var name = Free(called);
             var part = PartFor(name);
-            part.IsTrigger = true;
+            part.IsSignal = true;
             if (type.Length > 0)
                 part.Expects.Add(type);
 
@@ -442,6 +447,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return name;
         }
 
+        /// <summary>Puts into <paramref name="into" /> every slot its triggers and steps name, each once.</summary>
         public void Acted(List<string> into)
         {
             into.Clear();
@@ -583,6 +589,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return instance;
         }
 
+        /// <summary>Makes <paramref name="sequence" /> one of its own.</summary>
         public void Add(Sequence sequence)
         {
             _sequences.Add(sequence);
@@ -591,6 +598,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Used(sequence.Number);
         }
 
+        /// <summary>Takes <paramref name="sequence" /> out of it, and says whether it was there.</summary>
         public bool Remove(Sequence sequence)
         {
             if (!_sequences.Remove(sequence))

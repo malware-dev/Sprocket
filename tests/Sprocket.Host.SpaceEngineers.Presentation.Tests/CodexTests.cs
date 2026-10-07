@@ -297,6 +297,24 @@ public class CodexTests
         }
     }
 
+    /// <summary>Every kind icon a codex page asks for, in every language, is a mark the editor can draw.</summary>
+    [Fact]
+    public void EveryIconInTheCodexIsAMark()
+    {
+        var marks = new MarkImages(null);
+        foreach (var page in Directory.GetFiles(CodexFiles.Beside, "*.md", SearchOption.AllDirectories))
+        {
+            var text = File.ReadAllText(page);
+            for (var at = text.IndexOf("](mark:", StringComparison.Ordinal); at >= 0;
+                 at = text.IndexOf("](mark:", at + 1, StringComparison.Ordinal))
+            {
+                var end = text.IndexOf(')', at);
+                var locator = text.Substring(at + 2, end - at - 2);
+                Assert.True(marks.Find(locator) != null, Path.GetFileName(page) + " asks for " + locator + ", which is no mark");
+            }
+        }
+    }
+
     /// <summary>A page a translation lacks is read in English.</summary>
     [Fact]
     public void APageATranslationLacksIsReadInEnglish()

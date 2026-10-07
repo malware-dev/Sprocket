@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public static class Meanings
     {
+        /// <summary>Gives the members of <paramref name="kind" />, which <paramref name="block" /> is of, their meanings, and hides those no sequence should be offered.</summary>
         public static void Settle(EntityKind kind, IMyTerminalBlock block)
         {
             Everywhere(kind);
@@ -145,7 +146,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // What starts a programmable block's own script. A step runs a script by running the block,
             // and the argument and Sprocket's own toolbar action are the wiring of the thing.
             if (block is IMyProgrammableBlock)
-                kind.Hiding("ConsoleCommand", "RunWithDefaultArgument", TriggerAction.ActionId);
+                kind.Hiding("ConsoleCommand", "RunWithDefaultArgument", SignalAction.ActionId);
         }
 
         /// <summary>Takes out the setters written by hand beside a value that says the same.</summary>

@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     /// The action Sprocket puts into somebody else's block so that block can start a sequence.
     /// </summary>
     /// <remarks>
-    /// The mechanism the whole trigger vocabulary rests on. A button panel raises nothing at all
+    /// The mechanism every signal rests on. A button panel raises nothing at all
     /// unless its slot holds an item, and before this API no mod could fill one - so without this,
     /// "when the airlock button is pressed" needs the player to have wired the button by hand in the
     /// game's own UI first.
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     /// unassigned colour. Working, and looking broken, on a mod whose interface is a button panel.
     /// </para>
     /// </remarks>
-    public static class TriggerAction
+    public static class SignalAction
     {
         /// <summary>
         /// Stored inside somebody's saved game, so it can never change.
@@ -76,6 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             return MyToolbarItemInfo.BlockAction(sprocketBlockId, ActionId);
         }
 
+        /// <summary>Whether the toolbar item <paramref name="info" /> is this action.</summary>
         public static bool IsOurs(MyToolbarItemInfo info)
         {
             return info.ActionId == ActionId;

@@ -84,6 +84,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Three steps beside an arrow down: a sequence, steps taken in order.</summary>
         public const string Sequence = "q";
 
+        /// <summary>A square pulse: a signal, sent from a block's toolbar, and the slot it comes in through.</summary>
+        public const string Signal = "n";
+
+        /// <summary>A lightning bolt: something a block is told to do.</summary>
+        public const string Action = "i";
+
+        /// <summary>A clock: something a block is told to do that takes time, which a step waits for.</summary>
+        public const string Awaited = "k";
+
+        /// <summary>"=?": something a block is asked about, what one of its values is.</summary>
+        public const string Value = "l";
+
+        /// <summary>A cube: a block, where none in particular is meant, and the slot a block fills.</summary>
+        public const string Block = "B";
+
         /// <summary>Every hue in order, red round to red.</summary>
         /// <remarks>
         ///     The game's own <c>Textures\GUI\HueScale.png</c>, which has no id a mod can use, so a material is

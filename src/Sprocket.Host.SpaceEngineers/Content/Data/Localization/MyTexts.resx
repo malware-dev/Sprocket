@@ -264,7 +264,7 @@ Renaming it here renames the grid.</value>
     <comment>Button that adds a trigger started on a timer.</comment>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Add a trigger that starts on a button or toolbar press, or when a block's value changes.</value>
+    <value>Add a trigger that starts on a signal from a block's toolbar, or when a block's value changes.</value>
     <comment>Note on the button that adds a trigger started by something happening.</comment>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
@@ -650,6 +650,34 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Pick.Partial" xml:space="preserve">
     <value>Support for this block is only partly done, so some of what it offers may still be doubled, missing or oddly named.</value>
     <comment>Note over what a block offers, where the block has been checked in part.</comment>
+  </data>
+  <data name="Sprocket.Member.Action" xml:space="preserve">
+    <value>Something the block is told to do.</value>
+    <comment>Note on the mark beside something a block can be told to do.</comment>
+  </data>
+  <data name="Sprocket.Member.Value" xml:space="preserve">
+    <value>Something the block is asked: what one of its values is.</value>
+    <comment>Note on the mark beside a value a block is asked about.</comment>
+  </data>
+  <data name="Sprocket.Member.Signal" xml:space="preserve">
+    <value>A signal the block sends from its toolbar.</value>
+    <comment>Note on the mark beside a signal.</comment>
+  </data>
+  <data name="Sprocket.Member.Moment" xml:space="preserve">
+    <value>Something that happens to the block, which the automation watches for.</value>
+    <comment>Note on the mark beside a moment watched on a block.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.BlockSlot" xml:space="preserve">
+    <value>A block slot: the blocks the steps act on or watch.</value>
+    <comment>Note on the mark beside a block slot on the configuration panel.</comment>
+  </data>
+  <data name="Sprocket.Blueprint.SignalSlot" xml:space="preserve">
+    <value>A signal slot: a block, and the toolbar slot on it that sends the signal.</value>
+    <comment>Note on the mark beside a signal slot on the configuration panel.</comment>
+  </data>
+  <data name="Sprocket.Member.Sequence" xml:space="preserve">
+    <value>A sequence: steps taken in order.</value>
+    <comment>Note on the mark beside a sequence where one is named.</comment>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>This takes time to finish. The sequence waits until it is done before going on to the next step.</value>
@@ -1710,7 +1738,7 @@ Renaming it here renames the grid.</value>
     <comment>Label on the programmable block that keeps the automation, shown only in developer mode.</comment>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
-    <value>Automation: trigger</value>
+    <value>Automation Signal</value>
     <comment>The block's toolbar action, as the game lists it.</comment>
   </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">

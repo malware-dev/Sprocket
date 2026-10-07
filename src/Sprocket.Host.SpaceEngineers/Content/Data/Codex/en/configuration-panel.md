@@ -1,6 +1,6 @@
 # Configuration panel
 
-The configuration panel is where an [installation](#installation) gets its blocks and [signals](#signal). Each installation has its own. It is also where whoever made the [logic system](#logic-system) explains it, so that someone who has never seen it can install it.
+The configuration panel is where an [installation](#installation) gets its blocks and ![](mark:signal) [signals](#signal). Each installation has its own. It is also where whoever made the [logic system](#logic-system) explains it, so that someone who has never seen it can install it.
 
 ## Opening it
 
@@ -15,7 +15,7 @@ A logic system put on this [construct](#construct) from the [library](#library) 
 
 - **The installation's name**, which you can change, and the logic system it belongs to. Pressing the logic system's name opens it.
 - **The description** that whoever made the logic system wrote.
-- **What is wrong**, if anything, with a button that opens the [sequence](#sequence) where it went wrong.
+- **What is wrong**, if anything, with a button that opens the ![](mark:sequence) [sequence](#sequence) where it went wrong.
 - **The slots**, with how many still need a block.
 
 Each [slot](#slot) shows its name, what it is for, and what fills it now. A signal slot also shows the toolbar slot that sends its signal, for example `button 2 is pressed`.
