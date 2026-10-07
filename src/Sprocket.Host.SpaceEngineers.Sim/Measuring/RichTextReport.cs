@@ -7,6 +7,7 @@ using System.Text;
 using Sandbox.ModAPI;
 using Lumel;
 using Lumel.Drawing;
+using Lumel.Images;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
 using VRageMath;
@@ -40,7 +41,7 @@ public static class RichTextReport
 
         device.Fonts = fonts;
         device.Install();
-        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
+        var graphics = new ScreenSpaceGraphics(device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new ScreenSpaceImages(device));
 
         var report = new StringBuilder();
         report.AppendLine("Rich text timing, Release only, " + (game != null ? "with the game's font widths." : "with a stand-in font (the game is not installed)."));

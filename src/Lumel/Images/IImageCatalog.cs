@@ -1,10 +1,13 @@
 namespace Lumel.Images
 {
-    /// <summary>Finds pictures by the names written for them, such as an image's name in markdown.</summary>
-    /// <remarks>What a name means is up to the surface drawing it: a screen and a text panel know different pictures.</remarks>
+    /// <summary>Resolves the locators written for pictures, such as an image's in markdown, to pictures that can be drawn.</summary>
+    /// <remarks>
+    ///     The host's own, handed to the graphics it draws with. A locator means only what its host makes of it: a screen
+    ///     and a text panel can draw different pictures, so the same locator need not resolve on both.
+    /// </remarks>
     public interface IImageCatalog
     {
-        /// <summary>The picture called <paramref name="name" />, or null for a name that is no picture here.</summary>
-        IImageSource Find(string name);
+        /// <summary>The picture <paramref name="locator" /> leads to, or null where it leads to none here.</summary>
+        IImageSource Find(string locator);
     }
 }

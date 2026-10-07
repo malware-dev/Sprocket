@@ -14,6 +14,10 @@ namespace Lumel.Text
     ///     drawing measures nothing. Colors are read as it draws, so changing one lays out nothing. A document
     ///     read by <see cref="Template.Read" /> has slots, which take their words from <see cref="Arguments" />:
     ///     changing one lays the words out again and reads nothing again.
+    ///     <para>
+    ///         An image's locator is carried as written, as a link's target is: the graphics' <see cref="IGraphics.Images" />
+    ///         says what picture it leads to, and an image whose locator leads to none says its description instead.
+    ///     </para>
     /// </remarks>
     public class RichText : Element, IPadded, ITextual
     {
@@ -43,7 +47,6 @@ namespace Lumel.Text
         Document _document;
         string _markdown;
         Arguments _arguments;
-        IImageCatalog _images;
         string _font = MyFontEnum.White;
         string _codeFont = MyFontEnum.White;
         string _strongFont;
@@ -136,20 +139,6 @@ namespace Lumel.Text
                 if (_arguments != null)
                     _arguments.Changed += Relayout;
 
-                Relayout();
-            }
-        }
-
-        /// <summary>Where the pictures the document's images name are found, or null for the surface's own: an image whose picture is not found says its description instead.</summary>
-        public IImageCatalog Images
-        {
-            get { return _images; }
-            set
-            {
-                if (_images == value)
-                    return;
-
-                _images = value;
                 Relayout();
             }
         }
@@ -916,9 +905,8 @@ namespace Lumel.Text
                     continue;
                 }
 
-                var images = _images ?? g.Images;
                 var shown = run as ImageRun;
-                var image = shown != null && images != null ? images.Find(shown.Picture.Name) : null;
+                var image = shown != null && g.Images != null ? g.Images.Find(shown.Picture.Locator) : null;
                 if (image != null)
                 {
                     var box = SizeOf(shown.Picture, image, size, _scale);

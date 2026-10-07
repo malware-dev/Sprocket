@@ -9,7 +9,7 @@ namespace Lumel.Text
     ///     Markdown-lite is CommonMark's headings (<c>#</c> to <c>######</c>), rules (<c>---</c>, <c>***</c>,
     ///     <c>___</c>, spaced or not), one level of lists (<c>-</c>, <c>*</c> or <c>+</c>, and <c>1.</c> or
     ///     <c>1)</c>), quotes (<c>&gt;</c>, one level), boxes (<c>:::</c>), GitHub's tables, strong and emphasis with <c>*</c> and <c>_</c>, code spans, images
-    ///     (<c>![description](name)</c>), links (<c>[words](target)</c>) and backslash escapes. A single newline
+    ///     (<c>![description](locator)</c>), links (<c>[words](target)</c>) and backslash escapes. A single newline
     ///     is a line break and a blank line ends a block. Anything else reads as the text it is.
     ///     <para>
     ///         A table's delimiter row may give a column a star for each share it takes of the width the table

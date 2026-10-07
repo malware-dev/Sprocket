@@ -76,24 +76,26 @@ namespace Lumel.Drawing
         Vector2 _transformMove;
         bool _transformed;
 
-        /// <summary>Draws onto a layer with <paramref name="fill" /> for flat fills, at a scale set by the height a layout is written against.</summary>
+        /// <summary>
+        ///     Draws onto a layer with <paramref name="fill" /> for flat fills and the pictures <paramref name="images" />
+        ///     resolves, at a scale set by the height a layout is written against.
+        /// </summary>
         /// <remarks>
         ///     The fill is a plain white transparent material. The game declares none a mod can use, so the mod
         ///     declares its own over <c>Textures\GUI\Blank.dds</c>.
         /// </remarks>
-        public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer, MyStringId fill,
+        public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer, MyStringId fill, IImageCatalog images,
             float referenceHeight = GameReferenceHeight)
         {
             _screenSpace = screenSpace;
             _layer = layer;
             _fill = fill;
             _referenceHeight = referenceHeight;
-            Images = new ScreenSpaceImages(screenSpace);
+            Images = images;
             Begin();
         }
 
         /// <inheritdoc />
-        /// <remarks>Each picture is looked up once for as long as this lives.</remarks>
         public IImageCatalog Images { get; }
 
         /// <summary>The whole window in UI units, which extends past <see cref="Size" /> on a screen wider than 4:3.</summary>

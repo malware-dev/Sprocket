@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Sandbox.ModAPI;
 using VRageMath;
 using Lumel.Drawing;
+using Lumel.Images;
 // Supplies Lettering, which the inspection does not see from every configuration it runs in.
 // ReSharper disable once RedundantUsingDirective
 using Sprocket.Sim.Content;
@@ -52,7 +52,7 @@ namespace Sprocket.Sim.Simulation
             _device.SafeArea = new RectangleF((windowWidth - safeWidth) / 2f, 0f, safeWidth, windowHeight);
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
-            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
+            _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new ScreenSpaceImages(_device));
             _scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
         }
 

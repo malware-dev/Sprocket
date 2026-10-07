@@ -293,7 +293,7 @@ namespace Lumel.Text
             words.Clear();
         }
 
-        /// <summary>The image written at <paramref name="at" /> as <c>![words](name)</c> or <c>![words](name =size)</c>, and where it ends; null where none is written there.</summary>
+        /// <summary>The image written at <paramref name="at" /> as <c>![words](locator)</c> or <c>![words](locator =size)</c>, and where it ends; null where none is written there.</summary>
         /// <remarks>The words in the brackets are only words, read for nothing, as an image's description.</remarks>
         static ImagePiece Image(string text, int at, out int end)
         {
@@ -309,8 +309,8 @@ namespace Lumel.Text
 
             var inside = text.Substring(close + 2, shut - close - 2).Trim();
             var space = inside.IndexOf(' ');
-            var picture = space < 0 ? inside : inside.Substring(0, space);
-            if (picture.Length == 0)
+            var locator = space < 0 ? inside : inside.Substring(0, space);
+            if (locator.Length == 0)
                 return null;
 
             var width = float.NaN;
@@ -323,7 +323,7 @@ namespace Lumel.Text
             {
                 Kind = PieceKind.Image,
                 Text = Unescaped(text, at + 2, close),
-                Picture = new Picture(picture, width, height)
+                Picture = new Picture(locator, width, height)
             };
         }
 

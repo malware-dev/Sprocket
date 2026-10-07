@@ -61,7 +61,7 @@ public class ImageTests
         Assert.Equal(40f, image.Bounds.Height);
     }
 
-    /// <summary>An image in markdown names its picture, describes it, and may say how big it is.</summary>
+    /// <summary>An image in markdown gives its picture's locator, describes it, and may say how big it is.</summary>
     [Theory]
     [InlineData("![The logo](Logo)", float.NaN, float.NaN)]
     [InlineData("![](Logo =64)", 64f, float.NaN)]
@@ -73,7 +73,7 @@ public class ImageTests
         var run = Assert.Single(Markdown.Parse(source).Blocks[0].Runs);
 
         var image = Assert.IsType<ImageRun>(run);
-        Assert.Equal("Logo", image.Picture.Name);
+        Assert.Equal("Logo", image.Picture.Locator);
         Assert.Equal(width, image.Picture.Width);
         Assert.Equal(height, image.Picture.Height);
     }
@@ -169,12 +169,23 @@ public class ImageTests
         Assert.Equal(Body, Word(easel, "Welcome to Gabbo's").Color);
     }
 
-    static Easel Laid(string markdown)
+    /// <summary>A locator reaches the host's resolver exactly as written, whatever it looks like.</summary>
+    [Fact]
+    public void ALocatorReachesTheResolverAsWritten()
+    {
+        var pictures = new Pictures();
+        Laid("A ![signal](mark:signal =20) and ![](Textures\\GUI\\Icon.dds)", pictures);
+
+        Assert.Equal(new[] { "mark:signal", "Textures\\GUI\\Icon.dds" }, pictures.Asked);
+    }
+
+    static Easel Laid(string markdown) => Laid(markdown, new Pictures());
+
+    static Easel Laid(string markdown, Pictures pictures)
     {
         var text = new RichText
         {
             Document = Markdown.Parse(markdown),
-            Images = new Pictures(),
             FontSize = 20f,
             Color = Body,
             BlockSpacing = 8f,
@@ -182,16 +193,21 @@ public class ImageTests
             Placement = Fixed.Wide(Wide)
         };
 
-        var easel = new Easel(new VStack { Children = { text } }, Wide, High);
-        return easel;
+        return new Easel(new VStack { Children = { text } }, Wide, High, pictures);
     }
 
     static Sim.Simulation.DrawCommand Word(Easel easel, string text) =>
         Assert.Single(easel.Written, command => command.Text.Trim() == text);
 
-    /// <summary>The two pictures above, by name.</summary>
+    /// <summary>The two pictures above, by locator, keeping every locator it is asked about.</summary>
     sealed class Pictures : IImageCatalog
     {
-        public IImageSource? Find(string name) => name == "Banner" ? Banner : name == "Unknown" ? Unknown : null;
+        public List<string> Asked { get; } = new List<string>();
+
+        public IImageSource? Find(string locator)
+        {
+            Asked.Add(locator);
+            return locator == "Banner" ? Banner : locator == "Unknown" ? Unknown : null;
+        }
     }
 }

@@ -183,6 +183,20 @@ A font size is a size in UI units, never a scale of the font's own size. The siz
 height as the game draws it, so a label with a 24 font is one line of 24 units.
 The game's scale is worked out from it at the point where text is handed to the game.
 
+## Pictures
+
+An image's locator, the `locator` in markdown-lite's `![words](locator)`, means nothing to rich text or
+markdown-lite. They carry it from the document to the host as written and draw what comes back, as they
+carry a link's target to the host's `Follow` and `LinkTip`.
+
+The host owns the one `IImageCatalog` that resolves locators, and hands it to the graphics it draws with,
+where everything finds it as `IGraphics.Images`. `ScreenSpaceImages`, which reads a locator as a material
+name, is one resolver a host may use as it is or wrap in its own.
+
+A locator only has to resolve on the host it is written for. A text panel and the screen space draw
+different pictures, so the same locator may lead to a picture on one and to nothing on the other, where
+the image says its description instead.
+
 ## Sizes
 
 Every size the framework and its views use is a multiple of 4: font sizes, spacing, padding and

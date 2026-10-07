@@ -2,6 +2,7 @@ using System.Text;
 using Sandbox.ModAPI;
 using Lumel;
 using Lumel.Drawing;
+using Lumel.Images;
 using Lumel.Text;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Simulation;
@@ -38,7 +39,19 @@ sealed class Easel
     /// game's are not remotely - a <c>1</c> is less than half a <c>0</c>. Anything about how text of
     /// different widths lines up therefore cannot be seen with it, and has to ask for this instead.
     /// </remarks>
-    public Easel(Element element, float width, float height, bool exact)
+    public Easel(Element element, float width, float height, bool exact) : this(element, width, height, exact, null)
+    {
+    }
+
+    /// <summary>
+    /// One element drawn with the pictures <paramref name="images" /> resolves, as a host hands its own resolver to the
+    /// graphics, rather than the screen's materials.
+    /// </summary>
+    public Easel(Element element, float width, float height, IImageCatalog images) : this(element, width, height, false, images)
+    {
+    }
+
+    Easel(Element element, float width, float height, bool exact, IImageCatalog? images)
     {
         _element = element;
 
@@ -52,7 +65,7 @@ sealed class Easel
         _device.SafeArea = new RectangleF(0f, 0f, width, height);
         _device.ViewportSize = new Vector2(width, height);
 
-        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
+        _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill, images ?? new ScreenSpaceImages(_device));
 
         Draw(width, height);
     }

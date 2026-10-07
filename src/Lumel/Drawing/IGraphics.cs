@@ -18,7 +18,7 @@ namespace Lumel.Drawing
         /// <summary>The whole screen in the same units, reaching past the drawable area on either side of a screen wider than it.</summary>
         RectangleF ScreenBounds { get; }
 
-        /// <summary>The pictures this can draw, found by the names written for them, or null where it knows none.</summary>
+        /// <summary>The host's resolver for the pictures this can draw, or null where it has none.</summary>
         IImageCatalog Images { get; }
 
         /// <summary>Restricts drawing to <paramref name="bounds" />, intersected with whatever clip is already in effect.</summary>

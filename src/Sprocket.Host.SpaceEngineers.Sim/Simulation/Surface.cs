@@ -14,6 +14,7 @@ using Point = System.Windows.Point;
 using Rect = System.Windows.Rect;
 using Ink = System.Windows.Media.Color;
 using Lumel.Drawing;
+using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Simulation
@@ -214,7 +215,7 @@ namespace Sprocket.Sim.Simulation
             // Held across frames, as the mod holds one. Begin re-samples the area, so a resized window is
             // picked up without building another.
             if (_graphics == null)
-                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill);
+                _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new ScreenSpaceImages(_device));
 
             _graphics.Begin();
 
