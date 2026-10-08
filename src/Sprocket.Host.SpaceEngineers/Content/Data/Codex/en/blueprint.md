@@ -31,6 +31,8 @@ Switching `On this construct` off takes the logic system and its installations o
 
 Updating a blueprint changes only the library's copy. A logic system already on another construct keeps running as it was.
 
+Where the library's blueprint was changed after a logic system, that logic system's button reads `Update from library`, on its heading on the home screen and in the library. It puts the blueprint in the logic system's place, after asking, and its installations keep their blocks in every slot the blueprint still has.
+
 ::: player
 Your blueprints are saved on your computer, so every world you play on it can use them. They don't reach another computer or the game's cloud storage on their own. The game lets a mod save files either inside one world or on the computer itself, and gives it no way to reach the cloud.
 

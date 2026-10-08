@@ -21,7 +21,7 @@ Because the blocks are kept apart from the job, one logic system can run every a
 
 ## Switch it off to change it
 
-A logic system can only be changed while it is switched off, so a half-built sequence never starts by accident. A new one starts switched off.
+A logic system can only be changed while it is switched off, so a half-built sequence never starts by accident. A new one starts switched off. Its switch is on its heading on the home screen, and at the top right of its own screen.
 
 Switching it off stops anything running and leaves the blocks as they are. When you leave a changed logic system that is still off, you are asked whether to switch it on.
 
@@ -32,7 +32,7 @@ The blocks you pick become [slots](#slot). There are two kinds:
 - A ![](mark:block) **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
 - A ![](mark:signal) **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
 
-`Using the blocks of`, at the top of the logic system's screen, chooses whose blocks the steps show.
+`Using the blocks of`, at the top of the logic system's screen, chooses which installation's blocks the steps show, and which installation a block you pick fills.
 
 ## More than one airlock
 

@@ -31,6 +31,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The characters the game refuses in a file name in mod storage.</summary>
         static readonly char[] Refused = { '\\', '/', '"', '<', '>', '|', ':', '*', '?' };
 
+        /// <summary>What a new index says, so a player opening it for the first time sees how it is used.</summary>
+        static readonly string[] Explained =
+        {
+            "# Blueprints for the automation library: one file name a line, each file in this folder.",
+            "# A line starting with # is ignored."
+        };
+
         readonly IFiles _files;
 
         readonly Action<string> _say;
@@ -137,7 +144,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             try
             {
                 if (!_files.Has(Index))
+                {
+                    // Made at once, so the index is always there beside the blueprints for a player to add a line to.
+                    _lines.AddRange(Explained);
+                    WriteIndex();
                     return "";
+                }
 
                 index = _files.Read(Index);
             }

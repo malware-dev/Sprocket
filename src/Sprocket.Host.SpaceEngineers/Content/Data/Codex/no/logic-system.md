@@ -21,7 +21,7 @@ Fordi blokkene holdes atskilt fra jobben, kan ett logikksystem kjøre alle lufts
 
 ## Slå det av for å endre det
 
-Et logikksystem kan bare endres mens det er slått av, så en halvferdig sekvens aldri starter ved et uhell. Et nytt logikksystem starter slått av.
+Et logikksystem kan bare endres mens det er slått av, så en halvferdig sekvens aldri starter ved et uhell. Et nytt logikksystem starter slått av. Bryteren står på overskriften på startskjermen, og øverst til høyre på logikksystemets egen skjerm.
 
 Slår du det av, stopper alt som kjører, og blokkene blir stående som de er. Når du forlater et endret logikksystem som fortsatt er av, blir du spurt om du vil slå det på.
 
@@ -32,7 +32,7 @@ Blokkene du velger, blir [plasser](#slot). Det finnes to slags:
 - En ![](mark:block) **blokkplass**, som *den indre døra*, holder blokker som en sekvens virker på eller følger med på.
 - En ![](mark:signal) **signalplass**, som *knappen*, holder en blokk og verktøylinjeplassen på den som sender signalet.
 
-`Bruker blokkene til`, øverst på skjermen til logikksystemet, velger hvem sine blokker stegene viser.
+`Bruker blokkene til`, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene viser, og hvilken installasjon en blokk du velger, fyller.
 
 ## Mer enn én luftsluse
 

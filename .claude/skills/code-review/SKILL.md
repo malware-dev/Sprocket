@@ -53,6 +53,17 @@ The other half no build can see: a Norwegian text that has gone stale. Every Eng
 or changes in `MyTexts.resx` has its Norwegian written or rewritten in `MyTexts.no.resx` in the same
 change, and is read against it.
 
+## Check the codex
+
+**Every change a player can see keeps the codex true.** For each one in the diff - a new button, a
+screen that behaves differently, a rule that changed - name the codex page that covers it
+(`Content/Data/Codex/en/`) and read what that page says against the change. A page left saying what is
+no longer so is a finding, and so is a new function no page mentions where a player would look for it.
+The page is mended in the same change, in both languages, by the `writing` skill.
+
+A function added without its page goes unnoticed: `Update from library` reached the screens and no page
+mentioned it until a reader test happened to ask how a construct gets a newer blueprint.
+
 ## Read the diff
 
 Every added comment, against the rule that a comment says what the code **is**:
@@ -115,8 +126,9 @@ Then the structural questions, in this order, because the early ones invalidate 
 5. **Member order**: constants, fields, constructors, properties, methods. A field among the
    properties is the common slip.
 6. **Names**: a word, not a description, and no role suffixes.
-7. **What the tests do not cover**, said out loud. The harness models no gas, no power and no
-   conveyors, so anything resting on those is proved in the game or not at all.
+7. **What the tests do not cover**, said out loud. The harness models no power and no conveyors, and
+   gas only as far as the flow through a vent, so anything resting on more than that is proved in the
+   game or not at all.
 
 ## When the subject is the whole codebase
 

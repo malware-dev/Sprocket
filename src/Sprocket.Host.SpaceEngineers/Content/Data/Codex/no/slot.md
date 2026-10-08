@@ -25,7 +25,7 @@ Når du velger en blokk for et steg eller en utløser, lages en plass med navn e
 Blokken du valgte, fyller plassen for installasjonen som er valgt under `Bruker blokkene til`. Alle andre installasjoner fyller den på sitt eget konfigurasjonspanel.
 
 ::: warning
-Når du fjerner det siste steget eller den siste utløseren som bruker en bestemt blokk eller et bestemt signal, forsvinner plassen fra konfigurasjonspanelet, med navnet og hva den er til. Velger du en annen blokk i stedet, lages en ny plass, som alle installasjonene må fylle på nytt. Vil du bytte hvilken blokk en plass holder, fyller du den heller på nytt på konfigurasjonspanelet.
+Når du fjerner det siste steget eller den siste utløseren som bruker en bestemt blokk eller et bestemt signal, forsvinner plassen fra konfigurasjonspanelet, med navnet og hva den er til. Velger du en annen blokk i stedet, lages en ny plass, som alle installasjonene må fylle på nytt. Det samme skjer om du velger den samme blokken igjen: den nye plassen får navnet til blokken, og beskrivelsen starter tom. Vil du bytte hvilken blokk en plass holder, fyller du den heller på nytt på konfigurasjonspanelet.
 :::
 
 ## Navn og beskrivelse
@@ -34,4 +34,4 @@ Navnet på hver plass, og en linje om hva den er til, settes én gang, for alle 
 
 ## En tom plass
 
-Når en sekvens kommer til en plass som er tom, eller der blokken er borte, slås installasjonen av, og raden sier hvorfor.
+Når en sekvens kommer til en plass som er tom, eller der blokken er borte, slås installasjonen av, og raden sier hvorfor. En utløser med tom signalplass kan ikke starte, og slår av installasjonen sin på samme måte.

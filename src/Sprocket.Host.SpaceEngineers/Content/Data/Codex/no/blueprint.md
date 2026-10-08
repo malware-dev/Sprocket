@@ -31,6 +31,8 @@ Slår du av `På denne konstruksjonen`, tas logikksystemet og installasjonene av
 
 Å oppdatere en plantegning endrer bare kopien i biblioteket. Et logikksystem som allerede er på en annen konstruksjon, fortsetter å kjøre som det var.
 
+Der plantegningen i biblioteket ble endret etter et logikksystem, står det `Oppdater fra biblioteket` på knappen til logikksystemet, på overskriften på startskjermen og i biblioteket. Den setter plantegningen inn i stedet for logikksystemet, etter å ha spurt, og installasjonene beholder blokkene sine i alle plassene plantegningen fortsatt har.
+
 ::: player
 Plantegningene dine lagres på datamaskinen din, så alle verdener du spiller på den, kan bruke dem. De kommer ikke til en annen datamaskin eller til spillets skylagring av seg selv. Spillet lar en mod lagre filer enten inne i én verden eller på selve datamaskinen, og gir den ingen måte å nå skyen på.
 

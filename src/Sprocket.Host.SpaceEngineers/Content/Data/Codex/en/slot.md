@@ -25,7 +25,7 @@ When you pick a block for a step or a trigger, a slot is made and named after th
 The block you picked fills the slot for the installation chosen under `Using the blocks of`. Every other installation fills it on its own configuration panel.
 
 ::: warning
-When you remove the last step or trigger that uses a given block or signal, its slot disappears from the configuration panel, with its name and what it is for. Picking another block in its place makes a new slot, which every installation has to fill again. To change which block a slot holds, fill it again on the configuration panel instead.
+When you remove the last step or trigger that uses a given block or signal, its slot disappears from the configuration panel, with its name and what it is for. Picking another block in its place makes a new slot, which every installation has to fill again. So does picking the same block again: the new slot takes the block's name, and its description starts empty. To change which block a slot holds, fill it again on the configuration panel instead.
 :::
 
 ## Name and description
@@ -34,4 +34,4 @@ Each slot's name, and a line saying what it is for, are set once, for every inst
 
 ## An empty slot
 
-When a sequence reaches a slot that is empty, or whose block is gone, the installation is switched off and its row says why.
+When a sequence reaches a slot that is empty, or whose block is gone, the installation is switched off and its row says why. A trigger whose signal slot is empty can't start, and switches its installation off the same way.

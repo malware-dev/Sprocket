@@ -271,6 +271,23 @@ public class LibraryTests
         Assert.Equal("Airlock Mk II", Assert.Single(rig.Shelf.All).Name);
     }
 
+    /// <summary>A library with no index makes one as it is read, saying how it is used, and lists what it keeps below that.</summary>
+    [Fact]
+    public void TheLibraryMakesItsIndexWhereThereIsNone()
+    {
+        var rig = Blueprinted();
+        Assert.False(rig.Folder.Has("sprocket-bp.index"));
+
+        Assert.Equal("", rig.Shelf.Read());
+        var made = rig.Folder.Files["sprocket-bp.index"];
+        Assert.StartsWith("# Blueprints for the automation library:", made);
+        Assert.Empty(rig.Shelf.All);
+
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        Assert.Equal(made + "sprocket-bp-Airlock.cog\n", rig.Folder.Files["sprocket-bp.index"]);
+        Assert.Single(rig.Shelf.All);
+    }
+
     /// <summary>A blueprint put in the library is a file of its own holding the blueprint as written, named in the index, and reads back.</summary>
     [Fact]
     public void TheLibraryReadsBackWhatItWrites()
