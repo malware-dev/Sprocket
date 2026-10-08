@@ -332,12 +332,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
             // A blueprint's line of whose blocks the sentences name stands above it; a logic system of its own has nothing there.
             _triggersHeading.Style = _system.IsBlueprint ? Styles.NextHeading : Styles.Heading;
-            _when.Text = StatusRow.Plus + texts.SystemWhen;
-            _when.Tip = Tip.For(_when.Tip, texts.SystemWhenAbout);
-            _when.Command = Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); });
-            _every.Text = StatusRow.Plus + texts.SystemEvery;
-            _every.Tip = Tip.For(_every.Tip, texts.SystemEveryAbout);
-            _every.Command = Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Cadences.Default)); });
+            _addTrigger.Show(new Adder(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
+            {
+                new Adder(texts.SystemWhen, texts.SystemWhenAbout,
+                    Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); })),
+                new Adder(texts.SystemEvery, texts.SystemEveryAbout,
+                    Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Cadences.Default)); }))
+            }));
 
             _runs.Clear();
             for (var i = 0; i < _triggers.Count; i++)
@@ -476,7 +477,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             for (var i = 0; i < instances.Count; i++)
                 _called.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, instances[i]));
 
-            _blocksets = new ListField(_called.ToArray(), delegate { return Editor.Windows; });
+            _blocksets = new ListField(_called.ToArray());
             _blocksets.Edited += Chose;
             _usingChoice.Children.Clear();
             _usingChoice.Children.Add(_blocksets);

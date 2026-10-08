@@ -1,11 +1,9 @@
-using System;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Lumel.Styling;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel;
 using Lumel.Text;
-using Lumel.Windows;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
@@ -19,16 +17,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
     /// </remarks>
     public partial class Composer : VStack
     {
-        readonly Func<WindowLayer> _windows;
         string _examples;
 
         /// <summary>A composer whose box and preview are <paramref name="high" /> tall, previewing in <paramref name="reads" />.</summary>
         /// <param name="high">How tall the box and the preview are.</param>
         /// <param name="reads">The style the text is read in wherever it is shown, so the preview is what will be seen.</param>
-        /// <param name="windows">Where the guide opens, read when it is opened, so they may be given after the composer is made.</param>
-        public Composer(float high, IStyle reads, Func<WindowLayer> windows)
+        public Composer(float high, IStyle reads)
         {
-            _windows = windows;
             CreateView(high, reads);
             _markup.Command = new Relay(Guide);
             _preview.Command = new Relay(delegate { Preview(!_previewing.IsVisible); });
@@ -87,14 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         /// <summary>Opens the guide to the marks under its button, or closes it where it is open.</summary>
         public void Guide()
         {
-            var layer = _windows();
-            if (layer == null)
-                return;
-
-            if (layer.IsOpen(_guide))
-                layer.Close(_guide);
-            else
-                layer.Open(_guide);
+            _guide.Toggle();
         }
 
         /// <summary>Shows the text as it will read in place of its box, or the box again.</summary>

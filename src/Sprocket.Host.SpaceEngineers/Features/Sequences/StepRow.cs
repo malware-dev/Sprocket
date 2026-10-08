@@ -10,6 +10,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
@@ -32,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly List<Slot> _chips = new List<Slot>();
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
         readonly List<Mention> _pieces = new List<Mention>();
-        readonly List<Button> _adders = new List<Button>();
+        readonly List<PlusMenu> _adders = new List<PlusMenu>();
 
         int _numbered;
         StepKind _led = (StepKind)(-1);
@@ -57,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>How many rows after it are carried with it: the rest of the if, for the row that opens one.</summary>
         public int Carries { get; set; }
 
-        /// <summary>The ways it offers to add to the sequence, after its sentence: the end of a branch, the row closing an if, an otherwise.</summary>
+        /// <summary>The pluses it offers to add to the sequence with, after its sentence, each holding every choice it has: the end of a branch, the row closing an if, an otherwise.</summary>
         public List<Adder> Adds { get; }
 
         /// <summary>What sort of step it is, which is what its line opens with.</summary>
@@ -123,12 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Reshape();
 
             for (var i = 0; i < Adds.Count; i++)
-            {
-                _adders[i].IsVisible = Adds[i].Adds != null;
-                _adders[i].Command = Adds[i].Adds;
-                _adders[i].Text = Adds[i].Shown;
-                _adders[i].Tip = Tip.For(_adders[i].Tip, Adds[i].About);
-            }
+                _adders[i].Show(Adds[i]);
 
             for (var i = 0; i < Slots.Count; i++)
             {
@@ -233,7 +229,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _chips[at].Show(part, _pieces);
         }
 
-        /// <summary>Lays the sentence out again with a chip for every part it now has and a button for every adder, keeping the ones it had.</summary>
+        /// <summary>Lays the sentence out again with a chip for every part it now has and a plus for every adder, keeping the ones it had.</summary>
         void Reshape()
         {
             while (_chips.Count < Slots.Count)
@@ -243,7 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             while (_adders.Count < Adds.Count)
-                _adders.Add(new Button { Style = Styles.Start });
+                _adders.Add(new PlusMenu());
 
             _adders.RemoveRange(Adds.Count, _adders.Count - Adds.Count);
 

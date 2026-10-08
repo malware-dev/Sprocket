@@ -13,8 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class OpeningTests
 {
-    const string ARadiusStep = "60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
-        + "70 175 200 485 800 653 1315 209 type 5 enter";
+    const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+        + "press step press task 200 485 800 653 1315 209 type 5 enter";
 
     /// <summary>A stage of the page showing, counted from its first.</summary>
     static StageColumn Stage(Screen screen, int at)
@@ -188,8 +188,8 @@ public class OpeningTests
     [Fact]
     public void ADoublePressOnAnotherBlockFinishes()
     {
-        const string anOpenStep = "60 196 type Airlock enter 60 265 200 351 560 333 1394 72 "
-            + "70 175 400 396 800 626 1394 72";
+        const string anOpenStep = "60 196 type Airlock enter press trigger press when 200 351 560 333 1394 72 "
+            + "press step press task 400 396 800 626 1394 72";
 
         // The step's blocks, then the outer door pressed twice.
         var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 545 tick 2").Split(' '));

@@ -2,7 +2,7 @@
 
 An action is something a block does, one of its functions, such as opening a door or switching a light on. Each kind of block brings its own: a door can open and close, and a piston can extend and retract.
 
-In a [step](#step), `+ task` does an action. A [trigger](#trigger) can do one too, with `A task on blocks`.
+For a [step](#step) that does an action, choose `task` under `+ step`. A [trigger](#trigger) can do one too, with `A task on blocks`.
 
 ## Finding one
 

@@ -38,7 +38,8 @@ public class ListFieldTests
         var graphics = new Recording(Area);
         var layer = new WindowLayer();
         var words = Enumerable.Range(0, count).Select(i => "Sound " + i).ToList();
-        var field = new ListField(words, () => layer) { Text = given };
+        var field = new ListField(words) { Text = given };
+        layer.Covers(field);
 
         field.Measure(graphics, new Vector2(300f, 40f));
         field.Arrange(new RectangleF(0f, 100f, 300f, 40f));

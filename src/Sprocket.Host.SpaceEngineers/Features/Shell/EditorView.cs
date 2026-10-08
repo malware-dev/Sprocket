@@ -188,6 +188,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 ShowsCancel = false
             };
 
+            _windows.Covers(_root);
             _input = new InputRoot(_root);
             _input.FocusChanged += Refocused;
 
@@ -846,8 +847,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_renaming >= 0)
                 _input.Focus(box);
         }
-
-        /// <summary>Moves the nearest thing at or above <paramref name="from" /> that has anywhere to go.</summary>
 
         /// <summary>Carries out <paramref name="command" />, where there is one that can be.</summary>
         static void Run(ICommand command)

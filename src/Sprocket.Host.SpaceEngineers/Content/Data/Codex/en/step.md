@@ -1,11 +1,11 @@
 # Step
 
-A step is one line of a ![](mark:sequence) [sequence](#sequence). The buttons at the end of a sequence add one:
+A step is one line of a ![](mark:sequence) [sequence](#sequence). `+ step`, at the end of a sequence and of each branch of an if, adds one of these kinds:
 
-- `+ task` does something to blocks: [an action](#action) such as `open`, or setting one of their values.
-- `+ run` and `+ stop` [run or stop another sequence](#run-and-stop).
-- `+ wait` [waits](#wait) a set time.
-- `+ if` [checks blocks](#if), and runs the steps under it where the check holds.
+- `task` does something to blocks: [an action](#action) such as `open`, or setting one of their values.
+- `wait` [waits](#wait) a set time.
+- `run` and `stop` [run or stop another sequence](#run-and-stop).
+- `if` [checks blocks](#if), and runs the steps under it where the check holds.
 
 ## Moving steps
 

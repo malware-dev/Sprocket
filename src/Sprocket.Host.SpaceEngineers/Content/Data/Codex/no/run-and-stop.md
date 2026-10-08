@@ -2,7 +2,7 @@
 
 ## Kjøre en sekvens
 
-`+ kjør` legger til et [steg](#step) som starter en annen ![](mark:sequence) [sekvens](#sequence) i det samme logikksystemet, valgt fra en liste over sekvensene i det. Neste steg begynner når den sekvensen er ferdig.
+Velger du `kjør` under `+ steg`, får du et [steg](#step) som starter en annen ![](mark:sequence) [sekvens](#sequence) i det samme logikksystemet, valgt fra en liste over sekvensene i det. Neste steg begynner når den sekvensen er ferdig.
 
 En ![](mark:installation) [installasjon](#installation) kjører en sekvens én gang om gangen. Kjører sekvensen allerede, venter kjør-steget på at den kjøringen blir ferdig, og sekvensen teller starten som hoppet over, slik den gjør for en [utløser](#trigger): `hoppet over 1x mens den var opptatt`.
 
@@ -12,7 +12,7 @@ En sekvens som ville startet seg selv igjen gjennom sekvensene den kjører, er e
 
 ## Stoppe en sekvens
 
-`+ stopp` legger til et steg som stopper en annen sekvens i det samme logikksystemet. Det virker med en gang, og neste steg begynner straks. Skjermen til sekvensen som ble stoppet, sier hva som stoppet den, for eksempel `stoppet ved steg 2 av Nedstenging`. Et stopp som finner sekvensen ledig, lar den være som den er.
+Velger du `stopp` under `+ steg`, får du et steg som stopper en annen sekvens i det samme logikksystemet. Det virker med en gang, og neste steg begynner straks. Skjermen til sekvensen som ble stoppet, sier hva som stoppet den, for eksempel `stoppet ved steg 2 av Nedstenging`. Et stopp som finner sekvensen ledig, lar den være som den er.
 
 Et stopp lar blokkene være slik et stopp for hånd gjør, som siden om sekvenser forklarer under *Starte den*.
 

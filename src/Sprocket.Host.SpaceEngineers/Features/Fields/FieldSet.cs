@@ -5,7 +5,6 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -66,9 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <summary>Raised when Enter is pressed in a field, which is finishing the form.</summary>
         public event Action Submitted;
-
-        /// <summary>Where a list of words hangs open, read when one is opened.</summary>
-        public Func<WindowLayer> Windows { get; set; }
 
         /// <summary>How many values it asks for.</summary>
         public int Count => _fields.Count;
@@ -347,15 +343,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return new WordsField(words);
 
             if (words != null && words.Count > Few)
-                return new ListField(words, Opened);
+                return new ListField(words);
 
             return new TypedField(Bounded(field), _submit);
-        }
-
-        WindowLayer Opened()
-        {
-            var windows = Windows;
-            return windows == null ? null : windows();
         }
 
         /// <summary>Puts a value's label and field on their line: a color across the whole of it, text across all the label leaves, anything else against the right.</summary>

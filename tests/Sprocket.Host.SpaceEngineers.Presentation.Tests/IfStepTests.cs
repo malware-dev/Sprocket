@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -47,16 +48,19 @@ public class IfStepTests
         AddIf(rig, "Airlock Outer Door", "is closed");
 
         var end = rig.Editor.StepRows().Single(row => row.Kind == StepKind.End);
-        Assert.Equal(new[] { rig.Texts.SequenceOtherwiseIf, rig.Texts.SequenceOtherwise }, end.Adds.Select(adder => adder.Text));
-        end.Adds[1].Adds!.Execute();
+        var branches = Assert.Single(end.Adds).Choices!;
+        Assert.Equal(new[] { rig.Texts.SequenceOtherwiseIf, rig.Texts.SequenceOtherwise }, Offered(branches));
+        branches[1].Adds!.Execute();
         rig.Tick();
 
         Assert.Null(Assert.IsType<Else>(sequence.Steps[sequence.Steps.Count - 2]).Test);
-        Assert.Equal(rig.Texts.SequenceOtherwiseIf, Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds).Text);
+        Assert.Equal(new[] { rig.Texts.SequenceOtherwiseIf },
+            Offered(Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds).Choices!));
 
         var otherwise = rig.Editor.StepRows().Single(row => row.Kind == StepKind.Otherwise);
-        Assert.Equal(rig.Texts.SequenceIf, Assert.Single(otherwise.Adds).Text);
-        otherwise.Adds[0].Adds!.Execute();
+        var test = Assert.Single(Assert.Single(otherwise.Adds).Choices!);
+        Assert.Equal(rig.Texts.SequenceIf, test.Text);
+        test.Adds!.Execute();
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Tick();
@@ -66,7 +70,7 @@ public class IfStepTests
 
         var tested = Assert.IsType<Else>(sequence.Steps[sequence.Steps.Count - 2]);
         Assert.Equal("opened", tested.Test.MemberId);
-        Assert.Equal(2, rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds.Count);
+        Assert.Equal(2, Offered(Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds).Choices!).Count);
     }
 
     /// <summary>An otherwise if added to an if that has an otherwise goes in above it, since the otherwise comes last.</summary>
@@ -81,7 +85,7 @@ public class IfStepTests
         rig.Editor.Program.Edited();
         rig.Tick();
 
-        rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds[0].Adds!.Execute();
+        rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds[0].Choices![0].Adds!.Execute();
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Tick();
@@ -107,7 +111,7 @@ public class IfStepTests
         rig.Tick();
 
         var end = rig.Editor.StepRows().Single(row => row.Kind == StepKind.Adds);
-        end.Adds.Single(adder => adder.Text == rig.Texts.SequenceWait).Adds!.Execute();
+        end.Adds.Single().Choices!.Single(adder => adder.Text == rig.Texts.SequenceWait).Adds!.Execute();
         rig.Tick();
         rig.Editor.PressChoice(rig.Editor.Choices().First().Text);
         rig.Tick();
@@ -310,6 +314,9 @@ public class IfStepTests
         rig.Tick();
         return rig;
     }
+
+    /// <summary>The words of those of <paramref name="choices" /> that may be added now.</summary>
+    static List<string> Offered(IList<Adder> choices) => choices.Where(choice => choice.Adds != null).Select(choice => choice.Text).ToList();
 
     static Simulation Airlock(out Sequence sequence)
     {

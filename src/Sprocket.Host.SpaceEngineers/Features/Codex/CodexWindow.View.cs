@@ -29,10 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             var texts = _editor.Texts;
             Style = Styles.CodexWindow;
             Placement = Fixed.Size(Wide, High);
-            Shadow = Styles.Shadow;
-            ShadowSpread = Styles.ShadowSpread;
-            ShadowOffset = Styles.ShadowOffset;
-            ShadowColor = Palette.Shadow;
 
             _stepsBack = new Relay(StepBack);
             _stepsForward = new Relay(StepForward);

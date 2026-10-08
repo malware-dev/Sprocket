@@ -1,11 +1,11 @@
 # Steg
 
-Et steg er én linje i en ![](mark:sequence) [sekvens](#sequence). Knappene på slutten av en sekvens legger til et:
+Et steg er én linje i en ![](mark:sequence) [sekvens](#sequence). `+ steg`, på slutten av en sekvens og av hver gren i et hvis, legger til et av disse slagene:
 
-- `+ oppgave` gjør noe med blokker: [en handling](#action) som `open`, eller å sette en av verdiene deres.
-- `+ kjør` og `+ stopp` [kjører eller stopper en annen sekvens](#run-and-stop).
-- `+ vent` [venter](#wait) en fastsatt tid.
-- `+ hvis` [sjekker blokker](#if), og kjører stegene under det der det som sjekkes stemmer.
+- `oppgave` gjør noe med blokker: [en handling](#action) som `open`, eller å sette en av verdiene deres.
+- `vent` [venter](#wait) en fastsatt tid.
+- `kjør` og `stopp` [kjører eller stopper en annen sekvens](#run-and-stop).
+- `hvis` [sjekker blokker](#if), og kjører stegene under det der det som sjekkes stemmer.
 
 ## Flytte steg
 

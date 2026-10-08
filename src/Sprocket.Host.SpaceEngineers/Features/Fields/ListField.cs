@@ -40,9 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         string _text = "";
 
-        /// <summary>A line saying no word yet, opening a list of <paramref name="words" /> in <paramref name="windows" /> when pressed.</summary>
-        /// <remarks>The windows are read when the list is opened, so they may be given after the field is made.</remarks>
-        public ListField(IList<string> words, Func<WindowLayer> windows)
+        /// <summary>A line saying no word yet, opening a list of <paramref name="words" /> over the screen it is on when pressed.</summary>
+        public ListField(IList<string> words)
         {
             Spacing = 8f;
             Style = Styles.ListLine;
@@ -74,29 +73,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             Command = new Relay(delegate
             {
-                var layer = windows();
-                if (layer == null)
-                    return;
-
-                if (layer.IsOpen(list))
+                if (list.IsOpen)
                 {
-                    layer.Close(list);
+                    list.Close();
                     return;
                 }
 
-                layer.Open(list);
+                list.Open();
 
                 var given = _words.IndexOf(_text);
                 if (given >= 0)
                     scroll.BringIntoView(_rows[given]);
             });
 
-            _close = delegate
-            {
-                var layer = windows();
-                if (layer != null)
-                    layer.Close(list);
-            };
+            _close = list.Close;
         }
 
         /// <summary>The mark a drop-down line ends with, placed as every drop-down places it.</summary>

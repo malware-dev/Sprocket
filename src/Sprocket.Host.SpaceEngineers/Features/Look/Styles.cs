@@ -14,8 +14,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// <summary>How the views converted to the size scale look.</summary>
     public static class Styles
     {
-        /// <summary>How far a floating window's shadow reaches out from its edge.</summary>
-        public const float ShadowSpread = 24f;
+        /// <summary>The soft square every shadow is drawn with.</summary>
+        static readonly NineSlice Shade = new NineSlice(Materials.Shadow, 64, 24);
+
+        /// <summary>The shadow a floating window casts, lying well away from the page as if lit from the top left.</summary>
+        public static readonly Shadow Shadow = new Shadow(Shade, 24f, new VRageMath.Vector2(6f, 10f), Palette.Shadow);
+
+        /// <summary>The shorter shadow a window hanging from a control casts, lying close to the page.</summary>
+        public static readonly Shadow ShortShadow = new Shadow(Shade, 8f, new VRageMath.Vector2(2f, 4f), Palette.Shadow);
 
         /// <summary>A name, or a sentence that is the point of where it stands.</summary>
         public static readonly TextStyle Name = new TextStyle
@@ -148,17 +154,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Lettering.Mono, FontSize = 16f, Color = Palette.Faint }
         };
 
-        /// <summary>The codex's window: the page's own color, edged, with nothing veiled behind it.</summary>
+        /// <summary>The codex's window: the page's own color, edged, with nothing veiled behind it, casting a floating window's shadow.</summary>
         public static readonly WindowStyle CodexWindow = new WindowStyle
         {
-            Base = { Background = Palette.Page, Edge = Palette.Line }
+            Base = { Background = Palette.Page, Edge = Palette.Line, Shadow = Shadow }
         };
-
-        /// <summary>The shadow a floating window casts.</summary>
-        public static readonly NineSlice Shadow = new NineSlice(Materials.Shadow, 64, 24);
-
-        /// <summary>How far a floating window's shadow lies from it, as if lit from the top left.</summary>
-        public static readonly VRageMath.Vector2 ShadowOffset = new VRageMath.Vector2(6f, 10f);
 
         /// <summary>A dialog: a panel in the middle of the screen, with the screen veiled behind it.</summary>
         public static readonly WindowStyle Dialog = new WindowStyle
@@ -713,13 +713,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A list hanging open under what opened it.</summary>
         public static readonly WindowStyle List = new WindowStyle
         {
-            Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(4f) }
+            Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(4f), Shadow = ShortShadow }
         };
 
-        /// <summary>A menu hanging open under the line it narrows, on the highlight tone.</summary>
+        /// <summary>A menu hanging open from what opened it, on the highlight tone.</summary>
         public static readonly WindowStyle Menu = new WindowStyle
         {
-            Base = { Background = Palette.PanelHot, Edge = Palette.Line, Padding = new Thickness(8f) }
+            Base = { Background = Palette.PanelHot, Edge = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
         };
 
         /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer.</summary>

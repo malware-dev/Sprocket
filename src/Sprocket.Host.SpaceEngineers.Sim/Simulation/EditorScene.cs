@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -295,6 +296,17 @@ namespace Sprocket.Sim.Simulation
         public Element? Under(Vector2 point)
         {
             return _view.Under(point);
+        }
+
+        /// <summary>Where a press reaches the first thing on the screen saying <paramref name="text" />, in UI units.</summary>
+        /// <exception cref="InvalidOperationException">Nothing a press can reach says it.</exception>
+        public Vector2 Find(string text)
+        {
+            Vector2 at;
+            if (!_view.Find(text, out at))
+                throw new InvalidOperationException("Nothing on the screen says '" + text + "'.");
+
+            return at;
         }
 
         /// <summary>What is held down with the pointer, which the game's own screen reads off the keyboard as a press lands.</summary>

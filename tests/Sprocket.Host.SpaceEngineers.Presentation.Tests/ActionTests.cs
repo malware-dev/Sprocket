@@ -241,8 +241,8 @@ public class ActionTests
     [Fact]
     public void TheTabIsPressedWhereItIsDrawn()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
-            + "70 175 200 509").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+            + "press step press task 200 509").Split(' '));
 
         StageColumn what = screen.Editor.Pick().Stages.Last();
         Assert.NotNull(what.Views[1].Command);
@@ -443,8 +443,8 @@ public class ActionTests
     [Fact]
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
-            + "70 175 150 203 type Approach 200 360 800 565").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+            + "press step press task 150 203 type Approach 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Picking().Fields.Single().Edits);
@@ -473,8 +473,8 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
-            + "70 175 200 485 800 565").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+            + "press step press task 200 485 800 565").Split(' '));
 
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
@@ -499,8 +499,8 @@ public class ActionTests
     [Fact]
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
-            + "70 175 150 203 type Standby 200 360 800 397").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+            + "press step press task 150 203 type Standby 200 360 800 397").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
@@ -531,8 +531,8 @@ public class ActionTests
     [Fact]
     public void MoreChoicesThanFitFoldIntoAList()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter 60 265 200 384 560 340 1394 72 "
-            + "70 175 150 203 type Tug 200 360 800 565").Split(' '));
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+            + "press step press task 150 203 type Tug 200 360 800 565").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");
 

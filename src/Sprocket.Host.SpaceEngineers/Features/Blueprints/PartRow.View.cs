@@ -1,10 +1,8 @@
-using System;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
@@ -30,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// Makes the part's name and what it says about itself, with the blocks beside them; and the boxes they are
         /// written in, with the switch that makes the slot optional, for a blueprint being edited.
         /// </summary>
-        void CreateView(Func<WindowLayer> windows)
+        void CreateView()
         {
             Spacing = 20f;
             Padding = new Thickness(20f, 8f);
@@ -55,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     new TextBox { Style = Styles.Field, IsVisible = false }.As(out _nameBox),
                     new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _refusal),
                     new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about),
-                    new Composer(72f, Styles.SlotDescription, windows) { IsVisible = false }.As(out _aboutComposer)
+                    new Composer(72f, Styles.SlotDescription) { IsVisible = false }.As(out _aboutComposer)
                 }
             }.As(out _column));
 

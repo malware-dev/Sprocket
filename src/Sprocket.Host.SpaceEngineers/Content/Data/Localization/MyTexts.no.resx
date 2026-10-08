@@ -202,10 +202,16 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>hver</value>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Legg til en utløser som starter på et signal fra en blokks verktøylinje, eller når en verdi på en blokk endres.</value>
+    <value>Når en blokk sender et signal, eller kommer i en tilstand.</value>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
-    <value>Start en sekvens om og om igjen, med et fast tidsintervall.</value>
+    <value>Med et fast intervall, om og om igjen.</value>
+  </data>
+  <data name="Sprocket.System.Trigger" xml:space="preserve">
+    <value>utløser</value>
+  </data>
+  <data name="Sprocket.System.TriggerAbout" xml:space="preserve">
+    <value>Legg til en utløser: noe som starter en sekvens, eller gjør én oppgave.</value>
   </data>
   <data name="Sprocket.System.Sequences" xml:space="preserve">
     <value>Sekvenser</value>
@@ -261,10 +267,16 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>vent</value>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
-    <value>Legg til en oppgave: kjør en handling på blokker, eller sett en av verdiene deres.</value>
+    <value>Gjør noe med blokker: en handling, eller å sette en av verdiene deres.</value>
+  </data>
+  <data name="Sprocket.Sequence.Step" xml:space="preserve">
+    <value>steg</value>
+  </data>
+  <data name="Sprocket.Sequence.StepAbout" xml:space="preserve">
+    <value>Legg til et steg her.</value>
   </data>
   <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
-    <value>Legg til et steg som venter en stund før det neste.</value>
+    <value>Vent en fastsatt tid før neste steg.</value>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
     <value>Kan bare leses mens {holder} redigerer den.</value>
@@ -1510,7 +1522,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>kjør</value>
   </data>
   <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
-    <value>Legg til et steg som kjører en annen sekvens i dette systemet.</value>
+    <value>Start en annen sekvens, og vent til den er ferdig.</value>
   </data>
   <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
     <value>Kjøre hvilken sekvens?</value>
@@ -1522,25 +1534,31 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>stopp</value>
   </data>
   <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
-    <value>Legg til et steg som stopper en annen sekvens i dette systemet.</value>
+    <value>Stopp en annen sekvens der den er, og gå rett videre.</value>
   </data>
   <data name="Sprocket.Sequence.If" xml:space="preserve">
     <value>hvis</value>
   </data>
   <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
-    <value>Legg til et hvis: steg som dras inn i det, kjører bare der det som sjekkes stemmer.</value>
+    <value>Sjekk blokker, og kjør stegene under bare der det som sjekkes stemmer.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIf" xml:space="preserve">
     <value>ellers hvis</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
-    <value>Legg til en gren som sjekker noe annet, der ingenting over den stemte.</value>
+    <value>Sjekk noe annet, der ingenting over stemte.</value>
   </data>
   <data name="Sprocket.Sequence.Otherwise" xml:space="preserve">
     <value>ellers</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
-    <value>Legg til en siste gren, som kjører der ingenting over den stemte.</value>
+    <value>Kjør der ingenting over stemte.</value>
+  </data>
+  <data name="Sprocket.Sequence.Branch" xml:space="preserve">
+    <value>gren</value>
+  </data>
+  <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
+    <value>Legg til en gren i dette hvis-et.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
     <value>Gjør dette om til et ellers hvis, som sjekker noe først.</value>

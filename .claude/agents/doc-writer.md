@@ -44,6 +44,8 @@ Where the brief and the code disagree, write what the brief says and report the 
 Short, and in this order: the files written; the questions with their answers; every check hit you kept and
 why; every place the brief, the skill or the code left you choosing, with what you chose. Nothing else.
 
-You work in a worktree of your own, on a branch of your own, so your pages reach main only after they are
-reviewed. You leave your pages uncommitted in that worktree for review, and never commit, push or merge,
-and never edit anything outside the codex folders and its index.
+A new page or a bigger rework is written in a worktree of your own, on a branch of your own, so it reaches main
+only after it is reviewed. An adjustment that follows other work in progress, such as renaming what a page tells
+the player to press, is made in the main checkout beside that work. The brief says which. Either way you leave
+your pages uncommitted for review, and never commit, push or merge, and never edit anything outside the codex
+folders and its index.

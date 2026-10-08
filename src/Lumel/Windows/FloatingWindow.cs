@@ -1,10 +1,9 @@
 using System;
-using Lumel.Drawing;
 using VRageMath;
 
 namespace Lumel.Windows
 {
-    /// <summary>A window that stays open beside what it floats over, where the player has moved it, with a shadow to say it can be.</summary>
+    /// <summary>A window that stays open beside what it floats over, where the player has moved it.</summary>
     /// <remarks>
     ///     It keeps the place it was moved to, in UI units, and is put back on the screen whenever that place would leave any
     ///     of it off: a remembered place outlives a change of screen, and a screen of another shape can be narrower.
@@ -19,18 +18,6 @@ namespace Lumel.Windows
 
         /// <summary>The whole screen, which the window is kept inside, or empty to keep it inside the area it is placed in; the layer it is open in sets it.</summary>
         public RectangleF Screen { get; set; }
-
-        /// <summary>What is drawn under the window and out past its edge, or null for nothing.</summary>
-        public NineSlice Shadow { get; set; }
-
-        /// <summary>How far the shadow reaches out from the window's edge.</summary>
-        public float ShadowSpread { get; set; }
-
-        /// <summary>How far the shadow lies from the window, as if lit from the top left.</summary>
-        public Vector2 ShadowOffset { get; set; }
-
-        /// <summary>The shadow's tint.</summary>
-        public Color ShadowColor { get; set; } = Color.White;
 
         /// <inheritdoc />
         /// <remarks>Where it was moved to, or where <see cref="Home" /> puts it, and then back inside the screen.</remarks>
@@ -66,17 +53,6 @@ namespace Lumel.Windows
             var moved = Moved;
             if (moved != null)
                 moved();
-        }
-
-        /// <inheritdoc />
-        public override void DrawBehind(IGraphics g)
-        {
-            if (Shadow == null || ShadowSpread <= 0f)
-                return;
-
-            var bounds = Bounds;
-            Shadow.Draw(g, new RectangleF(bounds.X + ShadowOffset.X - ShadowSpread, bounds.Y + ShadowOffset.Y - ShadowSpread,
-                bounds.Width + 2f * ShadowSpread, bounds.Height + 2f * ShadowSpread), ShadowSpread, ShadowColor);
         }
 
         /// <summary>Where the window's top-left corner stands in <paramref name="area" /> before it has been moved: in the middle, unless a kind of floating window says otherwise.</summary>

@@ -18,8 +18,10 @@ namespace Sprocket.Sim.Simulation
     {
         private readonly List<Step> _steps = new List<Step>();
 
+        /// <summary>The steps, in the order they are played.</summary>
         public IList<Step> Steps => _steps;
 
+        /// <summary>How many steps there are.</summary>
         public int Count => _steps.Count;
 
         /// <summary>
@@ -68,6 +70,16 @@ namespace Sprocket.Sim.Simulation
                 {
                     script.Add(Step.Load).Text = args[i + 1];
                     i += 1;
+                    continue;
+                }
+
+                // A press on what the screen says rather than where it says it, so a script outlives the layout. Words with
+                // spaces in them are quoted, and survive a command line split at every space: "+ step" arrives as two
+                // pieces and is joined again here.
+                if (word == "press" && i + 1 < args.Length)
+                {
+                    script.Add(Step.Named).Text = Quoted(args, i + 1, out var last);
+                    i = last;
                     continue;
                 }
 
@@ -154,6 +166,20 @@ namespace Sprocket.Sim.Simulation
             return step;
         }
 
+        /// <summary>The words starting at <paramref name="at" />: one piece, or every piece up to the one closing its quote, which <paramref name="last" /> is given.</summary>
+        private static string Quoted(string[] args, int at, out int last)
+        {
+            last = at;
+            if (!args[at].StartsWith("\"", StringComparison.Ordinal))
+                return args[at];
+
+            var words = args[at];
+            while (!(words.Length > 1 && words.EndsWith("\"", StringComparison.Ordinal)) && last + 1 < args.Length)
+                words += " " + args[++last];
+
+            return words.Trim('"');
+        }
+
         private static Vector2 Point(string[] args, int at)
         {
             return new Vector2(
@@ -183,6 +209,15 @@ namespace Sprocket.Sim.Simulation
             // Two presses in one gesture, which the game reports as a count rather than as two
             // presses - and which the editor treats as choosing a thing and moving on in one move.
             // Not the same as pressing twice, so a script cannot say it any other way.
+            if (step.Kind == Step.Named)
+            {
+                var at = scene.Find(step.Text);
+                scene.MoveTo(at);
+                scene.Press(at, 1);
+                drawn();
+                return;
+            }
+
             if (step.Kind == Step.Onward)
             {
                 scene.Tab();

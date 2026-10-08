@@ -2,7 +2,7 @@
 
 En utløser sier når en ![](mark:sequence) [sekvens](#sequence) kjører. Den er én linje: når noe skjer, gjør én ting. For eksempel: når knappen til luftslusen trykkes, kjør *Sluse ut*.
 
-For å legge til en trykker du `+ når` under `Utløsere` på skjermen til ![](mark:logic-system) [logikksystemet](#logic-system), eller `+ hver` for en som starter på en fast tid. Trykker du en del av en utløser, åpnes [velgeren](#picking) på den delen, så du kan endre den.
+For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til ![](mark:logic-system) [logikksystemet](#logic-system), og velger `når`, eller `hver` for en som starter på en fast tid. Trykker du en del av en utløser, åpnes [velgeren](#picking) på den delen, så du kan endre den.
 
 ## Hva som starter den
 

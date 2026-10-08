@@ -77,14 +77,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             if (_strip == null)
             {
-                _strip = new PickStrip(Editor.Texts, delegate { return Editor.Windows; });
+                _strip = new PickStrip(Editor.Texts);
                 _finish = Editor.Act(Cmd.Primary, Primary);
 
-                _rates = new StageColumn(_strip.Width, false, null, Editor.Texts, delegate { return Editor.Windows; });
+                _rates = new StageColumn(_strip.Width, false, null, Editor.Texts);
                 _rates.Title = Editor.Texts.PickHowOften;
                 _rows = new Keyed<int, PickRow>(_rates.Rows, Rate);
 
-                _does = new StageColumn(_strip.Width, false, null, Editor.Texts, delegate { return Editor.Windows; });
+                _does = new StageColumn(_strip.Width, false, null, Editor.Texts);
                 _does.Title = Editor.Texts.PickWhatItDoes;
             }
 

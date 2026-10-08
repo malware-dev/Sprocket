@@ -6,7 +6,6 @@ using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -21,19 +20,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public partial class StageColumn : VStack
     {
-        readonly Func<WindowLayer> _windows;
         readonly List<Button> _views = new List<Button>();
 
         float _width;
 
         /// <summary>
         /// A column <paramref name="width" /> across, narrowed by typing where <paramref name="canNarrow" /> says, looked at
-        /// in any of <paramref name="views" />, saying its fixed words in <paramref name="texts" />; its list of kinds hangs
-        /// open in <paramref name="windows" />, read when it is opened.
+        /// in any of <paramref name="views" />, saying its fixed words in <paramref name="texts" />.
         /// </summary>
-        public StageColumn(float width, bool canNarrow, IList<string> views, Texts texts, Func<WindowLayer> windows)
+        public StageColumn(float width, bool canNarrow, IList<string> views, Texts texts)
         {
-            _windows = windows;
             CreateView();
 
             Width = width;
@@ -54,17 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kindNarrowClear.Command = new Relay(delegate { Emptied(_kindNarrow, _kindNarrowClear, KindsNarrowed); });
 
             // The list hangs off this line and is reachable only while it hangs there, so its rows cannot be pressed through it.
-            _kindLine.Command = new Relay(delegate
-            {
-                var layer = _windows();
-                if (layer == null)
-                    return;
-
-                if (layer.IsOpen(_kinds))
-                    layer.Close(_kinds);
-                else
-                    layer.Open(_kinds);
-            });
+            _kindLine.Command = new Relay(_kinds.Toggle);
 
             if (views == null || views.Count < 2)
                 return;
@@ -229,9 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Closes the list of kinds, where it hangs open.</summary>
         public void CloseKinds()
         {
-            var layer = _windows();
-            if (layer != null)
-                layer.Close(_kinds);
+            _kinds.Close();
         }
 
         /// <summary>Puts <paramref name="text" /> in <paramref name="box" /> unless somebody is typing there, and arms its cross.</summary>

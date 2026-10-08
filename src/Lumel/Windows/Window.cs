@@ -13,8 +13,22 @@ namespace Lumel.Windows
         /// <summary>Whether nothing beneath the window takes input while it is open.</summary>
         public bool IsModal { get; set; }
 
+        /// <summary>Whether it is open in a layer.</summary>
+        public bool IsOpen => Layer != null;
+
         /// <summary>What a modal window paints over everything beneath it.</summary>
         public Color Backdrop { get; set; }
+
+        /// <summary>What it casts on what lies beneath it, or null for nothing.</summary>
+        public Shadow Shadow { get; set; }
+
+        /// <summary>Takes it away from the layer it is open in, if it is open.</summary>
+        public void Close()
+        {
+            var layer = Layer;
+            if (layer != null)
+                layer.Close(this);
+        }
 
         /// <summary>The room <paramref name="area" /> gives the window to be measured in: all of it, unless a kind of window says otherwise.</summary>
         public virtual Vector2 Room(RectangleF area)
@@ -22,9 +36,12 @@ namespace Lumel.Windows
             return new Vector2(area.Width, area.Height);
         }
 
-        /// <summary>Draws whatever lies under the window and outside it, such as a shadow, before the window itself: nothing, unless a kind of window says otherwise.</summary>
+        /// <summary>Draws whatever lies under the window and outside it before the window itself: its <see cref="Shadow" />, unless a kind of window says otherwise.</summary>
         public virtual void DrawBehind(IGraphics g)
         {
+            var shadow = Shadow;
+            if (shadow != null)
+                shadow.Draw(g, Bounds);
         }
 
         /// <summary>Where the window stands in <paramref name="area" /> at <paramref name="size" />: in the middle, unless a kind of window says otherwise.</summary>

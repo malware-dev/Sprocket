@@ -2,7 +2,7 @@
 
 En handling er noe en blokk gjør, en av funksjonene dens, som å åpne en dør eller slå på et lys. Hver slags blokk har sine egne: en dør kan åpnes og lukkes, og et stempel kan skyves ut og trekkes inn.
 
-I et [steg](#step) gjør `+ oppgave` en handling. En [utløser](#trigger) kan også gjøre en, med `En oppgave på blokker`.
+For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`. En [utløser](#trigger) kan også gjøre en, med `En oppgave på blokker`.
 
 ## Finne en
 

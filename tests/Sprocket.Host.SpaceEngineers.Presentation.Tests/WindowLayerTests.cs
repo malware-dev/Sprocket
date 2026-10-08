@@ -1,3 +1,5 @@
+using VRage.Utils;
+using Lumel.Drawing;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
@@ -185,6 +187,127 @@ public class WindowLayerTests
         layer.SayingAt(beside, out said);
         layer.WheelAt(beside, out turned);
         Assert.False(pressed || said || turned, "something beside the window stopped at it");
+    }
+
+    /// <summary>Anything on a screen a layer covers finds that layer through what holds it, and anything loose finds none.</summary>
+    [Fact]
+    public void WhatIsOnACoveredScreenFindsItsLayer()
+    {
+        var button = new Button { Text = "Go" };
+        var screen = new VStack { Children = { new HStack { Children = { button } } } };
+        var layer = new WindowLayer();
+
+        Assert.Null(button.Windows);
+
+        layer.Covers(screen);
+
+        Assert.Same(layer, button.Windows);
+        Assert.Null(new Button().Windows);
+    }
+
+    /// <summary>A popup opens over the layer its anchor finds, what it holds finds that layer while it is open, and closing it lets go of both.</summary>
+    [Fact]
+    public void APopupOpensWhereItsAnchorIs()
+    {
+        var anchor = new Button { Text = "Open" };
+        var inside = new Button { Text = "Inside" };
+        var popup = new Popup { Anchor = anchor, Content = new VStack { Children = { inside } } };
+        var layer = new WindowLayer();
+        layer.Covers(new VStack { Children = { anchor } });
+
+        popup.Toggle();
+
+        Assert.True(layer.IsOpen(popup));
+        Assert.True(popup.IsOpen);
+        Assert.Same(layer, inside.Windows);
+
+        popup.Toggle();
+
+        Assert.False(layer.IsOpen(popup));
+        Assert.False(popup.IsOpen);
+        Assert.Null(inside.Windows);
+    }
+
+    /// <summary>A popup hung beside its anchor opens to its right with its first entry level with it, and to its left where the right has no room.</summary>
+    [Theory]
+    [InlineData(100f, true)]
+    [InlineData(900f, false)]
+    public void APopupBesideItsAnchorSetsItsFirstEntryLevelWithIt(float at, bool right)
+    {
+        var anchor = new Button { Text = "Add" };
+        var first = new Button { Text = "First" };
+        var popup = new Popup
+        {
+            Anchor = anchor,
+            Side = PopupSide.Beside,
+            Gap = 4f,
+            Padding = new Thickness(8f),
+            Placement = Fixed.Wide(150f),
+            Content = new VStack { Children = { first, new Button { Text = "Second" }, new Button { Text = "Third" } } }
+        };
+        var screen = new VStack { Children = { anchor } };
+        var layer = new WindowLayer();
+        layer.Covers(screen);
+        screen.Measure(new Recording(Area), new Vector2(Area.Width, Area.Height));
+        anchor.Arrange(new RectangleF(at, 300f, 80f, 30f));
+
+        popup.Open();
+        layer.Draw(new Recording(Area), Area);
+
+        Assert.Equal(Middle(anchor).Y, Middle(first).Y, 1);
+        if (right)
+            Assert.Equal(anchor.Bounds.X + anchor.Bounds.Width + 4f, popup.Bounds.X, 1);
+        else
+            Assert.Equal(anchor.Bounds.X - 4f, popup.Bounds.X + popup.Bounds.Width, 1);
+    }
+
+    /// <summary>A window whose style casts a shadow draws it before itself, reaching out past its edge; one whose style casts none draws nothing.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void AWindowCastsTheShadowItsStyleGivesIt(bool casts)
+    {
+        var shade = new NineSlice(MyStringId.GetOrCompute("Shade"), 64, 24);
+        var style = new WindowStyle { Base = { Shadow = casts ? new Shadow(shade, 8f, new Vector2(2f, 4f), Color.Black) : null } };
+        var window = new Window { Style = style, Placement = Fixed.Size(200f, 100f), Content = new Label { Text = "Words" } };
+        var layer = new WindowLayer();
+        var graphics = new Recording(Area);
+        layer.Open(window);
+
+        layer.Draw(graphics, Area);
+
+        var shadow = graphics.Pieces.Where(piece => piece.Material.String == "Shade").Select(piece => piece.Destination).ToList();
+        if (!casts)
+        {
+            Assert.Empty(shadow);
+            return;
+        }
+
+        Assert.NotEmpty(shadow);
+        Assert.Equal(window.Bounds.X + 2f - 8f, shadow.Min(r => r.X), 1);
+        Assert.Equal(window.Bounds.Y + window.Bounds.Height + 4f + 8f, shadow.Max(r => r.Y + r.Height), 1);
+    }
+
+    /// <summary>A popup whose anchor is on no screen stays closed when it is opened.</summary>
+    [Fact]
+    public void APopupWithNowhereToOpenStaysClosed()
+    {
+        var popup = new Popup { Anchor = new Button(), Content = new Label { Text = "Words" } };
+
+        popup.Open();
+
+        Assert.False(popup.IsOpen);
+    }
+
+    /// <summary>A popup a press closes by missing it is closed as far as it knows too.</summary>
+    [Fact]
+    public void APopupDismissedByAPressKnowsItIsClosed()
+    {
+        var (layer, popup, _, _) = Hanging(3, 100f);
+
+        Assert.True(popup.IsOpen);
+        Assert.True(layer.Dismiss(new Vector2(Area.Width - 1f, Area.Height - 1f)));
+        Assert.False(popup.IsOpen);
     }
 
     static Vector2 Middle(Element element) =>

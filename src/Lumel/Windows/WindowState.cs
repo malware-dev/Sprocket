@@ -9,14 +9,23 @@ namespace Lumel.Windows
         /// <summary>What a modal window paints over everything beneath it, or null to leave it to the layers beneath.</summary>
         public Color? Backdrop { get; set; }
 
+        /// <summary>What the window casts on what lies beneath it, or null to leave it to the layers beneath.</summary>
+        public Shadow Shadow { get; set; }
+
         /// <inheritdoc />
         public override void Neutral(Element element)
         {
             base.Neutral(element);
 
             var window = element as Window;
-            if (window != null && Backdrop.HasValue)
+            if (window == null)
+                return;
+
+            if (Backdrop.HasValue)
                 window.Backdrop = Color.Transparent;
+
+            if (Shadow != null)
+                window.Shadow = null;
         }
 
         /// <inheritdoc />
@@ -25,8 +34,14 @@ namespace Lumel.Windows
             base.Lay(element);
 
             var window = element as Window;
-            if (window != null && Backdrop.HasValue)
+            if (window == null)
+                return;
+
+            if (Backdrop.HasValue)
                 window.Backdrop = Backdrop.Value;
+
+            if (Shadow != null)
+                window.Shadow = Shadow;
         }
 
         /// <inheritdoc />
@@ -34,6 +49,7 @@ namespace Lumel.Windows
         {
             base.Clear();
             Backdrop = null;
+            Shadow = null;
         }
 
         /// <inheritdoc />
@@ -46,6 +62,9 @@ namespace Lumel.Windows
 
             if (!Backdrop.HasValue)
                 Backdrop = other.Backdrop;
+
+            if (Shadow == null)
+                Shadow = other.Shadow;
         }
     }
 }

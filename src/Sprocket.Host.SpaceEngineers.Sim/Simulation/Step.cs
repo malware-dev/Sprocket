@@ -6,14 +6,31 @@ namespace Sprocket.Sim.Simulation
     /// <summary>One thing the pointer or the clock does to the screen.</summary>
     public sealed class Step
     {
+        /// <summary>A press at <see cref="At" />, with <see cref="Held" /> held down.</summary>
         public const int Press = 0;
+
+        /// <summary>A press at <see cref="At" /> carried to <see cref="To" /> before it is let go.</summary>
         public const int Drag = 1;
+
+        /// <summary><see cref="Count" /> ticks of the clock, drawn after each.</summary>
         public const int Tick = 2;
+
+        /// <summary>The wheel turned by <see cref="Amount" /> over <see cref="At" />; positive scrolls down.</summary>
         public const int Scroll = 3;
+
+        /// <summary><see cref="Text" /> typed into whatever holds the keyboard.</summary>
         public const int Type = 4;
+
+        /// <summary>The Enter key.</summary>
         public const int Enter = 5;
+
+        /// <summary>The Escape key.</summary>
         public const int Escape = 6;
+
+        /// <summary>The pointer moved to <see cref="At" /> without pressing.</summary>
         public const int Move = 7;
+
+        /// <summary>Everything typed in the box holding the keyboard taken away.</summary>
         public const int Clear = 8;
 
         /// <summary>Reads a program into the construct, as loading a save does.</summary>
@@ -28,6 +45,10 @@ namespace Sprocket.Sim.Simulation
         /// <summary>An arrow key, which way held in <see cref="At" />: right and down are one, left and up minus one.</summary>
         public const int Arrow = 12;
 
+        /// <summary>A press on whatever says <see cref="Text" />, found where it is drawn at the moment it is pressed.</summary>
+        public const int Named = 13;
+
+        /// <summary>Which of the kinds above it is.</summary>
         public int Kind;
 
         /// <summary>
@@ -39,10 +60,19 @@ namespace Sprocket.Sim.Simulation
         /// differs.
         /// </remarks>
         public Held Held;
+        /// <summary>Where it happens, in UI units; for an arrow, which way.</summary>
         public Vector2 At;
+
+        /// <summary>Where a drag ends, in UI units.</summary>
         public Vector2 To;
+
+        /// <summary>How many ticks a tick step runs.</summary>
         public int Count;
+
+        /// <summary>How far a scroll turns the wheel.</summary>
         public float Amount;
+
+        /// <summary>What is typed, the file a program is loaded from, or the words a named press finds.</summary>
         public string Text;
     }
 }

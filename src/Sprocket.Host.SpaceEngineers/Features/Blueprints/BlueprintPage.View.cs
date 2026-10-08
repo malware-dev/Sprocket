@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Children =
                         {
                             new Label { Style = Styles.Heading }.As(out _writingHeading),
-                            new Composer(240f, Styles.Example, Windows).As(out _composer)
+                            new Composer(240f, Styles.Example).As(out _composer)
                         }
                     }.As(out _writing),
                     new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }.As(out _rule),

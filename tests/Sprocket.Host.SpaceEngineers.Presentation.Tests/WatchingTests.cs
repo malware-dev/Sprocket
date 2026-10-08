@@ -28,7 +28,7 @@ public class WatchingTests
         screen.Run(5);
 
         var parked = Places(screen);
-        var adders = screen.TopOf(screen.Text("+ task"));
+        var adders = screen.TopOf(screen.Text("+ step"));
 
         editor.SwitchOn();
         screen.Run(5);
@@ -36,7 +36,7 @@ public class WatchingTests
         Assert.Equal(parked, Places(screen));
 
         // The adders' line says why there are none, on the same line.
-        Assert.False(screen.Shows("+ task"), "add button still offered while locked");
+        Assert.False(screen.Shows("+ step"), "add button still offered while locked");
         Assert.Equal(adders, screen.TopOf(screen.Text(editor.Sentence().LockedText)), 3);
 
         // A logic system with installations asks before it stops them.
@@ -46,7 +46,7 @@ public class WatchingTests
         screen.Run(5);
 
         Assert.Equal(parked, Places(screen));
-        Assert.True(screen.Shows("+ task"), "add button did not come back");
+        Assert.True(screen.Shows("+ step"), "add button did not come back");
     }
 
     /// <summary>Where the step's words, its grips and every bin and arrow stand.</summary>

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Lumel;
@@ -6,7 +5,6 @@ using Lumel.Drawing;
 using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
-using Lumel.Windows;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -38,7 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly VStack _fold;
         readonly VStack _next;
         readonly Texts _texts;
-        readonly Func<WindowLayer> _windows;
 
         readonly List<Element> _old = new List<Element>();
         readonly List<Element> _leaving = new List<Element>();
@@ -58,11 +55,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         float _squeezeFrom;
         float _squeezeTo;
 
-        /// <summary>An empty strip saying its fixed words in <paramref name="texts" />, whose lists hang open in <paramref name="windows" />.</summary>
-        public PickStrip(Texts texts, Func<WindowLayer> windows)
+        /// <summary>An empty strip saying its fixed words in <paramref name="texts" />.</summary>
+        public PickStrip(Texts texts)
         {
             _texts = texts;
-            _windows = windows;
             Spacing = Gap;
 
             // Pressed anywhere down its length: it is the whole of what that page was, and going back to it is the one thing it does.
@@ -135,7 +131,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_arguments == null)
             {
                 _arguments = new ArgumentsColumn(Width, named);
-                _arguments.Form.Windows = _windows;
             }
 
             _arguments.Title = named;

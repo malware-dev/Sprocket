@@ -6,7 +6,6 @@ using Sprocket.Host.SpaceEngineers.Storage;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -145,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 aim.MovesOn = MoveOn;
             }
 
-            _strip = after ?? new PickStrip(editor.Texts, delegate { return Editor.Windows; });
+            _strip = after ?? new PickStrip(editor.Texts);
             _base = after == null ? 0 : after.Stages.Count;
 
             if (arguments != null)
@@ -412,7 +411,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var does = _what != null && _aim != null && !string.IsNullOrEmpty(_chosen);
             if (does && _does == null)
             {
-                _does = new StageColumn(_strip.Width, false, null, Editor.Texts, Windows);
+                _does = new StageColumn(_strip.Width, false, null, Editor.Texts);
                 _does.Title = Editor.Texts.PickWhatItDoes;
                 _strip.Add(_does);
             }
@@ -488,14 +487,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _strip.Arrive(Opens, Editor.Input);
         }
 
-        WindowLayer Windows()
-        {
-            return Editor.Windows;
-        }
-
         void MakeBlocks()
         {
-            _blocks = new StageColumn(_strip.Width, true, null, Editor.Texts, Windows);
+            _blocks = new StageColumn(_strip.Width, true, null, Editor.Texts);
             _blocks.Title = Editor.Texts.PickBlocks;
             _blocks.EmptyText = _fits != null
                 ? Editor.Texts.BlueprintNoneFits
@@ -520,7 +514,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // Sprocket's own wording throughout, so there is no second way to look at it.
             var views = _forEvents || _forTests ? null : new[] { Editor.Texts.PickOrganized, Editor.Texts.PickTerminal };
 
-            _what = new StageColumn(_strip.Width, true, views, Editor.Texts, Windows);
+            _what = new StageColumn(_strip.Width, true, views, Editor.Texts);
             _what.Title = _forTests ? Editor.Texts.PickWhatToCheck : _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
             _what.EmptyText = _forTests
                 ? Editor.Texts.PickNothingChecked

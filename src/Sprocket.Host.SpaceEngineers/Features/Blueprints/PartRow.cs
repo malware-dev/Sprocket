@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -28,12 +26,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         float _wide = PartList.Widest;
 
-        /// <summary>A part saying nothing yet, whose description's guide opens in <paramref name="windows" />.</summary>
-        public PartRow(Func<WindowLayer> windows)
+        /// <summary>A part saying nothing yet.</summary>
+        public PartRow()
         {
             Blocks = new List<long>();
             Signals = new List<EntityEvent>();
-            CreateView(windows);
+            CreateView();
         }
 
         /// <summary>What the part is called.</summary>

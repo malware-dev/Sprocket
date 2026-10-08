@@ -12,7 +12,6 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -451,15 +450,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         PartRow PartRow(Part part)
         {
-            var row = new PartRow(Windows);
+            var row = new PartRow();
             row.NameBox.Edited += delegate { Typed(row); };
             return row;
         }
 
-        WindowLayer Windows()
-        {
-            return Editor.Windows;
-        }
 
         /// <summary>A slot, with the blocks <paramref name="chosen" /> fills it with and a press on them that chooses others; false where no block fills it.</summary>
         /// <remarks>While the blueprint is being written, its name and what it is for in their boxes instead, and whether it needs a block.</remarks>

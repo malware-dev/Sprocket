@@ -667,7 +667,7 @@ public class EditorTests
         // Parked while it is being built, so the sentence is open for work.
         var sentence = editor.Sentence();
         Assert.True(sentence.Editable);
-        Assert.NotNull(editor.Adders()[0].Command);
+        Assert.True(Assert.IsType<PlusMenu>(Assert.Single(editor.Adders())).Offers);
 
         editor.SwitchOn();
         ship.Tick();
@@ -677,8 +677,7 @@ public class EditorTests
         sentence = editor.Sentence();
         Assert.False(sentence.Editable);
         Assert.NotEmpty(sentence.LockedText);
-        Assert.Equal(5, editor.Adders().Count);
-        Assert.All(editor.Adders(), adder => Assert.Null(adder.Command));
+        Assert.False(Assert.IsType<PlusMenu>(Assert.Single(editor.Adders())).Offers);
 
         // The bin is the exception, and deliberately: throwing a sequence away is not editing it,
         // and wanting rid of one while it runs is exactly when somebody wants rid of it.

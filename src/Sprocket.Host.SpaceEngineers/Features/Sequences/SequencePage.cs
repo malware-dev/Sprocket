@@ -316,26 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // Everything that changes what the sequence does waits until its system is switched off: the commands are not
             // made, so there is nothing to press by accident, and the page keeps its shape either way.
             var editable = Editable;
-            _doSomething.Text = StatusRow.Plus + texts.SequenceDoSomething;
-            _doSomething.Tip = Tip.For(_doSomething.Tip, texts.SequenceDoSomethingAbout);
-            _doSomething.Command = Changes(Cmd.AddAction, delegate { AddAction(_sequence.Steps.Count); });
-            _doSomething.IsVisible = editable;
-            _wait.Text = StatusRow.Plus + texts.SequenceWait;
-            _wait.Tip = Tip.For(_wait.Tip, texts.SequenceWaitAbout);
-            _wait.Command = Changes(Cmd.AddWait, delegate { AddWait(_sequence.Steps.Count); });
-            _wait.IsVisible = editable;
-            _run.Text = StatusRow.Plus + texts.SequenceRun;
-            _run.Tip = Tip.For(_run.Tip, texts.SequenceRunAbout);
-            _run.Command = Changes(Cmd.AddRun, delegate { AddRun(false, _sequence.Steps.Count); });
-            _run.IsVisible = editable;
-            _stop.Text = StatusRow.Plus + texts.SequenceStop;
-            _stop.Tip = Tip.For(_stop.Tip, texts.SequenceStopAbout);
-            _stop.Command = Changes(Cmd.AddStop, delegate { AddRun(true, _sequence.Steps.Count); });
-            _stop.IsVisible = editable;
-            _if.Text = StatusRow.Plus + texts.SequenceIf;
-            _if.Tip = Tip.For(_if.Tip, texts.SequenceIfAbout);
-            _if.Command = Changes(Cmd.AddIf, delegate { AddIf(_sequence.Steps.Count); });
-            _if.IsVisible = editable;
+            _add.Show(new Adder(texts.SequenceStep, texts.SequenceStepAbout, Kinds(texts, _sequence.Steps.Count)));
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
 
@@ -439,33 +420,46 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Grip.CanCarry = false;
             row.Locked = locked;
             row.Adds.Clear();
-            row.Adds.Add(new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout,
-                Changes(Cmd.AddAction, delegate { AddAction(at); })));
-            row.Adds.Add(new Adder(texts.SequenceWait, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); })));
-            row.Adds.Add(new Adder(texts.SequenceRun, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })));
-            row.Adds.Add(new Adder(texts.SequenceStop, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })));
-            row.Adds.Add(new Adder(texts.SequenceIf, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); })));
+            row.Adds.Add(new Adder(texts.SequenceStep, texts.SequenceStepAbout, Kinds(texts, at)));
+        }
+
+        /// <summary>Every kind of step there is, each added at the line <paramref name="at" />, in the order a menu offers them.</summary>
+        /// <remarks>Made when the page is arranged, which is when the program changes, so the line each adds at is current.</remarks>
+        List<Adder> Kinds(Texts texts, int at)
+        {
+            return new List<Adder>
+            {
+                new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, delegate { AddAction(at); })),
+                new Adder(texts.SequenceWait, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); })),
+                new Adder(texts.SequenceRun, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })),
+                new Adder(texts.SequenceStop, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })),
+                new Adder(texts.SequenceIf, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); }))
+            };
         }
 
         /// <summary>
-        /// Gives the row closing an if the ways to add a branch, an otherwise only while it has none, and an otherwise the way to
-        /// make it an otherwise if where it stands.
+        /// Gives the row closing an if its plus for a branch, offering an otherwise only while it has none, and an otherwise the
+        /// way to make it an otherwise if where it stands.
         /// </summary>
         void Branches(StepRow row, Texts texts, Step step, int index)
         {
             row.Adds.Clear();
             if (step is EndIf)
             {
-                row.Adds.Add(new Adder(texts.SequenceOtherwiseIf, texts.SequenceOtherwiseIfAbout,
-                    Changes(Cmd.AddBranch, delegate { AddBranch(index); })));
-                if (_sequence.Otherwise(_sequence.OpenOf(index)) < 0)
-                    row.Adds.Add(new Adder(texts.SequenceOtherwise, texts.SequenceOtherwiseAbout,
-                        Changes(Cmd.AddBranch, delegate { AddLast(index); })));
+                var ends = _sequence.Otherwise(_sequence.OpenOf(index)) < 0;
+                row.Adds.Add(new Adder(texts.SequenceBranch, texts.SequenceBranchAbout, new[]
+                {
+                    new Adder(texts.SequenceOtherwiseIf, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, delegate { AddBranch(index); })),
+                    new Adder(texts.SequenceOtherwise, texts.SequenceOtherwiseAbout,
+                        ends ? Changes(Cmd.AddBranch, delegate { AddLast(index); }) : null)
+                }));
             }
             else if (Kind(step) == StepKind.Otherwise)
             {
-                row.Adds.Add(new Adder(texts.SequenceIf, texts.SequenceOtherwiseTestAbout,
-                    Changes(Cmd.AddBranch, delegate { GiveTest(step); })));
+                row.Adds.Add(new Adder(texts.SequenceIf, texts.SequenceOtherwiseTestAbout, new[]
+                {
+                    new Adder(texts.SequenceIf, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, delegate { GiveTest(step); }))
+                }));
             }
         }
 

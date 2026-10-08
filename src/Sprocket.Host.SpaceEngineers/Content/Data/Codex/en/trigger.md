@@ -2,7 +2,7 @@
 
 A trigger says when a ![](mark:sequence) [sequence](#sequence) runs. It is one line: when something happens, then do one thing. For example, when the airlock's button is pressed, run *Cycle Out*.
 
-To add one, press `+ when` under `Triggers` on the ![](mark:logic-system) [logic system](#logic-system)'s screen, or `+ every` for one that starts on a set time. Pressing a part of a trigger opens the [picker](#picking) on that part, to change it.
+To add one, press `+ trigger` under `Triggers` on the ![](mark:logic-system) [logic system](#logic-system)'s screen, and choose `when`, or `every` for one that starts on a set time. Pressing a part of a trigger opens the [picker](#picking) on that part, to change it.
 
 ## What starts it
 

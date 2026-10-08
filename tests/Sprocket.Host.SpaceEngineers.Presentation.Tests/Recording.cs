@@ -12,6 +12,9 @@ sealed class Recording(RectangleF area) : IGraphics
 {
     public List<RectangleF> Fills { get; } = new List<RectangleF>();
 
+    /// <summary>Every picture drawn from a part of a texture, with where it was drawn, in order.</summary>
+    public List<(MyStringId Material, RectangleF Destination)> Pieces { get; } = new List<(MyStringId, RectangleF)>();
+
     public Vector2 Size => new Vector2(area.Width, area.Height);
 
     public RectangleF ScreenBounds => area;
@@ -42,9 +45,8 @@ sealed class Recording(RectangleF area) : IGraphics
     {
     }
 
-    public void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color)
-    {
-    }
+    public void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color) =>
+        Pieces.Add((material, destination));
 
     public void DrawText(string font, string text, Vector2 position, float size, Color color)
     {

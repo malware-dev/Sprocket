@@ -257,19 +257,27 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.System.When" xml:space="preserve">
     <value>when</value>
-    <comment>Button that adds a trigger started by something happening to a block.</comment>
+    <comment>Entry in the menu of triggers to add: a trigger started by something happening to a block.</comment>
   </data>
   <data name="Sprocket.System.Every" xml:space="preserve">
     <value>every</value>
-    <comment>Button that adds a trigger started on a timer.</comment>
+    <comment>Entry in the menu of triggers to add: a trigger started on a timer.</comment>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Add a trigger that starts on a signal from a block's toolbar, or when a block's value changes.</value>
-    <comment>Note on the button that adds a trigger started by something happening.</comment>
+    <value>When a block sends a signal, or reaches a state.</value>
+    <comment>Note on the menu entry that adds a trigger started by something happening.</comment>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
-    <value>Start a sequence repeatedly, on a timed interval.</value>
-    <comment>Note on the button that adds a trigger started on a timer.</comment>
+    <value>At a set interval, over and over.</value>
+    <comment>Note on the menu entry that adds a trigger started on a timer.</comment>
+  </data>
+  <data name="Sprocket.System.Trigger" xml:space="preserve">
+    <value>trigger</value>
+    <comment>Button under a logic system's triggers, after a plus that means add. It opens a menu of the kinds of trigger: when, every.</comment>
+  </data>
+  <data name="Sprocket.System.TriggerAbout" xml:space="preserve">
+    <value>Add a trigger: something that starts a sequence, or does one task.</value>
+    <comment>Note on the button that opens the menu of triggers to add.</comment>
   </data>
   <data name="Sprocket.System.Sequences" xml:space="preserve">
     <value>Sequences</value>
@@ -334,18 +342,26 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
     <value>task</value>
-    <comment>Button under a sequence's steps, after a plus that means add, that adds a step acting on blocks. The ellipsis says it asks which before it adds.</comment>
+    <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: a step acting on blocks. It asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.Wait" xml:space="preserve">
     <value>wait</value>
-    <comment>Button under a sequence's steps, after a plus that means add, that adds a step waiting a length of time. The ellipsis says it asks how long before it adds.</comment>
+    <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: a step waiting a length of time. It asks how long before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
-    <value>Add a task: run an action on blocks, or set one of their values.</value>
+    <value>Do something to blocks: an action, or setting one of their values.</value>
     <comment>Note on the button that adds a task to a sequence.</comment>
   </data>
+  <data name="Sprocket.Sequence.Step" xml:space="preserve">
+    <value>step</value>
+    <comment>Button at the end of a sequence, and of each branch of an if, after a plus that means add. It opens a menu of the kinds of step: task, wait, run, stop, if.</comment>
+  </data>
+  <data name="Sprocket.Sequence.StepAbout" xml:space="preserve">
+    <value>Add a step here.</value>
+    <comment>Note on the button that opens the menu of steps to add.</comment>
+  </data>
   <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
-    <value>Add a step that waits a while before the next one.</value>
+    <value>Wait a set time before the next step.</value>
     <comment>Note on the button that adds a wait to a sequence.</comment>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
@@ -1985,10 +2001,10 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   </data>
   <data name="Sprocket.Sequence.Run" xml:space="preserve">
     <value>run</value>
-    <comment>Button under a sequence's steps, after a plus that means add, that adds a step running another sequence. The ellipsis says it asks which before it adds.</comment>
+    <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: a step running another sequence. It asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
-    <value>Add a step that runs another sequence of this system.</value>
+    <value>Start another sequence, and wait for it to finish.</value>
     <comment>Note on the button that adds a step running another sequence.</comment>
   </data>
   <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
@@ -2001,18 +2017,18 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   </data>
   <data name="Sprocket.Sequence.Stop" xml:space="preserve">
     <value>stop</value>
-    <comment>Button under a sequence's steps, after a plus that means add, that adds a step stopping another sequence. The ellipsis says it asks which before it adds.</comment>
+    <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: a step stopping another sequence. It asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
-    <value>Add a step that stops another sequence of this system.</value>
+    <value>Stop another sequence where it is, and go straight on.</value>
     <comment>Note on the button that adds a step stopping another sequence.</comment>
   </data>
   <data name="Sprocket.Sequence.If" xml:space="preserve">
     <value>if</value>
-    <comment>The button that adds an if to the end of a sequence: the steps dragged into it run only where what it checks holds.</comment>
+    <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: an if, whose steps run only where what it checks holds. Also the button beside an otherwise that gives it something to check.</comment>
   </data>
   <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
-    <value>Add an if: steps dragged into it run only where what it checks holds.</value>
+    <value>Check blocks, and run the steps under it only where the check holds.</value>
     <comment>Tooltip for the button that adds an if.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIf" xml:space="preserve">
@@ -2020,7 +2036,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>The button under an if that adds a branch checking something else, tried where nothing before it held.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
-    <value>Add a branch that checks something else, where nothing above it held.</value>
+    <value>Check something else, where nothing above held.</value>
     <comment>Tooltip for the button that adds an otherwise if.</comment>
   </data>
   <data name="Sprocket.Sequence.Otherwise" xml:space="preserve">
@@ -2028,8 +2044,16 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>The button under an if that adds its last branch, run where nothing above it held.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
-    <value>Add a last branch, which runs where nothing above it held.</value>
+    <value>Run where nothing above held.</value>
     <comment>Tooltip for the button that adds an otherwise.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Branch" xml:space="preserve">
+    <value>branch</value>
+    <comment>Button on the row closing an if, after a plus that means add. It opens a menu of the branches that may be added: otherwise if, otherwise.</comment>
+  </data>
+  <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
+    <value>Add a branch to this if.</value>
+    <comment>Note on the button that opens the menu of branches to add to an if.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
     <value>Make this an otherwise if, which checks something first.</value>

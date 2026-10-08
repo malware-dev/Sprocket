@@ -230,7 +230,7 @@ namespace Sprocket.Sim.Driving
         }
 
         /// <summary>Presses one of the ways to start something on this screen, wherever it sits.</summary>
-        public static void PressStart(this SprocketEditor editor, string label) => PressButton(editor, label);
+        public static void PressStart(this SprocketEditor editor, string label) => PressOffered(editor, label);
 
         /// <summary>
         /// Switches on the logic system the editor is in, which a new one is not.
@@ -432,7 +432,42 @@ namespace Sprocket.Sim.Driving
             Run(editor.Screen.Answers.First(a => a.Text == text).Command);
 
         /// <summary>Presses one of the ways to add a step to the sequence the screen shows.</summary>
-        public static void PressAdd(this SprocketEditor editor, string text) => PressButton(editor, text);
+        public static void PressAdd(this SprocketEditor editor, string text) => PressOffered(editor, text);
+
+        /// <summary>Presses the first way on the screen to add <paramref name="text" />: a button saying it, or the entry saying it in a menu.</summary>
+        /// <remarks>A menu's entry is taken straight from what the menu offers, without hanging it open: what opening one does is its own test's.</remarks>
+        static void PressOffered(SprocketEditor editor, string text)
+        {
+            var view = editor.Current.View
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
+
+            foreach (var element in Within(view))
+            {
+                var menu = element as PlusMenu;
+                if (menu != null)
+                {
+                    foreach (var choice in menu.Choices)
+                    {
+                        if (choice.Text == text && choice.Adds != null)
+                        {
+                            choice.Adds.Execute();
+                            return;
+                        }
+                    }
+
+                    continue;
+                }
+
+                var button = element as Button;
+                if (button != null && (button.Text == StatusRow.Plus + text || button.Text == text))
+                {
+                    button.Command!.Execute();
+                    return;
+                }
+            }
+
+            throw new InvalidOperationException($"Nothing adds '{text}' on '{editor.Screen.Title()}'.");
+        }
 
         /// <summary>Presses one part of one step of the sequence the screen shows.</summary>
         public static void PressStepSlot(this SprocketEditor editor, int step, int slot) =>

@@ -14,6 +14,9 @@ namespace Lumel.Windows
         /// <summary>How many windows are open.</summary>
         public int Count => _open.Count;
 
+        /// <summary>The open window <paramref name="index" /> places from the bottom, the one opened first being nought.</summary>
+        public Window this[int index] => _open[index];
+
         /// <summary>Whether every open window is a floating one, which leaves the screen beneath free to use around it.</summary>
         public bool Floats
         {
@@ -47,17 +50,27 @@ namespace Lumel.Windows
             }
         }
 
+        /// <summary>Makes this the layer over <paramref name="screen" />, so everything on it opens its windows here.</summary>
+        public void Covers(Element screen)
+        {
+            screen.Layer = this;
+        }
+
         /// <summary>Puts <paramref name="window" /> on top; one already open is left where it is.</summary>
         public void Open(Window window)
         {
-            if (!_open.Contains(window))
-                _open.Add(window);
+            if (_open.Contains(window))
+                return;
+
+            _open.Add(window);
+            window.Layer = this;
         }
 
         /// <summary>Takes <paramref name="window" /> away, if it is open.</summary>
         public void Close(Window window)
         {
-            _open.Remove(window);
+            if (_open.Remove(window))
+                window.Layer = null;
         }
 
         /// <summary>Whether <paramref name="window" /> is open.</summary>
@@ -113,6 +126,7 @@ namespace Lumel.Windows
                     break;
 
                 _open.RemoveAt(i);
+                window.Layer = null;
                 closed = true;
             }
 

@@ -16,7 +16,7 @@ public class RunStepTests
     {
         var rig = Two(out var first, out _);
 
-        rig.Editor.PressStart(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(rig.Texts.SequenceRun);
         rig.Tick();
 
         Assert.IsType<ChoicePage>(rig.Editor.Current);
@@ -31,7 +31,7 @@ public class RunStepTests
     {
         var rig = Two(out _, out _);
 
-        rig.Editor.PressStart(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(rig.Texts.SequenceRun);
         rig.Tick();
 
         Assert.All(rig.Editor.Choices(), row => Assert.Equal(Symbols.Sequence, row.Mark));
@@ -43,7 +43,7 @@ public class RunStepTests
     {
         var rig = Two(out var first, out var second);
 
-        rig.Editor.PressStart(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(rig.Texts.SequenceRun);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
@@ -67,7 +67,7 @@ public class RunStepTests
         var rig = Two(out var first, out var second);
         var before = first.Steps.Count;
 
-        rig.Editor.PressStart(rig.Texts.SequenceStop);
+        rig.Editor.PressAdd(rig.Texts.SequenceStop);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
@@ -84,11 +84,11 @@ public class RunStepTests
     {
         var rig = Two(out _, out _);
 
-        rig.Editor.PressStart(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(rig.Texts.SequenceRun);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
-        rig.Editor.PressStart(rig.Texts.SequenceStop);
+        rig.Editor.PressAdd(rig.Texts.SequenceStop);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
@@ -106,7 +106,7 @@ public class RunStepTests
         var third = rig.Editor.Program.AddSequence(first.System!);
         third.Name = "Purge";
 
-        rig.Editor.PressStart(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(rig.Texts.SequenceRun);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();

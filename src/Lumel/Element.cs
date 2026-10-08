@@ -3,6 +3,7 @@ using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Styling;
 using Lumel.Viewing;
+using Lumel.Windows;
 using VRage.Input;
 using VRageMath;
 
@@ -30,6 +31,7 @@ namespace Lumel
         bool _measureDirty = true;
         Vector2 _measuredFor;
         Element _parent;
+        WindowLayer _layer;
         IPlacement _placement;
         Action _placementChanged;
         Action<Element, int> _released;
@@ -39,6 +41,33 @@ namespace Lumel
 
         /// <summary>Set when this is added to another element's children. Null while it is loose.</summary>
         public Element Parent => _parent;
+
+        /// <summary>Where this opens windows: the layer of the window it is in, or the layer over the screen it is on.</summary>
+        /// <remarks>
+        /// Found by climbing to the top of the tree this is in, which is an open window or the screen a layer covers, so
+        /// nothing that opens a window has to be handed the layer. Null while this is loose, or in a window that is closed.
+        /// </remarks>
+        public WindowLayer Windows
+        {
+            get
+            {
+                for (var at = this; at != null; at = at._parent)
+                {
+                    if (at._layer != null)
+                        return at._layer;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>The layer this is the top of, as a screen it covers or a window open in it; null for anything else.</summary>
+        /// <remarks>Set by the layer, through <see cref="WindowLayer.Covers" /> and <see cref="WindowLayer.Open" />.</remarks>
+        public WindowLayer Layer
+        {
+            get { return _layer; }
+            set { _layer = value; }
+        }
 
         /// <summary>Where this sits in the room its holder gives it; <see cref="Lumel.Align.Default" /> leaves that to the holder.</summary>
         public Align Align

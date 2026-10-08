@@ -3,6 +3,7 @@ using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
@@ -17,8 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Label _lockedText;
         Label _triggersHeading;
         VStack _addTriggers;
-        Button _when;
-        Button _every;
+        PlusMenu _addTrigger;
         VStack _triggerList;
         Label _sequencesHeading;
         VStack _addSequence;
@@ -72,15 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Padding = new Thickness(0f, 8f, 0f, 0f),
                         Children =
                         {
-                            new HStack
-                            {
-                                Spacing = 8f,
-                                Children =
-                                {
-                                    new Button { Style = Styles.Start }.As(out _when),
-                                    new Button { Style = Styles.Start }.As(out _every)
-                                }
-                            }
+                            new HStack { Children = { new PlusMenu().As(out _addTrigger) } }
                         }
                     }.As(out _addTriggers),
 

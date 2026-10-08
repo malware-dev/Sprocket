@@ -91,13 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             Show();
         }
 
-        /// <summary>Closes the window, keeping where it stands and what it was reading for the next time it opens.</summary>
-        public void Close()
-        {
-            if (_editor.Windows != null)
-                _editor.Windows.Close(this);
-        }
-
         /// <inheritdoc />
         /// <remarks>Beside the editor's right edge, outside it where the screen has the room and inside it where it has not.</remarks>
         protected override Vector2 Home(RectangleF area, Vector2 size)

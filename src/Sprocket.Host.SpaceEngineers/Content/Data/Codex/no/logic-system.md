@@ -14,9 +14,9 @@ Fordi blokkene holdes atskilt fra jobben, kan ett logikksystem kjøre alle lufts
 
 1. På startskjermen trykker du `+ logikksystem` og gir det navnet *Luftsluse* i overskriften.
 2. Under `Sekvenser` trykker du `+ sekvens` og gir den navnet *Sluse ut*.
-3. Trykk `+ oppgave`, [velg](#picking) den indre døra, og velg `close` med klokka ved siden av. Siden om ![](mark:sequence) [sekvenser](#sequence) forklarer klokka.
+3. Trykk `+ steg` og så `oppgave`, [velg](#picking) den indre døra, og velg `close` med klokka ved siden av. Siden om sekvenser forklarer klokka.
 4. Legg til `depressurize` for ventilen og `open` for den ytre døra på samme måte.
-5. Gå tilbake. Under `Utløsere` trykker du `+ når`, velger knappen til luftslusen og lar den kjøre *Sluse ut*.
+5. Gå tilbake. Under `Utløsere` trykker du `+ utløser` og så `når`, velger knappen til luftslusen og lar den kjøre *Sluse ut*.
 6. Forlat skjermen, og slå på logikksystemet når du blir spurt.
 
 ## Slå det av for å endre det
