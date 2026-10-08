@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -29,18 +29,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// finished writing has no colour, and opening its picker on black would be an answer it
         /// never gave.
         /// </remarks>
-        public static string Said(IList<Literal> values, int from, int count)
+        public static string Said(IList<Literal> arguments, int from, int count)
         {
             if (count == 1)
-                return from < values.Count ? values[from].Said : "";
+                return from < arguments.Count ? arguments[from].Said : "";
 
             var parts = new byte[3];
             for (var i = 0; i < 3; i++)
             {
-                if (from + i >= values.Count)
+                if (from + i >= arguments.Count)
                     return "";
 
-                Literal value = values[from + i];
+                Literal value = arguments[from + i];
                 if (value.Kind != ValueKind.Integer)
                     return "";
 
@@ -60,13 +60,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// the question that fills a step in have to arrive at the same words - a value that read
         /// one way in a sentence and another in the box that sets it would be two values.
         /// </remarks>
-        public static void Shown(IList<Literal> values, IList<Field> fields, IList<string> into)
+        public static void Shown(IList<Literal> arguments, IList<Field> fields, IList<string> into)
         {
             var at = 0;
             for (var i = 0; i < fields.Count; i++)
             {
                 // A value left out is the one the action does without it, which an optional field starts with.
-                var said = Said(values, at, fields[i].Covers);
+                var said = Said(arguments, at, fields[i].Covers);
                 into.Add(said.Length == 0 && !fields[i].Needed && fields[i].Default != null
                     ? fields[i].Default
                     : fields[i].Wording(said));

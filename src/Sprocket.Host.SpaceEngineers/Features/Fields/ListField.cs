@@ -13,7 +13,7 @@ using VRage.Input;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A value that is one of more words than fit on a line: the word given, and a list of them all hanging under it when pressed.</summary>
     /// <remarks>

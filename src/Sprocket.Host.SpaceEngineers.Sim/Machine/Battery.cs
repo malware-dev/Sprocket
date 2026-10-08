@@ -111,7 +111,7 @@ public sealed class Battery : Fitting
     }
 
     /// <inheritdoc />
-    public override void Perform(string actionId, IList<Literal> values)
+    public override void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "Recharge_On")
             Mode(ChargeMode.Recharge);
@@ -120,7 +120,7 @@ public sealed class Battery : Fitting
         else if (actionId == "Auto" || actionId == "Recharge_Off" || actionId == "Discharge_Off")
             Mode(ChargeMode.Auto);
         else
-            base.Perform(actionId, values);
+            base.Perform(actionId, arguments);
     }
 
     /// <summary>Charges on a recharge, and lands exactly on full as the game's battery does.</summary>

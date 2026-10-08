@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return false;
         }
@@ -98,13 +98,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
 
         /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return false;
         }
 
         /// <summary>Nothing: nothing known about this block says why it would not finish.</summary>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
         {
             return Trouble.None;
         }
@@ -138,7 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return GridEntity.Unestimated;
         }

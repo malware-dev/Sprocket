@@ -52,8 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Reads the reading <paramref name="propertyId" /> of <paramref name="block" />, answering whether it is one this declares.</summary>
         bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value);
 
-        /// <summary>Does the action <paramref name="actionId" /> to <paramref name="block" /> with <paramref name="values" />, answering whether it is one this declares.</summary>
-        bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values);
+        /// <summary>Does the action <paramref name="actionId" /> to <paramref name="block" /> with <paramref name="arguments" />, answering whether it is one this declares.</summary>
+        bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments);
 
         /// <summary>
         /// What this block is doing, or what is stopping it, or <see cref="Status.None" /> to fall back to the floor.
@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         Status StatusOf(IMyTerminalBlock block);
 
         /// <summary>
-        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="values" />, though the
+        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="arguments" />, though the
         /// state that action leads to does not hold.
         /// </summary>
         /// <remarks>
@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// keeps the room from empty. Asked of a block a sequence is held waiting on, on the cadence of
         /// <see cref="TroubleWith" /> and never on a tick.
         /// </remarks>
-        bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values);
+        bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments);
 
         /// <summary>
         /// Why this block will not finish what it was told to do, or null while it might.
@@ -90,11 +90,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// fill it by another, and what is wrong is a different answer for each of them.
         /// </para>
         /// <para>
-        /// <paramref name="actionId" /> and <paramref name="values" /> are what the step told it, since what stands in its
+        /// <paramref name="actionId" /> and <paramref name="arguments" /> are what the step told it, since what stands in its
         /// way can depend on that: a vent told to carry on where the air has nowhere to go has nothing in its way there.
         /// </para>
         /// </remarks>
-        Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId);
+        Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId);
 
         /// <summary>
         /// Whether this block is doing something <em>right now</em>, which is not whether it works.
@@ -125,6 +125,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Decides how often a wait for it is looked at, never whether it has arrived: a wrong answer
         /// costs a few ticks either way and nothing else.
         /// </remarks>
-        int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values);
+        int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments);
     }
 }

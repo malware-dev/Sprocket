@@ -11,7 +11,7 @@ using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>The values something takes, one line each: what the value is, and where it is given.</summary>
     /// <remarks>

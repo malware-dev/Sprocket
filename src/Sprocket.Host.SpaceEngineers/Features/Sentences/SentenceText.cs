@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -356,7 +356,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// program say the same thing - and so somebody who types a value into this slot sees back
         /// exactly what they typed.
         /// </remarks>
-        public static string Given(ValuesSlot slot)
+        public static string Given(ArgumentsSlot slot)
         {
             if (slot.IsEmpty)
                 return Empty;
@@ -462,7 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (duration != null)
                 return TimeText.Duration(duration.Ticks);
 
-            var given = slot as ValuesSlot;
+            var given = slot as ArgumentsSlot;
             if (given != null)
                 return Given(given);
 

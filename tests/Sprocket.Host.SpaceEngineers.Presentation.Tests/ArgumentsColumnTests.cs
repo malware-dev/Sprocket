@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// keyboard when they are pressed, Done sits at its foot, and what was entered for one thing is
 /// there again on going back to it while the picker is open.
 /// </remarks>
-public class ValuesColumnTests
+public class ArgumentsColumnTests
 {
     const string ALight = "60 196 type Airlock enter 60 265 200 384 560 340 1394 72 70 175 200 485";
 
@@ -54,7 +54,7 @@ public class ValuesColumnTests
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(5L, Assert.Single(act.Values).Whole);
+        Assert.Equal(5L, Assert.Single(act.Arguments).Whole);
     }
 
     /// <summary>Done with nothing given says so at the foot of the column, and the caret goes to the field.</summary>
@@ -104,7 +104,7 @@ public class ValuesColumnTests
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Empty(act.Values);
+        Assert.Empty(act.Arguments);
     }
 
     /// <summary>Double pressing something that takes values takes the caret to its first field.</summary>

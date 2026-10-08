@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using SpaceEngineers.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -93,14 +93,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var sounds = block as IMySoundBlock;
             if (sounds == null || actionId != Play)
                 return false;
 
-            if (values != null && values.Count > 0 && values[0].Text.Length > 0)
-                sounds.SelectedSound = values[0].Text;
+            if (arguments != null && arguments.Count > 0 && arguments[0].Text.Length > 0)
+                sounds.SelectedSound = arguments[0].Text;
 
             sounds.Play();
             return true;
@@ -113,13 +113,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return false;
         }
 
         /// <inheritdoc />
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
         {
             return Trouble.None;
         }
@@ -136,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return GridEntity.Unestimated;
         }

@@ -13,23 +13,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     public sealed class PickAnswer
     {
         readonly List<long> _targets = new List<long>();
-        readonly List<Literal> _values = new List<Literal>();
+        readonly List<Literal> _arguments = new List<Literal>();
 
+        /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, all together or any one as <paramref name="all" /> says, with no arguments.</summary>
         public PickAnswer(IList<long> targets, string chosen, bool all)
             : this(targets, chosen, all, null)
         {
         }
 
-        public PickAnswer(IList<long> targets, string chosen, bool all, IList<Literal> values,
+        /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, given <paramref name="arguments" />, reaching the blocks the way <paramref name="form" /> says.</summary>
+        public PickAnswer(IList<long> targets, string chosen, bool all, IList<Literal> arguments,
             Form form = Form.Native)
         {
             for (var i = 0; i < targets.Count; i++)
                 _targets.Add(targets[i]);
 
-            if (values != null)
+            if (arguments != null)
             {
-                for (var i = 0; i < values.Count; i++)
-                    _values.Add(values[i]);
+                for (var i = 0; i < arguments.Count; i++)
+                    _arguments.Add(arguments[i]);
             }
 
             Chosen = chosen;
@@ -37,17 +39,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Form = form;
         }
 
+        /// <summary>The entities what was chosen acts on.</summary>
         public IList<long> Targets => _targets;
 
         /// <summary>
-        /// What was typed for the action, where it takes values, and empty otherwise.
+        /// What was given for the action, where it takes options or sets a value, and empty otherwise.
         /// </summary>
         /// <remarks>
-        /// Asked for on the button that finishes the picking, because an action that needs values is
+        /// Asked for on the button that finishes the picking, because an action that needs options is
         /// not finished without them - so they arrive with the rest of the answer rather than
         /// afterwards.
         /// </remarks>
-        public IList<Literal> Values => _values;
+        public IList<Literal> Arguments => _arguments;
 
         /// <summary>The event or action that was chosen.</summary>
         public string Chosen { get; private set; }

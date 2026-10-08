@@ -5,7 +5,7 @@ using Lumel.Text;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     partial class ColorField
     {

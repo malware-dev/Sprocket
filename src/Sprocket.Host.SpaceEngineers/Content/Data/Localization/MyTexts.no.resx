@@ -284,7 +284,7 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Sequence.BlocksAbout" xml:space="preserve">
     <value>Velg hvilke blokker dette steget virker på.</value>
   </data>
-  <data name="Sprocket.Sequence.ValuesAbout" xml:space="preserve">
+  <data name="Sprocket.Sequence.ArgumentsAbout" xml:space="preserve">
     <value>Endre det den får.</value>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">

@@ -729,7 +729,7 @@ public class ScriptTests
         Assert.True(off.IsOff);
         Assert.Equal("open", off.ActionId);
         Assert.Equal(new[] { "inner" }, off.Targets);
-        Assert.Equal(2, off.Values[0].Whole);
+        Assert.Equal(2, off.Arguments[0].Whole);
         Assert.Equal("Not yet", off.Annotation);
         Assert.True(steps[3].IsOff);
         Assert.False(steps[4].IsOff);
@@ -759,14 +759,14 @@ public class ScriptTests
 
         var dim = Assert.IsType<Act>(triggers[1].Does);
         Assert.True(dim.Sets);
-        Assert.Equal(4.5, dim.Values[0].Real);
+        Assert.Equal(4.5, dim.Arguments[0].Real);
 
         Assert.Equal(1, triggers[2].Runs);
         Assert.True(triggers[2].Stops);
 
         var reverse = Assert.IsType<Act>(Assert.IsType<WhenTrigger>(triggers[3]).Does);
         Assert.Equal(Form.Action, reverse.Form);
-        Assert.Equal(2, reverse.Values[0].Whole);
+        Assert.Equal(2, reverse.Arguments[0].Whole);
 
         Assert.True(Assert.IsType<EveryTrigger>(triggers[4]).Stops);
 

@@ -218,13 +218,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     }
 
                     // Done what it was told short of the state, which only the block can say; the step is settled there.
-                    if (!reached && entity.Done(doing.Id, compiled.Values[t]))
+                    if (!reached && entity.Done(doing.Id, compiled.Arguments[t]))
                     {
                         Finish(_outstanding[i], entity);
                         continue;
                     }
 
-                    Trouble said = entity.Trouble(doing.Id, compiled.Values[t], doing.LeadsToStateId);
+                    Trouble said = entity.Trouble(doing.Id, compiled.Arguments[t], doing.LeadsToStateId);
                     if (said.Ends)
                         return said;
 
@@ -1071,7 +1071,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var compiled = Compile(_outstanding[i]);
                 for (var q = 0; q < compiled.Entities.Count; q++)
                 {
-                    var expected = compiled.Entities[q].Expected(_outstanding[i].ActionId, compiled.Values[q]);
+                    var expected = compiled.Entities[q].Expected(_outstanding[i].ActionId, compiled.Arguments[q]);
                     if (expected < 0)
                         return GridEntity.Unestimated;
 
@@ -1120,7 +1120,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var i = 0; i < compiled.Entities.Count; i++)
             {
                 if (step.Form == Form.Native)
-                    world.Invoke(compiled.Entities[i], step.ActionId, compiled.Values[i], step.Form);
+                    world.Invoke(compiled.Entities[i], step.ActionId, compiled.Arguments[i], step.Form);
                 else if (compiled.Orders[i] != null)
                     compiled.Orders[i].Give();
             }
@@ -1134,7 +1134,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             public readonly List<GridEntity> Entities = new List<GridEntity>();
             public readonly List<EntityAction> Actions = new List<EntityAction>();
-            public readonly List<IList<Literal>> Values = new List<IList<Literal>>();
+            public readonly List<IList<Literal>> Arguments = new List<IList<Literal>>();
             public readonly List<Order> Orders = new List<Order>();
 
             /// <summary>Why the act cannot be done, gone or possibly swapped, or none.</summary>
@@ -1206,13 +1206,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (action == null)
                     continue;
 
-                var values = Converted(compiled, action, step.Values);
+                var values = Converted(compiled, action, step.Arguments);
                 if (values == null)
                     continue;
 
                 compiled.Entities.Add(entity);
                 compiled.Actions.Add(action);
-                compiled.Values.Add(values);
+                compiled.Arguments.Add(values);
                 compiled.Orders.Add(entity.Prepare(action, values));
             }
 
@@ -1325,7 +1325,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var i = 0; i < compiled.Actions.Count; i++)
             {
                 if (compiled.Actions[i] == action)
-                    return compiled.Values[i];
+                    return compiled.Arguments[i];
             }
 
             var converted = new List<Literal>(given.Count);

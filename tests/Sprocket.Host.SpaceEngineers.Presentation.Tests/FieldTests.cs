@@ -1,7 +1,7 @@
 using Lumel;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;

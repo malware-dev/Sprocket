@@ -27,8 +27,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What this did, as it will be offered back.</summary>
         public abstract Change Change { get; }
 
+        /// <summary>Makes this change to <paramref name="subject" />.</summary>
         public abstract void Apply(T subject);
 
+        /// <summary>Takes this change back out of <paramref name="subject" />, leaving it as it was before <see cref="Apply" />.</summary>
         public abstract void Undo(T subject);
 
         /// <summary>
@@ -75,6 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
+        /// <summary>A list of its own holding the same ids as <paramref name="ids" />.</summary>
         protected static List<string> CopyOf(IList<string> ids)
         {
             var copy = new List<string>();
@@ -83,6 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return copy;
         }
 
+        /// <summary>Empties <paramref name="target" /> and fills it with the ids in <paramref name="source" />, keeping the list itself.</summary>
         protected static void Refill(IList<string> target, IList<string> source)
         {
             target.Clear();
@@ -90,6 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 target.Add(source[i]);
         }
 
+        /// <summary>Whether two lists hold the same ids in the same order.</summary>
         protected static bool Same(IList<string> left, IList<string> right)
         {
             if (left.Count != right.Count)
@@ -103,18 +108,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
-        protected static List<Literal> CopyOf(IList<Literal> values)
+        /// <summary>A list of its own holding the same arguments as <paramref name="arguments" />, and an empty one where there are none.</summary>
+        protected static List<Literal> CopyOf(IList<Literal> arguments)
         {
             var copy = new List<Literal>();
-            if (values == null)
+            if (arguments == null)
                 return copy;
 
-            for (var i = 0; i < values.Count; i++)
-                copy.Add(values[i]);
+            for (var i = 0; i < arguments.Count; i++)
+                copy.Add(arguments[i]);
 
             return copy;
         }
 
+        /// <summary>Empties <paramref name="target" /> and fills it with the arguments in <paramref name="source" />, keeping the list itself.</summary>
         protected static void Refill(IList<Literal> target, IList<Literal> source)
         {
             target.Clear();
@@ -122,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 target.Add(source[i]);
         }
 
-        /// <summary>Whether two lists of values say the same thing.</summary>
+        /// <summary>Whether two lists of arguments say the same thing.</summary>
         /// <remarks>
         /// By how each one reads, which is what a value is for: two that write themselves the same
         /// way are the same value, and comparing the kinds as well would call a step changed for a

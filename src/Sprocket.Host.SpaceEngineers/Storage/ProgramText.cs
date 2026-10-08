@@ -1742,10 +1742,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     pen.Word(act.ActionId).Says(Keyword.On);
                     WriteNames(pen, act.Targets);
 
-                    if (act.Values.Count > 0)
+                    if (act.Arguments.Count > 0)
                     {
                         pen.Says(Keyword.To);
-                        Written(pen, act.Values[0]);
+                        Written(pen, act.Arguments[0]);
                     }
                 }
                 else
@@ -1758,16 +1758,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     pen.Says(Keyword.On);
                     WriteNames(pen, act.Targets);
 
-                    if (act.Values.Count > 0)
+                    if (act.Arguments.Count > 0)
                     {
                         pen.Says(Keyword.With);
 
-                        for (var i = 0; i < act.Values.Count; i++)
+                        for (var i = 0; i < act.Arguments.Count; i++)
                         {
                             if (i > 0)
                                 pen.Comma();
 
-                            Written(pen, act.Values[i]);
+                            Written(pen, act.Arguments[i]);
                         }
                     }
                 }
@@ -1907,7 +1907,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return false;
             }
 
-            act.Values.Add(Given(statement.ValueAt(index)));
+            act.Arguments.Add(Given(statement.ValueAt(index)));
             return true;
         }
 

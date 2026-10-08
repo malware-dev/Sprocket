@@ -43,7 +43,7 @@ public class KeepingTests
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(5L, Assert.Single(act.Values).Whole);
+        Assert.Equal(5L, Assert.Single(act.Arguments).Whole);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class KeepingTests
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal(new[] { "Cockpit Light" }, act.Targets);
-        Assert.Equal(5.0, Assert.Single(act.Values).Number);
+        Assert.Equal(5.0, Assert.Single(act.Arguments).Number);
     }
 
     /// <summary>Blocks that do not offer the step's action leave nothing chosen, and nothing to finish with.</summary>
@@ -110,7 +110,7 @@ public class KeepingTests
 
         Assert.Equal("Sequence 1", screen.Editor.Screen.Title());
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(5.0, Assert.Single(act.Values).Number);
+        Assert.Equal(5.0, Assert.Single(act.Arguments).Number);
     }
 
     /// <summary>An action chosen in place of the step's asks for its own values: a double press on it goes to them rather than finishing.</summary>

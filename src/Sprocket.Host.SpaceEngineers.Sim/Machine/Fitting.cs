@@ -388,7 +388,7 @@ public abstract class Fitting
     /// An action the rig declares but does not model writes itself down instead, with its values,
     /// because what a test about values needs to know is which values arrived and in what order.
     /// </remarks>
-    public virtual void Perform(string actionId, IList<Literal> values)
+    public virtual void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "OnOff_On")
             Enabled = true;
@@ -397,17 +397,17 @@ public abstract class Fitting
         else if (actionId == "OnOff")
             Enabled = !Enabled;
         else if (Named(actionId))
-            Told(Said(actionId, values));
+            Told(Said(actionId, arguments));
     }
 
-    static string Said(string actionId, IList<Literal> values)
+    static string Said(string actionId, IList<Literal> arguments)
     {
-        if (values == null || values.Count == 0)
+        if (arguments == null || arguments.Count == 0)
             return actionId;
 
         var said = actionId;
-        for (var i = 0; i < values.Count; i++)
-            said += " " + values[i].Said;
+        for (var i = 0; i < arguments.Count; i++)
+            said += " " + arguments[i].Said;
 
         return said;
     }

@@ -13,8 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>What happens to the blocks or is done to them, and the box that narrows it.</summary>
         What,
 
-        /// <summary>The values what is done is given, and the first of them.</summary>
-        Values,
+        /// <summary>What is given to what is done, its options or the new value, and the first of them.</summary>
+        Arguments,
 
         /// <summary>No column in particular, where the part pressed stands for one with nothing to type into.</summary>
         Nothing

@@ -1,5 +1,5 @@
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>What may be typed into a field's box.</summary>
     public enum Entry

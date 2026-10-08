@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -49,7 +49,7 @@ public class SoundTests
         var sequence = automation.AddSequence((Trigger)null!);
         var play = new Act(SoundExtension.Play);
         play.Targets.Add(automation.Declare(ship.World, ship.Entity(speaker.Id)).Name);
-        play.Values.Add(Literal.Of("SoundBlockAlert2"));
+        play.Arguments.Add(Literal.Of("SoundBlockAlert2"));
         sequence.Steps.Add(play);
 
         var runner = new AutomationRunner(automation, ship.World);
@@ -74,6 +74,6 @@ public class SoundTests
         // The rig's names are its ids; the game's are the terminal's, by the same field.
         fields[0] = Field.Among("sound", ["Alert 1", "Alert 2"], ["SoundBlockAlert1", "SoundBlockAlert2"]);
 
-        Assert.Equal("Alert 2", SentenceText.Given(new ValuesSlot([Literal.Of("SoundBlockAlert2")], fields, null)));
+        Assert.Equal("Alert 2", SentenceText.Given(new ArgumentsSlot([Literal.Of("SoundBlockAlert2")], fields, null)));
     }
 }

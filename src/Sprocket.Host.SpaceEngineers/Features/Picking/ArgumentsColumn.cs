@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Lumel;
 using Lumel.Layout;
 using Lumel.Text;
@@ -6,8 +6,8 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
-    /// <summary>The values what is chosen takes, as a column after the stages, with why the pick cannot be finished under them.</summary>
-    public class ValuesColumn : VStack
+    /// <summary>What the chosen thing is given, its options or the new value, as a column after the stages, with why the pick cannot be finished under them.</summary>
+    public class ArgumentsColumn : VStack
     {
         readonly Label _title;
         readonly Label _why;
@@ -16,13 +16,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         float _width;
 
         /// <summary>An empty column <paramref name="width" /> across, headed <paramref name="title" />.</summary>
-        public ValuesColumn(float width, string title)
+        public ArgumentsColumn(float width, string title)
         {
             Spacing = 8f;
             Style = Styles.Column;
             Width = width;
 
-            // Headed as a stage is, with the line a stage keeps under its heading, so the first value lines up with the
+            // Headed as a stage is, with the line a stage keeps under its heading, so the first argument lines up with the
             // boxes beside it.
             Children.Add(new VStack
             {
@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set { _title.Text = (value ?? "").ToUpperInvariant(); }
         }
 
-        /// <summary>Where the values are given.</summary>
+        /// <summary>Where the arguments are given.</summary>
         public FieldSet Form => _form;
 
         /// <summary>Why the pick cannot be finished as it stands, or empty.</summary>

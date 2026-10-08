@@ -96,7 +96,7 @@ public sealed class Tank : Fitting
     }
 
     /// <inheritdoc />
-    public override void Perform(string actionId, IList<Literal> values)
+    public override void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "Stockpile_On")
             Stockpiling(true);
@@ -105,7 +105,7 @@ public sealed class Tank : Fitting
         else if (actionId == "Stockpile")
             Stockpiling(!_stockpile);
         else
-            base.Perform(actionId, values);
+            base.Perform(actionId, arguments);
     }
 
     /// <summary>Fills while it stockpiles, and lands exactly on full as the game's tank does.</summary>

@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -127,7 +127,7 @@ public class PistonTests
         var act = new Act(actionId);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(piston.Id)).Name);
         foreach (var value in given)
-            act.Values.Add(value);
+            act.Arguments.Add(value);
         sequence.Steps.Add(act);
         sequence.Steps.Add(new Await());
 

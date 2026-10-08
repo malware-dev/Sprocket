@@ -415,7 +415,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (doing == null)
                         continue;
 
-                    var missing = doing.Missing(act.Values.Count);
+                    var missing = doing.Missing(act.Arguments.Count);
                     if (missing != null)
                         return new SequenceFault(SequenceProblem.Unfilled, i, Trouble.None, missing);
                 }
@@ -446,7 +446,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 var act = sequence.Steps[i] as Act;
-                if (act == null || !act.HasAction || act.Values.Count == 0)
+                if (act == null || !act.HasAction || act.Arguments.Count == 0)
                     continue;
 
                 var targets = SystemInstance.Through(through, act.Targets);
@@ -457,7 +457,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         continue;
 
                     EntityAction doing = act.Names(entity.Kind.Actions);
-                    var refused = doing == null ? null : doing.Refused(act.Values);
+                    var refused = doing == null ? null : doing.Refused(act.Arguments);
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, i, Trouble.None, refused);
                 }

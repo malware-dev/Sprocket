@@ -3,7 +3,7 @@ using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Lumel.Text;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>
     /// What one field of a form asks for: what it is called, and what it will take.
@@ -184,6 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             return Called("");
         }
 
+        /// <summary>A box that takes anything, named <paramref name="name" />.</summary>
         public static Field Called(string name)
         {
             var field = new Field();

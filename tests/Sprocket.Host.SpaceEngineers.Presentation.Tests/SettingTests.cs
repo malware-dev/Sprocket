@@ -3,7 +3,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -79,7 +79,7 @@ public class SettingTests
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Falloff", act.ActionId);
         Assert.True(act.Sets, "a value was picked and the step does not say it sets one");
-        Assert.Equal(2, Assert.Single(act.Values).Whole);
+        Assert.Equal(2, Assert.Single(act.Arguments).Whole);
     }
 
     /// <summary>And running it tells the block, which is the whole point of the exercise.</summary>
@@ -107,7 +107,7 @@ public class SettingTests
         var set = new Act("Falloff");
         set.Form = Form.Value;
         set.Targets.Add(Named(sim, light));
-        set.Values.Add(Literal.Of(2L));
+        set.Arguments.Add(Literal.Of(2L));
         dim.Steps.Add(set);
 
         for (var i = 0; i < 5; i++)
@@ -151,7 +151,7 @@ public class SettingTests
         var off = new Act("OnOff");
         off.Form = Form.Value;
         off.Targets.Add(Named(sim, light));
-        off.Values.Add(Literal.Of(false));
+        off.Arguments.Add(Literal.Of(false));
         dark.Steps.Add(off);
 
         for (var i = 0; i < 5; i++)
@@ -214,7 +214,7 @@ public class SettingTests
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Radius", act.ActionId);
-        Assert.Equal(4, Assert.Single(act.Values).Whole);
+        Assert.Equal(4, Assert.Single(act.Arguments).Whole);
     }
 
     static string Named(Simulation sim, Fitting fitting)

@@ -372,7 +372,7 @@ Renaming it here renames the grid.</value>
     <value>Choose which blocks this step acts on.</value>
     <comment>Note on the blocks a step's sentence names.</comment>
   </data>
-  <data name="Sprocket.Sequence.ValuesAbout" xml:space="preserve">
+  <data name="Sprocket.Sequence.ArgumentsAbout" xml:space="preserve">
     <value>Change what it is given.</value>
     <comment>Note on a value a step's sentence gives.</comment>
   </data>

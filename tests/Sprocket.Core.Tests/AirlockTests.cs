@@ -1,5 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -147,9 +147,9 @@ public class AirlockTests
         Assert.False(string.IsNullOrEmpty(field.About));
 
         // Holding is what the action does anyway, so a sentence leaves it out; moving on is said.
-        Assert.True(new ValuesSlot(new Literal[0], fields, null).Quiet);
-        Assert.True(new ValuesSlot(new[] { Literal.Of(AirVentExtension.Hold) }, fields, null).Quiet);
-        var movesOn = new ValuesSlot(new[] { Literal.Of(AirVentExtension.MoveOn) }, fields, null);
+        Assert.True(new ArgumentsSlot(new Literal[0], fields, null).Quiet);
+        Assert.True(new ArgumentsSlot(new[] { Literal.Of(AirVentExtension.Hold) }, fields, null).Quiet);
+        var movesOn = new ArgumentsSlot(new[] { Literal.Of(AirVentExtension.MoveOn) }, fields, null);
         Assert.False(movesOn.Quiet);
         Assert.Equal("or move on", SentenceText.Given(movesOn));
     }
@@ -159,7 +159,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnIsWrittenAndReadSo()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
 
         var saved = ProgramText.Save(a.Automation, a.World.Values);
         Assert.Contains("call ext.depressurize on [ ", saved);
@@ -168,7 +168,7 @@ public class AirlockTests
         var after = new Automation();
         Assert.Equal("", ProgramText.Load(saved, after, a.World.Values));
         var told = Assert.IsType<Act>(after.Sequences[0].Steps[2]);
-        Assert.Equal(AirVentExtension.MoveOn, Assert.Single(told.Values).Whole);
+        Assert.Equal(AirVentExtension.MoveOn, Assert.Single(told.Arguments).Whole);
     }
 
     /// <summary>A room whose air has nowhere to go holds the cycle, says why, and keeps the outer door shut.</summary>
@@ -197,7 +197,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnOpensTheOuterDoorWhenItsAirHasNowhereToGo()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -216,7 +216,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnStillEmptiesWhereItCan()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
         a.Inner.ForceOpen();
         a.Tick(3);
         a.Log.Clear();
@@ -235,7 +235,7 @@ public class AirlockTests
     public void ARoomToldToWaitHoldsTheCycle()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Values.Add(Literal.Of(AirVentExtension.Hold));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.Hold));
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -877,7 +877,7 @@ public class AirlockTests
         var cycle = a.Automation.AddSequence(system);
         var empty = new Act("Depressurize") { Form = Form.Value };
         empty.Targets.Add(a.Ref(a.Seen(a.Vent)));
-        empty.Values.Add(Literal.Of(true));
+        empty.Arguments.Add(Literal.Of(true));
         cycle.Steps.Add(empty);
 
         a.Vent.Enabled = false;
@@ -901,7 +901,7 @@ public class AirlockTests
         var cycle = a.Automation.AddSequence(system);
         var radius = new Act("Radius") { Form = Form.Value };
         radius.Targets.Add(a.Ref(a.Seen(lamp)));
-        radius.Values.Add(Literal.Of(4.5));
+        radius.Arguments.Add(Literal.Of(4.5));
         cycle.Steps.Add(radius);
         Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
 
@@ -1576,7 +1576,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1593,7 +1593,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Values.Add(Literal.Of(AirVentExtension.Hold));
+        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(AirVentExtension.Hold));
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1610,7 +1610,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Values.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
         a.Vent.Leaking = true;
         a.Automation.Edited();
         a.Tick();

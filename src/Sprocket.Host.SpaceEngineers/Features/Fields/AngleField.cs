@@ -8,7 +8,7 @@ using Lumel.Text;
 using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>An angle, given by turning a dial or by typing it into the box beside it, the two kept in step.</summary>
     /// <remarks>

@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var battery = block as IMyBatteryBlock;
             if (battery == null || actionId != Recharge)
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return false;
         }
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Set to another mode is its own answer: whatever set it has overruled the step, and nothing
         /// is heading towards full any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
         {
             var battery = block as IMyBatteryBlock;
             if (battery == null || stateId != IsFull || Charged(battery))
@@ -159,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return GridEntity.Unestimated;
         }

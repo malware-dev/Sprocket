@@ -19,6 +19,7 @@ public sealed class RigSlots : ISlots
 {
     readonly Rig _rig;
 
+    /// <summary>The toolbars of the blocks on <paramref name="rig" />.</summary>
     public RigSlots(Rig rig)
     {
         _rig = rig;
@@ -136,7 +137,7 @@ public sealed class RigSlots : ISlots
     /// A made-up block's action or value, made ready the way the game's are: each value built as the
     /// type it is taken as, which the fitting keeps for a test to look at when it is given.
     /// </summary>
-    public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+    public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
         IList<Primitive> types)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -145,19 +146,19 @@ public sealed class RigSlots : ISlots
                 continue;
 
             if (form == Form.Value)
-                return values == null || values.Count == 0 ? null : new Told(fitting, id, values, null, true);
+                return arguments == null || arguments.Count == 0 ? null : new Told(fitting, id, arguments, null, true);
 
             if (!fitting.Offers(id))
                 return null;
 
             var handed = new List<object>();
-            for (var i = 0; values != null && i < values.Count; i++)
+            for (var i = 0; arguments != null && i < arguments.Count; i++)
             {
                 var type = types == null || i >= types.Count ? Primitive.None : types[i];
-                handed.Add(values[i].Native(type));
+                handed.Add(arguments[i].Native(type));
             }
 
-            return new Told(fitting, id, values, handed, false);
+            return new Told(fitting, id, arguments, handed, false);
         }
 
         return null;
@@ -171,11 +172,11 @@ public sealed class RigSlots : ISlots
         readonly IList<object> _handed;
         readonly bool _sets;
 
-        public Told(Fitting fitting, string id, IList<Literal> values, IList<object> handed, bool sets)
+        public Told(Fitting fitting, string id, IList<Literal> arguments, IList<object> handed, bool sets)
         {
             _fitting = fitting;
             _id = id;
-            _values = values;
+            _values = arguments;
             _handed = handed;
             _sets = sets;
         }
@@ -195,14 +196,14 @@ public sealed class RigSlots : ISlots
     }
 
     /// <inheritdoc />
-    public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
+    public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
     {
         foreach (Fitting fitting in _rig.Fitted)
         {
             if (fitting.Block != block || !fitting.Offers(actionId))
                 continue;
 
-            fitting.Perform(actionId, values);
+            fitting.Perform(actionId, arguments);
             return true;
         }
 

@@ -14,7 +14,7 @@ using Lumel.Input;
 using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Localization;
 using VRage.Game.ModAPI;
 using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
@@ -2056,8 +2056,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 for (var i = 0; i < named.Count; i++)
                     act.Targets.Add(named[i]);
 
-                for (var i = 0; i < answer.Values.Count; i++)
-                    act.Values.Add(answer.Values[i]);
+                for (var i = 0; i < answer.Arguments.Count; i++)
+                    act.Arguments.Add(answer.Arguments[i]);
 
                 UnwindTo(origin);
                 Points(system, trigger, act, fresh, null, start);
@@ -2070,7 +2070,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 {
                     aim.Following = new PickPage(this, Texts.PickSingleTask, false, Blocks(system, only.Targets),
                         only.ActionId, only.Form, delegate(PickAnswer answer) { aim.Finish(answer); },
-                        values: only.Values, opens: aim.Opens, after: aim.Pick);
+                        arguments: only.Arguments, opens: aim.Opens, after: aim.Pick);
                 }
 
                 aim.Following.Arrived(aim.Straight);

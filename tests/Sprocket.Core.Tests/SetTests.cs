@@ -1,7 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Tests;
 
@@ -32,7 +32,7 @@ public class SetTests
     public void ASetNamesTheValue()
     {
         var off = new Act("OnOff") { Form = Form.Value };
-        off.Values.Add(Literal.Of(false));
+        off.Arguments.Add(Literal.Of(false));
 
         Assert.Same(_value, off.Names(Both()));
     }

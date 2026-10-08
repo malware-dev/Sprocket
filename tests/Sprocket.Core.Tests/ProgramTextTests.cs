@@ -288,13 +288,13 @@ public class ProgramTextTests
 
         var rotate = new Act(RotorExtension.RotateTo) { Form = Form.Native };
         rotate.Targets.Add("rotor");
-        rotate.Values.Add(Literal.Of(90L));
-        rotate.Values.Add(Literal.Of(2.5));
+        rotate.Arguments.Add(Literal.Of(90L));
+        rotate.Arguments.Add(Literal.Of(2.5));
         sequence.Steps.Add(rotate);
 
         var speed = new Act("Velocity") { Form = Form.Value };
         speed.Targets.Add("rotor");
-        speed.Values.Add(Literal.Of(5.0));
+        speed.Arguments.Add(Literal.Of(5.0));
         sequence.Steps.Add(speed);
 
         var saved = Save(program);
@@ -309,14 +309,14 @@ public class ProgramTextTests
         var game = Assert.IsType<Act>(steps[0]);
         Assert.Equal(Form.Action, game.Form);
         Assert.Equal("Reverse", game.ActionId);
-        Assert.Empty(game.Values);
+        Assert.Empty(game.Arguments);
 
         var own = Assert.IsType<Act>(steps[1]);
         Assert.Equal(Form.Native, own.Form);
         Assert.Equal(RotorExtension.RotateTo, own.ActionId);
-        Assert.Equal(2, own.Values.Count);
-        Assert.Equal(90, own.Values[0].Whole);
-        Assert.Equal(2.5, own.Values[1].Real);
+        Assert.Equal(2, own.Arguments.Count);
+        Assert.Equal(90, own.Arguments[0].Whole);
+        Assert.Equal(2.5, own.Arguments[1].Real);
 
         var value = Assert.IsType<Act>(steps[2]);
         Assert.Equal(Form.Value, value.Form);
@@ -337,17 +337,17 @@ public class ProgramTextTests
 
         var colour = new Act("SetColor") { Form = Form.Action };
         colour.Targets.Add("light");
-        colour.Values.Add(Literal.Of(255));
-        colour.Values.Add(Literal.Of(136));
-        colour.Values.Add(Literal.Of(0));
+        colour.Arguments.Add(Literal.Of(255));
+        colour.Arguments.Add(Literal.Of(136));
+        colour.Arguments.Add(Literal.Of(0));
         sequence.Steps.Add(colour);
 
         var each = new Act("SetEverything") { Form = Form.Action };
         each.Targets.Add("light");
-        each.Values.Add(Literal.Of("four and a half"));
-        each.Values.Add(Literal.Of(4.5));
-        each.Values.Add(Literal.Of(true));
-        each.Values.Add(Literal.Colour(255, 136, 0, 255));
+        each.Arguments.Add(Literal.Of("four and a half"));
+        each.Arguments.Add(Literal.Of(4.5));
+        each.Arguments.Add(Literal.Of(true));
+        each.Arguments.Add(Literal.Colour(255, 136, 0, 255));
         sequence.Steps.Add(each);
 
         // The language's own words for it, rather than a spelling invented here.
@@ -359,28 +359,28 @@ public class ProgramTextTests
         var back = Assert.IsType<Act>(after.Sequences[0].Steps[0]);
         Assert.Equal("SetColor", back.ActionId);
         Assert.Equal(new[] { "light" }, back.Targets);
-        Assert.Equal(3, back.Values.Count);
-        Assert.Equal(ValueKind.Integer, back.Values[0].Kind);
-        Assert.Equal(255, back.Values[0].Whole);
-        Assert.Equal(136, back.Values[1].Whole);
-        Assert.Equal(0, back.Values[2].Whole);
+        Assert.Equal(3, back.Arguments.Count);
+        Assert.Equal(ValueKind.Integer, back.Arguments[0].Kind);
+        Assert.Equal(255, back.Arguments[0].Whole);
+        Assert.Equal(136, back.Arguments[1].Whole);
+        Assert.Equal(0, back.Arguments[2].Whole);
 
         var kinds = Assert.IsType<Act>(after.Sequences[0].Steps[1]);
-        Assert.Equal(4, kinds.Values.Count);
+        Assert.Equal(4, kinds.Arguments.Count);
 
-        Assert.Equal(ValueKind.Text, kinds.Values[0].Kind);
-        Assert.Equal("four and a half", kinds.Values[0].Text);
+        Assert.Equal(ValueKind.Text, kinds.Arguments[0].Kind);
+        Assert.Equal("four and a half", kinds.Arguments[0].Text);
 
-        Assert.Equal(ValueKind.Real, kinds.Values[1].Kind);
-        Assert.Equal(4.5, kinds.Values[1].Real);
+        Assert.Equal(ValueKind.Real, kinds.Arguments[1].Kind);
+        Assert.Equal(4.5, kinds.Arguments[1].Real);
 
-        Assert.Equal(ValueKind.Flag, kinds.Values[2].Kind);
-        Assert.True(kinds.Values[2].Flag);
+        Assert.Equal(ValueKind.Flag, kinds.Arguments[2].Kind);
+        Assert.True(kinds.Arguments[2].Flag);
 
-        Assert.Equal(ValueKind.Color, kinds.Values[3].Kind);
-        Assert.Equal(255, kinds.Values[3].Red);
-        Assert.Equal(136, kinds.Values[3].Green);
-        Assert.Equal(0, kinds.Values[3].Blue);
+        Assert.Equal(ValueKind.Color, kinds.Arguments[3].Kind);
+        Assert.Equal(255, kinds.Arguments[3].Red);
+        Assert.Equal(136, kinds.Arguments[3].Green);
+        Assert.Equal(0, kinds.Arguments[3].Blue);
     }
 
     /// <summary>An action that asked for nothing is written as the action and its parts, with no <c>with</c>.</summary>
@@ -419,7 +419,7 @@ public class ProgramTextTests
         var radius = new Act("Radius");
         radius.Form = Form.Value;
         radius.Targets.Add("light");
-        radius.Values.Add(Literal.Of(4.5));
+        radius.Arguments.Add(Literal.Of(4.5));
         sequence.Steps.Add(radius);
 
         Assert.Contains("set Radius on [ light ] to 4.5", Save(program));
@@ -431,7 +431,7 @@ public class ProgramTextTests
         Assert.True(back.Sets);
         Assert.Equal("Radius", back.ActionId);
         Assert.Equal(new[] { "light" }, back.Targets);
-        Assert.Equal(4.5, Assert.Single(back.Values).Real);
+        Assert.Equal(4.5, Assert.Single(back.Arguments).Real);
     }
 
     /// <summary>

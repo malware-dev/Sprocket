@@ -4,7 +4,7 @@ using System.Globalization;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 // The direction lives in the Ingame namespace, which cannot be imported whole: IMyMotorStator is
 // declared in both, and the mod-side one is the one with the event on it.
@@ -215,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var rotor = block as IMyMotorStator;
             if (rotor == null || actionId != RotateTo)
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             MyRotationDirection way;
             float angle;
             float speed;
-            if (!Given(values, Hinge(block), out way, out angle, out speed))
+            if (!Given(arguments, Hinge(block), out way, out angle, out speed))
                 return true;
 
             if (Already(rotor, angle))
@@ -272,7 +272,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The direction, angle and speed a step turning the rotor was given, in that order, or the angle
         /// and speed a step turning a hinge was given, which goes the short way.
         /// </summary>
-        static bool Given(IList<Literal> values, bool hinge, out MyRotationDirection way, out float angle,
+        static bool Given(IList<Literal> arguments, bool hinge, out MyRotationDirection way, out float angle,
             out float speed)
         {
             way = MyRotationDirection.AUTO;
@@ -280,14 +280,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             speed = 0;
 
             var at = hinge ? 0 : 1;
-            if (values == null || values.Count < at + 2)
+            if (arguments == null || arguments.Count < at + 2)
                 return false;
 
             if (!hinge)
-                way = (MyRotationDirection)values[0].Whole;
+                way = (MyRotationDirection)arguments[0].Whole;
 
-            angle = (float)values[at].Real;
-            speed = (float)Math.Abs(values[at + 1].Real);
+            angle = (float)arguments[at].Real;
+            speed = (float)Math.Abs(arguments[at + 1].Real);
             return true;
         }
 
@@ -308,7 +308,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return false;
         }
@@ -322,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// answer worth giving up on - it was set by the turn, so nought means something else has
         /// been at it and nothing is heading for the angle any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
         {
             var rotor = block as IMyMotorStator;
             if (rotor == null || stateId != There || AtLimit(rotor))
@@ -371,14 +371,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A revolution a minute is six degrees a second, and the game runs sixty ticks to the second,
         /// so a rotor turns a tenth of a degree a tick for every revolution a minute it is given.
         /// </remarks>
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var rotor = block as IMyMotorStator;
 
             MyRotationDirection way;
             float angle;
             float speed;
-            if (rotor == null || actionId != RotateTo || !Given(values, Hinge(block), out way, out angle, out speed)
+            if (rotor == null || actionId != RotateTo || !Given(arguments, Hinge(block), out way, out angle, out speed)
                 || speed <= 0)
                 return GridEntity.Unestimated;
 

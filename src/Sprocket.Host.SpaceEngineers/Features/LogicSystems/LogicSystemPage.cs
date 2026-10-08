@@ -13,7 +13,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -633,7 +633,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ValuesSlot(act.Values, fields, Does(trigger, Opening.Values));
+            var given = new ArgumentsSlot(act.Arguments, fields, Does(trigger, Opening.Arguments));
             if (!given.Quiet)
                 row.Does.Add(given);
         }

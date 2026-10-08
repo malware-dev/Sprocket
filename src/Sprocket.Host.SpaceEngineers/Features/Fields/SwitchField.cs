@@ -7,32 +7,34 @@ using Lumel.Layout;
 using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A value that is one of three words, given by pressing the one wanted.</summary>
-    /// <remarks>Three words fit on one line, and a line of words shows every answer at once, which a list hides until it is opened.</remarks>
-    public class WordsField : HStack, IField
+    /// <summary>A value that is one of exactly two words, given with a switch saying them.</summary>
+    /// <remarks>
+    /// Two words are a switch because a switch is what two words that exclude each other look like everywhere in this game.
+    /// Inside a row of its own, so it is as wide as its words rather than as wide as the form.
+    /// </remarks>
+    public class SwitchField : HStack, IField
     {
+        readonly Switch _switch;
+        readonly string _on;
+        readonly string _off;
         readonly List<string> _words = new List<string>();
-        readonly List<Button> _buttons = new List<Button>();
 
         string _text = "";
 
-        /// <summary>One button for each of <paramref name="words" />, none of them given yet.</summary>
-        public WordsField(IList<string> words)
+        /// <summary>A switch between <paramref name="on" /> and <paramref name="off" />, given neither yet.</summary>
+        public SwitchField(string on, string off)
         {
-            Spacing = 4f;
+            _on = on;
+            _off = off;
+            _words.Add(on);
+            _words.Add(off);
             Focusable = true;
 
-            for (var i = 0; i < words.Count; i++)
-            {
-                var word = words[i];
-                _words.Add(word);
-
-                var button = new Button { Style = Styles.Word, Text = word, Command = new Relay(delegate { Give(word); }) };
-                _buttons.Add(button);
-                Children.Add(button);
-            }
+            Children.Add(new Switch { Style = Styles.Switch }.As(out _switch));
+            _switch.Says(on, off);
+            _switch.Command = new Relay(Flip);
         }
 
         /// <inheritdoc />
@@ -45,8 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             set
             {
                 _text = value ?? "";
-                for (var i = 0; i < _buttons.Count; i++)
-                    _buttons[i].Style = _words[i] == _text ? Styles.WordChosen : Styles.Word;
+                _switch.IsOn = _text == _on;
             }
         }
 
@@ -81,6 +82,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Values
             var word = Choosing.Letter(_words, _text, c);
             if (word != null)
                 Give(word);
+        }
+
+        /// <summary>Gives the other word, or the first where neither has been given.</summary>
+        void Flip()
+        {
+            Give(_text == _on ? _off : _on);
         }
 
         void Give(string word)

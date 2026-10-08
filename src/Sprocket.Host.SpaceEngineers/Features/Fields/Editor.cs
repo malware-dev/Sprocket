@@ -1,5 +1,5 @@
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>
     /// What a field is filled in with.

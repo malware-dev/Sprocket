@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
@@ -294,8 +294,8 @@ public class RotorTests
 
         var turn = new Act(RotorExtension.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
-        turn.Values.Add(Literal.Of(Directly));
-        turn.Values.Add(Literal.Of(90L));
+        turn.Arguments.Add(Literal.Of(Directly));
+        turn.Arguments.Add(Literal.Of(90L));
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
 
@@ -309,7 +309,7 @@ public class RotorTests
         Assert.True(fault.Parks);
 
         // And with the speed it asks for, that is no longer what is wrong with it.
-        turn.Values.Add(Literal.Of(1L));
+        turn.Arguments.Add(Literal.Of(1L));
         Assert.NotEqual(SequenceProblem.Unfilled,
             SequenceSummary.Checked(ship.World, runner.Bindings, sequence, sequence.System.First).Problem);
     }
@@ -330,9 +330,9 @@ public class RotorTests
 
         var turn = new Act(RotorExtension.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
-        turn.Values.Add(Literal.Of(Clockwise));
-        turn.Values.Add(Literal.Of(350L));
-        turn.Values.Add(Literal.Of(1L));
+        turn.Arguments.Add(Literal.Of(Clockwise));
+        turn.Arguments.Add(Literal.Of(350L));
+        turn.Arguments.Add(Literal.Of(1L));
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
 
@@ -489,9 +489,9 @@ public class RotorTests
         var sequence = automation.AddSequence((Trigger)null!);
         var turn = new Act(RotorExtension.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
-        turn.Values.Add(Literal.Of(Clockwise));
-        turn.Values.Add(Literal.Of(degrees));
-        turn.Values.Add(Literal.Of(rpm));
+        turn.Arguments.Add(Literal.Of(Clockwise));
+        turn.Arguments.Add(Literal.Of(degrees));
+        turn.Arguments.Add(Literal.Of(rpm));
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
         return sequence;
@@ -506,8 +506,8 @@ public class RotorTests
         var automation = new Automation();
         var sequence = Turning(ship, automation, rotor, 90, 5);
         var turn = (Act)sequence.Steps[0];
-        turn.Values.RemoveAt(2);
-        turn.Values.RemoveAt(1);
+        turn.Arguments.RemoveAt(2);
+        turn.Arguments.RemoveAt(1);
         var runner = new AutomationRunner(automation, ship.World);
         ship.Tick();
         runner.Tick(1);
@@ -536,7 +536,7 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var automation = new Automation();
         var sequence = Turning(ship, automation, rotor, 90, 5);
-        ((Act)sequence.Steps[0]).Values[1] = Literal.Of("far");
+        ((Act)sequence.Steps[0]).Arguments[1] = Literal.Of("far");
         var runner = new AutomationRunner(automation, ship.World);
         ship.Tick();
         runner.Tick(1);
@@ -556,9 +556,9 @@ public class RotorTests
         action.Fields(fields);
 
         Assert.Equal("directly to 90° at 10 rpm",
-            SentenceText.Given(new ValuesSlot([Literal.Of(Directly), Literal.Of(90L), Literal.Of(10L)], fields, null)));
+            SentenceText.Given(new ArgumentsSlot([Literal.Of(Directly), Literal.Of(90L), Literal.Of(10L)], fields, null)));
         Assert.Equal("clockwise to 45° at 2 rpm",
-            SentenceText.Given(new ValuesSlot([Literal.Of(Clockwise), Literal.Of(45L), Literal.Of(2L)], fields, null)));
+            SentenceText.Given(new ArgumentsSlot([Literal.Of(Clockwise), Literal.Of(45L), Literal.Of(2L)], fields, null)));
     }
 
     static Literal Written(double number)
@@ -597,7 +597,7 @@ public class RotorTests
         var turn = new Act(RotorExtension.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
         foreach (var value in given)
-            turn.Values.Add(value);
+            turn.Arguments.Add(value);
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
 

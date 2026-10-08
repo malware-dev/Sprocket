@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -439,7 +439,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var fields = new List<Field>();
             value.Fields(fields);
-            return value.Named + " on " + blocks + " is " + SentenceText.Given(new ValuesSlot(new[] { test.Value }, fields, null));
+            return value.Named + " on " + blocks + " is " + SentenceText.Given(new ArgumentsSlot(new[] { test.Value }, fields, null));
         }
 
 
@@ -459,13 +459,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // in a list of steps and the values are the detail.
             var fields = new List<Field>();
             named.Fields(fields);
-            var slot = new ValuesSlot(step.Values, fields, null);
+            var slot = new ArgumentsSlot(step.Arguments, fields, null);
             var given = SentenceText.Given(slot);
 
             if (step.Sets)
                 return SentenceText.Setting(named.Named, blocks, given);
 
-            return step.Values.Count == 0 || slot.Quiet ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
+            return step.Arguments.Count == 0 || slot.Quiet ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
         }
     }
 }

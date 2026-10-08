@@ -131,16 +131,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the block is in <paramref name="moment" />: the flag it reads is set where the moment rises, clear where it falls.</summary>
-        public bool In(Values values, EntityEvent moment)
+        public bool In(Values arguments, EntityEvent moment)
         {
-            return Flag(values, moment.PropertyId) == (moment.Edge == Edge.Rising);
+            return Flag(arguments, moment.PropertyId) == (moment.Edge == Edge.Rising);
         }
 
         /// <summary>Whether there is anything in <paramref name="propertyId" />, read as the kind the block declares it, or as a flag.</summary>
-        public bool Flag(Values values, string propertyId)
+        public bool Flag(Values arguments, string propertyId)
         {
             var property = Kind.FindProperty(propertyId);
-            return values.Flag(property == null ? ValueKind.Flag : property.Kind, GetValue(propertyId));
+            return arguments.Flag(property == null ? ValueKind.Flag : property.Kind, GetValue(propertyId));
         }
 
         /// <summary>Tells the block to do <paramref name="actionId" />.</summary>
@@ -191,45 +191,45 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>How many ticks this block should take to finish what the action started, or <see cref="Unestimated" />.</summary>
-        public int Expected(string actionId, IList<Literal> values)
+        public int Expected(string actionId, IList<Literal> arguments)
         {
-            return _extension == null ? Unestimated : _extension.Expected(_block, actionId, values);
+            return _extension == null ? Unestimated : _extension.Expected(_block, actionId, arguments);
         }
 
         /// <summary>
         /// Why this block cannot reach <paramref name="stateId" /> as <paramref name="actionId" /> told it with
-        /// <paramref name="values" />, or null while it might.
+        /// <paramref name="arguments" />, or null while it might.
         /// </summary>
-        public Trouble Trouble(string actionId, IList<Literal> values, string stateId)
+        public Trouble Trouble(string actionId, IList<Literal> arguments, string stateId)
         {
-            return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, actionId, values, stateId);
+            return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, actionId, arguments, stateId);
         }
 
         /// <summary>
-        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="values" />, though the
+        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="arguments" />, though the
         /// state that action leads to does not hold.
         /// </summary>
-        public bool Done(string actionId, IList<Literal> values)
+        public bool Done(string actionId, IList<Literal> arguments)
         {
-            return _extension != null && _extension.Done(_block, actionId, values);
+            return _extension != null && _extension.Done(_block, actionId, arguments);
         }
 
         /// <summary>
         /// What this block is told by a step doing one of the game's actions or values, made ready, or
         /// null for one of Sprocket's own or one the block does not have.
         /// </summary>
-        public Order Prepare(EntityAction action, IList<Literal> values)
+        public Order Prepare(EntityAction action, IList<Literal> arguments)
         {
             if (action.Form == Form.Native)
                 return null;
 
-            return Toolbars.Prepare(_block, action.Id, action.Form, values, action.Primitives);
+            return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
         }
 
-        /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="values" />.</summary>
-        public void Invoke(string actionId, IList<Literal> values)
+        /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />.</summary>
+        public void Invoke(string actionId, IList<Literal> arguments)
         {
-            Invoke(actionId, values, Form.Native);
+            Invoke(actionId, arguments, Form.Native);
         }
 
         /// <summary>The same, told which of the three ways the step reaches the block.</summary>
@@ -238,33 +238,33 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// an id, and one of Sprocket's own words may be spelled like one of the game's, so a step
         /// that went looking for whatever answered to its id could find the wrong one.
         /// </remarks>
-        public void Invoke(string actionId, IList<Literal> values, Form form)
+        public void Invoke(string actionId, IList<Literal> arguments, Form form)
         {
-            Perform(actionId, values, form);
+            Perform(actionId, arguments, form);
 
             // What Sprocket asks of a block is a change it need not wait for the block to announce.
             for (var i = 0; i < _hearing.Count; i++)
                 _hearing[i]();
         }
 
-        void Perform(string actionId, IList<Literal> values, Form form)
+        void Perform(string actionId, IList<Literal> arguments, Form form)
         {
             // The block's own members are named by the block's ids, so those go straight to the game.
             if (form == Form.Value)
             {
-                if (values != null && values.Count > 0)
-                    Toolbars.Set(_block, actionId, values[0]);
+                if (arguments != null && arguments.Count > 0)
+                    Toolbars.Set(_block, actionId, arguments[0]);
 
                 return;
             }
 
             if (form == Form.Action)
             {
-                Toolbars.Perform(_block, actionId, values);
+                Toolbars.Perform(_block, actionId, arguments);
                 return;
             }
 
-            if (_extension != null && _extension.TryInvoke(_block, actionId, values))
+            if (_extension != null && _extension.TryInvoke(_block, actionId, arguments))
                 return;
 
             IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
@@ -288,7 +288,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // rather than throwing - the same answer a reading gives.
             var entry = _kind.FindAction(actionId, Form.Native);
             if (entry != null && entry.GameActionId != null)
-                Toolbars.Perform(_block, entry.GameActionId, values);
+                Toolbars.Perform(_block, entry.GameActionId, arguments);
         }
 
         /// <summary>A listener to this block, until disposed.</summary>

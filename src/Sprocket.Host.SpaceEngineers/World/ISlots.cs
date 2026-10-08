@@ -58,8 +58,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         void Offered(IMyTerminalBlock block, List<Offer> into);
 
+        /// <summary>Every value this block carries that can be told what to be, appended to <paramref name="into" />.</summary>
         void Settable(IMyTerminalBlock block, List<Offer> into);
 
+        /// <summary>Sets the block's value <paramref name="propertyId" /> to <paramref name="value" />, answering whether it was set; a value of the wrong kind is refused.</summary>
         bool Set(IMyTerminalBlock block, string propertyId, Literal value);
 
         /// <summary>Whether one of the block's own values is <paramref name="value" />, compared as the type the block holds it as; false where it has no such value.</summary>
@@ -73,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Asked once, when a program is bound; each value is built as the type in
         /// <paramref name="types" /> where there is one, so giving the order does nothing else.
         /// </remarks>
-        Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+        Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
             IList<Primitive> types);
 
         /// <summary>
@@ -88,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// declared with, because that is the only place the game's own types are known at all.
         /// </para>
         /// </remarks>
-        bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values);
+        bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> arguments);
 
         /// <summary>
         /// Whether the block a slot names is still anywhere in the world.

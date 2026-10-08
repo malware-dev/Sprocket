@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using SpaceEngineers.Game.ModAPI;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var vent = block as IMyAirVent;
             if (vent == null)
@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// two directions fail for different reasons and a person can act on either one, so they
         /// are said apart rather than as one word.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
         {
             var vent = block as IMyAirVent;
             if (vent == null || !vent.IsWorking)
@@ -220,13 +220,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (stateId == "is-empty")
             {
                 var emptying = Emptying(vent);
-                return Passes(emptying, actionId, values) ? Trouble.None : emptying;
+                return Passes(emptying, actionId, arguments) ? Trouble.None : emptying;
             }
 
             if (stateId == "has-air")
             {
                 var filling = Filling(vent);
-                return Passes(filling, actionId, values) ? Trouble.None : filling;
+                return Passes(filling, actionId, arguments) ? Trouble.None : filling;
             }
 
             return Trouble.None;
@@ -236,26 +236,26 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Whether a room told to fill or empty, and to move on, has done what it was told short of the state: once all that
         /// keeps it from full is that there is no more oxygen to give, or from empty that the air has nowhere to go.
         /// </summary>
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var vent = block as IMyAirVent;
             if (vent == null || !vent.IsWorking)
                 return false;
 
             if (actionId == Depressurize)
-                return Passes(Emptying(vent), actionId, values);
+                return Passes(Emptying(vent), actionId, arguments);
 
-            return actionId == Pressurize && Passes(Filling(vent), actionId, values);
+            return actionId == Pressurize && Passes(Filling(vent), actionId, arguments);
         }
 
         /// <summary>
-        /// Whether <paramref name="trouble" /> is one a step told <paramref name="values" /> lets pass: nothing to move the gas
+        /// Whether <paramref name="trouble" /> is one a step told <paramref name="arguments" /> lets pass: nothing to move the gas
         /// with, where it was told to move on.
         /// </summary>
         /// <remarks>A room that is not airtight never passes: carrying on would open it to the leak.</remarks>
-        static bool Passes(Trouble trouble, string actionId, IList<Literal> values)
+        static bool Passes(Trouble trouble, string actionId, IList<Literal> arguments)
         {
-            if (values == null || values.Count == 0 || values[0].Kind != ValueKind.Integer || values[0].Whole != MoveOn)
+            if (arguments == null || arguments.Count == 0 || arguments[0].Kind != ValueKind.Integer || arguments[0].Whole != MoveOn)
                 return false;
 
             return actionId == Depressurize ? trouble.Cause == Cause.VentNowhere
@@ -340,7 +340,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return GridEntity.Unestimated;
         }

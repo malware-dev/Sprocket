@@ -578,8 +578,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 copy.Provider = act.Provider;
                 for (var i = 0; i < act.Targets.Count; i++)
                     copy.Targets.Add(act.Targets[i]);
-                for (var i = 0; i < act.Values.Count; i++)
-                    copy.Values.Add(act.Values[i]);
+                for (var i = 0; i < act.Arguments.Count; i++)
+                    copy.Arguments.Add(act.Arguments[i]);
                 return Annotated(copy, step);
             }
 

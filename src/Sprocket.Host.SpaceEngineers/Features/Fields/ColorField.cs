@@ -9,7 +9,7 @@ using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A color, given from the player's own colors, by hue, saturation and value, or by writing it.</summary>
     /// <remarks>

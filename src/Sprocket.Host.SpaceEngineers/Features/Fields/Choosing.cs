@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using VRage.Input;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>How the keyboard chooses among a value's words: an arrow steps to the next word, and a letter to the next word starting with it.</summary>
     /// <remarks>

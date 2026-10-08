@@ -14,7 +14,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class Act : Step
     {
         readonly List<string> _targets = new List<string>();
+        readonly List<Literal> _arguments = new List<Literal>();
 
+        /// <summary>A step doing the action <paramref name="actionId" />, to no parts yet.</summary>
         public Act(string actionId)
         {
             ActionId = actionId;
@@ -26,8 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Which of the three ways this reaches the block.</summary>
         /// <remarks>
         /// Part of what names the entry, alongside the id, and what the program writes it as: a bare
-        /// head, <c>action</c> or <c>set</c>. Carried here rather than read off how many values the
-        /// step holds, because values have no bearing on which it is.
+        /// head, <c>action</c> or <c>set</c>. Carried here rather than read off how many arguments the
+        /// step holds, because arguments have no bearing on which it is.
         /// </remarks>
         public Form Form { get; set; }
 
@@ -42,7 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override IList<string> Targets => _targets;
 
         /// <summary>
-        /// The values the action has to be given, in the order it declares them.
+        /// What the step gives its action, in the order the action declares it: an action's options, or the new value for a
+        /// step that sets one.
         /// </summary>
         /// <remarks>
         /// Each carries the kind it was written as, which is the program's record of what somebody
@@ -52,10 +55,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Empty for every action of Sprocket's own, and for the great majority of the game's.
         /// </para>
         /// </remarks>
-        public IList<Literal> Values => _values;
+        public IList<Literal> Arguments => _arguments;
 
-        readonly List<Literal> _values = new List<Literal>();
-
+        /// <summary>Whether the step has both parts to act on and an action to do to them.</summary>
         public bool HasAction => Targets.Count > 0 && !string.IsNullOrEmpty(ActionId);
 
         /// <summary>The entry among these that this step names, or null where there is none.</summary>

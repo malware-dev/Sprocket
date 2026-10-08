@@ -28,6 +28,7 @@ public sealed class Piston : Fitting
     float _upper = Highest;
     float _speed = 0.5f;
 
+    /// <summary>A piston, <paramref name="id" /> and <paramref name="name" />, of the game's type and subtype, called <paramref name="display" />.</summary>
     public Piston(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
@@ -130,7 +131,7 @@ public sealed class Piston : Fitting
     }
 
     /// <inheritdoc />
-    public override void Perform(string actionId, IList<Literal> values)
+    public override void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "Extend")
             Out();
@@ -139,7 +140,7 @@ public sealed class Piston : Fitting
         else if (actionId == "Reverse")
             _speed = -_speed;
         else
-            base.Perform(actionId, values);
+            base.Perform(actionId, arguments);
     }
 
     /// <inheritdoc />

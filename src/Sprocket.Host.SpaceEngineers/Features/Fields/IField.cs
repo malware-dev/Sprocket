@@ -1,7 +1,7 @@
 using System;
 using Lumel;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>Where one value of a form is given, whatever it is given with: a box, a switch, a few words, a color or a dial.</summary>
     public interface IField

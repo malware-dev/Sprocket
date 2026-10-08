@@ -130,17 +130,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One of a block's own actions or values made ready to be given, or null.</summary>
-        public static Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+        public static Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
             IList<Primitive> types)
         {
-            return block == null || string.IsNullOrEmpty(id) ? null : _slots.Prepare(block, id, form, values, types);
+            return block == null || string.IsNullOrEmpty(id) ? null : _slots.Prepare(block, id, form, arguments, types);
         }
 
         /// <summary>Performs one of a block's own actions, if it has one by that name.</summary>
-        public static bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public static bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return block != null && !string.IsNullOrEmpty(actionId)
-                && _slots.Perform(block, actionId, values);
+                && _slots.Perform(block, actionId, arguments);
         }
     }
 }

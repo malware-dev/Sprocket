@@ -1,7 +1,7 @@
 using VRage.Game;
 using VRageMath;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A colour as hue, saturation and value.</summary>
     /// <remarks>

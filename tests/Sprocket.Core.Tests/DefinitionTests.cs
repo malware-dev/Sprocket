@@ -4,7 +4,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;

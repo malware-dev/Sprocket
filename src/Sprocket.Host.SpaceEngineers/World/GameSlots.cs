@@ -480,24 +480,24 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> values,
+        public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
             IList<Primitive> types)
         {
             if (block == null)
                 return null;
 
             if (form == Form.Value)
-                return values == null || values.Count == 0 ? null : Written(block, id, values[0]);
+                return arguments == null || arguments.Count == 0 ? null : Written(block, id, arguments[0]);
 
             ITerminalAction action = block.GetActionWithName(id);
             if (action == null)
                 return null;
 
-            if (values == null || values.Count == 0)
+            if (arguments == null || arguments.Count == 0)
                 return new Performed(block, action, null);
 
             var given = new List<TerminalActionParameter>();
-            Fill(action, values, types, given);
+            Fill(action, arguments, types, given);
             return new Performed(block, action, given);
         }
 
@@ -607,7 +607,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             if (block == null)
                 return false;
@@ -616,14 +616,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (action == null)
                 return false;
 
-            if (values == null || values.Count == 0)
+            if (arguments == null || arguments.Count == 0)
             {
                 action.Apply(block);
                 return true;
             }
 
             _given.Clear();
-            Fill(action, values, null, _given);
+            Fill(action, arguments, null, _given);
             action.Apply(block, new ListReader<TerminalActionParameter>(_given));
             return true;
         }
@@ -639,22 +639,22 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// declared default for the rest, which is what the game does when a player fills in part
         /// of a toolbar action's dialog.
         /// </remarks>
-        static void Fill(ITerminalAction action, IList<Literal> values, IList<Primitive> types,
+        static void Fill(ITerminalAction action, IList<Literal> arguments, IList<Primitive> types,
             List<TerminalActionParameter> into)
         {
             var declared = action as IMyTerminalAction;
             List<TerminalActionParameter> wanted =
                 declared == null ? null : declared.ParameterDefinitions;
 
-            var count = wanted == null ? values.Count : wanted.Count;
+            var count = wanted == null ? arguments.Count : wanted.Count;
             for (var i = 0; i < count; i++)
             {
-                if (i < values.Count)
+                if (i < arguments.Count)
                 {
                     var type = types == null || i >= types.Count ? Primitive.None : types[i];
                     into.Add(type == Primitive.None
-                        ? Given(values[i])
-                        : TerminalActionParameter.Get(values[i].Native(type)));
+                        ? Given(arguments[i])
+                        : TerminalActionParameter.Get(arguments[i].Native(type)));
                     continue;
                 }
 

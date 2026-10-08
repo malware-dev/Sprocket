@@ -87,6 +87,6 @@ public class LeavingTests
         // The step the picker was making, holding the value the column asked for.
         var act = Assert.IsType<Act>(picker.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("Radius", act.ActionId);
-        Assert.Single(act.Values);
+        Assert.Single(act.Arguments);
     }
 }

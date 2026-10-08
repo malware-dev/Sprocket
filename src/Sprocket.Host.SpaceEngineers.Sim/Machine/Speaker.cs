@@ -41,14 +41,14 @@ public sealed class Speaker : Fitting
     }
 
     /// <inheritdoc />
-    public override void Perform(string actionId, IList<Literal> values)
+    public override void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "PlaySound")
             Played();
         else if (actionId == "StopSound")
             Stopped();
         else
-            base.Perform(actionId, values);
+            base.Perform(actionId, arguments);
     }
 
     /// <summary>Its sounds by id, which are a few of the game's own from its sound categories.</summary>

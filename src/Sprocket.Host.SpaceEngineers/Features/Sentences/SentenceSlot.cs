@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Lumel.Input;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {

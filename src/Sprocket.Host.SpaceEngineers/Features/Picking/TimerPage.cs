@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _strip.Returns = null;
-            _strip.ShowsValues = false;
+            _strip.ShowsArguments = false;
             _strip.Onward = _aim.Outcome == Outcome.One ? Editor.Act(Cmd.PageOn, Primary) : null;
 
             FillRates();

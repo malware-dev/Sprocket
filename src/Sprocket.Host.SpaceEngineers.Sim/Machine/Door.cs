@@ -83,7 +83,7 @@ public sealed class Door : Fitting
     }
 
     /// <inheritdoc />
-    public override void Perform(string actionId, IList<Literal> values)
+    public override void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "Open_On")
         {
@@ -97,7 +97,7 @@ public sealed class Door : Fitting
             return;
         }
 
-        base.Perform(actionId, values);
+        base.Perform(actionId, arguments);
     }
 
     /// <summary>

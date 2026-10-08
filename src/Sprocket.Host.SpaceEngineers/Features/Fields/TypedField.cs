@@ -5,7 +5,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
-namespace Sprocket.Host.SpaceEngineers.Features.Values
+namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A value typed into a box: as wide as the form where it may be anything, and as wide as a number where it is bounded.</summary>
     /// <remarks>

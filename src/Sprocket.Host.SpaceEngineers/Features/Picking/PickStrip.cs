@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Lumel;
 using Lumel.Drawing;
 using Lumel.Images;
@@ -13,7 +13,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
-    /// <summary>The stages of a pick as columns side by side, in the manner of a file browser's column view, and the values the last of them takes.</summary>
+    /// <summary>The stages of a pick as columns side by side, in the manner of a file browser's column view, and the arguments the last of them takes.</summary>
     /// <remarks>
     /// With every stage of a page in view, the blocks already picked stay beside what is happening to them, and changing an
     /// earlier answer is a glance to the left. A pick asking more than a screen holds goes on in pages, one after another in
@@ -44,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Element> _leaving = new List<Element>();
         readonly Cut _reveal = new Cut();
 
-        ValuesColumn _values;
-        string _given;
+        ArgumentsColumn _arguments;
+        string _chosen;
         int _shownPage = -1;
         bool _onward;
         int _slide = -1;
@@ -90,11 +90,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set { _next.Command = value; }
         }
 
-        /// <summary>The values what is chosen takes, made when the pick first finishes with values.</summary>
-        public ValuesColumn Values => _values;
+        /// <summary>The column asking what the chosen thing is given, made when the pick first finishes with one.</summary>
+        public ArgumentsColumn Arguments => _arguments;
 
-        /// <summary>Whether the values column stands after the stages of the page showing.</summary>
-        public bool ShowsValues { get; set; }
+        /// <summary>Whether the column of what is given stands after the stages of the page showing.</summary>
+        public bool ShowsArguments { get; set; }
 
         /// <summary>How wide a column is on the page showing now.</summary>
         public float Width => Page > 0 ? PagedWidth : ColumnWidth;
@@ -124,34 +124,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// Asks for the values what is chosen takes, known as <paramref name="given" /> and headed by its name
+        /// Asks for the arguments what is chosen takes, known as <paramref name="chosen" /> and headed by its name
         /// <paramref name="named" />: <paramref name="fields" />, holding what was given for it earlier in this pick where anything
         /// was and <paramref name="filled" /> otherwise.
         /// </summary>
         /// <remarks>What was given for what was chosen before is kept, so choosing it again gives it back.</remarks>
-        /// <returns>The column the values are asked for in.</returns>
-        public ValuesColumn Restate(string given, string named, IList<Field> fields, IList<string> filled, IList<Hsv> colors)
+        /// <returns>The column the arguments are asked for in.</returns>
+        public ArgumentsColumn Restate(string chosen, string named, IList<Field> fields, IList<string> filled, IList<Hsv> colors)
         {
-            if (_values == null)
+            if (_arguments == null)
             {
-                _values = new ValuesColumn(Width, named);
-                _values.Form.Windows = _windows;
+                _arguments = new ArgumentsColumn(Width, named);
+                _arguments.Form.Windows = _windows;
             }
 
-            _values.Title = named;
+            _arguments.Title = named;
 
-            if (!string.IsNullOrEmpty(_given))
+            if (!string.IsNullOrEmpty(_chosen))
             {
-                var was = Kept(_given);
+                var was = Kept(_chosen);
                 was.Clear();
-                _values.Form.Spell(was);
+                _arguments.Form.Spell(was);
             }
 
-            _given = given ?? "";
+            _chosen = chosen ?? "";
 
             Dictionary<string, string> kept = null;
-            if (_given.Length > 0)
-                _entered.TryGetValue(_given, out kept);
+            if (_chosen.Length > 0)
+                _entered.TryGetValue(_chosen, out kept);
 
             var filling = new List<string>();
             for (var i = 0; i < fields.Count; i++)
@@ -163,12 +163,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     filling.Add(i < filled.Count ? filled[i] : "");
             }
 
-            _values.Form.Show(fields, filling, colors, _texts);
-            _values.Why = "";
-            return _values;
+            _arguments.Form.Show(fields, filling, colors, _texts);
+            _arguments.Why = "";
+            return _arguments;
         }
 
-        /// <summary>Lays out the page showing: the way back where there is a page before it, its columns, the values, and the way on where there is a page after.</summary>
+        /// <summary>Lays out the page showing: the way back where there is a page before it, its columns, the arguments, and the way on where there is a page after.</summary>
         /// <remarks>
         /// A page other than the one showing before is turned to. Going on, the page being left slides out to the left and the
         /// column the new page follows on from folds into the way back as it goes; going back, the page coming back slides in
@@ -183,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < Children.Count; i++)
             {
                 var child = Children[i];
-                if (child != _next && child != _values)
+                if (child != _next && child != _arguments)
                     _old.Add(child == _reveal ? _reveal.Content : child);
             }
 
@@ -250,7 +250,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             input.Focus(_stages[opens].Narrow);
         }
 
-        /// <summary>The page as it stands: the way back where there is a page before it, its columns, the values, and the way on.</summary>
+        /// <summary>The page as it stands: the way back where there is a page before it, its columns, the arguments, and the way on.</summary>
         void Lay()
         {
             if (Page > 0)
@@ -275,13 +275,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
-        /// <summary>The values after the columns where they are showing, and the way on where there is one.</summary>
+        /// <summary>The arguments after the columns where they are showing, and the way on where there is one.</summary>
         void After()
         {
-            if (ShowsValues && _values != null)
+            if (ShowsArguments && _arguments != null)
             {
-                _values.Width = Width;
-                Children.Add(_values);
+                _arguments.Width = Width;
+                Children.Add(_arguments);
             }
 
             if (_onward)
@@ -407,7 +407,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (stage != null)
                 return stage.Width;
 
-            var values = column as ValuesColumn;
+            var values = column as ArgumentsColumn;
             return values != null ? values.Width : column.DesiredSize.X;
         }
 
@@ -462,13 +462,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _stages[_stages.Count - 1].Width = Width - (room > 0f ? room + Gap : 0f);
         }
 
-        Dictionary<string, string> Kept(string given)
+        Dictionary<string, string> Kept(string chosen)
         {
             Dictionary<string, string> kept;
-            if (!_entered.TryGetValue(given, out kept))
+            if (!_entered.TryGetValue(chosen, out kept))
             {
                 kept = new Dictionary<string, string>();
-                _entered[given] = kept;
+                _entered[chosen] = kept;
             }
 
             return kept;

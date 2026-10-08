@@ -31,17 +31,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <paramref name="awaited" /> says what it is changed to takes time to finish.
         /// </summary>
         public ChangeStep(int index, Act step, IList<string> targets, string actionId, Form form,
-            IList<Literal> values, bool awaited)
+            IList<Literal> arguments, bool awaited)
         {
             _index = index;
             _wasTargets = CopyOf(step.Targets);
             _wasAction = step.ActionId;
             _wasForm = step.Form;
-            _wasValues = CopyOf(step.Values);
+            _wasValues = CopyOf(step.Arguments);
             _nowTargets = CopyOf(targets);
             _nowAction = actionId;
             _nowForm = form;
-            _nowValues = CopyOf(values);
+            _nowValues = CopyOf(arguments);
             _awaited = awaited;
         }
 
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         void Put(Sequence sequence, IList<string> targets, string action, Form form,
-            IList<Literal> values)
+            IList<Literal> arguments)
         {
             var step = sequence.Steps[_index] as Act;
             if (step == null)
@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Refill(step.Targets, targets);
             step.ActionId = action;
             step.Form = form;
-            Refill(step.Values, values);
+            Refill(step.Arguments, arguments);
         }
     }
 }

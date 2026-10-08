@@ -5,7 +5,7 @@ using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {

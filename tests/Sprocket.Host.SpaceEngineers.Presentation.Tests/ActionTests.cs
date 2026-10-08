@@ -9,7 +9,7 @@ using VRageMath;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -253,7 +253,7 @@ public class ActionTests
     }
 
     /// <summary>What the first value in the column of values holds.</summary>
-    static string Given(Screen screen) => screen.Editor.Pick().Values!.Form.Fields[0].Text;
+    static string Given(Screen screen) => screen.Editor.Pick().Arguments!.Form.Fields[0].Text;
 
     static StageColumn What(Screen screen)
     {
@@ -335,10 +335,10 @@ public class ActionTests
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal("SetColor", act.ActionId);
-        Assert.Equal(3, act.Values.Count);
-        Assert.Equal(255, act.Values[0].Whole);
-        Assert.Equal(136, act.Values[1].Whole);
-        Assert.Equal(0, act.Values[2].Whole);
+        Assert.Equal(3, act.Arguments.Count);
+        Assert.Equal(255, act.Arguments[0].Whole);
+        Assert.Equal(136, act.Arguments[1].Whole);
+        Assert.Equal(0, act.Arguments[2].Whole);
     }
 
     /// <summary>
@@ -362,7 +362,7 @@ public class ActionTests
         screen.Run(2);
 
         StepRow step = screen.Editor.StepRows()[0];
-        ValuesSlot given = step.Slots.OfType<ValuesSlot>().Single();
+        ArgumentsSlot given = step.Slots.OfType<ArgumentsSlot>().Single();
 
         Assert.Equal(new Color(255, 136, 0), given.Sample);
         Assert.False(screen.Shows("255 136 0"), "the step still spells the colour out");
@@ -512,7 +512,7 @@ public class ActionTests
 
         // What the block is told, which is the number the game keeps its charge modes as.
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Literal held = Assert.Single(act.Values);
+        Literal held = Assert.Single(act.Arguments);
         Assert.Equal(1, held.Whole);
 
         // And what a person reads, which is neither the number nor anywhere in the program.
@@ -550,7 +550,7 @@ public class ActionTests
         screen.Do("enter");
 
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(2, Assert.Single(act.Values).Whole);
+        Assert.Equal(2, Assert.Single(act.Arguments).Whole);
         Assert.True(screen.Shows("Left"), "the step does not say what was chosen");
     }
 }

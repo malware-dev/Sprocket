@@ -12,7 +12,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
@@ -602,7 +602,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ValuesSlot(act.Values, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Values); }));
+            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Arguments); }));
             if (!given.Quiet)
                 row.Slots.Add(given);
         }
@@ -642,8 +642,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             value.Fields(fields);
-            row.Slots.Add(new ValuesSlot(new[] { test.Value }, fields,
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Values); })));
+            row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields,
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); })));
         }
 
         static StepKind Kind(Step step)
@@ -688,10 +688,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 {
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Editor.Named(_sequence.System, answer.Targets), answer.Chosen,
-                            answer.Form, answer.Values,
+                            answer.Form, answer.Arguments,
                             Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)));
                     Editor.Pop();
-                }, values: step.Values, opens: opens));
+                }, arguments: step.Arguments, opens: opens));
         }
 
         /// <summary>Asks what to affect, then what to do to it, and adds the step only once both are answered.</summary>
@@ -713,8 +713,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);
 
-                    for (var i = 0; i < answer.Values.Count; i++)
-                        step.Values.Add(answer.Values[i]);
+                    for (var i = 0; i < answer.Arguments.Count; i++)
+                        step.Arguments.Add(answer.Arguments[i]);
 
                     // With a wait for it after it where what it does takes time to finish, because a numbered list is
                     // read as one thing after another; one edit, so one press takes the pair back.
@@ -799,7 +799,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (answer.Form == Form.Value)
             {
                 test.MemberId = answer.Chosen;
-                test.Value = answer.Values != null && answer.Values.Count > 0 ? answer.Values[0] : Literal.Of(true);
+                test.Value = answer.Arguments != null && answer.Arguments.Count > 0 ? answer.Arguments[0] : Literal.Of(true);
                 return test;
             }
 

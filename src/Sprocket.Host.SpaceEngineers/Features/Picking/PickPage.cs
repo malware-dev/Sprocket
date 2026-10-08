@@ -11,7 +11,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -76,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly bool _arrivedAll;
         readonly List<string> _filled = new List<string>();
         readonly List<Field> _nothing = new List<Field>();
-        readonly List<Field> _givenFields = new List<Field>();
+        readonly List<Field> _shownFields = new List<Field>();
         readonly Func<GridEntity, bool> _fits;
         readonly Func<GridEntity, bool> _admits;
         readonly bool _signalsOnly;
@@ -99,8 +99,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         bool _goesOn;
         bool _straight;
         string _entered;
-        string _given;
-        bool _openedValues;
+        string _shown;
+        bool _openedArguments;
         long _anchor;
         Interval _looked = new Interval(Looked);
 
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
-            bool asksAll = false, bool all = false, IList<Literal> values = null,
+            bool asksAll = false, bool all = false, IList<Literal> arguments = null,
             Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
             bool signalsOnly = false, bool forTests = false)
             : base(editor)
@@ -148,10 +148,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _strip = after ?? new PickStrip(editor.Texts, delegate { return Editor.Windows; });
             _base = after == null ? 0 : after.Stages.Count;
 
-            if (values != null)
+            if (arguments != null)
             {
-                for (var i = 0; i < values.Count; i++)
-                    _arrivedValues.Add(values[i]);
+                for (var i = 0; i < arguments.Count; i++)
+                    _arrivedValues.Add(arguments[i]);
             }
 
             _title = title;
@@ -326,16 +326,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>Every value is held to what it takes from here on, and where one fails the column says why and the keyboard goes to it.</remarks>
         public override void Primary()
         {
-            var values = _strip.Values;
-            if (_forEvents || !_strip.ShowsValues || values == null || values.Form.Count == 0)
+            var arguments = _strip.Arguments;
+            if (_forEvents || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
                 _done(new PickAnswer(_selection, _chosen, _all, null, _chosenForm));
                 return;
             }
 
-            var form = values.Form;
+            var form = arguments.Form;
             form.Judge();
-            values.Why = form.Wrong;
+            arguments.Why = form.Wrong;
             if (form.Wrong.Length > 0 || form.Missing)
             {
                 form.Take(Editor.Input);
@@ -348,9 +348,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Finishes with the values <paramref name="said" /> gives, written as a line of values.</summary>
         public void Give(string said)
         {
-            var values = new List<Literal>();
-            ValueLine.Read(said, values);
-            _done(new PickAnswer(_selection, _chosen, _all, values, _chosenForm));
+            var arguments = new List<Literal>();
+            ValueLine.Read(said, arguments);
+            _done(new PickAnswer(_selection, _chosen, _all, arguments, _chosenForm));
         }
 
         /// <inheritdoc />
@@ -605,10 +605,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (PrimaryText.Length == 0 || !CanPrimary)
                 return;
 
-            var values = _strip.Values;
-            if (_strip.ShowsValues && values != null && values.Form.Count > 0 && !values.Form.Complete)
+            var arguments = _strip.Arguments;
+            if (_strip.ShowsArguments && arguments != null && arguments.Form.Count > 0 && !arguments.Form.Complete)
             {
-                values.Form.Take(Editor.Input);
+                arguments.Form.Take(Editor.Input);
                 return;
             }
 
@@ -661,59 +661,59 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // A state is chosen whole, being in it or not, so only a value is given anything.
             if (_forEvents || _forTests && _chosenForm != Form.Value)
             {
-                _strip.ShowsValues = false;
+                _strip.ShowsArguments = false;
                 return;
             }
 
-            var given = IsComplete ? _chosenForm + " " + _chosen : "";
-            _strip.ShowsValues = _what != null && given.Length != 0;
+            var shown = IsComplete ? _chosenForm + " " + _chosen : "";
+            _strip.ShowsArguments = _what != null && shown.Length != 0;
 
             var fields = Wanted();
-            if (_given == given && Same(_givenFields, fields))
+            if (_shown == shown && Same(_shownFields, fields))
                 return;
 
-            _given = given;
-            _givenFields.Clear();
-            _givenFields.AddRange(fields);
+            _shown = shown;
+            _shownFields.Clear();
+            _shownFields.AddRange(fields);
 
             // Read once, where a color is asked for: these are the colors this player paints with, only ever read.
             var colors = new List<Hsv>();
             for (var i = 0; i < fields.Count; i++)
             {
-                if (fields[i].Edits != Features.Values.Editor.Colour)
+                if (fields[i].Edits != Features.Fields.Editor.Colour)
                     continue;
 
                 Player.Colours(colors);
                 break;
             }
 
-            var made = _strip.Values == null;
-            var values = _strip.Restate(given, Chosen(), fields, Filled, colors);
+            var made = _strip.Arguments == null;
+            var arguments = _strip.Restate(shown, Chosen(), fields, Filled, colors);
             if (made)
             {
-                values.Form.Edited += delegate
+                arguments.Form.Edited += delegate
                 {
                     if (Editor.Current != this)
                         return;
 
-                    _entered = values.Form.Answer;
-                    values.Why = values.Form.Wrong;
+                    _entered = arguments.Form.Answer;
+                    arguments.Why = arguments.Form.Wrong;
                 };
 
-                values.Form.Submitted += delegate
+                arguments.Form.Submitted += delegate
                 {
                     if (Editor.Current == this && _finish != null)
                         _finish.Execute();
                 };
             }
 
-            _entered = values.Form.Answer;
+            _entered = arguments.Form.Answer;
 
             // Nowhere to type is nowhere to keep the keyboard. Somebody who came for the values gets it in them, once.
-            if (_opens == Opening.Values && !_openedValues && values.Form.Count > 0)
+            if (_opens == Opening.Arguments && !_openedArguments && arguments.Form.Count > 0)
             {
-                _openedValues = true;
-                values.Form.Take(Editor.Input);
+                _openedArguments = true;
+                arguments.Form.Take(Editor.Input);
             }
         }
 

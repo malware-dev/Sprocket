@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 // The status lives in the Ingame namespace, which cannot be imported whole: IMyPistonBase is declared
 // in both, and the mod-side one is the one with the events on it.
@@ -149,7 +149,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Moves the piston to a position; extending and retracting are the game's own, performed as its.</summary>
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var piston = block as IMyPistonBase;
             if (piston == null || actionId != MoveTo)
@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             float position;
             float speed;
-            if (!Given(values, out position, out speed))
+            if (!Given(arguments, out position, out speed))
                 return true;
 
             if (Math.Abs(piston.CurrentPosition - position) <= float.Epsilon)
@@ -184,16 +184,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The position and speed a step moving the piston was given, in that order.</summary>
-        static bool Given(IList<Literal> values, out float position, out float speed)
+        static bool Given(IList<Literal> arguments, out float position, out float speed)
         {
             position = 0;
             speed = 0;
 
-            if (values == null || values.Count < 2)
+            if (arguments == null || arguments.Count < 2)
                 return false;
 
-            position = (float)values[0].Real;
-            speed = (float)Math.Abs(values[1].Real);
+            position = (float)arguments[0].Real;
+            speed = (float)Math.Abs(arguments[1].Real);
             return true;
         }
 
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             return false;
         }
@@ -219,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// by what sent it, so a speed of nought or the wrong way round means something else has been at
         /// it and nothing is heading there any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> values, string stateId)
+        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
         {
             var piston = block as IMyPistonBase;
             if (piston == null)
@@ -281,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The ticks the move should take: the distance it has to go, at the speed it goes.</summary>
         /// <remarks>Its speed is in metres a second, and the game runs sixty ticks to the second.</remarks>
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> values)
+        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
         {
             var piston = block as IMyPistonBase;
             if (piston == null)
@@ -292,7 +292,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (actionId == MoveTo)
             {
                 float position;
-                if (!Given(values, out position, out speed))
+                if (!Given(arguments, out position, out speed))
                     return GridEntity.Unestimated;
 
                 distance = Math.Abs(position - piston.CurrentPosition);

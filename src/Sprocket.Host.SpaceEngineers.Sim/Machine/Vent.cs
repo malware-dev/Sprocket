@@ -100,7 +100,7 @@ public sealed class Vent : Fitting
     }
 
     /// <inheritdoc />
-    public override void Perform(string actionId, IList<Literal> values)
+    public override void Perform(string actionId, IList<Literal> arguments)
     {
         if (actionId == "Depressurize_On")
         {
@@ -116,7 +116,7 @@ public sealed class Vent : Fitting
             return;
         }
 
-        base.Perform(actionId, values);
+        base.Perform(actionId, arguments);
     }
 
     /// <inheritdoc />

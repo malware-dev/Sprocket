@@ -4,7 +4,7 @@ using Sprocket.Sim.Machine;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Features.Values;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Tests;
@@ -217,9 +217,9 @@ public class CompileTests
 
         var steer = new Act("Steer") { Form = Form.Action };
         steer.Targets.Add(automation.Declare(ship.World, ship.Entity(remote.Id)).Name);
-        steer.Values.Add(Literal.Of(3L));
-        steer.Values.Add(Literal.Of(2L));
-        steer.Values.Add(Literal.Of(7L));
+        steer.Arguments.Add(Literal.Of(3L));
+        steer.Arguments.Add(Literal.Of(2L));
+        steer.Arguments.Add(Literal.Of(7L));
         sequence.Steps.Add(steer);
 
         var runner = new AutomationRunner(automation, ship.World);
@@ -244,7 +244,7 @@ public class CompileTests
 
         var steer = new Act("Steer") { Form = Form.Action };
         steer.Targets.Add(automation.Declare(ship.World, ship.Entity(remote.Id)).Name);
-        steer.Values.Add(Literal.Of(300L));
+        steer.Arguments.Add(Literal.Of(300L));
         sequence.Steps.Add(steer);
 
         var runner = new AutomationRunner(automation, ship.World);
@@ -298,9 +298,9 @@ public class CompileTests
     {
         var turn = new Act(RotorExtension.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
-        turn.Values.Add(Literal.Of(Directly));
-        turn.Values.Add(angle);
-        turn.Values.Add(speed);
+        turn.Arguments.Add(Literal.Of(Directly));
+        turn.Arguments.Add(angle);
+        turn.Arguments.Add(speed);
         return turn;
     }
 
