@@ -142,7 +142,7 @@ public class FieldTests
         form.Fields[1].Text = "900";
         form.Judge();
 
-        Assert.Equal("Value 2 has to be between 0 and 255.", form.Wrong);
+        Assert.Equal("Option 2 has to be between 0 and 255.", form.Wrong);
     }
 
     /// <summary>What a field is about is told where it is filled in, on its name and on the field itself; a field about nothing more tells nothing.</summary>

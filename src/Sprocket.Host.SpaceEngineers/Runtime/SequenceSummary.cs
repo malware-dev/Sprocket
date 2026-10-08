@@ -415,8 +415,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (doing == null)
                         continue;
 
-                    if (doing.Needs(act.Values.Count))
-                        return new SequenceFault(SequenceProblem.Unfilled, i);
+                    var missing = doing.Missing(act.Values.Count);
+                    if (missing != null)
+                        return new SequenceFault(SequenceProblem.Unfilled, i, Trouble.None, missing);
                 }
             }
 
@@ -456,8 +457,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         continue;
 
                     EntityAction doing = act.Names(entity.Kind.Actions);
-                    if (doing != null && !doing.Takes(act.Values))
-                        return new SequenceFault(SequenceProblem.Mistyped, i);
+                    var refused = doing == null ? null : doing.Refused(act.Values);
+                    if (refused != null)
+                        return new SequenceFault(SequenceProblem.Mistyped, i, Trouble.None, refused);
                 }
             }
 

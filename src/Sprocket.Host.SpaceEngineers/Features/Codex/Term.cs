@@ -19,15 +19,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         string _summary;
         Tip _preview;
 
-        /// <summary>The term <paramref name="id" />, whose page is in the book <paramref name="texts" /> hold.</summary>
-        public Term(string id, Texts texts)
+        /// <summary>The term <paramref name="id" />, whose page is in the book <paramref name="texts" /> hold; <paramref name="opens" /> where it begins a section of the contents.</summary>
+        public Term(string id, Texts texts, bool opens = false)
         {
             Id = id;
             _texts = texts;
+            Opens = opens;
         }
 
         /// <summary>What a link names the term by, as in <c>[installations](#installation)</c>.</summary>
         public string Id { get; }
+
+        /// <summary>Whether the term begins a section of the contents: its name heads the section, and the terms after it are listed under it.</summary>
+        public bool Opens { get; }
 
         /// <summary>The term, as its page's first heading of the first level says it, or its id where the page has none.</summary>
         public string Name

@@ -160,7 +160,7 @@ public class EditorTests
         editor.PressChoice("AI Behavior On/Off");
         Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
         Assert.False(Offered().Single(e => e.Text == "Set AI Behavior").IsChosen);
-        Assert.Equal("", editor.Picking().Question);
+        Assert.Empty(editor.Picking().Fields);
 
         editor.PressPrimary();
         var step = ship.Automation.Sequences[0].Steps.OfType<Act>().Last();

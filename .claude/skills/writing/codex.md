@@ -12,12 +12,25 @@ lists the terms in the order the contents show them. Every page and tooltip exis
 
 ## How a page is written
 
+- **The codex explains everything that is built, and grows with the editor.** Mal: "Explain what we have.
+  We just need to make damn sure we update the codex as Sprocket grows." Something not built yet is left
+  out until it is, and the code review's codex step catches the change that builds it.
+- **The codex teaches the editor, never the script.** What is on the screens and what to press; the
+  script's syntax and keywords do not appear in a page.
 - **Link a term once per page**, the first time it matters: `[logic systems](#logic-system)`. Mal: the
   wiki rule.
 - **A kind's mark sits beside a link or a bold term**, never beside plain running text, and never in a
   title: `![](mark:blueprint) [blueprints](#blueprint)`, with empty words. Mal: "[icon] signal slot"
   makes sense, "sends the [icon] signal" does not.
 - **What is on screen is quoted as it is on screen**, in backticks: `Make blueprint`.
+- **A detail belongs to the page about the thing it is a detail of.** What only one kind of block or
+  one action does goes on that block's or action's page, not on a general page that happens to meet it.
+  Mal, on a vent's "move on" written into the sequence page: "the place it would belong, would be a page
+  that describes that action specifically."
+- **No list that pretends to be complete.** Where the cases depend on the block or the action (the ways
+  a run can fail, the reasons a step holds), state the rule and give an example, not a list. Mal: "there's
+  any number of errors that might stop a sequence, that is per-action determined."
+- **Say a thing once,** on the page that owns it, and link there from the others.
 - **Explain what a player would get wrong, and trust them with the rest.** A page that spells out what a
   player sees for themselves on the screen talks down to them.
 - **A page describes the product for its own purpose.** A guide once said text "draws as a sign" because
@@ -29,6 +42,8 @@ lists the terms in the order the contents show them. Every page and tooltip exis
   gear dock one construct to another, and each stays its own.
 - A construct keeps its automation in its programmable blocks, and loses it only when the last one is
   destroyed or ground down. The logic systems the library lacks are then kept as backups.
+- Most actions happen at once (the bolt). Only a few take time and are waited for (the clock), such as a
+  door closing, a vent filling or emptying a room, or a piston or rotor moving to where it was sent.
 - A blueprint is a copy in the library; editing the construct's logic system leaves the blueprint as it
   was.
 

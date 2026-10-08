@@ -285,7 +285,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Velg hvilke blokker dette steget virker på.</value>
   </data>
   <data name="Sprocket.Sequence.ValuesAbout" xml:space="preserve">
-    <value>Endre verdien den får.</value>
+    <value>Endre det den får.</value>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
     <value>Endre hvor lenge den venter.</value>
@@ -501,7 +501,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Noe blokken blir bedt om å gjøre.</value>
   </data>
   <data name="Sprocket.Member.Value" xml:space="preserve">
-    <value>Noe blokken blir spurt om: hva en av verdiene dens er.</value>
+    <value>En av verdiene til blokken: noe den settes til, eller blir spurt om.</value>
   </data>
   <data name="Sprocket.Member.Signal" xml:space="preserve">
     <value>Et signal blokken sender fra verktøylinjen sin.</value>
@@ -736,24 +736,6 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Sequence.Numbered" xml:space="preserve">
     <value>Sekvens {number}</value>
   </data>
-  <data name="Sprocket.Pick.WantsOne" xml:space="preserve">
-    <value>Denne trenger én verdi.</value>
-  </data>
-  <data name="Sprocket.Pick.WantsMany" xml:space="preserve">
-    <value>Denne trenger {count} verdier.</value>
-  </data>
-  <data name="Sprocket.Pick.WantsColor" xml:space="preserve">
-    <value>Denne trenger en farge.</value>
-  </data>
-  <data name="Sprocket.Number.Two" xml:space="preserve">
-    <value>to</value>
-  </data>
-  <data name="Sprocket.Number.Three" xml:space="preserve">
-    <value>tre</value>
-  </data>
-  <data name="Sprocket.Number.Four" xml:space="preserve">
-    <value>fire</value>
-  </data>
   <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
     <value>Plassen {slot} er tom. Fyll den på konfigurasjonspanelet.</value>
   </data>
@@ -809,10 +791,16 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Dette gjør noe disse blokkene ikke lenger tilbyr. Erstatt dette steget.</value>
   </data>
   <data name="Sprocket.Problem.Unfilled" xml:space="preserve">
-    <value>Dette steget mangler en verdi det trenger. Fyll den inn.</value>
+    <value>Dette steget mangler noe det trenger. Fyll det inn.</value>
   </data>
   <data name="Sprocket.Problem.Mistyped" xml:space="preserve">
-    <value>Dette steget har en verdi handlingen ikke kan ta. Fyll den inn på nytt.</value>
+    <value>Dette steget har fått noe handlingen ikke kan ta. Fyll det inn på nytt.</value>
+  </data>
+  <data name="Sprocket.Problem.OptionMissing" xml:space="preserve">
+    <value>Dette steget mangler {name}. Fyll det inn.</value>
+  </data>
+  <data name="Sprocket.Problem.OptionWrong" xml:space="preserve">
+    <value>{name} i dette steget passer ikke til handlingen. Fyll det inn på nytt.</value>
   </data>
   <data name="Sprocket.Problem.Unawaited" xml:space="preserve">
     <value>Dette steget venter ikke på det det starter, og det kan ikke denne versjonen vise. Erstatt dette steget.</value>
@@ -875,10 +863,16 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>blokkene tilbød ikke lenger handlingen.</value>
   </data>
   <data name="Sprocket.Stopped.Unfilled" xml:space="preserve">
-    <value>en verdi manglet.</value>
+    <value>noe det trengte, manglet.</value>
   </data>
   <data name="Sprocket.Stopped.Mistyped" xml:space="preserve">
-    <value>en verdi passet ikke til handlingen.</value>
+    <value>noe det fikk, passet ikke til handlingen.</value>
+  </data>
+  <data name="Sprocket.Stopped.OptionMissing" xml:space="preserve">
+    <value>{name} manglet.</value>
+  </data>
+  <data name="Sprocket.Stopped.OptionWrong" xml:space="preserve">
+    <value>{name} passet ikke til handlingen.</value>
   </data>
   <data name="Sprocket.Stopped.Unawaited" xml:space="preserve">
     <value>den ventet ikke på det den startet.</value>
@@ -1178,7 +1172,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>{rest} eller {last}</value>
   </data>
   <data name="Sprocket.Value.Needed" xml:space="preserve">
-    <value>{name} trenger en verdi.</value>
+    <value>{name} må fylles inn.</value>
   </data>
   <data name="Sprocket.Value.OneOf" xml:space="preserve">
     <value>{name} må være {words}.</value>
@@ -1208,7 +1202,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>{most} eller mindre</value>
   </data>
   <data name="Sprocket.Value.Numbered" xml:space="preserve">
-    <value>Verdi {number}</value>
+    <value>Valg {number}</value>
   </data>
   <data name="Sprocket.Change.Describe" xml:space="preserve">
     <value>endring av beskrivelsen</value>

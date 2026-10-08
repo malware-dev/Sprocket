@@ -13,6 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityAction
     {
+        /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, reaching the state <paramref name="leadsToStateId" /> where it names one, and standing for the game's member <paramref name="gameActionId" /> where there is one.</summary>
         public EntityAction(string id, string text, string leadsToStateId, string gameActionId)
             : this(id, text, leadsToStateId, gameActionId, 0)
         {
@@ -24,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         IList<Primitive> _takes;
 
+        /// <summary>The same, for one the game will not perform until it is given <paramref name="wants" /> values.</summary>
         public EntityAction(string id, string text, string leadsToStateId, string gameActionId,
             int wants)
         {
@@ -205,6 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Hidden = true;
         }
 
+        /// <summary>Makes this the setting of the block's value <paramref name="propertyId" />, named <paramref name="named" />, holding a <paramref name="holds" /> asked for by <paramref name="field" />.</summary>
         public EntityAction Writes(string propertyId, Field field, string named, ValueKind holds)
         {
             GamePropertyId = propertyId;
@@ -230,6 +233,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public Description Description { get; private set; }
 
+        /// <summary>Gives it the description of its values that a block's definition or an extension declares.</summary>
         public EntityAction Described(Description description)
         {
             Description = description;
@@ -270,16 +274,60 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Needs(int given)
         {
+            return Missing(given) != null;
+        }
+
+        /// <summary>
+        /// What the first option it cannot do without, among those <paramref name="given" /> leaves out, is called; empty where
+        /// nothing names it, and null where none is missing.
+        /// </summary>
+        public string Missing(int given)
+        {
             _wanted.Clear();
             Fields(_wanted);
 
             for (var i = 0; i < _wanted.Count; i++)
             {
                 if (_wanted[i].Needed && i >= given)
-                    return true;
+                    return _wanted[i].Name ?? "";
             }
 
-            return false;
+            return null;
+        }
+
+        /// <summary>
+        /// What the first of <paramref name="given" /> that this cannot take is called; empty where nothing names it, and null
+        /// where it takes them all.
+        /// </summary>
+        /// <remarks>Asked when a program is bound, never while it runs.</remarks>
+        public string Refused(IList<Literal> given)
+        {
+            var some = new List<Literal>(given.Count);
+            for (var i = 0; i < given.Count; i++)
+            {
+                some.Add(given[i]);
+                if (!Converts(some, null))
+                    return Called(i);
+            }
+
+            return null;
+        }
+
+        /// <summary>What the option at <paramref name="at" /> among the values it takes is called, or empty where nothing names it.</summary>
+        string Called(int at)
+        {
+            _wanted.Clear();
+            Fields(_wanted);
+
+            var from = 0;
+            for (var i = 0; i < _wanted.Count; i++)
+            {
+                from += _wanted[i].Covers;
+                if (at < from)
+                    return _wanted[i].Name ?? "";
+            }
+
+            return "";
         }
 
         readonly List<Field> _wanted = new List<Field>();
@@ -399,6 +447,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
+        /// <summary>Adds to <paramref name="into" /> the field each of its options is asked for by, in the order they are given.</summary>
         public void Fields(IList<Field> into)
         {
             var from = into.Count;

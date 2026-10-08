@@ -1,1 +1,1 @@
-A **step** is one line of a sequence, for example a task on some blocks, a wait, or running, stopping or checking something.
+A **step** is one line of a sequence: a task on blocks, a wait, or an if that checks blocks before running the steps under it.

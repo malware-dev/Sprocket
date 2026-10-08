@@ -39,12 +39,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
             var list = new VStack { Padding = new Thickness(12f, 8f) };
             var terms = _editor.Codex.All;
+            var within = false;
             for (var i = 0; i < terms.Count; i++)
             {
                 var term = terms[i];
-                var entry = new Button { Style = Styles.CodexEntry, Text = term.Name, Command = new Relay(delegate { Go(term); }) };
+                within |= term.Opens;
+                var entry = new Button { Style = Entry(term, false), Text = term.Name, Command = new Relay(delegate { Go(term); }) };
                 _entries.Add(entry);
-                list.Children.Add(new HStack { Children = { entry } });
+
+                // The terms of a section stand under its heading, in from it.
+                var indent = within && !term.Opens ? Styles.CodexIndent : 0f;
+                list.Children.Add(new HStack { Padding = new Thickness(indent, 0f, 0f, 0f), Children = { entry } });
             }
 
             Content = new VStack

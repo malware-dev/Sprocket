@@ -52,7 +52,11 @@ is made to its partner too, without asking.
 The vocabulary is settled; use it exactly, on screen, in the codex, in tickets and in chat.
 
 - **Action** is a block's function (open, switch on). **Value** is a block's property. **Task** is one
-  operation: run, stop, an action, setting a value. A wait is not a task.
+  operation: run, stop, an action, or setting a value. A value carries its own mark, `=?`, wherever it is
+  named, set as well as checked; setting one is not an action. A wait is not a task.
+- **Option** is a setting an action takes, such as a piston's position and speed. The picker asks for them in a
+  column headed by the action's name, each by its own name, and a problem names the one at fault ("This step is
+  missing its speed"). An option is never called a value, and a value never an option.
 - **The configuration panel** is the screen that fills an installation's slots. It is never "the
   blueprint editor"; a blueprint is edited on its logic system's screen.
 - **An installation** is "a set of blocks a logic system works on", never a copy of one and never itself

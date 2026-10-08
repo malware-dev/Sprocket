@@ -9,6 +9,10 @@ library
 picking
 trigger
 step
+action
+run-and-stop
+wait
+if
 slot
 signal
 blueprint

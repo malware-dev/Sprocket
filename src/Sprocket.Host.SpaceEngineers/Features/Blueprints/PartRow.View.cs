@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         RichText _about;
         Composer _aboutComposer;
         Slot _blocks;
+        Slot _signals;
         Label _problem;
         Switch _required;
 
@@ -59,6 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }.As(out _column));
 
             Children.Add(new Slot().As(out _blocks));
+            Children.Add(new Slot { IsVisible = false }.As(out _signals));
             Children.Add(new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem));
             // Hidden: an empty optional slot can still stop its installation.
             Children.Add(new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required));

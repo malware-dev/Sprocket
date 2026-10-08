@@ -270,14 +270,14 @@ public class RotorTests
         action.Fields(fields);
 
         var speed = fields[2];
-        Assert.Equal("speed needs a value.", speed.Refuses(new Texts(), "speed", ""));
+        Assert.Equal("speed must be given.", speed.Refuses(new Texts(), "speed", ""));
         Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "0"));
         Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "31"));
         Assert.Equal("", speed.Refuses(new Texts(), "speed", "0.5"));
         Assert.Equal("(0 - 30)", speed.Takes(new Texts()));
 
-        Assert.Equal("angle needs a value.", fields[1].Refuses(new Texts(), "angle", ""));
-        Assert.Equal("direction needs a value.", fields[0].Refuses(new Texts(), "direction", ""));
+        Assert.Equal("angle must be given.", fields[1].Refuses(new Texts(), "angle", ""));
+        Assert.Equal("direction must be given.", fields[0].Refuses(new Texts(), "direction", ""));
     }
 
     /// <summary>
@@ -495,6 +495,55 @@ public class RotorTests
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
         return sequence;
+    }
+
+    /// <summary>A turn missing an option it needs names that option, on the sequence and as the reason its run stopped.</summary>
+    [Fact]
+    public void AMissingOptionIsNamed()
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+        var automation = new Automation();
+        var sequence = Turning(ship, automation, rotor, 90, 5);
+        var turn = (Act)sequence.Steps[0];
+        turn.Values.RemoveAt(2);
+        turn.Values.RemoveAt(1);
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+
+        var fault = Faulted(runner, sequence);
+        Assert.Equal(SequenceProblem.Unfilled, fault.Problem);
+        Assert.Equal("This step is missing its angle. Fill it in.", SequenceText.Problem(new Texts(), fault, sequence));
+
+        // Switched off for it, the reason it stopped names the option as well.
+        for (var frame = 2; frame < 600; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame);
+        }
+
+        var halt = sequence.System.Halt!;
+        Assert.Equal("angle", halt.Block);
+        Assert.EndsWith("its angle was missing.", SequenceText.Stopped(new Texts(), halt, sequence.System));
+    }
+
+    /// <summary>A turn given an option it cannot take names that option.</summary>
+    [Fact]
+    public void AWrongOptionIsNamed()
+    {
+        var ship = new Rigged();
+        var rotor = ship.Rotor(1, "Rotor");
+        var automation = new Automation();
+        var sequence = Turning(ship, automation, rotor, 90, 5);
+        ((Act)sequence.Steps[0]).Values[1] = Literal.Of("far");
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+
+        var fault = Faulted(runner, sequence);
+        Assert.Equal(SequenceProblem.Mistyped, fault.Problem);
+        Assert.Equal("This step's angle doesn't fit its action. Fill it in again.", SequenceText.Problem(new Texts(), fault, sequence));
     }
 
     [Fact]

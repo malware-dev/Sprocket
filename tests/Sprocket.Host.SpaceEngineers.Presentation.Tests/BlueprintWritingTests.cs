@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -149,7 +150,13 @@ public class BlueprintWritingTests
 
         var row = Assert.Single(editor.Parts());
         Assert.Single(row.Blocks);
-        Assert.EndsWith("button 1 is pressed", Assert.Single(row.Signals));
+        Assert.Equal("button 1 is pressed", Assert.Single(row.Signals).Text);
+
+        // The block and the signal are two parts, as a trigger's row shows them: the signal carries its mark.
+        var chips = row.Within().OfType<Slot>().Where(chip => chip.IsVisible).ToList();
+        Assert.Equal(2, chips.Count);
+        Assert.Equal("Airlock Button", chips[0].Text);
+        Assert.Contains("button 1 is pressed", chips[1].Text);
     }
 
     /// <summary>A step back taken while a box holds the keyboard takes back what was typed in it, and nothing before it.</summary>

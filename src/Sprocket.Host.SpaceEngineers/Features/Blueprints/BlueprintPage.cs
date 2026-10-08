@@ -491,7 +491,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         if (at != null)
                         {
                             var answers = i < at.Count ? block.Kind.Signal(at[i]) : null;
-                            row.Signals.Add(answers == null ? "" : answers.Text);
+                            if (answers != null)
+                                row.Signals.Add(answers);
                         }
                     }
                     else if (_gone.Count == 0)

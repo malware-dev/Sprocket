@@ -9,6 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// <summary>The values what is chosen takes, as a column after the stages, with why the pick cannot be finished under them.</summary>
     public class ValuesColumn : VStack
     {
+        readonly Label _title;
         readonly Label _why;
         readonly FieldSet _form;
 
@@ -28,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Spacing = 8f,
                 Children =
                 {
-                    new Label { Style = Styles.ColumnTitle, Text = title.ToUpperInvariant() },
+                    new Label { Style = Styles.ColumnTitle, Text = title.ToUpperInvariant() }.As(out _title),
                     new Label { Style = Styles.ColumnNote }
                 }
             });
@@ -51,6 +52,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _width = value;
                 Placement = Fixed.Wide(value);
             }
+        }
+
+        /// <summary>What the column is headed by: the name of what was chosen, whose options it asks for.</summary>
+        public string Title
+        {
+            get { return _title.Text; }
+            set { _title.Text = (value ?? "").ToUpperInvariant(); }
         }
 
         /// <summary>Where the values are given.</summary>

@@ -38,6 +38,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
         const string Index = "index";
 
+        /// <summary>What a line of the index starts with where its term begins a section of the contents.</summary>
+        const char Section = '>';
+
         /// <summary>The terms a screen links to by name, which the index has to list.</summary>
         static readonly string[] Linked = { Home, LogicSystem, Installation, Sequence, ConfigurationPanel, Library, Picking };
 
@@ -131,8 +134,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 for (var i = 0; i < lines.Length; i++)
                 {
                     var id = lines[i].Trim();
+                    var opens = id.Length > 0 && id[0] == Section;
+                    if (opens)
+                        id = id.Substring(1).Trim();
+
                     if (id.Length > 0 && id[0] != '#' && Listed(id) == null)
-                        _all.Add(new Term(id, _texts));
+                        _all.Add(new Term(id, _texts, opens));
                 }
             }
 

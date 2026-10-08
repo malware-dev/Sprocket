@@ -592,6 +592,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.PanelHot }
         };
 
+        /// <summary>The term in the codex's margin that heads a section, the terms of the section listed under it.</summary>
+        public static readonly ButtonStyle CodexSection = new ButtonStyle(CodexEntry)
+        {
+            Base = { Font = Lettering.Bold, Padding = new Thickness(12f, 16f, 12f, 6f) }
+        };
+
+        /// <summary>The section heading in the codex's margin whose page is being read.</summary>
+        public static readonly ButtonStyle CodexSectionShown = new ButtonStyle(CodexSection)
+        {
+            Base = { Color = Palette.Ink, Background = Palette.Panel },
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>How far in from a section's heading the codex's margin lists the terms of that section.</summary>
+        public const float CodexIndent = 16f;
+
         /// <summary>The mark a drop-down line ends with, smaller than a symbol pressed on its own.</summary>
         public static readonly GlyphStyle ListMark = new GlyphStyle
         {

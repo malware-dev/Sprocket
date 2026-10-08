@@ -234,28 +234,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>
-        /// Each of the blocks <paramref name="entityIds" />, each followed by the signal it sends: "Airlock Button button 2 is
-        /// pressed".
-        /// </summary>
-        /// <remarks>The signal's words as a trigger's row says them, so a slot and the trigger its signal starts read alike.</remarks>
-        public static void Signals(GridWorld world, IList<long> entityIds, IList<string> signals, List<Mention> into)
-        {
-            var entities = Found(world, entityIds);
-            var order = InOrder(entities);
-            for (var k = 0; k < order.Length; k++)
-            {
-                if (k > 0)
-                    into.Add(new Mention(", ", null));
-
-                var i = order[k];
-                var entity = entities[i];
-                into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
-                if (i < signals.Count && !string.IsNullOrEmpty(signals[i]))
-                    into.Add(new Mention(" " + signals[i], null));
-            }
-        }
-
-        /// <summary>
         /// Names a selection as pieces added to <paramref name="into" />, each block with its icon, joined the way
         /// <see cref="Entities(GridWorld, IList{long}, bool)" /> joins their names.
         /// </summary>

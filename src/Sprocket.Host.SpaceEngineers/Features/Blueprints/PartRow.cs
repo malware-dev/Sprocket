@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     public partial class PartRow : HStack
     {
         readonly List<Mention> _pieces = new List<Mention>();
+        readonly List<Mention> _signalPieces = new List<Mention>();
 
         float _wide = PartList.Widest;
 
@@ -31,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public PartRow(Func<WindowLayer> windows)
         {
             Blocks = new List<long>();
-            Signals = new List<string>();
+            Signals = new List<EntityEvent>();
             CreateView(windows);
         }
 
@@ -86,6 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 _name.IsVisible = !value;
                 _about.IsVisible = !value && Described.Length != 0;
                 _blocks.IsVisible = !value;
+                _signals.IsVisible = !value && Signals.Count != 0;
                 _problem.IsVisible = !value && _problem.Text.Length != 0;
                 _nameBox.IsVisible = value;
                 _refusal.IsVisible = value && _refusal.Text.Length != 0;
@@ -142,14 +144,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The blocks the chosen logic system fills the part with, by entity id; none where it is empty.</summary>
         public List<long> Blocks { get; }
 
-        /// <summary>For a signal slot, what each of <see cref="Blocks" /> does that answers it, in the same order: "button 2 is pressed"; none for any other slot.</summary>
-        public List<string> Signals { get; }
+        /// <summary>For a signal slot, the signals its blocks send that answer it, such as "button 2 is pressed"; none for any other slot.</summary>
+        public List<EntityEvent> Signals { get; }
 
         /// <summary>What pressing the blocks does, which is choosing others, or null where they cannot be changed.</summary>
         public ICommand Fills
         {
             get { return _blocks.Command; }
-            set { _blocks.Command = value; }
+            set
+            {
+                _blocks.Command = value;
+                _signals.Command = value;
+            }
         }
 
         /// <summary>How wide the part's name and description would stand in <paramref name="available" />.</summary>
@@ -166,20 +172,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _pieces.Add(new Mention(words, null));
             _blocks.Say(_pieces);
             _blocks.IsEmpty = unfilled;
+            _signals.IsVisible = false;
         }
 
-        /// <summary>Says the blocks, naming them as <paramref name="world" /> calls them.</summary>
-        /// <remarks>Walks the blocks for their names, so it is for whoever holds it to call only when they change.</remarks>
+        /// <summary>Says the blocks, naming them as <paramref name="world" /> calls them, and for a signal slot the signals beside them.</summary>
+        /// <remarks>
+        /// The blocks and their signals are two parts, as they are in a trigger's row, so a slot and the trigger its signal
+        /// starts read alike. Walks the blocks for their names, so it is for whoever holds it to call only when they change.
+        /// </remarks>
         public void Show(GridWorld world)
         {
             _pieces.Clear();
-            if (Signals.Count == Blocks.Count && Blocks.Count > 0)
-                SentenceText.Signals(world, Blocks, Signals, _pieces);
-            else
-                SentenceText.Entities(world, Blocks, true, _pieces);
-
+            SentenceText.Entities(world, Blocks, Signals.Count == 0, _pieces);
             _blocks.Say(_pieces);
             _blocks.IsEmpty = Blocks.Count == 0;
+
+            _signalPieces.Clear();
+            for (var i = 0; i < Signals.Count; i++)
+            {
+                if (i > 0)
+                    _signalPieces.Add(new Mention(", ", null));
+
+                SentenceText.InTrigger(world, new EventSlot(Signals[i], null), _signalPieces);
+            }
+
+            _signals.Say(_signalPieces);
+            _signals.IsVisible = Signals.Count != 0 && !Editing;
         }
     }
 }

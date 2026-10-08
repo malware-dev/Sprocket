@@ -145,39 +145,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>
-        /// How many values an action is waiting for, said as a sentence.
-        /// </summary>
-        /// <remarks>
-        /// The count and nothing else, because the count is all the game declares: an action says
-        /// how many values it wants and never what they are for. Saying more would be Sprocket
-        /// inventing knowledge it does not have, on the screen where somebody is deciding what to
-        /// type.
-        /// </remarks>
-        static string Wants(Texts texts, int values)
-        {
-            if (values <= 1)
-                return texts.PickWantsOne;
-
-            return Template.Fill(texts.PickWantsMany, "count", Counted(texts, values));
-        }
-
-        /// <summary>
-        /// The same, said as what is actually being asked for where somebody has described it.
-        /// </summary>
-        /// <remarks>
-        /// A count is what can be said when the game is the only source, and it stops being the whole
-        /// truth the moment a description says these three values are one colour. Then the form shows
-        /// one control and asking for three values would be counting something nobody can see.
-        /// </remarks>
-        public static string Wants(Texts texts, IList<Field> fields)
-        {
-            if (fields.Count == 1 && fields[0].Edits == Editor.Colour)
-                return texts.PickWantsColor;
-
-            return Wants(texts, fields.Count);
-        }
-
-        /// <summary>
         /// What the one button that starts and stops a sequence promises, whichever way it faces.
         /// </summary>
         /// <remarks>
@@ -201,18 +168,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string Giving()
         {
             return "Say what to give it";
-        }
-
-        static string Counted(Texts texts, int values)
-        {
-            if (values == 2)
-                return texts.NumberTwo;
-            if (values == 3)
-                return texts.NumberThree;
-            if (values == 4)
-                return texts.NumberFour;
-
-            return values.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>What stopped the last run of <paramref name="sequence" />, and at which step: "stopped at step 4 by Cycle Out".</summary>
@@ -245,6 +200,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             if (fault.Problem == SequenceProblem.Stalled && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(texts.ProblemBlockStalled, "block", fault.Which);
+
+            if (fault.Problem == SequenceProblem.Unfilled && !string.IsNullOrEmpty(fault.Which))
+                return Template.Fill(texts.ProblemOptionMissing, "name", fault.Which);
+
+            if (fault.Problem == SequenceProblem.Mistyped && !string.IsNullOrEmpty(fault.Which))
+                return Template.Fill(texts.ProblemOptionWrong, "name", fault.Which);
 
             return fault.Because.Exists ? TroubleText.Of(texts, fault.Because) : Problem(texts, fault.Problem);
         }
@@ -317,6 +278,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Template.Fill(texts.StoppedBlockGone, "block", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Adrift)
                 return Template.Fill(texts.StoppedBlockReplaced, "block", block);
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Unfilled)
+                return Template.Fill(texts.StoppedOptionMissing, "name", block);
+            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Mistyped)
+                return Template.Fill(texts.StoppedOptionWrong, "name", block);
 
             if (problem == SequenceProblem.NeverTriggered)
                 return texts.StoppedNeverTriggered;

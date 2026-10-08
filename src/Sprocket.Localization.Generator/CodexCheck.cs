@@ -181,6 +181,9 @@ namespace Sprocket.Localization.Generator
             for (var i = 0; i < lines.Length; i++)
             {
                 var id = lines[i].Trim();
+                if (id.Length > 0 && id[0] == '>')
+                    id = id.Substring(1).Trim();
+
                 if (id.Length == 0 || id[0] == '#')
                     continue;
 

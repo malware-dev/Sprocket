@@ -113,6 +113,16 @@ public class CodexCheckTests
         Assert.Equal(4, unpaged.Location.GetLineSpan().StartLinePosition.Line);
     }
 
+    /// <summary>A line beginning a section names its term like any other: listed, with its page, and reported where it is listed again.</summary>
+    [Fact]
+    public void ASectionLineNamesItsTerm()
+    {
+        Assert.Empty(Run(Whole(English).Append((Index, "a\n> b\n")).ToArray()).Diagnostics);
+
+        var twice = Assert.Single(Run(Whole(English).Append((Index, "a\n> b\nb\n")).ToArray()).Diagnostics);
+        Assert.Equal("LOC015", twice.Id);
+    }
+
     /// <summary>A page the index does not list is reported, since the codex never shows it.</summary>
     [Fact]
     public void APageTheIndexLacksIsReported()

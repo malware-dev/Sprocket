@@ -201,7 +201,7 @@ namespace Sprocket.Sim.Driving
         public static void Typed(this SprocketEditor editor, string said)
         {
             var pick = editor.Current as PickPage;
-            if (pick == null || pick.Question.Length == 0)
+            if (pick == null || pick.Fields.Count == 0)
                 throw new InvalidOperationException($"'{editor.Screen.Title()}' asks nothing to be typed.");
 
             Run(editor.Act(Cmd.Primary, () => pick.Give(said)));

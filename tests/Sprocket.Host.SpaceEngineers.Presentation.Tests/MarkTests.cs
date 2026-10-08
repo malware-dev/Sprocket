@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -61,9 +62,9 @@ public class MarkTests
         Assert.All(entries, entry => Assert.Equal(Symbols.Value, entry.Mark));
     }
 
-    /// <summary>Setting a value is something a block is told to do, and is marked as one.</summary>
+    /// <summary>A value carries its own mark when it is chosen to be set, as it does wherever a value is named, and so does the step that sets it.</summary>
     [Fact]
-    public void SettingAValueIsMarkedAsAnAction()
+    public void SettingAValueIsMarkedAsAValue()
     {
         var screen = OnTheSequence();
 
@@ -71,7 +72,11 @@ public class MarkTests
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
-        Assert.Equal(Symbols.Action, Entry(screen, "Set Radius").Mark);
+        Assert.Equal(Symbols.Value, Entry(screen, "Set Radius").Mark);
+
+        var light = screen.Editor.World.Entities.Single(entity => entity.Name == "Airlock Light");
+        Assert.Equal(Symbols.Value, MarkText.Of(light.Kind.FindAction("Radius", Form.Value)!));
+        Assert.Equal(Symbols.Action, MarkText.Of(light.Kind.FindAction("OnOff_On", Form.Action)!));
     }
 
     /// <summary>A trigger's row marks the signal that starts it and the sequence it runs.</summary>

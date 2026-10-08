@@ -124,18 +124,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// Asks for the values what is chosen takes, known as <paramref name="given" />: <paramref name="fields" />, holding what
-        /// was given for it earlier in this pick where anything was and <paramref name="filled" /> otherwise.
+        /// Asks for the values what is chosen takes, known as <paramref name="given" /> and headed by its name
+        /// <paramref name="named" />: <paramref name="fields" />, holding what was given for it earlier in this pick where anything
+        /// was and <paramref name="filled" /> otherwise.
         /// </summary>
         /// <remarks>What was given for what was chosen before is kept, so choosing it again gives it back.</remarks>
         /// <returns>The column the values are asked for in.</returns>
-        public ValuesColumn Restate(string given, IList<Field> fields, IList<string> filled, IList<Hsv> colors)
+        public ValuesColumn Restate(string given, string named, IList<Field> fields, IList<string> filled, IList<Hsv> colors)
         {
             if (_values == null)
             {
-                _values = new ValuesColumn(Width, _texts.PickValues);
+                _values = new ValuesColumn(Width, named);
                 _values.Form.Windows = _windows;
             }
+
+            _values.Title = named;
 
             if (!string.IsNullOrEmpty(_given))
             {

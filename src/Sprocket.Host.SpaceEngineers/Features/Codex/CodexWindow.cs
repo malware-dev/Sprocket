@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Lumel.Controls;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -122,7 +123,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
             var terms = _editor.Codex.All;
             for (var i = 0; i < _entries.Count; i++)
-                _entries[i].Style = terms[i] == term ? Styles.CodexEntryShown : Styles.CodexEntry;
+                _entries[i].Style = Entry(terms[i], terms[i] == term);
+        }
+
+        /// <summary>How <paramref name="term" /> stands in the contents: as a section's heading or a term, and as the one being read where <paramref name="shown" /> is set.</summary>
+        static ButtonStyle Entry(Term term, bool shown)
+        {
+            if (term.Opens)
+                return shown ? Styles.CodexSectionShown : Styles.CodexSection;
+
+            return shown ? Styles.CodexEntryShown : Styles.CodexEntry;
         }
     }
 }

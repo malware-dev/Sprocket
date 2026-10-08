@@ -204,20 +204,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override string PrimaryWaits => Editor.Texts.PickDoneFirst;
 
-        /// <summary>What the chosen action will not do anything without, which the column of values asks for beside the stages.</summary>
-        /// <remarks>
-        /// Nearly nothing wants values, so this is empty nearly always. When it is not, the count is the whole of what can
-        /// honestly be asked: the game declares how many values an action takes and nothing about what any of them is for.
-        /// </remarks>
-        public string Question
-        {
-            get
-            {
-                var fields = Wanted();
-                return fields.Count > 0 ? SequenceText.Wants(Editor.Texts, fields) : "";
-            }
-        }
-
         /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
         public IList<Field> Fields => Wanted();
 
@@ -702,7 +688,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             var made = _strip.Values == null;
-            var values = _strip.Restate(given, fields, Filled, colors);
+            var values = _strip.Restate(given, Chosen(), fields, Filled, colors);
             if (made)
             {
                 values.Form.Edited += delegate
@@ -1239,6 +1225,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             return true;
+        }
+
+        /// <summary>The name what is chosen is listed under, or empty where nothing is.</summary>
+        string Chosen()
+        {
+            var at = At(_chosen, _chosenForm);
+            return at < 0 ? "" : _names[at];
         }
 
         /// <summary>Where the thing on offer under that id is in the list, or -1 where it is not listed.</summary>

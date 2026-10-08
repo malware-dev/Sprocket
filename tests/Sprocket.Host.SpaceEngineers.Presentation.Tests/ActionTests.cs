@@ -323,9 +323,6 @@ public class ActionTests
         screen.Editor.PressChoice("Set Color");
         screen.Run(2);
 
-        // Asked on the button that finishes the picking, rather than on a screen of its own.
-        Assert.Equal("This needs a color.", screen.Editor.Picking().Question);
-
         // One field over all three, because somebody described these three as one colour - which for
         // a light is Sprocket itself, since these are the game's own blocks. The action still says
         // nothing about them, and a block nobody has described still gets a box for each.

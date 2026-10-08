@@ -209,7 +209,7 @@ public class CodexTests
     {
         var sim = Simulation.Fresh();
         var index = File.ReadAllLines(Path.Combine(CodexFiles.Beside, "index"))
-            .Select(line => line.Trim()).Where(line => line.Length > 0 && line[0] != '#');
+            .Select(line => line.Trim().TrimStart('>').Trim()).Where(line => line.Length > 0 && line[0] != '#');
 
         Assert.Equal(index, sim.Editor.Codex.All.Select(term => term.Id));
         Assert.Equal("", sim.Editor.Codex.Trouble);
@@ -225,6 +225,41 @@ public class CodexTests
         var terms = new Terms(sim.Texts);
 
         Assert.Equal(new[] { Terms.Library, Terms.Home }, terms.All.Select(term => term.Id));
+    }
+
+    /// <summary>A line of the index starting with <c>&gt;</c> begins a section: its term heads it, and the terms after it are listed under it.</summary>
+    [Fact]
+    public void ALineStartingWithAnAngleBeginsASection()
+    {
+        var sim = Simulation.Fresh();
+        sim.Texts.Book.Pages = new Pages("index", "home\n> library\npicking\n");
+
+        var terms = new Terms(sim.Texts);
+
+        Assert.Equal(new[] { Terms.Home, Terms.Library, Terms.Picking }, terms.All.Select(term => term.Id));
+        Assert.Equal(new[] { false, true, false }, terms.All.Select(term => term.Opens));
+    }
+
+    /// <summary>The contents show a section's term as its heading, and the terms of the section in from it.</summary>
+    [Fact]
+    public void TheContentsShowASectionUnderItsHeading()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.Texts.Book.Pages = new Pages("index", "home\n> library\npicking\n",
+            "home.md", "# Home\n", "library.md", "# Library\n", "picking.md", "# Picking\n");
+        editor.OpenCodex(editor.Codex.Find(Terms.Home)!);
+        var codex = editor.CodexWindow!;
+        codex.List(true);
+
+        var entries = codex.Within().OfType<Lumel.Controls.Button>().ToList();
+        var heading = Assert.Single(entries, b => b.Text == "Library");
+        var under = Assert.Single(entries, b => b.Text == "Picking");
+        var before = Assert.Single(entries, b => b.Text == "Home");
+        Assert.Same(Styles.CodexSection, heading.Style);
+        Assert.Same(Styles.CodexEntry, under.Style);
+        Assert.Equal(Styles.CodexIndent, ((Lumel.Layout.HStack)under.Parent!).Padding.Left);
+        Assert.Equal(0f, ((Lumel.Layout.HStack)before.Parent!).Padding.Left);
     }
 
     /// <summary>A term a screen links to that the index leaves out is said, since that screen's help opens nothing.</summary>

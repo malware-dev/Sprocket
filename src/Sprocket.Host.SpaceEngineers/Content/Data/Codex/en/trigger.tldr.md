@@ -1,1 +1,1 @@
-A **trigger** starts or stops a sequence, or does a single task, for example when a signal arrives, a door finishes closing, or a set time passes.
+A **trigger** runs or stops a sequence, or does one task, when a signal arrives, blocks reach a state such as a door finishing closing, or a set time passes.

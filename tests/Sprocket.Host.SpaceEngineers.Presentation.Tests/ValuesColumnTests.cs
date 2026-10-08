@@ -31,7 +31,7 @@ public class ValuesColumnTests
     {
         var screen = Screen.Fresh(ALight.Split(' '));
 
-        Assert.False(screen.Shows("VALUES"), "the values column came before anything was chosen");
+        Assert.False(screen.Shows("SET RADIUS"), "the options column came before anything was chosen");
         Assert.True(screen.Shows("WHAT TO DO"), "the second column is not there");
     }
 
@@ -40,7 +40,7 @@ public class ValuesColumnTests
     {
         var screen = Open(SetRadius);
 
-        Assert.True(screen.Shows("VALUES"), "there is no values column");
+        Assert.True(screen.Shows("SET RADIUS"), "the column is not headed by what was chosen");
         Assert.True(screen.Shows("Radius (0.1 - 20)"), "the column asks for nothing");
         Assert.False(screen.Shows("This needs"), "the column says what its fields already show");
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised over the picker");
@@ -64,7 +64,7 @@ public class ValuesColumnTests
         var screen = Open(SetRadius + " " + Done);
 
         Assert.Equal("Set Radius on Airlock Light", screen.Ended);
-        Assert.True(screen.Shows("Radius needs a value."), "nothing said why it did not finish");
+        Assert.True(screen.Shows("Radius must be given."), "nothing said why it did not finish");
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
 

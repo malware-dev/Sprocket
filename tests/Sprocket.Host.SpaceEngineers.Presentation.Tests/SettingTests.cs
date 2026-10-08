@@ -57,8 +57,6 @@ public class SettingTests
         screen.Editor.PressChoice("Set Falloff");
         screen.Run(2);
 
-        Assert.Equal("This needs one value.", screen.Editor.Picking().Question);
-
         // The numbers this block's own definition declares, and nobody else's: a corner light's
         // falloff stops at two where another light's stops somewhere else.
         Field one = Assert.Single(screen.Editor.Picking().Fields);

@@ -765,7 +765,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (system == null || !system.Enabled)
                 return;
 
+            // A slot or an option is named as it is; a block by the name it goes by.
             var block = fault.Which == null || fault.Problem == SequenceProblem.EmptySlot
+                || fault.Problem == SequenceProblem.Unfilled || fault.Problem == SequenceProblem.Mistyped
                 ? fault.Which
                 : _automation.Called(fault.Which, _world.Values);
             var halt = new Halt(fault.Problem, sequence.Number, fault.Step, fault.Because, block);

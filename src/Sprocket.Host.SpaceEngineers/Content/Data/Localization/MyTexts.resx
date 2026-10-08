@@ -373,7 +373,7 @@ Renaming it here renames the grid.</value>
     <comment>Note on the blocks a step's sentence names.</comment>
   </data>
   <data name="Sprocket.Sequence.ValuesAbout" xml:space="preserve">
-    <value>Change the value it is given.</value>
+    <value>Change what it is given.</value>
     <comment>Note on a value a step's sentence gives.</comment>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
@@ -656,7 +656,7 @@ Renaming it here renames the grid.</value>
     <comment>Note on the mark beside something a block can be told to do.</comment>
   </data>
   <data name="Sprocket.Member.Value" xml:space="preserve">
-    <value>Something the block is asked: what one of its values is.</value>
+    <value>One of the block's values: something it is set to, or asked about.</value>
     <comment>Note on the mark beside a value a block is asked about.</comment>
   </data>
   <data name="Sprocket.Member.Signal" xml:space="preserve">
@@ -957,30 +957,6 @@ Renaming it here renames the grid.</value>
     <value>Sequence {number}</value>
     <comment>What a sequence nobody has named is called; {number} is its number.</comment>
   </data>
-  <data name="Sprocket.Pick.WantsOne" xml:space="preserve">
-    <value>This needs one value.</value>
-    <comment>Over the values of an action that takes one.</comment>
-  </data>
-  <data name="Sprocket.Pick.WantsMany" xml:space="preserve">
-    <value>This needs {count} values.</value>
-    <comment>Over the values of an action that takes several; {count} is a number word or digits.</comment>
-  </data>
-  <data name="Sprocket.Pick.WantsColor" xml:space="preserve">
-    <value>This needs a color.</value>
-    <comment>Over the values of an action that takes a color.</comment>
-  </data>
-  <data name="Sprocket.Number.Two" xml:space="preserve">
-    <value>two</value>
-    <comment>The number 2 as a word, in "This needs {count} values."</comment>
-  </data>
-  <data name="Sprocket.Number.Three" xml:space="preserve">
-    <value>three</value>
-    <comment>The number 3 as a word.</comment>
-  </data>
-  <data name="Sprocket.Number.Four" xml:space="preserve">
-    <value>four</value>
-    <comment>The number 4 as a word.</comment>
-  </data>
   <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
     <value>The {slot} slot is empty. Fill it on the configuration panel.</value>
     <comment>A blueprint slot a step needs has no block; {slot} is its name.</comment>
@@ -1054,12 +1030,20 @@ Renaming it here renames the grid.</value>
     <comment>A step's action is no longer offered by its blocks.</comment>
   </data>
   <data name="Sprocket.Problem.Unfilled" xml:space="preserve">
-    <value>This step is missing a value it needs. Fill it in.</value>
+    <value>This step is missing something it needs. Fill it in.</value>
     <comment>A step lacks a value.</comment>
   </data>
   <data name="Sprocket.Problem.Mistyped" xml:space="preserve">
-    <value>This step has a value its action can't take. Fill it in again.</value>
+    <value>This step is given something its action can't take. Fill it in again.</value>
     <comment>A step has a value of the wrong kind.</comment>
+  </data>
+  <data name="Sprocket.Problem.OptionMissing" xml:space="preserve">
+    <value>This step is missing its {name}. Fill it in.</value>
+    <comment>A step lacks an option its action needs; {name} is the option, such as speed.</comment>
+  </data>
+  <data name="Sprocket.Problem.OptionWrong" xml:space="preserve">
+    <value>This step's {name} doesn't fit its action. Fill it in again.</value>
+    <comment>An option a step was given is the wrong kind; {name} is the option.</comment>
   </data>
   <data name="Sprocket.Problem.Unawaited" xml:space="preserve">
     <value>This step doesn't wait for what it starts, which this version can't show. Replace this step.</value>
@@ -1142,12 +1126,20 @@ Renaming it here renames the grid.</value>
     <comment>Reason: the action was no longer offered.</comment>
   </data>
   <data name="Sprocket.Stopped.Unfilled" xml:space="preserve">
-    <value>a value was missing.</value>
+    <value>something it needed was missing.</value>
     <comment>Reason: a value was missing.</comment>
   </data>
   <data name="Sprocket.Stopped.Mistyped" xml:space="preserve">
-    <value>a value didn't fit the action.</value>
+    <value>something it was given didn't fit the action.</value>
     <comment>Reason: a value did not fit.</comment>
+  </data>
+  <data name="Sprocket.Stopped.OptionMissing" xml:space="preserve">
+    <value>its {name} was missing.</value>
+    <comment>Reason a run stopped: an option it needed was not given; {name} is the option.</comment>
+  </data>
+  <data name="Sprocket.Stopped.OptionWrong" xml:space="preserve">
+    <value>its {name} didn't fit the action.</value>
+    <comment>Reason a run stopped: an option was the wrong kind; {name} is the option.</comment>
   </data>
   <data name="Sprocket.Stopped.Unawaited" xml:space="preserve">
     <value>it didn't wait for what it started.</value>
@@ -1546,7 +1538,7 @@ Renaming it here renames the grid.</value>
     <comment>The words a value can be, the last joined by "or".</comment>
   </data>
   <data name="Sprocket.Value.Needed" xml:space="preserve">
-    <value>{name} needs a value.</value>
+    <value>{name} must be given.</value>
     <comment>A value left empty.</comment>
   </data>
   <data name="Sprocket.Value.OneOf" xml:space="preserve">
@@ -1586,7 +1578,7 @@ Renaming it here renames the grid.</value>
     <comment>A range in a refusal.</comment>
   </data>
   <data name="Sprocket.Value.Numbered" xml:space="preserve">
-    <value>Value {number}</value>
+    <value>Option {number}</value>
     <comment>What a refusal calls a value nobody named.</comment>
   </data>
   <data name="Sprocket.Change.Describe" xml:space="preserve">
