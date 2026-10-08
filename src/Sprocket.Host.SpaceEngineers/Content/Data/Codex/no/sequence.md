@@ -52,12 +52,3 @@ Trykk knappen til luftslusen, og mens den kjører:
 Når den ytre døra er åpen, er kjøringen over, og på raden til *Sluse ut* står det `klar`.
 
 Trykker du knappen igjen under kjøringen, hoppes trykket over. Skjermen til *Sluse ut* teller det, for eksempel `hoppet over 1x mens den var opptatt`. Stopper du kjøringen for hånd under steg 2, står det `stoppet ved steg 2 for hånd` på skjermen. Begge dørene forblir lukket.
-
-## Slags steg
-
-Knappene på slutten av en sekvens legger til et steg:
-
-- `+ oppgave` gjør noe med blokker: [en handling](#action) som `open`, eller å sette en av verdiene deres.
-- `+ kjør` og `+ stopp` [kjører eller stopper en annen sekvens](#run-and-stop).
-- `+ vent` [venter](#wait) en fastsatt tid.
-- `+ hvis` [sjekker blokker](#if), og kjører stegene under det der det som sjekkes stemmer.

@@ -1,1 +1,1 @@
-This entry is still to be written.
+**Run** and **stop** are steps that start or stop another sequence of the same logic system.

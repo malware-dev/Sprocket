@@ -52,12 +52,3 @@ Press the airlock's button, and while it runs:
 When the outer door is open, the run is over, and the row of *Cycle Out* reads `ready`.
 
 Press the button again during the run, and the press is skipped. The screen of *Cycle Out* counts it, for example `skipped 1x while busy`. Stop the run by hand during step 2, and its screen reads `stopped at step 2 by hand`. Both doors stay shut.
-
-## The kinds of step
-
-The buttons at the end of a sequence add a step:
-
-- `+ task` does something to blocks: [an action](#action) such as `open`, or setting one of their values.
-- `+ run` and `+ stop` [run or stop another sequence](#run-and-stop).
-- `+ wait` [waits](#wait) a set time.
-- `+ if` [checks blocks](#if), and runs the steps under it where the check holds.
