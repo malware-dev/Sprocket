@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Home;
 using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -647,6 +648,121 @@ public class LibraryTests
         Assert.Null(now.FindPart("Inner"));
         Assert.All(now.Instances, i => Assert.Null(i.FilledWith("Inner")));
         Assert.Equal(kept, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
+    }
+
+    /// <summary>
+    /// Where the logic system was changed after its blueprint, the library offers to reset it to the blueprint, and the home
+    /// screen does not: it asks first, then puts the blueprint back in its place with its installations, and undo brings the
+    /// changes back.
+    /// </summary>
+    [Fact]
+    public void AChangedLogicSystemIsResetToItsBlueprint()
+    {
+        var rig = Blueprinted();
+        var system = rig.Editor.Program.Systems[0];
+        Assert.Single(rig.Editor.RootHeadings()).Offers!.Execute();
+        rig.Tick();
+        rig.Editor.GoToRoot();
+        rig.Tick();
+        var filled = system.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList();
+        var switched = system.Instances.Select(i => i.Enabled).ToList();
+
+        system.Name = "Airlock Mk II";
+        system.Changed = DateTime.UtcNow.AddMinutes(1);
+        rig.Editor.Invalidate();
+        rig.Tick();
+        Assert.DoesNotContain(rig.Editor.Current.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryReset);
+
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        var reset = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryReset);
+        Assert.True(reset.IsVisible);
+
+        reset.Command!.Execute();
+        rig.Tick();
+        Assert.Contains(rig.Texts.LibraryResetReplaced, rig.Editor.Question());
+        rig.Editor.PressChoice(rig.Texts.LibraryResetConfirm);
+        rig.Tick();
+
+        var now = Assert.Single(rig.Editor.Program.Systems);
+        Assert.Equal("Airlock", now.Name);
+        Assert.Equal(system.Identity, now.Identity);
+        Assert.Equal(filled, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
+        Assert.Equal(switched, now.Instances.Select(i => i.Enabled).ToList());
+        Assert.True(rig.Shelf.Holds(now));
+        Assert.False(reset.IsVisible, "the logic system and its blueprint are the same, and reset is still offered");
+
+        rig.Editor.GoToRoot();
+        rig.Tick();
+        Assert.Equal(rig.Texts.ChangeResetToBlueprint, rig.Editor.Screen.UndoText);
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Equal("Airlock Mk II", Assert.Single(rig.Editor.Program.Systems).Name);
+    }
+
+    /// <summary>Updating the blueprint from the home screen leaves the logic system and its blueprint the same, so the heading offers nothing more.</summary>
+    [Fact]
+    public void UpdatingTheBlueprintFromHomeLeavesNothingToOffer()
+    {
+        var rig = Blueprinted();
+        var system = rig.Editor.Program.Systems[0];
+        Assert.Single(rig.Editor.RootHeadings()).Offers!.Execute();
+        rig.Tick();
+        rig.Editor.GoToRoot();
+        rig.Tick();
+
+        system.Name = "Airlock Mk II";
+        system.Changed = DateTime.UtcNow.AddMinutes(1);
+        rig.Editor.Invalidate();
+        rig.Tick();
+        var heading = Assert.Single(rig.Editor.RootHeadings());
+        Assert.Equal(rig.Texts.SystemsUpdateBlueprint, heading.ButtonText);
+
+        heading.Offers!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryUpdateConfirm);
+        rig.Tick();
+
+        Assert.IsType<HomePage>(rig.Editor.Current);
+        Assert.True(rig.Shelf.Holds(system), "the library's copy is not the logic system as it is");
+        Assert.Null(Assert.Single(rig.Editor.RootHeadings()).Offers);
+    }
+
+    /// <summary>The same, pressed on the screen: the button, then the answer in the question hanging under it.</summary>
+    [Fact]
+    public void UpdatingTheBlueprintByPressingStoresIt()
+    {
+        var screen = Screen.Fresh("press \"logic system\" type Airlock enter escape press \"Make blueprint\" escape".Split(' '));
+        var system = Assert.Single(screen.Editor.Program.Systems);
+        Assert.True(screen.Editor.Shelf!.Holds(system), "making the blueprint stored nothing");
+
+        system.Name = "Airlock Mk II";
+        system.Changed = DateTime.UtcNow.AddMinutes(1);
+        screen.Editor.Invalidate();
+        screen.Run(2);
+        Assert.True(screen.Shows("Update blueprint"), screen.Dump);
+
+        screen.Do("press", "\"Update", "blueprint\"");
+        screen.Run(1);
+        Assert.True(screen.Shows("Update"), "no question");
+        screen.Do("press", "Update");
+        screen.Run(2);
+
+        Assert.True(screen.Editor.Shelf.Holds(system), "the answer stored nothing");
+        Assert.False(screen.Shows("Update blueprint"), "the button is still offered");
+    }
+
+    /// <summary>The library's blueprint being the newer of the two offers no reset: there is nothing on the logic system to go back from.</summary>
+    [Fact]
+    public void ANewerBlueprintOffersNoReset()
+    {
+        var rig = Newer();
+
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.False(Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryReset).IsVisible);
     }
 
     /// <summary>The same, whose blueprint in the library is a newer copy, renamed Airlock Mk II.</summary>

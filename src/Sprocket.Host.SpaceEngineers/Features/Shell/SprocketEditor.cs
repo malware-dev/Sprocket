@@ -2683,18 +2683,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Ask(Texts.LibraryRenewQuestion + "\n\n**{named}**\n\n" + Texts.LibraryRenewReplaced, arguments);
             Answer(Texts.LibraryRenewKeep, delegate { }, true);
-            Answer(Texts.LibraryRenewConfirm, delegate { Renew(system); });
+            Answer(Texts.LibraryRenewConfirm, delegate { Renew(system, Change.UpdateFromLibrary); });
+        }
+
+        /// <summary>Asks before putting the blueprint of <paramref name="system" /> in the library back in its place, losing what changed since; keeping it is the answer Enter takes.</summary>
+        public void AskReset(AutomationSystem system)
+        {
+            Stamp(true);
+
+            var arguments = new Arguments();
+            arguments.Set("named", system.Name);
+
+            Ask(Texts.LibraryResetQuestion + "\n\n**{named}**\n\n" + Texts.LibraryResetReplaced, arguments);
+            Answer(Texts.LibraryRenewKeep, delegate { }, true);
+            Answer(Texts.LibraryResetConfirm, delegate { Renew(system, Change.ResetToBlueprint); });
         }
 
         /// <summary>
         /// Puts the blueprint of <paramref name="system" /> in the library in its place, its installations keeping their blocks in
-        /// every slot the blueprint still uses, answering what was wrong, or empty.
+        /// every slot the blueprint still uses, offered back as <paramref name="change" />, answering what was wrong, or empty.
         /// </summary>
         /// <remarks>
         /// Its runs end, as they do when a logic system goes, and each installation stays switched as it was. The whole
         /// program as it would stand is read first, because a text with an error in it is trusted in no part.
         /// </remarks>
-        public string Renew(AutomationSystem system)
+        public string Renew(AutomationSystem system, Change change)
         {
             var volume = Shelf == null ? null : Shelf.Find(system.Identity);
             if (volume == null)
@@ -2739,7 +2752,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // Said as it is, so its date stays the library's and nothing reads it as changed since.
             _said[fresh.Identity] = ProgramText.Said(fresh);
 
-            Do(new ReplaceSystem(system, fresh, Change.UpdateFromLibrary));
+            Do(new ReplaceSystem(system, fresh, change));
             Gone(system);
             return "";
         }

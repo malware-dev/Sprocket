@@ -16,6 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         Label _hereLabel;
         Switch _switch;
         Button _keep;
+        Button _reset;
         Button _copy;
         Label _line;
         RichText _about;
@@ -71,6 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                                             new Switch { Style = Styles.Switch }.As(out _switch),
                                             new HStack { Placement = Fixed.Wide(24f) },
                                             new Button { Style = Styles.Button }.As(out _keep),
+                                            new Button { Style = Styles.Button }.As(out _reset),
                                             new Button { Style = Styles.Button }.As(out _copy)
                                         }
                                     }.As(out _here),

@@ -272,14 +272,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Write(Index, text.ToString());
         }
 
+        /// <summary>Writes <paramref name="text" /> to <paramref name="file" />, saying in the log that it did, or why it did not.</summary>
         void Write(string file, string text)
         {
             if (!Intact)
+            {
+                _say(file + " is not written, because the library's index did not read");
                 return;
+            }
 
             try
             {
                 _files.Write(file, text);
+                _say("wrote " + file + " in the library");
             }
             catch (Exception failed)
             {

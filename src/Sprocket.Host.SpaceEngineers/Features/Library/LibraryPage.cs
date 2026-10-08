@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         readonly List<string> _names = new List<string>();
         readonly Relay _flips;
         readonly Relay _keeps;
+        readonly Relay _resets;
         readonly Relay _copies;
 
         Entry _chosen;
@@ -44,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _opening = opening;
             _flips = new Relay(Flip);
             _keeps = new Relay(Keep);
+            _resets = new Relay(Reset);
             _copies = new Relay(Copy);
         }
 
@@ -76,6 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _switch.Command = _flips;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _keep.Command = _keeps;
+            _reset.Command = _resets;
             _copy.Command = _copies;
             List();
         }
@@ -310,6 +313,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 : newer ? texts.SystemsUpdateFromLibraryAbout
                 : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
 
+            // Back the other way while the logic system has moved on from its blueprint, beside the button that would copy it over.
+            _reset.IsVisible = live != null && volume != null && !same && !newer;
+            _reset.Text = texts.LibraryReset;
+            _reset.Tip = Tip.For(_reset.Tip, texts.LibraryResetAbout);
+
             _copy.Text = texts.LibraryCopy;
             _copies.CanExecute = free && system != null;
             _copy.Tip = Tip.For(_copy.Tip, texts.LibraryCopyAbout);
@@ -426,6 +434,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Run(Cmd.Shelve, delegate { Editor.AskUpdate(live); });
             else
                 Run(Cmd.Renew, delegate { Editor.AskRenew(live); });
+        }
+
+        /// <summary>Puts the chosen blueprint in the library back in the place of the logic system on this construct, after asking.</summary>
+        void Reset()
+        {
+            var live = _chosen == null ? null : Live(_chosen.Identity);
+            if (live != null)
+                Run(Cmd.Renew, delegate { Editor.AskReset(live); });
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>

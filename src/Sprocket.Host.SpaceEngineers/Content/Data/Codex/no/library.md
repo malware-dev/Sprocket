@@ -16,6 +16,7 @@ Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen f
 
 - `På denne konstruksjonen` setter det på denne konstruksjonen, eller tar det av.
 - `Lag plantegning` tar vare på en kopi i lageret, og `Oppdater plantegning` oppdaterer den kopien.
+- `Oppdater fra biblioteket` henter en nyere kopi fra lageret, og `Tilbakestill til plantegning` går tilbake til kopien i lageret, uten endringene som er gjort siden. Uansett beholder installasjonene blokkene sine.
 - `Lag en kopi` setter et nytt logikksystem på denne konstruksjonen som starter som en kopi av dette.
 - Søppelkassen sletter en plantegning fra lageret, etter å ha spurt. Logikksystemer som allerede er på konstruksjoner, fortsetter å kjøre.
 

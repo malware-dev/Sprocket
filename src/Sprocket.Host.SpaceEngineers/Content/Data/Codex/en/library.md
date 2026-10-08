@@ -16,6 +16,7 @@ Choose one to see who made it and when it last changed, its description from the
 
 - `On this construct` puts it on this construct, or takes it off.
 - `Make blueprint` keeps a copy in storage, and `Update blueprint` brings that copy up to date.
+- `Update from library` takes a newer copy from storage, and `Reset to blueprint` goes back to the copy in storage, leaving out the changes made since. Either way its installations keep their blocks.
 - `Make a copy` puts a new logic system on this construct that starts as a copy of this one.
 - The bin deletes a blueprint from storage, after asking. Logic systems already on constructs keep running.
 

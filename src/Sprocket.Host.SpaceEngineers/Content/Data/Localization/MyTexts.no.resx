@@ -1303,6 +1303,9 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
     <value>oppdatering av et logikksystem fra biblioteket</value>
   </data>
+  <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
+    <value>tilbakestilling av et logikksystem til plantegningen</value>
+  </data>
   <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
     <value>fjerning av et logikksystem</value>
   </data>
@@ -1493,6 +1496,21 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Library.RenewKeep" xml:space="preserve">
     <value>Behold det</value>
+  </data>
+  <data name="Sprocket.Library.Reset" xml:space="preserve">
+    <value>Tilbakestill til plantegning</value>
+  </data>
+  <data name="Sprocket.Library.ResetAbout" xml:space="preserve">
+    <value>Gå tilbake til plantegningen i biblioteket, uten endringene siden. Installasjonene beholder blokkene sine.</value>
+  </data>
+  <data name="Sprocket.Library.ResetQuestion" xml:space="preserve">
+    <value>Tilbakestille dette logikksystemet til plantegningen sin?</value>
+  </data>
+  <data name="Sprocket.Library.ResetReplaced" xml:space="preserve">
+    <value>Alle endringer siden plantegningen sist ble oppdatert, går tapt. Installasjonene beholder blokkene sine i alle plasser plantegningen fortsatt har.</value>
+  </data>
+  <data name="Sprocket.Library.ResetConfirm" xml:space="preserve">
+    <value>Tilbakestill</value>
   </data>
   <data name="Sprocket.Library.UpdateQuestion" xml:space="preserve">
     <value>Oppdatere plantegningen i biblioteket?</value>
