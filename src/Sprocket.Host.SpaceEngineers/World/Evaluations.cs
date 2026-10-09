@@ -5,11 +5,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>How far each kind of block has been checked, which is declared here and nowhere else.</summary>
     /// <remarks>
-    /// Keyed on the interface, like an extension, so everything shaped like a door shares the door's
+    /// Keyed on the interface, like a capability, so everything shaped like a door shares the door's
     /// answer. Anything not named is pending.
     /// </remarks>
     public static class Evaluations
     {
+        /// <summary>How far <paramref name="block" />'s kind has been checked.</summary>
         public static Evaluation Of(IMyTerminalBlock block)
         {
             if (block is IMyDoor || block is IMyAirVent || block is IMyMotorStator || block is IMyButtonPanel

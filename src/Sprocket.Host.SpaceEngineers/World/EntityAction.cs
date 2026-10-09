@@ -13,9 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityAction
     {
-        /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, reaching the state <paramref name="leadsToStateId" /> where it names one, and standing for the game's member <paramref name="gameActionId" /> where there is one.</summary>
-        public EntityAction(string id, string text, string leadsToStateId, string gameActionId)
-            : this(id, text, leadsToStateId, gameActionId, 0)
+        /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, standing for the game's member <paramref name="gameActionId" /> where there is one.</summary>
+        public EntityAction(string id, string text, string gameActionId)
+            : this(id, text, gameActionId, 0)
         {
         }
 
@@ -26,12 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         IList<Primitive> _takes;
 
         /// <summary>The same, for one the game will not perform until it is given <paramref name="wants" /> values.</summary>
-        public EntityAction(string id, string text, string leadsToStateId, string gameActionId,
-            int wants)
+        public EntityAction(string id, string text, string gameActionId, int wants)
         {
             Id = id;
             Text = text;
-            LeadsToStateId = leadsToStateId;
             GameActionId = gameActionId;
             Named = Capitalised(text);
             Declared = text;
@@ -130,16 +128,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// The <see cref="EntityState"/> this action is trying to bring about, or
-        /// null if it does not settle into a state.
+        /// What this does as one of Sprocket's own, what it waits for and how it finishes; null for one of the game's own
+        /// members, which the game performs.
         /// </summary>
-        /// <remarks>
-        /// This is what makes interlocks possible. Knowing that "open" is an attempt
-        /// to reach "is open" lets the runtime refuse the action while a promise says
-        /// that state must not hold - and, far more importantly, say so afterwards.
-        /// An action that declares nothing here simply cannot be interlocked.
-        /// </remarks>
-        public string LeadsToStateId { get; private set; }
+        public Doing Doing { get; private set; }
+
+        /// <summary>What it waits for, or null where it is done the moment it is told.</summary>
+        public Reading Until => Doing == null ? null : Doing.Until;
+
+        /// <summary>Gives it what it does as one of Sprocket's own.</summary>
+        public EntityAction Performing(Doing doing)
+        {
+            Doing = doing;
+            return this;
+        }
 
         /// <summary>
         /// The game's own name for this act, or null where the game has no single action for it.
@@ -178,15 +180,15 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         /// <remarks>
-        /// What the terminal view lists, whether or not the organized one has replaced it. An
-        /// extension's entry is Sprocket's; one the block declares and nothing has reworded is this.
+        /// What the terminal view lists, whether or not the organized one has replaced it. A
+        /// capability's entry is Sprocket's; one the block declares and nothing has reworded is this.
         /// </remarks>
         public bool Unaltered { get; set; }
 
         /// <summary>Whether this is left out of the list somebody chooses from.</summary>
         /// <remarks>
-        /// Only where an extension stands in for it, naming it as the game's own form of what the
-        /// extension's entry does. Still there for anything that names it, and for a list that shows
+        /// Only where a capability's entry stands in for it, naming it as the game's own form of what
+        /// that entry does. Still there for anything that names it, and for a list that shows
         /// everything.
         /// </remarks>
         public bool Hidden { get; private set; }
@@ -196,7 +198,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         /// <remarks>
         /// Worked out from the game's own id where there is one - see <see cref="Categories" /> - and
-        /// said outright by an extension for anything Sprocket invented, which has no game id to ask
+        /// said outright by a capability for anything Sprocket invented, which has no game id to ask
         /// about.
         /// </remarks>
         public Category Category { get; set; }
@@ -233,7 +235,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public Description Description { get; private set; }
 
-        /// <summary>Gives it the description of its values that a block's definition or an extension declares.</summary>
+        /// <summary>Gives it the description of its values that a block's definition or a capability declares.</summary>
         public EntityAction Described(Description description)
         {
             Description = description;

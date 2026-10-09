@@ -26,5 +26,6 @@
     <!-- The editor driven the way a target drives it, in every test. -->
     <ItemGroup>
         <Using Include="Sprocket.Sim.Driving" />
+        <Using Include="Sprocket.Host.SpaceEngineers.Blocks" Alias="Blocks" />
     </ItemGroup>
 </Project>

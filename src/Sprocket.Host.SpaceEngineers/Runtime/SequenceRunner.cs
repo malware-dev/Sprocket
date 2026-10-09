@@ -199,51 +199,44 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _stuck = SequenceFault.None;
             for (var i = 0; i < _outstanding.Count; i++)
             {
-                var compiled = Compile(_outstanding[i]);
-                for (var t = 0; t < compiled.Entities.Count; t++)
+                var step = _outstanding[i];
+                var compiled = Compile(step);
+                for (var t = 0; t < compiled.Acts.Count; t++)
                 {
-                    EntityAction doing = compiled.Actions[t];
-                    if (string.IsNullOrEmpty(doing.LeadsToStateId))
+                    var acted = compiled.Acts[t];
+                    var until = acted.Action.Until;
+                    if (until == null)
                         continue;
 
                     // Switched off, unpowered or broken on the way: it gets no further until somebody sees to it.
-                    var entity = compiled.Entities[t];
-                    var reached = Reached(_owner.World, entity, doing.LeadsToStateId);
-                    if (!reached && entity.Stalls(doing))
+                    var entity = acted.Entity;
+                    var reached = until.Holds(entity.Block, acted.Seen);
+                    if (!reached && entity.Stalls(acted.Action))
                     {
                         if (!_stuck.Exists)
-                            _stuck = new SequenceFault(SequenceProblem.Stalled, _sequence.Steps.IndexOf(_outstanding[i]), Trouble.None, entity.Name);
+                            _stuck = new SequenceFault(SequenceProblem.Stalled, step, Trouble.None, entity.Name);
 
                         continue;
                     }
 
                     // Done what it was told short of the state, which only the block can say; the step is settled there.
-                    if (!reached && entity.Done(doing.Id, compiled.Arguments[t]))
+                    if (!reached && acted.Bound.Done(entity.Block, acted.Seen))
                     {
-                        Finish(_outstanding[i], entity);
+                        acted.Done = true;
                         continue;
                     }
 
-                    Trouble said = entity.Trouble(doing.Id, compiled.Arguments[t], doing.LeadsToStateId);
+                    Trouble said = acted.Bound.Trouble(entity.Block, acted.Seen);
                     if (said.Ends)
                         return said;
 
                     if (said.Exists && !_stuck.Exists)
-                        _stuck = new SequenceFault(SequenceProblem.Stuck, _sequence.Steps.IndexOf(_outstanding[i]), said);
+                        _stuck = new SequenceFault(SequenceProblem.Stuck, step, said);
                 }
             }
 
             return Trouble.None;
         }
-
-        /// <summary>
-        /// The acts this is held waiting on, empty unless it is waiting.
-        /// </summary>
-        public IList<Act> Outstanding
-        {
-            get { return _outstanding; }
-        }
-
 
         /// <summary>How much of a wait is left to spend, in ticks.</summary>
         /// <remarks>Written down when a world is saved, so a pause survives being reloaded.</remarks>
@@ -352,7 +345,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            Advance(_owner.World);
+            Advance();
             Schedule();
         }
 
@@ -435,7 +428,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// whoever asks.
         /// </para>
         /// </remarks>
-        public void Call(GridWorld world, Bindings bindings, int tick, bool live = true,
+        public void Call(Bindings bindings, int tick, bool live = true,
             bool byHand = false)
         {
             _bindings = bindings;
@@ -466,7 +459,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             _byHand = byHand;
-            Start(world, tick);
+            Start(tick);
         }
 
         bool _byHand;
@@ -482,7 +475,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// means, and counting it would report a door somebody opened ten times as ten refusals. One
         /// already running skips, which is counted, because the press or the moment was real.
         /// </remarks>
-        public void Triggered(GridWorld world, Bindings bindings, int tick)
+        public void Triggered(Bindings bindings, int tick)
         {
             _bindings = bindings;
             _tick = tick;
@@ -498,7 +491,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             _byHand = false;
-            Start(world, tick);
+            Start(tick);
         }
 
         /// <summary>
@@ -535,8 +528,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _waitUntil = -1;
             _holding = false;
 
-            _outstanding.Clear();
-            _finished.Clear();
+            Release();
             _started.Clear();
 
             // Backwards to the await before this step, because that is the span an await covers. An
@@ -560,9 +552,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (earlier is Await)
                     break;
 
-                var act = earlier as Act;
-                if (act != null)
-                    _outstanding.Add(act);
+                if (earlier is Act)
+                    _outstanding.Add(i);
 
                 var run = earlier as Run;
                 if (run != null && !run.Stops)
@@ -621,8 +612,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _waitTicks = 0;
             _waitUntil = -1;
             _holding = false;
-            _outstanding.Clear();
-            _finished.Clear();
+            Release();
             _started.Clear();
             _rota.Leave(_busy);
             _rota.Leave(_sampling);
@@ -636,87 +626,70 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < _outstanding.Count; i++)
             {
-                Act act = _outstanding[i];
+                var act = (Act)_sequence.Steps[_outstanding[i]];
                 if (!act.HasAction || act.Sets)
                     continue;
 
-                var compiled = Compile(act);
-                for (var t = 0; t < compiled.Entities.Count; t++)
-                    compiled.Entities[t].Stop(act.ActionId);
+                var compiled = Compile(_outstanding[i]);
+                for (var t = 0; t < compiled.Acts.Count; t++)
+                {
+                    var acted = compiled.Acts[t];
+                    if (acted.Bound != null)
+                        acted.Bound.Stop(acted.Entity.Block);
+                }
             }
         }
 
-        /// <summary>Whether <paramref name="entity" /> is in the state <paramref name="stateId" /> names, or has no such state.</summary>
-        static bool Reached(GridWorld world, GridEntity entity, string stateId)
-        {
-            var state = entity.Kind.FindState(stateId);
-            return state == null || state.Holds(world.Values, entity.GetValue(state.PropertyId));
-        }
-
         /// <summary>
-        /// Whether every entity this step acted on has reached the state the action
+        /// Whether every block the act at <paramref name="step" /> acted on has got to what the action
         /// was reaching for.
         /// </summary>
         /// <remarks>
-        /// An action that declares no destination - switching a light on - is done
+        /// An action that waits for nothing - switching a light on - is done
         /// the instant it is invoked, so instant things stay instant and only things
         /// that genuinely take time are waited on.
         ///
-        /// An entity that never gets there holds the sequence indefinitely. That is
+        /// A block that never gets there holds the sequence indefinitely. That is
         /// the right failure: carrying on regardless is how a jammed door vents a
         /// ship. It does mean being visibly stuck has to be impossible to miss, which
         /// is why the step being waited on is reported rather than inferred.
+        /// <para>
+        /// A block that has said it is done with what it was told, short of what it waits for, is settled: found on the
+        /// cadence troubles are asked on, and kept until the act is done again or the run ends.
+        /// </para>
         /// </remarks>
-        public bool Settled(GridWorld world, Act step)
+        bool Settled(int step)
         {
-            if (!step.HasAction)
+            var act = (Act)_sequence.Steps[step];
+            if (!act.HasAction)
                 return true;
 
             var compiled = Compile(step);
-            for (var i = 0; i < compiled.Entities.Count; i++)
+            for (var i = 0; i < compiled.Acts.Count; i++)
             {
-                var entity = compiled.Entities[i];
-                var action = compiled.Actions[i];
-                if (string.IsNullOrEmpty(action.LeadsToStateId))
-                    continue;
-
-                var state = entity.Kind.FindState(action.LeadsToStateId);
-                if (state == null)
-                    continue;
-
-                if (!state.Holds(world.Values, entity.GetValue(state.PropertyId)) && !Finished(step, entity))
+                var acted = compiled.Acts[i];
+                var until = acted.Action.Until;
+                if (until != null && !acted.Done && !until.Holds(acted.Entity.Block, acted.Seen))
                     return false;
             }
 
             return true;
         }
 
-        /// <summary>The blocks each act waited on has said it is done with, short of the state the act leads to.</summary>
-        /// <remarks>
-        /// Found on the cadence troubles are asked on, and kept so the tick can read it: a block is asked whether it is done
-        /// once a second, and the answer is good until the act is done again or the run ends.
-        /// </remarks>
-        readonly Dictionary<Act, List<GridEntity>> _finished = new Dictionary<Act, List<GridEntity>>();
-
-        /// <summary>Keeps that <paramref name="entity" /> has done what <paramref name="act" /> told it.</summary>
-        void Finish(Act act, GridEntity entity)
+        /// <summary>Lets go of everything being waited on, forgetting what any block said it was done with.</summary>
+        void Release()
         {
-            List<GridEntity> by;
-            if (!_finished.TryGetValue(act, out by))
-                _finished[act] = by = new List<GridEntity>();
+            for (var i = 0; i < _outstanding.Count; i++)
+            {
+                var compiled = _outstanding[i] < _steps.Length ? _steps[_outstanding[i]] : null;
+                for (var t = 0; compiled != null && t < compiled.Acts.Count; t++)
+                    compiled.Acts[t].Done = false;
+            }
 
-            if (!by.Contains(entity))
-                by.Add(entity);
+            _outstanding.Clear();
         }
 
-        /// <summary>Whether <paramref name="entity" /> has said it is done with what <paramref name="act" /> told it.</summary>
-        bool Finished(Act act, GridEntity entity)
-        {
-            List<GridEntity> by;
-            return _finished.Count > 0 && _finished.TryGetValue(act, out by) && by.Contains(entity);
-        }
-
-        void Start(GridWorld world, int tick)
+        void Start(int tick)
         {
             LastFiredTick = tick;
             FiredCount++;
@@ -730,7 +703,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             StoppedBy = Stopper.None;
             _stepIndex = 0;
             EnterStep();
-            Advance(world);
+            Advance();
             Schedule();
             Pace();
         }
@@ -755,7 +728,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// default. <see cref="Await" /> is what stops that, and it is what makes a numbered list
         /// mean what it looks like it means.
         /// </remarks>
-        void Advance(GridWorld world)
+        void Advance()
         {
             while (_stepIndex >= 0 && _stepIndex < _sequence.Steps.Count)
             {
@@ -779,7 +752,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     // A block the step needs that is gone, or may have been swapped, is found here, where the run needs
                     // it; the working-out it rests on is already done once per change.
-                    var needed = act.HasAction ? Compile(act) : null;
+                    var needed = act.HasAction ? Compile(_stepIndex) : null;
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
                         Meet(new SequenceFault(needed.Problem, _stepIndex, Trouble.None, needed.Which));
@@ -794,13 +767,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
-                    Execute(world, act);
+                    Execute(_stepIndex);
 
                     // Kept so an await below knows what it is waiting for. Nothing with a
                     // destination is nothing to wait on, which is how an instant action stays
                     // instant.
-                    if (!Settled(world, act))
-                        _outstanding.Add(act);
+                    if (!Settled(_stepIndex))
+                        _outstanding.Add(_stepIndex);
 
                     Step();
                     continue;
@@ -874,7 +847,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
-                    if (!Finished(world))
+                    if (!Finished())
                     {
                         if (!_holding)
                         {
@@ -902,8 +875,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
-                    _outstanding.Clear();
-                    _finished.Clear();
+                    Release();
                     _started.Clear();
                     _holding = false;
                     _stuck = SequenceFault.None;
@@ -951,7 +923,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var at = _stepIndex;
             while (true)
             {
-                var tested = Test(test);
+                var tested = Test(at, test);
                 if (tested.Problem != SequenceProblem.None)
                 {
                     Meet(new SequenceFault(tested.Problem, at, Trouble.None, tested.Which));
@@ -980,14 +952,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>Read once, when the run reaches the test; with no block to read, <c>all</c> holds and <c>any</c> does not.</remarks>
         bool Holds(Tested tested, Comparison test)
         {
-            var values = _owner.World.Values;
-            for (var i = 0; i < tested.Entities.Count; i++)
+            for (var i = 0; i < tested.Reads.Count; i++)
             {
-                var entity = tested.Entities[i];
-                var moment = tested.Moments[i];
-                var equal = moment != null
-                    ? entity.In(values, moment) == test.Value.Flag
-                    : entity.Holds(tested.Values[i], tested.Literals[i]);
+                var read = tested.Reads[i];
+                var equal = read.Moment != null
+                    ? read.Entity.In(read.Moment, read.Seen) == test.Value.Flag
+                    : read.Entity.Holds(read.Value, read.Literal);
 
                 if (equal != test.RequiresAll)
                     return equal;
@@ -999,16 +969,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The first block of an act that is switched off, and so cannot do what it is asked; none where all can.</summary>
         SequenceFault Unable(Compiled compiled)
         {
-            for (var i = 0; i < compiled.Entities.Count; i++)
+            for (var i = 0; i < compiled.Acts.Count; i++)
             {
                 // A block already where the step would take it has nothing to do, switched on or not.
-                var entity = compiled.Entities[i];
-                var leads = compiled.Actions[i].LeadsToStateId;
-                if (!string.IsNullOrEmpty(leads) && Reached(_owner.World, entity, leads))
+                var acted = compiled.Acts[i];
+                var until = acted.Action.Until;
+                if (until != null && until.Holds(acted.Entity.Block, acted.Seen))
                     continue;
 
-                if (entity.Refuses(compiled.Actions[i]))
-                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, Trouble.None, entity.Name);
+                if (acted.Entity.Refuses(acted.Action))
+                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, Trouble.None, acted.Entity.Name);
             }
 
             return SequenceFault.None;
@@ -1023,12 +993,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             for (var i = 0; i < _outstanding.Count; i++)
             {
-                if (!_outstanding[i].HasAction)
+                if (!((Act)_sequence.Steps[_outstanding[i]]).HasAction)
                     continue;
 
                 var compiled = Compile(_outstanding[i]);
                 if (compiled.Problem != SequenceProblem.None)
-                    return new SequenceFault(compiled.Problem, _sequence.Steps.IndexOf(_outstanding[i]), Trouble.None, compiled.Which);
+                    return new SequenceFault(compiled.Problem, _outstanding[i], Trouble.None, compiled.Which);
             }
 
             return SequenceFault.None;
@@ -1065,13 +1035,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var longest = 0;
             for (var i = 0; i < _outstanding.Count; i++)
             {
-                if (!_outstanding[i].HasAction)
+                if (!((Act)_sequence.Steps[_outstanding[i]]).HasAction)
                     continue;
 
                 var compiled = Compile(_outstanding[i]);
-                for (var q = 0; q < compiled.Entities.Count; q++)
+                for (var q = 0; q < compiled.Acts.Count; q++)
                 {
-                    var expected = compiled.Entities[q].Expected(_outstanding[i].ActionId, compiled.Arguments[q]);
+                    var acted = compiled.Acts[q];
+                    var expected = acted.Bound == null ? GridEntity.Unestimated : acted.Bound.Expected(acted.Entity.Block);
                     if (expected < 0)
                         return GridEntity.Unestimated;
 
@@ -1084,11 +1055,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Whether everything started since the last await has got where it was going, and every sequence started since has finished.</summary>
-        bool Finished(GridWorld world)
+        bool Finished()
         {
             for (var i = 0; i < _outstanding.Count; i++)
             {
-                if (!Settled(world, _outstanding[i]))
+                if (!Settled(_outstanding[i]))
                     return false;
             }
 
@@ -1104,38 +1075,47 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return true;
         }
 
-        readonly List<Act> _outstanding = new List<Act>();
+        readonly List<int> _outstanding = new List<int>();
 
         readonly List<int> _started = new List<int>();
 
-        void Execute(GridWorld world, Act step)
+        void Execute(int step)
         {
-            if (!step.HasAction)
+            var act = (Act)_sequence.Steps[step];
+            if (!act.HasAction)
                 return;
 
-            // Done again, so what its blocks said of the last time is no answer for this one.
-            _finished.Remove(step);
-
             var compiled = Compile(step);
-            for (var i = 0; i < compiled.Entities.Count; i++)
+            for (var i = 0; i < compiled.Acts.Count; i++)
             {
-                if (step.Form == Form.Native)
-                    world.Invoke(compiled.Entities[i], step.ActionId, compiled.Arguments[i], step.Form);
-                else if (compiled.Orders[i] != null)
-                    compiled.Orders[i].Give();
+                // Done again, so what its blocks said of the last time is no answer for this one.
+                var acted = compiled.Acts[i];
+                acted.Done = false;
+
+                if (act.Form != Form.Native)
+                {
+                    if (acted.Order != null)
+                        acted.Order.Give();
+
+                    continue;
+                }
+
+                if (acted.Bound != null && acted.Bound.Acts)
+                    acted.Bound.Do(acted.Entity.Block, acted.Seen);
+                else if (acted.Order != null)
+                    acted.Order.Give();
+
+                acted.Entity.Asked();
             }
         }
 
         /// <summary>
-        /// What one act comes to on this one's blocks: each block it acts on, what it does there, its
-        /// values as that takes them, and where it is one of the game's own, the order made ready.
+        /// What one act comes to on this one's blocks: each block it acts on and what it does there, or why it cannot be
+        /// done.
         /// </summary>
         sealed class Compiled
         {
-            public readonly List<GridEntity> Entities = new List<GridEntity>();
-            public readonly List<EntityAction> Actions = new List<EntityAction>();
-            public readonly List<IList<Literal>> Arguments = new List<IList<Literal>>();
-            public readonly List<Order> Orders = new List<Order>();
+            public readonly List<Acted> Acts = new List<Acted>();
 
             /// <summary>Why the act cannot be done, gone or possibly swapped, or none.</summary>
             public SequenceProblem Problem;
@@ -1145,15 +1125,28 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// What one test comes to on this one's blocks: each block it reads, and on each the moment, or the value with what
-        /// it is compared with as the block holds it.
+        /// One block an act reaches: what it does there, its values as that takes them, what the action makes of them, the
+        /// order made ready where the game does it, and what the action remembers of the block.
+        /// </summary>
+        sealed class Acted
+        {
+            public GridEntity Entity;
+            public EntityAction Action;
+            public IList<Literal> Arguments;
+            public Bound Bound;
+            public Order Order;
+            public Recall Seen;
+
+            /// <summary>Whether the block has said it is done with what it was told, short of what the action waits for.</summary>
+            public bool Done;
+        }
+
+        /// <summary>
+        /// What one test comes to on this one's blocks: each block it reads, or why it cannot be read.
         /// </summary>
         sealed class Tested
         {
-            public readonly List<GridEntity> Entities = new List<GridEntity>();
-            public readonly List<EntityEvent> Moments = new List<EntityEvent>();
-            public readonly List<EntityAction> Values = new List<EntityAction>();
-            public readonly List<Literal> Literals = new List<Literal>();
+            public readonly List<Read> Reads = new List<Read>();
 
             /// <summary>Why the test cannot be read, a slot empty or a block gone or possibly swapped, or none.</summary>
             public SequenceProblem Problem;
@@ -1162,9 +1155,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public string Which;
         }
 
-        readonly Dictionary<Act, Compiled> _compiled = new Dictionary<Act, Compiled>();
+        /// <summary>One block a test reads: the moment, or the value with what it is compared with as the block holds it.</summary>
+        sealed class Read
+        {
+            public GridEntity Entity;
+            public EntityEvent Moment;
+            public Recall Seen;
+            public EntityAction Value;
+            public Literal Literal;
+        }
 
-        readonly Dictionary<Comparison, Tested> _tested = new Dictionary<Comparison, Tested>();
+        Compiled[] _steps = new Compiled[0];
+
+        Tested[] _tests = new Tested[0];
 
         int _boundAt = -1;
         int _editedAt = -1;
@@ -1174,60 +1177,66 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public int Compilations { get; private set; }
 
         /// <summary>
-        /// What an act comes to, worked out the first time it is asked after anything it rests on has
-        /// changed.
+        /// What the act at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests
+        /// on has changed.
         /// </summary>
         /// <remarks>
         /// <b>Every act a run does and waits on is asked for here, on the tick it happens.</b> So the
         /// blocks, what each is told and the values it is handed are found once per change to the
-        /// program or to what its names point at, and a tick that repeats a step does a lookup and
+        /// program or to what its names point at, and a tick that repeats a step reads an array and does
         /// the act. A block whose action takes a value as some other kind is left out: the step is
         /// at fault, and the fault says so.
         /// </remarks>
-        Compiled Compile(Act step)
+        Compiled Compile(int step)
         {
             Fresh();
 
-            Compiled compiled;
-            if (_compiled.TryGetValue(step, out compiled))
+            var compiled = _steps[step];
+            if (compiled != null)
                 return compiled;
 
             Compilations++;
+            var act = (Act)_sequence.Steps[step];
             compiled = new Compiled();
-            compiled.Problem = Needed(step.Targets, SequenceProblem.MissingTarget, out compiled.Which);
-            var acting = ActedOn(step.Targets);
+            compiled.Problem = Needed(act.Targets, SequenceProblem.MissingTarget, out compiled.Which);
+            var acting = ActedOn(act.Targets);
             for (var i = 0; i < acting.Count; i++)
             {
                 var entity = _bindings.Entity(acting[i]);
                 if (entity == null)
                     continue;
 
-                var action = step.Names(entity.Kind.Actions);
+                var action = act.Names(entity.Kind.Actions);
                 if (action == null)
                     continue;
 
-                var values = Converted(compiled, action, step.Arguments);
-                if (values == null)
+                var shared = Shared(compiled, action, act.Arguments);
+                if (shared == null)
                     continue;
 
-                compiled.Entities.Add(entity);
-                compiled.Actions.Add(action);
-                compiled.Arguments.Add(values);
-                compiled.Orders.Add(entity.Prepare(action, values));
+                compiled.Acts.Add(new Acted
+                {
+                    Entity = entity,
+                    Action = action,
+                    Arguments = shared.Arguments,
+                    Bound = shared.Bound,
+                    Order = entity.Prepare(action, shared.Bound, shared.Arguments),
+                    Seen = action.Doing == null ? null : new Recall()
+                });
             }
 
-            _compiled[step] = compiled;
+            _steps[step] = compiled;
             return compiled;
         }
 
-        /// <summary>What a test comes to, worked out the first time it is asked after anything it rests on has changed, as an act is.</summary>
+        /// <summary>What the test at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests on has changed, as an act is.</summary>
         /// <remarks>A block that has neither the moment nor the value, or holds the value as another kind, is left out: the step is at fault, and the fault says so.</remarks>
-        Tested Test(Comparison test)
+        Tested Test(int step, Comparison test)
         {
             Fresh();
 
-            Tested tested;
-            if (_tested.TryGetValue(test, out tested))
+            var tested = _tests[step];
+            if (tested != null)
                 return tested;
 
             tested = new Tested();
@@ -1250,13 +1259,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (moment == null && (value == null || !value.Converts(given, became)))
                     continue;
 
-                tested.Entities.Add(entity);
-                tested.Moments.Add(moment);
-                tested.Values.Add(value);
-                tested.Literals.Add(moment == null ? became[0] : test.Value);
+                tested.Reads.Add(new Read
+                {
+                    Entity = entity,
+                    Moment = moment,
+                    Seen = moment == null ? null : new Recall(),
+                    Value = value,
+                    Literal = moment == null ? became[0] : test.Value
+                });
             }
 
-            _tested[test] = tested;
+            _tests[step] = tested;
             return tested;
         }
 
@@ -1268,8 +1281,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (bound == _boundAt && edited == _editedAt)
                 return;
 
-            _compiled.Clear();
-            _tested.Clear();
+            var count = _sequence.Steps.Count;
+            _steps = new Compiled[count];
+            _tests = new Tested[count];
             _boundAt = bound;
             _editedAt = edited;
         }
@@ -1314,22 +1328,30 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// The values as <paramref name="action" /> takes them, or null where it cannot take them.
+        /// The values as <paramref name="action" /> takes them, and what the action makes of them, or null where it cannot
+        /// take them.
         /// </summary>
         /// <remarks>
         /// Shared between the blocks of one act that do the same thing, which is every block of the
-        /// same kind: an airlock's two doors are handed one list.
+        /// same kind: an airlock's two doors are handed one list, and one reading of it.
         /// </remarks>
-        static IList<Literal> Converted(Compiled compiled, EntityAction action, IList<Literal> given)
+        static Acted Shared(Compiled compiled, EntityAction action, IList<Literal> given)
         {
-            for (var i = 0; i < compiled.Actions.Count; i++)
+            for (var i = 0; i < compiled.Acts.Count; i++)
             {
-                if (compiled.Actions[i] == action)
-                    return compiled.Arguments[i];
+                if (compiled.Acts[i].Action == action)
+                    return compiled.Acts[i];
             }
 
             var converted = new List<Literal>(given.Count);
-            return action.Converts(given, converted) ? converted : null;
+            if (!action.Converts(given, converted))
+                return null;
+
+            return new Acted
+            {
+                Arguments = converted,
+                Bound = action.Doing == null ? null : action.Doing.Bind(converted)
+            };
         }
     }
 }

@@ -1,10 +1,10 @@
-using System.Collections.Generic;
 using Sandbox.Definitions;
 using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>
     /// A gas tank, oxygen or hydrogen, which can stockpile and be waited on until it is full.
@@ -12,61 +12,33 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <remarks>
     /// Its fill is sampled: a tank has no events. The game lands a filling tank exactly on full, so
     /// full is a comparison and needs no band.
+    /// <para>
+    /// Nothing to call off: a tank left stockpiling holds nobody in danger, and switching it off is a step of its own.
+    /// </para>
     /// </remarks>
-    public sealed class TankExtension : IBlockExtension
+    public sealed class Tank : Capability
     {
         /// <summary>Stockpiling until full, which is Sprocket's own and waits until the tank is full.</summary>
         public const string Stockpile = "stockpile";
 
-        const string Full = "full";
-        const string IsFull = "is-full";
+        static readonly Reading Full = Reading.Of<IMyGasTank>(tank => tank.FilledRatio >= 1.0);
+
+        static readonly Doing Stockpiles = Doing.Of<IMyGasTank>(tank => tank.Stockpile = true, Full, Why);
 
         /// <inheritdoc />
-        public bool Claims(IMyTerminalBlock block)
+        public override bool Claims(IMyTerminalBlock block)
         {
             return block is IMyGasTank;
         }
 
-        /// <summary>Nothing to arrange: this block's events fire when they fire.</summary>
-        public bool Raises(IMyTerminalBlock block, string eventId, string key)
+        /// <inheritdoc />
+        public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            return true;
+            kind.WithAction(Stockpile, "stockpile", Stockpiles, "Stockpile_On").Lasting().In(Category.Air);
         }
 
         /// <inheritdoc />
-        public void Describe(EntityKind kind, IMyTerminalBlock block)
-        {
-            kind.WithProperty(Full, "full")
-                .WithState(IsFull, Full, true, "is full")
-                .WithAction(Stockpile, "stockpile", IsFull, "Stockpile_On").Lasting().In(Category.Air);
-        }
-
-        /// <inheritdoc />
-        public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
-        {
-            value = default(EntityValue);
-
-            var tank = block as IMyGasTank;
-            if (tank == null || propertyId != Full)
-                return false;
-
-            value = EntityValue.Of(tank.FilledRatio >= 1.0);
-            return true;
-        }
-
-        /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            var tank = block as IMyGasTank;
-            if (tank == null || actionId != Stockpile)
-                return false;
-
-            tank.Stockpile = true;
-            return true;
-        }
-
-        /// <inheritdoc />
-        public Status StatusOf(IMyTerminalBlock block)
+        public override Status StatusOf(IMyTerminalBlock block)
         {
             var tank = block as IMyGasTank;
             if (tank == null)
@@ -88,10 +60,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             return tank.FilledRatio <= 0.0 ? Status.Of(Condition.Empty) : Status.None;
         }
 
-        /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
+        /// <summary>Busy while it fills on a stockpile, which is the one filling a step asks for.</summary>
+        /// <remarks>
+        /// A tank that is not stockpiling fills whenever there is gas to spare, so counting that would
+        /// light every tank on a ship with an oxygen generator.
+        /// </remarks>
+        public override bool IsBusy(IMyTerminalBlock block)
         {
-            return false;
+            var tank = block as IMyGasTank;
+            return tank != null && tank.Stockpile && tank.FilledRatio < 1.0 && In(tank) > 0f;
         }
 
         /// <summary>
@@ -101,10 +78,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Stockpile switched off is its own answer: whatever switched it has overruled the step, and
         /// a tank that is not stockpiling hands its gas on as fast as it takes it in.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
+        static Trouble Why(IMyGasTank tank)
         {
-            var tank = block as IMyGasTank;
-            if (tank == null || stateId != IsFull || tank.FilledRatio >= 1.0)
+            if (tank.FilledRatio >= 1.0)
                 return Trouble.None;
 
             if (!tank.Stockpile)
@@ -157,28 +133,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return definitions == null
                 ? null
                 : definitions.GetCubeBlockDefinition(tank.BlockDefinition) as MyGasTankDefinition;
-        }
-
-        /// <summary>Busy while it fills on a stockpile, which is the one filling a step asks for.</summary>
-        /// <remarks>
-        /// A tank that is not stockpiling fills whenever there is gas to spare, so counting that would
-        /// light every tank on a ship with an oxygen generator.
-        /// </remarks>
-        public bool IsBusy(IMyTerminalBlock block)
-        {
-            var tank = block as IMyGasTank;
-            return tank != null && tank.Stockpile && tank.FilledRatio < 1.0 && In(tank) > 0f;
-        }
-
-        /// <summary>Nothing: a tank left stockpiling holds nobody in danger, and switching it off is a step of its own.</summary>
-        public void Stop(IMyTerminalBlock block, string actionId)
-        {
-        }
-
-        /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            return GridEntity.Unestimated;
         }
     }
 }

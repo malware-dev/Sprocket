@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI;
@@ -32,13 +33,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
         readonly Catalogue _catalogue;
-        readonly BlockExtensions _extensions;
+        readonly Capabilities _capabilities;
 
-        /// <summary>The kinds of block, described from <paramref name="extensions" /> and what <paramref name="catalogue" /> says of each block's actions.</summary>
-        public BlockKinds(Catalogue catalogue, BlockExtensions extensions)
+        /// <summary>The kinds of block, described from <paramref name="capabilities" /> and what <paramref name="catalogue" /> says of each block's actions.</summary>
+        public BlockKinds(Catalogue catalogue, Capabilities capabilities)
         {
             _catalogue = catalogue;
-            _extensions = extensions;
+            _capabilities = capabilities;
         }
 
         /// <summary>The kind of <paramref name="block" />, described the first time a block of that type is asked about and kept.</summary>
@@ -62,29 +63,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             kind.Evaluation = Evaluations.Of(block);
 
             // What this block is, before what every block is, so a door offers "open" above "switch on".
-            IBlockExtension extension = _extensions.For(block);
-            if (extension != null)
-                extension.Describe(kind, block);
+            Describe(kind, block, _capabilities.Blocks);
 
-            Signals(kind, block, _extensions.SignalsFor(block));
+            if (!Signalled(kind))
+                Signals(kind, block);
 
-            kind.WithProperty(GridEntity.WorkingProperty, "working")
-                .WithState("is-working", GridEntity.WorkingProperty, true, "is working")
-                .WithState("is-not-working", GridEntity.WorkingProperty, false, "is not working");
-
-
-            // Only a block with a switch gets the words for one. A cargo container has no on and off, and
-            // offering them would be offering a sentence that cannot come true.
-            if (block is IMyFunctionalBlock)
-            {
-                kind.WithProperty(GridEntity.OnProperty, "switched on")
-                    .WithEvent("switched-on", GridEntity.OnProperty, Edge.Rising, "is switched on").Reading("is on", "is off").Announced()
-                    .WithEvent("switched-off", GridEntity.OnProperty, Edge.Falling, "is switched off").Reading("is off", "is on").Announced()
-                    .WithState("is-on", GridEntity.OnProperty, true, "is on")
-                    .WithState("is-off", GridEntity.OnProperty, false, "is off")
-                    .WithAction(SwitchOn, "switch on", "is-on", "OnOff_On")
-                    .WithAction(SwitchOff, "switch off", "is-off", "OnOff_Off");
-            }
+            Describe(kind, block, _capabilities.Floor);
 
             // And then everything the block says it can do, which is most of what Sprocket can offer
             // about most blocks. Last, so the words chosen for a sentence come first where there are
@@ -101,19 +85,38 @@ namespace Sprocket.Host.SpaceEngineers.World
             return kind;
         }
 
-        /// <summary>Adds the block's signals: as <paramref name="layout" /> says they run, or every slot of every toolbar it has, by where it is.</summary>
+        /// <summary>Has every one of <paramref name="capabilities" /> that claims <paramref name="block" /> describe it, in order.</summary>
+        static void Describe(EntityKind kind, IMyTerminalBlock block, IList<Capability> capabilities)
+        {
+            for (var i = 0; i < capabilities.Count; i++)
+            {
+                if (!capabilities[i].Claims(block))
+                    continue;
+
+                kind.Known(capabilities[i]);
+                capabilities[i].Describe(kind, block);
+            }
+        }
+
+        /// <summary>Whether something that knows the block has said what its toolbar slots signal.</summary>
+        static bool Signalled(EntityKind kind)
+        {
+            for (var i = 0; i < kind.Events.Count; i++)
+            {
+                if (kind.Events[i].Answered)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Adds every slot of every toolbar the block has as a signal, by where it is.</summary>
         /// <remarks>
         /// A signal is sent from a toolbar slot, whatever block it is on, so a block nothing knows about offers its slots all the same.
         /// Asked once per block type, which has the same toolbars whichever block is asked.
         /// </remarks>
-        static void Signals(EntityKind kind, IMyTerminalBlock block, ISignals layout)
+        static void Signals(EntityKind kind, IMyTerminalBlock block)
         {
-            if (layout != null)
-            {
-                layout.Describe(kind, block);
-                return;
-            }
-
             var toolbars = 0;
             while (Toolbars.Of(block, toolbars + 1) != null)
                 toolbars++;
@@ -146,20 +149,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         /// <remarks>
         /// <b>The floor under the whole vocabulary.</b> Without it Sprocket can tell a piston nothing,
-        /// because nobody has written a piston extension - and it can tell a modded block nothing
-        /// ever, because nobody can write an extension for a block that does not exist yet. Asking
+        /// until somebody writes what a piston is - and it can tell a modded block nothing ever,
+        /// because nobody can write that for a block that does not exist yet. Asking
         /// the block instead means every block in the game works, and so does every block anybody
         /// adds to it afterwards.
         /// <para>
         /// The words are the game's own, which are written for a button in the terminal rather than
         /// for the middle of a sentence. They are what the player has already read, which is worth
-        /// more than a guess at a better phrasing - and where a better one exists, an extension has
+        /// more than a guess at a better phrasing - and where a better one exists, a capability has
         /// said it, and this one is still added but left out of the list somebody chooses from.
         /// </para>
         /// <para>
         /// No state is claimed: an action here says nothing about what it is trying to bring about,
         /// so nothing generic can be waited for or interlocked. That is a real limit and not an
-        /// oversight - see the extensions, which are where that knowledge lives.
+        /// oversight - see the capabilities, which are where that knowledge lives.
         /// </para>
         /// </remarks>
         void Rest(EntityKind kind, IMyTerminalBlock block)
@@ -194,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             else
             {
-                kind.WithAction(id, said, null, offer.Id);
+                kind.WithAction(id, said, offer.Id);
             }
         }
 
@@ -343,8 +346,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Marks what is left out of the list somebody chooses from.</summary>
         /// <remarks>
-        /// An entry is left out where an extension stands in for it, naming it as the game's own form of
-        /// what the extension's entry does - a door's open is the game's <c>Open_On</c> said better - and
+        /// An entry is left out where a capability's stands in for it, naming it as the game's own form of
+        /// what the capability's entry does - a door's open is the game's <c>Open_On</c> said better - and
         /// where the kind names it outright. Runs once the list is complete, because the entry that stands
         /// in and the one it stands in for are added at different times.
         /// </remarks>

@@ -128,7 +128,7 @@ public class AirlockTests
     {
         var ship = new Rigged();
         var vent = ship.Vent(1, "Vent");
-        var action = ship.Entity(vent.Id).Kind.FindAction(AirVentExtension.Depressurize, Form.Native)!;
+        var action = ship.Entity(vent.Id).Kind.FindAction(Blocks.Vent.Depressurize, Form.Native)!;
 
         var fields = new List<Field>();
         action.Fields(fields);
@@ -142,14 +142,14 @@ public class AirlockTests
         Assert.Equal(new[] { "hold" }, shown);
 
         shown.Clear();
-        Channels.Shown(new[] { Literal.Of(AirVentExtension.MoveOn) }, fields, shown);
+        Channels.Shown(new[] { Literal.Of(Blocks.Vent.MoveOn) }, fields, shown);
         Assert.Equal(new[] { "move on" }, shown);
         Assert.False(string.IsNullOrEmpty(field.About));
 
         // Holding is what the action does anyway, so a sentence leaves it out; moving on is said.
         Assert.True(new ArgumentsSlot(new Literal[0], fields, null).Quiet);
-        Assert.True(new ArgumentsSlot(new[] { Literal.Of(AirVentExtension.Hold) }, fields, null).Quiet);
-        var movesOn = new ArgumentsSlot(new[] { Literal.Of(AirVentExtension.MoveOn) }, fields, null);
+        Assert.True(new ArgumentsSlot(new[] { Literal.Of(Blocks.Vent.Hold) }, fields, null).Quiet);
+        var movesOn = new ArgumentsSlot(new[] { Literal.Of(Blocks.Vent.MoveOn) }, fields, null);
         Assert.False(movesOn.Quiet);
         Assert.Equal("or move on", SentenceText.Given(movesOn));
     }
@@ -159,7 +159,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnIsWrittenAndReadSo()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
 
         var saved = ProgramText.Save(a.Automation, a.World.Values);
         Assert.Contains("call ext.depressurize on [ ", saved);
@@ -168,7 +168,7 @@ public class AirlockTests
         var after = new Automation();
         Assert.Equal("", ProgramText.Load(saved, after, a.World.Values));
         var told = Assert.IsType<Act>(after.Sequences[0].Steps[2]);
-        Assert.Equal(AirVentExtension.MoveOn, Assert.Single(told.Arguments).Whole);
+        Assert.Equal(Blocks.Vent.MoveOn, Assert.Single(told.Arguments).Whole);
     }
 
     /// <summary>A room whose air has nowhere to go holds the cycle, says why, and keeps the outer door shut.</summary>
@@ -197,7 +197,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnOpensTheOuterDoorWhenItsAirHasNowhereToGo()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -216,7 +216,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnStillEmptiesWhereItCan()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
         a.Inner.ForceOpen();
         a.Tick(3);
         a.Log.Clear();
@@ -235,7 +235,7 @@ public class AirlockTests
     public void ARoomToldToWaitHoldsTheCycle()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(AirVentExtension.Hold));
+        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.Hold));
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -305,8 +305,8 @@ public class AirlockTests
         Assert.Contains("Airlock Vent:depressurize", a.Log);
         Assert.Equal(VentStatus.Depressurizing, ((IMyAirVent)a.Vent.Block).Status);
 
-        var empty = vent.Kind.FindState("is-empty");
-        Assert.True(empty.Holds(a.World.Values, vent.GetValue(empty.PropertyId)),
+        var emptied = vent.Kind.FindEvent("emptied")!;
+        Assert.True(vent.In(emptied, new Recall()),
             "the airlock has no air left and does not read as empty");
     }
 
@@ -398,12 +398,12 @@ public class AirlockTests
         a.Tick(3);
 
         var vent = a.Seen(a.Vent);
-        var empty = vent.Kind.FindState("is-empty");
+        var emptied = vent.Kind.FindEvent("emptied")!;
 
         a.Vent.Enabled = false;
         a.Tick();
 
-        Assert.False(empty.Holds(a.World.Values, vent.GetValue(empty.PropertyId)),
+        Assert.False(vent.In(emptied, new Recall()),
             "a vent that cannot be read is saying the room is empty");
     }
 
@@ -1576,7 +1576,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1593,7 +1593,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(AirVentExtension.Hold));
+        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(Blocks.Vent.Hold));
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1610,7 +1610,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(AirVentExtension.MoveOn));
+        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
         a.Vent.Leaking = true;
         a.Automation.Edited();
         a.Tick();
@@ -1663,61 +1663,27 @@ public class PropertyTests
 {
     readonly Values _store = new Values();
 
-    /// <summary>
-    /// A kind with a reading of each sort, declared here rather than taken off a block.
-    /// </summary>
-    /// <remarks>
-    /// These tests are about the vocabulary and nothing else: what a state compares, and what it
-    /// answers. A ship would only be a way of getting hold of a kind, and the fixture that used to
-    /// supply one had to invent a tank the game does not offer.
-    /// </remarks>
-    EntityKind Tank()
-    {
-        return new EntityKind("tank", "Hydrogen Tank")
-            .WithProperty("fill", ValueKind.Real, "fill level")
-            .WithState("is-low", "fill", Relation.Below, EntityValue.Of(0.25), "is low")
-            .WithState("is-fine", "fill", Relation.AtLeast, EntityValue.Of(0.25), "has plenty")
-            .WithProperty("label", ValueKind.Text, "label")
-            .WithState("is-spare", "label", Relation.Is, _store.Text("spare"), "is the spare");
-    }
-
     [Fact]
     public void AStateOverANumberComparesAgainstIt()
     {
-        EntityKind tank = Tank();
-        var low = tank.FindState("is-low")!;
-        var fine = tank.FindState("is-fine")!;
+        var quarter = EntityValue.Of(0.25);
 
-        Assert.True(low.Holds(_store, EntityValue.Of(0.10)));
-        Assert.False(fine.Holds(_store, EntityValue.Of(0.10)));
+        Assert.True(Relations.Holds(_store, ValueKind.Real, EntityValue.Of(0.10), Relation.Below, quarter));
+        Assert.False(Relations.Holds(_store, ValueKind.Real, EntityValue.Of(0.10), Relation.AtLeast, quarter));
 
         // The boundary belongs to "has plenty": is-low is Below, is-fine is AtLeast, so the
         // pair covers every reading exactly once and no level is both or neither.
-        Assert.False(low.Holds(_store, EntityValue.Of(0.25)));
-        Assert.True(fine.Holds(_store, EntityValue.Of(0.25)));
+        Assert.False(Relations.Holds(_store, ValueKind.Real, quarter, Relation.Below, quarter));
+        Assert.True(Relations.Holds(_store, ValueKind.Real, quarter, Relation.AtLeast, quarter));
     }
 
     [Fact]
     public void AStateOverTextComparesAgainstIt()
     {
-        var spare = Tank().FindState("is-spare")!;
+        var spare = _store.Text("spare");
 
-        Assert.False(spare.Holds(_store, _store.Text("main")));
-        Assert.True(spare.Holds(_store, _store.Text("spare")));
-    }
-
-    [Fact]
-    public void AFlagIsJustAPropertyWhoseReadingsAreTrueAndFalse()
-    {
-        EntityKind door = new EntityKind("door", "Door")
-            .WithProperty("open", "open")
-            .WithState("is-open", "open", true, "is open");
-
-        var open = door.FindState("is-open")!;
-
-        Assert.Equal(ValueKind.Flag, door.FindProperty("open")!.Kind);
-        Assert.Equal(Relation.Is, open.Relation);
-        Assert.True(_store.Flag(ValueKind.Flag, open.Operand));
+        Assert.False(Relations.Holds(_store, ValueKind.Text, _store.Text("main"), Relation.Is, spare));
+        Assert.True(Relations.Holds(_store, ValueKind.Text, _store.Text("spare"), Relation.Is, spare));
     }
 
     /// <summary>Only a number can be above something; anything can equal something.</summary>

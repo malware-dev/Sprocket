@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using VRage.Game.ModAPI;
 using VRageMath;
 
@@ -12,15 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// The construct the editor was opened on, as Sprocket sees it.
     /// </summary>
     /// <remarks>
-    /// <b>This is the universal floor and nothing more.</b> Every block gets the same small vocabulary -
-    /// whether it is switched on, whether it is working, and the two actions that change the first. That is
-    /// deliberate rather than unfinished: <c>docs/Catalogue.md</c> argues it is the one thing every block on
-    /// the surface can answer, modded blocks included, and therefore the thing to build before anything that
-    /// knows what a door is.
-    /// <para>
-    /// What is not here yet is the base layer proper, which reads a block's own terminal properties and
-    /// actions, and the extensions above it.
-    /// </para>
+    /// Every block on it is a <see cref="GridEntity" /> of a kind described once per definition, by the
+    /// capabilities that claim it and by what the block itself declares - see <see cref="BlockKinds" />.
     /// </remarks>
     public sealed class GridWorld : IDisposable
     {
@@ -29,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly BlockKinds _kinds;
 
-        readonly BlockExtensions _extensions = new BlockExtensions();
+        readonly Capabilities _capabilities = new Capabilities();
 
         static Catalogue Catalogue()
         {
@@ -55,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public GridWorld(IMyTerminalBlock anchor)
         {
             _anchor = anchor;
-            _kinds = new BlockKinds(_catalogue, _extensions);
+            _kinds = new BlockKinds(_catalogue, _capabilities);
         }
 
         /// <summary>Raised from the grid's own event when the anchor is removed from the construct, in the middle of the grid changing.</summary>
@@ -503,8 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     if (block == null || _byId.ContainsKey(block.EntityId))
                         continue;
 
-                    IBlockExtension extension = _extensions.For(block);
-                    GridEntity entity = new GridEntity(block, _kinds.For(block), extension);
+                    GridEntity entity = new GridEntity(block, _kinds.For(block));
                     _byId.Add(block.EntityId, entity);
                     _entities.Add(entity);
                 }

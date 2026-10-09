@@ -1,6 +1,6 @@
 using SpaceEngineers.Game.ModAPI;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>How much gas a vent is moving, which only the game can say.</summary>
     /// <remarks>

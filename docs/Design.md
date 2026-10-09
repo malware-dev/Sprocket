@@ -854,7 +854,7 @@ None of these is an argument still running. Each says what would settle it.
 
 **What a kind means as a constraint.** `Door/LargeBlockDoor` is a definition, right for finding the
 same block again. A premade airlock does not need that exact door - it needs *something that opens
-and closes*. Both levels exist already: `EntityKind` is per definition, `BlockExtensions` decides a
+and closes*. Both levels exist already: `EntityKind` is per definition, and a `Capability` decides a
 block behaves like a door. Whether the constraint is the definition, the capability, or both, is a
 configurator question.
 

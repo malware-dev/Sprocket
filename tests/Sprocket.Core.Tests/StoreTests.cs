@@ -24,7 +24,7 @@ public class StoreTests
         var battery = ship.Battery(1, "Battery");
         var kind = ship.Entity(battery.Id).Kind;
 
-        var recharge = kind.FindAction(BatteryExtension.Recharge, Form.Native)!;
+        var recharge = kind.FindAction(Blocks.Battery.Recharge, Form.Native)!;
         Assert.True(recharge.Lasts);
         Assert.False(recharge.Hidden);
 
@@ -42,7 +42,7 @@ public class StoreTests
         var lamp = ship.Light(2, "Lamp");
         battery.Charge = 0.5f;
 
-        var frames = Run(ship, battery, lamp, BatteryExtension.Recharge);
+        var frames = Run(ship, battery, lamp, Blocks.Battery.Recharge);
 
         Assert.Equal(1f, battery.Charge, 3);
         Assert.InRange(frames, 60, 80);
@@ -59,9 +59,9 @@ public class StoreTests
         battery.Powered = false;
         var entity = ship.Entity(battery.Id);
 
-        ship.World.Invoke(entity, BatteryExtension.Recharge);
+        ship.World.Invoke(entity, Blocks.Battery.Recharge);
 
-        var trouble = entity.Trouble(BatteryExtension.Recharge, new Literal[0], "is-full");
+        var trouble = entity.Trouble(Blocks.Battery.Recharge, new Literal[0]);
         Assert.Equal("cannot charge - no power coming in", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
@@ -73,10 +73,10 @@ public class StoreTests
         var battery = ship.Battery(1, "Battery");
         var entity = ship.Entity(battery.Id);
 
-        ship.World.Invoke(entity, BatteryExtension.Recharge);
+        ship.World.Invoke(entity, Blocks.Battery.Recharge);
         battery.Perform("Discharge_On");
 
-        Assert.True(entity.Trouble(BatteryExtension.Recharge, new Literal[0], "is-full").Ends);
+        Assert.True(entity.Trouble(Blocks.Battery.Recharge, new Literal[0]).Ends);
     }
 
     [Fact]
@@ -88,9 +88,9 @@ public class StoreTests
         battery.Charge = 1f;
         var entity = ship.Entity(battery.Id);
 
-        ship.World.Invoke(entity, BatteryExtension.Recharge);
+        ship.World.Invoke(entity, Blocks.Battery.Recharge);
 
-        Assert.False(entity.Trouble(BatteryExtension.Recharge, new Literal[0], "is-full").Exists);
+        Assert.False(entity.Trouble(Blocks.Battery.Recharge, new Literal[0]).Exists);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class StoreTests
         var tank = ship.Tank(1, "Tank");
         var kind = ship.Entity(tank.Id).Kind;
 
-        var stockpile = kind.FindAction(TankExtension.Stockpile, Form.Native)!;
+        var stockpile = kind.FindAction(Blocks.Tank.Stockpile, Form.Native)!;
         Assert.True(stockpile.Lasts);
         Assert.False(stockpile.Hidden);
 
@@ -119,7 +119,7 @@ public class StoreTests
         var lamp = ship.Light(2, "Lamp");
         tank.Filled = 0.25;
 
-        var frames = Run(ship, tank, lamp, TankExtension.Stockpile);
+        var frames = Run(ship, tank, lamp, Blocks.Tank.Stockpile);
 
         Assert.Equal(1.0, tank.Filled, 3);
         Assert.InRange(frames, 90, 110);
@@ -136,9 +136,9 @@ public class StoreTests
         tank.Enabled = false;
         var entity = ship.Entity(tank.Id);
 
-        ship.World.Invoke(entity, TankExtension.Stockpile);
+        ship.World.Invoke(entity, Blocks.Tank.Stockpile);
 
-        var trouble = entity.Trouble(TankExtension.Stockpile, new Literal[0], "is-full");
+        var trouble = entity.Trouble(Blocks.Tank.Stockpile, new Literal[0]);
         Assert.Equal("cannot fill - it is switched off or has no power", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
@@ -150,10 +150,10 @@ public class StoreTests
         var tank = ship.Tank(1, "Tank");
         var entity = ship.Entity(tank.Id);
 
-        ship.World.Invoke(entity, TankExtension.Stockpile);
+        ship.World.Invoke(entity, Blocks.Tank.Stockpile);
         tank.Perform("Stockpile_Off");
 
-        Assert.True(entity.Trouble(TankExtension.Stockpile, new Literal[0], "is-full").Ends);
+        Assert.True(entity.Trouble(Blocks.Tank.Stockpile, new Literal[0]).Ends);
     }
 
     /// <summary>Runs the one act on the block, and counts the frames until the step after it runs.</summary>

@@ -4,7 +4,7 @@ using VRage.Game;
 using VRage.Game.ObjectBuilders.Definitions;
 using VRage.Utils;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The gas a vent moves, as the game's resource components say it.</summary>
     /// <remarks>

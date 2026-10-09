@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sandbox.Common.ObjectBuilders;

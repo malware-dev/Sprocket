@@ -296,7 +296,7 @@ public class CompileTests
 
     static Act Turn(Rigged ship, Automation automation, Rotor rotor, Literal angle, Literal speed)
     {
-        var turn = new Act(RotorExtension.RotateTo);
+        var turn = new Act(Blocks.Rotor.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
         turn.Arguments.Add(Literal.Of(Directly));
         turn.Arguments.Add(angle);

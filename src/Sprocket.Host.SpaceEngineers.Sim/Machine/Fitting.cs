@@ -219,7 +219,7 @@ public abstract class Fitting
     /// </summary>
     /// <remarks>
     /// Most of a ship is blocks like this: a piston that extends, a connector that connects, a tank
-    /// that stockpiles. Nobody has written an extension for any of them and nobody ever will write
+    /// that stockpiles. Nobody has written a capability for any of them and nobody ever will write
     /// one for a block a mod adds next year, so what Sprocket can say about them is whatever they
     /// declare - and the rig has to be able to declare something for that to be tested at all.
     /// </remarks>

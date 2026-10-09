@@ -1,0 +1,130 @@
+using System;
+using System.Collections.Generic;
+using Sandbox.ModAPI;
+
+namespace Sprocket.Host.SpaceEngineers.World
+{
+    /// <summary>What one of Sprocket's own actions does to a block, what it waits for, and how it finishes.</summary>
+    /// <remarks>
+    /// Declared once, beside the action, by what knows the block. Each action has options of its own, and what they mean
+    /// is the action's alone: it reads them into a type of its own when a step is compiled, and is handed that from then
+    /// on. See <see cref="Bind" />.
+    /// </remarks>
+    public abstract class Doing
+    {
+        /// <summary>What the action waits for, or null where it is done the moment it is told.</summary>
+        public abstract Reading Until { get; }
+
+        /// <summary>The action as a step gives it <paramref name="arguments" />, already in the kinds its fields take.</summary>
+        /// <remarks>Asked when a step is compiled, and never while it runs.</remarks>
+        public abstract Bound Bind(IList<Literal> arguments);
+
+        /// <summary>An action on a <typeparamref name="T" /> that takes no options.</summary>
+        /// <remarks>Where <paramref name="does" /> is null, the game's own action the entry names does it.</remarks>
+        public static Doing Of<T>(Action<T> does = null, Reading until = null, Func<T, Trouble> trouble = null,
+            Action<T> stop = null, Func<T, int> expected = null) where T : class
+        {
+            return new Typed<T, object>(
+                Nothing,
+                does == null ? null : new Action<T, object, Recall>((block, options, seen) => does(block)),
+                until,
+                null,
+                trouble == null ? null : new Func<T, object, Recall, Trouble>((block, options, seen) => trouble(block)),
+                stop,
+                expected == null ? null : new Func<T, object, int>((block, options) => expected(block)));
+        }
+
+        /// <summary>An action on a <typeparamref name="T" /> with options of its own, read into a <typeparamref name="TOptions" />.</summary>
+        public static Doing Of<T, TOptions>(Func<IList<Literal>, TOptions> options, Action<T, TOptions, Recall> does = null,
+            Reading until = null, Func<T, TOptions, Recall, bool> done = null, Func<T, TOptions, Recall, Trouble> trouble = null,
+            Action<T> stop = null, Func<T, TOptions, int> expected = null) where T : class
+        {
+            return new Typed<T, TOptions>(options, does, until, done, trouble, stop, expected);
+        }
+
+        static object Nothing(IList<Literal> arguments)
+        {
+            return null;
+        }
+
+        /// <summary>An action on a <typeparamref name="T" />, with options read into a <typeparamref name="TOptions" />.</summary>
+        sealed class Typed<T, TOptions> : Doing where T : class
+        {
+            readonly Func<IList<Literal>, TOptions> _options;
+            readonly Reading _until;
+
+            public Typed(Func<IList<Literal>, TOptions> options, Action<T, TOptions, Recall> does, Reading until,
+                Func<T, TOptions, Recall, bool> done, Func<T, TOptions, Recall, Trouble> trouble, Action<T> stop,
+                Func<T, TOptions, int> expected)
+            {
+                _options = options;
+                _until = until;
+                Does = does;
+                Finished = done;
+                Troubled = trouble;
+                Stops = stop;
+                Takes = expected;
+            }
+
+            public Action<T, TOptions, Recall> Does { get; private set; }
+
+            public Func<T, TOptions, Recall, bool> Finished { get; private set; }
+
+            public Func<T, TOptions, Recall, Trouble> Troubled { get; private set; }
+
+            public Action<T> Stops { get; private set; }
+
+            public Func<T, TOptions, int> Takes { get; private set; }
+
+            public override Reading Until => _until;
+
+            public override Bound Bind(IList<Literal> arguments)
+            {
+                return new Given<T, TOptions>(this, _options(arguments));
+            }
+        }
+
+        /// <summary>An action with the options one step gave it.</summary>
+        /// <remarks>The cast in each of these never fails: a step is compiled only against blocks of the kind that declared it.</remarks>
+        sealed class Given<T, TOptions> : Bound where T : class
+        {
+            readonly Typed<T, TOptions> _doing;
+            readonly TOptions _options;
+
+            public Given(Typed<T, TOptions> doing, TOptions options)
+            {
+                _doing = doing;
+                _options = options;
+            }
+
+            public override bool Acts => _doing.Does != null;
+
+            public override void Do(IMyTerminalBlock block, Recall seen)
+            {
+                if (_doing.Does != null)
+                    _doing.Does((T)block, _options, seen);
+            }
+
+            public override bool Done(IMyTerminalBlock block, Recall seen)
+            {
+                return _doing.Finished != null && _doing.Finished((T)block, _options, seen);
+            }
+
+            public override Trouble Trouble(IMyTerminalBlock block, Recall seen)
+            {
+                return _doing.Troubled == null ? World.Trouble.None : _doing.Troubled((T)block, _options, seen);
+            }
+
+            public override void Stop(IMyTerminalBlock block)
+            {
+                if (_doing.Stops != null)
+                    _doing.Stops((T)block);
+            }
+
+            public override int Expected(IMyTerminalBlock block)
+            {
+                return _doing.Takes == null ? GridEntity.Unestimated : _doing.Takes((T)block, _options);
+            }
+        }
+    }
+}

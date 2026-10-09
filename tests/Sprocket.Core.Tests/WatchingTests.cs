@@ -29,7 +29,7 @@ public class WatchingTests
             var kind = ship.Entity(id).Kind;
             foreach (var moment in kind.Events)
             {
-                if (!moment.Announced && moment.RuledOutBy.Length == 0 && !moment.Answered && moment.LookedBecause.Length == 0)
+                if (!moment.Announced && moment.RuledOutBy == null && !moment.Answered && moment.LookedBecause.Length == 0)
                     unsaid.Add(kind.Id + " " + moment.Id);
             }
         }

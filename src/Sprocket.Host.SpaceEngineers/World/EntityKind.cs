@@ -14,11 +14,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityKind
     {
-        readonly List<EntityProperty> _properties = new List<EntityProperty>();
         readonly List<EntityEvent> _events = new List<EntityEvent>();
-        readonly List<EntityState> _states = new List<EntityState>();
         readonly List<EntityAction> _actions = new List<EntityAction>();
         readonly List<string> _hidden = new List<string>();
+        readonly List<Capability> _capabilities = new List<Capability>();
 
         /// <summary>A kind of block, <paramref name="id" />, called <paramref name="displayName" />, with nothing described yet.</summary>
         public EntityKind(string id, string displayName)
@@ -52,6 +51,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string Icon { get; private set; }
 
+        /// <summary>Moments. These start sequences, and nothing else.</summary>
+        public IList<EntityEvent> Events => _events;
+
+        /// <summary>What a block of this kind can be told to do.</summary>
+        public IList<EntityAction> Actions => _actions;
+
+        /// <summary>What knows this kind of block, in the order each described it: the block's own first, the floor every block stands on last.</summary>
+        public IList<Capability> Capabilities => _capabilities;
+
+        /// <summary>Says <paramref name="capability" /> knows this kind of block.</summary>
+        public void Known(Capability capability)
+        {
+            _capabilities.Add(capability);
+        }
+
         /// <summary>Gives the kind the picture <paramref name="icon" />.</summary>
         public EntityKind WithIcon(string icon)
         {
@@ -59,46 +73,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>Everything that can be read off one of these.</summary>
-        public IList<EntityProperty> Properties => _properties;
-
-        /// <summary>Moments. These start sequences, and nothing else.</summary>
-        public IList<EntityEvent> Events => _events;
-
-        /// <summary>Situations. These gate steps and guard interlocks, and nothing else.</summary>
-        public IList<EntityState> States => _states;
-
-        /// <summary>What a block of this kind can be told to do.</summary>
-        public IList<EntityAction> Actions => _actions;
-
-        /// <summary>Declares something that can be read off this kind.</summary>
-        public EntityKind WithProperty(string id, ValueKind kind, string label)
+        /// <summary>Adds the moment <paramref name="id" />: <paramref name="flag" /> crossing <paramref name="edge" />, read as <paramref name="text" />.</summary>
+        public EntityKind WithEvent(string id, Reading flag, Edge edge, string text)
         {
-            _properties.Add(new EntityProperty(id, kind, label));
-            return this;
-        }
-
-        /// <summary>A flag, which is the common case.</summary>
-        public EntityKind WithProperty(string id, string label)
-        {
-            return WithProperty(id, ValueKind.Flag, label);
-        }
-
-        /// <summary>The reading <paramref name="propertyId" />, or null where the kind has none.</summary>
-        public EntityProperty FindProperty(string propertyId)
-        {
-            for (var i = 0; i < _properties.Count; i++)
-            {
-                if (_properties[i].Id == propertyId)
-                    return _properties[i];
-            }
-            return null;
-        }
-
-        /// <summary>Adds the moment <paramref name="id" />: <paramref name="propertyId" /> crossing <paramref name="edge" />, read as <paramref name="text" />.</summary>
-        public EntityKind WithEvent(string id, string propertyId, Edge edge, string text)
-        {
-            _events.Add(new EntityEvent(id, propertyId, edge, text));
+            _events.Add(new EntityEvent(id, flag, edge, text));
             return this;
         }
 
@@ -109,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>Says that the block announces when the moment added last may have happened - see <see cref="IAnnounces" />.</summary>
+        /// <summary>Says that the block announces when the moment added last may have happened - see <see cref="Capability.Listen" />.</summary>
         public EntityKind Announced()
         {
             _events[_events.Count - 1].Announce();
@@ -123,10 +101,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>Says the moment added last cannot happen while <paramref name="propertyId" /> reads true, and the block announces when that changes - see <see cref="EntityEvent.RuledOutBy" />.</summary>
-        public EntityKind RuledOutBy(string propertyId)
+        /// <summary>Says the moment added last cannot happen while <paramref name="flag" /> reads true, and the block announces when that changes - see <see cref="EntityEvent.RuledOutBy" />.</summary>
+        public EntityKind RuledOutBy(Reading flag)
         {
-            _events[_events.Count - 1].RuleOutBy(propertyId);
+            _events[_events.Count - 1].RuleOutBy(flag);
             return this;
         }
 
@@ -144,37 +122,20 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>
-        /// Adds a situation: a relation against one of this kind's properties.
-        /// </summary>
-        /// <remarks>
-        /// Two of these over one property describe both sides of it - "is open" and "is shut"
-        /// off a single reading - which is why a host is never asked to keep a pair of
-        /// opposites in step by hand.
-        /// </remarks>
-        public EntityKind WithState(string id, string propertyId, Relation relation, EntityValue operand, string text)
+        /// <summary>Adds one of the block's own actions, <paramref name="gameActionId" />, as <paramref name="id" /> said as <paramref name="text" />.</summary>
+        public EntityKind WithAction(string id, string text, string gameActionId)
         {
-            var property = FindProperty(propertyId);
-            var kind = property == null ? ValueKind.Flag : property.Kind;
-
-            _states.Add(new EntityState(id, propertyId, kind, relation, operand, text));
+            _actions.Add(new EntityAction(id, text, gameActionId));
             return this;
         }
 
-        /// <summary>A flag being one way or the other, which is the common case.</summary>
-        public EntityKind WithState(string id, string propertyId, bool whenTrue, string text)
-        {
-            return WithState(id, propertyId, Relation.Is, EntityValue.Of(whenTrue), text);
-        }
-
         /// <summary>
-        /// Adds an action. <paramref name="leadsToStateId"/> names the state the
-        /// action is trying to reach, which is what allows an interlock to stop it.
+        /// Adds one of Sprocket's own actions, doing <paramref name="doing" />, which is the game's member
+        /// <paramref name="gameActionId" /> said another way.
         /// </summary>
-        public EntityKind WithAction(string id, string text, string leadsToStateId = null,
-            string gameActionId = null)
+        public EntityKind WithAction(string id, string text, Doing doing, string gameActionId)
         {
-            _actions.Add(new EntityAction(id, text, leadsToStateId, gameActionId));
+            _actions.Add(new EntityAction(id, text, gameActionId).Performing(doing));
             return this;
         }
 
@@ -182,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityKind WithAction(string id, string text, string gameActionId, int wants,
             Description described, IList<Primitive> takes)
         {
-            _actions.Add(new EntityAction(id, text, null, gameActionId, wants)
+            _actions.Add(new EntityAction(id, text, gameActionId, wants)
                 .Described(described)
                 .Taking(takes));
 
@@ -190,11 +151,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// The same, for one of Sprocket's own that is given values, each asked for by its field.
+        /// Adds one of Sprocket's own actions, doing <paramref name="doing" />, given values each asked for by its field.
         /// </summary>
-        public EntityKind WithAction(string id, string text, string leadsToStateId, params Field[] asks)
+        public EntityKind WithAction(string id, string text, Doing doing, params Field[] asks)
         {
-            _actions.Add(new EntityAction(id, text, leadsToStateId, null).Asking(asks));
+            _actions.Add(new EntityAction(id, text, null).Performing(doing).Asking(asks));
             return this;
         }
 
@@ -316,7 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
         public EntityKind WithValue(string id, string named, string propertyId, Field field, ValueKind holds)
         {
-            _actions.Add(new EntityAction(id, "set " + named, null, null, 1)
+            _actions.Add(new EntityAction(id, "set " + named, null, 1)
                 .Writes(propertyId, field, named, holds));
 
             return this;
@@ -346,17 +307,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                     return _events[i];
             }
 
-            return null;
-        }
-
-        /// <summary>The state <paramref name="stateId" />, or null where the kind has none.</summary>
-        public EntityState FindState(string stateId)
-        {
-            for (var i = 0; i < _states.Count; i++)
-            {
-                if (_states[i].Id == stateId)
-                    return _states[i];
-            }
             return null;
         }
 

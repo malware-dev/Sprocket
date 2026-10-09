@@ -26,7 +26,7 @@ public class PistonTests
         var piston = ship.Piston(1, "Piston");
         var kind = ship.Entity(piston.Id).Kind;
 
-        foreach (var id in new[] { PistonExtension.Extend, PistonExtension.Retract, PistonExtension.MoveTo })
+        foreach (var id in new[] { Blocks.Piston.Extend, Blocks.Piston.Retract, Blocks.Piston.MoveTo })
             Assert.True(kind.FindAction(id, Form.Native)!.Lasts, id + " is not waited for");
 
         // Extending and retracting are said by Sprocket's own acts, and a move to a position stands in
@@ -40,7 +40,7 @@ public class PistonTests
         Assert.Equal("Reverse", kind.FindAction("Reverse", Form.Action)!.Named);
 
         var asked = new List<Field>();
-        kind.FindAction(PistonExtension.MoveTo, Form.Native)!.Fields(asked);
+        kind.FindAction(Blocks.Piston.MoveTo, Form.Native)!.Fields(asked);
         Assert.Equal(2, asked.Count);
         Assert.Equal("0", asked[0].Least);
         Assert.Equal("10", asked[0].Most);
@@ -53,7 +53,7 @@ public class PistonTests
         var piston = ship.Piston(1, "Piston");
         var lamp = ship.Light(2, "Lamp");
 
-        var frames = Run(ship, piston, lamp, PistonExtension.Extend);
+        var frames = Run(ship, piston, lamp, Blocks.Piston.Extend);
 
         Assert.Equal(10f, piston.Position, 3);
 
@@ -69,7 +69,7 @@ public class PistonTests
         var lamp = ship.Light(2, "Lamp");
         piston.Stand(3f);
 
-        var frames = Run(ship, piston, lamp, PistonExtension.Retract);
+        var frames = Run(ship, piston, lamp, Blocks.Piston.Retract);
 
         Assert.Equal(0f, piston.Position, 3);
         Assert.InRange(frames, 360, 370);
@@ -82,7 +82,7 @@ public class PistonTests
         var piston = ship.Piston(1, "Piston");
         var lamp = ship.Light(2, "Lamp");
 
-        var frames = Run(ship, piston, lamp, PistonExtension.MoveTo, Literal.Of(4L), Literal.Of(2L));
+        var frames = Run(ship, piston, lamp, Blocks.Piston.MoveTo, Literal.Of(4L), Literal.Of(2L));
 
         Assert.Equal(4f, piston.Position, 3);
 
@@ -99,7 +99,7 @@ public class PistonTests
         var lamp = ship.Light(2, "Lamp");
         piston.Stand(4f);
 
-        var frames = Run(ship, piston, lamp, PistonExtension.MoveTo, Literal.Of(4L), Literal.Of(2L));
+        var frames = Run(ship, piston, lamp, Blocks.Piston.MoveTo, Literal.Of(4L), Literal.Of(2L));
 
         Assert.Equal(4f, piston.Position, 3);
         Assert.InRange(frames, 0, 3);
@@ -113,9 +113,9 @@ public class PistonTests
         piston.Attached = false;
         var entity = ship.Entity(piston.Id);
 
-        ship.World.Invoke(entity, PistonExtension.Extend);
+        ship.World.Invoke(entity, Blocks.Piston.Extend);
 
-        Assert.Equal("cannot move - it has no head", TroubleText.Of(new Texts(), entity.Trouble(PistonExtension.Extend, new Literal[0], "is-extended")));
+        Assert.Equal("cannot move - it has no head", TroubleText.Of(new Texts(), entity.Trouble(Blocks.Piston.Extend, new Literal[0])));
     }
 
     /// <summary>Runs the one act on the piston, and counts the frames until the step after it runs.</summary>

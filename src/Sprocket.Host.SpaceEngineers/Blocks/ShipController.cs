@@ -1,8 +1,9 @@
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.ModAPI;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A cockpit's signals: each slot of the pilot's hotbar, and its target lock being gained and lost.</summary>
     /// <remarks>
@@ -10,16 +11,16 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// hotbar key runs its slot on the page the pilot has open; the target lock runs the first slot of every page when it is
     /// gained and the second when it is lost. Nothing runs the build toolbar of itself, so it offers no signal.
     /// </remarks>
-    public sealed class ShipControllerSignals : ISignals
+    public sealed class ShipController : Capability
     {
         /// <inheritdoc />
-        public bool Claims(IMyTerminalBlock block)
+        public override bool Claims(IMyTerminalBlock block)
         {
             return block is IMyShipController;
         }
 
         /// <inheritdoc />
-        public void Describe(EntityKind kind, IMyTerminalBlock block)
+        public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             IMyToolbar hotbar = Toolbars.Of(block, 1);
             for (var page = 1; hotbar != null && page <= hotbar.PageCount; page++)

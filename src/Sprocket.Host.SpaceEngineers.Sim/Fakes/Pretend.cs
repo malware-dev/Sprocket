@@ -35,15 +35,21 @@ namespace Sprocket.Sim.Fakes
         /// </remarks>
         public static int Asked;
 
+        /// <summary>Where every question is written down by name, as it is asked, or null for nowhere.</summary>
+        /// <remarks>For a test that has to say which questions a look costs, not only how many. A static for the reason <see cref="Asked" /> is.</remarks>
+        public static List<string> Heard;
+
         /// <summary>One generator, because each one keeps a cache of the types it has made.</summary>
         public static readonly ProxyGenerator Generator = new ProxyGenerator();
 
+        /// <summary>A stand-in for a <typeparamref name="T" />, answering nothing until it is told what.</summary>
         public static Stand<T> To<T>() where T : class
         {
             return new Stand<T>();
         }
     }
 
+    /// <summary>A stand-in being told what it answers, which <see cref="Done" /> makes.</summary>
     public sealed class Stand<T> where T : class
     {
         readonly List<Type> _also = new List<Type>();
@@ -85,6 +91,7 @@ namespace Sprocket.Sim.Fakes
             return this;
         }
 
+        /// <summary>A method whose answer depends on what it was passed.</summary>
         public Stand<T> Does(string method, Func<object[], object> answer)
         {
             _answers.Add(method, answer);
@@ -116,6 +123,7 @@ namespace Sprocket.Sim.Fakes
             return this;
         }
 
+        /// <summary>The stand-in, answering what it was told.</summary>
         public T Done()
         {
             var answering = new Answering(_answers, _whole);
@@ -144,6 +152,8 @@ namespace Sprocket.Sim.Fakes
             public void Intercept(IInvocation invocation)
             {
                 Pretend.Asked++;
+                if (Pretend.Heard != null)
+                    Pretend.Heard.Add(Named(invocation));
 
                 Func<IInvocation, object> everything;
                 if (_whole.TryGetValue(invocation.Method.Name, out everything))

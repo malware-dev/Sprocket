@@ -159,7 +159,7 @@ A moment a `when` waits for is watched in one of three ways, and a new moment us
 its own:
 
 - **Announced** (`EntityKind.Announced`): the game raises an event when the moment may have happened, and the block's
-  extension listens through `IAnnounces`. Looked for on the tick after, with a backstop look every hundred ticks.
+  capability listens through `Capability.Listen`. Looked for on the tick after, with a backstop look every hundred ticks.
 - **Ruled out** (`EntityKind.RuledOutBy`): the game does not announce the moment, but does announce a reading that rules
   it out. Looked for on its cadence only while a watched block is outside that reading, otherwise as if announced. A
   door starting to close is the case: it can only between starting to open and having closed.
@@ -197,7 +197,7 @@ these, never a new mechanism:**
 - *A message about the screen, not about a sequence:* the banner's `Notice`, at `NoticeLevel.Info` or
   `Problem`.
 - *Why a logic system was switched off:* `Halt`, worded by `SequenceText.Stopped`.
-- *Knowledge about a kind of block:* `IBlockExtension`. *What a block offers:* `Offer`. *What a value
+- *Knowledge about a kind of block:* `Capability`. *What a block offers:* `Offer`. *What a value
   asks for:* `Field`.
 
 ## The language's spec is `docs/Language.md`

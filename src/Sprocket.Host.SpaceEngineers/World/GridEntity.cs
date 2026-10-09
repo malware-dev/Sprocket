@@ -7,26 +7,18 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>One block, answering the small set of questions every block can answer.</summary>
     public sealed class GridEntity
     {
-        /// <summary>The reading of whether a block is switched on.</summary>
-        public const string OnProperty = "on";
-
-        /// <summary>The reading of whether a block is working, as the game judges it.</summary>
-        public const string WorkingProperty = "working";
-
         /// <summary>What a block answers when it cannot say how long something will take.</summary>
         public const int Unestimated = -1;
 
         readonly IMyTerminalBlock _block;
         readonly EntityKind _kind;
-        readonly IBlockExtension _extension;
         readonly List<Action> _hearing = new List<Action>();
 
-        /// <summary><paramref name="block" />, of <paramref name="kind" />, answered for where it can be by <paramref name="extension" />.</summary>
-        public GridEntity(IMyTerminalBlock block, EntityKind kind, IBlockExtension extension)
+        /// <summary><paramref name="block" />, of <paramref name="kind" />, answered for where it can be by the capabilities the kind was described by.</summary>
+        public GridEntity(IMyTerminalBlock block, EntityKind kind)
         {
             _block = block;
             _kind = kind;
-            _extension = extension;
         }
 
         /// <summary>The block behind this, for the few things that need the game's own object.</summary>
@@ -50,21 +42,29 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Live state, for the player's own words.
         /// </summary>
         /// <remarks>
-        /// Four answers rather than two, because "off" and "no power" are different problems and telling
-        /// somebody the wrong one is worse than telling them nothing. Damage comes first because a damaged
-        /// block is not working for a reason no switch will fix.
+        /// What stops the block, where anything that knows it says something does, then what the first that knows it says
+        /// it is doing: "closing" beats "on" on a list of forty. Then four answers rather than two, because "off" and "no
+        /// power" are different problems and telling somebody the wrong one is worse than telling them nothing. Damage
+        /// comes first because a damaged block is not working for a reason no switch will fix.
         /// </remarks>
         public Status Status
         {
             get
             {
-                // What this block is doing, when something knows. "closing" beats "on" on a list of forty.
-                if (_extension != null)
+                var capabilities = _kind.Capabilities;
+                var doing = Status.None;
+                for (var i = 0; i < capabilities.Count; i++)
                 {
-                    var told = _extension.StatusOf(_block);
-                    if (told.Exists)
+                    var told = capabilities[i].StatusOf(_block);
+                    if (told.Trouble.Exists)
                         return told;
+
+                    if (told.Exists && !doing.Exists)
+                        doing = told;
                 }
+
+                if (doing.Exists)
+                    return doing;
 
                 if (!_block.IsFunctional)
                     return Status.Of(Condition.Damaged);
@@ -83,10 +83,22 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>
         /// Not whether it works. A row in the ship list lights up on this, and answering it with "powered
         /// and switched on" lit every row on the ship, which made the light mean nothing at all. Only
-        /// something that knows the block can say it is in motion, so a block nobody has written an
-        /// extension for is never busy.
+        /// something that knows the block can say it is in motion, so a block nothing knows is never busy.
         /// </remarks>
-        public bool IsActive => _extension != null && _extension.IsBusy(_block);
+        public bool IsActive
+        {
+            get
+            {
+                var capabilities = _kind.Capabilities;
+                for (var i = 0; i < capabilities.Count; i++)
+                {
+                    if (capabilities[i].IsBusy(_block))
+                        return true;
+                }
+
+                return false;
+            }
+        }
 
         /// <summary>Whether it is switched off, where it is a block that has a switch.</summary>
         public bool IsSwitchedOff
@@ -101,29 +113,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether it can do anything at all: built, powered and switched on.</summary>
         public bool IsWorking => _block.IsWorking;
 
-        /// <summary>What the block reads for <paramref name="propertyId" />, or false where it has no such reading.</summary>
-        public EntityValue GetValue(string propertyId)
-        {
-            EntityValue told;
-
-            // What this sort of block can be asked, then the floor every block stands on.
-            if (_extension != null && _extension.TryRead(_block, propertyId, out told))
-                return told;
-
-            if (propertyId == OnProperty)
-            {
-                IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
-                return EntityValue.Of(functional != null && functional.Enabled);
-            }
-
-            if (propertyId == WorkingProperty)
-                return EntityValue.Of(_block.IsWorking);
-
-            // An unknown name gives back a default rather than throwing: a saved sequence can outlive the
-            // vocabulary it was written against, and that is a thing to surface calmly.
-            return EntityValue.Of(false);
-        }
-
         /// <summary>Whether the block's own value that <paramref name="value" /> writes is <paramref name="literal" />.</summary>
         public bool Holds(EntityAction value, Literal literal)
         {
@@ -131,39 +120,50 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the block is in <paramref name="moment" />: the flag it reads is set where the moment rises, clear where it falls.</summary>
-        public bool In(Values arguments, EntityEvent moment)
+        public bool In(EntityEvent moment, Recall seen)
         {
-            return Flag(arguments, moment.PropertyId) == (moment.Edge == Edge.Rising);
+            return moment.Flag != null && moment.Flag.Holds(_block, seen) == (moment.Edge == Edge.Rising);
         }
 
-        /// <summary>Whether there is anything in <paramref name="propertyId" />, read as the kind the block declares it, or as a flag.</summary>
-        public bool Flag(Values arguments, string propertyId)
+        /// <summary>Whether <paramref name="reading" /> reads true of the block; false where there is no reading, as for a signal.</summary>
+        public bool Reads(Reading reading, Recall seen)
         {
-            var property = Kind.FindProperty(propertyId);
-            return arguments.Flag(property == null ? ValueKind.Flag : property.Kind, GetValue(propertyId));
-        }
-
-        /// <summary>Tells the block to do <paramref name="actionId" />.</summary>
-        public void Invoke(string actionId)
-        {
-            Invoke(actionId, null);
+            return reading != null && reading.Holds(_block, seen);
         }
 
         /// <summary>Tells <paramref name="told" /> each time this block may have changed, until the answer is disposed; null where it says nothing.</summary>
         /// <remarks>
-        /// Told as the block announces a change, as it is switched on or off, which every functional block announces, and as
-        /// Sprocket itself asks the block for anything.
+        /// Told as the block announces a change, by whatever knows it, and as Sprocket itself asks the block for anything.
         /// </remarks>
         public IDisposable Listen(Action told)
         {
-            var announces = _extension as IAnnounces;
-            var listening = announces == null ? null : announces.Listen(_block, told);
-            var functional = _block as IMyFunctionalBlock;
-            if (listening == null && functional == null)
+            List<IDisposable> listening = null;
+            var capabilities = _kind.Capabilities;
+            for (var i = 0; i < capabilities.Count; i++)
+            {
+                var one = capabilities[i].Listen(_block, told);
+                if (one == null)
+                    continue;
+
+                if (listening == null)
+                    listening = new List<IDisposable>();
+
+                listening.Add(one);
+            }
+
+            if (listening == null)
                 return null;
 
             _hearing.Add(told);
-            return new Hearing(this, told, listening, functional);
+            return new Hearing(this, told, listening);
+        }
+
+        /// <summary>Tells everything listening that Sprocket has asked the block for something.</summary>
+        /// <remarks>What Sprocket asks of a block is a change it need not wait for the block to announce.</remarks>
+        public void Asked()
+        {
+            for (var i = 0; i < _hearing.Count; i++)
+                _hearing[i]();
         }
 
         /// <summary>Whether a step asking this block for <paramref name="action" /> would be lost: it is waited for, and the block is switched off.</summary>
@@ -183,47 +183,26 @@ namespace Sprocket.Host.SpaceEngineers.World
             return action.Lasts && !IsWorking;
         }
 
-        /// <summary>Calls off what the action started, where this block's own knowledge says how.</summary>
-        public void Stop(string actionId)
-        {
-            if (_extension != null)
-                _extension.Stop(_block, actionId);
-        }
-
-        /// <summary>How many ticks this block should take to finish what the action started, or <see cref="Unestimated" />.</summary>
-        public int Expected(string actionId, IList<Literal> arguments)
-        {
-            return _extension == null ? Unestimated : _extension.Expected(_block, actionId, arguments);
-        }
-
         /// <summary>
-        /// Why this block cannot reach <paramref name="stateId" /> as <paramref name="actionId" /> told it with
-        /// <paramref name="arguments" />, or null while it might.
+        /// What this block is told by a step doing <paramref name="action" />, made ready, where the game performs it: one
+        /// of the game's actions or values, or one of Sprocket's own that the game's action does. Null where Sprocket
+        /// does it itself, or the block does not have it.
         /// </summary>
-        public Trouble Trouble(string actionId, IList<Literal> arguments, string stateId)
+        public Order Prepare(EntityAction action, Bound bound, IList<Literal> arguments)
         {
-            return _extension == null ? World.Trouble.None : _extension.TroubleWith(_block, actionId, arguments, stateId);
-        }
+            if (action.Form != Form.Native)
+                return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
 
-        /// <summary>
-        /// Whether this block has done what <paramref name="actionId" /> told it with <paramref name="arguments" />, though the
-        /// state that action leads to does not hold.
-        /// </summary>
-        public bool Done(string actionId, IList<Literal> arguments)
-        {
-            return _extension != null && _extension.Done(_block, actionId, arguments);
-        }
-
-        /// <summary>
-        /// What this block is told by a step doing one of the game's actions or values, made ready, or
-        /// null for one of Sprocket's own or one the block does not have.
-        /// </summary>
-        public Order Prepare(EntityAction action, IList<Literal> arguments)
-        {
-            if (action.Form == Form.Native)
+            if (bound != null && bound.Acts || action.GameActionId == null)
                 return null;
 
-            return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
+            return Toolbars.Prepare(_block, action.GameActionId, Form.Action, arguments, action.Primitives);
+        }
+
+        /// <summary>Tells the block to do <paramref name="actionId" />.</summary>
+        public void Invoke(string actionId)
+        {
+            Invoke(actionId, null);
         }
 
         /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />.</summary>
@@ -234,17 +213,41 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The same, told which of the three ways the step reaches the block.</summary>
         /// <remarks>
+        /// <b>For the editor and the harness, never the runtime,</b> which compiles what a step does once and does that.
+        /// This finds it by name and works it out on every call.
+        /// <para>
         /// Each is tried as what it is and nothing else. A value and the game's act that flips it share
         /// an id, and one of Sprocket's own words may be spelled like one of the game's, so a step
         /// that went looking for whatever answered to its id could find the wrong one.
+        /// </para>
         /// </remarks>
         public void Invoke(string actionId, IList<Literal> arguments, Form form)
         {
             Perform(actionId, arguments, form);
+            Asked();
+        }
 
-            // What Sprocket asks of a block is a change it need not wait for the block to announce.
-            for (var i = 0; i < _hearing.Count; i++)
-                _hearing[i]();
+        /// <summary>How many ticks this block should take to finish <paramref name="actionId" /> with <paramref name="arguments" />, or <see cref="Unestimated" />.</summary>
+        /// <remarks>For the editor and the harness: it works out what the action was told on every call.</remarks>
+        public int Expected(string actionId, IList<Literal> arguments)
+        {
+            var bound = Bind(actionId, arguments);
+            return bound == null ? Unestimated : bound.Expected(_block);
+        }
+
+        /// <summary>Why this block cannot finish <paramref name="actionId" /> as told with <paramref name="arguments" />, or none while it might.</summary>
+        /// <remarks>For the editor and the harness: it works out what the action was told on every call, and remembers nothing.</remarks>
+        public Trouble Trouble(string actionId, IList<Literal> arguments)
+        {
+            var bound = Bind(actionId, arguments);
+            return bound == null ? World.Trouble.None : bound.Trouble(_block, new Recall());
+        }
+
+        /// <summary>One of Sprocket's own actions as told <paramref name="arguments" />, or null where the block has no such action.</summary>
+        Bound Bind(string actionId, IList<Literal> arguments)
+        {
+            var action = _kind.FindAction(actionId, Form.Native);
+            return action == null || action.Doing == null ? null : action.Doing.Bind(arguments ?? new Literal[0]);
         }
 
         void Perform(string actionId, IList<Literal> arguments, Form form)
@@ -264,30 +267,17 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            if (_extension != null && _extension.TryInvoke(_block, actionId, arguments))
+            // An id this block does not have is a sequence written against a vocabulary it no longer offers, and it does
+            // nothing rather than throwing - the same answer a reading gives.
+            var entry = _kind.FindAction(actionId, Form.Native);
+            if (entry == null)
                 return;
 
-            IMyFunctionalBlock functional = _block as IMyFunctionalBlock;
-            if (functional != null)
-            {
-                if (actionId == BlockKinds.SwitchOn)
-                {
-                    functional.Enabled = true;
-                    return;
-                }
-
-                if (actionId == BlockKinds.SwitchOff)
-                {
-                    functional.Enabled = false;
-                    return;
-                }
-            }
-
-            // One of Sprocket's own that is the game's act said another way. An id this block does not
-            // have is a sequence written against a vocabulary it no longer offers, and it does nothing
-            // rather than throwing - the same answer a reading gives.
-            var entry = _kind.FindAction(actionId, Form.Native);
-            if (entry != null && entry.GameActionId != null)
+            var bound = entry.Doing == null ? null : entry.Doing.Bind(arguments ?? new Literal[0]);
+            if (bound != null && bound.Acts)
+                bound.Do(_block, new Recall());
+            else if (entry.GameActionId != null)
+                // One of Sprocket's own that is the game's act said another way.
                 Toolbars.Perform(_block, entry.GameActionId, arguments);
         }
 
@@ -296,33 +286,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             readonly GridEntity _entity;
             readonly Action _told;
-            readonly IDisposable _listening;
-            readonly IMyFunctionalBlock _functional;
+            readonly List<IDisposable> _listening;
 
-            public Hearing(GridEntity entity, Action told, IDisposable listening, IMyFunctionalBlock functional)
+            public Hearing(GridEntity entity, Action told, List<IDisposable> listening)
             {
                 _entity = entity;
                 _told = told;
                 _listening = listening;
-                _functional = functional;
-                if (_functional != null)
-                    _functional.EnabledChanged += Switched;
             }
 
             /// <inheritdoc />
             public void Dispose()
             {
                 _entity._hearing.Remove(_told);
-                if (_listening != null)
-                    _listening.Dispose();
-
-                if (_functional != null)
-                    _functional.EnabledChanged -= Switched;
-            }
-
-            void Switched(IMyTerminalBlock block)
-            {
-                _told();
+                for (var i = 0; i < _listening.Count; i++)
+                    _listening[i].Dispose();
             }
         }
     }

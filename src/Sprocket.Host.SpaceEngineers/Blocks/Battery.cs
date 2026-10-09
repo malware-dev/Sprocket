@@ -1,11 +1,11 @@
-using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.World;
 
 // The charge mode lives in the Ingame namespace, which cannot be imported whole: IMyBatteryBlock is
 // declared in both.
 using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>
     /// A battery, which can be recharged and waited on until it is full.
@@ -13,61 +13,34 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <remarks>
     /// Its charge is sampled. The game moves it on once every hundred frames and lands it exactly on
     /// the battery's capacity when it gets there, so full is a comparison and needs no band.
+    /// <para>
+    /// Nothing to call off: a battery left recharging holds nobody in danger, and its mode is a step of its own.
+    /// </para>
     /// </remarks>
-    public sealed class BatteryExtension : IBlockExtension
+    public sealed class Battery : Capability
     {
         /// <summary>Recharging until full, which is Sprocket's own and waits until the battery is full.</summary>
         public const string Recharge = "recharge";
 
-        const string Full = "full";
-        const string IsFull = "is-full";
+        static readonly Reading Full = Reading.Of<IMyBatteryBlock>(Charged);
+
+        static readonly Doing Recharges = Doing.Of<IMyBatteryBlock>(battery => battery.ChargeMode = ChargeMode.Recharge,
+            Full, Why);
 
         /// <inheritdoc />
-        public bool Claims(IMyTerminalBlock block)
+        public override bool Claims(IMyTerminalBlock block)
         {
             return block is IMyBatteryBlock;
         }
 
-        /// <summary>Nothing to arrange: this block's events fire when they fire.</summary>
-        public bool Raises(IMyTerminalBlock block, string eventId, string key)
+        /// <inheritdoc />
+        public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            return true;
+            kind.WithAction(Recharge, "recharge", Recharges, "Recharge_On").Lasting().In(Category.Power);
         }
 
         /// <inheritdoc />
-        public void Describe(EntityKind kind, IMyTerminalBlock block)
-        {
-            kind.WithProperty(Full, "full")
-                .WithState(IsFull, Full, true, "is full")
-                .WithAction(Recharge, "recharge", IsFull, "Recharge_On").Lasting().In(Category.Power);
-        }
-
-        /// <inheritdoc />
-        public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
-        {
-            value = default(EntityValue);
-
-            var battery = block as IMyBatteryBlock;
-            if (battery == null || propertyId != Full)
-                return false;
-
-            value = EntityValue.Of(Charged(battery));
-            return true;
-        }
-
-        /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            var battery = block as IMyBatteryBlock;
-            if (battery == null || actionId != Recharge)
-                return false;
-
-            battery.ChargeMode = ChargeMode.Recharge;
-            return true;
-        }
-
-        /// <inheritdoc />
-        public Status StatusOf(IMyTerminalBlock block)
+        public override Status StatusOf(IMyTerminalBlock block)
         {
             var battery = block as IMyBatteryBlock;
             if (battery == null)
@@ -89,10 +62,16 @@ namespace Sprocket.Host.SpaceEngineers.World
             return battery.HasCapacityRemaining ? Status.None : Status.Of(Condition.Empty);
         }
 
-        /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
+        /// <summary>Busy while it charges on a recharge, which is the one charging a step asks for.</summary>
+        /// <remarks>
+        /// A battery on auto charges whenever the grid has power to spare, so counting that would light
+        /// every battery on a ship with a solar panel.
+        /// </remarks>
+        public override bool IsBusy(IMyTerminalBlock block)
         {
-            return false;
+            var battery = block as IMyBatteryBlock;
+            return battery != null && battery.ChargeMode == ChargeMode.Recharge && !Charged(battery)
+                && battery.CurrentInput > 0f;
         }
 
         /// <summary>
@@ -102,10 +81,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Set to another mode is its own answer: whatever set it has overruled the step, and nothing
         /// is heading towards full any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
+        static Trouble Why(IMyBatteryBlock battery)
         {
-            var battery = block as IMyBatteryBlock;
-            if (battery == null || stateId != IsFull || Charged(battery))
+            if (Charged(battery))
                 return Trouble.None;
 
             if (battery.ChargeMode == ChargeMode.Discharge)
@@ -139,29 +117,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         static bool Charged(IMyBatteryBlock battery)
         {
             return battery.MaxStoredPower > 0f && battery.CurrentStoredPower >= battery.MaxStoredPower;
-        }
-
-        /// <summary>Busy while it charges on a recharge, which is the one charging a step asks for.</summary>
-        /// <remarks>
-        /// A battery on auto charges whenever the grid has power to spare, so counting that would light
-        /// every battery on a ship with a solar panel.
-        /// </remarks>
-        public bool IsBusy(IMyTerminalBlock block)
-        {
-            var battery = block as IMyBatteryBlock;
-            return battery != null && battery.ChargeMode == ChargeMode.Recharge && !Charged(battery)
-                && battery.CurrentInput > 0f;
-        }
-
-        /// <summary>Nothing: a battery left recharging holds nobody in danger, and its mode is a step of its own.</summary>
-        public void Stop(IMyTerminalBlock block, string actionId)
-        {
-        }
-
-        /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            return GridEntity.Unestimated;
         }
     }
 }

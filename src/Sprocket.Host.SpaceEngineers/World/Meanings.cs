@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <see cref="Categories" /> answers by id, which is what lets one table cover every block in the
     /// game. It is a default and nothing more: the same word means a glow on a light and a reach on
     /// an antenna, and a great many members are only placeable by somebody who knows what the block
-    /// is for. This is where that knowledge goes until the block gets an extension of its own.
+    /// is for. This is where that knowledge goes until the block gets a capability of its own.
     /// <para>
     /// <b>Hiding is the other half.</b> Three kinds of member have no business in a list of things a
     /// sequence can do: one that needs somebody sitting in the block, one the game keeps for

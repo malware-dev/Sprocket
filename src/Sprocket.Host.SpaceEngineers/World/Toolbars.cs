@@ -13,9 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// One statement of how Sprocket's wiring is found, read and written, so the next change to that
     /// answer is one edit rather than a hunt. What does the work is <see cref="ISlots" />.
     /// <para>
-    /// <b>Static because the block vocabulary is.</b> An extension describing a button panel is
-    /// reached through a static registry with no instance to hand anything to, so a toolbar is found
-    /// the same way. The game's own API is a static for the same reason, and this holds a reference to
+    /// <b>Static because the block vocabulary is.</b> A capability describing a button panel is
+    /// made with no instance to hand anything to, so a toolbar is found the same way. The game's own API is a static for the same reason, and this holds a reference to
     /// an ordinary object rather than being one.
     /// </para>
     /// </remarks>

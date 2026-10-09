@@ -23,7 +23,7 @@ public class SoundTests
         var speaker = ship.Speaker(1, "Speaker");
         var kind = ship.Entity(speaker.Id).Kind;
 
-        var play = kind.FindAction(SoundExtension.Play, Form.Native)!;
+        var play = kind.FindAction(Blocks.Speaker.Play, Form.Native)!;
         Assert.False(play.Lasts);
 
         var fields = new List<Field>();
@@ -47,7 +47,7 @@ public class SoundTests
 
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
-        var play = new Act(SoundExtension.Play);
+        var play = new Act(Blocks.Speaker.Play);
         play.Targets.Add(automation.Declare(ship.World, ship.Entity(speaker.Id)).Name);
         play.Arguments.Add(Literal.Of("SoundBlockAlert2"));
         sequence.Steps.Add(play);
@@ -67,7 +67,7 @@ public class SoundTests
     {
         var ship = new Rigged();
         var speaker = ship.Speaker(1, "Speaker");
-        var play = ship.Entity(speaker.Id).Kind.FindAction(SoundExtension.Play, Form.Native)!;
+        var play = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Play, Form.Native)!;
         var fields = new List<Field>();
         play.Fields(fields);
 

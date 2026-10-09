@@ -5,12 +5,13 @@ using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.World;
 
 // The direction lives in the Ingame namespace, which cannot be imported whole: IMyMotorStator is
 // declared in both, and the mod-side one is the one with the event on it.
 using MyRotationDirection = Sandbox.ModAPI.Ingame.MyRotationDirection;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>
     /// A rotor or a hinge: turned to an angle, and the members of its terminal said in Sprocket's words.
@@ -27,26 +28,59 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// is its own, beside the rotor's.
     /// </para>
     /// </remarks>
-    public sealed class RotorExtension : IBlockExtension
+    public sealed class Rotor : Capability
     {
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
         public const string RotateTo = "rotate-to";
 
         const float Hair = 0.0001f;
 
-        const string Arrived = "arrived";
-        const string There = "is-there";
-
-        readonly RotorTurn _turn = new RotorTurn();
-
         static readonly string[] Directions = { "0", "1", "2" };
 
         static readonly string[] Ways = { "directly", "clockwise", "counter-clockwise" };
 
+        static readonly Reading Arrived = Reading.Of<IMyMotorStator>(AtLimit);
+
         /// <inheritdoc />
-        public bool Claims(IMyTerminalBlock block)
+        public override bool Claims(IMyTerminalBlock block)
         {
             return block is IMyMotorStator;
+        }
+
+        /// <inheritdoc />
+        public override void Describe(EntityKind kind, IMyTerminalBlock block)
+        {
+            // A hinge's lock is its own, and a hinge goes the short way whatever it is told.
+            var hinge = Hinge(block);
+            var locks = hinge ? "HingeLock" : "RotorLock";
+
+            var turns = Doing.Of<IMyMotorStator, Turn>(given => Turn.Read(given, hinge), Turned, Arrived, null, Why,
+                Stop, Expected);
+
+            if (hinge)
+                kind.WithAction(RotateTo, "rotate", turns, AskedAngle(block), AskedSpeed(block));
+            else
+                kind.WithAction(RotateTo, "rotate", turns, AskedWay(), AskedAngle(block), AskedSpeed(block));
+
+            kind.Lasting().Listed("rotate to").In(Category.Movement)
+                .Hiding("RotateToAngle", "RotorLock", "HingeLock")
+                .Renaming("Reverse", false, "reverse")
+                .Renaming("Attach", false, "attach")
+                .Renaming("Detach", false, "detach")
+                .Renaming(locks + "_On", false, "lock")
+                .Renaming(locks + "_Off", false, "unlock")
+                .Renaming("Velocity", true, "speed")
+                .Renaming("LowerLimit", true, "lower limit")
+                .Renaming("UpperLimit", true, "upper limit")
+                .Renaming("Torque", true, "torque")
+                .Renaming("BrakingTorque", true, "braking torque");
+        }
+
+        /// <inheritdoc />
+        public override bool IsBusy(IMyTerminalBlock block)
+        {
+            var rotor = block as IMyMotorStator;
+            return rotor != null && rotor.TargetVelocityRPM != 0 && !AtLimit(rotor);
         }
 
         /// <summary>Whether the block's definition says it is a hinge rather than a rotor.</summary>
@@ -95,42 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 : number.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
-        /// <summary>Nothing to arrange: arriving is read off the rotor.</summary>
-        public bool Raises(IMyTerminalBlock block, string eventId, string key)
-        {
-            return true;
-        }
-
-        /// <inheritdoc />
-        public void Describe(EntityKind kind, IMyTerminalBlock block)
-        {
-            // A hinge's lock is its own, and a hinge goes the short way whatever it is told.
-            var hinge = Hinge(block);
-            var locks = hinge ? "HingeLock" : "RotorLock";
-
-            kind.WithProperty(Arrived, "at its angle")
-                .WithState(There, Arrived, true, "is at its angle");
-
-            if (hinge)
-                kind.WithAction(RotateTo, "rotate", There, Angle(block), Speed(block));
-            else
-                kind.WithAction(RotateTo, "rotate", There, Way(), Angle(block), Speed(block));
-
-            kind.Lasting().Listed("rotate to").In(Category.Movement)
-                .Hiding("RotateToAngle", "RotorLock", "HingeLock")
-                .Renaming("Reverse", false, "reverse")
-                .Renaming("Attach", false, "attach")
-                .Renaming("Detach", false, "detach")
-                .Renaming(locks + "_On", false, "lock")
-                .Renaming(locks + "_Off", false, "unlock")
-                .Renaming("Velocity", true, "speed")
-                .Renaming("LowerLimit", true, "lower limit")
-                .Renaming("UpperLimit", true, "upper limit")
-                .Renaming("Torque", true, "torque")
-                .Renaming("BrakingTorque", true, "braking torque");
-        }
-
-        static Field Way()
+        static Field AskedWay()
         {
             // The game's own values for MyRotationDirection: shortest way, then clockwise, then counter-clockwise.
             var way = Field.Among("direction", Ways, Directions);
@@ -145,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A quarter turn either way for a hinge with no definition to say otherwise - the test harness -
         /// which is what every hinge the game has is built to.
         /// </remarks>
-        static Field Angle(IMyTerminalBlock block)
+        static Field AskedAngle(IMyTerminalBlock block)
         {
             var reach = Hinge(block) ? 90f : 360f;
             float least = -reach;
@@ -167,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return angle;
         }
 
-        static Field Speed(IMyTerminalBlock block)
+        static Field AskedSpeed(IMyTerminalBlock block)
         {
             // A turn at no speed sets out for an angle it can never reach, so there is no reading of an
             // empty speed that means anything.
@@ -179,19 +178,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             speed.Lead = "at";
             speed.Unit = " rpm";
             return speed;
-        }
-
-        /// <inheritdoc />
-        public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
-        {
-            value = default(EntityValue);
-
-            var rotor = block as IMyMotorStator;
-            if (rotor == null || propertyId != Arrived)
-                return false;
-
-            value = EntityValue.Of(AtLimit(rotor));
-            return true;
         }
 
         /// <summary>Whether the rotor has reached the limit it is running towards.</summary>
@@ -214,26 +200,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
+        /// <summary>Sets the rotor turning to the angle, and starts watching whether it is held.</summary>
+        static void Turned(IMyMotorStator rotor, Turn turn, Recall seen)
         {
-            var rotor = block as IMyMotorStator;
-            if (rotor == null || actionId != RotateTo)
-                return false;
+            if (!turn.Given)
+                return;
 
-            MyRotationDirection way;
-            float angle;
-            float speed;
-            if (!Given(arguments, Hinge(block), out way, out angle, out speed))
-                return true;
-
-            if (Already(rotor, angle))
-                Hold(rotor, way, angle, speed);
+            if (Already(rotor, turn.Angle))
+                Hold(rotor, turn.Way, turn.Angle, turn.Speed);
             else
-                rotor.RotateToAngle(way, angle, speed);
+                rotor.RotateToAngle(turn.Way, turn.Angle, turn.Speed);
 
-            _turn.Began(rotor);
-            return true;
+            RotorTurn.Began(rotor, seen);
         }
 
         /// <summary>Whether the rotor already stands at the angle, by the game's own test.</summary>
@@ -269,29 +247,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// The direction, angle and speed a step turning the rotor was given, in that order, or the angle
-        /// and speed a step turning a hinge was given, which goes the short way.
-        /// </summary>
-        static bool Given(IList<Literal> arguments, bool hinge, out MyRotationDirection way, out float angle,
-            out float speed)
-        {
-            way = MyRotationDirection.AUTO;
-            angle = 0;
-            speed = 0;
-
-            var at = hinge ? 0 : 1;
-            if (arguments == null || arguments.Count < at + 2)
-                return false;
-
-            if (!hinge)
-                way = (MyRotationDirection)arguments[0].Whole;
-
-            angle = (float)arguments[at].Real;
-            speed = (float)Math.Abs(arguments[at + 1].Real);
-            return true;
-        }
-
-        /// <summary>
         /// Stops the rotor where it stands.
         /// </summary>
         /// <remarks>
@@ -300,17 +255,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// sequence that was watching for a reason to stop it is exactly the one that has just
         /// stopped. Its limits are left where the turn put them; the speed is what makes it move.
         /// </remarks>
-        public void Stop(IMyTerminalBlock block, string actionId)
+        static void Stop(IMyMotorStator rotor)
         {
-            var rotor = block as IMyMotorStator;
-            if (rotor != null && actionId == RotateTo)
-                rotor.TargetVelocityRPM = 0f;
-        }
-
-        /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            return false;
+            rotor.TargetVelocityRPM = 0f;
         }
 
         /// <summary>
@@ -322,10 +269,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// answer worth giving up on - it was set by the turn, so nought means something else has
         /// been at it and nothing is heading for the angle any more.
         /// </remarks>
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
+        static Trouble Why(IMyMotorStator rotor, Turn turn, Recall seen)
         {
-            var rotor = block as IMyMotorStator;
-            if (rotor == null || stateId != There || AtLimit(rotor))
+            if (AtLimit(rotor))
                 return Trouble.None;
 
             if (!rotor.IsWorking)
@@ -346,22 +292,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Waited through rather than given up on. Whatever is holding the rotor may be moved, and
             // the rotor leaning on it meanwhile is no worse than the rotor stopped: measured in game,
             // taking its speed away does not settle what the pushing does to a construct.
-            return _turn.Turning(rotor)
+            return RotorTurn.Turning(rotor, seen)
                 ? Trouble.None
                 : Trouble.Waiting(Cause.RotorHeld);
-        }
-
-        /// <inheritdoc />
-        public Status StatusOf(IMyTerminalBlock block)
-        {
-            return Status.None;
-        }
-
-        /// <inheritdoc />
-        public bool IsBusy(IMyTerminalBlock block)
-        {
-            var rotor = block as IMyMotorStator;
-            return rotor != null && rotor.TargetVelocityRPM != 0 && !AtLimit(rotor);
         }
 
         /// <summary>
@@ -371,31 +304,25 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A revolution a minute is six degrees a second, and the game runs sixty ticks to the second,
         /// so a rotor turns a tenth of a degree a tick for every revolution a minute it is given.
         /// </remarks>
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
+        static int Expected(IMyMotorStator rotor, Turn turn)
         {
-            var rotor = block as IMyMotorStator;
-
-            MyRotationDirection way;
-            float angle;
-            float speed;
-            if (rotor == null || actionId != RotateTo || !Given(arguments, Hinge(block), out way, out angle, out speed)
-                || speed <= 0)
+            if (!turn.Given || turn.Speed <= 0)
                 return GridEntity.Unestimated;
 
             var from = Degrees(rotor.Angle);
-            var to = Wrapped(angle);
+            var to = Wrapped(turn.Angle);
             var clockwise = Wrapped(to - from);
             var counter = Wrapped(from - to);
 
             float degrees;
-            if (way == MyRotationDirection.CW)
+            if (turn.Way == MyRotationDirection.CW)
                 degrees = clockwise;
-            else if (way == MyRotationDirection.CCW)
+            else if (turn.Way == MyRotationDirection.CCW)
                 degrees = counter;
             else
                 degrees = Math.Min(clockwise, counter);
 
-            return (int)Math.Ceiling(degrees / (speed / 10f));
+            return (int)Math.Ceiling(degrees / (turn.Speed / 10f));
         }
 
         static float Degrees(float radians)
@@ -408,6 +335,40 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var wrapped = degrees % 360f;
             return wrapped < 0 ? wrapped + 360f : wrapped;
+        }
+
+        /// <summary>Where a step told the rotor to turn to, which way, and how fast.</summary>
+        sealed class Turn
+        {
+            /// <summary>Whether the step gave all of it; a step that did not turns nothing.</summary>
+            public bool Given;
+
+            public MyRotationDirection Way;
+
+            public float Angle;
+
+            public float Speed;
+
+            /// <summary>
+            /// The direction, angle and speed a step turning the rotor was given, in that order, or the angle
+            /// and speed a step turning a hinge was given, which goes the short way.
+            /// </summary>
+            public static Turn Read(IList<Literal> arguments, bool hinge)
+            {
+                var turn = new Turn { Way = MyRotationDirection.AUTO };
+
+                var at = hinge ? 0 : 1;
+                if (arguments == null || arguments.Count < at + 2)
+                    return turn;
+
+                if (!hinge)
+                    turn.Way = (MyRotationDirection)arguments[0].Whole;
+
+                turn.Angle = (float)arguments[at].Real;
+                turn.Speed = (float)Math.Abs(arguments[at + 1].Real);
+                turn.Given = true;
+                return turn;
+            }
         }
     }
 }

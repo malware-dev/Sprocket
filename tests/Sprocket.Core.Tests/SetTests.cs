@@ -14,9 +14,9 @@ namespace Sprocket.Tests;
 /// </remarks>
 public class SetTests
 {
-    readonly EntityAction _toggle = new EntityAction("OnOff", "Toggle block On/Off", null, "OnOff");
+    readonly EntityAction _toggle = new EntityAction("OnOff", "Toggle block On/Off", "OnOff");
 
-    readonly EntityAction _value = new EntityAction("OnOff", "set On", null, null, 1)
+    readonly EntityAction _value = new EntityAction("OnOff", "set On", null, 1)
         .Writes("OnOff", Field.Called("On"), "On", ValueKind.Flag);
 
     [Fact]

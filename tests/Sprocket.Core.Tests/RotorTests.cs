@@ -54,7 +54,7 @@ public class RotorTests
         Assert.False(kind.FindAction("RotorLock_Off", Form.Action)!.Hidden);
 
         // Rotating to an angle is Sprocket's own, performed its own way, so the game's is left out.
-        Assert.NotNull(kind.FindAction(RotorExtension.RotateTo, Form.Native));
+        Assert.NotNull(kind.FindAction(Blocks.Rotor.RotateTo, Form.Native));
         Assert.True(kind.FindAction("RotateToAngle", Form.Action)!.Hidden);
 
         // What is not renamed stays as the game says it.
@@ -100,7 +100,7 @@ public class RotorTests
         var kind = ship.Entity(hinge.Id).Kind;
 
         var asked = new List<Field>();
-        kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Fields(asked);
+        kind.FindAction(Blocks.Rotor.RotateTo, Form.Native)!.Fields(asked);
 
         Assert.Equal(2, asked.Count);
         Assert.Equal("-90", asked[0].Least);
@@ -135,12 +135,12 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var kind = ship.Entity(rotor.Id).Kind;
 
-        Assert.Equal("Rotate to", kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Named);
+        Assert.Equal("Rotate to", kind.FindAction(Blocks.Rotor.RotateTo, Form.Native)!.Named);
         Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", Form.Action)!.Named);
         Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Form.Value)!.Named);
 
-        // And the sentence keeps the word it needs, which is the one the extension wrote.
-        Assert.Equal("rotate", kind.FindAction(RotorExtension.RotateTo, Form.Native)!.Text);
+        // And the sentence keeps the word it needs, which is the one the capability wrote.
+        Assert.Equal("rotate", kind.FindAction(Blocks.Rotor.RotateTo, Form.Native)!.Text);
     }
 
     /// <summary>A renamed member is the game's own, and does what the game's does.</summary>
@@ -252,7 +252,7 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var entity = ship.Entity(rotor.Id);
 
-        var ticks = entity.Expected(RotorExtension.RotateTo, [Literal.Of(Directly), Literal.Of(90.0), Literal.Of(10.0)]);
+        var ticks = entity.Expected(Blocks.Rotor.RotateTo, [Literal.Of(Directly), Literal.Of(90.0), Literal.Of(10.0)]);
 
         Assert.Equal(90, ticks);
     }
@@ -265,7 +265,7 @@ public class RotorTests
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
-        var action = ship.Entity(rotor.Id).Kind.FindAction(RotorExtension.RotateTo, Form.Native)!;
+        var action = ship.Entity(rotor.Id).Kind.FindAction(Blocks.Rotor.RotateTo, Form.Native)!;
         var fields = new List<Field>();
         action.Fields(fields);
 
@@ -292,7 +292,7 @@ public class RotorTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var turn = new Act(RotorExtension.RotateTo);
+        var turn = new Act(Blocks.Rotor.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
         turn.Arguments.Add(Literal.Of(Directly));
         turn.Arguments.Add(Literal.Of(90L));
@@ -328,7 +328,7 @@ public class RotorTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var turn = new Act(RotorExtension.RotateTo);
+        var turn = new Act(Blocks.Rotor.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
         turn.Arguments.Add(Literal.Of(Clockwise));
         turn.Arguments.Add(Literal.Of(350L));
@@ -420,16 +420,16 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
 
         var block = (IMyMotorStator)rotor.Block;
-        var watch = new RotorTurn();
-        Assert.True(watch.Turning(block), "a rotor just looked at is already called held");
+        var seen = new Recall();
+        Assert.True(Blocks.RotorTurn.Turning(block, seen), "a rotor just looked at is already called held");
 
         for (var frame = 0; frame < 120; frame++)
             ship.Tick();
 
-        Assert.False(watch.Turning(block), "a rotor that has not moved for two seconds reads as turning");
+        Assert.False(Blocks.RotorTurn.Turning(block, seen), "a rotor that has not moved for two seconds reads as turning");
 
-        watch.Began(block);
-        Assert.True(watch.Turning(block), "a turn just begun is called held before it can move");
+        Blocks.RotorTurn.Began(block, seen);
+        Assert.True(Blocks.RotorTurn.Turning(block, seen), "a turn just begun is called held before it can move");
     }
 
     /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>
@@ -487,7 +487,7 @@ public class RotorTests
     static Sequence Turning(Rigged ship, Automation automation, Rotor rotor, long degrees, long rpm)
     {
         var sequence = automation.AddSequence((Trigger)null!);
-        var turn = new Act(RotorExtension.RotateTo);
+        var turn = new Act(Blocks.Rotor.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
         turn.Arguments.Add(Literal.Of(Clockwise));
         turn.Arguments.Add(Literal.Of(degrees));
@@ -551,7 +551,7 @@ public class RotorTests
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
-        var action = ship.Entity(rotor.Id).Kind.FindAction(RotorExtension.RotateTo, Form.Native)!;
+        var action = ship.Entity(rotor.Id).Kind.FindAction(Blocks.Rotor.RotateTo, Form.Native)!;
         var fields = new List<Field>();
         action.Fields(fields);
 
@@ -594,7 +594,7 @@ public class RotorTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var turn = new Act(RotorExtension.RotateTo);
+        var turn = new Act(Blocks.Rotor.RotateTo);
         turn.Targets.Add(automation.Declare(ship.World, ship.Entity(rotor.Id)).Name);
         foreach (var value in given)
             turn.Arguments.Add(value);

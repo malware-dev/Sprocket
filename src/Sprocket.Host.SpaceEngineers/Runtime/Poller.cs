@@ -42,16 +42,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Rota _rota;
         readonly Shift _shift;
 
-        readonly Dictionary<string, bool> _signals = new Dictionary<string, bool>();
-        readonly List<string> _forgotten = new List<string>();
+        readonly Dictionary<string, bool> _kept = new Dictionary<string, bool>();
         readonly List<string> _watched = new List<string>();
         readonly List<IDisposable> _listening = new List<IDisposable>();
         readonly Action _heard;
 
-        int _listenedBindings = -1;
-        int _listenedEdits = -1;
-        int _watchedBindings = -1;
-        int _watchedEdits = -1;
+        string[] _names = new string[0];
+        GridEntity[] _entities = new GridEntity[0];
+        EntityEvent[] _moments = new EntityEvent[0];
+        Recall[] _seen = new Recall[0];
+        Recall[] _ruling = new Recall[0];
+        bool[] _previous = new bool[0];
+        bool[] _known = new bool[0];
+
+        int _compiledBindings = -1;
+        int _compiledEdits = -1;
         bool _announced;
         bool _possible;
 
@@ -114,7 +119,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>What it read of each block at its last look, by the name the program gives the block; for a save.</summary>
-        public IEnumerable<KeyValuePair<string, bool>> Signals => _signals;
+        public IEnumerable<KeyValuePair<string, bool>> Signals
+        {
+            get
+            {
+                for (var i = 0; i < _names.Length; i++)
+                {
+                    if (_known[i])
+                        yield return new KeyValuePair<string, bool>(_names[i], _previous[i]);
+                }
+
+                foreach (var kept in _kept)
+                    yield return kept;
+            }
+        }
 
         /// <summary>Whether every block was there at the last look of a <c>when all</c>: 1 or 0, or -1 before its first look.</summary>
         public int All => _all;
@@ -125,7 +143,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Takes back what a save says it read of <paramref name="block" /> at its last look before the world was written.</summary>
         public void Recall(string block, bool was)
         {
-            _signals[block] = was;
+            for (var i = 0; i < _names.Length; i++)
+            {
+                if (_names[i] == block)
+                {
+                    _previous[i] = was;
+                    _known[i] = true;
+                    return;
+                }
+            }
+
+            _kept[block] = was;
         }
 
         /// <summary>Takes back whether every block was there at the last look before the world was written.</summary>
@@ -152,9 +180,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             _tick = tick;
             _bindings = _owner.Current;
-            Listen();
+            Compile();
 
-            var firings = Sampled(_owner.World);
+            var firings = Sampled();
             for (var i = 0; i < firings && _owner.Live; i++)
             {
                 FiredCount++;
@@ -185,26 +213,60 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Listens to every watched block that announces the moment, or when it is ruled out, and marks whether all of them do.
+        /// Works out which blocks it watches, what each is read by, and listens to every one that announces the moment or
+        /// when it is ruled out, marking whether all of them do.
         /// </summary>
-        /// <remarks>Done again only where the blocks the names point at, or the program, have changed since.</remarks>
-        void Listen()
+        /// <remarks>
+        /// Done again only where the blocks the names point at, or the program, have changed since, so a look reads arrays
+        /// and asks nothing by name. What it read of a block at its last look is kept across, by the block's name, and let
+        /// go of for any block it no longer watches.
+        /// </remarks>
+        void Compile()
         {
             var when = _trigger as WhenTrigger;
-            if (when == null || (_bindings.Revision == _listenedBindings && _owner.Program.Edits == _listenedEdits))
+            if (when == null || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits))
                 return;
 
-            _listenedBindings = _bindings.Revision;
-            _listenedEdits = _owner.Program.Edits;
+            _compiledBindings = _bindings.Revision;
+            _compiledEdits = _owner.Program.Edits;
             Deafen();
 
-            var sources = Watched(when.Sources);
-            var all = sources.Count > 0;
-            for (var i = 0; i < sources.Count; i++)
+            for (var i = 0; i < _names.Length; i++)
             {
-                var entity = _bindings.Entity(sources[i]);
-                var definition = entity == null ? null : when.Moment(entity.Kind);
-                var heard = definition != null && (definition.Announced || definition.RuledOutBy.Length > 0);
+                if (_known[i])
+                    _kept[_names[i]] = _previous[i];
+            }
+
+            Watched(when.Sources);
+            var count = _watched.Count;
+            _names = new string[count];
+            _entities = new GridEntity[count];
+            _moments = new EntityEvent[count];
+            _seen = new Recall[count];
+            _ruling = new Recall[count];
+            _previous = new bool[count];
+            _known = new bool[count];
+
+            var all = count > 0;
+            for (var i = 0; i < count; i++)
+            {
+                var name = _watched[i];
+                var entity = _bindings.Entity(name);
+                var moment = entity == null ? null : when.Moment(entity.Kind);
+                _names[i] = name;
+                _entities[i] = entity;
+                _moments[i] = moment;
+                _seen[i] = moment != null && moment.Flag != null && moment.Flag.Remembers ? new Recall() : null;
+                _ruling[i] = moment != null && moment.RuledOutBy != null && moment.RuledOutBy.Remembers ? new Recall() : null;
+
+                bool was;
+                if (_kept.TryGetValue(name, out was))
+                {
+                    _previous[i] = was;
+                    _known[i] = true;
+                }
+
+                var heard = moment != null && (moment.Announced || moment.RuledOutBy != null);
                 var listening = heard ? entity.Listen(_heard) : null;
                 if (listening == null)
                 {
@@ -215,6 +277,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _listening.Add(listening);
             }
 
+            _kept.Clear();
             _announced = all;
         }
 
@@ -229,26 +292,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>How many times it fires on this look.</summary>
-        int Sampled(GridWorld world)
+        int Sampled()
         {
             _possible = false;
             var when = _trigger as WhenTrigger;
             if (when != null)
-                return when.RequiresAll ? (SampleWhenAll(world, when) ? 1 : 0) : SampleWhen(world, when);
+                return when.RequiresAll ? (SampleWhenAll() ? 1 : 0) : SampleWhen();
 
             var every = _trigger as EveryTrigger;
             return every != null && SampleEvery(every) ? 1 : 0;
         }
 
-        /// <summary>The blocks <paramref name="slots" /> come to, each once.</summary>
-        /// <remarks>Worked out again only where the blocks the names point at, or the program, have changed since.</remarks>
-        List<string> Watched(IList<string> slots)
+        /// <summary>Works out the blocks <paramref name="slots" /> come to, each once.</summary>
+        void Watched(IList<string> slots)
         {
-            if (_bindings.Revision == _watchedBindings && _owner.Program.Edits == _watchedEdits)
-                return _watched;
-
-            _watchedBindings = _bindings.Revision;
-            _watchedEdits = _owner.Program.Edits;
             _watched.Clear();
             if (_instance == null)
             {
@@ -261,53 +318,47 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             _bindings.Distinct(_watched);
-            return _watched;
         }
 
         /// <summary>Fires once for each block that has reached the state since the last look, however close together they arrived.</summary>
-        int SampleWhen(GridWorld world, WhenTrigger when)
+        int SampleWhen()
         {
-            var sources = Watched(when.Sources);
             var fired = 0;
             var anyTrue = false;
             var anyMissing = false;
 
-            for (var i = 0; i < sources.Count; i++)
+            for (var i = 0; i < _entities.Length; i++)
             {
-                var sourceId = sources[i];
-                var entity = _bindings.Entity(sourceId);
+                var entity = _entities[i];
                 if (entity == null)
                 {
                     anyMissing = true;
                     continue;
                 }
 
-                var definition = when.Moment(entity.Kind);
-                if (definition == null)
+                var moment = _moments[i];
+                if (moment == null)
                     continue;
 
-                Mark(world, entity, definition);
-                var now = entity.Flag(world.Values, definition.PropertyId);
+                Mark(entity, moment, _ruling[i]);
+                var now = entity.Reads(moment.Flag, _seen[i]);
                 if (now)
                     anyTrue = true;
 
-                bool previous;
-                if (_signals.TryGetValue(sourceId, out previous))
+                // No previous look means the trigger has only just come into existence, and an edge needs two.
+                // Firing on the first look would set every trigger off the moment it was made.
+                if (_known[i])
                 {
-                    // No previous look means the trigger has only just come into existence, and an edge needs two.
-                    // Firing on the first look would set every trigger off the moment it was made.
-                    if (definition.Edge == Edge.Rising && !previous && now)
+                    var previous = _previous[i];
+                    if (moment.Edge == Edge.Rising && !previous && now)
                         fired++;
-                    else if (definition.Edge == Edge.Falling && previous && !now)
+                    else if (moment.Edge == Edge.Falling && previous && !now)
                         fired++;
                 }
 
-                _signals[sourceId] = now;
+                _previous[i] = now;
+                _known[i] = true;
             }
-
-            // More remembered than watched only once the blocks it watches have changed, so the walk is rare.
-            if (_signals.Count > sources.Count)
-                Forget(sources);
 
             Live = anyTrue;
             Missed(anyMissing);
@@ -315,27 +366,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Notes where <paramref name="entity" /> could reach <paramref name="moment" /> unannounced: one it does not announce, and nothing rules out now.</summary>
-        void Mark(GridWorld world, GridEntity entity, EntityEvent moment)
+        void Mark(GridEntity entity, EntityEvent moment, Recall ruling)
         {
             if (_possible || moment.Announced)
                 return;
 
-            if (moment.RuledOutBy.Length == 0 || !entity.Flag(world.Values, moment.RuledOutBy))
+            if (moment.RuledOutBy == null || !entity.Reads(moment.RuledOutBy, ruling))
                 _possible = true;
-        }
-
-        /// <summary>Lets go of what it read of any block it no longer watches.</summary>
-        void Forget(List<string> sources)
-        {
-            _forgotten.Clear();
-            foreach (var pair in _signals)
-            {
-                if (!sources.Contains(pair.Key))
-                    _forgotten.Add(pair.Key);
-            }
-
-            for (var i = 0; i < _forgotten.Count; i++)
-                _signals.Remove(_forgotten[i]);
         }
 
         /// <summary>
@@ -346,15 +383,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// state at different moments. What the sentence means is "the moment they are all there", so that is what is
         /// watched: one edge, on the whole condition.
         /// </remarks>
-        bool SampleWhenAll(GridWorld world, WhenTrigger when)
+        bool SampleWhenAll()
         {
-            var sources = Watched(when.Sources);
-            var all = sources.Count > 0;
+            var all = _entities.Length > 0;
             var anyMissing = false;
 
-            for (var i = 0; i < sources.Count; i++)
+            for (var i = 0; i < _entities.Length; i++)
             {
-                var entity = _bindings.Entity(sources[i]);
+                var entity = _entities[i];
                 if (entity == null)
                 {
                     anyMissing = true;
@@ -362,16 +398,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
-                var definition = when.Moment(entity.Kind);
-                if (definition == null)
+                var moment = _moments[i];
+                if (moment == null)
                 {
                     all = false;
                     continue;
                 }
 
-                Mark(world, entity, definition);
-                var wanted = definition.Edge == Edge.Rising;
-                if (entity.Flag(world.Values, definition.PropertyId) != wanted)
+                Mark(entity, moment, _ruling[i]);
+                var wanted = moment.Edge == Edge.Rising;
+                if (entity.Reads(moment.Flag, _seen[i]) != wanted)
                     all = false;
             }
 

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// appears - every functional block's switch is the same pair of ids, every light's colour the
     /// same one - so one table covers every block that uses them, including blocks nobody has
     /// written anything else about. A kind that means something different by a shared id says so
-    /// itself with <see cref="EntityKind.In" />, which is the extension's business rather than this
+    /// itself with <see cref="EntityKind.In" />, which is the capability's business rather than this
     /// table's.
     /// <para>
     /// A switch rather than a dictionary: this is a constant, asked once per member while a block's

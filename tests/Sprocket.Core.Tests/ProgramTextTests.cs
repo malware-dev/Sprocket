@@ -286,7 +286,7 @@ public class ProgramTextTests
         reverse.Targets.Add("rotor");
         sequence.Steps.Add(reverse);
 
-        var rotate = new Act(RotorExtension.RotateTo) { Form = Form.Native };
+        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = Form.Native };
         rotate.Targets.Add("rotor");
         rotate.Arguments.Add(Literal.Of(90L));
         rotate.Arguments.Add(Literal.Of(2.5));
@@ -313,7 +313,7 @@ public class ProgramTextTests
 
         var own = Assert.IsType<Act>(steps[1]);
         Assert.Equal(Form.Native, own.Form);
-        Assert.Equal(RotorExtension.RotateTo, own.ActionId);
+        Assert.Equal(Blocks.Rotor.RotateTo, own.ActionId);
         Assert.Equal(2, own.Arguments.Count);
         Assert.Equal(90, own.Arguments[0].Whole);
         Assert.Equal(2.5, own.Arguments[1].Real);

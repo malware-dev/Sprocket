@@ -112,7 +112,7 @@ Then the structural questions, in this order, because the early ones invalidate 
 
 1. **Was an existing surface reinvented?** A new fault, status, reading or question about a block is
    a new *kind of thing*, never a new *mechanism*. `SequenceFault` and `SequenceProblem` report what
-   is wrong with a sequence and which step. `IBlockExtension` holds knowledge about a kind of block.
+   is wrong with a sequence and which step. `Capability` holds knowledge about a kind of block.
    `Offer` is what a block declares. `Field` is what a value asks for. `Features/Sentences/` decides how a
    sentence is composed. The tell is the feeling of designing a way to carry information from A to B.
 2. **Does every new type belong where it was put?** A UI type that names nothing of Sprocket belongs in

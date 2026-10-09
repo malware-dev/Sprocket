@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.World;
 using SpaceEngineers.Game.ModAPI;
 
-namespace Sprocket.Host.SpaceEngineers.World
+namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>
     /// A sound block, which plays the sound a step chooses from the game's own list.
@@ -13,21 +14,17 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Playing is not waited for. A dedicated server plays no sound at all and nothing tells a mod when
     /// one has finished, so there is nothing to wait on.
     /// </remarks>
-    public sealed class SoundExtension : IBlockExtension
+    public sealed class Speaker : Capability
     {
         /// <summary>Playing a chosen sound, which is Sprocket's own.</summary>
         public const string Play = "play";
 
+        static readonly Doing Plays = Doing.Of<IMySoundBlock, Chosen>(Chosen.Read, Played);
+
         /// <inheritdoc />
-        public bool Claims(IMyTerminalBlock block)
+        public override bool Claims(IMyTerminalBlock block)
         {
             return block is IMySoundBlock;
-        }
-
-        /// <summary>Nothing to arrange: this block's events fire when they fire.</summary>
-        public bool Raises(IMyTerminalBlock block, string eventId, string key)
-        {
-            return true;
         }
 
         /// <inheritdoc />
@@ -35,9 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The game's own play is kept out of the list: it plays whichever sound was left selected,
         /// which is the one thing a step choosing its sound exists to avoid.
         /// </remarks>
-        public void Describe(EntityKind kind, IMyTerminalBlock block)
+        public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction(Play, "play", null, Sound(block)).In(Category.Sound)
+            kind.WithAction(Play, "play", Plays, AskedSound(block)).In(Category.Sound)
                 .Hiding("PlaySound");
         }
 
@@ -49,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// loaded. Where none are loaded - the test harness - the block's own list of ids, each
         /// named by itself.
         /// </remarks>
-        static Field Sound(IMyTerminalBlock block)
+        static Field AskedSound(IMyTerminalBlock block)
         {
             var words = new List<string>();
             var means = new List<string>();
@@ -85,60 +82,26 @@ namespace Sprocket.Host.SpaceEngineers.World
             return sound;
         }
 
-        /// <inheritdoc />
-        public bool TryRead(IMyTerminalBlock block, string propertyId, out EntityValue value)
+        /// <summary>Plays the sound a step chose, or the one left selected where it chose none.</summary>
+        static void Played(IMySoundBlock sounds, Chosen chosen, Recall seen)
         {
-            value = default(EntityValue);
-            return false;
-        }
-
-        /// <inheritdoc />
-        public bool TryInvoke(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            var sounds = block as IMySoundBlock;
-            if (sounds == null || actionId != Play)
-                return false;
-
-            if (arguments != null && arguments.Count > 0 && arguments[0].Text.Length > 0)
-                sounds.SelectedSound = arguments[0].Text;
+            if (chosen.Sound.Length > 0)
+                sounds.SelectedSound = chosen.Sound;
 
             sounds.Play();
-            return true;
         }
 
-        /// <summary>Nothing to add to the floor: whether a sound is playing is known only where it is heard.</summary>
-        public Status StatusOf(IMyTerminalBlock block)
+        /// <summary>The sound a step chose.</summary>
+        sealed class Chosen
         {
-            return Status.None;
-        }
+            /// <summary>The sound's id, or empty where the step chose none.</summary>
+            public string Sound = "";
 
-        /// <inheritdoc />
-        public bool Done(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            return false;
-        }
-
-        /// <inheritdoc />
-        public Trouble TroubleWith(IMyTerminalBlock block, string actionId, IList<Literal> arguments, string stateId)
-        {
-            return Trouble.None;
-        }
-
-        /// <inheritdoc />
-        public bool IsBusy(IMyTerminalBlock block)
-        {
-            return false;
-        }
-
-        /// <summary>Nothing: a sound is never waited on, so no run ends with one in flight.</summary>
-        public void Stop(IMyTerminalBlock block, string actionId)
-        {
-        }
-
-        /// <inheritdoc />
-        public int Expected(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
-        {
-            return GridEntity.Unestimated;
+            /// <summary>The sound a step playing one was given.</summary>
+            public static Chosen Read(IList<Literal> arguments)
+            {
+                return new Chosen { Sound = arguments != null && arguments.Count > 0 ? arguments[0].Text ?? "" : "" };
+            }
         }
     }
 }

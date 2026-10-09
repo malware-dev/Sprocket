@@ -309,7 +309,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var runner = Get(sequence, instance);
                 if (runner != null)
-                    runner.Triggered(_world, _bindings, CurrentTick);
+                    runner.Triggered(_bindings, CurrentTick);
 
                 return;
             }
@@ -317,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var alone = Alone(system, trigger);
             var acting = alone == null ? null : Get(alone, instance);
             if (acting != null)
-                acting.Triggered(_world, _bindings, CurrentTick);
+                acting.Triggered(_bindings, CurrentTick);
         }
 
         static long Key(int sequenceId, int instanceNumber)
@@ -333,7 +333,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             var runner = Get(sequence);
             if (runner != null)
-                runner.Call(_world, _bindings, CurrentTick, Live);
+                runner.Call(_bindings, CurrentTick, Live);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             var runner = Get(sequence, instance);
             if (runner != null)
-                runner.Call(_world, _bindings, CurrentTick, Live, byHand);
+                runner.Call(_bindings, CurrentTick, Live, byHand);
         }
 
         /// <summary>

@@ -5,22 +5,17 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Something that can happen to an entity, and which a rule can listen for.
     /// </summary>
     /// <remarks>
-    /// An edge on one of the entity's properties: the moment its reading changes. The same
-    /// property backs the conditions somebody writes about it - "only if the door is open" -
-    /// so a host describes a reading once and gets both the moment and the situation from it.
-    ///
-    /// Edges are for readings that turn on and off, which today means flags. What the
-    /// equivalent is for a number - crossing a threshold, moving at all - is not decided, and
-    /// a host declaring an event on a numeric property is declaring something core cannot
-    /// currently watch.
+    /// An edge on a flag read off the block: the moment the reading changes. The same reading
+    /// backs the conditions somebody writes about it - "only if the door is open" - so a block
+    /// is read one way for both the moment and the situation.
     /// </remarks>
     public sealed class EntityEvent
     {
-        /// <summary>The moment <paramref name="id" />: <paramref name="propertyId" /> crossing <paramref name="edge" />, read in a sentence as <paramref name="text" />.</summary>
-        public EntityEvent(string id, string propertyId, Edge edge, string text)
+        /// <summary>The moment <paramref name="id" />: <paramref name="flag" /> crossing <paramref name="edge" />, read in a sentence as <paramref name="text" />.</summary>
+        public EntityEvent(string id, Reading flag, Edge edge, string text)
         {
             Id = id;
-            PropertyId = propertyId;
+            Flag = flag;
             Edge = edge;
             Text = text;
         }
@@ -29,7 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityEvent(Sequences.ToolbarSlot at, string text)
         {
             Id = at.EventId;
-            PropertyId = "";
             Text = text;
             Answered = true;
         }
@@ -53,25 +47,25 @@ namespace Sprocket.Host.SpaceEngineers.World
         public bool Answered { get; private set; }
 
         /// <summary>Whether the block says when this may have happened, so it is looked for then rather than only on a cadence.</summary>
-        /// <remarks>See <see cref="IAnnounces" />. Set by the extension that knows the block raises it.</remarks>
+        /// <remarks>See <see cref="Capability.Listen" />. Set by the capability that knows the block raises it.</remarks>
         public bool Announced { get; private set; }
 
-        /// <summary>The flag that, while it reads true, rules this moment out, so the block need not be looked at then; empty where nothing does.</summary>
+        /// <summary>The flag that, while it reads true, rules this moment out, so the block need not be looked at then; null where nothing does.</summary>
         /// <remarks>
         /// For a moment the block does not announce, where it does announce when the moment becomes possible: a door
         /// says when it starts opening and when it has closed, and only between the two can it start closing. While every
         /// block watched reads this true, the moment is looked for only when one of them announces a change; otherwise on
         /// its cadence.
         /// </remarks>
-        public string RuledOutBy { get; private set; } = "";
+        public Reading RuledOutBy { get; private set; }
 
         /// <summary>Why this moment is looked for on a cadence, where the block neither announces it nor anything that rules it out; empty where it is watched another way.</summary>
         public string LookedBecause { get; private set; } = "";
 
-        /// <summary>The property on the entity this event watches.</summary>
-        public string PropertyId { get; private set; }
+        /// <summary>The flag this moment is a change in, or null for a signal.</summary>
+        public Reading Flag { get; private set; }
 
-        /// <summary>Which transition of <see cref="PropertyId"/> fires this event.</summary>
+        /// <summary>Which change in <see cref="Flag" /> this moment is.</summary>
         public Edge Edge { get; private set; }
 
         /// <summary>
@@ -95,10 +89,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             Announced = true;
         }
 
-        /// <summary>Says <paramref name="propertyId" />, while it reads true, rules this moment out.</summary>
-        public void RuleOutBy(string propertyId)
+        /// <summary>Says <paramref name="flag" />, while it reads true, rules this moment out.</summary>
+        public void RuleOutBy(Reading flag)
         {
-            RuledOutBy = propertyId;
+            RuledOutBy = flag;
         }
 
         /// <summary>Says this moment is looked for on a cadence, and <paramref name="reason" /> why nothing better is possible.</summary>
