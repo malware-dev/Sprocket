@@ -51,10 +51,16 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public static GlyphAtlas Load(string pageFile)
         {
+            return Load("white", pageFile);
+        }
+
+        /// <summary>Loads the page a font file in the game's font folder <paramref name="folder" /> names, or answers null where it cannot be had.</summary>
+        public static GlyphAtlas Load(string folder, string pageFile)
+        {
             if (string.IsNullOrEmpty(pageFile))
                 return null;
 
-            string relative = "Fonts/white/" + pageFile;
+            string relative = "Fonts/" + folder + "/" + pageFile;
             string png;
 
             try

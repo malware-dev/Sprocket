@@ -70,6 +70,17 @@ namespace Sprocket.Sim
 
             // A markdown file drawn by the rich text element, in the game's font, for looking at what it can do:
             // --rich <file.md> <picture.png> <width> [tip|description|codex] [strong=RRGGBB] [emphasis=RRGGBB] [link=RRGGBB] [align=left|center|right] [fit=<height>]
+            // A text panel's screen as the rich text app shows an empty panel, the full text or the brief one:
+            // --panel <full.md> <brief.md> <picture.png> <width> <height> [ink=RRGGBB] [screen=RRGGBB] [fit] [code=<font>]
+            if (args.Length > 5 && args[0] == "--panel")
+            {
+                Console.WriteLine(args[3] + ": " + PanelShot.Save(args[3], File.ReadAllText(args[1]), File.ReadAllText(args[2]),
+                    float.Parse(args[4], CultureInfo.InvariantCulture), float.Parse(args[5], CultureInfo.InvariantCulture),
+                    Hex(args, "ink="), Hex(args, "screen="), Array.IndexOf(args, "fit") > 0,
+                    Text(args, "code=")));
+                return;
+            }
+
             if (args.Length > 3 && args[0] == "--rich")
             {
                 var wide = float.Parse(args[3], CultureInfo.InvariantCulture);
@@ -192,6 +203,13 @@ namespace Sprocket.Sim
 
             var rgb = int.Parse(given.Substring(name.Length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
             return new VRageMath.Color((rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255);
+        }
+
+        /// <summary>What follows <paramref name="name" /> in the argument starting with it, or null where none does.</summary>
+        static string Text(string[] args, string name)
+        {
+            var given = Array.Find(args, a => a.StartsWith(name, StringComparison.Ordinal));
+            return given == null ? null : given.Substring(name.Length);
         }
 
         /// <summary>The number an argument starting <paramref name="name" /> gives, or zero where none does.</summary>

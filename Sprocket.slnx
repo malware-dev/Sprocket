@@ -4,6 +4,7 @@
     <Project Path="src/Maltek.Sans/Maltek.Sans.csproj" />
     <Project Path="src/SpaceEngineers.FontStyles/SpaceEngineers.FontStyles.csproj" />
     <Project Path="src/Maltek.Symbols/Maltek.Symbols.csproj" />
+    <Project Path="src/RichTextPanels/RichTextPanels.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers/Sprocket.Host.SpaceEngineers.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers.Sim/Sprocket.Host.SpaceEngineers.Sim.csproj" />
     <Project Path="src/Sprocket.Localization.Generator/Sprocket.Localization.Generator.csproj" />

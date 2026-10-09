@@ -30,6 +30,9 @@ namespace Sprocket.Sim.Simulation
     /// </remarks>
     public sealed class Surface : FrameworkElement
     {
+        /// <summary>The name the game knows its monospace face by, as a text panel draws code in it.</summary>
+        public const string GameMonospace = "Monospace";
+
         readonly ScreenSpaceDevice _device = new ScreenSpaceDevice();
         readonly FallbackFonts _shapes;
 
@@ -127,6 +130,18 @@ namespace Sprocket.Sim.Simulation
                 _ours[font] = metrics;
                 _ourPages[font] = GlyphAtlas.FromDds(Path.Combine(ModFonts.Folder, font + "-0.dds"));
                 fonts = fonts.And(font, metrics);
+            }
+
+            // The game's own monospace face, which a text panel draws code in. Only its first page is read: it holds every
+            // character code is written in, and the rest of the face's pages hold letters no screen here draws.
+            var mono = SeFontMetrics.LoadFrom(_device, GameContent.Resolve(Path.Combine("Fonts", "monospace", "FontDataPA.xml")),
+                GameContent.HasGame ? "the game" : "cache", GameContent.HasGame);
+            var monoPage = mono == null ? null : GlyphAtlas.Load("monospace", mono.PageFile);
+            if (monoPage != null)
+            {
+                _ours[GameMonospace] = mono;
+                _ourPages[GameMonospace] = monoPage;
+                fonts = fonts.And(GameMonospace, mono);
             }
 
             _device.Fonts = fonts;

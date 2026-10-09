@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <EntityComponents>
+        <!--
+        Claims the keys a panel keeps its Rich Text settings under, in the block's mod storage. The game writes out only
+        the keys some mod has claimed here and drops the rest at save.
+
+        The first GUID must match Vertical.Key exactly and the second Fitting.Key, and neither must ever change: a
+        different one reads as every panel in the world set to the top, or set back to its font size.
+        -->
+        <EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
+            <Id>
+                <TypeId>ModStorageComponent</TypeId>
+                <SubtypeId>MalwareRichText</SubtypeId>
+            </Id>
+            <RegisteredStorageGuids>
+                <guid>5A66D669-D166-43D3-8E74-FF0C7E280C30</guid>
+                <guid>BEBE4495-8A4E-4444-8594-A534F5B5A0FF</guid>
+            </RegisteredStorageGuids>
+        </EntityComponent>
+    </EntityComponents>
+</Definitions>
