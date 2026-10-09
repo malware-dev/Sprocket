@@ -64,6 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Where the arguments are given.</summary>
         public FieldSet Form => _form;
 
+        /// <summary>Nothing in it is drawn past its edge: a list or a question it opens hangs in a window of its own.</summary>
+        protected override bool Clips => true;
+
         /// <summary>Why the pick cannot be finished as it stands, or empty.</summary>
         public string Why
         {

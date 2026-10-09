@@ -101,8 +101,10 @@ matters is cost per statement across the headroom table: flat means linear. Re-r
 language grows - expressions and branching will multiply program sizes - and before believing any claim
 that a change to storage made it faster.
 
-A script is a list of things done to the screen in order: a bare `x y` pair is a press, and then
-`move x y`, `drag x y x y`, `scroll x y n`, `tick n`, `type "words"`, `clear`, `enter`, `escape`.
+A script is a list of things done to the screen in order: `press <text>` presses whatever says it,
+a symbol included, and then `move x y`, `drag x y x y`, `scroll x y n`, `tick n`, `type "words"`,
+`clear`, `enter`, `escape`. A bare `x y` pair is a press by position, which breaks the moment a
+layout moves, so a script that is kept presses by name.
 Shots default to 1920x1080 because that is the size a letter actually lands at for a player.
 
 **The simulator has been wrong before, and when it disagrees with the game the simulator is what is
@@ -110,10 +112,14 @@ broken.** It has confirmed three wrong answers by returning line height where th
 height, and by lacking `==` on its substitute `VRageMath` types. Before trusting it on a measurement,
 check it against `--content` or the game itself.
 
-**Reference suite.** The cleanup's behavioural proof is a checked-in list of named scripts, one per
-screen and state worth holding still, shot before the pass starts and re-shot after each folder. A
-pixel difference is a defect in the cleanup, not a thing to explain. These stay in the repository
-afterwards as the UI regression tests.
+**The UI's guard is the presentation tests.** Every change to a screen, and every block given
+members, comes with tests that press and read by name and assert what matters on that screen; a
+test about particular blocks fits a rig of its own with `Screen.On(rig)`. The harness draws the
+game's font with stand-in widths, so a test about what fits picks words that fail under any font.
+
+**Reference suite.** A handful of screens meant to hold still, in `tests/Reference/suite.txt`,
+pressed by name and dumped whole. A cleanup shoots them before it starts and after each folder,
+and a difference is a defect in the cleanup, not a thing to explain.
 
 ## Values that are transcriptions, not choices
 

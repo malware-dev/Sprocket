@@ -49,7 +49,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var button = element as Button;
             var label = element as Label;
-            var said = button != null ? button.Text : label != null ? label.Text : null;
+            var glyph = element as Lumel.Images.Glyph;
+            var said = button != null ? button.Text : label != null ? label.Text : glyph != null ? glyph.Symbol : null;
             if (said == text || said == StatusRow.Plus + text)
             {
                 var bounds = element.Bounds;

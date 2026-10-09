@@ -1,0 +1,119 @@
+window        1920 x 1080
+safe gui area {X:240 Y:0 W:1440 H:1080}
+UI size       {X:1440 Y:1080}
+screen bounds {X:-240 Y:0 W:1920 H:1080}
+on screen     Automation for Test Rig
+
+000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
+001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+002  SetClip    {X:256 Y:53 W:1172 H:40}
+003  Text       at {X:256 Y:53.39666} scale 1.111  #A2C3CDFF  "Automation for"
+004  Text       at {X:430.6234 Y:53.39666} scale 1.111  #DCF5FDFF  "Test Rig"
+005  Text       at {X:526.9529 Y:59.01406} scale 0.401  #85A1A9FF  "p"
+006  ClearClip  
+007  Sprite     Sprocket_Fill         {X:1436 Y:57 W:32 H:32}  #3C4C52FF
+008  Text       at {X:1447.325 Y:55.81107} scale 0.972  #DCF5FDFF  "?"
+009  Text       at {X:1482.2 Y:61.51406} scale 0.401  #5F7278FF  "u"
+010  Text       at {X:1522.2 Y:61.51406} scale 0.401  #5F7278FF  "r"
+011  Sprite     Sprocket_Fill         {X:1556 Y:57 W:68 H:32}  #29363EFF
+012  Sprite     Sprocket_Fill         {X:1556 Y:57 W:68 H:1}  #3F474FFF
+013  Sprite     Sprocket_Fill         {X:1556 Y:88 W:68 H:1}  #3F474FFF
+014  Sprite     Sprocket_Fill         {X:1556 Y:57 W:1 H:32}  #3F474FFF
+015  Sprite     Sprocket_Fill         {X:1623 Y:57 W:1 H:32}  #3F474FFF
+016  Text       at {X:1572.043 Y:63.05432} scale 0.556  #DCF5FDFF  "Library"
+017  Text       at {X:1638.156 Y:61.51406} scale 0.401  #A2C3CDFF  "x"
+018  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+019  SetClip    {X:256 Y:118 W:1408 H:902}
+020  Sprite     Sprocket_Fill         {X:260 Y:143 W:107 H:1}  #4FC3F7FF
+021  Text       at {X:260 Y:123.6399} scale 0.694  #4FC3F7FF  "LOGIC SYSTEMS"
+022  Text       at {X:264 Y:159.2255} scale 0.833  #A2C3CDFF  "Nothing automated here yet."
+023  Text       at {X:272 Y:195.2255} scale 0.833  #A2C3CDFF  "+ logic system"
+024  ClearClip  
+025  Sprite     Sprocket_Shadow       {X:946 Y:96 W:24 H:24}  #000000AA
+026  Sprite     Sprocket_Shadow       {X:1670 Y:96 W:24 H:24}  #000000AA
+027  Sprite     Sprocket_Shadow       {X:946 Y:980 W:24 H:24}  #000000AA
+028  Sprite     Sprocket_Shadow       {X:1670 Y:980 W:24 H:24}  #000000AA
+029  Sprite     Sprocket_Shadow       {X:970 Y:96 W:700 H:24}  #000000AA
+030  Sprite     Sprocket_Shadow       {X:970 Y:980 W:700 H:24}  #000000AA
+031  Sprite     Sprocket_Shadow       {X:946 Y:120 W:24 H:860}  #000000AA
+032  Sprite     Sprocket_Shadow       {X:1670 Y:120 W:24 H:860}  #000000AA
+033  Sprite     Sprocket_Shadow       {X:970 Y:120 W:700 H:860}  #000000AA
+034  Sprite     Sprocket_Fill         {X:964 Y:110 W:700 H:860}  #141B20FF
+035  Sprite     Sprocket_Fill         {X:964 Y:110 W:700 H:1}  #5B737BFF
+036  Sprite     Sprocket_Fill         {X:964 Y:969 W:700 H:1}  #5B737BFF
+037  Sprite     Sprocket_Fill         {X:964 Y:110 W:1 H:860}  #5B737BFF
+038  Sprite     Sprocket_Fill         {X:1663 Y:110 W:1 H:860}  #5B737BFF
+039  Sprite     Sprocket_Fill         {X:964 Y:110 W:700 H:48}  #1B242AFF
+040  Text       at {X:982.1563 Y:120.3021} scale 0.401  #5F7278FF  "<"
+041  Text       at {X:1022.156 Y:120.3021} scale 0.401  #5F7278FF  ">"
+042  Sprite     Sprocket_Fill         {X:1056 Y:118 W:80 H:32}  #29363EFF
+043  Sprite     Sprocket_Fill         {X:1056 Y:118 W:80 H:1}  #3F474FFF
+044  Sprite     Sprocket_Fill         {X:1056 Y:149 W:80 H:1}  #3F474FFF
+045  Sprite     Sprocket_Fill         {X:1056 Y:118 W:1 H:32}  #3F474FFF
+046  Sprite     Sprocket_Fill         {X:1135 Y:118 W:1 H:32}  #3F474FFF
+047  Text       at {X:1072 Y:124.3423} scale 0.556  #DCF5FDFF  "Contents"
+048  Text       at {X:1143.657 Y:119.5135} scale 0.833  #DCF5FDFF  "Welcome to Sprocket Automation"
+049  Text       at {X:1626.156 Y:122.8021} scale 0.401  #A2C3CDFF  "x"
+050  Sprite     Sprocket_Fill         {X:964 Y:158 W:700 H:1}  #5B737BFF
+051  SetClip    {X:964 Y:159 W:700 H:811}
+052  Sprite     Sprocket_Fill         {X:984 Y:499 W:648 H:1}  #5B737BFF
+053  Sprite     Sprocket_Fill         {X:984 Y:620 W:648 H:1}  #5B737BFF
+054  Sprite     Sprocket_Fill         {X:984 Y:741 W:648 H:1}  #5B737BFF
+055  Sprite     Sprocket_Fill         {X:984 Y:862 W:648 H:1}  #5B737BFF
+056  Sprite     Sprocket_Fill         {X:984 Y:983 W:648 H:1}  #5B737BFF
+057  Sprite     Sprocket_Fill         {X:1187 Y:646 W:98 H:1}  #4FC3F7FF
+058  Sprite     Sprocket_Fill         {X:1388 Y:767 W:36 H:1}  #4FC3F7FF
+059  Sprite     Sprocket_Fill         {X:1080 Y:787 W:84 H:1}  #4FC3F7FF
+060  Sprite     Sprocket_Fill         {X:1542 Y:888 W:50 H:1}  #4FC3F7FF
+061  Sprite     Sprocket_Fill         {X:1003 Y:908 W:70 H:1}  #4FC3F7FF
+062  Sprite     Sprocket_Fill         {X:1275 Y:908 W:74 H:1}  #4FC3F7FF
+063  Sprite     Sprocket_Fill         {X:1243 Y:928 W:152 H:1}  #4FC3F7FF
+064  Sprite     Sprocket_Mark         {X:1180 Y:183 W:256 H:256}  #FFFFFFFF
+065  Text       at {X:1033.405 Y:450.8559} scale 1.389  #DCF5FDFF  "Welcome to Sprocket Automation"
+066  Text       at {X:984 Y:505.9279} scale 0.694  #A2C3CDFF  "Timer blocks and event controllers can make blocks act on their own, but each is"
+067  Text       at {X:984 Y:525.9279} scale 0.694  #A2C3CDFF  "set up by hand, for one set of blocks. The automation lets you describe a job"
+068  Text       at {X:984 Y:545.9279} scale 0.694  #A2C3CDFF  "once and use it wherever it is needed."
+069  Text       at {X:984 Y:580.6847} scale 1.111  #DCF5FDFF  "Describe a job once"
+070  Text       at {X:984 Y:626.9279} scale 0.694  #A2C3CDFF  "A job is described as a "
+071  Text       at {X:1167.901 Y:630.6016} scale 0.301  #A2C3CDFF  "y"
+072  Text       at {X:1182.784 Y:626.9279} scale 0.694  #A2C3CDFF  " "
+073  Text       at {X:1187.108 Y:626.9279} scale 0.694  #4FC3F7FF  "logic system"
+074  Text       at {X:1285.487 Y:626.9279} scale 0.694  #A2C3CDFF  ", which says what happens, step by step,"
+075  Text       at {X:984 Y:646.9279} scale 0.694  #A2C3CDFF  "and what starts it. For example, when the airlock's button is pressed, close the"
+076  Text       at {X:984 Y:666.9279} scale 0.694  #A2C3CDFF  "inner door, depressurize the airlock and open the outer door."
+077  Text       at {X:984 Y:701.6847} scale 1.111  #DCF5FDFF  "Run it in many places"
+078  Text       at {X:984 Y:747.9279} scale 0.694  #A2C3CDFF  "A logic system doesn't name your blocks. It names "
+079  Text       at {X:1387.784 Y:747.9279} scale 0.694  #4FC3F7FF  "slots"
+080  Text       at {X:1424 Y:747.9279} scale 0.694  #A2C3CDFF  ", such as "
+081  Text       at {X:1498.595 Y:747.9279} scale 0.694  #A2C3CDFF  "the inner door"
+082  Text       at {X:1609.405 Y:747.9279} scale 0.694  #A2C3CDFF  ","
+083  Text       at {X:984 Y:767.9279} scale 0.694  #A2C3CDFF  "and each "
+084  Text       at {X:1060.874 Y:771.6016} scale 0.301  #A2C3CDFF  "I"
+085  Text       at {X:1075.757 Y:767.9279} scale 0.694  #A2C3CDFF  " "
+086  Text       at {X:1080.081 Y:767.9279} scale 0.694  #4FC3F7FF  "installation"
+087  Text       at {X:1163.865 Y:767.9279} scale 0.694  #A2C3CDFF  " fills them with real blocks. So one airlock logic system"
+088  Text       at {X:984 Y:787.9279} scale 0.694  #A2C3CDFF  "runs every airlock on the ship, and fixing it fixes all of them."
+089  Text       at {X:984 Y:822.6847} scale 1.111  #DCF5FDFF  "Take it with you"
+090  Text       at {X:984 Y:868.9279} scale 0.694  #A2C3CDFF  "Because the job is kept apart from the blocks, it can travel. Kept in the "
+091  Text       at {X:1542.378 Y:868.9279} scale 0.694  #4FC3F7FF  "library"
+092  Text       at {X:1592.108 Y:868.9279} scale 0.694  #A2C3CDFF  " as a"
+093  Text       at {X:984.1172 Y:892.6016} scale 0.301  #A2C3CDFF  "b"
+094  Text       at {X:999 Y:888.9279} scale 0.694  #A2C3CDFF  " "
+095  Text       at {X:1003.324 Y:888.9279} scale 0.694  #4FC3F7FF  "blueprint"
+096  Text       at {X:1073.054 Y:888.9279} scale 0.694  #A2C3CDFF  ", it can be put on another "
+097  Text       at {X:1274.676 Y:888.9279} scale 0.694  #4FC3F7FF  "construct"
+098  Text       at {X:1348.73 Y:888.9279} scale 0.694  #A2C3CDFF  ", and whoever installs it only"
+099  Text       at {X:984 Y:908.9279} scale 0.694  #A2C3CDFF  "chooses their own blocks on the "
+100  Text       at {X:1243.459 Y:908.9279} scale 0.694  #4FC3F7FF  "configuration panel"
+101  Text       at {X:1395.892 Y:908.9279} scale 0.694  #A2C3CDFF  "."
+102  Text       at {X:984 Y:943.6847} scale 1.111  #DCF5FDFF  "Where to start"
+103  Text       at {X:984 Y:989.9279} scale 0.694  #A2C3CDFF  "This screen lists every logic system on this construct. To build your own, start"
+104  Text       at {X:984 Y:1009.928} scale 0.694  #A2C3CDFF  "with the logic system page."
+105  Sprite     Sprocket_Fill         {X:1652 Y:159 W:12 H:733}  #5F7278FF
+106  ClearClip  
+107  Sprite     Sprocket_Fill         {X:1182 Y:89 W:260 H:36}  #1B242AFF
+108  Sprite     Sprocket_Fill         {X:1182 Y:89 W:260 H:1}  #5B737BFF
+109  Sprite     Sprocket_Fill         {X:1182 Y:124 W:260 H:1}  #5B737BFF
+110  Sprite     Sprocket_Fill         {X:1182 Y:89 W:1 H:36}  #5B737BFF
+111  Sprite     Sprocket_Fill         {X:1441 Y:89 W:1 H:36}  #5B737BFF
+112  Text       at {X:1194.453 Y:94.6399} scale 0.694  #A2C3CDFF  "What this screen is for, in the codex"

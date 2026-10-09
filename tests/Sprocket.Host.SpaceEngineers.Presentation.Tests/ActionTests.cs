@@ -19,10 +19,10 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <remarks>
 /// Sprocket knows three families of block by hand, and a ship is made of hundreds. Everything else
 /// had a switch and nothing more: a piston could not be extended, a connector could not be
-/// connected, a tank could not stockpile. No number of hand-written extensions closes that, because
+/// connected, a tank could not stockpile. No number of hand-written capabilities closes that, because
 /// mods keep arriving and nobody can write one for a block that does not exist yet.
 /// <para>
-/// So the block is asked. What an extension is for is what a block <em>is</em> - its states and its
+/// So the block is asked. What a capability is for is what a block <em>is</em> - its states and its
 /// moments, which no action can report - and saying an act better than the terminal does.
 /// </para>
 /// </remarks>
@@ -79,7 +79,7 @@ public class ActionTests
     }
 
     /// <summary>
-    /// What an extension stands in for is in the terminal view, under the name the block gives it.
+    /// What a capability stands in for is in the terminal view, under the name the block gives it.
     /// </summary>
     /// <remarks>
     /// Replaced is not gone: a use nobody anticipated is still a use. The two views are disjoint, so
@@ -284,7 +284,7 @@ public class ActionTests
     /// The tank declares a toggle of its own, and nothing has said either half, so all three stand.
     /// </summary>
     /// <remarks>
-    /// Only an extension hides anything, by standing in for the game's own form of what it does.
+    /// Only a capability hides anything, by standing in for the game's own form of what it does.
     /// Where nothing stands in, what the block offers is what the block offers.
     /// </remarks>
     [Fact]
@@ -552,5 +552,55 @@ public class ActionTests
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
         Assert.Equal(2, Assert.Single(act.Arguments).Whole);
         Assert.True(screen.Shows("Left"), "the step does not say what was chosen");
+    }
+
+    /// <summary>The fields of a form end together against the right, whatever their widths: a dial with its box, a number, a list.</summary>
+    [Fact]
+    public void TheFieldsOfAFormEndTogether()
+    {
+        var rig = Rig.Demo();
+        rig.Rotor(30, "Rotor");
+        var screen = Screen.On(rig);
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Rotor");
+        screen.Editor.PressChoice("Rotate to");
+        screen.Run(2);
+
+        var fields = screen.Editor.Pick().Arguments!.Form.Fields;
+        Assert.Equal(3, fields.Count);
+        var ends = fields.Select(field => ((Lumel.Element)field).Bounds).Select(at => at.X + at.Width).ToList();
+        Assert.All(ends, end => Assert.Equal(ends[0], end, 1));
+    }
+
+    /// <summary>
+    /// Three words too long for the room beside their label fold into a list, where three short ones stay a row.
+    /// </summary>
+    /// <remarks>
+    /// A rotor turns directly, clockwise or counter-clockwise, and in the game's own letters the three are wider than the
+    /// column: a row of them ran past its edge. The list is one line whatever its words. These three are long enough not
+    /// to fit in any letters, so the harness's stand-in widths cannot let them through.
+    /// </remarks>
+    [Fact]
+    public void AFewWordsTooLongForTheirRoomFoldIntoAList()
+    {
+        var rig = Rig.Demo();
+        // A definition of its own, since a kind is described once per definition from the first block of it seen.
+        rig.Weld(new Plain(30, "Mood Light", typeof(Sandbox.Common.ObjectBuilders.MyObjectBuilder_InteriorLight),
+                "MoodLight", "Mood Light"))
+            .Carrying("Mood", "Mood", "brightly lit all the way round", "0", "dimmed down to a gentle glow", "1",
+                "flickering as if about to fail", "2");
+        var screen = Screen.On(rig);
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Mood Light");
+        screen.Editor.PressChoice("Set Mood");
+        screen.Run(2);
+
+        Assert.True(screen.Shows("Mood"), "the value is not asked for");
+        Assert.False(screen.Shows("dimmed down to a gentle glow"), "the three are a row too wide for the column");
+        Assert.False(screen.Shows("flickering as if about to fail"), "the three are a row too wide for the column");
     }
 }

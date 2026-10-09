@@ -58,6 +58,12 @@ namespace Sprocket.Sim.Simulation
             return new EditorScene(Ship.On(store));
         }
 
+        /// <summary>A screen on a construct of <paramref name="rig" />'s blocks that remembers nothing, for a test about particular blocks.</summary>
+        public static EditorScene On(Rig rig)
+        {
+            return new EditorScene(Ship.On(rig));
+        }
+
         EditorScene(Ship ship)
         {
             _ship = ship;

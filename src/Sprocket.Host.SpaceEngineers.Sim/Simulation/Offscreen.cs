@@ -9,6 +9,7 @@ using Lumel.Images;
 // ReSharper disable once RedundantUsingDirective
 using Sprocket.Sim.Content;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Sim.Machine;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -31,6 +32,18 @@ namespace Sprocket.Sim.Simulation
 
         /// <summary>A frame of the editor on a block holding <paramref name="holding" />, or nothing for null.</summary>
         public Offscreen(float windowWidth, float windowHeight, string holding = null)
+            : this(windowWidth, windowHeight, delegate { return holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding); })
+        {
+        }
+
+        /// <summary>A frame of the editor on a construct of <paramref name="rig" />'s blocks that remembers nothing.</summary>
+        public Offscreen(float windowWidth, float windowHeight, Rig rig)
+            : this(windowWidth, windowHeight, delegate { return EditorScene.On(rig); })
+        {
+        }
+
+        /// <summary>A frame of the editor on the scene <paramref name="scene" /> makes, made once the device it draws to is in place.</summary>
+        Offscreen(float windowWidth, float windowHeight, System.Func<EditorScene> scene)
         {
             _width = windowWidth;
             _height = windowHeight;
@@ -53,7 +66,7 @@ namespace Sprocket.Sim.Simulation
             _device.ViewportSize = new Vector2(windowWidth, windowHeight);
 
             _graphics = new ScreenSpaceGraphics(_device, MyScreenSpaceLayer.AboveHud, Materials.Fill, new MarkImages(new ScreenSpaceImages(_device)));
-            _scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
+            _scene = scene();
         }
 
         /// <summary>One of the faces this mod requires, or null where the build did not carry it.</summary>

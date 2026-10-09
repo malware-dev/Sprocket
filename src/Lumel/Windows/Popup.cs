@@ -15,6 +15,9 @@ namespace Lumel.Windows
         /// <summary>Which side of its anchor it opens on: below it unless told otherwise.</summary>
         public PopupSide Side { get; set; }
 
+        /// <summary>Whether, hanging below its anchor, it is never narrower than the anchor, as a drop-down's list is never narrower than its line.</summary>
+        public bool Flush { get; set; }
+
         /// <summary>Hangs it open over the screen or window its anchor is on; nothing happens while the anchor is on neither.</summary>
         public void Open()
         {
@@ -54,7 +57,7 @@ namespace Lumel.Windows
             return new Vector2(area.Width, tall > 0f ? tall : 0f);
         }
 
-        /// <summary>On its side of the anchor, or the opposite side where the area has no room for it there, and kept inside the area either way.</summary>
+        /// <summary>On its side of the anchor, or the opposite side where the area has no room for it there, and kept inside the area either way; below a line, as wide as the line where it is <see cref="Flush" />.</summary>
         public override RectangleF Place(RectangleF area, Vector2 size)
         {
             if (Anchor == null)
@@ -74,6 +77,9 @@ namespace Lumel.Windows
             }
             else
             {
+                if (Flush && size.X < from.Width)
+                    size.X = from.Width;
+
                 x = from.X;
                 y = from.Y + from.Height + Gap;
                 if (y + size.Y > area.Y + area.Height)

@@ -348,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return new TypedField(Bounded(field), _submit);
         }
 
-        /// <summary>Puts a value's label and field on their line: a color across the whole of it, text across all the label leaves, anything else against the right.</summary>
+        /// <summary>Puts a value's label and field on their line: a color across the whole of it, text and a few words across all the label leaves, anything else against the right.</summary>
         void Lay(int at, IField field)
         {
             var element = (Element)field;
@@ -370,10 +370,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             if (color)
                 Place(element, at, 0, 3);
-            else if (field is TypedField && !Bounded(_wanted[at]))
+            else if (field is TypedField && !Bounded(_wanted[at]) || field is WordsField)
                 Place(element, at, 1, 2);
             else
+            {
+                // Against the right edge whatever its width, so the fields of a form end together.
+                element.Align = Align.Right;
                 Place(element, at, 2, 1);
+            }
         }
 
         void Place(Element element, int row, int column, int columns)

@@ -47,7 +47,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Style = Styles.ListLine;
             Focusable = true;
 
-            Children.Add(new Label { Style = Styles.ListWord }.As(out _said));
+            // The word takes what the line has spare, so the mark stands at its end whichever word is given.
+            Children.Add(new Label { Style = Styles.ListWord, Placement = Flex.Grow }.As(out _said));
             Children.Add(Fold());
 
             var rows = new VStack();
@@ -69,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             }
 
             var scroll = new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = rows };
-            var list = new Popup { Style = Styles.List, Anchor = this, Content = scroll };
+            var list = new Popup { Style = Styles.List, Anchor = this, Flush = true, Content = scroll };
 
             Command = new Relay(delegate
             {
@@ -131,7 +132,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             for (var i = 0; i < _spelled.Count; i++)
                 widest = Math.Max(widest, g.MeasureText(_said.Font, _spelled[i], _said.FontSize).X);
 
-            size.X = Math.Max(size.X, widest + Spacing + Mark);
+            // Exactly that, never the room it was offered: the word grows into whatever it is given when it is placed.
+            size.X = widest + Spacing + Mark;
             return size;
         }
 

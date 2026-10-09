@@ -1,3 +1,4 @@
+using Sprocket.Sim.Machine;
 using Sprocket.Sim.Simulation;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -11,8 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 /// <remarks>
 /// The same offscreen frame the reference dumps are made from, so a test and a dump are looking at
-/// one thing. Scripts are written the way they are written in tests/Reference/suite.txt: coordinates
-/// in UI units, and the words move, drag, scroll, tick, type, enter, escape and clear.
+/// one thing. Scripts are written the way they are written in tests/Reference/suite.txt: press by
+/// what the screen says, coordinates in UI units, and the words move, drag, scroll, tick, type, enter,
+/// escape and clear.
 /// </remarks>
 sealed class Screen
 {
@@ -26,6 +28,15 @@ sealed class Screen
     public static Screen Fresh(params string[] script)
     {
         var frame = new Offscreen(Width, Height);
+        frame.Play(Script.Parse(script, 0));
+
+        return new Screen(frame);
+    }
+
+    /// <summary>The editor on a construct of <paramref name="rig" />'s blocks, after <paramref name="script" />.</summary>
+    public static Screen On(Rig rig, params string[] script)
+    {
+        var frame = new Offscreen(Width, Height, rig);
         frame.Play(Script.Parse(script, 0));
 
         return new Screen(frame);

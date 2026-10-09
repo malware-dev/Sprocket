@@ -261,6 +261,33 @@ public class WindowLayerTests
             Assert.Equal(anchor.Bounds.X - 4f, popup.Bounds.X + popup.Bounds.Width, 1);
     }
 
+    /// <summary>A drop-down's list hangs no narrower than its line, however short its words; any other popup is as wide as what it holds.</summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ADropDownsListIsNeverNarrowerThanItsLine(bool flush)
+    {
+        var anchor = new Button { Text = "Line" };
+        var popup = new Popup
+        {
+            Anchor = anchor,
+            Flush = flush,
+            Placement = Fixed.Wide(40f),
+            Content = new VStack { Children = { new Button { Text = "A" }, new Button { Text = "B" } } }
+        };
+        var screen = new VStack { Children = { anchor } };
+        var layer = new WindowLayer();
+        layer.Covers(screen);
+        screen.Measure(new Recording(Area), new Vector2(Area.Width, Area.Height));
+        anchor.Arrange(new RectangleF(100f, 300f, 200f, 30f));
+
+        popup.Open();
+        layer.Draw(new Recording(Area), Area);
+
+        Assert.Equal(anchor.Bounds.X, popup.Bounds.X, 1);
+        Assert.Equal(flush ? 200f : 40f, popup.Bounds.Width, 1);
+    }
+
     /// <summary>A window whose style casts a shadow draws it before itself, reaching out past its edge; one whose style casts none draws nothing.</summary>
     [Theory]
     [InlineData(true)]

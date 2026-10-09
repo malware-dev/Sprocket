@@ -113,6 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Style = Styles.Menu,
                 Anchor = _kindLine,
                 Gap = 4f,
+                Flush = true,
                 Content = new Menu
                 {
                     Spacing = 4f,
