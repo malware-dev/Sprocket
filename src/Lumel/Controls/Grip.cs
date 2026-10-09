@@ -5,7 +5,10 @@ using VRageMath;
 namespace Lumel.Controls
 {
     /// <summary>The handle something is dragged by, such as a row or a window: six small squares, two across and three down.</summary>
-    /// <remarks>It takes the pointer itself while it can be carried, and says where it went.</remarks>
+    /// <remarks>
+    ///     It takes the pointer itself while it can be carried, and says where it went on the screen: what it is the
+    ///     handle of moves with the pointer, so the grip's own layout is no place to measure the pointer from.
+    /// </remarks>
     public class Grip : Element
     {
         const int Across = 2;
@@ -20,13 +23,13 @@ namespace Lumel.Controls
             Color = Color.White;
         }
 
-        /// <summary>Raised with where the pointer is when the grip is taken hold of.</summary>
+        /// <summary>Raised with where the pointer is on the screen when the grip is taken hold of.</summary>
         public event Action<Vector2> Taken;
 
-        /// <summary>Raised with where the pointer is as the grip is carried.</summary>
+        /// <summary>Raised with where the pointer is on the screen as the grip is carried.</summary>
         public event Action<Vector2> Carried;
 
-        /// <summary>Raised with where the pointer is when the grip is let go of.</summary>
+        /// <summary>Raised with where the pointer is on the screen when the grip is let go of.</summary>
         public event Action<Vector2> Dropped;
 
         /// <summary>The color of its squares.</summary>
@@ -71,7 +74,7 @@ namespace Lumel.Controls
         {
             var taken = Taken;
             if (taken != null)
-                taken(point);
+                taken(ToScreen(point));
         }
 
         /// <inheritdoc />
@@ -79,7 +82,7 @@ namespace Lumel.Controls
         {
             var carried = Carried;
             if (carried != null)
-                carried(point);
+                carried(ToScreen(point));
         }
 
         /// <inheritdoc />
@@ -87,7 +90,7 @@ namespace Lumel.Controls
         {
             var dropped = Dropped;
             if (dropped != null)
-                dropped(point);
+                dropped(ToScreen(point));
         }
 
         /// <inheritdoc />

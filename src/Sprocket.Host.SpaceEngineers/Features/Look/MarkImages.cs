@@ -80,8 +80,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             public Vector2 Size => new Vector2(Height, 1f);
 
             /// <inheritdoc />
-            /// <remarks>Measured again only where the room is a new height, which is once for every size of text it stands in.</remarks>
-            public void Draw(IGraphics g, RectangleF destination, Color tint)
+            /// <remarks>
+            /// Measured again only where the room is a new height, which is once for every size of text it stands in. Drawn
+            /// upright whatever its turn, since the screens draw text only upright.
+            /// </remarks>
+            public void Draw(IGraphics g, RectangleF destination, Color tint, float rotation)
             {
                 var size = destination.Height * Height;
                 if (size != _measuredAt)

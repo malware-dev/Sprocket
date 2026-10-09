@@ -5,6 +5,7 @@ using Lumel.Drawing;
 using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
+using Lumel.Screens;
 using Lumel.Text;
 using Lumel.Viewing;
 using Lumel.Windows;
@@ -25,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// hangs directly beneath it so that everything above the press stays exactly where the eye left it.
     /// </para>
     /// </remarks>
-    public sealed partial class EditorView
+    public sealed partial class EditorView : IScreenView
     {
         /// <summary>How wide one of the game's own screens is, as a share of the safe area.</summary>
         /// <remarks>
@@ -494,7 +495,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var wanted = Under(Pointer);
 
             var speaker = SayingAt(Pointer);
-            var tip = speaker == null ? null : speaker.TipAt(Pointer);
+            var tip = speaker == null ? null : speaker.TipAt(speaker.FromScreen(Pointer));
             _saying = tip == null ? null : tip.Document;
             _sayingArguments = tip == null ? null : tip.Arguments;
 

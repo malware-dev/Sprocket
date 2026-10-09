@@ -380,6 +380,19 @@ namespace Lumel
             return _transform.IsIdentity ? point : _transform.Undo(point, new Vector2(Bounds.X, Bounds.Y));
         }
 
+        /// <summary>Where <paramref name="point" />, as drawn on the screen, lies in this element's own layout: through the render transform of everything above it, and its own.</summary>
+        public Vector2 FromScreen(Vector2 point)
+        {
+            return Local(_parent == null ? point : _parent.FromScreen(point));
+        }
+
+        /// <summary>Where <paramref name="point" />, in this element's own layout, is drawn on the screen: the reverse of <see cref="FromScreen" />.</summary>
+        public Vector2 ToScreen(Vector2 point)
+        {
+            var drawn = _transform.IsIdentity ? point : _transform.Apply(point, new Vector2(Bounds.X, Bounds.Y));
+            return _parent == null ? drawn : _parent.ToScreen(drawn);
+        }
+
         void DrawBox(IGraphics g)
         {
             if (Background.A > 0)
@@ -585,7 +598,10 @@ namespace Lumel
         ///     Told that a press has begun on this at <paramref name="point" />, the <paramref name="presses" />th in quick
         ///     succession, with <paramref name="shift" /> and <paramref name="ctrl" /> saying whether those keys were held.
         /// </summary>
-        /// <remarks>The pointer's moves and its release come to this until it is released, wherever they are.</remarks>
+        /// <remarks>
+        ///     The pointer's moves and its release come to this until it is released, wherever they are. Every point a
+        ///     pointer handler is given is in this element's own layout, as <see cref="FromScreen" /> finds it.
+        /// </remarks>
         public virtual void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
         }

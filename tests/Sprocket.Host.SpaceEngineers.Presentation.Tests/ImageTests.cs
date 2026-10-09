@@ -85,11 +85,43 @@ public class ImageTests
         Assert.Equal("The logo", Assert.Single(Markdown.Parse("![The logo](Logo)").Blocks[0].Runs).Text);
     }
 
-    /// <summary>An image whose size is not a size, or whose brackets do not close, is the text it is.</summary>
+    /// <summary>An image may be turned, written in degrees clockwise after the locator, before or after its size.</summary>
+    [Theory]
+    [InlineData("![](Logo 90deg)", 90f, float.NaN)]
+    [InlineData("![](Logo =64 -45deg)", -45f, 64f)]
+    [InlineData("![](Logo 12.5deg =64x32)", 12.5f, 64f)]
+    [InlineData("![](Logo)", 0f, float.NaN)]
+    public void AnImageIsReadWithItsTurn(string source, float rotation, float width)
+    {
+        var image = Assert.IsType<ImageRun>(Assert.Single(Markdown.Parse(source).Blocks[0].Runs));
+
+        Assert.Equal(rotation, image.Picture.Rotation);
+        Assert.Equal(width, image.Picture.Width);
+    }
+
+    /// <summary>A turned image takes the room of its turned outline, and is drawn turned in the middle of it.</summary>
+    [Fact]
+    public void ATurnedImageTakesTheRoomOfItsOutline()
+    {
+        var easel = Laid("Fuel ![](Banner =40x20 90deg) low");
+
+        var drawn = Assert.Single(easel.Sprites, s => s.Material.String == "Banner");
+        var words = Word(easel, "low").Position.X - Word(easel, "Fuel").Position.X;
+        var plain = Laid("Fuel ![](Banner =40x20) low");
+        var unturned = Word(plain, "low").Position.X - Word(plain, "Fuel").Position.X;
+
+        Assert.Equal(MathHelper.PiOver2, drawn.Rotation, 3);
+        Assert.Equal(20f * easel.Pixels, unturned - words, 1f);
+    }
+
+    /// <summary>An image whose size is not a size, whose turn is not a turn, which says either twice, or whose brackets do not close, is the text it is.</summary>
     [Theory]
     [InlineData("![](Logo =big)")]
     [InlineData("![](Logo =0)")]
     [InlineData("![](Logo 64)")]
+    [InlineData("![](Logo deg)")]
+    [InlineData("![](Logo 90deg 90deg)")]
+    [InlineData("![](Logo =64 =32)")]
     [InlineData("![](Logo")]
     [InlineData("![]()")]
     public void AMalformedImageIsText(string source)

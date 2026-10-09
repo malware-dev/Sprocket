@@ -10,9 +10,9 @@ namespace Lumel.Viewing
     /// </remarks>
     public class ScrollView : ContentControl, IScrolls
     {
-        readonly Rail _rail = new Rail();
+        readonly Rail _rail = new Rail { MinThumb = ScrollViewState.NeutralLeastThumb };
 
-        float _barWidth;
+        float _barWidth = ScrollViewState.NeutralBarWidth;
         bool _held;
         bool _fits;
 
@@ -49,7 +49,7 @@ namespace Lumel.Viewing
         }
 
         /// <summary>The thumb's color.</summary>
-        public Color Thumb { get; set; }
+        public Color Thumb { get; set; } = ScrollViewState.NeutralThumb;
 
         /// <summary>How short the thumb may get.</summary>
         public float LeastThumb

@@ -17,9 +17,9 @@ namespace Lumel.Text
     ///         heading at all, which is how a table without one is written.
     ///     </para>
     ///     <para>
-    ///         An image is as tall as its line unless <c>=WxH</c>, <c>=W</c> or <c>=xH</c> after its name says
-    ///         otherwise, a side not given following the picture's shape. A link's target is a string only the
-    ///         host reads, and holds no spaces.
+    ///         An image is as tall as its line unless <c>=WxH</c>, <c>=W</c> or <c>=xH</c> after its locator says
+    ///         otherwise, a side not given following the picture's shape, and <c>90deg</c> there turns it clockwise.
+    ///         An image's locator and a link's target are strings only the host reads, and hold no spaces.
     ///     </para>
     ///     <para>
     ///         A line of three or more <c>:</c> and then names opens a box, and a line of only <c>:</c> closes the

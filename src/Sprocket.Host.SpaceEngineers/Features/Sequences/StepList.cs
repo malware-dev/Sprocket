@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _span = Math.Max(0, Math.Min(row.Carries, Children.Count - 1 - _carrying));
             var landings = Landings;
             _allowed = landings == null ? null : landings(_carrying);
-            _grabbedAt = point.Y;
+            _grabbedAt = FromScreen(point).Y;
             _moved = 0f;
             row.IsCarried = true;
             for (var i = _carrying; i <= _carrying + _span; i++)
@@ -148,7 +148,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_carrying < 0)
                 return;
 
-            _moved = point.Y - _grabbedAt;
+            _moved = FromScreen(point).Y - _grabbedAt;
             MakeRoom(LandingFor(_moved));
         }
 

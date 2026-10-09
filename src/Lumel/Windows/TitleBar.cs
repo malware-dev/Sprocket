@@ -21,6 +21,7 @@ namespace Lumel.Windows
                 return;
 
             var bounds = Window.Bounds;
+            point = Placed(point);
             _held = new Vector2(point.X - bounds.X, point.Y - bounds.Y);
             _holding = true;
         }
@@ -29,7 +30,7 @@ namespace Lumel.Windows
         public override void OnPointerMove(Vector2 point)
         {
             if (_holding && Window != null)
-                Window.Position = point - _held;
+                Window.Position = Placed(point) - _held;
         }
 
         /// <inheritdoc />
@@ -39,8 +40,15 @@ namespace Lumel.Windows
                 return;
 
             _holding = false;
-            Window.Position = point - _held;
+            Window.Position = Placed(point) - _held;
             Window.Settle();
+        }
+
+        /// <summary>Where <paramref name="point" />, in this bar's own layout, lies in the layout the window is placed in, which holds still while the window moves.</summary>
+        Vector2 Placed(Vector2 point)
+        {
+            var screen = ToScreen(point);
+            return Window.Parent == null ? screen : Window.Parent.FromScreen(screen);
         }
     }
 }

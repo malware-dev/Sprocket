@@ -107,6 +107,18 @@ public class ScrollBarTests
         Assert.Null(scroll.Under(new Vector2(Wide - Bar / 2f, 50f)));
     }
 
+    /// <summary>A scroll given no style shows its bar, in the neutral look, wherever it can move.</summary>
+    [Fact]
+    public void AnUnstyledScrollShowsItsBar()
+    {
+        var content = new VStack { Children = { new VStack { Placement = Fixed.High(1000f) } } };
+        var scroll = new ScrollView { Content = content, Placement = Fixed.Size(Wide, High) };
+        var easel = new Easel(new VStack { Children = { scroll } }, Wide, High);
+
+        var thumb = Assert.Single(easel.Sprites, s => s.Color == ScrollViewState.NeutralThumb);
+        Assert.Equal(ScrollViewState.NeutralBarWidth * easel.Pixels, thumb.Destination.Width, 1f);
+    }
+
     static (ScrollView, Element, Easel, InputRoot) Laid(float tall)
     {
         var content = new VStack { Children = { new VStack { Placement = Fixed.High(tall) } } };

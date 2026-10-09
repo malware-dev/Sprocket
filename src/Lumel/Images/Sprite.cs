@@ -21,9 +21,9 @@ namespace Lumel.Images
         public Vector2 Size { get; }
 
         /// <inheritdoc />
-        public void Draw(IGraphics g, RectangleF destination, Color tint)
+        public void Draw(IGraphics g, RectangleF destination, Color tint, float rotation)
         {
-            g.DrawSprite(Material, destination, tint, 0f);
+            g.DrawSprite(Material, destination, tint, rotation);
         }
     }
 }

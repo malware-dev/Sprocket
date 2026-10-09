@@ -6,6 +6,15 @@ namespace Lumel.Viewing
     /// <summary>What a scroll view looks like in one state, on top of what any element does.</summary>
     public class ScrollViewState : ElementState
     {
+        /// <summary>How wide the bar is when a style leaves it to the neutral values.</summary>
+        public const float NeutralBarWidth = 12f;
+
+        /// <summary>How short the thumb may get when a style leaves it to the neutral values.</summary>
+        public const float NeutralLeastThumb = 32f;
+
+        /// <summary>The thumb's color when a style leaves it to the neutral values: a gray-blue that shows on a dark page and on a light one.</summary>
+        public static readonly Color NeutralThumb = new Color(95, 114, 120);
+
         /// <summary>How wide the bar is, or null to leave it to the layers beneath.</summary>
         public float? BarWidth { get; set; }
 
@@ -25,13 +34,13 @@ namespace Lumel.Viewing
                 return;
 
             if (BarWidth.HasValue)
-                scroll.BarWidth = 0f;
+                scroll.BarWidth = NeutralBarWidth;
 
             if (Thumb.HasValue)
-                scroll.Thumb = Color.Transparent;
+                scroll.Thumb = NeutralThumb;
 
             if (LeastThumb.HasValue)
-                scroll.LeastThumb = 0f;
+                scroll.LeastThumb = NeutralLeastThumb;
         }
 
         /// <inheritdoc />

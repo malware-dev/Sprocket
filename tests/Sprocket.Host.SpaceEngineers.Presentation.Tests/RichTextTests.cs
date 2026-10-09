@@ -284,39 +284,6 @@ public class RichTextTests
         Assert.True(Word(easel, "2").Position.X > Word(easel, "Ice").Position.X, "the cells lost their columns");
     }
 
-    /// <summary>A fitted document too tall for its room shrinks until it fits, close to the room's height.</summary>
-    [Fact]
-    public void AFittedDocumentShrinksToItsRoom()
-    {
-        var text = Fitted(string.Join("\n\n", Enumerable.Repeat("The airlock cycles when the inner door shuts.", 12)), 120f);
-
-        Assert.True(text.DesiredSize.Y <= 120f, $"{text.DesiredSize.Y} is taller than the room");
-        Assert.True(text.DesiredSize.Y > 120f * 0.8f, $"{text.DesiredSize.Y} shrank further than it had to");
-    }
-
-    /// <summary>A fitted document that fits its room keeps its own sizes, and never grows to fill it.</summary>
-    [Fact]
-    public void AFittedDocumentThatFitsKeepsItsSize()
-    {
-        var text = Fitted("Short", 300f);
-
-        Assert.Equal(20f, text.DesiredSize.Y);
-    }
-
-    static RichText Fitted(string markdown, float high)
-    {
-        var text = new RichText
-        {
-            Document = Markdown.Parse(markdown),
-            FontSize = 20f,
-            BlockSpacing = 8f,
-            Fit = true,
-            Placement = Fixed.Size(Wide, high)
-        };
-
-        _ = new Easel(new VStack { Children = { text } }, Wide, High);
-        return text;
-    }
 
     static (RichText, Easel) Laid(string markdown, float wide) => Laid(Markdown.Parse(markdown), wide, null);
 

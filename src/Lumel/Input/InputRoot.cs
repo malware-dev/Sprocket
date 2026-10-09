@@ -73,7 +73,7 @@ namespace Lumel.Input
             if (target == null)
                 return false;
 
-            target.OnPointerDown(point, presses, shift, ctrl);
+            target.OnPointerDown(target.FromScreen(point), presses, shift, ctrl);
             return true;
         }
 
@@ -81,7 +81,7 @@ namespace Lumel.Input
         public void PointerMove(Vector2 point)
         {
             if (_captured != null)
-                _captured.OnPointerMove(point);
+                _captured.OnPointerMove(_captured.FromScreen(point));
         }
 
         /// <summary>The press ending at <paramref name="point" />, carrying out the pressed element's command when it ends on it.</summary>
@@ -93,9 +93,10 @@ namespace Lumel.Input
             if (released == null)
                 return;
 
-            released.OnPointerUp(point);
+            var local = released.FromScreen(point);
+            released.OnPointerUp(local);
 
-            if (released.Command != null && released.IsEnabled && released.Holds(point))
+            if (released.Command != null && released.IsEnabled && released.Holds(local))
                 released.Command.Execute();
         }
 

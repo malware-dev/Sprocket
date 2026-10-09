@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Lumel;
 using Lumel.Layout;
 using VRage.Game;
 using VRageMath;
@@ -9,6 +10,7 @@ using Color = VRageMath.Color;
 using Size = System.Windows.Size;
 using Thickness = Lumel.Thickness;
 using Lumel.Text;
+using Lumel.Viewing;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Sim.Simulation;
@@ -55,16 +57,11 @@ public static class RichShot
         if (link.HasValue)
             text.LinkColor = link.Value;
 
-        if (fit > 0f)
-        {
-            text.Fit = true;
-            text.Placement = Fixed.Size(wide, fit);
-        }
-
         if (emphasis.HasValue)
             text.EmphasisColor = emphasis.Value;
 
-        var page = new VStack { Background = Palette.Page, Padding = new Thickness(24f), Children = { text } };
+        Element shown = fit > 0f ? new Viewbox { Content = text, Grows = false, Placement = Fixed.Size(wide, fit) } : text;
+        var page = new VStack { Background = Palette.Page, Padding = new Thickness(24f), Children = { shown } };
 
         var surface = new Surface { Target = new PixelSize(1920, 1080) };
         var drawn = Vector2.Zero;

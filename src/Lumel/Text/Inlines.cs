@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -293,8 +294,8 @@ namespace Lumel.Text
             words.Clear();
         }
 
-        /// <summary>The image written at <paramref name="at" /> as <c>![words](locator)</c> or <c>![words](locator =size)</c>, and where it ends; null where none is written there.</summary>
-        /// <remarks>The words in the brackets are only words, read for nothing, as an image's description.</remarks>
+        /// <summary>The image written at <paramref name="at" /> as <c>![words](locator)</c>, with a size <c>=size</c> and a turn <c>90deg</c> after the locator if wanted, and where it ends; null where none is written there.</summary>
+        /// <remarks>The words in the brackets are only words, read for nothing, as an image's description. The size and the turn may come in either order, each once.</remarks>
         static ImagePiece Image(string text, int at, out int end)
         {
             end = at;
@@ -315,15 +316,39 @@ namespace Lumel.Text
 
             var width = float.NaN;
             var height = float.NaN;
-            if (space >= 0 && !IsSize(inside.Substring(space + 1).Trim(), out width, out height))
-                return null;
+            var turn = 0f;
+            var sized = false;
+            var turned = false;
+            var i = space;
+            while (i >= 0 && i < inside.Length)
+            {
+                while (i < inside.Length && IsSpace(inside[i]))
+                    i++;
+
+                if (i >= inside.Length)
+                    break;
+
+                var next = i;
+                while (next < inside.Length && !IsSpace(inside[next]))
+                    next++;
+
+                var word = inside.Substring(i, next - i);
+                if (!sized && IsSize(word, out width, out height))
+                    sized = true;
+                else if (!turned && IsTurn(word, out turn))
+                    turned = true;
+                else
+                    return null;
+
+                i = next;
+            }
 
             end = shut + 1;
             return new ImagePiece
             {
                 Kind = PieceKind.Image,
                 Text = Unescaped(text, at + 2, close),
-                Picture = new Picture(locator, width, height)
+                Picture = new Picture(locator, width, height, turn)
             };
         }
 
@@ -394,6 +419,22 @@ namespace Lumel.Text
             return (across.Length > 0 || down.Length > 0)
                    && (across.Length == 0 || IsNumber(across, out width))
                    && (down.Length == 0 || IsNumber(down, out height));
+        }
+
+        /// <summary>Whether <paramref name="text" /> is an image's turn: degrees clockwise followed by <c>deg</c>, as <c>90deg</c> or <c>-12.5deg</c>.</summary>
+        static bool IsTurn(string text, out float degrees)
+        {
+            degrees = 0f;
+            if (text.Length < 4 || !text.EndsWith("deg", StringComparison.Ordinal))
+                return false;
+
+            float read;
+            if (!float.TryParse(text.Substring(0, text.Length - 3), NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint,
+                    CultureInfo.InvariantCulture, out read) || float.IsInfinity(read))
+                return false;
+
+            degrees = read;
+            return true;
         }
 
         static bool IsNumber(string text, out float number)

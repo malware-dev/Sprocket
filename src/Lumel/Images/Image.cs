@@ -95,7 +95,7 @@ namespace Lumel.Images
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            _source?.Draw(g, ContentBounds, Tint);
+            _source?.Draw(g, ContentBounds, Tint, 0f);
         }
     }
 }
