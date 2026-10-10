@@ -82,7 +82,7 @@ public class AirlockTests
         var step = new Act(actionId);
         foreach (var target in targets)
             step.Targets.Add(target);
-        return step;
+        return Given.Defaults(step);
     }
 
     /// <summary>
@@ -106,8 +106,8 @@ public class AirlockTests
         a.Vent = a.Ship.Vent(3, "Airlock Vent");
         a.Inside = a.Ship.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger(new ToolbarSlot(1, 1, 1).EventId);
-        trigger.Sources.Add(a.Ref(a.Seen(a.Inside)));
+        var button = a.Automation.DeclareSignal(a.Ref(a.Seen(a.Inside)), new ToolbarSlot(1, 1, 1), "button");
+        var trigger = SignalTrigger.Named(button.Name);
 
         a.LetMeOut = a.Automation.AddSequence(trigger);
         a.LetMeOut.Name = "Let me out";
@@ -159,11 +159,10 @@ public class AirlockTests
     public void ARoomToldToCarryOnIsWrittenAndReadSo()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
 
         var saved = ProgramText.Save(a.Automation, a.World.Values);
-        Assert.Contains("call ext.depressurize on [ ", saved);
-        Assert.Contains(" ] with 1", saved);
+        Assert.Contains("call ext.depressurize(1) on [ ", saved);
 
         var after = new Automation();
         Assert.Equal("", ProgramText.Load(saved, after, a.World.Values));
@@ -197,7 +196,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnOpensTheOuterDoorWhenItsAirHasNowhereToGo()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -216,7 +215,7 @@ public class AirlockTests
     public void ARoomToldToCarryOnStillEmptiesWhereItCan()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
+        ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
         a.Inner.ForceOpen();
         a.Tick(3);
         a.Log.Clear();
@@ -235,7 +234,7 @@ public class AirlockTests
     public void ARoomToldToWaitHoldsTheCycle()
     {
         var a = Build();
-        ((Act)a.LetMeOut.Steps[2]).Arguments.Add(Literal.Of(Blocks.Vent.Hold));
+        ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.Hold);
         a.Inner.ForceOpen();
         a.Vent.Nowhere = true;
         a.Tick(3);
@@ -305,7 +304,7 @@ public class AirlockTests
         Assert.Contains("Airlock Vent:depressurize", a.Log);
         Assert.Equal(VentStatus.Depressurizing, ((IMyAirVent)a.Vent.Block).Status);
 
-        var emptied = vent.Kind.FindEvent("emptied")!;
+        var emptied = vent.Kind.FindEvent("finishes-emptying")!;
         Assert.True(vent.In(emptied, new Recall()),
             "the airlock has no air left and does not read as empty");
     }
@@ -398,7 +397,7 @@ public class AirlockTests
         a.Tick(3);
 
         var vent = a.Seen(a.Vent);
-        var emptied = vent.Kind.FindEvent("emptied")!;
+        var emptied = vent.Kind.FindEvent("finishes-emptying")!;
 
         a.Vent.Enabled = false;
         a.Tick();
@@ -511,7 +510,7 @@ public class AirlockTests
 
         foreach (var lamp in new[] { one, other })
         {
-            var trigger = new WhenTrigger("switched-on");
+            var trigger = SignalTrigger.Written("ext", "turns-on");
             trigger.Sources.Add(a.Ref(a.Seen(lamp)));
             trigger.Does = new Run(a.LetMeOut.Number);
             system.AddTrigger(trigger);
@@ -1058,7 +1057,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var shut = new WhenTrigger("closed");
+        var shut = SignalTrigger.Written("ext", "finishes-closing");
         shut.Sources.Add(a.Ref(a.Seen(a.Inner)));
         shut.Does = Do("open", a.Ref(a.Seen(a.Outer)));
         system.AddTrigger(shut);
@@ -1091,7 +1090,7 @@ public class AirlockTests
         a.Runner.QuickestLook = 30;
         var system = a.Automation.Systems[0];
 
-        var on = new WhenTrigger("filled");
+        var on = new WhenTrigger("room-status") { Value = Literal.Name("full") };
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(on);
@@ -1117,7 +1116,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var on = new WhenTrigger("switched-on");
+        var on = SignalTrigger.Written("ext", "turns-on");
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.Sources.Add(a.Ref(a.Seen(a.Outer)));
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
@@ -1150,7 +1149,7 @@ public class AirlockTests
         again.Keys.AddRange(vent.Keys);
         a.Automation.Restore(again);
 
-        var on = new WhenTrigger("switched-on");
+        var on = SignalTrigger.Written("ext", "turns-on");
         on.Sources.Add(vent.Name);
         on.Sources.Add(again.Name);
 
@@ -1178,9 +1177,8 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opened.IntervalTicks = 600;
         opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(opened);
         a.Automation.Edited();
@@ -1205,9 +1203,8 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opening = new WhenTrigger("opening");
+        var opening = SignalTrigger.Written("ext", "starts-opening");
         opening.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        opening.IntervalTicks = 600;
         opening.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(opening);
         a.Automation.Edited();
@@ -1230,7 +1227,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var closing = new WhenTrigger("closing");
+        var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
         closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(closing);
@@ -1255,7 +1252,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var closing = new WhenTrigger("closing");
+        var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
         closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(closing);
@@ -1281,7 +1278,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var closing = new WhenTrigger("closing");
+        var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
         closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(closing);
@@ -1308,14 +1305,13 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
         opened.Does = Do("close", a.Ref(a.Seen(a.Outer)));
         system.AddTrigger(opened);
 
-        var closing = new WhenTrigger("closing");
+        var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(a.Ref(a.Seen(a.Outer)));
-        closing.IntervalTicks = 600;
         closing.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(closing);
         a.Automation.Edited();
@@ -1337,7 +1333,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
         opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(opened);
@@ -1363,7 +1359,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
         opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(opened);
@@ -1389,9 +1385,8 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var on = new WhenTrigger("filled");
+        var on = new WhenTrigger("room-status") { Value = Literal.Name("full"), IntervalTicks = 30 };
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
-        on.IntervalTicks = 30;
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(on);
         a.Automation.Edited();
@@ -1515,13 +1510,13 @@ public class AirlockTests
     /// </remarks>
     static void Mutex(Airlock a, Door door, Door other)
     {
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(a.Ref(a.Seen(door)));
         var secure = a.Automation.AddSequence(opened);
         secure.Name = $"Secure the other door while {door.Name} is open";
         Then(secure, BlockKinds.SwitchOff, a.Ref(a.Seen(other)));
 
-        var shut = new WhenTrigger("closed");
+        var shut = SignalTrigger.Written("ext", "finishes-closing");
         shut.Sources.Add(a.Ref(a.Seen(door)));
         var release = a.Automation.AddSequence(shut);
         release.Name = $"Release the other door when {door.Name} shuts";
@@ -1576,7 +1571,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
+        ((Act)letMeIn.Steps[4]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1593,7 +1588,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(Blocks.Vent.Hold));
+        ((Act)letMeIn.Steps[4]).Arguments[0] = Literal.Of(Blocks.Vent.Hold);
         a.Vent.Dry = true;
         a.Automation.Edited();
         a.Tick();
@@ -1610,7 +1605,7 @@ public class AirlockTests
     {
         var a = Emptied();
         var letMeIn = Cycle(a, "Let me in", a.Outer, a.Inner, "pressurize");
-        ((Act)letMeIn.Steps[4]).Arguments.Add(Literal.Of(Blocks.Vent.MoveOn));
+        ((Act)letMeIn.Steps[4]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
         a.Vent.Leaking = true;
         a.Automation.Edited();
         a.Tick();

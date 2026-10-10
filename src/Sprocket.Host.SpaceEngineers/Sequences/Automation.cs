@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public IReadOnlyList<EntityRef> Refs => _refs;
 
-        /// <summary>Every trigger this program names as a variable: a slot on a block's toolbar, which a system starts a step from with <c>on</c>.</summary>
+        /// <summary>Every trigger this program names as a variable: a slot on a block's toolbar, which a system starts a step from with <c>whenever</c>.</summary>
         public IReadOnlyList<SignalRef> SignalRefs => _signalRefs;
 
         /// <summary>
@@ -266,16 +266,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// The variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, declared where there
-        /// is none, named <paramref name="called" /> as a block's variable is.
+        /// The variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names and no other, declared
+        /// where there is none, named <paramref name="called" /> as a block's variable is.
         /// </summary>
+        /// <remarks>One on several blocks is left alone: a trigger on it would be sent from all of them.</remarks>
         public SignalRef DeclareSignal(string block, ToolbarSlot at, string called)
         {
-            var declared = FindSignalRef(block, at);
+            var declared = FindSignalRefOnly(block, at);
             if (declared != null)
                 return declared;
 
-            return Restore(new SignalRef(Free(called), block, at));
+            return Restore(new SignalRef(Free(called), new[] { block }, at));
         }
 
         /// <summary>Puts back a signal variable read from storage.</summary>
@@ -302,7 +303,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             for (var i = 0; i < _signalRefs.Count; i++)
             {
-                if (_signalRefs[i].Block == block && _signalRefs[i].At.Same(at))
+                if (_signalRefs[i].Holds(block, at))
+                    return _signalRefs[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>The signal variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names and no other, or null.</summary>
+        public SignalRef FindSignalRefOnly(string block, ToolbarSlot at)
+        {
+            for (var i = 0; i < _signalRefs.Count; i++)
+            {
+                if (_signalRefs[i].HoldsOnly(block, at))
                     return _signalRefs[i];
             }
 
@@ -323,6 +336,37 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 name = called + " " + n;
 
             return name;
+        }
+
+        /// <summary>
+        /// The toolbar slots that send the signal <paramref name="trigger" /> of <paramref name="system" /> starts on, as
+        /// <paramref name="instance" /> runs it: the blocks, in <paramref name="blocks" />, and the slot on each, in
+        /// <paramref name="at" />.
+        /// </summary>
+        /// <remarks>
+        /// A signal written in place on a toolbar slot is sent from that slot on each of its blocks; a named one is answered
+        /// as its part or variable is; a block's own change is sent from no toolbar, and leaves both lists empty.
+        /// </remarks>
+        public void Answers(AutomationSystem system, SystemInstance instance, SignalTrigger trigger, List<string> blocks,
+            List<ToolbarSlot> at)
+        {
+            if (!trigger.IsWritten)
+            {
+                Answers(system, instance, trigger.Part, blocks, at);
+                return;
+            }
+
+            blocks.Clear();
+            at.Clear();
+            if (trigger.At == null)
+                return;
+
+            var sources = SystemInstance.Through(instance, trigger.Sources);
+            for (var i = 0; i < sources.Count; i++)
+            {
+                blocks.Add(sources[i]);
+                at.Add(trigger.At);
+            }
         }
 
         /// <summary>
@@ -356,8 +400,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (declared == null)
                 return;
 
-            blocks.Add(declared.Block);
-            at.Add(declared.At);
+            for (var i = 0; i < declared.Blocks.Count; i++)
+            {
+                blocks.Add(declared.Blocks[i]);
+                at.Add(declared.At);
+            }
         }
 
         /// <summary>The name <paramref name="reference" /> was last known by on the construct, or the reference itself where none was recorded.</summary>
@@ -614,10 +661,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var copy = new Comparison();
             copy.MemberId = test.MemberId;
             copy.Provider = test.Provider;
-            copy.RequiresAll = test.RequiresAll;
+            copy.Quantifier = test.Quantifier;
+            copy.Relation = test.Relation;
             copy.Value = test.Value;
             for (var i = 0; i < test.Targets.Count; i++)
                 copy.Targets.Add(test.Targets[i]);
+
+            for (var i = 0; i < test.Arguments.Count; i++)
+                copy.Arguments.Add(test.Arguments[i]);
 
             return copy;
         }

@@ -113,10 +113,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether it can do anything at all: built, powered and switched on.</summary>
         public bool IsWorking => _block.IsWorking;
 
-        /// <summary>Whether the block's own value that <paramref name="value" /> writes is <paramref name="literal" />.</summary>
-        public bool Holds(EntityAction value, Literal literal)
+        /// <summary>The block's own value that <paramref name="value" /> writes, made ready to be read; null where it has none.</summary>
+        public Gauge Gauge(EntityAction value)
         {
-            return Toolbars.Holds(_block, value.Id, literal);
+            return Toolbars.Gauge(_block, value.Id);
         }
 
         /// <summary>Whether the block is in <paramref name="moment" />: the flag it reads is set where the moment rises, clear where it falls.</summary>
@@ -190,6 +190,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public Order Prepare(EntityAction action, Bound bound, IList<Literal> arguments)
         {
+            if (action.Being != null)
+                return arguments == null || arguments.Count == 0 ? null : action.Being.Order(_block, arguments[0]);
+
             if (action.Form != Form.Native)
                 return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
 

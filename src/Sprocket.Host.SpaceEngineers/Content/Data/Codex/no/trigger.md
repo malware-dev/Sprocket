@@ -10,7 +10,7 @@ For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til !
 - Blokker som kommer i en tilstand, som at en dør er ferdig med å lukke seg. Med flere blokker starter `hvilken som helst` den når den første kommer dit, og `alle sammen` når den siste gjør det.
 - En fastsatt tid som går, om og om igjen, som hvert minutt.
 
-Noen tilstander, som lufta i et rom eller ladningen i et batteri, finnes ved å se på blokken. Hvor ofte utløseren ser, velges under `Hvor ofte`, og de raske valgene sier hva de koster.
+Der spillet melder en endring, som at en dør lukker seg eller en blokk slås på, starter utløseren med én gang. For andre endringer, som at lufta i et rom fylles eller tømmes, sjekker utløseren selve blokken, ofte nok til å fange den opp. En utløser som starter på en fast tid, velger den tiden under `Hvor ofte`.
 
 ## Hva den gjør
 

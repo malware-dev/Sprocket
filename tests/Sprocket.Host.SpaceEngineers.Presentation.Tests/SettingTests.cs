@@ -191,6 +191,37 @@ public class SettingTests
         Assert.Equal("then set Charge Mode on Standby Battery to Recharge", screen.Editor.Doing(0));
     }
 
+    /// <summary>A trigger that sets a value of Sprocket's own does it in Sprocket's namespace, and says all of it.</summary>
+    [Fact]
+    public void ATriggerThatSetsAnOwnValueSetsItInItsNamespace()
+    {
+        var screen = Screen.Fresh();
+        var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
+        var speed = 0;
+        door.Kind.WithValue("speed", "speed",
+                Being.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new[] { "low", "middle", "high" }, _ => speed)
+                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
+            .Looked("A test value.");
+
+        screen.Editor.NewSystem("Doors");
+        screen.Editor.PressStart("when");
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressChoice("button 1 is pressed");
+        screen.Editor.PressChoice("A task on blocks…");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("Set speed");
+        screen.Run(2);
+        screen.Editor.Current!.View.Within().OfType<WordsField>().Single().Within().OfType<Lumel.Controls.Button>()
+            .Single(word => word.Text == "high").Command!.Execute();
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var set = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Triggers[0].Does);
+        Assert.Equal(BlockKinds.Own, set.Provider);
+        Assert.Equal(Literal.Name("high"), Assert.Single(set.Arguments));
+        Assert.Equal("then set Speed on Airlock Inner Door to high", screen.Editor.Doing(0));
+    }
+
     /// <summary>Choosing something else for a step keeps what was given for the new choice.</summary>
     /// <remarks>
     /// A step changed from one value to another is given its new value at the end of the choosing.
@@ -221,6 +252,38 @@ public class SettingTests
     {
         GridEntity entity = sim.World.FindEntity(fitting.Id);
         return sim.Editor.Program.Declare(sim.World, entity).Name;
+    }
+
+    /// <summary>A value of Sprocket's own is offered as something to set where it can be set, and not where it is only read.</summary>
+    [Fact]
+    public void AnOwnValueIsOfferedToSetOnlyWhereItCanBe()
+    {
+        var screen = WithASequence();
+        var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
+        var speed = 0;
+        door.Kind.WithValue("speed", "speed",
+                Being.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new[] { "low", "middle", "high" }, _ => speed)
+                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
+            .Looked("A test value.");
+
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Run(2);
+
+        Assert.True(screen.Editor.HasChoice("Set speed"), "a value of Sprocket's own that can be set is not offered");
+        Assert.False(screen.Editor.HasChoice("Status"), "a value of Sprocket's own that is only read is offered as a step");
+        Assert.False(screen.Editor.HasChoice("Set status"), "a value of Sprocket's own that is only read is offered as a step");
+
+        screen.Editor.PressChoice("Set speed");
+        screen.Run(2);
+        screen.Editor.Current!.View.Within().OfType<WordsField>().Single().Within().OfType<Lumel.Controls.Button>().Single(word => word.Text == "high").Command!.Execute();
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var set = screen.Editor.Program.Systems[0].Sequences[0].Steps.OfType<Act>().Single(step => step.ActionId == "speed");
+        Assert.Equal(Form.Value, set.Form);
+        Assert.Equal(BlockKinds.Own, set.Provider);
+        Assert.Equal(Literal.Name("high"), Assert.Single(set.Arguments));
     }
 
     static Screen WithASequence()

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.World;
 using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
@@ -145,6 +146,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public string Wording(string said)
         {
             return Found(Means, said, Words);
+        }
+
+        /// <summary>
+        /// Whether <paramref name="given" />, already the kind this field holds, is one of its words where it lists some, and
+        /// within its bounds where it has them and <paramref name="bounded" /> asks for them.
+        /// </summary>
+        /// <remarks>
+        /// A step is held to the bounds, since the block takes nothing outside them; a test is not, since comparing with a
+        /// number outside them still says something.
+        /// </remarks>
+        public bool Admits(Literal given, bool bounded)
+        {
+            var words = Means ?? Words;
+            if (words != null && !words.Contains(given.Said))
+                return false;
+
+            var number = given.Kind == ValueKind.Integer || given.Kind == ValueKind.Real;
+            if (!bounded || !number)
+                return true;
+
+            double bound;
+            if (Bound(Least, out bound) && (Above ? given.Number <= bound : given.Number < bound))
+                return false;
+
+            return !(Bound(Most, out bound) && given.Number > bound);
+        }
+
+        static bool Bound(string written, out double bound)
+        {
+            bound = 0;
+            return !string.IsNullOrEmpty(written)
+                   && double.TryParse(written, NumberStyles.Float, CultureInfo.InvariantCulture, out bound);
         }
 
         /// <summary>

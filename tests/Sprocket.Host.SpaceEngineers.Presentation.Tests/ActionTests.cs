@@ -554,6 +554,25 @@ public class ActionTests
         Assert.True(screen.Shows("Left"), "the step does not say what was chosen");
     }
 
+    /// <summary>An option left as it starts is written as what it starts with, because every parameter is given an argument.</summary>
+    [Fact]
+    public void AnOptionLeftAsItStartsIsWrittenAsItsDefault()
+    {
+        var screen = Screen.On(Rig.Demo());
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Airlock Vent");
+        screen.Editor.PressChoice("Depressurize");
+        screen.Run(2);
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var act = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
+            .Single(step => step.ActionId == Blocks.Vent.Depressurize);
+        Assert.Equal(Blocks.Vent.Hold, Assert.Single(act.Arguments).Whole);
+    }
+
     /// <summary>The fields of a form end together against the right, whatever their widths: a dial with its box, a number, a list.</summary>
     [Fact]
     public void TheFieldsOfAFormEndTogether()

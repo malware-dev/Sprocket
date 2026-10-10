@@ -77,7 +77,7 @@ public class ProgramTextTests
         var when = new WhenTrigger("pressed");
         when.Sources.Add("call");
         when.Sources.Add("spare");
-        when.RequiresAll = true;
+        when.Quantifier = Quantifier.All;
 
         var out1 = program.AddSequence(airlock, when);
         out1.Name = "Let me out";
@@ -95,7 +95,7 @@ public class ProgramTextTests
 
         var vent = new Act("depressurize");
         vent.Targets.Add("vent");
-        out1.Steps.Add(vent);
+        out1.Steps.Add(Given.Defaults(vent));
 
         // What the author wrote about a part, and a second one of the system that fills the
         // parts with its own doors.
@@ -234,7 +234,7 @@ public class ProgramTextTests
 
         var when = Assert.IsType<WhenTrigger>(letMeOut.Trigger);
         Assert.Equal("pressed", when.EventId);
-        Assert.True(when.RequiresAll);
+        Assert.Equal(Quantifier.All, when.Quantifier);
         Assert.Equal(new[] { "call", "spare" }, when.Sources);
 
         Assert.Equal(4, letMeOut.Steps.Count);
@@ -299,7 +299,7 @@ public class ProgramTextTests
 
         var saved = Save(program);
         Assert.Contains("call Reverse on [ rotor ]", saved);
-        Assert.Contains("call ext.'rotate-to' on [ rotor ] with 90, 2.5", saved);
+        Assert.Contains("call ext.'rotate-to'(90, 2.5) on [ rotor ]", saved);
         Assert.Contains("set Velocity on [ rotor ] to 5", saved);
 
         var after = new Automation();
@@ -351,7 +351,7 @@ public class ProgramTextTests
         sequence.Steps.Add(each);
 
         // The language's own words for it, rather than a spelling invented here.
-        Assert.Contains("call SetColor on [ light ] with 255, 136, 0", Save(program));
+        Assert.Contains("call SetColor(255, 136, 0) on [ light ]", Save(program));
 
         var after = new Automation();
         LoadAll(program, after);

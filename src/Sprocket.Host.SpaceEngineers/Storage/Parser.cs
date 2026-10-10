@@ -36,8 +36,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         Token _token;
 
+        Token _ahead;
+
+        bool _looked;
+
         int _failures;
 
+        /// <summary>A parser at the start of <paramref name="text" />.</summary>
         public Parser(string text)
         {
             _lexer = new Lexer(text);
@@ -47,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>What was wrong with the first thing that was wrong, or empty.</summary>
         public string Trouble { get; private set; } = "";
 
+        /// <summary>Every statement of the text, nested in the blocks they are written in.</summary>
         public List<Statement> Read()
         {
             var into = new List<Statement>();
@@ -56,9 +62,45 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         void Step()
         {
-            _token = _lexer.Next();
+            if (_looked)
+            {
+                _token = _ahead;
+                _looked = false;
+            }
+            else
+            {
+                _token = _lexer.Next();
+            }
+
             if (_token.Kind == TokenKind.Bad)
                 Fail(_token.Text.ToString());
+        }
+
+        /// <summary>The token after the current one, read without moving on to it.</summary>
+        Token Peek()
+        {
+            if (!_looked)
+            {
+                _ahead = _lexer.Next();
+                _looked = true;
+            }
+
+            return _ahead;
+        }
+
+        /// <summary>
+        /// Whether a member's arguments or blocks follow the name just read: <c>(</c>, or <c>on</c> and a list.
+        /// </summary>
+        /// <remarks>
+        /// <c>on</c> alone is not enough, since a name followed by a flag is written that way too: the reading a run left
+        /// behind says <c>door1 on</c>.
+        /// </remarks>
+        bool Referencing()
+        {
+            if (_token.Kind == TokenKind.VectorOpen)
+                return true;
+
+            return _token.Kind == TokenKind.Keyword && _token.Keyword == Keyword.On && Peek().Kind == TokenKind.ListOpen;
         }
 
         /// <summary>
@@ -202,22 +244,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             Step();
 
-            // After 'with', the values are separated by commas, and a comma stands nowhere else in a statement.
-            var listing = false;
-            var separated = true;
             while (true)
             {
                 if (_token.Kind == TokenKind.Comma)
                 {
-                    if (!listing || separated)
-                    {
-                        Fail("unexpected ','.");
-                        break;
-                    }
-
-                    separated = true;
-                    Step();
-                    continue;
+                    Fail("unexpected ','.");
+                    break;
                 }
 
                 if (_token.Kind == TokenKind.Off)
@@ -229,25 +261,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!Valuish())
                     break;
 
-                if (listing && !separated)
-                {
-                    Fail("expected ',' between the values after 'with'.");
-                    break;
-                }
-
-                var value = Next();
-                values.Add(value);
-                if (value.Says(Keyword.With))
-                    listing = true;
-                else if (listing)
-                {
-                    separated = false;
-                }
+                values.Add(Next());
             }
-
-            if (listing && separated && _failures == failures && values.Count - from > 0
-                && !values[values.Count - 1].Says(Keyword.With))
-                Fail("expected a value after ','.");
 
             // A line that went wrong is not made a statement at all, since the trouble already says what is wrong
             // with it and half a statement would only be judged again for what is missing.
@@ -288,7 +303,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Identifier:
                 case TokenKind.Keyword:
                 case TokenKind.Equals:
-                case TokenKind.EqualTo:
+                case TokenKind.Comparison:
                 case TokenKind.Text:
                 case TokenKind.Integer:
                 case TokenKind.Real:
@@ -311,9 +326,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     Step();
                     var name = new Value(ValueForm.Identifier, token.Text.ToString());
                     if (_token.Kind == TokenKind.Dot)
-                        return Qualified(name);
+                    {
+                        var failures = _failures;
+                        name = Qualified(name);
+                        if (_failures > failures)
+                            return Value.None;
+                    }
 
-                    return _token.Kind == TokenKind.Colon ? Function(name) : name;
+                    return Referencing() ? Referenced(name) : name;
 
                 case TokenKind.Keyword:
                     Step();
@@ -331,9 +351,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     Step();
                     return new Value(ValueForm.Keyword, null, 0, 0, Keyword.Equals);
 
-                case TokenKind.EqualTo:
+                case TokenKind.Comparison:
                     Step();
-                    return new Value(ValueForm.Keyword, null, 0, 0, Keyword.EqualTo);
+                    return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
 
                 case TokenKind.Text:
                     Step();
@@ -371,6 +391,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         Value List()
         {
+            return Run(TokenKind.ListClose, "']'");
+        }
+
+        /// <summary>A member's arguments in parentheses, at least one, kept as a list is.</summary>
+        Value Arguments()
+        {
+            return Run(TokenKind.VectorClose, "')'");
+        }
+
+        /// <summary>Values separated by commas up to <paramref name="close" />, written as one run once it closes.</summary>
+        Value Run(TokenKind close, string closing)
+        {
             if (_depth == _held.Count)
                 _held.Add(new List<Value>());
 
@@ -379,19 +411,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _depth++;
             Step();
 
-            var value = Listed(held);
+            var value = Listed(held, close, closing);
             _depth--;
             return value;
         }
 
-        /// <summary>Reads a list's items into <paramref name="held" />, then writes them as one run.</summary>
-        Value Listed(List<Value> held)
+        /// <summary>Reads items into <paramref name="held" /> up to <paramref name="close" />, then writes them as one run.</summary>
+        Value Listed(List<Value> held, TokenKind close, string closing)
         {
-            while (_token.Kind != TokenKind.ListClose)
+            if (close == TokenKind.VectorClose && _token.Kind == close)
+            {
+                Fail("expected an argument before ')'.");
+                return Value.None;
+            }
+
+            while (_token.Kind != close)
             {
                 if (!Valuish())
                 {
-                    Fail("expected a value or ']'.");
+                    Fail("expected a value or " + closing + ".");
                     return Value.None;
                 }
 
@@ -400,11 +438,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     break;
 
                 Step();
+                if (close == TokenKind.VectorClose && _token.Kind == close)
+                {
+                    Fail("expected an argument after ','.");
+                    return Value.None;
+                }
             }
 
-            if (_token.Kind != TokenKind.ListClose)
+            if (_token.Kind != close)
             {
-                Fail("expected ']'.");
+                Fail("expected " + closing + ".");
                 return Value.None;
             }
 
@@ -449,66 +492,61 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return Value.Qualified(from, parts.Count - from);
         }
 
-        /// <summary>A host function called on a block, <c>panel1:toolbar(1, 1, 4)</c>, having read the block's name already.</summary>
+        /// <summary>
+        /// A member and the blocks it is read on or done to, <c>ext.amount("Ingot/Iron") on [ cargo ]</c>, having read the
+        /// member's name already.
+        /// </summary>
         /// <remarks>
-        /// Only the shape is the language's: which functions there are, and what each takes, is the host's, so the values are
-        /// read as whatever they are and judged by whoever reads the statement.
+        /// One value, because a member is never written apart from its blocks. Which members there are, and what each takes,
+        /// is the host's, so the arguments are read as whatever they are and judged by whoever reads the statement. The run
+        /// is written once everything is read, because an argument may write a run of its own first: the name's parts, then
+        /// the arguments as a list, empty where there are none, then the names.
         /// </remarks>
-        Value Function(Value block)
+        Value Referenced(Value member)
         {
-            Step();
-            if (_token.Kind != TokenKind.Identifier)
+            var failures = _failures;
+            var arguments = Value.Listed(0, 0);
+            if (_token.Kind == TokenKind.VectorOpen)
             {
-                Fail("expected a function's name after ':'.");
-                return Value.None;
-            }
-
-            var name = new Value(ValueForm.Identifier, _token.Text.ToString());
-            Step();
-            if (_token.Kind != TokenKind.VectorOpen)
-            {
-                Fail("expected '(' after " + name.Word + ".");
-                return Value.None;
-            }
-
-            Step();
-            var values = new List<Value>();
-            while (_token.Kind != TokenKind.VectorClose)
-            {
-                if (values.Count > 0)
-                {
-                    if (_token.Kind != TokenKind.Comma)
-                    {
-                        Fail("expected ',' or ')' after a value of " + name.Word + ".");
-                        return Value.None;
-                    }
-
-                    Step();
-                }
-
-                if (!Valuish())
-                {
-                    Fail("expected a value of " + name.Word + ".");
-                    return Value.None;
-                }
-
-                var failures = _failures;
-                values.Add(Next());
+                arguments = Arguments();
                 if (_failures > failures)
                     return Value.None;
             }
 
-            Step();
+            if (_token.Kind != TokenKind.Keyword || _token.Keyword != Keyword.On)
+            {
+                Fail("expected 'on' and a list of names after the arguments.");
+                return Value.None;
+            }
 
-            // Written as one run only once the values are read, because a value may write a run of its own first.
+            Step();
+            if (_token.Kind != TokenKind.ListOpen)
+            {
+                Fail("expected a list of names after 'on'.");
+                return Value.None;
+            }
+
+            var names = List();
+            if (_failures > failures)
+                return Value.None;
+
+            // A qualified name's parts are already the last of the run unless an argument wrote parts of its own after them,
+            // so they are copied only then.
             var parts = _reading.Parts;
             var from = parts.Count;
-            parts.Add(block);
-            parts.Add(name);
-            for (var i = 0; i < values.Count; i++)
-                parts.Add(values[i]);
+            if (member.Form != ValueForm.Qualified)
+                parts.Add(member);
+            else if (member.From + member.Count == parts.Count)
+                from = member.From;
+            else
+            {
+                for (var i = 0; i < member.Count; i++)
+                    parts.Add(parts[member.From + i]);
+            }
 
-            return Value.Function(from, parts.Count - from);
+            parts.Add(arguments);
+            parts.Add(names);
+            return Value.Referenced(from, parts.Count - from);
         }
 
         /// <summary>A vector, its three numbers written into the reading's shared run.</summary>

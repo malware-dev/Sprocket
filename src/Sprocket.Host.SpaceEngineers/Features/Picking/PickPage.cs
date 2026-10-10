@@ -349,7 +349,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var arguments = new List<Literal>();
             ValueLine.Read(said, arguments);
+            Named(arguments);
             _done(new PickAnswer(_selection, _chosen, _all, arguments, _chosenForm));
+        }
+
+        /// <summary>Gives the argument of each field for one of a list of names as that name.</summary>
+        /// <remarks>The answer comes as a line of text, which carries a chosen word as a bare word, and a bare word reads as text.</remarks>
+        void Named(List<Literal> arguments)
+        {
+            var fields = Fields;
+            var at = 0;
+            for (var f = 0; f < fields.Count && at < arguments.Count; f++)
+            {
+                if (fields[f].Entry == Entry.Name && arguments[at].Kind == ValueKind.Text)
+                    arguments[at] = Literal.Name(arguments[at].Text);
+
+                at += fields[f].Covers;
+            }
         }
 
         /// <inheritdoc />
@@ -1050,7 +1066,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>What a test can read of the blocks: each state they can be in, and then not, and then each of their values.</summary>
-        /// <remarks>A state read the same as one already listed is left out: switched on and switched off are one state, read from either side.</remarks>
+        /// <remarks>
+        /// A state read the same as one already listed is left out: switched on and switched off are one state, read from
+        /// either side. A value of Sprocket's own that its signals say as states is read through them, and one they do not is
+        /// listed by its name with the block's own.
+        /// </remarks>
         void Testable()
         {
             var events = Vocabulary.EventsOf(Editor.World, _selection);
@@ -1068,7 +1088,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < actions.Count; i++)
             {
                 var one = actions[i];
-                if (!one.Sets || !Lists(one))
+                var own = one.Being != null && !Stated(events, one.Id);
+                if (!own && (!one.Sets || !Lists(one)))
                     continue;
 
                 _names.Add(Said(one));
@@ -1080,6 +1101,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ready.Add(one.Readiness);
                 _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
             }
+        }
+
+        /// <summary>Whether a signal among <paramref name="events" /> says the value <paramref name="value" /> as a state.</summary>
+        static bool Stated(List<EntityEvent> events, string value)
+        {
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].IsState && events[i].Value == value)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Lists a state to be read, by the words it reads in and the choice it makes.</summary>
@@ -1244,10 +1277,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether the view now showing lists this one.</summary>
         /// <remarks>
         /// The terminal view lists what the block declares, whether or not something has been offered in its place; the
-        /// organized view lists what is on offer, whoever worded it, and nothing known to be out of reach.
+        /// organized view lists what is on offer, whoever worded it, and nothing known to be out of reach. A value of
+        /// Sprocket's own is a step only where it can be set; a test lists it itself.
         /// </remarks>
         bool Lists(EntityAction one)
         {
+            if (one.Being != null && !one.Sets)
+                return false;
+
             if (Editor.ShowsTerminal)
                 return one.Unaltered;
 

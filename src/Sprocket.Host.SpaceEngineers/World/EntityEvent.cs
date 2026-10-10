@@ -83,6 +83,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this is a state a block is in or not, which a test can read.</summary>
         public bool IsState => State.Length > 0;
 
+        /// <summary>The id of Sprocket's own value this is a change in, or empty where it is a change in nothing a block has.</summary>
+        /// <remarks>A door finishing closing is its status coming to be closed; a test on the door reads that value.</remarks>
+        public string Value { get; private set; } = "";
+
+        /// <summary>What <see cref="Value" /> comes to be as this happens.</summary>
+        public Literal Becomes { get; private set; }
+
+        /// <summary>Says this is <paramref name="value" /> coming to be <paramref name="becomes" />.</summary>
+        public void Changes(string value, Literal becomes)
+        {
+            Value = value;
+            Becomes = becomes;
+        }
+
         /// <summary>Says the block announces this.</summary>
         public void Announce()
         {

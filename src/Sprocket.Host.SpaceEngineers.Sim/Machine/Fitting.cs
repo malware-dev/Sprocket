@@ -336,15 +336,46 @@ public abstract class Fitting
         return true;
     }
 
-    /// <summary>Whether one of its values is <paramref name="value" />: whether it is on, for OnOff, and the last it was told for the rest.</summary>
-    public virtual bool Holds(string propertyId, Literal value)
+    /// <summary>
+    /// What one of its values reads: whether it is on, for OnOff, the last it was told for the rest, and nought of the kind it
+    /// carries before it is told anything.
+    /// </summary>
+    public virtual Literal Read(string propertyId)
     {
         if (propertyId == "OnOff")
-            return value.Kind == ValueKind.Flag && value.Flag == Enabled;
+            return Literal.Of(Enabled);
 
         Literal had;
-        return _values.TryGetValue(propertyId, out had) && had.Kind == value.Kind && had.Value.Bits == value.Value.Bits
-               && had.Text == value.Text;
+        return _values.TryGetValue(propertyId, out had) ? had : Zero(propertyId);
+    }
+
+    /// <summary>One of its values made ready to be read, or null where it carries none by that name.</summary>
+    public Gauge Gauge(string propertyId)
+    {
+        return propertyId == "OnOff" || Carries(propertyId) ? new Reading(this, propertyId) : null;
+    }
+
+    Literal Zero(string propertyId)
+    {
+        for (var i = 0; i < _carries.Count; i++)
+        {
+            if (_carries[i].Id != propertyId)
+                continue;
+
+            switch (_carries[i].Sets)
+            {
+                case ValueKind.Integer:
+                    return Literal.Of(0L);
+                case ValueKind.Real:
+                    return Literal.Of(0.0);
+                case ValueKind.Text:
+                    return Literal.Of("");
+                case ValueKind.Color:
+                    return Literal.Colour(0, 0, 0, 0);
+            }
+        }
+
+        return Literal.Of(false);
     }
 
     bool Carries(string propertyId)
@@ -361,6 +392,26 @@ public abstract class Fitting
     readonly List<Offer> _carries = new List<Offer>();
 
     readonly Dictionary<string, Literal> _values = new Dictionary<string, Literal>();
+
+    /// <summary>One of a fitting's values, read as it reads now.</summary>
+    sealed class Reading : Gauge
+    {
+        readonly Fitting _fitting;
+        readonly string _id;
+
+        public Reading(Fitting fitting, string id)
+        {
+            _fitting = fitting;
+            _id = id;
+        }
+
+        public override ValueKind Kind => _fitting.Read(_id).Kind;
+
+        public override Literal Read()
+        {
+            return _fitting.Read(_id);
+        }
+    }
 
     bool Named(string actionId)
     {

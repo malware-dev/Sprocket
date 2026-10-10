@@ -55,7 +55,7 @@ public class StoppedTests
         {
             var act = new Act(action);
             act.Targets.Add(Program.Declare(Rig.World, Rig.Entity(block.Id)).Name);
-            sequence.Steps.Add(act);
+            sequence.Steps.Add(Given.Defaults(act));
             sequence.Steps.Add(new Await());
         }
     }

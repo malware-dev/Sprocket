@@ -5,15 +5,15 @@ using Xunit;
 
 namespace Sprocket.Tests;
 
-/// <summary>How each moment a block can reach is watched: announced, ruled out while a reading holds, or looked for with a reason.</summary>
+/// <summary>How each signal and each value of Sprocket's own is watched: announced, ruled out while a reading holds, or looked for with a reason.</summary>
 public class WatchingTests
 {
     /// <summary>
-    /// Every moment of every kind of block says how it is watched: the block announces it, something it announces rules it
-    /// out, a toolbar answers it, or it is looked for and says why nothing better is possible.
+    /// Every signal and every value of Sprocket's own on every kind of block says how it is watched: the block announces it,
+    /// something it announces rules it out, a toolbar answers it, or it is looked for and says why nothing better is possible.
     /// </summary>
     [Fact]
-    public void EveryMomentSaysHowItIsWatched()
+    public void EverySignalAndValueSaysHowItIsWatched()
     {
         var ship = new Rigged();
         var blocks = new[]
@@ -27,14 +27,36 @@ public class WatchingTests
         foreach (var id in blocks)
         {
             var kind = ship.Entity(id).Kind;
-            foreach (var moment in kind.Events)
+            foreach (var signal in kind.Events)
             {
-                if (!moment.Announced && moment.RuledOutBy == null && !moment.Answered && moment.LookedBecause.Length == 0)
-                    unsaid.Add(kind.Id + " " + moment.Id);
+                if (!signal.Announced && signal.RuledOutBy == null && !signal.Answered && signal.LookedBecause.Length == 0)
+                    unsaid.Add(kind.Id + " " + signal.Id);
+            }
+
+            foreach (var value in kind.Actions)
+            {
+                if (value.Being != null && !value.Announced && value.RuledOutBy == null && value.LookedBecause.Length == 0)
+                    unsaid.Add(kind.Id + " " + value.Id);
             }
         }
 
         Assert.Empty(unsaid);
+    }
+
+    /// <summary>
+    /// How a value is heard is the kind's own: a hangar door announces its status, and a door beside it in the same world is
+    /// still looked at only while it is not shut.
+    /// </summary>
+    [Fact]
+    public void EachKindHearsItsValueItsOwnWay()
+    {
+        var ship = new Rigged();
+        var hangar = ship.Entity(ship.HangarDoor(1, "Hangar").Id).Kind.FindAction("status", Form.Value)!;
+        var door = ship.Entity(ship.Door(2, "Door").Id).Kind.FindAction("status", Form.Value)!;
+
+        Assert.True(hangar.Announced);
+        Assert.False(door.Announced);
+        Assert.NotNull(door.RuledOutBy);
     }
 
     /// <summary>A block switched on is seen on the tick after, whatever the <c>when</c> asks for, since every functional block announces it.</summary>
@@ -47,9 +69,8 @@ public class WatchingTests
         var lamp = ship.Light(2, "Lamp");
         door.Enabled = false;
 
-        var on = new WhenTrigger("switched-on");
+        var on = SignalTrigger.Written("ext", "turns-on");
         on.Sources.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
-        on.IntervalTicks = 600;
         var sequence = automation.AddSequence(on);
         var act = new Act(BlockKinds.SwitchOn);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
@@ -87,9 +108,8 @@ public class WatchingTests
         var lamp = ship.Light(2, "Lamp");
         hangar.ForceOpen();
 
-        var closing = new WhenTrigger("closing");
+        var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
-        closing.IntervalTicks = 600;
         var sequence = automation.AddSequence(closing);
         var act = new Act(BlockKinds.SwitchOn);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
@@ -123,7 +143,7 @@ public class WatchingTests
         var hangar = ship.HangarDoor(1, "Hangar");
         var lamp = ship.Light(2, "Lamp");
 
-        var closing = new WhenTrigger("closing");
+        var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
         var sequence = automation.AddSequence(closing);
         var act = new Act(BlockKinds.SwitchOn);

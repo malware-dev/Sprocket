@@ -115,8 +115,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var when = triggers[t] as WhenTrigger;
                 var every = triggers[t] as EveryTrigger;
-                if (when == null && every == null)
+                var signal = triggers[t] as SignalTrigger;
+                var watched = signal != null && signal.IsWatched;
+                if (when == null && every == null && !watched)
                     continue;
+
+                // A signal Sprocket watches for is a change on each block, kept block by block as a when on any of them is.
+                var each = watched || (when != null && when.Quantifier == Quantifier.Any);
 
                 for (var n = 0; n < uses.Count; n++)
                 {
@@ -127,10 +132,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     if (every != null && poller.Since < 0)
                         continue;
 
-                    if (when != null && when.RequiresAll && poller.All < 0)
+                    if (when != null && !each && poller.All < 0)
                         continue;
 
-                    if (when != null && !when.RequiresAll && !Any(poller.Signals))
+                    if (each && !Any(poller.Signals))
                         continue;
 
                     pen.Start(every != null ? Keyword.Every : Keyword.When).Text(identity);
@@ -143,14 +148,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     {
                         pen.Says(Keyword.Wait).Ticks(poller.Since);
                     }
-                    else if (when.RequiresAll)
+                    else if (!each)
                     {
                         pen.Says(Keyword.All).Says(poller.All == 1 ? Keyword.On : Keyword.Off);
                     }
                     else
                     {
-                        foreach (var signal in poller.Signals)
-                            pen.Word(signal.Key).Says(signal.Value ? Keyword.On : Keyword.Off);
+                        foreach (var read in poller.Signals)
+                            pen.Word(read.Key).Says(read.Value ? Keyword.On : Keyword.Off);
                     }
 
                     pen.End();
@@ -247,7 +252,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
 
             var trigger = system.Triggers[number - 1];
-            var kind = line.Key == Keyword.Every ? trigger is EveryTrigger : trigger is WhenTrigger;
+            var signal = trigger as SignalTrigger;
+            var kind = line.Key == Keyword.Every
+                ? trigger is EveryTrigger
+                : trigger is WhenTrigger || (signal != null && signal.IsWatched);
             var one = !instanced ? (system.IsBlueprint ? null : system.First) : system.FindInstance(instance);
             if (!kind || one == null)
                 return;

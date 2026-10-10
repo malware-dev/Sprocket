@@ -22,6 +22,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         readonly int _from;
         readonly List<Statement> _body;
 
+        /// <summary>
+        /// A statement at <paramref name="at" /> in the script, headed by <paramref name="key" /> or <paramref name="head" />,
+        /// whose values are the <paramref name="count" /> of <paramref name="reading" />'s from <paramref name="from" />.
+        /// </summary>
         public Statement(Reading reading, int at, Keyword key, string head, int from, int count,
             List<Statement> body)
         {
@@ -63,6 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Whether its line starts with <c>//</c>, which switches a step off.</summary>
         public bool IsOff { get; set; }
 
+        /// <summary>How many values follow the word it starts with.</summary>
         public int Count { get; private set; }
 
         /// <summary>What is inside its braces, empty when it has none.</summary>
@@ -71,6 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Whether it was written with a block, empty or not.</summary>
         public bool HasBlock => _body != null;
 
+        /// <summary>The value at a position, or none where there is none.</summary>
         public Value ValueAt(int index)
         {
             return index >= 0 && index < Count ? _reading.Values[_from + index] : Value.None;
@@ -96,6 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return value.Form == ValueForm.Text ? value.Word : "";
         }
 
+        /// <summary>The number at a position as a whole number, 0 where there is none.</summary>
         public int Whole(int index)
         {
             return (int)ValueAt(index).Number();
@@ -124,19 +131,40 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return -1;
         }
 
-        /// <summary>The block, function name and values of a host function call, or false where <paramref name="value" /> is not one.</summary>
-        public bool Function(Value value, out string block, out string name, out ValueRange values)
+        /// <summary>The arguments of the member at a position, none where it was written without them or is no member.</summary>
+        public ValueRange Arguments(int index)
         {
-            block = name = "";
-            values = new ValueRange();
-            if (value.Form != ValueForm.Function)
-                return false;
+            return Arguments(ValueAt(index));
+        }
 
-            var parts = new ValueRange(_reading.Parts, value.From, value.Count);
-            block = parts[0].Word;
-            name = parts[1].Word;
-            values = new ValueRange(_reading.Parts, value.From + 2, value.Count - 2);
-            return true;
+        /// <summary>The arguments of the member <paramref name="value" />, none where it was written without them or is no member.</summary>
+        public ValueRange Arguments(Value value)
+        {
+            return value.Form == ValueForm.Reference ? Within(_reading.Parts[value.From + value.Count - 2]) : new ValueRange();
+        }
+
+        /// <summary>The names the member at a position is on, none where there is no member there.</summary>
+        public ValueRange On(int index)
+        {
+            return On(ValueAt(index));
+        }
+
+        /// <summary>The names the member <paramref name="value" /> is on, none where it is no member.</summary>
+        public ValueRange On(Value value)
+        {
+            return value.Form == ValueForm.Reference ? Within(_reading.Parts[value.From + value.Count - 1]) : new ValueRange();
+        }
+
+        /// <summary>The parts of the name of the member <paramref name="value" />, none where it is no member.</summary>
+        public ValueRange Member(Value value)
+        {
+            return value.Form == ValueForm.Reference ? new ValueRange(_reading.Parts, value.From, value.Count - 2) : new ValueRange();
+        }
+
+        /// <summary>Whether the value at a position is a member written on blocks.</summary>
+        public bool IsMember(int index)
+        {
+            return ValueAt(index).Form == ValueForm.Reference;
         }
 
         /// <summary>A written number as a count, 0 where it is none a count can be.</summary>
@@ -174,7 +202,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// The parts of a name at a position: two for <c>MalTek.Airlock</c>, one for a name written alone.
+        /// The parts of a name at a position: two for <c>MalTek.Airlock</c>, one for a name written alone, and the member's
+        /// for a member written on blocks.
         /// </summary>
         /// <remarks>
         /// A name written alone is answered as a run of one, so a reader asks one question whichever way a
@@ -191,6 +220,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var value = ValueAt(index);
             if (value.Form == ValueForm.Qualified)
                 return new ValueRange(_reading.Parts, value.From, value.Count);
+
+            if (value.Form == ValueForm.Reference)
+                return new ValueRange(_reading.Parts, value.From, value.Count - 2);
 
             return value.Form == ValueForm.Identifier
                 ? new ValueRange(_reading.Values, _from + index, 1)

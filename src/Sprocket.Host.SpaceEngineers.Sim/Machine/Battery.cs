@@ -102,12 +102,9 @@ public sealed class Battery : Fitting
     }
 
     /// <inheritdoc />
-    public override bool Holds(string propertyId, Literal value)
+    public override Literal Read(string propertyId)
     {
-        if (propertyId != "ChargeMode")
-            return base.Holds(propertyId, value);
-
-        return value.Kind == ValueKind.Integer && value.Whole == (long)_mode;
+        return propertyId == "ChargeMode" ? Literal.Of((long)_mode) : base.Read(propertyId);
     }
 
     /// <inheritdoc />

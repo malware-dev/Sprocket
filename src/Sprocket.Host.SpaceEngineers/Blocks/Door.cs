@@ -22,9 +22,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Shut = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Closed);
 
-        static readonly Reading Opening = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Opening);
+        static readonly string[] Statuses = { "open", "closed", "opening", "closing" };
 
-        static readonly Reading Closing = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Closing);
+        static readonly Being State = Being.OneOf<IMyDoor>(Statuses, door => Position(door.Status));
 
         static readonly Doing Opens = Doing.Of<IMyDoor>(door => door.OpenDoor(), Opened);
 
@@ -42,21 +42,52 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithEvent("opened", Opened, Edge.Rising, "finishes opening").Announced().Reading("is open", "is not open")
-                .WithEvent("closed", Shut, Edge.Rising, "finishes closing").Announced().Reading("is closed", "is not closed")
-                .WithEvent("opening", Opening, Edge.Rising, "starts opening").Announced().Reading("is opening", "is not opening")
-                .WithEvent("closing", Closing, Edge.Rising, "starts closing").Reading("is closing", "is not closing");
-
             // Every door says when it is told to open; only a hangar door says when it is told to close. Any other door is
-            // looked at for starting to close only between starting to open and having closed, which it does say.
-            if (block is IMyAirtightHangarDoor)
-                kind.Announced();
-            else
-                kind.RuledOutBy(Shut);
+            // looked at for starting to close only between starting to open and having closed, which it does say, and so
+            // is its status as a whole.
+            var hangar = block is IMyAirtightHangarDoor;
+            kind.WithValue("status", "status", State);
+            Watched(kind, hangar);
+
+            kind.WithChange("finishes-opening", "finishes opening", "status", Literal.Name("open")).Announced()
+                .Reading("is open", "is not open")
+                .WithChange("finishes-closing", "finishes closing", "status", Literal.Name("closed")).Announced()
+                .Reading("is closed", "is not closed")
+                .WithChange("starts-opening", "starts opening", "status", Literal.Name("opening")).Announced()
+                .Reading("is opening", "is not opening")
+                .WithChange("starts-closing", "starts closing", "status", Literal.Name("closing"))
+                .Reading("is closing", "is not closing");
+
+            Watched(kind, hangar);
 
             kind.WithAction("open", "open", Opens, "Open_On").Lasting()
                 .WithAction("close", "close", Closes, "Open_Off").Lasting()
                 .Renaming("Open", false, "reverse");
+        }
+
+        /// <summary>Says how what was added last is heard: announced on a hangar door, and on any other ruled out while it is shut.</summary>
+        static void Watched(EntityKind kind, bool hangar)
+        {
+            if (hangar)
+                kind.Announced();
+            else
+                kind.RuledOutBy(Shut);
+        }
+
+        /// <summary>Where <paramref name="status" /> stands among the door's statuses.</summary>
+        static int Position(DoorStatus status)
+        {
+            switch (status)
+            {
+                case DoorStatus.Open:
+                    return 0;
+                case DoorStatus.Closed:
+                    return 1;
+                case DoorStatus.Opening:
+                    return 2;
+            }
+
+            return 3;
         }
 
         /// <summary>Told when the door finishes opening or closing, which every door raises from its own update, as it is told to open, and, for a hangar door, as it is told to close.</summary>

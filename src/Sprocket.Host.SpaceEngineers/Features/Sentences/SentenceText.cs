@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>The words between what starts a trigger and what it does.</summary>
         /// <remarks>
-        /// As the program writes it: a moment is followed by "then", "when any closed [ inner ] then
+        /// As the program writes it: a comparison is followed by "then", "when any ext.closed on [ inner ] == on then
         /// run 2", and a clock by the verb alone, "every 600t run 3". A trigger that does one plain thing
         /// has no verb here, because that thing's own words follow; one that sets a value has "set",
         /// because its value is said by name alone, as on its step.

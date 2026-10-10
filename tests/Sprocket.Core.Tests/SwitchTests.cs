@@ -76,7 +76,7 @@ public class SwitchTests
         ship.Airlock.AddInstance();
 
 
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(ship.Ref(ship.Inner));
 
         ship.Secure = ship.Program.AddSequence(ship.Airlock, opened);
@@ -93,7 +93,7 @@ public class SwitchTests
         var step = new Act(actionId);
         foreach (var target in targets)
             step.Targets.Add(target);
-        return step;
+        return Given.Defaults(step);
     }
 
     /// <summary>

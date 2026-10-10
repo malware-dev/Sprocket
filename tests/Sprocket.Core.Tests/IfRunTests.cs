@@ -60,11 +60,16 @@ public class IfRunTests
             }
         }
 
-        public Comparison Closed(Door door, bool closed) => Test("closed", "ext", door, Literal.Of(closed));
+        public Comparison Closed(Door door, bool closed)
+        {
+            var test = Test("status", "ext", door, Literal.Name("closed"));
+            test.Relation = closed ? Relation.Is : Relation.IsNot;
+            return test;
+        }
 
         public Comparison Test(string member, string provider, Fitting block, Literal value)
         {
-            var test = new Comparison { MemberId = member, Provider = provider, RequiresAll = true, Value = value };
+            var test = new Comparison { MemberId = member, Provider = provider, Quantifier = Quantifier.All, Value = value };
             test.Targets.Add(Name(block));
             return test;
         }
@@ -73,7 +78,7 @@ public class IfRunTests
         {
             var act = new Act(action);
             act.Targets.Add(Name(block));
-            return act;
+            return Given.Defaults(act);
         }
 
         public void Add(params Step[] steps)
@@ -200,7 +205,7 @@ public class IfRunTests
         var a = new Airlock();
         a.Light.Enabled = on;
         var test = a.Test("OnOff", "", a.Light, Literal.Of(false));
-        test.RequiresAll = all;
+        test.Quantifier = all ? Quantifier.All : Quantifier.Any;
         a.Add(new If(test), a.Do("open", a.Inner), new EndIf(), new Await());
 
         a.Start();

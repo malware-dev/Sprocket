@@ -38,6 +38,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const float Filled = 0.95f;
 
+        const string Unheard = "A vent raises no event of its own, and nothing it announces rules a room's air in or out.";
+
         /// <summary>The action that fills the room, which may be told to carry on where there is no more oxygen to give.</summary>
         public const string Pressurize = "pressurize";
 
@@ -62,6 +64,27 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly Reading Empty = Reading.Remembering<IMyAirVent>((vent, seen) =>
             vent.IsWorking && vent.GetOxygenLevel() <= Emptied && !VentGas.Working(vent, true, seen));
 
+        static readonly string[] Rooms = { "filling", "full", "emptying", "empty", "stopped" };
+
+        // Full and empty as the readings above judge them, so a test of the room and a step that fills it agree; filling and
+        // emptying are the vent on its way, and stopped is a vent switched off, unpowered or broken. A room that is not
+        // airtight never fills, and stays filling. Written out rather than asking Air and Empty, which would read whether
+        // the vent works and its level once each on every look (BudgetTests.ALookedForMomentIsLookedAtOnItsCadence).
+        static readonly Being Room = Being.OneOf<IMyAirVent>(Rooms, (vent, seen) =>
+        {
+            if (!vent.IsWorking)
+                return 4;
+
+            var level = vent.GetOxygenLevel();
+            if (level >= Filled && !VentGas.Working(vent, false, seen))
+                return 1;
+
+            if (level <= Emptied && !VentGas.Working(vent, true, seen))
+                return 3;
+
+            return vent.Depressurize ? 2 : 0;
+        });
+
         static readonly Doing Fills = Doing.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = false, Air,
             (vent, stuck, seen) => vent.IsWorking && Passes(Filling(vent, seen), stuck, Cause.VentNoOxygen),
@@ -82,10 +105,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>Nothing to call off: a vent goes on with the air it was moving, and a room half emptied is no kind of stop.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithEvent("filled", Air, Edge.Rising, "finishes filling").Reading("has air", "has no air")
-                .Looked("A vent raises no event of its own, and nothing it announces rules a room's air in or out.")
-                .WithEvent("emptied", Empty, Edge.Rising, "finishes emptying").Reading("is empty", "is not empty")
-                .Looked("A vent raises no event of its own, and nothing it announces rules a room's air in or out.")
+            kind.WithValue("room-status", "room status", Room).Looked(Unheard)
+                .WithChange("finishes-filling", "finishes filling", "room-status", Literal.Name("full"))
+                .Reading("has air", "has no air").Looked(Unheard)
+                .WithChange("finishes-emptying", "finishes emptying", "room-status", Literal.Name("empty"))
+                .Reading("is empty", "is not empty").Looked(Unheard)
                 .WithAction(Pressurize, "pressurize", Fills, "Depressurize_Off").Lasting().Asking(Asked(
                     "**Hold** waits until the room is full. Where there is no more oxygen to give, as when the tanks are "
                     + "empty, that wait never ends.\n\n**Move on** carries on once the room will fill no further, with what "

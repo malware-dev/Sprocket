@@ -14,6 +14,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         Decimal,
 
         /// <summary>Text, kept as text whatever it spells.</summary>
-        Text
+        Text,
+
+        /// <summary>One of a list of names a member gives, chosen rather than typed, and given as the name.</summary>
+        Name
     }
 }

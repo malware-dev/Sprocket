@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _wasEvent;
         readonly string _nowEvent;
 
+        /// <summary>The trigger <paramref name="was" /> made into <paramref name="now" />.</summary>
         public ChangeTrigger(MomentTrigger was, MomentTrigger now)
         {
             _was = was;
@@ -56,7 +57,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
                 var wasWhen = _was as WhenTrigger;
                 var nowWhen = _now as WhenTrigger;
-                return wasWhen != null && nowWhen != null && wasWhen.RequiresAll != nowWhen.RequiresAll;
+                return wasWhen != null && nowWhen != null
+                       && (wasWhen.Quantifier != nowWhen.Quantifier || wasWhen.Relation != nowWhen.Relation
+                           || wasWhen.Provider != nowWhen.Provider || wasWhen.Value.Said != nowWhen.Value.Said
+                           || !Same(wasWhen.Arguments, nowWhen.Arguments));
             }
         }
 

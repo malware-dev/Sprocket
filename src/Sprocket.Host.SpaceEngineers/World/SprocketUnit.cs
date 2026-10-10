@@ -288,16 +288,22 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the signal part.
+        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the signal part, or the
+        /// slot and blocks of a signal written in place.
         /// </summary>
         /// <remarks>
         /// By the part's name, because a trigger has no number and its part is what each instance answers. Renaming the part
         /// changes what is wanted, and the slot is written again with the rest of the wiring. Marked <c>part:</c>, because a
-        /// part may be called anything, a sequence's number and <c>2/stop</c> among it.
+        /// part may be called anything, a sequence's number and <c>2/stop</c> among it, and <c>at:</c> for one written in
+        /// place, which is the slot and the blocks it is sent from.
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
         {
-            return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/part:" + trigger.Part;
+            var head = system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number);
+            if (!trigger.IsWritten)
+                return head + "/part:" + trigger.Part;
+
+            return head + "/at:" + (trigger.At == null ? "" : trigger.At.EventId) + ":" + string.Join(",", trigger.Sources);
         }
 
         readonly List<Sequence> _runs = new List<Sequence>();
@@ -365,7 +371,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 for (var t = 0; t < triggers.Count; t++)
                 {
                     var needed = triggers[t] as SignalTrigger;
-                    var alone = needed == null ? null : _runner.Alone(system, needed);
+                    var alone = needed == null || needed.IsWatched ? null : _runner.Alone(system, needed);
                     for (var n = 0; alone != null && n < instances.Count; n++)
                     {
                         var target = new Target();
@@ -550,7 +556,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 var needed = triggers[i] as SignalTrigger;
-                if (needed != null)
+                if (needed != null && !needed.IsWatched)
                     WantedForSignal(into, system, instance, sequence, needed);
             }
         }
@@ -561,7 +567,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var blocks = _answering;
             var positions = _answeringAt;
-            _program.Answers(system, instance, needed.Part, blocks, positions);
+            _program.Answers(system, instance, needed, blocks, positions);
 
             for (var i = 0; i < blocks.Count && i < positions.Count; i++)
             {
@@ -690,7 +696,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
-                if (!(triggers[i] is SignalTrigger) || !triggers[i].IsAbout(sequence))
+                var signal = triggers[i] as SignalTrigger;
+                if (signal == null || signal.IsWatched || !triggers[i].IsAbout(sequence))
                     continue;
 
                 var wanted = Wanting(system, instance, sequence, triggers[i]);
@@ -775,13 +782,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < triggers.Count; i++)
             {
                 var needed = triggers[i] as SignalTrigger;
-                if (needed == null || !needed.IsAbout(sequence))
+                if (needed == null || needed.IsWatched || !needed.IsAbout(sequence))
                     continue;
 
                 var wanted = Wanting(system, instance, sequence, needed);
                 var blocks = _answering;
                 var positions = _answeringAt;
-                _program.Answers(system, instance, needed.Part, blocks, positions);
+                _program.Answers(system, instance, needed, blocks, positions);
                 for (var s = 0; s < blocks.Count && s < positions.Count; s++)
                 {
                     IMyToolbar toolbar = ToolbarOf(blocks[s], positions[s].Toolbar);

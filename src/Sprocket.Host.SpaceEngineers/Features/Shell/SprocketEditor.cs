@@ -1506,7 +1506,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void Unless(AutomationSystem system, MomentTrigger made, PickAnswer answer, Trigger except, Action<Occupant> then,
             Action otherwise)
         {
-            if (!(made is SignalTrigger))
+            var signal = made as SignalTrigger;
+            if (signal == null || signal.IsWatched)
             {
                 then(null);
                 return;
@@ -1681,7 +1682,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         {
                             var through = instances[n];
                             if ((other == trigger && (through == instance || !each.IsBlueprint))
-                                || !Answers(each, through, other.Part, panel.Id, where))
+                                || !Answers(each, through, other, panel.Id, where))
                                 continue;
 
                             named = true;
@@ -1715,7 +1716,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether <paramref name="instance" /> of <paramref name="system" /> answers trigger <paramref name="trigger" /> with the slot <paramref name="where" /> on the block <paramref name="block" />.</summary>
-        bool Answers(AutomationSystem system, SystemInstance instance, string trigger, long block, ToolbarSlot where)
+        bool Answers(AutomationSystem system, SystemInstance instance, SignalTrigger trigger, long block, ToolbarSlot where)
         {
             var blocks = new List<string>();
             var positions = new List<ToolbarSlot>();
@@ -1844,7 +1845,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
 
-            if (!(made is SignalTrigger))
+            var signal = made as SignalTrigger;
+            if (signal == null || signal.IsWatched)
             {
                 var named = Named(system, answer.Targets);
                 for (var i = 0; i < named.Count; i++)
@@ -1878,7 +1880,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </summary>
         string SignalName(string block, ToolbarSlot at)
         {
-            var held = _program.FindSignalRef(block, at);
+            var held = _program.FindSignalRefOnly(block, at);
             return held != null
                 ? held.Name
                 : _program.Free(block + " " + at.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -1897,7 +1899,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         SystemEdit Answering(AutomationSystem system, MomentTrigger made, PickAnswer answer, SystemEdit then)
         {
             var required = made as SignalTrigger;
-            if (required == null)
+            if (required == null || required.IsWatched)
                 return null;
 
             var declared = new List<string>();
@@ -2052,6 +2054,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 var act = new Act(answer.Chosen);
                 act.Form = answer.Form;
+                act.Provider = Vocabulary.Provider(_world, answer.Targets, answer.Chosen, answer.Form);
                 var named = Named(system, answer.Targets);
                 for (var i = 0; i < named.Count; i++)
                     act.Targets.Add(named[i]);
@@ -2137,12 +2140,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (declared == null || slots.ContainsKey(needed.Part))
                     continue;
 
-                GridEntity panel = _runner.Bindings.Entity(declared.Block);
+                GridEntity panel = _runner.Bindings.Entity(declared.Name);
                 var slot = system.Free(panel == null ? declared.Name : Called(panel));
                 var part = system.PartFor(slot);
                 part.IsSignal = true;
 
-                first.Fill(slot, new[] { declared.Block }, new[] { declared.At });
+                var at = new ToolbarSlot[declared.Blocks.Count];
+                for (var n = 0; n < at.Length; n++)
+                    at[n] = declared.At;
+
+                first.Fill(slot, declared.Blocks, at);
 
                 slots[needed.Part] = slot;
             }
@@ -2361,6 +2368,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 delegate(PickAnswer answer)
                 {
                     var keeping = moment as SignalTrigger;
+                    if (keeping != null && keeping.IsWritten)
+                        keeping = null;
+
                     MomentTrigger made = Starter(system, answer, keeping);
                     Unless(system, made, answer, moment, delegate(Occupant taken)
                     {
@@ -2375,7 +2385,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
                         // A button picked again for a button trigger answers the same signal part, so the trigger is kept:
                         // its toolbar slots name it.
-                        if (keeping != null && made is SignalTrigger && system.IsBlueprint)
+                        var answered = made as SignalTrigger;
+                        if (keeping != null && answered != null && !answered.IsWritten && system.IsBlueprint)
                         {
                             var refill = Answering(system, made, answer, null);
                             if (refill != null)
@@ -2398,7 +2409,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Aimed(system, made, aim, origin, false, taken == null ? edit : TakingOver(edit, taken));
                     }, delegate { UnwindTo(origin); });
                 },
-                true, was != null && was.RequiresAll, opens: action ? Opening.Nothing : opens, aim: aim);
+                true, was != null && was.Quantifier == Quantifier.All, opens: action ? Opening.Nothing : opens, aim: aim);
 
             Push(picker);
             if (action)

@@ -70,8 +70,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             {
                 var when = moment as WhenTrigger;
                 var sources = SystemInstance.Through(through, moment.Sources);
+                if (when != null && !Watched(bindings, when, sources))
+                    return "When " + Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources);
+
                 return "When " + SentenceText.Named(bindings, sources,
-                    when != null && when.RequiresAll) + " " + Happening(bindings, Vocabulary.EventOf(null, bindings, null, moment, through), sources);
+                    when != null && when.Quantifier == Quantifier.All) + " " + Happening(bindings, Vocabulary.EventOf(null, bindings, null, moment, through), sources);
             }
 
             var every = trigger as EveryTrigger;
@@ -419,27 +422,60 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>A test as its row reads: the blocks and the state they are read for, or the value on the blocks and what it is compared with.</summary>
         static string Tested(Bindings bindings, Comparison test, SystemInstance through)
         {
-            var targets = SystemInstance.Through(through, test.Targets);
-            var blocks = SentenceText.Named(bindings, targets, test.RequiresAll);
-            if (test.IsMoment)
-            {
-                var events = Vocabulary.EventsFor(bindings, targets);
-                for (var i = 0; i < events.Count; i++)
-                {
-                    if (events[i].Id == test.MemberId && events[i].IsState)
-                        return blocks + " " + (test.Value.Flag ? events[i].State : events[i].Unstate);
-                }
+            return Compared(bindings, test.Provider, test.MemberId, test.Quantifier, test.Relation, test.Value,
+                SystemInstance.Through(through, test.Targets));
+        }
 
-                return blocks + " " + SentenceText.Empty;
+        /// <summary>
+        /// A member compared on some blocks, as a sentence reads it: the blocks and the state they are read for, for one of
+        /// Sprocket's own, or the value on the blocks and what it is compared with.
+        /// </summary>
+        static string Compared(Bindings bindings, string provider, string id, Quantifier quantifier, Relation relation,
+            Literal compared, IList<string> targets)
+        {
+            var blocks = SentenceText.Named(bindings, targets, quantifier != Quantifier.Any);
+            if (provider == BlockKinds.Own)
+            {
+                bool inState;
+                var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), id, relation, compared, out inState);
+                if (state != null)
+                    return blocks + " " + (inState ? state.State : state.Unstate);
             }
 
-            EntityAction value = test.Names(Vocabulary.ActionsFor(bindings, targets));
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), provider, id);
+
             if (value == null)
                 return SentenceText.Empty + " on " + blocks;
 
             var fields = new List<Field>();
             value.Fields(fields);
-            return value.Named + " on " + blocks + " is " + SentenceText.Given(new ArgumentsSlot(new[] { test.Value }, fields, null));
+            var read = value.Named + " on " + blocks;
+            return (quantifier == Quantifier.Sum ? "the sum of " + read : read) + " " + Compared(relation) + " "
+                   + SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null));
+        }
+
+        /// <summary>Whether <paramref name="when" /> is a value of Sprocket's own coming to be what one of its signals says it becomes, which reads as that signal.</summary>
+        static bool Watched(Bindings bindings, WhenTrigger when, IList<string> sources)
+        {
+            bool inState;
+            return when.Provider == BlockKinds.Own
+                   && Vocabulary.Change(Vocabulary.EventsFor(bindings, sources), when.EventId, when.Relation, when.Value, out inState) != null
+                   && inState;
+        }
+
+        /// <summary>How a comparison reads between a value and what it is compared with.</summary>
+        static string Compared(Relation relation)
+        {
+            switch (relation)
+            {
+                case Relation.IsNot: return "is not";
+                case Relation.Above: return "is above";
+                case Relation.AtLeast: return "is at least";
+                case Relation.Below: return "is below";
+                case Relation.AtMost: return "is at most";
+            }
+
+            return "is";
         }
 
 

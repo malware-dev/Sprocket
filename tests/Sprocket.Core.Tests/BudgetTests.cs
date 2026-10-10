@@ -42,7 +42,7 @@ public class BudgetTests
         var automation = new Automation();
         var door = ship.Door(1, "Door");
         var lamp = ship.Light(2, "Lamp");
-        Watch(ship, automation, "opened", door.Id, lamp.Id);
+        Watch(ship, automation, "finishes-opening", door.Id, lamp.Id);
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = Settle(ship, runner);
@@ -67,7 +67,7 @@ public class BudgetTests
         var automation = new Automation();
         var vent = ship.Vent(1, "Vent");
         var lamp = ship.Light(2, "Lamp");
-        Watch(ship, automation, "filled", vent.Id, lamp.Id);
+        Watch(ship, automation, "finishes-filling", vent.Id, lamp.Id);
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = Settle(ship, runner);
@@ -81,10 +81,50 @@ public class BudgetTests
         Assert.Equal(Span / 10 * look.Count, Counted(runner, ref frame));
     }
 
-    /// <summary>A <c>when</c> on <paramref name="moment" /> of <paramref name="watched" /> that switches <paramref name="lit" /> on.</summary>
-    static void Watch(Rigged ship, Automation automation, string moment, long watched, long lit)
+    /// <summary>
+    /// A <c>when</c> on one of the block's own values looks on its cadence and asks the game nothing by name: the value was
+    /// made ready to read when the program was bound.
+    /// </summary>
+    /// <remarks>
+    /// The harness reads the value off its fitting, so a look here asks the game nothing at all; the game's own reads the
+    /// property it was handed once, which is one call a look.
+    /// </remarks>
+    [Fact]
+    public void AWhenOnAValueAsksNothingByNameWhenItLooks()
     {
-        var when = new WhenTrigger(moment);
+        var ship = new Rigged();
+        var automation = new Automation();
+        var lamp = ship.Light(1, "Lamp");
+        var door = ship.Door(2, "Door");
+        lamp.Carrying("Radius", "Radius", ValueKind.Real);
+        lamp.Set("Radius", Literal.Of(2.0));
+
+        var when = new WhenTrigger("Radius") { Provider = "", Relation = Relation.Above, Value = Literal.Of(5.0) };
+        when.Sources.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        var sequence = automation.AddSequence(when);
+        var act = new Act("open");
+        act.Targets.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
+        sequence.Steps.Add(act);
+        sequence.Steps.Add(new Await());
+
+        var runner = new AutomationRunner(automation, ship.World);
+        var frame = Settle(ship, runner);
+
+        Assert.Empty(Look(runner, ref frame, 10));
+        Assert.Equal(0, Counted(runner, ref frame));
+
+        // Still watching: what it reads coming to hold starts the step.
+        lamp.Set("Radius", Literal.Of(6.0));
+        for (var i = 0; i < 20; i++)
+            runner.Tick(++frame);
+
+        Assert.Contains("Door:open", ship.Rig.Log);
+    }
+
+    /// <summary>An <c>on</c> <paramref name="signal" /> of <paramref name="watched" /> that switches <paramref name="lit" /> on.</summary>
+    static void Watch(Rigged ship, Automation automation, string signal, long watched, long lit)
+    {
+        var when = SignalTrigger.Written(BlockKinds.Own, signal);
         when.Sources.Add(automation.Declare(ship.World, ship.Entity(watched)).Name);
         var sequence = automation.AddSequence(when);
         var act = new Act(BlockKinds.SwitchOn);

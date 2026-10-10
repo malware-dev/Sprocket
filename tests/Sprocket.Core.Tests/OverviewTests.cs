@@ -56,7 +56,7 @@ public class OverviewTests
         var system = ship.Program.AddSystem();
         system.Name = name;
 
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(ship.Ref(watches));
 
         var sequence = ship.Program.AddSequence(system, opened);

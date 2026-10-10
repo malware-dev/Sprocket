@@ -21,13 +21,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Text, in double quotes. Never a name.</summary>
         Text,
 
+        /// <summary>A whole number.</summary>
         Integer,
+
+        /// <summary>A number with a point or an exponent.</summary>
         Real,
+
+        /// <summary>A length of time: <c>600t</c>.</summary>
         Duration,
+
+        /// <summary>A color: <c>#FF8800</c>.</summary>
         Color,
 
         /// <summary>
-        /// Three numbers in brackets, checked and then not kept.
+        /// Three numbers in parentheses, checked and then not kept.
         /// </summary>
         /// <remarks>
         /// Nothing in the model can hold one yet, so there is nowhere for its numbers to go. The syntax is
@@ -36,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         Vector,
 
+        /// <summary>Items in square brackets, separated by commas, a run of <see cref="Reading.Items" />.</summary>
         List,
 
         /// <summary>
@@ -44,9 +52,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Qualified,
 
         /// <summary>
-        /// A host function called on a block, <c>panel1:toolbar(1, 1, 4)</c>: the block's name, the function's name and its
-        /// values, a run of <see cref="Reading.Parts" />.
+        /// A member and the blocks it is read on or done to, <c>ext.toolbar(1, 1, 4) on [ panel1 ]</c>: the name's parts, the
+        /// arguments as a list and the names as a list, a run of <see cref="Reading.Parts" />.
         /// </summary>
-        Function
+        Reference
     }
 }

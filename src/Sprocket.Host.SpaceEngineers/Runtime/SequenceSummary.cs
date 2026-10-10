@@ -89,6 +89,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var required = triggers[i] as SignalTrigger;
                 if (required != null)
                 {
+                    // A block that never sends the change Sprocket watches for can never start it, which is said rather than
+                    // waited on forever.
+                    if (required.IsWatched)
+                    {
+                        var sending = SystemInstance.Through(through, required.Sources);
+                        for (var s = 0; s < sending.Count; s++)
+                        {
+                            GridEntity block = bindings.Entity(sending[s]);
+                            if (block != null && Probe.Watching(block, required.Provider, required.EventId) == null)
+                                return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
+                        }
+                    }
+
                     if (required.Sources.Count > 0)
                         continue;
 
@@ -119,7 +132,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     return SequenceFault.Unstarted(Unwired.NoMoment, entity == null ? null : entity.Name);
                 }
 
-                // A block that never reaches the moment can never start it, which is said rather than waited on forever.
+                // A block whose member can never be read as the when compares it can never start it, which is said rather
+                // than waited on forever.
                 var when = moment as WhenTrigger;
                 if (when == null)
                     continue;
@@ -128,7 +142,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 for (var s = 0; s < watched.Count; s++)
                 {
                     GridEntity block = bindings.Entity(watched[s]);
-                    if (block != null && when.Moment(block.Kind) == null)
+                    if (block != null && Probe.Of(block, when.Provider, when.EventId, when.Arguments, when.Quantifier,
+                            when.Relation, when.Value) == null)
                         return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
                 }
             }
@@ -391,7 +406,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return false;
         }
 
-        /// <summary>The first step that has not been given a value its action needs, or none.</summary>
+        /// <summary>The first step that has not been given a value its action or function needs, or none.</summary>
         /// <remarks>
         /// Asked of the action the blocks offer, because what is needed is the action's to declare and
         /// a block may have been replaced by one that declares otherwise.
@@ -400,6 +415,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
+                var test = TestOf(sequence.Steps[i]);
+                if (test != null)
+                {
+                    var read = SystemInstance.Through(through, test.Targets);
+                    for (var t = 0; t < read.Count; t++)
+                    {
+                        GridEntity entity = bindings.Entity(read[t]);
+                        var value = entity == null ? null : test.Names(entity.Kind.Actions);
+                        var left = value == null || value.Being == null ? null : value.Being.Missing(test.Arguments.Count);
+                        if (left != null)
+                            return new SequenceFault(SequenceProblem.Unfilled, i, Trouble.None, left);
+                    }
+
+                    continue;
+                }
+
                 var act = sequence.Steps[i] as Act;
                 if (act == null || !act.HasAction)
                     continue;
@@ -466,15 +497,29 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return SequenceFault.None;
         }
 
-        /// <summary>Whether every block a test reads a value on takes what it is compared with as the kind the value is.</summary>
+        /// <summary>
+        /// Whether every block a test reads a member on takes what it is compared with as the kind the member is, and can be
+        /// compared as the test compares it.
+        /// </summary>
         static bool TestTakes(Bindings bindings, Comparison test, SystemInstance through, IList<Literal> compared)
         {
             var targets = SystemInstance.Through(through, test.Targets);
             for (var t = 0; t < targets.Count; t++)
             {
                 GridEntity entity = bindings.Entity(targets[t]);
-                EntityAction value = entity == null ? null : test.Names(entity.Kind.Actions);
+                if (entity == null)
+                    continue;
+
+                EntityAction value = test.Names(entity.Kind.Actions);
                 if (value != null && !value.Takes(compared))
+                    return false;
+
+                if (value != null && value.Being != null && value.Being.Refused(test.Arguments) != null)
+                    return false;
+
+                var offered = value != null;
+                if (offered && Probe.Of(entity, test.Provider, test.MemberId, test.Arguments, test.Quantifier, test.Relation,
+                        test.Value) == null)
                     return false;
             }
 
@@ -498,7 +543,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     for (var t = 0; t < read.Count; t++)
                     {
                         GridEntity entity = bindings.Entity(read[t]);
-                        if (entity != null && test.Moment(entity.Kind) == null && test.Names(entity.Kind.Actions) == null)
+                        if (entity != null && test.Names(entity.Kind.Actions) == null)
                             return new SequenceFault(SequenceProblem.Unoffered, i);
                     }
 

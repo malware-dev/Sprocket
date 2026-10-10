@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 
@@ -18,6 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<EntityAction> _actions = new List<EntityAction>();
         readonly List<string> _hidden = new List<string>();
         readonly List<Capability> _capabilities = new List<Capability>();
+
+        EntityAction _value;
 
         /// <summary>A kind of block, <paramref name="id" />, called <paramref name="displayName" />, with nothing described yet.</summary>
         public EntityKind(string id, string displayName)
@@ -77,8 +80,38 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityKind WithEvent(string id, Reading flag, Edge edge, string text)
         {
             _events.Add(new EntityEvent(id, flag, edge, text));
+            _value = null;
             return this;
         }
+
+        /// <summary>
+        /// Adds the signal <paramref name="id" />, read as <paramref name="text" />: Sprocket's own value <paramref name="value" />,
+        /// added before it, coming to be <paramref name="becomes" />.
+        /// </summary>
+        public EntityKind WithChange(string id, string text, string value, Literal becomes)
+        {
+            var changed = FindAction(value, Form.Value);
+            if (changed == null || changed.Being == null)
+                throw new ArgumentException("The signal " + id + " is a change in " + value + ", which is no value of Sprocket's own declared before it.");
+
+            var signal = new EntityEvent(id, changed.Being.Is(becomes), Edge.Rising, text);
+            signal.Changes(value, becomes);
+            _events.Add(signal);
+            _value = null;
+            return this;
+        }
+
+        /// <summary>Adds Sprocket's own value <paramref name="id" />, named <paramref name="named" />, read by <paramref name="being" />.</summary>
+        /// <remarks>Read, never set. What it is called in a list is what the field beside a test asks for.</remarks>
+        public EntityKind WithValue(string id, string named, Being being)
+        {
+            var value = new EntityAction(id, named, null).Reads(being, Asked(named, being));
+            value.List(named);
+            _actions.Add(value);
+            _value = value;
+            return this;
+        }
+
 
         /// <summary>Says how a test reads the moment added last: the block in it, and not.</summary>
         public EntityKind Reading(string state, string unstate)
@@ -87,24 +120,36 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>Says that the block announces when the moment added last may have happened - see <see cref="Capability.Listen" />.</summary>
+        /// <summary>Says that the block announces when the value or signal added last may have changed - see <see cref="Capability.Listen" />.</summary>
         public EntityKind Announced()
         {
-            _events[_events.Count - 1].Announce();
+            if (_value != null)
+                _value.Announce();
+            else
+                _events[_events.Count - 1].Announce();
+
             return this;
         }
 
-        /// <summary>Says the moment added last is looked for on a cadence, and <paramref name="reason" /> why: the game announces neither it nor anything that rules it out.</summary>
+        /// <summary>Says the value or signal added last is looked for on a cadence, and <paramref name="reason" /> why: the game announces neither it nor anything that rules it out.</summary>
         public EntityKind Looked(string reason)
         {
-            _events[_events.Count - 1].Look(reason);
+            if (_value != null)
+                _value.Look(reason);
+            else
+                _events[_events.Count - 1].Look(reason);
+
             return this;
         }
 
-        /// <summary>Says the moment added last cannot happen while <paramref name="flag" /> reads true, and the block announces when that changes - see <see cref="EntityEvent.RuledOutBy" />.</summary>
+        /// <summary>Says the value or signal added last cannot change while <paramref name="flag" /> reads true, and the block announces when that changes - see <see cref="EntityEvent.RuledOutBy" />.</summary>
         public EntityKind RuledOutBy(Reading flag)
         {
-            _events[_events.Count - 1].RuleOutBy(flag);
+            if (_value != null)
+                _value.RuleOutBy(flag);
+            else
+                _events[_events.Count - 1].RuleOutBy(flag);
+
             return this;
         }
 
@@ -119,6 +164,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityKind WithSignal(Sequences.ToolbarSlot at, string text)
         {
             _events.Add(new EntityEvent(at, text));
+            _value = null;
             return this;
         }
 
@@ -324,6 +370,36 @@ namespace Sprocket.Host.SpaceEngineers.World
                     return _actions[i];
             }
             return null;
+        }
+
+        /// <summary>The field a test of a value of Sprocket's own asks for what it is compared with.</summary>
+        static Field Asked(string named, Being being)
+        {
+            switch (being.Kind)
+            {
+                case ValueKind.Name:
+                    var words = new string[being.Names.Count];
+                    var means = new string[being.Names.Count];
+                    for (var i = 0; i < words.Length; i++)
+                    {
+                        means[i] = being.Names[i];
+                        words[i] = means[i].Replace('-', ' ');
+                    }
+
+                    var among = Field.Among(named, words, means);
+                    among.Entry = Entry.Name;
+                    return among;
+                case ValueKind.Flag:
+                    var either = Field.OneOf(named, Literal.Of(true).Said, Literal.Of(false).Said);
+                    either.Edits = Editor.Chosen;
+                    return either;
+                case ValueKind.Color:
+                    return Field.Holding(named, Editor.Colour, 1);
+            }
+
+            var box = Field.Called(named);
+            box.Entry = EntityAction.Entered(being.Kind);
+            return box;
         }
     }
 }

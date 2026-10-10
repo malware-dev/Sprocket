@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;
@@ -70,6 +71,32 @@ public class ButtonWiringTests
         Assert.EndsWith("/2/1", KeyIn(port));
     }
 
+    /// <summary>A button a toolbar signal written in place already answers is asked about, as one a named signal answers is.</summary>
+    [Fact]
+    public void AButtonAWrittenSignalAnswersIsAskedAbout()
+    {
+        var sim = Blueprinted();
+        var port = sim.Editor.World.Entities.First(entity => entity.Name == "Port Button");
+        var other = sim.Editor.Program.AddSequence(sim.Editor.Program.AddSystem("Bell"));
+        var written = SignalTrigger.Written(BlockKinds.Own, ProgramText.Toolbar);
+        written.At = new ToolbarSlot(1, 1, 1);
+        written.Sources.Add(sim.Editor.Program.Declare(sim.Editor.World, port).Name);
+        written.Does = new Run(other.Number);
+        other.System.AddTrigger(written);
+        sim.Editor.Program.Edited();
+        Tick(sim);
+        Assert.StartsWith(other.System.Identity.ToString("D"), KeyIn(PanelNamed(sim, "Port Button")));
+
+        sim.Editor.Parts()[0].Fills!.Execute();
+        sim.Tick();
+        sim.Editor.PressBlock("Port Button");
+        sim.Editor.PressChoice("button 1 is pressed");
+        sim.Editor.PressPrimary();
+        sim.Tick();
+
+        Assert.StartsWith("Port Button already starts", sim.Editor.Question());
+    }
+
     /// <summary>Taking another blockset's button writes it for the one taking it, and the other is left needing a button.</summary>
     [Fact]
     public void TakingAnotherBlocksetsButtonRewiresIt()
@@ -122,7 +149,7 @@ public class ButtonWiringTests
         var trigger = (SignalTrigger)system.Triggers[0];
         Assert.Equal(1, system.Instances[0].Positions(trigger.Part)![0].Slot);
         Assert.Equal(3, system.Instances[1].Positions(trigger.Part)![0].Slot);
-        Assert.Contains(":toolbar(1, 1, 3) ]", ProgramText.Save(sim.Editor.Program, sim.World.Values));
+        Assert.Contains("ext.toolbar(1, 1, 3) on [ ", ProgramText.Save(sim.Editor.Program, sim.World.Values));
     }
 
     /// <summary>

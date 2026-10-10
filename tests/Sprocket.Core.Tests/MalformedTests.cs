@@ -13,19 +13,19 @@ namespace Sprocket.Tests;
 public class MalformedTests
 {
     /// <summary>A script that reads clean, using every statement the cases below break.</summary>
-    const string Good = "sprocket 1 alpha 11\n\n"
+    const string Good = "sprocket 1 alpha 14\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n"
         + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n"
-        + "let halt = panel1:toolbar(1, 1, 2)\n"
-        + "let bell = panel1:toolbar(1, 1, 3)\n\n"
+        + "let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n"
+        + "let bell = ext.toolbar(1, 1, 3) on [ panel1 ]\n\n"
         + "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door {\n"
-        + "    on halt then call ext.open on [ door1 ]\n"
+        + "    whenever halt then call ext.open on [ door1 ]\n"
         + "}\n\n"
         + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock {\n"
         + "    required slot inner expects Door\n"
         + "    optional slot button expects signal\n\n"
-        + "    on button then run 1\n\n"
-        + "    when any ext.closed [ inner ] then run 1\n\n"
+        + "    whenever button then run 1\n\n"
+        + "    whenever ext.'finishes-closing' on [ inner ] then run 1\n\n"
         + "    every 600t stop 1\n\n"
         + "    sequence 1 as Cycle {\n"
         + "        call ext.close on [ inner ]\n"
@@ -37,7 +37,7 @@ public class MalformedTests
         + "}\n\n"
         + "instance 1 of MalTek.Airlock {\n"
         + "    inner = [ door1 ]\n"
-        + "    button = [ panel1:toolbar(1, 1, 1), bell ]\n"
+        + "    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n"
         + "}\n";
 
     [Theory]
@@ -55,41 +55,41 @@ public class MalformedTests
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius on [ inner ] to 4 5\n")]
     [InlineData("    required slot inner expects Door\n", "    required slot inner expects Door garbage\n")]
     [InlineData("    required slot inner expects Door\n", "    required slot inner garbage\n")]
-    [InlineData("    on button then run 1\n", "    on button then run 1 garbage\n")]
-    [InlineData("    on button then run 1\n", "    on button run 1\n")]
-    [InlineData("    on button then run 1\n", "    on inner then run 1\n")]
-    [InlineData("    on button then run 1\n", "    on halt then run 1\n")]
-    [InlineData("    on halt then call ext.open on [ door1 ]\n", "    on door1 then call ext.open on [ door1 ]\n")]
-    [InlineData("    on halt then call ext.open on [ door1 ]\n", "    on halt then call ext.open on [ halt ]\n")]
-    [InlineData("    on halt then call ext.open on [ door1 ]\n", "    on halt then call ext.open on [ inner ]\n")]
-    [InlineData("    on halt then call ext.open on [ door1 ]\n", "    on halt then await\n")]
+    [InlineData("    whenever button then run 1\n", "    whenever button then run 1 garbage\n")]
+    [InlineData("    whenever button then run 1\n", "    whenever button run 1\n")]
+    [InlineData("    whenever button then run 1\n", "    whenever inner then run 1\n")]
+    [InlineData("    whenever button then run 1\n", "    whenever halt then run 1\n")]
+    [InlineData("    whenever halt then call ext.open on [ door1 ]\n", "    whenever door1 then call ext.open on [ door1 ]\n")]
+    [InlineData("    whenever halt then call ext.open on [ door1 ]\n", "    whenever halt then call ext.open on [ halt ]\n")]
+    [InlineData("    whenever halt then call ext.open on [ door1 ]\n", "    whenever halt then call ext.open on [ inner ]\n")]
+    [InlineData("    whenever halt then call ext.open on [ door1 ]\n", "    whenever halt then await\n")]
     [InlineData("    optional slot button expects signal\n", "    optional slot button expects signal garbage\n")]
     [InlineData("    optional slot button expects signal\n", "    optional block button expects signal\n")]
     [InlineData("    optional slot button expects signal\n", "    optional slot call expects signal\n")]
     [InlineData("system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door {\n", "system \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Door {\n    required slot lamp expects InteriorLight\n")]
     [InlineData("instance 1 of MalTek.Airlock {\n", "instance 1 of MalTek.Door {\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = panel1:toolbar(1, 1)\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = panel1:toolbar(1, 0, 2)\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = panel1:shelf(1, 1, 2)\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = panel9:toolbar(1, 1, 2)\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = panel1:toolbar(1, 1, 2) garbage\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = halt\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "let halt = 4\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = ext.toolbar(1, 1) on [ panel1 ]\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = ext.toolbar(1, 0, 2) on [ panel1 ]\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = ext.shelf(1, 1, 2) on [ panel1 ]\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = ext.toolbar(1, 1, 2) on [ panel9 ]\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = ext.toolbar(1, 1, 2) on [ panel1 ] garbage\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = halt\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "let halt = 4\n")]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n", "")]
     [InlineData("let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n", "let door1 = block 'ButtonPanel/ButtonPanelLarge' [ 8, \"Button\" ]\n")]
     [InlineData("let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n", "let door1 block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n")]
     [InlineData("let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n", "let let = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n")]
     [InlineData("    inner = [ door1 ]\n", "    inner = [ halt ]\n")]
-    [InlineData("    button = [ panel1:toolbar(1, 1, 1), bell ]\n", "    button = [ door1 ]\n")]
-    [InlineData("    button = [ panel1:toolbar(1, 1, 1), bell ]\n", "    button = [ panel1:toolbar(1, 1, 1), halt ]\n")]
-    [InlineData("    button = [ panel1:toolbar(1, 1, 1), bell ]\n", "    button = [ panel1:toolbar(1, 1, 2) ]\n")]
-    [InlineData("    button = [ panel1:toolbar(1, 1, 1), bell ]\n", "    button = [ bell, panel1:toolbar(1, 1, 3) ]\n")]
-    [InlineData("    on halt then call ext.open on [ door1 ]\n", "    on halt then call ext.open on [ door1 ]\n    on halt then run 1\n")]
-    [InlineData("    on button then run 1\n", "    on button then run 1\n    on button then stop 1\n")]
-    [InlineData("    button = [ panel1:toolbar(1, 1, 1), bell ]\n", "    button = [ panel1:toolbar(1, 1) ]\n")]
-    [InlineData("    button = [ panel1:toolbar(1, 1, 1), bell ]\n", "    button = [ door9:toolbar(1, 1, 1) ]\n")]
+    [InlineData("    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ door1 ]\n")]
+    [InlineData("    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], halt ]\n")]
+    [InlineData("    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ ext.toolbar(1, 1, 2) on [ panel1 ] ]\n")]
+    [InlineData("    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ bell, ext.toolbar(1, 1, 3) on [ panel1 ] ]\n")]
+    [InlineData("    whenever halt then call ext.open on [ door1 ]\n", "    whenever halt then call ext.open on [ door1 ]\n    whenever halt then run 1\n")]
+    [InlineData("    whenever button then run 1\n", "    whenever button then run 1\n    whenever button then stop 1\n")]
+    [InlineData("    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ ext.toolbar(1, 1) on [ panel1 ] ]\n")]
+    [InlineData("    button = [ ext.toolbar(1, 1, 1) on [ panel1 ], bell ]\n", "    button = [ ext.toolbar(1, 1, 1) on [ door9 ] ]\n")]
     [InlineData("    every 600t stop 1\n", "    every 600t stop 1 garbage\n")]
-    [InlineData("    when any ext.closed [ inner ] then run 1\n", "    when any ext.closed [ inner ] garbage then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.status on [ inner ] == closed garbage then run 1\n")]
     [InlineData("    sequence 1 as Cycle {\n", "    sequence 1 as Cycle garbage {\n")]
     [InlineData("    inner = [ door1 ]\n", "    inner = [ door1 ] garbage\n")]
     [InlineData("    inner = [ door1 ]\n", "    inner = [ door9 ]\n")]
@@ -97,10 +97,10 @@ public class MalformedTests
     [InlineData("instance 1 of MalTek.Airlock {\n", "instance 1 of MalTek.Airlock garbage {\n")]
     [InlineData("let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n", "let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ] garbage\n")]
     [InlineData("let door1 = block 'Door/LargeBlockDoor' [ 7, \"Inner\" ]\n", "block door1 [ 7, \"Inner\" ]\n")]
-    [InlineData("sprocket 1 alpha 11\n", "sprocket 1 alpha 11 garbage\n")]
+    [InlineData("sprocket 1 alpha 14\n", "sprocket 1 alpha 14 garbage\n")]
     [InlineData("    required slot inner expects Door\n", "    // required slot inner expects Door\n")]
-    [InlineData("    on button then run 1\n", "    // on button then run 1\n")]
-    [InlineData("let halt = panel1:toolbar(1, 1, 2)\n", "// let halt = panel1:toolbar(1, 1, 2)\n")]
+    [InlineData("    whenever button then run 1\n", "    // whenever button then run 1\n")]
+    [InlineData("let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n", "// let halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n")]
     [InlineData("    every 600t stop 1\n", "    // every 600t stop 1\n")]
     [InlineData("    sequence 1 as Cycle {\n", "    // sequence 1 as Cycle {\n")]
     [InlineData("    inner = [ door1 ]\n", "    // inner = [ door1 ]\n")]
@@ -116,29 +116,45 @@ public class MalformedTests
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius on [ inner ] to [ 4 ]\n")]
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius on [ inner ] to (1 2 3)\n")]
     [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius on [ inner ] to MalTek.Four\n")]
-    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ inner ] with [ 1, 2 ]\n")]
-    [InlineData("sprocket 1 alpha 11\n", "sprocket 1.5 alpha 11\n")]
-    [InlineData("sprocket 1 alpha 11\n", "sprocket 1 alpha 11.9\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close([ 1, 2 ]) on [ inner ]\n")]
+    [InlineData("sprocket 1 alpha 14\n", "sprocket 1.5 alpha 11\n")]
+    [InlineData("sprocket 1 alpha 14\n", "sprocket 1 alpha 14.9\n")]
     [InlineData("        run 1\n", "        Run 1\n")]
     [InlineData("        await\n", "        Await\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close ON [ inner ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ Inner ]\n")]
     [InlineData("    inner = [ door1 ]\n", "    inner = [ Door1 ]\n")]
     [InlineData("instance 1 of MalTek.Airlock {\n", "instance 1 of maltek.airlock {\n")]
-    [InlineData("sprocket 1 alpha 11\n", "Sprocket 1 alpha 11\n")]
+    [InlineData("sprocket 1 alpha 14\n", "Sprocket 1 alpha 11\n")]
     [InlineData("        run 1\n", "        run all\n")]
     [InlineData("        run 1\n", "        stop every\n")]
     [InlineData("    required slot inner expects Door\n", "    required slot inner expects block\n")]
     [InlineData("        set Radius on [ inner ] to 4\n", "        set on on [ inner ] to 4\n")]
     [InlineData("    inner = [ door1 ]\n", "    inner = [ door1 ]\n    inner = [ door1 ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ button ]\n")]
-    [InlineData("    when any ext.closed [ inner ] then run 1\n", "    when any ext.closed [ button ] then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    whenever ext.'finishes-closing' on [ button ] then run 1\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call sprocket.close on [ inner ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.on on [ inner ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        act ext.close on [ inner ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ door1 ]\n")]
     [InlineData("        call ext.close on [ inner ]\n", "        call ext.run on [ inner ]\n")]
-    [InlineData("    when any ext.closed [ inner ] then run 1\n", "    when any sprocket.closed [ inner ] then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any sprocket.closed on [ inner ] == on then run 1\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close() on [ inner ]\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close(1,) on [ inner ]\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close(1 2) on [ inner ]\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close(1) [ inner ]\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close(1)\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ inner ] with 2\n")]
+    [InlineData("        call ext.close on [ inner ]\n", "        call ext.close on [ inner ], 2\n")]
+    [InlineData("        set Radius on [ inner ] to 4\n", "        set Radius(1) on [ inner ] to 4\n")]
+    [InlineData("        set Radius on [ inner ] to 4\n", "        set other.radius on [ inner ] to 4\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] == then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] < on then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when sum ext.closed on [ inner ] == on then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when ext.closed on [ inner ] == on then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] = on then run 1\n")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] ! on then run 1\n")]
     public void ALineNotAsTheLanguageSaysIsAnError(string was, string now)
     {
         Assert.Equal("", ProgramText.Load(Good, new Automation(), new Values()));
@@ -155,7 +171,7 @@ public class MalformedTests
     public void AHeaderThatWillNotParseIsDamage()
     {
         var after = new Automation();
-        var said = ProgramText.Load(Good.Replace("sprocket 1 alpha 11\n", "sprocket 1 alpha 11 ,\n"), after, new Values());
+        var said = ProgramText.Load(Good.Replace("sprocket 1 alpha 14\n", "sprocket 1 alpha 14 ,\n"), after, new Values());
 
         Assert.StartsWith("Line 1: ", said);
         Assert.False(after.Intact);
@@ -180,12 +196,11 @@ public class MalformedTests
         Assert.False(program.Intact);
     }
 
-    /// <summary>An action or a moment in a namespace this host has not got is an error, and so is a moment in the root, where it has none.</summary>
+    /// <summary>A member in a namespace this host has not got is an error.</summary>
     [Theory]
     [InlineData("        call ext.close on [ inner ]\n", "        call Gearbox.close on [ inner ]\n", "no namespace 'Gearbox'")]
     [InlineData("        call ext.close on [ inner ]\n", "        call Sprocket.close on [ inner ]\n", "no namespace 'Sprocket'")]
-    [InlineData("    when any ext.closed [ inner ] then run 1\n", "    when any Gearbox.closed [ inner ] then run 1\n", "no namespace 'Gearbox'")]
-    [InlineData("    when any ext.closed [ inner ] then run 1\n", "    when any closed [ inner ] then run 1\n", "expected a moment qualified")]
+    [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any Gearbox.closed on [ inner ] == on then run 1\n", "no namespace 'Gearbox'")]
     public void AMemberOrMomentTheHostHasNotGotIsAnError(string was, string now, string said)
     {
         var after = new Automation();
@@ -199,7 +214,7 @@ public class MalformedTests
     public void EveryAnnotationIsKept()
     {
         var script = Good
-            .Replace("sprocket 1 alpha 11\n", "# The ship's automation.\nsprocket 1 alpha 11\n")
+            .Replace("sprocket 1 alpha 14\n", "# The ship's automation.\nsprocket 1 alpha 14\n")
             .Replace("let door1 = ", "# The inner door.\nlet door1 = ")
             .Replace("let halt = ", "# The stop button.\nlet halt = ")
             .Replace("instance 1 of MalTek.Airlock {\n", "# The front airlock.\ninstance 1 of MalTek.Airlock {\n")
@@ -209,7 +224,7 @@ public class MalformedTests
         Assert.Equal("", ProgramText.Load(script, after, new Values()));
         var saved = ProgramText.Save(after, new Values());
 
-        Assert.Contains("# The ship's automation.\nsprocket 1 alpha 11", saved);
+        Assert.Contains("# The ship's automation.\nsprocket 1 alpha 14", saved);
         Assert.Contains("# The inner door.\nlet door1 = ", saved);
         Assert.Contains("# The stop button.\nlet halt = ", saved);
 

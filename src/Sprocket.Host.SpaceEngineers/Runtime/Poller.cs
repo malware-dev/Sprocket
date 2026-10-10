@@ -49,8 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         string[] _names = new string[0];
         GridEntity[] _entities = new GridEntity[0];
-        EntityEvent[] _moments = new EntityEvent[0];
-        Recall[] _seen = new Recall[0];
+        Probe[] _probes = new Probe[0];
         Recall[] _ruling = new Recall[0];
         bool[] _previous = new bool[0];
         bool[] _known = new bool[0];
@@ -85,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The instance whose blocks it watches.</summary>
         public SystemInstance Instance => _instance;
 
-        /// <summary>Whether what it watches for read true at the last look; false until the first look.</summary>
+        /// <summary>Whether the comparison it watches held at the last look, on any block or on what it asks of them all; false until the first look.</summary>
         public bool Live { get; private set; }
 
         /// <summary>Whether one or more of the blocks it watches is no longer on the construct.</summary>
@@ -118,7 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>What it read of each block at its last look, by the name the program gives the block; for a save.</summary>
+        /// <summary>Whether the comparison held on each block at its last look, by the name the program gives the block; for a save.</summary>
         public IEnumerable<KeyValuePair<string, bool>> Signals
         {
             get
@@ -134,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>Whether every block was there at the last look of a <c>when all</c>: 1 or 0, or -1 before its first look.</summary>
+        /// <summary>Whether the comparison held on every block, or on their sum, at the last look of a <c>when all</c> or a <c>when sum</c>: 1 or 0, or -1 before its first look.</summary>
         public int All => _all;
 
         /// <summary>Ticks since an <c>every</c> last fell due, or -1 before its first look.</summary>
@@ -213,8 +212,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Works out which blocks it watches, what each is read by, and listens to every one that announces the moment or
-        /// when it is ruled out, marking whether all of them do.
+        /// Works out which blocks it watches, what each is read by, and listens to every one that announces a change in what
+        /// it reads or when that is ruled out, marking whether all of them do.
         /// </summary>
         /// <remarks>
         /// Done again only where the blocks the names point at, or the program, have changed since, so a look reads arrays
@@ -224,7 +223,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Compile()
         {
             var when = _trigger as WhenTrigger;
-            if (when == null || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits))
+            var signal = _trigger as SignalTrigger;
+            var watched = when != null ? (MomentTrigger)when : signal;
+            if (watched == null || (_bindings.Revision == _compiledBindings && _owner.Program.Edits == _compiledEdits))
                 return;
 
             _compiledBindings = _bindings.Revision;
@@ -237,12 +238,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _kept[_names[i]] = _previous[i];
             }
 
-            Watched(when.Sources);
+            Watched(watched.Sources);
             var count = _watched.Count;
             _names = new string[count];
             _entities = new GridEntity[count];
-            _moments = new EntityEvent[count];
-            _seen = new Recall[count];
+            _probes = new Probe[count];
             _ruling = new Recall[count];
             _previous = new bool[count];
             _known = new bool[count];
@@ -252,12 +252,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var name = _watched[i];
                 var entity = _bindings.Entity(name);
-                var moment = entity == null ? null : when.Moment(entity.Kind);
+                var probe = when != null
+                    ? Probe.Of(entity, when.Provider, when.EventId, when.Arguments, when.Quantifier, when.Relation, when.Value)
+                    : Probe.Watching(entity, signal.Provider, signal.EventId);
+
+                var ruling = probe == null ? null : probe.RuledOutBy;
                 _names[i] = name;
                 _entities[i] = entity;
-                _moments[i] = moment;
-                _seen[i] = moment != null && moment.Flag != null && moment.Flag.Remembers ? new Recall() : null;
-                _ruling[i] = moment != null && moment.RuledOutBy != null && moment.RuledOutBy.Remembers ? new Recall() : null;
+                _probes[i] = probe;
+                _ruling[i] = ruling != null && ruling.Remembers ? new Recall() : null;
 
                 bool was;
                 if (_kept.TryGetValue(name, out was))
@@ -266,7 +269,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _known[i] = true;
                 }
 
-                var heard = moment != null && (moment.Announced || moment.RuledOutBy != null);
+                var heard = probe != null && (probe.Announced || ruling != null);
                 var listening = heard ? entity.Listen(_heard) : null;
                 if (listening == null)
                 {
@@ -296,8 +299,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             _possible = false;
             var when = _trigger as WhenTrigger;
+            if (when != null && when.Quantifier == Quantifier.Sum)
+                return SampleSum(when) ? 1 : 0;
+
             if (when != null)
-                return when.RequiresAll ? (SampleWhenAll() ? 1 : 0) : SampleWhen();
+                return when.Quantifier == Quantifier.All ? (SampleWhenAll() ? 1 : 0) : SampleWhen();
+
+            if (_trigger is SignalTrigger)
+                return SampleWhen();
 
             var every = _trigger as EveryTrigger;
             return every != null && SampleEvery(every) ? 1 : 0;
@@ -320,7 +329,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _bindings.Distinct(_watched);
         }
 
-        /// <summary>Fires once for each block that has reached the state since the last look, however close together they arrived.</summary>
+        /// <summary>Fires once for each block the comparison has come to hold on since the last look, however close together they arrived.</summary>
         int SampleWhen()
         {
             var fired = 0;
@@ -329,32 +338,25 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < _entities.Length; i++)
             {
-                var entity = _entities[i];
-                if (entity == null)
+                if (_entities[i] == null)
                 {
                     anyMissing = true;
                     continue;
                 }
 
-                var moment = _moments[i];
-                if (moment == null)
+                var probe = _probes[i];
+                if (probe == null)
                     continue;
 
-                Mark(entity, moment, _ruling[i]);
-                var now = entity.Reads(moment.Flag, _seen[i]);
+                Mark(probe, _ruling[i]);
+                var now = probe.Holds();
                 if (now)
                     anyTrue = true;
 
                 // No previous look means the trigger has only just come into existence, and an edge needs two.
                 // Firing on the first look would set every trigger off the moment it was made.
-                if (_known[i])
-                {
-                    var previous = _previous[i];
-                    if (moment.Edge == Edge.Rising && !previous && now)
-                        fired++;
-                    else if (moment.Edge == Edge.Falling && previous && !now)
-                        fired++;
-                }
+                if (_known[i] && !_previous[i] && now)
+                    fired++;
 
                 _previous[i] = now;
                 _known[i] = true;
@@ -365,18 +367,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return fired;
         }
 
-        /// <summary>Notes where <paramref name="entity" /> could reach <paramref name="moment" /> unannounced: one it does not announce, and nothing rules out now.</summary>
-        void Mark(GridEntity entity, EntityEvent moment, Recall ruling)
+        /// <summary>Notes where the block <paramref name="probe" /> reads could change unannounced: one whose change it does not announce, and nothing rules out now.</summary>
+        void Mark(Probe probe, Recall ruling)
         {
-            if (_possible || moment.Announced)
+            if (_possible || probe.Announced)
                 return;
 
-            if (moment.RuledOutBy == null || !entity.Reads(moment.RuledOutBy, ruling))
+            if (probe.RuledOutBy == null || !probe.Entity.Reads(probe.RuledOutBy, ruling))
                 _possible = true;
         }
 
         /// <summary>
-        /// Fires when the last of the blocks reaches the state, and not again until one of them has left it.
+        /// Fires when the comparison comes to hold on the last of the blocks, and not again until it stops holding on one of
+        /// them.
         /// </summary>
         /// <remarks>
         /// Watching for several separate edges on the same tick would almost never fire, because the blocks reach their
@@ -390,33 +393,70 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < _entities.Length; i++)
             {
-                var entity = _entities[i];
-                if (entity == null)
+                if (_entities[i] == null)
                 {
                     anyMissing = true;
                     all = false;
                     continue;
                 }
 
-                var moment = _moments[i];
-                if (moment == null)
+                var probe = _probes[i];
+                if (probe == null)
                 {
                     all = false;
                     continue;
                 }
 
-                Mark(entity, moment, _ruling[i]);
-                var wanted = moment.Edge == Edge.Rising;
-                if (entity.Reads(moment.Flag, _seen[i]) != wanted)
+                Mark(probe, _ruling[i]);
+                if (!probe.Holds())
                     all = false;
             }
 
             Live = all;
             Missed(anyMissing);
+            return Edge(all);
+        }
 
-            // Unknown until the second look, so a condition that is already true when the trigger appears does not set
-            // it off.
-            var now = all ? 1 : 0;
+        /// <summary>
+        /// Fires when the comparison comes to hold on the sum of what the blocks read, and not again until it stops holding.
+        /// </summary>
+        /// <remarks>Every block is read, so a block the sum cannot read leaves it out of reach: it never holds.</remarks>
+        bool SampleSum(WhenTrigger when)
+        {
+            var total = 0d;
+            var readable = _entities.Length > 0;
+            var anyMissing = false;
+
+            for (var i = 0; i < _entities.Length; i++)
+            {
+                if (_entities[i] == null)
+                {
+                    anyMissing = true;
+                    readable = false;
+                    continue;
+                }
+
+                var probe = _probes[i];
+                if (probe == null)
+                {
+                    readable = false;
+                    continue;
+                }
+
+                Mark(probe, _ruling[i]);
+                total += probe.Number();
+            }
+
+            var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, when.Value);
+            Live = holds;
+            Missed(anyMissing);
+            return Edge(holds);
+        }
+
+        /// <summary>Whether the whole condition has just come to hold, which is unknown until the second look, so a condition already true when the trigger appears does not set it off.</summary>
+        bool Edge(bool holds)
+        {
+            var now = holds ? 1 : 0;
             var fired = _all == 0 && now == 1;
             _all = now;
             return fired;

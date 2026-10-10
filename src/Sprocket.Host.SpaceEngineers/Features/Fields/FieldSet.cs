@@ -100,8 +100,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     }
 
                     // What the program holds for the word chosen, which is not the word wherever a block shows one
-                    // thing and is told another.
-                    _parts.Add(_wanted[i].Meaning(_fields[i].Text));
+                    // thing and is told another. A field left empty is written as what it starts with, because a member
+                    // is given every argument.
+                    var text = _fields[i].Text;
+                    if (string.IsNullOrEmpty(text) && _wanted[i].Default != null)
+                        text = _wanted[i].Default;
+
+                    _parts.Add(_wanted[i].Meaning(text));
                     _texts.Add(_wanted[i].Entry == Entry.Text);
                 }
 
@@ -152,14 +157,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             }
         }
 
-        /// <summary>Whether a value that has to be given has none.</summary>
+        /// <summary>Whether a value has none, and nothing it starts with to stand in for it.</summary>
+        /// <remarks>A member is given every argument, so a value that cannot be written as its default has to be given.</remarks>
         public bool Missing
         {
             get
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (_wanted[i].Needed && string.IsNullOrEmpty(_fields[i].Text))
+                    if (string.IsNullOrEmpty(_fields[i].Text) && (_wanted[i].Needed || _wanted[i].Default == null))
                         return true;
                 }
 

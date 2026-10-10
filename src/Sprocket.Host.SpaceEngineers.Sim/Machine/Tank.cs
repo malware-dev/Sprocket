@@ -87,12 +87,9 @@ public sealed class Tank : Fitting
     }
 
     /// <inheritdoc />
-    public override bool Holds(string propertyId, Literal value)
+    public override Literal Read(string propertyId)
     {
-        if (propertyId != "Stockpile")
-            return base.Holds(propertyId, value);
-
-        return value.Kind == ValueKind.Flag && value.Flag == _stockpile;
+        return propertyId == "Stockpile" ? Literal.Of(_stockpile) : base.Read(propertyId);
     }
 
     /// <inheritdoc />

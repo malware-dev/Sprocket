@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         TextPtr _ptr;
 
+        /// <summary>A lexer at the start of <paramref name="text" />.</summary>
         public Lexer(string text)
         {
             _ptr = new TextPtr(text ?? "");
@@ -32,6 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The whole script, so trouble can be placed on a line after the fact.</summary>
         public string Script => _ptr.Content;
 
+        /// <summary>The next token, past any spaces before it.</summary>
         public Token Next()
         {
             _ptr = _ptr.SkipWhitespace();
@@ -56,8 +58,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case ')': return One(TokenKind.VectorClose);
                 case ',': return One(TokenKind.Comma);
                 case '.': return One(TokenKind.Dot);
-                case ':': return One(TokenKind.Colon);
                 case '=': return Equality();
+                case '!': return Different();
+                case '<': return Ordered(Keyword.Below, Keyword.AtMost);
+                case '>': return Ordered(Keyword.Above, Keyword.AtLeast);
                 case '#': return Hash();
                 case '/': return Slashes();
                 case '"': return Quoted('"', TokenKind.Text);
@@ -111,7 +115,31 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return new Token(TokenKind.Equals, start.Index);
 
             _ptr++;
-            return new Token(TokenKind.EqualTo, start.Index);
+            return new Token(TokenKind.Comparison, start.Index, keyword: Keyword.EqualTo);
+        }
+
+        /// <summary><c>!=</c>, or trouble where <c>!</c> stands alone.</summary>
+        Token Different()
+        {
+            var start = _ptr;
+            _ptr++;
+            if (_ptr.IsOutOfBounds() || _ptr.Char != '=')
+                return Bad(start, "unexpected '!'.");
+
+            _ptr++;
+            return new Token(TokenKind.Comparison, start.Index, keyword: Keyword.NotEqualTo);
+        }
+
+        /// <summary><paramref name="strict" />, or <paramref name="inclusive" /> where <c>=</c> follows it.</summary>
+        Token Ordered(Keyword strict, Keyword inclusive)
+        {
+            var start = _ptr;
+            _ptr++;
+            if (_ptr.IsOutOfBounds() || _ptr.Char != '=')
+                return new Token(TokenKind.Comparison, start.Index, keyword: strict);
+
+            _ptr++;
+            return new Token(TokenKind.Comparison, start.Index, keyword: inclusive);
         }
 
         /// <summary><c>//</c>, or trouble where a single slash stands alone.</summary>

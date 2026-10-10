@@ -57,23 +57,54 @@ namespace Sprocket.Host.SpaceEngineers.World
             long here, there;
 
             if (values.TryInteger(kind, reading, out here) && values.TryInteger(kind, operand, out there))
-            {
-                switch (relation)
-                {
-                    case Relation.Is: return here == there;
-                    case Relation.IsNot: return here != there;
-                    case Relation.Above: return here > there;
-                    case Relation.AtLeast: return here >= there;
-                    case Relation.Below: return here < there;
-                    case Relation.AtMost: return here <= there;
-                }
+                return Whole(here, relation, there);
 
-                return false;
+            return Real(values.AsNumber(kind, reading), relation, values.AsNumber(kind, operand));
+        }
+
+        /// <summary>
+        /// Measures a reading against an operand, each carrying its own kind.
+        /// </summary>
+        /// <remarks>
+        /// Two whole numbers are compared as whole numbers and any other two numbers as reals, so an integer stands for a
+        /// real. A flag, a colour and text answer only sameness, and two of different kinds are never the same.
+        /// </remarks>
+        public static bool Holds(Literal reading, Relation relation, Literal operand)
+        {
+            if (reading.Kind == ValueKind.Integer && operand.Kind == ValueKind.Integer)
+                return Whole(reading.Whole, relation, operand.Whole);
+
+            var numbers = (reading.Kind == ValueKind.Integer || reading.Kind == ValueKind.Real)
+                          && (operand.Kind == ValueKind.Integer || operand.Kind == ValueKind.Real);
+            if (numbers)
+                return Real(reading.Number, relation, operand.Number);
+
+            if (reading.Kind != operand.Kind)
+                return Same(false, relation);
+
+            if (reading.Kind == ValueKind.Text || reading.Kind == ValueKind.Name)
+                return Same(string.Equals(reading.Text, operand.Text), relation);
+
+            return Same(reading.Value.Bits == operand.Value.Bits, relation);
+        }
+
+        static bool Whole(long here, Relation relation, long there)
+        {
+            switch (relation)
+            {
+                case Relation.Is: return here == there;
+                case Relation.IsNot: return here != there;
+                case Relation.Above: return here > there;
+                case Relation.AtLeast: return here >= there;
+                case Relation.Below: return here < there;
+                case Relation.AtMost: return here <= there;
             }
 
-            double left = values.AsNumber(kind, reading);
-            double right = values.AsNumber(kind, operand);
+            return false;
+        }
 
+        static bool Real(double left, Relation relation, double right)
+        {
             switch (relation)
             {
                 case Relation.Is: return left == right;

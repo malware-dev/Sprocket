@@ -22,9 +22,10 @@ public class IfStepTests
 
         var opens = Assert.IsType<If>(sequence.Steps[before]);
         Assert.IsType<EndIf>(sequence.Steps[before + 1]);
-        Assert.Equal("closed", opens.Test.MemberId);
-        Assert.True(opens.Test.IsMoment);
-        Assert.Equal(Literal.Of(true), opens.Test.Value);
+        Assert.Equal("status", opens.Test.MemberId);
+        Assert.Equal("ext", opens.Test.Provider);
+        Assert.Equal(Relation.Is, opens.Test.Relation);
+        Assert.Equal("closed", opens.Test.Value.Text);
     }
 
     /// <summary>A state's other side is a choice of its own, and makes a test for the blocks not being in it.</summary>
@@ -36,8 +37,9 @@ public class IfStepTests
         AddIf(rig, "Airlock Outer Door", "is not closed");
 
         var opens = Assert.IsType<If>(sequence.Steps[sequence.Steps.Count - 2]);
-        Assert.Equal("closed", opens.Test.MemberId);
-        Assert.Equal(Literal.Of(false), opens.Test.Value);
+        Assert.Equal("status", opens.Test.MemberId);
+        Assert.Equal(Relation.IsNot, opens.Test.Relation);
+        Assert.Equal("closed", opens.Test.Value.Text);
     }
 
     /// <summary>The row closing an if adds an otherwise once, and an otherwise if above it; the otherwise is made an otherwise if where it stands.</summary>
@@ -69,7 +71,8 @@ public class IfStepTests
         rig.Tick();
 
         var tested = Assert.IsType<Else>(sequence.Steps[sequence.Steps.Count - 2]);
-        Assert.Equal("opened", tested.Test.MemberId);
+        Assert.Equal("status", tested.Test.MemberId);
+        Assert.Equal(Literal.Name("open"), tested.Test.Value);
         Assert.Equal(2, Offered(Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds).Choices!).Count);
     }
 
@@ -94,7 +97,9 @@ public class IfStepTests
         rig.Tick();
 
         Assert.IsType<If>(sequence.Steps[0]);
-        Assert.Equal("opened", Assert.IsType<Else>(sequence.Steps[1]).Test.MemberId);
+        var tested = Assert.IsType<Else>(sequence.Steps[1]).Test;
+        Assert.Equal("status", tested.MemberId);
+        Assert.Equal(Literal.Name("open"), tested.Value);
         Assert.Null(Assert.IsType<Else>(sequence.Steps[2]).Test);
         Assert.IsType<EndIf>(sequence.Steps[3]);
     }
@@ -318,6 +323,36 @@ public class IfStepTests
     /// <summary>The words of those of <paramref name="choices" /> that may be added now.</summary>
     static List<string> Offered(IList<Adder> choices) => choices.Where(choice => choice.Adds != null).Select(choice => choice.Text).ToList();
 
+    /// <summary>Changing the blocks of a test written in the script keeps how it compares and that it is a sum.</summary>
+    [Fact]
+    public void ChangingATestsBlocksKeepsHowItCompares()
+    {
+        var rig = Airlock(out var sequence);
+        var beacon = rig.World.Entities.First(entity => entity.Name == "Warning Beacon");
+        var test = new Comparison
+        {
+            MemberId = "Radius", Provider = "", Quantifier = Quantifier.Sum, Relation = Relation.AtLeast, Value = Literal.Of(7.0)
+        };
+
+        test.Targets.Add(rig.Editor.Program.Declare(rig.World, beacon).Name);
+        sequence.Steps.Clear();
+        sequence.Steps.Add(new If(test));
+        sequence.Steps.Add(new EndIf());
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        rig.Editor.StepRows()[0].Slots[1].Opens!.Execute();
+        rig.Tick();
+        rig.Editor.PressPrimary();
+        rig.Tick();
+
+        var now = Assert.IsType<If>(sequence.Steps[0]).Test;
+        Assert.Equal("Radius", now.MemberId);
+        Assert.Equal(Quantifier.Sum, now.Quantifier);
+        Assert.Equal(Relation.AtLeast, now.Relation);
+        Assert.Equal(Literal.Of(7.0), now.Value);
+    }
+
     static Simulation Airlock(out Sequence sequence)
     {
         var rig = Simulation.Fresh();
@@ -339,7 +374,7 @@ public class IfStepTests
     static Comparison Closed(Simulation rig)
     {
         var door = rig.World.Entities.First(entity => entity.Name == "Airlock Outer Door");
-        var test = new Comparison { MemberId = "closed", Provider = "ext", Value = Literal.Of(true) };
+        var test = new Comparison { MemberId = "status", Provider = "ext", Value = Literal.Name("closed") };
         test.Targets.Add(rig.Editor.Program.Declare(rig.World, door).Name);
         return test;
     }

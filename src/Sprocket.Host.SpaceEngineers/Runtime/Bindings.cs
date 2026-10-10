@@ -64,8 +64,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// The same, and each signal variable to the block its slot is on, so a signal names its block wherever blocks are
-        /// asked after.
+        /// The same, and each signal variable to the first block its slot is on, so a signal names its block wherever blocks
+        /// are asked after, and is as bound as the least bound of its blocks.
         /// </summary>
         public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<SignalRef> signals)
         {
@@ -109,11 +109,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < signals.Count; i++)
             {
+                var blocks = signals[i].Blocks;
                 GridEntity panel;
-                if (_bound.TryGetValue(signals[i].Block, out panel))
+                if (blocks.Count > 0 && _bound.TryGetValue(blocks[0], out panel))
                     _bound[signals[i].Name] = panel;
 
-                _states[signals[i].Name] = State(signals[i].Block);
+                var state = RefState.Bound;
+                for (var n = 0; n < blocks.Count; n++)
+                {
+                    var one = State(blocks[n]);
+                    if (one == RefState.Lost || (one == RefState.Adrift && state == RefState.Bound))
+                        state = one;
+                }
+
+                _states[signals[i].Name] = state;
             }
         }
 

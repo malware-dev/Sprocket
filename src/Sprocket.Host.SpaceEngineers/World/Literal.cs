@@ -25,49 +25,64 @@ namespace Sprocket.Host.SpaceEngineers.World
             Text = text ?? "";
         }
 
+        /// <summary>A flag, on or off.</summary>
         public static Literal Of(bool flag)
         {
             return new Literal(ValueKind.Flag, EntityValue.Of(flag), null);
         }
 
+        /// <summary>A whole number.</summary>
         public static Literal Of(long whole)
         {
             return new Literal(ValueKind.Integer, EntityValue.Of(whole), null);
         }
 
+        /// <summary>A real number.</summary>
         public static Literal Of(double real)
         {
             return new Literal(ValueKind.Real, EntityValue.Of(real), null);
         }
 
+        /// <summary>Text.</summary>
         public static Literal Of(string text)
         {
             return new Literal(ValueKind.Text, new EntityValue(0), text);
         }
 
+        /// <summary>One of a list of names a member gives, written as the name.</summary>
+        public static Literal Name(string name)
+        {
+            return new Literal(ValueKind.Name, new EntityValue(0), name);
+        }
+
+        /// <summary>A color, by its red, green, blue and alpha.</summary>
         public static Literal Colour(byte r, byte g, byte b, byte a)
         {
             return new Literal(ValueKind.Color, EntityValue.Of(r, g, b, a), null);
         }
 
+        /// <summary>The kind of value it is.</summary>
         public ValueKind Kind { get; private set; }
 
         /// <summary>What it is, for every kind but <see cref="ValueKind.Text" />.</summary>
         public EntityValue Value { get; private set; }
 
-        /// <summary>The text, for <see cref="ValueKind.Text" />, and empty for the rest.</summary>
+        /// <summary>The text, for <see cref="ValueKind.Text" />, or the name, for <see cref="ValueKind.Name" />, and empty for the rest.</summary>
         public string Text { get; private set; }
 
+        /// <summary>It as a flag, for <see cref="ValueKind.Flag" />.</summary>
         public bool Flag
         {
             get { return Value.Bits != 0; }
         }
 
+        /// <summary>It as a whole number, for <see cref="ValueKind.Integer" />.</summary>
         public long Whole
         {
             get { return Value.Bits; }
         }
 
+        /// <summary>It as a real number, for <see cref="ValueKind.Real" />.</summary>
         public double Real
         {
             get { return BitConverter.Int64BitsToDouble(Value.Bits); }
@@ -90,21 +105,25 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>The red of a color.</summary>
         public byte Red
         {
             get { return (byte)(Value.Bits >> 24); }
         }
 
+        /// <summary>The green of a color.</summary>
         public byte Green
         {
             get { return (byte)(Value.Bits >> 16); }
         }
 
+        /// <summary>The blue of a color.</summary>
         public byte Blue
         {
             get { return (byte)(Value.Bits >> 8); }
         }
 
+        /// <summary>The alpha of a color.</summary>
         public byte Alpha
         {
             get { return (byte)Value.Bits; }
@@ -123,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                if (Kind == ValueKind.Text)
+                if (Kind == ValueKind.Text || Kind == ValueKind.Name)
                     return Text;
 
                 if (Kind == ValueKind.Flag)
@@ -178,9 +197,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case Primitive.Double:
                     return Becomes(ValueKind.Real, out became);
                 case Primitive.Char:
-                    return Kind == ValueKind.Text && Text.Length == 1;
+                    return (Kind == ValueKind.Text || Kind == ValueKind.Name) && Text.Length == 1;
                 case Primitive.String:
-                    return Kind == ValueKind.Text;
+                    return Kind == ValueKind.Text || Kind == ValueKind.Name;
             }
 
             return false;
@@ -232,14 +251,20 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>This as <paramref name="kind" />, or false where it cannot be one.</summary>
         /// <remarks>
-        /// The same kind is itself and a whole number is also a real one. Nothing else becomes
-        /// anything: a value is written as the kind it is.
+        /// The same kind is itself, a whole number is also a real one, and a name is also text, as a bare word where text is
+        /// taken. Nothing else becomes anything: a value is written as the kind it is.
         /// </remarks>
         public bool Becomes(ValueKind kind, out Literal became)
         {
             became = this;
             if (Kind == kind)
                 return true;
+
+            if (Kind == ValueKind.Name && kind == ValueKind.Text)
+            {
+                became = Of(Text);
+                return true;
+            }
 
             if (Kind != ValueKind.Integer || kind != ValueKind.Real)
                 return false;

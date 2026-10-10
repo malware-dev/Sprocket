@@ -948,22 +948,28 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, or on all.</summary>
+        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, on all, or on their sum.</summary>
         /// <remarks>Read once, when the run reaches the test; with no block to read, <c>all</c> holds and <c>any</c> does not.</remarks>
-        bool Holds(Tested tested, Comparison test)
+        static bool Holds(Tested tested, Comparison test)
         {
-            for (var i = 0; i < tested.Reads.Count; i++)
+            if (test.Quantifier == Quantifier.Sum)
             {
-                var read = tested.Reads[i];
-                var equal = read.Moment != null
-                    ? read.Entity.In(read.Moment, read.Seen) == test.Value.Flag
-                    : read.Entity.Holds(read.Value, read.Literal);
+                var total = 0d;
+                for (var i = 0; i < tested.Reads.Count; i++)
+                    total += tested.Reads[i].Number();
 
-                if (equal != test.RequiresAll)
-                    return equal;
+                return Relations.Holds(Literal.Of(total), test.Relation, test.Value);
             }
 
-            return test.RequiresAll;
+            var all = test.Quantifier == Quantifier.All;
+            for (var i = 0; i < tested.Reads.Count; i++)
+            {
+                var holds = tested.Reads[i].Holds();
+                if (holds != all)
+                    return holds;
+            }
+
+            return all;
         }
 
         /// <summary>The first block of an act that is switched off, and so cannot do what it is asked; none where all can.</summary>
@@ -1146,23 +1152,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </summary>
         sealed class Tested
         {
-            public readonly List<Read> Reads = new List<Read>();
+            public readonly List<Probe> Reads = new List<Probe>();
 
             /// <summary>Why the test cannot be read, a slot empty or a block gone or possibly swapped, or none.</summary>
             public SequenceProblem Problem;
 
             /// <summary>The slot or block that is so, by its reference.</summary>
             public string Which;
-        }
-
-        /// <summary>One block a test reads: the moment, or the value with what it is compared with as the block holds it.</summary>
-        sealed class Read
-        {
-            public GridEntity Entity;
-            public EntityEvent Moment;
-            public Recall Seen;
-            public EntityAction Value;
-            public Literal Literal;
         }
 
         Compiled[] _steps = new Compiled[0];
@@ -1230,7 +1226,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>What the test at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests on has changed, as an act is.</summary>
-        /// <remarks>A block that has neither the moment nor the value, or holds the value as another kind, is left out: the step is at fault, and the fault says so.</remarks>
+        /// <remarks>A block that has no such member, or cannot compare it as the test does, is left out: the step is at fault, and the fault says so.</remarks>
         Tested Test(int step, Comparison test)
         {
             Fresh();
@@ -1242,31 +1238,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             tested = new Tested();
             tested.Problem = Needed(test.Targets, SequenceProblem.MissingGate, out tested.Which);
 
-            var given = new List<Literal>(1);
-            given.Add(test.Value);
-            var became = new List<Literal>(1);
-
             var reading = ActedOn(test.Targets);
             for (var i = 0; i < reading.Count; i++)
             {
-                var entity = _bindings.Entity(reading[i]);
-                if (entity == null)
-                    continue;
+                var probe = Probe.Of(_bindings.Entity(reading[i]), test.Provider, test.MemberId, test.Arguments,
+                    test.Quantifier, test.Relation, test.Value);
 
-                var moment = test.Moment(entity.Kind);
-                var value = moment == null ? test.Names(entity.Kind.Actions) : null;
-                became.Clear();
-                if (moment == null && (value == null || !value.Converts(given, became)))
-                    continue;
-
-                tested.Reads.Add(new Read
-                {
-                    Entity = entity,
-                    Moment = moment,
-                    Seen = moment == null ? null : new Recall(),
-                    Value = value,
-                    Literal = moment == null ? became[0] : test.Value
-                });
+                if (probe != null)
+                    tested.Reads.Add(probe);
             }
 
             _tests[step] = tested;

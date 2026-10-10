@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
@@ -24,6 +26,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         bool _first;
         bool _fresh = true;
+
+        bool _arguments;
+
+        bool _firstArgument;
 
         /// <summary>
         /// A blank line, unless one would be the first thing inside a block or in the file.
@@ -140,13 +146,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
-        /// <summary>A comma after the value just written, as between the values after <c>with</c>.</summary>
-        public Pen Comma()
-        {
-            _text.Append(',');
-            return this;
-        }
-
         /// <summary>Text, always quoted, because it is whatever somebody typed.</summary>
         public Pen Text(string value)
         {
@@ -155,12 +154,41 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
-        /// <summary>A toolbar slot on a block: <c>panel1:toolbar(1, 1, 4)</c>.</summary>
-        public Pen Slot(string block, ToolbarSlot at)
+        /// <summary>A signal sent from a toolbar slot on some blocks: <c>ext.toolbar(1, 1, 4) on [ panel1 ]</c>.</summary>
+        /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
+        public Pen Signal(IList<string> blocks, ToolbarSlot at)
         {
             Space();
-            Write(block);
-            _text.Append(":").Append(ProgramText.Toolbar).Append("(").Append(at.Toolbar).Append(", ").Append(at.Page).Append(", ").Append(at.Slot).Append(')');
+            Spell(_text, BlockKinds.Own, ProgramText.Toolbar);
+            _text.Append('(')
+                .Append(at.Toolbar.ToString(CultureInfo.InvariantCulture)).Append(", ")
+                .Append(at.Page.ToString(CultureInfo.InvariantCulture)).Append(", ")
+                .Append(at.Slot.ToString(CultureInfo.InvariantCulture)).Append(") on [");
+
+            for (var i = 0; i < blocks.Count; i++)
+            {
+                _text.Append(i == 0 ? " " : ", ");
+                Write(blocks[i]);
+            }
+
+            _text.Append(" ]");
+            return this;
+        }
+
+        /// <summary>Opens a member's arguments, against the name just written.</summary>
+        public Pen Open()
+        {
+            _text.Append('(');
+            _arguments = true;
+            _firstArgument = true;
+            return this;
+        }
+
+        /// <summary>Closes a member's arguments.</summary>
+        public Pen Close()
+        {
+            _text.Append(')');
+            _arguments = false;
             return this;
         }
 
@@ -172,6 +200,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>A whole number.</summary>
         public Pen Whole(long value)
         {
             Space();
@@ -202,6 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>A color, written <c>#RRGGBBAA</c>.</summary>
         public Pen Colour(byte r, byte g, byte b, byte a)
         {
             Space();
@@ -213,6 +243,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>Opens a list, whose items are separated by commas.</summary>
         public Pen OpenList()
         {
             Space();
@@ -222,6 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>Closes the list opened last.</summary>
         public Pen CloseList()
         {
             if (_lists > 0)
@@ -285,6 +317,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         void Space()
         {
+            if (_arguments)
+            {
+                if (!_firstArgument)
+                    _text.Append(", ");
+
+                _firstArgument = false;
+                return;
+            }
+
             if (_lists == 0)
             {
                 _text.Append(' ');

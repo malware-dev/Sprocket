@@ -566,7 +566,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 var when = moment as WhenTrigger;
                 row.Starts.Add(new EntitiesSlot(Editor.Blocks(_system, moment.Sources),
-                    when != null && when.RequiresAll, Starts(trigger, Opening.Blocks)));
+                    when != null && when.Quantifier != Quantifier.Any, Starts(trigger, Opening.Blocks)));
 
                 row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, Opening.What)));
             }

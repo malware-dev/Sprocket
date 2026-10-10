@@ -122,10 +122,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 && _slots.Set(block, propertyId, value);
         }
 
-        /// <summary>Whether one of a block's own values is <paramref name="value" />; false where it has none by that name.</summary>
-        public static bool Holds(IMyTerminalBlock block, string propertyId, Literal value)
+        /// <summary>One of a block's own values made ready to be read, or null where it has none by that name.</summary>
+        public static Gauge Gauge(IMyTerminalBlock block, string propertyId)
         {
-            return block != null && !string.IsNullOrEmpty(propertyId) && _slots.Holds(block, propertyId, value);
+            return block == null || string.IsNullOrEmpty(propertyId) ? null : _slots.Gauge(block, propertyId);
         }
 
         /// <summary>One of a block's own actions or values made ready to be given, or null.</summary>

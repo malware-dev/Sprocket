@@ -1,0 +1,700 @@
+using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Storage;
+using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Sim.Machine;
+using Xunit;
+
+namespace Sprocket.Tests;
+
+/// <summary>
+/// The language's members as they are written and as they run: arguments in parentheses, every member on its blocks, the six
+/// comparisons, <c>sum</c>, and a <c>when</c> on any value.
+/// </summary>
+public class VocabularyTests
+{
+    const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
+
+    /// <summary>Two lamps and a door, with a program on them and a runner ticking it.</summary>
+    sealed class Ship
+    {
+        public readonly Rigged Rig = new();
+        public readonly Automation Program = new();
+        public readonly Lamp Left;
+        public readonly Lamp Right;
+        public readonly Door Door;
+        public AutomationRunner Runner = null!;
+
+        int _frame;
+
+        public Ship()
+        {
+            Left = Rig.Light(1, "Left Lamp");
+            Right = Rig.Light(2, "Right Lamp");
+            Door = Rig.Door(3, "Door");
+            Left.Carrying("Radius", "Radius", ValueKind.Real);
+            Right.Carrying("Radius", "Radius", ValueKind.Real);
+        }
+
+        public string Name(Fitting fitting) => Program.Declare(Rig.World, Rig.Entity(fitting.Id)).Name;
+
+        public void Start()
+        {
+            Program.Edited();
+            Runner = new AutomationRunner(Program, Rig.World);
+            Tick(3);
+        }
+
+        public void Tick(int ticks = 1)
+        {
+            for (var i = 0; i < ticks; i++)
+            {
+                Rig.Tick();
+                Runner.Tick(++_frame);
+            }
+        }
+
+        /// <summary>A when on <paramref name="member" /> of the lamps, compared by <paramref name="relation" /> with <paramref name="value" />, that switches the door off.</summary>
+        public WhenTrigger When(string provider, string member, Quantifier quantifier, Relation relation, Literal value,
+            params Fitting[] blocks)
+        {
+            var when = new WhenTrigger(member) { Provider = provider, Quantifier = quantifier, Relation = relation, Value = value };
+            foreach (var block in blocks)
+                when.Sources.Add(Name(block));
+
+            var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+            off.Targets.Add(Name(Door));
+            when.Does = off;
+            Program.AddSequence((Trigger)null!).System.AddTrigger(when);
+            return when;
+        }
+
+        public int Fired => Rig.Rig.Log.Count(line => line == "Door:off");
+    }
+
+    /// <summary>Every new shape reads clean and is written back as it was read.</summary>
+    [Fact]
+    public void EveryShapeReadsAndIsWrittenBackAsItWas()
+    {
+        const string written = "sprocket 1 alpha 14\n\n"
+            + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
+            + "let light = block 'InteriorLight/SmallLight' [ 2 ]\n"
+            + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
+            + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
+            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
+            + "system \"" + Identity + "\" as MalTek.Airlock {\n"
+            + "    whenever button then run 1\n\n"
+            + "    whenever ext.'finishes-closing' on [ door1 ] then run 1\n\n"
+            + "    whenever ext.toolbar(1, 1, 2) on [ panel2 ] then run 1\n\n"
+            + "    when all ext.status on [ door1 ] != closed then run 1\n\n"
+            + "    when sum Radius on [ light ] >= 2.5 then call SetColor(255, 136, 0) on [ light ]\n\n"
+            + "    sequence 1 {\n"
+            + "        call SetColor(0, 255, 0) on [ light ]\n"
+            + "        if any Radius on [ light ] < 4 then {\n"
+            + "            set Radius on [ light ] to 4\n"
+            + "        }\n"
+            + "        else if sum Radius on [ light ] > 10 then {\n"
+            + "            call ext.close on [ door1 ]\n"
+            + "        }\n"
+            + "        else if all Radius on [ light ] <= 2 then {\n"
+            + "            call ext.open on [ door1 ]\n"
+            + "        }\n"
+            + "    }\n"
+            + "}\n";
+
+        var program = new Automation();
+        Assert.Equal("", ProgramText.Load(written, program, new Values()));
+        Assert.Equal(written, ProgramText.Save(program, new Values()));
+
+        var when = (WhenTrigger)program.Systems[0].Triggers[4];
+        Assert.Equal(Quantifier.Sum, when.Quantifier);
+        Assert.Equal(Relation.AtLeast, when.Relation);
+        Assert.Equal("", when.Provider);
+        Assert.Equal(new[] { "panel1", "panel2" }, program.FindSignalRef("button")!.Blocks);
+    }
+
+    /// <summary>A comparison is spaced or not as anybody likes, and reads the same.</summary>
+    [Theory]
+    [InlineData("if any Radius on [ light ] >=4 then {")]
+    [InlineData("if any Radius on [light] >= 4 then {")]
+    [InlineData("if any Radius on [ light ]>=  4 then {")]
+    public void AComparisonReadsWhateverItsSpacing(string line)
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 14\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
+            + "system \"" + Identity + "\" as MalTek.Lamp {\n    sequence 1 {\n        " + line + "\n        }\n    }\n}\n",
+            program, new Values()));
+
+        Assert.Contains("        if any Radius on [ light ] >= 4 then {\n", ProgramText.Save(program, new Values()));
+    }
+
+    /// <summary>Each comparison holds where the block's value stands that way to what it is compared with.</summary>
+    [Theory]
+    [InlineData(Relation.Is, 3.0, true)]
+    [InlineData(Relation.Is, 4.0, false)]
+    [InlineData(Relation.IsNot, 4.0, true)]
+    [InlineData(Relation.Above, 2.5, true)]
+    [InlineData(Relation.Above, 3.0, false)]
+    [InlineData(Relation.AtLeast, 3.0, true)]
+    [InlineData(Relation.Below, 3.0, false)]
+    [InlineData(Relation.Below, 3.5, true)]
+    [InlineData(Relation.AtMost, 3.0, true)]
+    [InlineData(Relation.AtMost, 2.9, false)]
+    public void EachComparisonHoldsAsItsNumbersStand(Relation relation, double than, bool holds)
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(3.0));
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var test = new Comparison { MemberId = "Radius", Relation = relation, Value = Literal.Of(than) };
+        test.Targets.Add(ship.Name(ship.Left));
+        var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+        off.Targets.Add(ship.Name(ship.Door));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(off);
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        ship.Runner.Call(cycle);
+        ship.Tick(5);
+
+        Assert.Equal(holds ? 1 : 0, ship.Fired);
+    }
+
+    /// <summary>An integer stands for a real: a lamp at 3 is at least 3 written whole.</summary>
+    [Fact]
+    public void AnIntegerStandsForAReal()
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(3.0));
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var test = new Comparison { MemberId = "Radius", Relation = Relation.AtLeast, Value = Literal.Of(3L) };
+        test.Targets.Add(ship.Name(ship.Left));
+        var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+        off.Targets.Add(ship.Name(ship.Door));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(off);
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        ship.Runner.Call(cycle);
+        ship.Tick(5);
+
+        Assert.Equal(1, ship.Fired);
+    }
+
+    /// <summary><c>sum</c> adds what every block reads and compares the total once.</summary>
+    [Theory]
+    [InlineData(Relation.AtLeast, 7.0, true)]
+    [InlineData(Relation.Above, 7.0, false)]
+    [InlineData(Relation.Is, 7.0, true)]
+    public void SumComparesTheTotal(Relation relation, double than, bool holds)
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(3.0));
+        ship.Right.Set("Radius", Literal.Of(4.0));
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var test = new Comparison { MemberId = "Radius", Quantifier = Quantifier.Sum, Relation = relation, Value = Literal.Of(than) };
+        test.Targets.Add(ship.Name(ship.Left));
+        test.Targets.Add(ship.Name(ship.Right));
+        var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+        off.Targets.Add(ship.Name(ship.Door));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(off);
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        ship.Runner.Call(cycle);
+        ship.Tick(5);
+
+        Assert.Equal(holds ? 1 : 0, ship.Fired);
+    }
+
+    /// <summary>A <c>when</c> on one of the block's own values fires as its comparison comes to hold, and once.</summary>
+    [Fact]
+    public void AWhenOnAValueFiresAsItsComparisonComesToHold()
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(2.0));
+        ship.When("", "Radius", Quantifier.Any, Relation.Above, Literal.Of(5.0), ship.Left);
+        ship.Start();
+        ship.Tick(30);
+        Assert.Equal(0, ship.Fired);
+
+        ship.Left.Set("Radius", Literal.Of(6.0));
+        ship.Tick(30);
+        Assert.Equal(1, ship.Fired);
+
+        ship.Left.Set("Radius", Literal.Of(7.0));
+        ship.Tick(30);
+        Assert.Equal(1, ship.Fired);
+    }
+
+    /// <summary>A <c>when</c> on a value being other than a name fires as the block leaves it.</summary>
+    [Fact]
+    public void AWhenOnIsNotFiresAsTheBlockLeavesTheState()
+    {
+        var ship = new Ship();
+        ship.When(BlockKinds.Own, "status", Quantifier.Any, Relation.IsNot, Literal.Name("closed"), ship.Door);
+        ship.Start();
+        ship.Tick(30);
+        Assert.Equal(0, ship.Fired);
+
+        ship.Door.ForceOpen();
+        ship.Tick(30);
+        Assert.Equal(1, ship.Fired);
+    }
+
+    /// <summary><c>when sum</c> fires once, as the total comes to hold, and not again until it has stopped holding.</summary>
+    [Fact]
+    public void AWhenSumFiresOnceAsTheTotalComesToHold()
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(2.0));
+        ship.Right.Set("Radius", Literal.Of(2.0));
+        ship.When("", "Radius", Quantifier.Sum, Relation.AtLeast, Literal.Of(7.0), ship.Left, ship.Right);
+        ship.Start();
+        ship.Tick(30);
+
+        ship.Left.Set("Radius", Literal.Of(4.0));
+        ship.Tick(30);
+        Assert.Equal(0, ship.Fired);
+
+        ship.Right.Set("Radius", Literal.Of(3.0));
+        ship.Tick(30);
+        Assert.Equal(1, ship.Fired);
+
+        ship.Right.Set("Radius", Literal.Of(4.0));
+        ship.Tick(30);
+        Assert.Equal(1, ship.Fired);
+
+        ship.Right.Set("Radius", Literal.Of(1.0));
+        ship.Tick(30);
+        ship.Right.Set("Radius", Literal.Of(5.0));
+        ship.Tick(30);
+        Assert.Equal(2, ship.Fired);
+    }
+
+    /// <summary>A function's argument is one of the words its field lists, and within the bounds it sets.</summary>
+    [Theory]
+    [InlineData("up", 5.0, SequenceProblem.None)]
+    [InlineData("sideways", 5.0, SequenceProblem.Mistyped)]
+    [InlineData("up", 11.0, SequenceProblem.Mistyped)]
+    [InlineData("down", -1.0, SequenceProblem.Mistyped)]
+    public void AFunctionsArgumentIsOneOfItsWordsAndWithinItsBounds(string way, double by, SequenceProblem problem)
+    {
+        var ship = new Ship();
+        var ways = new[] { "up", "down" };
+        var amount = Field.Between("by", "0", "10");
+        amount.Entry = Entry.Decimal;
+        ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
+            Being.Number<IMyTerminalBlock, double>(arguments => arguments[1].Real, (_, more, _) => more)
+                .Taking(Field.Among("way", ways, ways), amount));
+
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var test = new Comparison
+        {
+            MemberId = "brighter", Provider = "ext", Quantifier = Quantifier.Any, Relation = Relation.AtLeast,
+            Value = Literal.Of(1.0)
+        };
+
+        test.Arguments.Add(Literal.Name(way));
+        test.Arguments.Add(Literal.Of(by));
+        test.Targets.Add(ship.Name(ship.Left));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        Assert.Equal(problem, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>A value of Sprocket's own that can be set is set by a step, qualified by its namespace, and read back so.</summary>
+    [Fact]
+    public void AnOwnValueThatCanBeSetIsSetByAStep()
+    {
+        var ship = new Ship();
+        var level = 0.0;
+        ship.Rig.Entity(ship.Left.Id).Kind.WithValue("level", "level",
+                Being.Number<IMyTerminalBlock>(_ => level).Writing<IMyTerminalBlock>((_, value) => level = value.Number))
+            .Looked("A test value.");
+
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var set = new Act("level") { Form = Form.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(ship.Name(ship.Left));
+        set.Arguments.Add(Literal.Of(3.0));
+        cycle.Steps.Add(set);
+
+        ship.Start();
+        Assert.Contains("    sequence 1 {\n        set ext.level on [ 'Left Lamp' ] to 3\n",
+            ProgramText.Save(ship.Program, new Values()));
+
+        ship.Runner.Call(cycle, cycle.System.First);
+        ship.Tick();
+        Assert.Equal(3.0, level);
+    }
+
+    /// <summary>
+    /// A set of a value of Sprocket's own is a fault where the value is only read, and where it is given none of its names.
+    /// </summary>
+    [Theory]
+    [InlineData("status", "closed", SequenceProblem.Unoffered)]
+    [InlineData("speed", "medium", SequenceProblem.Mistyped)]
+    [InlineData("speed", "high", SequenceProblem.None)]
+    public void ASetOfAnOwnValueItCannotTakeIsAFault(string value, string name, SequenceProblem problem)
+    {
+        var ship = new Ship();
+        var at = 0;
+        ship.Rig.Entity(ship.Door.Id).Kind.WithValue("speed", "speed",
+                Being.OneOf<IMyTerminalBlock>(new[] { "low", "high" }, _ => at).Writing<IMyTerminalBlock>((_, given) => at = (int)given.Whole))
+            .Looked("A test value.");
+
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var set = new Act(value) { Form = Form.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(ship.Name(ship.Door));
+        set.Arguments.Add(Literal.Name(name));
+        cycle.Steps.Add(set);
+
+        ship.Start();
+        Assert.Equal(problem, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>A set qualified by Sprocket's namespace reads and is written back as it was.</summary>
+    [Fact]
+    public void ASetOfAnOwnValueReadsAndIsWrittenBack()
+    {
+        var written = "sprocket 1 alpha 14\n\n"
+            + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n\n"
+            + "system \"" + Identity + "\" as MalTek.Airlock {\n"
+            + "    sequence 1 {\n"
+            + "        set ext.speed on [ door1 ] to high\n"
+            + "    }\n"
+            + "}\n";
+
+        var program = new Automation();
+        Assert.Equal("", ProgramText.Load(written, program, new Values()));
+        Assert.Equal(written, ProgramText.Save(program, new Values()));
+        var set = Assert.IsType<Act>(program.Systems[0].Sequences[0].Steps[0]);
+        Assert.Equal(BlockKinds.Own, set.Provider);
+        Assert.Equal(Form.Value, set.Form);
+    }
+
+    /// <summary>
+    /// A step's value is one its field admits: one of the words it lists, for an action as for a value, and within the bounds
+    /// the block declares.
+    /// </summary>
+    [Theory]
+    [InlineData("depressurize", 5L, SequenceProblem.Mistyped)]
+    [InlineData("depressurize", 1L, SequenceProblem.None)]
+    [InlineData("Intensity", 10L, SequenceProblem.Mistyped)]
+    [InlineData("Intensity", 3L, SequenceProblem.None)]
+    public void AStepsValueIsOneItsFieldAdmits(string member, long given, SequenceProblem problem)
+    {
+        var ship = new Ship();
+        var vent = ship.Rig.Vent(4, "Vent");
+        ship.Left.Carrying("Intensity", "Intensity", ValueKind.Real, "0.5", "5");
+
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var vents = member == "depressurize";
+        var step = new Act(member) { Form = vents ? Form.Native : Form.Value };
+        step.Targets.Add(vents ? ship.Name(vent) : ship.Name(ship.Left));
+        step.Arguments.Add(Literal.Of(given));
+        cycle.Steps.Add(step);
+        if (vents)
+            cycle.Steps.Add(new Await());
+
+        ship.Start();
+        Assert.Equal(problem, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>A test compares with whatever it likes: a number outside a value's bounds still says something.</summary>
+    [Fact]
+    public void ATestIsNotHeldToAValuesBounds()
+    {
+        var ship = new Ship();
+        ship.Left.Carrying("Intensity", "Intensity", ValueKind.Real, "0.5", "5");
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var test = new Comparison
+        {
+            MemberId = "Intensity", Provider = "", Quantifier = Quantifier.Any, Relation = Relation.Below, Value = Literal.Of(10.0)
+        };
+
+        test.Targets.Add(ship.Name(ship.Left));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        Assert.Equal(SequenceProblem.None, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>A <c>when sum</c> with one of its blocks gone holds no total, so what is left never fires it.</summary>
+    [Fact]
+    public void AWhenSumMissingABlockNeverHolds()
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(2.0));
+        ship.Right.Set("Radius", Literal.Of(4.0));
+        ship.When("", "Radius", Quantifier.Sum, Relation.AtMost, Literal.Of(3.0), ship.Left, ship.Right);
+        ship.Start();
+        ship.Tick(30);
+
+        ship.Rig.Grind(ship.Right);
+        ship.Tick(30);
+        Assert.Equal(0, ship.Fired);
+    }
+
+    /// <summary>A number the block was never told is still a number, and a test comparing it as one is sound.</summary>
+    [Fact]
+    public void AnUntoldNumberIsComparedAsANumber()
+    {
+        var ship = new Ship();
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var test = new Comparison
+        {
+            MemberId = "Radius", Provider = "", Quantifier = Quantifier.Any, Relation = Relation.Above, Value = Literal.Of(2.0)
+        };
+
+        test.Targets.Add(ship.Name(ship.Left));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        Assert.Equal(SequenceProblem.None, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>A <c>when</c> on a value reads as its comparison; one on Sprocket's own value read for off, as leaving the state.</summary>
+    [Fact]
+    public void AWhenOnAValueReadsAsItsComparison()
+    {
+        var ship = new Ship();
+        var radius = ship.When("", "Radius", Quantifier.Sum, Relation.AtLeast, Literal.Of(7.0), ship.Left, ship.Right);
+        var open = ship.When(BlockKinds.Own, "status", Quantifier.Any, Relation.IsNot, Literal.Name("closed"), ship.Door);
+        ship.Start();
+
+        Assert.Equal("When the sum of Radius on Left Lamp and Right Lamp is at least 7",
+            SequenceText.Trigger(ship.Runner.Bindings, radius, null));
+        Assert.Equal("When Door is not closed", SequenceText.Trigger(ship.Runner.Bindings, open, null));
+    }
+
+    /// <summary>A comparison a block's member cannot be read for is a fault found before anything runs.</summary>
+    [Theory]
+    [InlineData("ext", "status", Quantifier.Sum, Relation.Is, "closed")]
+    [InlineData("ext", "status", Quantifier.Any, Relation.Above, "closed")]
+    [InlineData("ext", "status", Quantifier.Any, Relation.Is, "ajar")]
+    [InlineData("", "Radius", Quantifier.Any, Relation.Is, "")]
+    public void ATestItsBlockCannotReadIsMistyped(string provider, string member, Quantifier quantifier, Relation relation,
+        string name)
+    {
+        Assert.Equal(SequenceProblem.Mistyped, Checked(provider, member, quantifier, relation, name).Problem);
+    }
+
+    /// <summary>A state is tested by one of the names its value has, which is the case the faults above differ from.</summary>
+    [Fact]
+    public void ATestOfAStateByItsNameIsSound()
+    {
+        Assert.Equal(SequenceProblem.None, Checked("ext", "status", Quantifier.Any, Relation.Is, "closed").Problem);
+    }
+
+    /// <summary>
+    /// A function of Sprocket's own is given an argument for each of its parameters, of the kind each asks for: one left out
+    /// is a fault, and so is one of another kind or one too many.
+    /// </summary>
+    [Theory]
+    [InlineData("", SequenceProblem.Unfilled)]
+    [InlineData("x", SequenceProblem.Mistyped)]
+    [InlineData("2 3", SequenceProblem.Mistyped)]
+    [InlineData("2", SequenceProblem.None)]
+    public void AFunctionIsGivenAnArgumentForEachParameter(string given, SequenceProblem problem)
+    {
+        var ship = new Ship();
+        var by = Field.Called("by");
+        by.Entry = Entry.Decimal;
+        ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
+            Being.Number<IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more, _) => more).Taking(by));
+
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var test = new Comparison
+        {
+            MemberId = "brighter", Provider = "ext", Quantifier = Quantifier.Any, Relation = Relation.AtLeast,
+            Value = Literal.Of(1.0)
+        };
+
+        foreach (var word in given.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
+            test.Arguments.Add(double.TryParse(word, out var number) ? Literal.Of(number) : Literal.Of(word));
+
+        test.Targets.Add(ship.Name(ship.Left));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        Assert.Equal(problem, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>The fault of an <c>if</c> on <paramref name="member" /> of the door, or of a lamp for Radius.</summary>
+    static SequenceFault Checked(string provider, string member, Quantifier quantifier, Relation relation, string name)
+    {
+        var ship = new Ship();
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var test = new Comparison
+        {
+            MemberId = member, Provider = provider, Quantifier = quantifier, Relation = relation,
+            Value = name.Length == 0 ? Literal.Of(true) : Literal.Name(name)
+        };
+
+        test.Targets.Add(ship.Name(member == "Radius" ? ship.Left : ship.Door));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        return SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First);
+    }
+
+    /// <summary>
+    /// A change picked on blocks starts a sequence as the signal it is, sent from any of them; asked of all of them, as the
+    /// value it is a change in coming to be so on the last of them.
+    /// </summary>
+    [Fact]
+    public void AChangePickedOnBlocksIsItsSignalOrItsValueOnAll()
+    {
+        var ship = new Ship();
+        var events = new List<EntityEvent>(ship.Rig.Entity(ship.Door.Id).Kind.Events);
+
+        var any = Assert.IsType<SignalTrigger>(Vocabulary.Starter(events, "finishes-closing", false));
+        Assert.True(any.IsWatched);
+        Assert.Equal(BlockKinds.Own, any.Provider);
+        Assert.Equal("finishes-closing", any.EventId);
+
+        var all = Assert.IsType<WhenTrigger>(Vocabulary.Starter(events, "finishes-closing", true));
+        Assert.Equal("status", all.EventId);
+        Assert.Equal(BlockKinds.Own, all.Provider);
+        Assert.Equal(Quantifier.All, all.Quantifier);
+        Assert.Equal(Relation.Is, all.Relation);
+        Assert.Equal(Literal.Name("closed"), all.Value);
+    }
+
+    /// <summary>A toolbar signal written in place is answered by its slot on the blocks it names.</summary>
+    [Fact]
+    public void ASignalWrittenInPlaceIsAnsweredOnItsBlocks()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 14\n\n"
+            + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
+            + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n\n"
+            + "system \"" + Identity + "\" as MalTek.Bell {\n    whenever ext.toolbar(1, 2, 3) on [ panel2 ] then run 1\n\n"
+            + "    sequence 1 {\n    }\n}\n",
+            program, new Values()));
+
+        var trigger = Assert.IsType<SignalTrigger>(program.Systems[0].Triggers[0]);
+        Assert.False(trigger.IsWatched);
+        var blocks = new List<string>();
+        var at = new List<ToolbarSlot>();
+        program.Answers(program.Systems[0], null, trigger, blocks, at);
+
+        Assert.Equal(new[] { "panel2" }, blocks);
+        var slot = Assert.Single(at);
+        Assert.Equal(2, slot.Page);
+        Assert.Equal(3, slot.Slot);
+    }
+
+    /// <summary>Every parameter is given an argument: one left out is a fault, and so is one left over.</summary>
+    [Theory]
+    [InlineData(0, SequenceProblem.Unfilled)]
+    [InlineData(2, SequenceProblem.Mistyped)]
+    public void EveryParameterIsGivenOneArgument(int given, SequenceProblem problem)
+    {
+        var ship = new Ship();
+        var vent = ship.Rig.Vent(6, "Vent");
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var act = new Act(Blocks.Vent.Depressurize) { Form = Form.Native };
+        act.Targets.Add(ship.Name(vent));
+        for (var i = 0; i < given; i++)
+            act.Arguments.Add(Literal.Of(Blocks.Vent.Hold));
+
+        cycle.Steps.Add(act);
+
+        ship.Start();
+        var fault = SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First);
+
+        Assert.Equal(problem, fault.Problem);
+    }
+
+    /// <summary>An argument to an action that declares no parameters is one left over.</summary>
+    [Fact]
+    public void AnArgumentToAnActionWithoutParametersIsLeftOver()
+    {
+        var ship = new Ship();
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var act = new Act("close") { Form = Form.Native };
+        act.Targets.Add(ship.Name(ship.Door));
+        act.Arguments.Add(Literal.Of(1L));
+        cycle.Steps.Add(act);
+
+        ship.Start();
+        var fault = SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First);
+
+        Assert.Equal(SequenceProblem.Mistyped, fault.Problem);
+    }
+
+    /// <summary>A signal named on two blocks is sent from either: an <c>on</c> naming it is answered by the slot on both.</summary>
+    [Fact]
+    public void ASignalOnTwoBlocksIsAnsweredOnBoth()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 14\n\n"
+            + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
+            + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
+            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
+            + "system \"" + Identity + "\" as MalTek.Bell {\n    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n",
+            program, new Values()));
+
+        var blocks = new List<string>();
+        var at = new List<ToolbarSlot>();
+        program.Answers(program.Systems[0], null, "button", blocks, at);
+
+        Assert.Equal(new[] { "panel1", "panel2" }, blocks);
+        Assert.All(at, slot => Assert.Equal(4, slot.Slot));
+    }
+
+    /// <summary>A signal picked on one block is a variable of its own, never one that is also sent from other blocks.</summary>
+    [Fact]
+    public void ASignalPickedOnOneBlockIsNotOneOnSeveral()
+    {
+        var program = new Automation();
+        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 14\n\n"
+            + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
+            + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
+            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n",
+            program, new Values()));
+
+        var picked = program.DeclareSignal("panel1", new ToolbarSlot(1, 1, 4), "panel1 4");
+
+        Assert.NotEqual("button", picked.Name);
+        Assert.Equal(new[] { "panel1" }, picked.Blocks);
+        Assert.Same(picked, program.DeclareSignal("panel1", new ToolbarSlot(1, 1, 4), "panel1 4"));
+    }
+
+    /// <summary>An instance answered by a signal variable on several blocks writes the variable back once, and a part of one in place.</summary>
+    [Fact]
+    public void ASignalVariableIsWrittenOnlyWhereAllOfItAnswers()
+    {
+        const string head = "sprocket 1 alpha 14\n\n"
+            + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
+            + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
+            + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
+            + "system blueprint \"" + Identity + "\" as MalTek.Bell {\n    optional slot bell expects signal\n\n"
+            + "    whenever bell then run 1\n\n    sequence 1 {\n    }\n}\n\n";
+
+        var whole = new Automation();
+        Assert.Equal("", ProgramText.Load(head + "instance 1 of MalTek.Bell {\n    bell = [ button ]\n}\n", whole, new Values()));
+        Assert.Contains("    bell = [ button ]\n", ProgramText.Save(whole, new Values()));
+
+        var part = new Automation();
+        Assert.Equal("", ProgramText.Load(head.Replace("let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
+            + "instance 1 of MalTek.Bell {\n    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n}\n", part, new Values()));
+        part.Restore(new SignalRef("button", new[] { "panel1", "panel2" }, new ToolbarSlot(1, 1, 4)));
+
+        Assert.Contains("    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n", ProgramText.Save(part, new Values()));
+    }
+}

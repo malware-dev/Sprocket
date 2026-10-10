@@ -271,8 +271,9 @@ public class EditorTests
         ship.Editor.PressChoice("finishes closing");
         ship.Editor.PressPrimary();
 
-        var closed = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[1].Trigger);
-        Assert.Equal("closed", closed.EventId);
+        var closed = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[1].Trigger);
+        Assert.True(closed.IsWatched);
+        Assert.Equal("finishes-closing", closed.EventId);
     }
 
     /// <summary>
@@ -291,7 +292,7 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
+        Assert.True(Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger).IsWatched);
 
         // Back to the system, where what starts a sequence is listed. Its row opens the same picker
         // the wizard used.
@@ -1496,9 +1497,9 @@ public class EditorTests
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
 
-        var starts = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
+        var starts = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(2, starts.Sources.Count);
-        Assert.False(starts.RequiresAll);
+        Assert.True(starts.IsWatched);
 
         editor.PressAdd("task");
         editor.PressBlock("Inner Door");
@@ -1684,10 +1685,13 @@ public class EditorTests
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
 
-        var starts = Assert.IsType<WhenTrigger>(ship.Automation.Sequences[0].Trigger);
+        var starts = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
         Assert.Equal(2, starts.Sources.Count);
 
-        starts.RequiresAll = true;
+        var all = new WhenTrigger("status") { Quantifier = Quantifier.All, Value = Literal.Name("open") };
+        foreach (var source in starts.Sources)
+            all.Sources.Add(source);
+        new ChangeTrigger(starts, all).Apply(ship.Automation.Systems[0]);
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");

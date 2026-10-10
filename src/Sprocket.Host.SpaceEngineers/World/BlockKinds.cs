@@ -360,7 +360,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Sets && (Turned(actions, one) || kind.Hides(one.GamePropertyId)))
+                if (one.GamePropertyId != null && (Turned(actions, one) || kind.Hides(one.GamePropertyId)))
                     one.Hide();
             }
 
@@ -403,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!other.Unaltered && other.GameActionId == one.Id)
                     return true;
 
-                if (other.Sets && !other.Hidden && Generated(one.GameActionId, other.GamePropertyId))
+                if (other.GamePropertyId != null && !other.Hidden && Generated(one.GameActionId, other.GamePropertyId))
                     return true;
             }
 

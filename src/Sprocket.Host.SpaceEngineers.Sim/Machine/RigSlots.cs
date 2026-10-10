@@ -122,15 +122,15 @@ public sealed class RigSlots : ISlots
     }
 
     /// <inheritdoc />
-    public bool Holds(IMyTerminalBlock block, string propertyId, Literal value)
+    public Gauge Gauge(IMyTerminalBlock block, string propertyId)
     {
         foreach (Fitting fitting in _rig.Fitted)
         {
             if (fitting.Block == block)
-                return fitting.Holds(propertyId, value);
+                return fitting.Gauge(propertyId);
         }
 
-        return false;
+        return null;
     }
 
     /// <summary>

@@ -19,6 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Doing SwitchOff = Doing.Of<IMyFunctionalBlock>(block => block.Enabled = false, Off);
 
+        static readonly Being SwitchedOn = Being.Flag(On);
+
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
@@ -28,8 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithEvent("switched-on", On, Edge.Rising, "is switched on").Reading("is on", "is off").Announced()
-                .WithEvent("switched-off", On, Edge.Falling, "is switched off").Reading("is off", "is on").Announced()
+            kind.WithValue("switched-on", "switched on", SwitchedOn).Announced()
+                .WithChange("turns-on", "turns on", "switched-on", Literal.Of(true)).Reading("is on", "is off").Announced()
+                .WithChange("turns-off", "turns off", "switched-on", Literal.Of(false)).Reading("is off", "is on").Announced()
                 .WithAction(BlockKinds.SwitchOn, "switch on", SwitchOn, "OnOff_On")
                 .WithAction(BlockKinds.SwitchOff, "switch off", SwitchOff, "OnOff_Off");
         }

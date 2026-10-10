@@ -48,7 +48,7 @@ public class UndoTests
         var step = new Act(actionId);
         foreach (var target in targets)
             step.Targets.Add(target);
-        return step;
+        return Given.Defaults(step);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class UndoTests
         {
             case WhenTrigger onEvent:
                 text.Append(" when ").Append(onEvent.EventId)
-                    .Append(onEvent.RequiresAll ? " all of " : " any of ")
+                    .Append(onEvent.Quantifier == Quantifier.All ? " all of " : " any of ")
                     .Append(string.Join("+", onEvent.Sources));
                 break;
             case SignalTrigger needed:
@@ -160,7 +160,7 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         Sequence sequence = Build();
-        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", Form.Native, new[] { Literal.Of(4L) }, true));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", Form.Native, BlockKinds.Own, new[] { Literal.Of(4L) }, true));
     }
 
     /// <summary>A step changed to something that takes no time loses the wait after it, and undoing puts that wait back.</summary>
@@ -172,7 +172,7 @@ public class UndoTests
         sequence.Steps.Insert(1, awaited);
         var before = Shape(sequence);
 
-        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", Form.Native, new Literal[0], false);
+        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", Form.Native, BlockKinds.Own, new Literal[0], false);
         edit.Apply(sequence);
         Assert.IsNotType<Await>(sequence.Steps[1]);
 
@@ -219,8 +219,7 @@ public class UndoTests
         Sequence sequence = Build();
         var was = (MomentTrigger)sequence.Trigger;
 
-        var now = new WhenTrigger("opened");
-        now.RequiresAll = true;
+        var now = new WhenTrigger("status") { Quantifier = Quantifier.All, Value = Literal.Name("open") };
         now.Sources.Add("inner");
         now.Sources.Add("outer");
 
@@ -540,7 +539,7 @@ public class UndoTests
     {
         Sequence sequence = Build();
 
-        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", Form.Native, new Literal[0], true).Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", Form.Native, BlockKinds.Own, new Literal[0], true).Changes);
         Assert.False(new Rename("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
 

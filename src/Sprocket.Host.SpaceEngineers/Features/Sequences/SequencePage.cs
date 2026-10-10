@@ -610,26 +610,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var blocks = Editor.Blocks(_sequence.System, test.Targets);
             var seen = Editor.Seen(_sequence.System, test.Targets);
             var bindings = Editor.Runner.Bindings;
-            if (test.IsMoment)
+            bool inState;
+            var state = Stated(test, seen, out inState);
+            if (state != null)
             {
-                EntityEvent moment = null;
-                var events = Vocabulary.EventsFor(bindings, seen);
-                for (var i = 0; i < events.Count && moment == null; i++)
-                {
-                    if (events[i].Id == test.MemberId && events[i].IsState)
-                        moment = events[i];
-                }
-
-                row.Slots.Add(new EntitiesSlot(blocks, test.RequiresAll,
+                row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
                     Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
-                row.Slots.Add(new StateSlot(moment, test.Value.Flag,
+                row.Slots.Add(new StateSlot(state, inState,
                     Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
                 return;
             }
 
             var value = test.Names(Vocabulary.ActionsFor(bindings, seen));
             row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
-            row.Slots.Add(new EntitiesSlot(blocks, test.RequiresAll,
+            row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
                 Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
             if (value == null)
                 return;
@@ -682,7 +676,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 {
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, Editor.Named(_sequence.System, answer.Targets), answer.Chosen,
-                            answer.Form, answer.Arguments,
+                            answer.Form, Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form),
+                            answer.Arguments,
                             Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)));
                     Editor.Pop();
                 }, arguments: step.Arguments, opens: opens));
@@ -703,6 +698,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 {
                     var step = new Act(answer.Chosen);
                     step.Form = answer.Form;
+                    step.Provider = Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form);
                     var named = Editor.Named(_sequence.System, answer.Targets);
                     for (var i = 0; i < named.Count; i++)
                         step.Targets.Add(named[i]);
@@ -769,39 +765,97 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }));
         }
 
+        /// <summary>
+        /// The signal whose state words say <paramref name="test" /> on the blocks <paramref name="seen" /> names, with whether it
+        /// asks for the block in that state rather than out of it; null where the test is on no value of Sprocket's own that a
+        /// signal says.
+        /// </summary>
+        EntityEvent Stated(Comparison test, IList<string> seen, out bool inState)
+        {
+            inState = true;
+            if (test.Provider != BlockKinds.Own)
+                return null;
+
+            return Vocabulary.Change(Vocabulary.EventsFor(Editor.Runner.Bindings, seen), test.MemberId, test.Relation, test.Value,
+                out inState);
+        }
+
         /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
         PickPage TestPage(Comparison test, Opening opens, Action<Comparison> chosen)
         {
-            var moment = test == null || test.IsMoment;
-            var id = test == null ? "" : moment && !test.Value.Flag ? PickPage.Not + test.MemberId : test.MemberId;
+            bool inState = true;
+            var state = test == null ? null : Stated(test, Editor.Seen(_sequence.System, test.Targets), out inState);
+            var stated = test == null || state != null;
+            var id = test == null ? "" : state == null ? test.MemberId : inState ? state.Id : PickPage.Not + state.Id;
             return new PickPage(Editor, "Check something", false,
                 test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets), id,
-                moment ? Form.Native : Form.Value,
-                delegate(PickAnswer answer) { chosen(Test(answer)); },
-                true, test != null && test.RequiresAll, moment ? null : new[] { test.Value }, opens, forTests: true);
+                stated ? Form.Native : Form.Value,
+                delegate(PickAnswer answer) { chosen(Test(answer, test)); },
+                true, test != null && test.Quantifier == Quantifier.All, stated ? null : new[] { test.Value }, opens, forTests: true);
         }
 
-        /// <summary>The test a pick for one comes to.</summary>
-        Comparison Test(PickAnswer answer)
+        /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>
+        /// <remarks>
+        /// The picker asks for the blocks, the value and what it is compared with. How it is compared, a sum, and a function's
+        /// arguments are kept from <paramref name="was" /> where the same value is picked again, so changing the blocks of a
+        /// test written in the script changes nothing else.
+        /// </remarks>
+        Comparison Test(PickAnswer answer, Comparison was)
         {
             var test = new Comparison();
-            test.RequiresAll = answer.All;
+            test.Quantifier = answer.All ? Quantifier.All : Quantifier.Any;
             var named = Editor.Named(_sequence.System, answer.Targets);
             for (var i = 0; i < named.Count; i++)
                 test.Targets.Add(named[i]);
 
             if (answer.Form == Form.Value)
             {
+                var value = Valued(Vocabulary.ActionsFor(Editor.Runner.Bindings, named), answer.Chosen);
                 test.MemberId = answer.Chosen;
+                test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";
                 test.Value = answer.Arguments != null && answer.Arguments.Count > 0 ? answer.Arguments[0] : Literal.Of(true);
+                if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
+                    return test;
+
+                test.Relation = was.Relation;
+                if (was.Quantifier == Quantifier.Sum)
+                    test.Quantifier = Quantifier.Sum;
+
+                for (var i = 0; i < was.Arguments.Count; i++)
+                    test.Arguments.Add(was.Arguments[i]);
+
                 return test;
             }
 
+            // A state is a value of Sprocket's own, said by the signal that is its coming to be so.
             var not = answer.Chosen.StartsWith(PickPage.Not, StringComparison.Ordinal);
-            test.MemberId = not ? answer.Chosen.Substring(PickPage.Not.Length) : answer.Chosen;
+            var id = not ? answer.Chosen.Substring(PickPage.Not.Length) : answer.Chosen;
+            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, named);
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].Id != id || events[i].Value.Length == 0)
+                    continue;
+
+                test.MemberId = events[i].Value;
+                test.Value = events[i].Becomes;
+                break;
+            }
+
             test.Provider = BlockKinds.Own;
-            test.Value = Literal.Of(!not);
+            test.Relation = not ? Relation.IsNot : Relation.Is;
             return test;
+        }
+
+        /// <summary>The value called <paramref name="id" /> among <paramref name="actions" />, or null where there is none.</summary>
+        static EntityAction Valued(IList<EntityAction> actions, string id)
+        {
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].Id == id && actions[i].Form == Form.Value)
+                    return actions[i];
+            }
+
+            return null;
         }
 
         /// <summary>Adds a timed wait, for the things that have no finishing to wait on.</summary>

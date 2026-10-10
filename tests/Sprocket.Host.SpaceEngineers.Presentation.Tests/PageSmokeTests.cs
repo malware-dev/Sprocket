@@ -33,7 +33,7 @@ public class PageSmokeTests
         editor.PressBlock("Approach Sensor");
         Record(seen, screen);
 
-        editor.PressChoice("is switched on");
+        editor.PressChoice("turns on");
         editor.PressPrimary();
         Record(seen, screen);
 

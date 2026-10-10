@@ -33,10 +33,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 11;
+        const int Draft = 14;
 
-        /// <summary>The host function this host names a signal with: a slot on a block's toolbar.</summary>
-        /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Slot" />.</remarks>
+        /// <summary>The function this host names a signal with: a slot on a block's toolbar.</summary>
+        /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Signal" />.</remarks>
         public const string Toolbar = "toolbar";
 
         static readonly string[] Times =
@@ -51,6 +51,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "yyyy'-'MM'-'dd'T'HH':'mm",
             "yyyy'-'MM'-'dd"
         };
+
+        static readonly Literal[] NoArguments = new Literal[0];
 
         /// <summary>The program <paramref name="program" /> written out, as the block keeps it.</summary>
         public static string Save(Automation program, Values values)
@@ -284,7 +286,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         for (var f = 0; f < filled.Count; f++)
                         {
                             blocks.Add(filled[f]);
-                            var declared = at == null || f >= at.Count ? null : program.FindSignalRef(filled[f], at[f]);
+                            var declared = Held(program, filled, at, f);
                             if (declared != null)
                                 triggers.Add(declared.Name);
                         }
@@ -295,8 +297,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var held = program.SignalRefs;
             for (var i = 0; i < held.Count; i++)
             {
-                if (triggers.Contains(held[i].Name))
-                    blocks.Add(held[i].Block);
+                for (var n = 0; triggers.Contains(held[i].Name) && n < held[i].Blocks.Count; n++)
+                    blocks.Add(held[i].Blocks[n]);
             }
         }
 
@@ -528,17 +530,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return cells;
         }
 
-        /// <summary><c>let button = panel1:toolbar(1, 1, 4)</c>: a trigger, the slot this host answers one with, on a block above.</summary>
+        /// <summary><c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>: a signal, sent from a slot on the toolbars of blocks above.</summary>
         static void WriteSignalRef(Pen pen, SignalRef declared)
         {
             pen.Note(declared.Annotation);
-            pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Slot(declared.Block, declared.At);
+            pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Signal(declared.Blocks, declared.At);
             pen.End();
         }
 
         /// <summary>
-        /// <c>let door1 = block '…' [ … ]</c> or <c>let button = panel1:toolbar(1, 1, 4)</c>: a variable, holding a block or a
-        /// trigger on one.
+        /// <c>let door1 = block '…' [ … ]</c> or <c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>: a variable, holding a
+        /// block or a signal.
         /// </summary>
         static void ReadLet(Statement statement, Automation program, Values values, Trouble trouble)
         {
@@ -555,25 +557,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
             }
 
-            if (statement.ValueAt(2).Form == ValueForm.Function)
+            if (statement.IsMember(2))
             {
                 if (!Ends(statement, 3, trouble))
                     return;
 
-                string block;
+                var blocks = new List<string>();
                 ToolbarSlot at;
-                if (!Trigger(statement, statement.ValueAt(2), program, trouble, out block, out at))
+                if (!Signal(statement, statement.ValueAt(2), program, trouble, blocks, out at))
                     return;
 
-                var trigger = new SignalRef(name.Word, block, at);
-                trigger.Annotation = statement.Annotation;
-                program.Restore(trigger);
+                var signal = new SignalRef(name.Word, blocks, at);
+                signal.Annotation = statement.Annotation;
+                program.Restore(signal);
                 return;
             }
 
             if (!statement.Says(2, Keyword.Block) || !Named(statement.ValueAt(3)) || statement.ValueAt(4).Form != ValueForm.List)
             {
-                trouble.Say(statement, "expected a block, like block '<type>/<subtype>' [ <keys> ], or a trigger, like panel1:toolbar(1, 1, 4).");
+                trouble.Say(statement, "expected a block, like block '<type>/<subtype>' [ <keys> ], or a signal, like ext.toolbar(1, 1, 4) on [ panel1 ].");
                 return;
             }
 
@@ -590,32 +592,49 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// The trigger the host function <paramref name="value" /> gives back: this host's <c>toolbar</c>, a slot on the
-        /// toolbars of a block a variable above holds, or trouble.
+        /// The signal the member <paramref name="value" /> gives back: this host's <c>ext.toolbar</c>, a slot on the
+        /// toolbars of the blocks variables above hold, each added to <paramref name="blocks" />; or trouble.
         /// </summary>
-        static bool Trigger(Statement statement, Value value, Automation program, Trouble trouble, out string block,
+        static bool Signal(Statement statement, Value value, Automation program, Trouble trouble, IList<string> blocks,
             out ToolbarSlot at)
         {
             at = null;
-            string function;
-            ValueRange given;
-            statement.Function(value, out block, out function, out given);
-            if (function != Toolbar)
+            var member = statement.Member(value);
+            if (member.Count != 2 || member[0].Word != BlockKinds.Own || member[1].Word != Toolbar)
             {
-                trouble.Say(statement, "no host function '" + function + "'; expected toolbar(<toolbar>, <page>, <slot>).");
+                trouble.Say(statement, "no function " + Spelling(member) + " giving back a signal; expected ext.toolbar(<toolbar>, <page>, <slot>).");
                 return false;
             }
 
+            var given = statement.Arguments(value);
             if (given.Count != 3 || Statement.Counted(given[0]) == 0 || Statement.Counted(given[1]) == 0 || Statement.Counted(given[2]) == 0)
             {
-                trouble.Say(statement, "expected toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
+                trouble.Say(statement, "expected ext.toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
                 return false;
             }
 
-            if (program.FindRef(block) == null)
+            var on = statement.On(value);
+            if (on.Count == 0)
             {
-                trouble.Say(statement, "no variable '" + block + "' holding a block above this line.");
+                trouble.Say(statement, "expected the blocks the signal is sent from.");
                 return false;
+            }
+
+            for (var i = 0; i < on.Count; i++)
+            {
+                if (!Named(on[i]))
+                {
+                    trouble.Say(statement, "expected names in the list.");
+                    return false;
+                }
+
+                if (program.FindRef(on[i].Word) == null)
+                {
+                    trouble.Say(statement, "no variable '" + on[i].Word + "' holding a block above this line.");
+                    return false;
+                }
+
+                blocks.Add(on[i].Word);
             }
 
             at = new ToolbarSlot(Statement.Counted(given[0]), Statement.Counted(given[1]), Statement.Counted(given[2]));
@@ -801,14 +820,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     ReadSlot(inner, system, trouble);
                 else if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
                     trouble.Say(inner, "unexpected " + Headed(inner) + "; only a system blueprint has slots.");
-                else if (inner.Key == Keyword.On || inner.Key == Keyword.When || inner.Key == Keyword.Every)
+                else if (inner.Key == Keyword.Whenever || inner.Key == Keyword.When || inner.Key == Keyword.Every)
                     ReadTrigger(inner, system, program, trouble);
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program, trouble);
                 else
                     trouble.Say(inner, "unexpected " + Headed(inner) + (blueprint
-                        ? "; expected required, optional, on, when, every or sequence."
-                        : "; expected on, when, every or sequence."));
+                        ? "; expected required, optional, whenever, when, every or sequence."
+                        : "; expected whenever, when, every or sequence."));
             }
 
             Resolve(system, statement, trouble);
@@ -913,7 +932,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             else if (Named(one))
                 part.Expects.Add(one.Word);
             else
-                trouble.Say(statement, "expected trigger, a block type or a list of them after 'expects'.");
+                trouble.Say(statement, "expected signal, a block type or a list of them after 'expects'.");
 
             Ends(statement, 4, trouble);
         }
@@ -1102,8 +1121,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>button = [ panel1:toolbar(1, 1, 4) ]</c>: the signals that answer a signal slot in one use of a blueprint, each
-        /// written in place or named by a variable above.
+        /// <c>button = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]</c>: the signals that answer a signal slot in one use of a
+        /// blueprint, each written in place or named by a variable above.
         /// </summary>
         static void Answered(Statement statement, AutomationSystem system, SystemInstance instance, Automation program,
             Trouble trouble)
@@ -1118,28 +1137,32 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     var declared = program.FindSignalRef(items[i].Word);
                     if (declared == null)
                     {
-                        trouble.Say(statement, "no variable '" + items[i].Word + "' holding a trigger above this line.");
+                        trouble.Say(statement, "no variable '" + items[i].Word + "' holding a signal above this line.");
                         return;
                     }
 
-                    blocks.Add(declared.Block);
-                    at.Add(declared.At);
+                    for (var n = 0; n < declared.Blocks.Count; n++)
+                    {
+                        blocks.Add(declared.Blocks[n]);
+                        at.Add(declared.At);
+                    }
+
                     continue;
                 }
 
-                string block;
-                ToolbarSlot slot;
-                if (items[i].Form != ValueForm.Function)
+                if (items[i].Form != ValueForm.Reference)
                 {
-                    trouble.Say(statement, "expected triggers in the list, like [ panel1:toolbar(1, 1, 4) ].");
+                    trouble.Say(statement, "expected signals in the list, like [ ext.toolbar(1, 1, 4) on [ panel1 ] ].");
                     return;
                 }
 
-                if (!Trigger(statement, items[i], program, trouble, out block, out slot))
+                var from = blocks.Count;
+                ToolbarSlot slot;
+                if (!Signal(statement, items[i], program, trouble, blocks, out slot))
                     return;
 
-                blocks.Add(block);
-                at.Add(slot);
+                for (var n = from; n < blocks.Count; n++)
+                    at.Add(slot);
             }
 
             // Each answer to a slot an on names is a toolbar slot that starts it, and holds nothing else.
@@ -1149,20 +1172,54 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             instance.Fill(statement.Head, blocks, at);
         }
 
-        /// <summary>A signal slot's answers as a list, each by the variable holding it where there is one, or written in place on its block.</summary>
+        /// <summary>
+        /// A signal slot's answers as a list: by the variable holding them where one holds every block it names among them,
+        /// once, and otherwise each written in place on its block.
+        /// </summary>
         static void Slots(Pen pen, Automation program, IList<string> blocks, IList<ToolbarSlot> at)
         {
+            var written = new List<SignalRef>();
             pen.OpenList();
             for (var i = 0; blocks != null && i < blocks.Count && i < at.Count; i++)
             {
-                var declared = program.FindSignalRef(blocks[i], at[i]);
-                if (declared != null)
+                var declared = Held(program, blocks, at, i);
+                if (declared == null)
+                    pen.Signal(new[] { blocks[i] }, at[i]);
+                else if (!written.Contains(declared))
+                {
+                    written.Add(declared);
                     pen.Word(declared.Name);
-                else
-                    pen.Slot(blocks[i], at[i]);
+                }
             }
 
             pen.CloseList();
+        }
+
+        /// <summary>
+        /// The signal variable answer <paramref name="index" /> of a slot is written as: one holding that slot on that block
+        /// and on every other block it names among the answers, or null where none does.
+        /// </summary>
+        /// <remarks>Every block, because a variable reads back as all of its blocks.</remarks>
+        static SignalRef Held(Automation program, IList<string> blocks, IList<ToolbarSlot> at, int index)
+        {
+            if (at == null || index >= at.Count)
+                return null;
+
+            var declared = program.FindSignalRef(blocks[index], at[index]);
+            if (declared == null)
+                return null;
+
+            for (var i = 0; i < declared.Blocks.Count; i++)
+            {
+                var found = false;
+                for (var n = 0; n < blocks.Count && n < at.Count && !found; n++)
+                    found = blocks[n] == declared.Blocks[i] && at[n].Same(declared.At);
+
+                if (!found)
+                    return null;
+            }
+
+            return declared;
         }
 
         /// <summary>The system a statement names by identity or by name, or null.</summary>
@@ -1207,7 +1264,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Shut();
         }
 
-        /// <summary><c>if all ext.pressurized on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
+        /// <summary><c>if all ext.filled on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
         static void WriteIf(Pen pen, If step)
         {
             if (step.Annotation.Length > 0)
@@ -1234,20 +1291,174 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Body();
         }
 
-        /// <summary><c>all ext.pressurized on [ vent ] == on then</c>.</summary>
+        /// <summary><c>all ext.filled on [ vent ] == on then</c>.</summary>
         static void WriteTest(Pen pen, Comparison test)
         {
-            pen.Says(test.RequiresAll ? Keyword.All : Keyword.Any);
-            if (test.Provider.Length == 0)
-                pen.Word(test.MemberId);
-            else
-                pen.Qualified(test.Provider, test.MemberId);
-
-            pen.Says(Keyword.On);
-            WriteNames(pen, test.Targets);
-            pen.Says(Keyword.EqualTo);
+            pen.Says(Said(test.Quantifier));
+            WriteMember(pen, test.Provider, test.MemberId, test.Arguments, test.Targets);
+            pen.Says(Said(test.Relation));
             Written(pen, test.Value);
             pen.Says(Keyword.Then);
+        }
+
+        /// <summary><c>ext.amount("Ingot/Iron") on [ cargo ]</c>: a member, bare or qualified, with its arguments where it has any, and its blocks.</summary>
+        static void WriteMember(Pen pen, string provider, string id, IList<Literal> arguments, IList<string> targets)
+        {
+            pen.Qualified(provider, id);
+            if (arguments.Count > 0)
+            {
+                pen.Open();
+                for (var i = 0; i < arguments.Count; i++)
+                    Written(pen, arguments[i]);
+
+                pen.Close();
+            }
+
+            pen.Says(Keyword.On);
+            WriteNames(pen, targets);
+        }
+
+        /// <summary>How <paramref name="quantifier" /> is written.</summary>
+        static Keyword Said(Quantifier quantifier)
+        {
+            return quantifier == Quantifier.All ? Keyword.All : quantifier == Quantifier.Sum ? Keyword.Sum : Keyword.Any;
+        }
+
+        /// <summary>How <paramref name="relation" /> is written.</summary>
+        static Keyword Said(Relation relation)
+        {
+            switch (relation)
+            {
+                case Relation.IsNot: return Keyword.NotEqualTo;
+                case Relation.Above: return Keyword.Above;
+                case Relation.AtLeast: return Keyword.AtLeast;
+                case Relation.Below: return Keyword.Below;
+                case Relation.AtMost: return Keyword.AtMost;
+            }
+
+            return Keyword.EqualTo;
+        }
+
+        /// <summary>The quantifier at <paramref name="at" />, or false and trouble naming <paramref name="after" /> where there is none.</summary>
+        static bool Quantified(Statement statement, int at, string after, Trouble trouble, out Quantifier quantifier)
+        {
+            quantifier = Quantifier.Any;
+            if (statement.Says(at, Keyword.All))
+                quantifier = Quantifier.All;
+            else if (statement.Says(at, Keyword.Sum))
+                quantifier = Quantifier.Sum;
+            else if (!statement.Says(at, Keyword.Any))
+            {
+                trouble.Say(statement, "expected any, all or sum after '" + after + "'.");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>The comparison <paramref name="value" /> is, or false where it is none.</summary>
+        static bool Related(Value value, out Relation relation)
+        {
+            relation = Relation.Is;
+            if (value.Form != ValueForm.Keyword)
+                return false;
+
+            switch (value.Keyword)
+            {
+                case Keyword.EqualTo: return true;
+                case Keyword.NotEqualTo: relation = Relation.IsNot; return true;
+                case Keyword.Above: relation = Relation.Above; return true;
+                case Keyword.AtLeast: relation = Relation.AtLeast; return true;
+                case Keyword.Below: relation = Relation.Below; return true;
+                case Keyword.AtMost: relation = Relation.AtMost; return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// The member at <paramref name="index" />, bare or qualified by <c>ext</c>, its arguments and its blocks; or false and
+        /// trouble where it is not one, <paramref name="what" /> saying what was expected.
+        /// </summary>
+        static bool Member(Statement statement, int index, string what, Trouble trouble, out string provider, out string id,
+            IList<Literal> arguments, IList<string> targets)
+        {
+            provider = id = "";
+            if (!statement.IsMember(index))
+            {
+                trouble.Say(statement, "expected " + what + ".");
+                return false;
+            }
+
+            var member = statement.Parts(index);
+            var bare = member.Count == 1 && member[0].Word.Length > 0;
+            var qualified = member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0;
+            if (!bare && !qualified)
+            {
+                trouble.Say(statement, "expected " + what + ".");
+                return false;
+            }
+
+            if (qualified && member[0].Word != BlockKinds.Own)
+            {
+                trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected a member, bare or qualified by ext.");
+                return false;
+            }
+
+            provider = qualified ? member[0].Word : "";
+            id = member[member.Count - 1].Word;
+
+            var given = statement.Arguments(index);
+            for (var i = 0; i < given.Count; i++)
+            {
+                if (!Argument(statement, given[i], trouble))
+                    return false;
+
+                arguments.Add(Given(given[i]));
+            }
+
+            return Names(statement.On(index), targets, statement, trouble);
+        }
+
+        /// <summary>Whether <paramref name="value" /> is one a member can be given or compared with, and trouble where it is not.</summary>
+        static bool Argument(Statement statement, Value value, Trouble trouble)
+        {
+            var form = value.Form;
+            if (form != ValueForm.List && form != ValueForm.Vector && form != ValueForm.Reference && form != ValueForm.Qualified)
+                return true;
+
+            trouble.Say(statement, "unexpected " + Spelled(statement, value) + "; expected a value.");
+            return false;
+        }
+
+        /// <summary>
+        /// The comparison and the value from <paramref name="at" />, into <paramref name="relation" /> and
+        /// <paramref name="value" />; or false and trouble where they are not that, or a number is wanted and not given.
+        /// </summary>
+        /// <remarks>An ordering compares numbers, and so does a sum, so either is given one.</remarks>
+        static bool Compared(Statement statement, int at, Quantifier quantifier, Trouble trouble, out Relation relation,
+            out Literal value)
+        {
+            value = default(Literal);
+            if (!Related(statement.ValueAt(at), out relation) || statement.Count <= at + 1)
+            {
+                trouble.Say(statement, "expected a comparison and a value after the names, like == on.");
+                return false;
+            }
+
+            var written = statement.ValueAt(at + 1);
+            if (!Argument(statement, written, trouble))
+                return false;
+
+            value = Given(written);
+            var ordered = relation != Relation.Is && relation != Relation.IsNot;
+            if ((ordered || quantifier == Quantifier.Sum) && value.Kind != ValueKind.Integer && value.Kind != ValueKind.Real)
+            {
+                trouble.Say(statement, "expected a number after '" + Keywords.Name(Said(relation)) + "'.");
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -1376,75 +1587,40 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>all ext.pressurized on [ vent ] == on then</c>, from <paramref name="at" />: what an <c>if</c> or an <c>else if</c>
+        /// <c>all ext.filled on [ vent ] == on then</c>, from <paramref name="at" />: what an <c>if</c> or an <c>else if</c>
         /// tests, or null and trouble where it is not that.
         /// </summary>
         static Comparison Tested(Statement statement, int at, AutomationSystem system, Automation program, Trouble trouble)
         {
-            var all = statement.Says(at, Keyword.All);
-            if (!all && !statement.Says(at, Keyword.Any))
-            {
-                trouble.Say(statement, "expected any or all after 'if'.");
-                return null;
-            }
-
-            var member = statement.Parts(at + 1);
-            var bare = member.Count == 1 && member[0].Word.Length > 0;
-            var qualified = member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0;
-            if (!bare && !qualified)
-            {
-                trouble.Say(statement, "expected a value or a moment after '" + (all ? "all" : "any") + "'.");
-                return null;
-            }
-
-            if (qualified && member[0].Word != BlockKinds.Own)
-            {
-                trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected a value or a moment, bare or qualified by ext.");
-                return null;
-            }
-
-            if (!statement.Says(at + 2, Keyword.On) || statement.ValueAt(at + 3).Form != ValueForm.List)
-            {
-                trouble.Say(statement, "expected 'on' and a list of names.");
-                return null;
-            }
-
             var test = new Comparison();
-            test.RequiresAll = all;
-            test.MemberId = member[member.Count - 1].Word;
-            test.Provider = qualified ? member[0].Word : "";
-            if (!Names(statement, at + 3, test.Targets, trouble, "expected names in the list."))
+            Quantifier quantifier;
+            if (!Quantified(statement, at, "if", trouble, out quantifier))
                 return null;
 
-            if (!statement.Says(at + 4, Keyword.EqualTo) || statement.Count <= at + 5)
-            {
-                trouble.Say(statement, "expected '==' and a value after the names.");
+            string provider, id;
+            if (!Member(statement, at + 1, "a value on a list of names, like ext.closed on [ inner ]", trouble, out provider,
+                    out id, test.Arguments, test.Targets))
                 return null;
-            }
 
-            var form = statement.ValueAt(at + 5).Form;
-            if (form == ValueForm.List || form == ValueForm.Vector || form == ValueForm.Function || form == ValueForm.Qualified)
-            {
-                trouble.Say(statement, "unexpected " + Spelled(statement, at + 5) + "; expected a value.");
+            Relation relation;
+            Literal value;
+            if (!Compared(statement, at + 2, quantifier, trouble, out relation, out value))
                 return null;
-            }
 
-            test.Value = Given(statement.ValueAt(at + 5));
-            if (test.IsMoment && test.Value.Kind != ValueKind.Flag)
-            {
-                trouble.Say(statement, "expected on or off after '==' for a moment.");
-                return null;
-            }
-
-            if (!statement.Says(at + 6, Keyword.Then))
+            if (!statement.Says(at + 4, Keyword.Then))
             {
                 trouble.Say(statement, "expected 'then' after the value.");
                 return null;
             }
 
-            if (!Ends(statement, at + 7, trouble))
+            if (!Ends(statement, at + 5, trouble))
                 return null;
 
+            test.Quantifier = quantifier;
+            test.Provider = provider;
+            test.MemberId = id;
+            test.Relation = relation;
+            test.Value = value;
             for (var i = 0; i < test.Targets.Count; i++)
                 Uses(statement, test.Targets[i], system, program, false, trouble);
 
@@ -1452,7 +1628,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>on button then run 1</c>, <c>when any ext.closed [ inner ] then run 2</c>, or <c>every 600t stop 3</c>.
+        /// <c>whenever button then run 1</c>, <c>when all ext.status on [ inner ] == closed then run 2</c>, or <c>every 600t stop 3</c>.
         /// </summary>
         /// <remarks>
         /// A trigger says the step it does, written as a sequence writes it, because it belongs to the system rather than
@@ -1466,7 +1642,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var needed = trigger as SignalTrigger;
             if (needed != null)
             {
-                pen.Start(Keyword.On).Word(needed.Part).Says(Keyword.Then);
+                pen.Start(Keyword.Whenever);
+                if (!needed.IsWritten)
+                    pen.Word(needed.Part);
+                else if (needed.At != null)
+                    pen.Signal(needed.Sources, needed.At);
+                else
+                    WriteMember(pen, needed.Provider, needed.EventId, NoArguments, needed.Sources);
+
+                pen.Says(Keyword.Then);
                 WriteDoes(pen, trigger.Does);
                 pen.End();
                 return;
@@ -1475,8 +1659,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var when = trigger as WhenTrigger;
             if (when != null)
             {
-                pen.Start(Keyword.When).Says(when.RequiresAll ? Keyword.All : Keyword.Any).Qualified(when.Provider, when.EventId);
-                WriteNames(pen, when.Sources);
+                pen.Start(Keyword.When).Says(Said(when.Quantifier));
+                WriteMember(pen, when.Provider, when.EventId, when.Arguments, when.Sources);
+                pen.Says(Said(when.Relation));
+                Written(pen, when.Value);
                 if (when.IntervalTicks > 0)
                     pen.Says(Keyword.Every).Ticks(when.IntervalTicks);
 
@@ -1519,7 +1705,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Uses(statement, when.Sources[i], system, program, false, trouble);
 
             var needed = trigger as SignalTrigger;
-            if (needed != null)
+            if (needed != null && needed.IsWritten)
+            {
+                for (var i = 0; i < needed.Sources.Count; i++)
+                    Uses(statement, needed.Sources[i], system, program, false, trouble);
+
+                for (var i = 0; needed.At != null && !system.IsBlueprint && i < needed.Sources.Count; i++)
+                    trouble.Takes(statement, needed.Sources[i], needed.At);
+            }
+            else if (needed != null)
             {
                 Uses(statement, needed.Part, system, program, true, trouble);
                 Takes(statement, needed, system, program, trouble);
@@ -1531,9 +1725,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         /// <summary>
         /// Trouble where the trigger <paramref name="needed" /> names already starts something: a slot of a system blueprint
-        /// another <c>on</c> names, or the toolbar slot a system's signal variable holds.
+        /// another <c>whenever</c> names, or the toolbar slot a system's signal variable holds.
         /// </summary>
-        /// <remarks>A toolbar slot holds one action, so a second <c>on</c> on it could never be wired.</remarks>
+        /// <remarks>A toolbar slot holds one action, so a second <c>whenever</c> on it could never be wired.</remarks>
         static void Takes(Statement statement, SignalTrigger needed, AutomationSystem system, Automation program, Trouble trouble)
         {
             if (system.IsBlueprint)
@@ -1545,11 +1739,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             var declared = program.FindSignalRef(needed.Part);
-            if (declared != null)
-                trouble.Takes(statement, declared.Block, declared.At);
+            for (var i = 0; declared != null && i < declared.Blocks.Count; i++)
+                trouble.Takes(statement, declared.Blocks[i], declared.At);
         }
 
-        /// <summary>Whether an <c>on</c> of <paramref name="system" /> names <paramref name="slot" />.</summary>
+        /// <summary>Whether a <c>whenever</c> of <paramref name="system" /> names <paramref name="slot" />.</summary>
         static bool Started(AutomationSystem system, string slot)
         {
             var triggers = system.Triggers;
@@ -1597,23 +1791,65 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Key == Keyword.Every)
                 return Every(statement, trouble);
 
-            // on button then run 1: the signal button, a variable of a system's or a signal slot of a blueprint's.
-            if (!Named(statement.ValueAt(0)) || !statement.Says(1, Keyword.Then))
+            if (!statement.Says(1, Keyword.Then) || (!Named(statement.ValueAt(0)) && !statement.IsMember(0)))
             {
-                trouble.Say(statement, "expected on <trigger> then <step>.");
+                trouble.Say(statement, "expected whenever <signal> then <step>.");
                 return null;
             }
 
-            return SignalTrigger.Named(statement.Word(0));
+            // whenever button then run 1: the signal button, a variable of a system's or a signal slot of a blueprint's.
+            if (Named(statement.ValueAt(0)))
+                return SignalTrigger.Named(statement.Word(0));
+
+            return Written(statement, trouble);
+        }
+
+        /// <summary>
+        /// <c>whenever ext.'finishes-closing' on [ inner ] then</c> or <c>whenever ext.toolbar(1, 1, 4) on [ panel1 ] then</c>: a signal
+        /// written in place, a block's own change or a slot on the blocks' toolbars; or null and trouble where it is neither.
+        /// </summary>
+        static Trigger Written(Statement statement, Trouble trouble)
+        {
+            var member = statement.Parts(0);
+            if (member.Count != 2 || member[0].Word.Length == 0 || member[1].Word.Length == 0)
+            {
+                trouble.Say(statement, "expected a signal qualified by its namespace, like ext.'finishes-closing' on [ inner ].");
+                return null;
+            }
+
+            if (member[0].Word != BlockKinds.Own)
+            {
+                trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected a signal qualified by ext.");
+                return null;
+            }
+
+            var written = SignalTrigger.Written(member[0].Word, member[1].Word);
+            var given = statement.Arguments(0);
+            if (member[1].Word == Toolbar)
+            {
+                if (given.Count != 3 || Statement.Counted(given[0]) == 0 || Statement.Counted(given[1]) == 0
+                    || Statement.Counted(given[2]) == 0)
+                {
+                    trouble.Say(statement, "expected ext.toolbar(<toolbar>, <page>, <slot>), each a whole number from 1.");
+                    return null;
+                }
+
+                written.At = new ToolbarSlot(Statement.Counted(given[0]), Statement.Counted(given[1]), Statement.Counted(given[2]));
+            }
+            else if (given.Count > 0)
+            {
+                trouble.Say(statement, "unexpected arguments; a block's own signal takes none.");
+                return null;
+            }
+
+            return Names(statement.On(0), written.Sources, statement, trouble) ? written : null;
         }
 
         static Trigger When(Statement statement, Trouble trouble)
         {
-            if (!statement.Says(0, Keyword.All) && !statement.Says(0, Keyword.Any))
-            {
-                trouble.Say(statement, "expected 'any' or 'all' after 'when'.");
+            Quantifier quantifier;
+            if (!Quantified(statement, 0, "when", trouble, out quantifier))
                 return null;
-            }
 
             var then = statement.Find(Keyword.Then);
             if (then < 0)
@@ -1622,33 +1858,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return null;
             }
 
-            // Every moment this host has is its own, so a moment is always qualified by ext.
-            var moment = statement.Parts(1);
-            if (moment.Count != 2 || moment[0].Word.Length == 0 || moment[1].Word.Length == 0)
-            {
-                trouble.Say(statement, "expected a moment qualified by its namespace, like ext.closed.");
-                return null;
-            }
-
-            if (moment[0].Word != BlockKinds.Own)
-            {
-                trouble.Say(statement, "no namespace '" + moment[0].Word + "' with moments; expected ext.");
-                return null;
-            }
-
-            var when = new WhenTrigger(moment[1].Word);
-            when.Provider = moment[0].Word;
-            when.RequiresAll = statement.Says(0, Keyword.All);
-            if (statement.ValueAt(2).Form != ValueForm.List)
-            {
-                trouble.Say(statement, "expected a list of names.");
-                return null;
-            }
-
-            if (!Names(statement, 2, when.Sources, trouble, "expected a list of names."))
+            var when = new WhenTrigger("");
+            string provider, id;
+            if (!Member(statement, 1, "a value on a list of names, like ext.closed on [ inner ]", trouble, out provider, out id,
+                    when.Arguments, when.Sources))
                 return null;
 
-            var at = 3;
+            Relation relation;
+            Literal value;
+            if (!Compared(statement, 2, quantifier, trouble, out relation, out value))
+                return null;
+
+            when.EventId = id;
+            when.Provider = provider;
+            when.Quantifier = quantifier;
+            when.Relation = relation;
+            when.Value = value;
+
+            var at = 4;
             if (statement.Says(at, Keyword.Every))
             {
                 int ticks;
@@ -1739,9 +1966,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 if (act.Form == Form.Value)
                 {
-                    pen.Word(act.ActionId).Says(Keyword.On);
-                    WriteNames(pen, act.Targets);
-
+                    WriteMember(pen, act.Provider, act.ActionId, NoArguments, act.Targets);
                     if (act.Arguments.Count > 0)
                     {
                         pen.Says(Keyword.To);
@@ -1750,26 +1975,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
                 else
                 {
-                    if (act.Form == Form.Action)
-                        pen.Word(act.ActionId);
-                    else
-                        pen.Qualified(act.Provider, act.ActionId);
-
-                    pen.Says(Keyword.On);
-                    WriteNames(pen, act.Targets);
-
-                    if (act.Arguments.Count > 0)
-                    {
-                        pen.Says(Keyword.With);
-
-                        for (var i = 0; i < act.Arguments.Count; i++)
-                        {
-                            if (i > 0)
-                                pen.Comma();
-
-                            Written(pen, act.Arguments[i]);
-                        }
-                    }
+                    WriteMember(pen, act.Form == Form.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
                 }
 
                 return;
@@ -1817,57 +2023,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>call ext.close on [ inner ]</c> or <c>call SetColor on [ light ] with 255 0 0</c>: an action, bare or qualified by
-        /// its namespace, on some blocks, given what it asks for.
+        /// <c>call ext.close on [ inner ]</c> or <c>call SetColor(255, 0, 0) on [ light ]</c>: an action, bare or qualified by
+        /// its namespace, on some blocks, given its arguments.
         /// </summary>
         static Step Acted(Statement statement, Trouble trouble)
         {
-            var member = statement.Parts(0);
-            Act act;
-            if (member.Count == 1 && member[0].Word.Length > 0)
-            {
-                act = new Act(member[0].Word);
-                act.Form = Form.Action;
-            }
-            else if (member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0)
-            {
-                if (member[0].Word != BlockKinds.Own)
-                {
-                    trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected an action, bare or qualified by ext.");
-                    return null;
-                }
-
-                act = new Act(member[1].Word);
-
-                act.Form = Form.Native;
-                act.Provider = member[0].Word;
-            }
-            else
-            {
-                trouble.Say(statement, "expected an action after 'call', like Reverse or ext.close.");
-                return null;
-            }
-
-            if (!statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List)
-            {
-                trouble.Say(statement, "expected 'on' and a list of names.");
-                return null;
-            }
-
-            if (!Names(statement, 2, act.Targets, trouble, "expected names in the list."))
+            var act = new Act("");
+            string provider, id;
+            if (!Member(statement, 0, "an action on a list of names after 'call', like ext.close on [ inner ]", trouble,
+                    out provider, out id, act.Arguments, act.Targets))
                 return null;
 
-            if (statement.Count > 3 && (!statement.Says(3, Keyword.With) || statement.Count < 5))
-            {
-                trouble.Say(statement, "expected 'with' and values after the names.");
+            if (!Ends(statement, 1, trouble))
                 return null;
-            }
 
-            for (var at = 4; at < statement.Count; at++)
-            {
-                if (!ReadValue(statement, at, act, trouble))
-                    return null;
-            }
+            act.ActionId = id;
+            act.Form = provider.Length == 0 ? Form.Action : Form.Native;
+            if (provider.Length > 0)
+                act.Provider = provider;
 
             return Noted(act, statement);
         }
@@ -1879,43 +2052,42 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         static Step ReadSet(Statement statement, Trouble trouble)
         {
-            if (!Named(statement.ValueAt(0)) || !statement.Says(1, Keyword.On) || statement.ValueAt(2).Form != ValueForm.List
-                || !statement.Says(3, Keyword.To) || statement.Count < 5)
+            var act = new Act("");
+            string provider, id;
+            if (!Member(statement, 0, "a value on a list of names after 'set', like Radius on [ light ]", trouble,
+                    out provider, out id, act.Arguments, act.Targets))
+                return null;
+
+            if (provider.Length > 0 && provider != BlockKinds.Own)
+            {
+                trouble.Say(statement, "no value '" + Pen.Spelling(provider, id) + "' to set; expected one of the block's own, written bare, or one qualified by " + BlockKinds.Own + ".");
+                return null;
+            }
+
+            if (act.Arguments.Count > 0)
+            {
+                trouble.Say(statement, "unexpected arguments; a value takes none.");
+                return null;
+            }
+
+            if (!statement.Says(1, Keyword.To) || statement.Count < 3)
             {
                 trouble.Say(statement, "expected set <value> on [ <names> ] to <value>.");
                 return null;
             }
 
-            if (!Ends(statement, 5, trouble))
+            if (!Ends(statement, 3, trouble) || !Argument(statement, statement.ValueAt(2), trouble))
                 return null;
 
-            var act = new Act(statement.Word(0));
+            act.ActionId = id;
             act.Form = Form.Value;
-            if (!Names(statement, 2, act.Targets, trouble, "expected names in the list."))
-                return null;
-
-            return ReadValue(statement, 4, act, trouble) ? Noted(act, statement) : null;
+            act.Provider = provider;
+            act.Arguments.Add(Given(statement.ValueAt(2)));
+            return Noted(act, statement);
         }
 
-        /// <summary>Adds the value at <paramref name="index" /> of <paramref name="statement" /> to what <paramref name="act" /> is given, and says whether it is one a step can be given.</summary>
-        static bool ReadValue(Statement statement, int index, Act act, Trouble trouble)
-        {
-            var form = statement.ValueAt(index).Form;
-            if (form == ValueForm.List || form == ValueForm.Vector || form == ValueForm.Function || form == ValueForm.Qualified)
-            {
-                trouble.Say(statement, "unexpected " + Spelled(statement, index) + "; expected a value.");
-                return false;
-            }
-
-            act.Arguments.Add(Given(statement.ValueAt(index)));
-            return true;
-        }
-
-        /// <summary>One value of an action, as whatever kind it was written as.</summary>
-        /// <remarks>
-        /// A bare word that is not a flag is kept as text. Nothing else could be done with it, and
-        /// losing it would turn a step somebody wrote into one that quietly does something else.
-        /// </remarks>
+        /// <summary>One value, as whatever kind it was written as.</summary>
+        /// <remarks>A bare word that is not a flag is a name: one of a list of names a member gives.</remarks>
         static Literal Given(Value value)
         {
             if (value.Form == ValueForm.Text)
@@ -1939,7 +2111,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (value.Says(Keyword.Off))
                 return Literal.Of(false);
 
-            return Literal.Of(value.Word);
+            return Literal.Name(value.Word);
         }
 
         /// <summary>The same, written back as the kind it is.</summary>
@@ -1948,6 +2120,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (value.Kind == ValueKind.Text)
             {
                 pen.Text(value.Text);
+                return;
+            }
+
+            if (value.Kind == ValueKind.Name)
+            {
+                pen.Word(value.Text);
                 return;
             }
 
@@ -2092,14 +2270,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             var value = statement.ValueAt(index);
             if (value.Form == ValueForm.Qualified)
-            {
-                var parts = statement.Parts(index);
-                var joined = "";
-                for (var i = 0; i < parts.Count; i++)
-                    joined += (i > 0 ? "." : "") + parts[i].Word;
+                return "'" + Spelling(statement.Parts(index)) + "'";
 
-                return "'" + joined + "'";
-            }
+            return Spelled(statement, value);
+        }
+
+        /// <summary><paramref name="value" /> as it is written, or what it is, for trouble to name it.</summary>
+        static string Spelled(Statement statement, Value value)
+        {
+            if (value.Form == ValueForm.Reference)
+                return "'" + Spelling(statement.Member(value)) + "'";
+
+            if (value.Form == ValueForm.Qualified)
+                return "a qualified name";
 
             if (value.Form == ValueForm.Real)
                 return value.Real.ToString(CultureInfo.InvariantCulture);
@@ -2113,8 +2296,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (value.Form == ValueForm.Vector)
                 return "'('";
 
-            if (value.Form == ValueForm.Function)
-                return "a host function";
 
             if (value.Form == ValueForm.Keyword)
                 return "'" + Keywords.Name(value.Keyword) + "'";
@@ -2134,6 +2315,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return "what follows";
         }
 
+        /// <summary>A name's parts joined as they are written: <c>ext.closed</c>.</summary>
+        static string Spelling(ValueRange parts)
+        {
+            var joined = "";
+            for (var i = 0; i < parts.Count; i++)
+                joined += (i > 0 ? "." : "") + parts[i].Word;
+
+            return joined;
+        }
+
         /// <summary>Whether <paramref name="value" /> is a name, bare or quoted, rather than one of the language's words or anything else.</summary>
         static bool Named(Value value)
         {
@@ -2150,6 +2341,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!Named(items[i]))
                 {
                     trouble.Say(statement, what);
+                    return false;
+                }
+
+                into.Add(items[i].Word);
+            }
+
+            return true;
+        }
+
+        /// <summary>The names in <paramref name="items" />, into <paramref name="into" />; or false, and trouble, where one is not a name.</summary>
+        static bool Names(ValueRange items, IList<string> into, Statement statement, Trouble trouble)
+        {
+            into.Clear();
+            for (var i = 0; i < items.Count; i++)
+            {
+                if (!Named(items[i]))
+                {
+                    trouble.Say(statement, "expected names in the list.");
                     return false;
                 }
 

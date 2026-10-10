@@ -72,18 +72,55 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// blocks and not at all for the rest. A mixed selection is treated as watched, which is the
         /// one that reports itself honestly - see <c>SignalTrigger</c>.
         /// </para>
+        /// <para>
+        /// A change Sprocket watches for is a signal written on the blocks, sent from any of them. Asked of all of them, it is
+        /// the value it is a change in, coming to be so on the last of them: "when all of these doors finish closing" is the
+        /// doors' status coming to be closed on all of them.
+        /// </para>
         /// </remarks>
         public static MomentTrigger Starter(List<EntityEvent> events, string eventId, bool all)
         {
-            for (var i = 0; i < events.Count; i++)
+            EntityEvent picked = null;
+            for (var i = 0; i < events.Count && picked == null; i++)
             {
-                if (events[i].Id == eventId && events[i].Answered)
-                    return new SignalTrigger(eventId);
+                if (events[i].Id == eventId)
+                    picked = events[i];
             }
 
-            var when = new WhenTrigger(eventId);
-            when.RequiresAll = all;
+            if (picked != null && picked.Answered)
+                return new SignalTrigger(eventId);
+
+            if (!all || picked == null || picked.Value.Length == 0)
+                return SignalTrigger.Written(BlockKinds.Own, eventId);
+
+            var when = new WhenTrigger(picked.Value);
+            when.Provider = BlockKinds.Own;
+            when.Quantifier = Quantifier.All;
+            when.Value = picked.Becomes;
             return when;
+        }
+
+        /// <summary>
+        /// The signal among <paramref name="events" /> that is the value <paramref name="value" /> coming to be what
+        /// <paramref name="compared" /> says, with whether the comparison asks for the block to be in that state rather than
+        /// out of it; null where no signal is, or the comparison is no sameness.
+        /// </summary>
+        /// <remarks>How a test or a watch on one of Sprocket's own values reads in a sentence: by the words of its signal.</remarks>
+        public static EntityEvent Change(IList<EntityEvent> events, string value, Relation relation, Literal compared,
+            out bool inState)
+        {
+            inState = relation == Relation.Is;
+            if (relation != Relation.Is && relation != Relation.IsNot)
+                return null;
+
+            for (var i = 0; i < events.Count; i++)
+            {
+                var signal = events[i];
+                if (signal.Value == value && signal.IsState && signal.Becomes.Said == compared.Said)
+                    return signal;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -94,8 +131,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static string EventOf(Automation program, Bindings bindings, AutomationSystem system, MomentTrigger moment,
             SystemInstance through)
         {
+            var when = moment as WhenTrigger;
+            if (when != null && when.Provider == BlockKinds.Own && bindings != null)
+            {
+                bool inState;
+                var signal = Change(EventsFor(bindings, SystemInstance.Through(through, when.Sources)), when.EventId,
+                    when.Relation, when.Value, out inState);
+
+                return signal != null && inState ? signal.Id : when.EventId;
+            }
+
             var required = moment as SignalTrigger;
-            if (required == null)
+            if (required == null || required.IsWatched)
                 return moment.EventId;
 
             if (program == null || system == null)
@@ -103,13 +150,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var blocks = new List<string>();
             var positions = new List<ToolbarSlot>();
-            program.Answers(system, through, required.Part, blocks, positions);
+            program.Answers(system, through, required, blocks, positions);
             if (positions.Count == 0)
                 return "";
 
             GridEntity block = bindings == null ? null : bindings.Entity(blocks[0]);
             EntityEvent stands = block == null ? null : block.Kind.Signal(positions[0]);
             return stands != null ? stands.Id : positions[0].EventId;
+        }
+
+        /// <summary>
+        /// The namespace a step doing <paramref name="id" /> as <paramref name="form" /> on these blocks is qualified by:
+        /// Sprocket's own for its own actions and values, empty for the game's.
+        /// </summary>
+        public static string Provider(GridWorld world, IList<long> entityIds, string id, Form form)
+        {
+            if (form == Form.Native)
+                return BlockKinds.Own;
+
+            if (form != Form.Value)
+                return "";
+
+            return EntityAction.Value(ActionsOf(world, entityIds), BlockKinds.Own, id) != null ? BlockKinds.Own : "";
         }
 
         /// <summary>Actions every one of the given entities accepts.</summary>
@@ -242,7 +304,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             for (var i = 0; i < kind.Actions.Count; i++)
             {
-                if (kind.Actions[i].Sets)
+                if (kind.Actions[i].Form == Form.Value)
                     return true;
             }
 

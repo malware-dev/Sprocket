@@ -626,7 +626,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 {
                     var trigger = triggers[t];
                     _keptTriggers.Add(trigger);
-                    var watched = trigger is WhenTrigger || trigger is EveryTrigger;
+                    var signal = trigger as SignalTrigger;
+                    var watched = trigger is WhenTrigger || trigger is EveryTrigger || (signal != null && signal.IsWatched);
                     var alone = Alone(system, trigger);
 
                     for (var n = 0; n < instances.Count; n++)

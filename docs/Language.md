@@ -2,21 +2,21 @@
 
 A Sprocket program is a script, written so that a person can read and repair it.
 
-A host is what runs a program in a game. It supplies what the language leaves open: the actions,
-values and moments a block has, how a block is found again, and the functions it offers on a block.
+A host is what runs a program in a game. It supplies what the language leaves open: the members
+a block has, and how a block is found again.
 What a host may add is set out under [What a host adds](#what-a-host-adds).
 
 A construct is what a program runs on, and a program belongs to one construct: its own. A block is
-one thing on a construct that the host can find again: it has a type, and it has the members and
-moments the host gives it.
+one thing on a construct that the host can find again: it has a type, and it has the members the
+host gives it.
 
 ## The shape of a file
 
 ```
 file        := version entry*
 entry       := annotation? statement
-statement   := head (value | keyword)* newline
-             | head (value | keyword)* block
+statement   := head (value | keyword | operator)* newline
+             | head (value | keyword | operator)* block
 block       := "{" newline entry* "}" newline
 annotation  := ("#" (" " line)? newline)+
 ```
@@ -46,10 +46,9 @@ An annotation describes the statement below it. An annotation with nothing under
 | Duration | `600t` | A number and its unit as one token. `t` is ticks |
 | Flag | `on`, `off` | |
 | Color | `#FF8800`, `#FF8800CC` | |
-| Vector | `(3 0 -2)` | |
+| Vector | `(3 0 -2)` | Three integers or reals, separated by spaces |
 | List | `[ 1, "two", three ]` | An item may be a list or a vector: `[ 7, [ (0 2 -1), (3 0 0) ] ]` |
 | Block | `block 'Door/LargeBlockDoor' [ … ]` | One actual block. See Variables |
-| Host function | `panel1:toolbar(1, 1, 4)` | A block, a function the host offers on it, and its values in parentheses. See Host functions |
 
 ### References
 
@@ -68,50 +67,73 @@ A reference written as an id survives a rename; one written as a name has to fol
 
 ## What a host adds
 
-Everything a program says about a block beyond its name is the host's: its members, its moments, and
-the functions on it. The two sections below say how each is written. The examples throughout this
-document are written for a host with a namespace called Gearbox.
+Everything a program says about a block beyond its name is one of its members, and the host's. The
+sections below say how members are written. The examples throughout this document are written for a
+host with a namespace called Gearbox.
+
+### Members
+
+Every member the host gives a block is an action, a value, a function or a signal.
+
+An action is something a block does, done with `call`. A value is something a block has: `if` and
+`when` read it, and `set` writes it where the host allows. A function is read like a value, and is
+given arguments. A member the host does not give a block is an error, and so is a member used as a
+kind it is not, such as `call` on a value or `set` on a function.
+
+Each member of a block has an id of its own, except that an action and a value may share one.
+
+An action may declare parameters, and a function declares at least one. Each parameter is given an
+argument, in parentheses after the member, in order, separated by commas:
+`Gearbox.'rotate-to'(0, 90, 2)`, `Gearbox.amount("Ingot/Iron")`. Parentheses are written only where
+there are arguments, and empty ones are an error: `call Gearbox.close on [ inner ]`.
+
+Each argument is written as the kind it is. An argument missing or left over is an error. Where a
+parameter declares a type, an argument of another kind, or an integer too large for that type, is an
+error.
+
+A value or a function gives back a flag, an integer, a real, text, a color, or one of a list of names
+the host gives that member. A flag is `on` or `off`. One of a list is written as a name: `closed`.
+Wherever a real is taken, an integer stands for one.
+
+A signal is something a block sends: `Gearbox.closes` is sent as a door finishes closing. A function
+may give back a signal too, named by the place it is sent from, a place the host offers. Either starts
+a step with `whenever`, and is written in place after `whenever`, in a variable, or answering a slot that expects
+`signal`. Its blocks are a set like any other, and the signal is sent from any of them.
+
+```
+# The signal sent from a place on the panel's toolbar, by toolbar, page and position, each counted
+# from 1
+let 'call pressed' = Gearbox.toolbar(1, 1, 4) on [ panel1 ]
+```
+
+```
+call Gearbox.close on [ inner ]
+set Radius on [ light ] to 4.5
+if all Gearbox.status on [ inner ] == closed then {
+    call Gearbox.open on [ outer ]
+}
+```
 
 ### Namespaces
 
-Every member of a block, action or value, and every moment it reaches, is the host's, and lives in a
-namespace. A member of the root namespace is written bare; a member of a named namespace is written
-qualified, the namespace's name, a dot, and the id.
+Every member of a block is the host's, and lives in a namespace. A member of the root namespace is
+written bare; a member of a named namespace is written qualified, the
+namespace's name, a dot, and the id.
 
 ```
 call Reverse on [ arm ]
 set Radius on [ light ] to 4.5
 call Gearbox.close on [ inner ]
-call Gearbox.'rotate-to' on [ arm ] with 0, 90, 2
-when any Gearbox.closed [ inner ] then run 2
+call Gearbox.'rotate-to'(0, 90, 2) on [ arm ]
+whenever Gearbox.closes on [ inner ] then run 2
 ```
 
 Each part of a qualified name is a name, judged on its own, so a part spelled like a keyword is
 quoted: `Gearbox.'on'`.
 
 A host may have a root namespace, named namespaces, or both. A host with no root namespace has every
-member and moment written qualified. Which namespaces there are, and what each holds, is the host's to
-say. A member or moment in no namespace the host has is an error.
-
-### Host functions
-
-`<block>:<name>(<values>)` calls a function a host offers on a block: a variable holding a block, a
-colon, the function's name, and its values in parentheses. The host says which functions it offers,
-which values each takes, and what each gives back. The language knows only the shape.
-
-What a host function gives back has a type. A `signal` names a signal by the place it is sent from, a
-place the host offers, and is what starts a step with `on`. A slot that expects `signal` is answered by a
-host function that names one.
-
-A host function is a value, written wherever a value of the type it gives back is taken.
-
-```
-# Gearbox's toolbar function names a signal: the one sent from a place on the block's toolbar,
-# by toolbar, page and position, each counted from 1
-let button = panel1:toolbar(1, 1, 4)
-```
-
-A function the host does not offer, or values it does not take, is an error.
+member written qualified. Which namespaces there are, and what each holds, is the host's to say. A
+member in no namespace the host has is an error.
 
 ## `sprocket <format> [alpha <draft>]`
 
@@ -198,7 +220,7 @@ optional slot button expects signal
 ```
 
 `required slot <name> expects <what>` asks the construct for it. `expects` names what may fill the
-slot: a block's type, or `signal` for a slot answered by a host function that names a signal. A
+slot: a block's type, or `signal` for a slot answered by a function that gives back a signal. A
 block's type is a game type id with the `MyObjectBuilder_` prefix dropped, a quoted `'Type/Subtype'`
 for one exact block, or a list of either.
 
@@ -208,57 +230,65 @@ An `optional` slot is one an instance may leave unanswered.
 
 ```
 # The call button runs the cycle
-on button then run 1
+whenever 'call pressed' then run 1
 
 # The stop button
-on halt then stop 1
+whenever 'stop pressed' then stop 1
 
 # The outer door's own button: it opens the door, and nothing else
-on open then call Gearbox.open on [ outer ]
-```
+whenever 'open pressed' then call Gearbox.open on [ outer ]
 
-`on <signal> then <step>` starts the step each time the signal is sent. In a system the signal is a
-variable holding what a host function named; in a system blueprint it is a slot that expects
-`signal`. A signal starts one step. Two `on`s that reach the same signal, whether by naming it or through
-what an instance answers their slots with, are an error.
-
-A signal always comes from something done on the construct. A state a block reaches, such as a door having
-closed, is watched with `when`.
-
-```
 # The inner door has shut
-when any Gearbox.closed [ inner ] then run 2
+whenever Gearbox.closes on [ inner ] then run 2
 
 # Whichever of the two shuts first
-when any Gearbox.closed [ inner, outer ] then run 2
+whenever Gearbox.closes on [ inner, outer ] then run 2
+```
 
+`whenever <signal> then <step>` starts the step each time the signal is sent. The signal is written in place,
+`whenever Gearbox.closes on [ inner ] then run 2`, or named: in a system by a variable holding one, in a
+system blueprint by a slot that expects `signal`.
+
+A signal is sent as something happens: a toolbar slot used, a door finishing closing. A state the
+blocks come to, such as both doors being shut, is watched with `when`.
+
+```
 # Not until both of them are shut, and then the hangar opens
-when all Gearbox.closed [ inner, outer ] then call Gearbox.open on [ hangar ]
+when all Gearbox.status on [ inner, outer ] == closed then call Gearbox.open on [ hangar ]
 
 # The room has filled, looked for every half second
-when any Gearbox.filled [ vent ] every 30t then run 4
+when any Gearbox.filled on [ vent ] == on every 30t then run 4
+
+# The tank has filled halfway
+when any Gearbox.fill on [ tank ] >= 0.5 then run 5
+
+# The holds have a thousand iron ingots between them
+when sum Gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then run 6
 
 every 600t stop 3
 ```
 
-`when <any|all> <moment> [ <names> ] [every <duration>] then <step>` starts the step when the blocks
-named reach the moment: `when any Gearbox.closed [ inner ] then run 2` runs sequence 2 once the inner
-door has closed.
+`when <any|all|sum> <member> on [ <names> ] <comparison> <value> [every <duration>] then <step>` starts
+the step when the comparison comes to hold on the blocks named:
+`when all Gearbox.status on [ inner, outer ] == closed then call Gearbox.open on [ hangar ]` opens the
+hangar once both doors are shut. `<member>` is a value or a function, and `<comparison>`, `<value>` and `sum` follow the rules
+an `if` sets out for them.
 
-`any` and `all` say how the moment is tested across every block the names stand for, each block once,
-however many names reach it. With `any`, one block reaching the moment is enough, and each block that
-reaches it fires on its own, so two doors shutting at different times is two firings. With `all`,
-every block must be there, and it fires once, the instant the last of them arrives, and not again
-until one of them leaves that state.
+`any`, `all` and `sum` say how the comparison is tested across every block the names stand for, each
+block once, however many names reach it. With `any`, the comparison coming to hold on one block is
+enough, and each block it comes to hold on fires on its own, so two doors shutting at different times
+is two firings. With `all`, it must hold on every block, and the `when` fires once, the instant it
+comes to hold on the last of them, and not again until it stops holding on one of them. With `sum`,
+the member is read on every block and the readings are added; the `when` fires once, the instant the
+comparison comes to hold on the total, and not again until it stops holding.
 
-A moment is a state a block is in, named by its id and qualified by what adds it: `Gearbox.closed`.
-`every` is how often it is tested, and `10t` where it is left out. A host that is told when a moment
-changes may test it then instead, and set the `every` aside.
+`every` is how often a `when` is tested, and `10t` where it is left out. A host that is told when a
+member changes may test it then, and set the `every` aside.
 
 `every <duration> <step>` is a clock, and starts the step each time the duration passes:
 `every 600t stop 3` stops sequence 3 every ten seconds.
 
-An `on`, a `when` and an `every` have no name.
+A `whenever`, a `when` and an `every` have no name.
 
 ### Sequences
 
@@ -276,25 +306,25 @@ The name is optional, and is a name rather than text.
 ### Steps
 
 ```
-call <member> on [ <names> ] [with <values>]
+call <member>[(<arguments>)] on [ <names> ]
 set <member> on [ <names> ] to <value>
 run <sequence>
 stop <sequence>
 await
 wait <duration>
-if <any|all> <member> on [ <names> ] == <value> then {
+if <any|all|sum> <member> on [ <names> ] <comparison> <value> then {
     <steps>
 }
 ```
 
 A step starts something and the next statement follows immediately.
 
-An `on`, a `when` and an `every` each start one step: `run`, `stop`, `call` or `set`, written as it is
+A `whenever`, a `when` and an `every` each start one step: `run`, `stop`, `call` or `set`, written as it is
 here. `await`, `wait` and `if` belong to sequences alone.
 
-The list in `call` and `set` is every name the step acts on: a system's variables, or a system
-blueprint's slots. The names stand for one set of blocks: every block any of them stands for, each
-once, however many names reach it. The step acts on every block in the set.
+The list after a member is every name the statement acts on or tests: a system's variables, or a
+system blueprint's slots. The names stand for one set of blocks: every block any of them stands for,
+each once, however many names reach it. The statement acts on, or tests, every block in the set.
 `call Gearbox.close on [ inner, outer ]` closes both doors in one step, and so does
 `call Gearbox.close on [ hangar ]` in an instance that answers the slot with two blocks:
 `hangar = [ door2, door3 ]`.
@@ -311,29 +341,27 @@ sequence 1 as Cycle {
 }
 ```
 
-#### `call <member> on [ <names> ] [with <values>]`
+#### `call <member>[(<arguments>)] on [ <names> ]`
 
 `call <member> on [ <names> ]` calls an action on the blocks. The member is the action's id, bare or
 qualified by its namespace, as [Namespaces](#namespaces) sets out.
 
-`with` carries the values an action takes, separated by commas. Every value is written as the kind it
-is, in order, and a value left out is the default the action declared. Where an action says what type a
-value has to be, a value of another kind, or a whole number too large for that type, is an error, and a
-whole number stands for a real.
+An action's arguments are written as [Members](#members) sets out.
 
 ```
 call Gearbox.close on [ inner ]
-call Gearbox.'rotate-to' on [ arm ] with 0, 90, 2
+call Gearbox.'rotate-to'(0, 90, 2) on [ arm ]
 call Reverse on [ arm ]
-call SetColor on [ light ] with 255, 136, 0
-call Run on [ pb ] with "doors open"
+call SetColor(255, 136, 0) on [ light ]
+call Run("doors open") on [ pb ]
 ```
 
 #### `set <member> on [ <names> ] to <value>`
 
 `set <member> on [ <names> ] to <value>` writes one of the block's own values, by its id. A value
-declares what kind it is, and it is written as that kind, or as a whole number where it is real. An
-id can name both an action and a value, and `set` always means the value.
+declares what kind it is, and it is written as that kind, or as an integer where it is real. An
+id can name both an action and a value, and `set` always means the value. `set` on a value the host
+offers only to be read is an error.
 
 ```
 set Radius on [ light ] to 4.5
@@ -366,10 +394,10 @@ call Gearbox.close on [ inner ]
 await
 call Gearbox.open on [ outer ]
 wait 60t
-call Run on [ pb ] with "doors open"
+call Run("doors open") on [ pb ]
 ```
 
-#### `if <any|all> <member> on [ <names> ] == <value> then`
+#### `if <any|all|sum> <member> on [ <names> ] <comparison> <value> then`
 
 ```
 sequence 1 as Cycle {
@@ -391,20 +419,32 @@ sequence 1 as Cycle {
         call Gearbox.close on [ inner, outer ]
     }
     await
-    call SetColor on [ light ] with 0, 255, 0
+    call SetColor(0, 255, 0) on [ light ]
 }
 ```
 
-`if <any|all> <member> on [ <names> ] == <value> then` tests the member on the blocks once, when the step is
-reached, and runs the statements in its block where the test holds. With `any`, one block's member equal to
-the value is enough; with `all`, every block's must be. The member is one `set` writes, and the value is
-written as `set` writes it, or a moment, named as `when` names it, with `on` or `off` as its value.
+`if <any|all|sum> <member> on [ <names> ] <comparison> <value> then` tests the member on the blocks
+once, when the step is reached, and runs the statements between its braces where the test holds.
+`<member>` is a value or a function, and `<value>` is written as the kind it gives back.
+
+The comparison is `==`, `!=`, `<`, `>`, `<=` or `>=`. `==` and `!=` compare any kind; the other four
+compare integers and reals, and are an error on any other kind.
+
+With `any`, the test holding on one block is enough; with `all`, it must hold on every block. With
+`sum`, the member is read on every block, the readings are added, and the total is compared once.
+`sum` adds integers and reals, and is an error on anything else.
+
+```
+if sum Gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then {
+    call Gearbox.close on [ hatch ]
+}
+```
 
 The statement after an `if`'s closing brace may be an `else if`, tested in turn where nothing before it
 held, or an `else`, which runs where nothing held. An `else` comes last, and once. The sequence then carries
 on after the whole `if`.
 
-The statements in an `if`'s block are steps like any other, an `if` among them. An `await` among them waits
+The statements between an `if`'s braces are steps like any other, an `if` among them. An `await` among them waits
 for everything started above it in the sequence, inside the `if` or before it.
 
 A `//` before an `if` switches off the whole of it, its `else if` and `else` included. A step inside can be
@@ -428,8 +468,8 @@ let door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, [ (3 0 -2) ], "Airl
 let door2 = block 'Door/LargeBlockDoor' [ 74857693847562935, [ (0 2 -1), (1 0 0) ], "Hangar Door" ]
 let panel1 = block 'ButtonPanel/ButtonPanel' [ 74857693847562937, "Airlock Button" ]
 
-# A signal from the panel above: a host function called on the variable that holds it
-let button = panel1:toolbar(1, 1, 4)
+# A signal from the panel above
+let button = Gearbox.toolbar(1, 1, 4) on [ panel1 ]
 ```
 
 `block '<Type/Subtype>' [ <keys> ]` is one actual block on the program's construct. The quoted value
@@ -456,8 +496,8 @@ instance <n> of <system blueprint> [as '<name>'] {
 ```
 
 `<slot> = [ <answers> ]` says what on the program's construct answers a slot of the system blueprint:
-variables holding blocks, or, for a slot that expects `signal`, host functions written in place, or
-variables holding what one named. More than one may answer a slot, and more than one answer to a
+variables holding blocks, or, for a slot that expects `signal`, functions that give back a signal,
+written in place, or variables holding one. More than one may answer a slot, and more than one answer to a
 slot that expects `signal` means any of them starts it. An instance that leaves a required slot unanswered is missing
 it.
 
@@ -465,6 +505,6 @@ it.
 instance 1 of MalTek.Airlock {
     inner = [ door1 ]
     hangar = [ door2, door3 ]
-    button = [ panel1:toolbar(1, 1, 4) ]
+    button = [ Gearbox.toolbar(1, 1, 4) on [ panel1 ] ]
 }
 ```

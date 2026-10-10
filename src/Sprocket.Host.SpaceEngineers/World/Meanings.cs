@@ -348,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Sets && Categories.Names(one.GamePropertyId, stem))
+                if (one.GamePropertyId != null && Categories.Names(one.GamePropertyId, stem))
                     one.Hide();
             }
         }

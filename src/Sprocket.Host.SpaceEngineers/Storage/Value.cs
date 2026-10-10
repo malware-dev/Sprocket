@@ -16,8 +16,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     public struct Value
     {
+        /// <summary>No value: what is answered where a position holds nothing.</summary>
         public static readonly Value None = new Value(ValueForm.Identifier);
 
+        /// <summary>A value written as <paramref name="form" />, carrying what that form carries.</summary>
         public Value(ValueForm form, string word = null, long whole = 0, double real = 0,
             Keyword keyword = Keyword.None) : this()
         {
@@ -28,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Real = real;
         }
 
+        /// <summary>What it is written as.</summary>
         public ValueForm Form { get; private set; }
 
         /// <summary>The text of a word, however it was written. Empty for anything that is not one.</summary>
@@ -38,8 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </summary>
         public long Whole { get; private set; }
 
+        /// <summary>A real number, for one written with a point or an exponent.</summary>
         public double Real { get; private set; }
 
+        /// <summary>Which of the format's words it is, for a keyword.</summary>
         public Keyword Keyword { get; private set; }
 
         /// <summary>Whether this is a name, bare or quoted. Text is not.</summary>
@@ -69,10 +74,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return new Value(ValueForm.Qualified, null, Run(from, count));
         }
 
-        /// <summary>A host function call, its block, its name and its values the run of <see cref="Reading.Parts" /> starting at <paramref name="from" />.</summary>
-        public static Value Function(int from, int count)
+        /// <summary>A member and its blocks, whose name's parts, arguments and names are a run of <see cref="Reading.Parts" />.</summary>
+        public static Value Referenced(int from, int count)
         {
-            return new Value(ValueForm.Function, null, Run(from, count));
+            return new Value(ValueForm.Reference, null, Run(from, count));
         }
 
         static long Run(int from, int count)
@@ -95,6 +100,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return Form == ValueForm.Real ? Real : 0d;
         }
 
+        /// <summary>A color's red, green, blue and alpha.</summary>
         public void Colour(out byte r, out byte g, out byte b, out byte a)
         {
             r = (byte)((Whole >> 24) & 0xFF);

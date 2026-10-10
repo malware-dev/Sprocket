@@ -34,8 +34,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         Text,
 
+        /// <summary>A whole number.</summary>
         Integer,
 
+        /// <summary>A number with a point or an exponent.</summary>
         Real,
 
         /// <summary>A whole number of ticks and its unit, written as one word: <c>600t</c>.</summary>
@@ -47,12 +49,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>One line of text somebody typed, without its <c>#</c>.</summary>
         Annotation,
 
+        /// <summary><c>{</c></summary>
         BlockOpen,
+
+        /// <summary><c>}</c></summary>
         BlockClose,
+
+        /// <summary><c>[</c></summary>
         ListOpen,
+
+        /// <summary><c>]</c></summary>
         ListClose,
+
+        /// <summary><c>(</c>, which opens a vector or a member's arguments.</summary>
         VectorOpen,
+
+        /// <summary><c>)</c></summary>
         VectorClose,
+
+        /// <summary><c>,</c>, between the items of a list or a member's arguments.</summary>
         Comma,
 
         /// <summary>
@@ -64,14 +79,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         Dot,
 
-        /// <summary>The <c>:</c> between a block and the toolbar slot on it: <c>panel1:toolbar(1, 1, 4)</c>.</summary>
-        Colon,
-
         /// <summary>The <c>=</c> of one of a system saying what one of its parts is.</summary>
         Equals,
 
-        /// <summary><c>==</c>, the test that two things are equal.</summary>
-        EqualTo,
+        /// <summary>One of the comparisons, <c>==</c>, <c>!=</c>, <c>&lt;</c>, <c>&gt;</c>, <c>&lt;=</c> or <c>&gt;=</c>, carried as its keyword.</summary>
+        Comparison,
 
         /// <summary>
         /// Text that is not a token at all, carrying what is wrong with it.

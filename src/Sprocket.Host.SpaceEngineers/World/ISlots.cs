@@ -64,8 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Sets the block's value <paramref name="propertyId" /> to <paramref name="value" />, answering whether it was set; a value of the wrong kind is refused.</summary>
         bool Set(IMyTerminalBlock block, string propertyId, Literal value);
 
-        /// <summary>Whether one of the block's own values is <paramref name="value" />, compared as the type the block holds it as; false where it has no such value.</summary>
-        bool Holds(IMyTerminalBlock block, string propertyId, Literal value);
+        /// <summary>One of the block's own values made ready to be read, or null where it has no such value.</summary>
+        /// <remarks>Asked once, when a program is bound.</remarks>
+        Gauge Gauge(IMyTerminalBlock block, string propertyId);
 
         /// <summary>
         /// One of the block's own actions or values made ready to be given, or null where it has no

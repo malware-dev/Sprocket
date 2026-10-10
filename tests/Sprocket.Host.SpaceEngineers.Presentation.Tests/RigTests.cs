@@ -51,8 +51,8 @@ public class RigTests
         // own arrangement is, through the signal slot the installation fills with the button. A "when" here
         // would be Sprocket claiming it watches the button.
         var program = store.GetValue(SprocketUnit.ProgramKey);
-        Assert.Contains("on 'Airlock Button' then run 1", program);
-        Assert.Contains("'Airlock Button' = [ 'Airlock Button':toolbar(1, 1, 1) ]", program);
+        Assert.Contains("whenever 'Airlock Button' then run 1", program);
+        Assert.Contains("'Airlock Button' = [ ext.toolbar(1, 1, 1) on [ 'Airlock Button' ] ]", program);
         Assert.DoesNotContain("when ", program);
 
 
@@ -203,7 +203,7 @@ public class RigTests
         sim.Editor.NewSystem("Clock");
         sim.Editor.PressStart("when");
         sim.Editor.PressBlock("Cycle Timer");
-        Assert.True(sim.Editor.HasChoice("is switched on"), "the timer offers nothing but triggers, so this proves nothing");
+        Assert.True(sim.Editor.HasChoice("turns on"), "the timer offers nothing but triggers, so this proves nothing");
         sim.Editor.PressChoice("goes off");
         sim.Editor.PressPrimary();
         sim.Tick();
@@ -219,7 +219,7 @@ public class RigTests
         Assert.DoesNotContain(sim.Editor.Offered(), row => row.Text == "Inner Door");
         sim.Editor.PressBlock("Cycle Timer");
         Assert.True(sim.Editor.HasChoice("goes off"));
-        Assert.False(sim.Editor.HasChoice("is switched on"), "a moment Sprocket watches was offered as a signal");
+        Assert.False(sim.Editor.HasChoice("turns on"), "a signal Sprocket watches was offered as a toolbar signal");
     }
 
     /// <summary>
@@ -466,7 +466,7 @@ public class RigTests
         Simulation rig = Simulation.On(Store.Nowhere());
         rig.Tick();
 
-        var program = "sprocket 1 alpha 11\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
+        var program = "sprocket 1 alpha 14\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
 
         Assert.Equal("", ProgramText.Load(program, rig.Editor.Program, rig.World.Values));

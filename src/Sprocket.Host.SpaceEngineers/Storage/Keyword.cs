@@ -45,13 +45,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>A step that sets a value on some blocks.</summary>
         Set,
 
-        /// <summary>A trigger started by a signal, the blocks a step acts on, or a flag that holds.</summary>
+        /// <summary>The blocks a member is on, or a flag that holds.</summary>
         On,
         /// <summary>A flag that does not hold, such as a block's switch.</summary>
         Off,
-        /// <summary>A moment watched on every one of the blocks named.</summary>
+        /// <summary>A test that has to hold on every one of the blocks named.</summary>
         All,
-        /// <summary>A moment watched on any one of the blocks named.</summary>
+        /// <summary>A test that holds where it holds on any one of the blocks named.</summary>
         Any,
         /// <summary>A step that waits a length of time.</summary>
         Wait,
@@ -82,9 +82,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>A step calling an action on some blocks.</summary>
         Call,
 
-        /// <summary>The values such an action has to be given.</summary>
-        With,
-
         /// <summary>Which draft of an unfinished format a program was written against.</summary>
         Alpha,
 
@@ -110,6 +107,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         EqualTo,
 
         /// <summary>What a slot expects where a signal answers it: a signal, named by the place it is sent from.</summary>
-        Signal
+        Signal,
+
+        /// <summary>A test on the total of a number read on every one of the blocks named.</summary>
+        Sum,
+
+        /// <summary>The test that a member differs from a value.</summary>
+        NotEqualTo,
+
+        /// <summary>The test that a number is below a value.</summary>
+        Below,
+
+        /// <summary>The test that a number is above a value.</summary>
+        Above,
+
+        /// <summary>The test that a number is at most a value.</summary>
+        AtMost,
+
+        /// <summary>The test that a number is at least a value.</summary>
+        AtLeast,
+
+        /// <summary>A trigger started each time a signal is sent.</summary>
+        Whenever
     }
 }

@@ -86,8 +86,8 @@ public class ResumeTests
         a.Vent = a.Rig.Vent(3, "Airlock Vent");
         a.Button = a.Rig.Panel(4, "Inside Button");
 
-        var trigger = new WhenTrigger(new ToolbarSlot(1, 1, 1).EventId);
-        trigger.Sources.Add(a.Name(a.Button));
+        var button = a.Program.DeclareSignal(a.Name(a.Button), new ToolbarSlot(1, 1, 1), "button");
+        var trigger = SignalTrigger.Named(button.Name);
 
         var cycle = a.Program.AddSequence(trigger);
         cycle.Name = "Let me out";
@@ -107,7 +107,7 @@ public class ResumeTests
     {
         var act = new Act(actionId);
         act.Targets.Add(target);
-        sequence.Steps.Add(act);
+        sequence.Steps.Add(Given.Defaults(act));
         sequence.Steps.Add(new Await());
     }
 
@@ -231,7 +231,7 @@ public class ResumeTests
     public void AWhenRemembersWhatItReadAcrossAReload()
     {
         var a = Build();
-        var opened = new WhenTrigger("opened");
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
         opened.Sources.Add(a.Name(a.Outer));
         var close = new Act("close");
         close.Targets.Add(a.Name(a.Inner));
@@ -249,6 +249,27 @@ public class ResumeTests
         a.Tick(30);
 
         Assert.Contains("Inner Door:close", a.Log);
+    }
+
+    /// <summary>What a <c>when any</c> read of each block is written as the block's name and on or off, and read back.</summary>
+    [Fact]
+    public void WhatAWhenReadOfEachBlockIsReadBack()
+    {
+        var a = Build();
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
+        opened.Sources.Add(a.Name(a.Outer));
+        opened.Sources.Add(a.Name(a.Inner));
+        var close = new Act("close");
+        close.Targets.Add(a.Name(a.Inner));
+        opened.Does = close;
+        a.Program.Systems[0].AddTrigger(opened);
+        a.Program.Edited();
+        a.Outer.ForceOpen();
+        a.Tick(30);
+
+        var state = StateText.Save(a.Program, a.Runner);
+        Assert.Contains("'Outer Door' on 'Inner Door' off", state);
+        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
     }
 
     /// <summary>An <c>every</c> keeps its beat across a reload rather than waiting a whole interval again.</summary>

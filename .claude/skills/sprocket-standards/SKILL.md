@@ -161,18 +161,30 @@ server load and calling it time.
 
 ## Watching what a block does
 
-A moment a `when` waits for is watched in one of three ways, and a new moment uses one of them, never a mechanism of
-its own:
+A block's members are actions, values, functions and signals. A value is a state, read after "is" (`if all
+ext.status on [ inner ] == closed`). A function is a value with parameters. A signal is a change, read after "when" on
+screen and started with `whenever` in script (`whenever ext.'finishes-closing' on [ inner ] then`). A `when` compares a value and
+fires as the comparison comes to hold.
 
-- **Announced** (`EntityKind.Announced`): the game raises an event when the moment may have happened, and the block's
-  capability listens through `Capability.Listen`. Looked for on the tick after, with a backstop look every hundred ticks.
-- **Ruled out** (`EntityKind.RuledOutBy`): the game does not announce the moment, but does announce a reading that rules
+One of Sprocket's own values is declared once on its kind with `EntityKind.WithValue(id, named, Being)`; `Being`
+reads it (`Being.Flag`, `OneOf`, `Number`, `Whole`, `Text`, `Color`, and the `<T, TOptions>` forms with `Taking`
+for a function). A signal Sprocket watches for is a change in one of those values, declared right after it with
+`WithChange(id, text, value, becomes)`, and carries the state words the `if` picker and sentences use
+(`Reading(state, unstate)`). A signal only a toolbar sends is an answered `EntityEvent`.
+
+A value and its signals are watched in one of three ways, and a new one uses one of them, never a mechanism of its
+own; a value of the block's own is looked for on the `when`'s cadence:
+
+- **Announced** (`Announced()` after `WithValue` or `WithChange`): the game raises an event when the value may have
+  changed, and the block's capability listens through `Capability.Listen`. Looked for on the tick after, with a
+  backstop look every hundred ticks.
+- **Ruled out** (`RuledOutBy(reading)`): the game does not announce the change, but does announce a reading that rules
   it out. Looked for on its cadence only while a watched block is outside that reading, otherwise as if announced. A
   door starting to close is the case: it can only between starting to open and having closed.
-- **Looked for** (`EntityKind.Looked`, with its reason): the `when`'s own cadence through the rota, where neither of the
-  others exists.
+- **Looked for** (`Looked(reason)`): the cadence through the rota, where neither of the others exists. A signal has no
+  `every` of its own: the host picks its cadence, and a change it cannot give a sensible cadence is no signal.
 
-**An event first.** A look only where the game has no event, and only while the moment is possible. Never wrap or
+**An event first.** A look only where the game has no event, and only while the change is possible. Never wrap or
 replace the game's own terminal actions to learn of a change: another mod doing the same collides. What Sprocket asks
 of a block prompts a look by itself (`GridEntity.Invoke`).
 

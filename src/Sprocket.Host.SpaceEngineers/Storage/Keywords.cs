@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "sprocket", "block", "system", "instance", "of", "sequence",
             "when", "every", "then", "trigger", "to", "run", "set",
             "on", "off", "all", "any", "wait", "await", "required", "expects", "=", "changed", "as", "last",
-            "running", "step", "stop", "call", "with", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
-            "signal"
+            "running", "step", "stop", "call", "alpha", "optional", "let", "blueprint", "slot", "if", "else", "==",
+            "signal", "sum", "!=", "<", ">", "<=", ">=", "whenever"
         };
 
         static readonly Keyword[][] ByLength = Bucket();

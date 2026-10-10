@@ -272,7 +272,7 @@ public class RotaTests
 
         vent.Enabled = false;
 
-        var on = new WhenTrigger("filled");
+        var on = SignalTrigger.Written("ext", "finishes-filling");
         on.Sources.Add(automation.Declare(ship.World, ship.Entity(vent.Id)).Name);
         var sequence = automation.AddSequence(on);
         Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
@@ -412,7 +412,7 @@ public class RotaTests
             var watched = automation.Declare(ship.World, ship.Entity(door.Id)).Name;
             for (var i = 0; i < 10; i++)
             {
-                var opened = new WhenTrigger("opened");
+                var opened = SignalTrigger.Written("ext", "finishes-opening");
                 opened.Sources.Add(watched);
                 var sequence = automation.AddSequence(opened);
                 Then(sequence, "close", watched);
@@ -462,7 +462,7 @@ public class RotaTests
     {
         var act = new Act(actionId);
         act.Targets.Add(target);
-        sequence.Steps.Add(act);
+        sequence.Steps.Add(Given.Defaults(act));
         sequence.Steps.Add(new Await());
     }
 }

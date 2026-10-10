@@ -81,7 +81,7 @@ public class InstanceTests
         ship.Airlock.AddInstance();
 
 
-        var when = new WhenTrigger(new ToolbarSlot(1, 1, 1).EventId);
+        var when = new SignalTrigger(new ToolbarSlot(1, 1, 1).EventId);
         when.Sources.Add(ship.Ref(1));
 
         var cycle = ship.Program.AddSequence(ship.Airlock, when);

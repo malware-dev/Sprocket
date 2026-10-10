@@ -8,7 +8,7 @@ namespace Sprocket.Tests;
 /// A trigger reads the way the program writes it.
 /// </summary>
 /// <remarks>
-/// "when any closed [ inner ] then run 2", and "every 600t run 3": a moment is followed by "then", a
+/// "when any closed on [ inner ] == on then run 2", and "every 600t run 3": a moment is followed by "then", a
 /// clock by the verb alone. A row that said "runs" read as the block running the sequence.
 /// </remarks>
 public class TriggerWordsTests

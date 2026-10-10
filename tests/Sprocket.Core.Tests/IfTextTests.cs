@@ -10,7 +10,7 @@ public class IfTextTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Top = "sprocket 1 alpha 11\n\n"
+    const string Top = "sprocket 1 alpha 14\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
         + "let door2 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "\n"
@@ -30,17 +30,17 @@ public class IfTextTests
     public void AnIfReadsAndWritesBackAsItWas()
     {
         var written = Steps(
-            "        if all ext.closed on [ door1 ] == on then {\n" +
+            "        if all ext.status on [ door1 ] == closed then {\n" +
             "            call ext.open on [ door2 ]\n" +
             "            if any ext.open on [ door2 ] == on then {\n" +
             "                await\n" +
             "            }\n" +
             "        }\n" +
-            "        else if any ext.closed on [ door2 ] == off then {\n" +
+            "        else if any ext.status on [ door2 ] != closed then {\n" +
             "            call ext.close on [ door1 ]\n" +
             "        }\n" +
             "        else {\n" +
-            "            call SetColor on [ door1 ] with 255, 136, 0\n" +
+            "            call SetColor(255, 136, 0) on [ door1 ]\n" +
             "        }\n" +
             "        await\n");
 
@@ -55,7 +55,7 @@ public class IfTextTests
     {
         var program = new Automation();
         Assert.Equal("", Load(Steps(
-            "        if all ext.closed on [ door1 ] == on then {\n" +
+            "        if all ext.status on [ door1 ] == closed then {\n" +
             "            call ext.open on [ door2 ]\n" +
             "        }\n" +
             "        else {\n" +
@@ -73,25 +73,25 @@ public class IfTextTests
         Assert.IsType<Await>(steps[5]);
 
         var test = ((If)steps[0]).Test;
-        Assert.True(test.RequiresAll);
-        Assert.Equal("closed", test.MemberId);
+        Assert.Equal(Quantifier.All, test.Quantifier);
+        Assert.Equal("status", test.MemberId);
         Assert.Equal("ext", test.Provider);
         Assert.Equal(new[] { "door1" }, test.Targets);
-        Assert.Equal(Literal.Of(true), test.Value);
+        Assert.Equal(Relation.Is, test.Relation);
+        Assert.Equal(Literal.Name("closed"), test.Value);
     }
 
     /// <summary>What an if may not be is trouble, and the program is read as nothing.</summary>
     [Theory]
     [InlineData("        else {\n        }\n")]
-    [InlineData("        if all ext.closed on [ door1 ] == on then {\n        }\n        else {\n        }\n        else {\n        }\n")]
-    [InlineData("        if all ext.closed on [ door1 ] == on {\n        }\n")]
+    [InlineData("        if all ext.status on [ door1 ] == closed then {\n        }\n        else {\n        }\n        else {\n        }\n")]
+    [InlineData("        if all ext.status on [ door1 ] == closed {\n        }\n")]
     [InlineData("        if all ext.closed on [ door1 ] = on then {\n        }\n")]
     [InlineData("        if ext.closed on [ door1 ] == on then {\n        }\n")]
-    [InlineData("        if all ext.closed on [ door9 ] == on then {\n        }\n")]
-    [InlineData("        if all ext.closed on [ door1 ] == on then\n")]
+    [InlineData("        if all ext.status on [ door9 ] == closed then {\n        }\n")]
+    [InlineData("        if all ext.status on [ door1 ] == closed then\n")]
     [InlineData("        if all ext.closed on [ door1 ] == [ 1 ] then {\n        }\n")]
-    [InlineData("        if all ext.closed on [ door1 ] == 5 then {\n        }\n")]
-    [InlineData("        if all ext.closed on [ door1 ] == on then {\n        }\n        // else {\n        }\n")]
+    [InlineData("        if all ext.status on [ door1 ] == closed then {\n        }\n        // else {\n        }\n")]
     public void AnIfThatIsWrongIsTrouble(string lines)
     {
         var program = new Automation();
@@ -99,11 +99,11 @@ public class IfTextTests
         Assert.False(program.Intact);
     }
 
-    /// <summary>The values after with are separated by commas, and only there does a comma stand in a statement.</summary>
+    /// <summary>A member's arguments are separated by commas, one between each two, and a comma stands nowhere else outside a list.</summary>
     [Theory]
-    [InlineData("        call SetColor on [ door1 ] with 255 136 0\n")]
-    [InlineData("        call SetColor on [ door1 ] with 255, 136,\n")]
-    [InlineData("        call SetColor on [ door1 ] with , 255\n")]
+    [InlineData("        call SetColor(255 136 0) on [ door1 ]\n")]
+    [InlineData("        call SetColor(255, 136,) on [ door1 ]\n")]
+    [InlineData("        call SetColor(, 255) on [ door1 ]\n")]
     [InlineData("        call ext.close on [ door1 ], [ door2 ]\n")]
     public void ValuesWithoutTheirCommasAreTrouble(string lines)
     {
@@ -116,7 +116,7 @@ public class IfTextTests
     public void ASwitchedOffIfIsWrittenOff()
     {
         var written = Steps(
-            "        // if all ext.closed on [ door1 ] == on then {\n" +
+            "        // if all ext.status on [ door1 ] == closed then {\n" +
             "            call ext.open on [ door2 ]\n" +
             "        }\n" +
             "        else {\n" +

@@ -168,15 +168,29 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string GamePropertyId { get; private set; }
 
-        /// <summary>Whether this writes one of the block's own values, which a program says with <c>set</c>.</summary>
-        public bool Sets => GamePropertyId != null;
+        /// <summary>Whether this is a value a step can write, which a program says with <c>set</c>: one of the block's own, or of Sprocket's own that can be set.</summary>
+        public bool Sets => GamePropertyId != null || (Being != null && Being.Settable);
+
+        /// <summary>What this reads as one of Sprocket's own values, or null for anything else.</summary>
+        /// <remarks>Written qualified by its namespace; set where its Being can be set, and read only otherwise.</remarks>
+        public Being Being { get; private set; }
+
+        /// <summary>Whether the block says when this value of Sprocket's own may have changed, so it is looked at then rather than only on a cadence.</summary>
+        /// <remarks>See <see cref="Capability.Listen" />.</remarks>
+        public bool Announced { get; private set; }
+
+        /// <summary>The flag that, while it reads true, rules out a change in this value, so the block need not be looked at then; null where nothing does.</summary>
+        public Reading RuledOutBy { get; private set; }
+
+        /// <summary>Why this value is looked at on a cadence, where the block neither announces it nor anything that rules it out; empty where it is watched another way.</summary>
+        public string LookedBecause { get; private set; } = "";
 
         /// <summary>Which of the three ways a step reaches this one.</summary>
         /// <remarks>
-        /// A value is the block's own and is set; anything the block itself declared is the game's
-        /// action, whatever Sprocket calls it; and what is left is Sprocket's own.
+        /// A value, the block's own or Sprocket's, is a value; anything the block itself declared is the game's action,
+        /// whatever Sprocket calls it; and what is left is Sprocket's own.
         /// </remarks>
-        public Form Form => Sets ? Form.Value : Unaltered ? Form.Action : Form.Native;
+        public Form Form => Sets || Being != null ? Form.Value : Unaltered ? Form.Action : Form.Native;
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         /// <remarks>
@@ -225,6 +239,37 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says the block announces when this value may have changed.</summary>
+        public void Announce()
+        {
+            Announced = true;
+        }
+
+        /// <summary>Says <paramref name="flag" />, while it reads true, rules out a change in this value.</summary>
+        public void RuleOutBy(Reading flag)
+        {
+            RuledOutBy = flag;
+        }
+
+        /// <summary>Says this value is looked at on a cadence, and <paramref name="reason" /> why nothing better is possible.</summary>
+        public void Look(string reason)
+        {
+            LookedBecause = reason;
+        }
+
+        /// <summary>Makes this one of Sprocket's own values, read by <paramref name="being" /> and shown by <paramref name="field" />.</summary>
+        public EntityAction Reads(Being being, Field field)
+        {
+            Being = being;
+            _holds = being.Kind;
+            _writes = field;
+            Wants = 1;
+            if (being.Settable)
+                Text = "set " + Text;
+
+            return this;
+        }
+
         /// <summary>
         /// What somebody has said its parameters are, or null where nobody has.
         /// </summary>
@@ -263,13 +308,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityAction Asking(IList<Field> fields)
         {
             _asks = fields;
-            Wants = fields.Count;
+            Wants = 0;
+            for (var i = 0; i < fields.Count; i++)
+                Wants += fields[i].Covers;
+
             return this;
         }
 
         IList<Field> _asks;
 
-        /// <summary>Whether a value it cannot do without is among the ones it has not been given.</summary>
+        /// <summary>Whether a value it takes is among the ones it has not been given, every one being needed.</summary>
         /// <remarks>
         /// Asked of the action rather than worked out from a list of its fields, so nothing has to keep
         /// a list to ask the question - which is asked of every step of every sequence being looked at.
@@ -280,17 +328,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// What the first option it cannot do without, among those <paramref name="given" /> leaves out, is called; empty where
-        /// nothing names it, and null where none is missing.
+        /// What the first option among those <paramref name="given" /> leaves out is called; empty where nothing names it, and
+        /// null where none is missing.
         /// </summary>
+        /// <remarks>A member is given an argument for every parameter it declares, so each option is needed.</remarks>
         public string Missing(int given)
         {
             _wanted.Clear();
             Fields(_wanted);
 
+            var covered = 0;
             for (var i = 0; i < _wanted.Count; i++)
             {
-                if (_wanted[i].Needed && i >= given)
+                covered += _wanted[i].Covers;
+                if (given < covered)
                     return _wanted[i].Name ?? "";
             }
 
@@ -334,10 +385,20 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<Field> _wanted = new List<Field>();
 
-        /// <summary>Whether every value a step was given is one this can take.</summary>
+        readonly List<Literal> _converted = new List<Literal>();
+
+        /// <summary><paramref name="value" /> as the kind this value holds, for a test to compare it with; false where it cannot be one, or this is no value.</summary>
+        public bool Compares(Literal value, out Literal became)
+        {
+            became = value;
+            return Form == Form.Value && value.Becomes(_holds, out became);
+        }
+
+        /// <summary>Whether every value a test compares this with is one it can be: its kind, and one of its words where it lists some.</summary>
         public bool Takes(IList<Literal> given)
         {
-            return Converts(given, null);
+            _converted.Clear();
+            return Convert(given, _converted) && Admits(_converted, 0, false);
         }
 
         /// <summary>
@@ -350,14 +411,53 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// takes it as, the kind the box for one of Sprocket's own is for. A value nothing says the
         /// kind of goes as it was written. Given nowhere to put them, it only answers.
         /// </remarks>
+        /// <remarks>Each value is also held to its field: one of its words where it lists some, and within its bounds.</remarks>
         public bool Converts(IList<Literal> given, List<Literal> into)
         {
+            var from = into == null ? 0 : into.Count;
+            if (into == null)
+            {
+                _converted.Clear();
+                into = _converted;
+            }
+
+            return Convert(given, into) && Admits(into, from, true);
+        }
+
+        /// <summary>Whether each of <paramref name="values" /> from <paramref name="from" /> on is one its field admits.</summary>
+        bool Admits(List<Literal> values, int from, bool bounded)
+        {
+            _wanted.Clear();
+            Fields(_wanted);
+
+            var at = from;
+            for (var f = 0; f < _wanted.Count && at < values.Count; f++)
+            {
+                if (_wanted[f].Covers == 1 && !_wanted[f].Admits(values[at], bounded))
+                    return false;
+
+                at += _wanted[f].Covers;
+            }
+
+            return true;
+        }
+
+        /// <summary>Puts the values a step was given into the kinds this takes, or answers false where one cannot be.</summary>
+        bool Convert(IList<Literal> given, List<Literal> into)
+        {
+            // An argument for a parameter it does not declare is one it cannot take.
+            if (given.Count > Wants)
+                return false;
+
             Literal became;
-            if (GamePropertyId != null)
+            if (GamePropertyId != null || Being != null)
             {
                 for (var i = 0; i < given.Count; i++)
                 {
                     if (!given[i].Becomes(_holds, out became))
+                        return false;
+
+                    if (_holds == ValueKind.Name && Being != null && Being.Position(became.Text) < 0)
                         return false;
 
                     if (into != null)
@@ -414,6 +514,23 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
+        /// <summary>
+        /// The value <paramref name="id" /> among <paramref name="actions" />: Sprocket's own where <paramref name="provider" />
+        /// is <c>ext</c>, the block's own where it is empty; null where there is none.
+        /// </summary>
+        public static EntityAction Value(IList<EntityAction> actions, string provider, string id)
+        {
+            var own = provider == BlockKinds.Own;
+            for (var i = 0; i < actions.Count; i++)
+            {
+                var action = actions[i];
+                if (action.Id == id && action.Form == Form.Value && (action.Being != null) == own)
+                    return action;
+            }
+
+            return null;
+        }
+
         /// <summary>What may be typed into a box for a value of this kind.</summary>
         public static Entry Entered(ValueKind kind)
         {
@@ -431,7 +548,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The kind a box of this sort holds, or false where it may hold anything.</summary>
-        static bool Kind(Entry entry, out ValueKind kind)
+        public static bool Kind(Entry entry, out ValueKind kind)
         {
             kind = ValueKind.Text;
             switch (entry)
@@ -544,7 +661,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             // A value describes itself, so nothing has to have been written about it.
-            if (GamePropertyId != null)
+            if (GamePropertyId != null || Being != null)
             {
                 into.Add(_writes);
                 return;
@@ -581,9 +698,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// How many values it has to be given before it will do anything.
         /// </summary>
         /// <remarks>
-        /// Zero for everything of Sprocket's own. The game declares one default per value it wants, so
-        /// this is the count of those - which is all it declares: what each one is for is not said,
-        /// and the type of each is the runtime type of the default it was declared with.
+        /// For one of the game's actions, the game declares one default per value it wants, so this is the count of those
+        /// - which is all it declares: what each one is for is not said, and the type of each is the runtime type of the
+        /// default it was declared with. For an action of Sprocket's own it is what its fields cover, and for a value
+        /// one: what it is set to, or compared with.
         /// </remarks>
         public int Wants { get; private set; }
     }
