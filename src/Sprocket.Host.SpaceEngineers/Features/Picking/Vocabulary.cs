@@ -347,18 +347,53 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return result;
         }
 
-        /// <summary>How far the least checked of the blocks has been checked, or completed where none are picked.</summary>
-        public static Evaluation Least(GridWorld world, IList<long> entityIds)
+        /// <summary>The game's toggle that flips the switch <paramref name="value" /> on the blocks, or null where none does.</summary>
+        public static string Toggle(GridWorld world, IList<long> entityIds, string value)
         {
-            var least = Evaluation.Completed;
             var entities = Blocks(world, entityIds);
             for (var i = 0; i < entities.Count; i++)
             {
-                if (entities[i].Kind.Evaluation < least)
-                    least = entities[i].Kind.Evaluation;
+                var one = entities[i].Kind.FindAction(value, Form.Value);
+                if (one != null && one.Flips)
+                    return one.FlippedBy;
             }
 
-            return least;
+            return null;
+        }
+
+        /// <summary>The switch the game's toggle <paramref name="toggle" /> flips on the blocks, or null where it flips none listed.</summary>
+        public static string Flipped(GridWorld world, IList<long> entityIds, string toggle)
+        {
+            var entities = Blocks(world, entityIds);
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var actions = entities[i].Kind.Actions;
+                for (var a = 0; a < actions.Count; a++)
+                {
+                    if (actions[a].Form == Form.Value && actions[a].FlippedBy == toggle)
+                        return actions[a].Id;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>What any of the blocks is to offer that is not built yet, each once, in the order the blocks say them.</summary>
+        public static List<Plan> Planned(GridWorld world, IList<long> entityIds)
+        {
+            var planned = new List<Plan>();
+            var entities = Blocks(world, entityIds);
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var plans = entities[i].Kind.Planned;
+                for (var p = 0; p < plans.Count; p++)
+                {
+                    if (!planned.Contains(plans[p]))
+                        planned.Add(plans[p]);
+                }
+            }
+
+            return planned;
         }
 
         static List<GridEntity> Blocks(GridWorld world, IList<long> entityIds)

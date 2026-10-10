@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Spacing = 4f,
                 Children =
                 {
-                    new Grip { Color = Palette.Faint, Placement = Fixed.Size(24f, 24f) }.As(out _grip),
+                    new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = Fixed.Size(24f, 24f) }.As(out _grip),
                     new Label { Style = Styles.Aside, Placement = Fixed.Wide(36f) }.As(out _number)
                 }
             });

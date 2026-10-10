@@ -361,6 +361,42 @@ public class VocabularyTests
         Assert.Equal(problem, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
     }
 
+    /// <summary>A value of Sprocket's own given bounds holds a step setting it to them, at either end.</summary>
+    [Theory]
+    [InlineData(11.0, SequenceProblem.Mistyped)]
+    [InlineData(-1.0, SequenceProblem.Mistyped)]
+    [InlineData(10.0, SequenceProblem.None)]
+    [InlineData(0.0, SequenceProblem.None)]
+    public void ASetOfAnOwnValueIsHeldToItsBounds(double given, SequenceProblem problem)
+    {
+        var ship = new Ship();
+        var level = 0.0;
+        ship.Rig.Entity(ship.Left.Id).Kind.WithValue("level", "level",
+                Being.Number<IMyTerminalBlock>(_ => level).Writing<IMyTerminalBlock>((_, value) => level = value.Number))
+            .Looked("A test value.").Between("0", "10");
+
+        var cycle = ship.Program.AddSequence(new EveryTrigger(600));
+        var set = new Act("level") { Form = Form.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(ship.Name(ship.Left));
+        set.Arguments.Add(Literal.Of(given));
+        cycle.Steps.Add(set);
+
+        ship.Start();
+        Assert.Equal(problem, SequenceSummary.Checked(ship.Rig.World, ship.Runner.Bindings, cycle, cycle.System.First).Problem);
+    }
+
+    /// <summary>Bounds belong to a value of Sprocket's own, so a kind whose last addition is none refuses them.</summary>
+    [Fact]
+    public void BoundsWithNoOwnValueBeforeThemAreRefused()
+    {
+        var kind = new EntityKind("Test/Block", "Block");
+        Assert.Throws<InvalidOperationException>(() => kind.Between("0", "10"));
+
+        kind.WithValue("level", "level", Being.Number<IMyTerminalBlock>(_ => 0.0))
+            .WithEvent("bumped", Host.SpaceEngineers.World.Reading.Of<IMyTerminalBlock>(_ => false), Edge.Rising, "bumped");
+        Assert.Throws<InvalidOperationException>(() => kind.Between("0", "10"));
+    }
+
     /// <summary>A set qualified by Sprocket's namespace reads and is written back as it was.</summary>
     [Fact]
     public void ASetOfAnOwnValueReadsAndIsWrittenBack()

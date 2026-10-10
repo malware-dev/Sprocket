@@ -7,8 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// <summary>A cryo chamber or bed a player sleeps and respawns in, which the game counts as a seat.</summary>
     /// <remarks>
     /// Being a seat, it keeps the ship's dampeners, handbrake and park, which act on the whole grid as from any seat. What
-    /// a pilot steers and aims with does nothing in a chamber nobody flies from, so it is not offered. Ejecting the sleeper
-    /// is not on the terminal, and would throw a sleeping or logged-off player out of bed on a server.
+    /// a pilot steers and aims with does nothing in a chamber nobody flies from, so it is not offered. The ship's speed is
+    /// every ship controller's - see <see cref="ShipController" />.
     /// </remarks>
     public sealed class Cryo : Capability
     {
@@ -19,8 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         // The game reads the chamber's air as a fraction; every fill Sprocket says is in percent.
         static readonly Being Air = Being.Number<IMyCryoChamber>(chamber => chamber.OxygenFilledRatio * 100.0);
-
-        static readonly Being Speed = Being.Number<IMyCryoChamber>(chamber => chamber.GetShipSpeed());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -39,8 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("occupant-name", "occupant name", Sleeper).Announced()
                 .WithValue("oxygen-level", "oxygen level", Air)
                 .Looked("A chamber announces nothing as its air rises or falls.").In(Category.Air)
-                .WithValue("speed", "speed", Speed)
-                .Looked("A ship announces nothing as its speed changes.").In(Category.Flight)
                 .Renaming("DampenersOverride", true, "dampeners")
                 .Renaming("DampenersOverride", false, "toggle dampeners")
                 .Renaming("HandBrake", true, "handbrake")

@@ -162,6 +162,9 @@ static class PaperTarget
         if (slot is DurationSlot duration)
             return duration.Ticks + " ticks";
 
+        if (slot is ArgumentsSlot arguments)
+            return string.Join(", ", arguments.Arguments.Select(argument => argument.Said));
+
         throw new InvalidOperationException(
             $"Core put a {slot.GetType().Name} in a sentence and nothing here knows what words go on "
             + "one. Say what it reads as before shipping it to a real target, or the first anybody "

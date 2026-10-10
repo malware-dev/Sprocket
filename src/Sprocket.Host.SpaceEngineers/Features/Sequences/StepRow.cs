@@ -111,7 +111,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _leadWaits.IsVisible = Kind == StepKind.Run;
             }
 
-            _leadWaits.Tip = Tip.For(_leadWaits.Tip, texts.MemberWaits);
+            _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.MemberWaits : null);
 
             // The row closing an if and the end of a branch are where things are added, and are nothing that can be moved,
             // paused or deleted; a branch's own line moves, pauses and switches with its if.

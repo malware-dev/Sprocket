@@ -16,7 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Hacked = Being.Flag(Reading.Of<IMyTerminalBlock>(block => block.IsBeingHacked));
 
-        static readonly Being Data = Being.Text<IMyTerminalBlock>(block => block.CustomData);
+        static readonly Being Data = Being.Text<IMyTerminalBlock>(block => block.CustomData)
+            .Writing<IMyTerminalBlock>((block, value) => block.CustomData = value.Text ?? "");
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -35,11 +36,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.WithValue("being-hacked", "being hacked", Hacked).Looked(Unheard);
 
-            kind.WithValue("custom-data", "custom data", Data).In(Category.Identity).Announced();
+            kind.WithValue("custom-data", "custom data", Data).In(Category.Other).Announced();
 
-            kind.Renaming("ShowOnHUD_On", false, "show on HUD")
-                .Renaming("ShowOnHUD_Off", false, "hide from HUD")
-                .Renaming("ShowOnHUD", false, "toggle show on HUD")
+            kind.Renaming("ShowOnHUD", false, "toggle show on HUD")
                 .Renaming("ShowOnHUD", true, "shown on HUD");
         }
 

@@ -7,7 +7,7 @@ using MyJumpDriveStatus = Sandbox.ModAPI.Ingame.MyJumpDriveStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A jump drive: recharged and waited on until it can jump, and read for its charge, its status and how far it reaches.</summary>
+    /// <summary>A jump drive: recharged and waited on until it can jump, its jump distance set, and read for its charge, its status and how far it reaches.</summary>
     /// <remarks>
     /// The game moves its charge on the server as it fills and says so, and lands it exactly on what a jump needs, so
     /// charged is a comparison and needs no band.
@@ -23,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         const string Unjumped = "A jump drive raises nothing as a jump starts or ends.";
 
         const string Unweighed = "Nothing announces a change in the ship's mass, which the drive's reach follows.";
+
 
         static readonly string[] Statuses = { "charging", "ready", "jumping" };
 
@@ -42,6 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Capacity = Being.Number<IMyJumpDrive>(drive => drive.MaxStoredPower);
 
+
         static readonly Being Shortest = Being.Number<IMyJumpDrive>(drive => drive.MinJumpDistanceMeters / 1000.0);
 
         static readonly Being Longest = Being.Number<IMyJumpDrive>(drive => drive.MaxJumpDistanceMeters / 1000.0);
@@ -57,6 +59,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Recharge names no game action: an entry of Sprocket's that names one half of a switch's pair hides the switch
         /// itself, and recharging is listed. Capacity and the shortest jump are fixed by the block, so nothing need announce
         /// them. The game's own jump asks a pilot to confirm it, which nobody does for a sequence, so it is hidden.
+        /// <para>
+        /// Jump distance is in kilometers, held by the drive between the shortest and the longest jump the ship can make,
+        /// which move with its mass and with how many drives it has, so only a distance below nothing is refused. The
+        /// game's own distance as a share of that reach, its setter, and the steps made out of it are hidden behind it.
+        /// </para>
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
@@ -70,7 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("capacity", "capacity", Capacity).Announced().In(Category.Power)
                 .WithValue("minimum-jump-distance", "minimum jump distance", Shortest).Announced().In(Category.Flight)
                 .WithValue("maximum-jump-distance", "maximum jump distance", Longest).Looked(Unweighed).In(Category.Flight)
-                .Hiding("Jump", "SearchField", "SelectedTarget", "BeaconList");
+                .Hiding("Jump", "SearchField", "SelectedTarget", "BeaconList", "JumpDistance", "SetGravityAcceleration",
+                    "IncreaseJumpDistance", "DecreaseJumpDistance");
         }
 
         /// <summary>Told as the drive's charge moves, which it announces.</summary>

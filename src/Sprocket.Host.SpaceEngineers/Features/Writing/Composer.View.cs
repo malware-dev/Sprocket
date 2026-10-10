@@ -5,7 +5,6 @@ using Lumel.Layout;
 using Lumel.Styling;
 using Lumel.Text;
 using Lumel.Viewing;
-using Lumel.Windows;
 using VRage.Game;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
@@ -17,11 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         EditBox _box;
         ScrollView _previewing;
         RichText _previewed;
-        Popup _guide;
-        VStack _examplesList;
-        Label _guideNote;
 
-        /// <summary>Makes the two buttons over the box, the box and its preview in one room, and the guide that hangs from its button.</summary>
+        /// <summary>Makes the two buttons over the box, and the box and its preview in one room.</summary>
         void CreateView(float high, IStyle reads)
         {
             Spacing = 6f;
@@ -66,37 +62,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                     }.As(out _previewing)
                 }
             });
-
-            _guide = new Popup
-            {
-                Style = Styles.Menu,
-                Anchor = _markup,
-                Gap = 4f,
-                Placement = Fixed.Wide(480f),
-                Content = new VStack
-                {
-                    Spacing = 6f,
-                    Children =
-                    {
-                        new VStack { Spacing = 6f }.As(out _examplesList),
-                        new Label { Style = Styles.Detail, Wraps = true }.As(out _guideNote)
-                    }
-                }
-            };
-        }
-
-        /// <summary>One mark as it is typed, beside what it makes.</summary>
-        static Element Example(string written)
-        {
-            return new HStack
-            {
-                Spacing = 12f,
-                Children =
-                {
-                    new Label { Style = Styles.Markup, Text = written, Placement = Fixed.Wide(190f) },
-                    new RichText { Style = Styles.Example, Markdown = written, Placement = Flex.Grow }
-                }
-            };
         }
     }
 }

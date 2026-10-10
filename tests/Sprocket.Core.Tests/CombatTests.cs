@@ -7,12 +7,12 @@ using Xunit;
 namespace Sprocket.Tests;
 
 /// <summary>
-/// A turret and a warhead as Sprocket offers them: the game's own members in Sprocket's words, the order kept apart from the
-/// value it sets, and Sprocket's own values read by an <c>if</c> and a <c>when</c>.
+/// A turret, a warhead and a remote control as Sprocket offers them: the game's own members in Sprocket's words, the order
+/// kept apart from the value it sets, Sprocket's own values read by an <c>if</c> and a <c>when</c>, and what Sprocket vouches for.
 /// </summary>
 public class CombatTests
 {
-    /// <summary>A turret, a warhead and a door, with a program on them and a runner ticking it.</summary>
+    /// <summary>A turret, a warhead, a remote control and a door, with a program on them and a runner ticking it.</summary>
     sealed class Ship
     {
         public readonly Rigged Rig = new();
@@ -20,6 +20,7 @@ public class CombatTests
         public readonly Turret Turret;
         public readonly Warhead Warhead;
         public readonly Door Door;
+        public readonly Remote Remote;
         public AutomationRunner Runner = null!;
 
         int _frame;
@@ -29,6 +30,7 @@ public class CombatTests
             Turret = Rig.Turret(1, "Turret");
             Warhead = Rig.Warhead(2, "Warhead");
             Door = Rig.Door(3, "Door");
+            Remote = Rig.RemoteControl(4, "Remote");
         }
 
         public string Name(Fitting fitting) => Program.Declare(Rig.World, Rig.Entity(fitting.Id)).Name;
@@ -76,7 +78,7 @@ public class CombatTests
         Assert.Equal("fire once", Listed(kind, "ShootOnce").Text);
     }
 
-    /// <summary>A target switch reads as a state, its toggle is kept, and its pair is said by the value.</summary>
+    /// <summary>A target switch reads as a state and is flipped on its own switch, and its toggle and pair are said by the value.</summary>
     [Fact]
     public void ATargetSwitchReadsAsAState()
     {
@@ -86,19 +88,19 @@ public class CombatTests
         var value = kind.FindAction("TargetNeutrals", Form.Value)!;
         Assert.False(value.Hidden);
         Assert.Equal("Neutrals targeted", value.Named);
-        Assert.Equal("toggle neutrals targeted", Listed(kind, "TargetNeutrals").Text);
+        Assert.Equal("toggle neutrals targeted", Flipped(kind, "TargetNeutrals").Text);
         Assert.True(kind.FindAction("TargetNeutrals_On", Form.Action)!.Hidden);
         Assert.True(kind.FindAction("FocusLockedTarget", Form.Action)!.Hidden);
     }
 
-    /// <summary>A gun keeps the toggle for what it feeds from, which every other block leaves to its value.</summary>
+    /// <summary>A gun's switch for what it feeds from is flipped on its own switch, in the gun's words.</summary>
     [Fact]
     public void AGunKeepsItsConveyorToggle()
     {
         var ship = new Ship();
         var kind = ship.Kind(ship.Turret);
 
-        Assert.Equal("toggle using conveyors", Listed(kind, "UseConveyor").Text);
+        Assert.Equal("toggle using conveyors", Flipped(kind, "UseConveyor").Text);
         Assert.Equal("Using conveyors", kind.FindAction("UseConveyor", Form.Value)!.Named);
     }
 
@@ -180,7 +182,7 @@ public class CombatTests
         Assert.Contains("Turret:reset targeting", ship.Rig.Rig.Log);
     }
 
-    /// <summary>A warhead's members are said in Sprocket's words: armed, its toggle, and its countdown.</summary>
+    /// <summary>A warhead's members are said in Sprocket's words: armed, flipped on its own switch, and its countdown.</summary>
     [Fact]
     public void AWarheadIsSaidInSprocketsWords()
     {
@@ -188,7 +190,7 @@ public class CombatTests
         var kind = ship.Kind(ship.Warhead);
 
         Assert.Equal("Armed", kind.FindAction("Safety", Form.Value)!.Named);
-        Assert.Equal("toggle armed", Listed(kind, "Safety").Text);
+        Assert.Equal("toggle armed", Flipped(kind, "Safety").Text);
         Assert.Equal("Countdown", kind.FindAction("DetonationTime", Form.Value)!.Named);
         Assert.Equal("start countdown", Listed(kind, "StartCountdown").Text);
         Assert.Equal("detonate", Listed(kind, "Detonate").Text);
@@ -216,6 +218,99 @@ public class CombatTests
         ship.Tick(5);
 
         Assert.Equal(fired, ship.Fired);
+    }
+
+    /// <summary>A turret vouches for what it keeps, and not for the pair a target switch's value says, nor what it hides.</summary>
+    [Fact]
+    public void ATurretVouchesForWhatItKeeps()
+    {
+        var ship = new Ship();
+        var kind = ship.Kind(ship.Turret);
+
+        Vouched(kind, Form.Action, "Shoot_On", "Shoot_Off", "Shoot", "ShootOnce", "UseConveyor", "TargetNeutrals");
+        Vouched(kind, Form.Value, "UseConveyor", "TargetNeutrals", "Range", "firing", "targeting", "on-target",
+            "controlled-by-a-person");
+        Vouched(kind, Form.Native, "reset-targeting");
+
+        Unvouched(kind, Form.Action, "TargetNeutrals_On", "TargetNeutrals_Off", "FocusLockedTarget");
+        Unvouched(kind, Form.Value, "Shoot");
+    }
+
+    /// <summary>A warhead vouches for what it keeps, and not for the pair its armed value says, nor the steps of its countdown.</summary>
+    [Fact]
+    public void AWarheadVouchesForWhatItKeeps()
+    {
+        var ship = new Ship();
+        var kind = ship.Kind(ship.Warhead);
+
+        Vouched(kind, Form.Action, "StartCountdown", "StopCountdown", "Detonate", "Safety");
+        Vouched(kind, Form.Value, "Safety", "DetonationTime", "counting-down");
+
+        Unvouched(kind, Form.Action, "Safety_On", "Safety_Off", "IncreaseDetonationTime", "DecreaseDetonationTime");
+    }
+
+    /// <summary>
+    /// A remote control vouches for its autopilot and for the flight switches it shares with a cockpit, in the game's words,
+    /// and not for the pairs those switches' values say, the steps of its speed limit, nor the setters its values stand for;
+    /// it has no main cockpit or target locking, which the game's terminal shows on a cockpit alone.
+    /// </summary>
+    [Fact]
+    public void ARemoteControlVouchesForWhatItKeeps()
+    {
+        var ship = new Ship();
+        var kind = ship.Kind(ship.Remote);
+        var switches = new[]
+        {
+            "CollisionAvoidance", "HandBrake", "Park", "DampenersOverride", "ControlThrusters", "ControlWheels", "ControlGyros",
+            "MainRemoteControl", "HorizonIndicator"
+        };
+
+        Vouched(kind, Form.Action, "AutoPilot_On", "AutoPilot_Off", "AutoPilot", "Reset");
+        Vouched(kind, Form.Action, switches);
+        Vouched(kind, Form.Value, switches);
+        Vouched(kind, Form.Value, "SpeedLimit", "FlightMode", "autopilot", "current-waypoint", "speed");
+
+        Unvouched(kind, Form.Action, "CollisionAvoidance_On", "CollisionAvoidance_Off", "HandBrake_On", "HandBrake_Off", "Park_On",
+            "Park_Off", "DampenersOverride_On", "DampenersOverride_Off", "IncreaseSpeedLimit", "DecreaseSpeedLimit",
+            "SetFlightMode_BlockPropertyTitle_FlightMode_Patrol", "Forward");
+        Unvouched(kind, Form.Value, "AutoPilot");
+
+        foreach (var id in new[] { "MainCockpit", "TargetLocking" })
+        {
+            Assert.Null(kind.FindAction(id, Form.Value));
+            Assert.Null(kind.FindAction(id, Form.Action));
+        }
+    }
+
+    /// <summary>Asserts that each of <paramref name="ids" /> is on the kind in that form and is vouched for.</summary>
+    static void Vouched(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var member = kind.FindAction(id, form);
+            Assert.True(member != null, id + " is not on the block as a " + form);
+            Assert.True(member.Vetted, id + " is not vouched for as a " + form);
+        }
+    }
+
+    /// <summary>Asserts that each of <paramref name="ids" /> is on the kind in that form and is not vouched for.</summary>
+    static void Unvouched(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var member = kind.FindAction(id, form);
+            Assert.True(member != null, id + " is not on the block as a " + form);
+            Assert.False(member.Vetted, id + " is vouched for as a " + form);
+        }
+    }
+
+    /// <summary>The toggle of the switch <paramref name="id" />, kept to the terminal view, since the switch's value flips it.</summary>
+    static EntityAction Flipped(EntityKind kind, string id)
+    {
+        Assert.True(kind.FindAction(id, Form.Value)!.Flips, id + " is not flipped on its own switch");
+        var toggle = kind.FindAction(id, Form.Action)!;
+        Assert.True(toggle.Hidden, id + "'s toggle is still listed");
+        return toggle;
     }
 
     /// <summary>One of the block's own actions, listed where somebody chooses.</summary>

@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What it makes a noise about.</summary>
         Sound,
 
-        /// <summary>What it is called, and what it carries written on it.</summary>
+        /// <summary>What it is called.</summary>
         Identity,
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Who may use it.</summary>
         Access,
 
-        /// <summary>Everything nothing has been said about.</summary>
+        /// <summary>What belongs under no other heading, and anything nobody has placed.</summary>
         Other
     }
 }

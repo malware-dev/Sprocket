@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Sim.Machine;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -200,6 +201,61 @@ public class BlueprintWritingTests
         Assert.False(part.Optional);
     }
 
+    /// <summary>The guide button beside each description box opens the codex on writing text.</summary>
+    [Fact]
+    public void TheGuideButtonOpensTheCodexOnWriting()
+    {
+        var screen = Writing();
+        var editor = screen.Editor;
+
+        var composers = editor.Blueprint().View.Within().OfType<Features.Writing.Composer>().ToList();
+        Assert.NotEmpty(composers);
+        foreach (var composer in composers)
+        {
+            if (editor.CodexOpen)
+                editor.Windows!.Close(editor.CodexWindow!);
+
+            composer.Guides!.Execute();
+            screen.Run(2);
+
+            Assert.True(editor.CodexOpen, "the codex did not open");
+            Assert.Equal("writing", editor.CodexWindow!.Term!.Id);
+        }
+    }
+
+    /// <summary>The first paste says, under the box pasted into, where text from outside the game comes in, and later ones do not.</summary>
+    [Fact]
+    public void TheFirstPasteSaysWhereOutsideTextComesIn()
+    {
+        var screen = Writing();
+        var editor = screen.Editor;
+        editor.Input.Clipboard = new Storage.ClipboardFile(new Folder(), delegate { }, editor.Pasted);
+        var box = editor.Blueprint().View.Within().OfType<Features.Writing.Composer>().First().Box;
+
+        editor.Input.Focus(box);
+        editor.Input.Key(VRage.Input.MyKeys.V, false, true);
+        screen.Run(2);
+        Assert.Equal(1, Notes(editor));
+
+        editor.Windows!.Close(editor.Windows.Top);
+        editor.Input.Focus(box);
+        editor.Input.Key(VRage.Input.MyKeys.V, false, true);
+        screen.Run(2);
+        Assert.Equal(0, Notes(editor));
+    }
+
+    /// <summary>How many windows are open saying where outside text comes in.</summary>
+    static int Notes(Features.Shell.SprocketEditor editor)
+    {
+        var count = 0;
+        for (var i = 0; i < editor.Windows!.Count; i++)
+        {
+            if (editor.Windows[i].Within().OfType<Lumel.Text.Label>().Any(label => label.Text == editor.Texts.WritingPasteNote))
+                count++;
+        }
+
+        return count;
+    }
 
     /// <summary>A logic system with a button, its configuration panel open to be set up.</summary>
     static Screen Writing()

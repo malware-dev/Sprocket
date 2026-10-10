@@ -11,6 +11,8 @@ using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel.Input;
+using Lumel.Layout;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -52,6 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         bool _structureDirty;
         bool _developerMode;
+        bool _toldPasting;
 
         /// <summary>An editor of <paramref name="program" />, saying what it says in <paramref name="texts" />.</summary>
         public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner, Texts texts)
@@ -1227,7 +1230,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
             _screen.Library = page.Library;
-            _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, page.ShowHelp) : null;
+            _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, delegate { Helped(page); }) : null;
             _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 
@@ -1295,6 +1298,44 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
 
             _screen.ShowActions(_actionBar);
+        }
+
+        /// <summary>Says, under the box pasted into, where text from outside the game comes in; the first paste while this editor lives, and no other.</summary>
+        /// <remarks>
+        /// The game gives a mod no clipboard, and nothing can tell whether the player copied something outside the game, so the
+        /// paste itself is the one moment there is to say so.
+        /// </remarks>
+        public void Pasted()
+        {
+            if (_toldPasting || Input == null || Input.Focused == null)
+                return;
+
+            _toldPasting = true;
+            new Popup
+            {
+                Style = Styles.Menu,
+                Anchor = Input.Focused,
+                Gap = 4f,
+                Placement = Fixed.Wide(360f),
+                Content = new Label { Style = Styles.Detail, Wraps = true, Text = Texts.WritingPasteNote }
+            }.Open();
+        }
+
+        /// <summary>Whether the codex's window is open beside the screen.</summary>
+        public bool CodexOpen => CodexWindow != null && Windows != null && Windows.IsOpen(CodexWindow);
+
+        /// <summary>What the question mark in a screen's heading does: opens the codex at the screen's page, or closes it where it is open.</summary>
+        void Helped(EditorPage page)
+        {
+            if (CodexOpen)
+            {
+                Windows.Close(CodexWindow);
+                Invalidate();
+                return;
+            }
+
+            page.ShowHelp();
+            Invalidate();
         }
 
         /// <summary>Opens the codex's window at <paramref name="term" />, beside whatever screen is showing.</summary>
@@ -2201,7 +2242,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public List<string> Named(AutomationSystem system, IList<long> blocks)
         {
+            Swap swap;
+            return Named(system, blocks, null, out swap);
+        }
+
+        /// <summary>
+        /// The same, for blocks picked again in place of the slots <paramref name="was" />, with the <paramref name="swap" /> that
+        /// keeps a slot whose block was traded for another, or null.
+        /// </summary>
+        /// <remarks>
+        /// Trading a slot's one block for one new block of the kind the slot expects, where nothing else names that slot, is a
+        /// replacement: the new block fills the slot, which keeps its name, its description and what every other installation
+        /// filled it with. The swap is made by the edit it is handed to, so taking the edit back gives the slot its block back.
+        /// </remarks>
+        public List<string> Named(AutomationSystem system, IList<long> blocks, IList<string> was, out Swap swap)
+        {
             SystemInstance instance = system.IsBlueprint ? StandIn(system) : null;
+            swap = instance == null || was == null ? null : Swapped(system, instance, blocks, was);
 
             var named = new List<string>();
             for (var i = 0; i < blocks.Count; i++)
@@ -2211,12 +2268,68 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     continue;
 
                 var declared = _program.Declare(_world, entity).Name;
-                named.Add(instance == null
-                    ? declared
-                    : system.Take(instance, declared, Called(entity), Type(entity.Kind)));
+                if (instance == null)
+                    named.Add(declared);
+                else if (swap != null && system.FilledBy(instance, declared) == null)
+                    named.Add(swap.Slot);
+                else
+                    named.Add(system.Take(instance, declared, Called(entity), Type(entity.Kind)));
             }
 
             return named;
+        }
+
+        /// <summary>The swap of exactly one slot of <paramref name="was" /> for exactly one block of <paramref name="blocks" /> no slot holds, or null where the pick is no such trade.</summary>
+        Swap Swapped(AutomationSystem system, SystemInstance instance, IList<long> blocks, IList<string> was)
+        {
+            string fresh = null;
+            GridEntity freshly = null;
+            var kept = new List<string>();
+            for (var i = 0; i < blocks.Count; i++)
+            {
+                GridEntity entity = _world.FindEntity(blocks[i]);
+                if (entity == null)
+                    continue;
+
+                var declared = _program.Declare(_world, entity).Name;
+                var slot = system.FilledBy(instance, declared);
+                if (slot != null)
+                {
+                    kept.Add(slot);
+                    continue;
+                }
+
+                if (fresh != null)
+                    return null;
+
+                fresh = declared;
+                freshly = entity;
+            }
+
+            if (fresh == null)
+                return null;
+
+            string dropped = null;
+            for (var i = 0; i < was.Count; i++)
+            {
+                if (kept.Contains(was[i]))
+                    continue;
+
+                if (dropped != null && dropped != was[i])
+                    return null;
+
+                dropped = was[i];
+            }
+
+            var part = dropped == null ? null : system.FindPart(dropped);
+            if (part == null || part.IsSignal || !part.Fits(BlockKinds.Sort(freshly.Kind.Id)))
+                return null;
+
+            // Named anywhere else, the slot is still that block's there, and the new block is a slot of its own.
+            if (system.Mentions(dropped) != AutomationSystem.Count(was, dropped))
+                return null;
+
+            return new Swap(instance, dropped, new[] { fresh });
         }
 
         /// <summary>

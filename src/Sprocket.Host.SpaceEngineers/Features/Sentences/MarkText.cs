@@ -4,7 +4,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
-    /// <summary>Which mark each kind of member is shown under, and what the mark says while the pointer rests on it.</summary>
+    /// <summary>Which mark each kind of member is shown under, and what a member under it says as part of its row.</summary>
     /// <remarks>
     /// One mark to a row. A value carries its own mark wherever it is named, set as well as checked, since setting one is
     /// telling a block what one of its properties is, a different thing from telling it to do something; an action that
@@ -21,25 +21,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return action.Lasts ? Symbols.Awaited : Symbols.Action;
         }
 
-        /// <summary>The mark of <paramref name="moment" />: the pulse for a signal a block sends, and the block for one watched on it.</summary>
+        /// <summary>The mark of <paramref name="moment" />, a signal the block sends, from a toolbar slot or of Sprocket's own alike.</summary>
         public static string Of(EntityEvent moment)
         {
-            return moment.Answered ? Symbols.Signal : Symbols.Block;
+            return Symbols.Signal;
         }
 
-        /// <summary>What <paramref name="mark" /> says while the pointer rests on it, or null where it is none of these.</summary>
-        public static string Note(Texts texts, string mark)
+        /// <summary>What a member under <paramref name="mark" /> says as part of the whole it is shown in, or null where it says nothing.</summary>
+        /// <remarks>A mark carries no note of its own: what it stands for is told by the row or the part it is in.</remarks>
+        public static string About(Texts texts, string mark)
         {
-            switch (mark)
-            {
-                case Symbols.Action: return texts.MemberAction;
-                case Symbols.Awaited: return texts.MemberWaits;
-                case Symbols.Value: return texts.MemberValue;
-                case Symbols.Signal: return texts.MemberSignal;
-                case Symbols.Block: return texts.MemberMoment;
-                case Symbols.Sequence: return texts.MemberSequence;
-                default: return null;
-            }
+            return mark == Symbols.Awaited ? texts.MemberWaits : null;
         }
     }
 }

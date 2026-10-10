@@ -24,6 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         float _width;
 
+        readonly string _showHidden;
+        readonly string _hideHidden;
+
         /// <summary>
         /// A column <paramref name="width" /> across, narrowed by typing where <paramref name="canNarrow" /> says, looked at
         /// in any of <paramref name="views" />, saying its fixed words in <paramref name="texts" />.
@@ -42,6 +45,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _narrowClear.Tip = Tip.For(null, texts.PickClearTyped);
             _kindNarrowClear.Tip = Tip.For(null, texts.PickClearTyped);
             _kindClear.Tip = Tip.For(null, texts.PickEveryKind);
+            _showHidden = texts.PickShowHidden;
+            _hideHidden = texts.PickHideHidden;
+            ShowsHidden = false;
             _kindLine.Tip = Tip.For(null, texts.PickKindAbout);
 
             _narrow.Edited += delegate { Typed(_narrow, _narrowClear, Narrowed); };
@@ -50,18 +56,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _kindNarrowClear.Command = new Relay(delegate { Emptied(_kindNarrow, _kindNarrowClear, KindsNarrowed); });
 
             // The list hangs off this line and is reachable only while it hangs there, so its rows cannot be pressed through it.
-            _kindLine.Command = new Relay(_kinds.Toggle);
+            _kindLine.Command = new Relay(delegate
+            {
+                _kinds.Toggle();
+                if (_kinds.IsOpen && KindsOpened != null)
+                    KindsOpened();
+            });
 
             if (views == null || views.Count < 2)
                 return;
 
-            _tabs.IsVisible = true;
             for (var i = 0; i < views.Count; i++)
             {
-                _tabs.Columns.Add(Length.Flex(1));
-                var tab = new Button { Style = Styles.Tab, Text = views[i] };
-                _views.Add(tab);
-                _tabs.Cells[0, i] = tab;
+                var link = new Button { Style = Styles.ViewLink, Text = views[i] };
+                _views.Add(link);
+                _viewLinks.Children.Add(link);
             }
         }
 
@@ -70,6 +79,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Raised with what is typed into the box that narrows the list of kinds, as it is typed.</summary>
         public event Action<string> KindsNarrowed;
+
+        /// <summary>Raised as the list of kinds is hung open, for the keyboard to be given to the box that narrows it.</summary>
+        public event Action KindsOpened;
 
         /// <summary>How wide the column is.</summary>
         public float Width
@@ -138,6 +150,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
+        /// <summary>What showing or hiding the blocks hidden from toolbars does, or null where the column offers no such switch.</summary>
+        public ICommand ShowHidden
+        {
+            get { return _hidden.Command; }
+            set
+            {
+                _hidden.Command = value;
+                _hidden.IsVisible = value != null;
+            }
+        }
+
+        /// <summary>Whether the blocks hidden from toolbars are shown: the eye open, or shut.</summary>
+        public bool ShowsHidden
+        {
+            get { return _hidden.Symbol == Symbols.HiddenShown; }
+            set
+            {
+                _hidden.Symbol = value ? Symbols.HiddenShown : Symbols.HiddenHidden;
+                _hidden.Tip = Tip.For(_hidden.Tip, value ? _hideHidden : _showHidden);
+            }
+        }
+
         /// <summary>The kinds the column can be narrowed to, one row each, in the list hanging from its line.</summary>
         public Collection Kinds => _kindRows.Children;
 
@@ -151,7 +185,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set { Put(_kindNarrow, _kindNarrowClear, value); }
         }
 
-        /// <summary>The ways of looking at what the column offers, in order, or none where there is only one way.</summary>
+        /// <summary>The links to each way of looking at what the column offers, in order, or none where there is only one way.</summary>
+        /// <remarks>Only the links to the views not showing are shown.</remarks>
         public IReadOnlyList<Button> Views => _views;
 
         /// <summary>Which of <see cref="Views" /> is showing.</summary>
@@ -190,13 +225,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
 
 
-        /// <summary>Shows the view at <paramref name="current" /> as the one showing, each view carrying out the command beside it.</summary>
+        /// <summary>Shows the view at <paramref name="current" /> as the one showing, the link to each other view carrying out the command beside it.</summary>
         public void ShowViews(int current, IList<ICommand> commands)
         {
             ViewShown = current;
             for (var i = 0; i < _views.Count; i++)
             {
-                _views[i].Style = i == current ? Styles.TabCurrent : Styles.Tab;
+                _views[i].IsVisible = i != current;
                 _views[i].Command = i == current || i >= commands.Count ? null : commands[i];
             }
         }

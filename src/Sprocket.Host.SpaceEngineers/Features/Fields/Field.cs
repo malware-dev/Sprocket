@@ -159,6 +159,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// </remarks>
         public bool Admits(Literal given, bool bounded)
         {
+            if (Unfilled(given))
+                return true;
+
             var words = Means ?? Words;
             if (words != null && words.Count > 0 && !words.Contains(given.Said))
                 return false;
@@ -172,6 +175,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return false;
 
             return !(Bound(Most, out bound) && given.Number > bound);
+        }
+
+        /// <summary>Whether <paramref name="given" /> is this field left empty, which is a value not given where none is needed.</summary>
+        public bool Unfilled(Literal given)
+        {
+            return !Needed && given.Kind == ValueKind.Text && string.IsNullOrEmpty(given.Text);
         }
 
         static bool Bound(string written, out double bound)

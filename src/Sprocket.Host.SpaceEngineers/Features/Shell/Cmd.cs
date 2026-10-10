@@ -169,6 +169,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Showing blocks of every kind.</summary>
         AnyKind,
 
+        /// <summary>Showing or hiding the blocks hidden from toolbars.</summary>
+        HiddenBlocks,
+
         /// <summary>Showing blocks of one kind.</summary>
         OneKind,
 

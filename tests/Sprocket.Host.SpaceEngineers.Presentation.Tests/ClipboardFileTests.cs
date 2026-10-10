@@ -12,7 +12,7 @@ public class ClipboardFileTests
     public void ACopyWritesTheFileAndAPasteReadsIt()
     {
         var folder = new Folder();
-        var clipboard = new ClipboardFile(folder, delegate { });
+        var clipboard = new ClipboardFile(folder, delegate { }, null);
 
         clipboard.Set("copied\nin the game");
         Assert.Equal("copied\nin the game", folder.Files["sprocket-clipboard.txt"]);
@@ -25,6 +25,6 @@ public class ClipboardFileTests
     [Fact]
     public void WithNoFileAPasteGivesNothing()
     {
-        Assert.Equal("", new ClipboardFile(new Folder(), delegate { }).Get());
+        Assert.Equal("", new ClipboardFile(new Folder(), delegate { }, null).Get());
     }
 }

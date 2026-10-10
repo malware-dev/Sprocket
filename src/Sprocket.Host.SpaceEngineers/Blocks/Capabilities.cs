@@ -49,7 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             new Camera(),
             new Timer(),
             new Sensor(),
-            new EventController(),
             new Cockpit(),
             new Weapon(),
             new Aiming(),
@@ -82,7 +81,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             new LaserAntenna(),
             new BroadcastController(),
             new Transponder(),
-            new SafeZone()
+            new SafeZone(),
+            new SeparationCharge(),
+            new MicroEmitter(),
+            new ServicesTerminal()
         };
 
         readonly Capability[] _floor =
@@ -92,7 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             new Electric(),
             new Damage(),
             new Inventory(),
-            new Screen()
+            new Screen(),
+            new Screens()
         };
 
         /// <summary>What particular kinds of block are.</summary>

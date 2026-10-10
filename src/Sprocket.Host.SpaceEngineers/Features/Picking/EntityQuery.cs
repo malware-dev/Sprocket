@@ -24,12 +24,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return string.IsNullOrEmpty(search) || EveryWord(search, text, null);
         }
 
-        public static bool Matches(GridEntity entity, string search, string kindId)
+        /// <summary>
+        /// Whether <paramref name="entity" /> is of <paramref name="family" />, or of the kind <paramref name="kindId" /> where it
+        /// names no family, with every word of <paramref name="search" /> in its name or its kind's.
+        /// </summary>
+        public static bool Matches(GridEntity entity, string search, string kindId, Family family)
         {
             if (entity == null)
                 return false;
 
-            if (!string.IsNullOrEmpty(kindId) && entity.Kind.Id != kindId)
+            if (family != Family.None)
+            {
+                if (entity.Kind.Family != family)
+                    return false;
+            }
+            else if (!string.IsNullOrEmpty(kindId) && entity.Kind.Id != kindId)
                 return false;
 
             if (string.IsNullOrEmpty(search))

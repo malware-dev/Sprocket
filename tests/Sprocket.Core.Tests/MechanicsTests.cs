@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Doors;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -7,7 +8,8 @@ using Xunit;
 namespace Sprocket.Tests;
 
 /// <summary>
-/// What doors, pistons, rotors and hinges say of themselves as values and signals, read and watched the way a program does.
+/// What doors, pistons, rotors and hinges say of themselves as values and signals, read and watched the way a program does,
+/// and which of their members Sprocket vouches for.
 /// </summary>
 public class MechanicsTests
 {
@@ -220,5 +222,138 @@ public class MechanicsTests
         var add = kind.FindAction("Add Top Part", Form.Action)!;
         Assert.False(add.Hidden);
         Assert.Equal("add head", add.Text);
+    }
+
+    /// <summary>
+    /// A door vouches for its own open, close and readings and for the members of its terminal it keeps, and for none of
+    /// the game's pair its own open and close stand in for, nor the switch's value they say.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ADoorVouchesForWhatItKeeps(bool hangar)
+    {
+        var rig = new Rigged();
+        var door = hangar ? rig.HangarDoor(1, "Door") : rig.Door(1, "Door");
+
+        // What the game's door carries beyond the harness's own, as its terminal declares them.
+        door.Carrying("Open", "Open", ValueKind.Flag)
+            .Carrying("AnyoneCanUse", "Anyone can use", ValueKind.Flag)
+            .Offering("AnyoneCanUse", "Anyone can use On/Off")
+            .Carrying(DoorControls.Id, "Close automatically after", ValueKind.Real, "0", "600");
+
+        var kind = rig.Entity(door.Id).Kind;
+        Vetted(kind, Form.Native, "open", "close");
+        Vetted(kind, Form.Value, "status", "how-far-open", "AnyoneCanUse");
+        Unvetted(kind, Form.Value, DoorControls.Id);
+        Vetted(kind, Form.Action, "Open", "AnyoneCanUse");
+
+        Unvetted(kind, Form.Action, "Open_On", "Open_Off");
+        Unvetted(kind, Form.Value, "Open");
+    }
+
+    /// <summary>
+    /// A piston vouches for its own moves and readings and for the members of its terminal it keeps, and for none of the
+    /// game's moves its own stand in for, nor the setters and steps of a value it already offers.
+    /// </summary>
+    [Fact]
+    public void APistonVouchesForWhatItKeeps()
+    {
+        var rig = new Rigged();
+        var piston = rig.Piston(1, "Piston");
+
+        // What the game's piston carries beyond the harness's own, as its terminal declares them.
+        piston.Carrying("MaxImpulseAxis", "Max impulse axis", ValueKind.Real, "100", "1000000")
+            .Carrying("MaxImpulseNonAxis", "Max impulse non-axis", ValueKind.Real, "100", "1000000")
+            .Carrying("SafetyDetach", "Safety lock", ValueKind.Real, "0", "5")
+            .Carrying("ShareInertiaTensor", "Share inertia tensor", ValueKind.Flag)
+            .Offering("ShareInertiaTensor", "Share inertia tensor On/Off")
+            .Offering("SetVelocity", "Set Velocity", 1)
+            .Offering("ResetVelocity", "Reset Velocity");
+        Stepped(piston, "Velocity", "UpperLimit", "LowerLimit", "MaxImpulseAxis", "MaxImpulseNonAxis", "SafetyDetach");
+
+        var kind = rig.Entity(piston.Id).Kind;
+        Vetted(kind, Form.Native, Blocks.Piston.Extend, Blocks.Piston.Retract, Blocks.Piston.MoveTo);
+        Vetted(kind, Form.Value, "position", "status", "Velocity", "LowerLimit", "UpperLimit", "MaxImpulseAxis",
+            "MaxImpulseNonAxis", "SafetyDetach", "ShareInertiaTensor");
+        Vetted(kind, Form.Action, "Reverse", "Add Top Part", "ShareInertiaTensor");
+
+        Unvetted(kind, Form.Action, "Extend", "Retract", "SetAndMove", "SetVelocity", "ResetVelocity");
+        Unstepped(kind, "Velocity", "UpperLimit", "LowerLimit", "MaxImpulseAxis", "MaxImpulseNonAxis", "SafetyDetach");
+    }
+
+    /// <summary>
+    /// A rotor and a hinge vouch for their own turn, head and readings and for the members of their terminal they keep, and
+    /// for none of the game's members their own stand in for, nor the lock's value, nor the setters and steps of a value
+    /// they already offer.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ARotorVouchesForWhatItKeeps(bool hinge)
+    {
+        var rig = new Rigged();
+        var rotor = hinge ? rig.Hinge(1, "Rotor") : rig.Rotor(1, "Rotor");
+        var locks = hinge ? "HingeLock" : "RotorLock";
+
+        // What the game's rotor carries beyond the harness's own, as its terminal declares them.
+        rotor.Carrying("SafetyDetach", "Safety lock", ValueKind.Real, "0", "5")
+            .Carrying("ShareInertiaTensor", "Share inertia tensor", ValueKind.Flag)
+            .Offering("ShareInertiaTensor", "Share inertia tensor On/Off")
+            .Offering("SetVelocity", "Set Velocity", 1)
+            .Offering("SetLowerLimit", "Set Lower Limit", 1)
+            .Offering("SetUpperLimit", "Set Upper Limit", 1)
+            .Offering("ResetVelocity", "Reset Velocity");
+        Stepped(rotor, "Torque", "BrakingTorque", "Velocity", "LowerLimit", "UpperLimit", "Displacement", "SafetyDetach");
+
+        var kind = rig.Entity(rotor.Id).Kind;
+        Vetted(kind, Form.Native, Blocks.Rotor.RotateTo, Blocks.Rotor.AddHead);
+        Vetted(kind, Form.Value, "angle", "locked", "attached", "Velocity", "LowerLimit", "UpperLimit", "Torque",
+            "BrakingTorque", "Displacement", "SafetyDetach", "ShareInertiaTensor");
+        Vetted(kind, Form.Action, "Reverse", "Attach", "Detach", locks + "_On", locks + "_Off", locks, "ShareInertiaTensor");
+
+        Unvetted(kind, Form.Value, locks);
+        Unvetted(kind, Form.Action, "RotateToAngle", "SetVelocity", "SetLowerLimit", "SetUpperLimit", "ResetVelocity");
+        if (hinge)
+            Unvetted(kind, Form.Action, "AddHingeTopPart");
+        else
+            Unvetted(kind, Form.Action, "AddRotorTopPart", "AddSmallRotorTopPart", "AddMediumRotorTopPart");
+        Unstepped(kind, "Torque", "BrakingTorque", "Velocity", "LowerLimit", "UpperLimit", "Displacement", "SafetyDetach");
+    }
+
+    /// <summary>Gives <paramref name="fitting" /> the game's step up and step down of each value <paramref name="ids" /> names, as a slider's actions are.</summary>
+    static void Stepped(Fitting fitting, params string[] ids)
+    {
+        foreach (var id in ids)
+            fitting.Offering("Increase" + id, "Increase " + id).Offering("Decrease" + id, "Decrease " + id);
+    }
+
+    /// <summary>Asserts the step up and step down of each value <paramref name="ids" /> names is not vouched for.</summary>
+    static void Unstepped(EntityKind kind, params string[] ids)
+    {
+        foreach (var id in ids)
+            Unvetted(kind, Form.Action, "Increase" + id, "Decrease" + id);
+    }
+
+    /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" /> and vouched for.</summary>
+    static void Vetted(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var one = kind.FindAction(id, form);
+            Assert.True(one != null, id + " is missing");
+            Assert.True(one.Vetted, id + " is not vetted");
+        }
+    }
+
+    /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" /> and not vouched for.</summary>
+    static void Unvetted(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var one = kind.FindAction(id, form);
+            Assert.True(one != null, id + " is missing");
+            Assert.False(one.Vetted, id + " is vetted");
+        }
     }
 }

@@ -34,22 +34,4 @@ public class CommonMembersTests
         Assert.Equal("stops-working", trigger.EventId);
         Assert.Equal("When Airlock Inner Door stops working", screen.Editor.Says(0));
     }
-
-    /// <summary>A door's breaking is chosen by its words and read back as a sentence.</summary>
-    [Fact]
-    public void BreaksIsChosenAndSaid()
-    {
-        var screen = WithOne();
-
-        screen.Editor.PressWhen(0);
-        screen.Editor.PressBlock("Airlock Button");
-        screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("breaks");
-        screen.Editor.PressPrimary();
-        screen.Run(2);
-
-        var trigger = Assert.IsType<SignalTrigger>(System(screen).Triggers[0]);
-        Assert.Equal("breaks", trigger.EventId);
-        Assert.Equal("When Airlock Inner Door breaks", screen.Editor.Says(0));
-    }
 }

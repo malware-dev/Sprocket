@@ -20,6 +20,7 @@ public sealed class TextScreen : Fitting
         Fit(Pretend.To<IMyTextPanel>()
             .Does("GetText", () => Text)
             .Gives("Script", () => App)
+            .Takes("Script", value => App = (string)value)
             .Gives("ContentType", () => Content)
             .Takes("ContentType", value => Content = (ContentType)value)
             .Does("GetScripts", args => ((List<string>)args[0]).AddRange(Apps))

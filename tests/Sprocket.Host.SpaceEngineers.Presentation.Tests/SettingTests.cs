@@ -182,8 +182,11 @@ public class SettingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("button 1 is pressed");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Standby Battery");
+        screen.Editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         screen.Editor.PressChoice("Charge Mode");
         screen.Editor.Typed("1");
         screen.Run(2);
@@ -207,6 +210,8 @@ public class SettingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressChoice("button 1 is pressed");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("Speed");
@@ -314,15 +319,9 @@ public class SettingTests
         Assert.False(screen.Shows("APPEARANCE"), "a beacon's radius is grouped as how it looks");
     }
 
-    /// <summary>
-    /// What nothing has been said about is offered last, under Other.
-    /// </summary>
-    /// <remarks>
-    /// Which is what every member of a modded block is until somebody writes a category for it. Last
-    /// rather than left out: a member Sprocket cannot place is still a member the block can perform.
-    /// </remarks>
+    /// <summary>A member nothing vouches for is left to the terminal view, and the organized view keeps Other for the custom data alone.</summary>
     [Fact]
-    public void WhatNothingKnowsAboutComesLast()
+    public void WhatNothingKnowsAboutIsLeftToTheTerminalView()
     {
         var screen = WithASequence();
 
@@ -330,13 +329,14 @@ public class SettingTests
         screen.Editor.PressBlock("Approach Sensor");
         screen.Run(2);
 
-        var entries = What(screen).Entries();
-        var other = entries.ToList().FindIndex(entry => entry.IsHeading && entry.Text == "Other");
-        var power = entries.ToList().FindIndex(entry => entry.IsHeading && entry.Text == "Power");
+        Assert.False(screen.Shows("Chime On Approach"), "a member nothing vouches for is offered");
+        var entries = What(screen).Entries().ToList();
+        var other = entries.FindIndex(entry => entry.IsHeading && entry.Text == "Other");
+        Assert.Equal(new[] { "Custom data" }, entries.Skip(other + 1).TakeWhile(entry => !entry.IsHeading).Select(entry => entry.Text));
 
-        Assert.True(other >= 0, "nothing is grouped under Other");
-        Assert.True(power >= 0 && power < other, "Other is not last");
-        Assert.True(screen.Shows("Chime On Approach"), "the unknown member is not offered at all");
+        What(screen).PressView("Terminal");
+        screen.Run(2);
+        Assert.True(screen.Shows("Chime On Approach"), "the terminal view does not list what the block declares");
     }
 
     static StageColumn What(Screen screen)

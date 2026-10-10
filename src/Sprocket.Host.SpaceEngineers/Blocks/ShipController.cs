@@ -1,3 +1,4 @@
+using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -27,10 +28,29 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>The ship's speed is the same through any seat or remote control of it, in metres a second.</remarks>
+        /// <remarks>
+        /// The ship's speed is the same through any seat or remote control of it, in metres a second. Every ship controller
+        /// carries every seat's flight settings, and the game's terminal shows each only where its own test holds: the flight
+        /// settings where the block can control the ship, which a shower or a toilet cannot, the main cockpit on a cockpit
+        /// alone, a horizon anywhere but a cryo chamber, and target locking on a cockpit whose definition allows it. Each test
+        /// is transcribed from the game's ship controller.
+        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("speed", "speed", Speed).Looked(Unheard);
+
+            var flies = ((IMyShipController)block).CanControlShip;
+            if (!flies)
+                kind.Lacking("HandBrake", "Park", "DampenersOverride", "ControlThrusters", "ControlWheels", "ControlGyros");
+
+            if (!flies || !(block is IMyCockpit))
+                kind.Lacking("MainCockpit");
+
+            if (!flies || block is IMyCryoChamber)
+                kind.Lacking("HorizonIndicator");
+
+            if (!(block is IMyCockpit) || !Locks(block))
+                kind.Lacking("TargetLocking");
 
             IMyToolbar hotbar = Toolbars.Of(block, 1);
             for (var page = 1; hotbar != null && page <= hotbar.PageCount; page++)
@@ -44,6 +64,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.WithSignal(new ToolbarSlot(3, 0, 1), "gets a target lock")
                 .WithSignal(new ToolbarSlot(3, 0, 2), "loses its target lock");
+        }
+
+        /// <summary>Whether the definition of <paramref name="block" /> allows target locking, or nothing has been loaded to say.</summary>
+        static bool Locks(IMyTerminalBlock block)
+        {
+            var definitions = MyDefinitionManager.Static;
+            var definition = definitions == null
+                ? null
+                : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyShipControllerDefinition;
+
+            return definition == null || definition.TargetLockingEnabled;
         }
     }
 }

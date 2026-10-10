@@ -1,6 +1,7 @@
 using System.Globalization;
 using VRageMath;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
@@ -48,6 +49,52 @@ public class DragTests
         screen.Run(5);
 
         Assert.Equal("close, depressurize, open", Order(editor));
+    }
+
+    /// <summary>The step being carried is highlighted while it is held, and the highlight goes as it is dropped.</summary>
+    [Fact]
+    public void TheStepBeingCarriedIsHighlighted()
+    {
+        var screen = Build(out var editor);
+        var grab = Grips(screen)[1];
+
+        screen.Scene.MoveTo(grab);
+        screen.Scene.Down(grab);
+        screen.Scene.Move(new Vector2(grab.X, grab.Y + 10f));
+        screen.Run(1);
+        Assert.Equal(Palette.SlotFill, editor.StepRows()[1].Background);
+
+        screen.Scene.Up();
+        screen.Run(1);
+        Assert.NotEqual(Palette.SlotFill, editor.StepRows()[1].Background);
+    }
+
+    /// <summary>A step's grip brightens while the pointer rests on it, which is what says it can be taken hold of.</summary>
+    [Fact]
+    public void AGripBrightensUnderThePointer()
+    {
+        var screen = Build(out _);
+        var grips = Grips(screen);
+
+        screen.Scene.MoveTo(grips[1]);
+        screen.Run(1);
+        Assert.All(DotsAt(screen, grips[1]), dot => Assert.Equal(Palette.Ink, dot.Ink));
+        Assert.All(DotsAt(screen, grips[0]), dot => Assert.Equal(Palette.Faint, dot.Ink));
+
+        screen.Scene.MoveTo(Screen.Ui(10f, 10f));
+        screen.Run(1);
+        Assert.All(DotsAt(screen, grips[1]), dot => Assert.Equal(Palette.Faint, dot.Ink));
+    }
+
+    /// <summary>The squares of the grip at <paramref name="grip" />, as drawn.</summary>
+    static List<Drawn> DotsAt(Screen screen, Vector2 grip)
+    {
+        var dots = screen.Drawings
+            .Where(d => !d.IsText && d.Where.Width == 3 && d.Where.Height == 3)
+            .Where(d => Math.Abs(Screen.Ui(d.Where.X, d.Where.Y).Y - grip.Y) < GripHeight)
+            .ToList();
+        Assert.NotEmpty(dots);
+        return dots;
     }
 
     [Fact]

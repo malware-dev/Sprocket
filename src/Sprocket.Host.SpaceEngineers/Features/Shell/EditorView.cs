@@ -654,7 +654,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _help.IsVisible = screen.Help != null;
             _helps.CanExecute = screen.Help != null;
-            _help.Tip = Tip.For(_help.Tip, screen.Help == null ? null : texts.CodexHelp);
+            _help.Tip = Tip.For(_help.Tip, screen.Help == null ? null : _editor.CodexOpen ? texts.CodexClose : texts.CodexHelp);
 
             _undone.Set("action", screen.UndoText);
             _redone.Set("action", screen.RedoText);

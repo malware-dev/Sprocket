@@ -618,6 +618,60 @@ def cube():
     return [poly(*hexagon(r))], [poly(*hexagon(inner))], [path([left, middle, right], line), stroke(middle, bottom, line)]
 
 
+# The toolbar an eye looks over: where its eye sits and how wide it opens, the bar under it and the gap between.
+EYE_Y, EYE_RISE, EYE_HALF = 0.38, 0.20, 0.38
+BAR_TOP, BAR_BOTTOM, BAR_GAP, BAR_DOT = 0.64, 0.86, 0.06, 0.04
+
+
+def lid(rise, half=EYE_HALF, steps=48):
+    """An eyelid from corner to corner: bowed up for a positive rise, down for a negative one."""
+    return [(0.5 - half + 2 * half * i / steps, EYE_Y - math.sin(math.pi * i / steps) * rise) for i in range(steps + 1)]
+
+
+def toolbar():
+    """A toolbar: a bar with three slots cut out of it, and the band of gap above it cleared of whatever is there."""
+    line = 0.094
+    bar = poly((0.10, BAR_TOP), (0.90, BAR_TOP), (0.90, BAR_BOTTOM), (0.10, BAR_BOTTOM))
+    middle = (BAR_TOP + BAR_BOTTOM) / 2
+    dots = [poly((x - BAR_DOT, middle - BAR_DOT), (x + BAR_DOT, middle - BAR_DOT), (x + BAR_DOT, middle + BAR_DOT),
+                 (x - BAR_DOT, middle + BAR_DOT)) for x in (0.30, 0.5, 0.70)]
+    band = poly((0.0, BAR_TOP - BAR_GAP), (1.0, BAR_TOP - BAR_GAP), (1.0, BAR_TOP), (0.0, BAR_TOP))
+    return bar, dots, band, line
+
+
+def toolbar_eye():
+    """
+    Hidden from toolbars, shown: an open eye over a toolbar.
+
+    A block can be kept out of the toolbar's list, and this is the switch that shows such blocks after all. The eye is
+    the game's own picture for showing what is hidden, and the toolbar says which list it means. Its partner, the same
+    eye shut, is drawn on this one's frame, so one replaces the other without the bar moving.
+    """
+    bar, dots, band, line = toolbar()
+    outer = poly(*(lid(EYE_RISE) + lid(-EYE_RISE)[::-1][1:-1]))
+    inside = lid(EYE_RISE - line, EYE_HALF - line * 1.4) + lid(-(EYE_RISE - line), EYE_HALF - line * 1.4)[::-1][1:-1]
+    inner = poly(*[(x, min(y, BAR_TOP - BAR_GAP)) for (x, y) in inside])
+    pupil = [(x, y - (0.5 - EYE_Y) * _fit) for (x, y) in circle(EYE_RISE * 0.5)]
+    return [outer, bar], [inner, band] + dots, [pupil]
+
+
+def toolbar_eye_shut():
+    """
+    Hidden from toolbars, hidden: the same eye, shut, over the same toolbar.
+
+    The lid comes down between the open eye's own two corners with its lashes below it, so the eye is seen to close
+    rather than give way to another mark; drawn on the open eye's frame, see FRAMED.
+    """
+    bar, dots, band, line = toolbar()
+    depth = 0.07
+    lashes = []
+    for t, lean in ((0.25, -0.035), (0.5, 0.0), (0.75, 0.035)):
+        x = 0.5 - EYE_HALF + 2 * EYE_HALF * t
+        y = EYE_Y + math.sin(math.pi * t) * depth
+        lashes.append(stroke((x, y), (x + lean, y + 0.10), line * 0.75))
+    return [bar], [band] + dots, [path(lid(-depth, EYE_HALF - line * 0.3), line)] + lashes
+
+
 def solid(shapes):
     """Most glyphs are just filled shapes with nothing taken back out."""
     return shapes, []
@@ -670,7 +724,18 @@ GLYPHS = [
     ("y", "logic system", lambda: solid(logic())),
     # Every letter of the word is taken in lower case.
     ("I", "installation", lambda: installed()),
+    # Hidden: "h" with the eye open, showing what is hidden, and "H" with it shut.
+    ("h", "hidden shown", lambda: toolbar_eye()),
+    ("H", "hidden hidden", lambda: toolbar_eye_shut()),
 ]
+
+
+# A glyph drawn on another's scale and frame rather than its own, by code, so the two replace each other in place.
+#
+# Each glyph is otherwise fitted and centred on its own ink, which is right for a set read side by side and wrong for a
+# pair that stands in for each other on one switch: the shut eye has less ink than the open one, so on its own frame its
+# toolbar would grow and jump up as the eye closed.
+FRAMED = {"H": "h"}
 
 
 # How a glyph's shapes behind are drawn, as a part of the color the glyph is drawn in.
@@ -755,7 +820,22 @@ def ink(shapes, holes, over=(), behind=()):
     return page.getbbox()
 
 
-def render(glyph):
+def frame(make):
+    """The scale a glyph is fitted at, and where its ink lies at that scale."""
+    global _fit
+
+
+    _fit = 1.0
+    for _ in range(2):
+        drawn = ink(*make())
+        _fit *= EXTENT / (max(drawn[2] - drawn[0], drawn[3] - drawn[1]) / float(CELL * OVER))
+
+    scale, box = _fit, ink(*make())
+    _fit = 1.0
+    return scale, box
+
+
+def render(glyph, framed=None):
     """
     One glyph, drawn oversized, centred on its own ink, and averaged down: how much of each pixel it covers, and how
     bright that ink is, which is full for every shape but those drawn behind.
@@ -772,7 +852,17 @@ def render(glyph):
 
     from PIL import Image, ImageDraw
 
-    made = fitted(glyph)
+    global _fit
+
+    if framed is None:
+        made = fitted(glyph)
+        box = None
+    else:
+        scale, box = frame(framed)
+        _fit = scale
+        made = glyph()
+        _fit = 1.0
+
     shapes, holes = made[0], made[1]
     over = made[2] if len(made) > 2 else ()
     behind = made[3] if len(made) > 3 else ()
@@ -792,8 +882,8 @@ def render(glyph):
         for shape in over:
             draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
-    # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL.
-    ink = cover.getbbox()
+    # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL: of its own ink, or its partner's.
+    ink = box or cover.getbbox()
     side = size * EXTENT / FILL
     edge = (size - side) / 2.0
     done = []
@@ -823,9 +913,10 @@ def main():
     page = Image.new("RGBA", (side, side), (255, 255, 255, 0))
     entries = []
 
+    makers = dict((ch, glyph) for (ch, _, glyph) in GLYPHS)
     for i, (ch, label, glyph) in enumerate(GLYPHS):
         x, y = (i % across) * CELL, (i // across) * CELL
-        alpha, bright = render(glyph)
+        alpha, bright = render(glyph, makers.get(FRAMED.get(ch)))
 
         # The page is straight alpha, so the color is the brightness without the coverage folded into it: white for
         # every shape but those drawn behind.

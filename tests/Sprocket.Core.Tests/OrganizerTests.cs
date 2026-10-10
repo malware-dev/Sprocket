@@ -60,11 +60,11 @@ public class OrganizerTests
     }
 
     /// <summary>
-    /// The mark on the HUD is offered every way the game has it, each in Sprocket's words: shown, hidden, toggled, and a value
-    /// read after "is".
+    /// The mark on the HUD is a value read after "is" and its toggle, each in Sprocket's words and vetted; the game's pair
+    /// that sets the value each way says what the value says, so it stays in the game's words, unvetted.
     /// </summary>
     [Fact]
-    public void TheHudMarkIsOfferedEveryWay()
+    public void TheHudMarkIsAValueAndItsToggle()
     {
         var ship = new Rigged();
         var lamp = ship.Light(1, "Lamp");
@@ -74,23 +74,23 @@ public class OrganizerTests
             .Offering("ShowOnHUD_Off", "Show on HUD Off");
         var kind = ship.Entity(lamp.Id).Kind;
 
-        var said = new Dictionary<string, string>
-        {
-            ["ShowOnHUD_On"] = "Show on HUD",
-            ["ShowOnHUD_Off"] = "Hide from HUD",
-            ["ShowOnHUD"] = "Toggle show on HUD"
-        };
-
-        foreach (var pair in said)
-        {
-            var action = kind.FindAction(pair.Key, Form.Action)!;
-            Assert.False(action.Hidden, pair.Key + " is left out");
-            Assert.Equal(pair.Value, action.Named);
-        }
-
         var value = kind.FindAction("ShowOnHUD", Form.Value)!;
         Assert.False(value.Hidden);
         Assert.Equal("Shown on HUD", value.Named);
+        Assert.True(value.Vetted);
+
+        var toggle = kind.FindAction("ShowOnHUD", Form.Action)!;
+        Assert.True(toggle.Hidden);
+        Assert.Equal("Toggle show on HUD", toggle.Named);
+        Assert.True(toggle.Vetted);
+        Assert.True(value.Flips);
+
+        foreach (var id in new[] { "ShowOnHUD_On", "ShowOnHUD_Off" })
+        {
+            var each = kind.FindAction(id, Form.Action)!;
+            Assert.False(each.Renamed, id + " is renamed");
+            Assert.False(each.Vetted, id + " is vetted");
+        }
     }
 
     /// <summary>

@@ -1,6 +1,5 @@
 using System;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Doors;
 using Sprocket.Host.SpaceEngineers.World;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -72,8 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithAction("close", "close", Closes, "Open_Off").Lasting()
                 .Renaming("Open", false, "reverse")
                 .Renaming("AnyoneCanUse", true, "anyone can use")
-                .Renaming("AnyoneCanUse", false, "toggle anyone can use")
-                .Renaming(DoorControls.Id, true, "closes automatically after");
+                .Renaming("AnyoneCanUse", false, "toggle anyone can use");
         }
 
         /// <summary>Says how what was added last is heard: announced on a hangar door, and on any other ruled out while it is shut.</summary>

@@ -13,6 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityAction
     {
+        /// <summary>The third choice on a flag's switch, beside on and off, which writes the game's toggle for it.</summary>
+        public const string Flip = "flip";
+
         /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, standing for the game's member <paramref name="gameActionId" /> where there is one.</summary>
         public EntityAction(string id, string text, string gameActionId)
             : this(id, text, gameActionId, 0)
@@ -217,6 +220,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Hidden { get; private set; }
 
+        /// <summary>Whether this flag is also flipped, by the game's toggle beside it, chosen as <see cref="Flip" /> on its switch.</summary>
+        public bool Flips => FlippedBy != null;
+
+        /// <summary>The id of the game's toggle that flips this flag, or null where nothing does.</summary>
+        public string FlippedBy { get; private set; }
+
         /// <summary>
         /// What this member is about, which is the group it is listed under.
         /// </summary>
@@ -234,6 +243,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Leaves this out of the list somebody chooses from.</summary>
+        /// <summary>Says this flag is also flipped, by the game's toggle <paramref name="toggle" />: its switch offers off, on and flip.</summary>
+        public void Flipped(string toggle)
+        {
+            FlippedBy = toggle;
+            _writes.Words = new[] { Literal.Of(false).Said, Literal.Of(true).Said, Flip };
+        }
+
+        /// <summary>Keeps it out of the organized view.</summary>
         public void Hide()
         {
             Hidden = true;
@@ -253,6 +270,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             Declared = named;
             _writes = field;
             return this;
+        }
+
+        /// <summary>Holds what a step sets this value to between <paramref name="least" /> and <paramref name="most" />, each written as a number or empty for none.</summary>
+        public void Between(string least, string most)
+        {
+            _writes.Least = least ?? "";
+            _writes.Most = most ?? "";
         }
 
         /// <summary>Says the block announces when this value may have changed.</summary>
@@ -501,7 +525,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var f = 0; f < _wanted.Count && at < given.Count; f++)
             {
                 ValueKind kind;
-                if (_wanted[f].Covers != 1 || !Kind(_wanted[f].Entry, out kind))
+                if (_wanted[f].Covers != 1 || !Kind(_wanted[f].Entry, out kind) || _wanted[f].Unfilled(given[at]))
                 {
                     for (var c = 0; c < _wanted[f].Covers && at < given.Count; c++, at++)
                     {

@@ -199,7 +199,7 @@ public sealed class Simulation
             _unit.Rehome();
 
             // As the session does: nothing holds the automation after this, so its backup is taken from it now.
-            if (_unit.Lost)
+            if (_unit.Lost && _unit.Destroyed)
                 _unit.BackUp(_backups, DateTime.UtcNow, _shelf);
         }
 

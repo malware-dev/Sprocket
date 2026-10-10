@@ -2,13 +2,13 @@
 
 En handling er noe en blokk gjør, en av funksjonene dens, som å åpne en dør eller slå på et lys. Hver slags blokk har sine egne: en dør kan åpnes og lukkes, og et stempel kan skyves ut og trekkes inn.
 
-For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`. En [utløser](#trigger) kan også gjøre en, med `En oppgave på blokker`.
+For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`.
 
 ## Finne en
 
-[Velg](#picking) blokkene, så viser `Hva som skal gjøres` hva de kan gjøre under `Ordnet`, samlet under overskrifter som `Kraft`, `Bevegelse` og `Utseende`. For blokkene automasjonen kjenner, har de vanlige handlingene enkle navn, som `Move to` på et stempel.
+[Velg](#picking) blokkene, så viser `Hva som skal gjøres` hva de kan gjøre, samlet under overskrifter som `Kraft`, `Bevegelse` og `Utseende`. For blokkene automasjonen kjenner, har de vanlige handlingene enkle navn, som `Move to` på et stempel.
 
-`Terminal` har de rå medlemmene til blokkene, med navnene terminalen og verktøylinja i spillet gir dem, for den som kjenner dem godt.
+`Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i spillets terminal, under spillets egne navn. Å bruke dem er ditt eget valg: kodeksen forklarer dem ikke, og automasjonen sjekker dem ikke. `‹ Ordnet` går tilbake.
 
 ## Hvilke handlinger det ventes på
 

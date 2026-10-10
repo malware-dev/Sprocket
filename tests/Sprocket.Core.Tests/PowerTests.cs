@@ -8,8 +8,11 @@ using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;
 
 namespace Sprocket.Tests;
 
-/// <summary>A battery's members: recharge with or without waiting, its toggles and charge mode in Sprocket's words, and its own readings.</summary>
-/// <remarks>The rig models only the battery of the power family; the other blocks are proved in the game alone.</remarks>
+/// <summary>
+/// The power family's members: a battery's recharge with or without waiting, its toggles and charge mode in Sprocket's words
+/// and its own readings; a thruster's override and a jump drive's distance set by a step; and what each vouches for.
+/// </summary>
+/// <remarks>The rig models the battery, the thruster and the jump drive of the power family; the other blocks are proved in the game alone.</remarks>
 public class PowerTests
 {
     /// <summary>A battery offers its toggles and charge mode in Sprocket's words, and leaves out what charge mode says.</summary>
@@ -151,10 +154,190 @@ public class PowerTests
         Assert.Equal(charged + 1, frame);
     }
 
-    static double Read(Rigged ship, Battery battery, string id)
+    /// <summary>A battery vouches for every member it keeps, and for none of the game's duplicates of charge mode.</summary>
+    [Fact]
+    public void ABatteryVetsWhatItKeepsAndNotItsDuplicates()
     {
-        var value = ship.Entity(battery.Id).Kind.FindAction(id, Form.Value)!;
-        return value.Being!.Gauge(battery.Block, new Literal[0], new Recall()).Read().Number;
+        var ship = new Rigged();
+        var kind = ship.Entity(ship.Battery(1, "Battery").Id).Kind;
+
+        Vetted(kind, Form.Native, Blocks.Battery.Recharge);
+        Vetted(kind, Form.Action, "Recharge", "Discharge");
+        Vetted(kind, Form.Value, "ChargeMode", "charge", "stored-power", "capacity", "charging", "input", "maximum-input",
+            "output", "maximum-output");
+        Unvetted(kind, Form.Action, "Recharge_On", "Recharge_Off", "Discharge_On", "Discharge_Off", "Auto");
+    }
+
+    /// <summary>
+    /// A thruster vouches for its override in percent and its readings, and for none of the game's override in newtons, its
+    /// setter or its steps, which are hidden behind it.
+    /// </summary>
+    [Fact]
+    public void AThrusterVetsWhatItKeepsAndNotItsDuplicates()
+    {
+        var ship = new Rigged();
+        var kind = ship.Entity(ship.Thruster(1, "Thruster").Id).Kind;
+
+        Vetted(kind, Form.Value, "override", "thrust", "maximum-thrust");
+        Unvetted(kind, Form.Value, "Override");
+        Unvetted(kind, Form.Action, "SetOverride", "IncreaseOverride", "DecreaseOverride");
+
+        Assert.True(kind.FindAction("Override", Form.Value)!.Hidden);
+        foreach (var id in new[] { "SetOverride", "IncreaseOverride", "DecreaseOverride" })
+            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is listed");
+    }
+
+    /// <summary>
+    /// A jump drive vouches for what it keeps: its recharge, recharging and its toggle, its status, charge and reach, and its
+    /// jump distance in kilometers; and for none of the game's duplicates of them, nor its jump, which waits for a pilot.
+    /// </summary>
+    [Fact]
+    public void AJumpDriveVetsWhatItKeepsAndNotItsDuplicates()
+    {
+        var ship = new Rigged();
+        var kind = ship.Entity(ship.JumpDrive(1, "Drive").Id).Kind;
+
+        Vetted(kind, Form.Native, Blocks.JumpDrive.Recharge);
+        Vetted(kind, Form.Action, "Recharge");
+        Vetted(kind, Form.Value, "Recharge", "status", "charge", "stored-power", "capacity",
+            "minimum-jump-distance", "maximum-jump-distance");
+        Unvetted(kind, Form.Value, "JumpDistance");
+        Unvetted(kind, Form.Action, "Recharge_On", "Recharge_Off", "Jump", "IncreaseJumpDistance", "DecreaseJumpDistance",
+            "SetGravityAcceleration");
+
+        Assert.True(kind.FindAction("JumpDistance", Form.Value)!.Hidden);
+        foreach (var id in new[] { "SetGravityAcceleration", "IncreaseJumpDistance", "DecreaseJumpDistance" })
+            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is listed");
+    }
+
+    /// <summary>A step sets a thruster's override in percent, and it reads back so.</summary>
+    [Fact]
+    public void AStepSetsAThrustersOverride()
+    {
+        var ship = new Rigged();
+        var thruster = ship.Thruster(1, "Thruster");
+
+        Set(ship, thruster, "override", Literal.Of(40.0));
+
+        Assert.Equal(0.4f, thruster.Override, 3);
+        Assert.Equal(40.0, Read(ship, thruster, "override"), 3);
+    }
+
+    /// <summary>An override outside nought to a hundred percent is a fault on the step.</summary>
+    [Theory]
+    [InlineData(101.0, SequenceProblem.Mistyped)]
+    [InlineData(-1.0, SequenceProblem.Mistyped)]
+    [InlineData(100.0, SequenceProblem.None)]
+    [InlineData(0.0, SequenceProblem.None)]
+    public void AnOverrideOutsideItsBoundsIsAFault(double given, SequenceProblem problem)
+    {
+        var ship = new Rigged();
+        Assert.Equal(problem, Checked(ship, ship.Thruster(1, "Thruster"), "override", Literal.Of(given)));
+    }
+
+    /// <summary>A <c>when</c> on a thruster's override is seen on the tick after somebody changes it, since the thruster announces it.</summary>
+    [Fact]
+    public void AWhenOnOverrideIsSeenOnTheTickAfter()
+    {
+        var ship = new Rigged();
+        var automation = new Automation();
+        var thruster = ship.Thruster(1, "Thruster");
+        var lamp = ship.Light(2, "Lamp");
+
+        var when = new WhenTrigger("override")
+        {
+            Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(50.0)
+        };
+
+        when.Sources.Add(automation.Declare(ship.World, ship.Entity(thruster.Id)).Name);
+        var on = new Act(BlockKinds.SwitchOn);
+        on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        when.Does = on;
+        automation.AddSequence((Trigger)null!).System.AddTrigger(when);
+        automation.Edited();
+
+        var runner = new AutomationRunner(automation, ship.World);
+        var frame = 0;
+        for (; frame < 23; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame + 1);
+        }
+
+        Assert.DoesNotContain("Lamp:on", ship.Rig.Log);
+        Assert.True(thruster.Listeners > 0, "nothing listens to the thruster");
+
+        thruster.Override = 0.6f;
+        var changed = frame;
+        while (frame < 200 && !ship.Rig.Log.Contains("Lamp:on"))
+        {
+            ship.Tick();
+            runner.Tick(++frame);
+        }
+
+        Assert.Equal(changed + 1, frame);
+    }
+
+    static void Vetted(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var member = kind.FindAction(id, form);
+            Assert.True(member != null, id + " is not offered");
+            Assert.True(member.Vetted, id + " is not vetted");
+        }
+    }
+
+    static void Unvetted(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var member = kind.FindAction(id, form);
+            Assert.True(member != null, id + " is not offered");
+            Assert.False(member.Vetted, id + " is vetted");
+        }
+    }
+
+    /// <summary>Runs a step setting Sprocket's own value <paramref name="id" /> on <paramref name="fitting" /> to <paramref name="value" />.</summary>
+    static void Set(Rigged ship, Fitting fitting, string id, Literal value)
+    {
+        var automation = new Automation();
+        var sequence = automation.AddSequence((Trigger)null!);
+        sequence.Steps.Add(Setting(automation, ship, fitting, id, value));
+        automation.Edited();
+
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+        runner.Call(sequence);
+        ship.Tick();
+        runner.Tick(2);
+    }
+
+    /// <summary>What is wrong with a sequence whose one step sets Sprocket's own value <paramref name="id" /> on <paramref name="fitting" /> to <paramref name="value" />.</summary>
+    static SequenceProblem Checked(Rigged ship, Fitting fitting, string id, Literal value)
+    {
+        var automation = new Automation();
+        var sequence = automation.AddSequence(new EveryTrigger(600));
+        sequence.Steps.Add(Setting(automation, ship, fitting, id, value));
+        automation.Edited();
+
+        var runner = new AutomationRunner(automation, ship.World);
+        return SequenceSummary.Checked(ship.World, runner.Bindings, sequence, sequence.System.First).Problem;
+    }
+
+    static Act Setting(Automation automation, Rigged ship, Fitting fitting, string id, Literal value)
+    {
+        var set = new Act(id) { Form = Form.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(automation.Declare(ship.World, ship.Entity(fitting.Id)).Name);
+        set.Arguments.Add(value);
+        return set;
+    }
+
+    static double Read(Rigged ship, Fitting fitting, string id)
+    {
+        var value = ship.Entity(fitting.Id).Kind.FindAction(id, Form.Value)!;
+        return value.Being!.Gauge(fitting.Block, new Literal[0], new Recall()).Read().Number;
     }
 
     /// <summary>Runs a recharge given <paramref name="wait" /> on the battery, and counts the frames until the step after its await runs.</summary>

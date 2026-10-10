@@ -24,12 +24,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     /// </remarks>
     public sealed partial class BlueprintPage : EditorPage
     {
+        /// <summary>The codex page on writing rich text, which the description boxes' guide button opens.</summary>
+        const string WritingTerm = "writing";
+
         readonly AutomationSystem _system;
         readonly List<Part> _parts = new List<Part>();
         readonly List<string> _used = new List<string>();
         readonly List<Mention> _gone = new List<Mention>();
         readonly Dictionary<Part, string> _refusals = new Dictionary<Part, string>();
         readonly bool _editing;
+        readonly ICommand _guide;
 
         SystemInstance _made;
         string _madeName;
@@ -43,6 +47,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             _system = system;
             _editing = editing;
+            _guide = new Relay(delegate
+            {
+                var term = Editor.Codex.Find(WritingTerm);
+                if (term != null)
+                    Editor.OpenCodex(term);
+            });
         }
 
         /// <summary>The blockset whose blocks fill the slots, or, in edit mode, the panel itself.</summary>
@@ -333,6 +343,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             _writingHeading.Text = texts.BlueprintDescription.ToUpperInvariant();
             _composer.Show(texts);
+            _composer.Guides = _guide;
             _composer.Hint = texts.BlueprintDescriptionHint;
             if (!_composer.Box.IsFocused)
                 _composer.Text = _system.Annotation;
@@ -466,7 +477,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             row.Name = part.Id;
             row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
-            row.MarkTip = part.IsSignal ? Editor.Texts.BlueprintSignalSlot : Editor.Texts.BlueprintBlockSlot;
             row.Described = part.Annotation;
             row.Optional = part.Optional ? Editor.Texts.BlueprintOptional : null;
             row.Blocks.Clear();
@@ -524,6 +534,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             row.NameBox.Tip = Tip.For(row.NameBox.Tip, texts.BlueprintNameBoxAbout);
 
             row.About.Show(texts);
+            row.About.Guides = _guide;
             row.About.Hint = texts.BlueprintAboutHint;
             if (!row.About.Box.IsFocused)
                 row.About.Text = part.Annotation;
@@ -610,19 +621,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         static bool Fits(Part part, GridEntity block)
         {
-            if (part.Expects.Count == 0)
-                return true;
-
-            var sort = BlockKinds.Sort(block.Kind.Id);
-            for (var i = 0; i < part.Expects.Count; i++)
-            {
-                var expects = part.Expects[i];
-                if (string.Equals(sort, expects, StringComparison.Ordinal)
-                    || sort.StartsWith(expects + "/", StringComparison.Ordinal))
-                    return true;
-            }
-
-            return false;
+            return part.Fits(BlockKinds.Sort(block.Kind.Id));
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back to the blueprint.</summary>

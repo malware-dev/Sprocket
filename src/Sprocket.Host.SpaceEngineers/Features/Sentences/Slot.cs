@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The color of the line along the bottom.</summary>
         public Color Underline { get; set; }
 
-        /// <summary>The texts the notes over the marks of the members it says are in.</summary>
+        /// <summary>The texts what the members it says have to say are in.</summary>
         public Texts Texts
         {
             get { return _texts; }
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 {
                     var member = Children[i] as MemberName;
                     if (member != null)
-                        member.MarkTip = Noted(_said[i].Mark);
+                        member.About = Noted(_said[i].Mark);
                 }
             }
         }
@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     var member = (MemberName)Children[i];
                     member.Name = piece.Text;
                     member.Mark = piece.Mark;
-                    member.MarkTip = Noted(piece.Mark);
+                    member.About = Noted(piece.Mark);
                     continue;
                 }
 
@@ -201,10 +201,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             Dress();
         }
 
-        /// <summary>What <paramref name="mark" /> says while the pointer rests on it, in the texts given, or null before they are.</summary>
+        /// <summary>What a member under <paramref name="mark" /> says, in the texts given, or null before they are.</summary>
         string Noted(string mark)
         {
-            return _texts == null ? null : MarkText.Note(_texts, mark);
+            return _texts == null ? null : MarkText.About(_texts, mark);
         }
 
         /// <summary>Whether <paramref name="child" /> is the element that says <paramref name="piece" />: a block's, a member's, or words.</summary>

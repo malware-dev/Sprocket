@@ -40,10 +40,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
         }
 
-        /// <summary>The note over the mark.</summary>
-        public string MarkTip
+        /// <summary>What the member says while the pointer rests on it, words and mark alike, or null for nothing.</summary>
+        public string About
         {
-            set { _mark.Tip = Tip.For(_mark.Tip, value); }
+            set { Tip = Tip.For(Tip, value); }
         }
 
         /// <summary>Whether the words take all the room given and run onto further lines where they are wider.</summary>

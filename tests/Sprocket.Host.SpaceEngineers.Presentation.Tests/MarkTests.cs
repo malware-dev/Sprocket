@@ -1,3 +1,4 @@
+using Lumel.Images;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -13,16 +14,16 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <remarks>The configuration panel's two kinds of slot carry the same marks as the moments they are filled for.</remarks>
 public class MarkTests
 {
-    /// <summary>A moment watched on a block is marked by the cube, and a signal a block sends by the pulse.</summary>
+    /// <summary>Every signal is marked by the pulse, one of Sprocket's own as one sent from a toolbar slot.</summary>
     [Fact]
-    public void TheTriggerPickerMarksSignalsAndMoments()
+    public void TheTriggerPickerMarksEverySignalByThePulse()
     {
         var screen = OnTheSystem();
 
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Run(2);
-        Assert.Equal(Symbols.Block, Entry(screen, "finishes closing").Mark);
+        Assert.Equal(Symbols.Signal, Entry(screen, "finishes closing").Mark);
 
         screen.Editor.PressBlock("Airlock Button");
         screen.Run(2);
@@ -35,16 +36,40 @@ public class MarkTests
     {
         var screen = OnTheSystem();
         var texts = screen.Editor.Texts;
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
 
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Run(2);
 
+        // The mark each row draws, from the first time the rows are filled.
         var rows = screen.Editor.Pick().Stages.Last().Entries();
-        Assert.Equal(Symbols.Action, rows.Single(row => row.Text == texts.PickSingleAction).Mark);
-        Assert.Equal(Symbols.Sequence, rows.Single(row => row.Text == texts.PickNewSequence).Mark);
-        Assert.Equal(Symbols.Sequence, rows.Single(row => row.Text == "Sequence 1").Mark);
+        Assert.Equal(Symbols.Action, Drawn(rows.Single(row => row.Text == texts.PickSingleAction)));
+        Assert.Equal(Symbols.Sequence, Drawn(rows.Single(row => row.Text == texts.PickNewSequence)));
+        Assert.Equal(Symbols.Sequence, Drawn(rows.Single(row => row.Text == "Sequence 1")));
+    }
+
+    /// <summary>
+    /// A mark says nothing of its own: an action a step waits for says so on its whole row, and a mark beside a member that
+    /// does not wait carries no note at all.
+    /// </summary>
+    [Fact]
+    public void WhatAMarkStandsForIsToldByTheRow()
+    {
+        var screen = OnTheSequence();
+
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Airlock Outer Door");
+        screen.Run(2);
+
+        var open = screen.Editor.Pick().Stages.Last().Entries().First(row => row.Mark == Symbols.Awaited);
+        Assert.Equal(screen.Editor.Texts.MemberWaits, open.Tip!.Text);
+
+        var marks = screen.Editor.Pick().Stages.Last().Entries().SelectMany(row => row.Within().OfType<Glyph>()).ToList();
+        Assert.NotEmpty(marks);
+        Assert.All(marks, mark => Assert.Null(mark.Tip));
     }
 
     /// <summary>What an if asks about a block is marked "=?", every one of it.</summary>
@@ -127,6 +152,9 @@ public class MarkTests
     {
         return screen.Editor.Pick().Stages.Last().Entries().Single(entry => entry.Text == text);
     }
+
+    /// <summary>The mark <paramref name="row" />'s name draws beside it.</summary>
+    static string Drawn(PickRow row) => row.Within().OfType<MemberName>().Single().Mark;
 
     /// <summary>A button system's own screen.</summary>
     static Screen OnTheSystem()

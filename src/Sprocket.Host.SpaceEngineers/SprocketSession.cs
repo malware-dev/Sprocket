@@ -602,7 +602,8 @@ namespace Sprocket.Host.SpaceEngineers
             if (unit.Lost)
             {
                 // Taken now, from what it was running, because nothing holds the automation after this.
-                unit.BackUp(_backups, DateTime.UtcNow, _shelf);
+                if (unit.Destroyed)
+                    unit.BackUp(_backups, DateTime.UtcNow, _shelf);
                 _units.Remove(was);
                 if (_shown == unit && _screen != null)
                     _screen.CloseNow();

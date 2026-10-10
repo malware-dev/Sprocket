@@ -405,12 +405,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <param name="type">The block's type, as a part expects one.</param>
         public string Take(SystemInstance instance, string declared, string called, string type)
         {
-            for (var i = 0; i < _parts.Count; i++)
-            {
-                var filled = instance.FilledWith(_parts[i].Id);
-                if (filled != null && filled.Count == 1 && filled[0] == declared)
-                    return _parts[i].Id;
-            }
+            var had = FilledBy(instance, declared);
+            if (had != null)
+                return had;
 
             var name = Free(called);
             var part = PartFor(name);
@@ -445,6 +442,57 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 name = called + " " + n;
 
             return name;
+        }
+
+        /// <summary>The part <paramref name="instance" /> fills with <paramref name="declared" /> and nothing else, or null where there is none.</summary>
+        public string FilledBy(SystemInstance instance, string declared)
+        {
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                var filled = instance.FilledWith(_parts[i].Id);
+                if (filled != null && filled.Count == 1 && filled[0] == declared)
+                    return _parts[i].Id;
+            }
+
+            return null;
+        }
+
+        /// <summary>How many times its triggers and steps name <paramref name="slot" />.</summary>
+        public int Mentions(string slot)
+        {
+            var uses = 0;
+            for (var i = 0; i < _triggers.Count; i++)
+            {
+                var moment = _triggers[i] as MomentTrigger;
+                if (moment != null)
+                    uses += Count(moment.Sources, slot);
+
+                var own = _triggers[i].Acts;
+                if (own != null)
+                    uses += Count(own.Targets, slot);
+            }
+
+            for (var i = 0; i < _sequences.Count; i++)
+            {
+                var steps = _sequences[i].Steps;
+                for (var s = 0; s < steps.Count; s++)
+                    uses += Count(steps[s].Targets, slot);
+            }
+
+            return uses;
+        }
+
+        /// <summary>How many of <paramref name="ids" /> are <paramref name="id" />.</summary>
+        public static int Count(IList<string> ids, string id)
+        {
+            var count = 0;
+            for (var i = 0; i < ids.Count; i++)
+            {
+                if (ids[i] == id)
+                    count++;
+            }
+
+            return count;
         }
 
         /// <summary>Puts into <paramref name="into" /> every slot its triggers and steps name, each once.</summary>

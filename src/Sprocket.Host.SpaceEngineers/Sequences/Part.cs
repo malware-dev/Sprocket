@@ -49,6 +49,22 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public string Annotation { get; set; }
 
+        /// <summary>Whether a block of the type <paramref name="sort" />, written as <see cref="Expects" /> writes one, may fill this part.</summary>
+        public bool Fits(string sort)
+        {
+            if (_expects.Count == 0)
+                return true;
+
+            for (var i = 0; i < _expects.Count; i++)
+            {
+                if (string.Equals(sort, _expects[i], System.StringComparison.Ordinal)
+                    || sort.StartsWith(_expects[i] + "/", System.StringComparison.Ordinal))
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Calls the part <paramref name="id" />, and nothing else: <see cref="AutomationSystem.RenamePart" /> renames what names it.</summary>
         public void Rename(string id)
         {

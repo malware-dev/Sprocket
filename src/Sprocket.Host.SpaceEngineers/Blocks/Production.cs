@@ -42,10 +42,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Progress = Being.Number<IMyAssembler>(assembler => assembler.CurrentProgress * 100.0);
 
-        static readonly Being Mode = Being.OneOf<IMyAssembler>(Modes,
-            assembler => assembler.Mode == MyAssemblerMode.Disassembly ? 1 : 0);
+        static readonly Being Mode = Being.OneOf<IMyAssembler>(Modes, Position)
+            .Writing<IMyAssembler>((assembler, mode) =>
+                assembler.Mode = mode.Whole == 1 ? MyAssemblerMode.Disassembly : MyAssemblerMode.Assembly);
 
-        static readonly Being Repeating = Being.Flag(Reading.Of<IMyAssembler>(assembler => assembler.Repeating));
+        // The mode of an assembler whose definition keeps it from taking apart, which its production screen offers no
+        // choice of.
+        static readonly Being Locked = Being.OneOf<IMyAssembler>(Modes, Position);
+
+        static readonly Being Repeating = Being.Flag(Reading.Of<IMyAssembler>(assembler => assembler.Repeating))
+            .Writing<IMyAssembler>((assembler, repeating) => assembler.Repeating = repeating.Flag);
 
         static readonly Being InputFill = Being.Number<IMyProductionBlock>(block => block.InputInventory.VolumeFillFactor * 100.0);
 
@@ -149,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             // Whether an assembler can take apart is fixed by its definition, so it never changes and there is nothing to announce.
             var able = TakesApart(block);
-            kind.WithValue("mode", "mode", Mode).Announced().In(Category.Making)
+            kind.WithValue("mode", "mode", able ? Mode : Locked).Announced().In(Category.Making)
                 .WithValue("able-to-take-apart", "able to take apart", Being.Flag(Reading.Of<IMyAssembler>(assembler => able)))
                 .Announced().In(Category.Making)
                 .WithValue("repeating", "repeating", Repeating).Looked(Repeat).In(Category.Making);
@@ -196,6 +202,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyAssemblerDefinition;
 
             return definition == null || definition.EnableDisassembly;
+        }
+
+        /// <summary>Where an assembler's mode stands among the modes: making, or taking apart.</summary>
+        static int Position(IMyAssembler assembler)
+        {
+            return assembler.Mode == MyAssemblerMode.Disassembly ? 1 : 0;
         }
 
         /// <summary>How much of an item one of the block's two inventories holds: in kilograms for ore and ingots, and in pieces for anything else.</summary>

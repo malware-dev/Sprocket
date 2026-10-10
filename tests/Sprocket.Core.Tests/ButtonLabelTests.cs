@@ -66,7 +66,34 @@ public class ButtonLabelTests
         Assert.Single(kind.FindAction(ButtonPanel.Assigned, Form.Value)!.Being!.Parameters);
     }
 
-    /// <summary>A panel offers flipping who may use it, in Sprocket's words, where every other block keeps it to the value.</summary>
+    /// <summary>
+    /// A button panel vouches for its labels, whether a button has an action, and who may use it with its toggle, and not for
+    /// the terminal's label box or the pair that sets who may use it.
+    /// </summary>
+    [Fact]
+    public void APanelVouchesForItsButtonsAndAccessAndNotTheirPairs()
+    {
+        var ship = new Rigged();
+        var panel = ship.Panel(1, "Panel", 4);
+        panel.Carrying("AnyoneCanUse", "Anyone can use", ValueKind.Flag)
+            .Carrying("ButtonName", "Button name", ValueKind.Text)
+            .Offering("AnyoneCanUse", "Anyone can use On/Off")
+            .Offering("AnyoneCanUse_On", "Anyone can use On")
+            .Offering("AnyoneCanUse_Off", "Anyone can use Off");
+        var kind = ship.Entity(panel.Id).Kind;
+
+        Assert.True(kind.FindAction(ButtonPanel.Label, Form.Native)!.Vetted);
+        Assert.True(kind.FindAction(ButtonPanel.LabelOf, Form.Value)!.Vetted);
+        Assert.True(kind.FindAction(ButtonPanel.Assigned, Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("AnyoneCanUse", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("AnyoneCanUse", Form.Action)!.Vetted);
+
+        Assert.False(kind.FindAction("ButtonName", Form.Value)!.Vetted);
+        Assert.False(kind.FindAction("AnyoneCanUse_On", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("AnyoneCanUse_Off", Form.Action)!.Vetted);
+    }
+
+    /// <summary>A panel offers flipping who may use it on the value's own switch, its toggle kept to the terminal view, where every other block keeps it to the value.</summary>
     [Fact]
     public void APanelOffersFlippingWhoMayUseIt()
     {
@@ -77,9 +104,10 @@ public class ButtonLabelTests
         lamp.Offering("AnyoneCanUse", "Anyone can use On/Off").Carrying("AnyoneCanUse", "Anyone can use", ValueKind.Flag);
 
         var toggle = ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Form.Action)!;
-        Assert.False(toggle.Hidden);
+        Assert.True(toggle.Hidden);
         Assert.Equal("toggle anyone can use", toggle.Text);
         Assert.Equal("anyone can use", ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Form.Value)!.Text);
+        Assert.True(ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Form.Value)!.Flips);
         Assert.True(ship.Entity(lamp.Id).Kind.FindAction("AnyoneCanUse", Form.Action)!.Hidden);
     }
 }

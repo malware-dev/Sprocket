@@ -35,6 +35,18 @@ public class ButtonWiringTests
         Assert.EndsWith("/2/1", KeyIn(port));
     }
 
+    /// <summary>A button picked for a signal slot is named after the slot, as the game names a button after what its slot holds.</summary>
+    [Fact]
+    public void AButtonPickedIsNamedAfterItsSlot()
+    {
+        var sim = Blueprinted();
+        var port = PanelNamed(sim, "Port Button");
+
+        FillWith(sim, "Port Button");
+
+        Assert.Equal(sim.Editor.Parts()[0].Name, port.Label(0));
+    }
+
     /// <summary>A button whose slot holds the game's own action is asked about; left alone nothing changes, and taken it is written over.</summary>
     [Fact]
     public void AButtonDoingSomethingElseIsAskedAbout()

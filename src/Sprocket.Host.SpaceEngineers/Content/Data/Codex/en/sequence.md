@@ -6,7 +6,7 @@ Under `Sequences` on the logic system's screen, `+ sequence` adds one, and press
 
 ## Starting it
 
-A [trigger](#trigger) starts it, for example when the airlock's button is pressed. The play mark on its row runs it by hand, even while the logic system is switched off, on the installation chosen under `Using the blocks of`. That is how to try a sequence while building it.
+A [trigger](#trigger) starts it, for example when the airlock's button is pressed. The play mark on its row runs it by hand, even while the logic system is switched off, on the installation chosen under `Showing the slots filled by installation`. That is how to try a sequence while building it.
 
 An installation runs a sequence once at a time. A trigger that fires while it is still running is skipped, and the sequence counts how often that happens.
 

@@ -42,7 +42,7 @@ public class SensingTests
         return screen.Run(2);
     }
 
-    /// <summary>A timer's task picker offers its countdown and its beeps in Sprocket's words.</summary>
+    /// <summary>A timer's task picker offers its countdown and its beeps in Sprocket's words, the beeps flipped on their own switch.</summary>
     [Fact]
     public void ATimersTasksAreSaidInSprocketsWords()
     {
@@ -54,11 +54,11 @@ public class SensingTests
 
         Assert.True(screen.Shows("Start the countdown"), "the timer does not offer starting its countdown");
         Assert.True(screen.Shows("Go off now"), "the timer does not offer going off now");
-        Assert.True(screen.Shows("Toggle silent"), "the timer does not offer flipping its beeps");
+        Assert.False(screen.Shows("Toggle silent"), "the toggle is listed beside the switch that flips");
         Assert.True(screen.Shows("Delay"), "the timer does not offer its delay");
     }
 
-    /// <summary>A sensor's task picker offers what it watches for, and the toggle that flips it.</summary>
+    /// <summary>A sensor's task picker offers what it watches for, flipped on its own switch rather than by a toggle beside it.</summary>
     [Fact]
     public void ASensorsTasksSayWhatItWatchesFor()
     {
@@ -69,7 +69,7 @@ public class SensingTests
         screen.Run(2);
 
         Assert.True(screen.Shows("Watching for people"), "the sensor does not offer what it watches for");
-        Assert.True(screen.Shows("Toggle watching for people"), "the sensor does not offer flipping what it watches for");
+        Assert.False(screen.Shows("Toggle watching for people"), "the toggle is listed beside the switch that flips");
     }
 
     /// <summary>A trigger on a sensor starts as it starts detecting, which is its toolbar's first slot.</summary>

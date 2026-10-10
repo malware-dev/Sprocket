@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -7,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>What the picker offers for a vent and a tank, in their own words.</summary>
 public class GasPickerTests
 {
-    /// <summary>A vent offers the switch under pressurize and depressurize as depressurizing, beside the act that flips it.</summary>
+    /// <summary>A vent offers the switch under pressurize and depressurize as depressurizing, which flips on its own switch.</summary>
     [Fact]
     public void AVentOffersItsSwitchInItsOwnWords()
     {
@@ -19,8 +20,41 @@ public class GasPickerTests
         screen.Run(2);
 
         Assert.True(screen.Shows("Pressurize"), "the vent's own actions are not listed");
-        Assert.True(screen.Shows("Toggle depressurize"), "the act that flips the switch is not said in the vent's words");
+        Assert.False(screen.Shows("Toggle depressurize"), "the toggle is listed beside the switch that flips");
         Assert.False(screen.Shows("Depressurize On/Off"), "the game's own words are listed beside Sprocket's");
+    }
+
+    /// <summary>
+    /// A switch is set off, on, or flipped on its own three chips; flip makes the step the game's toggle, and the step opens
+    /// on flip again.
+    /// </summary>
+    [Fact]
+    public void FlipOnASwitchIsTheToggle()
+    {
+        var screen = Screen.On(Rig.Demo());
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Airlock Vent");
+        screen.Editor.PressChoice("Depressurizing");
+        screen.Run(2);
+
+        Assert.True(screen.Shows("off") && screen.Shows("on") && screen.Shows("flip"), "the switch does not offer off, on and flip");
+
+        screen.Do("press", "flip");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var step = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Assert.Equal(Form.Action, step.Form);
+        Assert.Equal("Depressurize", step.ActionId);
+        Assert.Empty(step.Arguments);
+
+        screen.Editor.StepRows()[0].Slots[0].Opens!.Execute();
+        screen.Run(2);
+        var chosen = screen.Editor.Pick().Stages.Last().Entries().Single(entry => entry.IsChosen);
+        Assert.Equal("Depressurizing", chosen.Text);
+        Assert.Equal(EntityAction.Flip, screen.Editor.Pick().Arguments!.Form.Answer);
     }
 
     /// <summary>A tank's stockpile asks whether to wait until full, and starts waiting.</summary>

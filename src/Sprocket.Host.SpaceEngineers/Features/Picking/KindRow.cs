@@ -51,6 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
+        /// <summary>Whether it is a kind listed under its family, and set in from it.</summary>
+        public bool IsNested
+        {
+            get { return Style == Styles.MenuRowNested; }
+            set { Style = value ? Styles.MenuRowNested : Styles.MenuRow; }
+        }
+
         /// <summary>Whether it is the kind the column is narrowed to.</summary>
         public bool IsCurrent
         {

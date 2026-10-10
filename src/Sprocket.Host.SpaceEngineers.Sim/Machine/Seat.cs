@@ -18,20 +18,32 @@ public sealed class Seat : Fitting
     Action<IMyCockpit>? _changed;
     IMyCharacter? _pilot;
 
-    /// <summary>A cockpit on the rig, empty, holding <paramref name="air" /> of oxygen where it is enclosed.</summary>
-    public Seat(long id, string name, MyObjectBuilderType type, string subtype, string display, float air)
+    /// <summary>
+    /// A cockpit on the rig, empty, holding <paramref name="air" /> of oxygen where it is enclosed, a cryo chamber where
+    /// <paramref name="cryo" /> says so, and able to fly the ship unless <paramref name="flies" /> says otherwise.
+    /// </summary>
+    /// <remarks>
+    /// A cryo chamber is a cockpit to the game, which tells it apart by the interface it adds. A seat that cannot fly the
+    /// ship, a couch or a toilet, is a cockpit whose definition says so.
+    /// </remarks>
+    public Seat(long id, string name, MyObjectBuilderType type, string subtype, string display, float air, bool cryo = false,
+        bool flies = true)
         : base(id, name, type, subtype, display)
     {
-        Fit(Pretend.To<IMyCockpit>()
+        var stand = Pretend.To<IMyCockpit>();
+        if (cryo)
+            stand.Also<Sandbox.ModAPI.IMyCryoChamber>();
+
+        Fit(stand
             .Gives("IsOccupied", () => _pilot != null)
             .Gives("Pilot", () => _pilot!)
             .Gives("IsUnderControl", () => _pilot != null)
+            .Gives("CanControlShip", () => flies)
             .Gives("OxygenCapacity", () => air)
             .Gives("OxygenFilledRatio", () => Air)
             .Does("GetShipSpeed", () => Speed)
             .Does("GetNaturalGravity", () => Gravity)
             .Does("CalculateShipMass", () => new MyShipMass(Mass, Mass, Mass))
-            .Does("RemovePilot", _ => Rise())
             .Answers("add_IsOccupiedChanged", invocation =>
             {
                 _changed = (Action<IMyCockpit>?)Delegate.Combine(_changed, (Delegate)invocation.Arguments[0]);

@@ -1,6 +1,9 @@
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Blocks;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -11,7 +14,6 @@ using VRage.Game;
 using VRage.Game.ModAPI;
 using VRage.ObjectBuilders;
 using Xunit;
-using MyInventoryItemFilter = Sandbox.ModAPI.Ingame.MyInventoryItemFilter;
 
 namespace Sprocket.Tests;
 
@@ -47,8 +49,10 @@ public class ProductionTests
             else
                 Fit(Production(Pretend.To<IMyAssembler>(), input, output)
                     .Gives("CurrentProgress", () => 0f)
-                    .Gives("Mode", () => Sandbox.ModAPI.Ingame.MyAssemblerMode.Assembly)
-                    .Gives("Repeating", () => false)
+                    .Gives("Mode", () => Mode)
+                    .Takes("Mode", mode => Mode = (Sandbox.ModAPI.Ingame.MyAssemblerMode)mode)
+                    .Gives("Repeating", () => Repeating)
+                    .Takes("Repeating", repeating => Repeating = (bool)repeating)
                     .Does("add_CurrentProgressChanged", args => _assembling.Add((Action<IMyAssembler>)args[0]))
                     .Does("remove_CurrentProgressChanged", args => _assembling.Remove((Action<IMyAssembler>)args[0]))
                     .Does("add_CurrentStateChanged", args => _assembling.Add((Action<IMyAssembler>)args[0]))
@@ -58,7 +62,16 @@ public class ProductionTests
 
             Offering("UseConveyor", "Use Conveyor System On/Off");
             Carrying("UseConveyor", "Use Conveyor System", ValueKind.Flag);
+            if (refinery)
+                return;
+
+            Offering("slaveMode", "Cooperative mode On/Off");
+            Carrying("slaveMode", "Cooperative mode", ValueKind.Flag);
         }
+
+        public Sandbox.ModAPI.Ingame.MyAssemblerMode Mode { get; set; }
+
+        public bool Repeating { get; set; }
 
         public bool Producing { get; set; }
 
@@ -111,36 +124,41 @@ public class ProductionTests
         }
     }
 
-    /// <summary>A conveyor sorter that writes down what is added to its list and lets through what a test says.</summary>
+    /// <summary>The list of what a conveyor sorter offers says what is still to come for it, and the lamp beside it, which has nothing planned, says nothing.</summary>
+    [Fact]
+    public void ASortersListSaysWhatIsStillToCome()
+    {
+        var ship = new Ship();
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Weld(new Gate(1, "Sorter"));
+        var editor = new SprocketEditor(ship.Rig.World, ship.Program, new AutomationRunner(ship.Program, ship.Rig.World), new Texts());
+
+        editor.NewButtonSystem("Airlock");
+        editor.PressAdd("task");
+        StageColumn What() => editor.Pick().Stages.Single(stage => stage.Entries().Any(entry => entry.Text == "Switched on"));
+
+        editor.PressBlock("Sorter");
+        Assert.Equal("Still to come: setting the sorter's list.", What().Note);
+
+        editor.PressBlock("Lamp");
+        Assert.Equal("", What().Note);
+    }
+
+    /// <summary>A conveyor sorter, offering the game's own switches for its pulling and its filter mode.</summary>
     sealed class Gate : Fitting
     {
         public Gate(long id, string name)
             : base(id, name, new MyObjectBuilderType(typeof(MyObjectBuilder_ConveyorSorter)), "LargeBlockConveyorSorter", "Conveyor Sorter")
         {
-            Fit(Pretend.To<IMyConveyorSorter>()
-                .Gives("Mode", () => Mode)
-                .Does("AddItem", args => Added.Add((MyInventoryItemFilter)args[0]))
-                .Does("RemoveItem", args => Removed.Add((MyInventoryItemFilter)args[0]))
-                .Does("SetFilter", args =>
-                {
-                    Mode = (Sandbox.ModAPI.Ingame.MyConveyorSorterMode)args[0];
-                    Cleared = ((List<MyInventoryItemFilter>)args[1]).Count == 0;
-                })
-                .Does("IsAllowed", args => ((MyDefinitionId)args[0]).SubtypeName == Allows));
+            Fit(Pretend.To<IMyConveyorSorter>());
+
+            Offering("DrainAll", "Drain All On/Off").Offering("DrainAll_On", "Drain All On").Offering("DrainAll_Off", "Drain All Off");
+            Carrying("DrainAll", "Drain All", ValueKind.Flag);
+            Carrying("blacklistWhitelist", "Mode", "Whitelist", "0", "Blacklist", "1");
         }
-
-        public List<MyInventoryItemFilter> Added { get; } = new();
-
-        public List<MyInventoryItemFilter> Removed { get; } = new();
-
-        public Sandbox.ModAPI.Ingame.MyConveyorSorterMode Mode { get; set; } = Sandbox.ModAPI.Ingame.MyConveyorSorterMode.Whitelist;
-
-        public bool Cleared { get; private set; }
-
-        public string Allows { get; set; } = "";
     }
 
-    /// <summary>A drill whose mode a test sets.</summary>
+    /// <summary>A drill whose mode a test sets, or a step does, offering the game's own switch for the mode.</summary>
     sealed class Bore : Fitting
     {
         public Bore(long id, string name)
@@ -148,13 +166,19 @@ public class ProductionTests
         {
             Fit(Pretend.To<IMyShipDrill>()
                 .Gives("TerrainClearingMode", () => Clearing)
+                .Takes("TerrainClearingMode", clearing => Clearing = (bool)clearing)
                 .Gives("IsActivated", () => Enabled));
+
+            Offering("TerrainClearingMode", "Terrain Clearing Mode On/Off")
+                .Offering("TerrainClearingMode_On", "Terrain Clearing Mode On")
+                .Offering("TerrainClearingMode_Off", "Terrain Clearing Mode Off");
+            Carrying("TerrainClearingMode", "Terrain Clearing Mode", ValueKind.Flag);
         }
 
         public bool Clearing { get; set; }
     }
 
-    /// <summary>A store that offers the game's own access switch.</summary>
+    /// <summary>A store that offers the game's own access and listing switches.</summary>
     sealed class Shop : Fitting
     {
         public Shop(long id, string name)
@@ -163,19 +187,42 @@ public class ProductionTests
             Fit(Pretend.To<IMyStoreBlock>());
             Offering("AnyoneCanUse", "Anyone Can Use On/Off");
             Carrying("AnyoneCanUse", "Anyone Can Use", ValueKind.Flag);
+            Offering("Searchable", "Searchable On/Off");
+            Carrying("Searchable", "Searchable", ValueKind.Flag);
         }
     }
 
-    /// <summary>A projector whose blocks left a test sets.</summary>
+    /// <summary>A projector whose blocks left a test sets, offering the game's own settings for where and how it shows.</summary>
     sealed class Printer : Fitting
     {
         public Printer(long id, string name)
             : base(id, name, new MyObjectBuilderType(typeof(MyObjectBuilder_Projector)), "LargeProjector", "Projector")
         {
             Fit(Pretend.To<IMyProjector>().Gives("RemainingBlocks", () => Left));
+
+            Offering("KeepProjection", "Keep Projection On/Off");
+            Carrying("KeepProjection", "Keep Projection", ValueKind.Flag);
+            foreach (var placed in new[] { "X", "Y", "Z", "RotX", "RotY", "RotZ", "Scale" })
+            {
+                Carrying(placed, placed, ValueKind.Real);
+                Offering("Increase" + placed, "Increase " + placed).Offering("Decrease" + placed, "Decrease " + placed);
+            }
+
+            foreach (var shown in new[] { "ShowOnlyBuildable", "MarkMissingBlocks", "MarkUnfinishedBlocks" })
+                Carrying(shown, shown, ValueKind.Flag);
         }
 
         public int Left { get; set; }
+    }
+
+    /// <summary>A block of this family answering only what it is, offering what a test gives it of the game's own.</summary>
+    sealed class Stood<T> : Fitting where T : class, IMyTerminalBlock
+    {
+        public Stood(long id, string name, Type type, string subtype, string display)
+            : base(id, name, new MyObjectBuilderType(type), subtype, display)
+        {
+            Fit(Pretend.To<T>());
+        }
     }
 
     /// <summary>The rig, a program on it and a runner ticking it.</summary>
@@ -223,6 +270,26 @@ public class ProductionTests
         }
 
         public int Fired => Rig.Rig.Log.Count(line => line == "Lamp:off");
+
+        /// <summary>
+        /// Has a sequence of one step set Sprocket's own value <paramref name="id" /> on <paramref name="fitting" /> to
+        /// <paramref name="value" />, runs it, and gives back what checking the step found.
+        /// </summary>
+        /// <remarks>That nothing starts the sequence is about the sequence, which is called here, and not about the step.</remarks>
+        public SequenceProblem Set(Fitting fitting, string id, Literal value)
+        {
+            var set = new Act(id) { Form = Form.Value, Provider = BlockKinds.Own };
+            set.Targets.Add(Name(fitting));
+            set.Arguments.Add(value);
+            var sequence = Program.AddSequence((Trigger)null!);
+            sequence.Steps.Add(set);
+            Start();
+
+            var problem = SequenceSummary.Checked(Rig.World, Runner.Bindings, sequence, sequence.System.First).Problem;
+            Runner.Call(sequence);
+            Tick(3);
+            return problem == SequenceProblem.NothingStarts ? SequenceProblem.None : problem;
+        }
     }
 
     /// <summary>
@@ -310,7 +377,8 @@ public class ProductionTests
         var ship = new Ship();
         var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
         var toggle = assembler.FindAction("UseConveyor", Form.Action)!;
-        Assert.False(toggle.Hidden);
+        Assert.True(toggle.Hidden);
+        Assert.True(assembler.FindAction("UseConveyor", Form.Value)!.Flips);
         Assert.Equal("toggle automatic push and pull", toggle.Text);
         Assert.Equal("Automatic push and pull", assembler.FindAction("UseConveyor", Form.Value)!.Named);
 
@@ -418,42 +486,6 @@ public class ProductionTests
         Assert.Equal(known, Items.Read(said, out _));
     }
 
-    /// <summary>A sorter's list takes a whole kind of item, or one item, and nothing it cannot name.</summary>
-    [Fact]
-    public void ASorterListTakesAKindOrAnItem()
-    {
-        var ship = new Ship();
-        var sorter = ship.Weld(new Gate(1, "Sorter"));
-        var entity = ship.Rig.Entity(sorter.Id);
-
-        entity.Invoke("add-to-the-list", new[] { Literal.Of("Ore") });
-        entity.Invoke("add-to-the-list", new[] { Literal.Of("Ingot/Iron") });
-        entity.Invoke("add-to-the-list", new[] { Literal.Of("Nonsense") });
-
-        Assert.Equal(2, sorter.Added.Count);
-        Assert.True(sorter.Added[0].AllSubTypes);
-        Assert.Equal("MyObjectBuilder_Ore", sorter.Added[0].ItemId.TypeId.ToString());
-        Assert.False(sorter.Added[1].AllSubTypes);
-        Assert.Equal("Iron", sorter.Added[1].ItemId.SubtypeName);
-    }
-
-    /// <summary>An item comes off a sorter's list as it went on, and clearing the list keeps whether it lets the list through or holds it back.</summary>
-    [Fact]
-    public void ASorterListIsTakenFromAndCleared()
-    {
-        var ship = new Ship();
-        var sorter = ship.Weld(new Gate(1, "Sorter"));
-        sorter.Mode = Sandbox.ModAPI.Ingame.MyConveyorSorterMode.Blacklist;
-        var entity = ship.Rig.Entity(sorter.Id);
-
-        entity.Invoke("remove-from-the-list", new[] { Literal.Of("Ore/Ice") });
-        entity.Invoke("clear-the-list", new Literal[0]);
-
-        Assert.Equal("Ice", Assert.Single(sorter.Removed).ItemId.SubtypeName);
-        Assert.True(sorter.Cleared);
-        Assert.Equal(Sandbox.ModAPI.Ingame.MyConveyorSorterMode.Blacklist, sorter.Mode);
-    }
-
     /// <summary>A drill's mode is one of mining and clearing terrain, read off the game's own switch for it.</summary>
     [Fact]
     public void ADrillsModeIsMiningOrClearingTerrain()
@@ -475,7 +507,8 @@ public class ProductionTests
         var ship = new Ship();
         var store = ship.Rig.Entity(ship.Weld(new Shop(1, "Store")).Id).Kind;
         var toggle = store.FindAction("AnyoneCanUse", Form.Action)!;
-        Assert.False(toggle.Hidden);
+        Assert.True(toggle.Hidden);
+        Assert.True(store.FindAction("AnyoneCanUse", Form.Value)!.Flips);
         Assert.Equal("toggle anyone can use", toggle.Text);
 
         var panel = new Plain(2, "Panel", new MyObjectBuilderType(typeof(MyObjectBuilder_ButtonPanel)), "ButtonPanelLarge",
@@ -483,21 +516,6 @@ public class ProductionTests
         panel.Offering("AnyoneCanUse", "Anyone Can Use On/Off");
         ship.Weld(panel);
         Assert.True(ship.Rig.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Form.Action)!.Hidden);
-    }
-
-    /// <summary>Whether a sorter lets an item through is a flag given the item.</summary>
-    [Fact]
-    public void ASorterSaysWhetherItLetsAnItemThrough()
-    {
-        var ship = new Ship();
-        var sorter = ship.Weld(new Gate(1, "Sorter"));
-        sorter.Allows = "Ice";
-        var lets = ship.Rig.Entity(sorter.Id).Kind.FindAction("lets-through", Form.Value)!;
-
-        Assert.Equal(ValueKind.Flag, lets.Being.Kind);
-        Assert.Equal(Literal.Of(true), lets.Being.Gauge(sorter.Block, new[] { Literal.Of("Ore/Ice") }, new Recall()).Read());
-        Assert.Equal(Literal.Of(false), lets.Being.Gauge(sorter.Block, new[] { Literal.Of("Ore/Iron") }, new Recall()).Read());
-        Assert.Equal(Literal.Of(false), lets.Being.Gauge(sorter.Block, new[] { Literal.Of("Nonsense/Ice") }, new Recall()).Read());
     }
 
     /// <summary>A projector finishes building as its blocks left come to nothing, looked for on its cadence.</summary>
@@ -541,5 +559,213 @@ public class ProductionTests
 
         Assert.Null(function.Refused(new[] { Literal.Of("Ingot/Gold") }));
         Assert.Equal("item", function.Refused(new[] { Literal.Of(3L) }));
+    }
+
+    /// <summary>
+    /// Every member an assembler and a refinery keep is vetted: Sprocket's own, and the game's switches for cooperative mode
+    /// and the conveyors in Sprocket's words.
+    /// </summary>
+    [Fact]
+    public void WhatAnAssemblerAndARefineryKeepIsVetted()
+    {
+        var ship = new Ship();
+        var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
+        Vetted(assembler, Form.Native, "make", "clear-the-queue");
+        Vetted(assembler, Form.Value, "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
+            "input-fill", "output-fill", "amount-in-input", "amount-in-output", "slaveMode", "UseConveyor");
+        Vetted(assembler, Form.Action, "slaveMode", "UseConveyor");
+
+        var refinery = ship.Rig.Entity(ship.Weld(new Factory(2, "Refinery", true)).Id).Kind;
+        Vetted(refinery, Form.Value, "refining", "stuck", "input-fill", "output-fill", "amount-in-input", "amount-in-output",
+            "UseConveyor");
+        Vetted(refinery, Form.Action, "UseConveyor");
+    }
+
+    /// <summary>
+    /// A sorter's filter mode and pulling are vetted, and the game's own pull on and pull off beside its pulling are not; its
+    /// list waits for the setting of it that is still to come.
+    /// </summary>
+    [Fact]
+    public void WhatASorterKeepsIsVettedAndItsPullSwitchesAreNot()
+    {
+        var ship = new Ship();
+        var sorter = ship.Rig.Entity(ship.Weld(new Gate(1, "Sorter")).Id).Kind;
+
+        Assert.Equal(new[] { Plan.SorterList }, sorter.Planned);
+        Vetted(sorter, Form.Value, "blacklistWhitelist", "DrainAll");
+        Vetted(sorter, Form.Action, "DrainAll");
+        Unvetted(sorter, Form.Action, "DrainAll_On", "DrainAll_Off");
+    }
+
+    /// <summary>
+    /// A drill's own values and the flip of its mode are vetted, and the game's own terrain clearing value and its on and off,
+    /// which setting the mode does, are not.
+    /// </summary>
+    [Fact]
+    public void WhatADrillKeepsIsVettedAndTheGamesModeIsNot()
+    {
+        var ship = new Ship();
+        var drill = ship.Rig.Entity(ship.Weld(new Bore(1, "Drill")).Id).Kind;
+
+        Vetted(drill, Form.Value, "drilling", "mode");
+        Vetted(drill, Form.Action, "TerrainClearingMode");
+        Unvetted(drill, Form.Value, "TerrainClearingMode");
+        Unvetted(drill, Form.Action, "TerrainClearingMode_On", "TerrainClearingMode_Off");
+    }
+
+    /// <summary>A projector's members are vetted, and the game's increase and decrease steps beside its placement are not.</summary>
+    [Fact]
+    public void WhatAProjectorKeepsIsVettedAndItsStepsAreNot()
+    {
+        var ship = new Ship();
+        var projector = ship.Rig.Entity(ship.Weld(new Printer(1, "Printer")).Id).Kind;
+
+        Vetted(projector, Form.Native, "remove-the-blueprint");
+        Vetted(projector, Form.Value, "projecting", "blocks-left", "armor-blocks-left", "total-blocks", "blocks-ready-to-weld",
+            "KeepProjection", "X", "Y", "Z", "RotX", "RotY", "RotZ", "Scale", "ShowOnlyBuildable", "MarkMissingBlocks",
+            "MarkUnfinishedBlocks");
+        Vetted(projector, Form.Action, "KeepProjection");
+        foreach (var placed in new[] { "X", "Y", "Z", "RotX", "RotY", "RotZ", "Scale" })
+            Unvetted(projector, Form.Action, "Increase" + placed, "Decrease" + placed);
+    }
+
+    /// <summary>
+    /// A store's, a vending machine's and a contract block's switches are vetted in Sprocket's words, and the vending machine's
+    /// turning through its items.
+    /// </summary>
+    [Fact]
+    public void WhatTheTradingBlocksKeepIsVetted()
+    {
+        var ship = new Ship();
+        var store = ship.Rig.Entity(ship.Weld(new Shop(1, "Store")).Id).Kind;
+        Vetted(store, Form.Value, "AnyoneCanUse", "Searchable");
+        Vetted(store, Form.Action, "AnyoneCanUse", "Searchable");
+
+        var machine = new Stood<IMyVendingMachine>(2, "Machine", typeof(MyObjectBuilder_VendingMachine), "VendingMachine",
+            "Vending Machine");
+        machine.Offering("AnyoneCanUse", "Anyone Can Use On/Off").Offering("Searchable", "Searchable On/Off");
+        machine.Carrying("AnyoneCanUse", "Anyone Can Use", ValueKind.Flag).Carrying("Searchable", "Searchable", ValueKind.Flag);
+        var vending = ship.Rig.Entity(ship.Weld(machine).Id).Kind;
+        Vetted(vending, Form.Native, "show-next-item", "show-previous-item");
+        Vetted(vending, Form.Value, "AnyoneCanUse", "Searchable");
+        Vetted(vending, Form.Action, "AnyoneCanUse", "Searchable");
+
+        var desk = new Plain(3, "Contracts", new MyObjectBuilderType(typeof(MyObjectBuilder_ContractBlock)), "ContractBlock",
+            "Contracts");
+        desk.Offering("AnyoneCanUse", "Anyone Can Use On/Off").Carrying("AnyoneCanUse", "Anyone Can Use", ValueKind.Flag);
+        var contracts = ship.Rig.Entity(ship.Weld(desk).Id).Kind;
+        Vetted(contracts, Form.Value, "AnyoneCanUse");
+        Vetted(contracts, Form.Action, "AnyoneCanUse");
+    }
+
+    /// <summary>
+    /// A collector's, a grinder's and a welder's conveyor switch is vetted in Sprocket's words, with a tool's run by a pilot, and an
+    /// upgrade module's two counts.
+    /// </summary>
+    [Fact]
+    public void WhatTheToolsAndTheModuleKeepIsVetted()
+    {
+        var ship = new Ship();
+        var tools = new Fitting[]
+        {
+            new Stood<IMyCollector>(1, "Collector", typeof(MyObjectBuilder_Collector), "Collector", "Collector"),
+            new Stood<IMyShipGrinder>(2, "Grinder", typeof(MyObjectBuilder_ShipGrinder), "LargeShipGrinder", "Grinder"),
+            new Stood<IMyShipWelder>(3, "Welder", typeof(MyObjectBuilder_ShipWelder), "LargeShipWelder", "Welder")
+        };
+
+        foreach (var tool in tools)
+        {
+            tool.Offering("UseConveyor", "Use Conveyor System On/Off").Carrying("UseConveyor", "Use Conveyor System", ValueKind.Flag);
+            var kind = ship.Rig.Entity(ship.Weld(tool).Id).Kind;
+            Vetted(kind, Form.Value, "UseConveyor");
+            Vetted(kind, Form.Action, "UseConveyor");
+            if (!(tool.Block is IMyCollector))
+                Vetted(kind, Form.Value, "run-by-a-pilot");
+        }
+
+        var module = ship.Weld(new Stood<IMyUpgradeModule>(4, "Module", typeof(MyObjectBuilder_UpgradeModule), "LargeProductivityModule",
+            "Productivity Module"));
+        Vetted(ship.Rig.Entity(module.Id).Kind, Form.Value, "connections", "upgrade-count");
+    }
+
+    /// <summary>An assembler's mode is set by a step, to making or taking apart, and to nothing else.</summary>
+    [Fact]
+    public void AStepSetsAnAssemblersMode()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+
+        Assert.Equal(SequenceProblem.None, ship.Set(assembler, "mode", Literal.Name("taking-apart")));
+        Assert.Equal(Sandbox.ModAPI.Ingame.MyAssemblerMode.Disassembly, assembler.Mode);
+
+        Assert.Equal(SequenceProblem.None, ship.Set(assembler, "mode", Literal.Name("assembling")));
+        Assert.Equal(Sandbox.ModAPI.Ingame.MyAssemblerMode.Assembly, assembler.Mode);
+    }
+
+    /// <summary>A mode that is none of an assembler's is the step's fault, and the assembler is left as it was.</summary>
+    [Fact]
+    public void AnAssemblerModeOutsideItsChoicesIsAFault()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+
+        Assert.Equal(SequenceProblem.Mistyped, ship.Set(assembler, "mode", Literal.Name("melting")));
+        Assert.Equal(Sandbox.ModAPI.Ingame.MyAssemblerMode.Assembly, assembler.Mode);
+    }
+
+    /// <summary>Whether an assembler repeats its queue is set by a step, on and off, and only to on or off.</summary>
+    [Fact]
+    public void AStepSetsWhetherAnAssemblerRepeats()
+    {
+        var ship = new Ship();
+        var assembler = ship.Weld(new Factory(1, "Assembler", false));
+
+        Assert.Equal(SequenceProblem.None, ship.Set(assembler, "repeating", Literal.Of(true)));
+        Assert.True(assembler.Repeating);
+
+        Assert.Equal(SequenceProblem.None, ship.Set(assembler, "repeating", Literal.Of(false)));
+        Assert.False(assembler.Repeating);
+
+        Assert.Equal(SequenceProblem.Mistyped, ship.Set(assembler, "repeating", Literal.Of(3L)));
+        Assert.False(assembler.Repeating);
+    }
+
+    /// <summary>A drill's mode is set by a step, to mining or clearing terrain, and a mode that is neither is the step's fault.</summary>
+    [Fact]
+    public void AStepSetsADrillsMode()
+    {
+        var ship = new Ship();
+        var drill = ship.Weld(new Bore(1, "Drill"));
+
+        Assert.Equal(SequenceProblem.None, ship.Set(drill, "mode", Literal.Name("clearing-terrain")));
+        Assert.True(drill.Clearing);
+
+        Assert.Equal(SequenceProblem.None, ship.Set(drill, "mode", Literal.Name("mining")));
+        Assert.False(drill.Clearing);
+
+        Assert.Equal(SequenceProblem.Mistyped, ship.Set(drill, "mode", Literal.Name("digging")));
+        Assert.False(drill.Clearing);
+    }
+
+    /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" />, and vetted.</summary>
+    static void Vetted(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var member = kind.FindAction(id, form);
+            Assert.True(member != null, kind.Id + " has no " + form + " " + id);
+            Assert.True(member.Vetted, kind.Id + " " + form + " " + id + " is not vetted");
+        }
+    }
+
+    /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" />, and not vetted.</summary>
+    static void Unvetted(EntityKind kind, Form form, params string[] ids)
+    {
+        foreach (var id in ids)
+        {
+            var member = kind.FindAction(id, form);
+            Assert.True(member != null, kind.Id + " has no " + form + " " + id);
+            Assert.False(member.Vetted, kind.Id + " " + form + " " + id + " is vetted");
+        }
     }
 }

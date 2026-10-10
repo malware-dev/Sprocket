@@ -80,6 +80,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         TankNoGas,
 
         /// <summary>Something else switched the jump drive's recharging off.</summary>
-        JumpDriveRechargeOff
+        JumpDriveRechargeOff,
+
+        /// <summary>The programmable block did not run its script: it has none, it would not compile, or it is already running.</summary>
+        ScriptNotRun
     }
 }

@@ -6,17 +6,22 @@ Velgeren er der blokker, og hva som skal gjøres med dem, velges for et [steg](#
 
 Trykk en blokk for å velge den, eller kryss av flere for å velge alle sammen.
 
-Skriv i `Søk` for å vise bare blokkene der navnet inneholder det du skriver, og velg en type for å vise bare blokker av den typen. Søket står slik du skrev det for skjermen velgeren ble åpnet fra, til du forlater den skjermen, så et søk etter *Luftsluse* fortsatt gjelder når du velger for neste steg.
+Skriv i `Søk` for å vise bare blokkene der navnet inneholder det du skriver, og velg en type for å vise bare blokker av den typen, eller en familie, som `Dør`, for å vise alle typene i den. Søket står slik du skrev det for skjermen velgeren ble åpnet fra, til du forlater den skjermen, så et søk etter *Luftsluse* fortsatt gjelder når du velger for neste steg.
+
+Blokker som verktøylinjeoppsettet i spillet ikke viser, er utelatt. Øyet ytterst på linja med typen viser dem også, og trykt igjen skjuler det dem.
 
 Når en plass fylles, blir bare blokker av riktig slag tilbudt.
 
 ## Hva som skal gjøres
+
+`Hva som skal gjøres` viser hva de valgte blokkene kan gjøre, samlet under overskrifter som `Kraft` og `Åpning`. `Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i spillets terminal, under spillets egne navn, og `‹ Ordnet` går tilbake. Se [Handling](#action).
 
 Hvert valg har et merke for slaget sitt:
 
 - ![](mark:action) **En handling**, merket med et lyn, startes uten å vente på at blokken fullfører den, som å slå på et lys.
 - ![](mark:awaited) **En handling som tar tid**, merket med en klokke, som å lukke en dør, ventes på før neste steg begynner.
 - ![](mark:value) **En verdi**, merket `=?`, er en av egenskapene til blokken, som skal settes eller sjekkes, som `Radius` på et lys.
+- ![](mark:signal) **Et signal**, merket med en firkantpuls, er noe en blokk sender, som at en knapp trykkes eller en dør er ferdig med å lukke seg. Signaler tilbys når du velger for en utløser.
 
 ## Endre et valg
 

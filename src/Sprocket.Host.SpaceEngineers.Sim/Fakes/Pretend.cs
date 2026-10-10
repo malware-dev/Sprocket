@@ -73,6 +73,15 @@ namespace Sprocket.Sim.Fakes
             return this;
         }
 
+        /// <summary>What a property reads as where nothing has said already.</summary>
+        public Stand<T> Otherwise(string property, Func<object> value)
+        {
+            if (!_answers.ContainsKey("get_" + property))
+                _answers.Add("get_" + property, _ => value());
+
+            return this;
+        }
+
         /// <summary>A method whose answer does not depend on what it was passed.</summary>
         public Stand<T> Does(string method, Func<object> answer)
         {

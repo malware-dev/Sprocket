@@ -28,6 +28,8 @@ public sealed class Grid
     /// <summary>The next cell handed to a block welded without one, along one row.</summary>
     int _next;
 
+    bool _closed;
+
     Action<IMySlimBlock> _added;
     Action<IMySlimBlock> _removed;
 
@@ -51,7 +53,8 @@ public sealed class Grid
             .Takes("CustomName", value => called = (string)value)
             .Gives("DisplayName", () => called)
             .Gives("GridSizeEnum", () => MyCubeSize.Large)
-            .Gives("Closed", () => false)
+            .Gives("Closed", () => _closed)
+            .Gives("MarkedForClose", () => _closed)
             .Does("GetBlocks", Blocks)
             .Answers("GetCubeBlock", invocation => At((Vector3I)invocation.Arguments[0]))
             .Answers("add_OnBlockAdded", invocation => Listen(ref _added, invocation, true))
@@ -96,18 +99,28 @@ public sealed class Grid
     }
 
     /// <summary>Grinding one off, which leaves whatever named it pointing at nothing.</summary>
+    /// <remarks>The game reports the block removed from the grid, then closes it.</remarks>
     public void Grind(Fitting fitting)
     {
         if (!_fitted.Remove(fitting))
             return;
-
-        fitting.Closed = true;
 
         IMySlimBlock slim = _slim[fitting];
         _slim.Remove(fitting);
 
         if (_removed != null)
             _removed(slim);
+
+        fitting.Close();
+    }
+
+    /// <summary>Deleting the grid whole, as a player in creative or the server's cleanup does.</summary>
+    /// <remarks>The game closes the grid and every block on it, and reports none of them removed.</remarks>
+    public void Delete()
+    {
+        _closed = true;
+        for (var i = 0; i < _fitted.Count; i++)
+            _fitted[i].Close();
     }
 
     /// <summary>A moment of every block on this grid running.</summary>

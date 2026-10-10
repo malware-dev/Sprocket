@@ -28,6 +28,30 @@ static class Ran
         runner.Tick(2);
     }
 
+    /// <summary>
+    /// Sets Sprocket's own value <paramref name="id" /> of <paramref name="fitting" /> to <paramref name="value" /> as a one-step
+    /// sequence, and gives back what checking that sequence found wrong with it.
+    /// </summary>
+    /// <remarks>The sequence repeats on a long interval, so a check finds nothing wrong with how it starts.</remarks>
+    public static SequenceProblem Set(Rigged ship, Fitting fitting, string id, Literal value)
+    {
+        var automation = new Automation();
+        var sequence = automation.AddSequence(new EveryTrigger(600));
+        var set = new Act(id) { Form = Form.Value, Provider = BlockKinds.Own };
+        set.Targets.Add(automation.Declare(ship.World, ship.Entity(fitting.Id)).Name);
+        set.Arguments.Add(value);
+        sequence.Steps.Add(set);
+
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+        var problem = SequenceSummary.Checked(ship.World, runner.Bindings, sequence, sequence.System.First).Problem;
+        runner.Call(sequence);
+        ship.Tick();
+        runner.Tick(2);
+        return problem;
+    }
+
     /// <summary>What Sprocket's own value <paramref name="id" /> of <paramref name="fitting" /> reads now, given <paramref name="arguments" />.</summary>
     public static Literal Read(Rigged ship, Fitting fitting, string id, params Literal[] arguments)
     {

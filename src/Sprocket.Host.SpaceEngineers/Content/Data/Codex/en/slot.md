@@ -4,7 +4,7 @@ A slot is a named place in a ![](mark:logic-system) [logic system](#logic-system
 
 ## Two kinds
 
-- A ![](mark:block) **block slot** holds the blocks a step acts on or watches, for example a door, or every light in the airlock.
+- A ![](mark:block) **block slot** holds the blocks a step acts on or a trigger watches, for example a door, or every light in the airlock.
 - A ![](mark:signal) **signal slot** holds a block and the toolbar slot on it that sends the ![](mark:signal) [signal](#signal), for example a button panel and one of its buttons.
 
 ## Filling a slot
@@ -22,7 +22,7 @@ The heading over the slots counts how many still need a block. A slot whose bloc
 
 When you pick a block for a step or a trigger, a slot is made and named after the block, such as *Airlock Inner Door*. Picking the same block again uses the same slot, so a block that many steps use is still one slot, filled once.
 
-The block you picked fills the slot for the installation chosen under `Using the blocks of`. Every other installation fills it on its own configuration panel.
+The block you picked fills the slot for the installation chosen under `Showing the slots filled by installation`. Every other installation fills it on its own configuration panel.
 
 ::: warning
 When you remove the last step or trigger that uses a given block or signal, its slot disappears from the configuration panel, with its name and what it is for. Picking another block in its place makes a new slot, which every installation has to fill again. So does picking the same block again: the new slot takes the block's name, and its description starts empty. To change which block a slot holds, fill it again on the configuration panel instead.

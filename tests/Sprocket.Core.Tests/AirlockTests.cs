@@ -1713,9 +1713,10 @@ public class PropertyTests
         Assert.False(depressurizing.Hidden);
         Assert.Equal("Depressurizing", depressurizing.Named);
 
-        // The act that flips it stays: nothing else in the list says "whichever way it is not".
+        // Flipping it is the third choice on its own switch, so the act that flips it is kept to the terminal view.
         var toggle = kind.FindAction("Depressurize", Form.Action)!;
-        Assert.False(toggle.Hidden);
+        Assert.True(toggle.Hidden);
+        Assert.True(depressurizing.Flips);
         Assert.Equal("toggle depressurize", toggle.Text);
     }
 

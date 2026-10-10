@@ -32,7 +32,7 @@ The blocks you pick become [slots](#slot). There are two kinds:
 - A ![](mark:block) **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
 - A ![](mark:signal) **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
 
-`Using the blocks of`, at the top of the logic system's screen, chooses which installation's blocks the steps show, and which installation a block you pick fills.
+`Showing the slots filled by installation`, at the top of the logic system's screen, chooses which installation's blocks the steps show, and which installation a block you pick fills.
 
 ## More than one airlock
 

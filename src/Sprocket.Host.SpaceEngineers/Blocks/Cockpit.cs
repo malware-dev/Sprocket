@@ -21,9 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>Whether somebody sits in it, which is Sprocket's own.</summary>
         public const string Occupied = "occupied";
 
-        /// <summary>Putting whoever sits in it out of the seat, which is Sprocket's own.</summary>
-        public const string Eject = "eject-occupant";
-
         const string Unheard = "The game raises no event when this changes.";
 
         /// <summary>One g in metres a second squared, as the game's gravity system counts it.</summary>
@@ -43,8 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Mass = Being.Number<IMyCockpit>(cockpit => cockpit.CalculateShipMass().TotalMass);
 
-        static readonly Doing Ejects = Doing.Of<IMyCockpit>(cockpit => cockpit.RemovePilot());
-
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
@@ -61,8 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithChange("becomes-empty", "becomes empty", Occupied, Literal.Of(false))
                 .Reading("is empty", "is occupied").Announced()
                 .WithValue("occupant-name", "occupant name", Occupant).Announced()
-                .WithValue("under-control", "under control", Controlled).Looked(Unheard)
-                .WithAction(Eject, "eject occupant", Ejects);
+                .WithValue("under-control", "under control", Controlled).Looked(Unheard);
 
             var cockpit = block as IMyCockpit;
             if (cockpit != null && cockpit.OxygenCapacity > 0f)

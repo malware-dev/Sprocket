@@ -6,7 +6,7 @@ Under `Sekvenser` på skjermen til logikksystemet legger `+ sekvens` til en, og 
 
 ## Starte den
 
-En [utløser](#trigger) starter den, for eksempel når knappen til luftslusen trykkes. Spill-merket på raden kjører den for hånd, også mens logikksystemet er slått av, på installasjonen som er valgt under `Bruker blokkene til`. Slik prøver du en sekvens mens du bygger den.
+En [utløser](#trigger) starter den, for eksempel når knappen til luftslusen trykkes. Spill-merket på raden kjører den for hånd, også mens logikksystemet er slått av, på installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Slik prøver du en sekvens mens du bygger den.
 
 En installasjon kjører en sekvens én gang om gangen. En utløser som går av mens den fortsatt kjører, hoppes over, og sekvensen teller hvor ofte det skjer.
 

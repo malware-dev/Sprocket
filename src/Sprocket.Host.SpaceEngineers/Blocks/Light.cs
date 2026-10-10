@@ -31,13 +31,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.Renaming("Color", true, "color")
                 .Renaming("Intensity", true, "intensity")
                 .Renaming("Radius", true, "radius")
-                .Renaming("Falloff", true, "falloff")
                 .Renaming("Offset", true, "offset")
                 .Renaming("Blink Interval", true, "blink interval")
                 .Renaming("Blink Lenght", true, "blink length")
                 .Renaming("Blink Offset", true, "blink offset");
 
-            if (!(block is IMyInteriorLight))
+            if (block is IMyInteriorLight)
+                kind.Renaming("Falloff", true, "falloff");
+            else
                 kind.Hiding("Falloff", "IncreaseFalloff", "DecreaseFalloff");
 
             if (!(block is IMyReflectorLight))

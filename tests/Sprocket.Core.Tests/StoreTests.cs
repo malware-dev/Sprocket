@@ -105,7 +105,7 @@ public class StoreTests
         Assert.False(stockpile.Hidden);
 
         // Stockpiling stands in for the game's own act. The switch is offered as stockpiling, which says the game's pair
-        // between them, and the act that flips it as toggle stockpile.
+        // between them and flips it on its own switch, so toggle stockpile is kept to the terminal view.
         Assert.True(kind.FindAction("Stockpile_On", Form.Action)!.Hidden);
         Assert.True(kind.FindAction("Stockpile_Off", Form.Action)!.Hidden);
 
@@ -114,7 +114,8 @@ public class StoreTests
         Assert.Equal("Stockpiling", stockpiling.Named);
 
         var toggle = kind.FindAction("Stockpile", Form.Action)!;
-        Assert.False(toggle.Hidden);
+        Assert.True(toggle.Hidden);
+        Assert.True(stockpiling.Flips);
         Assert.Equal("toggle stockpile", toggle.Text);
     }
 

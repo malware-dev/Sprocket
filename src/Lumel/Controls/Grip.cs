@@ -35,8 +35,15 @@ namespace Lumel.Controls
         /// <summary>The color of its squares.</summary>
         public Color Color { get; set; }
 
+        /// <summary>The color of its squares while the pointer rests on it or carries it, or none to keep <see cref="Color" />.</summary>
+        /// <remarks>What tells a player it can be taken hold of, where a host cannot change its pointer to say so.</remarks>
+        public Color HeldColor { get; set; }
+
         /// <summary>Whether it can be taken hold of now.</summary>
         public bool CanCarry { get; set; }
+
+        /// <summary>Whether it is being carried right now.</summary>
+        public bool IsCarrying { get; private set; }
 
         /// <summary>How long a side of each square is, in UI units.</summary>
         public float Square
@@ -72,6 +79,7 @@ namespace Lumel.Controls
         /// <inheritdoc />
         public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
+            IsCarrying = true;
             var taken = Taken;
             if (taken != null)
                 taken(ToScreen(point));
@@ -88,6 +96,7 @@ namespace Lumel.Controls
         /// <inheritdoc />
         public override void OnPointerUp(Vector2 point)
         {
+            IsCarrying = false;
             var dropped = Dropped;
             if (dropped != null)
                 dropped(ToScreen(point));
@@ -107,10 +116,11 @@ namespace Lumel.Controls
 
             var left = ContentBounds.X + (ContentBounds.Width - width) * 0.5f;
             var top = ContentBounds.Y + (ContentBounds.Height - height) * 0.5f;
+            var color = CanCarry && (IsHot || IsCarrying) && HeldColor.A > 0 ? HeldColor : Color;
 
             for (var x = 0; x < Across; x++)
             for (var y = 0; y < Down; y++)
-                g.Fill(new RectangleF(left + x * (_square + _gap), top + y * (_square + _gap), _square, _square), Color);
+                g.Fill(new RectangleF(left + x * (_square + _gap), top + y * (_square + _gap), _square, _square), color);
         }
     }
 }

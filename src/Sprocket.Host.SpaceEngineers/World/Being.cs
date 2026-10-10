@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public abstract class Being
     {
-        static readonly string[] None = new string[0];
+        static readonly string[] None = Array.Empty<string>();
 
         readonly List<Field> _parameters = new List<Field>();
 
@@ -127,9 +127,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string Refused(IList<Literal> arguments)
         {
             var at = 0;
-            for (var f = 0; f < _parameters.Count; f++)
+            foreach (var field in _parameters)
             {
-                var field = _parameters[f];
                 if (field.Covers != 1)
                 {
                     at += field.Covers;
@@ -221,6 +220,25 @@ namespace Sprocket.Host.SpaceEngineers.World
                 (block, given, seen) => Literal.Of(number(block, given, seen)));
         }
 
+        /// <summary>A function of a <typeparamref name="T" /> giving back one of <paramref name="names" /> as a position among them, with options read into a <typeparamref name="TOptions" />.</summary>
+        public static Being OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
+            Func<T, TOptions, Recall, int> position) where T : class
+        {
+            return new Typed<T, TOptions>(ValueKind.Name, names, true, options,
+                (block, given, seen) => Literal.Of(position(block, given, seen)));
+        }
+
+        /// <summary>A function of a <typeparamref name="T" /> giving back a color, with options read into a <typeparamref name="TOptions" />.</summary>
+        public static Being Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, Color> color)
+            where T : class
+        {
+            return new Typed<T, TOptions>(ValueKind.Color, None, true, options, (block, given, seen) =>
+            {
+                var read = color(block, given, seen);
+                return Literal.Colour(read.R, read.G, read.B, read.A);
+            });
+        }
+
         /// <summary>A function of a <typeparamref name="T" /> giving back a flag, with options read into a <typeparamref name="TOptions" />.</summary>
         public static Being Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, bool> flag)
             where T : class
@@ -282,7 +300,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             readonly ValueKind _kind;
             readonly string[] _names;
-            readonly bool _remembers;
             readonly Func<IList<Literal>, TOptions> _options;
             readonly Func<T, TOptions, Recall, Literal> _read;
 
@@ -291,7 +308,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 _kind = kind;
                 _names = names;
-                _remembers = remembers;
+                Remembers = remembers;
                 _options = options;
                 _read = read;
             }
@@ -300,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override IReadOnlyList<string> Names => _names;
 
-            public override bool Remembers => _remembers;
+            public override bool Remembers { get; }
 
             public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, Recall seen)
             {
@@ -415,7 +432,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             public Equal(Typed<T, TOptions> being, Literal operand)
             {
                 _being = being;
-                _options = being.Options(new Literal[0]);
+                _options = being.Options(Array.Empty<Literal>());
                 _operand = operand;
             }
 

@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             words.AddRange(means);
         }
 
-        /// <summary>The sound the block holds ready, as one of <paramref name="sounds" /> by id.</summary>
+        /// <summary>The sound the block holds ready, as one of <paramref name="sounds" /> by id, which a step can choose.</summary>
         /// <remarks>
         /// A look finds the selected sound among the ids, which is a pass over the list; it is made only where an <c>if</c>
         /// reads the value or a <c>when</c> watches it, on its cadence. A sound the list does not hold, or none, is no
@@ -106,7 +106,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         static Being Holding(string[] sounds)
         {
-            return Being.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound));
+            return Being.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound))
+                .Writing<IMySoundBlock>((block, value) => block.SelectedSound = sounds[(int)value.Whole]);
         }
 
         /// <summary>Plays the sound a step chose, or the one left selected where it chose none.</summary>

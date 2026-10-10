@@ -1,10 +1,15 @@
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>A battery as the picker and a step show it: its members in Sprocket's words, and a recharge that may move on.</summary>
+/// <summary>
+/// The power family as the picker and a step show it: a battery's members in Sprocket's words and a recharge that may move
+/// on, a thruster's override and a jump drive's distance set by a step.
+/// </summary>
 public class PowerTests
 {
     /// <summary>The picker lists a battery's toggles and charge mode in Sprocket's words, and leaves out what they stand for.</summary>
@@ -53,18 +58,52 @@ public class PowerTests
         Assert.False(screen.Shows("and wait"), "the step says what it does anyway");
     }
 
-    /// <summary>A system with a step being added on a battery, its members on screen.</summary>
-    /// <remarks>A rig of its own, because the demonstration rig's battery is a plain block of the same definition.</remarks>
-    static Screen OnABattery()
+    /// <summary>
+    /// A thruster's override is offered in percent, held to nought to a hundred, and set in Sprocket's namespace; the game's
+    /// override in newtons, its setter and its steps are not listed.
+    /// </summary>
+    [Fact]
+    public void AThrustersOverrideIsSetInPercent()
+    {
+        var screen = OnA(rig => rig.Thruster(30, "Main Thruster"), "Main Thruster");
+
+        Assert.False(screen.Shows("Thrust override"), "the game's override in newtons is listed beside Sprocket's");
+        Assert.False(screen.Shows("Set override"), "the game's setter is listed beside Sprocket's override");
+        Assert.False(screen.Shows("Increase Thrust override"), "the game's step is listed beside Sprocket's override");
+
+        screen.Editor.PressChoice("Override");
+        screen.Run(2);
+        var field = Assert.Single(screen.Editor.Picking().Fields);
+        Assert.Equal("override (0 - 100)", field.Label(new Texts()));
+        Assert.Equal("Override has to be between 0 and 100.", field.Refuses(new Texts(), "Override", "101"));
+
+        screen.Editor.Typed("40");
+        screen.Run(2);
+
+        var set = screen.Editor.Program.Sequences.SelectMany(sequence => sequence.Steps).OfType<Act>()
+            .Single(step => step.ActionId == "override");
+        Assert.Equal(BlockKinds.Own, set.Provider);
+        Assert.Equal(40.0, Assert.Single(set.Arguments).Number);
+    }
+
+    /// <summary>A system with a step being added on the block <paramref name="name" /> that <paramref name="fit" /> puts on the rig, its members on screen.</summary>
+    static Screen OnA(Action<Rig> fit, string name)
     {
         var rig = new Rig();
         rig.Panel(1, "Airlock Button");
-        rig.Battery(30, "Main Battery");
+        fit(rig);
         var screen = Screen.On(rig);
         screen.Editor.NewButtonSystem("Power");
         screen.Run(2);
         screen.Editor.PressAdd("task");
-        screen.Editor.PressBlock("Main Battery");
+        screen.Editor.PressBlock(name);
         return screen.Run(2);
+    }
+
+    /// <summary>A system with a step being added on a battery, its members on screen.</summary>
+    /// <remarks>A rig of its own, because the demonstration rig's battery is a plain block of the same definition.</remarks>
+    static Screen OnABattery()
+    {
+        return OnA(rig => rig.Battery(30, "Main Battery"), "Main Battery");
     }
 }

@@ -50,16 +50,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Content", true, "content")
                 .Renaming("FontColor", true, "text color")
                 .Renaming("BackgroundColor", true, "background color")
-                .Renaming("ScriptForegroundColor", true, "app text color")
+                .Renaming("ScriptForegroundColor", true, "app color")
                 .Renaming("ScriptBackgroundColor", true, "app background color")
                 .Renaming("Font", true, "font")
                 .Renaming("FontSize", true, "font size")
                 .Renaming("alignment", true, "alignment")
-                .Renaming("TextPaddingSlider", true, "text padding")
+                .Renaming("TextPaddingSlider", true, "padding")
                 .Renaming("Rotate", true, "rotation")
-                .Renaming("PreserveAspectRatio", true, "keeps aspect ratio")
-                .Renaming("PreserveAspectRatio", false, "toggle keeps aspect ratio")
-                .Renaming("ChangeIntervalSlider", true, "image change interval");
+                .Renaming("PreserveAspectRatio", true, "keep aspect ratio")
+                .Renaming("ChangeIntervalSlider", true, "image interval");
         }
 
         /// <summary>
@@ -108,14 +107,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return apps.ToArray();
         }
 
-        /// <summary>The app the screen runs, as one of <paramref name="apps" />.</summary>
+        /// <summary>The app the screen runs, as one of <paramref name="apps" />, which a step can choose.</summary>
         /// <remarks>
         /// A look finds the app among the ids, which is a pass over the list; it is made only where an <c>if</c> reads the
         /// value or a <c>when</c> watches it, on its cadence. No app, or one the list does not hold, is none of the names.
+        /// Choosing one leaves the screen's content as it was: the screen runs the app while its content is an app, which is
+        /// when the terminal shows its list of them.
         /// </remarks>
         static Being Running(string[] apps)
         {
-            return Being.OneOf<IMyTextPanel>(apps, panel => Array.IndexOf(apps, panel.Script));
+            return Being.OneOf<IMyTextPanel>(apps, panel => Array.IndexOf(apps, panel.Script))
+                .Writing<IMyTextPanel>((panel, value) => panel.Script = apps[(int)value.Whole]);
         }
 
         /// <summary>Replaces the images the screen shows with the one a step chose, and has it show text and images.</summary>

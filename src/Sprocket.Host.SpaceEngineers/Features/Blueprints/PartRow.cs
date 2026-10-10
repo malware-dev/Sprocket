@@ -48,12 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set { _mark.Symbol = value; }
         }
 
-        /// <summary>What the mark says while the pointer rests on it.</summary>
-        public string MarkTip
-        {
-            set { _mark.Tip = Lumel.Tip.For(_mark.Tip, value); }
-        }
-
         /// <summary>What the author wrote about the part beyond its name, as markup read into rich text, or empty.</summary>
         public string Described
         {

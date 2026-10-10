@@ -116,6 +116,84 @@ public class SoundTests
         Assert.Equal("volume", kind.FindAction("VolumeSlider", Form.Value)!.Text);
     }
 
+    /// <summary>
+    /// A sound block vouches for its play, its selected sound, its stop and its sliders, and not for the game's own play or
+    /// the steps of a slider.
+    /// </summary>
+    [Fact]
+    public void ASpeakerVouchesForItsMembersAndNotTheirSteps()
+    {
+        var ship = new Rigged();
+        var speaker = ship.Speaker(1, "Speaker");
+        speaker.Carrying("VolumeSlider", "Volume", ValueKind.Real)
+            .Carrying("RangeSlider", "Range", ValueKind.Real)
+            .Carrying("LoopableSlider", "Loop time", ValueKind.Real)
+            .Offering("IncreaseVolumeSlider", "Increase Volume")
+            .Offering("DecreaseRangeSlider", "Decrease Range")
+            .Offering("IncreaseLoopableSlider", "Increase Loop time");
+        var kind = ship.Entity(speaker.Id).Kind;
+
+        Assert.True(kind.FindAction(Blocks.Speaker.Play, Form.Native)!.Vetted);
+        Assert.True(kind.FindAction(Blocks.Speaker.Selected, Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("StopSound", Form.Action)!.Vetted);
+        Assert.True(kind.FindAction("VolumeSlider", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("RangeSlider", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("LoopableSlider", Form.Value)!.Vetted);
+
+        Assert.False(kind.FindAction("PlaySound", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseVolumeSlider", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("DecreaseRangeSlider", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseLoopableSlider", Form.Action)!.Vetted);
+    }
+
+    /// <summary>A jukebox vouches for its volume and range, and for nothing its own terminal hides or steps.</summary>
+    [Fact]
+    public void AJukeboxVouchesForItsVolumeAndRangeAlone()
+    {
+        var ship = new Rigged();
+        var jukebox = ship.Rig.Jukebox(1, "Jukebox");
+        jukebox.Carrying("VolumeSlider", "Volume", ValueKind.Real)
+            .Carrying("RangeSlider", "Range", ValueKind.Real)
+            .Carrying("LoopableSlider", "Loop time", ValueKind.Real)
+            .Offering("IncreaseVolumeSlider", "Increase Volume");
+        var kind = ship.Entity(jukebox.Id).Kind;
+
+        Assert.True(kind.FindAction("VolumeSlider", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("RangeSlider", Form.Value)!.Vetted);
+
+        Assert.False(kind.FindAction("PlaySound", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("StopSound", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("LoopableSlider", Form.Value)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseVolumeSlider", Form.Action)!.Vetted);
+    }
+
+    /// <summary>A step sets the sound the block holds ready, by its id, without playing it.</summary>
+    [Fact]
+    public void AStepChoosesTheSelectedSound()
+    {
+        var ship = new Rigged();
+        var speaker = ship.Speaker(1, "Speaker");
+        speaker.Selected = "SoundBlockAlert1";
+
+        Assert.Equal(SequenceProblem.None, Ran.Set(ship, speaker, Blocks.Speaker.Selected, Literal.Name("SoundBlockLightsOn")));
+
+        Assert.Equal("SoundBlockLightsOn", speaker.Selected);
+        Assert.DoesNotContain(ship.Rig.Log, line => line.StartsWith("Speaker:play"));
+    }
+
+    /// <summary>A sound the block does not have is a fault, and leaves the sound it holds as it was.</summary>
+    [Fact]
+    public void ASoundTheBlockLacksIsAFault()
+    {
+        var ship = new Rigged();
+        var speaker = ship.Speaker(1, "Speaker");
+        speaker.Selected = "SoundBlockAlert1";
+
+        Assert.Equal(SequenceProblem.Mistyped, Ran.Set(ship, speaker, Blocks.Speaker.Selected, Literal.Name("SoundBlockAlert9")));
+
+        Assert.Equal("SoundBlockAlert1", speaker.Selected);
+    }
+
     [Fact]
     public void TheStepReadsWithTheSoundsName()
     {

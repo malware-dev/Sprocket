@@ -59,8 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // one straight to that block's picture, so nothing has to be declared, extracted or shipped.
             // It is the same string as the kind id, which is not a coincidence - both are "which block
             // type is this".
-            kind = new EntityKind(id, name).WithIcon(id);
-            kind.Evaluation = Evaluations.Of(block);
+            kind = new EntityKind(id, name).WithIcon(id).WithFamily(Families.Of(block.BlockDefinition.TypeIdString));
 
             // What this block is, before what every block is, so a door offers "open" above "switch on".
             Describe(kind, block, _capabilities.Blocks);
@@ -80,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Values(kind, block);
             Meanings.Settle(kind, block);
             Hide(kind);
+            Flips(kind);
 
             _kinds.Add(id, kind);
             return kind;
@@ -173,7 +173,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _offered.Count; i++)
             {
                 Offer offer = _offered[i];
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Action) != null)
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Action) != null || kind.Lacks(offer.Id))
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Offer offer = _offered[i];
 
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Value) != null)
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Value) != null || kind.Lacks(offer.Id))
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -376,6 +376,50 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!one.Sets && (StoodIn(actions, one) || kind.Hides(one.GameActionId)))
                     one.Hide();
             }
+        }
+
+        /// <summary>
+        /// Gives each switch the organized view lists a third choice, flip, where the game's toggle for it is listed beside it,
+        /// and takes that toggle out of the organized view.
+        /// </summary>
+        /// <remarks>
+        /// After everything has been hidden that is going to be, since only a switch that is listed can take its toggle's place,
+        /// and only a toggle that is listed has a place to give up. The toggle stays in the terminal view, as the game's own.
+        /// </remarks>
+        static void Flips(EntityKind kind)
+        {
+            var fields = new List<Field>();
+            var actions = kind.Actions;
+            for (var i = 0; i < actions.Count; i++)
+            {
+                EntityAction one = actions[i];
+                if (one.Form != Form.Value || !one.Sets || !one.Vetted || one.Hidden)
+                    continue;
+
+                var toggleId = one.GamePropertyId ?? kind.Flipper(one.Id);
+                if (toggleId == null)
+                    continue;
+
+                fields.Clear();
+                one.Fields(fields);
+                if (fields.Count != 1 || !Switch(fields[0]))
+                    continue;
+
+                var toggle = kind.FindAction(toggleId, Form.Action);
+                if (toggle == null || toggle.Hidden || !toggle.Vetted)
+                    continue;
+
+                one.Flipped(toggleId);
+                toggle.Hide();
+            }
+        }
+
+        /// <summary>Whether <paramref name="field" /> is a switch's: on or off, chosen.</summary>
+        static bool Switch(Field field)
+        {
+            var words = field.Words;
+            return field.Edits == Editor.Chosen && words != null && words.Count == 2
+                && words.Contains(Literal.Of(true).Said) && words.Contains(Literal.Of(false).Said);
         }
 
         static EntityAction Last(EntityKind kind)

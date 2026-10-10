@@ -7,25 +7,20 @@ using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
-    /// <summary>Where rich text is written: its markup in a box, the way to see it as it will read, and a guide to the marks it can use.</summary>
+    /// <summary>Where rich text is written: its markup in a box, the way to see it as it will read, and the way to the guide to the marks it can use.</summary>
     /// <remarks>
-    /// The box and its preview take turns in one room held to one height, so swapping them moves nothing under them. The guide
-    /// hangs from its button in a window, since a box as narrow as a slot's has no room beside or under it for a guide as wide
-    /// as its examples, and it is drawn by the same rich text as the preview, so it shows exactly what the preview will. Whoever holds it gives it its
-    /// words through <see cref="Show" /> and reads what was written from <see cref="Text" />; the elements it is drawn with are
-    /// declared in <c>Composer.View.cs</c>.
+    /// The box and its preview take turns in one room held to one height, so swapping them moves nothing under them. Whoever holds
+    /// it gives it its words through <see cref="Show" />, says what its guide button does through <see cref="Guides" />, and reads
+    /// what was written from <see cref="Text" />; the elements it is drawn with are declared in <c>Composer.View.cs</c>.
     /// </remarks>
     public partial class Composer : VStack
     {
-        string _examples;
-
         /// <summary>A composer whose box and preview are <paramref name="high" /> tall, previewing in <paramref name="reads" />.</summary>
         /// <param name="high">How tall the box and the preview are.</param>
         /// <param name="reads">The style the text is read in wherever it is shown, so the preview is what will be seen.</param>
         public Composer(float high, IStyle reads)
         {
             CreateView(high, reads);
-            _markup.Command = new Relay(Guide);
             _preview.Command = new Relay(delegate { Preview(!_previewing.IsVisible); });
         }
 
@@ -55,34 +50,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         /// <summary>The box the markup is typed in, which holds the keyboard while it is being written.</summary>
         public EditBox Box => _box;
 
+        /// <summary>What the button for the guide to the marks does.</summary>
+        public ICommand Guides
+        {
+            get { return _markup.Command; }
+            set { _markup.Command = value; }
+        }
+
         /// <summary>Whether the text is shown as it will read rather than as it is written.</summary>
         public bool IsPreviewing => _previewing.IsVisible;
 
-        /// <summary>Gives the buttons and the guide their words, from <paramref name="texts" />.</summary>
-        /// <remarks>The guide's examples are parsed again only when the words have changed.</remarks>
+        /// <summary>Gives the buttons their words, from <paramref name="texts" />.</summary>
         public void Show(Texts texts)
         {
             _markup.Text = texts.WritingMarkup;
             _markup.Tip = Tip.For(_markup.Tip, texts.WritingMarkupAbout);
             _preview.Text = _previewing.IsVisible ? texts.WritingEdit : texts.WritingPreview;
             _preview.Tip = Tip.For(_preview.Tip, _previewing.IsVisible ? null : texts.WritingPreviewAbout);
-            _guideNote.Text = texts.WritingExamplesNote;
-
-            if (ReferenceEquals(_examples, texts.WritingExamples))
-                return;
-
-            _examples = texts.WritingExamples;
-            _examplesList.Children.Clear();
-
-            var examples = _examples.Replace("\r", "").Split('\n');
-            for (var i = 0; i < examples.Length; i++)
-                _examplesList.Children.Add(Example(examples[i]));
-        }
-
-        /// <summary>Opens the guide to the marks under its button, or closes it where it is open.</summary>
-        public void Guide()
-        {
-            _guide.Toggle();
         }
 
         /// <summary>Shows the text as it will read in place of its box, or the box again.</summary>

@@ -2,13 +2,13 @@
 
 An action is something a block does, one of its functions, such as opening a door or switching a light on. Each kind of block brings its own: a door can open and close, and a piston can extend and retract.
 
-For a [step](#step) that does an action, choose `task` under `+ step`. A [trigger](#trigger) can do one too, with `A task on blocks`.
+For a [step](#step) that does an action, choose `task` under `+ step`.
 
 ## Finding one
 
-[Pick](#picking) the blocks, and `What to do` lists what they can do under `Organized`, grouped under headings such as `Power`, `Movement` and `Appearance`. For the blocks the automation knows, the common actions have plain names, such as a piston's `Move to`.
+[Pick](#picking) the blocks, and `What to do` lists what they can do, grouped under headings such as `Power`, `Movement` and `Appearance`. For the blocks the automation knows, the common actions have plain names, such as a piston's `Move to`.
 
-`Terminal` holds the blocks' raw members, under the names the game's terminal and toolbar give them, for anyone who knows those well.
+`Terminal ›`, at the end of the heading, lists instead everything the blocks offer in the game's terminal, under the game's own names. Using those is your own call: this codex doesn't explain them, and the automation doesn't check them. `‹ Organized` goes back.
 
 ## Which actions are waited for
 

@@ -32,7 +32,7 @@ Blokkene du velger, blir [plasser](#slot). Det finnes to slags:
 - En ![](mark:block) **blokkplass**, som *den indre døra*, holder blokker som en sekvens virker på eller følger med på.
 - En ![](mark:signal) **signalplass**, som *knappen*, holder en blokk og verktøylinjeplassen på den som sender signalet.
 
-`Bruker blokkene til`, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene viser, og hvilken installasjon en blokk du velger, fyller.
+`Viser plassene fylt av installasjonen`, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene viser, og hvilken installasjon en blokk du velger, fyller.
 
 ## Mer enn én luftsluse
 

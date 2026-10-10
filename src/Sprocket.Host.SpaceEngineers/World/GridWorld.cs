@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Blocks;
 using VRage.Game.ModAPI;
+using VRage.ModAPI;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -48,13 +49,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The construct <paramref name="anchor" /> is on, read when it is first asked about.</summary>
         public GridWorld(IMyTerminalBlock anchor)
         {
-            _anchor = anchor;
             _kinds = new BlockKinds(_catalogue, _capabilities);
+            Follow(anchor);
         }
 
         /// <summary>Raised from the grid's own event when the anchor is removed from the construct, in the middle of the grid changing.</summary>
         /// <remarks>Whatever answers it waits until the grid has finished, before it reads the construct again - see <see cref="SprocketUnit" />.</remarks>
         public event Action AnchorRemoved;
+
+        /// <summary>Raised from the anchor's own event as the game closes it, in the middle of whatever is closing it.</summary>
+        /// <remarks>
+        /// A block removed by itself is closed too, after <see cref="AnchorRemoved" />. A grid deleted whole closes every block on
+        /// it and reports none of them removed, so this is all that is heard of it. Answered as that is.
+        /// </remarks>
+        public event Action AnchorClosed;
 
         /// <summary>
         /// Makes and reads the values this construct deals in, and the lists behind the wide ones.
@@ -484,6 +492,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _grids.Clear();
             MyAPIGateway.GridGroups.GetGroup(home, GridLinkTypeEnum.Mechanical, _grids);
+            _grids.RemoveAll(Closing);
             Watch(_grids);
 
             for (int i = 0; i < _grids.Count; i++)
@@ -512,16 +521,26 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         IMyCubeGrid Home()
         {
-            if (_anchor != null && !_anchor.Closed && _anchor.CubeGrid != null && !_anchor.CubeGrid.Closed)
+            if (_anchor != null && !Closing(_anchor) && _anchor.CubeGrid != null && !Closing(_anchor.CubeGrid))
                 return _anchor.CubeGrid;
 
             for (var i = 0; i < _watched.Count; i++)
             {
-                if (!_watched[i].Closed)
+                if (!Closing(_watched[i]))
                     return _watched[i];
             }
 
             return null;
+        }
+
+        /// <summary>Whether the game has closed <paramref name="entity" /> or is about to, either of which leaves it no part of the construct.</summary>
+        /// <remarks>
+        /// A grid deleted whole is marked first and closed later in the frame, and stays in its group until then, so a construct
+        /// read in between would still count it.
+        /// </remarks>
+        static bool Closing(IMyEntity entity)
+        {
+            return entity.MarkedForClose || entity.Closed;
         }
 
         /// <summary>Puts the entity ids of the construct's grids into <paramref name="into" />, which a backup knows the construct again by.</summary>
@@ -538,8 +557,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Anchors the construct on <paramref name="anchor" />, the programmable block that holds the automation from here on.</summary>
         public void Anchor(IMyTerminalBlock anchor)
         {
-            _anchor = anchor;
+            Follow(anchor);
             _stale = true;
+        }
+
+        /// <summary>Makes <paramref name="anchor" /> the anchor, listening for it closing in place of the one before it.</summary>
+        void Follow(IMyTerminalBlock anchor)
+        {
+            if (_anchor != null)
+                _anchor.OnMarkForClose -= OnAnchorClosed;
+
+            _anchor = anchor;
+            if (_anchor != null)
+                _anchor.OnMarkForClose += OnAnchorClosed;
         }
 
         /// <summary>Listens to whatever grids are currently part of this construct, and nothing else.</summary>
@@ -573,6 +603,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 AnchorRemoved();
         }
 
+        void OnAnchorClosed(IMyEntity anchor)
+        {
+            _stale = true;
+            if (AnchorClosed != null)
+                AnchorClosed();
+        }
+
         /// <summary>
         /// Marks the list for rebuilding. For the moments the grid does not report, above all a piston
         /// or rotor attaching, which changes which grids are in the group without adding a block to any of
@@ -587,6 +624,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Dispose()
         {
             Watch(new List<IMyCubeGrid>());
+            Follow(null);
         }
     }
 }

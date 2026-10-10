@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     partial class StageColumn
     {
         Label _title;
+        HStack _viewLinks;
         Label _subtitle;
         HStack _search;
         TextBox _narrow;
@@ -20,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         HStack _kindLine;
         Label _kindWord;
         Glyph _kindClear;
-        Grid _tabs;
+        Glyph _hidden;
         Label _showing;
         HStack _options;
         Label _note;
@@ -38,7 +39,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Spacing = 8f;
             Style = Styles.Column;
 
-            Children.Add(new Label { Style = Styles.ColumnTitle }.As(out _title));
+            // The way to the column's other view stands at the end of its heading, as a quiet link rather than a tab, so the
+            // list under the heading is the column's list and the other is a step aside from it.
+            Children.Add(new HStack
+            {
+                Spacing = 8f,
+                Children =
+                {
+                    new Label { Style = Styles.ColumnTitle, Placement = Flex.Grow }.As(out _title),
+                    new HStack().As(out _viewLinks)
+                }
+            });
             // Its line is held whether or not there is anything to say on it, so every column's box lines up.
             Children.Add(new Label { Style = Styles.ColumnNote }.As(out _subtitle));
 
@@ -78,13 +89,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         }
                     }.As(out _kindLine),
                     new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }
-                        .As(out _kindClear)
+                        .As(out _kindClear),
+                    new Label { Placement = Flex.Grow },
+
+                    // At the far end of the line, as the game keeps its own eye apart from what narrows its list.
+                    new Glyph { Symbol = Symbols.HiddenHidden, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }
+                        .As(out _hidden)
                 }
             }.As(out _kindHead));
-
-            // Equal plates butted edge to edge, as the game draws the tabs across the top of its terminal, so the strip
-            // is the same shape whatever the views are called.
-            Children.Add(new Grid { IsVisible = false }.As(out _tabs));
 
             Children.Add(new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _showing));
 
@@ -137,7 +149,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                                 }.As(out _kindNarrowClear)
                             }
                         },
-                        new VStack().As(out _kindRows)
+                        // As tall as its kinds until they run past the room on the screen, and scrolled from there.
+                        new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = new VStack().As(out _kindRows) }
                     }
                 }
             };

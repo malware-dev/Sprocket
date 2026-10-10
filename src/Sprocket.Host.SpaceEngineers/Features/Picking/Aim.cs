@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -155,12 +154,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _stop.IsCurrent = Stops;
             }
 
+            // A single action is offered only in developer mode, or where the trigger does one already: whether a trigger needs
+            // one at all, rather than a sequence of one step, is open.
+            var offersOne = !Stops && (_editor.DeveloperMode || Outcome == Outcome.One);
+
             _keys.Clear();
-            if (!Stops)
-            {
+            if (offersOne)
                 _keys.Add(One);
+
+            if (!Stops)
                 _keys.Add(New);
-            }
 
             if (!Stops && _offered.Count > 0)
                 _keys.Add(Heading);
@@ -170,12 +173,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _rows.Show(_keys);
 
+            if (offersOne)
+            {
+                _rows[One].Mark = Symbols.Action;
+                Show(_rows[One], texts.PickSingleAction, texts.PickSingleActionAbout, Outcome == Outcome.One, false);
+            }
+
             if (!Stops)
             {
-                Show(_rows[One], texts.PickSingleAction, texts.PickSingleActionAbout, Outcome == Outcome.One, false);
-                Mark(_rows[One], texts, Symbols.Action);
+                _rows[New].Mark = Symbols.Sequence;
                 Show(_rows[New], texts.PickNewSequence, texts.PickNewSequenceAbout, Outcome == Outcome.New, false);
-                Mark(_rows[New], texts, Symbols.Sequence);
             }
 
             if (!Stops && _offered.Count > 0)
@@ -184,7 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < _offered.Count; i++)
             {
                 var number = _offered[i].Number;
-                Mark(_rows[Key(number)], texts, Symbols.Sequence);
+                _rows[Key(number)].Mark = Symbols.Sequence;
                 Show(_rows[Key(number)], _offered[i].Name, null, Outcome == Outcome.Existing && Sequence == number, false);
             }
 
@@ -194,13 +201,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         static string Key(int number)
         {
             return number.ToString(CultureInfo.InvariantCulture);
-        }
-
-        /// <summary>Puts <paramref name="row" /> under <paramref name="mark" />, with what the mark says in <paramref name="texts" />; shown with the row.</summary>
-        static void Mark(PickRow row, Texts texts, string mark)
-        {
-            row.Mark = mark;
-            row.MarkTip = MarkText.Note(texts, mark);
         }
 
         static void Show(PickRow row, string text, string about, bool chosen, bool heading)

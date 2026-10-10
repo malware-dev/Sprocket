@@ -69,9 +69,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>The mark of what kind of member it is, one of the symbols, or empty for none.</summary>
         public string Mark { get; set; } = "";
 
-        /// <summary>What the mark says while the pointer rests on it.</summary>
-        public string MarkTip { get; set; }
-
         /// <summary>What pressing the box at its head does, which takes it as well as whatever else is taken.</summary>
         public ICommand Ticks
         {
@@ -106,7 +103,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _name.Name = IsHeading ? (Text ?? "").ToUpperInvariant() : Text;
             _name.Style = IsHeading ? Styles.PickGroup : IsWithheld ? Styles.PickWithheld : Styles.PickName;
             _name.Mark = Mark;
-            _name.MarkTip = MarkTip;
 
             var detail = Detail(Secondary, Status);
             _detail.Text = detail;

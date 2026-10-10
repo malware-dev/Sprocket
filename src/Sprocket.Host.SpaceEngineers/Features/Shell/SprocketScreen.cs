@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _unit = unit;
             _opened = opened;
             _closed = closed;
-            unit.Editor.Input.Clipboard = new ClipboardFile(new GlobalFiles(), Told.Say);
+            unit.Editor.Input.Clipboard = new ClipboardFile(new GlobalFiles(), Told.Say, unit.Editor.Pasted);
         }
 
         /// <inheritdoc />

@@ -187,10 +187,10 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Sett opp beskrivelsen og plassene alle som fyller ut dette logikksystemet ser.</value>
   </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
-    <value>Bruker blokkene til</value>
+    <value>Viser plassene fylt av installasjonen</value>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
-    <value>Velg en installasjon av dette logikksystemet, for å se blokkene dens i setningene under.</value>
+    <value>Velg hvilken installasjon av dette logikksystemet som fyller plassene i setningene under.</value>
   </data>
   <data name="Sprocket.System.Triggers" xml:space="preserve">
     <value>Utløsere</value>
@@ -419,6 +419,12 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Pick.EveryKind" xml:space="preserve">
     <value>Vis alle typer igjen</value>
   </data>
+  <data name="Sprocket.Pick.ShowHidden" xml:space="preserve">
+    <value>Vis blokker som er skjult fra verktøylinjer</value>
+  </data>
+  <data name="Sprocket.Pick.HideHidden" xml:space="preserve">
+    <value>Skjul blokker som er skjult fra verktøylinjer</value>
+  </data>
   <data name="Sprocket.Pick.AllShown" xml:space="preserve">
     <value>{count} blokker</value>
   </data>
@@ -494,41 +500,29 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Pick.ToolbarActions" xml:space="preserve">
     <value>Verktøylinjehandlinger</value>
   </data>
-  <data name="Sprocket.Pick.Organized" xml:space="preserve">
-    <value>Ordnet</value>
+  <data name="Sprocket.Pick.ToOrganized" xml:space="preserve">
+    <value>‹ Ordnet</value>
   </data>
-  <data name="Sprocket.Pick.Terminal" xml:space="preserve">
-    <value>Terminal</value>
+  <data name="Sprocket.Pick.ToTerminal" xml:space="preserve">
+    <value>Terminal ›</value>
+  </data>
+  <data name="Sprocket.Pick.TerminalNote" xml:space="preserve">
+    <value>Alt disse blokkene tilbyr i spillets terminal, under spillets egne navn. Å bruke dem er ditt eget valg: kodeksen forklarer dem ikke, og automasjonen sjekker dem ikke.</value>
   </data>
   <data name="Sprocket.Pick.Shared" xml:space="preserve">
     <value>Viser bare det de valgte blokkene har felles</value>
   </data>
-  <data name="Sprocket.Pick.Pending" xml:space="preserve">
-    <value>Støtten for denne blokken er fortsatt under arbeid, så noe av det den tilbyr kan være doblet, mangle eller ha rare navn.</value>
+  <data name="Sprocket.Pick.Planned" xml:space="preserve">
+    <value>Kommer senere: {planned}.</value>
   </data>
-  <data name="Sprocket.Pick.Partial" xml:space="preserve">
-    <value>Støtten for denne blokken er bare delvis ferdig, så noe av det den tilbyr kan fortsatt være doblet, mangle eller ha rare navn.</value>
+  <data name="Sprocket.Pick.NoteAndShared" xml:space="preserve">
+    <value>{note} {shared}.</value>
   </data>
-  <data name="Sprocket.Member.Action" xml:space="preserve">
-    <value>Noe blokken blir bedt om å gjøre.</value>
+  <data name="Sprocket.Plan.MovingItems" xml:space="preserve">
+    <value>flytting av gjenstander</value>
   </data>
-  <data name="Sprocket.Member.Value" xml:space="preserve">
-    <value>En av verdiene til blokken: noe den settes til, eller blir spurt om.</value>
-  </data>
-  <data name="Sprocket.Member.Signal" xml:space="preserve">
-    <value>Et signal blokken sender fra verktøylinjen sin.</value>
-  </data>
-  <data name="Sprocket.Member.Moment" xml:space="preserve">
-    <value>Noe som skjer med blokken, som automasjonen følger med på.</value>
-  </data>
-  <data name="Sprocket.Blueprint.BlockSlot" xml:space="preserve">
-    <value>En blokkplass: blokkene stegene virker på eller følger med på.</value>
-  </data>
-  <data name="Sprocket.Blueprint.SignalSlot" xml:space="preserve">
-    <value>En signalplass: en blokk, og verktøylinjeplassen på den som sender signalet.</value>
-  </data>
-  <data name="Sprocket.Member.Sequence" xml:space="preserve">
-    <value>En sekvens: steg som tas i rekkefølge.</value>
+  <data name="Sprocket.Plan.SorterList" xml:space="preserve">
+    <value>å sette sortererens liste</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette tar tid å fullføre. Sekvensen venter til det er gjort før den går videre til neste steg.</value>
@@ -630,18 +624,6 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Writing.Markup" xml:space="preserve">
     <value>Markering</value>
-  </data>
-  <data name="Sprocket.Writing.Examples" xml:space="preserve">
-    <value>**sterke ord**
-*framhevede ord*
-# En overskrift
-- Et punkt i en liste
-1. Et nummerert punkt
-`kode`
----</value>
-  </data>
-  <data name="Sprocket.Writing.ExamplesNote" xml:space="preserve">
-    <value>En tom linje starter et nytt avsnitt. En \ foran et merke viser selve merket.</value>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
     <value>Vis veiledningen for formatering av tekst.</value>
@@ -979,6 +961,9 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Trouble.JumpDriveRechargeOff" xml:space="preserve">
     <value>stoppet - noe annet slo av opplading</value>
   </data>
+  <data name="Sprocket.Trouble.ScriptNotRun" xml:space="preserve">
+    <value>kjørte ikke - intet skript, et skript som ikke kompilerte, eller et som allerede kjører</value>
+  </data>
   <data name="Sprocket.Status.Damaged" xml:space="preserve">
     <value>ødelagt</value>
   </data>
@@ -1056,9 +1041,6 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Pick.TagUnsupported" xml:space="preserve">
     <value>ikke støttet</value>
-  </data>
-  <data name="Sprocket.Pick.NoteAndShared" xml:space="preserve">
-    <value>{note} {shared}.</value>
   </data>
   <data name="Sprocket.Category.Power" xml:space="preserve">
     <value>Kraft</value>
@@ -1634,5 +1616,221 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Codex.Move" xml:space="preserve">
     <value>Dra for å flytte kodeksen.</value>
+  </data>
+  <data name="Sprocket.Family.Door" xml:space="preserve">
+    <value>Dør</value>
+  </data>
+  <data name="Sprocket.Family.HangarDoor" xml:space="preserve">
+    <value>Hangardør</value>
+  </data>
+  <data name="Sprocket.Family.Light" xml:space="preserve">
+    <value>Lys</value>
+  </data>
+  <data name="Sprocket.Family.Screen" xml:space="preserve">
+    <value>Skjerm</value>
+  </data>
+  <data name="Sprocket.Family.Turret" xml:space="preserve">
+    <value>Tårn</value>
+  </data>
+  <data name="Sprocket.Family.Weapon" xml:space="preserve">
+    <value>Fast våpen</value>
+  </data>
+  <data name="Sprocket.Family.Rotor" xml:space="preserve">
+    <value>Rotor og hengsel</value>
+  </data>
+  <data name="Sprocket.Family.GravityGenerator" xml:space="preserve">
+    <value>Gravitasjonsgenerator</value>
+  </data>
+  <data name="Sprocket.Family.AiBlock" xml:space="preserve">
+    <value>AI-blokk</value>
+  </data>
+  <data name="Sprocket.Family.Projector" xml:space="preserve">
+    <value>Projektor</value>
+  </data>
+  <data name="Sprocket.Family.Thruster" xml:space="preserve">
+    <value>Thruster</value>
+  </data>
+  <data name="Sprocket.Family.Battery" xml:space="preserve">
+    <value>Batteri</value>
+  </data>
+  <data name="Sprocket.Family.Tank" xml:space="preserve">
+    <value>Tank</value>
+  </data>
+  <data name="Sprocket.Family.Cockpit" xml:space="preserve">
+    <value>Cockpit og sete</value>
+  </data>
+  <data name="Sprocket.Family.Cryo" xml:space="preserve">
+    <value>Kryokammer og seng</value>
+  </data>
+  <data name="Sprocket.Family.RemoteControl" xml:space="preserve">
+    <value>Fjernkontroll</value>
+  </data>
+  <data name="Sprocket.Family.AirVent" xml:space="preserve">
+    <value>Luftventil</value>
+  </data>
+  <data name="Sprocket.Family.Connector" xml:space="preserve">
+    <value>Kobling</value>
+  </data>
+  <data name="Sprocket.Family.MergeBlock" xml:space="preserve">
+    <value>Sammenføyningsblokk</value>
+  </data>
+  <data name="Sprocket.Family.LandingGear" xml:space="preserve">
+    <value>Landingsstell og magnetplate</value>
+  </data>
+  <data name="Sprocket.Family.Piston" xml:space="preserve">
+    <value>Stempel</value>
+  </data>
+  <data name="Sprocket.Family.Suspension" xml:space="preserve">
+    <value>Hjuloppheng</value>
+  </data>
+  <data name="Sprocket.Family.Assembler" xml:space="preserve">
+    <value>Montør</value>
+  </data>
+  <data name="Sprocket.Family.Refinery" xml:space="preserve">
+    <value>Raffineri</value>
+  </data>
+  <data name="Sprocket.Family.SurvivalKit" xml:space="preserve">
+    <value>Overlevelsessett</value>
+  </data>
+  <data name="Sprocket.Family.GasGenerator" xml:space="preserve">
+    <value>O2/H2-generator</value>
+  </data>
+  <data name="Sprocket.Family.OxygenFarm" xml:space="preserve">
+    <value>Oksygenfarm</value>
+  </data>
+  <data name="Sprocket.Family.HydrogenEngine" xml:space="preserve">
+    <value>Hydrogenmotor</value>
+  </data>
+  <data name="Sprocket.Family.Reactor" xml:space="preserve">
+    <value>Reaktor</value>
+  </data>
+  <data name="Sprocket.Family.SolarPanel" xml:space="preserve">
+    <value>Solcellepanel</value>
+  </data>
+  <data name="Sprocket.Family.WindTurbine" xml:space="preserve">
+    <value>Vindturbin</value>
+  </data>
+  <data name="Sprocket.Family.Sorter" xml:space="preserve">
+    <value>Transportørsorterer</value>
+  </data>
+  <data name="Sprocket.Family.Drill" xml:space="preserve">
+    <value>Bor</value>
+  </data>
+  <data name="Sprocket.Family.Welder" xml:space="preserve">
+    <value>Sveiser</value>
+  </data>
+  <data name="Sprocket.Family.Grinder" xml:space="preserve">
+    <value>Kutter</value>
+  </data>
+  <data name="Sprocket.Family.ButtonPanel" xml:space="preserve">
+    <value>Knappepanel</value>
+  </data>
+  <data name="Sprocket.Family.Timer" xml:space="preserve">
+    <value>Tidsurblokk</value>
+  </data>
+  <data name="Sprocket.Family.Sensor" xml:space="preserve">
+    <value>Sensor</value>
+  </data>
+  <data name="Sprocket.Family.ProgrammableBlock" xml:space="preserve">
+    <value>Programmerbar blokk</value>
+  </data>
+  <data name="Sprocket.Family.Antenna" xml:space="preserve">
+    <value>Antenne</value>
+  </data>
+  <data name="Sprocket.Family.LaserAntenna" xml:space="preserve">
+    <value>Laserantenne</value>
+  </data>
+  <data name="Sprocket.Family.Beacon" xml:space="preserve">
+    <value>Fyr</value>
+  </data>
+  <data name="Sprocket.Family.Camera" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="Sprocket.Family.OreDetector" xml:space="preserve">
+    <value>Malmdetektor</value>
+  </data>
+  <data name="Sprocket.Family.Gyroscope" xml:space="preserve">
+    <value>Gyroskop</value>
+  </data>
+  <data name="Sprocket.Family.JumpDrive" xml:space="preserve">
+    <value>Hoppmotor</value>
+  </data>
+  <data name="Sprocket.Family.Cargo" xml:space="preserve">
+    <value>Lastecontainer</value>
+  </data>
+  <data name="Sprocket.Family.Collector" xml:space="preserve">
+    <value>Samler</value>
+  </data>
+  <data name="Sprocket.Family.UpgradeModule" xml:space="preserve">
+    <value>Oppgraderingsmodul</value>
+  </data>
+  <data name="Sprocket.Family.Decoy" xml:space="preserve">
+    <value>Lokkedue</value>
+  </data>
+  <data name="Sprocket.Family.SoundBlock" xml:space="preserve">
+    <value>Lydblokk</value>
+  </data>
+  <data name="Sprocket.Family.Jukebox" xml:space="preserve">
+    <value>Jukeboks</value>
+  </data>
+  <data name="Sprocket.Family.TurretController" xml:space="preserve">
+    <value>Tårnkontroller</value>
+  </data>
+  <data name="Sprocket.Family.EventController" xml:space="preserve">
+    <value>Hendelseskontroller</value>
+  </data>
+  <data name="Sprocket.Family.BroadcastController" xml:space="preserve">
+    <value>Kringkastingskontroller</value>
+  </data>
+  <data name="Sprocket.Family.ActionRelay" xml:space="preserve">
+    <value>Handlingsrelé</value>
+  </data>
+  <data name="Sprocket.Family.VendingMachine" xml:space="preserve">
+    <value>Salgsautomat</value>
+  </data>
+  <data name="Sprocket.Family.Store" xml:space="preserve">
+    <value>Butikk</value>
+  </data>
+  <data name="Sprocket.Family.SafeZone" xml:space="preserve">
+    <value>Sikker sone</value>
+  </data>
+  <data name="Sprocket.Family.ArtificialMass" xml:space="preserve">
+    <value>Kunstig masse</value>
+  </data>
+  <data name="Sprocket.Family.SpaceBall" xml:space="preserve">
+    <value>Romball</value>
+  </data>
+  <data name="Sprocket.Family.EmotionController" xml:space="preserve">
+    <value>Følelseskontroller</value>
+  </data>
+  <data name="Sprocket.Family.Parachute" xml:space="preserve">
+    <value>Fallskjerm</value>
+  </data>
+  <data name="Sprocket.Family.HeatVent" xml:space="preserve">
+    <value>Varmeventil</value>
+  </data>
+  <data name="Sprocket.Family.Exhaust" xml:space="preserve">
+    <value>Eksos</value>
+  </data>
+  <data name="Sprocket.Family.TargetDummy" xml:space="preserve">
+    <value>Måldukke</value>
+  </data>
+  <data name="Sprocket.Family.Kitchen" xml:space="preserve">
+    <value>Kjøkken</value>
+  </data>
+  <data name="Sprocket.Family.Planter" xml:space="preserve">
+    <value>Plantekasse</value>
+  </data>
+  <data name="Sprocket.Family.Contracts" xml:space="preserve">
+    <value>Kontrakter</value>
+  </data>
+  <data name="Sprocket.Family.MedicalRoom" xml:space="preserve">
+    <value>Sykestue</value>
+  </data>
+  <data name="Sprocket.Family.Warhead" xml:space="preserve">
+    <value>Stridshode</value>
+  </data>
+  <data name="Sprocket.Writing.PasteNote" xml:space="preserve">
+    <value>Spillet gir ikke mods tilgang til utklippstavlen, så tekst kopiert andre steder, utenfor spillet eller fra spillets egne tekstbokser, kan ikke limes inn her. For å få den inn, legg den i sprocket-clipboard.txt i Storage-mappa til spillet, og lim inn.</value>
   </data>
 </root>

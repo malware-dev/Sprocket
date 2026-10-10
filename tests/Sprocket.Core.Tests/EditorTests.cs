@@ -80,6 +80,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light").CarryingUnread("Pattern", "Pattern");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
+        ship.Rig.Entity(4).Kind.FindAction("Pattern", Form.Value)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -92,42 +93,12 @@ public class EditorTests
         var pattern = What().Entries().Single(e => e.Text == "Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("pending", pattern.Status);
-        Assert.False(What().Entries().Single(e => e.Text == "Switch on").IsWithheld);
+        Assert.False(What().Entries().Single(e => e.Text == "Switched on").IsWithheld);
 
         // It says why where the pointer rests, and gives a press nothing to do.
         Assert.StartsWith("Set this in the terminal", pattern.Why);
         Assert.False(pattern.IsPickable);
-        Assert.Null(What().Entries().Single(e => e.Text == "Switch on").Why);
-    }
-
-    /// <summary>
-    /// The list of what a block offers says above it how far that kind of block has been checked.
-    /// </summary>
-    /// <remarks>
-    /// What a block offers is read from the game and tidied by rules that know nothing of it, so a
-    /// block nobody has gone through can offer something doubled or oddly named. Said of the least
-    /// checked of the picked blocks, since that is the one whose list may be wrong.
-    /// </remarks>
-    [Fact]
-    public void TheListSaysHowFarItsBlockHasBeenChecked()
-    {
-        var ship = Build();
-        var editor = ship.Editor;
-
-        StartOnTheButton(editor);
-        editor.PressAdd("task");
-
-        StageColumn What() => editor.Pick().Stages
-            .Single(s => s.Entries().Any(e => e.Text == "Switch on"));
-
-        editor.PressBlock("Airlock Light");
-        Assert.StartsWith("Support for this block is still being worked on", What().Note);
-
-        editor.PressBlock("Inner Door");
-        Assert.StartsWith("Support for this block is only partly done", What().Note);
-
-        editor.TickBlock("Airlock Light");
-        Assert.StartsWith("Support for this block is still being worked on", What().Note);
+        Assert.Null(What().Entries().Single(e => e.Text == "Switched on").Why);
     }
 
     /// <summary>
@@ -148,6 +119,8 @@ public class EditorTests
             .Offering("AIBehavior", "AI Behavior On/Off");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
+        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Form.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Form.Action)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -184,6 +157,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light").Carrying("Mode", "Mode:", ValueKind.Flag);
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
+        ship.Rig.Entity(4).Kind.FindAction("Mode", Form.Value)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -354,7 +328,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
 
@@ -384,7 +359,8 @@ public class EditorTests
         {
             editor.PressAdd("task");
             editor.PressBlock("Airlock Light");
-            editor.PressChoice("Switch on");
+            editor.PressChoice("Switched on");
+            editor.Pick().Arguments!.Form.Fields[0].Text = "on";
             editor.PressPrimary();
             ship.Tick();
         }
@@ -775,7 +751,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
 
@@ -805,7 +782,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
 
@@ -854,7 +832,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.Screen.Undo!.Execute();
         ship.Tick();
@@ -1562,7 +1541,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.SwitchOn();
 
@@ -1600,7 +1580,8 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
 
@@ -1638,7 +1619,8 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
 
@@ -1726,7 +1708,8 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.SwitchOn();
 

@@ -5,24 +5,16 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>How whole every block is: its integrity, any damage, whether it is broken, and how far it is built.</summary>
-    /// <remarks>
-    /// Broken is the block's own flag rather than a mark on integrity: the line is each block's critical component, which a
-    /// player cannot see.
-    /// </remarks>
+    /// <summary>How whole every block is: its integrity, any damage, and how far it is built.</summary>
     public sealed class Damage : Capability
     {
         static readonly Reading Hurt = Reading.Of<IMyTerminalBlock>(block => block.SlimBlock.CurrentDamage > 0);
-
-        static readonly Reading Lost = Reading.Of<IMyTerminalBlock>(block => !block.IsFunctional);
 
         static readonly Being Integrity = Being.Number<IMyTerminalBlock>(block => Whole(block.SlimBlock));
 
         static readonly Being Built = Being.Number<IMyTerminalBlock>(block => block.SlimBlock.BuildLevelRatio * 100d);
 
         static readonly Being Damaged = Being.Flag(Hurt);
-
-        static readonly Being Broken = Being.Flag(Lost);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -35,11 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithValue("integrity", "integrity", Integrity).Announced()
                 .WithValue("damaged", "damaged", Damaged).Announced()
-                .WithValue("broken", "broken", Broken).Announced()
-                .WithChange("breaks", "breaks", "broken", Literal.Of(true))
-                .Reading("is broken", "is not broken").Announced()
-                .WithChange("gets-repaired", "gets repaired", "broken", Literal.Of(false))
-                .Reading("is not broken", "is broken").Announced()
                 .WithValue("build-level", "build level", Built).Announced();
         }
 

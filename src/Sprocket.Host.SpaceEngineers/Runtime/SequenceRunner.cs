@@ -769,6 +769,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     Execute(_stepIndex);
 
+                    // Refused on the spot, as a script that does not run is: the run ends there and says which block.
+                    var refused = Refused(_stepIndex);
+                    if (refused.Exists)
+                    {
+                        Meet(refused);
+                        return;
+                    }
+
                     // Kept so an await below knows what it is waiting for. Nothing with a
                     // destination is nothing to wait on, which is how an instant action stays
                     // instant.
@@ -1113,6 +1121,29 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 acted.Entity.Asked();
             }
+        }
+
+        /// <summary>The first block an act at <paramref name="step" /> was refused by as it was done, with the block's reason; none where every block did it.</summary>
+        /// <remarks>Asked once, as the act is done, of what is done the moment it is told: what takes time says its troubles while it is waited for.</remarks>
+        SequenceFault Refused(int step)
+        {
+            var act = (Act)_sequence.Steps[step];
+            if (!act.HasAction || act.Form != Form.Native)
+                return SequenceFault.None;
+
+            var compiled = Compile(step);
+            for (var i = 0; i < compiled.Acts.Count; i++)
+            {
+                var acted = compiled.Acts[i];
+                if (acted.Bound == null || acted.Action.Until != null)
+                    continue;
+
+                var said = acted.Bound.Trouble(acted.Entity.Block, acted.Seen);
+                if (said.Ends)
+                    return new SequenceFault(SequenceProblem.Stuck, step, said, acted.Entity.Name);
+            }
+
+            return SequenceFault.None;
         }
 
         /// <summary>

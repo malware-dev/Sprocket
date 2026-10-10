@@ -30,8 +30,9 @@ public class TargetTests
         screen.Editor.PressChoice("finishes closing");
     }
 
+    /// <summary>With no sequence to point at, a new trigger is offered a new sequence and nothing else.</summary>
     [Fact]
-    public void NothingToPointAtOffersOnlyTheTwoThatMakeSense()
+    public void NothingToPointAtOffersOnlyANewSequence()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Airlock");
@@ -41,8 +42,50 @@ public class TargetTests
         screen.Run(2);
 
         var does = screen.Editor.Pick().Stages[2];
-        Assert.Equal(new[] { "A task on blocks…", "A new sequence" }, does.Entries().Select(e => e.Text));
+        Assert.Equal(new[] { "A new sequence" }, does.Entries().Select(e => e.Text));
         Assert.Empty(does.Options);
+    }
+
+    /// <summary>A single action is offered to a new trigger in developer mode.</summary>
+    [Fact]
+    public void DeveloperModeOffersASingleAction()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Airlock");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
+        screen.Editor.PressStart("when");
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressChoice("button 1 is pressed");
+        screen.Run(2);
+
+        var does = screen.Editor.Pick().Stages[2];
+        Assert.Equal(new[] { "A task on blocks…", "A new sequence" }, does.Entries().Select(e => e.Text));
+    }
+
+    /// <summary>A trigger that does a single action already offers it when opened again, out of developer mode.</summary>
+    [Fact]
+    public void ATriggersOwnSingleActionIsStillOffered()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Airlock");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
+        screen.Editor.PressStart("when");
+        screen.Editor.PressBlock("Airlock Button");
+        screen.Editor.PressChoice("button 1 is pressed");
+        screen.Editor.PressChoice("A task on blocks…");
+        screen.Editor.PressBlock("Airlock Outer Door");
+        screen.Editor.PressChoice("Close");
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        screen.Editor.DeveloperMode = false;
+        screen.Run(1);
+        screen.Editor.PressWhen(0);
+        screen.Run(2);
+
+        Assert.Contains(screen.Editor.Pick().Stages[2].Entries(), e => e.Text == "A task on blocks…" && e.IsChosen);
     }
 
     [Fact]
@@ -110,10 +153,9 @@ public class TargetTests
         // And back to running offers the two that make something again, a new sequence already chosen,
         // with the sequences under their own heading after them.
         screen.Editor.PressChoice("run");
-        Assert.Equal(new[] { "A task on blocks…", "A new sequence", "Sequences", "Cycle" },
-            does.Entries().Select(e => e.Text));
+        Assert.Equal(new[] { "A new sequence", "Sequences", "Cycle" }, does.Entries().Select(e => e.Text));
         Assert.Contains(does.Entries(), e => e.Text == "A new sequence" && e.IsChosen);
-        Assert.True(does.Entries()[2].IsHeading, "the sequences are not set apart");
+        Assert.True(does.Entries()[1].IsHeading, "the sequences are not set apart");
     }
 
     /// <summary>
@@ -124,6 +166,10 @@ public class TargetTests
     {
         var screen = WithOne();
         Another(screen);
+
+        screen.Editor.DeveloperMode = true;
+
+        screen.Run(1);
 
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
@@ -145,6 +191,10 @@ public class TargetTests
     {
         var screen = WithOne();
         Another(screen);
+
+        screen.Editor.DeveloperMode = true;
+
+        screen.Run(1);
 
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");

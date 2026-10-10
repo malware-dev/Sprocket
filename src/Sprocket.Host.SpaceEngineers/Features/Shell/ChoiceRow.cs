@@ -26,12 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>What the mark says while the pointer rests on it.</summary>
-        public string MarkTip
-        {
-            set { _mark.Tip = Lumel.Tip.For(_mark.Tip, value); }
-        }
-
         /// <summary>What the answer says.</summary>
         public string Text
         {

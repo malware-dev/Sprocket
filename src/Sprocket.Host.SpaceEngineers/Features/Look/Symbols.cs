@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Three steps beside an arrow down: a sequence, steps taken in order.</summary>
         public const string Sequence = "q";
 
-        /// <summary>A square pulse: a signal, sent from a block's toolbar, and the slot it comes in through.</summary>
+        /// <summary>A square pulse: a signal a block sends, and the slot it comes in through.</summary>
         public const string Signal = "n";
 
         /// <summary>A lightning bolt: something a block is told to do.</summary>
@@ -104,6 +104,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
 
         /// <summary>A cube: a block, where none in particular is meant, and the slot a block fills.</summary>
         public const string Block = "B";
+
+        /// <summary>An open eye over a toolbar: blocks hidden from toolbars are shown.</summary>
+        public const string HiddenShown = "h";
+
+        /// <summary>The same eye shut: blocks hidden from toolbars stay hidden.</summary>
+        /// <remarks>Drawn on the open eye's frame, so one replaces the other without the toolbar moving.</remarks>
+        public const string HiddenHidden = "H";
 
         /// <summary>Every hue in order, red round to red.</summary>
         /// <remarks>

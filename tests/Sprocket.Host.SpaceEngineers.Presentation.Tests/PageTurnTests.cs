@@ -12,9 +12,24 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class PageTurnTests
 {
-    const string Chosen = "60 196 type Airlock enter press trigger press when 200 351 560 333 1000 207";
+    /// <summary>A new trigger's single action chosen, which goes on to the page it is picked on.</summary>
+    static readonly string[] Chosen =
+    {
+        "press", "+ logic system", "type", "Airlock", "enter", "press", "trigger", "press", "when",
+        "press", "Airlock Button", "press", "button 1 is pressed", "press", "A task on blocks…"
+    };
 
-    const string Fold = "47 500";
+    /// <summary>The fold at the page's left edge, pressed to go back a page.</summary>
+    static readonly string[] Fold = { "tick", "30", "47", "500" };
+
+    /// <summary>A screen in developer mode, which offers a trigger a single action, after <paramref name="script" />.</summary>
+    static Screen Developing(params string[] script)
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
+        return screen.Do(script);
+    }
 
     static List<float> Followed(Screen screen, string heading, int ticks)
     {
@@ -35,7 +50,7 @@ public class PageTurnTests
     [Fact]
     public void GoingOnMovesEveryTickUntilThePageIsGone()
     {
-        var screen = Screen.Fresh(Chosen.Split(' '));
+        var screen = Developing(Chosen);
 
         var at = Followed(screen, "WHAT HAPPENS", 30);
 
@@ -47,7 +62,7 @@ public class PageTurnTests
     [Fact]
     public void GoingBackMovesEveryTick()
     {
-        var screen = Screen.Fresh((Chosen + " tick 30 " + Fold).Split(' '));
+        var screen = Developing(Chosen.Concat(Fold).ToArray());
 
         var at = Followed(screen, "WHAT HAPPENS", 30);
 

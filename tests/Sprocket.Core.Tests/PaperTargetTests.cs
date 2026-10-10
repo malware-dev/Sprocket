@@ -38,7 +38,8 @@ public class PaperTargetTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         Note(seen, ship);
 

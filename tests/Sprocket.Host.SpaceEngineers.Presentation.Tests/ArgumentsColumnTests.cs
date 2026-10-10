@@ -15,10 +15,19 @@ public class ArgumentsColumnTests
 {
     const string ALight = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step press task 200 485";
 
-    const string SetRadius = "800 653";
-    const string SetColour = "800 565";
+    const string SetRadius = "press Radius";
+    const string SetColour = "press Color";
     const string RadiusBox = "1315 209";
     const string Done = "1394 72";
+
+    /// <summary>Presses twice on the words <paramref name="text" /> where they are drawn.</summary>
+    static void DoubleOn(Screen screen, string text)
+    {
+        var drawn = screen.Drawings.First(d => d.IsText && d.Text == text);
+        var at = Screen.Ui(drawn.At.X + 4f, drawn.At.Y + 8f);
+        screen.Do("double", at.X.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            at.Y.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
 
     static Screen Open(string then)
     {
@@ -100,7 +109,9 @@ public class ArgumentsColumnTests
     [Fact]
     public void ADoublePressOnSomethingThatTakesNothingFinishes()
     {
-        var screen = Open("double 800 441");
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step "
+            + "press task press \"Airlock Inner Door\"").Split(' '));
+        DoubleOn(screen, "Reverse");
 
         Assert.Equal("Sequence 1", screen.Ended);
         var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
@@ -111,7 +122,8 @@ public class ArgumentsColumnTests
     [Fact]
     public void ADoublePressGoesToTheFirstField()
     {
-        var screen = Open("double " + SetRadius);
+        var screen = Screen.Fresh(ALight.Split(' '));
+        DoubleOn(screen, "Radius");
 
         Assert.Equal("Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
@@ -136,7 +148,7 @@ public class ArgumentsColumnTests
     /// </summary>
     [Theory]
     [InlineData("508 192 type 7 escape")]
-    [InlineData("208 182 800 565")]
+    [InlineData("208 182 press Color")]
     public void LeavingAsksAboutAnyChange(string change)
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 enter " + change + " 25 62");

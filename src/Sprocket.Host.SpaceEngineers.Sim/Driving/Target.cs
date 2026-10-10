@@ -131,9 +131,9 @@ namespace Sprocket.Sim.Driving
         /// <summary>Types <paramref name="words" /> over whatever is in the box that narrows a column's kinds, as a keyboard would.</summary>
         public static void SearchKinds(this StageColumn column, string words) => Retype(column.KindNarrow, words);
 
-        /// <summary>Presses the tab of a column's view saying <paramref name="text" />.</summary>
+        /// <summary>Presses the link to a column's view saying <paramref name="text" />.</summary>
         public static void PressView(this StageColumn column, string text) =>
-            column.Views.First(v => v.Text == text).Command!.Execute();
+            column.Views.First(v => v.Text.Contains(text)).Command!.Execute();
 
         static void Retype(TextBox box, string words)
         {

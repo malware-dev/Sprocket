@@ -18,6 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<EntityEvent> _events = new List<EntityEvent>();
         readonly List<EntityAction> _actions = new List<EntityAction>();
         readonly List<string> _hidden = new List<string>();
+        readonly List<string> _lacking = new List<string>();
+        readonly List<Plan> _planned = new List<Plan>();
+        readonly Dictionary<string, string> _flippers = new Dictionary<string, string>();
         readonly List<Capability> _capabilities = new List<Capability>();
 
         EntityAction _value;
@@ -36,9 +39,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What this kind is called in the UI, e.g. "Door".</summary>
         public string DisplayName { get; private set; }
 
-        /// <summary>How far Sprocket has checked this kind, which is pending until somebody says otherwise.</summary>
-        public Evaluation Evaluation { get; set; }
-
         /// <summary>
         /// Names a picture of this kind, or empty for none.
         /// </summary>
@@ -54,6 +54,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public string Icon { get; private set; }
 
+        /// <summary>The node this kind hangs under in the list of kinds, or <see cref="World.Family.None" />.</summary>
+        public Family Family { get; private set; }
+
         /// <summary>Moments. These start sequences, and nothing else.</summary>
         public IList<EntityEvent> Events => _events;
 
@@ -63,10 +66,44 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What knows this kind of block, in the order each described it: the block's own first, the floor every block stands on last.</summary>
         public IList<Capability> Capabilities => _capabilities;
 
+        /// <summary>Says the game's toggle <paramref name="toggle" /> flips Sprocket's own switch <paramref name="value" />.</summary>
+        /// <remarks>A switch of the game's own is flipped by the toggle that shares its id, which needs no saying.</remarks>
+        public EntityKind Flipping(string value, string toggle)
+        {
+            _flippers[value] = toggle;
+            return this;
+        }
+
+        /// <summary>The game's toggle said to flip Sprocket's own switch <paramref name="value" />, or null.</summary>
+        public string Flipper(string value)
+        {
+            string toggle;
+            return _flippers.TryGetValue(value, out toggle) ? toggle : null;
+        }
+
+        /// <summary>What this kind is to offer that is not built yet, in the order it was said.</summary>
+        public IList<Plan> Planned => _planned;
+
+        /// <summary>Says this kind is to offer <paramref name="plan" />, which is not built yet.</summary>
+        public EntityKind Planning(Plan plan)
+        {
+            if (!_planned.Contains(plan))
+                _planned.Add(plan);
+
+            return this;
+        }
+
         /// <summary>Says <paramref name="capability" /> knows this kind of block.</summary>
         public void Known(Capability capability)
         {
             _capabilities.Add(capability);
+        }
+
+        /// <summary>Hangs the kind under <paramref name="family" /> in the list of kinds.</summary>
+        public EntityKind WithFamily(Family family)
+        {
+            Family = family;
+            return this;
         }
 
         /// <summary>Gives the kind the picture <paramref name="icon" />.</summary>
@@ -112,6 +149,20 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+
+        /// <summary>
+        /// Holds what a step sets the value of Sprocket's own added last to between <paramref name="least" /> and
+        /// <paramref name="most" />, each written as a number or empty for none.
+        /// </summary>
+        /// <remarks>Only what the block itself takes, which is what a player could set it to; a test is not held to them.</remarks>
+        public EntityKind Between(string least, string most)
+        {
+            if (_value == null)
+                throw new InvalidOperationException("Bounds belong to a value of Sprocket's own, and none was added last.");
+
+            _value.Between(least, most);
+            return this;
+        }
 
         /// <summary>Says how a test reads the moment added last: the block in it, and not.</summary>
         public EntityKind Reading(string state, string unstate)
@@ -231,6 +282,32 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _hidden.Add(gameIds[i]);
 
             return this;
+        }
+
+        /// <summary>Leaves out the settings the game's terminal never shows on this kind of block, by their ids.</summary>
+        /// <remarks>
+        /// A setting left out is in neither view: the terminal view lists what the game's terminal does. Each takes its value,
+        /// its toggle and the pair a checkbox adds with it.
+        /// </remarks>
+        public EntityKind Lacking(params string[] settingIds)
+        {
+            for (var i = 0; i < settingIds.Length; i++)
+                _lacking.Add(settingIds[i]);
+
+            return this;
+        }
+
+        /// <summary>Whether the game's member <paramref name="gameId" /> belongs to a setting this kind lacks.</summary>
+        public bool Lacks(string gameId)
+        {
+            for (var i = 0; i < _lacking.Count; i++)
+            {
+                var setting = _lacking[i];
+                if (gameId == setting || gameId == setting + "_On" || gameId == setting + "_Off")
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Whether this kind keeps the block's own member out of that list.</summary>

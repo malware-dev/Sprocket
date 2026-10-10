@@ -16,19 +16,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         readonly Action<string> _say;
 
+        readonly Action _pasted;
+
         string _held = string.Empty;
 
-        /// <summary>The clipboard file in <paramref name="files" />, saying through <paramref name="say" /> what would not open or write.</summary>
-        public ClipboardFile(IFiles files, Action<string> say)
+        /// <summary>The clipboard file in <paramref name="files" />, saying through <paramref name="say" /> what would not open or write, and telling <paramref name="pasted" /> of each paste.</summary>
+        public ClipboardFile(IFiles files, Action<string> say, Action pasted)
         {
             _files = files;
             _say = say;
+            _pasted = pasted;
         }
 
         /// <inheritdoc />
         /// <remarks>Where the file will not open, what was last copied this session.</remarks>
         public string Get()
         {
+            if (_pasted != null)
+                _pasted();
+
             try
             {
                 if (_files.Has(File))

@@ -5,9 +5,10 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A block with one inventory: how full it is and how heavy its load.</summary>
+    /// <summary>A block with an inventory: how full it is and how heavy its load, and moving items, which is still to come.</summary>
     /// <remarks>
-    /// One inventory only. On a block with several, which one a reading means is an option, and a value takes none.
+    /// How full and how heavy are read on a block with one inventory only. On a block with several, which one a reading
+    /// means is an option, and a value takes none.
     /// </remarks>
     public sealed class Inventory : Capability
     {
@@ -18,12 +19,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
-            return block.InventoryCount == 1;
+            return block.InventoryCount > 0;
         }
 
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
+            kind.Planning(Plan.MovingItems);
+            if (block.InventoryCount != 1)
+                return;
+
             kind.WithValue("inventory-fill", "inventory fill", Fill).In(Category.Stock).Announced()
                 .WithValue("inventory-mass", "inventory mass", Mass).In(Category.Stock).Announced();
         }

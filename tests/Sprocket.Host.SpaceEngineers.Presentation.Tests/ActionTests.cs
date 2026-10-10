@@ -42,6 +42,7 @@ public class ActionTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
+        screen.Editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         screen.Run(2);
 
         // The game's own words, which are the ones the player has already read in the terminal.
@@ -59,11 +60,11 @@ public class ActionTests
     }
 
     /// <summary>
-    /// And the switch every block has is still said in Sprocket's own words, above them.
+    /// And the switch every block has is still said in Sprocket's own words, above them, as one value.
     /// </summary>
     /// <remarks>
-    /// The floor does not displace what was already better. "Switch on" is a sentence; "Turn block
-    /// On" is a button in somebody else's menu.
+    /// The floor does not displace what was already better. "Switched on" is set off, on or flipped; "Turn block On" is a
+    /// button in somebody else's menu.
     /// </remarks>
     [Fact]
     public void WhatWasSaidBetterIsStillSaidThatWay()
@@ -74,7 +75,8 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Switch on"), "a block with a switch cannot be switched on");
+        Assert.True(screen.Shows("Switched on"), "a block with a switch cannot be switched on");
+        Assert.False(screen.Shows("Switch on"), "switching on is offered beside the switch's value");
         Assert.False(screen.Shows("Turn block On"), "the game's own on/off is offered twice");
     }
 
@@ -94,20 +96,20 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.False(screen.Shows("Turn block On"), "what switch on stands in for is showing");
+        Assert.False(screen.Shows("Turn block On"), "what the switch stands in for is showing");
 
         Terminal(screen).Command!.Execute();
         screen.Run(2);
 
         Assert.True(screen.Shows("Turn block On"), "the block's own switch is not in its own view");
-        Assert.False(screen.Shows("Switch on"), "Sprocket's wording is in the block's own view");
+        Assert.False(screen.Shows("Switched on"), "Sprocket's wording is in the block's own view");
         Assert.True(What(screen).ViewShown == 1);
 
         Organized(screen).Command!.Execute();
         screen.Run(2);
 
         Assert.False(screen.Shows("Turn block On"), "going back did not put it away again");
-        Assert.True(screen.Shows("Switch on"));
+        Assert.True(screen.Shows("Switched on"));
     }
 
     /// <summary>
@@ -140,7 +142,7 @@ public class ActionTests
     /// </summary>
     /// <remarks>
     /// Every functional block has an organizer whether or not anything was written for its kind:
-    /// switch on and switch off are Sprocket's words for what the game calls Toggle block On/Off.
+    /// switched on is Sprocket's word for what the game calls Toggle block On/Off.
     /// </remarks>
     [Fact]
     public void APickerOpensOnTheOrganizedView()
@@ -153,7 +155,7 @@ public class ActionTests
 
         Assert.NotNull(Terminal(screen).Command);
         Assert.True(What(screen).ViewShown == 0, "the picker did not open on Sprocket's own words");
-        Assert.True(screen.Shows("Switch on"));
+        Assert.True(screen.Shows("Switched on"));
     }
 
     [Fact]
@@ -208,7 +210,7 @@ public class ActionTests
 
         var entries = What(screen).Entries();
         Assert.Equal(Symbols.Awaited, entries.Single(entry => entry.Text == "Open").Mark);
-        Assert.Equal(Symbols.Action, entries.Single(entry => entry.Text == "Switch on").Mark);
+        Assert.Equal(Symbols.Action, entries.Single(entry => entry.Text == "Reverse").Mark);
     }
 
     /// <summary>A step's member is marked in its sentence as it is in the picker: the clock for what the step waits for, the bolt for the rest.</summary>
@@ -225,7 +227,7 @@ public class ActionTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("Switch on");
+        screen.Editor.PressChoice("Reverse");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -237,19 +239,30 @@ public class ActionTests
         Assert.Equal(Symbols.Action, switches.Mark);
     }
 
-    /// <summary>The tab answers where it is drawn, which nothing else on this screen proves.</summary>
+    /// <summary>
+    /// The link to the terminal's list answers where it is drawn, at the end of the column's heading, and the list it leads to
+    /// carries its banner and the link back.
+    /// </summary>
     [Fact]
-    public void TheTabIsPressedWhereItIsDrawn()
+    public void TheTerminalLinkIsPressedWhereItIsDrawn()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
             + "press step press task 200 509").Split(' '));
 
         StageColumn what = screen.Editor.Pick().Stages.Last();
         Assert.NotNull(what.Views[1].Command);
+        Assert.False(screen.Shows("‹ Organized"), "the link back shows while the organized list does");
 
-        screen.Do("820", "247");
-        Assert.True(screen.Editor.ShowsTerminal, "pressing the tab did not change the view");
+        var drawn = screen.Drawings.First(d => d.IsText && d.Text == "Terminal ›");
+        var at = Screen.Ui(drawn.At.X + 8f, drawn.At.Y + 8f);
+        screen.Do(at.X.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            at.Y.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+        Assert.True(screen.Editor.ShowsTerminal, "pressing the link did not change the view");
         Assert.True(screen.Shows("Toggle block On/Off"), "the block's own words are not listed");
+        Assert.StartsWith("Everything these blocks offer in the game's terminal", what.Note);
+        Assert.True(screen.Shows("‹ Organized"), "there is no way back from the terminal's list");
+        Assert.False(screen.Shows("Terminal ›"), "the link to the list showing still shows");
     }
 
     /// <summary>What the first value in the column of values holds.</summary>
@@ -294,6 +307,7 @@ public class ActionTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Hydrogen Tank");
+        screen.Editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         screen.Run(2);
 
         Assert.True(screen.Shows("Stockpile On/Off"), "the tank's own toggle was hidden");
@@ -416,6 +430,7 @@ public class ActionTests
 
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Hydrogen Tank");
+        rig.Editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         rig.Editor.PressChoice("Stockpile On");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
@@ -444,7 +459,7 @@ public class ActionTests
     public void AValueOfTwoWordsIsSwitchedRatherThanTyped()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Approach 200 360 800 565").Split(' '));
+            + "press step press task 150 203 type Approach 200 360 press \"Terminal ›\" press \"Chime On Approach\"").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
         Assert.Equal(Editor.Chosen, screen.Editor.Picking().Fields.Single().Edits);
@@ -474,7 +489,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 200 485 800 565").Split(' '));
+            + "press step press task 200 485 press Color").Split(' '));
 
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
@@ -500,7 +515,7 @@ public class ActionTests
     public void AValueOfSeveralChoicesIsPickedFromThem()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Standby 200 360 800 397").Split(' '));
+            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\"").Split(' '));
 
         Assert.True(screen.Shows("Auto") && screen.Shows("Recharge") && screen.Shows("Discharge"),
             "the column does not show what the value may be");
@@ -532,7 +547,7 @@ public class ActionTests
     public void MoreChoicesThanFitFoldIntoAList()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 150 203 type Tug 200 360 800 565").Split(' '));
+            + "press step press task 150 203 type Tug 200 360 press \"Terminal ›\" press \"Forward Direction\"").Split(' '));
 
         Assert.True(screen.Shows("Forward Direction"), "the forward direction does not ask for anything");
 
@@ -615,6 +630,7 @@ public class ActionTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Mood Light");
+        screen.Editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         screen.Editor.PressChoice("Mood");
         screen.Run(2);
 

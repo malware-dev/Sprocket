@@ -479,7 +479,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "piston no power", "piston no head", "piston stopped", "piston reversed extending", "piston reversed retracting",
             "rotor no power", "rotor no head", "rotor locked", "rotor no torque", "rotor stopped", "rotor held",
             "tank stockpile off", "tank no power", "tank no gas",
-            "jump drive recharge off"
+            "jump drive recharge off",
+            "script not run"
         };
 
         static readonly Cause[] Troubles =
@@ -490,7 +491,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Cause.PistonReversedRetracting,
             Cause.RotorNoPower, Cause.RotorNoHead, Cause.RotorLocked, Cause.RotorNoTorque, Cause.RotorStopped, Cause.RotorHeld,
             Cause.TankStockpileOff, Cause.TankNoPower, Cause.TankNoGas,
-            Cause.JumpDriveRechargeOff
+            Cause.JumpDriveRechargeOff,
+            Cause.ScriptNotRun
         };
 
         /// <summary>Writes why Sprocket switched something off: what was wrong, in which sequence, at which step, with which block, and what the block said.</summary>

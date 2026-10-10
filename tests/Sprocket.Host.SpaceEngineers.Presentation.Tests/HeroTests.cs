@@ -44,6 +44,35 @@ public class HeroTests
         Assert.True(rig.Unit.Lost);
     }
 
+    /// <summary>The construct's grid deleted whole, the automation goes with it.</summary>
+    [Fact]
+    public void DeletingTheGridLosesTheAutomation()
+    {
+        Simulation rig = Wired();
+
+        rig.Machine.Delete(rig.Machine.Sprocket.Grid);
+        rig.Tick();
+
+        Assert.True(rig.Unit.Lost);
+    }
+
+    /// <summary>The hero's grid deleted whole, a programmable block on a grid of the construct that is left keeps the automation.</summary>
+    [Fact]
+    public void DeletingTheHerosGridMovesTheAutomationToAGridThatIsLeft()
+    {
+        Simulation rig = Wired();
+        Rotor rotor = rig.Machine.Rotor(300, "Rotor");
+        rig.Machine.OnHeadOf(rotor);
+        Programmable spare = rig.Machine.Programmable(400, "Spare");
+        rig.Tick();
+
+        rig.Machine.Delete(rig.Machine.Sprocket.Grid);
+        rig.Tick();
+
+        Assert.False(rig.Unit.Lost);
+        Assert.Same(spare.Block, rig.Unit.Block);
+    }
+
     /// <summary>A construct whose blocks change leaves a hero that is still there where it is.</summary>
     [Fact]
     public void AnotherBlockChangingKeepsTheHero()

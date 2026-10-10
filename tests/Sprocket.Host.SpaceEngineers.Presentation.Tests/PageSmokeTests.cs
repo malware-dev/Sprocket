@@ -39,7 +39,8 @@ public class PageSmokeTests
 
         editor.PressAdd("task");
         editor.PressBlock("Landing Lights");
-        editor.PressChoice("Switch on");
+        editor.PressChoice("Switched on");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
 
         // The front door: the systems on this construct.

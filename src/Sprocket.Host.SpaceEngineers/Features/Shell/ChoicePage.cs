@@ -71,14 +71,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _options.Add(new Option(text, isCurrent, choose));
         }
 
-        /// <summary>Sets the mark of what the answer added last names, and what the mark says while the pointer rests on it.</summary>
-        public void MarkLast(string mark, string tip)
+        /// <summary>Sets the mark of what the answer added last names.</summary>
+        public void MarkLast(string mark)
         {
-            if (_options.Count == 0)
-                return;
-
-            _options[_options.Count - 1].Mark = mark;
-            _options[_options.Count - 1].MarkTip = tip;
+            if (_options.Count > 0)
+                _options[_options.Count - 1].Mark = mark;
         }
 
         /// <summary>Offers a box an answer is typed into, <paramref name="take" /> given what is typed on Enter or the button.</summary>
@@ -118,7 +115,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var row = new ChoiceRow
                 {
                     Mark = option.Mark,
-                    MarkTip = option.MarkTip,
                     Text = option.Text,
                     IsGiven = option.IsCurrent,
                     Caution = option.Warning,
@@ -172,7 +168,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             public Action Choose { get; private set; }
             public string Warning { get; set; }
             public string Mark { get; set; }
-            public string MarkTip { get; set; }
         }
     }
 }

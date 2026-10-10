@@ -31,6 +31,28 @@ public class CodexTests
         Assert.IsType<HomePage>(editor.Current);
     }
 
+    /// <summary>The question mark closes the codex where it is already open, and opens it at the screen's entry again after.</summary>
+    [Fact]
+    public void TheQuestionMarkClosesAnOpenCodex()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        var terms = editor.Codex;
+
+        editor.Screen.Help!.Execute();
+        screen.Do("tick", "3");
+        editor.CodexWindow!.Go(terms.Find(Terms.Sequence));
+
+        editor.Screen.Help!.Execute();
+        screen.Do("tick", "3");
+        Assert.False(editor.CodexOpen, "the question mark did not close the codex");
+
+        editor.Screen.Help!.Execute();
+        screen.Do("tick", "3");
+        Assert.True(editor.CodexOpen);
+        Assert.Equal(Terms.Home, editor.CodexWindow!.Term!.Id);
+    }
+
     /// <summary>The codex keeps a history of its own: moving on drops what was stepped back from, and closing it leaves the screen as it was.</summary>
     [Fact]
     public void TheCodexStepsThroughAHistoryOfItsOwn()
@@ -121,6 +143,37 @@ public class CodexTests
         editor.OpenCodex(editor.Codex.Find(Terms.Library)!);
         screen.Do("tick", "3");
         Assert.Equal(before.X - 200f, codex.Bounds.X, 1f);
+    }
+
+    /// <summary>
+    /// The codex moves most of the way off the screen, as a desktop window does, and never all of it: some of it stays on
+    /// each side, and its title bar never goes above the screen.
+    /// </summary>
+    [Fact]
+    public void TheCodexMovesMostOfTheWayOffTheScreen()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.Home)!);
+        screen.Do("tick", "3");
+
+        var codex = editor.CodexWindow!;
+        var before = codex.Bounds;
+        var x = (int)(before.X + before.Width * 0.5f);
+        var y = (int)(before.Y + 24f);
+        screen.Do("drag", x.ToString(), y.ToString(), (x + 5000).ToString(), (y + 5000).ToString(), "tick", "3");
+
+        var room = codex.Screen;
+        Assert.True(codex.Bounds.X > room.X + room.Width - before.Width, "the codex is held wholly on the screen");
+        Assert.Equal(room.X + room.Width - codex.Kept, codex.Bounds.X, 1f);
+        Assert.Equal(room.Y + room.Height - codex.Kept, codex.Bounds.Y, 1f);
+
+        x = (int)(codex.Bounds.X + codex.Kept - 8f);
+        y = (int)(codex.Bounds.Y + 24f);
+        screen.Do("drag", x.ToString(), y.ToString(), (x - 9000).ToString(), (y - 9000).ToString(), "tick", "3");
+
+        Assert.Equal(room.X - before.Width + codex.Kept, codex.Bounds.X, 1f);
+        Assert.Equal(room.Y, codex.Bounds.Y, 1f);
     }
 
     /// <summary>The wheel turned over the codex's page scrolls the page, not the screen beneath it.</summary>

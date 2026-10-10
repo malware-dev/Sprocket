@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
+using SpaceEngineers.Game.ModAPI;
 using VRage.Game.Components;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
@@ -164,6 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _runner.Live = _block.IsWorking;
             _block.IsWorkingChanged += Working;
             _world.AnchorRemoved += Removed;
+            _world.AnchorClosed += Closed;
         }
 
         /// <summary>
@@ -187,7 +189,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether the construct has no programmable block left to keep the automation in, which ends it.</summary>
         public bool Lost { get; private set; }
 
-        /// <summary>Raised when the hero is removed from the construct, from the grid's own event; answered with <see cref="Rehome" />.</summary>
+        /// <summary>
+        /// Whether the hero was last taken off the construct by itself, destroyed or ground down, rather than closed with its
+        /// whole grid; where that left the automation <see cref="Lost" />, it is backed up.
+        /// </summary>
+        /// <remarks>
+        /// A grid deleted whole, by a player in creative or by the server's cleanup, closes its blocks without removing any of
+        /// them, and what goes with it leaves no backup.
+        /// </remarks>
+        public bool Destroyed { get; private set; }
+
+        /// <summary>Raised when the hero is removed from the construct or closed with its grid, from the game's own event; answered with <see cref="Rehome" />.</summary>
         /// <remarks>
         /// The grid is still changing when it is raised, so whatever answers it calls <see cref="Rehome" /> once the grid has
         /// finished: the session through the game's own invoke on the game thread, the harness on its next tick.
@@ -432,6 +444,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             /// <summary>Which sequence on which one of its system, so reachability is reported for each one.</summary>
             public long Start;
 
+            /// <summary>The name of the signal slot the toolbar slot answers, which a button wired to it is named; null for a trigger written in the script.</summary>
+            public string Name;
+
             public bool Same(Want other)
             {
                 return PanelId == other.PanelId && Toolbar == other.Toolbar && Slot == other.Slot
@@ -583,6 +598,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 want.Key = needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence, needed.Stops);
                 want.Reference = blocks[i];
                 want.Start = GridWorld.Start(sequence.Id, instance);
+                want.Name = needed.IsWritten ? null : needed.Part;
                 into.Add(want);
             }
         }
@@ -881,6 +897,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
 
                 Told.Say("mended slot " + want.Slot + ", now " + want.Key);
+                Name(want);
             }
         }
 
@@ -976,6 +993,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
 
                 Told.Say("wired slot " + want.Slot + " to " + want.Key);
+                Name(want);
             }
         }
 
@@ -1145,6 +1163,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
 
                 Told.Say("wired slot " + want.Slot + " to " + want.Key + ", as picked");
+                Name(want);
             }
 
             if (_answered.Count == 0)
@@ -1158,6 +1177,22 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<long> _asserted = new List<long>();
         readonly List<long> _answered = new List<long>();
+
+        /// <summary>Names the button <paramref name="want" /> has just wired after the signal slot it answers.</summary>
+        /// <remarks>
+        /// Right after the slot is written, since the game names a button after any action put in its slot, Sprocket's
+        /// included; the game passes a button's name on to every player.
+        /// </remarks>
+        void Name(Want want)
+        {
+            if (string.IsNullOrEmpty(want.Name) || want.Toolbar != 1)
+                return;
+
+            var grid = _runner.Bindings.Entity(want.Reference);
+            var panel = grid == null ? null : grid.Block as IMyButtonPanel;
+            if (panel != null)
+                panel.SetCustomButtonName(want.Slot, want.Name);
+        }
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
         /// <remarks>
@@ -1190,7 +1225,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
 
             if (warning.Length > 0)
-                Told.Say(_block.CustomName + " has a program with a warning: " + warning);
+                Told.Say(Logged(_block) + " has a program with a warning: " + warning);
 
             // What is switched off, read after the program, because it names what the program
             // declared. A construct that has nothing parked has nothing here at all.
@@ -1198,7 +1233,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 var wrong = StateText.Load(state, _program, _runner);
                 if (wrong.Length > 0)
-                    Told.Say(_block.CustomName + " has switches that would not read: " + wrong);
+                    Told.Say(Logged(_block) + " has switches that would not read: " + wrong);
             }
 
             if (trouble.Length == 0)
@@ -1206,7 +1241,18 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // Logged here; the editor says it on its notice and shows the text on the script page, where it is mended.
             // Nothing of the program was kept, and it is marked not to be saved over, which is what protects somebody's work.
-            Told.Say(_block.CustomName + " has a program that would not read: " + trouble);
+            Told.Say(Logged(_block) + " has a program that would not read: " + trouble);
+        }
+
+        /// <summary>How the log names <paramref name="block" />: its name, or where it has none yet, as a dedicated server
+        /// loads a world, its type, id and construct.</summary>
+        public static string Logged(IMyTerminalBlock block)
+        {
+            if (!string.IsNullOrEmpty(block.CustomName))
+                return block.CustomName;
+
+            var grid = block.CubeGrid == null ? "" : " on " + block.CubeGrid.DisplayName;
+            return block.DefinitionDisplayNameText + " " + block.EntityId + grid;
         }
 
         /// <summary>
@@ -1313,7 +1359,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Logged rather than thrown. This runs on the way out of a screen and from the world save,
             // and taking the game down over it would cost far more than the program does.
             if (storage == null)
-                Told.Say("mod storage would not attach to " + block.CustomName + "; program not saved");
+                Told.Say("mod storage would not attach to " + Logged(block) + "; program not saved");
 
             return storage;
         }
@@ -1333,7 +1379,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Sequence which = named == null ? null : named.FindSequence(sequence);
             if (one == null || which == null)
             {
-                Told.Say(_block.CustomName + " has no " + (named == null ? "such system" : which == null ? "such sequence" : "such instance")
+                Told.Say(Logged(_block) + " has no " + (named == null ? "such system" : which == null ? "such sequence" : "such instance")
                     + " for an order to " + (stops ? "stop" : "run"));
                 return;
             }
@@ -1385,6 +1431,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         void Removed()
         {
+            Destroyed = true;
+            if (HeroRemoved != null)
+                HeroRemoved(this);
+        }
+
+        void Closed()
+        {
             if (HeroRemoved != null)
                 HeroRemoved(this);
         }
@@ -1393,9 +1446,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Moves into another programmable block on the construct where the hero has gone, answering whether it moved.
         /// </summary>
         /// <remarks>
-        /// Asked when the hero is removed and as the world saves, never on a tick. The hero found again under its own id is
-        /// the same block brought back as a new object, which a grid splitting does; it is taken as it is. Otherwise the first
-        /// programmable block found becomes the hero, and where there is none the automation is lost.
+        /// Asked when the hero is removed or closed and as the world saves, never on a tick. The hero found again under its own
+        /// id is the same block brought back as a new object, which a grid splitting does; it is taken as it is. Otherwise the
+        /// first programmable block found becomes the hero, and where there is none the automation is lost.
         /// </remarks>
         bool Seek()
         {
@@ -1406,7 +1459,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (found != null)
             {
                 if (found.Block == _block)
+                {
+                    Destroyed = false;
                     return false;
+                }
 
                 Move(found.Block);
                 return true;
@@ -1422,7 +1478,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return true;
             }
 
-            Told.Say(_block.CustomName + " is gone, and its construct has no programmable block left to keep the automation");
+            Told.Say(Logged(_block) + " is gone, and its construct has no programmable block left to keep the automation");
             Lost = true;
             return false;
         }
@@ -1430,13 +1486,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Makes <paramref name="block" /> the hero: the automation is kept in it from here on, and its buttons name it.</summary>
         void Move(IMyTerminalBlock block)
         {
-            Told.Say(_block.CustomName + " is gone; " + block.CustomName + " keeps the automation now");
+            Told.Say(Logged(_block) + " is gone; " + Logged(block) + " keeps the automation now");
 
             _block.IsWorkingChanged -= Working;
             _block = block;
             _block.IsWorkingChanged += Working;
             _runner.Live = _block.IsWorking;
             _world.Anchor(block);
+            Destroyed = false;
 
             // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
             _adopted = false;
@@ -1448,6 +1505,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _block.IsWorkingChanged -= Working;
             _world.AnchorRemoved -= Removed;
+            _world.AnchorClosed -= Closed;
             _runner.Retire();
             _world.Dispose();
         }

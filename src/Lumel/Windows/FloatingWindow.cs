@@ -16,24 +16,36 @@ namespace Lumel.Windows
         /// <summary>Where the window's top-left corner was moved to, or null where it stands where <see cref="Home" /> puts it.</summary>
         public Vector2? Position { get; set; }
 
-        /// <summary>The whole screen, which the window is kept inside, or empty to keep it inside the area it is placed in; the layer it is open in sets it.</summary>
+        /// <summary>The whole screen, which the window is kept on, or empty to keep it on the area it is placed in; the layer it is open in sets it.</summary>
         public RectangleF Screen { get; set; }
 
+        /// <summary>How much of the window always stays on the screen, across and down, in UI units: 96 unless set.</summary>
+        /// <remarks>
+        /// As a desktop window may be moved most of the way off its screen and never all of it, so what is left can be taken
+        /// hold of again.
+        /// </remarks>
+        public float Kept { get; set; } = 96f;
+
         /// <inheritdoc />
-        /// <remarks>Where it was moved to, or where <see cref="Home" /> puts it, and then back inside the screen.</remarks>
+        /// <remarks>
+        /// Where it was moved to, or where <see cref="Home" /> puts it, and then brought back far enough that <see cref="Kept" />
+        /// of it is on the screen. Its top never goes above the screen's, since the title bar it is moved by is at its top.
+        /// </remarks>
         public override RectangleF Place(RectangleF area, Vector2 size)
         {
             var at = Position ?? Home(area, size);
             var screen = Screen.Width > 0f && Screen.Height > 0f ? Screen : area;
+            var across = Math.Min(Kept, size.X);
+            var down = Math.Min(Kept, size.Y);
 
-            if (at.X + size.X > screen.X + screen.Width)
-                at.X = screen.X + screen.Width - size.X;
+            if (at.X > screen.X + screen.Width - across)
+                at.X = screen.X + screen.Width - across;
 
-            if (at.Y + size.Y > screen.Y + screen.Height)
-                at.Y = screen.Y + screen.Height - size.Y;
+            if (at.Y > screen.Y + screen.Height - down)
+                at.Y = screen.Y + screen.Height - down;
 
-            if (at.X < screen.X)
-                at.X = screen.X;
+            if (at.X < screen.X - size.X + across)
+                at.X = screen.X - size.X + across;
 
             if (at.Y < screen.Y)
                 at.Y = screen.Y;
@@ -41,7 +53,7 @@ namespace Lumel.Windows
             return new RectangleF(at.X, at.Y, size.X, size.Y);
         }
 
-        /// <summary>Says a move has ended where the window now stands, its <see cref="Position" /> first brought back inside the screen.</summary>
+        /// <summary>Says a move has ended where the window now stands, its <see cref="Position" /> first brought back far enough onto the screen.</summary>
         public void Settle()
         {
             if (Position.HasValue && Screen.Width > 0f && Screen.Height > 0f)

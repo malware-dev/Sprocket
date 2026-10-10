@@ -120,6 +120,8 @@ public class ChangingTests
         Trigger was = System(screen).Triggers[0];
 
         screen.Editor.PressDoes(0);
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
@@ -150,6 +152,8 @@ public class ChangingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
@@ -226,6 +230,8 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Button");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
 
@@ -244,6 +250,8 @@ public class ChangingTests
 
         // Nothing to finish here while a single action is chosen: choosing it again goes on.
         Assert.False(screen.Editor.Screen.HasPrimary);
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
@@ -269,6 +277,8 @@ public class ChangingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.Back();
         screen.Editor.Back();
@@ -290,6 +300,8 @@ public class ChangingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
@@ -299,6 +311,8 @@ public class ChangingTests
         var sequences = screen.Editor.Program.Sequences.Count;
 
         screen.Editor.PressWhen(1);
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
 
@@ -327,6 +341,10 @@ public class ChangingTests
         screen.Editor.PressChoice("finishes closing");
         Assert.Null(screen.Editor.Pick().Onward);
 
+        screen.Editor.DeveloperMode = true;
+
+        screen.Run(1);
+
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.Back();
@@ -353,6 +371,8 @@ public class ChangingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.Back();
@@ -360,6 +380,10 @@ public class ChangingTests
         screen.Run(2);
 
         Assert.Null(screen.Editor.Pick().Onward);
+
+        screen.Editor.DeveloperMode = true;
+
+        screen.Run(1);
 
         screen.Editor.PressChoice("A task on blocks…");
         screen.Run(2);
@@ -420,6 +444,8 @@ public class ChangingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");
@@ -500,6 +526,8 @@ public class ChangingTests
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
+        screen.Editor.DeveloperMode = true;
+        screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Editor.PressChoice("Close");

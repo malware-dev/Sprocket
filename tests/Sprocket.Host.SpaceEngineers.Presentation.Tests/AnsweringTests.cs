@@ -13,7 +13,7 @@ public class AnsweringTests
 {
     const string LeavingASystem =
         "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step press task "
-        + "150 203 type Tug 200 360 800 565 1316 201 1316 319 enter 25 62 25 62";
+        + "150 203 type Tug 200 360 press \"Terminal ›\" press \"Forward Direction\" 1316 201 1316 319 enter 25 62 25 62";
 
     [Fact]
     public void EnterTakesTheAnswerThePageNamed()

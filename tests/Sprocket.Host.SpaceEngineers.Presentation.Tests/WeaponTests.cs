@@ -47,7 +47,7 @@ public class WeaponTests
         screen.Run(2);
 
         Assert.True(screen.Shows("Armed"), "armed is not offered");
-        Assert.True(screen.Shows("Toggle armed"), "toggle armed is not offered");
+        Assert.False(screen.Shows("Toggle armed"), "the toggle is listed beside the switch that flips");
         Assert.True(screen.Shows("Detonate"), "detonate is not offered");
         Assert.False(screen.Shows("Arm"), "the game's own word is offered beside Sprocket's");
     }

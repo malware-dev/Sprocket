@@ -68,20 +68,6 @@ public class CockpitTests
         Assert.Equal("Mal", Ran.Read(ship, seat, "occupant-name").Text);
     }
 
-    /// <summary>Ejecting puts whoever sits in the seat out of it.</summary>
-    [Fact]
-    public void EjectingPutsTheOccupantOut()
-    {
-        var ship = new Rigged();
-        var seat = ship.Rig.Cockpit(1, "Cockpit");
-        seat.Sit("Mal");
-
-        Ran.Step(ship, seat, Cockpit.Eject);
-
-        Assert.Contains("Cockpit:empty", ship.Rig.Log);
-        Assert.Equal(Literal.Of(false), Ran.Read(ship, seat, Cockpit.Occupied));
-    }
-
     /// <summary>An enclosed cockpit's air is read in percent, and an open seat, which has none, offers none.</summary>
     [Fact]
     public void OnlyAnEnclosedCockpitOffersItsAir()
@@ -108,6 +94,81 @@ public class CockpitTests
         Assert.Equal(12.5, Ran.Read(ship, seat, "speed").Real, 3);
         Assert.Equal(0.5, Ran.Read(ship, seat, "gravity").Real, 3);
         Assert.Equal(40000.0, Ran.Read(ship, seat, "ship-mass").Real, 3);
+    }
+
+    /// <summary>
+    /// A cockpit vouches for who sits in it, the ship it reads and each switch with its toggle, and not for the pairs that
+    /// set a switch or for taking its controls. It offers nothing that puts its occupant out, which no player can do.
+    /// </summary>
+    [Fact]
+    public void ACockpitVouchesForItsSeatAndSwitchesAndNotTheirPairs()
+    {
+        var ship = new Rigged();
+        var seat = ship.Rig.Cockpit(1, "Cockpit");
+        string[] switches =
+        [
+            "HandBrake", "Park", "DampenersOverride", "ControlThrusters", "ControlWheels", "ControlGyros", "MainCockpit",
+            "TargetLocking", "HorizonIndicator"
+        ];
+        foreach (var id in switches)
+        {
+            seat.Carrying(id, id, ValueKind.Flag)
+                .Offering(id, id)
+                .Offering(id + "_On", id + " On")
+                .Offering(id + "_Off", id + " Off");
+        }
+
+        seat.Offering("Control", "Control");
+        var kind = ship.Entity(seat.Id).Kind;
+
+        foreach (var id in new[] { "occupied", "occupant-name", "under-control", "oxygen-level", "gravity", "ship-mass", "speed" })
+            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+
+        foreach (var id in switches)
+        {
+            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Form.Action)!.Vetted, "toggle " + id + " is not vetted");
+            Assert.False(kind.FindAction(id + "_On", Form.Action)!.Vetted, id + "_On is vetted");
+            Assert.False(kind.FindAction(id + "_Off", Form.Action)!.Vetted, id + "_Off is vetted");
+        }
+
+        Assert.False(kind.FindAction("Control", Form.Action)!.Vetted);
+        Assert.Null(kind.FindAction("eject-occupant", Form.Native));
+    }
+
+    /// <summary>
+    /// A seat that cannot fly the ship has none of the settings for flying it, in either view, as the game's terminal shows
+    /// none of them on it.
+    /// </summary>
+    [Fact]
+    public void ASeatThatCannotFlyTheShipHasNoFlightSettings()
+    {
+        var ship = new Rigged();
+        var toilet = ship.Rig.Toilet(1, "Toilet");
+        string[] switches =
+        [
+            "HandBrake", "Park", "DampenersOverride", "ControlThrusters", "ControlWheels", "ControlGyros", "MainCockpit",
+            "HorizonIndicator"
+        ];
+        foreach (var id in switches)
+        {
+            toilet.Carrying(id, id, ValueKind.Flag)
+                .Offering(id, id)
+                .Offering(id + "_On", id + " On")
+                .Offering(id + "_Off", id + " Off");
+        }
+
+        var kind = ship.Entity(toilet.Id).Kind;
+
+        foreach (var id in switches)
+        {
+            Assert.Null(kind.FindAction(id, Form.Value));
+            Assert.Null(kind.FindAction(id, Form.Action));
+            Assert.Null(kind.FindAction(id + "_On", Form.Action));
+            Assert.Null(kind.FindAction(id + "_Off", Form.Action));
+        }
+
+        Assert.True(kind.FindAction("occupied", Form.Value)!.Vetted);
     }
 
     /// <summary>The seat's own switches are said as states, each with its toggle beside it.</summary>

@@ -148,6 +148,8 @@ public class RootTests
     {
         sim.Editor.NewSystem(name);
         sim.Editor.PressStart("every");
+        sim.Editor.DeveloperMode = true;
+        sim.Tick();
         sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
         sim.Editor.PressChoice("Close");

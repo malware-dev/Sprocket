@@ -8,6 +8,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// <remarks>
     /// Only a block with a switch gets the words for one. A cargo container has no on and off, and offering them would be
     /// offering a sentence that cannot come true.
+    /// <para>
+    /// The switch is one value, set off, on, or flipped by the game's toggle. Switching on and off are kept for the script and
+    /// the terminal view, where a step says them as they always read.
+    /// </para>
     /// </remarks>
     public sealed class Functional : Capability
     {
@@ -19,7 +23,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Doing SwitchOff = Doing.Of<IMyFunctionalBlock>(block => block.Enabled = false, Off);
 
-        static readonly Being SwitchedOn = Being.Flag(On);
+        static readonly Being SwitchedOn = Being.Flag(On)
+            .Writing<IMyFunctionalBlock>((block, value) => block.Enabled = value.Flag);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -30,12 +35,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("switched-on", "switched on", SwitchedOn).Announced()
+            kind.WithValue("switched-on", "switched on", SwitchedOn).In(Category.Power).Announced()
                 .WithChange("turns-on", "turns on", "switched-on", Literal.Of(true)).Reading("is on", "is off").Announced()
                 .WithChange("turns-off", "turns off", "switched-on", Literal.Of(false)).Reading("is off", "is on").Announced()
                 .WithAction(BlockKinds.SwitchOn, "switch on", SwitchOn, "OnOff_On")
                 .WithAction(BlockKinds.SwitchOff, "switch off", SwitchOff, "OnOff_Off")
-                .Renaming("OnOff", false, "toggle on/off");
+                .Renaming("OnOff", false, "toggle on/off")
+                .Flipping("switched-on", "OnOff")
+                .Hiding("OnOff_On", "OnOff_Off");
         }
 
         /// <summary>Told as the block is switched on or off, which every functional block announces.</summary>

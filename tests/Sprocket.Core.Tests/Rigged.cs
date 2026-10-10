@@ -79,6 +79,11 @@ sealed class Rigged
         return Rig.Turret(id, name);
     }
 
+    public Remote RemoteControl(long id, string name)
+    {
+        return Rig.RemoteControl(id, name);
+    }
+
     public Rotor Hinge(long id, string name)
     {
         return Rig.Hinge(id, name);
@@ -92,6 +97,16 @@ sealed class Rigged
     public Battery Battery(long id, string name)
     {
         return Rig.Battery(id, name);
+    }
+
+    public Thruster Thruster(long id, string name)
+    {
+        return Rig.Thruster(id, name);
+    }
+
+    public JumpDrive JumpDrive(long id, string name)
+    {
+        return Rig.JumpDrive(id, name);
     }
 
     public Tank Tank(long id, string name)

@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.GUI.TextPanel;
 using Xunit;
@@ -56,9 +57,119 @@ public class ScreenBlockTests
 
         Assert.True(kind.FindAction("Title", Form.Value)!.Hidden);
         Assert.Equal("text color", kind.FindAction("FontColor", Form.Value)!.Text);
-        Assert.Equal("app text color", kind.FindAction("ScriptForegroundColor", Form.Value)!.Text);
-        Assert.Equal("keeps aspect ratio", kind.FindAction("PreserveAspectRatio", Form.Value)!.Text);
-        Assert.Equal("toggle keeps aspect ratio", kind.FindAction("PreserveAspectRatio", Form.Action)!.Text);
+        Assert.Equal("app color", kind.FindAction("ScriptForegroundColor", Form.Value)!.Text);
+        Assert.Equal("keep aspect ratio", kind.FindAction("PreserveAspectRatio", Form.Value)!.Text);
+    }
+
+    /// <summary>
+    /// A text panel vouches for what it shows and every setting it offers, and not for its title, the game's steps and
+    /// pairs that only say a setting again, or the toggle that flips whether it keeps the aspect ratio.
+    /// </summary>
+    [Fact]
+    public void ATextPanelVouchesForItsSettingsAndNotTheirSteps()
+    {
+        var ship = new Rigged();
+        var panel = ship.Rig.TextPanel(1, "Screen");
+        string[] colors = ["FontColor", "BackgroundColor", "ScriptForegroundColor", "ScriptBackgroundColor"];
+        string[] layout = ["Content", "Font", "FontSize", "alignment", "TextPaddingSlider", "Rotate", "ChangeIntervalSlider"];
+        foreach (var id in colors)
+            panel.Carrying(id, id, ValueKind.Color);
+
+        foreach (var id in layout)
+            panel.Carrying(id, id, ValueKind.Real);
+
+        panel.Carrying("Title", "Title", ValueKind.Text)
+            .Carrying("PreserveAspectRatio", "Preserve aspect ratio", ValueKind.Flag)
+            .Offering("PreserveAspectRatio", "Preserve aspect ratio On/Off")
+            .Offering("PreserveAspectRatio_On", "Preserve aspect ratio On")
+            .Offering("PreserveAspectRatio_Off", "Preserve aspect ratio Off")
+            .Offering("IncreaseFontSize", "Increase Font Size")
+            .Offering("DecreaseTextPaddingSlider", "Decrease Text padding")
+            .Offering("IncreaseChangeIntervalSlider", "Increase Image change interval");
+        var kind = ship.Entity(panel.Id).Kind;
+
+        Assert.True(kind.FindAction(TextPanel.ShowImage, Form.Native)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.Shown, Form.Value)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.App, Form.Value)!.Vetted);
+        foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio"))
+            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+
+        Assert.False(kind.FindAction("PreserveAspectRatio", Form.Action)!.Vetted);
+
+        Assert.False(kind.FindAction("Title", Form.Value)!.Vetted);
+        foreach (var id in new[]
+                 {
+                     "PreserveAspectRatio_On", "PreserveAspectRatio_Off", "IncreaseFontSize", "DecreaseTextPaddingSlider",
+                     "IncreaseChangeIntervalSlider"
+                 })
+            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+    }
+
+    /// <summary>A step chooses the app a panel runs, and leaves what the panel shows as it was.</summary>
+    [Fact]
+    public void AStepChoosesThePanelsApp()
+    {
+        var ship = new Rigged();
+        var panel = ship.Rig.TextPanel(1, "Screen");
+        panel.Content = ContentType.TEXT_AND_IMAGE;
+
+        Assert.Equal(SequenceProblem.None, Ran.Set(ship, panel, TextPanel.App, Literal.Name("TSS_Weather")));
+
+        Assert.Equal("TSS_Weather", panel.App);
+        Assert.Equal(ContentType.TEXT_AND_IMAGE, panel.Content);
+    }
+
+    /// <summary>An app the panel does not have is a fault, and leaves the app it runs as it was.</summary>
+    [Fact]
+    public void AnAppThePanelLacksIsAFault()
+    {
+        var ship = new Rigged();
+        var panel = ship.Rig.TextPanel(1, "Screen");
+        panel.App = "TSS_ClockAnalog";
+
+        Assert.Equal(SequenceProblem.Mistyped, Ran.Set(ship, panel, TextPanel.App, Literal.Name("TSS_Horizon")));
+
+        Assert.Equal("TSS_ClockAnalog", panel.App);
+    }
+
+    /// <summary>An emotion controller vouches for showing a face, and not for the game's own action for each face.</summary>
+    [Fact]
+    public void AnEmotionControllerVouchesForShowingAFaceAlone()
+    {
+        var ship = new Rigged();
+        var faces = ship.Rig.EmotionController(1, "Face");
+        var kind = ship.Entity(faces.Id).Kind;
+
+        Assert.True(kind.FindAction(EmotionController.ShowFace, Form.Native)!.Vetted);
+        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Happy.dds", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Form.Action)!.Vetted);
+    }
+
+    /// <summary>
+    /// A camera vouches for whether it is in use, its panning with its toggle and its view rotation, and not for the panning
+    /// pair or looking through it.
+    /// </summary>
+    [Fact]
+    public void ACameraVouchesForItsViewSettings()
+    {
+        var ship = new Rigged();
+        var camera = ship.Rig.Camera(1, "Camera");
+        camera.Carrying("EnablePanning", "Enable panning", ValueKind.Flag)
+            .Carrying("ViewRotation", "View rotation", ValueKind.Real)
+            .Offering("EnablePanning", "Panning On/Off")
+            .Offering("EnablePanning_On", "Panning On")
+            .Offering("EnablePanning_Off", "Panning Off")
+            .Offering("View", "View");
+        var kind = ship.Entity(camera.Id).Kind;
+
+        Assert.True(kind.FindAction(CameraBlock.InUse, Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("EnablePanning", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("EnablePanning", Form.Action)!.Vetted);
+        Assert.True(kind.FindAction("ViewRotation", Form.Value)!.Vetted);
+
+        Assert.False(kind.FindAction("EnablePanning_On", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("EnablePanning_Off", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("View", Form.Action)!.Vetted);
     }
 
     /// <summary>Showing a face offers every face the block has by its own name, and runs the game's action for the one chosen.</summary>

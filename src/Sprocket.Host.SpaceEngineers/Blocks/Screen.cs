@@ -10,17 +10,14 @@ using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block with one screen a player can set up: what it shows, and how it shows it.</summary>
-    /// <remarks>
-    /// On a block with several screens the game's settings act on whichever screen was last picked in the terminal, so
-    /// there they are kept out of the list; which screen a setting means is an option, and a value takes none.
-    /// </remarks>
+    /// <remarks>A block with several is <see cref="Screens" />'.</remarks>
     public sealed class Screen : Capability
     {
         /// <summary>The action that writes text on the block's screen.</summary>
         public const string ShowText = "show-text";
 
         /// <summary>The game's settings of a screen, which on a block with several act on the one last picked.</summary>
-        static readonly string[] Settings =
+        public static readonly string[] Settings =
         {
             "Content", "FontColor", "BackgroundColor", "Font", "FontSize", "alignment", "TextPaddingSlider",
             "ScriptForegroundColor", "ScriptBackgroundColor", "ChangeIntervalSlider", "PreserveAspectRatio"
@@ -33,19 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override bool Claims(IMyTerminalBlock block)
         {
             var screens = block as IMyTextSurfaceProvider;
-            return screens != null && (screens.UseGenericLcd || block is IMyTextPanel) && screens.SurfaceCount > 0;
+            return screens != null && (screens.UseGenericLcd || block is IMyTextPanel) && screens.SurfaceCount == 1;
         }
 
         /// <inheritdoc />
         /// <remarks>A text panel's own words for its settings are the text panel's.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            if (((IMyTextSurfaceProvider)block).SurfaceCount > 1)
-            {
-                kind.Hiding(Settings);
-                return;
-            }
-
             kind.WithAction(ShowText, "show text", Shows, Asked()).In(Category.Screen);
 
             if (block is IMyTextPanel)
@@ -61,8 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ScriptForegroundColor", true, "app color")
                 .Renaming("ScriptBackgroundColor", true, "app background color")
                 .Renaming("ChangeIntervalSlider", true, "image interval")
-                .Renaming("PreserveAspectRatio", true, "keep aspect ratio")
-                .Renaming("PreserveAspectRatio", false, "toggle keep aspect ratio");
+                .Renaming("PreserveAspectRatio", true, "keep aspect ratio");
         }
 
         /// <summary>The text to show.</summary>

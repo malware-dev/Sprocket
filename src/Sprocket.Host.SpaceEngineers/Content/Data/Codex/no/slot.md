@@ -4,7 +4,7 @@ En plass er et navngitt sted i et ![](mark:logic-system) [logikksystem](#logic-s
 
 ## To slags
 
-- En ![](mark:block) **blokkplass** holder blokkene et steg virker på eller følger med på, for eksempel en dør, eller alle lysene i luftslusen.
+- En ![](mark:block) **blokkplass** holder blokkene et steg virker på eller en utløser følger med på, for eksempel en dør, eller alle lysene i luftslusen.
 - En ![](mark:signal) **signalplass** holder en blokk og verktøylinjeplassen på den som sender ![](mark:signal) [signalet](#signal), for eksempel et knappepanel og en av knappene.
 
 ## Fylle en plass
@@ -22,7 +22,7 @@ Overskriften over plassene teller hvor mange som fortsatt mangler en blokk. En p
 
 Når du velger en blokk for et steg eller en utløser, lages en plass med navn etter blokken, som *Luftsluse indre dør*. Velger du den samme blokken igjen, brukes den samme plassen, så en blokk som mange steg bruker, er fortsatt én plass, fylt én gang.
 
-Blokken du valgte, fyller plassen for installasjonen som er valgt under `Bruker blokkene til`. Alle andre installasjoner fyller den på sitt eget konfigurasjonspanel.
+Blokken du valgte, fyller plassen for installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Alle andre installasjoner fyller den på sitt eget konfigurasjonspanel.
 
 ::: warning
 Når du fjerner det siste steget eller den siste utløseren som bruker en bestemt blokk eller et bestemt signal, forsvinner plassen fra konfigurasjonspanelet, med navnet og hva den er til. Velger du en annen blokk i stedet, lages en ny plass, som alle installasjonene må fylle på nytt. Det samme skjer om du velger den samme blokken igjen: den nye plassen får navnet til blokken, og beskrivelsen starter tom. Vil du bytte hvilken blokk en plass holder, fyller du den heller på nytt på konfigurasjonspanelet.

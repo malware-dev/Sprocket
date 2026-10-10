@@ -111,9 +111,9 @@ on screen     Automation for Test Rig
 104  Text       at {X:984 Y:1009.928} scale 0.694  #A2C3CDFF  "with the logic system page."
 105  Sprite     Sprocket_Fill         {X:1652 Y:159 W:12 H:733}  #5F7278FF
 106  ClearClip  
-107  Sprite     Sprocket_Fill         {X:1182 Y:89 W:260 H:36}  #1B242AFF
-108  Sprite     Sprocket_Fill         {X:1182 Y:89 W:260 H:1}  #5B737BFF
-109  Sprite     Sprocket_Fill         {X:1182 Y:124 W:260 H:1}  #5B737BFF
-110  Sprite     Sprocket_Fill         {X:1182 Y:89 W:1 H:36}  #5B737BFF
-111  Sprite     Sprocket_Fill         {X:1441 Y:89 W:1 H:36}  #5B737BFF
-112  Text       at {X:1194.453 Y:94.6399} scale 0.694  #A2C3CDFF  "What this screen is for, in the codex"
+107  Sprite     Sprocket_Fill         {X:1462 Y:89 W:129 H:36}  #1B242AFF
+108  Sprite     Sprocket_Fill         {X:1462 Y:89 W:129 H:1}  #5B737BFF
+109  Sprite     Sprocket_Fill         {X:1462 Y:124 W:129 H:1}  #5B737BFF
+110  Sprite     Sprocket_Fill         {X:1462 Y:89 W:1 H:36}  #5B737BFF
+111  Sprite     Sprocket_Fill         {X:1590 Y:89 W:1 H:36}  #5B737BFF
+112  Text       at {X:1474.043 Y:94.6399} scale 0.694  #A2C3CDFF  "Close the codex"

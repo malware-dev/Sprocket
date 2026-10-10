@@ -202,6 +202,20 @@ public sealed class Rig
             _grids[i].Grind(fitting);
     }
 
+    /// <summary>Deletes the grid <paramref name="grid" /> whole, which leaves the construct without it.</summary>
+    public void Delete(IMyCubeGrid grid)
+    {
+        for (var i = 0; i < _grids.Count; i++)
+        {
+            if (_grids[i].Block != grid)
+                continue;
+
+            _grids[i].Delete();
+            _grids.RemoveAt(i);
+            return;
+        }
+    }
+
     /// <summary>
     /// A light, which is the block the value work is proved against.
     /// </summary>
@@ -307,6 +321,18 @@ public sealed class Rig
             "Battery"));
     }
 
+    /// <summary>A large ion thruster, named, not overridden.</summary>
+    public Thruster Thruster(long id, string name)
+    {
+        return Weld(new Thruster(id, name, Type<MyObjectBuilder_Thrust>(), "LargeBlockLargeThrust", "Large Ion Thruster"));
+    }
+
+    /// <summary>A jump drive, named, empty, recharging and set to its longest jump.</summary>
+    public JumpDrive JumpDrive(long id, string name)
+    {
+        return Weld(new JumpDrive(id, name, Type<MyObjectBuilder_JumpDrive>(), "LargeJumpDrive", "Jump Drive"));
+    }
+
     /// <summary>A hydrogen tank, named, empty and not stockpiling.</summary>
     public Tank Tank(long id, string name)
     {
@@ -359,6 +385,55 @@ public sealed class Rig
         return turret;
     }
 
+    /// <summary>A remote control, named, with the autopilot and flight switches its terminal has.</summary>
+    public Remote RemoteControl(long id, string name)
+    {
+        var remote = Weld(new Remote(id, name, Type<MyObjectBuilder_RemoteControl>(), "LargeBlockRemoteControl",
+            "Remote Control"));
+        remote.Offering("AutoPilot", "Autopilot On/Off")
+            .Offering("AutoPilot_On", "Autopilot On")
+            .Offering("AutoPilot_Off", "Autopilot Off")
+            .Offering("Reset", "Reset waypoint")
+            .Offering("CollisionAvoidance", "Collision avoidance On/Off")
+            .Offering("CollisionAvoidance_On", "Collision avoidance On")
+            .Offering("CollisionAvoidance_Off", "Collision avoidance Off")
+            .Offering("HandBrake", "Handbrake On/Off")
+            .Offering("HandBrake_On", "Handbrake On")
+            .Offering("HandBrake_Off", "Handbrake Off")
+            .Offering("Park", "Park On/Off")
+            .Offering("Park_On", "Park On")
+            .Offering("Park_Off", "Park Off")
+            .Offering("DampenersOverride", "Inertia dampeners On/Off")
+            .Offering("DampenersOverride_On", "Inertia dampeners On")
+            .Offering("DampenersOverride_Off", "Inertia dampeners Off")
+            .Offering("ControlThrusters", "Control thrusters On/Off")
+            .Offering("ControlWheels", "Control wheels On/Off")
+            .Offering("ControlGyros", "Control gyroscopes On/Off")
+            .Offering("MainCockpit", "Main cockpit On/Off")
+            .Offering("MainRemoteControl", "Main remote control On/Off")
+            .Offering("TargetLocking", "Enable target locking On/Off")
+            .Offering("HorizonIndicator", "Show horizon and altitude On/Off")
+            .Offering("IncreaseSpeedLimit", "Increase Speed limit")
+            .Offering("DecreaseSpeedLimit", "Decrease Speed limit")
+            .Offering("SetFlightMode_BlockPropertyTitle_FlightMode_Patrol", "Flight mode Patrol")
+            .Offering("Forward", "Forward")
+            .Carrying("AutoPilot", "Autopilot", ValueKind.Flag)
+            .Carrying("CollisionAvoidance", "Collision avoidance", ValueKind.Flag)
+            .Carrying("HandBrake", "Handbrake", ValueKind.Flag)
+            .Carrying("Park", "Park", ValueKind.Flag)
+            .Carrying("DampenersOverride", "Inertia dampeners", ValueKind.Flag)
+            .Carrying("ControlThrusters", "Control thrusters", ValueKind.Flag)
+            .Carrying("ControlWheels", "Control wheels", ValueKind.Flag)
+            .Carrying("ControlGyros", "Control gyroscopes", ValueKind.Flag)
+            .Carrying("MainCockpit", "Main cockpit", ValueKind.Flag)
+            .Carrying("MainRemoteControl", "Main remote control", ValueKind.Flag)
+            .Carrying("TargetLocking", "Enable target locking", ValueKind.Flag)
+            .Carrying("HorizonIndicator", "Show horizon and altitude", ValueKind.Flag)
+            .Carrying("SpeedLimit", "Speed limit", ValueKind.Real, "0", "100")
+            .Carrying("FlightMode", "Flight mode", "Patrol", "0", "Circle", "1", "One way", "2");
+        return remote;
+    }
+
     /// <summary>An interior light, named, with the game's own type behind it.</summary>
     public Lamp Light(long id, string name)
     {
@@ -383,6 +458,18 @@ public sealed class Rig
     {
         return Weld(new Seat(id, name, Type<MyObjectBuilder_Cockpit>(), enclosed ? "LargeBlockCockpitSeat" : "OpenCockpitLarge",
             "Cockpit", enclosed ? 1f : 0f));
+    }
+
+    /// <summary>A toilet, named, empty: a seat that cannot fly the ship.</summary>
+    public Seat Toilet(long id, string name)
+    {
+        return Weld(new Seat(id, name, Type<MyObjectBuilder_Cockpit>(), "LargeBlockToilet", "Toilet", 0f, flies: false));
+    }
+
+    /// <summary>A cryo chamber, named, empty, holding air of its own.</summary>
+    public Seat CryoChamber(long id, string name)
+    {
+        return Weld(new Seat(id, name, Type<MyObjectBuilder_CryoChamber>(), "LargeBlockCryoChamber", "Cryo Chamber", 1f, true));
     }
 
     /// <summary>A text panel, named, showing nothing.</summary>
@@ -413,7 +500,7 @@ public sealed class Rig
         get
         {
             if (_grids.Count == 1)
-                return _grid.Fitted;
+                return _grids[0].Fitted;
 
             var all = new List<Fitting>();
             for (var i = 0; i < _grids.Count; i++)

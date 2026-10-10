@@ -6,6 +6,7 @@ using Sandbox.ModAPI;
 using VRage.Game.Components;
 using VRage.Game.Components.Interfaces;
 using VRage.Game.ModAPI;
+using VRage.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
@@ -119,6 +120,7 @@ public abstract class Fitting
 
     readonly List<Action<IMyCubeBlock>> _watching = new List<Action<IMyCubeBlock>>();
     readonly List<Action<IMyTerminalBlock>> _switching = new List<Action<IMyTerminalBlock>>();
+    readonly List<Action<IMyEntity>> _closing = new List<Action<IMyEntity>>();
 
     /// <summary>What the mod holds: the block, as the game's own interface.</summary>
     public IMyTerminalBlock Block { get; private set; }
@@ -129,8 +131,11 @@ public abstract class Fitting
     /// <summary>The grid the block is on, or null before it is welded to one.</summary>
     public IMyCubeGrid Grid { get; set; }
 
-    /// <summary>Whether the block has been ground off, which closes it as the game closes a block it removes.</summary>
-    public bool Closed { get; set; }
+    /// <summary>Whether the block is shown in toolbar config, the game's setting that keeps a block out of toolbar lists.</summary>
+    public bool InToolbars { get; set; } = true;
+
+    /// <summary>Whether the block has been closed, by being ground off or by its grid being deleted.</summary>
+    public bool Closed { get; private set; }
 
     /// <summary>Where the block stands on its grid, which the grid gives it as it is welded where nothing set one.</summary>
     public Vector3I? Cell { get; set; }
@@ -155,6 +160,17 @@ public abstract class Fitting
 
     /// <summary>What mods keep on the block.</summary>
     public MyModStorageComponentBase Storage { get; set; }
+
+    /// <summary>Closes the block as the game does, telling whoever listens for it closing.</summary>
+    public void Close()
+    {
+        if (Closed)
+            return;
+
+        Closed = true;
+        for (var i = _closing.Count - 1; i >= 0; i--)
+            _closing[i](Block);
+    }
 
     /// <summary>A moment of the rig running, which for most blocks is nothing at all.</summary>
     public virtual void Tick()
@@ -181,6 +197,9 @@ public abstract class Fitting
         return stand
             .Gives("EntityId", () => Id)
             .Gives("Closed", () => Closed)
+            .Gives("MarkedForClose", () => Closed)
+            .Does("add_OnMarkForClose", args => { _closing.Add((Action<IMyEntity>)args[0]); })
+            .Does("remove_OnMarkForClose", args => { _closing.Remove((Action<IMyEntity>)args[0]); })
             .Gives("CustomName", () => Name)
             .Takes("CustomName", value => Name = (string)value)
             .Gives("DisplayNameText", () => Name)
@@ -205,8 +224,9 @@ public abstract class Fitting
             .Gives("IsBeingHacked", () => false)
             .Gives("ResourceSink", () => null)
             .Gives("InventoryCount", () => 0)
-            .Gives("UseGenericLcd", () => false)
-            .Gives("SurfaceCount", () => 0)
+            .Gives("ShowInToolbarConfig", () => InToolbars)
+            .Otherwise("UseGenericLcd", () => false)
+            .Otherwise("SurfaceCount", () => 0)
             .Gives("CustomData", () => CustomData)
             .Takes("CustomData", value => CustomData = (string)value)
             .Does("add_CustomDataChanged", args => { _writing.Add((Action<IMyTerminalBlock>)args[0]); })
@@ -508,8 +528,27 @@ public abstract class Fitting
         return null;
     }
 
+    /// <summary>A component of the game's own this block carries besides its toolbar, of the type <paramref name="wanted" />, or null where it carries none.</summary>
+    protected virtual object? Part(Type wanted)
+    {
+        return null;
+    }
+
+    /// <summary>Gives this block a component of the game's, found by the mod-side interface <typeparamref name="T" /> as the game finds it.</summary>
+    /// <remarks>
+    /// What a catch-all functional block is made of: a separation charge is a functional block with a destroy component,
+    /// and nothing else says what it is.
+    /// </remarks>
+    public Fitting Holding<T>(T component) where T : class
+    {
+        _components[typeof(T)] = component;
+        return this;
+    }
+
+    readonly Dictionary<Type, object> _components = new Dictionary<Type, object>();
+
     /// <summary>
-    /// The one component the mod ever asks a block for, which is its toolbar.
+    /// A component the mod asks a block for: its toolbar, one a test gave it, or one <see cref="Part" /> gives.
     /// </summary>
     /// <remarks>
     /// A block does not implement the provider, it carries one - so a block with no toolbar answers
@@ -518,6 +557,14 @@ public abstract class Fitting
     object Component(Castle.DynamicProxy.IInvocation invocation)
     {
         var wanted = invocation.GenericArguments.Length == 1 ? invocation.GenericArguments[0] : null;
+        object held;
+        var carried = wanted == null ? null : _components.TryGetValue(wanted, out held) ? held : Part(wanted);
+        if (carried != null)
+        {
+            invocation.Arguments[0] = carried;
+            return true;
+        }
+
         if (wanted != typeof(IMyToolbarProvider) || Toolbar == null)
         {
             invocation.Arguments[0] = null;

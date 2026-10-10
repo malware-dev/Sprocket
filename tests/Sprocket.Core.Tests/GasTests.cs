@@ -11,7 +11,7 @@ namespace Sprocket.Tests;
 
 /// <summary>
 /// What a vent and a tank say of the air and the gas they hold, and what they send as it changes, on the rig's own vent and
-/// tank.
+/// tank, and what Sprocket vouches for on them and on a cryo chamber.
 /// </summary>
 /// <remarks>The rig carries no resource components, so a tank's running dry is looked for here rather than announced.</remarks>
 public class GasTests
@@ -181,7 +181,121 @@ public class GasTests
 
         var toggle = kind.FindAction("Auto-Refill", Form.Action)!;
         Assert.Equal("toggle automatic refill", toggle.Text);
-        Assert.False(toggle.Hidden);
+        Assert.True(toggle.Hidden);
+        Assert.True(automatic.Flips);
+    }
+
+    /// <summary>
+    /// A vent vouches for everything the survey keeps of it, its own members and the switch it words as depressurizing, and
+    /// not for the pair beside that switch, which pressurize and depressurize say.
+    /// </summary>
+    [Fact]
+    public void AVentVouchesForWhatItKeeps()
+    {
+        var ship = new Rigged();
+        var kind = ship.Entity(ship.Vent(1, "Vent").Id).Kind;
+
+        foreach (var id in new[]
+                 {
+                     "room-status", "airtight", "oxygen-level", "flow-into-the-room", "flow-out-of-the-room",
+                     "in-a-world-with-airtightness", "Depressurize"
+                 })
+            Assert.True(Vetted(kind, id, Form.Value), id);
+
+        Assert.True(Vetted(kind, Blocks.Vent.Pressurize, Form.Native));
+        Assert.True(Vetted(kind, Blocks.Vent.Depressurize, Form.Native));
+        Assert.True(Vetted(kind, "Depressurize", Form.Action));
+
+        Assert.False(Vetted(kind, "Depressurize_On", Form.Action));
+        Assert.False(Vetted(kind, "Depressurize_Off", Form.Action));
+    }
+
+    /// <summary>
+    /// A tank vouches for everything the survey keeps of it, its own members and the switches it words, and not for the pair
+    /// beside stockpiling, which stockpile and stockpiling say.
+    /// </summary>
+    [Fact]
+    public void ATankVouchesForWhatItKeeps()
+    {
+        var ship = new Rigged();
+        var kind = ship.Entity(ship.Tank(1, "Tank").Id).Kind;
+
+        foreach (var id in new[] { "hydrogen-level", "capacity", "Stockpile", "Auto-Refill" })
+            Assert.True(Vetted(kind, id, Form.Value), id);
+
+        Assert.True(Vetted(kind, Blocks.Tank.Stockpile, Form.Native));
+        foreach (var id in new[] { "Stockpile", "Refill", "Auto-Refill" })
+            Assert.True(Vetted(kind, id, Form.Action), id);
+
+        Assert.False(Vetted(kind, "Stockpile_On", Form.Action));
+        Assert.False(Vetted(kind, "Stockpile_Off", Form.Action));
+    }
+
+    /// <summary>
+    /// A cryo chamber vouches for who sleeps in it, its air, the ship's speed, and the seat's switches it words, and not for
+    /// the pairs beside those switches or what a pilot steers with, which do nothing in a bed; it has no horizon, which the
+    /// game's terminal never shows on one.
+    /// </summary>
+    [Fact]
+    public void ACryoChamberVouchesForWhatItKeeps()
+    {
+        var ship = new Rigged();
+        var chamber = ship.Rig.CryoChamber(1, "Bed");
+        foreach (var id in new[] { "DampenersOverride", "HandBrake", "Park", "MainCockpit", "ControlThrusters", "HorizonIndicator" })
+        {
+            chamber.Carrying(id, id, ValueKind.Flag).Offering(id, id + " On/Off");
+            chamber.Offering(id + "_On", id + " On").Offering(id + "_Off", id + " Off");
+        }
+
+        var kind = ship.Entity(chamber.Id).Kind;
+
+        foreach (var id in new[] { "occupied", "occupant-name", "oxygen-level", "speed" })
+            Assert.True(Vetted(kind, id, Form.Value), id);
+
+        foreach (var id in new[] { "DampenersOverride", "HandBrake", "Park", "MainCockpit" })
+        {
+            Assert.True(Vetted(kind, id, Form.Value), id);
+            Assert.True(Vetted(kind, id, Form.Action), id);
+            Assert.False(Vetted(kind, id + "_On", Form.Action), id + "_On");
+            Assert.False(Vetted(kind, id + "_Off", Form.Action), id + "_Off");
+        }
+
+        Assert.False(Vetted(kind, "ControlThrusters", Form.Value));
+        Assert.False(Vetted(kind, "ControlThrusters", Form.Action));
+
+        Assert.Null(kind.FindAction("HorizonIndicator", Form.Value));
+        Assert.Null(kind.FindAction("HorizonIndicator", Form.Action));
+    }
+
+    /// <summary>A cryo chamber says the ship's speed once, as every ship controller does, under the cockpit's heading.</summary>
+    [Fact]
+    public void ACryoChamberSaysTheShipsSpeedOnce()
+    {
+        var ship = new Rigged();
+        var chamber = ship.Rig.CryoChamber(1, "Bed");
+        var cockpit = ship.Rig.Cockpit(2, "Cockpit");
+        chamber.Speed = 12.5;
+        var kind = ship.Entity(chamber.Id).Kind;
+
+        var speeds = 0;
+        foreach (var one in kind.Actions)
+        {
+            if (one.Id == "speed")
+                speeds++;
+        }
+
+        Assert.Equal(1, speeds);
+        var seated = ship.Entity(cockpit.Id).Kind.FindAction("speed", Form.Value)!;
+        Assert.Equal(seated.Category, kind.FindAction("speed", Form.Value)!.Category);
+        Assert.Equal(12.5, Ran.Read(ship, chamber, "speed").Real, 3);
+    }
+
+    /// <summary>Whether the member <paramref name="id" /> of <paramref name="kind" />, reached as <paramref name="form" />, is one Sprocket vouches for.</summary>
+    static bool Vetted(EntityKind kind, string id, Form form)
+    {
+        var member = kind.FindAction(id, form);
+        Assert.True(member != null, id + " is not on the block as " + form);
+        return member.Vetted;
     }
 
     /// <summary>The value <paramref name="id" /> of Sprocket's own on <paramref name="fitting" />, read now.</summary>

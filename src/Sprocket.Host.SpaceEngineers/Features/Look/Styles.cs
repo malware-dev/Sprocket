@@ -142,16 +142,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A question hanging under the control that raised it, small and quiet above its answers.</summary>
         public static readonly RichTextStyle MenuQuestion = new RichTextStyle(SlotDescription);
 
-        /// <summary>A formatting example as it reads, beside the marks that make it.</summary>
+        /// <summary>A description as it reads, with no room of its own around it.</summary>
         public static readonly RichTextStyle Example = new RichTextStyle(Description)
         {
             Base = { Padding = new Thickness(0f) }
-        };
-
-        /// <summary>A formatting example as it is typed.</summary>
-        public static readonly TextStyle Markup = new TextStyle
-        {
-            Base = { Font = Lettering.Mono, FontSize = 16f, Color = Palette.Faint }
         };
 
         /// <summary>The codex's window: the page's own color, edged, with nothing veiled behind it, casting a floating window's shadow.</summary>
@@ -659,9 +653,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         };
 
         /// <summary>What a value in a form is, beside where it is given.</summary>
+        /// <remarks>Muted rather than faint, for 6.6:1 against the panel, where faint gives 4.5:1, the least WCAG allows.</remarks>
         public static readonly TextStyle ValueLabel = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Faint }
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted }
         };
 
         /// <summary>Why a form cannot be finished as it stands, beside the way to finish it.</summary>
@@ -729,6 +724,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.Line }
         };
 
+        /// <summary>An entry of a menu listed under another, set in from it.</summary>
+        public static readonly ElementStyle MenuRowNested = new ElementStyle
+        {
+            Base = { Padding = new Thickness(32f, 8f, 12f, 8f) },
+            Hot = { Background = Palette.Line }
+        };
+
         /// <summary>The entry of a menu that Enter takes, drawn the way every other thing that carries on is drawn.</summary>
         public static readonly ElementStyle MenuRowTaken = new ElementStyle(MenuRow)
         {
@@ -775,9 +777,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         };
 
         /// <summary>A quiet line under what a column asks, or about what it lists.</summary>
+        /// <remarks>Muted rather than faint, for 6.6:1 against the panel, where faint gives 4.5:1, the least WCAG allows.</remarks>
         public static readonly TextStyle ColumnNote = new TextStyle
         {
-            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Muted }
         };
 
         /// <summary>A box a list is narrowed by typing into.</summary>
@@ -802,26 +805,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted, Padding = new Thickness(4f, 8f, 0f, 0f) }
         };
 
-        /// <summary>One way of looking at a list, as the game draws the tabs across its terminal.</summary>
-        public static readonly ButtonStyle Tab = new ButtonStyle
+        /// <summary>A quiet link at the end of a column's heading to another way of looking at its list.</summary>
+        public static readonly ButtonStyle ViewLink = new ButtonStyle
         {
-            Base =
-            {
-                Font = MyFontEnum.White,
-                FontSize = 20f,
-                Color = Palette.Muted,
-                Background = Palette.Panel,
-                Edge = Palette.Line,
-                Padding = new Thickness(8f, 8f)
-            },
+            Base = { Font = MyFontEnum.White, FontSize = 20f, Color = Palette.Muted, Padding = new Thickness(8f, 4f) },
             Hot = { Background = Palette.PanelHot, Color = Palette.Ink }
-        };
-
-        /// <summary>The way of looking at a list that is showing, the lightest plate as the game has it.</summary>
-        public static readonly ButtonStyle TabCurrent = new ButtonStyle(Tab)
-        {
-            Base = { Background = Palette.Line },
-            Hot = { Background = Palette.Line }
         };
 
         /// <summary>A thing to choose in a column, lit under the pointer.</summary>
