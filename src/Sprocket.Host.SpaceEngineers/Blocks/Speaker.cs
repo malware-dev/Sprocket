@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sandbox.Definitions;
 using Sandbox.ModAPI;
@@ -12,19 +13,28 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </summary>
     /// <remarks>
     /// Playing is not waited for. A dedicated server plays no sound at all and nothing tells a mod when
-    /// one has finished, so there is nothing to wait on.
+    /// one has finished, so there is nothing to wait on, and nothing to say whether a sound is playing.
+    /// <para>
+    /// A jukebox is a sound block to the game too, and is not this: it plays a playlist, and a single sound outside it is
+    /// what its own terminal hides. See <see cref="Jukebox" />.
+    /// </para>
     /// </remarks>
     public sealed class Speaker : Capability
     {
         /// <summary>Playing a chosen sound, which is Sprocket's own.</summary>
         public const string Play = "play";
 
+        /// <summary>The sound the block holds ready, which is Sprocket's own.</summary>
+        public const string Selected = "selected-sound";
+
+        const string Unheard = "A sound block raises no event when its sound is chosen.";
+
         static readonly Doing Plays = Doing.Of<IMySoundBlock, Chosen>(Chosen.Read, Played);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
-            return block is IMySoundBlock;
+            return block is IMySoundBlock && !Jukebox.Is(block);
         }
 
         /// <inheritdoc />
@@ -34,23 +44,34 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction(Play, "play", Plays, AskedSound(block)).In(Category.Sound)
-                .Hiding("PlaySound");
+            var words = new List<string>();
+            var means = new List<string>();
+            Sounds(block, words, means);
+
+            var sound = Field.Among("sound", words, means);
+            sound.Entry = Entry.Text;
+            sound.Needed = true;
+
+            kind.WithAction(Play, "play", Plays, sound).In(Category.Sound)
+                .WithValue(Selected, "selected sound", Holding(means.ToArray())).Looked(Unheard)
+                .Hiding("PlaySound")
+                .Renaming("StopSound", false, "stop")
+                .Renaming("VolumeSlider", true, "volume")
+                .Renaming("RangeSlider", true, "range")
+                .Renaming("LoopableSlider", true, "loop time");
         }
 
         /// <summary>
-        /// The sound to play, from the list the terminal shows and by the names it shows them by.
+        /// Every sound the block can play, by the names the terminal shows into <paramref name="words" /> and by id into
+        /// <paramref name="means" />.
         /// </summary>
         /// <remarks>
         /// Every sound block has the same list, which is every public sound category the game has
         /// loaded. Where none are loaded - the test harness - the block's own list of ids, each
         /// named by itself.
         /// </remarks>
-        static Field AskedSound(IMyTerminalBlock block)
+        static void Sounds(IMyTerminalBlock block, List<string> words, List<string> means)
         {
-            var words = new List<string>();
-            var means = new List<string>();
-
             var definitions = MyDefinitionManager.Static;
             if (definitions != null)
             {
@@ -67,19 +88,25 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 }
             }
 
-            if (means.Count == 0)
-            {
-                var sounds = block as IMySoundBlock;
-                if (sounds != null)
-                    sounds.GetSounds(means);
+            if (means.Count > 0)
+                return;
 
-                words.AddRange(means);
-            }
+            var sounds = block as IMySoundBlock;
+            if (sounds != null)
+                sounds.GetSounds(means);
 
-            var sound = Field.Among("sound", words, means);
-            sound.Entry = Entry.Text;
-            sound.Needed = true;
-            return sound;
+            words.AddRange(means);
+        }
+
+        /// <summary>The sound the block holds ready, as one of <paramref name="sounds" /> by id.</summary>
+        /// <remarks>
+        /// A look finds the selected sound among the ids, which is a pass over the list; it is made only where an <c>if</c>
+        /// reads the value or a <c>when</c> watches it, on its cadence. A sound the list does not hold, or none, is no
+        /// position among them, and is none of the names.
+        /// </remarks>
+        static Being Holding(string[] sounds)
+        {
+            return Being.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound));
         }
 
         /// <summary>Plays the sound a step chose, or the one left selected where it chose none.</summary>

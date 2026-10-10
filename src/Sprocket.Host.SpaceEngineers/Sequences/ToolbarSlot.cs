@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public int Slot { get; private set; }
 
         /// <summary>Whether this stands for many slots that run at one moment: page 0 is every page, slot 0 every slot.</summary>
-        /// <remarks>A timer runs every slot when it goes off, and a sensor the first slot of every page when it detects something.</remarks>
+        /// <remarks>A timer runs every slot when it goes off, and a sensor the first slot of every page when it starts detecting.</remarks>
         public bool IsMany => Page == 0 || Slot == 0;
 
         /// <summary>The id of the trigger this slot, or these slots, are on its block: <c>toolbar-1-1-4</c>, or <c>toolbar-1-0-1</c> for many.</summary>

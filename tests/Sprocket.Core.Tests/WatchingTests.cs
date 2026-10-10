@@ -20,7 +20,11 @@ public class WatchingTests
         {
             ship.Door(1, "Door").Id, ship.Vent(2, "Vent").Id, ship.Rotor(3, "Rotor").Id, ship.Panel(4, "Panel").Id,
             ship.Light(5, "Lamp").Id, ship.Beacon(6, "Beacon").Id, ship.Hinge(7, "Hinge").Id, ship.Piston(8, "Piston").Id,
-            ship.Battery(9, "Battery").Id, ship.Tank(10, "Tank").Id, ship.Speaker(11, "Speaker").Id
+            ship.Battery(9, "Battery").Id, ship.Tank(10, "Tank").Id, ship.Speaker(11, "Speaker").Id,
+            ship.Rig.Spotlight(12, "Spotlight").Id, ship.Rig.Jukebox(13, "Jukebox").Id, ship.Rig.Cockpit(14, "Cockpit").Id,
+            ship.Rig.TextPanel(15, "Screen").Id, ship.Rig.Camera(16, "Camera").Id, ship.Rig.EmotionController(17, "Face").Id,
+            ship.Rig.Timer(18, "Timer").Id, ship.Rig.Programmable(19, "Script Block").Id, ship.Warhead(20, "Warhead").Id,
+            ship.Turret(21, "Turret").Id
         };
 
         var unsaid = new List<string>();

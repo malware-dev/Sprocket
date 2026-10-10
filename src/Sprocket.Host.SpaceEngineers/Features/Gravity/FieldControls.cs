@@ -164,7 +164,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         {
             var grid = generator.CubeGrid;
             var centre = generator.PositionComp.LocalVolume.Center;
-            var wanted = FieldFit.Covering(grid.WorldMatrix, grid.GridSize, min, max, generator.WorldMatrix, centre);
+            var wanted = FieldFit.Covering(generator, min, max);
 
             generator.FieldSize = wanted;
 

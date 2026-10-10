@@ -60,6 +60,11 @@ public class CategoryTests
         Assert.Equal(Category.Behaviour, Categories.Of("useConveyor"));
 
         Assert.Equal(Category.Behaviour, Categories.Of("Auto-Refill"));
+
+        // A tank holds hydrogen as often as oxygen, so its store is gas; the air in a room is the vent's alone.
+        Assert.Equal(Category.Gas, Categories.Of("Stockpile"));
+        Assert.Equal(Category.Gas, Categories.Of("Stockpile_On"));
+        Assert.Equal(Category.Air, Categories.Of("Depressurize"));
     }
 
     /// <summary>

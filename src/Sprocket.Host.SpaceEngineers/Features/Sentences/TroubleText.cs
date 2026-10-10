@@ -36,6 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 case Cause.TankStockpileOff: return texts.TroubleTankStockpileOff;
                 case Cause.TankNoPower: return texts.TroubleTankNoPower;
                 case Cause.TankNoGas: return Template.Fill(texts.TroubleTankNoGas, "gas", trouble.About ?? "");
+                case Cause.JumpDriveRechargeOff: return texts.TroubleJumpDriveRechargeOff;
                 default: return "";
             }
         }

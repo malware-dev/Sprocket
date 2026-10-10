@@ -2,13 +2,13 @@ window        1920 x 1080
 safe gui area {X:240 Y:0 W:1440 H:1080}
 UI size       {X:1440 Y:1080}
 screen bounds {X:-240 Y:0 W:1920 H:1080}
-on screen     Set Charge Mode on Standby Battery
+on screen     Charge Mode on Standby Battery
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1259 H:40}
-004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Set Charge Mode on Standby Battery"
+004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Charge Mode on Standby Battery"
 005  ClearClip  
 006  Text       at {X:1574.702 Y:55.81107} scale 0.972  #A2C3CDFF  "?"
 007  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #8EBCCFFF
@@ -83,13 +83,13 @@ on screen     Set Charge Mode on Standby Battery
 076  Text       at {X:752 Y:343.2255} scale 0.833  #85A1A9FF  "POWER"
 077  Sprite     Sprocket_Fill         {X:740 Y:374 W:416 H:40}  #5B737BFF
 078  Text       at {X:752 Y:382.5141} scale 0.401  #A2C3CDFF  "l"
-079  Text       at {X:779.6875 Y:379.2255} scale 0.833  #DCF5FDFF  "Set Charge Mode"
+079  Text       at {X:779.6875 Y:379.2255} scale 0.833  #DCF5FDFF  "Charge Mode"
 080  Text       at {X:752 Y:426.5141} scale 0.401  #A2C3CDFF  "i"
 081  Text       at {X:779.6875 Y:423.2255} scale 0.833  #DCF5FDFF  "Switch off"
 082  Text       at {X:752 Y:470.5141} scale 0.401  #A2C3CDFF  "i"
 083  Text       at {X:779.6875 Y:467.2255} scale 0.833  #DCF5FDFF  "Switch on"
 084  Text       at {X:752 Y:514.514} scale 0.401  #A2C3CDFF  "i"
-085  Text       at {X:779.6875 Y:511.2255} scale 0.833  #DCF5FDFF  "Toggle block On/Off"
+085  Text       at {X:779.6875 Y:511.2255} scale 0.833  #DCF5FDFF  "Toggle on/off"
 086  SetClip    {X:256 Y:118 W:1408 H:902}
 087  Sprite     Sprocket_Fill         {X:1192 Y:118 W:460 H:902}  #29363EFF
 088  Sprite     Sprocket_Fill         {X:1192 Y:118 W:460 H:1}  #5B737BFF
@@ -97,7 +97,7 @@ on screen     Set Charge Mode on Standby Battery
 090  Sprite     Sprocket_Fill         {X:1192 Y:118 W:1 H:902}  #5B737BFF
 091  Sprite     Sprocket_Fill         {X:1651 Y:118 W:1 H:902}  #5B737BFF
 092  SetClip    {X:1192 Y:118 W:460 H:902}
-093  Text       at {X:1208 Y:131.2255} scale 0.833  #DCF5FDFF  "SET CHARGE MODE"
+093  Text       at {X:1208 Y:131.2255} scale 0.833  #DCF5FDFF  "CHARGE MODE"
 094  Text       at {X:1208 Y:195.6399} scale 0.694  #85A1A9FF  "Charge Mode"
 095  Sprite     Sprocket_Fill         {X:1397 Y:194 W:56 H:28}  #20272DFF
 096  Sprite     Sprocket_Fill         {X:1397 Y:194 W:56 H:1}  #5B737BFF

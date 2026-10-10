@@ -85,6 +85,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return vent.Depressurize ? 2 : 0;
         });
 
+        static readonly Being Airtight = Being.Flag(Reading.Of<IMyAirVent>(vent => vent.CanPressurize));
+
+        // The game reads the room as a fraction; every fill Sprocket says is in percent.
+        static readonly Being Level = Being.Number<IMyAirVent>(vent => vent.GetOxygenLevel() * 100.0);
+
+        static readonly Being Into = Being.Number<IMyAirVent>(vent => vent.GasInputPerSecond);
+
+        static readonly Being OutOf = Being.Number<IMyAirVent>(vent => vent.GasOutputPerSecond);
+
+        static readonly Being Airtightness = Being.Flag(Reading.Of<IMyAirVent>(vent => vent.PressurizationEnabled));
+
         static readonly Doing Fills = Doing.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = false, Air,
             (vent, stuck, seen) => vent.IsWorking && Passes(Filling(vent, seen), stuck, Cause.VentNoOxygen),
@@ -105,11 +116,19 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>Nothing to call off: a vent goes on with the air it was moving, and a room half emptied is no kind of stop.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("room-status", "room status", Room).Looked(Unheard)
+            kind.WithValue("room-status", "room status", Room).Looked(Unheard).In(Category.Air)
                 .WithChange("finishes-filling", "finishes filling", "room-status", Literal.Name("full"))
                 .Reading("has air", "has no air").Looked(Unheard)
                 .WithChange("finishes-emptying", "finishes emptying", "room-status", Literal.Name("empty"))
                 .Reading("is empty", "is not empty").Looked(Unheard)
+                .WithValue("airtight", "airtight", Airtight).Looked(Unheard).In(Category.Air)
+                .WithValue("oxygen-level", "oxygen level", Level).Looked(Unheard).In(Category.Air)
+                .WithValue("flow-into-the-room", "flow into the room", Into).Looked(Unheard).In(Category.Air)
+                .WithValue("flow-out-of-the-room", "flow out of the room", OutOf).Looked(Unheard).In(Category.Air)
+                .WithValue("in-a-world-with-airtightness", "in a world with airtightness", Airtightness)
+                .Looked("The world's airtightness is set before it starts, and nothing announces it.").In(Category.Air)
+                .Renaming("Depressurize", true, "depressurizing")
+                .Renaming("Depressurize", false, "toggle depressurize")
                 .WithAction(Pressurize, "pressurize", Fills, "Depressurize_Off").Lasting().Asking(Asked(
                     "**Hold** waits until the room is full. Where there is no more oxygen to give, as when the tanks are "
                     + "empty, that wait never ends.\n\n**Move on** carries on once the room will fill no further, with what "

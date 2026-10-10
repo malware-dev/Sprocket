@@ -77,6 +77,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         TankNoPower,
 
         /// <summary>The tank cannot fill: none of its gas is coming in.</summary>
-        TankNoGas
+        TankNoGas,
+
+        /// <summary>Something else switched the jump drive's recharging off.</summary>
+        JumpDriveRechargeOff
     }
 }

@@ -1277,8 +1277,12 @@ Renaming it here renames the grid.</value>
     <value>cannot fill - no {gas} coming in</value>
     <comment>A tank gets no gas; {gas} is the gas the game names.</comment>
   </data>
+  <data name="Sprocket.Trouble.JumpDriveRechargeOff" xml:space="preserve">
+    <value>stopped - something else switched recharging off</value>
+    <comment>Something else switched a jump drive's recharging off.</comment>
+  </data>
   <data name="Sprocket.Status.Damaged" xml:space="preserve">
-    <value>damaged</value>
+    <value>broken</value>
     <comment>A block's state.</comment>
   </data>
   <data name="Sprocket.Status.Off" xml:space="preserve">
@@ -1412,6 +1416,14 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Category.Air" xml:space="preserve">
     <value>Air</value>
     <comment>Heading over a group of members.</comment>
+  </data>
+  <data name="Sprocket.Category.Gas" xml:space="preserve">
+    <value>Gas</value>
+    <comment>Heading over a group of members: a tank's or a generator's gas.</comment>
+  </data>
+  <data name="Sprocket.Category.Fuel" xml:space="preserve">
+    <value>Fuel</value>
+    <comment>Heading over a group of members: what an engine burns.</comment>
   </data>
   <data name="Sprocket.Category.Production" xml:space="preserve">
     <value>Production</value>

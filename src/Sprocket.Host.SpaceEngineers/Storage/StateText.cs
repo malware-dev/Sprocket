@@ -478,7 +478,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             "battery told to discharge", "battery told to auto", "battery off", "battery damaged", "battery no power",
             "piston no power", "piston no head", "piston stopped", "piston reversed extending", "piston reversed retracting",
             "rotor no power", "rotor no head", "rotor locked", "rotor no torque", "rotor stopped", "rotor held",
-            "tank stockpile off", "tank no power", "tank no gas"
+            "tank stockpile off", "tank no power", "tank no gas",
+            "jump drive recharge off"
         };
 
         static readonly Cause[] Troubles =
@@ -488,7 +489,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Cause.PistonNoPower, Cause.PistonNoHead, Cause.PistonStopped, Cause.PistonReversedExtending,
             Cause.PistonReversedRetracting,
             Cause.RotorNoPower, Cause.RotorNoHead, Cause.RotorLocked, Cause.RotorNoTorque, Cause.RotorStopped, Cause.RotorHeld,
-            Cause.TankStockpileOff, Cause.TankNoPower, Cause.TankNoGas
+            Cause.TankStockpileOff, Cause.TankNoPower, Cause.TankNoGas,
+            Cause.JumpDriveRechargeOff
         };
 
         /// <summary>Writes why Sprocket switched something off: what was wrong, in which sequence, at which step, with which block, and what the block said.</summary>

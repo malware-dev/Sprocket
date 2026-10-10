@@ -18,7 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
     /// </remarks>
     public static class DoorControls
     {
-        const string Id = "Sprocket_AutoClose";
+        /// <summary>The slider's id, which is the id of the value it sets.</summary>
+        /// <remarks>Persisted in every program that sets it, so it cannot change without changing what those programs say.</remarks>
+        public const string Id = "Sprocket_AutoClose";
 
         const string Open = "Open";
 

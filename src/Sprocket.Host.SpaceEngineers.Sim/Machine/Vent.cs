@@ -25,6 +25,9 @@ public sealed class Vent : Fitting
         Fit(Pretend.To<IMyAirVent>()
             .Gives("Status", () => Status)
             .Gives("CanPressurize", () => !Leaking)
+            .Gives("PressurizationEnabled", () => true)
+            .Gives("GasInputPerSecond", () => In)
+            .Gives("GasOutputPerSecond", () => Out)
             .Gives("Depressurize", () => !_pressurizing)
             .Takes("Depressurize", value =>
             {

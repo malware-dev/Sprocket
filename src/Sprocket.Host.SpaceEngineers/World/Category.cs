@@ -32,8 +32,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What it holds and what it does with it.</summary>
         Stock,
 
-        /// <summary>Air: holding it, making it, letting it out.</summary>
+        /// <summary>The air in a room: filling it, emptying it, and how much there is.</summary>
         Air,
+
+        /// <summary>Gas held or made: a tank's store, a generator's ice, a farm's output.</summary>
+        Gas,
+
+        /// <summary>What a block burns to run, and how much it has left.</summary>
+        Fuel,
 
         /// <summary>Making things.</summary>
         Making,

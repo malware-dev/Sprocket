@@ -27,6 +27,7 @@ public sealed class Piston : Fitting
     float _lower = Lowest;
     float _upper = Highest;
     float _speed = 0.5f;
+    Action<bool>? _reached;
 
     /// <summary>A piston, <paramref name="id" /> and <paramref name="name" />, of the game's type and subtype, called <paramref name="display" />.</summary>
     public Piston(long id, string name, MyObjectBuilderType type, string subtype, string display)
@@ -45,6 +46,8 @@ public sealed class Piston : Fitting
             .Gives("Velocity", () => _speed)
             .Gives("Status", () => Status)
             .Gives("IsAttached", () => Attached)
+            .Does("add_LimitReached", handler => { _reached += (Action<bool>)handler[0]; })
+            .Does("remove_LimitReached", handler => { _reached -= (Action<bool>)handler[0]; })
             .Takes("MinLimit", value => _lower = Clamped((float)value))
             .Takes("MaxLimit", value => _upper = Clamped((float)value))
             .Takes("Velocity", value => _speed = Math.Max(-Fastest, Math.Min(Fastest, (float)value)))
@@ -143,12 +146,21 @@ public sealed class Piston : Fitting
             base.Perform(actionId, arguments);
     }
 
+    /// <summary>How many are listening for the piston to reach either end.</summary>
+    public int Listeners => _reached == null ? 0 : _reached.GetInvocationList().Length;
+
     /// <inheritdoc />
+    /// <remarks>Raises <c>LimitReached</c> on the tick it arrives at the limit it is moving towards, as the game does.</remarks>
     public override void Tick()
     {
         if (!Enabled || !Attached || _speed == 0)
             return;
 
+        var was = _position;
         _position = Math.Max(_lower, Math.Min(_upper, _position + _speed / 60f));
+
+        var limit = _speed > 0 ? _upper : _lower;
+        if (_position == limit && was != limit)
+            _reached?.Invoke(_speed > 0);
     }
 }

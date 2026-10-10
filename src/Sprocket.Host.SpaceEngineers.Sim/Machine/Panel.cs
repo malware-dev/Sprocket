@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sprocket.Sim.Fakes;
 using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
@@ -16,7 +17,9 @@ namespace Sprocket.Sim.Machine;
 public sealed class Panel : Fitting
 {
     Action<int> _pressed;
+    readonly Dictionary<int, string> _labels = new Dictionary<int, string>();
 
+    /// <summary>A panel of <paramref name="buttons" /> buttons, each a slot on its toolbar's one page.</summary>
     public Panel(long id, string name, MyObjectBuilderType type, string subtype, string display,
         int buttons)
         : base(id, name, type, subtype, display)
@@ -35,6 +38,17 @@ public sealed class Panel : Fitting
                 return null;
             })
             .Does("IsButtonAssigned", arguments => Toolbar.Holds((int)arguments[0]))
+            .Does("GetButtonName", arguments => Label((int)arguments[0]))
+            .Does("SetCustomButtonName", arguments =>
+            {
+                _labels[(int)arguments[0]] = (string)arguments[1];
+                Told("label " + arguments[0] + " " + arguments[1]);
+            })
+            .Does("ClearCustomButtonName", arguments =>
+            {
+                _labels.Remove((int)arguments[0]);
+                Told("unlabel " + arguments[0]);
+            })
             .Gives("AnyoneCanUse", () => true));
     }
 
@@ -62,5 +76,12 @@ public sealed class Panel : Fitting
             _pressed(button);
 
         Run(button);
+    }
+
+    /// <summary>What a person reads on a button, counted from zero: the label a step wrote, or the game's own where none was.</summary>
+    /// <remarks>The game's own reads "No action" for an empty slot; the rig says the same for every slot.</remarks>
+    public string Label(int button)
+    {
+        return _labels.TryGetValue(button, out var label) ? label : "No action";
     }
 }

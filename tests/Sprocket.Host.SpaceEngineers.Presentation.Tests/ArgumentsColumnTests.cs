@@ -31,7 +31,7 @@ public class ArgumentsColumnTests
     {
         var screen = Screen.Fresh(ALight.Split(' '));
 
-        Assert.False(screen.Shows("SET RADIUS"), "the options column came before anything was chosen");
+        Assert.False(screen.Shows("RADIUS"), "the options column came before anything was chosen");
         Assert.True(screen.Shows("WHAT TO DO"), "the second column is not there");
     }
 
@@ -40,8 +40,8 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius);
 
-        Assert.True(screen.Shows("SET RADIUS"), "the column is not headed by what was chosen");
-        Assert.True(screen.Shows("Radius (0.1 - 20)"), "the column asks for nothing");
+        Assert.True(screen.Shows("RADIUS"), "the column is not headed by what was chosen");
+        Assert.True(screen.Shows("radius (0.1 - 20)"), "the column asks for nothing");
         Assert.False(screen.Shows("This needs"), "the column says what its fields already show");
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised over the picker");
         Assert.False(screen.Scene.IsFilling, "a field took the keyboard before it was pressed");
@@ -63,8 +63,8 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius + " " + Done);
 
-        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
-        Assert.True(screen.Shows("Radius must be given."), "nothing said why it did not finish");
+        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.True(screen.Shows("radius must be given."), "nothing said why it did not finish");
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
 
@@ -74,8 +74,8 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 50 " + Done);
 
-        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
-        Assert.True(screen.Shows("Radius has to be between 0.1 and 20."), "nothing said why");
+        Assert.Equal("Radius on Airlock Light", screen.Ended);
+        Assert.True(screen.Shows("radius has to be between 0.1 and 20."), "nothing said why");
     }
 
     /// <summary>Nothing is held against what is typed until Done has been tried.</summary>
@@ -113,7 +113,7 @@ public class ArgumentsColumnTests
     {
         var screen = Open("double " + SetRadius);
 
-        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
+        Assert.Equal("Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
 
@@ -125,7 +125,7 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 5 " + Done + " 508 192");
 
-        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
+        Assert.Equal("Radius on Airlock Light", screen.Ended);
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised");
         Assert.True(screen.Scene.IsFilling, "the caret is not in the values");
         Assert.Equal("5.0", screen.Scene.Filling!.Text);
@@ -163,7 +163,7 @@ public class ArgumentsColumnTests
 
         Assert.False(screen.Scene.IsFilling, "the field kept the keyboard");
         Assert.True(screen.Scene.IsQuestioning, "leaving a changed pick did not ask first");
-        Assert.Equal("Set Radius on Airlock Light", screen.Ended);
+        Assert.Equal("Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Shows("7"), "what was typed was thrown away");
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using SpaceEngineers.Game.ModAPI;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Gravity
@@ -11,6 +12,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
     /// </remarks>
     public static class FieldFit
     {
+        /// <summary>The field size that reaches every cell from <paramref name="min" /> to <paramref name="max" /> of <paramref name="generator" />'s own grid.</summary>
+        public static Vector3 Covering(IMyGravityGenerator generator, Vector3I min, Vector3I max)
+        {
+            var grid = generator.CubeGrid;
+            return Covering(grid.WorldMatrix, grid.GridSize, min, max, generator.WorldMatrix,
+                generator.PositionComp.LocalVolume.Center);
+        }
+
         /// <summary>
         /// The field size that reaches every cell from <paramref name="min" /> to <paramref name="max" /> of a grid placed at
         /// <paramref name="grid" />, its cells <paramref name="cell" /> wide, for a generator placed at

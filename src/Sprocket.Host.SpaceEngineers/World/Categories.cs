@@ -353,10 +353,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "searchfield":
                     return Category.Stock;
 
-                // Air, and the tanks that hold it.
+                // The air in a room.
                 case "depressurize":
-                case "stockpile":
                     return Category.Air;
+
+                // A tank's store, which holds hydrogen as often as oxygen.
+                case "stockpile":
+                    return Category.Gas;
 
                 // Making things.
                 case "cooperativemode":

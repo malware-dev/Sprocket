@@ -6,6 +6,7 @@ using Sandbox.Definitions;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
+using VRage.Game;
 
 // The direction lives in the Ingame namespace, which cannot be imported whole: IMyMotorStator is
 // declared in both, and the mod-side one is the one with the event on it.
@@ -33,13 +34,36 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
         public const string RotateTo = "rotate-to";
 
+        /// <summary>Adding a head, which is the game's own, in one of the sizes the block offers.</summary>
+        public const string AddHead = "add-head";
+
         const float Hair = 0.0001f;
+
+        const string Turning = "A rotor raises its angle on every tick it turns, too often to listen to.";
+
+        const string Unheard = "A rotor raises nothing as it is locked or unlocked.";
 
         static readonly string[] Directions = { "0", "1", "2" };
 
         static readonly string[] Ways = { "directly", "clockwise", "counter-clockwise" };
 
+        static readonly string[] Sizes = { "normal", "medium", "small" };
+
         static readonly Reading Arrived = Reading.Of<IMyMotorStator>(AtLimit);
+
+        static readonly Reading Held = Reading.Of<IMyMotorStator>(rotor => rotor.RotorLock);
+
+        static readonly Reading Joined = Reading.Of<IMyMotorStator>(rotor => rotor.IsAttached);
+
+        // The game's angle is in radians; the terminal says degrees, a rotor's nought to three hundred and sixty and a
+        // hinge's a quarter turn either way.
+        static readonly Being RotorAngle = Being.Number<IMyMotorStator>(rotor => Degrees(rotor.Angle));
+
+        static readonly Being HingeAngle = Being.Number<IMyMotorStator>(rotor => rotor.Angle * 180.0 / Math.PI);
+
+        static readonly Being Locked = Being.Flag(Held);
+
+        static readonly Being Attached = Being.Flag(Joined);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -63,17 +87,44 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 kind.WithAction(RotateTo, "rotate", turns, AskedWay(), AskedAngle(block), AskedSpeed(block));
 
             kind.Lasting().Listed("rotate to").In(Category.Movement)
-                .Hiding("RotateToAngle", "RotorLock", "HingeLock")
+                .Hiding("RotateToAngle", "ResetVelocity")
                 .Renaming("Reverse", false, "reverse")
                 .Renaming("Attach", false, "attach")
                 .Renaming("Detach", false, "detach")
                 .Renaming(locks + "_On", false, "lock")
                 .Renaming(locks + "_Off", false, "unlock")
+                .Renaming(locks, false, "toggle lock")
                 .Renaming("Velocity", true, "speed")
                 .Renaming("LowerLimit", true, "lower limit")
                 .Renaming("UpperLimit", true, "upper limit")
                 .Renaming("Torque", true, "torque")
-                .Renaming("BrakingTorque", true, "braking torque");
+                .Renaming("BrakingTorque", true, "braking torque")
+                .Renaming("Displacement", true, "displacement")
+                .Renaming("SafetyDetach", true, "safety detach distance")
+                .Renaming("ShareInertiaTensor", true, "sharing inertia tensor")
+                .Renaming("ShareInertiaTensor", false, "toggle sharing inertia tensor");
+
+            var heads = Heads(block, hinge);
+            var adds = Doing.Of<IMyMotorStator, string>(given => Head(given, heads), Added);
+            if (heads[1] != null || heads[2] != null)
+                kind.WithAction(AddHead, "add head", adds, AskedSize(heads));
+            else
+                kind.WithAction(AddHead, "add head", adds);
+
+            kind.WithValue("angle", "angle", hinge ? HingeAngle : RotorAngle).Looked(Turning).In(Category.Movement)
+                .WithValue("locked", "locked", Locked).Looked(Unheard).In(Category.Locking)
+                .WithValue("attached", "attached", Attached).Announced()
+                .WithChange("attaches", "attaches", "attached", Literal.Of(true)).Announced()
+                .Reading("is attached", "is not attached")
+                .WithChange("detaches", "detaches", "attached", Literal.Of(false)).Announced()
+                .Reading("is detached", "is attached");
+        }
+
+        /// <summary>Told as the head is attached or detached, which every rotor and hinge raises.</summary>
+        public override IDisposable Listen(IMyTerminalBlock block, Action told)
+        {
+            var rotor = block as IMyMotorStator;
+            return rotor == null ? null : new Listening(rotor, told);
         }
 
         /// <inheritdoc />
@@ -81,6 +132,66 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var rotor = block as IMyMotorStator;
             return rotor != null && rotor.TargetVelocityRPM != 0 && !AtLimit(rotor);
+        }
+
+        /// <summary>
+        /// The game's actions that add a head to this kind of block, by size: normal, medium and small, each null where the
+        /// block does not offer it.
+        /// </summary>
+        /// <remarks>
+        /// The game offers medium and small heads on a large grid only, and medium only where the block's definition names
+        /// one; with no definition loaded, as in the test harness, it is offered.
+        /// </remarks>
+        static string[] Heads(IMyTerminalBlock block, bool hinge)
+        {
+            var stem = hinge ? "Hinge" : "Rotor";
+            var heads = new string[Sizes.Length];
+            heads[0] = "Add" + stem + "TopPart";
+            if (block.CubeGrid == null || block.CubeGrid.GridSizeEnum != MyCubeSize.Large)
+                return heads;
+
+            var definition = Definition(block);
+            if (definition == null || definition.MediumTopPart != null)
+                heads[1] = "AddMedium" + stem + "TopPart";
+
+            heads[2] = "AddSmall" + stem + "TopPart";
+            return heads;
+        }
+
+        /// <summary>The field that asks which size of head to add, among the sizes <paramref name="heads" /> offers.</summary>
+        /// <remarks>A size is written as its place among normal, medium and small, whichever of them a block offers.</remarks>
+        static Field AskedSize(string[] heads)
+        {
+            var words = new List<string>();
+            var means = new List<string>();
+            for (var i = 0; i < heads.Length; i++)
+            {
+                if (heads[i] == null)
+                    continue;
+
+                words.Add(Sizes[i]);
+                means.Add(i.ToString(CultureInfo.InvariantCulture));
+            }
+
+            var size = Field.Among("size", words, means);
+            size.Entry = Entry.Whole;
+            size.Needed = true;
+            size.Default = Sizes[0];
+            return size;
+        }
+
+        /// <summary>The game's action for the size of head a step asked for, among <paramref name="heads" />; null where it asked for one the block does not offer.</summary>
+        static string Head(IList<Literal> arguments, string[] heads)
+        {
+            var at = arguments == null || arguments.Count == 0 ? 0 : arguments[0].Whole;
+            return at >= 0 && at < heads.Length ? heads[at] : null;
+        }
+
+        /// <summary>Adds the head through the game's own action, which does nothing while one is attached.</summary>
+        static void Added(IMyMotorStator rotor, string head, Recall seen)
+        {
+            if (head != null)
+                Toolbars.Perform(rotor, head, null);
         }
 
         /// <summary>Whether the block's definition says it is a hinge rather than a rotor.</summary>
@@ -335,6 +446,31 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var wrapped = degrees % 360f;
             return wrapped < 0 ? wrapped + 360f : wrapped;
+        }
+
+        /// <summary>A rotor being listened to, until disposed.</summary>
+        sealed class Listening : IDisposable
+        {
+            readonly IMyMotorStator _rotor;
+            readonly Action _told;
+
+            public Listening(IMyMotorStator rotor, Action told)
+            {
+                _rotor = rotor;
+                _told = told;
+                _rotor.OnAttachedChanged += Changed;
+            }
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+                _rotor.OnAttachedChanged -= Changed;
+            }
+
+            void Changed(IMyMechanicalConnectionBlock block)
+            {
+                _told();
+            }
         }
 
         /// <summary>Where a step told the rotor to turn to, which way, and how fast.</summary>

@@ -154,12 +154,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// </summary>
         /// <remarks>
         /// A step is held to the bounds, since the block takes nothing outside them; a test is not, since comparing with a
-        /// number outside them still says something.
+        /// number outside them still says something. An empty list of words is one that could not be read, as where the
+        /// game's definitions are not loaded, and holds nothing back.
         /// </remarks>
         public bool Admits(Literal given, bool bounded)
         {
             var words = Means ?? Words;
-            if (words != null && !words.Contains(given.Said))
+            if (words != null && words.Count > 0 && !words.Contains(given.Said))
                 return false;
 
             var number = given.Kind == ValueKind.Integer || given.Kind == ValueKind.Real;

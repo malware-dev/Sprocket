@@ -184,6 +184,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                 string word;
                 if (kind.Renames(offer.Id, false, out word))
                     Last(kind).Rename(word);
+
+                if (kind.Vets(offer.Id, false))
+                    Last(kind).Vouch();
             }
         }
 
@@ -257,6 +260,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 if (renamed)
                     Last(kind).Rename(word);
+
+                if (kind.Vets(offer.Id, true))
+                    Last(kind).Vouch();
             }
         }
 
@@ -360,7 +366,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.GamePropertyId != null && (Turned(actions, one) || kind.Hides(one.GamePropertyId)))
+                if (one.GamePropertyId != null && ((!one.Renamed && Turned(actions, one)) || kind.Hides(one.GamePropertyId)))
                     one.Hide();
             }
 
@@ -386,12 +392,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// way it is not, and whatever the block starts at.
         /// <para>
         /// Decided by the ids alone. A value that is not itself listed stands in for nothing, so a
-        /// block that keeps a value out of the list keeps the actions made out of it.
+        /// block that keeps a value out of the list keeps the actions made out of it. One that has
+        /// been given a word of its own is offered as that word, beside the value.
         /// </para>
         /// </remarks>
         static bool StoodIn(IList<EntityAction> actions, EntityAction one)
         {
-            if (!one.Unaltered)
+            if (!one.Unaltered || one.Renamed)
                 return false;
 
             for (var i = 0; i < actions.Count; i++)
@@ -412,8 +419,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Whether Sprocket's own entries turn this switch each way.</summary>
         /// <remarks>
-        /// Then the value is the third way of saying the same thing: a vent that reads pressurize and
-        /// depressurize has no use for a Depressurize to be told true.
+        /// Then the value is the third way of saying the same thing: a door that reads open and close has no
+        /// use for an Open to be told true. A value the kind gives a word of its own is offered all the same,
+        /// as a vent's depressurizing is beside its pressurize and depressurize.
         /// </remarks>
         static bool Turned(IList<EntityAction> actions, EntityAction value)
         {

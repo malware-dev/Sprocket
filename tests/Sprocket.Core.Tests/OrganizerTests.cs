@@ -52,11 +52,69 @@ public class OrganizerTests
     {
         var ship = new Rigged();
         var lamp = ship.Light(1, "Lamp");
-        lamp.Carrying("ShowOnHUD", "Show on HUD", ValueKind.Flag).Offering("ShowOnHUD", "Show on HUD On/Off");
+        lamp.Carrying("UseConveyor", "Use Conveyor System", ValueKind.Flag).Offering("UseConveyor", "Use Conveyor System On/Off");
         var kind = ship.Entity(lamp.Id).Kind;
 
-        Assert.True(kind.FindAction("ShowOnHUD", Form.Action)!.Hidden);
-        Assert.False(kind.FindAction("ShowOnHUD", Form.Value)!.Hidden);
+        Assert.True(kind.FindAction("UseConveyor", Form.Action)!.Hidden);
+        Assert.False(kind.FindAction("UseConveyor", Form.Value)!.Hidden);
+    }
+
+    /// <summary>
+    /// The mark on the HUD is offered every way the game has it, each in Sprocket's words: shown, hidden, toggled, and a value
+    /// read after "is".
+    /// </summary>
+    [Fact]
+    public void TheHudMarkIsOfferedEveryWay()
+    {
+        var ship = new Rigged();
+        var lamp = ship.Light(1, "Lamp");
+        lamp.Carrying("ShowOnHUD", "Show on HUD", ValueKind.Flag)
+            .Offering("ShowOnHUD", "Show on HUD On/Off")
+            .Offering("ShowOnHUD_On", "Show on HUD On")
+            .Offering("ShowOnHUD_Off", "Show on HUD Off");
+        var kind = ship.Entity(lamp.Id).Kind;
+
+        var said = new Dictionary<string, string>
+        {
+            ["ShowOnHUD_On"] = "Show on HUD",
+            ["ShowOnHUD_Off"] = "Hide from HUD",
+            ["ShowOnHUD"] = "Toggle show on HUD"
+        };
+
+        foreach (var pair in said)
+        {
+            var action = kind.FindAction(pair.Key, Form.Action)!;
+            Assert.False(action.Hidden, pair.Key + " is left out");
+            Assert.Equal(pair.Value, action.Named);
+        }
+
+        var value = kind.FindAction("ShowOnHUD", Form.Value)!;
+        Assert.False(value.Hidden);
+        Assert.Equal("Shown on HUD", value.Named);
+    }
+
+    /// <summary>
+    /// What Sprocket vouches for is its own members and the block's members a capability renamed or vetted; anything else
+    /// the block declares is not, until something vouches for it.
+    /// </summary>
+    [Fact]
+    public void OnlyWhatSprocketVouchesForIsVetted()
+    {
+        var ship = new Rigged();
+        var lamp = ship.Light(1, "Lamp");
+        lamp.Carrying("Radius", "Radius", ValueKind.Real).Offering("Strobe", "Strobe", 0);
+
+        var kind = ship.Entity(lamp.Id).Kind;
+        Assert.True(kind.FindAction(BlockKinds.SwitchOn, Form.Native)!.Vetted);
+
+        var renamed = kind.FindAction("Radius", Form.Value)!;
+        Assert.True(renamed.Renamed);
+        Assert.True(renamed.Vetted);
+
+        var strobe = kind.FindAction("Strobe", Form.Action)!;
+        Assert.False(strobe.Vetted);
+        strobe.Vouch();
+        Assert.True(strobe.Vetted);
     }
 
     /// <summary>

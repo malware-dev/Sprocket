@@ -10,6 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public static class CategoryText
     {
+        /// <summary>What <paramref name="category" /> is headed, in the words <paramref name="texts" /> give.</summary>
         public static string Of(Texts texts, Category category)
         {
             switch (category)
@@ -21,6 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 case Category.Flight: return texts.CategoryFlight;
                 case Category.Stock: return texts.CategoryCargo;
                 case Category.Air: return texts.CategoryAir;
+                case Category.Gas: return texts.CategoryGas;
+                case Category.Fuel: return texts.CategoryFuel;
                 case Category.Making: return texts.CategoryProduction;
                 case Category.Weapons: return texts.CategoryWeapons;
                 case Category.Detection: return texts.CategoryDetection;

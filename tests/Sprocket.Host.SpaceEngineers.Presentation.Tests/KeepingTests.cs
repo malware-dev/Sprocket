@@ -28,7 +28,7 @@ public class KeepingTests
     {
         var screen = Screen.Fresh((ARadiusStep + " " + Again).Split(' '));
 
-        Assert.True(screen.Shows("Radius (0.1 - 20)"), "the column asks for nothing");
+        Assert.True(screen.Shows("radius (0.1 - 20)"), "the column asks for nothing");
         Assert.True(screen.Shows("5.0"), "the box opened empty");
     }
 
@@ -88,7 +88,7 @@ public class KeepingTests
 
         Assert.Equal("\u2026 Airlock Inner Door", screen.Editor.Screen.Title());
         Assert.False(screen.Editor.Current.CanPrimary, "the picker would finish with nothing chosen");
-        Assert.False(screen.Shows("Radius (0.1 - 20)"), "the values column still asks for the radius");
+        Assert.False(screen.Shows("radius (0.1 - 20)"), "the values column still asks for the radius");
     }
 
     /// <summary>Back on blocks that offer the step's action, the action is chosen again and holds its value.</summary>
@@ -102,7 +102,7 @@ public class KeepingTests
         screen.Editor.PressBlock("Cockpit Light");
         screen.Run(2);
 
-        Assert.Equal("Set Radius on Cockpit Light", screen.Editor.Screen.Title());
+        Assert.Equal("Radius on Cockpit Light", screen.Editor.Screen.Title());
         Assert.True(screen.Shows("5.0"), "the value did not come back with the action");
 
         screen.Editor.DoublePressBlock("Cockpit Light");
@@ -123,11 +123,11 @@ public class KeepingTests
         screen.Run(2);
         screen.Editor.PressBlock("Cockpit Light");
         screen.Run(2);
-        screen.Editor.DoublePressChoice("Set Falloff");
+        screen.Editor.DoublePressChoice("Falloff");
         screen.Run(2);
 
-        Assert.Equal("Set Falloff on Cockpit Light", screen.Editor.Screen.Title());
-        Assert.True(screen.Shows("Falloff (0 - 2)"), "the values column asks for nothing");
+        Assert.Equal("Falloff on Cockpit Light", screen.Editor.Screen.Title());
+        Assert.True(screen.Shows("falloff (0 - 2)"), "the values column asks for nothing");
         Assert.False(screen.Shows("5.0"), "the radius's value was given to the falloff");
     }
 

@@ -28,8 +28,12 @@ public sealed class Tank : Fitting
         Fit(Pretend.To<IMyGasTank>()
             .Gives("Stockpile", () => _stockpile)
             .Takes("Stockpile", value => Stockpiling((bool)value))
-            .Gives("FilledRatio", () => _filled));
+            .Gives("FilledRatio", () => _filled)
+            .Gives("Capacity", () => Capacity));
     }
+
+    /// <summary>How much gas it holds when full, in litres, which is made up.</summary>
+    public float Capacity { get; set; } = 100000f;
 
     /// <summary>Whether the grid has gas to give it, which is the rig's stand-in for a ship's generators.</summary>
     public bool Supplied { get; set; } = true;

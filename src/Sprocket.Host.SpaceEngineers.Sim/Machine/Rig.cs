@@ -321,11 +321,87 @@ public sealed class Rig
             "Sound Block"));
     }
 
+    /// <summary>A warhead, named, armed and not counting down, with the actions and values its terminal has.</summary>
+    public Warhead Warhead(long id, string name)
+    {
+        var warhead = Weld(new Warhead(id, name, Type<MyObjectBuilder_Warhead>(), "LargeWarhead", "Warhead"));
+        warhead.Offering("StartCountdown", "Start countdown")
+            .Offering("StopCountdown", "Stop countdown")
+            .Offering("Detonate", "Detonate")
+            .Offering("Safety", "Toggle Arm/Disarm")
+            .Offering("Safety_On", "Arm")
+            .Offering("Safety_Off", "Disarm")
+            .Offering("IncreaseDetonationTime", "Increase Detonation time")
+            .Offering("DecreaseDetonationTime", "Decrease Detonation time")
+            .Carrying("Safety", "Arm", ValueKind.Flag)
+            .Carrying("DetonationTime", "Detonation time", ValueKind.Real, "1", "3600");
+        return warhead;
+    }
+
+    /// <summary>A gatling turret, named, with the firing and target switches its terminal has.</summary>
+    public Turret Turret(long id, string name)
+    {
+        var turret = Weld(new Turret(id, name, Type<MyObjectBuilder_LargeGatlingTurret>(), "LargeGatlingTurret",
+            "Gatling Turret"));
+        turret.Offering("Shoot", "Shoot On/Off")
+            .Offering("Shoot_On", "Shoot On")
+            .Offering("Shoot_Off", "Shoot Off")
+            .Offering("ShootOnce", "Shoot once")
+            .Offering("UseConveyor", "Use Conveyor System On/Off")
+            .Offering("TargetNeutrals", "Target neutrals On/Off")
+            .Offering("TargetNeutrals_On", "Target neutrals On")
+            .Offering("TargetNeutrals_Off", "Target neutrals Off")
+            .Offering("FocusLockedTarget", "Focus Locked Target")
+            .Carrying("Shoot", "Shoot", ValueKind.Flag)
+            .Carrying("UseConveyor", "Use Conveyor System", ValueKind.Flag)
+            .Carrying("TargetNeutrals", "Target neutrals", ValueKind.Flag)
+            .Carrying("Range", "Aiming radius", ValueKind.Real);
+        return turret;
+    }
+
     /// <summary>An interior light, named, with the game's own type behind it.</summary>
     public Lamp Light(long id, string name)
     {
         return Weld(new Lamp(id, name, Type<MyObjectBuilder_InteriorLight>(),
             "LargeBlockLight_1corner", "Interior Light"));
+    }
+
+    /// <summary>A spotlight, named, of the subtype given: a plain one, or one of the two rotating warning lights.</summary>
+    public Spotlight Spotlight(long id, string name, string subtype = "LargeBlockFrontLight")
+    {
+        return Weld(new Spotlight(id, name, Type<MyObjectBuilder_ReflectorLight>(), subtype, "Spotlight"));
+    }
+
+    /// <summary>A jukebox, named, which the game makes a sound block that only its definition tells apart.</summary>
+    public Speaker Jukebox(long id, string name)
+    {
+        return Weld(new Speaker(id, name, Type<MyObjectBuilder_Jukebox>(), "Jukebox", "Jukebox"));
+    }
+
+    /// <summary>A cockpit, named, empty: an enclosed one with air of its own, or an open seat with none.</summary>
+    public Seat Cockpit(long id, string name, bool enclosed = true)
+    {
+        return Weld(new Seat(id, name, Type<MyObjectBuilder_Cockpit>(), enclosed ? "LargeBlockCockpitSeat" : "OpenCockpitLarge",
+            "Cockpit", enclosed ? 1f : 0f));
+    }
+
+    /// <summary>A text panel, named, showing nothing.</summary>
+    public TextScreen TextPanel(long id, string name)
+    {
+        return Weld(new TextScreen(id, name, Type<MyObjectBuilder_TextPanel>(), "LargeTextPanel", "Text Panel"));
+    }
+
+    /// <summary>A camera, named, nobody looking.</summary>
+    public Camera Camera(long id, string name)
+    {
+        return Weld(new Camera(id, name, Type<MyObjectBuilder_CameraBlock>(), "LargeCameraBlock", "Camera"));
+    }
+
+    /// <summary>An emotion controller, named.</summary>
+    public Emoter EmotionController(long id, string name)
+    {
+        return Weld(new Emoter(id, name, Type<MyObjectBuilder_EmotionControllerBlock>(), "EmotionControlsBlock",
+            "Emotion Controller"));
     }
 
     /// <summary>The block Sprocket runs in, which is what the mod is handed.</summary>

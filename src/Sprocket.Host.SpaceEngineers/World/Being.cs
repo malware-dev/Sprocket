@@ -221,12 +221,28 @@ namespace Sprocket.Host.SpaceEngineers.World
                 (block, given, seen) => Literal.Of(number(block, given, seen)));
         }
 
+        /// <summary>A function of a <typeparamref name="T" /> giving back a flag, with options read into a <typeparamref name="TOptions" />.</summary>
+        public static Being Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, bool> flag)
+            where T : class
+        {
+            return new Typed<T, TOptions>(ValueKind.Flag, None, true, options,
+                (block, given, seen) => Literal.Of(flag(block, given, seen)));
+        }
+
         /// <summary>A function of a <typeparamref name="T" /> giving back a whole number, with options read into a <typeparamref name="TOptions" />.</summary>
         public static Being Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, long> whole)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Integer, None, true, options,
                 (block, given, seen) => Literal.Of(whole(block, given, seen)));
+        }
+
+        /// <summary>A function of a <typeparamref name="T" /> giving back text, with options read into a <typeparamref name="TOptions" />.</summary>
+        public static Being Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, string> text)
+            where T : class
+        {
+            return new Typed<T, TOptions>(ValueKind.Text, None, true, options,
+                (block, given, seen) => Literal.Of(text(block, given, seen) ?? ""));
         }
 
         static object Nothing(IList<Literal> arguments)

@@ -87,9 +87,9 @@ public class EditorTests
         editor.PressBlock("Airlock Light");
 
         StageColumn What() => editor.Pick().Stages
-            .Single(s => s.Entries().Any(e => e.Text == "Set Pattern"));
+            .Single(s => s.Entries().Any(e => e.Text == "Pattern"));
 
-        var pattern = What().Entries().Single(e => e.Text == "Set Pattern");
+        var pattern = What().Entries().Single(e => e.Text == "Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("pending", pattern.Status);
         Assert.False(What().Entries().Single(e => e.Text == "Switch on").IsWithheld);
@@ -159,7 +159,7 @@ public class EditorTests
 
         editor.PressChoice("AI Behavior On/Off");
         Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
-        Assert.False(Offered().Single(e => e.Text == "Set AI Behavior").IsChosen);
+        Assert.False(Offered().Single(e => e.Text == "AI Behavior").IsChosen);
         Assert.Empty(editor.Picking().Fields);
 
         editor.PressPrimary();
@@ -173,7 +173,7 @@ public class EditorTests
     /// </summary>
     /// <remarks>
     /// "Mode:" is how the terminal labels the box beside it. In a list of things to choose it reads as a
-    /// label with nothing after it, so the organized view says "Set Mode", and the terminal view shows the
+    /// label with nothing after it, so the organized view says "Mode", and the terminal view shows the
     /// block's own words as they are.
     /// </remarks>
     [Fact]
@@ -192,11 +192,39 @@ public class EditorTests
 
         IEnumerable<StageColumn> Stages() => editor.Pick().Stages;
 
-        Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "Set Mode");
-        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries()), e => e.Text == "Set Mode:");
+        Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "Mode");
+        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries()), e => e.Text == "Mode:");
 
         Stages().Single(s => s.Views.Count > 0).PressView("Terminal");
         Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "Mode:");
+    }
+
+    /// <summary>Where the game's own screens list a block is left to the terminal view.</summary>
+    [Fact]
+    public void WhereTheGameListsABlockIsLeftToTheTerminalView()
+    {
+        var ship = new Ship();
+        ship.Rig.Panel(3, "Airlock Button");
+        ship.Rig.Light(4, "Airlock Light")
+            .Carrying("ShowInTerminal", "Show block in terminal", ValueKind.Flag)
+            .Carrying("ShowInInventory", "Show block in inventory screen", ValueKind.Flag)
+            .Carrying("ShowInToolbarConfig", "Show block in toolbar config", ValueKind.Flag);
+        ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+        ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
+        var editor = ship.Editor;
+
+        StartOnTheButton(editor);
+        editor.PressAdd("task");
+        editor.PressBlock("Airlock Light");
+
+        IEnumerable<StageColumn> Stages() => editor.Pick().Stages;
+        var shown = new[] { "Show block in terminal", "Show block in inventory screen", "Show block in toolbar config" };
+
+        Assert.DoesNotContain(Stages().SelectMany(s => s.Entries()), e => shown.Contains(e.Text));
+
+        Stages().Single(s => s.Views.Count > 0).PressView("Terminal");
+        foreach (var one in shown)
+            Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == one);
     }
 
     /// <summary>
@@ -230,7 +258,7 @@ public class EditorTests
         IEnumerable<PickRow> Offered() =>
             editor.Pick().Stages.SelectMany(s => s.Entries());
 
-        Assert.DoesNotContain(Offered(), e => e.Text == "Pattern" || e.Text == "Set Pattern");
+        Assert.DoesNotContain(Offered(), e => e.Text == "Pattern");
 
         editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
         var pattern = Offered().Single(e => e.Text == "Pattern");
@@ -1415,10 +1443,11 @@ public class EditorTests
     }
 
     /// <summary>
-    /// An impossible pair is allowed, and answered where the answer belongs.
+    /// Blocks of different kinds offer together what every block has, and nothing only one of them has; a list left empty
+    /// would say so.
     /// </summary>
     [Fact]
-    public void BlocksWithNothingInCommonSaySo_RatherThanBeingUnpickable()
+    public void BlocksOfDifferentKindsShareWhatEveryBlockHas()
     {
         var ship = Build();
         ship.Editor.NewSystem("Airlock");
@@ -1427,7 +1456,9 @@ public class EditorTests
         ship.Editor.TickBlock("Inner Door");
 
         var what = ship.Editor.Pick().Stages[1];
-        Assert.Empty(what.Entries());
+        var said = what.Entries().Select(e => e.Text).ToList();
+        Assert.Contains(said, text => text.Contains("starts working"));
+        Assert.DoesNotContain(said, text => text.Contains("finishes closing"));
         Assert.NotEqual("", what.EmptyText);
     }
 

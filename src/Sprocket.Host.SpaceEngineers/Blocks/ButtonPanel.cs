@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Globalization;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.ModAPI;
@@ -7,7 +10,8 @@ using VRage.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>
-    /// A button panel: one signal for each button, which runs its own slot when it is pressed.
+    /// A button panel: one signal for each button, which runs its own slot when it is pressed, and the label a person reads
+    /// on each button.
     /// </summary>
     /// <remarks>
     /// There is no "was pressed" to sample - a press is a moment the game reports and then forgets - so the
@@ -22,6 +26,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class ButtonPanel : Capability
     {
+        /// <summary>Writing a label on a button, which is Sprocket's own.</summary>
+        public const string Label = "label-button";
+
+        /// <summary>What a button's label reads, which is Sprocket's own and takes the button.</summary>
+        public const string LabelOf = "label-of-button";
+
+        /// <summary>Whether a button has anything on its slot, which is Sprocket's own and takes the button.</summary>
+        public const string Assigned = "button-has-an-action";
+
+        const string Unheard = "A button panel raises no event when a label or a slot changes.";
+
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
         {
@@ -30,13 +45,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         /// <summary>"button 2 is pressed": every button by its number, on a panel with one button as on a panel with several.</summary>
         /// <remarks>
-        /// The same signal reads the same whatever panel it is on, so installations filled from different panels agree.
-        /// What is written on the panel for somebody standing in front of it to read is a label on the machine rather than
-        /// anything the machine does, so it is kept out.
+        /// The same signal reads the same whatever panel it is on, so installations filled from different panels agree. The
+        /// terminal's own label box edits whichever button is picked in its list, so it is left to the terminal view, and a
+        /// step labels the button it names.
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Hiding("ButtonName");
+            kind.Hiding("ButtonName")
+                .Renaming("AnyoneCanUse", true, "anyone can use")
+                .Renaming("AnyoneCanUse", false, "toggle anyone can use");
 
             IMyToolbar toolbar = Toolbars.Of(block, 1);
             if (toolbar == null || toolbar.SlotCount < 1)
@@ -49,6 +66,30 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 var at = new ToolbarSlot(1, button / toolbar.SlotCount + 1, button % toolbar.SlotCount + 1);
                 kind.WithSignal(at, "button " + (button + 1) + " is pressed");
             }
+
+            var labels = Doing.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
+            {
+                // A function's button is held to the panel's when a program is checked; an action's is not, so a button the
+                // panel lacks is never handed to the game, which would keep a label for it.
+                if (!Within(labelled, buttons))
+                    return;
+
+                if (labelled.Text.Length == 0)
+                    panel.ClearCustomButtonName(labelled.Button);
+                else
+                    panel.SetCustomButtonName(labelled.Button, labelled.Text);
+            });
+
+            var label = Field.Called("label");
+            label.Entry = Entry.Text;
+
+            kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
+                .WithValue(LabelOf, "label of button", Being.Text<IMyButtonPanel, Labelled>(Labelled.Read,
+                    (panel, labelled, seen) => panel.GetButtonName(labelled.Button))
+                    .Taking(Asked(buttons))).Looked(Unheard)
+                .WithValue(Assigned, "button has an action", Being.Flag<IMyButtonPanel, Labelled>(Labelled.Read,
+                    (panel, labelled, seen) => panel.IsButtonAssigned(labelled.Button))
+                    .Taking(Asked(buttons))).Looked(Unheard);
         }
 
         /// <summary>Not wired where none of its buttons is, because an unwired button cannot report a press.</summary>
@@ -78,6 +119,46 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             IMyToolbar toolbar = Toolbars.Of(block);
             return toolbar == null ? 0 : toolbar.SlotCount;
+        }
+
+        /// <summary>The button a member is given, by its number from 1 to <paramref name="buttons" />.</summary>
+        static Field Asked(int buttons)
+        {
+            var button = Field.Between("button", "1", buttons.ToString(CultureInfo.InvariantCulture));
+            button.Entry = Entry.Whole;
+            button.Needed = true;
+            return button;
+        }
+
+        /// <summary>Whether the button a member was given is one of the panel's <paramref name="buttons" />.</summary>
+        static bool Within(Labelled labelled, int buttons)
+        {
+            return labelled.Button >= 0 && labelled.Button < buttons;
+        }
+
+        /// <summary>The button a member was given, counted from 0 as the game counts it, and the label where one was given.</summary>
+        sealed class Labelled
+        {
+            /// <summary>The button, counted from 0, or -1 where none was given.</summary>
+            public int Button = -1;
+
+            /// <summary>The label, or empty to give the button back the game's own.</summary>
+            public string Text = "";
+
+            /// <summary>What a member taking a button, and perhaps a label, was given.</summary>
+            public static Labelled Read(IList<Literal> arguments)
+            {
+                var labelled = new Labelled();
+                if (arguments == null || arguments.Count == 0 || arguments[0].Kind != ValueKind.Integer
+                    || arguments[0].Whole < 1 || arguments[0].Whole > int.MaxValue)
+                    return labelled;
+
+                labelled.Button = (int)arguments[0].Whole - 1;
+                if (arguments.Count > 1)
+                    labelled.Text = arguments[1].Text ?? "";
+
+                return labelled;
+            }
         }
     }
 }

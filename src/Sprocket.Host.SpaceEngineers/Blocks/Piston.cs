@@ -38,6 +38,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const float Hair = 0.0001f;
 
+        const string Moving = "A piston raises its position on every tick it moves, too often to listen to, and nothing else as it starts or stops.";
+
+        static readonly string[] Statuses = { "extended", "retracted", "extending", "retracting", "stopped" };
+
+        static readonly Being State = Being.OneOf<IMyPistonBase>(Statuses, piston => Rank(piston.Status));
+
+        static readonly Being Travelled = Being.Number<IMyPistonBase>(piston => piston.CurrentPosition);
+
         static readonly Reading Out = Reading.Of<IMyPistonBase>(piston => piston.Status == PistonStatus.Extended);
 
         static readonly Reading In = Reading.Of<IMyPistonBase>(piston => piston.Status == PistonStatus.Retracted);
@@ -67,11 +75,33 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithAction(Retract, "retract", Retracts, "Retract").Lasting().In(Category.Movement)
                 .WithAction(MoveTo, "move", Moves, AskedPosition(block), AskedSpeed(block)).Lasting().Listed("move to")
                 .In(Category.Movement)
-                .Hiding("SetAndMove")
+                .Hiding("SetAndMove", "ResetVelocity")
                 .Renaming("Reverse", false, "reverse")
                 .Renaming("Velocity", true, "speed")
                 .Renaming("LowerLimit", true, "lower limit")
-                .Renaming("UpperLimit", true, "upper limit");
+                .Renaming("UpperLimit", true, "upper limit")
+                .Renaming("MaxImpulseAxis", true, "max impulse along the axis")
+                .Renaming("MaxImpulseNonAxis", true, "max impulse across the axis")
+                .Renaming("Add Top Part", false, "add head")
+                .Renaming("SafetyDetach", true, "safety detach distance")
+                .Renaming("ShareInertiaTensor", true, "sharing inertia tensor")
+                .Renaming("ShareInertiaTensor", false, "toggle sharing inertia tensor");
+
+            // Where it is, and whether it is going anywhere, change as it moves, which it says nothing of; it says when it
+            // reaches either end.
+            kind.WithValue("position", "position", Travelled).Looked(Moving).In(Category.Movement)
+                .WithValue("status", "status", State).Looked(Moving).In(Category.Movement)
+                .WithChange("finishes-extending", "finishes extending", "status", Literal.Name("extended")).Announced()
+                .Reading("is extended", "is not extended")
+                .WithChange("finishes-retracting", "finishes retracting", "status", Literal.Name("retracted")).Announced()
+                .Reading("is retracted", "is not retracted");
+        }
+
+        /// <summary>Told as the piston reaches either end of its travel, which it raises from its own update.</summary>
+        public override IDisposable Listen(IMyTerminalBlock block, Action told)
+        {
+            var piston = block as IMyPistonBase;
+            return piston == null ? null : new Listening(piston, told);
         }
 
         /// <inheritdoc />
@@ -98,6 +128,24 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var piston = block as IMyPistonBase;
             return piston != null
                 && (piston.Status == PistonStatus.Extending || piston.Status == PistonStatus.Retracting);
+        }
+
+        /// <summary>Where <paramref name="status" /> stands among the piston's statuses.</summary>
+        static int Rank(PistonStatus status)
+        {
+            switch (status)
+            {
+                case PistonStatus.Extended:
+                    return 0;
+                case PistonStatus.Retracted:
+                    return 1;
+                case PistonStatus.Extending:
+                    return 2;
+                case PistonStatus.Retracting:
+                    return 3;
+            }
+
+            return 4;
         }
 
         /// <summary>Where along its travel the piston will go, which is the piston's own to say.</summary>
@@ -241,6 +289,31 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static int Ticks(float distance, float speed)
         {
             return speed <= 0f ? GridEntity.Unestimated : (int)Math.Ceiling(Math.Max(0f, distance) / speed * 60f);
+        }
+
+        /// <summary>A piston being listened to, until disposed.</summary>
+        sealed class Listening : IDisposable
+        {
+            readonly IMyPistonBase _piston;
+            readonly Action _told;
+
+            public Listening(IMyPistonBase piston, Action told)
+            {
+                _piston = piston;
+                _told = told;
+                _piston.LimitReached += Reached;
+            }
+
+            /// <inheritdoc />
+            public void Dispose()
+            {
+                _piston.LimitReached -= Reached;
+            }
+
+            void Reached(bool upper)
+            {
+                _told();
+            }
         }
 
         /// <summary>Where a step told the piston to move to, and how fast.</summary>

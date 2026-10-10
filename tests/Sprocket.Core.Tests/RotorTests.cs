@@ -57,19 +57,15 @@ public class RotorTests
         Assert.NotNull(kind.FindAction(Blocks.Rotor.RotateTo, Form.Native));
         Assert.True(kind.FindAction("RotateToAngle", Form.Action)!.Hidden);
 
-        // What is not renamed stays as the game says it.
-        Assert.False(kind.FindAction("Displacement", Form.Value)!.Renamed);
+        // Displacement is the rotor's own word for it, which Sprocket keeps.
+        Assert.Equal("Displacement", kind.FindAction("Displacement", Form.Value)!.Named);
     }
 
     /// <summary>
-    /// Growing a head is welding the machine, so it is left out however well it is named.
+    /// Adding a head is one action asking for a size, standing in for the game's three, and is the game's own when it runs.
     /// </summary>
-    /// <remarks>
-    /// Nothing stands in for it, which is what separates it from the game's own Reverse: there is no
-    /// better way to say it, and no sequence has any use for it said at all.
-    /// </remarks>
     [Fact]
-    public void BuildingTheMachineIsNotSomethingASequenceCanTellItToDo()
+    public void AHeadIsAddedInTheSizeAsked()
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
@@ -82,6 +78,16 @@ public class RotorTests
         {
             Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is offered as a step");
         }
+
+        var add = kind.FindAction(Blocks.Rotor.AddHead, Form.Native)!;
+        Assert.False(add.Hidden);
+        var fields = new List<Field>();
+        add.Fields(fields);
+        Assert.Equal("size", Assert.Single(fields).Name);
+
+        rotor.Attached = false;
+        ship.Entity(rotor.Id).Invoke(Blocks.Rotor.AddHead, new[] { Literal.Of(2L) });
+        Assert.Contains("Rotor:AddSmallRotorTopPart", ship.Rig.Log);
     }
 
     /// <summary>

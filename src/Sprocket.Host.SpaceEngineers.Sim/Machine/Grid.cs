@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
+using VRage.Game;
 using VRage.Game.ModAPI;
 using VRageMath;
 
@@ -30,6 +31,7 @@ public sealed class Grid
     Action<IMySlimBlock> _added;
     Action<IMySlimBlock> _removed;
 
+    /// <summary>A grid called <paramref name="name" />, <paramref name="id" /> its entity id, with a journal of its own.</summary>
     public Grid(string name, long id = 9000) : this(name, new List<string>(), id)
     {
     }
@@ -48,6 +50,7 @@ public sealed class Grid
             .Gives("CustomName", () => called)
             .Takes("CustomName", value => called = (string)value)
             .Gives("DisplayName", () => called)
+            .Gives("GridSizeEnum", () => MyCubeSize.Large)
             .Gives("Closed", () => false)
             .Does("GetBlocks", Blocks)
             .Answers("GetCubeBlock", invocation => At((Vector3I)invocation.Arguments[0]))
@@ -55,16 +58,23 @@ public sealed class Grid
             .Answers("remove_OnBlockAdded", invocation => Listen(ref _added, invocation, false))
             .Answers("add_OnBlockRemoved", invocation => Listen(ref _removed, invocation, true))
             .Answers("remove_OnBlockRemoved", invocation => Listen(ref _removed, invocation, false))
+            .Does("add_OnBlockIntegrityChanged", () => null)
+            .Does("remove_OnBlockIntegrityChanged", () => null)
+            .Does("add_OnGridBlockDamaged", () => null)
+            .Does("remove_OnGridBlockDamaged", () => null)
             .Done();
     }
 
+    /// <summary>What the game would hand the mod for this grid, a large one as every grid on the rig is.</summary>
     public IMyCubeGrid Block { get; private set; }
 
+    /// <summary>The blocks welded to this grid, in the order they were welded.</summary>
     public IReadOnlyList<Fitting> Fitted => _fitted;
 
     /// <summary>What every block on this grid writes down, in the order it happened.</summary>
     public List<string> Journal { get; private set; }
 
+    /// <summary>Welds <paramref name="fitting" /> to this grid, and hands it back.</summary>
     public T Weld<T>(T fitting) where T : Fitting
     {
         fitting.Grid = Block;
@@ -77,6 +87,7 @@ public sealed class Grid
             .Gives("FatBlock", () => fitting.Block)
             .Gives("CubeGrid", () => Block)
             .Done();
+        fitting.Slim = _slim[fitting];
 
         if (_added != null)
             _added(_slim[fitting]);
@@ -99,6 +110,7 @@ public sealed class Grid
             _removed(slim);
     }
 
+    /// <summary>A moment of every block on this grid running.</summary>
     public void Tick()
     {
         for (var i = 0; i < _fitted.Count; i++)

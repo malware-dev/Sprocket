@@ -976,8 +976,11 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Trouble.TankNoGas" xml:space="preserve">
     <value>kan ikke fylle - ingen {gas} kommer inn</value>
   </data>
+  <data name="Sprocket.Trouble.JumpDriveRechargeOff" xml:space="preserve">
+    <value>stoppet - noe annet slo av opplading</value>
+  </data>
   <data name="Sprocket.Status.Damaged" xml:space="preserve">
-    <value>skadet</value>
+    <value>ødelagt</value>
   </data>
   <data name="Sprocket.Status.Off" xml:space="preserve">
     <value>av</value>
@@ -1077,6 +1080,12 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Category.Air" xml:space="preserve">
     <value>Luft</value>
+  </data>
+  <data name="Sprocket.Category.Gas" xml:space="preserve">
+    <value>Gass</value>
+  </data>
+  <data name="Sprocket.Category.Fuel" xml:space="preserve">
+    <value>Drivstoff</value>
   </data>
   <data name="Sprocket.Category.Production" xml:space="preserve">
     <value>Produksjon</value>

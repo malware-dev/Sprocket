@@ -490,7 +490,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             switch (property.TypeName)
             {
                 case "Boolean":
-                    return value.Kind == ValueKind.Flag ? new Writes<bool>(block, property.AsBool(), value.Flag) : null;
+                    if (value.Kind != ValueKind.Flag)
+                        return null;
+
+                    return Flips(block, propertyId)
+                        ? (Order)new Switches(block, property.AsBool(), value.Flag)
+                        : new Writes<bool>(block, property.AsBool(), value.Flag);
                 case "Single":
                     return value.Kind == ValueKind.Real
                         ? new Writes<float>(block, property.AsFloat(), (float)value.Real)
@@ -511,6 +516,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             return null;
+        }
+
+        /// <summary>Whether the block's setter for the switch flips it whatever it is told, so it may be set only where it differs.</summary>
+        /// <remarks>
+        /// A ship controller's handbrake and parking, from the game's own terminal controls: each setter asks the grid to
+        /// toggle. The state is the grid's, so reading first also sets it once however many seats of one grid a step names:
+        /// on the server the grid toggles at once, and the next seat reads it already set.
+        /// </remarks>
+        static bool Flips(IMyTerminalBlock block, string propertyId)
+        {
+            return block is IMyShipController && (propertyId == "HandBrake" || propertyId == "Park");
         }
 
         /// <summary>One of a block's own values, read through the property the game hands out for it.</summary>
@@ -644,6 +660,28 @@ namespace Sprocket.Host.SpaceEngineers.World
             public override void Give()
             {
                 _property.SetValue(_block, _value);
+            }
+        }
+
+        /// <summary>One of the block's switches whose setter flips it, told only where it does not already read as asked.</summary>
+        sealed class Switches : Order
+        {
+            readonly IMyTerminalBlock _block;
+            readonly ITerminalProperty<bool> _property;
+            readonly bool _value;
+
+            public Switches(IMyTerminalBlock block, ITerminalProperty<bool> property, bool value)
+            {
+                _block = block;
+                _property = property;
+                _value = value;
+            }
+
+            /// <inheritdoc />
+            public override void Give()
+            {
+                if (_property.GetValue(_block) != _value)
+                    _property.SetValue(_block, _value);
             }
         }
 

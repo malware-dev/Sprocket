@@ -34,7 +34,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithChange("turns-on", "turns on", "switched-on", Literal.Of(true)).Reading("is on", "is off").Announced()
                 .WithChange("turns-off", "turns off", "switched-on", Literal.Of(false)).Reading("is off", "is on").Announced()
                 .WithAction(BlockKinds.SwitchOn, "switch on", SwitchOn, "OnOff_On")
-                .WithAction(BlockKinds.SwitchOff, "switch off", SwitchOff, "OnOff_Off");
+                .WithAction(BlockKinds.SwitchOff, "switch off", SwitchOff, "OnOff_Off")
+                .Renaming("OnOff", false, "toggle on/off");
         }
 
         /// <summary>Told as the block is switched on or off, which every functional block announces.</summary>

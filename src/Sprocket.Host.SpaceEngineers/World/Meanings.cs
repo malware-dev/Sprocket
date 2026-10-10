@@ -1,5 +1,6 @@
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -24,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Gives the members of <paramref name="kind" />, which <paramref name="block" /> is of, their meanings, and hides those no sequence should be offered.</summary>
         public static void Settle(EntityKind kind, IMyTerminalBlock block)
         {
-            Everywhere(kind);
+            Everywhere(kind, block);
             Setters(kind, block);
 
             if (block is IMyShipController)
@@ -34,7 +35,21 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Turrets(kind, block);
 
             if (block is IMyUserControllableGun)
+            {
                 Withhold(kind, "SelectedAmmoType", Readiness.Pending, Holdback.Ammo);
+                HideValue(kind, "Shoot");
+            }
+
+            // An order whose two actions and toggle are offered, beside a value of Sprocket's own saying how it stands.
+            if (block is IMyOffensiveCombatBlock || block is IMyDefensiveCombatBlock || block is IMyFlightMovementBlock
+                || block is IMyPathRecorderBlock || block is IMyBasicMissionBlock)
+                HideValue(kind, "ActivateBehavior");
+
+            if (block is IMyPathRecorderBlock)
+                HideValue(kind, "ID_PLAY_CHECKBOX");
+
+            if (block is IMyRemoteControl)
+                HideValue(kind, "AutoPilot");
 
             if (block is IMyEventControllerBlock)
             {
@@ -53,6 +68,17 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (block is IMyMechanicalConnectionBlock)
                 Building(kind);
+
+            // Lock, unlock and toggle lock set it, and the rotor's own locked reads it.
+            if (block is IMyMotorStator)
+            {
+                HideValue(kind, "RotorLock");
+                HideValue(kind, "HingeLock");
+            }
+
+            // A parachute's switch says only whether a deploy was asked for, and the pair and the toggle already ask.
+            if (block is IMyParachute)
+                HideValue(kind, "Open");
 
             if (block is IMyMotorSuspension)
                 In(kind, "Speed Limit", Category.Behaviour);
@@ -116,19 +142,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block is IMyGasTank)
                 HideToggle(kind, "Stockpile");
 
-            // What a sensor reacts to is set when it is placed; the switches stay, to be set.
-            if (block is IMySensorBlock)
-            {
-                foreach (var one in new[]
-                         {
-                             "Detect Players", "Detect Floating Objects", "Detect Small Ships", "Detect Large Ships",
-                             "Detect Stations", "Detect Subgrids", "Detect Asteroids", "Detect Owner",
-                             "Detect Friendly", "Detect Neutral", "Detect Enemy"
-                         })
-                {
-                    HideToggle(kind, one);
-                }
-            }
+            // On these two, how far the grid's load moves the smoke or the glow, which is how it looks.
+            if (block is IMyExhaustBlock || block is IMyHeatVent)
+                In(kind, "PowerDependency", Category.Appearance);
 
             if (block is IMyShipConnector)
             {
@@ -138,15 +154,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                 HideToggle(kind, "ThrowOut");
             }
 
-            // Charge mode says all of these, one value and three words. Recharge On is left to the
-            // recharge that waits until the battery is full, which stands in for it by its id.
+            // Charge mode says all of these, one value and three words. Recharge On is left to Sprocket's
+            // recharge, which stands in for it by its id; the two toggles stay, renamed by the battery.
             if (block is IMyBatteryBlock)
-                kind.Hiding("Recharge", "Recharge_Off", "Discharge", "Discharge_On", "Discharge_Off", "Auto");
+                kind.Hiding("Recharge_Off", "Discharge_On", "Discharge_Off", "Auto");
 
             // What starts a programmable block's own script. A step runs a script by running the block,
-            // and the argument and Sprocket's own toolbar action are the wiring of the thing.
+            // and Sprocket's own toolbar action is the wiring of the thing.
             if (block is IMyProgrammableBlock)
-                kind.Hiding("ConsoleCommand", "RunWithDefaultArgument", SignalAction.ActionId);
+                kind.Hiding("RunWithDefaultArgument", SignalAction.ActionId);
         }
 
         /// <summary>Takes out the setters written by hand beside a value that says the same.</summary>
@@ -193,7 +209,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// An event controller is nothing but the setting up of a watcher, and a transponder's filter
         /// is who it listens to rather than what it says.
         /// </remarks>
-        static void Everywhere(EntityKind kind)
+        static void Everywhere(EntityKind kind, IMyTerminalBlock block)
         {
             In(kind, "Threshold", Category.Behaviour);
             In(kind, "Condition", Category.Behaviour);
@@ -203,18 +219,35 @@ namespace Sprocket.Host.SpaceEngineers.World
             Hide(kind, "SearchBox");
 
             // Set once when the machine is built, so flipping it is nothing a sequence does. The value
-            // stays, to be set.
-            HideToggle(kind, "ShowOnHUD");
-            HideToggle(kind, "AnyoneCanUse");
+            // stays, to be set. The production blocks and the stores offer theirs, for a button that flips one.
             HideToggle(kind, "EnableParking");
             HideToggle(kind, "Auto-Refill");
-            HideToggle(kind, "UseConveyor");
             HideToggle(kind, "AutomaticallyPullBottles");
+
+            // A store's and a button panel's are flipped to lock them to their faction while a sequence runs.
+            if (!Store.Admits(block) && !(block is IMyButtonPanel))
+                HideToggle(kind, Store.Access);
+
+            // A reactor's is how a sequence keeps uranium back for another reactor, and the reactor renames it; a safe
+            // zone's conveyors are what it eats its zone chips from; a gun's is flipped in a fight, to keep it on what it
+            // holds.
+            if (!(block is IMyReactor) && !(block is IMySafeZoneBlock) && !(block is IMyUserControllableGun)
+                && !Conveyors.Carries(block))
+                HideToggle(kind, Conveyors.Switch);
+
+            // Where the game's own screens list the block, which is nothing a sequence does.
+            Hide(kind, "ShowInInventory");
+            Hide(kind, "ShowInTerminal");
+            Hide(kind, "ShowInToolbarConfig");
 
             // A sequence says which block it means by the block's name, so a sequence that renamed
             // one would be cutting the ground from under itself and every other sequence besides.
             HideValue(kind, "Name");
-            HideValue(kind, "CustomName");
+
+            // On a broadcast controller CustomName is the name chat shows its messages as coming from, a setting of its
+            // own; its block name is Name, as everywhere.
+            if (!(block is IMyBroadcastController))
+                HideValue(kind, "CustomName");
         }
 
         /// <summary>A seat, a remote and a cryo chamber: what is flown, what is set, what needs a pilot.</summary>
@@ -294,11 +327,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>Takes growing the machine a new part out of the list of what to tell it to do.</summary>
+        /// <summary>Takes growing the machine a new part out of the list of what to tell it to do, where the block's capability has not brought it in.</summary>
         /// <remarks>
-        /// A rotor offers to grow itself a head in three sizes and a hinge's head as well, and a
-        /// sequence can use none of them: welding a machine is not running one. Asked of the id
-        /// rather than listed, because the game has more spellings of it than a list would hold.
+        /// A rotor offers to grow itself a head in three sizes and a hinge's head as well. Asked of the id rather than
+        /// listed, because the game has more spellings of it than a list would hold. One a capability gave a word of its
+        /// own is offered under that word.
         /// </remarks>
         static void Building(EntityKind kind)
         {
@@ -306,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (!one.Sets && Categories.Builds(one.GameActionId))
+                if (!one.Sets && !one.Renamed && Categories.Builds(one.GameActionId))
                     one.Hide();
             }
         }
@@ -353,17 +386,22 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>Takes the game's act that flips a switch out of the organized view, and nothing else of it.</summary>
+        /// <summary>Takes the game's act that flips a switch out of the organized view, and nothing else of it, where the block's capability has not brought it in.</summary>
         /// <remarks>
-        /// By its exact id, because the switch's value and the act share it and the value stays.
+        /// By its exact id, because the switch's value and the act share it and the value stays. One a capability or a kind gave
+        /// a word of its own is offered under that word, as a tank's toggle stockpile.
         /// </remarks>
         static void HideToggle(EntityKind kind, string id)
         {
+            string word;
+            if (kind.Renames(id, false, out word))
+                return;
+
             var actions = kind.Actions;
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Form == Form.Action && one.GameActionId == id)
+                if (one.Form == Form.Action && !one.Renamed && one.GameActionId == id)
                     one.Hide();
             }
         }

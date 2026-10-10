@@ -62,6 +62,60 @@ public class SoundTests
         Assert.Contains("Speaker:play SoundBlockAlert2", ship.Rig.Log);
     }
 
+    /// <summary>The sound the block holds ready is one of its sounds, by id, and none of them where none is chosen.</summary>
+    [Fact]
+    public void TheSelectedSoundIsOneOfItsSounds()
+    {
+        var ship = new Rigged();
+        var speaker = ship.Speaker(1, "Speaker");
+        var selected = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Selected, Form.Value)!;
+
+        Assert.Equal(new[] { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" }, selected.Being!.Names);
+        Assert.False(selected.Being.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
+
+        speaker.Selected = "SoundBlockAlert2";
+        Assert.True(selected.Being.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
+        Assert.Equal(Literal.Of(1L), Ran.Read(ship, speaker, Blocks.Speaker.Selected));
+    }
+
+    /// <summary>The block's own stop, volume, range and loop time are said in Sprocket's words.</summary>
+    [Fact]
+    public void ItsOwnMembersAreSaidInSprocketsWords()
+    {
+        var ship = new Rigged();
+        var speaker = ship.Speaker(1, "Speaker");
+        speaker.Carrying("VolumeSlider", "Volume", ValueKind.Real)
+            .Carrying("RangeSlider", "Range", ValueKind.Real)
+            .Carrying("LoopableSlider", "Loop time", ValueKind.Real);
+        var kind = ship.Entity(speaker.Id).Kind;
+
+        Assert.Equal("stop", kind.FindAction("StopSound", Form.Action)!.Text);
+        Assert.Equal("volume", kind.FindAction("VolumeSlider", Form.Value)!.Text);
+        Assert.Equal("range", kind.FindAction("RangeSlider", Form.Value)!.Text);
+        Assert.Equal("loop time", kind.FindAction("LoopableSlider", Form.Value)!.Text);
+    }
+
+    /// <summary>
+    /// A jukebox is a sound block to the game and not to Sprocket: no sound outside its playlist, nothing to stop, no loop,
+    /// and its volume and range in Sprocket's words.
+    /// </summary>
+    [Fact]
+    public void AJukeboxPlaysNoSingleSound()
+    {
+        var ship = new Rigged();
+        var jukebox = ship.Rig.Jukebox(1, "Jukebox");
+        jukebox.Carrying("VolumeSlider", "Volume", ValueKind.Real)
+            .Carrying("LoopableSlider", "Loop time", ValueKind.Real);
+        var kind = ship.Entity(jukebox.Id).Kind;
+
+        Assert.Null(kind.FindAction(Blocks.Speaker.Play, Form.Native));
+        Assert.Null(kind.FindAction(Blocks.Speaker.Selected, Form.Value));
+        Assert.True(kind.FindAction("PlaySound", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("StopSound", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("LoopableSlider", Form.Value)!.Hidden);
+        Assert.Equal("volume", kind.FindAction("VolumeSlider", Form.Value)!.Text);
+    }
+
     [Fact]
     public void TheStepReadsWithTheSoundsName()
     {

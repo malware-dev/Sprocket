@@ -1692,24 +1692,31 @@ public class PropertyTests
     }
 
     /// <summary>
-    /// The switch a pair of words has already said does not reach the list a third time.
+    /// The switch a pair of words has already said does not reach the list a third time, unless the block gives it a word
+    /// of its own.
     /// </summary>
     /// <remarks>
-    /// A vent's switch is called Depressurize, and the game offers it three ways: the value, the act
-    /// that flips it, and the pair that turns it each way. Sprocket says the pair as pressurize and
-    /// depressurize, so the value beneath it is the same sentence written backwards.
+    /// A door's switch is called Open, and Sprocket says its pair as open and close, so the value beneath it is the same
+    /// sentence written backwards. A vent's is called Depressurize, said as pressurize and depressurize, and offered all
+    /// the same as depressurizing, which sets the way the vent works without waiting for the room.
     /// </remarks>
     [Fact]
-    public void AValueThePairAlreadySaysIsLeftOut()
+    public void AValueThePairAlreadySaysIsLeftOutUnlessTheBlockNamesIt()
     {
         var ship = new Rigged();
-        var vent = ship.Vent(1, "Vent");
-        var kind = ship.Entity(vent.Id).Kind;
+        var door = ship.Door(1, "Door");
+        door.Carrying("Open", "Open", ValueKind.Flag);
+        Assert.True(ship.Entity(door.Id).Kind.FindAction("Open", Form.Value)!.Hidden);
 
-        Assert.True(kind.FindAction("Depressurize", Form.Value)!.Hidden);
+        var kind = ship.Entity(ship.Vent(2, "Vent").Id).Kind;
+        var depressurizing = kind.FindAction("Depressurize", Form.Value)!;
+        Assert.False(depressurizing.Hidden);
+        Assert.Equal("Depressurizing", depressurizing.Named);
 
         // The act that flips it stays: nothing else in the list says "whichever way it is not".
-        Assert.False(kind.FindAction("Depressurize", Form.Action)!.Hidden);
+        var toggle = kind.FindAction("Depressurize", Form.Action)!;
+        Assert.False(toggle.Hidden);
+        Assert.Equal("toggle depressurize", toggle.Text);
     }
 
 }

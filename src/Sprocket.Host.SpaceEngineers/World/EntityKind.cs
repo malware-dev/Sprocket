@@ -287,6 +287,31 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Vouches for the block's own members <paramref name="gameIds" /> in the game's own words: values where <paramref name="sets" /> says so, actions otherwise.</summary>
+        /// <remarks>
+        /// What puts one of the block's own members in the organized view without a word of Sprocket's for it. Taken up where
+        /// the block's own members are read, as a rename is.
+        /// </remarks>
+        public EntityKind Vetting(bool sets, params string[] gameIds)
+        {
+            for (var i = 0; i < gameIds.Length; i++)
+                _vetted.Add(new Alias(gameIds[i], sets, null));
+
+            return this;
+        }
+
+        /// <summary>Whether one of the block's own members is vouched for in the game's own words.</summary>
+        public bool Vets(string gameId, bool sets)
+        {
+            for (var i = 0; i < _vetted.Count; i++)
+            {
+                if (_vetted[i].GameId == gameId && _vetted[i].Sets == sets)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>Sprocket's word for one of the block's own members, where it has one.</summary>
         public bool Renames(string gameId, bool sets, out string word)
         {
@@ -320,10 +345,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<Alias> _renamed = new List<Alias>();
 
+        readonly List<Alias> _vetted = new List<Alias>();
+
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
         public EntityKind WithValue(string id, string named, string propertyId, Field field, ValueKind holds)
         {
-            _actions.Add(new EntityAction(id, "set " + named, null, 1)
+            _actions.Add(new EntityAction(id, named, null, 1)
                 .Writes(propertyId, field, named, holds));
 
             return this;

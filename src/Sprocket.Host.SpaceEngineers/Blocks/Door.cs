@@ -1,5 +1,6 @@
 using System;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Doors;
 using Sprocket.Host.SpaceEngineers.World;
 
 // The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
@@ -25,6 +26,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly string[] Statuses = { "open", "closed", "opening", "closing" };
 
         static readonly Being State = Being.OneOf<IMyDoor>(Statuses, door => Position(door.Status));
+
+        // The game's ratio is nought to one; the terminal and a sentence say a percentage.
+        static readonly Being Ratio = Being.Number<IMyDoor>(door => door.OpenRatio * 100.0);
 
         static readonly Doing Opens = Doing.Of<IMyDoor>(door => door.OpenDoor(), Opened);
 
@@ -60,9 +64,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             Watched(kind, hangar);
 
+            // How far open changes only while the door moves, which it can only between starting to open and having
+            // closed; nothing is raised as it moves, so it is looked at on the when's cadence in between.
+            kind.WithValue("how-far-open", "how far open", Ratio).RuledOutBy(Shut);
+
             kind.WithAction("open", "open", Opens, "Open_On").Lasting()
                 .WithAction("close", "close", Closes, "Open_Off").Lasting()
-                .Renaming("Open", false, "reverse");
+                .Renaming("Open", false, "reverse")
+                .Renaming("AnyoneCanUse", true, "anyone can use")
+                .Renaming("AnyoneCanUse", false, "toggle anyone can use")
+                .Renaming(DoorControls.Id, true, "closes automatically after");
         }
 
         /// <summary>Says how what was added last is heard: announced on a hangar door, and on any other ruled out while it is shut.</summary>

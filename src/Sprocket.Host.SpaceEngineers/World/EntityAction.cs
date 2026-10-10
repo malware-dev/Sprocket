@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Renamed = true;
             Named = Capitalised(word);
-            Text = Sets ? "set " + word : word;
+            Text = word;
         }
 
         /// <summary>
@@ -199,6 +199,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Unaltered { get; set; }
 
+        /// <summary>Whether this is something Sprocket vouches for, which is what the organized view lists.</summary>
+        /// <remarks>
+        /// Sprocket's own members are vouched for by being written, and one of the block's own by a capability renaming it
+        /// or naming it as vetted in the game's words. Anything else the block declares, a member a game update or a mod
+        /// adds among them, is listed by the terminal view alone.
+        /// </remarks>
+        public bool Vetted => !Unaltered || Renamed || _vouched;
+
+        bool _vouched;
+
         /// <summary>Whether this is left out of the list somebody chooses from.</summary>
         /// <remarks>
         /// Only where a capability's entry stands in for it, naming it as the game's own form of what
@@ -216,6 +226,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// about.
         /// </remarks>
         public Category Category { get; set; }
+
+        /// <summary>Vouches for this one of the block's own members as the game declares it.</summary>
+        public void Vouch()
+        {
+            _vouched = true;
+        }
 
         /// <summary>Leaves this out of the list somebody chooses from.</summary>
         public void Hide()
@@ -264,9 +280,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             _holds = being.Kind;
             _writes = field;
             Wants = 1;
-            if (being.Settable)
-                Text = "set " + Text;
-
             return this;
         }
 

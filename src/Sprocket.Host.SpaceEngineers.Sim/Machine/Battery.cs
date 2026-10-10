@@ -15,22 +15,40 @@ public sealed class Battery : Fitting
 
     const int ChargeTicks = 120;
 
+    const float Most = 12f;
+
     ChargeMode _mode = ChargeMode.Auto;
     float _stored;
+    Action<IMyStoredPowerRatio, float, float>? _charged;
+    Action<IMyPowerProducer, float, float>? _output;
 
     /// <summary>A battery on the rig, empty and on auto, as the game's large battery.</summary>
+    /// <remarks>It gives nothing out: the rig draws no power from it.</remarks>
     public Battery(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
         Fit(Pretend.To<IMyBatteryBlock>()
+            .Also<IMyStoredPowerRatio>()
             .Gives("ChargeMode", () => _mode)
             .Takes("ChargeMode", value => Mode((ChargeMode)value))
             .Gives("CurrentStoredPower", () => _stored)
             .Gives("MaxStoredPower", () => Capacity)
+            .Gives("StoredPowerRatio", () => _stored / Capacity)
             .Gives("CurrentInput", () => Input)
+            .Gives("MaxInput", () => _stored < Capacity ? Most : 0f)
+            .Gives("CurrentOutput", () => 0f)
+            .Gives("MaxOutput", () => _mode != ChargeMode.Recharge && _stored > 0f ? Most : 0f)
             .Gives("HasCapacityRemaining", () => _stored > 0f)
-            .Gives("IsCharging", () => Input > 0f));
+            .Gives("IsCharging", () => Input > 0f)
+            .Does("add_StoredPowerRatioChanged", handler => { _charged += (Action<IMyStoredPowerRatio, float, float>)handler[0]; })
+            .Does("remove_StoredPowerRatioChanged", handler => { _charged -= (Action<IMyStoredPowerRatio, float, float>)handler[0]; })
+            .Does("add_CurrentOutputRatioChanged", handler => { _output += (Action<IMyPowerProducer, float, float>)handler[0]; })
+            .Does("remove_CurrentOutputRatioChanged", handler => { _output -= (Action<IMyPowerProducer, float, float>)handler[0]; }));
     }
+
+    /// <summary>How many are listening to the battery's charge and output, together.</summary>
+    public int Listeners => (_charged == null ? 0 : _charged.GetInvocationList().Length)
+        + (_output == null ? 0 : _output.GetInvocationList().Length);
 
     /// <summary>Whether the grid has power to give it, which is the rig's stand-in for a ship's reactors.</summary>
     public bool Powered { get; set; } = true;
@@ -39,7 +57,7 @@ public sealed class Battery : Fitting
     public float Charge
     {
         get { return _stored / Capacity; }
-        set { _stored = value * Capacity; }
+        set { Store(value * Capacity); }
     }
 
     /// <summary>What it has been set to do with its charge.</summary>
@@ -50,7 +68,7 @@ public sealed class Battery : Fitting
     /// discharging, off or without power.
     /// </summary>
     /// <remarks>The large battery holds three megawatt hours, which is <c>Capacity</c>.</remarks>
-    float Input => Enabled && Powered && _mode != ChargeMode.Discharge && _stored < Capacity ? 12f : 0f;
+    float Input => Enabled && Powered && _mode != ChargeMode.Discharge && _stored < Capacity ? Most : 0f;
 
     void Mode(ChargeMode mode)
     {
@@ -124,6 +142,18 @@ public sealed class Battery : Fitting
     public override void Tick()
     {
         if (_mode == ChargeMode.Recharge && Input > 0f)
-            _stored = Math.Min(Capacity, _stored + Capacity / ChargeTicks);
+            Store(Math.Min(Capacity, _stored + Capacity / ChargeTicks));
+    }
+
+    /// <summary>Holds <paramref name="stored" /> megawatt hours, and says so where that is a change, as the game's battery does.</summary>
+    void Store(float stored)
+    {
+        if (stored == _stored)
+            return;
+
+        var before = _stored / Capacity;
+        _stored = stored;
+        if (_charged != null)
+            _charged((IMyStoredPowerRatio)Block, before, _stored / Capacity);
     }
 }

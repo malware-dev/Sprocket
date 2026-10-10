@@ -95,6 +95,28 @@ public abstract class Fitting
 
     bool _enabled = true;
 
+    /// <summary>The free text every block carries, raising <c>CustomDataChanged</c> as it changes, as the game does.</summary>
+    public string CustomData
+    {
+        get { return _customData; }
+        set
+        {
+            if (_customData == value)
+                return;
+
+            _customData = value;
+            for (var i = 0; i < _writing.Count; i++)
+                _writing[i](Block);
+        }
+    }
+
+    string _customData = "";
+
+    readonly List<Action<IMyTerminalBlock>> _writing = new List<Action<IMyTerminalBlock>>();
+
+    /// <summary>The block as its grid holds it, which the grid gives it as it is welded; null before.</summary>
+    public IMySlimBlock? Slim { get; set; }
+
     readonly List<Action<IMyCubeBlock>> _watching = new List<Action<IMyCubeBlock>>();
     readonly List<Action<IMyTerminalBlock>> _switching = new List<Action<IMyTerminalBlock>>();
 
@@ -177,6 +199,18 @@ public abstract class Fitting
                 Told(Enabled ? "on" : "off");
             })
             .Gives("CubeGrid", () => Grid)
+            .Does("add_CubeGridChanged", () => null)
+            .Does("remove_CubeGridChanged", () => null)
+            .Gives("SlimBlock", () => Slim)
+            .Gives("IsBeingHacked", () => false)
+            .Gives("ResourceSink", () => null)
+            .Gives("InventoryCount", () => 0)
+            .Gives("UseGenericLcd", () => false)
+            .Gives("SurfaceCount", () => 0)
+            .Gives("CustomData", () => CustomData)
+            .Takes("CustomData", value => CustomData = (string)value)
+            .Does("add_CustomDataChanged", args => { _writing.Add((Action<IMyTerminalBlock>)args[0]); })
+            .Does("remove_CustomDataChanged", args => { _writing.Remove((Action<IMyTerminalBlock>)args[0]); })
             .Gives("Position", () => Cell ?? Vector3I.Zero)
             .Gives("Storage", () => Storage)
             .Takes("Storage", value => Storage = (MyModStorageComponentBase)value)

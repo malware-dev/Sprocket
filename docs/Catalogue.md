@@ -276,8 +276,14 @@ performance of the whole runtime is decided.
 
 Not one. Its status must be sampled, and the vent is the block the airlock is built
 around. So *"when the vent finishes emptying"* sits inside the bound on what can be
-missed: a vent that empties and refills between two looks is invisible. Gas tanks are
-silent too, which puts both tank-level stories on sampling as well.
+missed: a vent that empties and refills between two looks is invisible.
+
+A gas tank is not silent: it raises `PropertiesChanged` on every change to its fill, which on
+a server is every tick while gas flows in or out, and a client hears it once per
+ten-thousandth of the tank's capacity. That saves no look while the level moves, so the
+level is sampled. Its resource source's `HasCapacityRemainingChanged` fires as the gas
+reaches nothing and as it comes back, which makes running dry told; the same holds for a gas
+generator's ice and a hydrogen engine's fuel.
 
 **Needed:** the sampled path treated as the hot path, because the blocks that cannot be
 told about are exactly the ones the stories lean on hardest.

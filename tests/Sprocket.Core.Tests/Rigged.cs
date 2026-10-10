@@ -69,6 +69,16 @@ sealed class Rigged
         return Rig.Beacon(id, name);
     }
 
+    public Warhead Warhead(long id, string name)
+    {
+        return Rig.Warhead(id, name);
+    }
+
+    public Turret Turret(long id, string name)
+    {
+        return Rig.Turret(id, name);
+    }
+
     public Rotor Hinge(long id, string name)
     {
         return Rig.Hinge(id, name);

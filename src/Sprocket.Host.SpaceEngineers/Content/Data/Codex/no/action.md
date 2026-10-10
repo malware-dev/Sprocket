@@ -19,6 +19,8 @@ I velgeren har hver handling et merke:
 - ![](mark:action) **Et lyn** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
 - ![](mark:awaited) **En klokke** merker en sekvensen venter på at blokken fullfører.
 
+Noen handlinger med klokke har et valg i kolonnen ved siden av: med `wait` venter `Recharge` på et batteri eller en hoppmotor til blokken er ladet, og med `move on` går sekvensen rett videre til neste steg, mens `Stockpile` på en gasstank har det samme valget som `until full` og `without waiting`. De venter til du velger noe annet.
+
 Når et steg mislykkes eller venter, for eksempel fordi blokken er borte eller sitter fast, sier siden om sekvenser hva som skjer og hvordan du retter det.
 
 ## Flere blokker på én gang

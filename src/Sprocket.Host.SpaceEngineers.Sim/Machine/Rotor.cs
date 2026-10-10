@@ -31,7 +31,10 @@ public sealed class Rotor : Fitting
     float _upper = float.PositiveInfinity;
     float _speed;
     readonly float _reach;
+    bool _attached = true;
+    Action<IMyMechanicalConnectionBlock>? _attachedChanged;
 
+    /// <summary>A rotor, <paramref name="id" /> and <paramref name="name" />, of the game's type and subtype, called <paramref name="display" />; a hinge where the subtype says so.</summary>
     public Rotor(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
@@ -49,6 +52,8 @@ public sealed class Rotor : Fitting
             .Gives("TopGrid", () => TopGrid)
             .Gives("RotorLock", () => Locked)
             .Gives("Torque", () => Torque)
+            .Does("add_OnAttachedChanged", handler => { _attachedChanged += (Action<IMyMechanicalConnectionBlock>)handler[0]; })
+            .Does("remove_OnAttachedChanged", handler => { _attachedChanged -= (Action<IMyMechanicalConnectionBlock>)handler[0]; })
             .Takes("LowerLimitRad", value => _lower = (float)value)
             .Takes("UpperLimitRad", value => _upper = (float)value)
             .Takes("TargetVelocityRPM", value => _speed = (float)value)
@@ -72,6 +77,7 @@ public sealed class Rotor : Fitting
         Offering("Reverse", "Reverse");
         Offering("Attach", "Attach");
         Offering("Detach", "Detach");
+        Offering(locks, hinge ? "Hinge lock On/Off" : "Rotor lock On/Off");
         Offering(locks + "_On", hinge ? "Hinge lock On" : "Rotor lock On");
         Offering(locks + "_Off", hinge ? "Hinge lock Off" : "Rotor lock Off");
         Offering("RotateToAngle", "Rotate To Angle", 3);
@@ -88,7 +94,22 @@ public sealed class Rotor : Fitting
     public float Speed => _speed;
 
     /// <summary>Whether it has a head on it, without which it turns nothing.</summary>
-    public bool Attached { get; set; } = true;
+    /// <remarks>Setting it to the other raises <c>OnAttachedChanged</c>, as the game does when a head is attached or comes off.</remarks>
+    public bool Attached
+    {
+        get { return _attached; }
+        set
+        {
+            if (_attached == value)
+                return;
+
+            _attached = value;
+            _attachedChanged?.Invoke((IMyMechanicalConnectionBlock)Block);
+        }
+    }
+
+    /// <summary>How many are listening for a head to be attached or come off.</summary>
+    public int Listeners => _attachedChanged == null ? 0 : _attachedChanged.GetInvocationList().Length;
 
     /// <summary>The grid its head stands on, or null where it has none.</summary>
     public IMyCubeGrid TopGrid { get; set; }

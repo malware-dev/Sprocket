@@ -615,7 +615,7 @@ public class ActionTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Mood Light");
-        screen.Editor.PressChoice("Set Mood");
+        screen.Editor.PressChoice("Mood");
         screen.Run(2);
 
         Assert.True(screen.Shows("Mood"), "the value is not asked for");

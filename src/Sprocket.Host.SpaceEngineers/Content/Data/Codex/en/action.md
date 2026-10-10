@@ -19,6 +19,8 @@ In the picker, each action carries a mark:
 - ![](mark:action) **A bolt** marks an action the sequence starts without waiting for the block to complete it.
 - ![](mark:awaited) **A clock** marks one the sequence waits for the block to complete.
 
+Some actions with a clock offer a choice in the column beside them: a battery's or jump drive's `Recharge` can `wait` until the block is charged or `move on` to the next step at once, and a gas tank's `Stockpile` can wait `until full` or go straight on `without waiting`. They wait unless you choose otherwise.
+
 When a step fails or holds, for example because its block is gone or stuck, the sequence page says what happens and how to put it right.
 
 ## Several blocks at once

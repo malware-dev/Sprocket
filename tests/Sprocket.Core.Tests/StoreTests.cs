@@ -42,7 +42,7 @@ public class StoreTests
         var lamp = ship.Light(2, "Lamp");
         battery.Charge = 0.5f;
 
-        var frames = Run(ship, battery, lamp, Blocks.Battery.Recharge);
+        var frames = Run(ship, battery, lamp, Blocks.Battery.Recharge, Literal.Of(true));
 
         Assert.Equal(1f, battery.Charge, 3);
         Assert.InRange(frames, 60, 80);
@@ -104,11 +104,18 @@ public class StoreTests
         Assert.True(stockpile.Lasts);
         Assert.False(stockpile.Hidden);
 
-        // Stockpiling stands in for the game's own act and for the switch, and the game's act
-        // switches it off.
+        // Stockpiling stands in for the game's own act. The switch is offered as stockpiling, which says the game's pair
+        // between them, and the act that flips it as toggle stockpile.
         Assert.True(kind.FindAction("Stockpile_On", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("Stockpile", Form.Value)!.Hidden);
-        Assert.False(kind.FindAction("Stockpile_Off", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("Stockpile_Off", Form.Action)!.Hidden);
+
+        var stockpiling = kind.FindAction("Stockpile", Form.Value)!;
+        Assert.False(stockpiling.Hidden);
+        Assert.Equal("Stockpiling", stockpiling.Named);
+
+        var toggle = kind.FindAction("Stockpile", Form.Action)!;
+        Assert.False(toggle.Hidden);
+        Assert.Equal("toggle stockpile", toggle.Text);
     }
 
     [Fact]
@@ -156,13 +163,17 @@ public class StoreTests
         Assert.True(entity.Trouble(Blocks.Tank.Stockpile, new Literal[0]).Ends);
     }
 
-    /// <summary>Runs the one act on the block, and counts the frames until the step after it runs.</summary>
-    static int Run(Rigged ship, Fitting fitting, Lamp lamp, string actionId)
+    /// <summary>Runs the one act on the block, given <paramref name="arguments" />, and counts the frames until the step after it runs.</summary>
+    static int Run(Rigged ship, Fitting fitting, Lamp lamp, string actionId, params Literal[] arguments)
     {
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
         var act = new Act(actionId);
+        foreach (var argument in arguments)
+            act.Arguments.Add(argument);
+
+        Given.Defaults(act);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(fitting.Id)).Name);
         sequence.Steps.Add(act);
         sequence.Steps.Add(new Await());
