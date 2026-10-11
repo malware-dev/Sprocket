@@ -10,6 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     partial class PickRow
     {
         Mark _mark;
+        HStack _content;
         Image _picture;
         MemberName _name;
         Label _detail;
@@ -17,24 +18,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Makes the mark and the picture, then the name with what is quieter about it under it.</summary>
         void CreateView()
         {
-            Spacing = 8f;
             Style = Styles.Pick;
 
-            Children.Add(new Mark { Placement = Fixed.Size(20f, 20f), IsVisible = false }.As(out _mark));
-
-            // Reserved for the whole column or for none of it, so rows never jog sideways with which kinds are listed.
-            Children.Add(new Image { Style = Styles.Picture, Placement = Fixed.Size(56f, 56f), IsVisible = false }.As(out _picture));
-
-            Children.Add(new VStack
+            // The box's control fills the strip at the row's head, down its whole height and out to its edge, so a press
+            // anywhere near the box is the box's and never takes the row alone; its padding sets where the box is drawn.
+            Children.Add(new Mark
             {
-                Spacing = 4f,
+                Placement = Fixed.Wide(40f),
+                Align = Align.Tall,
+                Padding = new Thickness(12f, 0f, 8f, 0f),
+                IsVisible = false
+            }.As(out _mark));
+
+            Children.Add(new HStack
+            {
+                Spacing = 8f,
                 Placement = Flex.Grow,
                 Children =
                 {
-                    new MemberName { Style = Styles.PickName, Wraps = true }.As(out _name),
-                    new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _detail)
+                    // Reserved for the whole column or for none of it, so rows never jog sideways with which kinds are listed.
+                    new Image { Style = Styles.Picture, Placement = Fixed.Size(56f, 56f), IsVisible = false }.As(out _picture),
+                    new VStack
+                    {
+                        Spacing = 4f,
+                        Placement = Flex.Grow,
+                        Children =
+                        {
+                            new MemberName { Style = Styles.PickName, Wraps = true }.As(out _name),
+                            new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _detail)
+                        }
+                    }
                 }
-            });
+            }.As(out _content));
         }
     }
 }

@@ -813,9 +813,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         };
 
         /// <summary>A thing to choose in a column, lit under the pointer.</summary>
+        /// <remarks>Padded on its right alone: the box at its head and what follows it hold the rest of the room themselves.</remarks>
         public static readonly ElementStyle Pick = new ElementStyle
         {
-            Base = { Padding = new Thickness(12f, 8f) },
+            Base = { Padding = new Thickness(0f, 0f, 12f, 0f) },
             Hot = { Background = Palette.PanelHot }
         };
 
@@ -835,7 +836,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A heading over a group of things to choose, against the first of them.</summary>
         public static readonly ElementStyle PickHeading = new ElementStyle(Unpicked)
         {
-            Base = { Padding = new Thickness(12f, 8f, 12f, 0f) }
+            Base = { Padding = new Thickness(0f, 0f, 12f, 0f) }
         };
 
         /// <summary>The name of a thing to choose, at the size the game writes a block list in.</summary>

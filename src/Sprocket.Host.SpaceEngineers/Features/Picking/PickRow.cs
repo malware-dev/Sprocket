@@ -88,6 +88,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var pressable = IsPickable;
 
             _mark.IsVisible = Many && !IsHeading;
+
+            // The room the row's style leaves out: the left edge where no box holds it, and above and below, except under a
+            // heading, which sits against the first row of its group.
+            _content.Padding = new Thickness(_mark.IsVisible ? 0f : 12f, 8f, 0f, IsHeading ? 0f : 8f);
             _mark.Many = Many;
             _mark.IsChecked = IsChosen;
             _mark.IsPressed = Many && pressable;
