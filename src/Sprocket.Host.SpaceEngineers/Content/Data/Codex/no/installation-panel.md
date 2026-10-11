@@ -1,6 +1,6 @@
-# Konfigurasjonspanel
+# Installasjonspanel
 
-Konfigurasjonspanelet er der en ![](mark:installation) [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det viser også det den som laget ![](mark:logic-system) [logikksystemet](#logic-system), skrev om det, så noen som aldri har sett det, kan installere det.
+Installasjonspanelet er der en ![](mark:installation) [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det viser også det den som laget ![](mark:logic-system) [logikksystemet](#logic-system), skrev om det, så noen som aldri har sett det, kan installere det.
 
 ## Åpne det
 

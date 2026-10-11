@@ -27,8 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The term for a sequence.</summary>
         public const string Sequence = "sequence";
 
-        /// <summary>The configuration panel, where an installation's blocks are chosen.</summary>
-        public const string ConfigurationPanel = "configuration-panel";
+        /// <summary>The installation panel, where an installation's blocks are chosen.</summary>
+        public const string InstallationPanel = "installation-panel";
 
         /// <summary>The term for a slot.</summary>
         public const string Slot = "slot";
@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         const char Section = '>';
 
         /// <summary>The terms a screen links to by name, which the index has to list.</summary>
-        static readonly string[] Linked = { Home, LogicSystem, Installation, Sequence, ConfigurationPanel, Library, Picking };
+        static readonly string[] Linked = { Home, LogicSystem, Installation, Sequence, InstallationPanel, Library, Picking };
 
         readonly Texts _texts;
         readonly List<Term> _all = new List<Term>();

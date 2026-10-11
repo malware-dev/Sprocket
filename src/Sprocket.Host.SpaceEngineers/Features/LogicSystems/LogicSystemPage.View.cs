@@ -11,6 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     public sealed partial class LogicSystemPage
     {
+        Label _panelHeading;
         VStack _describing;
         Label _descriptionHeading;
         Composer _composer;
@@ -40,20 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Children =
                 {
-                    // For a blueprint, what it does and what whoever fills it in needs to know, before anything else.
-                    new VStack
-                    {
-                        Spacing = 8f,
-                        Padding = new Thickness(4f, 0f, 0f, 8f),
-                        IsVisible = false,
-                        Children =
-                        {
-                            new Label { Style = Styles.Heading }.As(out _descriptionHeading),
-                            new Composer(120f, Styles.Example).As(out _composer),
-                            new RichText { Style = Styles.Description, IsVisible = false }.As(out _description)
-                        }
-                    }.As(out _describing),
-
                     // For a blueprint, whose blocks every sentence below names, said before any of them: one of the
                     // installations made from it.
                     new HStack
@@ -105,8 +92,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
                     }.As(out _addSequence),
 
-                    // For a blueprint, the slots its sentences name, each with the blocks of the installation shown.
-                    new Label { Style = Styles.NextHeading, IsVisible = false }.As(out _slotsHeading),
+                    // For a blueprint, the installation panel of the installation shown, laid out as the panel itself lays it
+                    // out: what the logic system does and what whoever fills it in needs to know, then the slots its
+                    // sentences name, each with that installation's blocks.
+                    new Label { Style = Styles.NextHeading, IsVisible = false }.As(out _panelHeading),
+                    new VStack
+                    {
+                        Spacing = 8f,
+                        Padding = new Thickness(0f, 0f, 0f, 16f),
+                        IsVisible = false,
+                        Children =
+                        {
+                            new Label { Style = Styles.SubHeading }.As(out _descriptionHeading),
+                            new Composer(120f, Styles.Example).As(out _composer),
+                            new RichText { Style = Styles.Description, IsVisible = false }.As(out _description)
+                        }
+                    }.As(out _describing),
+                    new Label { Style = Styles.SubHeading, IsVisible = false }.As(out _slotsHeading),
                     new PartList { Spacing = 4f, IsVisible = false }.As(out _slotList)
                 }
             };

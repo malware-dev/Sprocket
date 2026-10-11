@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override Change Change => Change.RenameSlot;
 
-        /// <summary>The configuration panel lists its slots in order of their names, so a slot renamed may move.</summary>
+        /// <summary>The installation panel lists its slots in order of their names, so a slot renamed may move.</summary>
         public override bool ChangesShape => true;
 
         /// <inheritdoc />

@@ -259,7 +259,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             return sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
         }
 
-        /// <summary>Adds another logic system made from a blueprint, numbered, and opens its configuration panel on it with its name in hand to be given.</summary>
+        /// <summary>Adds another logic system made from a blueprint, numbered, and opens its installation panel on it with its name in hand to be given.</summary>
         public void Another(AutomationSystem system)
         {
             if (Editor.Another(system) != null)

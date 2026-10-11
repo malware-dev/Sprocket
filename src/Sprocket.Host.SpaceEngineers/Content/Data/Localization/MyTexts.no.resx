@@ -145,6 +145,9 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
     <value>Plass {number}</value>
   </data>
+  <data name="Sprocket.System.InstallationPanel" xml:space="preserve">
+    <value>Installasjonspanel</value>
+  </data>
   <data name="Sprocket.Slot.Purpose" xml:space="preserve">
     <value>Hva den er til</value>
   </data>
@@ -755,7 +758,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Sekvens {number}</value>
   </data>
   <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
-    <value>Plassen {slot} er tom. Fyll den på konfigurasjonspanelet.</value>
+    <value>Plassen {slot} er tom. Fyll den på installasjonspanelet.</value>
   </data>
   <data name="Sprocket.Problem.BlockOff" xml:space="preserve">
     <value>{block} er slått av. Slå den på først.</value>

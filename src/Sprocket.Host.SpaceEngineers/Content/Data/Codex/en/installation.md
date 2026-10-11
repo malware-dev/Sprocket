@@ -10,9 +10,9 @@ A change to the logic system reaches every installation at once. Fix a step, and
 
 ## Adding one
 
-Every logic system starts with one installation, named *Installation 1*. To add another, press `+ installation` under the logic system on the [home screen](#home). Its [configuration panel](#configuration-panel) opens, where you name it and fill its slots.
+Every logic system starts with one installation, named *Installation 1*. To add another, press `+ installation` under the logic system on the [home screen](#home). Its [installation panel](#installation-panel) opens, where you name it and fill its slots.
 
-Pressing an installation's row opens its configuration panel again, to rename it or change its blocks.
+Pressing an installation's row opens its installation panel again, to rename it or change its blocks.
 
 ## Its switch
 
@@ -24,7 +24,7 @@ The logic system's switch stands above them. Switching the logic system off stop
 
 On the home screen, each installation has a row under its logic system. The row lights green while one of its sequences runs, and red when it needs mending. The logic system's heading turns red if any of its installations does.
 
-An installation whose slots were split or merged by a change to the logic system says so on its row, for example `1 slot to fill again`. Its configuration panel shows which.
+An installation whose slots were split or merged by a change to the logic system says so on its row, for example `1 slot to fill again`. Its installation panel shows which.
 
 When a sequence can't carry on, only that installation is switched off, and its row says why. The other installations keep running.
 

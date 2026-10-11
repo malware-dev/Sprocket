@@ -27,7 +27,7 @@ A run fails when one of its steps can't be done at all, for example because the 
 
 `Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.`
 
-Put right what it names, and switch the installation on again. A block that is gone, or a [slot](#slot) that was never filled, is filled on the installation's [configuration panel](#configuration-panel).
+Put right what it names, and switch the installation on again. A block that is gone, or a [slot](#slot) that was never filled, is filled on the installation's [installation panel](#installation-panel).
 
 ## When a step holds
 

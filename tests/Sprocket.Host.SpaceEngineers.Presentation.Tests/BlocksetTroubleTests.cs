@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>What is wrong with one blockset is said on its row and on its configuration panel, which leads to where it is mended.</summary>
+/// <summary>What is wrong with one blockset is said on its row and on its installation panel, which leads to where it is mended.</summary>
 public class BlocksetTroubleTests
 {
     const string Why = "Sequence 1, step 1: This affects something that isn't here any more.";
@@ -57,7 +57,7 @@ public class BlocksetTroubleTests
         Assert.IsType<BlueprintPage>(sim.Editor.Current);
     }
 
-    /// <summary>Its configuration panel says the same, and opens the sequence at fault as this blockset runs it.</summary>
+    /// <summary>Its installation panel says the same, and opens the sequence at fault as this blockset runs it.</summary>
     [Fact]
     public void ItsPanelSaysWhatIsWrongAndLeadsToTheSequence()
     {

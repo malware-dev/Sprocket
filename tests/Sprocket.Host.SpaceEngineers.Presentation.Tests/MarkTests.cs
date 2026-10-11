@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// Everything named is shown under the mark of its kind, one mark a row: the bolt for an action, the clock for one that is
 /// waited for, "=?" for a value asked about, the pulse for a signal, the cube for a block, and three steps for a sequence.
 /// </summary>
-/// <remarks>The configuration panel's two kinds of slot carry the same marks as the moments they are filled for.</remarks>
+/// <remarks>The installation panel's two kinds of slot carry the same marks as the moments they are filled for.</remarks>
 public class MarkTests
 {
     /// <summary>Every signal is marked by the pulse, one of Sprocket's own as one sent from a toolbar slot.</summary>

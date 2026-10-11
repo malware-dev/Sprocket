@@ -10,9 +10,9 @@ En endring i logikksystemet når alle installasjonene med én gang. Rett et steg
 
 ## Legge til en
 
-Hvert logikksystem starter med én installasjon, kalt *Installasjon 1*. For å legge til en til trykker du `+ installasjon` under logikksystemet på [startskjermen](#home). [Konfigurasjonspanelet](#configuration-panel) til den nye installasjonen åpnes, der du gir den et navn og fyller plassene.
+Hvert logikksystem starter med én installasjon, kalt *Installasjon 1*. For å legge til en til trykker du `+ installasjon` under logikksystemet på [startskjermen](#home). [Installasjonspanelet](#installation-panel) til den nye installasjonen åpnes, der du gir den et navn og fyller plassene.
 
-Trykker du på raden til en installasjon, åpnes konfigurasjonspanelet igjen, så du kan gi den nytt navn eller bytte blokkene.
+Trykker du på raden til en installasjon, åpnes installasjonspanelet igjen, så du kan gi den nytt navn eller bytte blokkene.
 
 ## Bryteren
 
@@ -24,7 +24,7 @@ Bryteren til logikksystemet står over dem. Slår du av logikksystemet, stopper 
 
 På startskjermen har hver installasjon en rad under logikksystemet sitt. Raden lyser grønt mens en av sekvensene kjører, og rødt når den må repareres. Overskriften til logikksystemet blir rød hvis noen av installasjonene blir det.
 
-En installasjon der plasser er delt eller slått sammen av en endring i logikksystemet, sier det på raden, for eksempel `1 plass å fylle på nytt`. Konfigurasjonspanelet viser hvilke.
+En installasjon der plasser er delt eller slått sammen av en endring i logikksystemet, sier det på raden, for eksempel `1 plass å fylle på nytt`. Installasjonspanelet viser hvilke.
 
 Når en sekvens ikke kan fortsette, slås bare den installasjonen av, og raden sier hvorfor. De andre installasjonene fortsetter å kjøre.
 

@@ -57,7 +57,7 @@ The vocabulary is settled; use it exactly, on screen, in the codex, in tickets a
 - **Option** is a setting an action takes, such as a piston's position and speed. The picker asks for them in a
   column headed by the action's name, each by its own name, and a problem names the one at fault ("This step is
   missing its speed"). An option is never called a value, and a value never an option.
-- **The configuration panel** is the screen that fills an installation's slots. It is never "the
+- **The installation panel** is the screen that fills an installation's slots. It is never "the
   blueprint editor"; a blueprint is edited on its logic system's screen.
 - **An installation** is "a set of blocks a logic system works on", never a copy of one and never itself
   called a logic system. **A blueprint** is a copy, kept in the library.

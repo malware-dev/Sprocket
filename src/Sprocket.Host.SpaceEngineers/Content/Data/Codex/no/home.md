@@ -16,7 +16,7 @@ Et logikksystem nevner ikke blokkene dine. Det nevner [plasser](#slot), som *den
 
 ## Ta den med deg
 
-Fordi jobben holdes atskilt fra blokkene, kan den flyttes. Tatt vare på i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint) kan den settes på en annen [konstruksjon](#construct), og den som installerer den, velger bare sine egne blokker på [konfigurasjonspanelet](#configuration-panel).
+Fordi jobben holdes atskilt fra blokkene, kan den flyttes. Tatt vare på i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint) kan den settes på en annen [konstruksjon](#construct), og den som installerer den, velger bare sine egne blokker på [installasjonspanelet](#installation-panel).
 
 ## Hvor du begynner
 

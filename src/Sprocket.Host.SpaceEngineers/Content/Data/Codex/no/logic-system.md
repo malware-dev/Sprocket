@@ -27,7 +27,9 @@ Slår du det av, stopper alt som kjører, og blokkene blir stående som de er. N
 
 ## Virkelige blokker, tatt vare på som plasser
 
-Blokkene du velger, blir [plasser](#slot), som står under `Plasser`, nedenfor sekvensene. Det finnes to slags:
+Nedenfor sekvensene viser `Installasjonspanel` det hver installatør leser, satt opp slik [installasjonspanelet](#installation-panel) deres viser det: beskrivelsen, så plassene.
+
+Blokkene du velger, blir [plasser](#slot), som står under `Plasser`. Det finnes to slags:
 
 - En ![](mark:block) **blokkplass**, som *den indre døra*, holder blokker som en sekvens virker på eller følger med på.
 - En ![](mark:signal) **signalplass**, som *knappen*, holder en blokk og verktøylinjeplassen på den som sender signalet.
@@ -38,20 +40,20 @@ Hver plass viser navnet sitt, hva den er til, og blokkene som fyller den. Trykke
 
 ## Beskrivelsen
 
-`Beskrivelse`, øverst på skjermen til logikksystemet, sier hva logikksystemet gjør, og hva den som installerer det, trenger å vite. Mens logikksystemet er slått av, er det en boks å skrive i, med overskrifter, lister og fet eller kursiv tekst, og `Markering` åpner siden om å [skrive tekst](#writing).
+Beskrivelsen, den første delen av `Installasjonspanel`, sier hva logikksystemet gjør, og hva den som installerer det, trenger å vite. Mens logikksystemet er slått av, er det en boks å skrive i, med overskriften `Beskrivelse`, med overskrifter, lister og fet eller kursiv tekst, og `Markering` åpner siden om å [skrive tekst](#writing).
 
-Den vises ved siden av plantegningen til logikksystemet i biblioteket, og øverst på [konfigurasjonspanelet](#configuration-panel) til hver installasjon. Den som får plantegningen din, har aldri sett konstruksjonen din, så beskrivelsen og plassene er den eneste veiledningen.
+Den vises ved siden av plantegningen til logikksystemet i biblioteket, og øverst på installasjonspanelet til hver installasjon. Den som får plantegningen din, har aldri sett konstruksjonen din, så beskrivelsen og plassene er den eneste veiledningen.
 
 ## Mer enn én luftsluse
 
-På startskjermen trykker du `+ installasjon` under logikksystemet og fyller plassene med blokkene til den andre luftslusen på konfigurasjonspanelet til den. Da kjører begge luftslusene de samme sekvensene på sine egne blokker, og en endring i en sekvens når begge.
+På startskjermen trykker du `+ installasjon` under logikksystemet og fyller plassene med blokkene til den andre luftslusen på installasjonspanelet til den. Da kjører begge luftslusene de samme sekvensene på sine egne blokker, og en endring i en sekvens når begge.
 
 ## Når noe går galt
 
 På startskjermen lyser en rad grønt mens den kjører, og rødt når den må repareres. Åpne den for å se hvorfor.
 
-Kan en sekvens ikke fortsette, for eksempel fordi en blokk er borte eller en plass er tom, slås den installasjonen av, og raden sier hvorfor: *Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør var borte.* Rett opp det den nevner, for eksempel ved å fylle plassen på konfigurasjonspanelet, og slå på installasjonen igjen.
+Kan en sekvens ikke fortsette, for eksempel fordi en blokk er borte eller en plass er tom, slås den installasjonen av, og raden sier hvorfor: *Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør var borte.* Rett opp det den nevner, for eksempel ved å fylle plassen på installasjonspanelet, og slå på installasjonen igjen.
 
 ## Ta vare på og dele det
 
-`Lag plantegning` lagrer en kopi i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint). Fra da av står det `Oppdater plantegning` på den samme knappen, og den oppdaterer kopien i biblioteket. Setter du plantegningen på en annen konstruksjon, får du et logikksystem med én installasjon, der plassene fylles på konfigurasjonspanelet.
+`Lag plantegning` lagrer en kopi i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint). Fra da av står det `Oppdater plantegning` på den samme knappen, og den oppdaterer kopien i biblioteket. Setter du plantegningen på en annen konstruksjon, får du et logikksystem med én installasjon, der plassene fylles på installasjonspanelet.

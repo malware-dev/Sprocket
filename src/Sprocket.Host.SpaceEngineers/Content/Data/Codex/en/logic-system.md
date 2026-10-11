@@ -27,7 +27,9 @@ Switching it off stops anything running and leaves the blocks as they are. When 
 
 ## Real blocks, kept as slots
 
-The blocks you pick become [slots](#slot), listed under `Slots`, below the sequences. There are two kinds:
+Below the sequences, `Installation panel` shows what every installer reads, laid out as their [installation panel](#installation-panel) shows it: the description, then the slots.
+
+The blocks you pick become [slots](#slot), listed under `Slots`. There are two kinds:
 
 - A ![](mark:block) **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
 - A ![](mark:signal) **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
@@ -38,20 +40,20 @@ Each slot shows its name, what it is for, and the blocks that fill it. Pressing 
 
 ## The description
 
-`Description`, at the top of the logic system's screen, says what the logic system does and what whoever installs it needs to know. While the logic system is switched off it is a box to write in, with headings, lists, and bold or italic text, and `Markup` opens the page on [writing text](#writing).
+The description, the first part of `Installation panel`, says what the logic system does and what whoever installs it needs to know. While the logic system is switched off it is a box to write in, headed `Description`, with headings, lists, and bold or italic text, and `Markup` opens the page on [writing text](#writing).
 
-It is shown beside the logic system's blueprint in the library, and at the top of every installation's [configuration panel](#configuration-panel). Anyone who receives your blueprint has never seen your construct, so the description and the slots are their only guide.
+It is shown beside the logic system's blueprint in the library, and at the top of every installation's installation panel. Anyone who receives your blueprint has never seen your construct, so the description and the slots are their only guide.
 
 ## More than one airlock
 
-On the home screen, press `+ installation` under the logic system, and fill its slots with the second airlock's blocks on its configuration panel. Both airlocks then run the same sequences on their own blocks, and a change to a sequence reaches both.
+On the home screen, press `+ installation` under the logic system, and fill its slots with the second airlock's blocks on its installation panel. Both airlocks then run the same sequences on their own blocks, and a change to a sequence reaches both.
 
 ## When something goes wrong
 
 On the home screen, a row lights green while it runs and red when it needs mending. Open it to see why.
 
-If a sequence cannot carry on, for example because a block is gone or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the configuration panel, and switch the installation on again.
+If a sequence cannot carry on, for example because a block is gone or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the installation panel, and switch the installation on again.
 
 ## Keeping and sharing it
 
-`Make blueprint` saves a copy in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint). From then on, the same button reads `Update blueprint`, and brings the library's copy up to date. Putting the blueprint on another construct makes a logic system with one installation, whose slots are filled on the configuration panel.
+`Make blueprint` saves a copy in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint). From then on, the same button reads `Update blueprint`, and brings the library's copy up to date. Putting the blueprint on another construct makes a logic system with one installation, whose slots are filled on the installation panel.

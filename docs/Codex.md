@@ -23,7 +23,7 @@ index leaves out, is said in the game's log as the codex is read.
 | `logic-system` | Logic system | Written |
 | `installation` | Installation | Written |
 | `sequence` | Sequence | Not written; the page says so |
-| `configuration-panel` | Configuration panel | Written; says the logic system must be off to set it up, until the issue *The configuration panel can be set up while its logic system runs* is done |
+| `installation-panel` | Installation panel | Written; the panel fills one installation's slots, and the description and slots are written on the logic system's screen and the slot's page |
 | `library` | Library | Written; describes lost constructs as the issue *A lost construct's logic systems can be put on another construct* plans them, and is checked again when that and the library rework are done |
 | `picking` | Picking blocks | Not written; the page says so. A first draft exists, held back to be written with sequence, trigger and step |
 | `trigger` | Trigger | Not written; the page says so |

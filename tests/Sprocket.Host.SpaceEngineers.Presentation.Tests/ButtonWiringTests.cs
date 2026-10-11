@@ -166,7 +166,7 @@ public class ButtonWiringTests
 
     /// <summary>
     /// A logic system started from Airlock Button, made a blueprint, with a second blockset switched off and open on the
-    /// configuration panel, and a second button on the construct.
+    /// installation panel, and a second button on the construct.
     /// </summary>
     static Simulation Blueprinted()
     {

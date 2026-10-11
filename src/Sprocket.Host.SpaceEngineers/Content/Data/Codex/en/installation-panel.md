@@ -1,6 +1,6 @@
-# Configuration panel
+# Installation panel
 
-The configuration panel is where an ![](mark:installation) [installation](#installation) gets its blocks and ![](mark:signal) [signals](#signal). Each installation has its own. It also shows what whoever made the ![](mark:logic-system) [logic system](#logic-system) wrote about it, so that someone who has never seen it can install it.
+The installation panel is where an ![](mark:installation) [installation](#installation) gets its blocks and ![](mark:signal) [signals](#signal). Each installation has its own. It also shows what whoever made the ![](mark:logic-system) [logic system](#logic-system) wrote about it, so that someone who has never seen it can install it.
 
 ## Opening it
 

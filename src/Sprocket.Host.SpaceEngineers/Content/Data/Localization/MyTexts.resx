@@ -171,7 +171,7 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Systems.AddAnother" xml:space="preserve">
     <value>installation</value>
-    <comment>Adds another installation of a blueprint: its blocks, chosen on the configuration panel. Shown after a plus, as the last line under a blueprint.</comment>
+    <comment>Adds another installation of a blueprint: its blocks, chosen on the installation panel. Shown after a plus, as the last line under a blueprint.</comment>
   </data>
   <data name="Sprocket.Systems.AddAnotherAbout" xml:space="preserve">
     <value>Install the **{name}** logic system on another set of blocks, and choose which blocks it uses.</value>
@@ -188,6 +188,10 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
     <value>Slot {number}</value>
     <comment>The name a new slot holding several blocks is given. {number} is the first number free, counting on from the block slots there are.</comment>
+  </data>
+  <data name="Sprocket.System.InstallationPanel" xml:space="preserve">
+    <value>Installation panel</value>
+    <comment>Heading over a blueprint's description and slots on its logic system's screen: the installation panel of the installation shown.</comment>
   </data>
   <data name="Sprocket.Slot.Purpose" xml:space="preserve">
     <value>What it is for</value>
@@ -211,11 +215,11 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Slot.SetAside" xml:space="preserve">
     <value>Set aside, offered first: {blocks}</value>
-    <comment>Under a slot to fill again on the configuration panel. {blocks} is the blocks the installation had, by name.</comment>
+    <comment>Under a slot to fill again on the installation panel. {blocks} is the blocks the installation had, by name.</comment>
   </data>
   <data name="Sprocket.Slot.Changed" xml:space="preserve">
     <value>Changed: fill it again</value>
-    <comment>In place of the blocks of a slot that was split or merged, on the configuration panel.</comment>
+    <comment>In place of the blocks of a slot that was split or merged, on the installation panel.</comment>
   </data>
   <data name="Sprocket.Slot.MarkNew" xml:space="preserve">
     <value>{installation}: new, fill it</value>
@@ -984,7 +988,7 @@ Renaming it here renames the grid.</value>
     <comment>What a sequence nobody has named is called; {number} is its number.</comment>
   </data>
   <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
-    <value>The {slot} slot is empty. Fill it on the configuration panel.</value>
+    <value>The {slot} slot is empty. Fill it on the installation panel.</value>
     <comment>A blueprint slot a step needs has no block; {slot} is its name.</comment>
   </data>
   <data name="Sprocket.Problem.BlockOff" xml:space="preserve">

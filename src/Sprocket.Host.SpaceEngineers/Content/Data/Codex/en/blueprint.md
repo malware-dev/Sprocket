@@ -8,7 +8,7 @@ On the [home screen](#home), `Make blueprint` on a logic system's heading saves 
 
 ## Putting it on a construct
 
-In the library, choose a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its [configuration panel](#configuration-panel).
+In the library, choose a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its [installation panel](#installation-panel).
 
 A construct can hold a blueprint only once. To have a second, make a copy.
 

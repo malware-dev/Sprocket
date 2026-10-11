@@ -66,9 +66,9 @@ public class PickerSearchTests
         Assert.True(string.IsNullOrEmpty(sim.Editor.Pick().Stages[0].KindText), "the kind search was kept");
     }
 
-    /// <summary>A configuration panel keeps its block search from one slot's picker to the next.</summary>
+    /// <summary>An installation panel keeps its block search from one slot's picker to the next.</summary>
     [Fact]
-    public void AConfigurationPanelKeepsItsSearchFromSlotToSlot()
+    public void AnInstallationPanelKeepsItsSearchFromSlotToSlot()
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");

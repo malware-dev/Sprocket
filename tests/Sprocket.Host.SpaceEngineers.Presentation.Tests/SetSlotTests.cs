@@ -212,6 +212,7 @@ public class SetSlotTests
 
         var page = (Features.LogicSystems.LogicSystemPage)editor.Current!;
         Assert.False(page.About.IsVisible, "the description box was offered while the logic system may run");
+        Assert.False(Headed(page, editor), "the description read as it is carried a heading");
 
         editor.SwitchSystem(system, false);
         editor.PressAnswer("Switch them off");
@@ -220,7 +221,12 @@ public class SetSlotTests
         Assert.NotNull(row.Opens);
         Assert.NotNull(row.Fills);
         Assert.True(page.About.IsVisible);
+        Assert.True(Headed(page, editor));
     }
+
+    /// <summary>Whether the logic system's screen shows the heading over its description.</summary>
+    static bool Headed(Features.LogicSystems.LogicSystemPage page, Features.Shell.SprocketEditor editor) =>
+        page.View.Within().OfType<Lumel.Text.Label>().Any(label => label.IsVisible && label.Text == editor.Texts.BlueprintDescription.ToUpperInvariant());
 
     /// <summary>Home says, on the other installation's row, how many of its slots it has to fill again.</summary>
     [Fact]

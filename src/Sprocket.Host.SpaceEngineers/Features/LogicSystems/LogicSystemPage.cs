@@ -405,6 +405,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
 
             ArrangeSlots(texts);
+
+            _panelHeading.Text = texts.SystemInstallationPanel.ToUpperInvariant();
+            _panelHeading.IsVisible = _describing.IsVisible || _slotsHeading.IsVisible;
         }
 
         /// <summary>Shows a blueprint's description, in its box while it may be changed, leaving alone a box being typed in.</summary>
@@ -418,6 +421,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (!_describing.IsVisible)
                 return;
 
+            // Only over the box: the description read as it is needs no heading.
+            _descriptionHeading.IsVisible = editable;
             _descriptionHeading.Text = texts.BlueprintDescription.ToUpperInvariant();
             _composer.IsVisible = editable;
             _composer.Show(texts);

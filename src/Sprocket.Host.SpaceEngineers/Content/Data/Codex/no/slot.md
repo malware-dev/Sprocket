@@ -27,18 +27,18 @@ Fjerner du det siste steget eller den siste utløseren som bruker en plass, fjer
 
 ## Fylle en plass
 
-Blokkene du velger for et steg eller en utløser, fyller plassen for installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Alle andre installasjoner fyller den på sitt eget [konfigurasjonspanel](#configuration-panel).
+Blokkene du velger for et steg eller en utløser, fyller plassen for installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Alle andre installasjoner fyller den på sitt eget [installasjonspanel](#installation-panel).
 
 Skjermen til logikksystemet viser plassene under `Plasser`, hver med blokkene installasjonen som vises, fyller den med. Under blokkene står det hva hver av de andre installasjonene fortsatt må gjøre, for eksempel *Installasjon 2: ny, fyll den*, *Installasjon 2: endret, fyll den på nytt* eller *Installasjon 2: mistet en blokk*.
 
-Trykk blokkene til en plass på skjermen til logikksystemet, eller en plass på et konfigurasjonspanel, for å velge hva som fyller den. Bare blokker av et slag plassen forventer, blir tilbudt. Passer ingenting på denne [konstruksjonen](#construct), sier lista det.
+Trykk blokkene til en plass på skjermen til logikksystemet, eller en plass på et installasjonspanel, for å velge hva som fyller den. Bare blokker av et slag plassen forventer, blir tilbudt. Passer ingenting på denne [konstruksjonen](#construct), sier lista det.
 
 - En blokkplass kan fylles med én blokk eller flere.
 - En signalplass trenger en blokk og verktøylinjeplassen på den som sender signalet. Den verktøylinjeplassen settes opp for deg, og du blir spurt først hvis den allerede gjør noe annet.
 
 ## Navnet og hva den er til
 
-Trykker du navnet til en plass på skjermen til logikksystemet, åpnes siden til plassen. Det som står der, viser konfigurasjonspanelet til hver installasjon. Det endres mens logikksystemet er slått av.
+Trykker du navnet til en plass på skjermen til logikksystemet, åpnes siden til plassen. Det som står der, viser installasjonspanelet til hver installasjon. Det endres mens logikksystemet er slått av.
 
 - **Overskriften** er navnet til plassen. Gi den nytt navn med blyanten der. Hver plass har sitt eget navn.
 - **`Hva den er til`** er en boks å skrive i, med overskrifter, lister og fet eller kursiv tekst. `Markering` åpner siden om å [skrive tekst](#writing).

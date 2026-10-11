@@ -12,7 +12,7 @@ using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
-    /// <summary>A blueprint's configuration panel: one installation's slots filled with its blocks.</summary>
+    /// <summary>A blueprint's installation panel: one installation's slots filled with its blocks.</summary>
     /// <remarks>
     /// Each slot says what it is for in the words its author gave it, and pressing its blocks chooses others. The elements it
     /// is drawn with are declared in <c>BlueprintPage.View.cs</c>.
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         int _shape = -1;
         Keyed<Part, PartRow> _partRows;
 
-        /// <summary>The configuration panel of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />, filling an installation's slots.</summary>
+        /// <summary>The installation panel of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />, filling an installation's slots.</summary>
         public BlueprintPage(SprocketEditor editor, AutomationSystem system) : base(editor)
         {
             _system = system;
@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool Edits => true;
 
         /// <inheritdoc />
-        public override string Help => Terms.ConfigurationPanel;
+        public override string Help => Terms.InstallationPanel;
 
         /// <inheritdoc />
         public override string CustomName => Title;

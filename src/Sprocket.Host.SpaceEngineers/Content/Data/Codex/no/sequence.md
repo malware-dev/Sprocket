@@ -27,7 +27,7 @@ En kjøring mislykkes når et av stegene ikke kan gjøres i det hele tatt, for e
 
 `Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør var borte.`
 
-Rett det den nevner, og slå på installasjonen igjen. En blokk som er borte, eller en [plass](#slot) som aldri ble fylt, fylles på [konfigurasjonspanelet](#configuration-panel) til installasjonen.
+Rett det den nevner, og slå på installasjonen igjen. En blokk som er borte, eller en [plass](#slot) som aldri ble fylt, fylles på [installasjonspanelet](#installation-panel) til installasjonen.
 
 ## Når et steg venter
 

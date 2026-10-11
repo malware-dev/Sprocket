@@ -8,7 +8,7 @@ På [startskjermen](#home) lagrer `Lag plantegning` i overskriften til et logikk
 
 ## Sette den på en konstruksjon
 
-I biblioteket velger du en plantegning og trykker `Legg til på denne konstruksjonen`. Den blir et logikksystem på denne konstruksjonen, med én installasjon der plassene fortsatt er tomme. Fyll dem på [konfigurasjonspanelet](#configuration-panel).
+I biblioteket velger du en plantegning og trykker `Legg til på denne konstruksjonen`. Den blir et logikksystem på denne konstruksjonen, med én installasjon der plassene fortsatt er tomme. Fyll dem på [installasjonspanelet](#installation-panel).
 
 En konstruksjon kan bare ha en plantegning én gang. Vil du ha en til, lager du en kopi.
 

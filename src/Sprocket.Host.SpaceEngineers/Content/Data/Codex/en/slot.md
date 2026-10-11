@@ -27,18 +27,18 @@ Removing the last step or trigger that uses a slot removes the slot. Blocks anot
 
 ## Filling a slot
 
-The blocks you pick for a step or a trigger fill its slot for the installation chosen under `Showing the slots filled by installation`. Every other installation fills it on its own [configuration panel](#configuration-panel).
+The blocks you pick for a step or a trigger fill its slot for the installation chosen under `Showing the slots filled by installation`. Every other installation fills it on its own [installation panel](#installation-panel).
 
 The logic system's screen lists its slots under `Slots`, each with the blocks the installation shown fills it with. Under them, each other installation with something still to do says so, for example *Installation 2: new, fill it*, *Installation 2: changed, fill it again* or *Installation 2: lost a block*.
 
-Press a slot's blocks on the logic system's screen, or a slot on a configuration panel, to pick what fills it. Only blocks of a kind the slot expects are offered. If nothing on this [construct](#construct) fits, the list says so.
+Press a slot's blocks on the logic system's screen, or a slot on an installation panel, to pick what fills it. Only blocks of a kind the slot expects are offered. If nothing on this [construct](#construct) fits, the list says so.
 
 - A block slot can be filled with one block or several.
 - A signal slot needs a block and the toolbar slot on it that sends the signal. That toolbar slot is set up for you, and you are asked first if it already does something else.
 
 ## Its name and what it is for
 
-Pressing a slot's name on the logic system's screen opens the slot's page. What is written there, every installation's configuration panel shows. It is changed while the logic system is switched off.
+Pressing a slot's name on the logic system's screen opens the slot's page. What is written there, every installation's installation panel shows. It is changed while the logic system is switched off.
 
 - **The heading** is the slot's name. Rename it with the pencil there. Each slot's name is its own.
 - **`What it is for`** is a box to write in, with headings, lists, and bold or italic text. `Markup` opens the page on [writing text](#writing).
