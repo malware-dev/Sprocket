@@ -57,6 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         bool _structureDirty;
         bool _developerMode;
         bool _toldPasting;
+        Shelf _shelf;
 
         /// <summary>An editor of <paramref name="program" />, saying what it says in <paramref name="texts" />.</summary>
         public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner, Texts texts)
@@ -695,7 +696,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public Backups Backups { get; set; }
 
         /// <summary>The player's library, which keeps blueprints for every world; null on a machine that keeps none.</summary>
-        public Shelf Shelf { get; set; }
+        /// <remarks>Each logic system that links to no blueprint is linked, as the library is given, to the one in it of its identity.</remarks>
+        public Shelf Shelf
+        {
+            get { return _shelf; }
+            set
+            {
+                _shelf = value;
+                for (var i = 0; value != null && i < _program.Systems.Count; i++)
+                    value.Link(_program.Systems[i]);
+            }
+        }
 
         /// <summary>How the player likes the screens to look in every world; null on a machine that keeps none.</summary>
         public Preferences Preferences { get; set; }
@@ -2704,21 +2715,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Puts the blueprint <paramref name="volume" /> from the library on the construct as a logic system with its first
-        /// installation, answering what was wrong with it, or empty.
+        /// Puts the blueprint <paramref name="volume" /> from the library on the construct as a logic system of its own, linked
+        /// to it, with its first installation, answering what was wrong, or empty.
         /// </summary>
+        /// <remarks>Refused where a logic system made from it is here already: another of the same is another installation of that one.</remarks>
         public string PutOn(Volume volume)
         {
-            return PutOn(volume.Text, volume.Identity);
+            if (_program.MadeFrom(volume.Identity) != null)
+                return Texts.LibraryOnAlready;
+
+            AutomationSystem system;
+            var trouble = ProgramText.Lone(volume.Text, _world.Values, out system);
+            if (trouble.Length > 0)
+                return trouble;
+
+            system.Identity = Guid.NewGuid();
+            system.Origin = volume.Identity;
+            system.OriginChanged = volume.Changed;
+            return PutOn(ProgramText.Linked(system), system.Identity);
         }
 
         /// <summary>
-        /// Puts the blueprint <paramref name="blueprint" />, as a backup keeps it, on the construct as a logic system with its
-        /// first installation, answering what was wrong with it, or empty.
+        /// Puts the logic system <paramref name="backed" />, as a backup keeps it, back on the construct with its own identity
+        /// and its link, with its first installation, answering what was wrong with it, or empty.
         /// </summary>
-        public string PutOn(AutomationSystem blueprint)
+        /// <remarks>Refused where a logic system of its identity is here already.</remarks>
+        public string PutOn(AutomationSystem backed)
         {
-            return PutOn(ProgramText.Blueprint(blueprint), blueprint.Identity);
+            if (Shelf != null)
+                Shelf.Link(backed);
+
+            return PutOn(ProgramText.Linked(backed), backed.Identity);
         }
 
         string PutOn(string text, Guid identity)
@@ -2794,10 +2821,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>Whether storage keeps a copy of the blueprint <paramref name="system" />, as it is or older.</summary>
+        /// <summary>Whether the library keeps the blueprint the logic system <paramref name="system" /> is linked to.</summary>
         public bool Stored(AutomationSystem system)
         {
-            return Shelf != null && Shelf.Find(system.Identity) != null;
+            return Shelf != null && system.HasOrigin && Shelf.Find(system.Origin) != null;
         }
 
         /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
@@ -2840,6 +2867,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Answer(Texts.LibraryUpdateConfirm, delegate { Shelve(system); });
         }
 
+        /// <summary>
+        /// Puts the logic system <paramref name="backed" />, as a backup keeps it, in the library: where the blueprint it is
+        /// linked to is there, after asking whether it updates that blueprint or is kept as a new one; leaving both is the
+        /// answer Enter takes.
+        /// </summary>
+        public void ShelveBackup(AutomationSystem backed)
+        {
+            if (!Stored(backed))
+            {
+                Shelve(backed);
+                return;
+            }
+
+            Stamp(true);
+
+            var arguments = new Arguments();
+            arguments.Set("named", backed.Name);
+
+            Ask(Texts.LibraryKeepBackupQuestion + "\n\n**{named}**\n\n" + Texts.LibraryKeepBackupLinked, arguments);
+            Answer(Texts.LibraryKeepBackupLeave, delegate { }, true);
+            Answer(Texts.LibraryKeepBackupUpdate, delegate { Shelve(backed); });
+            Answer(Texts.LibraryKeepBackupNew, delegate
+            {
+                backed.Origin = Guid.Empty;
+                backed.OriginChanged = null;
+                Shelve(backed);
+            });
+        }
+
         /// <summary>Asks before putting the blueprint of <paramref name="system" /> in the library in its place; keeping it is the answer Enter takes.</summary>
         public void AskRenew(AutomationSystem system)
         {
@@ -2867,16 +2923,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Puts the blueprint of <paramref name="system" /> in the library in its place, its installations keeping their blocks in
+        /// Puts the blueprint <paramref name="system" /> is linked to in its place, its installations keeping their blocks in
         /// every slot the blueprint still uses, offered back as <paramref name="change" />, answering what was wrong, or empty.
         /// </summary>
         /// <remarks>
-        /// Its runs end, as they do when a logic system goes, and each installation stays switched as it was. The whole
-        /// program as it would stand is read first, because a text with an error in it is trusted in no part.
+        /// It keeps its own identity, so its buttons go on naming it, and is linked to the blueprint as it now is. Its runs end,
+        /// as they do when a logic system goes, and each installation stays switched as it was. The whole program as it would
+        /// stand is read first, because a text with an error in it is trusted in no part.
         /// </remarks>
         public string Renew(AutomationSystem system, Change change)
         {
-            var volume = Shelf == null ? null : Shelf.Find(system.Identity);
+            var volume = Stored(system) ? Shelf.Find(system.Origin) : null;
             if (volume == null)
                 return "";
 
@@ -2884,6 +2941,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var trouble = ProgramText.Lone(volume.Text, _world.Values, out copy);
             if (trouble.Length > 0)
                 return trouble;
+
+            copy.Identity = system.Identity;
+            copy.Origin = volume.Identity;
+            copy.OriginChanged = volume.Changed;
 
             var text = ProgramText.Replacing(_program, _world.Values, copy);
             trouble = ProgramText.Load(text, new Automation(), _world.Values);
@@ -2924,12 +2985,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return "";
         }
 
-        /// <summary>Whether the logic system <paramref name="system" /> was changed after its blueprint in the library was.</summary>
-        /// <remarks>By the dates alone, which say which copy was changed last and nothing about what either was made from.</remarks>
+        /// <summary>Whether the logic system <paramref name="system" /> was changed after the version of its blueprint in the library it is linked to.</summary>
         public bool ChangedSince(AutomationSystem system)
         {
-            var copy = Shelf == null ? null : Shelf.Find(system.Identity);
-            return copy != null && system.Changed.HasValue && (!copy.Changed.HasValue || system.Changed.Value > copy.Changed.Value);
+            return Stored(system) && system.Changed.HasValue
+                && (!system.OriginChanged.HasValue || system.Changed.Value > system.OriginChanged.Value);
         }
 
         /// <summary>

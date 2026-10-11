@@ -1412,7 +1412,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Keeps a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
         /// <remarks>
-        /// A logic system whose blueprint in <paramref name="shelf" /> has the same identity and the same change date is left out,
+        /// A logic system whose blueprint in <paramref name="shelf" />, the one it is linked to, has its change date is left out,
         /// since the library has it already; where that is every one, no backup is kept. Only the logic systems are kept: their
         /// installations stay behind with their blocks.
         /// </remarks>
@@ -1429,7 +1429,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             var systems = _program.Systems;
             for (var i = 0; i < systems.Count; i++)
             {
-                var kept = shelf.Find(systems[i].Identity);
+                shelf.Link(systems[i]);
+                var kept = systems[i].HasOrigin ? shelf.Find(systems[i].Origin) : null;
                 if (kept == null || kept.Changed != systems[i].Changed)
                     unkept.Add(systems[i]);
             }

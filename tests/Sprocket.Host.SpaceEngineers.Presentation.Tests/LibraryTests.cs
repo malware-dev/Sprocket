@@ -320,8 +320,9 @@ public class LibraryTests
         keep.Command.Execute();
         rig.Tick();
 
-        Assert.Equal(lost.Identity, Assert.Single(rig.Shelf.All).Identity);
-        Assert.True(rig.Shelf.Holds(lost));
+        var volume = Assert.Single(rig.Shelf.All);
+        Assert.NotEqual(lost.Identity, volume.Identity);
+        Assert.Equal(ProgramText.Blueprint(lost, volume.Identity), volume.Text);
         Assert.Empty(rig.Editor.Program.Systems);
     }
 
@@ -329,25 +330,117 @@ public class LibraryTests
     [Fact]
     public void ALostConstructsLogicSystemUpdatesItsBlueprintAfterAsking()
     {
-        var rig = WithLost(out var lost, out var page, delegate(Simulation sim, AutomationSystem system)
-        {
-            system.Name = "Airlock Mk 0";
-            sim.Shelf.Keep(system);
-            system.Name = "Airlock";
-        });
+        var rig = WithLost(out var lost, out var page, Linked);
         ChooseLost(rig, page);
 
         var update = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint);
         update.Command!.Execute();
         rig.Tick();
-        Assert.Contains(rig.Texts.LibraryUpdateReplaced, rig.Editor.Question());
+        Assert.Contains(rig.Texts.LibraryKeepBackupLinked, rig.Editor.Question());
         Assert.Equal("Airlock Mk 0", Assert.Single(rig.Shelf.All).Name);
 
-        rig.Editor.PressChoice(rig.Texts.LibraryUpdateConfirm);
+        rig.Editor.PressChoice(rig.Texts.LibraryKeepBackupUpdate);
         rig.Tick();
 
         Assert.True(rig.Shelf.Holds(lost));
         Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
+    }
+
+    /// <summary>A lost construct's logic system linked to a blueprint in the library is kept beside it as a new blueprint, when asked to.</summary>
+    [Fact]
+    public void ALostConstructsLogicSystemIsKeptAsANewBlueprint()
+    {
+        var rig = WithLost(out var lost, out var page, Linked);
+        ChooseLost(rig, page);
+
+        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint).Command!.Execute();
+        rig.Tick();
+        rig.Editor.PressChoice(rig.Texts.LibraryKeepBackupNew);
+        rig.Tick();
+
+        Assert.Equal(2, rig.Shelf.All.Count);
+        Assert.Equal("Airlock Mk 0", rig.Shelf.Find(lost.Origin)!.Name);
+        Assert.NotEqual(lost.Origin, Assert.Single(rig.Shelf.All, v => v.Name == "Airlock").Identity);
+    }
+
+    /// <summary>A backup with no link, of a logic system sharing a stored blueprint's identity, is linked to that blueprint as it is chosen.</summary>
+    [Fact]
+    public void ABackupSharingABlueprintsIdentityIsLinkedToIt()
+    {
+        var rig = WithLost(out var lost, out var page, (sim, system) =>
+        {
+            sim.Folder.Write("sprocket-bp-Airlock.cog", ProgramText.Blueprint(system));
+            sim.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n");
+            Assert.Equal("", sim.Shelf.Read());
+        });
+        Assert.False(lost.HasOrigin);
+        page.Rows.OfType<StatusRow>().First(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
+        rig.Tick();
+
+        var keep = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint);
+        Assert.False(keep.Command!.CanExecute, "the library offers to keep a backup it holds already");
+        Assert.Single(rig.Shelf.All);
+    }
+
+    /// <summary>A lost construct's logic system put back on keeps the blueprint it is linked to.</summary>
+    [Fact]
+    public void ALostConstructsLogicSystemPutBackOnKeepsItsLink()
+    {
+        var rig = WithLost(out var lost, out var page, Linked);
+        ChooseLost(rig, page);
+
+        Add(rig, page).Command!.Execute();
+        rig.Tick();
+
+        var arrived = Assert.Single(rig.Editor.Program.Systems);
+        Assert.Equal(lost.Identity, arrived.Identity);
+        Assert.Equal(lost.Origin, arrived.Origin);
+        Assert.True(rig.Editor.Stored(arrived));
+    }
+
+    /// <summary>Make a copy on a backup copies the backup, even while the logic system it keeps is on this construct, changed.</summary>
+    [Fact]
+    public void MakeACopyOfABackupCopiesTheBackup()
+    {
+        var rig = WithLost(out _, out var page);
+        ChooseLost(rig, page);
+        Add(rig, page).Command!.Execute();
+        rig.Tick();
+
+        var here = Assert.Single(rig.Editor.Program.Systems);
+        here.Name = "Changed";
+        page = Reopened(rig);
+        ChooseLost(rig, page);
+
+        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryCopy).Command!.Execute();
+        rig.Tick();
+
+        Assert.Equal(2, rig.Editor.Program.Systems.Count);
+        Assert.Equal("Airlock 2", Assert.Single(rig.Editor.Program.Systems, s => s != here).Name);
+    }
+
+    /// <summary>Make a copy on a blueprint in the library copies the library's, even while a logic system made from it is on this construct, changed.</summary>
+    [Fact]
+    public void MakeACopyOfAStoredBlueprintCopiesTheStoredOne()
+    {
+        var rig = Blueprinted();
+        var here = rig.Editor.Program.Systems[0];
+        rig.Shelf.Keep(here);
+        here.Name = "Changed";
+        var page = Reopened(rig);
+
+        page.Rows.OfType<StatusRow>().Single(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
+        rig.Tick();
+        Assert.False(Add(rig, page).IsVisible, "the button to add it is there while a logic system made from it is on this construct");
+        Assert.DoesNotContain(page.View!.Within().OfType<Button>(), b => b.IsVisible
+            && (b.Text == rig.Texts.SystemsUpdateFromLibrary || b.Text == rig.Texts.SystemsUpdateBlueprint
+                || b.Text == rig.Texts.SystemsMakeBlueprint || b.Text == rig.Texts.LibraryReset));
+
+        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryCopy).Command!.Execute();
+        rig.Tick();
+
+        Assert.Equal(2, rig.Editor.Program.Systems.Count);
+        Assert.Equal("Airlock 2", Assert.Single(rig.Editor.Program.Systems, s => s != here).Name);
     }
 
     /// <summary>
@@ -465,6 +558,10 @@ public class LibraryTests
         var now = Assert.Single(rig.Editor.Program.Systems);
         Assert.Equal("Airlock Mk II", now.Name);
         Assert.Equal(was.Identity, now.Identity);
+        var volume = Assert.Single(rig.Shelf.All);
+        Assert.Equal(volume.Identity, now.Origin);
+        Assert.Equal(volume.Changed, now.OriginChanged);
+        Assert.False(rig.Editor.ChangedSince(now));
         Assert.Equal(filled, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
         Assert.Equal(switched, now.Instances.Select(i => i.Enabled).ToList());
         Assert.True(rig.Shelf.Holds(now));
@@ -529,16 +626,18 @@ public class LibraryTests
         var blueprint = rig.Editor.Program.Systems[0];
         blueprint.Changed = Saved;
         rig.Shelf.Keep(blueprint);
+        Assert.NotEqual(blueprint.Identity, blueprint.Origin);
+        Assert.Equal(Saved, blueprint.OriginChanged);
 
         Assert.Equal("sprocket-bp-Airlock.cog\n", rig.Folder.Files["sprocket-bp.index"]);
-        Assert.Equal(ProgramText.Blueprint(blueprint), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
+        Assert.Equal(ProgramText.Blueprint(blueprint, blueprint.Origin), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
 
         var read = new Shelf(rig.Folder, delegate { });
         Assert.Equal("", read.Read());
 
         var volume = Assert.Single(read.All);
         Assert.Equal(VolumeState.Read, volume.State);
-        Assert.Equal(blueprint.Identity, volume.Identity);
+        Assert.Equal(blueprint.Origin, volume.Identity);
         Assert.Equal("Airlock", volume.Name);
         Assert.Equal(Saved, volume.Changed);
         Assert.True(read.Holds(blueprint));
@@ -595,6 +694,9 @@ public class LibraryTests
         rig.Folder.Write("stoopid.doot", ProgramText.Blueprint(blueprint));
         rig.Folder.Write("sprocket-bp.index", "# from a friend\r\n\r\n  stoopid.doot  \r\n");
         Assert.Equal("", rig.Shelf.Read());
+
+        // Handed to the editor again, as opening the screen hands it, which links the logic system to the file of its identity.
+        rig.Editor.Shelf = rig.Shelf;
 
         blueprint.Name = "Airlock Mk II";
         rig.Shelf.Keep(blueprint);
@@ -672,13 +774,35 @@ public class LibraryTests
 
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.True(arrived.IsBlueprint);
-        Assert.Equal(blueprint.Identity, arrived.Identity);
+        Assert.NotEqual(volume.Identity, arrived.Identity);
+        Assert.Equal(volume.Identity, arrived.Origin);
+        Assert.Equal(volume.Changed, arrived.OriginChanged);
         Assert.Equal("Installation 1", Assert.Single(arrived.Instances).Name);
         Assert.Equal(blueprint.Parts.Select(p => p.Id), arrived.Parts.Select(p => p.Id));
         Assert.Equal(blueprint.Sequences.Count, arrived.Sequences.Count);
 
-        Assert.NotEqual("", rig.Editor.PutOn(volume));
+        Assert.Equal(rig.Texts.LibraryOnAlready, rig.Editor.PutOn(volume));
         Assert.Single(rig.Editor.Program.Systems);
+    }
+
+    /// <summary>A logic system with the identity of a blueprint in the library, and no link, is linked to it as the library is handed to the editor.</summary>
+    [Fact]
+    public void ALogicSystemSharingABlueprintsIdentityIsLinkedToIt()
+    {
+        var rig = Blueprinted();
+        var system = rig.Editor.Program.Systems[0];
+        system.Changed = Saved;
+        rig.Folder.Write("sprocket-bp-Airlock.cog", ProgramText.Blueprint(system));
+        rig.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n");
+        Assert.Equal("", rig.Shelf.Read());
+        Assert.False(system.HasOrigin);
+
+        rig.Editor.Shelf = rig.Shelf;
+
+        Assert.Equal(system.Identity, system.Origin);
+        Assert.Equal(Saved, system.OriginChanged);
+        Assert.True(rig.Shelf.Holds(system));
+        Assert.False(rig.Editor.ChangedSince(system));
     }
 
     /// <summary>A blueprint put on from the library is a step home's undo takes back, and redo puts it on again, switched off.</summary>
@@ -1105,6 +1229,28 @@ public class LibraryTests
         page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
         return rig;
+    }
+
+    /// <summary>Makes the backup of <see cref="WithLost" /> one of a logic system linked to a blueprint the library keeps as Airlock Mk 0.</summary>
+    static void Linked(Simulation sim, AutomationSystem system)
+    {
+        system.Name = "Airlock Mk 0";
+        sim.Shelf.Keep(system);
+        system.Name = "Airlock";
+        sim.Backups.Forget(sim.Backups.All[0]);
+        sim.Backups.Take("Lost Ship", Saved, new[] { system });
+    }
+
+    /// <summary>The library opened again from the home screen, listing what is there now.</summary>
+    static LibraryPage Reopened(Simulation rig)
+    {
+        rig.Editor.GoToRoot();
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        return page;
     }
 
     /// <summary>Chooses the lost construct's airlock in the library.</summary>

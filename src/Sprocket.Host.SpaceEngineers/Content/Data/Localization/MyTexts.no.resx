@@ -1557,6 +1557,24 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
     <value>Behold plantegningen</value>
   </data>
+  <data name="Sprocket.Library.OnAlready" xml:space="preserve">
+    <value>Et logikksystem laget fra denne plantegningen er allerede på denne konstruksjonen. Vil du ha ett til av samme slag, legg til en installasjon i det.</value>
+  </data>
+  <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
+    <value>Ta vare på denne sikkerhetskopien i biblioteket?</value>
+  </data>
+  <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
+    <value>Biblioteket har plantegningen den ble laget fra. Oppdatere den plantegningen fra den, eller ta vare på den som en ny plantegning?</value>
+  </data>
+  <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
+    <value>Oppdater plantegningen</value>
+  </data>
+  <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
+    <value>Ta vare på som ny plantegning</value>
+  </data>
+  <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
+    <value>La den være</value>
+  </data>
   <data name="Sprocket.Sequence.Run" xml:space="preserve">
     <value>kjør</value>
   </data>

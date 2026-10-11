@@ -334,10 +334,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>The details of a blueprint: whether it is on this construct, how it stands with the library, and what it holds.</summary>
-        /// <remarks>
-        /// The copy on this construct where there is one, chosen from any list; where there is not, the one the entry stands for,
-        /// kept in storage or in a backup.
-        /// </remarks>
+        /// <remarks>What it holds is the entry's own: the logic system here, the backup, or the blueprint in the library.</remarks>
         void DescribeBlueprint(Entry entry)
         {
             // A backup's blueprint is read from its file as it is chosen, so the list is drawn without reading any.
@@ -346,9 +343,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             var texts = Editor.Texts;
             var shelf = Editor.Shelf;
-            var live = Live(entry.Identity);
-            var volume = shelf == null ? null : shelf.Find(entry.Identity);
-            var system = live ?? entry.Read;
+            if (entry.Read != null && shelf != null)
+                shelf.Link(entry.Read);
+            var live = Live(entry);
+            var volume = Shelved(entry, live);
+            var system = entry.Section == OnConstruct ? live : entry.Read;
             var free = Editor.Holder == null;
 
             // Only where it is not on this construct already: it comes off from the home screen.
@@ -356,10 +355,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _add.IsVisible = live == null;
             _adds.CanExecute = free && system != null;
 
-            // A backed up blueprint is kept in storage from its backup where it is not on this construct.
-            var kept = live ?? (entry.Backup != null ? entry.Read : null);
-            var same = kept != null && volume != null && shelf.Holds(kept);
-            var newer = live != null && volume != null && !same && !Editor.ChangedSince(live);
+            // A backup is kept in the library as it keeps it, and a logic system here as it is; a blueprint in the library is
+            // there already, so its row has no button between it and the library.
+            var here = entry.Section == OnConstruct;
+            var kept = here ? live : entry.Section == BackedUp ? entry.Read : null;
+            var same = shelf != null && kept != null && volume != null && shelf.Holds(kept);
+            var newer = here && live != null && volume != null && !same && !Editor.ChangedSince(live);
             _keep.IsVisible = kept != null && shelf != null;
             _keep.Text = volume == null ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _keeps.CanExecute = !same;
@@ -368,7 +369,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
 
             // Back the other way while the logic system has moved on from its blueprint, beside the button that would copy it over.
-            _reset.IsVisible = live != null && volume != null && !same && !newer;
+            _reset.IsVisible = here && live != null && volume != null && !same && !newer;
             _reset.Text = texts.LibraryReset;
             _reset.Tip = Tip.For(_reset.Tip, texts.LibraryResetAbout);
 
@@ -432,7 +433,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         void Add()
         {
             var entry = _chosen;
-            if (entry == null || Live(entry.Identity) != null || (entry.Backup != null && entry.Read == null))
+            if (entry == null || Live(entry) != null || (entry.Backup != null && entry.Read == null))
                 return;
 
             if (entry.Backup != null)
@@ -449,22 +450,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Describe();
         }
 
-        /// <summary>Puts the chosen blueprint, as it is on this construct, in the library; or a backed up one, as its backup keeps it.</summary>
+        /// <summary>Puts the chosen logic system, as it is on this construct, in the library; or a backed up one, as its backup keeps it.</summary>
         void Keep()
         {
             var entry = _chosen;
-            var live = entry == null ? null : Live(entry.Identity);
-            if (live == null && entry != null && entry.Backup != null && entry.Read != null)
+            if (entry == null || entry.Section == Kept)
+                return;
+
+            if (entry.Section == BackedUp)
             {
                 var backed = entry.Read;
-                if (Editor.Stored(backed))
-                    Run(Cmd.Shelve, delegate { Editor.AskUpdate(backed); });
-                else
-                    Run(Cmd.Shelve, delegate { Editor.Shelve(backed); });
+                if (backed != null)
+                    Run(Cmd.Shelve, delegate { Editor.ShelveBackup(backed); });
 
                 return;
             }
 
+            var live = Live(entry);
             if (live == null)
                 return;
 
@@ -481,27 +483,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Puts the chosen blueprint in the library back in the place of the logic system on this construct, after asking.</summary>
         void Reset()
         {
-            var live = _chosen == null ? null : Live(_chosen.Identity);
+            var live = _chosen == null || _chosen.Section != OnConstruct ? null : Live(_chosen);
             if (live != null)
                 Run(Cmd.Renew, delegate { Editor.AskReset(live); });
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
-        /// <remarks>
-        /// Copied as it is on this construct where it is here; where it is not, as its backup keeps it, or as
-        /// the library does.
-        /// </remarks>
+        /// <remarks>Copied as the entry itself keeps it: the logic system here, the backup, or the blueprint in the library.</remarks>
         void Copy()
         {
             var entry = _chosen;
-            if (entry == null || (entry.Backup != null && entry.Read == null))
-                return;
-
-            var live = Live(entry.Identity);
-            var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
-            var text = live != null ? ProgramText.Blueprint(live)
-                : entry.Backup != null ? ProgramText.Blueprint(entry.Read)
-                : volume == null ? null : volume.Text;
+            var text = entry == null ? null : Source(entry);
             if (text == null)
                 return;
 
@@ -522,11 +514,45 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 command.Execute();
         }
 
-        /// <summary>The blueprint <paramref name="identity" /> on this construct, or null.</summary>
-        AutomationSystem Live(Guid identity)
+        /// <summary>
+        /// The logic system on this construct <paramref name="entry" /> is of, or null: itself, the one the backup keeps, or the
+        /// one made from the blueprint in the library.
+        /// </summary>
+        AutomationSystem Live(Entry entry)
         {
-            var system = Editor.Program.FindSystem(identity);
+            var program = Editor.Program;
+            var system = entry.Section == Kept ? program.MadeFrom(entry.Identity) : program.FindSystem(entry.Identity);
             return system != null && system.IsBlueprint ? system : null;
+        }
+
+        /// <summary>
+        /// The blueprint in the library <paramref name="entry" /> is, or the one its logic system, <paramref name="live" /> or the
+        /// backup's, is linked to; null where the library has none.
+        /// </summary>
+        Volume Shelved(Entry entry, AutomationSystem live)
+        {
+            var shelf = Editor.Shelf;
+            if (shelf == null)
+                return null;
+
+            if (entry.Section == Kept)
+                return shelf.Find(entry.Identity);
+
+            var linked = entry.Section == BackedUp ? entry.Read : live;
+            return linked != null && linked.HasOrigin ? shelf.Find(linked.Origin) : null;
+        }
+
+        /// <summary>The text <paramref name="entry" /> keeps its blueprint as, or null where it has none that reads.</summary>
+        string Source(Entry entry)
+        {
+            if (entry.Section == Kept)
+            {
+                var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
+                return volume == null ? null : volume.Text;
+            }
+
+            var system = entry.Section == BackedUp ? entry.Read : Live(entry);
+            return system == null ? null : ProgramText.Blueprint(system);
         }
 
         /// <summary>Who made <paramref name="system" /> and when it last changed, as far as either is known.</summary>

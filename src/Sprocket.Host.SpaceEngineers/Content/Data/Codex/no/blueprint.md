@@ -16,7 +16,7 @@ En konstruksjon kan bare ha en plantegning én gang. Vil du ha en til, lager du 
 
 `Lag en kopi` i biblioteket setter et nytt logikksystem på denne konstruksjonen som starter som en kopi av det valgte. Bruk det for å bygge noe som virker som et logikksystem du allerede har, for eksempel en hangardør laget av en luftsluse, uten å endre originalen.
 
-- Det kopieres slik det er på denne konstruksjonen, eller slik biblioteket har det hvis det ikke er her.
+- Det kopieres fra raden du valgte: logikksystemet på denne konstruksjonen, sikkerhetskopien eller plantegningen i lageret.
 - Det får navn med et tall, for eksempel *Luftsluse 2*, og du står som den som laget det.
 - Det har én installasjon der plassene fortsatt er tomme.
 - Det har ingen plantegning før du trykker `Lag plantegning`. Det og originalen er atskilt fra da av, og en endring i det ene lar det andre være som det er.

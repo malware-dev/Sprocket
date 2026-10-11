@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <remarks>
     /// The index is a list of file names, one to a line; a line starting <c>#</c> is a comment, and a blank line is
     /// nothing. A player adds a blueprint somebody gave them by putting its file beside the index and its name on a line
-    /// of its own. Each file holds one blueprint as <see cref="ProgramText.Blueprint" /> writes it.
+    /// of its own. Each file holds one blueprint as <see cref="ProgramText.Blueprint(AutomationSystem, Guid)" /> writes it.
     /// <para>
     /// The index is edited line by line, so whatever a player wrote in it stays where they wrote it. A file is only ever
     /// written where it read as a blueprint, or where the library made it.
@@ -73,22 +73,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return null;
         }
 
-        /// <summary>Puts <paramref name="blueprint" /> in the library as it is now, in place of any copy already there.</summary>
+        /// <summary>
+        /// Puts the logic system <paramref name="blueprint" /> in the library as it is now, in place of the blueprint it is
+        /// linked to, or as a new blueprint where it links to none here, and links it to the blueprint as it now is.
+        /// </summary>
         /// <remarks>
         /// A file the library named after the blueprint is renamed with it; a file a player named keeps the name they gave
         /// it.
         /// </remarks>
         public Volume Keep(AutomationSystem blueprint)
         {
-            var text = ProgramText.Blueprint(blueprint);
-            var had = Find(blueprint.Identity);
+            var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
+            var identity = had != null ? had.Identity : Guid.NewGuid();
+            var text = ProgramText.Blueprint(blueprint, identity);
             if (had == null)
             {
-                had = new Volume(Free(blueprint.Name), blueprint.Identity, blueprint.Namespace, blueprint.Name, blueprint.Changed, text);
+                had = new Volume(Free(blueprint.Name), identity, blueprint.Namespace, blueprint.Name, blueprint.Changed, text);
                 _all.Add(had);
                 _lines.Add(had.File);
                 Write(had.File, text);
                 WriteIndex();
+                Link(blueprint, had);
                 return had;
             }
 
@@ -107,7 +112,23 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Delete(was);
             }
 
+            Link(blueprint, had);
             return had;
+        }
+
+        /// <summary>
+        /// Links <paramref name="system" />, where it links to no blueprint, to the blueprint here that has its identity, at that
+        /// blueprint's version.
+        /// </summary>
+        /// <remarks>A logic system with the identity of a stored blueprint was put on from it or made into it.</remarks>
+        public void Link(AutomationSystem system)
+        {
+            if (system.HasOrigin || !system.IsBlueprint)
+                return;
+
+            var had = Find(system.Identity);
+            if (had != null)
+                Link(system, had);
         }
 
         /// <summary>Takes <paramref name="volume" /> out of the library, and deletes its file where it held a blueprint.</summary>
@@ -125,11 +146,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Delete(volume.File);
         }
 
-        /// <summary>Whether the library's copy of <paramref name="blueprint" /> is the blueprint as it is now.</summary>
+        /// <summary>Whether the blueprint the logic system <paramref name="blueprint" /> is linked to is the logic system as it is now.</summary>
         public bool Holds(AutomationSystem blueprint)
         {
-            var had = Find(blueprint.Identity);
-            return had != null && had.Text == ProgramText.Blueprint(blueprint);
+            var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
+            return had != null && had.Text == ProgramText.Blueprint(blueprint, had.Identity);
         }
 
         /// <summary>Reads the index and every file it names, answering what was wrong with any of them, or empty.</summary>
@@ -208,6 +229,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return new Volume(name, VolumeState.Twice, "system " + read.Identity.ToString("D") + " is already in the library.");
 
             return new Volume(name, read.Identity, read.Namespace, read.Name, read.Changed, text);
+        }
+
+        static void Link(AutomationSystem system, Volume volume)
+        {
+            system.Origin = volume.Identity;
+            system.OriginChanged = volume.Changed;
         }
 
         /// <summary>The line of the index naming <paramref name="file" />, or -1.</summary>

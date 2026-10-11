@@ -24,6 +24,9 @@ public class ScriptTests
 
     const string Blueprint = Version + "system blueprint \"" + Identity + "\" as ";
 
+    /// <summary>The identity of a stored blueprint a system blueprint was made from.</summary>
+    const string Origin = "9d0f1a2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b";
+
     /// <summary>Three doors a program may name.</summary>
     const string Doors = "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\nlet door2 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "let door3 = block 'Door/LargeBlockDoor' [ 3 ]\n";
@@ -1130,6 +1133,64 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(Head + "Airlock " + said + " {\n}\n", after));
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>
+    /// A system blueprint's <c>from</c> names the blueprint it was made from and the version of it, may come before or after
+    /// <c>changed</c>, and is written last.
+    /// </summary>
+    [Theory]
+    [InlineData("changed \"2026-09-14T19:02:11Z\" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\"")]
+    [InlineData("from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" changed \"2026-09-14T19:02:11Z\"")]
+    public void ABlueprintsFromNamesWhatItWasMadeFrom(string said)
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Blueprint + "MalTek.Airlock " + said + " {\n}\n", after));
+
+        var system = after.Systems[0];
+        Assert.Equal(new Guid(Origin), system.Origin);
+        Assert.Equal(new DateTime(2026, 9, 10, 8, 0, 0, DateTimeKind.Utc), system.OriginChanged);
+        Assert.Equal(new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc), system.Changed);
+        Assert.Contains(" as MalTek.Airlock changed \"2026-09-14T19:02:11Z\" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {",
+            Save(after));
+    }
+
+    /// <summary>A <c>from</c> without the version names the blueprint alone.</summary>
+    [Fact]
+    public void AFromWithoutItsVersionNamesTheBlueprint()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Blueprint + "MalTek.Airlock from \"" + Origin + "\" last sequence 4 {\n}\n", after));
+
+        Assert.Equal(new Guid(Origin), after.Systems[0].Origin);
+        Assert.Null(after.Systems[0].OriginChanged);
+        Assert.Equal(4, after.Systems[0].LastSequenceNumber);
+    }
+
+    /// <summary>A blueprint as the library keeps it carries no <c>from</c>; a logic system written alone with its link does.</summary>
+    [Fact]
+    public void ABlueprintAsStoredCarriesNoFrom()
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Blueprint + "MalTek.Airlock from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {\n}\n", after));
+
+        var system = after.Systems[0];
+        Assert.DoesNotContain(" from ", ProgramText.Blueprint(system));
+        Assert.Contains(" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {", ProgramText.Linked(system));
+    }
+
+    /// <summary>A <c>from</c> that does not name a blueprint by its GUID, gives a version that is no time, comes twice, or heads a plain system, is trouble.</summary>
+    [Theory]
+    [InlineData(Blueprint + "MalTek.Airlock from {\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock from \"not a guid\" {\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock from \"" + Origin + "\" \"14/09/2026\" {\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock from \"" + Origin + "\" from \"" + Origin + "\" {\n}\n")]
+    [InlineData(Head + "Airlock from \"" + Origin + "\" {\n}\n")]
+    public void AFromThatNamesNoBlueprintIsTrouble(string text)
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(text, after));
         Assert.False(after.Intact);
     }
 

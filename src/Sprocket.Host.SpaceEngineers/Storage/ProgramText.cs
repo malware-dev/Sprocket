@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                WriteSystem(pen, Written(systems[i], with), true, true);
+                WriteSystem(pen, Written(systems[i], with), Written(systems[i], with).Identity, true, true, true);
 
             // After every system, because an instance names the system it is one of and a reader
             // should have met it by then.
@@ -166,10 +166,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <remarks>A blueprint names nothing outside itself, so the system is the whole of it; its instances are the construct's.</remarks>
         public static string Blueprint(AutomationSystem system)
         {
+            return Blueprint(system, system.Identity);
+        }
+
+        /// <summary>The blueprint <paramref name="system" /> written out alone under the identity <paramref name="identity" />, as the library keeps the blueprint it is linked to.</summary>
+        /// <remarks>A blueprint as it is stored carries no link of its own.</remarks>
+        public static string Blueprint(AutomationSystem system, Guid identity)
+        {
             var pen = new Pen();
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
-            WriteSystem(pen, system, true, false);
+            WriteSystem(pen, system, identity, true, false, false);
+            return pen.ToString();
+        }
+
+        /// <summary>The logic system <paramref name="system" /> written out alone with its own identity and the blueprint it is linked to, as a backup keeps it.</summary>
+        public static string Linked(AutomationSystem system)
+        {
+            var pen = new Pen();
+            pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
+            pen.End();
+            WriteSystem(pen, system, system.Identity, true, false, true);
             return pen.ToString();
         }
 
@@ -180,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
             for (var i = 0; i < systems.Count; i++)
-                WriteSystem(pen, systems[i], true, false);
+                WriteSystem(pen, systems[i], systems[i].Identity, true, false, false);
 
             return pen.ToString();
         }
@@ -189,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public static string Said(AutomationSystem system)
         {
             var pen = new Pen();
-            WriteSystem(pen, system, false, false);
+            WriteSystem(pen, system, system.Identity, false, false, false);
             return pen.ToString();
         }
 
@@ -200,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <remarks>
         /// Read into a program of its own first, because a text with an error in it is trusted in no part: where anything is
         /// wrong, <paramref name="program" /> is left as it was. The text holds one system blueprint and nothing else, as
-        /// <see cref="Blueprint" /> writes it.
+        /// <see cref="Blueprint(AutomationSystem, Guid)" /> writes it.
         /// </remarks>
         public static string AddBlueprint(string text, Automation program, Values values)
         {
@@ -230,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Reads the blueprint <paramref name="text" /> on its own into <paramref name="read" />, answering what was wrong with it,
         /// or empty.
         /// </summary>
-        /// <remarks>The text holds one system blueprint and nothing else, as <see cref="Blueprint" /> writes it; where it does not, <paramref name="read" /> is null.</remarks>
+        /// <remarks>The text holds one system blueprint and nothing else, as <see cref="Blueprint(AutomationSystem, Guid)" /> writes it; where it does not, <paramref name="read" /> is null.</remarks>
         public static string Lone(string text, Values values, out AutomationSystem read)
         {
             read = null;
@@ -692,10 +709,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Writes <paramref name="system" />, with when it last changed where <paramref name="dated" />, and where
-        /// <paramref name="kept" /> the slots nothing in it uses that an installation holds blocks in.
+        /// Writes <paramref name="system" /> as <paramref name="identity" />, with when it last changed where
+        /// <paramref name="dated" />, where <paramref name="kept" /> the slots nothing in it uses that an installation holds
+        /// blocks in, and where <paramref name="linked" /> the blueprint it was made from.
         /// </summary>
-        static void WriteSystem(Pen pen, AutomationSystem system, bool dated, bool kept)
+        static void WriteSystem(Pen pen, AutomationSystem system, Guid identity, bool dated, bool kept, bool linked)
         {
             pen.Blank();
             pen.Note(system.Annotation);
@@ -703,7 +721,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system.IsBlueprint)
                 pen.Says(Keyword.Blueprint);
 
-            pen.Text(system.Identity.ToString("D")).Says(Keyword.As).Qualified(system.Namespace, system.Name);
+            pen.Text(identity.ToString("D")).Says(Keyword.As).Qualified(system.Namespace, system.Name);
 
             if (dated && system.Changed.HasValue)
             {
@@ -713,6 +731,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (system.LastSequenceNumber > system.HighestSequenceNumber())
                 pen.Says(Keyword.Last).Says(Keyword.Sequence).Whole(system.LastSequenceNumber);
+
+            // Last, so the date before it is read as the system's own and the one after it as the blueprint's.
+            if (linked && system.HasOrigin)
+            {
+                pen.Says(Keyword.From).Text(system.Origin.ToString("D"));
+                if (system.OriginChanged.HasValue)
+                    pen.Text(system.OriginChanged.Value.ToString(Times[0], CultureInfo.InvariantCulture));
+            }
 
             pen.Body();
 
@@ -784,17 +810,23 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             system.Annotation = statement.Annotation;
             system.IsBlueprint = blueprint;
 
-            // The two metadata clauses, in either order and each at most once.
+            // The metadata clauses, in any order and each at most once.
             var at = first + 3;
             var changed = false;
             var last = false;
+            var from = false;
             while (at < statement.Count)
             {
                 if (statement.Says(at, Keyword.Changed) && !changed)
                 {
-                    system.Changed = Time(statement, at + 1, trouble);
+                    system.Changed = Time(statement, at + 1, "'changed'", trouble);
                     changed = true;
                     at += 2;
+                }
+                else if (statement.Says(at, Keyword.From) && !from && blueprint)
+                {
+                    at = From(statement, at, system, trouble);
+                    from = true;
                 }
                 else if (statement.Says(at, Keyword.Last) && !last)
                 {
@@ -857,14 +889,38 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>A <c>changed</c> time, or null and trouble when it is not ISO 8601.</summary>
-        static DateTime? Time(Statement statement, int at, Trouble trouble)
+        /// <summary>
+        /// Reads <c>from "&lt;guid&gt;" ["&lt;iso&gt;"]</c> at <paramref name="at" /> into the link of <paramref name="system" />,
+        /// answering where the next clause starts.
+        /// </summary>
+        static int From(Statement statement, int at, AutomationSystem system, Trouble trouble)
+        {
+            Guid origin;
+            if (!Guid.TryParseExact(statement.Text(at + 1), "D", out origin) || origin == Guid.Empty)
+            {
+                trouble.Say(statement, "expected the identity of the blueprint after 'from', a quoted GUID.");
+                return at + 2;
+            }
+
+            system.Origin = origin;
+
+            // The version is the quoted text after it; a word there is the next clause.
+            if (statement.ValueAt(at + 2).Form != ValueForm.Text)
+                return at + 2;
+
+            system.OriginChanged = Time(statement, at + 2, "the blueprint's identity", trouble);
+            return at + 3;
+        }
+
+        /// <summary>The ISO 8601 time at <paramref name="at" />, or null, with trouble naming it as the time after <paramref name="after" />.</summary>
+        static DateTime? Time(Statement statement, int at, string after, Trouble trouble)
         {
             DateTime time;
             if (DateTime.TryParseExact(statement.Text(at), Times, CultureInfo.InvariantCulture,
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out time))
                 return time;
 
-            trouble.Say(statement, "expected an ISO 8601 time after 'changed', like \"2026-09-14T19:02:11Z\".");
+            trouble.Say(statement, "expected an ISO 8601 time after " + after + ", like \"2026-09-14T19:02:11Z\".");
             return null;
         }
 

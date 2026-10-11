@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Trigger> _triggers = new List<Trigger>();
         readonly SystemInstance[] _self;
         DateTime? _changed;
+        DateTime? _originChanged;
         int _lastSequence;
         bool _enabled = true;
         bool _blueprint;
@@ -142,6 +143,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             get { return _changed; }
             set { _changed = value.HasValue ? ToSecond(value.Value) : (DateTime?)null; }
         }
+
+        /// <summary>The identity of the stored blueprint this logic system was made from, or empty where it has none.</summary>
+        /// <remarks>
+        /// Its own <see cref="Identity" /> is its own; this is the link back, used to bring it up to date from the blueprint,
+        /// reset it to it, or write it into it.
+        /// </remarks>
+        public Guid Origin { get; set; }
+
+        /// <summary>The version of the blueprint, by its <see cref="Changed" />, it was made from or last brought up to date with; null where it has none.</summary>
+        public DateTime? OriginChanged
+        {
+            get { return _originChanged; }
+            set { _originChanged = value.HasValue ? ToSecond(value.Value) : (DateTime?)null; }
+        }
+
+        /// <summary>Whether it was made from a stored blueprint it still names.</summary>
+        public bool HasOrigin => Origin != Guid.Empty;
 
         /// <summary>Whether somebody has named it.</summary>
         public bool HasName => !string.IsNullOrEmpty(Name);

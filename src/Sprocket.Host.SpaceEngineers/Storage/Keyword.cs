@@ -128,6 +128,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         AtLeast,
 
         /// <summary>A trigger started each time a signal is sent.</summary>
-        Whenever
+        Whenever,
+
+        /// <summary>The stored blueprint a logic system was made from, and the version of it.</summary>
+        From
     }
 }

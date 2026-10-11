@@ -2053,6 +2053,30 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Keep the blueprint</value>
     <comment>Answer to the question about updating a blueprint that leaves the blueprint as it is.</comment>
   </data>
+  <data name="Sprocket.Library.OnAlready" xml:space="preserve">
+    <value>A logic system made from this blueprint is on this construct already. For another of the same, add an installation to it.</value>
+    <comment>Said in the library where a blueprint is to be put on a construct that has a logic system made from it.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepBackupQuestion" xml:space="preserve">
+    <value>Keep this backup in the library?</value>
+    <comment>Asked before keeping a backup in the library where the blueprint it was made from is there; its name follows.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
+    <value>The library has the blueprint it was made from. Update that blueprint from it, or keep it as a new blueprint?</value>
+    <comment>Under the question about keeping a backup.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
+    <value>Update the blueprint</value>
+    <comment>Answer to the question about keeping a backup that puts it in place of the blueprint it was made from.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepBackupNew" xml:space="preserve">
+    <value>Keep as a new blueprint</value>
+    <comment>Answer to the question about keeping a backup that keeps it beside the blueprint it was made from.</comment>
+  </data>
+  <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
+    <value>Leave it</value>
+    <comment>Answer to the question about keeping a backup that keeps nothing.</comment>
+  </data>
   <data name="Sprocket.Sequence.Run" xml:space="preserve">
     <value>run</value>
     <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: a step running another sequence. It asks which before it adds.</comment>

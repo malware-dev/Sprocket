@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// construct=Hangar Airlock
     /// lost=2026-10-02T14:30:00.0000000Z
     /// </code>
-    /// Each file holds one blueprint as <see cref="ProgramText.Blueprint" /> writes it, read only when it is asked for.
+    /// Each file holds one logic system as <see cref="ProgramText.Linked" /> writes it, read only when it is asked for.
     /// <para>
     /// Nothing is written until the index has been read, and nothing is written over an index that will not read: until
     /// then backups are kept for the session alone.
@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var backup = new Backup(Free(), system.Identity, system.Name, construct, lost);
                 _all.Add(backup);
                 if (Writes)
-                    _files.Write(backup.File, ProgramText.Blueprint(system));
+                    _files.Write(backup.File, ProgramText.Linked(system));
             }
 
             if (Writes)

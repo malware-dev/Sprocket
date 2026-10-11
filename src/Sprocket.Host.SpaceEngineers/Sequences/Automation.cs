@@ -531,6 +531,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return null;
         }
 
+        /// <summary>The logic system made from the stored blueprint <paramref name="origin" />, or null.</summary>
+        public AutomationSystem MadeFrom(Guid origin)
+        {
+            for (var i = 0; i < _systems.Count; i++)
+            {
+                if (_systems[i].Origin == origin)
+                    return _systems[i];
+            }
+            return null;
+        }
+
         /// <summary>The system called this, by this namespace, or null.</summary>
         public AutomationSystem FindSystem(string space, string name)
         {

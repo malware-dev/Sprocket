@@ -176,7 +176,7 @@ system "<guid>" as <namespace>.<name> [changed "<iso>"] [last sequence <n>] {
     <sequences>
 }
 
-system blueprint "<guid>" as <namespace>.<name> [changed "<iso>"] [last sequence <n>] {
+system blueprint "<guid>" as <namespace>.<name> [changed "<iso>"] [last sequence <n>] [from "<guid>" "<iso>"] {
     <slots>
     <triggers, watchers and clocks>
     <sequences>
@@ -184,6 +184,10 @@ system blueprint "<guid>" as <namespace>.<name> [changed "<iso>"] [last sequence
 ```
 
 The GUID is the system's identity, made with it and never changed.
+
+`from` names the stored blueprint a system blueprint was made from, by that blueprint's GUID, and the
+version of it, by its `changed`, that it was made from or last brought up to date with. It is
+metadata, and has no effect on what the program does. A blueprint as it is stored carries none.
 
 The namespace and name are for people, and a player may change either. Two systems may have the same
 name.
@@ -197,7 +201,7 @@ highest sequence number the system has handed out. Where both it and the sequenc
 higher wins. A sequence added to the system is numbered one past it, so a deleted number is never
 handed out again, and it is worth writing only where it is higher than every sequence in the system.
 
-`changed` and `last sequence` may come in either order, each at most once.
+`changed`, `last sequence` and `from` may come in any order, each at most once.
 
 ### Slots
 
