@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public string Text
         {
-            get { return _written.Text; }
+            get { return Written; }
             set
             {
                 _written.Text = value ?? "";
@@ -83,6 +83,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <inheritdoc />
         public Element Keyboard => _written;
+
+        /// <summary>What is written, with the hash put in front where it was left off and the rest reads as a color.</summary>
+        string Written
+        {
+            get
+            {
+                var text = _written.Text.Trim();
+                Color said;
+                byte alpha;
+                return text.Length > 0 && text[0] != '#' && Channels.Colour("#" + text, out said, out alpha) ? "#" + text : text;
+            }
+        }
 
         /// <summary>The color as the language writes one.</summary>
         string Spelling
@@ -108,14 +120,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Brings the rest into line with what is written, leaving a color that cannot be read yet alone.</summary>
         void Reread()
         {
-            if (_written.Text == Spelling && _chose)
+            var written = Written;
+            if (written == Spelling && _chose)
                 return;
 
             byte alpha;
             Color said;
-            if (!Channels.Colour(_written.Text, out said, out alpha))
+            if (!Channels.Colour(written, out said, out alpha))
             {
-                if (string.IsNullOrEmpty(_written.Text))
+                if (string.IsNullOrEmpty(written))
                 {
                     _chose = false;
                     Shown();
