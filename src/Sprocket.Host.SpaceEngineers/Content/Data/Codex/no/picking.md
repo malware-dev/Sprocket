@@ -8,7 +8,7 @@ Trykk en blokk for å velge den, eller kryss av flere for å velge alle sammen.
 
 Skriv i `Søk` for å vise bare blokkene der navnet inneholder det du skriver, og velg en type for å vise bare blokker av den typen, eller en familie, som `Dør`, for å vise alle typene i den. Søket står slik du skrev det for skjermen velgeren ble åpnet fra, til du forlater den skjermen, så et søk etter *Luftsluse* fortsatt gjelder når du velger for neste steg.
 
-Blokker som verktøylinjeoppsettet i spillet ikke viser, er utelatt. Øyet ytterst på linja med typen viser dem også, og trykt igjen skjuler det dem.
+Blokker som verktøylinjeoppsettet i spillet ikke viser, er utelatt. Øyet ytterst på overskriften `Blokker` viser dem også, og trykt igjen skjuler det dem. Det blir stående slik du forlot det, i alle velgere og alle verdener.
 
 Når en plass fylles, blir bare blokker av riktig slag tilbudt.
 

@@ -134,7 +134,7 @@ Renaming it here renames the grid.</value>
     <comment>Heading over a logic system's installations on the home screen, under the logic system; shown in capitals.</comment>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>The **library**: the logic systems on this construct, the blueprints in storage, and the automation of constructs that are lost.</value>
+    <value>The **library**: the logic systems on this construct, backups of constructs that lost their automation, and the blueprints in storage.</value>
     <comment>Note on the button above.</comment>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
@@ -1817,17 +1817,21 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>{count} installations</value>
     <comment>Under a blueprint in the library that is on the construct. {count} is how many installations, always more than one.</comment>
   </data>
+  <data name="Sprocket.Library.Backups" xml:space="preserve">
+    <value>Backups</value>
+    <comment>Heading in the library over the blueprints kept of constructs that lost their automation, each under its construct's name.</comment>
+  </data>
   <data name="Sprocket.Library.Lost" xml:space="preserve">
-    <value>Lost {time}. Its automation is kept here.</value>
-    <comment>Under a construct in the library that is gone from the world. {time} is when its automation was last saved.</comment>
+    <value>Lost {time}</value>
+    <comment>Under a backup in the library. {time} is when its construct lost its automation.</comment>
   </data>
-  <data name="Sprocket.Library.ForgetLost" xml:space="preserve">
-    <value>Forget this construct's automation</value>
-    <comment>Note on the bin of a lost construct in the library.</comment>
+  <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
+    <value>Forget this backup</value>
+    <comment>Note on the bin of a backup in the library.</comment>
   </data>
-  <data name="Sprocket.Library.ForgetLostQuestion" xml:space="preserve">
-    <value>Forget the automation of this lost construct?</value>
-    <comment>Asked before forgetting a lost construct's automation; the construct's name follows.</comment>
+  <data name="Sprocket.Library.ForgetBackupQuestion" xml:space="preserve">
+    <value>Forget this backup?</value>
+    <comment>Asked before forgetting a backup in the library; the logic system's name follows.</comment>
   </data>
   <data name="Sprocket.Library.InStorage" xml:space="preserve">
     <value>In storage</value>
@@ -1845,13 +1849,13 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Delete this blueprint from storage?</value>
     <comment>Asked before deleting a blueprint from storage; its name follows.</comment>
   </data>
-  <data name="Sprocket.Library.Here" xml:space="preserve">
-    <value>On this construct</value>
-    <comment>Beside the switch in the library that puts the chosen blueprint on the construct, or takes it off.</comment>
+  <data name="Sprocket.Library.Add" xml:space="preserve">
+    <value>Add to this construct</value>
+    <comment>Button in the library that puts the chosen blueprint on the construct, shown only where it is not on it already.</comment>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
     <value>Put this blueprint on this construct as a logic system, with its first installation.</value>
-    <comment>Note on the switch in the library, where the blueprint is not on the construct.</comment>
+    <comment>Note on the library's button that adds the chosen blueprint to the construct.</comment>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
     <value>Take this logic system off this construct, with its installations. Its blueprint stays in the library.</value>
@@ -1876,10 +1880,6 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   <data name="Sprocket.Library.InstallationsHeading" xml:space="preserve">
     <value>Installations</value>
     <comment>Heading in the library over the chosen blueprint's installations on the construct.</comment>
-  </data>
-  <data name="Sprocket.Library.Systems" xml:space="preserve">
-    <value>Logic systems</value>
-    <comment>Heading in the library over the logic systems a lost construct had.</comment>
   </data>
   <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
     <value>A logic system keeps at least one installation.</value>

@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Propulsion override", true, "propulsion override")
                 .Renaming("Steer override", true, "steering override")
                 .Renaming("Speed Limit", true, "speed limit")
-                .Renaming("Power", true, "power")
+                .Renaming("Power", true, "wheel power")
                 .Renaming("Braking", true, "reacting to braking")
                 .Renaming("Braking", false, "toggle reacting to braking")
                 .Renaming("Steering", true, "steering")

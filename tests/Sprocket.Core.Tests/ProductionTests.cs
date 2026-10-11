@@ -135,7 +135,7 @@ public class ProductionTests
 
         editor.NewButtonSystem("Airlock");
         editor.PressAdd("task");
-        StageColumn What() => editor.Pick().Stages.Single(stage => stage.Entries().Any(entry => entry.Text == "Switched on"));
+        StageColumn What() => editor.Pick().Stages.Single(stage => stage.Entries().Any(entry => entry.Text == "Power"));
 
         editor.PressBlock("Sorter");
         Assert.Equal("Still to come: setting the sorter's list.", What().Note);

@@ -6,4 +6,4 @@ Automasjonen tas vare på i de programmerbare blokkene på konstruksjonen. Trykk
 
 Et logikksystem kan bare bruke blokker på sin egen konstruksjon. Blokkene på et skip som ligger til kai, kan ikke fylle [plassene](#slot) til logikksystemet.
 
-En konstruksjon trenger en programmerbar blokk for å beholde automasjonen. Når den mister den siste, blir logikksystemene som [biblioteket](#library) ikke allerede har, tatt vare på der, som en tapt konstruksjon.
+En konstruksjon trenger en programmerbar blokk for å beholde automasjonen. Når den siste blir ødelagt eller slipt ned, blir logikksystemene som [biblioteket](#library) ikke allerede har, tatt vare på der, som sikkerhetskopier.

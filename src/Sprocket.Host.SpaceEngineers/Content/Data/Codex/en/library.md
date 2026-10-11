@@ -1,31 +1,31 @@
 # Library
 
-The library holds the ![](mark:logic-system) [logic systems](#logic-system) on this [construct](#construct), the automation of constructs that are lost, and your ![](mark:blueprint) [blueprints](#blueprint). Open it with `Library` on the [home screen](#home).
+The library holds the ![](mark:logic-system) [logic systems](#logic-system) on this [construct](#construct), backups of constructs that lost their automation, and your ![](mark:blueprint) [blueprints](#blueprint). Open it with `Library` on the [home screen](#home).
 
 It lists, from top to bottom:
 
-- **This construct**, with every logic system on it.
-- **Lost constructs**, whose automation is kept after the construct is gone.
-- **`In storage`**, your blueprints, which every world can use.
+- **`On your constructs`**: this construct, with every logic system on it.
+- **`Backups`**: the logic systems kept of constructs that lost their automation, each under its construct's name.
+- **`In storage`**: your blueprints, which every world can use.
 
-The first two are under `On your constructs`. Type in the search box to show only the rows whose name holds what you type.
+Type in the search box to show only the rows whose name holds what you type.
 
 ## A logic system or a blueprint
 
 Choose one to see who made it and when it last changed, its description from the [configuration panel](#configuration-panel), and its ![](mark:installation) [installations](#installation) on this construct.
 
-- `On this construct` puts it on this construct, or takes it off.
+- `Add to this construct` puts it on this construct. It's only there while it isn't on this construct already.
 - `Make blueprint` keeps a copy in storage, and `Update blueprint` brings that copy up to date.
 - `Update from library` takes a newer copy from storage, and `Reset to blueprint` goes back to the copy in storage, leaving out the changes made since. Either way its installations keep their blocks.
 - `Make a copy` puts a new logic system on this construct that starts as a copy of this one.
-- The bin deletes a blueprint from storage, after asking. Logic systems already on constructs keep running.
+- The bin deletes a blueprint from storage, after asking. Logic systems already on constructs keep running. On a backup, the bin forgets that one backup.
 
 The blueprint page explains each of these.
 
-## Lost constructs
+## Backups
 
-When a construct loses its last programmable block, its automation stays in the library, with when it was lost and the logic systems it had. Only the logic systems the library doesn't already have are kept: one whose blueprint is the same is left to the blueprint. Lost constructs are kept in the world, so another world's library doesn't show them.
+When a construct's last programmable block is destroyed or ground down, the logic systems it had are kept under `Backups`, with when it was lost. Only the logic systems the library doesn't already have are kept: one whose blueprint is the same is left to the blueprint. They're listed under the name the construct had, the latest first. Backups are kept in the world, so another world's library doesn't show them.
 
-Each of its logic systems works like a blueprint. It can be put on this construct, copied, or kept in storage with `Make blueprint`, so that every world can use it. Its installations stayed with the lost construct, so when it is put on this construct it comes with one new installation to fill.
+Each backup works like a blueprint. It can be put on this construct, copied, or kept in storage with `Make blueprint`, so that every world can use it. Its installations stayed with the construct it was kept from, so when it is put on this construct it comes with one new installation to fill.
 
-The bin forgets a lost construct's automation, after asking.
+The bin forgets one backup, after asking.

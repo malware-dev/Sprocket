@@ -93,12 +93,12 @@ public class EditorTests
         var pattern = What().Entries().Single(e => e.Text == "Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("pending", pattern.Status);
-        Assert.False(What().Entries().Single(e => e.Text == "Switched on").IsWithheld);
+        Assert.False(What().Entries().Single(e => e.Text == "Power" && !e.IsHeading).IsWithheld);
 
         // It says why where the pointer rests, and gives a press nothing to do.
         Assert.StartsWith("Set this in the terminal", pattern.Why);
         Assert.False(pattern.IsPickable);
-        Assert.Null(What().Entries().Single(e => e.Text == "Switched on").Why);
+        Assert.Null(What().Entries().Single(e => e.Text == "Power" && !e.IsHeading).Why);
     }
 
     /// <summary>
@@ -328,7 +328,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -359,7 +359,7 @@ public class EditorTests
         {
             editor.PressAdd("task");
             editor.PressBlock("Airlock Light");
-            editor.PressChoice("Switched on");
+            editor.PressChoice("Power");
             editor.Pick().Arguments!.Form.Fields[0].Text = "on";
             editor.PressPrimary();
             ship.Tick();
@@ -751,7 +751,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -782,7 +782,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -832,7 +832,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.Screen.Undo!.Execute();
@@ -1541,7 +1541,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.SwitchOn();
@@ -1580,7 +1580,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -1619,7 +1619,7 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -1708,7 +1708,7 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Switched on");
+        editor.PressChoice("Power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.SwitchOn();

@@ -35,13 +35,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("switched-on", "switched on", SwitchedOn).In(Category.Power).Announced()
-                .WithChange("turns-on", "turns on", "switched-on", Literal.Of(true)).Reading("is on", "is off").Announced()
-                .WithChange("turns-off", "turns off", "switched-on", Literal.Of(false)).Reading("is off", "is on").Announced()
+            kind.WithValue("power", "power", SwitchedOn).In(Category.Power).Announced()
+                .WithChange("turns-on", "turns on", "power", Literal.Of(true)).Reading("is on", "is off").Announced()
+                .WithChange("turns-off", "turns off", "power", Literal.Of(false)).Reading("is off", "is on").Announced()
                 .WithAction(BlockKinds.SwitchOn, "switch on", SwitchOn, "OnOff_On")
                 .WithAction(BlockKinds.SwitchOff, "switch off", SwitchOff, "OnOff_Off")
                 .Renaming("OnOff", false, "toggle on/off")
-                .Flipping("switched-on", "OnOff")
+                .Flipping("power", "OnOff")
                 .Hiding("OnOff_On", "OnOff_Off");
         }
 

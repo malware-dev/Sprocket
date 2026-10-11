@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Taking a logic system off the construct.</summary>
         TakeOff,
 
-        /// <summary>Forgetting the backup of a lost construct.</summary>
+        /// <summary>Forgetting a backup in the library.</summary>
         ForgetBackup,
 
         /// <summary>Putting a logic system's blueprint in the library in the place of the logic system, which changes the program.</summary>

@@ -15,7 +15,7 @@ using Sprocket.Host.SpaceEngineers.Storage;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
-    /// <summary>The library: the blueprints on this construct, the constructs that are lost, and the blueprints the player keeps for every world.</summary>
+    /// <summary>The library: the blueprints on this construct, the backups of constructs that lost their automation, and the blueprints the player keeps for every world.</summary>
     /// <remarks>
     /// A list beside the details of what is chosen from it. The list is made again whenever the screen is rebuilt, which
     /// only something done on this page or a change to the program brings about. The elements it is drawn with are declared
@@ -24,13 +24,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
     public sealed partial class LibraryPage : EditorPage
     {
         const int OnConstruct = 0;
-        const int Lost = 1;
+        const int BackedUp = 1;
         const int Kept = 2;
 
         readonly List<Entry> _entries = new List<Entry>();
         readonly List<Volume> _volumes = new List<Volume>();
         readonly List<string> _names = new List<string>();
-        readonly Relay _flips;
+        readonly List<Backup> _group = new List<Backup>();
+        readonly HashSet<Backup> _listed = new HashSet<Backup>();
+        readonly Relay _adds;
         readonly Relay _keeps;
         readonly Relay _resets;
         readonly Relay _copies;
@@ -43,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public LibraryPage(SprocketEditor editor, Guid opening) : base(editor)
         {
             _opening = opening;
-            _flips = new Relay(Flip);
+            _adds = new Relay(Add);
             _keeps = new Relay(Keep);
             _resets = new Relay(Reset);
             _copies = new Relay(Copy);
@@ -74,16 +76,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var texts = Editor.Texts;
             _search.Hint = texts.PickSearch;
             _search.Edited += Narrow;
-            _hereLabel.Text = texts.LibraryHere;
-            _switch.Command = _flips;
-            _switch.Says(texts.SwitchOn, texts.SwitchOff);
+            _add.Text = texts.LibraryAdd;
+            _add.Command = _adds;
+            _add.Tip = Tip.For(_add.Tip, texts.LibraryPutOn);
             _keep.Command = _keeps;
             _reset.Command = _resets;
             _copy.Command = _copies;
             List();
         }
 
-        /// <summary>Lists the blueprints on this construct, the constructs that are lost, and the blueprints in the library.</summary>
+        /// <summary>Lists the blueprints on this construct, the backups, and the blueprints in the library.</summary>
         /// <remarks>What was chosen stays chosen where it is still listed; the first row is chosen where it is not.</remarks>
         void List()
         {
@@ -118,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (here == 0)
                 Line(texts.LibraryNoneHere, Styles.Empty);
 
-            ListLost(texts);
+            ListBackups(texts);
             ListKept(texts);
 
             Entry again = null;
@@ -134,28 +136,76 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Narrow();
         }
 
-        /// <summary>Lists the constructs whose automation was lost, where this machine keeps the backups: a backup is only taken as it is lost.</summary>
-        void ListLost(Texts texts)
+        /// <summary>
+        /// Lists the backups, where this machine keeps them: the logic systems kept of each construct as it lost its automation,
+        /// under the construct's name, the latest loss first.
+        /// </summary>
+        /// <remarks>
+        /// Drawn from what the index says of each, without reading a blueprint. The name is only a label of where a backup came
+        /// from, so backups under the same name are listed together whichever construct they came from.
+        /// </remarks>
+        void ListBackups(Texts texts)
         {
             var backups = Editor.Backups;
-            if (backups == null)
+            if (backups == null || backups.All.Count == 0)
                 return;
 
-            var all = backups.All;
-            for (var i = 0; i < all.Count; i++)
-            {
-                var backup = all[i];
-                var row = new StatusRow
-                {
-                    Summary = backup.Name,
-                    Problem = Template.Fill(texts.LibraryLost, "time", Time(backup.Saved)),
-                    Problems = 1,
-                    Deletes = Editor.Act(Cmd.ForgetBackup, delegate { Editor.ForgetBackup(backup); }),
-                    DeleteText = texts.LibraryForgetLost
-                };
+            Heading(texts.LibraryBackups, Styles.NextHeading);
+            _listed.Clear();
 
-                Add(new Entry { Section = Lost, Backup = backup }, row);
+            var all = backups.All;
+            while (_listed.Count < all.Count)
+            {
+                // The name lost most lately leads; among those lost together, the one taken last.
+                Backup latest = null;
+                for (var i = 0; i < all.Count; i++)
+                {
+                    if (!_listed.Contains(all[i]) && (latest == null || all[i].Lost >= latest.Lost))
+                        latest = all[i];
+                }
+
+                if (latest == null)
+                    break;
+
+                _group.Clear();
+                for (var i = 0; i < all.Count; i++)
+                {
+                    if (all[i].Construct != latest.Construct)
+                        continue;
+
+                    // In order of loss, the latest first; among those lost together, as they were taken.
+                    var at = _group.Count;
+                    while (at > 0 && _group[at - 1].Lost < all[i].Lost)
+                        at--;
+
+                    _group.Insert(at, all[i]);
+                }
+
+                _listed.UnionWith(_group);
+                _list.Children.Add(new Label
+                {
+                    Style = Styles.InnerName,
+                    Text = latest.Construct,
+                    Padding = new Thickness(16f, 8f, 0f, 4f)
+                });
+
+                for (var g = 0; g < _group.Count; g++)
+                    ListBackup(texts, _group[g]);
             }
+        }
+
+        /// <summary>Lists <paramref name="backup" /> as a row, chosen and used as a blueprint from storage is.</summary>
+        void ListBackup(Texts texts, Backup backup)
+        {
+            Add(new Entry { Section = BackedUp, Backup = backup, Identity = backup.Identity }, new StatusRow
+            {
+                Mark = Symbols.Blueprint,
+                Summary = backup.Name,
+                Depth = 1,
+                Status = Template.Fill(texts.LibraryLost, "time", Time(backup.Lost)),
+                Deletes = Editor.Act(Cmd.ForgetBackup, delegate { Editor.ForgetBackup(backup); }),
+                DeleteText = texts.LibraryForgetBackup
+            });
         }
 
         /// <summary>Lists the blueprints in the library, by name, reading each to know it will read.</summary>
@@ -264,7 +314,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Describe();
         }
 
-        /// <summary>Shows the details of what is chosen: a blueprint, wherever it is listed, or a construct that is lost.</summary>
+        /// <summary>Shows the details of what is chosen: a blueprint, wherever it is listed.</summary>
         void Describe()
         {
             var entry = _chosen;
@@ -280,16 +330,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 return;
 
             _name.Text = entry.Row.Summary;
-            if (entry.Backup != null)
-                DescribeLost(entry.Backup);
-            else
-                DescribeBlueprint(entry);
+            DescribeBlueprint(entry);
         }
 
         /// <summary>The details of a blueprint: whether it is on this construct, how it stands with the library, and what it holds.</summary>
-        /// <remarks>The copy on this construct where there is one, chosen from either list; the library's where there is not.</remarks>
+        /// <remarks>
+        /// The copy on this construct where there is one, chosen from any list; where there is not, the one the entry stands for,
+        /// kept in storage or in a backup.
+        /// </remarks>
         void DescribeBlueprint(Entry entry)
         {
+            // A backup's blueprint is read from its file as it is chosen, so the list is drawn without reading any.
+            if (entry.Backup != null && entry.Read == null && entry.Trouble.Length == 0 && Editor.Backups != null)
+                entry.Trouble = Editor.Backups.Open(entry.Backup, Editor.World.Values, out entry.Read);
+
             var texts = Editor.Texts;
             var shelf = Editor.Shelf;
             var live = Live(entry.Identity);
@@ -297,16 +351,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var system = live ?? entry.Read;
             var free = Editor.Holder == null;
 
+            // Only where it is not on this construct already: it comes off from the home screen.
             _here.IsVisible = true;
-            _switch.IsOn = live != null;
-            _flips.CanExecute = free && system != null;
-            _switch.Tip = Tip.For(_switch.Tip, live == null
-                ? texts.LibraryPutOn
-                : volume != null ? texts.LibraryTakeOff : texts.LibraryDeletes);
+            _add.IsVisible = live == null;
+            _adds.CanExecute = free && system != null;
 
-            var same = live != null && volume != null && shelf.Holds(live);
+            // A backed up blueprint is kept in storage from its backup where it is not on this construct.
+            var kept = live ?? (entry.Backup != null ? entry.Read : null);
+            var same = kept != null && volume != null && shelf.Holds(kept);
             var newer = live != null && volume != null && !same && !Editor.ChangedSince(live);
-            _keep.IsVisible = live != null && shelf != null;
+            _keep.IsVisible = kept != null && shelf != null;
             _keep.Text = volume == null ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _keeps.CanExecute = !same;
             _keep.Tip = Tip.For(_keep.Tip, same ? texts.LibrarySame
@@ -351,26 +405,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Say(_secondHeading, _second, texts.LibraryInstallationsHeading, _names);
         }
 
-        /// <summary>The details of a construct that is lost: when its automation was kept, and the logic systems it had.</summary>
-        void DescribeLost(Backup backup)
-        {
-            var texts = Editor.Texts;
-            _line.Text = Template.Fill(texts.LibraryLost, "time", Time(backup.Saved));
-            _line.IsVisible = true;
-
-            var trial = new Automation();
-            var trouble = ProgramText.Load(backup.Program, trial, Editor.World.Values);
-            _trouble.Text = trouble;
-            _trouble.IsVisible = trouble.Length > 0;
-
-            _names.Clear();
-            var systems = trial.Systems;
-            for (var i = 0; i < systems.Count; i++)
-                _names.Add(systems[i].Name);
-
-            Say(_firstHeading, _first, texts.LibrarySystems, _names);
-        }
-
         /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, or neither where there are none.</summary>
         static void Say(Label heading, Label list, string title, List<string> names)
         {
@@ -393,21 +427,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             list.Text = joined.ToString();
         }
 
-        /// <summary>Puts the chosen blueprint on the construct, or takes it off.</summary>
-        void Flip()
+        /// <summary>Puts the chosen blueprint on this construct as a logic system, with its first installation.</summary>
+        /// <remarks>As its backup keeps it where it is a backup's; as the library keeps it where it is not.</remarks>
+        void Add()
         {
             var entry = _chosen;
-            if (entry == null || entry.Backup != null)
+            if (entry == null || Live(entry.Identity) != null || (entry.Backup != null && entry.Read == null))
                 return;
 
-            var live = Live(entry.Identity);
-            if (live != null && Editor.Stored(live))
+            if (entry.Backup != null)
             {
-                Run(Cmd.TakeOff, delegate { Editor.AskTakeOff(live); });
-            }
-            else if (live != null)
-            {
-                Run(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(live); });
+                Run(Cmd.PutOn, delegate { _refused = Editor.PutOn(entry.Read); });
             }
             else
             {
@@ -419,10 +449,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Describe();
         }
 
-        /// <summary>Puts the chosen blueprint, as it is on this construct, in the library.</summary>
+        /// <summary>Puts the chosen blueprint, as it is on this construct, in the library; or a backed up one, as its backup keeps it.</summary>
         void Keep()
         {
-            var live = _chosen == null ? null : Live(_chosen.Identity);
+            var entry = _chosen;
+            var live = entry == null ? null : Live(entry.Identity);
+            if (live == null && entry != null && entry.Backup != null && entry.Read != null)
+            {
+                var backed = entry.Read;
+                if (Editor.Stored(backed))
+                    Run(Cmd.Shelve, delegate { Editor.AskUpdate(backed); });
+                else
+                    Run(Cmd.Shelve, delegate { Editor.Shelve(backed); });
+
+                return;
+            }
+
             if (live == null)
                 return;
 
@@ -445,16 +487,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
-        /// <remarks>Copied as it is on this construct where it is here; as the library keeps it where it is not.</remarks>
+        /// <remarks>
+        /// Copied as it is on this construct where it is here; where it is not, as its backup keeps it, or as
+        /// the library does.
+        /// </remarks>
         void Copy()
         {
             var entry = _chosen;
-            if (entry == null || entry.Backup != null)
+            if (entry == null || (entry.Backup != null && entry.Read == null))
                 return;
 
             var live = Live(entry.Identity);
             var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
-            var text = live != null ? ProgramText.Blueprint(live) : volume == null ? null : volume.Text;
+            var text = live != null ? ProgramText.Blueprint(live)
+                : entry.Backup != null ? ProgramText.Blueprint(entry.Read)
+                : volume == null ? null : volume.Text;
             if (text == null)
                 return;
 

@@ -281,7 +281,7 @@ namespace Sprocket.Sim.Driving
                     return;
                 }
 
-                var entry = pane.Entries().FirstOrDefault(e => e.Text == text);
+                var entry = pane.Entries().FirstOrDefault(e => e.Text == text && !e.IsHeading);
                 if (entry != null)
                 {
                     entry.Pick(Held.Alone, 1);
@@ -295,7 +295,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>Presses what a picker's column offers as <paramref name="text" /> twice in quick succession, which chooses it and moves on.</summary>
         public static void DoublePressChoice(this SprocketEditor editor, string text)
         {
-            var entry = editor.Stages().SelectMany(pane => pane.Entries()).FirstOrDefault(e => e.Text == text)
+            var entry = editor.Stages().SelectMany(pane => pane.Entries()).FirstOrDefault(e => e.Text == text && !e.IsHeading)
                         ?? throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
             entry.Pick(Held.Alone, 2);
         }

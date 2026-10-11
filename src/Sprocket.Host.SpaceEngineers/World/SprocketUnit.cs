@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         Shelf _shelf;
 
-        readonly List<long> _backedGrids = new List<long>();
+        Preferences _preferences;
 
         readonly bool _copy;
 
@@ -127,6 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 switches + "\n" + running);
             rebuilt._backups = _backups;
             rebuilt._shelf = _shelf;
+            rebuilt._preferences = _preferences;
             rebuilt.Showing = Showing;
             if (_editor != null)
                 rebuilt.Editor.Habits = _editor.Habits;
@@ -218,6 +219,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>How the player likes the screens to look, which the editor is given; null on a machine that keeps none.</summary>
+        public Preferences Preferences
+        {
+            get { return _preferences; }
+            set
+            {
+                _preferences = value;
+                if (_editor != null)
+                    _editor.Preferences = value;
+            }
+        }
+
         /// <summary>The editor, made the first time it is asked for, building its first screen out of whatever the program says by then.</summary>
         public SprocketEditor Editor
         {
@@ -229,6 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor = new SprocketEditor(_world, _program, _runner, _texts);
                 _editor.Backups = _backups;
                 _editor.Shelf = _shelf;
+                _editor.Preferences = _preferences;
 
                 // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
                 if (!_copy)
@@ -1319,8 +1333,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (unkept.Count == 0)
                 return;
 
-            _world.GridIds(_backedGrids);
-            backups.Take(_world.Name, saved, _backedGrids, ProgramText.Blueprints(unkept));
+            backups.Take(_world.Name, saved, unkept);
         }
 
         /// <summary>

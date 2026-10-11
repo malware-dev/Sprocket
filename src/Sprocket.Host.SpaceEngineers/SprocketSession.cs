@@ -44,13 +44,17 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly List<KeyValuePair<long, SprocketUnit>> _saving = new List<KeyValuePair<long, SprocketUnit>>();
 
-        readonly Backups _backups = new Backups();
+        readonly Backups _backups = new Backups(new WorldFiles());
+
+        readonly CarrierFiles _carried = new CarrierFiles();
 
         Carrier _carrier;
 
         bool _carries;
 
         readonly Shelf _shelf = new Shelf(new GlobalFiles(), Told.Say);
+
+        readonly Preferences _preferences = new Preferences(new GlobalFiles(), Told.Say);
 
         readonly FieldMarks _marks = new FieldMarks();
 
@@ -187,10 +191,16 @@ namespace Sprocket.Host.SpaceEngineers
             MyAPIGateway.TerminalControls.CustomControlGetter += DoorControls.Arrange;
 
             if (IsServer)
+            {
                 FindBackups();
+                FindCarrier();
+            }
 
             if (MyAPIGateway.Utilities != null && !MyAPIGateway.Utilities.IsDedicated)
+            {
                 FindShelf();
+                _preferences.Read();
+            }
         }
 
         /// <summary>Reads the player's library out of the global store, once, as the world starts.</summary>
@@ -207,25 +217,32 @@ namespace Sprocket.Host.SpaceEngineers
                 Told.Say("read " + _shelf.All.Count + " blueprints from the library");
         }
 
-        /// <summary>Reads the world's backups out of its carrier, once, as the world starts.</summary>
+        /// <summary>Reads the index of the world's backups out of world storage, once, as the world starts.</summary>
         /// <remarks>
-        /// Backups that will not read are logged and never written over: the backups go on being taken this session, and are
+        /// An index that will not read is logged and never written over: the backups go on being taken this session, and are
         /// not kept.
         /// </remarks>
         void FindBackups()
         {
-            var found = Carrier.Find();
-            var trouble = found == null ? "" : _backups.Read(found.Text);
+            var trouble = _backups.Read();
+            Told.Say(trouble.Length > 0 ? trouble + "; the backups are not kept this session" : "read " + _backups.All.Count + " backups");
+        }
 
+        /// <summary>Unpacks the files in the world's carrier, once, as the world starts.</summary>
+        /// <remarks>Files that will not read are logged and never written over: nothing written to them this session is kept.</remarks>
+        void FindCarrier()
+        {
+            var found = Carrier.Find();
+            var trouble = found == null ? "" : _carried.Unpack(found.Text);
             if (trouble.Length > 0)
             {
-                Told.Say(trouble + "; the backups are not kept this session");
+                Told.Say(trouble + "; the carrier's files are not kept this session");
                 return;
             }
 
             _carrier = found;
             _carries = true;
-            Told.Say("read " + _backups.All.Count + " backups");
+            Told.Say("read " + _carried.Count + " files from the carrier");
         }
 
         /// <inheritdoc />
@@ -693,6 +710,7 @@ namespace Sprocket.Host.SpaceEngineers
         void Show(IMyTerminalBlock block, SprocketUnit unit, Action closed)
         {
             unit.Shelf = _shelf;
+            unit.Preferences = _preferences;
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
                 if (_screen != null)
@@ -810,20 +828,20 @@ namespace Sprocket.Host.SpaceEngineers
             return base.GetObjectBuilder();
         }
 
-        /// <summary>Writes the backups into the world's carrier, making it where the world has none yet.</summary>
+        /// <summary>Packs the carrier's files into the world's carrier where they changed, making it where the world has none yet.</summary>
         /// <remarks>
-        /// Once a save, from every backup, which costs what writing out the programs costs and nothing during play. A world
-        /// with no backups is given no carrier; one that has a carrier has it written, emptied where every backup was forgotten.
+        /// Once a save, and only after a change, which costs what packing the files costs and nothing during play. A world that
+        /// never had a file written is given no carrier.
         /// </remarks>
         void Carry()
         {
-            if (!_carries || !IsServer || (_carrier == null && _backups.All.Count == 0))
+            if (!_carries || !IsServer || !_carried.Changed)
                 return;
 
             if (_carrier == null)
                 _carrier = Carrier.Make();
 
-            _carrier.Write(_backups.Write());
+            _carrier.Write(_carried.Pack());
         }
 
         /// <inheritdoc />

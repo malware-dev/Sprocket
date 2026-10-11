@@ -13,8 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         VStack _list;
         Label _name;
         HStack _here;
-        Label _hereLabel;
-        Switch _switch;
+        Button _add;
         Button _keep;
         Button _reset;
         Button _copy;
@@ -68,9 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                                         Padding = new Thickness(0f, 0f, 0f, 16f),
                                         Children =
                                         {
-                                            new Label { Style = Styles.Name }.As(out _hereLabel),
-                                            new Switch { Style = Styles.Switch }.As(out _switch),
-                                            new HStack { Placement = Fixed.Wide(24f) },
+                                            new Button { Style = Styles.Button }.As(out _add),
                                             new Button { Style = Styles.Button }.As(out _keep),
                                             new Button { Style = Styles.Button }.As(out _reset),
                                             new Button { Style = Styles.Button }.As(out _copy)

@@ -7,7 +7,7 @@ using VRage.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
-    /// <summary>Where the world keeps Sprocket's backups: an entity of the mod's own, saved with the world and tied to no block.</summary>
+    /// <summary>Where the world's save keeps Sprocket's files: an entity of the mod's own, saved with the world and tied to no block.</summary>
     /// <remarks>
     /// A plain entity, which the game saves into the sector and so into every backup of the world, sends to no client and
     /// leaves out of its cleanup; it sits at the origin with no model, no physics and no place in the spatial index. Only
@@ -17,17 +17,17 @@ namespace Sprocket.Host.SpaceEngineers.World
     public sealed class Carrier
     {
         /// <summary>
-        /// Where the backups sit in the entity's mod storage.
+        /// Where the files sit in the entity's mod storage.
         /// </summary>
         /// <remarks>
         /// Claimed in <c>Content/Data/EntityComponents.sbc</c>, without which the game drops it at save, and never to change:
-        /// another key reads as a world with no backups.
+        /// another key reads as a world with no files.
         /// </remarks>
         static readonly Guid Key = new Guid("24B4675F-1A0D-410A-8044-BFD7124C8588");
 
         /// <summary>The world variable that holds the carrier's entity id.</summary>
         /// <remarks>
-        /// One number, so its going to every client that joins costs nothing; the backups stay in the carrier, which reaches
+        /// One number, so its going to every client that joins costs nothing; the files stay in the carrier, which reaches
         /// no client. Never to change: another name leaves every world's carrier unfound.
         /// </remarks>
         const string Variable = "sprocket.carrier";
@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _entity.Storage[Key] = text;
         }
 
-        /// <summary>The world's carrier: the entity the world's variable names, where it holds the backups' key, or null for a world with no backups yet.</summary>
+        /// <summary>The world's carrier: the entity the world's variable names, where it holds the files' key, or null for a world with no files yet.</summary>
         /// <remarks>
         /// A saved world loads its own variables, but a new one starts with those of the world the game ran before it, so the
         /// id can name nothing or another world's entity; the key is what is trusted.

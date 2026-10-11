@@ -677,6 +677,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The player's library, which keeps blueprints for every world; null on a machine that keeps none.</summary>
         public Shelf Shelf { get; set; }
 
+        /// <summary>How the player likes the screens to look in every world; null on a machine that keeps none.</summary>
+        public Preferences Preferences { get; set; }
+
         /// <summary>How somebody is working in this editor; see <see cref="Shell.Habits" />.</summary>
         /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
         public Habits Habits
@@ -2663,10 +2666,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             });
         }
 
-        /// <summary>Asks before forgetting <paramref name="backup" />, the automation of a construct that is gone.</summary>
+        /// <summary>Asks before forgetting <paramref name="backup" />, a logic system kept of a construct that lost its automation.</summary>
         public void ForgetBackup(Backup backup)
         {
-            Deleting(Texts.LibraryForgetLostQuestion, backup.Name, Texts.DeleteFinal, null, delegate
+            Deleting(Texts.LibraryForgetBackupQuestion, backup.Name, Texts.DeleteFinal, null, delegate
             {
                 Backups.Forget(backup);
                 Invalidate();
@@ -2679,11 +2682,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </summary>
         public string PutOn(Volume volume)
         {
-            var trouble = ProgramText.AddBlueprint(volume.Text, _program, _world.Values);
+            return PutOn(volume.Text, volume.Identity);
+        }
+
+        /// <summary>
+        /// Puts the blueprint <paramref name="blueprint" />, as a backup keeps it, on the construct as a logic system with its
+        /// first installation, answering what was wrong with it, or empty.
+        /// </summary>
+        public string PutOn(AutomationSystem blueprint)
+        {
+            return PutOn(ProgramText.Blueprint(blueprint), blueprint.Identity);
+        }
+
+        string PutOn(string text, Guid identity)
+        {
+            var trouble = ProgramText.AddBlueprint(text, _program, _world.Values);
             if (trouble.Length > 0)
                 return trouble;
 
-            Installed(_program.FindSystem(volume.Identity));
+            Installed(_program.FindSystem(identity));
             _program.Edited();
             _program.Rewire();
             Invalidate();

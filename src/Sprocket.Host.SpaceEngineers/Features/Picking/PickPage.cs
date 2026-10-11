@@ -294,6 +294,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
+        /// <summary>Whether the blocks hidden from toolbars are listed: the eye open.</summary>
+        /// <remarks>The player's own, the same in every picker, where the machine keeps preferences; this picker's alone where it does not.</remarks>
+        bool ShowsHidden
+        {
+            get { return Editor.Preferences != null ? Editor.Preferences.ShowsHidden : _showsHidden; }
+            set
+            {
+                if (Editor.Preferences != null)
+                    Editor.Preferences.ShowsHidden = value;
+                else
+                    _showsHidden = value;
+            }
+        }
+
         bool IsComplete => _selection.Count > 0 && (_fits != null || !string.IsNullOrEmpty(_chosen)
             && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
             && (_aim == null || _aim.Chosen));
@@ -527,7 +541,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _clearKind = Editor.Act(Cmd.AnyKind, delegate { SetKind(""); });
             _toggleHidden = Editor.Act(Cmd.HiddenBlocks, delegate
             {
-                _showsHidden = !_showsHidden;
+                ShowsHidden = !ShowsHidden;
                 Editor.Invalidate();
             });
             _blocks.ShowHidden = _toggleHidden;
@@ -888,7 +902,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _blocks.Kind = current;
             _blocks.KindText = _kindSearch;
             _blocks.ClearKind = _kind.Length > 0 ? _clearKind : null;
-            _blocks.ShowsHidden = _showsHidden;
+            _blocks.ShowsHidden = ShowsHidden;
         }
 
         bool HasKind(string kindId)
@@ -1506,7 +1520,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether <paramref name="entity" /> is listed: shown in toolbars, or the eye open, or picked already.</summary>
         bool Listed(GridEntity entity)
         {
-            return _showsHidden || entity.Block == null || entity.Block.ShowInToolbarConfig || Contains(_selection, entity.Id);
+            return ShowsHidden || entity.Block == null || entity.Block.ShowInToolbarConfig || Contains(_selection, entity.Id);
         }
 
         /// <summary>Takes a block, the way the press said it was taken.</summary>

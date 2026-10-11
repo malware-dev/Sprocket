@@ -31,9 +31,13 @@ public sealed class Simulation
 
     readonly Rota _rota = new Rota();
 
-    readonly Backups _backups = new Backups();
-
     readonly Folder _folder = new Folder();
+
+    readonly Folder _worldFolder = new Folder();
+
+    readonly Backups _backups;
+
+    readonly Preferences _preferences;
 
     readonly Shelf _shelf;
 
@@ -92,6 +96,10 @@ public sealed class Simulation
         _store = store;
         _rig = rig;
         _shelf = new Shelf(_folder, delegate { });
+        _backups = new Backups(_worldFolder);
+        _backups.Read();
+        _preferences = new Preferences(_folder, delegate { });
+        _preferences.Read();
         _saidBefore = Told.Lines.Count;
         _texts.Book.Pages = new CodexFiles(CodexFiles.Beside, "");
 
@@ -113,6 +121,7 @@ public sealed class Simulation
         // The harness is always drawing the screen, which is what the unit ticks its editor for.
         _unit.Showing = true;
         _unit.Shelf = _shelf;
+        _unit.Preferences = _preferences;
 
         // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
         // removed the hero has finished changing.
@@ -135,11 +144,17 @@ public sealed class Simulation
     /// <summary>The world's backups, which the library lists.</summary>
     public Backups Backups => _backups;
 
+    /// <summary>How the player likes the screens to look, kept in <see cref="Folder" /> as the game keeps it.</summary>
+    public Preferences Preferences => _preferences;
+
     /// <summary>The player's library, kept in memory for as long as the harness runs.</summary>
     public Shelf Shelf => _shelf;
 
     /// <summary>The storage folder the library is kept in.</summary>
     public Folder Folder => _folder;
+
+    /// <summary>The world's storage folder, which the backups are kept in.</summary>
+    public Folder WorldFolder => _worldFolder;
 
     /// <summary>What the editor says; loading a language into its book says it in that language.</summary>
     public Texts Texts => _texts;

@@ -6,4 +6,4 @@ The automation is kept in the construct's programmable blocks. Press `Automation
 
 A logic system can only use blocks on its own construct. A docked ship's blocks can't fill its [slots](#slot).
 
-A construct needs a programmable block to keep its automation. When it loses its last one, the logic systems the [library](#library) doesn't already have are kept there, as a lost construct.
+A construct needs a programmable block to keep its automation. When its last one is destroyed or ground down, the logic systems the [library](#library) doesn't already have are kept there, as backups.

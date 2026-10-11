@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Lumel.Controls;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -16,54 +17,145 @@ public class LibraryTests
 {
     static readonly DateTime Saved = new DateTime(2026, 10, 2, 14, 30, 0, DateTimeKind.Utc);
 
-    /// <summary>Backups written out read back as they were, whatever their names and programs hold.</summary>
+    /// <summary>Backups read back from their index as they were taken, whatever their names hold, each blueprint from its own file.</summary>
     [Fact]
     public void BackupsReadBackWhatTheyWrite()
     {
-        var written = new Backups();
-        written.Take("Hangar\nAirlock", Saved, new long[] { 118, 119 }, "sprocket 1 alpha 14\n\nsystem ...\n");
-        written.Take("Lost Ship", Saved.AddHours(1), new long[] { 7 }, "p");
+        var folder = new Folder();
+        var written = new Backups(folder);
+        Assert.Equal("", written.Read());
+        var hangar = Other();
+        var airlock = Blueprinted().Editor.Program.Systems[0];
+        written.Take("Hangar [Airlock] ; = 2", Saved, new[] { hangar });
+        written.Take("Lost Ship", Saved.AddHours(1), new[] { airlock });
 
-        var read = new Backups();
-        Assert.Equal("", read.Read(written.Write()));
+        var read = new Backups(folder);
+        Assert.Equal("", read.Read());
 
         Assert.True(read.Intact);
         Assert.Equal(2, read.All.Count);
-        Assert.Equal("Hangar\nAirlock", read.All[0].Name);
-        Assert.Equal(Saved, read.All[0].Saved);
-        Assert.Equal(new long[] { 118, 119 }, read.All[0].Grids);
-        Assert.Equal("sprocket 1 alpha 14\n\nsystem ...\n", read.All[0].Program);
-        Assert.Equal("p", read.All[1].Program);
+        var first = read.All[0];
+        Assert.Equal("backup-1.cog", first.File);
+        Assert.Equal(hangar.Identity, first.Identity);
+        Assert.Equal("Hangar", first.Name);
+        Assert.Equal("Hangar [Airlock] ; = 2", first.Construct);
+        Assert.Equal(Saved, first.Lost);
+        Assert.Equal("backup-2.cog", read.All[1].File);
+
+        Assert.Equal("", read.Open(read.All[1], new Values(), out var opened));
+        Assert.Equal(airlock.Identity, opened!.Identity);
+        Assert.Equal(ProgramText.Blueprint(airlock), folder.Files["backup-2.cog"]);
     }
 
-    /// <summary>Backups that will not read are taken not at all, and say what was wrong.</summary>
+    /// <summary>An index that will not read gives no backups, says what was wrong, and is never written over.</summary>
     [Theory]
-    [InlineData("")]
-    [InlineData("backups 2\n")]
-    [InlineData("backups 1\nbackup 2026-10-02T14:30:00.0000000Z 1 7 4 1\nShip")]
-    [InlineData("backups 1\nbackup tomorrow 1 7 4 1\nShipp\n")]
+    [InlineData("[backup-1.cog\nname=A\n")]
+    [InlineData("[backup-1.cog]\nname=A\n")]
+    [InlineData("[backup-1.cog]\nsystem=nope\nname=A\nconstruct=B\nlost=2026-10-02T14:30:00.0000000Z\n")]
+    [InlineData("[backup-1.cog]\nsystem=6f1c0f0e-3c2b-4e8a-9d0f-1a2b3c4d5e6f\nname=A\nconstruct=B\nlost=tomorrow\n")]
+    [InlineData("[backup-1.cog]\nsystem=6f1c0f0e-3c2b-4e8a-9d0f-1a2b3c4d5e6f\nname=A\nlost=2026-10-02T14:30:00.0000000Z\n")]
     public void BackupsThatWillNotReadAreNotTaken(string text)
     {
-        var backups = new Backups();
-        backups.Take("Kept", Saved, new long[] { 1 }, "p");
+        var folder = new Folder();
+        folder.Write("backups.ini", text);
+        var backups = new Backups(folder);
 
-        Assert.NotEqual("", backups.Read(text));
+        Assert.NotEqual("", backups.Read());
         Assert.False(backups.Intact);
         Assert.Empty(backups.All);
+
+        backups.Take("Kept", Saved, new[] { Other() });
+        Assert.Equal(text, folder.Files["backups.ini"]);
+        Assert.False(folder.Has("backup-1.cog"));
     }
 
-    /// <summary>A construct's backup is taken again, not taken twice, where any of its grids is one it had.</summary>
+    /// <summary>A world with no index yet has no backups, and its first backup makes the index.</summary>
     [Fact]
-    public void ABackupIsTakenAgainForTheSameConstruct()
+    public void TheFirstBackupMakesTheIndex()
     {
-        var backups = new Backups();
-        backups.Take("Ship", Saved, new long[] { 1, 2 }, "first");
-        backups.Take("Ship renamed", Saved.AddHours(1), new long[] { 2, 3 }, "second");
+        var folder = new Folder();
+        var backups = new Backups(folder);
 
-        var backup = Assert.Single(backups.All);
-        Assert.Equal("Ship renamed", backup.Name);
-        Assert.Equal("second", backup.Program);
-        Assert.Equal(new long[] { 2, 3 }, backup.Grids);
+        Assert.Equal("", backups.Read());
+        Assert.Empty(backups.All);
+        Assert.Empty(folder.Files);
+
+        backups.Take("Lost Ship", Saved, new[] { Other() });
+        Assert.True(folder.Has("backups.ini"));
+        Assert.True(folder.Has("backup-1.cog"));
+    }
+
+    /// <summary>Backups taken before the index was read are kept for the session alone, which is how a machine that never reads them keeps them.</summary>
+    [Fact]
+    public void BackupsAreWrittenOnlyOnceTheIndexIsRead()
+    {
+        var folder = new Folder();
+        var backups = new Backups(folder);
+
+        backups.Take("Lost Ship", Saved, new[] { Other() });
+
+        Assert.Single(backups.All);
+        Assert.Empty(folder.Files);
+    }
+
+    /// <summary>Each loss is kept on its own: a logic system lost again is kept again, in a file of its own, beside the earlier backup.</summary>
+    [Fact]
+    public void EachLossIsKeptOnItsOwn()
+    {
+        var rig = Hangared();
+        var airlock = rig.Editor.Program.Systems[0];
+        var hangar = rig.Editor.Program.Systems[1];
+        rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
+
+        rig.Editor.Program.RemoveSystem(hangar);
+        airlock.Name = "Airlock Mk II";
+        rig.Unit.BackUp(rig.Backups, Saved.AddHours(1), rig.Shelf);
+
+        Assert.Equal(new[] { "Airlock", "Hangar", "Airlock Mk II" }, rig.Backups.All.Select(b => b.Name));
+        Assert.Equal(new[] { Saved, Saved, Saved.AddHours(1) }, rig.Backups.All.Select(b => b.Lost));
+        Assert.Equal(3, rig.Backups.All.Select(b => b.File).Distinct().Count());
+        Assert.Contains("Airlock Mk II", rig.WorldFolder.Files[rig.Backups.All[2].File]);
+        Assert.DoesNotContain("Airlock Mk II", rig.WorldFolder.Files[rig.Backups.All[0].File]);
+    }
+
+    /// <summary>Every backup under one construct's name is listed under that name once, the latest first, each with when it was lost.</summary>
+    [Fact]
+    public void AConstructsBackupsAreListedTogether()
+    {
+        var rig = Hangared();
+        rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
+        rig.Editor.Program.RemoveSystem(rig.Editor.Program.Systems[1]);
+        rig.Unit.BackUp(rig.Backups, Saved.AddHours(1), rig.Shelf);
+
+        rig.Editor.GoToRoot();
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        var lines = page.Rows.OfType<Label>().Select(l => l.Text).ToList();
+        Assert.Single(lines.Skip(lines.IndexOf(rig.Texts.LibraryBackups.ToUpperInvariant()) + 1), l => l == "Test Rig");
+
+        var backed = page.Rows.OfType<StatusRow>().Where(r => r.Status != null && r.Status.StartsWith("Lost ")).ToList();
+        Assert.Equal(new[] { "Airlock", "Airlock", "Hangar" }, backed.Select(r => r.Summary));
+        Assert.NotEqual(backed[0].Status, backed[1].Status);
+        Assert.Equal(backed[1].Status, backed[2].Status);
+    }
+
+    /// <summary>The list is drawn from the index alone: a backup's blueprint is read as it is chosen, and one that will not read says so then.</summary>
+    [Fact]
+    public void ABackupsBlueprintIsReadOnlyAsItIsChosen()
+    {
+        var rig = WithLost(out _, out var page, (sim, _) =>
+        {
+            sim.WorldFolder.Write(sim.Backups.All[0].File, "not a blueprint");
+        });
+
+        var row = Assert.Single(page.Rows.OfType<StatusRow>());
+        Assert.Equal(0, row.Problems);
+
+        ChooseLost(rig, page);
+        Assert.False(Add(rig, page).Command!.CanExecute);
     }
 
     /// <summary>A lost construct whose every logic system has its equal in the library leaves no backup: the library has it all.</summary>
@@ -94,20 +186,24 @@ public class LibraryTests
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
 
         var backup = Assert.Single(rig.Backups.All);
-        var read = new Automation();
-        Assert.Equal("", ProgramText.Load(backup.Program, read, new Values()));
-        var system = Assert.Single(read.Systems);
-        Assert.Equal("Hangar", system.Name);
+        Assert.Equal("Hangar", backup.Name);
+        Assert.Equal("", rig.Backups.Open(backup, new Values(), out var system));
+        Assert.Equal("Hangar", system!.Name);
         Assert.Empty(system.Instances);
     }
 
-    /// <summary>The library lists a lost construct whose grids are still in the world: a backup is only taken as the automation is lost.</summary>
+    /// <summary>
+    /// Backups are listed by the name of the construct they came from, the latest loss first, and none is listed as the
+    /// construct the library is opened on.
+    /// </summary>
     [Fact]
-    public void TheLibraryListsALostConstructWhoseGridsRemain()
+    public void BackupsAreListedByNameTheLatestFirst()
     {
         var rig = Blueprinted();
+        rig.Backups.Take("Lost Ship", Saved.AddHours(1), new[] { Other() });
         rig.Unit.BackUp(rig.Backups, Saved, rig.Shelf);
-        Assert.Single(rig.Backups.All);
+        rig.Backups.Take("Lost Ship", Saved.AddHours(-1), new[] { Other() });
+        Assert.Equal(3, rig.Backups.All.Count);
 
         rig.Editor.GoToRoot();
         rig.Editor.OpenLibrary();
@@ -115,7 +211,143 @@ public class LibraryTests
 
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
-        Assert.Contains(page.Rows.OfType<StatusRow>(), r => r.Problem != null && r.Problem.StartsWith("Lost "));
+        var lines = page.Rows.OfType<Label>().Select(l => l.Text).ToList();
+        var at = lines.IndexOf(rig.Texts.LibraryBackups.ToUpperInvariant());
+        Assert.True(at >= 0, "there is no backups heading");
+        Assert.Equal(new[] { "Lost Ship", "Test Rig" }, lines.Skip(at + 1).Take(2));
+        Assert.Equal(new[] { "Airlock", "Hangar", "Hangar", "Airlock" }, page.Rows.OfType<StatusRow>().Select(r => r.Summary));
+    }
+
+    /// <summary>A backup's blueprints are listed under its construct's name, each with when it was lost, to be chosen as a blueprint is.</summary>
+    [Fact]
+    public void ABackupsBlueprintsAreListedUnderItsConstruct()
+    {
+        var rig = WithLost(out _, out var page);
+
+        Assert.Contains(page.Rows.OfType<Label>(), l => l.Text == "Lost Ship");
+        var row = Assert.Single(page.Rows.OfType<StatusRow>());
+        Assert.Equal("Airlock", row.Summary);
+        Assert.Equal(1, row.Depth);
+        Assert.Equal(Symbols.Blueprint, row.Mark);
+        Assert.StartsWith("Lost ", row.Status);
+        Assert.NotNull(row.Deletes);
+
+        ChooseLost(rig, page);
+        Assert.True(row.Chosen);
+        Assert.True(Add(rig, page).Command!.CanExecute);
+    }
+
+    /// <summary>A backed up blueprint's bin forgets it alone, after asking, deleting its file, and the rest are kept.</summary>
+    [Fact]
+    public void ForgettingABackedUpBlueprintKeepsTheRest()
+    {
+        var rig = WithLost(out var lost, out var page, (sim, _) =>
+        {
+            sim.Backups.Take("Lost Ship", Saved, new[] { Other() });
+        });
+        var file = rig.Backups.All.Single(b => b.Identity == lost.Identity).File;
+
+        page.Rows.OfType<StatusRow>().Single(r => r.Summary == "Airlock").Deletes!.Execute();
+        Assert.StartsWith(rig.Texts.LibraryForgetBackupQuestion, rig.Editor.Question());
+        rig.Editor.PressChoice(rig.Texts.DeleteConfirm);
+        rig.Tick();
+
+        Assert.Equal("Hangar", Assert.Single(rig.Backups.All).Name);
+        Assert.False(rig.WorldFolder.Has(file));
+        Assert.DoesNotContain(file, rig.WorldFolder.Files["backups.ini"]);
+    }
+
+    /// <summary>A lost construct's logic system put on this construct arrives as it was kept, with one installation whose slots are empty.</summary>
+    [Fact]
+    public void ALostConstructsLogicSystemIsPutOnWithOneEmptyInstallation()
+    {
+        var rig = WithLost(out var lost, out var page);
+        ChooseLost(rig, page);
+
+        Add(rig, page).Command!.Execute();
+        rig.Tick();
+
+        var arrived = Assert.Single(rig.Editor.Program.Systems);
+        Assert.Equal(lost.Identity, arrived.Identity);
+        Assert.Equal(lost.Parts.Select(p => p.Id), arrived.Parts.Select(p => p.Id));
+        Assert.Empty(Assert.Single(arrived.Instances).Filled);
+    }
+
+    /// <summary>
+    /// The library adds a blueprint to this construct with a button, which is there only while the blueprint is not on this
+    /// construct already.
+    /// </summary>
+    [Fact]
+    public void TheLibraryAddsABlueprintWithAButton()
+    {
+        var rig = WithLost(out var lost, out var page);
+        ChooseLost(rig, page);
+        var add = Add(rig, page);
+        Assert.True(add.IsVisible);
+
+        add.Command!.Execute();
+        rig.Tick();
+
+        Assert.Equal(lost.Identity, Assert.Single(rig.Editor.Program.Systems).Identity);
+        Assert.False(add.IsVisible, "the button to add it is there while it is on this construct");
+    }
+
+    /// <summary>A lost construct's logic system copied arrives as a logic system of its own.</summary>
+    [Fact]
+    public void ALostConstructsLogicSystemIsCopied()
+    {
+        var rig = WithLost(out var lost, out var page);
+        ChooseLost(rig, page);
+
+        Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryCopy).Command!.Execute();
+        rig.Tick();
+
+        var copy = Assert.Single(rig.Editor.Program.Systems);
+        Assert.NotEqual(lost.Identity, copy.Identity);
+        Assert.Equal("Airlock 2", copy.Name);
+        Assert.Single(copy.Instances);
+    }
+
+    /// <summary>A lost construct's logic system is kept in storage with Make blueprint, and is not put on this construct by it.</summary>
+    [Fact]
+    public void ALostConstructsLogicSystemIsKeptInStorage()
+    {
+        var rig = WithLost(out var lost, out var page);
+        ChooseLost(rig, page);
+
+        var keep = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsMakeBlueprint);
+        Assert.True(keep.Command!.CanExecute);
+        keep.Command.Execute();
+        rig.Tick();
+
+        Assert.Equal(lost.Identity, Assert.Single(rig.Shelf.All).Identity);
+        Assert.True(rig.Shelf.Holds(lost));
+        Assert.Empty(rig.Editor.Program.Systems);
+    }
+
+    /// <summary>A lost construct's logic system whose blueprint storage keeps otherwise replaces it with Update blueprint, after asking.</summary>
+    [Fact]
+    public void ALostConstructsLogicSystemUpdatesItsBlueprintAfterAsking()
+    {
+        var rig = WithLost(out var lost, out var page, delegate(Simulation sim, AutomationSystem system)
+        {
+            system.Name = "Airlock Mk 0";
+            sim.Shelf.Keep(system);
+            system.Name = "Airlock";
+        });
+        ChooseLost(rig, page);
+
+        var update = Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.SystemsUpdateBlueprint);
+        update.Command!.Execute();
+        rig.Tick();
+        Assert.Contains(rig.Texts.LibraryUpdateReplaced, rig.Editor.Question());
+        Assert.Equal("Airlock Mk 0", Assert.Single(rig.Shelf.All).Name);
+
+        rig.Editor.PressChoice(rig.Texts.LibraryUpdateConfirm);
+        rig.Tick();
+
+        Assert.True(rig.Shelf.Holds(lost));
+        Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
     }
 
     /// <summary>
@@ -128,7 +360,7 @@ public class LibraryTests
         var rig = Blueprinted();
         rig.Editor.Program.Systems[0].Changed = Saved;
         rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
-        rig.Backups.Take("Lost Ship", Saved, new long[] { 424242 }, "p");
+        rig.Backups.Take("Lost Ship", Saved, new[] { Other() });
 
         rig.Editor.GoToRoot();
         rig.Editor.OpenLibrary();
@@ -137,9 +369,9 @@ public class LibraryTests
         var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
         Assert.NotNull(page.View);
         var rows = page.Rows.OfType<StatusRow>().ToList();
-        Assert.Equal(new[] { "Airlock", "Lost Ship", "Airlock" }, rows.Select(r => r.Summary));
+        Assert.Equal(new[] { "Airlock", "Hangar", "Airlock" }, rows.Select(r => r.Summary));
         Assert.Equal("2 installations", rows[0].Status);
-        Assert.StartsWith("Lost ", rows[1].Problem);
+        Assert.StartsWith("Lost ", rows[1].Status);
         Assert.StartsWith("Changed ", rows[2].Status);
         Assert.True(rows[0].Chosen);
     }
@@ -608,7 +840,41 @@ public class LibraryTests
 
         Assert.True(rig.Unit.Lost);
         var backup = Assert.Single(rig.Backups.All);
-        Assert.Contains("Airlock", backup.Program);
+        Assert.Equal("Airlock", backup.Name);
+        Assert.Contains("Airlock", rig.WorldFolder.Files[backup.File]);
+    }
+
+    /// <summary>A construct deleted whole, as a player in creative or the server's cleanup does it, leaves no backup.</summary>
+    [Fact]
+    public void DeletingTheConstructTakesNoBackup()
+    {
+        var rig = Simulation.Fresh();
+        rig.Editor.NewButtonSystem("Airlock");
+        rig.Tick();
+
+        rig.Machine.Delete(rig.Machine.Sprocket.Grid);
+        rig.Tick();
+
+        Assert.True(rig.Unit.Lost);
+        Assert.Empty(rig.Backups.All);
+    }
+
+    /// <summary>A programmable block that took the automation over as the hero was ground off, deleted with its grid, leaves no backup.</summary>
+    [Fact]
+    public void DeletingTheConstructAfterTheHeroWasGroundTakesNoBackup()
+    {
+        var rig = Simulation.Fresh();
+        rig.Editor.NewButtonSystem("Airlock");
+        rig.Machine.Programmable(200, "Spare");
+        rig.Tick();
+
+        rig.Machine.Grind(rig.Machine.Sprocket);
+        rig.Tick();
+        rig.Machine.Delete(rig.Machine.Sprocket.Grid);
+        rig.Tick();
+
+        Assert.True(rig.Unit.Lost);
+        Assert.Empty(rig.Backups.All);
     }
 
     /// <summary>
@@ -783,6 +1049,59 @@ public class LibraryTests
     }
 
     /// <summary>A logic system with a button, made a blueprint, with a second installation made from it.</summary>
+    /// <summary>
+    /// A construct with no automation whose library lists one lost construct, which had the airlock of
+    /// <see cref="Blueprinted" />; <paramref name="before" />, where given, is done before the library opens.
+    /// </summary>
+    static Simulation WithLost(out AutomationSystem lost, out LibraryPage page, Action<Simulation, AutomationSystem>? before = null)
+    {
+        lost = Blueprinted().Editor.Program.Systems[0];
+        var rig = Simulation.Fresh();
+        rig.Backups.Take("Lost Ship", Saved, new[] { lost });
+        before?.Invoke(rig, lost);
+
+        rig.Editor.GoToRoot();
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+
+        page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+        return rig;
+    }
+
+    /// <summary>Chooses the lost construct's airlock in the library.</summary>
+    static void ChooseLost(Simulation rig, LibraryPage page)
+    {
+        page.Rows.OfType<StatusRow>().Single(r => r.Depth == 1 && r.Summary == "Airlock").Opens!.Execute();
+        rig.Tick();
+    }
+
+    /// <summary>The construct of <see cref="Blueprinted" /> with a second logic system on it, called Hangar.</summary>
+    static Simulation Hangared()
+    {
+        var rig = Blueprinted();
+        rig.Editor.NewButtonSystem("Hangar");
+        rig.Editor.GoToRoot();
+        rig.Tick();
+        Assert.Equal(2, rig.Editor.Program.Systems.Count);
+        return rig;
+    }
+
+    /// <summary>A blueprint of another airlock, called Hangar, with an identity of its own.</summary>
+    static AutomationSystem Other()
+    {
+        var other = Blueprinted().Editor.Program.Systems[0];
+        other.Identity = Guid.NewGuid();
+        other.Name = "Hangar";
+        return other;
+    }
+
+    /// <summary>The library's button that adds what is chosen to this construct.</summary>
+    static Button Add(Simulation rig, LibraryPage page)
+    {
+        return Assert.Single(page.View!.Within().OfType<Button>(), b => b.Text == rig.Texts.LibraryAdd);
+    }
+
     static Simulation Blueprinted()
     {
         var sim = Simulation.Fresh();

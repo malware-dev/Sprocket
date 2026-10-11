@@ -63,7 +63,7 @@ public class ActionTests
     /// And the switch every block has is still said in Sprocket's own words, above them, as one value.
     /// </summary>
     /// <remarks>
-    /// The floor does not displace what was already better. "Switched on" is set off, on or flipped; "Turn block On" is a
+    /// The floor does not displace what was already better. "Power" is set off, on or flipped; "Turn block On" is a
     /// button in somebody else's menu.
     /// </remarks>
     [Fact]
@@ -75,7 +75,7 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Switched on"), "a block with a switch cannot be switched on");
+        Assert.True(ListsPower(screen), "a block with a switch cannot be switched on");
         Assert.False(screen.Shows("Switch on"), "switching on is offered beside the switch's value");
         Assert.False(screen.Shows("Turn block On"), "the game's own on/off is offered twice");
     }
@@ -102,14 +102,14 @@ public class ActionTests
         screen.Run(2);
 
         Assert.True(screen.Shows("Turn block On"), "the block's own switch is not in its own view");
-        Assert.False(screen.Shows("Switched on"), "Sprocket's wording is in the block's own view");
+        Assert.False(ListsPower(screen), "Sprocket's wording is in the block's own view");
         Assert.True(What(screen).ViewShown == 1);
 
         Organized(screen).Command!.Execute();
         screen.Run(2);
 
         Assert.False(screen.Shows("Turn block On"), "going back did not put it away again");
-        Assert.True(screen.Shows("Switched on"));
+        Assert.True(ListsPower(screen));
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class ActionTests
     /// </summary>
     /// <remarks>
     /// Every functional block has an organizer whether or not anything was written for its kind:
-    /// switched on is Sprocket's word for what the game calls Toggle block On/Off.
+    /// power is Sprocket's word for what the game calls Toggle block On/Off.
     /// </remarks>
     [Fact]
     public void APickerOpensOnTheOrganizedView()
@@ -155,7 +155,7 @@ public class ActionTests
 
         Assert.NotNull(Terminal(screen).Command);
         Assert.True(What(screen).ViewShown == 0, "the picker did not open on Sprocket's own words");
-        Assert.True(screen.Shows("Switched on"));
+        Assert.True(ListsPower(screen));
     }
 
     [Fact]
@@ -267,6 +267,9 @@ public class ActionTests
 
     /// <summary>What the first value in the column of values holds.</summary>
     static string Given(Screen screen) => screen.Editor.Pick().Arguments!.Form.Fields[0].Text;
+
+    /// <summary>Whether the column of what to do lists the power value, apart from the heading of the same name.</summary>
+    static bool ListsPower(Screen screen) => What(screen).Entries().Any(e => e.Text == "Power" && !e.IsHeading);
 
     static StageColumn What(Screen screen)
     {

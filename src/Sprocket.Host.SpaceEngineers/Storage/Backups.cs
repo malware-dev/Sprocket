@@ -1,164 +1,222 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
+using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
-    /// <summary>Every construct's backup in the world, and the text they are kept as.</summary>
+    /// <summary>The logic systems kept of each construct as it lost its automation, each blueprint in a file of its own, and the index listing them.</summary>
     /// <remarks>
-    /// One backup per construct, taken as it loses its automation, and kept until somebody deletes it. Where they are kept
-    /// is not this type's business - see <c>Carrier</c>.
-    /// <para>
-    /// The text is a line saying what it is, then each backup as a line of numbers followed by its name and program
-    /// written out at the lengths that line gives, so nothing inside them needs escaping:
+    /// The index is an ini file with a section for each blueprint file, saying what the library lists of it, so the list is
+    /// drawn without reading a single blueprint:
     /// <code>
-    /// backups 1
-    /// backup 2026-10-02T14:30:00.0000000Z 2 118 119 14 5021
-    /// Hangar Airlocksprocket 1 alpha 13 ...
+    /// [backup-1.cog]
+    /// system=6f1c0f0e-3c2b-4e8a-9d0f-1a2b3c4d5e6f
+    /// name=Cycle In
+    /// construct=Hangar Airlock
+    /// lost=2026-10-02T14:30:00.0000000Z
     /// </code>
+    /// Each file holds one blueprint as <see cref="ProgramText.Blueprint" /> writes it, read only when it is asked for.
+    /// <para>
+    /// Nothing is written until the index has been read, and nothing is written over an index that will not read: until
+    /// then backups are kept for the session alone.
     /// </para>
     /// </remarks>
     public sealed class Backups
     {
-        const string Head = "backups 1";
-        const string Line = "backup ";
+        const string Index = "backups.ini";
+
+        const string Lead = "backup-";
+
+        const string Kind = ".cog";
+
+        const string SystemKey = "system";
+
+        const string NameKey = "name";
+
+        const string ConstructKey = "construct";
+
+        const string LostKey = "lost";
+
+        readonly IFiles _files;
 
         readonly List<Backup> _all = new List<Backup>();
+
+        readonly List<string> _sections = new List<string>();
+
+        bool _open;
+
+        /// <summary>Backups kept in <paramref name="files" />, once they have been read from it.</summary>
+        public Backups(IFiles files)
+        {
+            _files = files;
+        }
 
         /// <summary>Every backup, in the order they were first taken.</summary>
         public IReadOnlyList<Backup> All => _all;
 
-        /// <summary>Whether what was read was read whole; where it was not, nothing is written over it.</summary>
+        /// <summary>Whether the index read whole; where it did not, nothing is written over it.</summary>
         public bool Intact { get; private set; } = true;
 
-        /// <summary>The backup of the construct made of <paramref name="grids" />, or null where it has none.</summary>
-        public Backup Of(IList<long> grids)
-        {
-            for (var i = 0; i < _all.Count; i++)
-            {
-                if (_all[i].Of(grids))
-                    return _all[i];
-            }
+        /// <summary>Whether what changes is written: once the index has been read, and only where it read whole.</summary>
+        bool Writes => _open && Intact;
 
-            return null;
-        }
-
-        /// <summary>Takes the backup of the construct made of <paramref name="grids" /> again, or takes its first.</summary>
-        public void Take(string name, DateTime saved, IList<long> grids, string program)
-        {
-            var had = Of(grids);
-            if (had != null)
-                had.Retake(name, saved, grids, program);
-            else
-                _all.Add(new Backup(name, saved, grids, program));
-        }
-
-        /// <summary>Forgets <paramref name="backup" />, which is no longer kept from the next save on.</summary>
-        public void Forget(Backup backup)
-        {
-            _all.Remove(backup);
-        }
-
-        /// <summary>The backups as text, to be kept.</summary>
-        public string Write()
-        {
-            var text = new StringBuilder(Head).Append('\n');
-            for (var i = 0; i < _all.Count; i++)
-            {
-                var backup = _all[i];
-                text.Append(Line).Append(backup.Saved.ToString("o", CultureInfo.InvariantCulture));
-                text.Append(' ').Append(backup.Grids.Count);
-                for (var g = 0; g < backup.Grids.Count; g++)
-                    text.Append(' ').Append(backup.Grids[g].ToString(CultureInfo.InvariantCulture));
-
-                text.Append(' ').Append(backup.Name.Length).Append(' ').Append(backup.Program.Length).Append('\n');
-                text.Append(backup.Name).Append(backup.Program).Append('\n');
-            }
-
-            return text.ToString();
-        }
-
-        /// <summary>Reads backups kept as <paramref name="text" />, answering what was wrong with it, or empty.</summary>
+        /// <summary>Reads the index, answering what was wrong with it, or empty.</summary>
         /// <remarks>Whole or not at all: where any of it will not read, none of it is taken, and it is never written over.</remarks>
-        public string Read(string text)
+        public string Read()
         {
             _all.Clear();
             Intact = true;
+            _open = true;
 
-            var read = new List<Backup>();
-            var trouble = Parse(text ?? "", read);
-            if (trouble.Length > 0)
+            string text;
+            try
+            {
+                if (!_files.Has(Index))
+                    return "";
+
+                text = _files.Read(Index);
+            }
+            catch (Exception failed)
             {
                 Intact = false;
-                return trouble;
+                return Index + " will not open - " + failed.Message;
+            }
+
+            var ini = new MyIni();
+            MyIniParseResult parsed;
+            if (!ini.TryParse(text, out parsed))
+            {
+                Intact = false;
+                return Index + " has a problem on line " + parsed.LineNo + " - " + parsed.Error;
+            }
+
+            _sections.Clear();
+            ini.GetSections(_sections);
+            var read = new List<Backup>();
+            for (var i = 0; i < _sections.Count; i++)
+            {
+                var backup = Entry(ini, _sections[i]);
+                if (backup == null)
+                {
+                    Intact = false;
+                    return Index + " says too little of " + _sections[i];
+                }
+
+                read.Add(backup);
             }
 
             _all.AddRange(read);
             return "";
         }
 
-        static string Parse(string text, List<Backup> into)
+        /// <summary>
+        /// Keeps <paramref name="systems" />, the logic systems of the construct called <paramref name="construct" />, as it
+        /// loses its automation at <paramref name="lost" />.
+        /// </summary>
+        /// <remarks>Each loss is kept on its own, beside any backup taken before, of the same logic system or any other.</remarks>
+        public void Take(string construct, DateTime lost, IList<AutomationSystem> systems)
         {
-            var at = 0;
-            var head = Next(text, ref at);
-            if (head != Head)
-                return "the backups do not start with \"" + Head + "\"";
-
-            while (at < text.Length)
+            for (var i = 0; i < systems.Count; i++)
             {
-                var line = Next(text, ref at);
-                if (!line.StartsWith(Line, StringComparison.Ordinal))
-                    return "a line of the backups is not a backup: " + line;
-
-                var words = line.Substring(Line.Length).Split(' ');
-                DateTime saved;
-                int grids;
-                if (words.Length < 2
-                    || !DateTime.TryParse(words[0], CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out saved)
-                    || !int.TryParse(words[1], NumberStyles.None, CultureInfo.InvariantCulture, out grids)
-                    || words.Length != 2 + grids + 2)
-                {
-                    return "a backup's line will not read: " + line;
-                }
-
-                var ids = new List<long>();
-                for (var g = 0; g < grids; g++)
-                {
-                    long id;
-                    if (!long.TryParse(words[2 + g], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out id))
-                        return "a backup's grid will not read: " + words[2 + g];
-
-                    ids.Add(id);
-                }
-
-                int name;
-                int program;
-                if (!int.TryParse(words[2 + grids], NumberStyles.None, CultureInfo.InvariantCulture, out name)
-                    || !int.TryParse(words[3 + grids], NumberStyles.None, CultureInfo.InvariantCulture, out program)
-                    || at + name + program + 1 > text.Length
-                    || text[at + name + program] != '\n')
-                {
-                    return "a backup's lengths do not match what follows: " + line;
-                }
-
-                into.Add(new Backup(text.Substring(at, name), saved, ids, text.Substring(at + name, program)));
-                at += name + program + 1;
+                var system = systems[i];
+                var backup = new Backup(Free(), system.Identity, system.Name, construct, lost);
+                _all.Add(backup);
+                if (Writes)
+                    _files.Write(backup.File, ProgramText.Blueprint(system));
             }
 
-            return "";
+            if (Writes)
+                WriteIndex();
         }
 
-        /// <summary>The line from <paramref name="at" />, moving past its end.</summary>
-        static string Next(string text, ref int at)
+        /// <summary>The logic system <paramref name="backup" /> keeps, read from its file, answering what was wrong with it, or empty.</summary>
+        public string Open(Backup backup, Values values, out AutomationSystem read)
         {
-            var end = text.IndexOf('\n', at);
-            if (end < 0)
-                end = text.Length;
+            read = null;
+            string text;
+            try
+            {
+                text = _files.Read(backup.File);
+            }
+            catch (Exception failed)
+            {
+                return backup.File + " will not open - " + failed.Message;
+            }
 
-            var line = text.Substring(at, end - at);
-            at = Math.Min(end + 1, text.Length);
-            return line;
+            return ProgramText.Lone(text, values, out read);
+        }
+
+        /// <summary>Forgets <paramref name="backup" />, deleting its file.</summary>
+        public void Forget(Backup backup)
+        {
+            if (!_all.Remove(backup) || !Writes)
+                return;
+
+            // The index first, so a file left behind by a delete that fails is one nothing lists.
+            WriteIndex();
+            _files.Delete(backup.File);
+        }
+
+        /// <summary>A file name no backup has and storage does not hold, numbered after the highest in use.</summary>
+        string Free()
+        {
+            var number = 1;
+            for (var i = 0; i < _all.Count; i++)
+            {
+                var file = _all[i].File;
+                int had;
+                if (file.StartsWith(Lead, StringComparison.Ordinal) && file.EndsWith(Kind, StringComparison.Ordinal)
+                    && int.TryParse(file.Substring(Lead.Length, file.Length - Lead.Length - Kind.Length), NumberStyles.None, CultureInfo.InvariantCulture, out had)
+                    && had >= number)
+                {
+                    number = had + 1;
+                }
+            }
+
+            while (Writes && _files.Has(Name(number)))
+                number++;
+
+            return Name(number);
+        }
+
+        static string Name(int number)
+        {
+            return Lead + number.ToString(CultureInfo.InvariantCulture) + Kind;
+        }
+
+        /// <summary>The backup the index's section <paramref name="file" /> describes, or null where it says too little.</summary>
+        static Backup Entry(MyIni ini, string file)
+        {
+            Guid identity;
+            DateTime lost;
+            var name = ini.Get(file, NameKey).ToString();
+            var construct = ini.Get(file, ConstructKey).ToString();
+            if (!Guid.TryParse(ini.Get(file, SystemKey).ToString(""), out identity)
+                || !DateTime.TryParse(ini.Get(file, LostKey).ToString(""), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out lost)
+                || !ini.ContainsKey(file, NameKey) || !ini.ContainsKey(file, ConstructKey))
+            {
+                return null;
+            }
+
+            return new Backup(file, identity, name, construct, lost);
+        }
+
+        void WriteIndex()
+        {
+            var ini = new MyIni();
+            for (var i = 0; i < _all.Count; i++)
+            {
+                var backup = _all[i];
+                ini.Set(backup.File, SystemKey, backup.Identity.ToString("D"));
+                ini.Set(backup.File, NameKey, backup.Name);
+                ini.Set(backup.File, ConstructKey, backup.Construct);
+                ini.Set(backup.File, LostKey, backup.Lost.ToString("o", CultureInfo.InvariantCulture));
+            }
+
+            _files.Write(Index, ini.ToString());
         }
     }
 }

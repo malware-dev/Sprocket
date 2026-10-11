@@ -208,7 +208,7 @@ public class CommonMembersTests
         Assert.Equal("toggle on/off", toggle.Text);
 
         // The switch is one value, set off, on or flipped, and the acts beside it are kept to the script and the terminal view.
-        var switched = kind.FindAction("switched-on", Form.Value)!;
+        var switched = kind.FindAction("power", Form.Value)!;
         Assert.True(switched.Sets);
         Assert.Equal("OnOff", switched.FlippedBy);
         Assert.True(toggle.Hidden);
@@ -231,7 +231,7 @@ public class CommonMembersTests
             .Offering("ShowOnHUD_Off", "Show on HUD Off");
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
-        foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level", "switched-on", "ShowOnHUD" })
+        foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level", "power", "ShowOnHUD" })
             Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in new[] { BlockKinds.SwitchOn, BlockKinds.SwitchOff })

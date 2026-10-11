@@ -104,7 +104,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>Installasjoner</value>
   </data>
   <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>**Biblioteket**: logikksystemene på denne konstruksjonen, plantegningene i lageret, og automasjonen til konstruksjoner som er tapt.</value>
+    <value>**Biblioteket**: logikksystemene på denne konstruksjonen, sikkerhetskopier av konstruksjoner som mistet automasjonen, og plantegningene i lageret.</value>
   </data>
   <data name="Sprocket.Systems.Empty" xml:space="preserve">
     <value>Ingenting er automatisert her ennå.</value>
@@ -1380,14 +1380,17 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Library.Installations" xml:space="preserve">
     <value>{count} installasjoner</value>
   </data>
+  <data name="Sprocket.Library.Backups" xml:space="preserve">
+    <value>Sikkerhetskopier</value>
+  </data>
   <data name="Sprocket.Library.Lost" xml:space="preserve">
-    <value>Tapt {time}. Automasjonen er tatt vare på her.</value>
+    <value>Tapt {time}</value>
   </data>
-  <data name="Sprocket.Library.ForgetLost" xml:space="preserve">
-    <value>Glem automasjonen til denne konstruksjonen</value>
+  <data name="Sprocket.Library.ForgetBackup" xml:space="preserve">
+    <value>Glem denne sikkerhetskopien</value>
   </data>
-  <data name="Sprocket.Library.ForgetLostQuestion" xml:space="preserve">
-    <value>Glemme automasjonen til denne tapte konstruksjonen?</value>
+  <data name="Sprocket.Library.ForgetBackupQuestion" xml:space="preserve">
+    <value>Glemme denne sikkerhetskopien?</value>
   </data>
   <data name="Sprocket.Library.InStorage" xml:space="preserve">
     <value>I lageret</value>
@@ -1401,8 +1404,8 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Library.ForgetQuestion" xml:space="preserve">
     <value>Slette denne plantegningen fra lageret?</value>
   </data>
-  <data name="Sprocket.Library.Here" xml:space="preserve">
-    <value>På denne konstruksjonen</value>
+  <data name="Sprocket.Library.Add" xml:space="preserve">
+    <value>Legg til på denne konstruksjonen</value>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
     <value>Legg denne plantegningen på denne konstruksjonen som et logikksystem, med den første installasjonen.</value>
@@ -1424,9 +1427,6 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Library.InstallationsHeading" xml:space="preserve">
     <value>Installasjoner</value>
-  </data>
-  <data name="Sprocket.Library.Systems" xml:space="preserve">
-    <value>Logikksystemer</value>
   </data>
   <data name="Sprocket.Systems.KeepsOne" xml:space="preserve">
     <value>Et logikksystem beholder minst én installasjon.</value>

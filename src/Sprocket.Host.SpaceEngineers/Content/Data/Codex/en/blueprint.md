@@ -8,7 +8,7 @@ On the [home screen](#home), `Make blueprint` on a logic system's heading saves 
 
 ## Putting it on a construct
 
-In the library, switch a blueprint's `On this construct` on. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its configuration panel.
+In the library, choose a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its configuration panel.
 
 A construct can hold a blueprint only once. To have a second, make a copy.
 
@@ -25,7 +25,7 @@ The copy opens at once, ready to be changed.
 
 ## Taking it off
 
-Switching `On this construct` off takes the logic system and its installations off this construct, after asking. If the logic system was changed after its blueprint, it also asks whether to bring the blueprint up to date. A logic system that has no blueprint is deleted instead, since it is the only copy.
+The minus beside a logic system on the home screen takes it and its installations off this construct, after asking. If the logic system was changed after its blueprint, it also asks whether to bring the blueprint up to date. A logic system that has no blueprint has a bin there instead, which deletes it, since it is the only copy.
 
 ## Each construct keeps its own
 

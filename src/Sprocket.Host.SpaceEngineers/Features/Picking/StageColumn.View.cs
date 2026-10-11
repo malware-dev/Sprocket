@@ -40,14 +40,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Style = Styles.Column;
 
             // The way to the column's other view stands at the end of its heading, as a quiet link rather than a tab, so the
-            // list under the heading is the column's list and the other is a step aside from it.
+            // list under the heading is the column's list and the other is a step aside from it. The eye stands there too,
+            // on a line that is always shown, so it is there even when everything it would show is hidden.
             Children.Add(new HStack
             {
                 Spacing = 8f,
                 Children =
                 {
                     new Label { Style = Styles.ColumnTitle, Placement = Flex.Grow }.As(out _title),
-                    new HStack().As(out _viewLinks)
+                    new HStack().As(out _viewLinks),
+                    new Glyph { Symbol = Symbols.HiddenHidden, Style = Styles.Icon, Placement = Fixed.Size(28f, 24f), IsVisible = false }
+                        .As(out _hidden)
                 }
             });
             // Its line is held whether or not there is anything to say on it, so every column's box lines up.
@@ -89,12 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         }
                     }.As(out _kindLine),
                     new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }
-                        .As(out _kindClear),
-                    new Label { Placement = Flex.Grow },
-
-                    // At the far end of the line, as the game keeps its own eye apart from what narrows its list.
-                    new Glyph { Symbol = Symbols.HiddenHidden, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }
-                        .As(out _hidden)
+                        .As(out _kindClear)
                 }
             }.As(out _kindHead));
 

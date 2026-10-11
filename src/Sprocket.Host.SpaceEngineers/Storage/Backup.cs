@@ -1,52 +1,37 @@
 using System;
-using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
-    /// <summary>The blueprints of the logic systems a construct had when it lost its automation, and which construct that was.</summary>
+    /// <summary>The blueprint of one logic system a construct had when it lost its automation, and which construct that was.</summary>
+    /// <remarks>
+    /// What the index says of it; the blueprint itself stays in its file until somebody asks for it. Nothing ties it to a
+    /// construct still in the world: it is only ever put on one by hand.
+    /// </remarks>
     public sealed class Backup
     {
-        /// <summary>The blueprints <paramref name="program" /> of the construct called <paramref name="name" />, made of <paramref name="grids" />.</summary>
-        public Backup(string name, DateTime saved, IList<long> grids, string program)
+        /// <summary>The blueprint in <paramref name="file" /> of the logic system <paramref name="name" />, kept of the construct <paramref name="construct" />.</summary>
+        public Backup(string file, Guid identity, string name, string construct, DateTime lost)
         {
+            File = file;
+            Identity = identity;
             Name = name;
-            Saved = saved;
-            Grids = new List<long>(grids);
-            Program = program;
+            Construct = construct;
+            Lost = lost;
         }
 
-        /// <summary>What the construct was called when the copy was taken.</summary>
-        public string Name { get; private set; }
+        /// <summary>The file in world storage the blueprint is kept in.</summary>
+        public string File { get; }
 
-        /// <summary>When the copy was taken, in UTC.</summary>
-        public DateTime Saved { get; private set; }
+        /// <summary>The logic system's identity.</summary>
+        public Guid Identity { get; }
 
-        /// <summary>The entity ids of the construct's grids when the copy was taken, by which it is known again.</summary>
-        public List<long> Grids { get; private set; }
+        /// <summary>The logic system's name.</summary>
+        public string Name { get; }
 
-        /// <summary>The logic systems, written out as blueprints.</summary>
-        public string Program { get; private set; }
+        /// <summary>What the construct was called when it lost its automation, a label of where the backup came from.</summary>
+        public string Construct { get; }
 
-        /// <summary>Whether the construct made of <paramref name="grids" /> is the one this was taken of: whether any grid is one it had.</summary>
-        public bool Of(IList<long> grids)
-        {
-            for (var i = 0; i < grids.Count; i++)
-            {
-                if (Grids.Contains(grids[i]))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Takes the copy again, from the construct as it is now.</summary>
-        public void Retake(string name, DateTime saved, IList<long> grids, string program)
-        {
-            Name = name;
-            Saved = saved;
-            Grids.Clear();
-            Grids.AddRange(grids);
-            Program = program;
-        }
+        /// <summary>When the construct lost its automation, in UTC.</summary>
+        public DateTime Lost { get; }
     }
 }
