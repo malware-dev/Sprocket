@@ -30,11 +30,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The configuration panel, where an installation's blocks are chosen.</summary>
         public const string ConfigurationPanel = "configuration-panel";
 
+        /// <summary>The term for a slot.</summary>
+        public const string Slot = "slot";
+
         /// <summary>The library.</summary>
         public const string Library = "library";
 
         /// <summary>Picking blocks.</summary>
         public const string Picking = "picking";
+
+        /// <summary>Writing rich text, which every description box's guide button opens.</summary>
+        public const string Writing = "writing";
 
         const string Index = "index";
 

@@ -1,6 +1,6 @@
 # Konfigurasjonspanel
 
-Konfigurasjonspanelet er der en ![](mark:installation) [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det er også der den som laget ![](mark:logic-system) [logikksystemet](#logic-system), forklarer det, så noen som aldri har sett det, kan installere det.
+Konfigurasjonspanelet er der en ![](mark:installation) [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det viser også det den som laget ![](mark:logic-system) [logikksystemet](#logic-system), skrev om det, så noen som aldri har sett det, kan installere det.
 
 ## Åpne det
 
@@ -14,26 +14,24 @@ Et logikksystem som settes på denne [konstruksjonen](#construct) fra [bibliotek
 ## Hva det viser
 
 - **Navnet på installasjonen**, som du kan endre, og logikksystemet den hører til. Trykker du navnet på logikksystemet, åpnes det.
-- **Beskrivelsen** som den som laget logikksystemet, skrev.
+- **Beskrivelsen** av logikksystemet, skrevet på skjermen til logikksystemet.
 - **Hva som er galt**, om noe, med en knapp som åpner ![](mark:sequence) [sekvensen](#sequence) der det gikk galt.
 - **Plassene**, med hvor mange som fortsatt mangler en blokk.
 
-Hver [plass](#slot) viser navnet sitt, hva den er til, og hva som fyller den nå. En signalplass viser også verktøylinjeplassen som sender signalet, for eksempel `button 2 is pressed`.
+Hver [plass](#slot) viser navnet sitt, hva den er til, og hva som fyller den nå. En signalplass viser også verktøylinjeplassen som sender signalet, for eksempel `button 2 is pressed`. En plass der blokken gikk tapt, sier det og nevner blokken.
+
+Navnene og hva hver plass er til, skrives på skjermen til logikksystemet og på siden til hver plass, én gang for alle installasjonene.
 
 ## Fylle plassene
 
-Trykk en plass for å [velge](#picking) hva som fyller den. Bare blokker av riktig slag blir tilbudt. For en signalplass velger du blokken og verktøylinjeplassen, og den verktøylinjeplassen settes opp for deg.
+Trykk en plass for å [velge](#picking) hva som fyller den. Bare blokker av et slag plassen forventer, blir tilbudt. For en signalplass velger du blokken og verktøylinjeplassen, og den verktøylinjeplassen settes opp for deg.
 
 Bryteren til installasjonen er også på panelet, så du kan slå den på så snart alle plassene er fylt.
 
-## Sette opp panelet
+## Fylle en plass på nytt
 
-Den som lager et logikksystem, bestemmer hva konfigurasjonspanelet sier. `Rediger konfigurasjonspanelet`, på skjermen til logikksystemet, åpner det for dette. Logikksystemet må være slått av først.
+Plassene regnes ut på nytt etter hver endring i logikksystemet, så en plass denne installasjonen har fylt, kan deles i to eller slås sammen til en større. Hver plass som er endret, viser `Endret: fyll den på nytt` i stedet for blokkene sine, og overskriften over plassene teller dem, for eksempel `1 plass å fylle på nytt`.
 
-- **Beskrivelsen** sier hva logikksystemet gjør, og hva den som installerer det, trenger å vite. Den kan ha overskrifter, lister og fet eller kursiv tekst, og vises også ved siden av ![](mark:blueprint) [plantegningen](#blueprint) i biblioteket.
-- **Navnet på hver plass** er det alle som fyller den, ser. To plasser kan ikke ha samme navn.
-- **Linja om hva hver plass er til** forteller dem hvilke av blokkene sine de skal velge.
+Blokkene installasjonen hadde, legges til side og vises under plassen etter `Lagt til side, tilbys først:`. Trykk plassen, så viser velgeren dem først, hver merket `Lagt til side`. Velg de som hører hjemme i denne plassen.
 
-Disse skrives én gang, og panelet til hver installasjon viser dem. Ingenting fylles mens panelet settes opp.
-
-Skriv det for noen som aldri har sett konstruksjonen din. En plass får først navnet på blokken du valgte, som *Interior Door 2*, og det forteller ingenting til den som fyller den. Gi den navnet *Indre dør* og beskriv den som døra på siden med trykk, så vet den som fyller den, hvilken dør som skal velges.
+Blokkene som er lagt til side, tas vare på til alle plassene til installasjonen er fylt på nytt, og slippes så.

@@ -210,7 +210,7 @@ public class RigTests
 
         AutomationSystem system = sim.Editor.Program.Systems[0];
         sim.Editor.Blueprinted(system);
-        sim.Editor.Push(new BlueprintPage(sim.Editor, system, true));
+        sim.Editor.Push(new BlueprintPage(sim.Editor, system));
         sim.Tick();
 
         sim.Editor.Parts()[0].Fills!.Execute();

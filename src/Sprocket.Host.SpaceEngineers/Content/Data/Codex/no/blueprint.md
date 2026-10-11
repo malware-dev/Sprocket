@@ -1,6 +1,6 @@
 # Plantegning
 
-En plantegning er en kopi av et ![](mark:logic-system) [logikksystem](#logic-system) som tas vare på i [biblioteket](#library). Den holder ![](mark:sequence) [sekvensene](#sequence), [utløserne](#trigger) og [plassene](#slot) til logikksystemet, og det [konfigurasjonspanelet](#configuration-panel) sier. Den holder ingen blokker, siden hver ![](mark:installation) [installasjon](#installation) tar med sine egne.
+En plantegning er en kopi av et ![](mark:logic-system) [logikksystem](#logic-system) som tas vare på i [biblioteket](#library). Den holder ![](mark:sequence) [sekvensene](#sequence), [utløserne](#trigger) og [plassene](#slot) til logikksystemet, beskrivelsen, og hva hver plass er til. Den holder ingen blokker, siden hver ![](mark:installation) [installasjon](#installation) tar med sine egne.
 
 ## Lage en
 
@@ -8,7 +8,7 @@ På [startskjermen](#home) lagrer `Lag plantegning` i overskriften til et logikk
 
 ## Sette den på en konstruksjon
 
-I biblioteket velger du en plantegning og trykker `Legg til på denne konstruksjonen`. Den blir et logikksystem på denne konstruksjonen, med én installasjon der plassene fortsatt er tomme. Fyll dem på konfigurasjonspanelet.
+I biblioteket velger du en plantegning og trykker `Legg til på denne konstruksjonen`. Den blir et logikksystem på denne konstruksjonen, med én installasjon der plassene fortsatt er tomme. Fyll dem på [konfigurasjonspanelet](#configuration-panel).
 
 En konstruksjon kan bare ha en plantegning én gang. Vil du ha en til, lager du en kopi.
 

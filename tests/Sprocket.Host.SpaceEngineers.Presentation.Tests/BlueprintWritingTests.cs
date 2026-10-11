@@ -5,35 +5,40 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>Setting up a configuration panel: what is typed reaches the blueprint once the keyboard leaves the box, as one step back.</summary>
+/// <summary>Writing a blueprint's slots and description: what is typed reaches the blueprint once the keyboard leaves the box, as one step back.</summary>
 public class BlueprintWritingTests
 {
-    /// <summary>A slot is called what its block is called when the blueprint is made.</summary>
+    /// <summary>A slot is called what its block is called when the blueprint is made, and listed so on its logic system's screen.</summary>
     [Fact]
     public void ASlotTakesItsBlocksName()
     {
-        var screen = Writing();
+        var screen = OnTheSystem();
         var part = Assert.Single(screen.Editor.Program.Systems[0].Parts);
 
         Assert.Equal("Airlock Button", part.Id);
-        Assert.Equal("Airlock Button", screen.Editor.Parts()[0].NameBox.Text);
+        Assert.Equal("Airlock Button", Assert.Single(screen.Editor.SystemSlots()).Name);
     }
 
-    /// <summary>A slot renamed as the panel is set up is renamed wherever its system names it, and one step back takes it back.</summary>
+    /// <summary>Pressing a slot's name opens its page, named for it.</summary>
+    [Fact]
+    public void PressingASlotsNameOpensIt()
+    {
+        var screen = OnTheSlot();
+
+        Assert.Equal("Airlock Button", screen.Editor.Slot().Title);
+    }
+
+    /// <summary>A slot renamed on its heading is renamed wherever its system names it, and one step back takes it back.</summary>
     [Fact]
     public void ASlotRenamedIsOneStepBack()
     {
-        var screen = Writing();
+        var screen = OnTheSlot();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var part = Assert.Single(system.Parts);
         var was = part.Id;
 
-        editor.Input.Focus(editor.Parts()[0].NameBox);
-        screen.Do("clear", "type", "Call button").Run(1);
-        Assert.Equal(was, part.Id);
-
-        editor.Input.Focus(null);
+        editor.Screen.Heading[0].Renames!("Call button");
         screen.Run(5);
         Assert.Equal("Call button", part.Id);
         Assert.NotNull(system.First!.FilledWith("Call button"));
@@ -41,41 +46,39 @@ public class BlueprintWritingTests
         editor.Screen.Undo!.Execute();
         screen.Run(5);
         Assert.Equal(was, part.Id);
-        Assert.Equal(was, editor.Parts()[0].NameBox.Text);
+        Assert.Equal(was, editor.Slot().Title);
     }
 
-    /// <summary>A name typed into a slot's box is kept when the page is built again in the tick the box is left.</summary>
+    /// <summary>A description typed into a slot's box is kept when the page is built again in the tick the box is left.</summary>
     [Fact]
-    public void ANameLeftAsThePageIsBuiltAgainIsKept()
+    public void ADescriptionLeftAsThePageIsBuiltAgainIsKept()
     {
-        var screen = Writing();
+        var screen = OnTheSlot();
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
 
-        editor.Input.Focus(editor.Parts()[0].NameBox);
-        screen.Do("clear", "type", "Call button").Run(1);
+        editor.Input.Focus(editor.Slot().About.Box);
+        screen.Do("type", "The button that cycles it.").Run(1);
 
         editor.Input.Focus(null);
         editor.Invalidate();
         screen.Run(5);
 
-        Assert.Equal("Call button", part.Id);
-        Assert.Equal("Call button", editor.Parts()[0].NameBox.Text);
+        Assert.Equal("The button that cycles it.", part.Annotation);
+        Assert.Equal("The button that cycles it.", editor.Slot().About.Text);
     }
 
-    /// <summary>A slot may take the name of one nothing uses, which is not saved and goes; the name of one in use is refused.</summary>
+    /// <summary>A slot may take the name of one nothing uses and no installation holds blocks in, which is not saved and goes.</summary>
     [Fact]
     public void ANameHeldByASlotNothingUsesIsFree()
     {
-        var screen = Writing();
+        var screen = OnTheSlot();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var part = Assert.Single(system.Parts);
         system.PartFor("Spare");
 
-        editor.Input.Focus(editor.Parts()[0].NameBox);
-        screen.Do("clear", "type", "Spare").Run(1);
-        editor.Input.Focus(null);
+        editor.Screen.Heading[0].Renames!("Spare");
         screen.Run(5);
 
         Assert.Equal("Spare", part.Id);
@@ -83,14 +86,11 @@ public class BlueprintWritingTests
         Assert.NotNull(system.First!.FilledWith("Spare"));
     }
 
-    /// <summary>
-    /// A slot's name is refused where another slot in use has it, said under the box while it is typed and again once the
-    /// box is left, and the slot keeps the name it had.
-    /// </summary>
+    /// <summary>A slot's name is refused where another slot in use has it, and the slot keeps the name it had.</summary>
     [Fact]
-    public void ANameAnotherSlotHasIsRefusedAndSaysSo()
+    public void ANameAnotherSlotHasIsRefused()
     {
-        var screen = Writing();
+        var screen = OnTheSystem();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         var part = Assert.Single(system.Parts);
@@ -101,52 +101,42 @@ public class BlueprintWritingTests
         editor.Invalidate();
         screen.Run(5);
 
-        var row = editor.Parts().Single(r => r.NameBox.Text == part.Id);
-        editor.Input.Focus(row.NameBox);
-        screen.Do("clear", "type", "Other").Run(1);
-        Assert.Equal("Another slot is already called Other.", row.Refusal);
-
-        editor.Input.Focus(null);
+        editor.OpenSlot(part.Id);
         screen.Run(5);
+        Assert.False(editor.Slot().AcceptsName("Other"));
 
+        editor.Screen.Heading[0].Renames!("Other");
+        screen.Run(5);
         Assert.Equal("Airlock Button", part.Id);
-        row = editor.Parts().Single(r => r.NameBox.Text == part.Id);
-        Assert.Equal("Not renamed: another slot is already called Other.", row.Refusal);
     }
 
-    /// <summary>A slot's name left empty is refused and says so, and the slot keeps the name it had.</summary>
+    /// <summary>A slot's name left empty is refused, and the slot keeps the name it had.</summary>
     [Fact]
-    public void AnEmptyNameIsRefusedAndSaysSo()
+    public void AnEmptyNameIsRefused()
     {
-        var screen = Writing();
+        var screen = OnTheSlot();
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
 
-        editor.Input.Focus(editor.Parts()[0].NameBox);
-        screen.Do("clear", "type", "x").Run(1);
-        Assert.Null(editor.Parts()[0].Refusal);
-        screen.Do("clear").Run(1);
-        Assert.Equal("A slot needs a name.", editor.Parts()[0].Refusal);
-
-        editor.Input.Focus(null);
+        Assert.True(editor.Slot().NameRequired);
+        editor.Screen.Heading[0].Renames!("");
         screen.Run(5);
 
         Assert.Equal("Airlock Button", part.Id);
-        Assert.Equal("Not renamed: a slot needs a name.", editor.Parts()[0].Refusal);
     }
 
     /// <summary>A signal slot being filled in names the trigger on its block that answers it, not only the block.</summary>
     [Fact]
     public void ATriggerSlotNamesTheTriggerOnItsBlock()
     {
-        var screen = Writing();
+        var screen = OnTheSystem();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
 
         editor.GoToRoot();
         screen.Run(5);
         editor.Choose(system, system.Instances[0]);
-        editor.Push(new BlueprintPage(editor, system, false));
+        editor.Push(new BlueprintPage(editor, system));
         screen.Run(5);
 
         var row = Assert.Single(editor.Parts());
@@ -164,21 +154,21 @@ public class BlueprintWritingTests
     [Fact]
     public void AStepBackWhileTypingTakesBackWhatWasTyped()
     {
-        var screen = Writing();
+        var screen = OnTheSlot();
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
 
-        editor.Parts()[0].Required.Command!.Execute();
+        editor.Slot().Required.Command!.Execute();
         screen.Run(5);
 
-        editor.Input.Focus(editor.Parts()[0].About.Box);
+        editor.Input.Focus(editor.Slot().About.Box);
         screen.Do("type", "The button that cycles it.").Run(1);
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
 
         Assert.Equal("", part.Annotation);
-        Assert.Equal("", editor.Parts()[0].About.Text);
+        Assert.Equal("", editor.Slot().About.Text);
         Assert.Null(editor.Input.Focused);
         Assert.True(part.Optional);
     }
@@ -187,12 +177,12 @@ public class BlueprintWritingTests
     [Fact]
     public void MakingASlotOptionalIsOneStepBack()
     {
-        var screen = Writing();
+        var screen = OnTheSlot();
         var editor = screen.Editor;
         var part = Assert.Single(editor.Program.Systems[0].Parts);
         Assert.False(part.Optional);
 
-        editor.Parts()[0].Required.Command!.Execute();
+        editor.Slot().Required.Command!.Execute();
         screen.Run(5);
         Assert.True(part.Optional);
 
@@ -201,14 +191,65 @@ public class BlueprintWritingTests
         Assert.False(part.Optional);
     }
 
+    /// <summary>A blueprint's description is written at the top of its logic system's screen, as one step back.</summary>
+    [Fact]
+    public void TheDescriptionIsWrittenOnTheLogicSystemsScreen()
+    {
+        var screen = OnTheSystem();
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        var page = (Features.LogicSystems.LogicSystemPage)editor.Current!;
+
+        editor.Input.Focus(page.About.Box);
+        screen.Do("type", "Cycles the airlock.").Run(1);
+        editor.Input.Focus(null);
+        screen.Run(5);
+        Assert.Equal("Cycles the airlock.", system.Annotation);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(5);
+        Assert.Equal("", system.Annotation);
+    }
+
     /// <summary>The guide button beside each description box opens the codex on writing text.</summary>
     [Fact]
     public void TheGuideButtonOpensTheCodexOnWriting()
     {
-        var screen = Writing();
+        var screen = OnTheSystem();
         var editor = screen.Editor;
+        Guides(screen, editor.Current!.View);
 
-        var composers = editor.Blueprint().View.Within().OfType<Features.Writing.Composer>().ToList();
+        editor.OpenSlot("Airlock Button");
+        screen.Run(5);
+        Guides(screen, editor.Slot().View);
+    }
+
+    /// <summary>The first paste says, under the box pasted into, where text from outside the game comes in, and later ones do not.</summary>
+    [Fact]
+    public void TheFirstPasteSaysWhereOutsideTextComesIn()
+    {
+        var screen = OnTheSlot();
+        var editor = screen.Editor;
+        editor.Input.Clipboard = new Storage.ClipboardFile(new Folder(), delegate { }, editor.Pasted);
+        var box = editor.Slot().About.Box;
+
+        editor.Input.Focus(box);
+        editor.Input.Key(VRage.Input.MyKeys.V, false, true);
+        screen.Run(2);
+        Assert.Equal(1, Notes(editor));
+
+        editor.Windows!.Close(editor.Windows.Top);
+        editor.Input.Focus(box);
+        editor.Input.Key(VRage.Input.MyKeys.V, false, true);
+        screen.Run(2);
+        Assert.Equal(0, Notes(editor));
+    }
+
+    /// <summary>Presses the guide button of every description box in <paramref name="view" />, each opening the codex on writing.</summary>
+    static void Guides(Screen screen, Lumel.Element view)
+    {
+        var editor = screen.Editor;
+        var composers = view.Within().OfType<Features.Writing.Composer>().ToList();
         Assert.NotEmpty(composers);
         foreach (var composer in composers)
         {
@@ -221,27 +262,6 @@ public class BlueprintWritingTests
             Assert.True(editor.CodexOpen, "the codex did not open");
             Assert.Equal("writing", editor.CodexWindow!.Term!.Id);
         }
-    }
-
-    /// <summary>The first paste says, under the box pasted into, where text from outside the game comes in, and later ones do not.</summary>
-    [Fact]
-    public void TheFirstPasteSaysWhereOutsideTextComesIn()
-    {
-        var screen = Writing();
-        var editor = screen.Editor;
-        editor.Input.Clipboard = new Storage.ClipboardFile(new Folder(), delegate { }, editor.Pasted);
-        var box = editor.Blueprint().View.Within().OfType<Features.Writing.Composer>().First().Box;
-
-        editor.Input.Focus(box);
-        editor.Input.Key(VRage.Input.MyKeys.V, false, true);
-        screen.Run(2);
-        Assert.Equal(1, Notes(editor));
-
-        editor.Windows!.Close(editor.Windows.Top);
-        editor.Input.Focus(box);
-        editor.Input.Key(VRage.Input.MyKeys.V, false, true);
-        screen.Run(2);
-        Assert.Equal(0, Notes(editor));
     }
 
     /// <summary>How many windows are open saying where outside text comes in.</summary>
@@ -257,8 +277,8 @@ public class BlueprintWritingTests
         return count;
     }
 
-    /// <summary>A logic system with a button, its configuration panel open to be set up.</summary>
-    static Screen Writing()
+    /// <summary>The screen of a logic system with a button, switched off so it can be written.</summary>
+    static Screen OnTheSystem()
     {
         var screen = Screen.Fresh();
         var editor = screen.Editor;
@@ -266,11 +286,19 @@ public class BlueprintWritingTests
         editor.GoToRoot();
         screen.Run(5);
 
+        editor.Program.Systems[0].Enabled = false;
+        editor.Program.Edited();
         editor.OpenBlueprintSystem(0);
         screen.Run(5);
-        editor.EditPanel();
+        return screen;
+    }
+
+    /// <summary>The page of the button's slot of a logic system switched off so it can be written.</summary>
+    static Screen OnTheSlot()
+    {
+        var screen = OnTheSystem();
+        screen.Editor.OpenSlot("Airlock Button");
         screen.Run(5);
-        Assert.True(editor.Blueprint().IsEditing);
         return screen;
     }
 }

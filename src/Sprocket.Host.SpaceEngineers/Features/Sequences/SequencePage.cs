@@ -674,13 +674,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
                 delegate(PickAnswer answer)
                 {
-                    Swap swap;
-                    var named = Editor.Named(_sequence.System, answer.Targets, step.Targets, out swap);
+                    var named = Editor.Named(_sequence.System, answer.Targets, step.Targets);
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, named, answer.Chosen,
                             answer.Form, Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form),
                             answer.Arguments,
-                            Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form), swap));
+                            Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)));
                     Editor.Pop();
                 }, arguments: step.Arguments, opens: opens));
         }
@@ -721,7 +720,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddIf(int at)
         {
             var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test, Swap swap)
+            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
             {
                 Editor.Do(_sequence, new AddStep(Change.AddIf, at, new If(test), new EndIf()));
                 Editor.UnwindTo(origin);
@@ -732,7 +731,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddBranch(int end)
         {
             var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test, Swap swap)
+            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
             {
                 var last = _sequence.Otherwise(_sequence.OpenOf(end));
                 Editor.Do(_sequence, new AddStep(Change.AddBranch, last < 0 ? end : last, new Else(test)));
@@ -744,7 +743,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void GiveTest(Step step)
         {
             var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test, Swap swap)
+            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
             {
                 Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), null, test));
                 Editor.UnwindTo(origin);
@@ -760,9 +759,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed.</summary>
         void EditTest(Step step, Comparison test, Opening opens)
         {
-            Editor.Push(TestPage(test, opens, delegate(Comparison now, Swap swap)
+            Editor.Push(TestPage(test, opens, delegate(Comparison now)
             {
-                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now, swap));
+                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
                 Editor.Pop();
             }));
         }
@@ -783,7 +782,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
-        PickPage TestPage(Comparison test, Opening opens, Action<Comparison, Swap> chosen)
+        PickPage TestPage(Comparison test, Opening opens, Action<Comparison> chosen)
         {
             bool inState = true;
             var state = test == null ? null : Stated(test, Editor.Seen(_sequence.System, test.Targets), out inState);
@@ -794,9 +793,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 stated ? Form.Native : Form.Value,
                 delegate(PickAnswer answer)
                 {
-                    Swap swap;
-                    var made = Test(answer, test, out swap);
-                    chosen(made, swap);
+                    chosen(Test(answer, test));
                 },
                 true, test != null && test.Quantifier == Quantifier.All, stated ? null : new[] { test.Value }, opens, forTests: true);
         }
@@ -807,11 +804,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// arguments are kept from <paramref name="was" /> where the same value is picked again, so changing the blocks of a
         /// test written in the script changes nothing else.
         /// </remarks>
-        Comparison Test(PickAnswer answer, Comparison was, out Swap swap)
+        Comparison Test(PickAnswer answer, Comparison was)
         {
             var test = new Comparison();
             test.Quantifier = answer.All ? Quantifier.All : Quantifier.Any;
-            var named = Editor.Named(_sequence.System, answer.Targets, was == null ? null : was.Targets, out swap);
+            var named = Editor.Named(_sequence.System, answer.Targets, was == null ? null : was.Targets);
             for (var i = 0; i < named.Count; i++)
                 test.Targets.Add(named[i]);
 

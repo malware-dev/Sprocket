@@ -79,6 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Func<GridEntity, bool> _fits;
         readonly Func<GridEntity, bool> _admits;
         readonly bool _signalsOnly;
+        readonly Dictionary<long, string> _ahead = new Dictionary<long, string>();
 
         string _chosen;
         Form _chosenForm;
@@ -221,6 +222,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
         public IList<Field> Fields => Wanted();
+
+        /// <summary>Blocks listed ahead of the rest, by entity id, each with what is said of it in place of its kind.</summary>
+        public IDictionary<long, string> Ahead => _ahead;
 
         /// <summary>What the values open holding, where this opened on something that has values.</summary>
         /// <remarks>
@@ -817,8 +821,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var entity = _filtered[i];
                 var row = _blockRows[entity.Id];
 
+                string note;
                 row.Text = entity.Name;
-                row.Secondary = entity.Kind.DisplayName;
+                row.Secondary = _ahead.TryGetValue(entity.Id, out note) ? note : entity.Kind.DisplayName;
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;
@@ -1489,6 +1494,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _candidates.Sort(ByName);
+            Lead();
 
             _kinds.Clear();
             EntityQuery.KindsPresent(_candidates, _kinds);
@@ -1514,6 +1520,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _filtered.Add(entity);
                 _filteredIds.Add(entity.Id);
+            }
+        }
+
+        /// <summary>Moves the blocks listed ahead of the rest to the front, keeping their order among themselves and the rest's among theirs.</summary>
+        void Lead()
+        {
+            if (_ahead.Count == 0)
+                return;
+
+            var at = 0;
+            for (var i = 0; i < _candidates.Count; i++)
+            {
+                if (!_ahead.ContainsKey(_candidates[i].Id))
+                    continue;
+
+                var entity = _candidates[i];
+                _candidates.RemoveAt(i);
+                _candidates.Insert(at++, entity);
             }
         }
 

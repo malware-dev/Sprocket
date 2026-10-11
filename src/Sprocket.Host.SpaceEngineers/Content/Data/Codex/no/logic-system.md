@@ -27,29 +27,24 @@ Slår du det av, stopper alt som kjører, og blokkene blir stående som de er. N
 
 ## Virkelige blokker, tatt vare på som plasser
 
-Blokkene du velger, blir [plasser](#slot). Det finnes to slags:
+Blokkene du velger, blir [plasser](#slot), som står under `Plasser`, nedenfor sekvensene. Det finnes to slags:
 
 - En ![](mark:block) **blokkplass**, som *den indre døra*, holder blokker som en sekvens virker på eller følger med på.
 - En ![](mark:signal) **signalplass**, som *knappen*, holder en blokk og verktøylinjeplassen på den som sender signalet.
 
-`Viser plassene fylt av installasjonen`, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene viser, og hvilken installasjon en blokk du velger, fyller.
+Hver plass viser navnet sitt, hva den er til, og blokkene som fyller den. Trykker du blokkene, velger du andre, og trykker du navnet, åpnes plassens egen side, der du gir den navn og sier hva den er til.
+
+`Viser plassene fylt av installasjonen`, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene og plassene viser, og hvilken installasjon en blokk du velger, fyller.
+
+## Beskrivelsen
+
+`Beskrivelse`, øverst på skjermen til logikksystemet, sier hva logikksystemet gjør, og hva den som installerer det, trenger å vite. Mens logikksystemet er slått av, er det en boks å skrive i, med overskrifter, lister og fet eller kursiv tekst, og `Markering` åpner siden om å [skrive tekst](#writing).
+
+Den vises ved siden av plantegningen til logikksystemet i biblioteket, og øverst på [konfigurasjonspanelet](#configuration-panel) til hver installasjon. Den som får plantegningen din, har aldri sett konstruksjonen din, så beskrivelsen og plassene er den eneste veiledningen.
 
 ## Mer enn én luftsluse
 
-På startskjermen trykker du `+ installasjon` under logikksystemet og fyller plassene med blokkene til den andre luftslusen på [konfigurasjonspanelet](#configuration-panel). Nå kjører begge luftslusene de samme sekvensene på sine egne blokker, og en endring i en sekvens når begge.
-
-## Konfigurasjonspanelet
-
-Konfigurasjonspanelet er der en installasjon får blokkene og signalene sine. Det åpnes når du trykker `+ installasjon`, eller en installasjon på startskjermen. Det viser alle plassene, blokkene som fyller dem, og hvor mange plasser som fortsatt mangler en blokk.
-
-Fyller du en signalplass, settes verktøylinjeplassen på blokken opp for deg, og du blir spurt først hvis den allerede gjør noe annet.
-
-Den som får plantegningen din, har aldri sett konstruksjonen din, så panelet er den eneste veiledningen. `Rediger konfigurasjonspanelet`, på skjermen til logikksystemet, bestemmer hva det forteller:
-
-- en beskrivelse av logikksystemet, med formatering som overskrifter og lister,
-- navnet på hver plass, og hva den er til.
-
-En plass får først navnet på blokken du valgte, som *Interior Door 2*. Gi den navnet *Indre dør* og beskriv den som døra på siden med trykk, så velger den som fyller den, riktig første gang.
+På startskjermen trykker du `+ installasjon` under logikksystemet og fyller plassene med blokkene til den andre luftslusen på konfigurasjonspanelet til den. Da kjører begge luftslusene de samme sekvensene på sine egne blokker, og en endring i en sekvens når begge.
 
 ## Når noe går galt
 

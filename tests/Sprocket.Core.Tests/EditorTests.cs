@@ -406,7 +406,6 @@ public class EditorTests
 
         // Opened on the logic system through the new one, which has blocks to be given.
         Assert.Equal("Installation 2", editor.Blueprint().Title);
-        Assert.False(editor.Blueprint().IsEditing);
 
         var system = ship.Automation.Systems[0];
         Assert.Equal(2, system.Instances.Count);
@@ -498,13 +497,9 @@ public class EditorTests
         OneLogicSystem(ship);
         editor.OpenBlueprintSystem(0);
         ship.Tick();
-        editor.EditPanel();
-        ship.Tick();
 
-        // The configuration panel, being set up, through the first installation.
-        Assert.True(editor.Blueprint().IsEditing);
-        Assert.Equal(editor.Texts.BlueprintPanel, editor.Blueprint().Title);
-        Assert.Single(Assert.Single(editor.Parts()).Blocks);
+        // The logic system's slots, through the first installation.
+        Assert.Single(Assert.Single(editor.SystemSlots()).Blocks);
 
         editor.GoToRoot();
         ship.Tick();
@@ -1507,8 +1502,9 @@ public class EditorTests
         editor.PressChoice("finishes opening");
         editor.PressPrimary();
 
+        // The two doors picked together are one slot, holding both.
         var starts = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal(2, starts.Sources.Count);
+        Assert.Equal(2, ship.Automation.Systems[0].First!.FilledWith(Assert.Single(starts.Sources))!.Count);
         Assert.True(starts.IsWatched);
 
         editor.PressAdd("task");
@@ -1699,7 +1695,7 @@ public class EditorTests
         editor.PressPrimary();
 
         var starts = Assert.IsType<SignalTrigger>(ship.Automation.Sequences[0].Trigger);
-        Assert.Equal(2, starts.Sources.Count);
+        Assert.Equal(2, ship.Automation.Systems[0].First!.FilledWith(Assert.Single(starts.Sources))!.Count);
 
         var all = new WhenTrigger("status") { Quantifier = Quantifier.All, Value = Literal.Name("open") };
         foreach (var source in starts.Sources)

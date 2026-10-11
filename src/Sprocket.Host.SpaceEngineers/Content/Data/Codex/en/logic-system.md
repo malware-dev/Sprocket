@@ -27,29 +27,24 @@ Switching it off stops anything running and leaves the blocks as they are. When 
 
 ## Real blocks, kept as slots
 
-The blocks you pick become [slots](#slot). There are two kinds:
+The blocks you pick become [slots](#slot), listed under `Slots`, below the sequences. There are two kinds:
 
 - A ![](mark:block) **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
 - A ![](mark:signal) **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
 
-`Showing the slots filled by installation`, at the top of the logic system's screen, chooses which installation's blocks the steps show, and which installation a block you pick fills.
+Each slot shows its name, what it is for, and the blocks that fill it. Pressing its blocks picks others, and pressing its name opens the slot's own page, to rename it and say what it is for.
+
+`Showing the slots filled by installation`, at the top of the logic system's screen, chooses which installation's blocks the steps and the slots show, and which installation a block you pick fills.
+
+## The description
+
+`Description`, at the top of the logic system's screen, says what the logic system does and what whoever installs it needs to know. While the logic system is switched off it is a box to write in, with headings, lists, and bold or italic text, and `Markup` opens the page on [writing text](#writing).
+
+It is shown beside the logic system's blueprint in the library, and at the top of every installation's [configuration panel](#configuration-panel). Anyone who receives your blueprint has never seen your construct, so the description and the slots are their only guide.
 
 ## More than one airlock
 
-On the home screen, press `+ installation` under the logic system, and fill its slots with the second airlock's blocks on the [configuration panel](#configuration-panel). Both airlocks now run the same sequences on their own blocks, and a change to a sequence reaches both.
-
-## The configuration panel
-
-The configuration panel is where an installation gets its blocks and signals. It opens when you press `+ installation`, or an installation on the home screen. It lists every slot, the blocks that fill it, and how many slots still need a block.
-
-Filling a signal slot sets up the block's toolbar slot for you, and you are asked first if it already does something else.
-
-Anyone who receives your blueprint has never seen your construct, so the panel is their only guide. `Edit configuration panel`, on the logic system's screen, sets what it tells them:
-
-- a description of the logic system, with formatting such as headings and lists,
-- each slot's name, and what it is for.
-
-A slot starts with the name of the block you picked, such as *Interior Door 2*. Rename it *Inner door* and describe it as the door on the pressurized side, and whoever fills it gets it right the first time.
+On the home screen, press `+ installation` under the logic system, and fill its slots with the second airlock's blocks on its configuration panel. Both airlocks then run the same sequences on their own blocks, and a change to a sequence reaches both.
 
 ## When something goes wrong
 

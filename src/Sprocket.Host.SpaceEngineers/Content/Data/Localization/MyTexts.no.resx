@@ -142,6 +142,45 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Systems.Numbered" xml:space="preserve">
     <value>System {number}</value>
   </data>
+  <data name="Sprocket.Slot.Numbered" xml:space="preserve">
+    <value>Plass {number}</value>
+  </data>
+  <data name="Sprocket.Slot.Purpose" xml:space="preserve">
+    <value>Hva den er til</value>
+  </data>
+  <data name="Sprocket.Slot.Expects" xml:space="preserve">
+    <value>Forventer</value>
+  </data>
+  <data name="Sprocket.Slot.AnyBlock" xml:space="preserve">
+    <value>Hvilken som helst blokk</value>
+  </data>
+  <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
+    <value>Gi plassen et navn, og si hva den er til.</value>
+  </data>
+  <data name="Sprocket.Slot.SetAsideNote" xml:space="preserve">
+    <value>Lagt til side</value>
+  </data>
+  <data name="Sprocket.Slot.SetAside" xml:space="preserve">
+    <value>Lagt til side, tilbys først: {blocks}</value>
+  </data>
+  <data name="Sprocket.Slot.Changed" xml:space="preserve">
+    <value>Endret: fyll den på nytt</value>
+  </data>
+  <data name="Sprocket.Slot.MarkNew" xml:space="preserve">
+    <value>{installation}: ny, fyll den</value>
+  </data>
+  <data name="Sprocket.Slot.MarkChanged" xml:space="preserve">
+    <value>{installation}: endret, fyll den på nytt</value>
+  </data>
+  <data name="Sprocket.Slot.MarkLost" xml:space="preserve">
+    <value>{installation}: mistet en blokk</value>
+  </data>
+  <data name="Sprocket.Slot.FillAgainOne" xml:space="preserve">
+    <value>1 plass å fylle på nytt</value>
+  </data>
+  <data name="Sprocket.Slot.FillAgainMany" xml:space="preserve">
+    <value>{count} plasser å fylle på nytt</value>
+  </data>
   <data name="Sprocket.Systems.Instance" xml:space="preserve">
     <value>Installasjon {number}</value>
   </data>
@@ -179,12 +218,6 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
     <value>Slett denne installasjonen</value>
-  </data>
-  <data name="Sprocket.System.EditPanel" xml:space="preserve">
-    <value>Rediger konfigurasjonspanelet</value>
-  </data>
-  <data name="Sprocket.System.EditPanelAbout" xml:space="preserve">
-    <value>Sett opp beskrivelsen og plassene alle som fyller ut dette logikksystemet ser.</value>
   </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
     <value>Viser plassene fylt av installasjonen</value>
@@ -575,15 +608,6 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
     <value>Plasser</value>
-  </data>
-  <data name="Sprocket.Blueprint.Panel" xml:space="preserve">
-    <value>Konfigurasjonspanel</value>
-  </data>
-  <data name="Sprocket.Blueprint.PanelFor" xml:space="preserve">
-    <value>for {name}</value>
-  </data>
-  <data name="Sprocket.Blueprint.PanelAbout" xml:space="preserve">
-    <value>Vises for alle som setter opp, eller endrer, en installasjon av dette logikksystemet.</value>
   </data>
   <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
     <value>1 mangler fortsatt en blokk</value>
@@ -1514,18 +1538,6 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
     <value>Behold plantegningen</value>
-  </data>
-  <data name="Sprocket.Blueprint.NameTaken" xml:space="preserve">
-    <value>En annen plass heter allerede {name}.</value>
-  </data>
-  <data name="Sprocket.Blueprint.NameEmpty" xml:space="preserve">
-    <value>En plass trenger et navn.</value>
-  </data>
-  <data name="Sprocket.Blueprint.NameKeptTaken" xml:space="preserve">
-    <value>Ikke omdøpt: en annen plass heter allerede {name}.</value>
-  </data>
-  <data name="Sprocket.Blueprint.NameKeptEmpty" xml:space="preserve">
-    <value>Ikke omdøpt: en plass trenger et navn.</value>
   </data>
   <data name="Sprocket.Sequence.Run" xml:space="preserve">
     <value>kjør</value>

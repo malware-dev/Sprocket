@@ -1,6 +1,6 @@
 # Skrive tekst
 
-Beskrivelsen av et ![](mark:logic-system) [logikksystem](#logic-system), og linja om hva hver [plass](#slot) i det er til, skrives på [konfigurasjonspanelet](#configuration-panel), i bokser med knappene `Markering` og `Forhåndsvis`. Noen få merker skrevet inn i teksten gir den overskrifter, lister, tabeller og fet eller kursiv tekst. `Markering` åpner denne siden, og `Forhåndsvis` viser teksten slik andre vil se den.
+Beskrivelsen av et ![](mark:logic-system) [logikksystem](#logic-system) skrives på skjermen til logikksystemet, og hva hver [plass](#slot) i det er til, på siden til plassen, i bokser med knappene `Markering` og `Forhåndsvis`. Noen få merker skrevet inn i teksten gir den overskrifter, lister, tabeller og fet eller kursiv tekst. `Markering` åpner denne siden, og `Forhåndsvis` viser teksten slik andre vil se den.
 
 Hver del nedenfor viser hva du skriver, og så hva det gir.
 

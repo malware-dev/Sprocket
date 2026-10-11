@@ -14,6 +14,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Writing;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -35,9 +36,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         readonly List<Sequence> _runs = new List<Sequence>();
 
         readonly List<string> _called = new List<string>();
+        readonly List<Part> _parts = new List<Part>();
+        readonly List<string> _used = new List<string>();
+        readonly List<string> _marks = new List<string>();
+        readonly SlotFill _fill;
 
         int _wiring = -1;
         int _quiet;
+        Element _focused;
         ListField _blocksets;
         string _madeName;
         string _madeAbout;
@@ -45,11 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         Keyed<Trigger, TriggerRow> _triggerRows;
         Keyed<Sequence, StatusRow> _sequenceRows;
+        Keyed<Part, PartRow> _slotRows;
 
         /// <summary>The page of <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public LogicSystemPage(SprocketEditor editor, AutomationSystem system) : base(editor)
         {
             _system = system;
+            _fill = new SlotFill(editor, system);
 
             // Here rather than when the screen is built, which happens again after every change.
             _quiet = editor.Program.Wiring;
@@ -61,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override bool Edits => true;
 
-        /// <summary>What the author said this thing is, for one logic system; a blueprint's description is read on its panel.</summary>
+        /// <summary>What the author said this thing is, for one logic system; a blueprint's is written at the top of the page.</summary>
         /// <remarks>
         /// A label to whoever built it, and the only explanation anybody who receives it will ever get. Empty until
         /// somebody writes one, and empty reads as nothing rather than as a blank waiting to be filled. A blueprint's is
@@ -164,6 +172,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Editor.SwitchSystem(_system, on);
         }
 
+        /// <summary>The box a blueprint's description is written in.</summary>
+        public Composer About => _composer;
+
+        /// <summary>The blueprint's slots, one row each, with the shown installation's blocks for each.</summary>
+        public Element.Collection Slots => _slotList.Children;
+
         /// <summary>Offers to switch a changed system on, on the way out.</summary>
         /// <remarks>
         /// A system is switched off while it is changed, so a half-written rule never fires, and the cost is somebody
@@ -174,6 +188,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </remarks>
         public override bool Leaving()
         {
+            Written(_focused);
+            _focused = null;
+
             if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps())
                 return true;
 
@@ -222,12 +239,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override void Undo()
         {
+            Settle();
             Editor.Undo(_system);
         }
 
         /// <inheritdoc />
         public override void Redo()
         {
+            Settle();
             Editor.Redo(_system);
         }
 
@@ -235,6 +254,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <remarks>Called when the editor builds the screen: on arriving at the page, coming back to it, a change to the program, and a change of language.</remarks>
         public override void Build()
         {
+            // A box just left is written first: the description filled below would otherwise put back what it replaced.
+            Refocused();
             Collect();
             Show(true);
         }
@@ -246,6 +267,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </remarks>
         public override void Refresh()
         {
+            Refocused();
+
             if (_wiring != Editor.Program.Wiring)
             {
                 Editor.Invalidate();
@@ -260,6 +283,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             _triggerRows = new Keyed<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
             _sequenceRows = new Keyed<Sequence, StatusRow>(_sequenceList.Children, Own);
+            _slotRows = new Keyed<Part, PartRow>(_slotList.Children, delegate { return new PartRow(); });
 
             Show(true);
         }
@@ -326,6 +350,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             // Walks the triggers' blocks for their names, which is why it runs only when the page is built.
 
+            ArrangeDescription(texts);
             ArrangeUsing(texts);
             ArrangeLock();
 
@@ -378,6 +403,131 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.DeleteText = texts.SequenceDelete;
                 row.Locked = Locked();
             }
+
+            ArrangeSlots(texts);
+        }
+
+        /// <summary>Shows a blueprint's description, in its box while it may be changed, leaving alone a box being typed in.</summary>
+        void ArrangeDescription(Texts texts)
+        {
+            var blueprint = _system.IsBlueprint;
+            var editable = Editable;
+            var said = _system.Annotation;
+
+            _describing.IsVisible = blueprint && (editable || said.Length > 0);
+            if (!_describing.IsVisible)
+                return;
+
+            _descriptionHeading.Text = texts.BlueprintDescription.ToUpperInvariant();
+            _composer.IsVisible = editable;
+            _composer.Show(texts);
+            _composer.Guides = Editor.Act(Cmd.OpenCodex, delegate
+            {
+                var term = Editor.Codex.Find(Terms.Writing);
+                if (term != null)
+                    Editor.OpenCodex(term);
+            });
+            _composer.Hint = texts.BlueprintDescriptionHint;
+            if (!_composer.Box.IsFocused)
+                _composer.Text = said;
+
+            _description.IsVisible = !editable;
+            _description.Markdown = said;
+        }
+
+        /// <summary>
+        /// Lists a blueprint's slots, each with the blocks the installation shown fills it with and what the others still have
+        /// to do about it; a press on its name opens it, and a press on its blocks chooses others.
+        /// </summary>
+        void ArrangeSlots(Texts texts)
+        {
+            var shown = _system.IsBlueprint ? Editor.StandIn(_system) : null;
+
+            _parts.Clear();
+            _system.Acted(_used);
+            if (shown != null)
+                PartList.Listed(_system, _used, _parts);
+
+            _slotsHeading.IsVisible = _parts.Count > 0;
+            _slotList.IsVisible = _parts.Count > 0;
+            _slotsHeading.Text = texts.BlueprintParts.ToUpperInvariant();
+            _slotRows.Show(_parts);
+            if (shown == null)
+                return;
+
+            for (var i = 0; i < _parts.Count; i++)
+            {
+                var part = _parts[i];
+                var row = _slotRows[part];
+
+                row.Name = part.Id;
+                row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
+                row.Described = part.Annotation;
+                // Like everything else on this screen, waiting for the switch, and saying why.
+                row.Opens = Changes(Cmd.OpenSlot, delegate { Editor.Push(new SlotPage(Editor, _system, part)); });
+                row.OpensAbout = Editable ? texts.SlotOpenAbout : Locked();
+                row.Fills = Changes(Cmd.FillPart, delegate { _fill.Ask(part, shown); });
+                row.Marks = Marked(texts, part, shown);
+                row.Take(Editor.Runner.Bindings, shown.FilledWith(part.Id), part.IsSignal ? shown.Positions(part.Id) : null);
+
+                if (row.Blocks.Count > 0)
+                    row.Show(Editor.World);
+                else
+                    row.Say(SentenceText.Empty, !part.Optional);
+            }
+        }
+
+        /// <summary>What the installations other than <paramref name="shown" /> still have to do about <paramref name="part" />, or null where nothing.</summary>
+        string Marked(Texts texts, Part part, SystemInstance shown)
+        {
+            _marks.Clear();
+            var instances = _system.Instances;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                if (instances[i] == shown)
+                    continue;
+
+                var mark = Marks.Of(Editor.Runner.Bindings, _system, instances[i], part, _used);
+                if (mark == SlotMark.None)
+                    continue;
+
+                var said = mark == SlotMark.Changed ? texts.SlotMarkChanged : mark == SlotMark.Lost ? texts.SlotMarkLost : texts.SlotMarkNew;
+                _marks.Add(Template.Fill(said, "installation", SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, instances[i])));
+            }
+
+            return _marks.Count == 0 ? null : string.Join("; ", _marks.ToArray());
+        }
+
+        /// <summary>Writes the description box into the blueprint once the keyboard has left it, read every tick because it is one comparison.</summary>
+        void Refocused()
+        {
+            var now = Editor.Input == null ? null : Editor.Input.Focused;
+            if (ReferenceEquals(now, _focused))
+                return;
+
+            var left = _focused;
+            _focused = now;
+            Written(left);
+        }
+
+        /// <summary>Writes the box that holds the keyboard into the blueprint and lets the keyboard go, so what comes next starts from what was typed.</summary>
+        /// <remarks>Before a step back, so it takes back what was typed and the box then shows what the step leaves.</remarks>
+        void Settle()
+        {
+            Written(_focused);
+            _focused = null;
+            if (Editor.Input != null)
+                Editor.Input.Focus(null);
+        }
+
+        /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is the description's box.</summary>
+        /// <remarks>Only once the keyboard has left it, so a description being typed is one step back rather than one a letter.</remarks>
+        void Written(Element box)
+        {
+            if (box == null || _composer == null || box != _composer.Box || !Editable)
+                return;
+
+            Editor.Do(_system, new Annotate(_system.Annotation, _composer.Text));
         }
 
         /// <summary>Hides the ways to add something while the system may run, and says why in their place.</summary>
@@ -432,30 +582,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return false;
         }
 
-        /// <summary>Says, for a blueprint, whose blocks the sentences name, as a list of the blocksets made from it, with the way to set up its configuration panel.</summary>
+        /// <summary>Says, for a blueprint, whose blocks the sentences name, as a list of the installations made from it.</summary>
         /// <remarks>A logic system of its own names its own blocks, which its heading already says.</remarks>
         void ArrangeUsing(Texts texts)
         {
-            var blueprint = _system.IsBlueprint;
-            var shown = Editor.StandIn(_system);
+            var shown = _system.IsBlueprint ? Editor.StandIn(_system) : null;
 
-            _using.IsVisible = blueprint;
-            if (!blueprint)
+            _using.IsVisible = shown != null;
+            if (shown == null)
                 return;
 
             _usingLead.Text = texts.SystemUsing;
-            _usingLead.IsVisible = shown != null;
-            _usingChoice.IsVisible = shown != null;
-
-            // Quiet rather than gone while the system is on, so it is the same button saying why it cannot be pressed.
-            var editable = Editable;
-            _editPanel.Text = texts.SystemEditPanel;
-            _editPanel.Command = Changes(Cmd.EditBlueprint, delegate { Editor.Push(new BlueprintPage(Editor, _system, true)); });
-            _editPanel.IsEnabled = editable;
-            _editPanel.Tip = Tip.For(_editPanel.Tip, editable ? texts.SystemEditPanelAbout : Locked());
-
-            if (shown == null)
-                return;
 
             Blocksets(texts);
             _blocksets.Text = SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, _system, shown);

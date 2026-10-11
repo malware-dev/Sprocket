@@ -1,11 +1,9 @@
 using Lumel;
-using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Features.Writing;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
@@ -14,20 +12,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         VStack _column;
         Glyph _mark;
         Label _name;
-        TextBox _nameBox;
-        Label _refusal;
-        Label _optional;
         RichText _about;
-        Composer _aboutComposer;
         Slot _blocks;
         Slot _signals;
         Label _problem;
-        Switch _required;
+        Label _marks;
+        Label _aside;
 
-        /// <summary>
-        /// Makes the part's name and what it says about itself, with the blocks beside them; and the boxes they are
-        /// written in, with the switch that makes the slot optional, for a blueprint being edited.
-        /// </summary>
+        /// <summary>Makes the part's name and what it says about itself, with the blocks beside them and what is still to do under those.</summary>
         void CreateView()
         {
             Spacing = 20f;
@@ -36,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Children.Add(new VStack
             {
                 Spacing = 4f,
+                Style = Styles.Plate,
                 Placement = Fixed.Wide(PartList.Widest),
                 Children =
                 {
@@ -45,23 +38,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Children =
                         {
                             new Glyph { Style = Styles.Waits }.As(out _mark),
-                            new Label { Style = Styles.Name }.As(out _name),
-                            // Hidden, as the switch below is.
-                            new Label { Style = Styles.Detail, IsVisible = false }.As(out _optional)
+                            new Label { Style = Styles.Name }.As(out _name)
                         }
                     },
-                    new TextBox { Style = Styles.Field, IsVisible = false }.As(out _nameBox),
-                    new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _refusal),
-                    new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about),
-                    new Composer(72f, Styles.SlotDescription) { IsVisible = false }.As(out _aboutComposer)
+                    new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about)
                 }
             }.As(out _column));
 
-            Children.Add(new Slot().As(out _blocks));
-            Children.Add(new Slot { IsVisible = false }.As(out _signals));
-            Children.Add(new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem));
-            // Hidden: an empty optional slot can still stop its installation.
-            Children.Add(new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required));
+            Children.Add(new VStack
+            {
+                Spacing = 4f,
+                Children =
+                {
+                    new HStack
+                    {
+                        Spacing = 20f,
+                        Children =
+                        {
+                            new Slot().As(out _blocks),
+                            new Slot { IsVisible = false }.As(out _signals),
+                            new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem)
+                        }
+                    },
+                    new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _marks),
+                    new Label { Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _aside)
+                }
+            });
         }
     }
 }

@@ -10,6 +10,7 @@ using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Lumel;
 using Lumel.Input;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
@@ -33,6 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
     public sealed partial class HomePage : EditorPage
     {
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
+        readonly List<string> _used = new List<string>();
 
         int _shape;
 
@@ -209,7 +211,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     var problems = SystemSummary.Problems(Editor.Runner, system, instance);
                     var remarks = SystemSummary.Remarks(Editor.Runner, system, instance);
                     var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system);
-                    var said = stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
+                    var again = system.IsBlueprint ? FillAgain(texts, system, instance) : "";
+                    var said = again.Length > 0 ? again : stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
                     changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != said;
                     row.Problems = problems;
                     row.Remarks = remarks;
@@ -235,6 +238,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Show(texts);
         }
 
+        /// <summary>How many of <paramref name="instance" />'s slots were split or merged and are to be filled again, or empty where none.</summary>
+        string FillAgain(Texts texts, AutomationSystem system, SystemInstance instance)
+        {
+            system.Acted(_used);
+            var again = Marks.Changed(system, instance, _used);
+            if (again == 0)
+                return "";
+
+            return again == 1
+                ? texts.SlotFillAgainOne
+                : Template.Fill(texts.SlotFillAgainMany, "count", again.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         /// <summary>What is wrong with <paramref name="system" /> on <paramref name="instance" />, said in place of what it is doing.</summary>
         string Failing(AutomationSystem system, SystemInstance instance)
         {
@@ -247,14 +263,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public void Another(AutomationSystem system)
         {
             if (Editor.Another(system) != null)
-                Editor.PushMade(new BlueprintPage(Editor, system, false));
+                Editor.PushMade(new BlueprintPage(Editor, system));
         }
 
         /// <summary>Opens the blueprint on one of the logic systems made from it.</summary>
         public void Open(AutomationSystem system, SystemInstance instance)
         {
             Editor.Choose(system, instance);
-            Editor.Push(new BlueprintPage(Editor, system, false));
+            Editor.Push(new BlueprintPage(Editor, system));
         }
 
         /// <summary>Gives the button its press, keeps the groups by system, and fills the view from the systems as they are.</summary>

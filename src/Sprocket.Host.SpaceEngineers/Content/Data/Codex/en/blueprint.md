@@ -1,6 +1,6 @@
 # Blueprint
 
-A blueprint is a copy of a ![](mark:logic-system) [logic system](#logic-system) kept in the [library](#library). It holds the logic system's ![](mark:sequence) [sequences](#sequence), [triggers](#trigger) and [slots](#slot), and what its [configuration panel](#configuration-panel) says. It holds no blocks, since every ![](mark:installation) [installation](#installation) brings its own.
+A blueprint is a copy of a ![](mark:logic-system) [logic system](#logic-system) kept in the [library](#library). It holds the logic system's ![](mark:sequence) [sequences](#sequence), [triggers](#trigger) and [slots](#slot), its description, and what each slot is for. It holds no blocks, since every ![](mark:installation) [installation](#installation) brings its own.
 
 ## Making one
 
@@ -8,7 +8,7 @@ On the [home screen](#home), `Make blueprint` on a logic system's heading saves 
 
 ## Putting it on a construct
 
-In the library, choose a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its configuration panel.
+In the library, choose a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its [configuration panel](#configuration-panel).
 
 A construct can hold a blueprint only once. To have a second, make a copy.
 

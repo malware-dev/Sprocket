@@ -6,12 +6,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly int _index;
         readonly Comparison _was;
         readonly Comparison _now;
-        readonly Swap _swap;
 
-        /// <summary>The test of the line at <paramref name="index" />, changed from <paramref name="was" /> to <paramref name="now" />, making <paramref name="swap" /> where a slot keeps its place with another block.</summary>
-        public SetTest(int index, Comparison was, Comparison now, Swap swap = null)
+        /// <summary>The test of the line at <paramref name="index" />, changed from <paramref name="was" /> to <paramref name="now" />.</summary>
+        public SetTest(int index, Comparison was, Comparison now)
         {
-            _swap = swap;
             _index = index;
             _was = was;
             _now = now;
@@ -23,9 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
-            if (_swap != null)
-                _swap.Apply();
-
             Put(sequence, _now);
         }
 
@@ -33,9 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Undo(Sequence sequence)
         {
             Put(sequence, _was);
-
-            if (_swap != null)
-                _swap.Undo();
         }
 
         void Put(Sequence sequence, Comparison test)

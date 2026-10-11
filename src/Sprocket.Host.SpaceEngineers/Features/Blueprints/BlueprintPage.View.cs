@@ -1,5 +1,4 @@
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Writing;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
@@ -13,15 +12,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         HStack _troubled;
         Label _trouble;
         Button _openTrouble;
-        VStack _writing;
-        Label _writingHeading;
-        Composer _composer;
         Rule _rule;
         Label _partsHeading;
         Label _needs;
         PartList _partList;
 
-        /// <summary>What the blueprint's author wrote about it, or the box it is written in, then the slots with how many still need a block.</summary>
+        /// <summary>What the blueprint's author wrote about it, then the slots with how many still need a block.</summary>
         protected override Element CreateView()
         {
             return new VStack
@@ -31,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 {
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _description),
 
-                    // What is wrong with the blockset being filled, and the way to where it is mended.
+                    // What is wrong with the installation being filled, and the way to where it is mended.
                     new HStack
                     {
                         Spacing = 8f,
@@ -44,17 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         }
                     }.As(out _troubled),
 
-                    new VStack
-                    {
-                        Spacing = 8f,
-                        IsVisible = false,
-                        Padding = new Thickness(20f, 4f),
-                        Children =
-                        {
-                            new Label { Style = Styles.Heading }.As(out _writingHeading),
-                            new Composer(240f, Styles.Example).As(out _composer)
-                        }
-                    }.As(out _writing),
                     new Rule(1f, Palette.Line) { Padding = new Thickness(0f, 8f) }.As(out _rule),
                     new HStack
                     {

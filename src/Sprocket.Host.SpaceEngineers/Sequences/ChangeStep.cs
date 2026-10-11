@@ -24,20 +24,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _nowProvider;
         readonly List<Literal> _nowValues;
         readonly bool _awaited;
-        readonly Swap _swap;
 
         Await _added;
         Await _dropped;
 
         /// <summary>
         /// A change to <paramref name="step" />, at <paramref name="index" />, followed by an await where
-        /// <paramref name="awaited" /> says what it is changed to takes time to finish, and making <paramref name="swap" /> where
-        /// a slot keeps its place with another block.
+        /// <paramref name="awaited" /> says what it is changed to takes time to finish.
         /// </summary>
         public ChangeStep(int index, Act step, IList<string> targets, string actionId, Form form, string provider,
-            IList<Literal> arguments, bool awaited, Swap swap = null)
+            IList<Literal> arguments, bool awaited)
         {
-            _swap = swap;
             _index = index;
             _wasTargets = CopyOf(step.Targets);
             _wasAction = step.ActionId;
@@ -57,15 +54,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override bool Changes =>
-            _swap != null || _wasAction != _nowAction || _wasForm != _nowForm || _wasProvider != _nowProvider
+            _wasAction != _nowAction || _wasForm != _nowForm || _wasProvider != _nowProvider
             || !Same(_wasTargets, _nowTargets) || !Same(_wasValues, _nowValues);
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)
         {
-            if (_swap != null)
-                _swap.Apply();
-
             Put(sequence, _nowTargets, _nowAction, _nowForm, _nowProvider, _nowValues);
 
             _added = null;
@@ -92,9 +86,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 sequence.Steps.Insert(_index + 1, _dropped);
 
             Put(sequence, _wasTargets, _wasAction, _wasForm, _wasProvider, _wasValues);
-
-            if (_swap != null)
-                _swap.Undo();
         }
 
         void Put(Sequence sequence, IList<string> targets, string action, Form form, string provider,

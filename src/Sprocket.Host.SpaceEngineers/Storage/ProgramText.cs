@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var systems = program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                WriteSystem(pen, Written(systems[i], with), true);
+                WriteSystem(pen, Written(systems[i], with), true, true);
 
             // After every system, because an instance names the system it is one of and a reader
             // should have met it by then.
@@ -169,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var pen = new Pen();
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
-            WriteSystem(pen, system, true);
+            WriteSystem(pen, system, true, false);
             return pen.ToString();
         }
 
@@ -180,7 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Start(Keyword.Sprocket).Whole(Version).Says(Keyword.Alpha).Whole(Draft);
             pen.End();
             for (var i = 0; i < systems.Count; i++)
-                WriteSystem(pen, systems[i], true);
+                WriteSystem(pen, systems[i], true, false);
 
             return pen.ToString();
         }
@@ -189,7 +189,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public static string Said(AutomationSystem system)
         {
             var pen = new Pen();
-            WriteSystem(pen, system, false);
+            WriteSystem(pen, system, false, false);
             return pen.ToString();
         }
 
@@ -691,7 +691,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             trouble.Say(statement, "unsupported key in the block's list.");
         }
 
-        static void WriteSystem(Pen pen, AutomationSystem system, bool dated)
+        /// <summary>
+        /// Writes <paramref name="system" />, with when it last changed where <paramref name="dated" />, and where
+        /// <paramref name="kept" /> the slots nothing in it uses that an installation holds blocks in.
+        /// </summary>
+        static void WriteSystem(Pen pen, AutomationSystem system, bool dated, bool kept)
         {
             pen.Blank();
             pen.Note(system.Annotation);
@@ -712,15 +716,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             pen.Body();
 
-            // The slots before what uses them, so a reader meets the vocabulary before the answers. A slot nothing uses is
-            // left out, and so are an instance's answers to it.
+            // The slots before what uses them, so a reader meets the vocabulary before the answers.
             var used = new List<string>();
             system.Acted(used);
 
             var parts = system.Parts;
             for (var i = 0; i < parts.Count; i++)
             {
-                if (used.Contains(parts[i].Id))
+                if (used.Contains(parts[i].Id) || kept && Held(system, parts[i].Id))
                     WriteSlot(pen, parts[i]);
             }
 
@@ -984,7 +987,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Which parts this one fills, in a settled order, leaving out a part nothing in the system uses.
+        /// Which parts this one fills, in a settled order, leaving out a part nothing in the system uses and no installation
+        /// holds blocks in.
         /// </summary>
         /// <remarks>
         /// Sorted, so a saved file does not churn between runs for no reason: a dictionary hands its
@@ -1001,13 +1005,26 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var parts = new List<string>();
             foreach (var slot in instance.Filled)
             {
-                Part part = system.FindPart(slot);
-                if (used.Contains(slot) || part == null && !replacing)
+                if (used.Contains(slot) || !replacing && (system.FindPart(slot) == null || Held(system, slot)))
                     parts.Add(slot);
             }
 
             parts.Sort(StringComparer.Ordinal);
             return parts;
+        }
+
+        /// <summary>Whether an installation of <paramref name="system" /> holds blocks in <paramref name="slot" />.</summary>
+        static bool Held(AutomationSystem system, string slot)
+        {
+            var instances = system.Instances;
+            for (var i = 0; i < instances.Count; i++)
+            {
+                var filled = instances[i].FilledWith(slot);
+                if (filled != null && filled.Count > 0)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>

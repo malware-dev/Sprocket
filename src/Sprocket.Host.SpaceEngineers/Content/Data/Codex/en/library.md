@@ -12,7 +12,7 @@ Type in the search box to show only the rows whose name holds what you type.
 
 ## A logic system or a blueprint
 
-Choose one to see who made it and when it last changed, its description from the [configuration panel](#configuration-panel), and its ![](mark:installation) [installations](#installation) on this construct.
+Choose one to see who made it and when it last changed, its description, and its ![](mark:installation) [installations](#installation) on this construct.
 
 - `Add to this construct` puts it on this construct. It's only there while it isn't on this construct already.
 - `Make blueprint` keeps a copy in storage, and `Update blueprint` brings that copy up to date.

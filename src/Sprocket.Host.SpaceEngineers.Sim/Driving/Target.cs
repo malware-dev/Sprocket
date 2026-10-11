@@ -52,6 +52,14 @@ namespace Sprocket.Sim.Driving
             return page;
         }
 
+        /// <summary>The page of the slot the editor is on, its view made.</summary>
+        public static SlotPage Slot(this SprocketEditor editor)
+        {
+            var page = editor.Current as SlotPage
+                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a slot's page.");
+            _ = page.View;
+            return page;
+        }
 
         /// <summary>The lines under each blueprint on the root that add another installation, one for each blueprint.</summary>
         public static List<Button> RootAdds(this SprocketEditor editor) =>
@@ -69,13 +77,18 @@ namespace Sprocket.Sim.Driving
         public static void OpenBlueprintSystem(this SprocketEditor editor, int group) =>
             Within(Root(editor).View).OfType<SystemGroup>().ElementAt(group).Heading.Opens!.Execute();
 
-        /// <summary>Opens the configuration panel of the logic system the editor is on, to be written, by pressing its button.</summary>
-        public static void EditPanel(this SprocketEditor editor)
+        /// <summary>The slots of the blueprint whose logic system the editor is on, one row each, in the order they stand.</summary>
+        public static List<PartRow> SystemSlots(this SprocketEditor editor)
         {
-            var page = editor.Current as LogicSystemPage
-                       ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a logic system's page.");
-            Within(page.View).OfType<Button>().First(button => button.Text == editor.Texts.SystemEditPanel).Command!.Execute();
+            var page = LogicSystem(editor);
+            _ = page.View;
+            return page.Slots.OfType<PartRow>().ToList();
         }
+
+        /// <summary>Opens the slot called <paramref name="name" /> of the logic system the editor is on, by pressing its name.</summary>
+        public static void OpenSlot(this SprocketEditor editor, string name) =>
+            (SystemSlots(editor).Single(row => row.Name == name).Opens
+             ?? throw new InvalidOperationException($"The slot '{name}' cannot be opened.")).Execute();
 
         /// <summary>The parts of the blueprint the editor is on, one row each.</summary>
         public static List<PartRow> Parts(this SprocketEditor editor) =>

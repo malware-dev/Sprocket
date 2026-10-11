@@ -355,7 +355,7 @@ public class ScriptTests
         Assert.True(after.Systems[0].FindPart("lamp")!.Optional);
     }
 
-    /// <summary>A slot nothing uses is not written, and neither is an instance's answer to it.</summary>
+    /// <summary>A slot nothing uses and no installation holds blocks in is not written, and neither is an instance's answer to it.</summary>
     [Fact]
     public void ASlotNothingUsesIsNotWritten()
     {
@@ -368,11 +368,31 @@ public class ScriptTests
 
         var instance = system.AddInstance();
         instance.Fill("inner", new[] { "door1" });
-        instance.Fill("spare", new[] { "door2" });
+        instance.Fill("spare", new string[0]);
 
         var text = Save(program);
         Assert.Contains("required slot inner", text);
         Assert.DoesNotContain("spare", text);
+    }
+
+    /// <summary>A slot nothing uses that an installation holds blocks in is kept with the construct, and left out of the blueprint.</summary>
+    [Fact]
+    public void ASlotAnInstallationHoldsIsWrittenWithTheConstruct()
+    {
+        var program = BlueprintCalled("", "Airlock");
+        var system = program.Systems[0];
+        system.PartFor("inner");
+        system.PartFor("spare");
+        Closes(program, "inner");
+
+        var instance = system.AddInstance();
+        instance.Fill("inner", new[] { "door1" });
+        instance.Fill("spare", new[] { "door2" });
+
+        var text = Save(program);
+        Assert.Contains("required slot spare", text);
+        Assert.Contains("spare = [ door2 ]", text);
+        Assert.DoesNotContain("spare", ProgramText.Blueprint(system));
     }
 
     /// <summary>

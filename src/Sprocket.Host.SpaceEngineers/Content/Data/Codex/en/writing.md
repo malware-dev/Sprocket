@@ -1,6 +1,6 @@
 # Writing text
 
-The description of a ![](mark:logic-system) [logic system](#logic-system), and the line on what each of its [slots](#slot) is for, are written on its [configuration panel](#configuration-panel), in boxes with a `Markup` and a `Preview` button. A few marks typed into the text give it headings, lists, tables, and bold or italic words. `Markup` opens this page, and `Preview` shows the text as others will see it.
+The description of a ![](mark:logic-system) [logic system](#logic-system) is written on its screen, and what each of its [slots](#slot) is for on the slot's page, in boxes with a `Markup` and a `Preview` button. A few marks typed into the text give it headings, lists, tables, and bold or italic words. `Markup` opens this page, and `Preview` shows the text as others will see it.
 
 Each part below shows what to write, then what it gives.
 

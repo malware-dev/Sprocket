@@ -538,7 +538,7 @@ The list of slots a system needs is derived from the system itself rather than m
 by hand. If a sequence acts on a block, that block is something the system needs, and it
 appears as a slot without anybody having declared it.
 
-**The same block used in five places is one slot, asked once.** An airlock's inner door
+**The same set of blocks used in five places is one slot, asked once.** An airlock's inner door
 appears in the cycle, in the interlock and in the recovery sequence, and the person
 setting it up answers "which is the inner door" a single time.
 

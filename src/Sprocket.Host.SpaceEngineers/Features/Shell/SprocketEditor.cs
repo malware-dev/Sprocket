@@ -761,6 +761,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.Expand:
                 case Cmd.OpenSystem:
                 case Cmd.OpenSequence:
+                case Cmd.OpenSlot:
                 case Cmd.PageOn:
                 case Cmd.PageBack:
                 case Cmd.ShowScript:
@@ -824,6 +825,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         readonly History<Sequence> _sequenceHistory = new History<Sequence>();
+
+        /// <summary>What the picks in a blueprint since the last edit do to its slots beyond the names they gave, in order, for the edit made next to carry.</summary>
+        readonly List<Reslot> _picked = new List<Reslot>();
+
+        /// <summary>The names those picks gave, which count as named until their edit is made.</summary>
+        readonly List<List<string>> _pickedNames = new List<List<string>>();
 
         readonly Dictionary<Guid, string> _said = new Dictionary<Guid, string>();
 
@@ -899,20 +906,36 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void Do(Sequence sequence, SequenceEdit edit, bool coalesce)
         {
-            if (!_sequenceHistory.Did(sequence, edit, coalesce))
+            var slotted = Slotted(sequence.System, edit);
+            if (!_sequenceHistory.Did(sequence, slotted, coalesce))
                 return;
 
-            Settled(edit);
+            Settled(slotted);
         }
 
         /// <summary>Makes a change to a system and remembers how to take it back.</summary>
         /// <remarks>The only way anything changes a trigger.</remarks>
         public void Do(AutomationSystem system, SystemEdit edit)
         {
-            if (!_systemHistory.Did(system, edit, false))
+            var slotted = Slotted(system, edit);
+            if (!_systemHistory.Did(system, slotted, false))
                 return;
 
-            Settled(edit);
+            Settled(slotted);
+        }
+
+        /// <summary>
+        /// <paramref name="edit" />, together with what it does to the slots of <paramref name="system" /> where that is a
+        /// blueprint: what the pick before it worked out, or what the lists come to once it is made.
+        /// </summary>
+        Edit<T> Slotted<T>(AutomationSystem system, Edit<T> edit)
+        {
+            var picked = Unpicked(system);
+            var shown = system != null && system.IsBlueprint ? StandIn(system) : null;
+            if (shown == null)
+                return edit;
+
+            return new Reslotted<T>(edit, picked, delegate { return Slots(system, shown, null).Settle(); });
         }
 
         /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
@@ -2046,6 +2069,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 trigger.Does = does;
                 system.AddTrigger(trigger);
+                Reslotted(system);
                 _program.Rewire();
                 Invalidate();
                 return;
@@ -2099,7 +2123,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var act = new Act(answer.Chosen);
                 act.Form = answer.Form;
                 act.Provider = Vocabulary.Provider(_world, answer.Targets, answer.Chosen, answer.Form);
-                var named = Named(system, answer.Targets);
+                var named = Named(system, answer.Targets, fresh || trigger.Acts == null ? null : trigger.Acts.Targets);
                 for (var i = 0; i < named.Count; i++)
                     act.Targets.Add(named[i]);
 
@@ -2142,9 +2166,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// that instance, or the first of a blueprint already.
         /// </summary>
         /// <remarks>
-        /// A system names the program's variables, and a blueprint its own slots: so each block the system acts on becomes a
-        /// slot, and each trigger it is started by a signal slot, called what the block is called now. Every step and trigger
-        /// that named the variable names the slot, and the first instance answers it with that variable.
+        /// A system names the program's variables, and a blueprint its own slots: so each trigger it is started by becomes a
+        /// signal slot, called what the block is called now, and the blocks its steps and triggers name become slots by the
+        /// sets they name, as <see cref="Slotting" /> works them out. The first instance answers them with those variables.
         /// </remarks>
         public SystemInstance Blueprinted(AutomationSystem system)
         {
@@ -2156,26 +2180,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             first.Name = name;
             system.IsBlueprint = true;
 
-            var named = new List<string>();
-            system.Acted(named);
-
             var slots = new Dictionary<string, string>();
-            for (var i = 0; i < named.Count; i++)
-            {
-                // What starts a trigger is named too, and becomes a signal slot below.
-                if (_program.FindSignalRef(named[i]) != null)
-                    continue;
-
-                GridEntity entity = _runner.Bindings.Entity(named[i]);
-                var slot = system.Free(entity == null ? _program.Called(named[i], _world.Values) : Called(entity));
-                var part = system.PartFor(slot);
-                if (entity != null && Type(entity.Kind).Length > 0)
-                    part.Expects.Add(Type(entity.Kind));
-
-                first.Fill(slot, new[] { named[i] });
-                slots[named[i]] = slot;
-            }
-
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
             {
@@ -2203,26 +2208,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var moment = triggers[i] as MomentTrigger;
                 if (moment != null)
                     Slotted(moment.Sources, slots);
-
-                var own = triggers[i].Acts;
-                if (own != null)
-                    Slotted(own.Targets, slots);
             }
 
-            var sequences = system.Sequences;
-            for (var q = 0; q < sequences.Count; q++)
-            {
-                var steps = sequences[q].Steps;
-                for (var s = 0; s < steps.Count; s++)
-                    Slotted(steps[s].Targets, slots);
-            }
+            // The blocks the steps and triggers name become slots as any picks do, the smallest sets first.
+            Slots(system, first, null).Settle().Apply();
 
             _program.Edited();
             _program.Rewire();
             return first;
         }
 
-        /// <summary>Names the slot for each variable in <paramref name="names" /> that <paramref name="slots" /> has one for.</summary>
+        /// <summary>Names the signal slot for each variable in <paramref name="names" /> that <paramref name="slots" /> has one for.</summary>
         static void Slotted(IList<string> names, Dictionary<string, string> slots)
         {
             for (var i = 0; i < names.Count; i++)
@@ -2235,8 +2231,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>
         /// The names <paramref name="system" /> uses for these blocks: a system's variables, each block declared where the
-        /// construct has not named it yet, or the slots a blueprint's stand-in fills with them, a slot taken for any block
-        /// that fills none.
+        /// construct has not named it yet, or the slots a blueprint's stand-in fills with them.
         /// </summary>
         /// <remarks>
         /// Where picking a block turns into naming one. What a blueprint's sentence stores is a slot, and which block fills
@@ -2245,94 +2240,106 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public List<string> Named(AutomationSystem system, IList<long> blocks)
         {
-            Swap swap;
-            return Named(system, blocks, null, out swap);
+            return Named(system, blocks, null);
         }
 
-        /// <summary>
-        /// The same, for blocks picked again in place of the slots <paramref name="was" />, with the <paramref name="swap" /> that
-        /// keeps a slot whose block was traded for another, or null.
-        /// </summary>
+        /// <summary>The same, for blocks picked in place of the names <paramref name="replacing" />, the list itself, where they replace one.</summary>
         /// <remarks>
-        /// Trading a slot's one block for one new block of the kind the slot expects, where nothing else names that slot, is a
-        /// replacement: the new block fills the slot, which keeps its name, its description and what every other installation
-        /// filled it with. The swap is made by the edit it is handed to, so taking the edit back gives the slot its block back.
+        /// In a blueprint the slots are worked out by <see cref="Slotting" />, and what that changes beyond the names given
+        /// back is kept for the edit made next, which carries it so taking the edit back takes it back too.
         /// </remarks>
-        public List<string> Named(AutomationSystem system, IList<long> blocks, IList<string> was, out Swap swap)
+        public List<string> Named(AutomationSystem system, IList<long> blocks, IList<string> replacing)
         {
-            SystemInstance instance = system.IsBlueprint ? StandIn(system) : null;
-            swap = instance == null || was == null ? null : Swapped(system, instance, blocks, was);
-
-            var named = new List<string>();
+            var declared = new List<string>();
+            var met = new Dictionary<string, GridEntity>();
             for (var i = 0; i < blocks.Count; i++)
             {
                 GridEntity entity = _world.FindEntity(blocks[i]);
                 if (entity == null)
                     continue;
 
-                var declared = _program.Declare(_world, entity).Name;
-                if (instance == null)
-                    named.Add(declared);
-                else if (swap != null && system.FilledBy(instance, declared) == null)
-                    named.Add(swap.Slot);
-                else
-                    named.Add(system.Take(instance, declared, Called(entity), Type(entity.Kind)));
+                var name = _program.Declare(_world, entity).Name;
+                declared.Add(name);
+                met[name] = entity;
             }
 
+            SystemInstance shown = system.IsBlueprint ? StandIn(system) : null;
+            if (shown == null)
+                return declared;
+
+            // Worked out as though the picks before it in this command were made, and undone again, since their edits come later.
+            if (_picked.Count > 0 && _picked[0].System != system)
+                Unpicked(null);
+
+            for (var i = 0; i < _picked.Count; i++)
+                _picked[i].Apply();
+
+            Reslot reslot;
+            var named = Slots(system, shown, met).Pick(declared, replacing, _pickedNames, out reslot);
+
+            for (var i = _picked.Count - 1; i >= 0; i--)
+                _picked[i].Undo();
+
+            _picked.Add(reslot);
+            _pickedNames.Add(new List<string>(named));
             return named;
         }
 
-        /// <summary>The swap of exactly one slot of <paramref name="was" /> for exactly one block of <paramref name="blocks" /> no slot holds, or null where the pick is no such trade.</summary>
-        Swap Swapped(AutomationSystem system, SystemInstance instance, IList<long> blocks, IList<string> was)
+        /// <summary>
+        /// Brings the slots of <paramref name="system" /> into line after a change made outside its history: what the pick
+        /// before it worked out, or what its lists come to now.
+        /// </summary>
+        void Reslotted(AutomationSystem system)
         {
-            string fresh = null;
-            GridEntity freshly = null;
-            var kept = new List<string>();
-            for (var i = 0; i < blocks.Count; i++)
-            {
-                GridEntity entity = _world.FindEntity(blocks[i]);
-                if (entity == null)
-                    continue;
+            var picked = Unpicked(system);
+            var shown = system.IsBlueprint ? StandIn(system) : null;
+            if (shown == null)
+                return;
 
-                var declared = _program.Declare(_world, entity).Name;
-                var slot = system.FilledBy(instance, declared);
-                if (slot != null)
+            if (picked.Count == 0)
+                picked.Add(Slots(system, shown, null).Settle());
+
+            for (var i = 0; i < picked.Count; i++)
+                picked[i].Apply();
+        }
+
+        /// <summary>The changes the picks since the last edit worked out for <paramref name="system" />, in order, forgetting them; none where they were for another.</summary>
+        List<Reslot> Unpicked(AutomationSystem system)
+        {
+            var picked = new List<Reslot>();
+            if (_picked.Count > 0 && _picked[0].System == system)
+                picked.AddRange(_picked);
+
+            _picked.Clear();
+            _pickedNames.Clear();
+            return picked;
+        }
+
+        /// <summary>Works out the slots of <paramref name="system" /> as <paramref name="shown" /> fills them, knowing the blocks just picked as <paramref name="met" />.</summary>
+        Slotting Slots(AutomationSystem system, SystemInstance shown, Dictionary<string, GridEntity> met)
+        {
+            return new Slotting(system, shown,
+                delegate(string name)
                 {
-                    kept.Add(slot);
-                    continue;
-                }
+                    GridEntity entity = Known(name, met);
+                    return entity != null ? Called(entity) : _program.Called(name, _world.Values);
+                },
+                delegate(string name)
+                {
+                    GridEntity entity = Known(name, met);
+                    return entity != null ? Type(entity.Kind) : "";
+                },
+                delegate(int number) { return Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture)); });
+        }
 
-                if (fresh != null)
-                    return null;
+        /// <summary>The block the variable <paramref name="name" /> holds: one just picked, or one the construct has bound.</summary>
+        GridEntity Known(string name, Dictionary<string, GridEntity> met)
+        {
+            GridEntity entity;
+            if (met != null && met.TryGetValue(name, out entity))
+                return entity;
 
-                fresh = declared;
-                freshly = entity;
-            }
-
-            if (fresh == null)
-                return null;
-
-            string dropped = null;
-            for (var i = 0; i < was.Count; i++)
-            {
-                if (kept.Contains(was[i]))
-                    continue;
-
-                if (dropped != null && dropped != was[i])
-                    return null;
-
-                dropped = was[i];
-            }
-
-            var part = dropped == null ? null : system.FindPart(dropped);
-            if (part == null || part.IsSignal || !part.Fits(BlockKinds.Sort(freshly.Kind.Id)))
-                return null;
-
-            // Named anywhere else, the slot is still that block's there, and the new block is a slot of its own.
-            if (system.Mentions(dropped) != AutomationSystem.Count(was, dropped))
-                return null;
-
-            return new Swap(instance, dropped, new[] { fresh });
+            return _runner.Bindings.Entity(name);
         }
 
         /// <summary>

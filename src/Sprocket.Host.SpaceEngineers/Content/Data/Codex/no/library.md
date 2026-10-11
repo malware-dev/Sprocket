@@ -12,7 +12,7 @@ Skriv i søkefeltet for å vise bare radene der navnet inneholder det du skriver
 
 ## Et logikksystem eller en plantegning
 
-Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen fra [konfigurasjonspanelet](#configuration-panel), og ![](mark:installation) [installasjonene](#installation) på denne konstruksjonen.
+Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen, og ![](mark:installation) [installasjonene](#installation) på denne konstruksjonen.
 
 - `Legg til på denne konstruksjonen` setter det på denne konstruksjonen. Den er der bare så lenge det ikke allerede er på denne konstruksjonen.
 - `Lag plantegning` tar vare på en kopi i lageret, og `Oppdater plantegning` oppdaterer den kopien.

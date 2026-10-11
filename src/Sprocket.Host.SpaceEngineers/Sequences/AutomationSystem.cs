@@ -383,42 +383,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>
-        /// Which of the system's parts its sequences actually act on.
-        /// </summary>
-        /// <remarks>
-        /// Worked out on the spot rather than kept, because a kept list goes stale the moment
-        /// somebody adds a step. The same thing acted on in five places is one part, listed once, so
-        /// whoever fits this system answers "which is the inner door" exactly once.
-        /// </remarks>
-        /// <summary>
-        /// The part <paramref name="instance" /> fills with <paramref name="declared" /> and nothing
-        /// else, made where there is none.
-        /// </summary>
-        /// <remarks>
-        /// A new part takes <paramref name="called" />, numbered the way the game numbers blocks where
-        /// another part has it - Door, Door 2 - and expects that type. The name is given once and kept:
-        /// deriving it again would let renaming a block rewrite the system's own vocabulary.
-        /// </remarks>
-        /// <param name="instance">The one of the system the block was picked through.</param>
-        /// <param name="declared">The block, as the construct declares it.</param>
-        /// <param name="called">What a new part is called, as a person reads it.</param>
-        /// <param name="type">The block's type, as a part expects one.</param>
-        public string Take(SystemInstance instance, string declared, string called, string type)
-        {
-            var had = FilledBy(instance, declared);
-            if (had != null)
-                return had;
-
-            var name = Free(called);
-            var part = PartFor(name);
-            if (type.Length > 0)
-                part.Expects.Add(type);
-
-            instance.Fill(name, new[] { declared });
-            return name;
-        }
-
-        /// <summary>
         /// A new signal part, answered in <paramref name="instance" /> by the slot <paramref name="at" /> on each block of
         /// <paramref name="declared" />, and called <paramref name="called" /> as a picked block's part is.
         /// </summary>
@@ -442,19 +406,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 name = called + " " + n;
 
             return name;
-        }
-
-        /// <summary>The part <paramref name="instance" /> fills with <paramref name="declared" /> and nothing else, or null where there is none.</summary>
-        public string FilledBy(SystemInstance instance, string declared)
-        {
-            for (var i = 0; i < _parts.Count; i++)
-            {
-                var filled = instance.FilledWith(_parts[i].Id);
-                if (filled != null && filled.Count == 1 && filled[0] == declared)
-                    return _parts[i].Id;
-            }
-
-            return null;
         }
 
         /// <summary>How many times its triggers and steps name <paramref name="slot" />.</summary>
@@ -517,6 +468,33 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
                 for (var s = 0; s < sequence.Steps.Count; s++)
                     Gather(sequence.Steps[s].Targets, into);
+            }
+        }
+
+        /// <summary>Puts into <paramref name="into" /> every list of names its triggers and steps hold, the lists themselves, leaving out empty ones.</summary>
+        public void Lists(List<IList<string>> into)
+        {
+            into.Clear();
+
+            for (var i = 0; i < _triggers.Count; i++)
+            {
+                var moment = _triggers[i] as MomentTrigger;
+                if (moment != null && moment.Sources.Count > 0)
+                    into.Add(moment.Sources);
+
+                var own = _triggers[i].Acts;
+                if (own != null && own.Targets.Count > 0)
+                    into.Add(own.Targets);
+            }
+
+            for (var i = 0; i < _sequences.Count; i++)
+            {
+                var steps = _sequences[i].Steps;
+                for (var s = 0; s < steps.Count; s++)
+                {
+                    if (steps[s].Targets.Count > 0)
+                        into.Add(steps[s].Targets);
+                }
             }
         }
 

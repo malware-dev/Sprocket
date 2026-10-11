@@ -116,14 +116,14 @@ public class MarkTests
         Assert.Contains(Symbols.Sequence, marks);
     }
 
-    /// <summary>The configuration panel lists its block slots, marked by the cube, before its signal slots, marked by the pulse, each in order of name.</summary>
+    /// <summary>A logic system lists its block slots, marked by the cube, before its signal slots, marked by the pulse, each in order of name.</summary>
     [Fact]
-    public void ThePanelListsBlockSlotsThenSignalSlotsByName()
+    public void TheSlotsAreBlockSlotsThenSignalSlotsByName()
     {
-        var screen = Panel();
+        var screen = Slots();
 
-        var rows = screen.Editor.Parts();
-        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, rows.Select(row => row.NameBox.Text));
+        var rows = screen.Editor.SystemSlots();
+        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, rows.Select(row => row.Name));
         Assert.Equal(new[] { Symbols.Block, Symbols.Block, Symbols.Signal }, rows.Select(row => row.Mark));
     }
 
@@ -131,20 +131,22 @@ public class MarkTests
     [Fact]
     public void ARenamedSlotMovesToItsPlace()
     {
-        var screen = Panel();
+        var screen = Slots();
         var editor = screen.Editor;
 
-        editor.Input.Focus(editor.Parts().Single(row => row.NameBox.Text == "Airlock Outer Door").NameBox);
-        screen.Do("clear", "type", "Aft Door").Run(1);
-        editor.Input.Focus(null);
+        editor.OpenSlot("Airlock Outer Door");
+        screen.Run(5);
+        editor.Screen.Heading[0].Renames!("Aft Door");
+        screen.Run(5);
+        editor.Back();
         screen.Run(5);
 
-        Assert.Equal(new[] { "Aft Door", "Airlock Inner Door", "Airlock Button" }, editor.Parts().Select(row => row.NameBox.Text));
+        Assert.Equal(new[] { "Aft Door", "Airlock Inner Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
 
-        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, editor.Parts().Select(row => row.NameBox.Text));
+        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>The row of the what column offering <paramref name="text" />.</summary>
@@ -173,8 +175,8 @@ public class MarkTests
         return screen.Run(2);
     }
 
-    /// <summary>The configuration panel, being written, of a button system whose sequence closes both airlock doors, the outer one first.</summary>
-    static Screen Panel()
+    /// <summary>The screen, switched off to be written, of a button system whose sequence closes both airlock doors, the outer one first.</summary>
+    static Screen Slots()
     {
         var screen = OnTheSequence();
         var editor = screen.Editor;
@@ -193,8 +195,6 @@ public class MarkTests
         editor.Program.Systems[0].Enabled = false;
         editor.Program.Edited();
         editor.OpenBlueprintSystem(0);
-        screen.Run(5);
-        editor.EditPanel();
         screen.Run(5);
         return screen;
     }

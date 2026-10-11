@@ -7,30 +7,44 @@ En plass er et navngitt sted i et ![](mark:logic-system) [logikksystem](#logic-s
 - En ![](mark:block) **blokkplass** holder blokkene et steg virker på eller en utløser følger med på, for eksempel en dør, eller alle lysene i luftslusen.
 - En ![](mark:signal) **signalplass** holder en blokk og verktøylinjeplassen på den som sender ![](mark:signal) [signalet](#signal), for eksempel et knappepanel og en av knappene.
 
+## Hvordan en plass blir til
+
+Blokkene som [velges](#picking) sammen for ett steg, én utløser eller det et [hvis](#if) sjekker, er ett sett, og hvert sett er én plass som holder alle blokkene sine. En plass med én blokk får navn etter blokken, som *Luftsluse indre dør*. En plass med flere blokker heter *Plass 1*, *Plass 2* og så videre.
+
+- Velger du de samme blokkene igjen, i hvilken som helst rekkefølge, brukes den samme plassen.
+- Velger du nøyaktig blokkene til to eller flere plasser, brukes de plassene, så få som mulig.
+- Alle andre sett blir en egen plass, så en blokk kan være i mer enn én plass.
+
+Plassene regnes ut på nytt etter hver endring. Seks lys som velges for et steg som slår dem av, er *Plass 1*. Velg lys 1 til 3 for et andre steg og lys 4 til 6 for et tredje, så blir de to plasser: *Plass 1* forsvinner, og det første steget nevner de to mindre plassene. Fjern det andre og det tredje steget, så kommer plassen med alle seks tilbake.
+
+En plass som blir stående, beholder navnet sitt, hva den er til, og blokkene til hver installasjon. Angre tar tilbake et valg sammen med alle endringene det gjorde på plassene.
+
+## Bytte blokkene til et steg
+
+Brukes plassen til et steg bare av det steget, beholdes plassen når du velger andre blokker for steget, med navnet, hva den er til, og blokkene til de andre installasjonene. De nye blokkene fyller den for installasjonen som vises, så lenge de er av et slag plassen forventer. Ellers er de nye blokkene et sett som alle andre, og blir til en plass etter reglene over.
+
+Fjerner du det siste steget eller den siste utløseren som bruker en plass, fjernes plassen. Blokker en annen installasjon hadde i den, legges til side for den installasjonen, og tilbys først når den fyller plassene sine på nytt.
+
 ## Fylle en plass
 
-Plassene fylles på [konfigurasjonspanelet](#configuration-panel) til installasjonen. Hver plass viser navnet sitt og hva den er til, slik den som laget logikksystemet, skrev dem.
+Blokkene du velger for et steg eller en utløser, fyller plassen for installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Alle andre installasjoner fyller den på sitt eget [konfigurasjonspanel](#configuration-panel).
 
-Trykk en plass for å [velge](#picking) hva som fyller den. Bare blokker av riktig slag blir tilbudt. En plass laget av en dør tar dører, og en laget av en ventil tar ventiler. Passer ingenting på denne [konstruksjonen](#construct), sier lista det.
+Skjermen til logikksystemet viser plassene under `Plasser`, hver med blokkene installasjonen som vises, fyller den med. Under blokkene står det hva hver av de andre installasjonene fortsatt må gjøre, for eksempel *Installasjon 2: ny, fyll den*, *Installasjon 2: endret, fyll den på nytt* eller *Installasjon 2: mistet en blokk*.
+
+Trykk blokkene til en plass på skjermen til logikksystemet, eller en plass på et konfigurasjonspanel, for å velge hva som fyller den. Bare blokker av et slag plassen forventer, blir tilbudt. Passer ingenting på denne [konstruksjonen](#construct), sier lista det.
 
 - En blokkplass kan fylles med én blokk eller flere.
 - En signalplass trenger en blokk og verktøylinjeplassen på den som sender signalet. Den verktøylinjeplassen settes opp for deg, og du blir spurt først hvis den allerede gjør noe annet.
 
-Overskriften over plassene teller hvor mange som fortsatt mangler en blokk. En plass der blokken gikk tapt, sier det og nevner blokken.
+## Navnet og hva den er til
 
-## Hvordan en plass blir til
+Trykker du navnet til en plass på skjermen til logikksystemet, åpnes siden til plassen. Det som står der, viser konfigurasjonspanelet til hver installasjon. Det endres mens logikksystemet er slått av.
 
-Når du velger en blokk for et steg eller en utløser, lages en plass med navn etter blokken, som *Luftsluse indre dør*. Velger du den samme blokken igjen, brukes den samme plassen, så en blokk som mange steg bruker, er fortsatt én plass, fylt én gang.
+- **Overskriften** er navnet til plassen. Gi den nytt navn med blyanten der. Hver plass har sitt eget navn.
+- **`Hva den er til`** er en boks å skrive i, med overskrifter, lister og fet eller kursiv tekst. `Markering` åpner siden om å [skrive tekst](#writing).
+- **`Forventer`** viser hvilke slags blokker plassen tar, for eksempel *Door, Sliding Door*, eller `Hvilken som helst blokk`.
 
-Blokken du valgte, fyller plassen for installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Alle andre installasjoner fyller den på sitt eget konfigurasjonspanel.
-
-::: warning
-Når du fjerner det siste steget eller den siste utløseren som bruker en bestemt blokk eller et bestemt signal, forsvinner plassen fra konfigurasjonspanelet, med navnet og hva den er til. Velger du en annen blokk i stedet, lages en ny plass, som alle installasjonene må fylle på nytt. Det samme skjer om du velger den samme blokken igjen: den nye plassen får navnet til blokken, og beskrivelsen starter tom. Vil du bytte hvilken blokk en plass holder, fyller du den heller på nytt på konfigurasjonspanelet.
-:::
-
-## Navn og beskrivelse
-
-Navnet på hver plass, og en linje om hva den er til, settes én gang, for alle installasjonene, med `Rediger konfigurasjonspanelet`.
+Skriv det for noen som aldri har sett konstruksjonen din. En plass som heter *Interior Door 2* eller *Plass 1*, lar den som fyller den, gjette. Gi den navnet *Indre dør* og si at det er døra på siden med trykk, så vet de hvilken dør de skal velge.
 
 ## En tom plass
 

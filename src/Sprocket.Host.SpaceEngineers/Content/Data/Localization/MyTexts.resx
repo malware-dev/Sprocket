@@ -185,6 +185,58 @@ Renaming it here renames the grid.</value>
     <value>System {number}</value>
     <comment>What a logic system is called when it has no name and its blocks share none. {number} is its number.</comment>
   </data>
+  <data name="Sprocket.Slot.Numbered" xml:space="preserve">
+    <value>Slot {number}</value>
+    <comment>The name a new slot holding several blocks is given. {number} is the first number free, counting on from the block slots there are.</comment>
+  </data>
+  <data name="Sprocket.Slot.Purpose" xml:space="preserve">
+    <value>What it is for</value>
+    <comment>Heading over a slot's description on its page.</comment>
+  </data>
+  <data name="Sprocket.Slot.Expects" xml:space="preserve">
+    <value>Expects</value>
+    <comment>Heading over the kinds of block a slot takes, on its page.</comment>
+  </data>
+  <data name="Sprocket.Slot.AnyBlock" xml:space="preserve">
+    <value>Any block</value>
+    <comment>Under the Expects heading, for a slot that takes any kind of block.</comment>
+  </data>
+  <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
+    <value>Name this slot and say what it is for.</value>
+    <comment>Tooltip on a slot's name on the logic system's screen, which opens the slot's page.</comment>
+  </data>
+  <data name="Sprocket.Slot.SetAsideNote" xml:space="preserve">
+    <value>Set aside</value>
+    <comment>Said in the picker in place of a block's kind, for a block the installation had for a slot that was split or merged.</comment>
+  </data>
+  <data name="Sprocket.Slot.SetAside" xml:space="preserve">
+    <value>Set aside, offered first: {blocks}</value>
+    <comment>Under a slot to fill again on the configuration panel. {blocks} is the blocks the installation had, by name.</comment>
+  </data>
+  <data name="Sprocket.Slot.Changed" xml:space="preserve">
+    <value>Changed: fill it again</value>
+    <comment>In place of the blocks of a slot that was split or merged, on the configuration panel.</comment>
+  </data>
+  <data name="Sprocket.Slot.MarkNew" xml:space="preserve">
+    <value>{installation}: new, fill it</value>
+    <comment>Under a slot's blocks on the logic system's screen, for another installation that has not filled it.</comment>
+  </data>
+  <data name="Sprocket.Slot.MarkChanged" xml:space="preserve">
+    <value>{installation}: changed, fill it again</value>
+    <comment>Under a slot's blocks on the logic system's screen, for another installation whose blocks for it were set aside.</comment>
+  </data>
+  <data name="Sprocket.Slot.MarkLost" xml:space="preserve">
+    <value>{installation}: lost a block</value>
+    <comment>Under a slot's blocks on the logic system's screen, for another installation one of whose blocks for it is gone.</comment>
+  </data>
+  <data name="Sprocket.Slot.FillAgainOne" xml:space="preserve">
+    <value>1 slot to fill again</value>
+    <comment>On an installation, where one of its slots was split or merged.</comment>
+  </data>
+  <data name="Sprocket.Slot.FillAgainMany" xml:space="preserve">
+    <value>{count} slots to fill again</value>
+    <comment>On an installation, where several of its slots were split or merged. {count} is how many.</comment>
+  </data>
   <data name="Sprocket.Systems.Instance" xml:space="preserve">
     <value>Installation {number}</value>
     <comment>The name a new installation of a logic system is given, the first included. {number} is the first number free, counting on from the installations there are; it is not the installation's own number.</comment>
@@ -234,14 +286,6 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
     <value>Delete this installation</value>
     <comment>The bin on an installation's row.</comment>
-  </data>
-  <data name="Sprocket.System.EditPanel" xml:space="preserve">
-    <value>Edit configuration panel</value>
-    <comment>Button on a blueprint's logic system screen that opens the panel its blocks are chosen on, to set up its slots and description.</comment>
-  </data>
-  <data name="Sprocket.System.EditPanelAbout" xml:space="preserve">
-    <value>Set up the description and slots everyone filling in this logic system sees.</value>
-    <comment>Note on the button that opens a logic system's configuration panel.</comment>
   </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
     <value>Showing the slots filled by installation</value>
@@ -754,18 +798,6 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Blueprint.Parts" xml:space="preserve">
     <value>Slots</value>
     <comment>Heading over a blueprint's slots, where each is filled with blocks.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.Panel" xml:space="preserve">
-    <value>Configuration panel</value>
-    <comment>Heading of a blueprint's configuration panel while it is being set up: the slots and words everyone filling a blockset made from the blueprint sees.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.PanelFor" xml:space="preserve">
-    <value>for {name}</value>
-    <comment>After "Configuration panel" in its heading. {name} is the logic system's name.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.PanelAbout" xml:space="preserve">
-    <value>Shown to anyone setting up, or changing, an installation of this logic system.</value>
-    <comment>Under the heading of a configuration panel being set up.</comment>
   </data>
   <data name="Sprocket.Blueprint.StillOne" xml:space="preserve">
     <value>1 still needs a block</value>
@@ -1996,22 +2028,6 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   <data name="Sprocket.Library.UpdateKeep" xml:space="preserve">
     <value>Keep the blueprint</value>
     <comment>Answer to the question about updating a blueprint that leaves the blueprint as it is.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.NameTaken" xml:space="preserve">
-    <value>Another slot is already called {name}.</value>
-    <comment>Under a slot's name box while what is typed is another slot's name. {name} is the name typed.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.NameEmpty" xml:space="preserve">
-    <value>A slot needs a name.</value>
-    <comment>Under a slot's name box while it is empty.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.NameKeptTaken" xml:space="preserve">
-    <value>Not renamed: another slot is already called {name}.</value>
-    <comment>Under a slot's name box after a name another slot has was typed and the box left; the slot keeps its name. {name} is the name typed.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.NameKeptEmpty" xml:space="preserve">
-    <value>Not renamed: a slot needs a name.</value>
-    <comment>Under a slot's name box after it was left empty; the slot keeps its name.</comment>
   </data>
   <data name="Sprocket.Sequence.Run" xml:space="preserve">
     <value>run</value>

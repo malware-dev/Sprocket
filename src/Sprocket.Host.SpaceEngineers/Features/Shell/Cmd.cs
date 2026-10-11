@@ -60,8 +60,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Deleting an installation.</summary>
         DeleteInstance,
 
-        /// <summary>Opening a blueprint's configuration panel.</summary>
-        EditBlueprint,
+        /// <summary>Opening a slot's page, where it is named and described.</summary>
+        OpenSlot,
 
         /// <summary>Answering a slot with the blocks chosen for it.</summary>
         FillPart,

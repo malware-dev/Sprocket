@@ -24,6 +24,8 @@ Bryteren til logikksystemet står over dem. Slår du av logikksystemet, stopper 
 
 På startskjermen har hver installasjon en rad under logikksystemet sitt. Raden lyser grønt mens en av sekvensene kjører, og rødt når den må repareres. Overskriften til logikksystemet blir rød hvis noen av installasjonene blir det.
 
+En installasjon der plasser er delt eller slått sammen av en endring i logikksystemet, sier det på raden, for eksempel `1 plass å fylle på nytt`. Konfigurasjonspanelet viser hvilke.
+
 Når en sekvens ikke kan fortsette, slås bare den installasjonen av, og raden sier hvorfor. De andre installasjonene fortsetter å kjøre.
 
 ## Fjerne en

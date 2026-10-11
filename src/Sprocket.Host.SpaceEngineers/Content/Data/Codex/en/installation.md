@@ -24,6 +24,8 @@ The logic system's switch stands above them. Switching the logic system off stop
 
 On the home screen, each installation has a row under its logic system. The row lights green while one of its sequences runs, and red when it needs mending. The logic system's heading turns red if any of its installations does.
 
+An installation whose slots were split or merged by a change to the logic system says so on its row, for example `1 slot to fill again`. Its configuration panel shows which.
+
 When a sequence can't carry on, only that installation is switched off, and its row says why. The other installations keep running.
 
 ## Removing one
