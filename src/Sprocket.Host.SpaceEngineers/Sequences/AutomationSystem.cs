@@ -569,6 +569,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
+        /// <summary>Puts a removed sequence back where it stood, <paramref name="at" />, as the sequence it was.</summary>
+        /// <remarks>For undo: its number, which every trigger and step that runs it names, comes back with it.</remarks>
+        public void PutBack(Sequence sequence, int at)
+        {
+            if (sequence == null || _sequences.Contains(sequence))
+                return;
+
+            _sequences.Insert(at < 0 || at > _sequences.Count ? _sequences.Count : at, sequence);
+            sequence.System = this;
+            Reshape();
+            Used(sequence.Number);
+        }
+
         /// <summary>Puts a removed installation back where it stood, <paramref name="at" />, as the installation it was.</summary>
         /// <remarks>For undo: the blocks it was filled with, and its number, come back with it.</remarks>
         public void PutBack(SystemInstance instance, int at)

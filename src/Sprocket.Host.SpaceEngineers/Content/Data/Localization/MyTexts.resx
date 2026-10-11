@@ -1731,6 +1731,10 @@ Renaming it here renames the grid.</value>
     <value>moving a branch</value>
     <comment>Named after Undo and Redo.</comment>
   </data>
+  <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
+    <value>deleting a sequence</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
   <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
     <value>deleting a logic system</value>
     <comment>Named after Undo and Redo.</comment>

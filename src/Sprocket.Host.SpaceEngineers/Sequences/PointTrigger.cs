@@ -25,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<string> _sources;
         readonly string _eventId;
 
+        /// <summary>Has <paramref name="trigger" /> do <paramref name="does" />, carrying <paramref name="made" />, the sequence made for it, where one was.</summary>
         public PointTrigger(Automation program, Trigger trigger, Step does, Sequence made)
         {
             _program = program;
@@ -73,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             // Already there the first time, and put back by this on the way forward again.
             if (_made != null && system.FindSequence(_made.Number) == null)
-                _program.PutBack(_made);
+                _program.PutBack(system, _made, -1);
 
             _trigger.Does = _now;
         }

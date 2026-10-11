@@ -1107,7 +1107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments = arguments ?? new Arguments();
             arguments.Set("named", named ?? "");
 
-            Ask(question + "\n\n**{named}**\n\n" + warning, arguments);
+            Ask(question + "\n\n**{named}**" + (string.IsNullOrEmpty(warning) ? "" : "\n\n" + warning), arguments);
             Answer(Texts.DeleteKeep, delegate { }, true);
             Answer(Texts.DeleteConfirm, delete);
         }
@@ -2616,13 +2616,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Asks before throwing a sequence away, and throws it away if they say so.
+        /// Asks before taking a sequence out of its logic system, with the triggers that run it, and takes it out if they say
+        /// so, as a step its logic system's undo takes back.
         /// </summary>
         /// <remarks>
-        /// The one place in the editor where a mistake cannot be walked back: every other act is
-        /// live and reversible by doing the opposite, and this one is not reversible at all. So it
-        /// asks, where deleting a trigger does not - a trigger is one line and three presses to make
-        /// again, and a sequence is work.
+        /// It asks where deleting a trigger does not: a trigger is one line and three presses to make again, and a sequence is
+        /// work. A sequence brought back by undo comes back without its own history of steps.
         /// <para>
         /// The safe answer is listed first, so the reflex press lands on it, and it is spelt out
         /// rather than left to back. Back does mean keep - it always means return to where somebody
@@ -2637,8 +2636,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void DeleteSequence(Sequence sequence)
         {
-            Deleting(Texts.SequenceDeleteQuestion, SequenceText.Called(Texts, sequence),
-                Texts.DeleteFinal, null, delegate { TakeOut(sequence); });
+            Deleting(Texts.SequenceDeleteQuestion, SequenceText.Called(Texts, sequence), null, null, delegate
+            {
+                Do(sequence.System, new TakeSequenceOut(_program, sequence));
+                ForgetSequence(sequence);
+            });
         }
 
         /// <summary>Asks before taking <paramref name="system" /> out of the program, with its sequences, its triggers and every one of it.</summary>

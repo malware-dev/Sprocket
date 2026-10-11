@@ -87,6 +87,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>Moving a branch of an if to another place in it.</summary>
         MoveBranch,
+        /// <summary>Deleting a sequence, with the triggers that run it.</summary>
+        DeleteSequence,
         /// <summary>Deleting a logic system.</summary>
         DeleteSystem,
         /// <summary>Taking a logic system off the construct.</summary>

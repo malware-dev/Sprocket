@@ -1048,13 +1048,8 @@ public class EditorTests
     }
 
     /// <summary>
-    /// The one irreversible act in the editor asks before it happens.
+    /// Deleting a sequence asks before it happens, and its logic system's undo brings it back with the trigger that runs it.
     /// </summary>
-    /// <remarks>
-    /// Everything else here is live and undone by doing the opposite. This throws away
-    /// everything somebody built and there is no undo, so it used to be the single press that
-    /// could not be walked back.
-    /// </remarks>
     [Fact]
     public void DeletingASequenceAsksFirst()
     {
@@ -1068,7 +1063,7 @@ public class EditorTests
 
         // Nothing has gone yet, and the question names what it is about.
         Assert.Single(ship.Automation.Sequences);
-        Assert.StartsWith("Delete this sequence?\n\nSequence 1\n\n", ship.Editor.Question());
+        Assert.Equal("Delete this sequence?\n\nSequence 1", ship.Editor.Question());
 
         // The safe answer comes first, so a reflex press lands on it.
         Assert.Equal("Keep it, Delete it", string.Join(", ", ship.Editor.Screen.Answers.Select(e => e.Text)));
@@ -1086,6 +1081,17 @@ public class EditorTests
         // Gone, and standing on the system rather than on a question about nothing.
         Assert.Empty(ship.Automation.Sequences);
         Assert.Equal("Airlock", ship.Editor.Screen.Title());
+        var system = ship.Automation.Systems[0];
+        Assert.Empty(system.Triggers);
+
+        // One step back, on the system, brings it back where it was, still run by its trigger.
+        Assert.Equal("deleting a sequence", ship.Editor.Screen.UndoText);
+        ship.Editor.Screen.Undo!.Execute();
+        ship.Tick();
+
+        var back = Assert.Single(ship.Automation.Sequences);
+        Assert.Same(back, Assert.Single(system.Sequences));
+        Assert.Equal(back.Number, Assert.Single(system.Triggers).Runs);
     }
 
     /// <summary>

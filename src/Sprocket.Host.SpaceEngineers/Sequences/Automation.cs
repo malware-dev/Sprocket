@@ -746,23 +746,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Wiring++;
         }
 
-        /// <summary>
-        /// Puts a removed sequence back, as the sequence it was.
-        /// </summary>
+        /// <summary>Puts a removed sequence back into <paramref name="system" />, where it stood among its sequences, <paramref name="at" />, as the sequence it was.</summary>
         /// <remarks>
         /// For undo. Everything that pointed at it named it by number - a toolbar slot, a step that
         /// runs it - so one that came back as a new sequence would come back as a different thing.
         /// </remarks>
-        public void PutBack(Sequence sequence)
+        public void PutBack(AutomationSystem system, Sequence sequence, int at)
         {
             if (sequence == null || _sequences.Contains(sequence))
                 return;
 
             _sequences.Add(sequence);
-
-            if (sequence.System != null)
-                sequence.System.Add(sequence);
-
+            system.PutBack(sequence, at);
             Wiring++;
         }
 

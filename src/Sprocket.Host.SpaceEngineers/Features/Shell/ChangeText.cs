@@ -38,6 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Change.Unwrap: return texts.ChangeUnwrap;
                 case Change.RemoveBranch: return texts.ChangeRemoveBranch;
                 case Change.MoveBranch: return texts.ChangeMoveBranch;
+                case Change.DeleteSequence: return texts.ChangeDeleteSequence;
                 case Change.DeleteSystem: return texts.ChangeDeleteSystem;
                 case Change.TakeOffSystem: return texts.ChangeTakeOffSystem;
                 case Change.DeleteInstallation: return texts.ChangeDeleteInstallation;

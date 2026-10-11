@@ -1315,6 +1315,9 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Change.MoveBranch" xml:space="preserve">
     <value>flytting av en gren</value>
   </data>
+  <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
+    <value>sletting av en sekvens</value>
+  </data>
   <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">
     <value>sletting av et logikksystem</value>
   </data>
