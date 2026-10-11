@@ -47,6 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         int _stoppedAt;
         int _stoppedFrom;
         string _madeName;
+        int _madeEdits;
         Keyed<object, StepRow> _rows;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
@@ -100,30 +101,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override ICommand Stops => Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(_sequence); });
 
-        /// <summary>Throws the whole sequence away, which is not editing it and so is offered while it may run.</summary>
-        public override ICommand Deletes => Editor.Act(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(_sequence); });
+        /// <summary>Deletes the sequence, as a step its logic system's undo takes back; like every edit, while it cannot run.</summary>
+        public override ICommand Deletes => Editable ? Editor.Act(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(_sequence); }) : null;
+
+        /// <inheritdoc />
+        public override string DeleteLocked => Editable ? null : LockedText;
 
         /// <inheritdoc />
         public override string DeleteAbout => Editor.Texts.SequenceDelete;
 
-        /// <summary>The sequence's own way back, for what is done to it on this page.</summary>
+        /// <summary>The way back of the logic system the sequence is in: the last thing done to it, on any of its screens.</summary>
         public override bool HasHistory => true;
 
-        /// <summary>Nothing is walked back while the sequence may run, as nothing else about it changes then.</summary>
-        public override bool CanUndo => !SwitchIsOn && Editor.CanUndo(_sequence);
+        /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_sequence.System);
 
         /// <inheritdoc />
-        public override string UndoText => Editor.UndoLabel(_sequence);
+        public override string UndoText => Editor.UndoLabel(_sequence.System);
 
         /// <inheritdoc />
-        public override bool CanRedo => !SwitchIsOn && Editor.CanRedo(_sequence);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_sequence.System);
 
         /// <inheritdoc />
-        public override string RedoText => Editor.RedoLabel(_sequence);
+        public override string RedoText => Editor.RedoLabel(_sequence.System);
 
-        /// <summary>The sequence just made is as it was made: its name, and nothing done to it that could be walked back.</summary>
-        /// <remarks>Everything that changes what a sequence does is an edit in its history, so an empty history is nothing done.</remarks>
-        public override bool Untouched => _sequence.Name == _madeName && !Editor.CanUndo(_sequence) && !Editor.CanRedo(_sequence);
+        /// <summary>The sequence just made is as it was made: its name, and nothing done in the program since.</summary>
+        public override bool Untouched => _sequence.Name == _madeName && Editor.Program.Edits == _madeEdits;
 
         /// <summary>A sequence arrives already named, "Sequence 3", the way a block does, so renaming is always overtyping.</summary>
         public override string CustomName => _sequence.Name ?? "";
@@ -162,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (wanted.Length == 0)
                 return;
 
-            Editor.Do(_sequence, new Rename(_sequence.Name, wanted), true);
+            Editor.Do(_sequence, new Rename(_sequence.Name, wanted));
         }
 
         /// <inheritdoc />
@@ -181,6 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         protected override void Remember()
         {
             _madeName = _sequence.Name;
+            _madeEdits = Editor.Program.Edits;
         }
 
         /// <inheritdoc />
@@ -193,13 +197,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override void Undo()
         {
-            Editor.Undo(_sequence);
+            Editor.Undo(_sequence.System);
         }
 
         /// <inheritdoc />
         public override void Redo()
         {
-            Editor.Redo(_sequence);
+            Editor.Redo(_sequence.System);
         }
 
         /// <summary>One part: what this sequence is called, the name where there is one and what it does where there is not.</summary>

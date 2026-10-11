@@ -89,6 +89,24 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         MoveBranch,
         /// <summary>Deleting a sequence, with the triggers that run it.</summary>
         DeleteSequence,
+        /// <summary>Making a new sequence.</summary>
+        NewSequence,
+        /// <summary>Copying a sequence.</summary>
+        CopySequence,
+        /// <summary>Renaming a logic system.</summary>
+        RenameSystem,
+        /// <summary>Renaming an installation.</summary>
+        RenameInstallation,
+        /// <summary>Filling a slot of an installation.</summary>
+        FillSlot,
+        /// <summary>Adding a trigger, with what it starts.</summary>
+        AddTrigger,
+        /// <summary>Putting a logic system on the construct from the library.</summary>
+        PutOnSystem,
+        /// <summary>Copying a blueprint as a new logic system.</summary>
+        CopyBlueprint,
+        /// <summary>Renaming the construct.</summary>
+        RenameConstruct,
         /// <summary>Deleting a logic system.</summary>
         DeleteSystem,
         /// <summary>Taking a logic system off the construct.</summary>

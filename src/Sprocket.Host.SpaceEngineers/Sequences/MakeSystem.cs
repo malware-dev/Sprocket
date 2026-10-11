@@ -1,24 +1,47 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>A logic system just made, in the program already; undone, it goes, and redone, it comes back where it stood.</summary>
+    /// <summary>
+    /// A logic system just made, or put on from the library, in the program already; undone, it goes, and redone, it comes back
+    /// where it stood, switched off.
+    /// </summary>
     public sealed class MakeSystem : ProgramEdit
     {
         readonly AutomationSystem _system;
+        readonly Change _change;
 
         int _at = -1;
 
         /// <summary>The making of <paramref name="system" />, which is in the program already.</summary>
-        public MakeSystem(AutomationSystem system)
+        public MakeSystem(AutomationSystem system) : this(system, Change.AddSystem)
         {
-            _system = system;
         }
 
+        /// <summary>The making of <paramref name="system" />, which is in the program already, offered back as <paramref name="change" />.</summary>
+        public MakeSystem(AutomationSystem system, Change change)
+        {
+            _system = system;
+            _change = change;
+        }
+
+        /// <summary>The logic system made.</summary>
+        public AutomationSystem System => _system;
+
         /// <inheritdoc />
-        public override Change Change => Change.AddSystem;
+        public override Change Change => _change;
+
+        /// <summary>Taking it away waits while it runs; putting it back, switched off, waits for nothing.</summary>
+        public override bool Held(Automation program, bool back)
+        {
+            return back && _system.Enabled;
+        }
 
         /// <remarks>Puts nothing back the first time: it was made in the program, and this only records that.</remarks>
         public override void Apply(Automation program)
         {
+            if (IndexOf(program, _system) >= 0)
+                return;
+
+            _system.Enabled = false;
             program.PutBack(_system, _at);
         }
 

@@ -32,8 +32,6 @@ public class SequenceDeleteTests
         var second = system.Sequences[1];
 
         editor.Rows().First(row => row.Summary == Called(first)).Deletes!.Execute();
-        screen.Run(1);
-        editor.PressAnswer("Delete it");
         screen.Run(2);
         Assert.Equal(new[] { second }, system.Sequences);
         Assert.Empty(system.Triggers);

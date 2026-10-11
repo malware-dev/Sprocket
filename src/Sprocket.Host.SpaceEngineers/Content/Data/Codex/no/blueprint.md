@@ -25,7 +25,7 @@ Kopien åpnes med én gang, klar til å endres.
 
 ## Ta den av
 
-Minustegnet ved et logikksystem på startskjermen tar det og installasjonene av denne konstruksjonen, etter at du er spurt. Ble logikksystemet endret etter plantegningen, blir du også spurt om plantegningen skal oppdateres. Et logikksystem uten plantegning har en søppelkasse der i stedet, som sletter det, siden det er den eneste kopien.
+Minustegnet ved et logikksystem på startskjermen tar det og installasjonene av denne konstruksjonen, etter at du er spurt. Ble logikksystemet endret etter plantegningen, blir du også spurt om plantegningen skal oppdateres. Et logikksystem uten plantegning har en søppelkasse der i stedet, siden det er den eneste kopien. Søppelkassen sletter det med én gang, og angre på startskjermen henter det tilbake, slått av.
 
 ## Hver konstruksjon beholder sitt eget
 

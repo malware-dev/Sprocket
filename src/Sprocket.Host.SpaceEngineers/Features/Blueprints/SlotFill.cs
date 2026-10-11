@@ -75,14 +75,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (ToolbarSlot.Of(answer.Chosen) == null)
                 return;
 
-            _editor.Filling(_system, part, chosen, answer.Targets, _editor.Pressed(answer), delegate
-            {
-                var names = new List<string>();
-                var kept = new List<ToolbarSlot>();
-                _editor.Picked(answer, names, kept);
-                chosen.Fill(part.Id, names, kept);
-                Done();
-            });
+            var names = new List<string>();
+            var kept = new List<ToolbarSlot>();
+            _editor.Picked(answer, names, kept);
+            _editor.Filling(_system, part, chosen, answer.Targets, _editor.Pressed(answer),
+                delegate { return new FillSlot(chosen, part.Id, names, kept, Settle); }, Done);
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back.</summary>
@@ -102,18 +99,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         names.Add(_editor.Program.Declare(_editor.World, block).Name);
                 }
 
-                chosen.Fill(part.Id, names);
-                Done();
-            });
+                return new FillSlot(chosen, part.Id, names, null, Settle);
+            }, Done);
         }
 
-        /// <summary>Lets go of the blocks set aside once every slot is filled again, and goes back to the screen the picker was opened from.</summary>
+        /// <summary>Lets go of the blocks set aside, in every installation of <paramref name="system" /> with every slot filled again.</summary>
+        /// <remarks>Run by the fill each time it is made, so making it again lets go of the same blocks.</remarks>
+        static void Settle(AutomationSystem system)
+        {
+            var used = new List<string>();
+            system.Acted(used);
+            Marks.Settle(system, used);
+        }
+
+        /// <summary>Goes back to the screen the picker was opened from.</summary>
         void Done()
         {
-            _system.Acted(_used);
-            Marks.Settle(_system, _used);
-            _editor.Program.Edited();
-            _editor.Program.Rewire();
             _editor.Pop();
             _editor.Invalidate();
         }

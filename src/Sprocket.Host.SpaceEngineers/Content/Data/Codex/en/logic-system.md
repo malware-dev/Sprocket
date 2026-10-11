@@ -21,9 +21,11 @@ Because the blocks are kept apart from the job, one logic system can run every a
 
 ## Switch it off to change it
 
-A logic system can only be changed while it is switched off, so a half-built sequence never starts by accident. A new one starts switched off. Its switch is on its heading on the home screen, and at the top right of its own screen.
+What a logic system does can only be changed while it is switched off, so a half-built sequence never starts by accident. A new one starts switched off. Its switch is on its heading on the home screen, and at the top right of its own screen.
 
 Switching it off stops anything running and leaves the blocks as they are. When you leave a changed logic system that is still off, you are asked whether to switch it on.
+
+Deleting is a change like any other. A sequence's bin, an installation's bin, and the bin at the top of the logic system's own screen delete at once. Undo on the logic system's screens brings back a sequence, and undo on the home screen an installation or a logic system. While the logic system runs, the bins stay in their places but can't be pressed, and say why. Copying a sequence waits for the switch the same way.
 
 ## Real blocks, kept as slots
 
@@ -43,6 +45,16 @@ Each slot shows its name, what it is for, and the blocks that fill it. Pressing 
 The description, the first part of `Installation panel`, says what the logic system does and what whoever installs it needs to know. While the logic system is switched off it is a box to write in, headed `Description`, with headings, lists, and bold or italic text, and `Markup` opens the page on [writing text](#writing).
 
 It is shown beside the logic system's blueprint in the library, and at the top of every installation's installation panel. Anyone who receives your blueprint has never seen your construct, so the description and the slots are their only guide.
+
+## Undo and redo
+
+Each logic system keeps one list of the changes made to it, on any of its screens: its own, its sequences', its slots' pages, and its installations' installation panels. The undo arrow on each of those screens takes back the last change on that list, wherever it was made, and the redo arrow makes it again. Both walk the list in the order the changes were made, and the list lasts for the game session.
+
+On the list is every change to its steps, sequences and triggers, its slots, its description and its name, and to its installations' names and the blocks that fill their slots. Adding a trigger is one change, together with the sequence it made and any button it took over. Undo passes over switching on and off, running a sequence by hand, which installation is shown, and how the picker shows its blocks.
+
+Undo opens the screen where the change was: a step's sequence, an installation's installation panel for its blocks, and the logic system's own screen for everything else.
+
+A change to what the logic system does, such as a step, is taken back and made again only while the logic system is switched off, as it was made. An installation's blocks are taken back only while that installation, or the logic system, is switched off. Whatever can be changed while it runs, such as a name, is taken back at any time. Until a change can be taken back, its arrow can't be pressed.
 
 ## More than one airlock
 

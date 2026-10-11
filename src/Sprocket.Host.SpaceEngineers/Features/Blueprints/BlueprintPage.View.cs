@@ -15,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Rule _rule;
         Label _partsHeading;
         Label _needs;
+        Label _locked;
         PartList _partList;
 
         /// <summary>What the blueprint's author wrote about it, then the slots with how many still need a block.</summary>
@@ -50,6 +51,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
                         }
                     },
+                    // Why the blocks cannot be changed now, said over them.
+                    new Label { Style = Styles.Aside, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _locked),
                     new PartList { Spacing = 4f }.As(out _partList)
                 }
             };

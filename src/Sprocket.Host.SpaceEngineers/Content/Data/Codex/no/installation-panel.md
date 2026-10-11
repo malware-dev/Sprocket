@@ -26,7 +26,7 @@ Navnene og hva hver plass er til, skrives på skjermen til logikksystemet og på
 
 Trykk en plass for å [velge](#picking) hva som fyller den. Bare blokker av et slag plassen forventer, blir tilbudt. For en signalplass velger du blokken og verktøylinjeplassen, og den verktøylinjeplassen settes opp for deg.
 
-Bryteren til installasjonen er også på panelet, så du kan slå den på så snart alle plassene er fylt.
+Plassene fylles mens installasjonen eller logikksystemet er slått av. Mens begge er på, kan installasjonen kjøre, og panelet sier det. Bryteren til installasjonen er også på panelet, så du kan slå den av for å fylle den, og på igjen så snart alle plassene er fylt.
 
 ## Fylle en plass på nytt
 

@@ -83,6 +83,60 @@ public class ButtonWiringTests
         Assert.EndsWith("/2/1", KeyIn(port));
     }
 
+    /// <summary>A button taken over from the game's own action is given its action back by undo, and taken again by redo.</summary>
+    [Fact]
+    public void AButtonTakenOverIsGivenBackByUndo()
+    {
+        var sim = Blueprinted();
+        var port = PanelNamed(sim, "Port Button");
+        var door = sim.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
+        port.Toolbar.Changing().Set(0, MyToolbarItemInfo.BlockAction(door.Id, "Open_On"), new List<TerminalActionParameter>()).Apply();
+        Tick(sim);
+
+        sim.Editor.Parts()[0].Fills!.Execute();
+        sim.Tick();
+        sim.Editor.PressBlock("Port Button");
+        sim.Editor.PressChoice("button 1 is pressed");
+        sim.Editor.PressPrimary();
+        sim.Tick();
+        sim.Editor.PressChoice(sim.Texts.ButtonTakeOver);
+        Tick(sim);
+        Assert.EndsWith("/2/1", KeyIn(port));
+
+        Assert.Equal("filling a slot", sim.Editor.Screen.UndoText);
+        sim.Editor.Screen.Undo!.Execute();
+        Tick(sim);
+
+        var cargo = sim.Editor.Program.Systems[0].Instances[1];
+        Assert.Empty(cargo.Filled);
+        Assert.True(port.Toolbar.TryGetItem(0, out var given));
+        Assert.Equal("Open_On", given.ActionId);
+
+        sim.Editor.Screen.Redo!.Execute();
+        Tick(sim);
+        Assert.EndsWith("/2/1", KeyIn(port));
+    }
+
+    /// <summary>An installation that may run keeps its blocks: its panel offers no fill, and says why.</summary>
+    [Fact]
+    public void ARunningInstallationIsNotFilled()
+    {
+        var sim = Blueprinted();
+        var system = sim.Editor.Program.Systems[0];
+        var first = system.Instances[0];
+        sim.Editor.Choose(system, first);
+        sim.Editor.Push(new Features.Blueprints.BlueprintPage(sim.Editor, system));
+        system.Enabled = true;
+        first.Enabled = true;
+        Tick(sim);
+
+        Assert.Null(sim.Editor.Parts()[0].Fills);
+
+        first.Enabled = false;
+        Tick(sim);
+        Assert.NotNull(sim.Editor.Parts()[0].Fills);
+    }
+
     /// <summary>A button a toolbar signal written in place already answers is asked about, as one a named signal answers is.</summary>
     [Fact]
     public void AButtonAWrittenSignalAnswersIsAskedAbout()

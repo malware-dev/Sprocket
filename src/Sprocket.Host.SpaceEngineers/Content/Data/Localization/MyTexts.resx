@@ -250,22 +250,6 @@ Renaming it here renames the grid.</value>
     <comment>An installation named where it does not stand under its logic system, as in a question. {installation} is the installation's name, {name} the logic system's.</comment>
   </data>
 
-  <data name="Sprocket.Delete.System" xml:space="preserve">
-    <value>Delete this logic system?</value>
-    <comment>Asked before a logic system is deleted, with its name under it.</comment>
-  </data>
-  <data name="Sprocket.Delete.SystemGoes" xml:space="preserve">
-    <value>Its installations go with it.</value>
-    <comment>Said on the answer that deletes a logic system.</comment>
-  </data>
-  <data name="Sprocket.Delete.Instance" xml:space="preserve">
-    <value>Delete only this installation?</value>
-    <comment>Asked before one of the logic systems made from a blueprint is deleted, with its name under it. Only that one goes.</comment>
-  </data>
-  <data name="Sprocket.Delete.InstanceKept" xml:space="preserve">
-    <value>The **{name}** logic system and its other installations are kept.</value>
-    <comment>Said on the answer that deletes one installation of a logic system. {name} is the logic system's name.</comment>
-  </data>
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
     <value>Keep it</value>
     <comment>The answer that deletes nothing.</comment>
@@ -275,7 +259,7 @@ Renaming it here renames the grid.</value>
     <comment>The answer that deletes it.</comment>
   </data>
   <data name="Sprocket.Delete.Final" xml:space="preserve">
-    <value>This cannot be undone.</value>
+    <value>This is permanent.</value>
     <comment>Said on the answer that deletes.</comment>
   </data>
 
@@ -419,10 +403,6 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Sequence.Delete" xml:space="preserve">
     <value>Delete this sequence</value>
     <comment>Note on the bin beside a sequence's switch.</comment>
-  </data>
-  <data name="Sprocket.Sequence.DeleteQuestion" xml:space="preserve">
-    <value>Delete this sequence?</value>
-    <comment>Asked before a sequence is deleted, with what it does under it.</comment>
   </data>
   <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
     <value>Delete this step</value>
@@ -1733,6 +1713,42 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Change.DeleteSequence" xml:space="preserve">
     <value>deleting a sequence</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.NewSequence" xml:space="preserve">
+    <value>making a sequence</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopySequence" xml:space="preserve">
+    <value>copying a sequence</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameSystem" xml:space="preserve">
+    <value>renaming the logic system</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameInstallation" xml:space="preserve">
+    <value>renaming an installation</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.FillSlot" xml:space="preserve">
+    <value>filling a slot</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.AddTrigger" xml:space="preserve">
+    <value>adding a trigger</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.PutOnSystem" xml:space="preserve">
+    <value>putting a logic system on</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyBlueprint" xml:space="preserve">
+    <value>copying a blueprint</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameConstruct" xml:space="preserve">
+    <value>renaming the construct</value>
     <comment>Named after Undo and Redo.</comment>
   </data>
   <data name="Sprocket.Change.DeleteSystem" xml:space="preserve">

@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         int _at = -1;
 
-        /// <summary>Does <paramref name="made" />, and takes <paramref name="taken" /> out of <paramref name="from" />.</summary>
+        /// <summary>Does <paramref name="made" />, where there is anything, and takes <paramref name="taken" /> out of <paramref name="from" />.</summary>
         public TakeOverTrigger(SystemEdit made, AutomationSystem from, Trigger taken)
         {
             _made = made;
@@ -33,7 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
-            _made.Apply(system);
+            if (_made != null)
+                _made.Apply(system);
             _at = _from.IndexOfTrigger(_taken);
             _from.ReplaceTrigger(_taken, null);
         }
@@ -42,19 +43,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Undo(AutomationSystem system)
         {
             _from.PutTriggerBack(_at, _taken);
-            _made.Undo(system);
+            if (_made != null)
+                _made.Undo(system);
+        }
+
+        /// <summary>Waits for what it did, and for the logic system it took the trigger from while that runs.</summary>
+        public override bool Held(AutomationSystem system, bool back)
+        {
+            return _made != null && _made.Held(system, back) || _from.Enabled;
         }
 
         /// <summary>Only while the trigger is still gone, and what was done can be taken back.</summary>
         public override bool Undoable(AutomationSystem system)
         {
-            return _from.IndexOfTrigger(_taken) < 0 && _made.Undoable(system);
+            return _from.IndexOfTrigger(_taken) < 0 && (_made == null || _made.Undoable(system));
         }
 
         /// <summary>Only while the trigger is back where it was, and what was done can be done again.</summary>
         public override bool Redoable(AutomationSystem system)
         {
-            return _from.IndexOfTrigger(_taken) >= 0 && _made.Redoable(system);
+            return _from.IndexOfTrigger(_taken) >= 0 && (_made == null || _made.Redoable(system));
         }
     }
 }

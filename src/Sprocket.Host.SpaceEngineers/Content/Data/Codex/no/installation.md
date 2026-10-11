@@ -30,4 +30,4 @@ Når en sekvens ikke kan fortsette, slås bare den installasjonen av, og raden s
 
 ## Fjerne en
 
-Søppelkassen på raden til en installasjon sletter den, etter å ha spurt. Logikksystemet og de andre installasjonene blir beholdt. Et logikksystem beholder minst én installasjon, så søppelkassen på den siste kan ikke trykkes.
+Søppelkassen på raden til en installasjon sletter den med én gang, og angre på startskjermen henter den tilbake, slått av. Logikksystemet og de andre installasjonene blir beholdt. Søppelkassen kan trykkes mens logikksystemet er slått av, som for alle endringer. Et logikksystem beholder minst én installasjon, så søppelkassen på den siste kan ikke trykkes.

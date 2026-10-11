@@ -18,6 +18,12 @@ Et logikksystem nevner ikke blokkene dine. Det nevner [plasser](#slot), som *den
 
 Fordi jobben holdes atskilt fra blokkene, kan den flyttes. Tatt vare på i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint) kan den settes på en annen [konstruksjon](#construct), og den som installerer den, velger bare sine egne blokker på [installasjonspanelet](#installation-panel).
 
+## Angre og gjør om
+
+Pilene for å angre og gjøre om på denne skjermen går gjennom konstruksjonens egen liste over endringer: å legge til og slette logikksystemer og installasjoner, `Legg til på denne konstruksjonen` og `Lag en kopi` i biblioteket, `Oppdater fra biblioteket` og `Tilbakestill til plantegning`, og å gi konstruksjonen nytt navn. Alt som gjøres inne i et logikksystem, står på den egne lista til det logikksystemet, som siden om logikksystemer forklarer.
+
+Å ta bort et logikksystem eller en installasjon som kan kjøre, venter til det som skal tas bort, er slått av. Det angre eller gjør om henter tilbake, kommer tilbake slått av, og et logikksystem som hentes tilbake, får sin egen liste over endringer igjen. Lista varer hele spilløkten.
+
 ## Hvor du begynner
 
 Denne skjermen viser alle logikksystemene på denne konstruksjonen. Vil du bygge ditt eget, begynner du med siden om logikksystemer.

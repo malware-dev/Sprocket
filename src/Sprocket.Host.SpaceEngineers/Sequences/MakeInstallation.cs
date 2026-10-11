@@ -1,6 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>An installation just made, in its logic system already; undone, it goes, and redone, it comes back where it stood.</summary>
+    /// <summary>An installation just made, in its logic system already; undone, it goes, and redone, it comes back where it stood, switched off.</summary>
     public sealed class MakeInstallation : ProgramEdit
     {
         readonly AutomationSystem _system;
@@ -15,13 +15,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _instance = instance;
         }
 
+        /// <summary>The installation made.</summary>
+        public SystemInstance Instance => _instance;
+
         /// <inheritdoc />
         public override Change Change => Change.AddInstallation;
 
         /// <remarks>Puts nothing back the first time: it was made in its logic system, and this only records that.</remarks>
         public override void Apply(Automation program)
         {
+            if (IndexOf(_system, _instance) >= 0)
+                return;
+
+            _instance.Enabled = false;
             _system.PutBack(_instance, _at);
+        }
+
+        /// <summary>Taking it away waits while it may run; putting it back, switched off, waits for nothing.</summary>
+        public override bool Held(Automation program, bool back)
+        {
+            return back && _system.Enabled && _instance.Enabled;
         }
 
         /// <inheritdoc />

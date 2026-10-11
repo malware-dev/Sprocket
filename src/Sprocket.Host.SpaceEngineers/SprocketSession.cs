@@ -75,6 +75,14 @@ namespace Sprocket.Host.SpaceEngineers
 
         long _copyOf;
 
+        /// <summary>The last copy this client edited, kept after it was handed back so its way back is there if it is lent again unchanged; or null.</summary>
+        SprocketUnit _rested;
+
+        long _restedOf;
+
+        /// <summary>The program <see cref="_rested" /> handed back, which the server lends again where nobody changed it since.</summary>
+        string _restedProgram;
+
         long _asked;
 
         readonly Dictionary<long, Habits> _habits = new Dictionary<long, Habits>();
@@ -355,11 +363,27 @@ namespace Sprocket.Host.SpaceEngineers
             if (_copy != null)
                 _copy.Dispose();
 
-            var copy = SprocketUnit.Copy(block, Asked, _texts, program, state);
-            copy.Editor.Habits = HabitsFor(id);
+            // The copy handed back last, lent again with nothing changed since, is taken up again with its way back; anything
+            // else is built afresh, since a history of what somebody else's change replaced cannot be walked.
+            var again = _rested != null && _restedOf == id && _restedProgram == program;
+            var copy = again ? _rested : SprocketUnit.Copy(block, Asked, _texts, program, state);
+            if (!again && _rested != null)
+                _rested.Dispose();
+
+            _rested = null;
+            _restedProgram = null;
             _copy = copy;
             _copyOf = id;
             _handover.Kept(id, copy);
+
+            if (again)
+            {
+                copy.Restate(state);
+                Lent(block, id, copy);
+                return;
+            }
+
+            copy.Editor.Habits = HabitsFor(id);
 
             // Running something by hand runs it where it is kept. What is not built there yet - a
             // change still on its way - is simply not found, and nothing happens.
@@ -376,15 +400,30 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Wire(id, panel);
             };
 
+            Lent(block, id, copy);
+        }
+
+        /// <summary>Shows <paramref name="copy" />, lent of <paramref name="block" />, and hands it back when it is closed, keeping it for its way back.</summary>
+        void Lent(IMyTerminalBlock block, long id, SprocketUnit copy)
+        {
             Show(Opened(block), copy, delegate
             {
                 // What changed since the last comparison goes before the Sprocket is handed back,
                 // because a change arriving from somebody who no longer holds it is not taken.
                 _handover.Keep(id, copy);
                 _handover.Hand(id);
-                copy.Dispose();
                 if (_copy == copy)
                     _copy = null;
+
+                string program;
+                string state;
+                copy.Written(out program, out state);
+                if (_rested != null && _rested != copy)
+                    _rested.Dispose();
+
+                _rested = copy;
+                _restedOf = id;
+                _restedProgram = program;
             });
         }
 
@@ -865,6 +904,9 @@ namespace Sprocket.Host.SpaceEngineers
             if (_copy != null)
                 _copy.Dispose();
 
+            if (_rested != null && _rested != _copy)
+                _rested.Dispose();
+
             foreach (KeyValuePair<long, SprocketUnit> unit in _units)
                 unit.Value.Dispose();
 
@@ -878,6 +920,7 @@ namespace Sprocket.Host.SpaceEngineers
             _screen = null;
             _shown = null;
             _copy = null;
+            _rested = null;
             _channel = null;
             _handover = null;
             _doors = null;

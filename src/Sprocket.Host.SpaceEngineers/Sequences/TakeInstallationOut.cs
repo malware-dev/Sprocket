@@ -1,6 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>Takes one installation out of its logic system; undone, it stands where it stood, with the blocks it had.</summary>
+    /// <summary>Takes one installation out of its logic system; undone, it stands where it stood, with the blocks it had, switched off.</summary>
     public sealed class TakeInstallationOut : ProgramEdit
     {
         readonly AutomationSystem _system;
@@ -28,7 +28,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override void Undo(Automation program)
         {
+            _instance.Enabled = false;
             _system.PutBack(_instance, _at);
+        }
+
+        /// <summary>Taking it out again waits while it may run; putting it back, switched off, waits for nothing.</summary>
+        public override bool Held(Automation program, bool back)
+        {
+            return !back && _system.Enabled && _instance.Enabled;
         }
 
         /// <summary>Only while its logic system is here, it is still gone, no installation has its number, and none of its buttons has been taken since.</summary>

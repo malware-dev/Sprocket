@@ -681,6 +681,41 @@ public class LibraryTests
         Assert.Single(rig.Editor.Program.Systems);
     }
 
+    /// <summary>A blueprint put on from the library is a step home's undo takes back, and redo puts it on again, switched off.</summary>
+    [Fact]
+    public void PuttingABlueprintOnIsTakenBack()
+    {
+        var made = Blueprinted();
+        made.Shelf.Keep(made.Editor.Program.Systems[0]);
+
+        var rig = Simulation.Fresh();
+        foreach (var file in made.Folder.Files)
+            rig.Folder.Write(file.Key, file.Value);
+
+        rig.Shelf.Read();
+        Assert.Equal("", rig.Editor.PutOn(rig.Shelf.All[0]));
+        rig.Editor.GoToRoot();
+        rig.Tick();
+        var arrived = Assert.Single(rig.Editor.Program.Systems);
+
+        // Taking it away waits while it may run.
+        arrived.Enabled = true;
+        rig.Tick();
+        Assert.Null(rig.Editor.Screen.Undo);
+        arrived.Enabled = false;
+        rig.Tick();
+
+        Assert.Equal("putting a logic system on", rig.Editor.Screen.UndoText);
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Empty(rig.Editor.Program.Systems);
+
+        rig.Editor.Screen.Redo!.Execute();
+        rig.Tick();
+        Assert.Same(arrived, Assert.Single(rig.Editor.Program.Systems));
+        Assert.False(arrived.Enabled);
+    }
+
     /// <summary>
     /// A logic system comes off the construct, installations and all, only where the library has its blueprint, which is
     /// brought up to date only when asked to.
@@ -754,7 +789,7 @@ public class LibraryTests
 
     /// <summary>
     /// The home screen offers a logic system a minus where the library has its blueprint, which asks before taking it off with
-    /// its installations, and a bin that deletes it, by its typed name, where this is the only copy.
+    /// its installations, and a bin that deletes it at once, undo bringing it back, where this is the only copy.
     /// </summary>
     [Fact]
     public void TheHomeScreenOffersAMinusOnlyWhereTheLibraryHasItsBlueprint()
@@ -766,8 +801,11 @@ public class LibraryTests
         Assert.Null(heading.BinMark);
         Assert.Equal(rig.Texts.LibraryDeletes, heading.DeleteText);
         heading.Deletes!.Execute();
-        Assert.StartsWith(rig.Texts.DeleteSystem, rig.Editor.Question());
-        rig.Editor.Unask();
+        rig.Tick();
+        Assert.Empty(rig.Editor.Program.Systems);
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Same(blueprint, Assert.Single(rig.Editor.Program.Systems));
 
         rig.Shelf.Keep(blueprint);
         rig.Editor.Invalidate();

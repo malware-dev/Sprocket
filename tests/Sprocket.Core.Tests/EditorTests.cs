@@ -679,9 +679,9 @@ public class EditorTests
         Assert.NotEmpty(sentence.LockedText);
         Assert.False(Assert.IsType<PlusMenu>(Assert.Single(editor.Adders())).Offers);
 
-        // The bin is the exception, and deliberately: throwing a sequence away is not editing it,
-        // and wanting rid of one while it runs is exactly when somebody wants rid of it.
-        Assert.NotNull(editor.Screen.Deletes);
+        // Deleting it is an edit too: the bin stays where it is, cannot be pressed, and says why.
+        Assert.Null(editor.Screen.Deletes);
+        Assert.Equal(sentence.LockedText, editor.Screen.DeleteLocked);
 
         // Renaming is exempt: it changes nothing about what the system does.
         Assert.True(editor.Screen.CanRename);
@@ -816,10 +816,10 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Both are edits, so both wait for the switch.
+    /// A step that changes what runs waits for the switch, both ways.
     /// </summary>
     [Fact]
-    public void NeitherUndoNorRedoIsOfferedWhileItRuns()
+    public void AStepIsNotWalkedWhileItRuns()
     {
         var ship = Build();
         var editor = ship.Editor;
@@ -838,6 +838,7 @@ public class EditorTests
         editor.SwitchOn();
         ship.Tick();
 
+        // Both steps change what runs, so both wait for the switch.
         Assert.Null(editor.Screen.Undo);
         Assert.Null(editor.Screen.Redo);
     }
@@ -1048,10 +1049,10 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Deleting a sequence asks before it happens, and its logic system's undo brings it back with the trigger that runs it.
+    /// Deleting a sequence happens at once, and its logic system's undo brings it back with the trigger that runs it.
     /// </summary>
     [Fact]
-    public void DeletingASequenceAsksFirst()
+    public void DeletingASequenceIsUndone()
     {
         var ship = Build();
         StartOnTheButton(ship.Editor);
@@ -1061,24 +1062,8 @@ public class EditorTests
         ship.Editor.Screen.Deletes!.Execute();
         ship.Tick();
 
-        // Nothing has gone yet, and the question names what it is about.
-        Assert.Single(ship.Automation.Sequences);
-        Assert.Equal("Delete this sequence?\n\nSequence 1", ship.Editor.Question());
-
-        // The safe answer comes first, so a reflex press lands on it.
-        Assert.Equal("Keep it, Delete it", string.Join(", ", ship.Editor.Screen.Answers.Select(e => e.Text)));
-
-        ship.Editor.PressChoice("Keep it");
-        ship.Tick();
-        Assert.Single(ship.Automation.Sequences);
-        Assert.Equal("Sequence 1", ship.Editor.Screen.Title());
-
-        ship.Editor.Screen.Deletes!.Execute();
-        ship.Tick();
-        ship.Editor.PressChoice("Delete it");
-        ship.Tick();
-
-        // Gone, and standing on the system rather than on a question about nothing.
+        // Gone without a question, and standing on the system.
+        Assert.Equal("", ship.Editor.Question());
         Assert.Empty(ship.Automation.Sequences);
         Assert.Equal("Airlock", ship.Editor.Screen.Title());
         var system = ship.Automation.Systems[0];
@@ -2028,7 +2013,8 @@ public class EditorTests
         Assert.Single(ship.Automation.Systems);
         Assert.Single(ship.Automation.Sequences);
 
-        // A copy is made the same way, and goes the same way.
+        // A copy is made the same way, and goes the same way, with the logic system switched off for it.
+        ship.Automation.Systems[0].Enabled = false;
         editor.RootHeadings()[0].Opens!.Execute();
         ship.Tick();
         editor.Rows().Single(row => row.Copies != null).Copies!.Execute();

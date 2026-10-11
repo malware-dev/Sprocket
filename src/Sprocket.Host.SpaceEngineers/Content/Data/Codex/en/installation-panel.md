@@ -26,7 +26,7 @@ The names and what each slot is for are written on the logic system's screen and
 
 Press a slot to [pick](#picking) what fills it. Only blocks of a kind the slot expects are offered. For a signal slot, you pick the block and the toolbar slot, and that toolbar slot is set up for you.
 
-The installation's switch is on the panel as well, so you can switch it on as soon as every slot is filled.
+Slots are filled while the installation or its logic system is switched off. While both are on, the installation can run, and the panel says so. The installation's switch is on the panel as well, so you can switch it off to fill it, and on again as soon as every slot is filled.
 
 ## Filling a slot again
 

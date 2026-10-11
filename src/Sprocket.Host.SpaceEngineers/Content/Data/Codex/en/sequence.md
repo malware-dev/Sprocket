@@ -2,7 +2,7 @@
 
 A sequence is what a ![](mark:logic-system) [logic system](#logic-system) does: a list of [steps](#step), run from top to bottom. Each ![](mark:installation) [installation](#installation) runs it on its own blocks, so one sequence cycles every airlock on the ship.
 
-Under `Sequences` on the logic system's screen, `+ sequence` adds one, and pressing a sequence's row opens it.
+Under `Sequences` on the logic system's screen, `+ sequence` adds one, and pressing a sequence's row opens it. The bin on its row deletes it at once, and undo brings it back.
 
 ## Starting it
 

@@ -64,13 +64,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool HasHistory => true;
 
         /// <inheritdoc />
-        public override bool CanUndo => Editable && Editor.CanUndo(_system);
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system);
 
         /// <inheritdoc />
         public override string UndoText => Editor.UndoLabel(_system);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editable && Editor.CanRedo(_system);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system);
 
         /// <inheritdoc />
         public override string RedoText => Editor.RedoLabel(_system);

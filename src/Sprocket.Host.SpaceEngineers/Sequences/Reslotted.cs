@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _reslots.Add(picked[i]);
         }
 
+        /// <summary>The edit the slot changes go with.</summary>
+        public Edit<T> Edit => _edit;
+
         /// <inheritdoc />
         public override Change Change => _edit.Change;
 
@@ -73,16 +76,34 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _edit.Undo(subject);
         }
 
-        /// <inheritdoc />
+        /// <summary>While the edit can be taken back, and the slots stand as it left them.</summary>
         public override bool Undoable(T subject)
         {
-            return _edit.Undoable(subject);
+            return _edit.Undoable(subject) && Holds(true);
+        }
+
+        /// <summary>While the edit can be made again, and the slots stand as they were before it.</summary>
+        public override bool Redoable(T subject)
+        {
+            return _edit.Redoable(subject) && Holds(false);
+        }
+
+        /// <summary>Whether every slot change it carries stands as it was made, where <paramref name="made" />, or as before it.</summary>
+        bool Holds(bool made)
+        {
+            for (var i = 0; i < _reslots.Count; i++)
+            {
+                if (!_reslots[i].Holds(made))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <inheritdoc />
-        public override bool Redoable(T subject)
+        public override bool Held(T subject, bool back)
         {
-            return _edit.Redoable(subject);
+            return _edit.Held(subject, back);
         }
     }
 }

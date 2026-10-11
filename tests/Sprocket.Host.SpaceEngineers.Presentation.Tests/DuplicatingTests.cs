@@ -42,15 +42,7 @@ public class DuplicatingTests
         Assert.Equal(2, screen.Editor.Program.Sequences.Count);
     }
 
-    /// <summary>
-    /// A sequence is thrown away from its row as well as from its own screen.
-    /// </summary>
-    /// <remarks>
-    /// The row has the switch that parks it and the button that copies it; the one thing it did not
-    /// have was the way to be rid of it, which left the bin on the sequence's own screen as
-    /// something to be found rather than seen. It asks first, wherever it is pressed from: a
-    /// sequence is work, and this is the one act in the editor that cannot be walked back.
-    /// </remarks>
+    /// <summary>A sequence is deleted from its row on its logic system's screen, at once, and undo brings it back.</summary>
     [Fact]
     public void ASequenceIsDeletedFromItsRow()
     {
@@ -62,19 +54,12 @@ public class DuplicatingTests
         row.Deletes!.Execute();
         screen.Run(2);
 
-        Assert.StartsWith("Delete this sequence?", screen.Editor.Question());
-
-        // The safe answer first, and taking it leaves the sequence where it was.
-        screen.Editor.PressChoice("Keep it");
-        screen.Run(2);
-
-        Assert.Single(screen.Editor.Program.Sequences);
-
-        Row(screen, 0).Deletes!.Execute();
-        screen.Editor.PressChoice("Delete it");
-        screen.Run(2);
-
+        Assert.Equal("", screen.Editor.Question());
         Assert.Empty(screen.Editor.Program.Sequences);
+
+        screen.Editor.Screen.Undo!.Execute();
+        screen.Run(2);
+        Assert.Single(screen.Editor.Program.Sequences);
     }
 
     /// <summary>
@@ -136,25 +121,18 @@ public class DuplicatingTests
         Assert.Null(made.Trigger);
     }
 
-    /// <summary>
-    /// A sequence of a system switched on can be copied, and the copy starts on nothing.
-    /// </summary>
-    /// <remarks>
-    /// Unlike everything on the sequence's own screen, which waits for the switch. Copying does not
-    /// touch what is running, and the copy cannot run: it has nothing to start it.
-    /// </remarks>
+    /// <summary>A sequence of a logic system switched on is not copied: copying is an edit, so its copy waits for the switch, quiet in its place.</summary>
     [Fact]
-    public void ARunningSequenceCanBeCopied()
+    public void ARunningSequenceIsNotCopied()
     {
         var screen = AtTheList();
         screen.Editor.Screen.Flip!.Execute();
         screen.Run(2);
 
-        Duplicate(screen, 0);
-
-        Assert.True(screen.Editor.Program.Systems[0].Enabled);
-        Assert.Equal(2, screen.Editor.Program.Sequences.Count);
-        Assert.Null(screen.Editor.Program.Sequences[1].Trigger);
+        var row = Row(screen, 0);
+        Assert.Null(row.Copies);
+        Assert.NotEmpty(row.Locked);
+        Assert.Single(screen.Editor.Program.Sequences);
     }
 
     /// <summary>The copy is a sequence of the same system, so the system's list shows both.</summary>

@@ -94,14 +94,14 @@ public class WatchingTests
     }
 
     /// <summary>
-    /// The undo pair holds its place whether or not there is anything to walk back.
+    /// The undo pair holds its place whether or not there is anything to walk either way.
     /// </summary>
     /// <remarks>
     /// Hiding them would move the marks beside them sideways every time somebody made or undid a
     /// change - under the pointer they were about to use.
     /// </remarks>
     [Fact]
-    public void TheUndoPairHoldsItsPlaceWithNothingToUndo()
+    public void TheUndoPairHoldsItsPlace()
     {
         var screen = Screen.Fresh();
         var editor = screen.Editor;
@@ -112,10 +112,10 @@ public class WatchingTests
         var undo = screen.Marks(Symbols.Undo)[0];
         var redo = screen.Marks(Symbols.Redo)[0];
         var placed = new[] { undo.At, redo.At };
-        var quiet = undo.Ink;
+        var quiet = redo.Ink;
 
-        // Freshly built: nothing to walk back either way, but both are there and quiet.
-        Assert.Equal(quiet, redo.Ink);
+        // Freshly built: the trigger it was made with to walk back, nothing to walk forward, and both there.
+        Assert.NotEqual(quiet, undo.Ink);
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
@@ -138,7 +138,8 @@ public class WatchingTests
         undo = screen.Marks(Symbols.Undo)[0];
         redo = screen.Marks(Symbols.Redo)[0];
 
-        Assert.Equal(quiet, undo.Ink);
+        // The step walked back: redo lit as well now, both in the same places.
+        Assert.NotEqual(quiet, undo.Ink);
         Assert.NotEqual(quiet, redo.Ink);
         Assert.Equal(placed[0], undo.At);
         Assert.Equal(placed[1], redo.At);

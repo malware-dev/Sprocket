@@ -18,6 +18,12 @@ A logic system doesn't name your blocks. It names [slots](#slot), such as *the i
 
 Because the job is kept apart from the blocks, it can travel. Kept in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint), it can be put on another [construct](#construct), and whoever installs it only chooses their own blocks on the [installation panel](#installation-panel).
 
+## Undo and redo
+
+The undo and redo arrows on this screen walk the construct's own list of changes: adding and deleting logic systems and installations, `Add to this construct` and `Make a copy` in the library, `Update from library` and `Reset to blueprint`, and renaming the construct. Everything done inside a logic system is on that logic system's own list, which the logic system page explains.
+
+Taking away a logic system or an installation that may be running waits until it is switched off. Whatever undo or redo brings back comes back switched off, and a logic system brought back has its own list of changes again. The list lasts for the game session.
+
 ## Where to start
 
 This screen lists every logic system on this construct. To build your own, start with the logic system page.

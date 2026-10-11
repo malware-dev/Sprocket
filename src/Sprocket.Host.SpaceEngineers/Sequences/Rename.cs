@@ -1,11 +1,13 @@
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
+    /// <summary>Gives a sequence another name.</summary>
     public sealed class Rename : SequenceEdit
     {
         readonly string _was;
         readonly string _now;
 
+        /// <summary>Renames a sequence called <paramref name="was" /> to <paramref name="now" />.</summary>
         public Rename(string was, string now)
         {
             _was = was;
@@ -20,6 +22,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override bool Changes => _was != _now;
+
+        /// <summary>A sequence is renamed whether or not its logic system runs, so taking the name back waits for nothing either.</summary>
+        public override bool Held(Sequence sequence, bool back)
+        {
+            return false;
+        }
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)

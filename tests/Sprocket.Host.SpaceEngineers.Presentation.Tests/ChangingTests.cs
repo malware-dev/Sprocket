@@ -482,8 +482,8 @@ public class ChangingTests
     {
         var screen = WithOne();
 
-        // Nothing done to this system yet, so both arrows are quiet and holding their place.
-        Assert.Null(screen.Editor.Steps().Undo);
+        // Only the trigger it was made with so far, and nothing to walk forward.
+        Assert.Equal("adding a trigger", screen.Editor.Steps().UndoText);
         Assert.Null(screen.Editor.Steps().Redo);
 
         screen.Editor.PressWhen(0);
@@ -577,8 +577,8 @@ public class ChangingTests
         trigger.Sources.Clear();
         screen.Run(2);
 
-        Assert.Null(screen.Editor.Steps().Undo);
-        Assert.Equal("", screen.Editor.Steps().UndoText);
+        // The way back goes on from the step before it.
+        Assert.Equal("renaming the logic system", screen.Editor.Steps().UndoText);
 
         // And the trigger is left as the game left it.
         Assert.Same(trigger, System(screen).Triggers[0]);

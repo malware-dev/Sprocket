@@ -277,8 +277,9 @@ public class SetSlotTests
         screen.Editor.PressPrimary();
         screen.Run(2);
 
-        Assert.Empty(port.FilledWith(whole)!);
-        Assert.Empty(system.First!.FilledWith(whole)!);
+        // Nothing holds it any more, so the slot goes with its blocks.
+        Assert.Null(system.FindPart(whole));
+        Assert.Null(port.FilledWith(whole));
         Assert.DoesNotContain("'" + whole + "'", ProgramText.Save(screen.Editor.Program, screen.Editor.World.Values));
     }
 

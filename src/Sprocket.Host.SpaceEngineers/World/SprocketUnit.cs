@@ -964,7 +964,85 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 Toolbars.Clear(toolbar, had.Slot);
                 Told.Say("released slot " + had.Slot + " on panel " + had.PanelId);
+                GiveBack(toolbar, had);
             }
+        }
+
+        /// <summary>
+        /// Notes what a player had in the slot <paramref name="want" /> is about to write over, where it is their own item, so
+        /// letting go of the slot gives it back.
+        /// </summary>
+        void Keep(IMyToolbar toolbar, Want want, MyToolbarItemInfo present)
+        {
+            var kept = Overwritten(want);
+            if (kept == null)
+            {
+                kept = new Taken { PanelId = want.PanelId, Toolbar = want.Toolbar, Slot = want.Slot };
+                _taken.Add(kept);
+            }
+
+            kept.Key = want.Key;
+            kept.Back = false;
+            kept.Item = present;
+            kept.Parameters.Clear();
+            Toolbars.Parameters(toolbar, want.Slot, kept.Parameters);
+
+            var panel = want.Toolbar != 1 ? null : PanelOf(want);
+            kept.Named = false;
+            kept.Name = null;
+            if (panel == null || !panel.HasCustomButtonName(want.Slot))
+                return;
+
+            kept.Named = true;
+            kept.Name = panel.GetButtonName(want.Slot);
+        }
+
+        /// <summary>Puts back in the slot <paramref name="had" /> let go of the player's own item it held before Sprocket took it, where there was one.</summary>
+        /// <remarks>
+        /// Remembered as taken back, so the same button taken over again, by a step made again, is taken again rather than
+        /// left as somebody's.
+        /// </remarks>
+        void GiveBack(IMyToolbar toolbar, Want had)
+        {
+            var kept = Overwritten(had);
+            if (kept == null || kept.Back)
+                return;
+
+            if (!Toolbars.Write(toolbar, had.Slot, kept.Item, kept.Parameters))
+            {
+                _taken.Remove(kept);
+                return;
+            }
+
+            kept.Back = true;
+            var panel = had.Toolbar != 1 ? null : PanelOf(had);
+            if (panel == null)
+                return;
+
+            if (kept.Named)
+                panel.SetCustomButtonName(had.Slot, kept.Name);
+            else
+                panel.ClearCustomButtonName(had.Slot);
+        }
+
+        /// <summary>What a player had in the slot of <paramref name="want" /> before Sprocket wrote over it, or null.</summary>
+        Taken Overwritten(Want want)
+        {
+            for (var i = 0; i < _taken.Count; i++)
+            {
+                var kept = _taken[i];
+                if (kept.PanelId == want.PanelId && kept.Toolbar == want.Toolbar && kept.Slot == want.Slot)
+                    return kept;
+            }
+
+            return null;
+        }
+
+        /// <summary>The button panel <paramref name="want" /> is on, or null where it is another kind of block.</summary>
+        IMyButtonPanel PanelOf(Want want)
+        {
+            var grid = _runner.Bindings.Entity(want.Reference);
+            return grid == null ? null : grid.Block as IMyButtonPanel;
         }
 
         /// <summary>Claims every button the program asks for and Sprocket does not already hold.</summary>
@@ -991,7 +1069,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (filled && Asked(toolbar, present, want))
                     continue;
 
-                if (filled && !Mine(present) && !Orphaned(present))
+                var given = Overwritten(want);
+                if (filled && given != null && given.Back && string.Equals(given.Key, want.Key, StringComparison.Ordinal))
+                {
+                    Keep(toolbar, want, present);
+                }
+                else if (filled && !Mine(present) && !Orphaned(present))
                 {
                     // Somebody's panel already does something. Overwriting it would configure
                     // Sprocket by breaking their ship, which is worse than not working - and another
@@ -1167,8 +1250,12 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 MyToolbarItemInfo present;
-                if (toolbar.TryGetItem(want.Slot, out present) && Asked(toolbar, present, want))
+                var filled = toolbar.TryGetItem(want.Slot, out present);
+                if (filled && Asked(toolbar, present, want))
                     continue;
+
+                if (filled && !Mine(present) && !Orphaned(present))
+                    Keep(toolbar, want, present);
 
                 if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
                 {
@@ -1191,6 +1278,23 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<long> _asserted = new List<long>();
         readonly List<long> _answered = new List<long>();
+
+        /// <summary>The players' own items Sprocket wrote over because somebody took their button, kept for the life of the session to be given back.</summary>
+        readonly List<Taken> _taken = new List<Taken>();
+
+        /// <summary>A player's own item in a toolbar slot, as it was before Sprocket took the slot.</summary>
+        sealed class Taken
+        {
+            public long PanelId;
+            public int Toolbar;
+            public int Slot;
+            public string Key;
+            public bool Back;
+            public MyToolbarItemInfo Item;
+            public readonly List<TerminalActionParameter> Parameters = new List<TerminalActionParameter>();
+            public bool Named;
+            public string Name;
+        }
 
         /// <summary>Names the button <paramref name="want" /> has just wired after the signal slot it answers.</summary>
         /// <remarks>
@@ -1420,6 +1524,14 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             program = ProgramText.Save(_program, _world.Values);
             state = StateText.Save(_program, _runner);
+        }
+
+        /// <summary>Takes up <paramref name="state" />, the switches and runs the block holds now, over what this copy last knew.</summary>
+        /// <remarks>For a copy lent again unchanged: its program is the block's, and only what is switched on may have moved since.</remarks>
+        public void Restate(string state)
+        {
+            StateText.Load(state, _program, _runner);
+            _program.Rewire();
         }
 
         /// <summary>Has the editor build its words again, after the language changes; an editor not yet made builds them when it is.</summary>

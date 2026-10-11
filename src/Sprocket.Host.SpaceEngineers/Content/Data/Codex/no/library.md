@@ -18,7 +18,7 @@ Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen, 
 - `Lag plantegning` tar vare på en kopi i lageret, og `Oppdater plantegning` oppdaterer den kopien.
 - `Oppdater fra biblioteket` henter en nyere kopi fra lageret, og `Tilbakestill til plantegning` går tilbake til kopien i lageret, uten endringene som er gjort siden. Uansett beholder installasjonene blokkene sine.
 - `Lag en kopi` setter et nytt logikksystem på denne konstruksjonen som starter som en kopi av dette.
-- Søppelkassen sletter en plantegning fra lageret, etter å ha spurt. Logikksystemer som allerede er på konstruksjoner, fortsetter å kjøre. På en sikkerhetskopi glemmer søppelkassen den ene sikkerhetskopien.
+- Søppelkassen sletter en plantegning fra lageret for godt, etter å ha spurt. Logikksystemer som allerede er på konstruksjoner, fortsetter å kjøre. På en sikkerhetskopi glemmer søppelkassen den ene sikkerhetskopien.
 
 Siden om plantegninger forklarer hver av disse.
 
@@ -28,4 +28,4 @@ Når den siste programmerbare blokken på en konstruksjon blir ødelagt eller sl
 
 Hver sikkerhetskopi virker som en plantegning. Den kan settes på denne konstruksjonen, kopieres eller tas vare på i lageret med `Lag plantegning`, så alle verdener kan bruke den. Installasjonene ble igjen med konstruksjonen den ble tatt fra, så når den settes på denne konstruksjonen, kommer den med én ny installasjon som skal fylles.
 
-Søppelkassen glemmer én sikkerhetskopi, etter å ha spurt.
+Søppelkassen glemmer én sikkerhetskopi for godt, etter å ha spurt.

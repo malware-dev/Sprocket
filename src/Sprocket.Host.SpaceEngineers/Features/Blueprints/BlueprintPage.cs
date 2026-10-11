@@ -85,6 +85,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>An installation has to be called something, since it is told from the others by its name.</summary>
         public override bool NameRequired => true;
 
+        /// <summary>The way back of the logic system the installation is one of: the last thing done to it, on any of its screens.</summary>
+        public override bool HasHistory => true;
+
+        /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system);
+
+        /// <inheritdoc />
+        public override string UndoText => Editor.UndoLabel(_system);
+
+        /// <inheritdoc />
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system);
+
+        /// <inheritdoc />
+        public override string RedoText => Editor.RedoLabel(_system);
+
         /// <summary>The blueprint's parts, one row each, with the chosen logic system's blocks for each.</summary>
         public Element.Collection Parts => _partList.Children;
 
@@ -119,7 +134,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 return;
 
             if (Blockset != null)
-                Blockset.Name = wanted;
+                Editor.Do(_system, new RenameInstallation(Blockset, Blockset.Name, wanted));
         }
 
         /// <summary>Names the blueprint after the installation's name, as a part of its own that opens the blueprint's logic system screen.</summary>
@@ -134,6 +149,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);
             from.Opens = Editor.Act(Cmd.OpenSystem, delegate { Editor.Push(new LogicSystemPage(Editor, _system)); });
             parts.Add(from);
+        }
+
+        /// <inheritdoc />
+        public override void Undo()
+        {
+            Editor.Undo(_system);
+        }
+
+        /// <inheritdoc />
+        public override void Redo()
+        {
+            Editor.Redo(_system);
         }
 
         /// <inheritdoc />
@@ -210,6 +237,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             Needs(chosen, unfilled);
             Troubled(chosen);
+
+            var runs = chosen != null && Live(chosen);
+            _locked.IsVisible = runs;
+            _locked.Text = runs ? Template.Fill(texts.SystemLocked, "name", Title) : "";
             _rule.IsVisible = _description.IsVisible || _troubled.IsVisible;
         }
 
@@ -311,7 +342,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var gone = row.Take(Editor.Runner.Bindings, chosen == null ? null : chosen.FilledWith(part.Id),
                 chosen == null || !part.IsSignal ? null : chosen.Positions(part.Id));
 
-            row.Fills = chosen == null ? null : Editor.Act(Cmd.FillPart, delegate { _fill.Ask(part, chosen); });
+            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(Cmd.FillPart, delegate { _fill.Ask(part, chosen); });
 
             row.Problem = row.Blocks.Count == 0 && gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
 
@@ -343,10 +374,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             PartList.Listed(_system, _used, _parts);
         }
 
-        /// <summary>What the page is built from that can change under it, as one number: how many of it, and which is chosen.</summary>
+        /// <summary>Whether <paramref name="chosen" /> may run now, which keeps its blocks as they are: switched on, in a logic system switched on.</summary>
+        bool Live(SystemInstance chosen)
+        {
+            return _system.Enabled && chosen.Enabled;
+        }
+
+        /// <summary>What the page is built from that can change under it, as one number: how many of it, which is chosen, and whether that one may run.</summary>
         int Shape(SystemInstance chosen)
         {
-            return _system.Instances.Count * 31 + (chosen == null ? 0 : chosen.Number);
+            var shape = _system.Instances.Count * 31 + (chosen == null ? 0 : chosen.Number);
+            return shape * 2 + (chosen != null && Live(chosen) ? 1 : 0);
         }
     }
 }

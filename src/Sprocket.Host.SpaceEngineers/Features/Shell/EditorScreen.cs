@@ -35,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         ICommand _stops;
         ICommand _deletes;
         string _deleteAbout = "";
+        string _deleteLocked;
         bool _hasHistory;
         ICommand _undo;
         string _undoText = "";
@@ -172,6 +173,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _deleteAbout; }
             set { Set(ref _deleteAbout, value ?? ""); }
+        }
+
+        /// <summary>Why the subject cannot be deleted now, which the bin says dimmed in its place; null where nothing holds it.</summary>
+        public string DeleteLocked
+        {
+            get { return _deleteLocked; }
+            set { Set(ref _deleteLocked, value); }
         }
 
         /// <summary>Whether this screen has a way back from what was done on it.</summary>

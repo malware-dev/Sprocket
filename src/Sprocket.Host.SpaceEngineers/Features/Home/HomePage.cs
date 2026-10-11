@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             if (wanted.Length == 0)
                 return;
 
-            Editor.World.Rename(wanted);
+            Editor.Do(new RenameConstruct(Editor.World, Editor.World.Name, wanted));
         }
 
         /// <inheritdoc />

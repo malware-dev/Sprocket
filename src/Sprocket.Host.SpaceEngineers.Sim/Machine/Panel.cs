@@ -39,6 +39,7 @@ public sealed class Panel : Fitting
             })
             .Does("IsButtonAssigned", arguments => Toolbar.Holds((int)arguments[0]))
             .Does("GetButtonName", arguments => Label((int)arguments[0]))
+            .Does("HasCustomButtonName", arguments => _labels.ContainsKey((int)arguments[0]))
             .Does("SetCustomButtonName", arguments =>
             {
                 _labels[(int)arguments[0]] = (string)arguments[1];

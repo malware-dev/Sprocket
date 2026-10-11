@@ -30,4 +30,4 @@ When a sequence can't carry on, only that installation is switched off, and its 
 
 ## Removing one
 
-The bin on an installation's row deletes it, after asking. The logic system and its other installations are kept. A logic system keeps at least one installation, so the bin of the last one can't be pressed.
+The bin on an installation's row deletes it at once, and undo on the home screen brings it back, switched off. The logic system and its other installations are kept. The bin can be pressed while the logic system is switched off, as for any change. A logic system keeps at least one installation, so the bin of the last one can't be pressed.

@@ -226,6 +226,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What deleting the subject does, said as the bin's note.</summary>
         public virtual string DeleteAbout => "";
 
+        /// <summary>Why the subject cannot be deleted now, said on a bin that keeps its place but cannot be pressed; null where nothing holds it.</summary>
+        public virtual string DeleteLocked => null;
+
         /// <summary>Whether this page shows <paramref name="system" /> or something in it, so it goes when the system does.</summary>
         public virtual bool IsAbout(AutomationSystem system)
         {

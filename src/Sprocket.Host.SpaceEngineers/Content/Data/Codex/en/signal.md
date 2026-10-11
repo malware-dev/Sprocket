@@ -17,7 +17,7 @@ Each button or toolbar slot sends a signal of its own, so one block can start se
 
 ### Setting one up
 
-The signal reaches a ![](mark:logic-system) [logic system](#logic-system) through a ![](mark:signal) [signal slot](#slot), which holds the block and the toolbar slot that sends it. When the signal slot is filled, that toolbar slot is set up for you, and shows `Automation Signal`. If it already does something else, you are asked whether to take it over, replacing what it did, or leave it alone.
+The signal reaches a ![](mark:logic-system) [logic system](#logic-system) through a ![](mark:signal) [signal slot](#slot), which holds the block and the toolbar slot that sends it. When the signal slot is filled, that toolbar slot is set up for you, and shows `Automation Signal`. If it already does something else, you are asked whether to take it over, replacing what it did, or leave it alone. Undoing the take-over gives the toolbar slot back what it did, as long as nothing else has been put there since.
 
 ### When the toolbar slot is changed
 

@@ -17,7 +17,7 @@ Hver knapp eller verktøylinjeplass sender sitt eget signal, så én blokk kan s
 
 ### Sette opp et
 
-Signalet når et ![](mark:logic-system) [logikksystem](#logic-system) gjennom en ![](mark:signal) [signalplass](#slot), som holder blokken og verktøylinjeplassen som sender det. Når signalplassen fylles, settes den verktøylinjeplassen opp for deg og viser `Automasjonssignal`. Gjør den allerede noe annet, blir du spurt om du vil ta den over og erstatte det den gjorde, eller la den være.
+Signalet når et ![](mark:logic-system) [logikksystem](#logic-system) gjennom en ![](mark:signal) [signalplass](#slot), som holder blokken og verktøylinjeplassen som sender det. Når signalplassen fylles, settes den verktøylinjeplassen opp for deg og viser `Automasjonssignal`. Gjør den allerede noe annet, blir du spurt om du vil ta den over og erstatte det den gjorde, eller la den være. Angrer du overtakelsen, får verktøylinjeplassen tilbake det den gjorde, så lenge ingenting annet er lagt der siden.
 
 ### Når verktøylinjeplassen endres
 

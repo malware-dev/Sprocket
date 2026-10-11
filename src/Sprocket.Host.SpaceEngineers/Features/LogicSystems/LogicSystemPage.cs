@@ -124,14 +124,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </remarks>
         public override bool HasHistory => true;
 
-        /// <summary>Nothing is walked back while the system may run, as nothing else about it changes then.</summary>
-        public override bool CanUndo => Editable && Editor.CanUndo(_system);
+        /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system);
 
         /// <inheritdoc />
         public override string UndoText => Editor.UndoLabel(_system);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editable && Editor.CanRedo(_system);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system);
 
         /// <inheritdoc />
         public override string RedoText => Editor.RedoLabel(_system);
@@ -156,7 +156,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (wanted.Length == 0 || !AcceptsName(wanted))
                 return;
 
-            _system.Name = wanted;
+            Editor.Do(_system, new RenameSystem(_system.Name, wanted));
         }
 
         /// <inheritdoc />
@@ -398,7 +398,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.About = texts.SystemOpenSequence;
                 row.AboutArguments.Set("name", SequenceText.Called(texts, sequence));
 
-                // Deleting one is changing the system, so it waits for the switch like any other change.
+                // Copying one or deleting it is changing the system, so it waits for the switch like any other change.
+                row.Copies = Changes(Cmd.DuplicateSequence, delegate { Editor.Duplicate(sequence); });
                 row.Deletes = Changes(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(sequence); });
                 row.DeleteText = texts.SequenceDelete;
                 row.Locked = Locked();
@@ -640,16 +641,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         StatusRow Own(Sequence sequence)
         {
-            // Copying is offered whether or not the system is on: a copy is started by nothing, so making one cannot
-            // disturb what is running. Running it by hand is offered whatever the switch says, because somebody working
-            // on a system switches it off so its triggers leave it alone, and that is when running a sequence by hand is
-            // worth most.
+            // Running it by hand is offered whatever the switch says, because somebody working on a system switches it off so
+            // its triggers leave it alone, and that is when running a sequence by hand is worth most.
 
             return new StatusRow
             {
                 Mark = Symbols.Sequence,
                 Opens = Editor.Act(Cmd.OpenSequence, delegate { Editor.Push(new SequencePage(Editor, sequence)); }),
-                Copies = Editor.Act(Cmd.DuplicateSequence, delegate { Editor.Duplicate(sequence); }),
                 Runs = Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(sequence); }),
                 Stops = Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(sequence); }),
                 AboutArguments = new Arguments()

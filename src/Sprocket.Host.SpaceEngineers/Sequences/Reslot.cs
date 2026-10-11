@@ -137,6 +137,48 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
+        /// <summary>
+        /// Whether the slots stand as this left them, where <paramref name="made" />, or as they were before it: its slots made
+        /// or not, the lists it renamed saying what it left, and its slots dropped or not.
+        /// </summary>
+        /// <remarks>What decides whether the step carrying it can still be walked; a walk of what it changed, and no more.</remarks>
+        public bool Holds(bool made)
+        {
+            for (var i = 0; i < _made.Count; i++)
+            {
+                if ((System.FindPart(_made[i].Id) == _made[i]) != made)
+                    return false;
+            }
+
+            for (var i = 0; i < _renamed.Count; i++)
+            {
+                if (!Same(_renamed[i], made ? _renamedNow[i] : _renamedWas[i]))
+                    return false;
+            }
+
+            for (var i = 0; i < _dropped.Count; i++)
+            {
+                if ((System.FindPart(_dropped[i].Id) == _dropped[i]) == made)
+                    return false;
+            }
+
+            return true;
+        }
+
+        static bool Same(IList<string> left, IList<string> right)
+        {
+            if (left.Count != right.Count)
+                return false;
+
+            for (var i = 0; i < left.Count; i++)
+            {
+                if (left[i] != right[i])
+                    return false;
+            }
+
+            return true;
+        }
+
         static void Put(IList<string> target, IList<string> source)
         {
             target.Clear();

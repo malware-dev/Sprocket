@@ -18,7 +18,7 @@ Choose one to see who made it and when it last changed, its description, and its
 - `Make blueprint` keeps a copy in storage, and `Update blueprint` brings that copy up to date.
 - `Update from library` takes a newer copy from storage, and `Reset to blueprint` goes back to the copy in storage, leaving out the changes made since. Either way its installations keep their blocks.
 - `Make a copy` puts a new logic system on this construct that starts as a copy of this one.
-- The bin deletes a blueprint from storage, after asking. Logic systems already on constructs keep running. On a backup, the bin forgets that one backup.
+- The bin deletes a blueprint from storage for good, after asking. Logic systems already on constructs keep running. On a backup, the bin forgets that one backup.
 
 The blueprint page explains each of these.
 
@@ -28,4 +28,4 @@ When a construct's last programmable block is destroyed or ground down, the logi
 
 Each backup works like a blueprint. It can be put on this construct, copied, or kept in storage with `Make blueprint`, so that every world can use it. Its installations stayed with the construct it was kept from, so when it is put on this construct it comes with one new installation to fill.
 
-The bin forgets one backup, after asking.
+The bin forgets one backup for good, after asking.

@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>Logic systems thrown away from the home page, each after asking, the toolbar slots their triggers took let go of.</summary>
+/// <summary>Logic systems thrown away from the home page, at once and back with undo, the toolbar slots their triggers took let go of.</summary>
 public class DeletingSystemsTests
 {
     /// <summary>A logic system keeps at least one installation: the only one's bin says so, and asking to delete it does nothing.</summary>
@@ -30,8 +30,7 @@ public class DeletingSystemsTests
         Assert.True(Button(sim).Toolbar.TryGetItem(0, out _), "the trigger never took the button");
 
         sim.Editor.RootHeadings().Single().Deletes!.Execute();
-        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        Assert.Equal("", sim.Editor.Question());
         for (var i = 0; i < 5; i++)
             sim.Tick();
 
@@ -49,13 +48,9 @@ public class DeletingSystemsTests
         var system = sim.Editor.Program.Systems.Single();
         Assert.Equal(2, system.Instances.Count);
 
-        // Asked as the one going, and told that the blueprint and the rest are kept.
+        // Gone at once, without a question: undo is the way back.
         sim.Editor.RootRows()[1].Deletes!.Execute();
-        Assert.StartsWith(sim.Texts.DeleteInstance, sim.Editor.Question());
-        Assert.EndsWith("The " + system.Name + " logic system and its other installations are kept.",
-            sim.Editor.Question());
-
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
+        Assert.Equal("", sim.Editor.Question());
         sim.Tick();
 
         Assert.Single(system.Instances);
@@ -72,7 +67,6 @@ public class DeletingSystemsTests
     {
         var sim = Blueprinted();
         sim.Editor.RootRows()[1].Deletes!.Execute();
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
 
         var system = sim.Editor.Program.Systems.Single();
@@ -90,8 +84,8 @@ public class DeletingSystemsTests
     }
 
     /// <summary>
-    /// A logic system's own screen has a bin too, which asks the same plain question and leaves for the home screen once it has
-    /// gone; undo there puts it back whole, installations and all, and redo takes it out again.
+    /// A logic system's own screen has a bin too, which deletes it at once and leaves for the home screen; undo there puts it
+    /// back whole, installations and all, switched off, and redo takes it out again.
     /// </summary>
     [Fact]
     public void ADeletedLogicSystemComesBackWithUndo()
@@ -103,8 +97,6 @@ public class DeletingSystemsTests
 
         Assert.Equal(sim.Texts.SystemDelete, sim.Editor.Screen.DeleteAbout);
         sim.Editor.Screen.Deletes!.Execute();
-        Assert.StartsWith(sim.Texts.DeleteSystem, sim.Editor.Question());
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
 
         Assert.Empty(sim.Editor.Program.Systems);
@@ -114,6 +106,7 @@ public class DeletingSystemsTests
         sim.Tick();
 
         Assert.Same(system, sim.Editor.Program.Systems.Single());
+        Assert.False(system.Enabled, "what came back came back switched on");
         Assert.Equal(2, system.Instances.Count);
         Assert.Single(sim.Editor.Program.Sequences);
         Assert.True(Button(sim).Toolbar.TryGetItem(0, out _), "the button was not wired again");
@@ -132,7 +125,6 @@ public class DeletingSystemsTests
         var second = system.Instances[1];
 
         sim.Editor.RootRows()[1].Deletes!.Execute();
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
         Assert.Single(system.Instances);
 
@@ -170,7 +162,6 @@ public class DeletingSystemsTests
     {
         var sim = Built();
         sim.Editor.RootHeadings().Single().Deletes!.Execute();
-        sim.Editor.PressChoice(sim.Texts.DeleteConfirm);
         sim.Tick();
         Assert.True(sim.Editor.Screen.Undo != null && sim.Editor.CanUndoConstruct());
 

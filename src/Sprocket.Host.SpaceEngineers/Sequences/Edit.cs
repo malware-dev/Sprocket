@@ -77,6 +77,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
+        /// <summary>
+        /// Whether taking this back, where <paramref name="back" />, or making it again, waits for a switch now: it changes what
+        /// may be running.
+        /// </summary>
+        /// <remarks>
+        /// A step is walked under the rule it was made under, so nothing can be undone that could not be done now. Nothing waits
+        /// unless the edit says so.
+        /// </remarks>
+        public virtual bool Held(T subject, bool back)
+        {
+            return false;
+        }
+
         /// <summary>A list of its own holding the same ids as <paramref name="ids" />.</summary>
         protected static List<string> CopyOf(IList<string> ids)
         {

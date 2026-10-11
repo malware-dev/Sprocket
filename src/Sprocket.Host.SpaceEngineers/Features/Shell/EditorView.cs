@@ -679,9 +679,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _runs.CanExecute = doing != null;
             _run.Tip = Tip.For(_run.Tip, doing == null ? null : screen.Running ? SequenceText.Stops(texts) : SequenceText.Starts(texts));
 
-            _delete.IsVisible = screen.Deletes != null;
+            // A bin held back keeps its place, so nothing beside it moves when a switch is flipped.
+            _delete.IsVisible = screen.Deletes != null || screen.DeleteLocked != null;
             _deletes.CanExecute = screen.Deletes != null;
-            _delete.Tip = Tip.For(_delete.Tip, screen.Deletes != null ? screen.DeleteAbout : null);
+            _delete.Tip = Tip.For(_delete.Tip, screen.Deletes != null ? screen.DeleteAbout : screen.DeleteLocked);
 
             // The words say the act and its reach, not what it is on - the heading directly above says that.
             _switch.IsVisible = screen.HasSwitch;

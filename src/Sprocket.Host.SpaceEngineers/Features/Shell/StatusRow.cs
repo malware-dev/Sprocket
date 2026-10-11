@@ -313,10 +313,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.Tip = Tip.For(_switch.Tip,
                 !switches ? null : held ? SwitchLocked : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
 
+            // A row that may not be changed now keeps its copy and its bin, quiet, saying why.
+            var locked = !string.IsNullOrEmpty(Locked);
             var copies = Copies != null;
-            _duplicate.IsVisible = copies;
+            _duplicate.IsVisible = copies || locked && DuplicateText != null;
             _copies.CanExecute = copies;
-            _duplicate.Tip = Tip.For(_duplicate.Tip, copies ? DuplicateText : null);
+            _duplicate.Tip = Tip.For(_duplicate.Tip, copies ? DuplicateText : locked ? Locked : null);
 
             var offers = Offers != null;
             _button.IsVisible = offers;
@@ -326,9 +328,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (offers)
                 _button.Text = ButtonText;
 
-            // A row that may not be deleted now keeps its bin, quiet, saying why.
             var bins = Deletes != null;
-            var locked = !string.IsNullOrEmpty(Locked);
             _delete.IsVisible = bins || locked;
             _delete.Symbol = BinMark ?? Symbols.Delete;
             _bins.CanExecute = bins;

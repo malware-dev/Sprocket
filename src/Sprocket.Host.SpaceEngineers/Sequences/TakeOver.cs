@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<string> _kept;
         readonly List<ToolbarSlot> _keptAt;
 
-        /// <summary>Does <paramref name="made" />, leaving signal part <paramref name="part" /> of <paramref name="from" /> answered by <paramref name="kept" /> at <paramref name="keptAt" /> alone.</summary>
+        /// <summary>Does <paramref name="made" />, where there is anything, leaving signal part <paramref name="part" /> of <paramref name="from" /> answered by <paramref name="kept" /> at <paramref name="keptAt" /> alone.</summary>
         public TakeOver(SystemEdit made, SystemInstance from, string part, IList<string> kept, IList<ToolbarSlot> keptAt)
         {
             _made = made;
@@ -44,7 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
-            _made.Apply(system);
+            if (_made != null)
+                _made.Apply(system);
             Put(_kept, _keptAt);
         }
 
@@ -52,19 +53,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Undo(AutomationSystem system)
         {
             Put(_had, _hadAt);
-            _made.Undo(system);
+            if (_made != null)
+                _made.Undo(system);
+        }
+
+        /// <summary>Waits for what it did, and for the installation it took the button from while that may run.</summary>
+        public override bool Held(AutomationSystem system, bool back)
+        {
+            return _made != null && _made.Held(system, back) || _from.Enabled;
         }
 
         /// <summary>Only while what it did is still what is there, and what it took is still gone.</summary>
         public override bool Undoable(AutomationSystem system)
         {
-            return Holding(_kept) && _made.Undoable(system);
+            return Holding(_kept) && (_made == null || _made.Undoable(system));
         }
 
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return Holding(_had) && _made.Redoable(system);
+            return Holding(_had) && (_made == null || _made.Redoable(system));
         }
 
         bool Holding(IList<string> blocks)

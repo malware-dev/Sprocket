@@ -25,7 +25,7 @@ The copy opens at once, ready to be changed.
 
 ## Taking it off
 
-The minus beside a logic system on the home screen takes it and its installations off this construct, after asking. If the logic system was changed after its blueprint, it also asks whether to bring the blueprint up to date. A logic system that has no blueprint has a bin there instead, which deletes it, since it is the only copy.
+The minus beside a logic system on the home screen takes it and its installations off this construct, after asking. If the logic system was changed after its blueprint, it also asks whether to bring the blueprint up to date. A logic system that has no blueprint has a bin there instead, since it is the only copy. The bin deletes it at once, and undo on the home screen brings it back, switched off.
 
 ## Each construct keeps its own
 
