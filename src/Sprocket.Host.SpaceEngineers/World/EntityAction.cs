@@ -13,8 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityAction
     {
-        /// <summary>The third choice on a flag's switch, beside on and off, which writes the game's toggle for it.</summary>
-        public const string Flip = "flip";
+        /// <summary>The third choice on a flag's switch, after on and off, which writes the game's toggle for it.</summary>
+        public const string Toggle = "toggle";
 
         /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, standing for the game's member <paramref name="gameActionId" /> where there is one.</summary>
         public EntityAction(string id, string text, string gameActionId)
@@ -220,7 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public bool Hidden { get; private set; }
 
-        /// <summary>Whether this flag is also flipped, by the game's toggle beside it, chosen as <see cref="Flip" /> on its switch.</summary>
+        /// <summary>Whether this flag is also flipped, by the game's toggle beside it, chosen as <see cref="Toggle" /> on its switch.</summary>
         public bool Flips => FlippedBy != null;
 
         /// <summary>The id of the game's toggle that flips this flag, or null where nothing does.</summary>
@@ -243,11 +243,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Leaves this out of the list somebody chooses from.</summary>
-        /// <summary>Says this flag is also flipped, by the game's toggle <paramref name="toggle" />: its switch offers off, on and flip.</summary>
+        /// <summary>Says this flag is also flipped, by the game's toggle <paramref name="toggle" />: its switch offers on, off and toggle.</summary>
         public void Flipped(string toggle)
         {
             FlippedBy = toggle;
-            _writes.Words = new[] { Literal.Of(false).Said, Literal.Of(true).Said, Flip };
+            _writes.Words = new[] { Literal.Of(true).Said, Literal.Of(false).Said, Toggle };
         }
 
         /// <summary>Keeps it out of the organized view.</summary>

@@ -174,7 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _arrived.Add(targets[i]);
             }
 
-            // A step that flips a switch was made by choosing flip on the switch's value, so that is what it opens on.
+            // A step that flips a switch was made by choosing toggle on the switch's value, so that is what it opens on.
             var flipped = !forEvents && !forTests && chosenForm == Form.Action
                 ? Vocabulary.Flipped(editor.World, _selection, _chosen)
                 : null;
@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _chosenForm = Form.Value;
                 _arrivedForm = Form.Value;
                 _arrivedValues.Clear();
-                _arrivedValues.Add(Literal.Of(EntityAction.Flip));
+                _arrivedValues.Add(Literal.Of(EntityAction.Toggle));
             }
         }
 
@@ -381,9 +381,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             ValueLine.Read(said, arguments);
             Named(arguments);
 
-            // Flip on a switch is the game's toggle for it, which takes nothing.
+            // Toggle on a switch is the game's toggle for it, which takes nothing.
             if (_chosenForm == Form.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text
-                && arguments[0].Text == EntityAction.Flip)
+                && arguments[0].Text == EntityAction.Toggle)
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _selection, _chosen) ?? _chosen;
                 _done(new PickAnswer(_selection, toggle, _all, new List<Literal>(), Form.Action));

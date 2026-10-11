@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
@@ -25,11 +26,11 @@ public class GasPickerTests
     }
 
     /// <summary>
-    /// A switch is set off, on, or flipped on its own three chips; flip makes the step the game's toggle, and the step opens
-    /// on flip again.
+    /// A switch is set on, off, or toggled on its own three chips; toggle makes the step the game's toggle, and the step
+    /// opens on toggle again.
     /// </summary>
     [Fact]
-    public void FlipOnASwitchIsTheToggle()
+    public void ToggleOnASwitchIsTheGamesToggle()
     {
         var screen = Screen.On(Rig.Demo());
         screen.Editor.NewButtonSystem("Airlock");
@@ -39,9 +40,10 @@ public class GasPickerTests
         screen.Editor.PressChoice("Depressurizing");
         screen.Run(2);
 
-        Assert.True(screen.Shows("off") && screen.Shows("on") && screen.Shows("flip"), "the switch does not offer off, on and flip");
+        Assert.True(screen.Shows("on") && screen.Shows("off") && screen.Shows("toggle"), "the switch does not offer on, off and toggle");
+        Assert.Equal(new[] { "on", "off", "toggle" }, Assert.IsType<PickPage>(screen.Editor.Current).Fields[0].Words);
 
-        screen.Do("press", "flip");
+        screen.Do("press", "toggle");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -54,7 +56,7 @@ public class GasPickerTests
         screen.Run(2);
         var chosen = screen.Editor.Pick().Stages.Last().Entries().Single(entry => entry.IsChosen);
         Assert.Equal("Depressurizing", chosen.Text);
-        Assert.Equal(EntityAction.Flip, screen.Editor.Pick().Arguments!.Form.Answer);
+        Assert.Equal(EntityAction.Toggle, screen.Editor.Pick().Arguments!.Form.Answer);
     }
 
     /// <summary>A tank's stockpile asks whether to wait until full, and starts waiting.</summary>
