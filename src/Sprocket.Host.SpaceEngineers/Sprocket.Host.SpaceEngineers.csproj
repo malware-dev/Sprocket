@@ -18,14 +18,12 @@
     <LangVersion>6</LangVersion>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
-
     <!-- This runs inside a 60Hz game loop. Unused and unreachable code, and accidental allocations,
          are worth hearing about. -->
     <WarningLevel>5</WarningLevel>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Configurations>Release;Debug</Configurations>
     <Platforms>x64</Platforms>
-
     <!-- The texts in Content\Data\Localization\MyTexts.resx become the class Localization.Texts. Every key
          starts with the prefix, because the game keeps every mod's texts in one table with its own. -->
     <LocalizationPrefix>Sprocket.</LocalizationPrefix>
@@ -36,8 +34,7 @@
     <CompilerVisibleProperty Include="LocalizationPrefix" />
     <CompilerVisibleProperty Include="LocalizationNamespace" />
     <!-- Both built first, and loaded from the copy each keeps for loading; see Loaded.targets. -->
-    <ProjectReference Include="..\Sprocket.Localization.Generator\Sprocket.Localization.Generator.csproj"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Sprocket.Localization.Generator\Sprocket.Localization.Generator.csproj" ReferenceOutputAssembly="false" />
     <Analyzer Include="..\Sprocket.Localization.Generator\bin\Loaded\Sprocket.Localization.Generator.dll" />
     <ProjectReference Include="..\Sprocket.Standards\Sprocket.Standards.csproj" ReferenceOutputAssembly="false" />
     <Analyzer Include="..\Sprocket.Standards\bin\Loaded\Sprocket.Standards.dll" />
@@ -47,7 +44,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.11">
+    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <!--
       The Maltek monospace font, packed as a mod of its own for any display mod to require. Content only:
@@ -16,7 +16,7 @@
     <NoWarn>CS2008</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.11">
+    <PackageReference Include="Mal.Mdk2.ModPackager" Version="2.2.12">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
