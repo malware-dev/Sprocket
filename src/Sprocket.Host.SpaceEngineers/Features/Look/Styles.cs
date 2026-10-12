@@ -634,10 +634,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Edge = Palette.Problem }
         };
 
-        /// <summary>The same strip on a banner worth reading.</summary>
+        /// <summary>The same strip on a banner with a warning.</summary>
         public static readonly ElementStyle NoticeStrip = new ElementStyle(ProblemStrip)
         {
             Hot = { Edge = Palette.Notice }
+        };
+
+        /// <summary>The same strip on a banner with a note, lit in the ink of its words.</summary>
+        public static readonly ElementStyle InfoStrip = new ElementStyle(ProblemStrip)
+        {
+            Hot = { Edge = Palette.Ink }
         };
 
         /// <summary>A box a value is typed into, in a form of values.</summary>

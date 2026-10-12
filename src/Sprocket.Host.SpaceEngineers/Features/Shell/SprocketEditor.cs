@@ -873,6 +873,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What adding a trigger has settled while its blocks were picked, made already, for the step that adds it to carry.</summary>
         readonly List<SystemEdit> _starting = new List<SystemEdit>();
 
+        /// <summary>The copies of button triggers whose start nobody has picked yet, whose lines say why they have a slot of their own.</summary>
+        readonly List<Trigger> _copies = new List<Trigger>();
+
         /// <summary>The trigger the one being added takes the place of, or null; and where it stood.</summary>
         Trigger _replaced;
 
@@ -2549,6 +2552,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Blocks(system, moment.Sources), Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)), Form.Native,
                 delegate(PickAnswer answer)
                 {
+                    // The first pick on a copy is the answer its line was asking for.
+                    _copies.Remove(moment);
+
                     var keeping = moment as SignalTrigger;
                     if (keeping != null && keeping.IsWritten)
                         keeping = null;
@@ -3139,6 +3145,71 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Do(copy.System, new MakeSequence(_program, copy, Change.CopySequence));
 
             PushMade(new SequencePage(this, copy));
+        }
+
+        /// <summary>Adds a copy of <paramref name="trigger" /> to <paramref name="system" />, after its last trigger, doing what it does.</summary>
+        /// <remarks>
+        /// A button starts only one trigger, so a button trigger's copy starts from a new, empty signal slot of the kinds the
+        /// original's expects, and its line says so until the first pick on it. Every other trigger is copied whole.
+        /// </remarks>
+        public void CopyTrigger(AutomationSystem system, Trigger trigger)
+        {
+            var signal = trigger as SignalTrigger;
+            var shown = system.IsBlueprint ? StandIn(system) : null;
+            if (signal == null || signal.IsWritten || shown == null)
+            {
+                Do(system, new AddTrigger(_program, Automation.Copied(trigger, null), null, new List<SystemEdit>(), null, -1,
+                    Change.CopyTrigger));
+
+                return;
+            }
+
+            var part = new Part(FreeSlotName(system));
+            part.IsSignal = true;
+            Expected(system, signal, part.Expects);
+
+            var reslot = new Reslot(system, shown);
+            reslot.Make(part, new List<string>());
+            _picked.Add(reslot);
+            _pickedNames.Add(new List<string> { part.Id });
+
+            var copy = Automation.Copied(trigger, part.Id);
+            Do(system, new AddTrigger(_program, copy, null, new List<SystemEdit>(), null, -1, Change.CopyTrigger));
+            _copies.Add(copy);
+        }
+
+        /// <summary>Whether <paramref name="trigger" /> is a copy of a button trigger nobody has picked a start for yet, whose line says why it has a slot of its own.</summary>
+        public bool Copied(Trigger trigger)
+        {
+            return _copies.Contains(trigger);
+        }
+
+        /// <summary>The first slot name of the numbered kind that <paramref name="system" /> does not use, counting on from how many slots it has.</summary>
+        string FreeSlotName(AutomationSystem system)
+        {
+            for (var number = system.Parts.Count + 1;; number++)
+            {
+                var name = Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                if (system.FindPart(name) == null)
+                    return name;
+            }
+        }
+
+        /// <summary>Adds to <paramref name="kinds" /> every kind the slots <paramref name="trigger" /> starts from expect, each once.</summary>
+        static void Expected(AutomationSystem system, MomentTrigger trigger, IList<string> kinds)
+        {
+            for (var i = 0; i < trigger.Sources.Count; i++)
+            {
+                var part = system.FindPart(trigger.Sources[i]);
+                if (part == null)
+                    continue;
+
+                for (var k = 0; k < part.Expects.Count; k++)
+                {
+                    if (!kinds.Contains(part.Expects[k]))
+                        kinds.Add(part.Expects[k]);
+                }
+            }
         }
 
         /// <summary>

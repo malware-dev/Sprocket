@@ -70,6 +70,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>What deleting it does, or null while it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
 
+        /// <summary>What copying it does, or null while it cannot be copied.</summary>
+        public ICommand Copies { get; set; }
+
         /// <summary>Why nothing on it can be changed, said over everything that would change it; empty while it can.</summary>
         public string Locked { get; set; } = "";
 
@@ -84,6 +87,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>Whether what is wrong with the sequence is on this step.</summary>
         public bool HasProblem { get; set; }
+
+        /// <summary>How much what is on this step matters: a problem washes it red, a warning amber, a note not at all.</summary>
+        public NoticeLevel Level { get; set; } = NoticeLevel.Problem;
 
         /// <summary>Whether the row is being carried to another place.</summary>
         public bool IsCarried { get; set; }
@@ -120,6 +126,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _pause.IsVisible = !branch;
             _delete.IsVisible = !adds;
 
+            // What a drag carries is what a copy holds, so the lines that stay with their if have none.
+            _duplicate.IsVisible = !branch || Kind == StepKind.OtherwiseIf;
+
             if (_chips.Count != Slots.Count || _adders.Count != Adds.Count)
                 Reshape();
 
@@ -149,6 +158,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var fixedInPlace = branch && Kind != StepKind.OtherwiseIf;
             _grip.Color = fixedInPlace ? Palette.None : _grip.CanCarry ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.SequenceDragStep : Why());
+            _duplicate.Command = Copies;
+            _duplicate.IsEnabled = Copies != null;
+            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.SequenceCopyStep : Why());
             _delete.Command = Deletes;
             _delete.IsEnabled = Deletes != null;
             _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.SequenceDeleteStep : Why());
@@ -163,8 +175,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // block going away and the run abandoning the step that named it.
             Background = IsCarried
                 ? Palette.SlotFill
-                : HasProblem
-                    ? Palette.ProblemWash
+                : HasProblem && Level != NoticeLevel.Info
+                    ? Level == NoticeLevel.Warning ? Palette.NoticeWash : Palette.ProblemWash
                     : IsCurrent
                         ? Palette.LiveWash
                         : Palette.None;

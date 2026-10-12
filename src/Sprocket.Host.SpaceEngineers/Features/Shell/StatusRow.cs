@@ -172,11 +172,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>When it last ran, or empty.</summary>
         public string LastRun { get; set; }
 
-        /// <summary>What is wrong with it, said in place of its status, or empty.</summary>
+        /// <summary>What is wrong with it, or worth a word, said in place of its status, or empty.</summary>
         public string Problem { get; set; }
 
-        /// <summary>Whether <see cref="Problem" /> is a warning rather than something broken.</summary>
-        public bool ProblemIsWarning { get; set; }
+        /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
+        public NoticeLevel Level { get; set; } = NoticeLevel.Problem;
 
         /// <summary>Whether its switch is on.</summary>
         public bool SwitchIsOn { get; set; }
@@ -296,10 +296,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _problem.Text = Problem;
             _problem.IsVisible = saying;
-            _problem.Color = ProblemIsWarning ? Palette.Notice : Palette.Problem;
+            _problem.Color = Inks.Of(Level, Palette.Faint);
 
-            var marked = saying || Problems > 0 || Remarks > 0;
-            var quietly = saying ? ProblemIsWarning : Problems == 0;
+            // A note is part of the line, so it has no flag; a warning's flag is amber and a problem's red.
+            var marked = saying && Level != NoticeLevel.Info || Problems > 0 || Remarks > 0;
+            var quietly = saying && Level != NoticeLevel.Info ? Level == NoticeLevel.Warning : Problems == 0;
 
             _below.IsVisible = marked;
             _below.Tint = quietly ? Palette.Notice : Palette.Problem;

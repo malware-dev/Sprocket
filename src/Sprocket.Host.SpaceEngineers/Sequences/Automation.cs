@@ -625,8 +625,59 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return copy;
         }
 
+        /// <summary>
+        /// <paramref name="trigger" /> again, doing a copy of what it does, deep enough that editing the copy cannot reach the
+        /// original; started from the slot <paramref name="from" /> in place of what the original starts from, where given.
+        /// </summary>
+        public static Trigger Copied(Trigger trigger, string from)
+        {
+            Trigger copy;
+            var every = trigger as EveryTrigger;
+            var when = trigger as WhenTrigger;
+            if (every != null)
+                copy = new EveryTrigger(every.IntervalTicks);
+            else if (when != null)
+            {
+                var made = new WhenTrigger(when.EventId);
+                made.Quantifier = when.Quantifier;
+                made.Relation = when.Relation;
+                made.Value = when.Value;
+                made.IntervalTicks = when.IntervalTicks;
+                made.Provider = when.Provider;
+                for (var i = 0; i < when.Arguments.Count; i++)
+                    made.Arguments.Add(when.Arguments[i]);
+
+                copy = made;
+            }
+            else
+            {
+                var signal = (SignalTrigger)trigger;
+                var made = new SignalTrigger(signal.EventId);
+                made.Provider = signal.Provider;
+                made.At = signal.At;
+                copy = made;
+            }
+
+            var moment = trigger as MomentTrigger;
+            if (moment != null)
+            {
+                var sources = ((MomentTrigger)copy).Sources;
+                if (from != null)
+                    sources.Add(from);
+                else
+                {
+                    for (var i = 0; i < moment.Sources.Count; i++)
+                        sources.Add(moment.Sources[i]);
+                }
+            }
+
+            copy.Annotation = trigger.Annotation;
+            copy.Does = Copied(trigger.Does);
+            return copy;
+        }
+
         /// <summary>One step again, deep enough that editing the copy cannot reach the original.</summary>
-        static Step Copied(Step step)
+        public static Step Copied(Step step)
         {
             var act = step as Act;
             if (act != null)

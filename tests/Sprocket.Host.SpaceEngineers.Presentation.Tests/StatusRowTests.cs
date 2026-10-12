@@ -60,7 +60,7 @@ public class StatusRowTests
     static (StatusRow Marked, StatusRow Plain) Laid()
     {
         var texts = Simulation.Fresh().Texts;
-        var marked = new StatusRow { Summary = "Sequence 1", Problem = "Nothing starts this yet.", ProblemIsWarning = true, Status = "ready" };
+        var marked = new StatusRow { Summary = "Sequence 1", Problem = "Nothing starts this yet.", Level = NoticeLevel.Warning, Status = "ready" };
         var plain = new StatusRow { Summary = "Sequence 2", Status = "switched off" };
         marked.Show(texts);
         plain.Show(texts);

@@ -18,6 +18,10 @@ It runs a sequence or stops one.
 
 A trigger does its one thing at once. Anything that waits, such as closing a door before opening another, belongs in a sequence.
 
+## Copying a trigger
+
+The copy mark on a trigger's row adds a trigger that does the same thing. A button starts only one trigger, so a copy of a button trigger starts from an empty [slot](#slot) of its own, which each installation fills on its [installation panel](#installation-panel). Every other trigger is copied whole.
+
 ## Which installation it starts
 
 A trigger started by a signal runs only for the ![](mark:installation) [installation](#installation) whose [slot](#slot) holds the block that sent it. So the port airlock's button cycles the port airlock, and the starboard airlock stays as it is.

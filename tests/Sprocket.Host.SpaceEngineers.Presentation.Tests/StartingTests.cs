@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -56,7 +57,7 @@ public class StartingTests
 
         var sentence = screen.Editor.Sentence();
         Assert.Equal("Nothing starts this yet.", sentence.Bar.Problem);
-        Assert.True(sentence.Bar.ProblemIsWarning);
+        Assert.Equal(NoticeLevel.Warning, sentence.Bar.Level);
 
         // And nothing on this screen offers to mend it, because what starts a sequence is not here.
         Assert.False(screen.Shows("+ say what starts this"));

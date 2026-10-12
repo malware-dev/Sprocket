@@ -120,6 +120,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Putting a logic system's blueprint in the library in the place of the logic system.</summary>
         UpdateFromLibrary,
         /// <summary>Putting a logic system's blueprint in the library back in the place of the logic system, which changed since.</summary>
-        ResetToBlueprint
+        ResetToBlueprint,
+        /// <summary>Copying a step.</summary>
+        CopyStep,
+        /// <summary>Copying a trigger.</summary>
+        CopyTrigger
     }
 }

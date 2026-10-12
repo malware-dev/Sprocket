@@ -7,9 +7,11 @@ A step is one line of a ![](mark:sequence) [sequence](#sequence). `+ step`, at t
 - `run` and `stop` [run or stop another sequence](#run-and-stop).
 - `if` [checks blocks](#if), and runs the steps under it where the check holds.
 
-## Moving steps
+## Moving and copying steps
 
 Drag a step to move it, into an if's branch or out of one as well.
+
+The copy mark on a step's row puts a copy right after it. An if is copied with every step in it.
 
 Every line is numbered in one count, an if's own rows included. A problem names a step by that number, for example *Stopped at step 4 of Cycle Out*.
 

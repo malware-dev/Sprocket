@@ -42,13 +42,14 @@ on screen     Sequence 1
 035  Sprite     Sprocket_Fill         {X:457 Y:196 W:209 H:2}  #8EBCCFFF
 036  Sprite     MyObjectBuilder_Door/LargeBlockDoor{X:473 Y:166 W:24 H:24}  #FFFFFFFF
 037  Text       at {X:504.5142 Y:163.2255} scale 0.833  #DCF5FDFF  "Airlock Inner Door"
-038  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
-039  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-040  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ step"
-041  ClearClip  
-042  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:36}  #1B242AFF
-043  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:1}  #5B737BFF
-044  Sprite     Sprocket_Fill         {X:1403 Y:124 W:220 H:1}  #5B737BFF
-045  Sprite     Sprocket_Fill         {X:1403 Y:89 W:1 H:36}  #5B737BFF
-046  Sprite     Sprocket_Fill         {X:1623 Y:89 W:1 H:36}  #5B737BFF
-047  Text       at {X:1415.283 Y:94.6399} scale 0.694  #A2C3CDFF  "Keep any changes and return."
+038  Text       at {X:1522.156 Y:166.5141} scale 0.401  #A2C3CDFF  "2"
+039  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
+040  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
+041  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ step"
+042  ClearClip  
+043  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:36}  #1B242AFF
+044  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:1}  #5B737BFF
+045  Sprite     Sprocket_Fill         {X:1403 Y:124 W:220 H:1}  #5B737BFF
+046  Sprite     Sprocket_Fill         {X:1403 Y:89 W:1 H:36}  #5B737BFF
+047  Sprite     Sprocket_Fill         {X:1623 Y:89 W:1 H:36}  #5B737BFF
+048  Text       at {X:1415.283 Y:94.6399} scale 0.694  #A2C3CDFF  "Keep any changes and return."

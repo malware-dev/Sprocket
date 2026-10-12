@@ -152,7 +152,7 @@ public class ProblemTests
 
         var row = ship.Editor.Rows()[1];
         Assert.Equal("Nothing starts this yet.", row.Problem);
-        Assert.True(row.ProblemIsWarning);
+        Assert.Equal(NoticeLevel.Warning, row.Level);
         Assert.Equal(0, row.Problems);
 
         // And the sequence's own screen says it too, quietly.
@@ -162,7 +162,7 @@ public class ProblemTests
 
         var sentence = ship.Editor.Sentence();
         Assert.Equal("Nothing starts this yet.", sentence.Bar.Problem);
-        Assert.True(sentence.Bar.ProblemIsWarning);
+        Assert.Equal(NoticeLevel.Warning, sentence.Bar.Level);
     }
 
     /// <summary>

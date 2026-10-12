@@ -6,6 +6,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -58,11 +59,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// </remarks>
         public bool IsLiveNow { get; set; }
 
-        /// <summary>What is wrong with it, in words, or empty.</summary>
+        /// <summary>What is wrong with it, or worth a word, in words, or empty.</summary>
         public string Problem { get; set; }
+
+        /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
+        public NoticeLevel Level { get; set; } = NoticeLevel.Problem;
 
         /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
+
+        /// <summary>What copying it does, or null where it cannot be copied.</summary>
+        public ICommand Copies { get; set; }
 
         /// <summary>Why nothing on it can be changed, said over every part that would change it; empty while it can.</summary>
         public string Locked { get; set; } = "";
@@ -116,12 +123,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _problem.Text = Problem;
             _problem.IsVisible = Problem.Length != 0;
+            _problem.Color = Inks.Of(Level, Palette.Faint);
 
             // The same wash a broken row in a list gets, so arriving here from one arrives at something
             // already recognised.
-            Background = Problem.Length != 0 ? Palette.ProblemWash : Palette.None;
+            Background = Problem.Length != 0 ? Inks.Wash(Level) : Palette.None;
 
-            // Quiet rather than gone while it cannot be deleted, saying why.
+            // Quiet rather than gone while it cannot be copied or deleted, saying why.
+            _duplicate.Command = Copies;
+            _duplicate.IsVisible = Copies != null || Locked.Length != 0;
+            _duplicate.IsEnabled = Copies != null;
+            _duplicate.Tip = Tip.For(_duplicate.Tip, Copies != null ? texts.TriggerCopy : Why());
+
             _delete.Command = Deletes;
             _delete.IsVisible = Deletes != null || Locked.Length != 0;
             _delete.IsEnabled = Deletes != null;

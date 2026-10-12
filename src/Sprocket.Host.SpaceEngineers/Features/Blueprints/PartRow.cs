@@ -6,7 +6,9 @@ using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -25,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         float _wide = PartList.Widest;
         string _opensAbout;
+        NoticeLevel _level = NoticeLevel.Problem;
 
         /// <summary>A slot saying nothing yet.</summary>
         public PartRow()
@@ -78,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
         }
 
-        /// <summary>What is wrong with the slot's block, said beside it, or null where nothing is.</summary>
+        /// <summary>What is wrong with the slot's block, or worth a word, said beside it, or null where nothing is.</summary>
         public string Problem
         {
             get { return _problem.Text.Length != 0 ? _problem.Text : null; }
@@ -86,6 +89,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _problem.Text = value ?? "";
                 _problem.IsVisible = value != null;
+            }
+        }
+
+        /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
+        public NoticeLevel Level
+        {
+            get { return _level; }
+            set
+            {
+                _level = value;
+                _problem.Color = Inks.Of(value, Palette.Faint);
             }
         }
 

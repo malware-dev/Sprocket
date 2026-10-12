@@ -392,6 +392,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Slots.Clear();
                 Word(row, step);
                 row.Deletes = closes ? null : Changes(Cmd.DeleteStep, delegate { Remove(index); });
+                row.Copies = closes || branch && Kind(step) != StepKind.OtherwiseIf
+                    ? null
+                    : Changes(Cmd.DuplicateStep, delegate { Duplicate(index); });
                 row.IsOff = step.IsOff || index <= offTo;
                 row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, delegate { SwitchStep(index); });
                 row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
@@ -419,6 +422,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Carries = 0;
             row.Slots.Clear();
             row.Deletes = null;
+            row.Copies = null;
             row.IsOff = off;
             row.Pauses = null;
             row.Grip.CanCarry = false;
@@ -500,10 +504,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var fault = SequenceSummary.Fault(Editor.Runner.Get(_sequence, through));
 
             _bar.Problem = fault.Exists ? SequenceText.Problem(Editor.Texts, fault, _sequence) : "";
-            _bar.ProblemIsWarning = fault.IsWarning;
+            _bar.Level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
 
             for (var i = 0; i < _keys.Count; i++)
+            {
                 _rows[_keys[i]].HasProblem = fault.Exists && _keys[i] is Step && fault.Step == _shown[i];
+                _rows[_keys[i]].Level = _bar.Level;
+            }
         }
 
         /// <summary>What stopped the last run and where, in one line.</summary>
@@ -993,6 +1000,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Editor.Answer(texts.SequenceKeepSteps, delegate { Unwrap(index, whole); });
             Editor.Answer(texts.SequenceDeleteSteps, delegate { Cut(index, whole); });
             Editor.Answer(texts.ButtonLeaveAlone, delegate { }, true);
+        }
+
+        /// <summary>Puts a copy of the row's step right after it: whatever a drag would carry, an if with every step in it, a branch with its own.</summary>
+        void Duplicate(int index)
+        {
+            var steps = _sequence.Steps;
+            int end;
+            if (steps[index] is If)
+            {
+                end = _sequence.EndOf(index) + 1;
+                if (end < steps.Count && steps[end] is Await)
+                    end++;
+            }
+            else if (steps[index] is Else)
+                end = _sequence.BranchAfter(index);
+            else
+                end = index + Spanned(index);
+
+            var copies = new List<Step>();
+            for (var i = index; i < end; i++)
+                copies.Add(Automation.Copied(steps[i]));
+
+            Editor.Do(_sequence, new AddStep(Change.CopyStep, end, copies.ToArray()));
         }
 
         void RemoveStep(int index)

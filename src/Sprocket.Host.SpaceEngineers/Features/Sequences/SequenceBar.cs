@@ -1,5 +1,6 @@
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
@@ -25,11 +26,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>What it is doing, in a word or two.</summary>
         public string Status { get; set; }
 
-        /// <summary>What is wrong with it, said in place of its status, or empty.</summary>
+        /// <summary>What is wrong with it, or worth a word, said in place of its status, or empty.</summary>
         public string Problem { get; set; }
 
-        /// <summary>Whether <see cref="Problem" /> is a warning rather than something broken.</summary>
-        public bool ProblemIsWarning { get; set; }
+        /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
+        public NoticeLevel Level { get; set; } = NoticeLevel.Problem;
 
         /// <summary>When it last ran, or empty.</summary>
         public string LastRun { get; set; }
@@ -50,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _status.Text = Status;
             _problem.IsVisible = wrong;
             _problem.Text = Problem;
-            _problem.Color = ProblemIsWarning ? Palette.Notice : Palette.Problem;
+            _problem.Color = Inks.Of(Level, Palette.Muted);
             _lastRun.Text = LastRun;
             _light.Tint = JustRan ? Palette.Live : Palette.Dim;
 

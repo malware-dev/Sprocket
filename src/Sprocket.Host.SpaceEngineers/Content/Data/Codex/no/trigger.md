@@ -18,6 +18,10 @@ Den kjører en sekvens eller stopper en.
 
 En utløser gjør den ene tingen sin med én gang. Alt som venter, som å lukke en dør før en annen åpnes, hører hjemme i en sekvens.
 
+## Kopiere en utløser
+
+Kopimerket på raden til en utløser legger til en utløser som gjør det samme. En knapp starter bare én utløser, så en kopi av en knappeutløser starter fra en tom [plass](#slot) for seg selv, som hver installasjon fyller på [installasjonspanelet](#installation-panel) sitt. Alle andre utløsere kopieres hele.
+
 ## Hvilken installasjon den starter
 
 En utløser som startes av et signal, kjører bare for den ![](mark:installation) [installasjonen](#installation) der [plassen](#slot) holder blokken som sendte det. Så knappen til babord luftsluse sluser babord luftsluse, og styrbord luftsluse blir stående som den er.

@@ -265,6 +265,12 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Trigger.Delete" xml:space="preserve">
     <value>Slett denne utløseren</value>
   </data>
+  <data name="Sprocket.Trigger.Copy" xml:space="preserve">
+    <value>Kopier denne utløseren</value>
+  </data>
+  <data name="Sprocket.Trigger.CopiedButton" xml:space="preserve">
+    <value>Hver knapp starter én utløser, så velg en ny knapp for denne kopien.</value>
+  </data>
   <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
     <value>Velg hvilken blokk som starter dette.</value>
   </data>
@@ -310,6 +316,9 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
     <value>Slett dette steget</value>
+  </data>
+  <data name="Sprocket.Sequence.CopyStep" xml:space="preserve">
+    <value>Kopier dette steget. Kopien legges rett etter det.</value>
   </data>
   <data name="Sprocket.Sequence.ActionAbout" xml:space="preserve">
     <value>Velg hva dette steget gjør.</value>
@@ -1338,6 +1347,12 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
     <value>tilbakestilling av et logikksystem til plantegningen</value>
+  </data>
+  <data name="Sprocket.Change.CopyStep" xml:space="preserve">
+    <value>kopiering av et steg</value>
+  </data>
+  <data name="Sprocket.Change.CopyTrigger" xml:space="preserve">
+    <value>kopiering av en utløser</value>
   </data>
   <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">
     <value>fjerning av et logikksystem</value>

@@ -102,11 +102,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         void Say(Notice notice)
         {
-            var problem = notice.Level == NoticeLevel.Problem;
-            var ink = problem ? Palette.Problem : Palette.Notice;
+            var ink = Inks.Of(notice.Level, Palette.Ink);
 
-            _column.Background = problem ? Palette.ProblemWash : Palette.NoticeWash;
-            _heading.Style = problem ? Styles.ProblemStrip : Styles.NoticeStrip;
+            _column.Background = notice.Level == NoticeLevel.Problem
+                ? Palette.ProblemWash
+                : notice.Level == NoticeLevel.Warning
+                    ? Palette.NoticeWash
+                    : Palette.Panel;
+            _heading.Style = notice.Level == NoticeLevel.Problem
+                ? Styles.ProblemStrip
+                : notice.Level == NoticeLevel.Warning
+                    ? Styles.NoticeStrip
+                    : Styles.InfoStrip;
             _text.Color = ink;
             _text.Text = notice.Text;
             _detail.Text = notice.Detail;

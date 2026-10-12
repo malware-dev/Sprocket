@@ -347,6 +347,14 @@ Renaming it here renames the grid.</value>
     <value>Delete this trigger</value>
     <comment>Note on the bin at the end of a trigger's row.</comment>
   </data>
+  <data name="Sprocket.Trigger.Copy" xml:space="preserve">
+    <value>Copy this trigger</value>
+    <comment>Note on the copy mark of a trigger's row.</comment>
+  </data>
+  <data name="Sprocket.Trigger.CopiedButton" xml:space="preserve">
+    <value>Each button starts one trigger, so pick a new button for this copy.</value>
+    <comment>Said under a copied button trigger's line until what starts it is first picked.</comment>
+  </data>
   <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
     <value>Choose which block starts this.</value>
     <comment>Note on the block a trigger's sentence names.</comment>
@@ -407,6 +415,10 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Sequence.DeleteStep" xml:space="preserve">
     <value>Delete this step</value>
     <comment>Note on the bin at the end of a step's row.</comment>
+  </data>
+  <data name="Sprocket.Sequence.CopyStep" xml:space="preserve">
+    <value>Copy this step. The copy goes right after it.</value>
+    <comment>Note on the copy mark of a step's row. An if is copied with the steps in it.</comment>
   </data>
   <data name="Sprocket.Sequence.ActionAbout" xml:space="preserve">
     <value>Choose what this step does.</value>
@@ -1761,6 +1773,14 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
     <value>resetting a logic system to its blueprint</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyStep" xml:space="preserve">
+    <value>copying a step</value>
+    <comment>Named after Undo and Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CopyTrigger" xml:space="preserve">
+    <value>copying a trigger</value>
     <comment>Named after Undo and Redo.</comment>
   </data>
   <data name="Sprocket.Change.TakeOffSystem" xml:space="preserve">

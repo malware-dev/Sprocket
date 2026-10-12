@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     row.Problems = problems;
                     row.Remarks = remarks;
                     row.Problem = said;
-                    row.ProblemIsWarning = problems == 0;
+                    row.Level = problems == 0 ? NoticeLevel.Warning : NoticeLevel.Problem;
                     row.Parked = stopped.Length > 0;
                 }
 

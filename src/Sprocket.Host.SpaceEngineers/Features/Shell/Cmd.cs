@@ -91,6 +91,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Deleting a trigger.</summary>
         DeleteTrigger,
 
+        /// <summary>Copying a trigger.</summary>
+        DuplicateTrigger,
+
         // A logic system's switch, and one of a blueprint's.
         /// <summary>Switching a logic system on or off.</summary>
         EnableSystem,
@@ -143,6 +146,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Deleting a step.</summary>
         DeleteStep,
+
+        /// <summary>Copying a step, right after it.</summary>
+        DuplicateStep,
 
         // Picking.
         /// <summary>Picking a block.</summary>

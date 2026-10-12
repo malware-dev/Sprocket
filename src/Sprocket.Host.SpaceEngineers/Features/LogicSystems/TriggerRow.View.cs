@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Label _live;
         Label _problem;
         Glyph _delete;
+        Glyph _duplicate;
 
         /// <summary>Makes the sentence with its opening and joining words, the badge and the problem under it, and the bin.</summary>
         void CreateView()
@@ -45,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 }
             });
 
+            Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f) }.As(out _duplicate));
             Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f) }.As(out _delete));
         }
     }

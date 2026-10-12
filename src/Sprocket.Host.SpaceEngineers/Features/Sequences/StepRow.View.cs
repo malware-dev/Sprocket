@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Flow _sentence;
         Glyph _leadWaits;
         Label _lead;
+        Glyph _duplicate;
         Glyph _pause;
         Glyph _delete;
 
@@ -46,6 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 }
             }.As(out _sentence));
 
+            Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f) }.As(out _duplicate));
             Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = Fixed.Size(32f, 32f) }.As(out _pause));
 
             // The one control on the row that destroys something, so the one place that warns under the pointer.

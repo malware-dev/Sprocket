@@ -323,7 +323,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 {
                     var fault = _runs[i] == null ? SequenceFault.None : Fault(_runs[i], through);
                     var own = _triggers[i].Acts != null && fault.Exists && !fault.IsWarning;
-                    row.Problem = own || IsStarting(fault) ? SequenceText.Problem(texts, fault, _runs[i]) : "";
+                    row.Problem = own || IsStarting(fault) && Concerns(_triggers[i], fault)
+                        ? SequenceText.Problem(texts, fault, _runs[i])
+                        : "";
+                    row.Level = NoticeLevel.Problem;
+
+                    // A button trigger's copy says why its start is empty until it is picked, in place of the empty slot that follows.
+                    if (Editor.Copied(_triggers[i]))
+                    {
+                        row.Problem = texts.TriggerCopiedButton;
+                        row.Level = NoticeLevel.Info;
+                    }
                 }
 
                 row.Show(Editor.World, texts);
@@ -677,13 +687,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var starting = IsStarting(fault);
 
             row.Problem = starting ? "" : SequenceText.Problem(texts, fault, sequence);
-            row.ProblemIsWarning = fault.IsWarning;
+            row.Level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
             row.Problems = !starting && fault.Exists && !fault.IsWarning ? 1 : 0;
         }
 
         static bool IsStarting(SequenceFault fault)
         {
             return fault.Exists && !fault.IsWarning && fault.Step == SequenceFault.Trigger;
+        }
+
+        /// <summary>Whether <paramref name="fault" />, about what starts a sequence, is about <paramref name="trigger" />: an empty slot is about the triggers that start from it, and anything else about every trigger of the sequence.</summary>
+        static bool Concerns(Trigger trigger, SequenceFault fault)
+        {
+            var moment = trigger as MomentTrigger;
+            return fault.Problem != SequenceProblem.EmptySlot || moment != null && moment.Sources.Contains(fault.Which);
         }
 
         SequenceFault Fault(Sequence sequence, SystemInstance through)
@@ -718,6 +735,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Doing(row, trigger);
 
             row.Deletes = Changes(Cmd.DeleteTrigger, delegate { Editor.Forget(_system, trigger); });
+            row.Copies = Changes(Cmd.DuplicateTrigger, delegate { Editor.CopyTrigger(_system, trigger); });
             row.Locked = Locked();
         }
 

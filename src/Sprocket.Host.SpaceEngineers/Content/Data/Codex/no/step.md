@@ -7,9 +7,11 @@ Et steg er én linje i en ![](mark:sequence) [sekvens](#sequence). `+ steg`, på
 - `kjør` og `stopp` [kjører eller stopper en annen sekvens](#run-and-stop).
 - `hvis` [sjekker blokker](#if), og kjører stegene under det der det som sjekkes stemmer.
 
-## Flytte steg
+## Flytte og kopiere steg
 
 Dra et steg for å flytte det, også inn i en gren av et hvis eller ut av en.
+
+Kopimerket på raden til et steg legger en kopi rett etter det. Et hvis kopieres med alle stegene i det.
 
 Hver linje er nummerert i én telling, radene til et hvis også. Et problem nevner et steg med det nummeret, for eksempel *Stoppet ved steg 4 i Sluse ut*.
 
