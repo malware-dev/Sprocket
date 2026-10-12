@@ -332,7 +332,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 edited();
         }
 
-        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, or a box.</summary>
+        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, a number's box, or a box.</summary>
         IField Make(Field field, IList<Hsv> colors, Texts texts)
         {
             if (field.Edits == Editor.Colour)
@@ -351,7 +351,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (words != null && words.Count > Few)
                 return new ListField(words);
 
-            return new TypedField(Bounded(field), _submit);
+            return NumberField.Takes(field) ? (IField)new NumberField(field, _submit) : new TypedField(_submit);
         }
 
         /// <summary>Puts a value's label and field on their line: a color across the whole of it, text and a few words across all the label leaves, anything else against the right.</summary>
@@ -376,7 +376,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             if (color)
                 Place(element, at, 0, 3);
-            else if (field is TypedField && !Bounded(_wanted[at]) || field is WordsField)
+            else if (field is TypedField || field is WordsField)
                 Place(element, at, 1, 2);
             else
             {
@@ -390,12 +390,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             Cells[row, column, 1, columns] = element;
             _placed.Add(new Spot { Row = row, Column = column, Columns = columns });
-        }
-
-        /// <summary>Whether a typed value says the longest it may be, which makes its box a number's width.</summary>
-        static bool Bounded(Field field)
-        {
-            return Math.Max((field.Least ?? "").Length, (field.Most ?? "").Length) > 0;
         }
 
         /// <summary>What a value is called beside its field: its name where the field already shows what it takes, its label, or its place where there are several.</summary>

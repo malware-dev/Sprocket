@@ -34,6 +34,8 @@ Noen handlinger trenger mer å gå på, som hvor de skal og hvor fort. De tar va
 - `Move to` på et stempel tar en posisjon og en fart.
 - `Rotate to` på en rotor tar en vinkel, en fart og hvilken vei den skal dreie.
 
+Et tall skrives inn i boksen sin, og opp og ned flytter det ett steg.
+
 Et valg som må gis, sier fra når det står tomt. Et som kan utelates, kan stå tomt, og da gjør handlingen det den gjør uten det.
 
 ## Sette en verdi

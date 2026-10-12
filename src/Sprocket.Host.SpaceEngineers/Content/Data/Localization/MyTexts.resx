@@ -1513,7 +1513,7 @@ Renaming it here renames the grid.</value>
   </data>
   <data name="Sprocket.Time.OtherWait" xml:space="preserve">
     <value>Another length, in ticks</value>
-    <comment>Hint in the box a length of wait is typed into.</comment>
+    <comment>Said beside the box a length of wait is typed into.</comment>
   </data>
   <data name="Sprocket.Time.Use" xml:space="preserve">
     <value>Use</value>

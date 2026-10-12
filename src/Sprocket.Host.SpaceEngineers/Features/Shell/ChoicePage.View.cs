@@ -11,7 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Label _empty;
         VStack _answers;
         HStack _typed;
-        TextBox _box;
+        Label _called;
+        NumberBox _box;
         Button _give;
 
         /// <inheritdoc />
@@ -33,7 +34,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         IsVisible = false,
                         Children =
                         {
-                            new TextBox { Style = Styles.Field, Focusable = true, Placement = Flex.Grow }.As(out _box),
+                            new Label { Style = Styles.Name, Placement = Flex.Grow }.As(out _called),
+                            new NumberBox { Style = Styles.Field, Focusable = true }.As(out _box),
                             new Button { Style = Styles.Button }.As(out _give)
                         }
                     }.As(out _typed)

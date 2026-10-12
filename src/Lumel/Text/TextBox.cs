@@ -17,8 +17,10 @@ namespace Lumel.Text
     /// </remarks>
     public class TextBox : Element, IPadded, ITextual
     {
+        /// <summary>How wide the caret is drawn.</summary>
+        protected const float CaretWidth = 2f;
+
         Thickness _padding;
-        const float CaretWidth = 2f;
 
         readonly List<float> _edges = new List<float>();
 
@@ -40,6 +42,8 @@ namespace Lumel.Text
         float _fontSize = 24f;
 
         float _scroll;
+
+        float _lead;
 
         string _written;
 
@@ -106,7 +110,7 @@ namespace Lumel.Text
         /// <summary>What Enter carries out while the box holds the keyboard, or null for nothing.</summary>
         public ICommand Submit { get; set; }
 
-        /// <summary>Whether the box may hold what is typed, or null for anything.</summary>
+        /// <summary>Whether the box may hold what is typed, or null for anything the kind of box takes.</summary>
         /// <remarks>Asked after every edit made by typing, cutting, pasting or deleting; one it refuses is undone as it is made.</remarks>
         public Func<string, bool> Accepts { get; set; }
 
@@ -143,6 +147,10 @@ namespace Lumel.Text
 
         /// <inheritdoc />
         protected override bool TakesPointer => true;
+
+        /// <summary>Whether what is in the box sits against its right-hand end rather than its left.</summary>
+        /// <remarks>Said by the kind of box rather than set on one, so a box that holds a number cannot be left without it.</remarks>
+        protected virtual bool Trails => false;
 
         /// <summary>Selects everything in the box, with the caret at the end.</summary>
         public void SelectAll()
@@ -351,7 +359,7 @@ namespace Lumel.Text
         protected override void DrawContent(IGraphics g)
         {
             var room = ContentBounds;
-            var at = new Vector2(room.X - _scroll, room.Y);
+            var at = new Vector2(room.X - _scroll + _lead, room.Y);
 
             if (HasSelection && IsFocused)
             {
@@ -362,11 +370,19 @@ namespace Lumel.Text
             if (_text.Length > 0)
                 g.DrawText(_font, Text, at, _fontSize, Color);
             else if (!string.IsNullOrEmpty(Hint))
-                g.DrawText(_font, Hint, at, _fontSize, HintColor);
+                g.DrawText(_font, Hint, Trails ? new Vector2(room.X + room.Width, room.Y) : at, _fontSize, HintColor,
+                    Trails ? TextAlign.Right : TextAlign.Left);
 
             // After the text, so the caret shows inside a selection.
             if (IsFocused && CaretVisible)
                 g.Fill(new RectangleF(at.X + _edges[_caret], at.Y, CaretWidth, _fontSize), CaretColor);
+        }
+
+        /// <summary>Whether the box may hold <paramref name="text" />: whatever <see cref="Accepts" /> takes.</summary>
+        /// <remarks>Asked after every edit made by typing, cutting, pasting or deleting; one it refuses is undone as it is made.</remarks>
+        protected virtual bool Takes(string text)
+        {
+            return Accepts == null || Accepts(text);
         }
 
         bool OnShortcut(InputRoot input, MyKeys key)
@@ -412,7 +428,7 @@ namespace Lumel.Text
         /// <summary>The boundary between characters nearest <paramref name="x" />.</summary>
         int IndexAt(float x)
         {
-            var local = x - ContentBounds.X + _scroll;
+            var local = x - ContentBounds.X + _scroll - _lead;
             var best = 0;
 
             for (var i = 1; i < _edges.Count; i++)
@@ -482,6 +498,8 @@ namespace Lumel.Text
 
             if (end - _scroll < width)
                 _scroll = Math.Max(0f, end - width);
+
+            _lead = Trails && end < width ? width - end : 0f;
         }
 
         void Rewritten()
@@ -496,11 +514,10 @@ namespace Lumel.Text
             InvalidateMeasure();
         }
 
+        /// <summary>Keeps what is in the box and where the caret is, for an edit refused to be undone to.</summary>
+        /// <remarks>On every edit made by hand, which is as often as somebody types.</remarks>
         void Hold()
         {
-            if (Accepts == null)
-                return;
-
             _before = _text.ToString();
             _beforeCaret = _caret;
             _beforeAnchor = _anchor;
@@ -508,7 +525,7 @@ namespace Lumel.Text
 
         void OnEdited()
         {
-            if (Accepts != null && !Accepts(_text.ToString()))
+            if (!Takes(_text.ToString()))
             {
                 _text.Clear();
                 _text.Append(_before);

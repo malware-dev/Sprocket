@@ -34,6 +34,8 @@ Some actions need more to go on, such as where to go and how fast. They take opt
 - A piston's `Move to` takes a position and a speed.
 - A rotor's `Rotate to` takes an angle, a speed, and which way to turn.
 
+A number is typed into its box, and up and down move it a step.
+
 An option that must be given says so when it is left empty. One that may be left out can stay empty, and the action then does what it does without it.
 
 ## Setting a value

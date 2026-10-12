@@ -7,26 +7,20 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A value typed into a box: as wide as the form where it may be anything, and as wide as a number where it is bounded.</summary>
-    /// <remarks>
-    /// A box as wide as the form invites a sentence, where a value bounded at thirty holds two digits. Every bounded box is
-    /// one width, so the boxes of a form start and end together.
-    /// </remarks>
+    /// <summary>A value typed into a box as wide as the form, for words; a number has a <see cref="NumberField" />.</summary>
     public class TypedField : HStack, IField
     {
-        const float Numbers = 176f;
-
         readonly TextBox _box;
 
-        /// <summary>An empty box, bounded where <paramref name="bounded" /> is set, whose Enter carries out <paramref name="submit" />.</summary>
-        public TypedField(bool bounded, ICommand submit)
+        /// <summary>An empty box whose Enter carries out <paramref name="submit" />.</summary>
+        public TypedField(ICommand submit)
         {
             Children.Add(new TextBox
             {
                 Style = Styles.Value,
                 Focusable = true,
                 Submit = submit,
-                Placement = bounded ? (IPlacement)Fixed.Wide(Numbers) : Flex.Grow
+                Placement = Flex.Grow
             }.As(out _box));
 
             _box.Edited += delegate

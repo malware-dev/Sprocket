@@ -31,6 +31,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     {
         const int JustRanTicks = 10;
 
+        // As many digits as fit an int.
+        const int MostTicks = 999999999;
+
+        // An hour is 216000 ticks.
+        const string LongestWait = "000000";
+
         static readonly int[] WaitPresets = { 60, 120, 300, 600, 1800, 3600 };
 
         readonly Sequence _sequence;
@@ -946,32 +952,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             page.TypedAbout = Editor.Texts.SequenceWaitTypedAbout;
             page.TypeFirst = Editor.Texts.SequenceWaitTypeFirst;
-            page.AddTyped(Editor.Texts.TimeOtherWait, Editor.Texts.TimeUse, WholeTicks, delegate(string said)
-            {
-                int ticks;
-                if (int.TryParse(said, NumberStyles.None, CultureInfo.InvariantCulture, out ticks) && ticks > 0)
-                    chosen(ticks);
-            });
+            page.AddNumber(Editor.Texts.TimeOtherWait, Editor.Texts.TimeUse, LongestWait, MostTicks, chosen);
 
             return page;
-        }
-
-        /// <summary>Whether what is typed can still become a number of ticks: digits only, few enough to fit, or nothing.</summary>
-        static bool WholeTicks(string said)
-        {
-            if (string.IsNullOrEmpty(said))
-                return true;
-
-            if (said.Length > 9)
-                return false;
-
-            for (var i = 0; i < said.Length; i++)
-            {
-                if (said[i] < '0' || said[i] > '9')
-                    return false;
-            }
-
-            return true;
         }
 
         void EditWait(Wait step)

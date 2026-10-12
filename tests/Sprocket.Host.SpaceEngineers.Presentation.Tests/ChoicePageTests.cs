@@ -44,12 +44,12 @@ public class ChoicePageTests
         Assert.Equal("Starboard", given);
     }
 
-    /// <summary>A typed answer is taken on Enter, and only while there is something typed to take.</summary>
+    /// <summary>A typed number is taken on Enter, only while there is one, and never past the most the box takes.</summary>
     [Fact]
-    public void ATypedAnswerIsTakenOnlyWhenThereIsOne()
+    public void ATypedNumberIsTakenOnlyWhenThereIsOne()
     {
-        var taken = new List<string>();
-        var sim = Asking(page => page.AddTyped("Another length", "Use", said => said.All(char.IsDigit), taken.Add));
+        var taken = new List<int>();
+        var sim = Asking(page => page.AddNumber("Another length", "Use", "0000", 500, taken.Add));
 
         var box = sim.Editor.TypedBox()!;
         Assert.False(box.Submit!.CanExecute, "an empty box offers to take nothing");
@@ -57,11 +57,14 @@ public class ChoicePageTests
         box.Insert("4x");
         Assert.Equal("", box.Text);
 
+        box.Insert("501");
+        Assert.Equal("", box.Text);
+
         box.Insert("45");
         Assert.True(box.Submit.CanExecute);
         box.Submit.Execute();
 
-        Assert.Equal(new[] { "45" }, taken);
+        Assert.Equal(new[] { 45 }, taken);
     }
 
     /// <summary>A question with nothing to choose from says so.</summary>

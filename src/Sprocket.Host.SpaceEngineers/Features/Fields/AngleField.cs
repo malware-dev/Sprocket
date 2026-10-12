@@ -5,7 +5,6 @@ using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
@@ -18,37 +17,39 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// </remarks>
     public class AngleField : HStack, IField
     {
-        const float Written = 80f;
         const float Turn = 360f;
         const float Notch = 5f;
 
         readonly Dial _dial;
-        readonly TextBox _box;
-        readonly float _least;
-        readonly float _most;
+        readonly NumberBox _box;
 
         /// <summary>An empty angle held between <paramref name="least" /> and <paramref name="most" /> as written, either of which may be empty for a whole turn.</summary>
         public AngleField(string least, string most, ICommand submit)
         {
             Spacing = 8f;
-            _least = Bound(least, -Turn);
-            _most = Bound(most, Turn);
+            var lowest = Bound(least, -Turn);
+            var highest = Bound(most, Turn);
 
             Children.Add(new Dial
             {
-                Most = Math.Min(Turn, Math.Max(Math.Abs(_least), Math.Abs(_most))),
+                Most = Math.Min(Turn, Math.Max(Math.Abs(lowest), Math.Abs(highest))),
                 MarkColor = Palette.Faint,
                 QuarterColor = Palette.Muted,
                 NeedleColor = Palette.Ink,
                 HeldColor = Palette.Live
             }.As(out _dial));
 
-            Children.Add(new NotchedBox(this)
+            Children.Add(new NumberBox
             {
                 Style = Styles.Value,
                 Focusable = true,
                 Submit = submit,
-                Placement = Fixed.Wide(Written)
+                Widest = "-360.0",
+                Negative = lowest < 0,
+                Step = Notch,
+                Least = lowest,
+                Most = highest,
+                Format = "0.0"
             }.As(out _box));
 
             _dial.Turned += delegate
@@ -110,50 +111,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _dial.Shows = false;
         }
 
-        /// <summary>Turns the angle <paramref name="by" /> notches from what is typed, within its bounds.</summary>
-        void Step(int by)
-        {
-            float degrees;
-            if (!float.TryParse(_box.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out degrees))
-                degrees = 0f;
-
-            degrees = (float)Math.Round(degrees / Notch) * Notch + by * Notch;
-            degrees = Math.Max(_least, Math.Min(_most, degrees));
-
-            _box.Text = degrees.ToString("0.0", CultureInfo.InvariantCulture);
-            _box.MoveCaret(_box.Length, false);
-            Reread();
-            Raise();
-        }
-
         void Raise()
         {
             var edited = Edited;
             if (edited != null)
                 edited();
-        }
-
-        /// <summary>The box the angle is typed into, which turns it a notch for each press of up or down.</summary>
-        sealed class NotchedBox : TextBox
-        {
-            readonly AngleField _field;
-
-            public NotchedBox(AngleField field)
-            {
-                _field = field;
-            }
-
-            /// <inheritdoc />
-            public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
-            {
-                if (key == MyKeys.Up || key == MyKeys.Down)
-                {
-                    _field.Step(key == MyKeys.Up ? 1 : -1);
-                    return true;
-                }
-
-                return base.OnKey(input, key, shift, ctrl);
-            }
         }
     }
 }
