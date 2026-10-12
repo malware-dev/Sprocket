@@ -42,8 +42,9 @@ lists the terms in the order the contents show them. Every page and tooltip exis
   gear dock one construct to another, and each stays its own.
 - A construct keeps its automation in its programmable blocks, and loses it only when the last one is
   destroyed or ground down. The logic systems the library lacks are then kept as backups.
-- Most actions happen at once (the bolt). Only a few take time and are waited for (the clock), such as a
-  door closing, a vent filling or emptying a room, or a piston or rotor moving to where it was sent.
+- Most actions happen at once (the bolt). Only a few take time (the clock), such as a door closing, a vent
+  filling or emptying a room, or a piston or rotor moving to where it was sent. A new step that takes time is
+  waited for; the sequence can instead go straight on from it, and one wait covers every step since the last.
 - A blueprint is a copy in the library; editing the construct's logic system leaves the blueprint as it
   was.
 

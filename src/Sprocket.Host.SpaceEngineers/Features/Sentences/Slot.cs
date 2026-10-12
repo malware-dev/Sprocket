@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<Mention> _said = new List<Mention>();
 
         bool _empty;
+        Color _glow;
         Texts _texts;
         string _font = MyFontEnum.White;
         float _fontSize = TextState.NeutralFontSize;
@@ -53,6 +54,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     var member = Children[i] as MemberName;
                     if (member != null)
                         member.About = Noted(_said[i].Mark);
+                }
+            }
+        }
+
+        /// <summary>The color of the ring around the marks of the members it says, transparent for none: tied to the wait or step under the pointer.</summary>
+        public Color Glow
+        {
+            get { return _glow; }
+            set
+            {
+                if (_glow == value)
+                    return;
+
+                _glow = value;
+                for (var i = 0; i < Children.Count; i++)
+                {
+                    var member = Children[i] as MemberName;
+                    if (member != null)
+                        member.Glow = value;
                 }
             }
         }
@@ -186,6 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     member.Name = piece.Text;
                     member.Mark = piece.Mark;
                     member.About = Noted(piece.Mark);
+                    member.Glow = _glow;
                     continue;
                 }
 

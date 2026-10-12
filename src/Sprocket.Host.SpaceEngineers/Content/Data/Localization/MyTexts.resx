@@ -720,7 +720,7 @@ Renaming it here renames the grid.</value>
     <comment>Something a conveyor sorter is to offer, named in the note of what is still to come.</comment>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
-    <value>This takes time to finish. The sequence waits until it is done before going on to the next step.</value>
+    <value>This takes time to finish. The sequence can wait for it, or go straight on while it runs.</value>
     <comment>Note on the mark beside something done that a step waits for.</comment>
   </data>
   <data name="Sprocket.Pick.Run" xml:space="preserve">
@@ -1051,10 +1051,6 @@ Renaming it here renames the grid.</value>
     <value>This step's {name} doesn't fit its action. Fill it in again.</value>
     <comment>An option a step was given is the wrong kind; {name} is the option.</comment>
   </data>
-  <data name="Sprocket.Problem.Unawaited" xml:space="preserve">
-    <value>This step doesn't wait for what it starts, which this version can't show. Replace this step.</value>
-    <comment>A step from an older program that cannot be shown.</comment>
-  </data>
   <data name="Sprocket.Problem.Stuck" xml:space="preserve">
     <value>This is waiting for something that cannot finish.</value>
     <comment>A step held by something that cannot finish.</comment>
@@ -1146,10 +1142,6 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Stopped.OptionWrong" xml:space="preserve">
     <value>its {name} didn't fit the action.</value>
     <comment>Reason a run stopped: an option was the wrong kind; {name} is the option.</comment>
-  </data>
-  <data name="Sprocket.Stopped.Unawaited" xml:space="preserve">
-    <value>it didn't wait for what it started.</value>
-    <comment>Reason: a step from an older program.</comment>
   </data>
   <data name="Sprocket.Stopped.Circular" xml:space="preserve">
     <value>it would have started itself again.</value>
@@ -2162,7 +2154,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Entry in the menu of steps to add, at the end of a sequence or of a branch: a step running another sequence. It asks which before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
-    <value>Start another sequence, and wait for it to finish.</value>
+    <value>Start another sequence.</value>
     <comment>Note on the button that adds a step running another sequence.</comment>
   </data>
   <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
@@ -2684,5 +2676,53 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   <data name="Sprocket.Admin.DefaultOff" xml:space="preserve">
     <value>Default (off)</value>
     <comment>This world choice leaving Developer mode to Every world, which has it off.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitsHere" xml:space="preserve">
+    <value>The sequence waits here until this step, and every step above it since the last wait, has finished. Press to go straight on.</value>
+    <comment>Note on the clock beside a step that takes time, while the sequence waits for it there; pressing it makes the sequence go straight on.</comment>
+  </data>
+  <data name="Sprocket.Sequence.CarriesOn" xml:space="preserve">
+    <value>The sequence goes straight on while this step finishes. Press to wait here until it has finished.</value>
+    <comment>Note on the clock beside a step that takes time, while the sequence goes straight on from it; pressing it makes the sequence wait there.</comment>
+  </data>
+  <data name="Sprocket.Sequence.Await" xml:space="preserve">
+    <value>await all pending tasks</value>
+    <comment>Entry in the menu of steps to add, where each wait for what is running is a row of its own: a row waiting for everything started above it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
+    <value>Wait until every ![](mark:awaited) task started above has finished.</value>
+    <comment>Note on the menu entry adding a wait for everything started above it.</comment>
+  </data>
+  <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
+    <value>The tasks started above, back to the last await, run together. The sequence waits here until every ![](mark:awaited) task has finished.</value>
+    <comment>Note on the words of a row waiting for everything started above it. "await all pending tasks" is what the row reads, which stays English.</comment>
+  </data>
+  <data name="Sprocket.Change.WaitHere" xml:space="preserve">
+    <value>waiting for a step</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Change.CarryOn" xml:space="preserve">
+    <value>going straight on from a step</value>
+    <comment>Follows Undo or Redo.</comment>
+  </data>
+  <data name="Sprocket.Sequence.WaitForCompletion" xml:space="preserve">
+    <value>Wait for completion</value>
+    <comment>The underhang under a step that takes time, while the sequence waits for it; pressed, the sequence goes straight on.</comment>
+  </data>
+  <data name="Sprocket.Sequence.DoNotWait" xml:space="preserve">
+    <value>Do not wait</value>
+    <comment>The underhang under a step that takes time, while the sequence goes straight on from it; pressed, the sequence waits for it.</comment>
+  </data>
+  <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
+    <value>Nothing above this takes time, so it has nothing to wait for.</value>
+    <comment>A warning on an await: no step since the await before it takes time to finish.</comment>
+  </data>
+  <data name="Sprocket.Admin.Spine" xml:space="preserve">
+    <value>Join highlighted lines</value>
+    <comment>Trial in the admin settings: a checkbox for the pulsing line that joins the lines lit by a wait or step under the pointer.</comment>
+  </data>
+  <data name="Sprocket.Admin.SpineAbout" xml:space="preserve">
+    <value>A pulsing line beside the line numbers joins the lines that light up when the pointer rests on a wait or a step, and runs on to lines scrolled out of view.</value>
+    <comment>Under Join highlighted lines.</comment>
   </data>
 </root>

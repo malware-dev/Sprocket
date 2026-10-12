@@ -12,14 +12,25 @@ An installation runs a sequence once at a time. A trigger that fires while it is
 
 While it runs, the play mark turns into a stop mark, which stops it. A stopped run starts nothing more. A door already moving finishes, and a vent goes on filling or emptying the room, while a piston or a rotor stops where it is.
 
-## Steps that are waited for
+## Steps that take time
 
-For most actions, the sequence tells the block and moves straight on to the next step, without waiting for the block to finish, such as switching a light on or playing a sound. A few are waited for, such as a door closing or a vent emptying a room: the next step begins only once the block is done. So the vent starts once the inner door is shut, and the outer door opens once the room is empty.
+For most actions, the sequence tells the block and moves straight on to the next step, without waiting for the block to finish, such as switching a light on or playing a sound. A few take time to finish, such as a door closing or a vent emptying a room, and a new step that does one waits for it: the next step begins only once the block is done. So the vent starts once the inner door is shut, and the outer door opens once the room is empty.
 
 In the [picker](#picking), each action carries a mark:
 
 - ![](mark:action) **A bolt** marks an action the sequence starts without waiting for the block to complete it.
-- ![](mark:awaited) **A clock** marks one the sequence waits for the block to complete.
+- ![](mark:awaited) **A clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
+
+## Going straight on
+
+A step that takes time can let the sequence go straight on, so the steps after it run while it is still going, such as closing both airlock doors together. One wait covers every step that takes time since the wait before it, so several steps can run together and one wait catches them all. Where the sequence goes straight on from its last step that takes time, the run is over at its last step, and what it started finishes on its own.
+
+A world shows its waits in one of two ways:
+
+- **`Switch on each step`**: under each step that takes time hangs a line, joined to it as an if's steps are. `Wait for completion` waits there for this step and every step above it since the last wait. Pressing it switches it to `Do not wait`, and the sequence goes straight on; pressing again waits.
+- **`Wait as its own step`**: each wait is a line of its own, reading `await all pending tasks`, after the steps it waits for. It is moved, copied, paused and deleted like a step, and `+ step` offers `await all pending tasks` to add one. A new step that takes time comes with one after it.
+
+Either way, resting the pointer on a wait lights its clock and those of the steps it waits for, and resting it on a step lights the step's clock and the wait that covers it. A pulsing line beside the line numbers joins the lit lines and runs on to lines scrolled out of view; a world can switch it off. A wait with no step above it that takes time is marked with a warning, since it has nothing to wait for.
 
 ## When a run fails
 
@@ -37,7 +48,7 @@ Clear the way, and it carries on by itself: free the rotor, or give the air some
 
 ## Example: the airlock's Cycle Out
 
-*Cycle Out* has three steps, each an action with a clock:
+*Cycle Out* has three steps, each an action with a clock that the sequence waits for:
 
 1. `close Airlock Inner Door` lasts until the inner door is shut.
 2. `depressurize Airlock Vent` begins once the door is shut, and lasts until the room is empty.

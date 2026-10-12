@@ -10,14 +10,14 @@ For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`.
 
 `Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i spillets terminal, under spillets egne navn. Å bruke dem er ditt eget valg: kodeksen forklarer dem ikke, og automasjonen sjekker dem ikke. `‹ Ordnet` går tilbake.
 
-## Hvilke handlinger det ventes på
+## Hvilke handlinger som tar tid
 
-For de fleste handlinger sier ![](mark:sequence) [sekvensen](#sequence) fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å slå på et lys eller spille av en lyd. På noen få ventes det, som at en dør lukker seg, at en ventil fyller eller tømmer et rom, eller at et stempel eller en rotor beveger seg dit det ble sendt: neste steg begynner først når blokken er ferdig.
+For de fleste handlinger sier ![](mark:sequence) [sekvensen](#sequence) fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å slå på et lys eller spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg, at en ventil fyller eller tømmer et rom, eller at et stempel eller en rotor beveger seg dit det ble sendt, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Siden om sekvenser forklarer hvordan et steg går rett videre mens blokken fortsatt holder på.
 
 I velgeren har hver handling et merke:
 
 - ![](mark:action) **Et lyn** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
-- ![](mark:awaited) **En klokke** merker en sekvensen venter på at blokken fullfører.
+- ![](mark:awaited) **En klokke** merker en som tar tid å fullføre. Sekvensen kan vente på den, eller gå rett videre mens den pågår.
 
 Noen handlinger med klokke har et valg i kolonnen ved siden av: med `wait` venter `Recharge` på et batteri eller en hoppmotor til blokken er ladet, og med `move on` går sekvensen rett videre til neste steg, mens `Stockpile` på en gasstank har det samme valget som `until full` og `without waiting`. De venter til du velger noe annet.
 
@@ -25,7 +25,7 @@ Når et steg mislykkes eller venter, for eksempel fordi blokken er borte eller s
 
 ## Flere blokker på én gang
 
-Ett steg kan virke på flere blokker, som alle lysene i luftslusen: kryss av alle i velgeren, så viser `Hva som skal gjøres` det alle sammen kan gjøre. Når det ventes på handlingen, er steget ferdig når den siste av dem er det.
+Ett steg kan virke på flere blokker, som alle lysene i luftslusen: kryss av alle i velgeren, så viser `Hva som skal gjøres` det alle sammen kan gjøre. Når handlingen tar tid, er steget ferdig når den siste av dem er det.
 
 ## Handlinger som tar valg
 
@@ -48,7 +48,7 @@ For å sjekke en verdi, og gjøre noe bare der den stemmer, bruker du et [hvis](
 
 ### Dørene og ventilen i luftslusen
 
-I *Sluse ut* for luftslusen har `Close` for den indre døra, `Depressurize` for ventilen og `Open` for den ytre døra hver sin klokke. Så hvert steg venter på det før: rommet tømmes først når den indre døra er lukket.
+I *Sluse ut* for luftslusen har `Close` for den indre døra, `Depressurize` for ventilen og `Open` for den ytre døra hver sin klokke, og sekvensen venter ved hver av dem: rommet tømmes først når den indre døra er lukket.
 
 ### En stempelarm
 

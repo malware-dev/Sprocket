@@ -43,6 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Change.CopySequence: return texts.ChangeCopySequence;
                 case Change.CopyStep: return texts.ChangeCopyStep;
                 case Change.CopyTrigger: return texts.ChangeCopyTrigger;
+                case Change.WaitHere: return texts.ChangeWaitHere;
+                case Change.CarryOn: return texts.ChangeCarryOn;
                 case Change.RenameSystem: return texts.ChangeRenameSystem;
                 case Change.RenameInstallation: return texts.ChangeRenameInstallation;
                 case Change.FillSlot: return texts.ChangeFillSlot;

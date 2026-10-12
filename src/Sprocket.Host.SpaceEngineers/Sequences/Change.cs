@@ -124,6 +124,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Copying a step.</summary>
         CopyStep,
         /// <summary>Copying a trigger.</summary>
-        CopyTrigger
+        CopyTrigger,
+        /// <summary>Waiting for a step that takes time where it stands.</summary>
+        WaitHere,
+        /// <summary>Carrying on from a step that takes time at once.</summary>
+        CarryOn
     }
 }

@@ -10,6 +10,7 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using VRageMath;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -31,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     {
         const int JustRanTicks = 10;
 
+        // How long the ring around what is tied to what is under the pointer takes to brighten and fade again: a second.
+        const int PulseTicks = 60;
+
         readonly Sequence _sequence;
         readonly List<object> _keys = new List<object>();
         readonly List<int> _shown = new List<int>();
@@ -47,6 +51,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         string _madeName;
         int _madeEdits;
         Keyed<object, StepRow> _rows;
+        readonly List<int> _waiter = new List<int>();
+        readonly List<int> _covered = new List<int>();
+        readonly List<bool> _lasting = new List<bool>();
+        int _hot = -1;
+        bool _hotWait;
         LengthQuestion _length;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
@@ -144,6 +153,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>Whether the sequence may be changed now: not while its system is switched on, and not while somebody else holds the editor.</summary>
         public bool Editable => !SwitchIsOn && Editor.Holder == null;
+
+        /// <summary>Whether each wait for what is running is a row of its own, rather than a switch on the step it follows.</summary>
+        bool AwaitRows => Editor.AwaitRows;
 
         /// <summary>Why nothing can be changed, said where the ways to add a step would be; empty while it can.</summary>
         public string LockedText => Editable
@@ -291,6 +303,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (recount)
                 Mark();
 
+            // The ring around what is tied to what is under the pointer pulses while there is one.
+            Light();
+            var glow = _hot < 0 ? Palette.None : Pulse(tick);
+
             // A row is lit while the sequence is anywhere inside it, so a step stays lit while the wait after it is what
             // is being waited on.
             for (var i = 0; i < _keys.Count; i++)
@@ -300,6 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var to = from + Spanned(from);
                 row.IsCurrent = _keys[i] is Step && state != null && state.IsRunning && state.CurrentStep >= from
                                 && state.CurrentStep < to;
+                row.Glow = glow;
                 row.Show(Editor.World, texts);
             }
 
@@ -359,7 +376,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < _sequence.Steps.Count; i++)
             {
                 var step = _sequence.Steps[i];
-                if (step is Await)
+                if (step is Await && !AwaitRows)
                     continue;
 
                 if (editable && (step is Else || step is EndIf))
@@ -418,6 +435,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     : Changes(Cmd.DuplicateStep, delegate { Duplicate(index); });
                 row.IsOff = step.IsOff || index <= offTo;
                 row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, delegate { SwitchStep(index); });
+                row.Waits = !AwaitRows && Lasting(step) ? Waited(index) : (bool?)null;
+                row.Toggles = row.Waits.HasValue ? Changes(Cmd.WaitStep, delegate { ToggleWait(index); }) : null;
                 row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
                 Branches(row, texts, step, index);
                 row.Locked = locked;
@@ -432,6 +451,157 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var row = _rows[_keys[i]];
                 row.Through = i + 1 < _keys.Count ? Math.Min(row.Depth, _rows[_keys[i + 1]].Depth) : 0;
             }
+
+            Covers();
+        }
+
+        /// <summary>
+        /// Works out which row waits for each step that takes time, and from which row each wait covers: every step that takes time
+        /// since the wait before, down to the wait. A wait is a row of its own, or the underhang of the step it follows.
+        /// </summary>
+        /// <remarks>A step that takes time with no wait below it is covered by none, which is how the sequence leaves it to finish on its own.</remarks>
+        void Covers()
+        {
+            _waiter.Clear();
+            _covered.Clear();
+            _lasting.Clear();
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                _waiter.Add(-1);
+                _covered.Add(-1);
+                var step = _keys[i] as Step;
+                _lasting.Add(step != null && Lasting(step));
+            }
+
+            _hot = -1;
+            var open = -1;
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                if (!(_keys[i] is Step))
+                    continue;
+
+                if (_lasting[i] && open < 0)
+                    open = i;
+
+                // Where waits are rows, the wait is the row; otherwise it is the step's own, after it.
+                var index = _shown[i];
+                var waits = AwaitRows ? _keys[i] is Await : index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await;
+                if (!waits || open < 0)
+                    continue;
+
+                _covered[i] = open;
+                for (var j = open; j <= i; j++)
+                {
+                    if (_lasting[j] || j == i)
+                        _waiter[j] = i;
+                }
+
+                open = -1;
+            }
+        }
+
+        /// <summary>
+        /// Lights what is tied to what is under the pointer, its own clock with it: on a wait, the clock marks of the steps it covers;
+        /// on a step, the clock of the wait covering it.
+        /// </summary>
+        /// <remarks>Asked every tick, as the pointer gives no word when it moves; it lights anything only when what is under it is another.</remarks>
+        void Light()
+        {
+            var hot = -1;
+            var onWait = false;
+            for (var i = 0; i < _keys.Count && i < _waiter.Count; i++)
+            {
+                var row = _rows[_keys[i]];
+                if (row.UnderhangHot || row.Kind == StepKind.Await && row.IsHot)
+                {
+                    hot = i;
+                    onWait = true;
+                    break;
+                }
+
+                if (hot < 0 && row.Hot)
+                    hot = i;
+            }
+
+            if (hot == _hot && onWait == _hotWait)
+                return;
+
+            _hot = hot;
+            _hotWait = onWait;
+
+            var waiter = hot < 0 ? -1 : onWait ? _covered[hot] >= 0 ? hot : -1 : _waiter[hot];
+            for (var i = 0; i < _waiter.Count; i++)
+            {
+                var row = _rows[_keys[i]];
+                var tied = waiter >= 0 && _waiter[i] == waiter && _lasting[i];
+                row.MarksLit = onWait ? tied : waiter >= 0 && i == hot;
+                row.ClockLit = i == waiter;
+            }
+
+            Join();
+        }
+
+        /// <summary>Where the world draws one, runs the spine joining lit lines from the first of them to the last.</summary>
+        void Join()
+        {
+            var first = -1;
+            var last = -1;
+            for (var i = 0; i < _waiter.Count && Editor.WaitSpine; i++)
+            {
+                var row = _rows[_keys[i]];
+                if (!row.MarksLit && !row.ClockLit)
+                    continue;
+
+                if (first < 0)
+                    first = i;
+
+                last = i;
+            }
+
+            for (var i = 0; i < _waiter.Count; i++)
+            {
+                var row = _rows[_keys[i]];
+                row.Joins = first >= 0 && i >= first && i <= last;
+                row.JoinFirst = i == first;
+                row.JoinLast = i == last;
+            }
+        }
+
+        /// <summary>The ring's color at <paramref name="tick" />, brightening and fading once a second.</summary>
+        static Color Pulse(int tick)
+        {
+            var phase = tick % PulseTicks * MathHelper.TwoPi / PulseTicks;
+            return Palette.Link * (0.6f - 0.4f * (float)Math.Cos(phase));
+        }
+
+        /// <summary>Whether <paramref name="step" /> starts something that takes time: running another sequence, or an action that lasts.</summary>
+        bool Lasting(Step step)
+        {
+            var run = step as Run;
+            if (run != null)
+                return !run.Stops;
+
+            var act = step as Act;
+            if (act == null || act.Sets)
+                return false;
+
+            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
+            return chosen != null && chosen.Lasts;
+        }
+
+        /// <summary>Whether a wait follows the step at <paramref name="index" />.</summary>
+        bool Waited(int index)
+        {
+            return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await;
+        }
+
+        /// <summary>Has the step at <paramref name="index" /> waited for where it stands, or carried on from at once where it was.</summary>
+        void ToggleWait(int index)
+        {
+            if (Waited(index))
+                Editor.Do(_sequence, new RemoveStep(Change.CarryOn, index + 1, _sequence.Steps[index + 1]));
+            else
+                Editor.Do(_sequence, new AddStep(Change.WaitHere, index + 1, new Await()));
         }
 
         /// <summary>Makes <paramref name="row" /> the end of a branch: the ways to add a step to it, at the line <paramref name="at" /> the branch ends before.</summary>
@@ -456,14 +626,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <remarks>Made when the page is arranged, which is when the program changes, so the line each adds at is current.</remarks>
         List<Adder> Kinds(Texts texts, int at)
         {
-            return new List<Adder>
+            var kinds = new List<Adder>
             {
                 new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, delegate { AddAction(at); })),
-                new Adder(texts.SequenceWait, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); })),
-                new Adder(texts.SequenceRun, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })),
-                new Adder(texts.SequenceStop, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })),
-                new Adder(texts.SequenceIf, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); }))
+                new Adder(texts.SequenceWait, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); }))
             };
+
+            // Beside the wait for a length of time, where waits for what is running are rows of their own.
+            if (AwaitRows)
+            {
+                kinds.Add(new Adder(texts.SequenceAwait, texts.SequenceAwaitAbout,
+                    Changes(Cmd.AddAwait, delegate { Editor.Do(_sequence, new AddStep(Change.AddStep, at, new Await())); })));
+            }
+
+            kinds.Add(new Adder(texts.SequenceRun, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })));
+            kinds.Add(new Adder(texts.SequenceStop, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })));
+            kinds.Add(new Adder(texts.SequenceIf, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); })));
+            return kinds;
         }
 
         /// <summary>
@@ -524,13 +703,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var through = Editor.StandIn(_sequence.System);
             var fault = SequenceSummary.Fault(Editor.Runner.Get(_sequence, through));
 
-            _bar.Problem = fault.Exists ? SequenceText.Problem(Editor.Texts, fault, _sequence) : "";
-            _bar.Level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
+            var said = fault.Exists ? SequenceText.Problem(Editor.Texts, fault, _sequence) : "";
+            var level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
 
+            // Said under the row of the line at fault, a wait hung under a step included; on the bar only where no row is.
+            var at = -1;
             for (var i = 0; i < _keys.Count; i++)
             {
-                _rows[_keys[i]].HasProblem = fault.Exists && _keys[i] is Step && fault.Step == _shown[i];
-                _rows[_keys[i]].Level = _bar.Level;
+                var from = _shown[i];
+                if (fault.Exists && at < 0 && _keys[i] is Step && fault.Step >= from && fault.Step < from + Spanned(from))
+                    at = i;
+            }
+
+            _bar.Problem = at < 0 ? said : "";
+            _bar.Level = level;
+            for (var i = 0; i < _keys.Count; i++)
+            {
+                var row = _rows[_keys[i]];
+                row.HasProblem = i == at;
+                row.Problem = i == at ? said : "";
+                row.Level = level;
             }
         }
 
@@ -547,7 +739,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _stoppedBy = state.StoppedBy;
             _stoppedAt = state.StoppedAt;
             _stoppedFrom = state.StoppedFrom;
-            _calledOff = SequenceText.CalledOff(texts, _sequence, state);
+            _calledOff = SequenceText.CalledOff(texts, _sequence, state, Editor.AwaitRows);
             return _calledOff;
         }
 
@@ -671,6 +863,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (step is Wait)
                 return StepKind.Wait;
 
+            if (step is Await)
+                return StepKind.Await;
+
             var branch = step as Branch;
             if (branch != null)
                 return step is If ? StepKind.If : branch.Test == null ? StepKind.Otherwise : StepKind.OtherwiseIf;
@@ -689,10 +884,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return StepKind.Do;
         }
 
-        /// <summary>How many of the sequence's lines a row stands for: the step, and any wait for it after it.</summary>
+        /// <summary>How many of the sequence's lines a row stands for: the step, and any wait for it after it where that is no row of its own.</summary>
         int Spanned(int index)
         {
-            return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await ? 2 : 1;
+            return !AwaitRows && Waited(index) ? 2 : 1;
         }
 
         /// <summary>Opens a step's picker on the column <paramref name="opens" /> says, the part that was pressed.</summary>
@@ -707,13 +902,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 delegate(PickAnswer answer)
                 {
                     var named = Editor.Named(_sequence.System, answer.Targets, step.Targets);
+                    var lasts = Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form);
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, named, answer.Chosen,
                             answer.Form, Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form),
-                            answer.Arguments,
-                            Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)));
+                            answer.Arguments, Awaited(index, step, lasts)));
                     Editor.Pop();
                 }, arguments: step.Arguments, opens: opens));
+        }
+
+        /// <summary>
+        /// Whether the step at <paramref name="index" />, changed to something that <paramref name="lasts" /> or not, is followed by a
+        /// wait: the one it has, kept, and one for a step that comes to take time as a new one would have; where waits are switched
+        /// on each step, none for a step that takes no time.
+        /// </summary>
+        bool Awaited(int index, Act step, bool lasts)
+        {
+            var had = Waited(index);
+            var lasted = Lasting(step);
+            if (AwaitRows)
+                return had || lasts && !lasted;
+
+            return lasts && (had || !lasted);
         }
 
         /// <summary>Asks what to affect, then what to do to it, and adds the step only once both are answered.</summary>
@@ -1017,7 +1227,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (steps[index] is If)
             {
                 end = _sequence.EndOf(index) + 1;
-                if (end < steps.Count && steps[end] is Await)
+                if (!AwaitRows && end < steps.Count && steps[end] is Await)
                     end++;
             }
             else if (steps[index] is Else)
@@ -1064,7 +1274,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void Cut(int index, bool whole)
         {
             var end = whole ? _sequence.EndOf(index) + 1 : _sequence.BranchAfter(index);
-            if (whole && end < _sequence.Steps.Count && _sequence.Steps[end] is Await)
+            if (whole && !AwaitRows && end < _sequence.Steps.Count && _sequence.Steps[end] is Await)
                 end++;
 
             var going = new List<Step>();

@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
     {
         static readonly string[] Reasons =
         {
-            "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "unawaited", "adrift",
+            "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "adrift",
             "slot empty", "circular", "unable", "stuck", "stalled", "conflicted"
         };
 
@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         {
             SequenceProblem.NeverTriggered, SequenceProblem.MissingSource, SequenceProblem.MissingTarget,
             SequenceProblem.MissingGate, SequenceProblem.Unoffered, SequenceProblem.Unfilled, SequenceProblem.Mistyped,
-            SequenceProblem.Unawaited, SequenceProblem.Adrift, SequenceProblem.EmptySlot, SequenceProblem.Circular,
+            SequenceProblem.Adrift, SequenceProblem.EmptySlot, SequenceProblem.Circular,
             SequenceProblem.Unable, SequenceProblem.Stuck, SequenceProblem.Stalled, SequenceProblem.Conflicted
         };
 

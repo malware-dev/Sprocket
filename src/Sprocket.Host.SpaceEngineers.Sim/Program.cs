@@ -149,7 +149,12 @@ namespace Sprocket.Sim
                 if (admin)
                     from += 1;
 
-                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer, admin);
+                // Each wait for what is running a row of its own, as the world's trial can set it: "await-rows".
+                var awaitRows = args.Length > from && args[from] == "await-rows";
+                if (awaitRows)
+                    from += 1;
+
+                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer, admin, awaitRows);
                 Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;

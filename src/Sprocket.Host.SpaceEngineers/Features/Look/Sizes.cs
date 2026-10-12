@@ -31,6 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>How short a scrollbar's thumb may get.</summary>
         public const float Thumb = 34f;
 
+        /// <summary>How much larger than a clock the ring is that pulses around it, while it is tied to what is under the pointer.</summary>
+        public const float Halo = 1.6f;
+
         /// <summary>The width of a spine down a gutter: a blueprint's installations, an if's branches.</summary>
         public const float Spine = 2f;
 

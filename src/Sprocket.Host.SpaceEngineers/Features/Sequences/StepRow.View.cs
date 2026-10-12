@@ -12,6 +12,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Grip _grip;
         Label _number;
         Flow _sentence;
+        HStack _hangRoom;
+        HStack _underhang;
+        Glyph _clock;
+        Label _waitWords;
+        Label _problem;
         Glyph _leadWaits;
         Label _lead;
         Glyph _duplicate;
@@ -34,18 +39,49 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 }
             });
 
-            Children.Add(new Flow
+            Children.Add(new VStack
             {
-                Spacing = 8f,
-                LineSpacing = 8f,
+                Spacing = 6f,
                 Placement = Flex.Grow,
                 Children =
                 {
-                    // Before its word, as it stands before a member's name: running another sequence lasts until it finishes.
-                    new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false }.As(out _leadWaits),
-                    new Label { Style = Styles.Phrase }.As(out _lead)
+                    new Flow
+                    {
+                        Spacing = 8f,
+                        LineSpacing = 8f,
+                        Children =
+                        {
+                            // Before its word, as it stands before a member's name: running another sequence lasts until it finishes.
+                            new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.Ring, HaloSize = 20f * Sizes.Halo }
+                                .As(out _leadWaits),
+                            new Label { Style = Styles.Phrase }.As(out _lead)
+                        }
+                    }.As(out _sentence),
+
+                    // Where waits are switched on each step: hung under a step that takes time, one in from it, as an if's steps are.
+                    new HStack
+                    {
+                        IsVisible = false,
+                        Children =
+                        {
+                            new HStack
+                            {
+                                Style = Styles.Underhang,
+                                Spacing = 6f,
+                                Children =
+                                {
+                                    new Glyph { Symbol = Symbols.Awaited, Style = Styles.WaitOn, Halo = Symbols.Ring, HaloSize = 16f * Sizes.Halo }
+                                        .As(out _clock),
+                                    new Label { Style = Styles.WaitWords }.As(out _waitWords)
+                                }
+                            }.As(out _underhang)
+                        }
+                    }.As(out _hangRoom),
+
+                    // Its own line under the step, as on every other line that says what is wrong with it.
+                    new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _problem)
                 }
-            }.As(out _sentence));
+            });
 
             Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f) }.As(out _duplicate));
             Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = Fixed.Size(32f, 32f) }.As(out _pause));

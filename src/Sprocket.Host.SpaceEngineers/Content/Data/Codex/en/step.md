@@ -5,6 +5,7 @@ A step is one line of a ![](mark:sequence) [sequence](#sequence). `+ step`, at t
 - `task` does something to blocks: [an action](#action) such as `open`, or setting one of their values.
 - `wait` [waits](#wait) a set time.
 - `run` and `stop` [run or stop another sequence](#run-and-stop).
+- `await all pending tasks`, offered where each wait is a line of its own, waits for the steps above it that take time, as the sequence page explains.
 - `if` [checks blocks](#if), and runs the steps under it where the check holds.
 
 ## Moving and copying steps

@@ -10,14 +10,14 @@ For a [step](#step) that does an action, choose `task` under `+ step`.
 
 `Terminal ›`, at the end of the heading, lists instead everything the blocks offer in the game's terminal, under the game's own names. Using those is your own call: this codex doesn't explain them, and the automation doesn't check them. `‹ Organized` goes back.
 
-## Which actions are waited for
+## Which actions take time
 
-For most actions, the ![](mark:sequence) [sequence](#sequence) tells the block and moves straight on to the next step, without waiting for the block to finish, such as switching a light on or playing a sound. A few are waited for, such as a door closing, a vent filling or emptying a room, or a piston or rotor moving to where it was sent: the next step begins only once the block is done.
+For most actions, the ![](mark:sequence) [sequence](#sequence) tells the block and moves straight on to the next step, without waiting for the block to finish, such as switching a light on or playing a sound. A few take time to finish, such as a door closing, a vent filling or emptying a room, or a piston or rotor moving to where it was sent, and a new step that does one waits for it: the next step begins only once the block is done. The sequence page explains how a step goes straight on while its block is still going.
 
 In the picker, each action carries a mark:
 
 - ![](mark:action) **A bolt** marks an action the sequence starts without waiting for the block to complete it.
-- ![](mark:awaited) **A clock** marks one the sequence waits for the block to complete.
+- ![](mark:awaited) **A clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
 
 Some actions with a clock offer a choice in the column beside them: a battery's or jump drive's `Recharge` can `wait` until the block is charged or `move on` to the next step at once, and a gas tank's `Stockpile` can wait `until full` or go straight on `without waiting`. They wait unless you choose otherwise.
 
@@ -25,7 +25,7 @@ When a step fails or holds, for example because its block is gone or stuck, the 
 
 ## Several blocks at once
 
-One step can act on several blocks, such as every light in the airlock: tick them all in the picker, and `What to do` lists what all of them can do. Where the action is waited for, the step finishes when the last of them does.
+One step can act on several blocks, such as every light in the airlock: tick them all in the picker, and `What to do` lists what all of them can do. Where the action takes time, the step finishes when the last of them does.
 
 ## Actions that take options
 
@@ -48,7 +48,7 @@ To check a value, and do something only where it holds, use an [if](#if).
 
 ### The airlock's doors and vent
 
-In the airlock's *Cycle Out*, `Close` for the inner door, `Depressurize` for the vent and `Open` for the outer door each carry a clock. So each step waits for the one before it: the room empties only once the inner door is shut.
+In the airlock's *Cycle Out*, `Close` for the inner door, `Depressurize` for the vent and `Open` for the outer door each carry a clock, and the sequence waits at each: the room empties only once the inner door is shut.
 
 ### A piston arm
 

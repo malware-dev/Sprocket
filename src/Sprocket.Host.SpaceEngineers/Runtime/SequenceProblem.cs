@@ -11,6 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public enum SequenceProblem
     {
+        /// <summary>Nothing is wrong.</summary>
         None,
 
         /// <summary>It listens to something that is no longer here.</summary>
@@ -47,14 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// a block that would not take it. A program written anywhere but the editor can hold one.
         /// </remarks>
         Mistyped,
-
-        /// <summary>One of its steps goes straight on without waiting for what it started, which takes time.</summary>
-        /// <remarks>
-        /// A program from anywhere but the editor can hold one, and the editor draws every step that takes
-        /// time as one that waits, so what it would show is not what runs. Said rather than drawn as if it
-        /// waited.
-        /// </remarks>
-        Unawaited,
 
         /// <summary>
         /// Nothing is missing and nothing will ever start it.
@@ -131,6 +124,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>A block a step waits for is switched off or not working, so it is getting nowhere.</summary>
         /// <remarks>The run holds rather than ends, since the block may be switched on or mended and carry on.</remarks>
-        Stalled
+        Stalled,
+
+        /// <summary>One of its awaits has nothing to wait for: no step since the await before it takes time.</summary>
+        /// <remarks>A warning: the await passes straight on, and is most likely left over from a step taken away or changed.</remarks>
+        NothingToAwait
     }
 }

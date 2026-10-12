@@ -228,13 +228,96 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (mistyped.Exists)
                 return mistyped;
 
-            // A trigger's own act starts what it starts and is done, with nothing after it to wait for.
-            SequenceFault unawaited = !sequence.IsAlone ? Unawaited(bindings, sequence, through) : SequenceFault.None;
-            if (unawaited.Exists)
-                return unawaited;
+            // Last, because it is about the sequence as a whole rather than about something it names; a warning about a step
+            // is said ahead of one about the whole, a fault behind none.
+            SequenceFault start = StartTrouble(world, bindings, sequence, through);
+            if (start.Exists && !start.IsWarning)
+                return start;
 
-            // Last, because it is about the sequence as a whole rather than about something it names.
-            return StartTrouble(world, bindings, sequence, through);
+            SequenceFault idle = Idle(bindings, sequence, through);
+            return idle.Exists ? idle : start;
+        }
+
+        /// <summary>The first await with nothing to wait for, no step since the await before it taking time, or none.</summary>
+        /// <remarks>
+        /// Each branch of an if starts from what was pending before the if, and after it whatever any way through may have left
+        /// pending is: an await is said to have nothing to wait for only where no way through gives it anything.
+        /// </remarks>
+        static SequenceFault Idle(Bindings bindings, Sequence sequence, SystemInstance through)
+        {
+            var steps = sequence.Steps;
+            var pending = false;
+            var before = new List<bool>();
+            var after = new List<bool>();
+            for (var i = 0; i < steps.Count; i++)
+            {
+                var step = steps[i];
+                if (step is If && step.IsOff)
+                {
+                    i = sequence.EndOf(i);
+                    continue;
+                }
+
+                if (step is If)
+                {
+                    before.Add(pending);
+                    after.Add(false);
+                    continue;
+                }
+
+                var top = before.Count - 1;
+                if (step is Else && top >= 0)
+                {
+                    after[top] = after[top] || pending;
+                    pending = before[top];
+                    continue;
+                }
+
+                if (step is EndIf && top >= 0)
+                {
+                    pending = pending || after[top] || before[top];
+                    before.RemoveAt(top);
+                    after.RemoveAt(top);
+                    continue;
+                }
+
+                if (step.IsOff)
+                    continue;
+
+                if (step is Await)
+                {
+                    if (!pending)
+                        return new SequenceFault(SequenceProblem.NothingToAwait, i);
+
+                    pending = false;
+                    continue;
+                }
+
+                var run = step as Run;
+                var act = step as Act;
+                if (run != null && !run.Stops || act != null && Lasts(bindings, act, through))
+                    pending = true;
+            }
+
+            return SequenceFault.None;
+        }
+
+        /// <summary>Whether what the step does to any of its blocks takes time to finish.</summary>
+        static bool Lasts(Bindings bindings, Act act, SystemInstance through)
+        {
+            var targets = SystemInstance.Through(through, act.Targets);
+            for (var t = 0; t < targets.Count; t++)
+            {
+                GridEntity entity = bindings.Entity(targets[t]);
+                if (entity == null)
+                    continue;
+
+                EntityAction doing = act.Names(entity.Kind.Actions);
+                if (doing != null && doing.Lasts)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>The first block a sequence's steps name on <paramref name="through" /> that is gone, or may have been swapped for another, or none.</summary>
@@ -321,25 +404,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return null;
         }
 
-        /// <summary>The first action that takes time to finish and is not followed by a wait for it, or none.</summary>
-        static SequenceFault Unawaited(Bindings bindings, Sequence sequence, SystemInstance through)
-        {
-            var steps = sequence.Steps;
-            for (var i = 0; i < steps.Count; i++)
-            {
-                // A step switched off starts nothing and waits for nothing, so the wait that counts is the next step that is on.
-                var act = steps[i] as Act;
-                if (act == null || act.IsOff || !Lasts(bindings, act, through))
-                    continue;
-
-                var next = sequence.After(i);
-                if (next >= steps.Count || !(steps[next] is Await))
-                    return new SequenceFault(SequenceProblem.Unawaited, i);
-            }
-
-            return SequenceFault.None;
-        }
-
         /// <summary>The test a <see cref="Branch" /> makes, or null for every other step and an <c>else</c>.</summary>
         static Comparison TestOf(Step step)
         {
@@ -382,24 +446,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 var run = steps[i] as Run;
                 if (run != null && !run.Stops && !run.IsOff && Reaches(system, run.Number, to, seen))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Whether what the step does to any of its blocks takes time to finish.</summary>
-        static bool Lasts(Bindings bindings, Act act, SystemInstance through)
-        {
-            var targets = SystemInstance.Through(through, act.Targets);
-            for (var t = 0; t < targets.Count; t++)
-            {
-                GridEntity entity = bindings.Entity(targets[t]);
-                if (entity == null)
-                    continue;
-
-                EntityAction doing = act.Names(entity.Kind.Actions);
-                if (doing != null && doing.Lasts)
                     return true;
             }
 

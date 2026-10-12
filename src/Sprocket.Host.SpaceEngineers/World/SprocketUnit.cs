@@ -73,6 +73,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly ConstructMemory _memory;
         readonly string _author;
         bool _developerMode;
+        Waiting _waiting;
+        bool _waitSpine;
 
         SprocketEditor _editor;
 
@@ -164,6 +166,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
+            _waiting = settings == null ? Waiting.Switch : settings.Waiting;
+            _waitSpine = settings == null || settings.WaitSpine;
 
             // The player's own name is only where a namespace starts; choosing another is theirs to do.
             // What the game draws in front of it is not part of that name - see Player.Plain.
@@ -344,8 +348,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _runner.FastestUpdate = settings.FastestUpdate;
             _developerMode = settings.DeveloperMode;
-            if (_editor != null)
-                _editor.DeveloperMode = _developerMode;
+            _waiting = settings.Waiting;
+            _waitSpine = settings.WaitSpine;
+            if (_editor == null)
+                return;
+
+            _editor.DeveloperMode = _developerMode;
+            _editor.Waiting = _waiting;
+            _editor.WaitSpine = _waitSpine;
         }
 
         /// <summary>The settings in this world of the player at the screen, which the editor is given.</summary>
@@ -389,6 +399,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                     _editor.Author = _author;
 
                 _editor.DeveloperMode = _developerMode;
+                _editor.Waiting = _waiting;
+                _editor.WaitSpine = _waitSpine;
                 return _editor;
             }
         }

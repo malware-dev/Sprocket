@@ -764,8 +764,7 @@ public class EditorTests
         Assert.IsType<Await>(sequence.Steps[2]);
 
         // A step with nothing to wait for goes straight on, and that is no fault.
-        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Checked(ship.World, ship.Runner.Bindings, sequence,
-            sequence.System.First).Problem);
+        Assert.False(SequenceSummary.Checked(ship.World, ship.Runner.Bindings, sequence, sequence.System.First).Exists);
     }
 
     [Fact]

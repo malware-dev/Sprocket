@@ -12,14 +12,25 @@ En installasjon kjører en sekvens én gang om gangen. En utløser som går av m
 
 Mens den kjører, blir spill-merket til et stopp-merke, som stopper den. En stoppet kjøring starter ikke noe mer. En dør som allerede beveger seg, går ferdig, og en ventil fortsetter å fylle eller tømme rommet, mens et stempel eller en rotor stopper der det er.
 
-## Steg det ventes på
+## Steg som tar tid
 
-For de fleste handlinger sier sekvensen fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å slå på et lys eller spille av en lyd. På noen få ventes det, som at en dør lukker seg eller en ventil tømmer et rom: neste steg begynner først når blokken er ferdig. Så ventilen starter når den indre døra er lukket, og den ytre døra åpnes når rommet er tomt.
+For de fleste handlinger sier sekvensen fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å slå på et lys eller spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg eller en ventil tømmer et rom, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Så ventilen starter når den indre døra er lukket, og den ytre døra åpnes når rommet er tomt.
 
 I [velgeren](#picking) har hver handling et merke:
 
 - ![](mark:action) **Et lyn** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
-- ![](mark:awaited) **En klokke** merker en sekvensen venter på at blokken fullfører.
+- ![](mark:awaited) **En klokke** merker en som tar tid å fullføre. Sekvensen kan vente på den, eller gå rett videre mens den pågår.
+
+## Gå rett videre
+
+Et steg som tar tid, kan la sekvensen gå rett videre, så stegene etter det kjører mens det fortsatt pågår, som når begge dørene i luftslusen lukkes samtidig. Én venting dekker hvert steg som tar tid siden ventingen før, så flere steg kan kjøre samtidig og én venting fanger dem alle. Går sekvensen rett videre fra det siste steget som tar tid, er kjøringen over ved det siste steget, og det den startet, gjør seg ferdig av seg selv.
+
+En verden viser ventingene sine på én av to måter:
+
+- **`Bryter på hvert steg`**: under hvert steg som tar tid henger en linje, koblet til steget slik stegene i et hvis er. `Vent til det er ferdig` venter der på dette steget og alle stegene over det siden forrige venting. Trykker du den, blir den til `Ikke vent`, og sekvensen går rett videre; trykker du igjen, venter den.
+- **`Venting som eget steg`**: hver venting er en egen linje som lyder `await all pending tasks`, etter stegene den venter på. Den flyttes, kopieres, settes på pause og slettes som et steg, og `+ steg` tilbyr `avvent alle ventende oppgaver` for å legge til en. Et nytt steg som tar tid, kommer med en etter seg.
+
+Uansett lyser klokka til en venting og klokkene til stegene den venter på når du holder pekeren over den, og klokka til et steg og ventingen som dekker det lyser når du holder pekeren over steget. En pulserende linje ved linjenumrene kobler sammen de opplyste linjene og fortsetter til linjer som er rullet ut av syne; en verden kan slå den av. En venting uten noe steg over seg som tar tid, får en advarsel, siden den ikke har noe å vente på.
 
 ## Når en kjøring mislykkes
 
@@ -37,7 +48,7 @@ Rydd veien, så fortsetter det av seg selv: frigjør rotoren, eller gi lufta et 
 
 ## Eksempel: Sluse ut for luftslusen
 
-*Sluse ut* har tre steg, hver av dem en handling med klokke:
+*Sluse ut* har tre steg, hver av dem en handling med klokke som sekvensen venter på:
 
 1. `close Luftsluse indre dør` varer til den indre døra er lukket.
 2. `depressurize Luftsluseventil` begynner når døra er lukket, og varer til rommet er tomt.

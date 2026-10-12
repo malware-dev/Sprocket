@@ -115,6 +115,22 @@ public class AdminTests
         Assert.True(screen.Shows("Default (every 10 ticks)"));
     }
 
+    /// <summary>The spine joining lit lines is drawn where nothing says otherwise, and the box under the trials takes it away for this world and brings it back.</summary>
+    [Fact]
+    public void TheSpineIsTickedOffAndOn()
+    {
+        var screen = Opened(new Settings(Layer.Empty, Layer.Empty));
+        Assert.True(screen.Editor.WaitSpine);
+
+        screen.Do("press", "Join highlighted lines").Run(1);
+        Assert.False(screen.Scene.Ship.Settings.World.WaitSpine);
+        Assert.False(screen.Editor.WaitSpine);
+
+        screen.Do("press", "Join highlighted lines").Run(1);
+        Assert.True(screen.Scene.Ship.Settings.WaitSpine);
+        Assert.True(screen.Editor.WaitSpine);
+    }
+
     /// <summary>Close and Escape both put it away, keeping what was changed.</summary>
     [Fact]
     public void CloseKeepsWhatChanged()

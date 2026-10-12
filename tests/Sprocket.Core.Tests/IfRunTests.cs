@@ -246,7 +246,7 @@ public class IfRunTests
 
         var fault = SequenceSummary.Checked(a.Rig.World, a.Runner.Bindings, a.Cycle, a.Cycle.System.First);
 
-        Assert.NotEqual(SequenceProblem.Unawaited, fault.Problem);
+        Assert.False(fault.Parks);
     }
 
     /// <summary>A test of a member its blocks do not have is a fault, found before anything runs.</summary>

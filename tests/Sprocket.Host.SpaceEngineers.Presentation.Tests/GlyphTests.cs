@@ -61,6 +61,39 @@ public class GlyphTests
         Assert.Equal(Dim, glyph.Tint);
     }
 
+    /// <summary>A halo is drawn around the symbol, centered on it, only while it has a tint, and takes no room of its own.</summary>
+    [Fact]
+    public void AHaloIsDrawnAroundTheSymbolWhileItHasATint()
+    {
+        var glyph = new Glyph { Symbol = "d", Style = Tool, Halo = "o", HaloSize = 64f };
+        var plain = new Glyph { Symbol = "d", Style = Tool };
+        var easel = new Easel(new VStack { Children = { glyph, plain } }, Wide, High);
+        Assert.Equal(plain.DesiredSize, glyph.DesiredSize);
+        Assert.Equal(2, easel.Written.Count());
+
+        glyph.HaloTint = Ink;
+        easel.Draw(Wide, High);
+        Assert.Equal(3, easel.Written.Count());
+        Assert.Equal(Ink, easel.Written.ElementAt(0).Color);
+        Assert.Equal(Faint, easel.Written.ElementAt(1).Color);
+    }
+
+    /// <summary>A halo's tint pulsing measures no text.</summary>
+    [Fact]
+    public void AHalosTintMeasuresNoText()
+    {
+        var glyph = new Glyph { Symbol = "d", Style = Tool, Halo = "o", HaloSize = 64f };
+        var easel = new Easel(new VStack { Children = { glyph } }, Wide, High);
+        var settled = easel.Measured;
+
+        glyph.HaloTint = Ink;
+        easel.Draw(Wide, High);
+        glyph.HaloTint = Faint;
+        easel.Draw(Wide, High);
+
+        Assert.Equal(settled, easel.Measured);
+    }
+
     /// <summary>Going hot and back measures no text.</summary>
     [Fact]
     public void GoingHotMeasuresNoText()

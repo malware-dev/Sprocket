@@ -776,7 +776,7 @@ public class AirlockTests
         a.Tick(150);
 
         Assert.Equal(["Inner Door:close", "Outer Door:open"], a.Log);
-        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
+        Assert.False(SequenceSummary.Fault(a.Runner.Get(cycle)).Parks);
     }
 
     /// <summary>A block switched off that is already where the step would take it has nothing to do, and is no trouble.</summary>
@@ -803,9 +803,9 @@ public class AirlockTests
         Assert.True(system.Enabled);
     }
 
-    /// <summary>An await switched off waits for nothing, so the step above it goes on without waiting, which is a fault.</summary>
+    /// <summary>An await switched off waits for nothing, so the step above it goes straight on, which is a sequence as it may be written.</summary>
     [Fact]
-    public void AnAwaitSwitchedOffLeavesItsStepUnawaited()
+    public void AnAwaitSwitchedOffLetsItsStepGoStraightOn()
     {
         var a = Build();
         var system = a.Automation.Systems[0];
@@ -822,8 +822,8 @@ public class AirlockTests
         a.Automation.Edited();
         a.Tick(3);
 
-        Assert.Equal(SequenceProblem.Unawaited, SequenceSummary.Fault(a.Runner.Get(cycle)).Problem);
-        Assert.NotEqual(SequenceProblem.Unawaited, SequenceSummary.Fault(a.Runner.Get(both)).Problem);
+        Assert.False(SequenceSummary.Fault(a.Runner.Get(cycle)).Parks);
+        Assert.False(SequenceSummary.Fault(a.Runner.Get(both)).Parks);
     }
 
     /// <summary>A run switched off starts nothing, so it makes no cycle.</summary>
@@ -1548,11 +1548,11 @@ public class AirlockTests
     }
 
     [Fact]
-    public void LockingBeforeTheDoorHasShutPinsItOpen()
+    public void LockingBeforeTheDoorHasShutPinsItShortOfShut()
     {
-        // Why the await is written after every step. Locking is disabling, and a disabled door
+        // Why a new step that takes time is waited for. Locking is disabling, and a disabled door
         // stops where it is, so overlapping the two leaves the door the sequence was securing
-        // standing open.
+        // short of shut.
         var a = Build();
         var letMeOut = Cycle(a, "Let me out", a.Inner, a.Outer, "depressurize");
 
@@ -1564,12 +1564,10 @@ public class AirlockTests
         a.Runner.Call(letMeOut);
         a.Tick(200);
 
-        Assert.Equal(DoorStatus.Open, a.Inner.Status);
+        Assert.NotEqual(DoorStatus.Closed, a.Inner.Status);
 
-        // And the outer door is never opened onto it. A step that does not wait is a fault, so the
-        // system is switched off rather than left to carry on.
-        Assert.Equal(DoorStatus.Closed, a.Outer.Status);
-        Assert.False(letMeOut.System.Enabled, "a system with a step that does not wait was left on");
+        // A step that goes straight on is a sequence as it may be written, so the system carries on with it.
+        Assert.True(letMeOut.System.Enabled);
     }
 
     /// <summary>

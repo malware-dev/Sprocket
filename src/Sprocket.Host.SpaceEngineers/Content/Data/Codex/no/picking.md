@@ -19,7 +19,7 @@ Når en plass fylles, blir bare blokker av riktig slag tilbudt.
 Hvert valg har et merke for slaget sitt:
 
 - ![](mark:action) **En handling**, merket med et lyn, startes uten å vente på at blokken fullfører den, som å slå på et lys.
-- ![](mark:awaited) **En handling som tar tid**, merket med en klokke, som å lukke en dør, ventes på før neste steg begynner.
+- ![](mark:awaited) **En handling som tar tid**, merket med en klokke, som å lukke en dør, kan ventes på før neste steg begynner, eller få holde på mens sekvensen går rett videre.
 - ![](mark:value) **En verdi**, merket `=?`, er en av egenskapene til blokken, som skal settes eller sjekkes, som `Radius` på et lys.
 - ![](mark:signal) **Et signal**, merket med en firkantpuls, er noe en blokk sender, som at en knapp trykkes eller en dør er ferdig med å lukke seg. Signaler tilbys når du velger for en utløser.
 

@@ -20,6 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>What <see cref="Step" /> holds when the line at fault is the one that starts it.</summary>
         public const int Trigger = -1;
 
+        /// <summary>Nothing wrong.</summary>
         public static readonly SequenceFault None = new SequenceFault(SequenceProblem.None, Trigger);
 
         /// <summary>Nothing can start the sequence, for <paramref name="why" />, on the button of <paramref name="block" /> where one is known.</summary>
@@ -30,6 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return fault;
         }
 
+        /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with nothing said by a block.</summary>
         public SequenceFault(SequenceProblem problem, int step) : this(problem, step, Trouble.None)
         {
         }
@@ -62,6 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>What the block at fault said is wrong, or none where it said nothing.</summary>
         public Trouble Because { get; private set; }
 
+        /// <summary>What is wrong.</summary>
         public SequenceProblem Problem { get; private set; }
 
         /// <summary>
@@ -82,7 +85,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// as broken, add to what is counted as wrong, or get the sequence parked.
         /// </remarks>
         public bool IsWarning => Problem == SequenceProblem.NothingStarts
-            || Problem == SequenceProblem.Conflicted;
+            || Problem == SequenceProblem.Conflicted
+            || Problem == SequenceProblem.NothingToAwait;
 
         /// <summary>
         /// Whether this is reason to switch the sequence off.

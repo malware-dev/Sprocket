@@ -921,6 +921,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted }
         };
 
+        /// <summary>The line hanging under a step that takes time, saying whether the sequence waits for it, lit under the pointer.</summary>
+        public static readonly ElementStyle Underhang = new ElementStyle
+        {
+            Base = { Padding = new Thickness(6f, 2f) },
+            Hot = { Background = Palette.PanelHot }
+        };
+
+        /// <summary>The words of an underhang while the sequence waits for its step.</summary>
+        public static readonly TextStyle WaitWords = new TextStyle(Status)
+        {
+            Base = { Color = Palette.Muted }
+        };
+
+        /// <summary>The words of an underhang while the sequence goes straight on from its step, quieter.</summary>
+        public static readonly TextStyle WaitWordsOff = new TextStyle(Status)
+        {
+            Base = { Color = Palette.Dim }
+        };
+
+        /// <summary>The clock of an underhang while the sequence waits for its step.</summary>
+        public static readonly GlyphStyle WaitOn = new GlyphStyle
+        {
+            Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Muted }
+        };
+
+        /// <summary>The clock of an underhang while the sequence goes straight on from its step, quieter.</summary>
+        public static readonly GlyphStyle WaitOff = new GlyphStyle(WaitOn)
+        {
+            Base = { Tint = Palette.Dim }
+        };
+
+
         /// <summary>A choice about the picking itself, lit under the pointer.</summary>
         public static readonly ElementStyle Option = new ElementStyle
         {

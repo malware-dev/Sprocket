@@ -8,6 +8,7 @@ using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
@@ -27,6 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
 
         readonly SprocketEditor _editor;
         readonly List<Choice> _choices = new List<Choice>();
+        readonly List<Mark> _spines = new List<Mark>();
 
         Settings _shown;
 
@@ -91,9 +93,45 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         null,
                         delegate(Layer layer) { return layer.Waiting.HasValue ? Waits(layer.Waiting.Value) : -1; },
                         delegate(Settings settings) { return Waits(settings.DefaultWaiting); },
-                        delegate(Layer layer, int at) { return layer.WithWaiting(at < 0 ? (Waiting?)null : at == 0 ? Waiting.Switch : Waiting.Step); }))
+                        delegate(Layer layer, int at) { return layer.WithWaiting(at < 0 ? (Waiting?)null : at == 0 ? Waiting.Switch : Waiting.Step); })),
+                    Spine(texts, world)
                 }
             };
+        }
+
+        /// <summary>The trial of the line joining lit lines at one level: a box ticked where it is drawn, and what it does under it.</summary>
+        /// <remarks>A trial has no default, so this world's box shows what the world draws, and ticking it says so for this world.</remarks>
+        Element Spine(Texts texts, bool world)
+        {
+            var mark = new Mark { Many = true };
+            _spines.Add(mark);
+            return new VStack
+            {
+                Spacing = 6f,
+                Children =
+                {
+                    new HStack
+                    {
+                        Style = Styles.Option,
+                        Spacing = 8f,
+                        Align = Align.Left,
+                        Command = new Relay(delegate { Flip(world); }),
+                        Children = { mark, new Label { Style = Styles.Phrase, Text = texts.AdminSpine } }
+                    },
+                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminSpineAbout }
+                }
+            };
+        }
+
+        /// <summary>Draws the line joining lit lines at one level where it is not drawn, and stops drawing it where it is.</summary>
+        void Flip(bool world)
+        {
+            var next = world
+                ? _shown.WithWorld(_shown.World.WithWaitSpine(!_shown.WaitSpine))
+                : _shown.WithGlobal(_shown.Global.WithWaitSpine(!_shown.DefaultWaitSpine));
+
+            _editor.ChangeSettings(next);
+            Show(next);
         }
 
         /// <summary>
@@ -135,6 +173,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         void Show(Settings settings)
         {
             _shown = settings;
+            for (var i = 0; i < _spines.Count; i++)
+                _spines[i].IsChecked = i == 0 ? settings.WaitSpine : settings.DefaultWaitSpine;
+
             foreach (var choice in _choices)
             {
                 var standing = choice.Standing(settings);

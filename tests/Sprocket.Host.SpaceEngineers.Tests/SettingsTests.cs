@@ -19,7 +19,7 @@ public class SettingsTests
     [Fact]
     public void WrittenSettingsReadBackTheSame()
     {
-        var written = new Settings(new Layer(true, 10, null), new Layer(null, 100, Waiting.Step));
+        var written = new Settings(new Layer(true, 10, null, true), new Layer(null, 100, Waiting.Step));
         var read = Settings.Of(written.Written());
 
         Assert.True(read.Global.Same(written.Global));
@@ -28,6 +28,7 @@ public class SettingsTests
         Assert.Equal(100, read.FastestUpdate);
         Assert.Equal(10, read.DefaultFastestUpdate);
         Assert.Equal(Waiting.Step, read.Waiting);
+        Assert.True(read.WaitSpine);
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 

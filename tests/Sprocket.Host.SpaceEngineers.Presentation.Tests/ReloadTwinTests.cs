@@ -1,6 +1,7 @@
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -96,6 +97,27 @@ public class ReloadTwinTests
     public void WhatARunMetIsRemembered(int reloadAt)
     {
         Twins(Cycle, reloadAt, delegate(Screen screen, int tick)
+        {
+            if (tick == 12)
+                screen.Scene.Ship.Press("Airlock Button");
+            if (tick == 30)
+                screen.Scene.Ship.Machine.Grind(screen.Scene.Ship.Machine.Fitted.First(fitting => fitting.Name == "Airlock Outer Door"));
+        });
+    }
+
+    /// <summary>
+    /// The same, in a world with settings of its own, which the editor of a world opened again is given after it is made: what a
+    /// run met is said as soon either way.
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(Every), 3, 300, 9)]
+    public void WhatARunMetIsRememberedInAWorldWithItsOwnSettings(int reloadAt)
+    {
+        Twins(delegate(Screen screen)
+        {
+            screen.Scene.Ship.Settle(new Settings(Layer.Empty, new Layer(true, null, Waiting.Step, false)));
+            Cycle(screen);
+        }, reloadAt, delegate(Screen screen, int tick)
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");

@@ -511,7 +511,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <remarks>Persisted: a spelling here cannot change without every saved reason being forgotten.</remarks>
         static readonly string[] Reasons =
         {
-            "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "unawaited", "adrift",
+            "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "adrift",
             "slot empty", "circular", "unable"
         };
 
@@ -519,7 +519,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             SequenceProblem.NeverTriggered, SequenceProblem.MissingSource, SequenceProblem.MissingTarget,
             SequenceProblem.MissingGate, SequenceProblem.Unoffered, SequenceProblem.Unfilled, SequenceProblem.Mistyped,
-            SequenceProblem.Unawaited, SequenceProblem.Adrift, SequenceProblem.EmptySlot, SequenceProblem.Circular,
+            SequenceProblem.Adrift, SequenceProblem.EmptySlot, SequenceProblem.Circular,
             SequenceProblem.Unable
         };
 

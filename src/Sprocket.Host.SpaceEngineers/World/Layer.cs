@@ -13,6 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const string Waits = "waits";
 
+        const string Spine = "waitSpine";
+
         /// <summary>A level saying nothing.</summary>
         public static readonly Layer Empty = new Layer(null, null, null);
 
@@ -20,11 +22,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static readonly int[] Updates = { 1, 10, 100 };
 
         /// <summary>A level giving the values that are not null, and leaving the rest to the level below.</summary>
-        public Layer(bool? developerMode, int? fastestUpdate, Waiting? waiting)
+        public Layer(bool? developerMode, int? fastestUpdate, Waiting? waiting, bool? waitSpine = null)
         {
             DeveloperMode = developerMode;
             FastestUpdate = fastestUpdate.HasValue ? Nearest(fastestUpdate.Value) : (int?)null;
             Waiting = waiting;
+            WaitSpine = waitSpine;
         }
 
         /// <summary>Whether the developer tools are on, or null where this level leaves it.</summary>
@@ -36,28 +39,38 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>How the editor shows and edits a sequence's waits, or null where this level leaves it.</summary>
         public Waiting? Waiting { get; }
 
+        /// <summary>Whether a pulsing line joins the lines lit by a wait or step under the pointer, or null where this level leaves it.</summary>
+        public bool? WaitSpine { get; }
+
         /// <summary>This level with developer mode given as <paramref name="on" />, or left where it is null.</summary>
         public Layer WithDeveloperMode(bool? on)
         {
-            return new Layer(on, FastestUpdate, Waiting);
+            return new Layer(on, FastestUpdate, Waiting, WaitSpine);
         }
 
         /// <summary>This level with the fastest update given as <paramref name="ticks" />, or left where it is null.</summary>
         public Layer WithFastestUpdate(int? ticks)
         {
-            return new Layer(DeveloperMode, ticks, Waiting);
+            return new Layer(DeveloperMode, ticks, Waiting, WaitSpine);
         }
 
         /// <summary>This level with waits shown as <paramref name="waiting" /> says, or left where it is null.</summary>
         public Layer WithWaiting(Waiting? waiting)
         {
-            return new Layer(DeveloperMode, FastestUpdate, waiting);
+            return new Layer(DeveloperMode, FastestUpdate, waiting, WaitSpine);
+        }
+
+        /// <summary>This level with the line joining lit lines drawn as <paramref name="on" /> says, or left where it is null.</summary>
+        public Layer WithWaitSpine(bool? on)
+        {
+            return new Layer(DeveloperMode, FastestUpdate, Waiting, on);
         }
 
         /// <summary>Whether this level says the same as <paramref name="other" /> about every setting.</summary>
         public bool Same(Layer other)
         {
-            return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate && Waiting == other.Waiting;
+            return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate && Waiting == other.Waiting
+                   && WaitSpine == other.WaitSpine;
         }
 
         /// <summary>The one of 1, 10 and 100 nearest <paramref name="ticks" />, the smaller where two are as near.</summary>
@@ -106,7 +119,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                     Told.Say(where + " gives " + Waits + " as " + word + ", which is not switch or step; it is left to the level below");
             }
 
-            return new Layer(developerMode, fastestUpdate, waiting);
+            bool spine;
+            bool? waitSpine = ini.Get(section, Spine).TryGetBoolean(out spine) ? spine : (bool?)null;
+
+            return new Layer(developerMode, fastestUpdate, waiting, waitSpine);
         }
 
         /// <summary>Writes this level into <paramref name="section" /> of <paramref name="ini" />: each value it gives, and none for each it leaves.</summary>
@@ -126,6 +142,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ini.Set(section, Waits, Spelled(Waiting.Value));
             else
                 ini.Delete(section, Waits);
+
+            if (WaitSpine.HasValue)
+                ini.Set(section, Spine, WaitSpine.Value);
+            else
+                ini.Delete(section, Spine);
         }
 
         /// <summary>How <paramref name="waiting" /> is spelled in a file.</summary>

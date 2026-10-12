@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 {
                     var problems = SystemSummary.Problems(Editor.Runner, system, instance);
                     var remarks = SystemSummary.Remarks(Editor.Runner, system, instance);
-                    var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system);
+                    var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system, Editor.AwaitRows);
                     var again = system.IsBlueprint ? FillAgain(texts, system, instance) : "";
                     var said = again.Length > 0 ? again : stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
                     changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != said;
@@ -256,7 +256,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             SequenceFault fault;
             var sequence = SystemSummary.Failing(Editor.Runner, system, instance, out fault);
-            return sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
+            return sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence, Editor.AwaitRows);
         }
 
         /// <summary>Adds another logic system made from a blueprint, numbered, and opens its installation panel on it with its name in hand to be given.</summary>

@@ -346,7 +346,7 @@ public class ProblemTests
 
         Assert.False(installation.Enabled);
         Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.",
-            SequenceText.Stopped(new Texts(), installation.Halt, system));
+            SequenceText.Stopped(new Texts(), installation.Halt, system, false));
     }
 
     /// <summary>A step's own trouble marks the step, and only the step.</summary>
@@ -364,7 +364,8 @@ public class ProblemTests
 
         var sentence = ship.Editor.Sentence();
         Assert.True(ship.Editor.StepRows()[0].HasProblem);
-        Assert.NotEmpty(sentence.Bar.Problem);
+        Assert.NotEmpty(ship.Editor.StepRows()[0].Problem);
+        Assert.Empty(sentence.Bar.Problem);
     }
 
     /// <summary>A mended trigger stops being marked, which is the half that is easy to forget.</summary>
@@ -416,23 +417,15 @@ public class ProblemTests
         Assert.Equal("transmogrify", act.ActionId);
     }
 
-    /// <summary>A step that does not wait for what it started is a fault this version reports.</summary>
-    /// <remarks>
-    /// The editor draws every step as one that waits, because it writes a wait after every action.
-    /// A program from anywhere else can leave one out, and drawn as it stands the screen would say the
-    /// door shuts before anything else happens when nothing waits for it at all.
-    /// </remarks>
+    /// <summary>A step that does not wait for what it started goes straight on, which the editor shows, and is no fault.</summary>
     [Fact]
-    public void AStepThatDoesNotWaitIsAFault()
+    public void AStepThatDoesNotWaitIsNoFault()
     {
         var ship = Build();
         Assert.IsType<Await>(ship.Sequence.Steps[1]);
         ship.Sequence.Steps.RemoveAt(1);
 
-        var fault = Fault(ship);
-        Assert.Equal(SequenceProblem.Unawaited, fault.Problem);
-        Assert.Equal(0, fault.Step);
-        Assert.True(fault.Parks);
+        Assert.False(Fault(ship).Exists);
     }
 
     static SequenceFault Fault(Ship ship) => Fault(ship, ship.Sequence);

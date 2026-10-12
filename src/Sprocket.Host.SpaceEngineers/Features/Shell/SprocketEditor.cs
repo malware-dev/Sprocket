@@ -59,6 +59,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         bool _structureDirty;
         bool _developerMode;
+        Waiting _waiting;
+        bool _waitSpine = true;
         bool _toldPasting;
         Shelf _shelf;
 
@@ -216,6 +218,39 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
+        /// <summary>Whether a pulsing line joins the lines lit by a wait or step under the pointer, beside the line numbers.</summary>
+        /// <remarks>The world's trial of it, set by the host.</remarks>
+        public bool WaitSpine
+        {
+            get { return _waitSpine; }
+            set
+            {
+                if (_waitSpine == value)
+                    return;
+
+                _waitSpine = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>Whether each wait for what is running is a row of its own, numbered as a line, rather than hung under the step before it.</summary>
+        public bool AwaitRows => _waiting == Waiting.Step;
+
+        /// <summary>How a sequence's waits are shown and edited: a switch on each step that takes time, or rows of their own.</summary>
+        /// <remarks>The world's trial of the two, set by the host. Rebuilds what is on screen, as <see cref="DeveloperMode" /> does.</remarks>
+        public Waiting Waiting
+        {
+            get { return _waiting; }
+            set
+            {
+                if (_waiting == value)
+                    return;
+
+                _waiting = value;
+                Invalidate();
+            }
+        }
+
 
         /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
         public int CurrentTick => _runner.CurrentTick;
@@ -237,16 +272,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Tick(int tick)
         {
             Stamp();
+
+            // Somebody is looking, so the construct is looked at for them: what a run would only find at the step that
+            // needs it is shown before anything runs into it. See AutomationRunner.Look for what it costs. On a tick that
+            // rebuilds the screen as well, which an editor made for a world with settings of its own does on its first.
+            if (_looked.Due(tick))
+                _runner.Look();
+
             if (_structureDirty)
             {
                 Rebuild();
                 return;
             }
-
-            // Somebody is looking, so the construct is looked at for them: what a run would only find at the step that
-            // needs it is shown before anything runs into it. See AutomationRunner.Look for what it costs.
-            if (_looked.Due(tick))
-                _runner.Look();
 
             Current.Refresh();
 

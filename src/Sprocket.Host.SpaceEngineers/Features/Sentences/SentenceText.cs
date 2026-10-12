@@ -27,6 +27,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The word a set is said with, on its step and wherever else it is said.</summary>
         public const string SetWord = "set";
 
+        /// <summary>What a wait for everything started above it reads as, on a row of its own.</summary>
+        const string AwaitWords = "await all pending tasks";
+
         const string OnWord = "on";
         const string ToWord = "to";
         const string IsWord = "is";
@@ -106,7 +109,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>
-        /// What comes before a step's slots: "wait", "run", "stop", "set", "if", "otherwise if", "otherwise", or nothing at all.
+        /// What comes before a step's slots: "wait", "run", "stop", "set", "if", "otherwise if", "otherwise", the words of a wait for
+        /// what is running, or nothing at all.
         /// </summary>
         /// <remarks>
         /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
@@ -131,6 +135,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             if (kind == StepKind.Otherwise)
                 return "otherwise";
+
+            if (kind == StepKind.Await)
+                return AwaitWords;
 
             return kind == StepKind.Wait ? "wait" : "";
         }

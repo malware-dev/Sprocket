@@ -549,7 +549,7 @@ Nytt navn her gir gridet nytt navn.</value>
     <value>å sette sortererens liste</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
-    <value>Dette tar tid å fullføre. Sekvensen venter til det er gjort før den går videre til neste steg.</value>
+    <value>Dette tar tid å fullføre. Sekvensen kan vente på det, eller gå rett videre mens det pågår.</value>
   </data>
   <data name="Sprocket.Pick.Run" xml:space="preserve">
     <value>kjør</value>
@@ -805,9 +805,6 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Problem.OptionWrong" xml:space="preserve">
     <value>{name} i dette steget passer ikke til handlingen. Fyll det inn på nytt.</value>
   </data>
-  <data name="Sprocket.Problem.Unawaited" xml:space="preserve">
-    <value>Dette steget venter ikke på det det starter, og det kan ikke denne versjonen vise. Erstatt dette steget.</value>
-  </data>
   <data name="Sprocket.Problem.Stuck" xml:space="preserve">
     <value>Dette venter på noe som ikke kan bli ferdig.</value>
   </data>
@@ -876,9 +873,6 @@ Nytt navn her gir gridet nytt navn.</value>
   </data>
   <data name="Sprocket.Stopped.OptionWrong" xml:space="preserve">
     <value>{name} passet ikke til handlingen.</value>
-  </data>
-  <data name="Sprocket.Stopped.Unawaited" xml:space="preserve">
-    <value>den ventet ikke på det den startet.</value>
   </data>
   <data name="Sprocket.Stopped.Circular" xml:space="preserve">
     <value>den ville ha startet seg selv igjen.</value>
@@ -1639,7 +1633,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>kjør</value>
   </data>
   <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
-    <value>Start en annen sekvens, og vent til den er ferdig.</value>
+    <value>Start en annen sekvens.</value>
   </data>
   <data name="Sprocket.Sequence.RunQuestion" xml:space="preserve">
     <value>Kjøre hvilken sekvens?</value>
@@ -2030,5 +2024,41 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Admin.DefaultOff" xml:space="preserve">
     <value>Standard (av)</value>
+  </data>
+  <data name="Sprocket.Sequence.WaitsHere" xml:space="preserve">
+    <value>Sekvensen venter her til dette steget og alle stegene over det siden sist den ventet, er ferdige. Trykk for å gå rett videre.</value>
+  </data>
+  <data name="Sprocket.Sequence.CarriesOn" xml:space="preserve">
+    <value>Sekvensen går rett videre mens dette steget fullføres. Trykk for å vente her til det er ferdig.</value>
+  </data>
+  <data name="Sprocket.Sequence.Await" xml:space="preserve">
+    <value>avvent alle ventende oppgaver</value>
+  </data>
+  <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
+    <value>Vent til alle ![](mark:awaited) oppgavene som er startet over, er ferdige.</value>
+  </data>
+  <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
+    <value>Oppgavene som er startet over, tilbake til forrige slike steg, kjører samtidig. Sekvensen venter her til alle ![](mark:awaited) oppgavene er ferdige.</value>
+  </data>
+  <data name="Sprocket.Change.WaitHere" xml:space="preserve">
+    <value>venting på et steg</value>
+  </data>
+  <data name="Sprocket.Change.CarryOn" xml:space="preserve">
+    <value>å gå rett videre fra et steg</value>
+  </data>
+  <data name="Sprocket.Sequence.WaitForCompletion" xml:space="preserve">
+    <value>Vent til det er ferdig</value>
+  </data>
+  <data name="Sprocket.Sequence.DoNotWait" xml:space="preserve">
+    <value>Ikke vent</value>
+  </data>
+  <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
+    <value>Ingenting over dette tar tid, så det har ingenting å vente på.</value>
+  </data>
+  <data name="Sprocket.Admin.Spine" xml:space="preserve">
+    <value>Koble uthevede linjer</value>
+  </data>
+  <data name="Sprocket.Admin.SpineAbout" xml:space="preserve">
+    <value>En pulserende linje ved linjenumrene kobler sammen linjene som lyser opp når pekeren hviler på en venting eller et steg, og fortsetter til linjer som er rullet ut av syne.</value>
   </data>
 </root>

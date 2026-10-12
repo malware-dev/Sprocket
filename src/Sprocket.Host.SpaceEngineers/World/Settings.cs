@@ -71,11 +71,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>How the editor shows and edits a sequence's waits, the trial's variant this world uses.</summary>
         public Waiting Waiting => World.Waiting ?? DefaultWaiting;
 
+        /// <summary>Whether a pulsing line joins the lines lit by a wait or step under the pointer, the trial's choice this world uses.</summary>
+        public bool WaitSpine => World.WaitSpine ?? DefaultWaitSpine;
+
         /// <summary>Whether developer mode is on in a world that leaves it: what every world says, or off.</summary>
         public bool DefaultDeveloperMode => Global.DeveloperMode ?? false;
 
         /// <summary>The fastest update of a world that leaves it: what every world says, or every tick.</summary>
         public int DefaultFastestUpdate => Global.FastestUpdate ?? 1;
+
+        /// <summary>Whether the line joining lit lines is drawn in a world that leaves it: as every world says, or drawn.</summary>
+        public bool DefaultWaitSpine => Global.WaitSpine ?? true;
 
         /// <summary>How waits are shown in a world that leaves it: as every world says, or by a switch on each step.</summary>
         public Waiting DefaultWaiting => Global.Waiting ?? Waiting.Switch;

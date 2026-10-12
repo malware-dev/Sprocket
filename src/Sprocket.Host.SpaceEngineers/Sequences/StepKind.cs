@@ -19,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Passes time and nothing else.</summary>
         Wait,
 
+        /// <summary>Waits for everything started above it to finish, where waits are rows of their own.</summary>
+        Await,
+
         /// <summary>Starts another sequence of the same system.</summary>
         Run,
 
