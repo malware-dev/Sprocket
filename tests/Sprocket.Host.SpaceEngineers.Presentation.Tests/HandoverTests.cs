@@ -3,7 +3,9 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
+using VRage.Game.ModAPI;
 using Xunit;
+using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -597,6 +599,56 @@ public class HandoverTests : IDisposable
         Assert.Contains(_sim.Panels(), panel => panel.Toolbar.Holds(0));
     }
 
+    /// <summary>A button a client takes over for a new trigger is written over what its slot held, as the client was asked.</summary>
+    [Fact]
+    public void AButtonAClientTakesOverIsWritten()
+    {
+        Repeating();
+        for (var i = 0; i < 3; i++)
+            _sim.Tick();
+
+        var panel = _sim.Panels().First(each => each.Name == "Airlock Button");
+        var door = _sim.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
+        panel.Toolbar.Changing().Set(0, MyToolbarItemInfo.BlockAction(door.Id, "Open_On"), new List<TerminalActionParameter>()).Apply();
+        _sim.Tick();
+
+        var (anna, hers, copy) = Lent();
+        string question = null!;
+        _wire.As(anna, () =>
+        {
+            copy.Editor.Wire = picked => hers.Wire(_block, picked);
+            copy.Editor.Unwire = () => hers.Unwire(_block);
+            copy.Editor.Tick(1);
+            copy.Editor.RootHeadings()[0].Opens!.Execute();
+            copy.Editor.Tick(1);
+            copy.Editor.PressStart("when");
+            copy.Editor.PressBlock("Airlock Button");
+            copy.Editor.PressChoice("button 1 is pressed");
+            copy.Editor.PressPrimary();
+            copy.Editor.Tick(1);
+            question = copy.Editor.Question();
+            copy.Editor.PressChoice(copy.Editor.Texts.ButtonTakeOver);
+            copy.Editor.Tick(1);
+        });
+        _wire.Settle();
+        _wire.As(anna, () => hers.Keep(_block, copy));
+        _wire.Settle();
+
+        Assert.Equal("Button 1 of Airlock Button already does something else.", question);
+
+        SprocketUnit rebuilt = null!;
+        _wire.As(_server, () =>
+        {
+            rebuilt = _sim.Unit.Rebuilt(_atServer.Changed[0], _atServer.Switches, null, new Rota());
+            for (var frame = 1; frame <= 5; frame++)
+                rebuilt.Tick(frame);
+        });
+
+        Assert.Equal(2, rebuilt.Editor.Program.Systems[0].Triggers.Count);
+        Assert.True(panel.Toolbar.TryGetItem(0, out var held));
+        Assert.NotEqual("Open_On", held.ActionId);
+    }
+
     /// <summary>
     /// A client picking a button again mends a slot cleared by hand, though the program it sends is the one the server
     /// already holds.
@@ -619,6 +671,34 @@ public class HandoverTests : IDisposable
             _sim.Tick();
 
         Assert.True(panel.Toolbar.Holds(0), "the server did not write the button picked again");
+    }
+
+    /// <summary>A button a client picks and backs out of is left as it is, when the server's wiring next changes.</summary>
+    [Fact]
+    public void AButtonAClientBacksOutOfIsLeftAlone()
+    {
+        _sim.Editor.NewButtonSystem("Airlock");
+        for (var i = 0; i < 3; i++)
+            _sim.Tick();
+
+        var panel = Assert.Single(_sim.Panels(), each => each.Toolbar.Holds(0));
+        var door = _sim.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
+        panel.Toolbar.Changing().Set(0, MyToolbarItemInfo.BlockAction(door.Id, "Open_On"), new List<TerminalActionParameter>()).Apply();
+        _sim.Tick();
+
+        var (anna, hers, _) = Lent();
+        _wire.As(anna, () =>
+        {
+            hers.Wire(_block, panel.Id);
+            hers.Unwire(_block);
+        });
+        _wire.Settle();
+        _sim.Editor.Program.Rewire();
+        for (var i = 0; i < 3; i++)
+            _sim.Tick();
+
+        Assert.True(panel.Toolbar.TryGetItem(0, out var held));
+        Assert.Equal("Open_On", held.ActionId);
     }
 
     /// <summary>

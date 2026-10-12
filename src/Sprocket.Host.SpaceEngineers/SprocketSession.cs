@@ -399,6 +399,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Keep(id, copy);
                 _handover.Wire(id, panel);
             };
+            copy.Editor.Unwire = delegate { _handover.Unwire(id); };
 
             Lent(block, id, copy);
         }

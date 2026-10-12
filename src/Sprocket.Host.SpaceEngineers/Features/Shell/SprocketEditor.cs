@@ -139,10 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public Action<long> Wire { get; set; }
 
         /// <summary>Where the buttons picked and not yet written are let go of, as a pick is backed out of.</summary>
-        /// <remarks>
-        /// Set beside <see cref="Wire" />. A copy a client is editing has none: every edit it sends rebuilds the Sprocket it
-        /// was lent, which ends what that was asked to write.
-        /// </remarks>
+        /// <remarks>Set beside <see cref="Wire" />, and like it, on a copy a client is editing it asks the server.</remarks>
         public Action Unwire { get; set; }
 
         /// <summary>Who holds the Sprocket this editor shows, or null where this editor may change it.</summary>

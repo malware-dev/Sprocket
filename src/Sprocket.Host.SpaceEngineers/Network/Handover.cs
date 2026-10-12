@@ -36,6 +36,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
         readonly List<long> _gone = new List<long>();
 
+        readonly List<long> _wiring = new List<long>();
+
         NetworkChannel _channel;
 
         struct Holder
@@ -83,7 +85,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 .UsingModel<Release>(Release.SizeOf, Release.Read, Release.Write)
                 .UsingModel<Change>(Change.SizeOf, Change.Read, Change.Write)
                 .UsingModel<Order>(Order.SizeOf, Order.Read, Order.Write)
-                .UsingModel<Wiring>(Wiring.SizeOf, Wiring.Read, Wiring.Write);
+                .UsingModel<Wiring>(Wiring.SizeOf, Wiring.Read, Wiring.Write)
+                .UsingModel<Unwiring>(Unwiring.SizeOf, Unwiring.Read, Unwiring.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
@@ -96,6 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.ListenFor<Change>(Changed);
             _channel.ListenFor<Order>(Ordered);
             _channel.ListenFor<Wiring>(Wired);
+            _channel.ListenFor<Unwiring>(Unwired);
         }
 
         /// <summary>Asks the server for the Sprocket on <paramref name="block" />, as <paramref name="name" />.</summary>
@@ -303,7 +307,21 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public void Wire(long block, long panel)
         {
             Told.Say("asking the server to wire panel " + panel + " for block " + block);
+            if (!_wiring.Contains(block))
+                _wiring.Add(block);
+
             _channel.SendToServer(new Wiring { Block = block, Panel = panel }, true);
+        }
+
+        /// <summary>Asks the server to let go of the buttons it was asked to write for the Sprocket on <paramref name="block" />, as a pick is backed out of.</summary>
+        /// <remarks>Sent only where something was asked since, because every step back in the editor lets go.</remarks>
+        public void Unwire(long block)
+        {
+            if (!_wiring.Remove(block))
+                return;
+
+            Told.Say("asking the server to let go of the buttons picked for block " + block);
+            _channel.SendToServer(new Unwiring { Block = block }, true);
         }
 
         /// <summary>A panel to wire arriving at the server, which it takes only from whoever holds that Sprocket.</summary>
@@ -329,6 +347,30 @@ namespace Sprocket.Host.SpaceEngineers.Network
             Told.Say(said);
             unit.Wire(wiring.Panel);
             unit.Revisit();
+        }
+
+        /// <summary>A pick backed out of arriving at the server, which it takes only from whoever holds that Sprocket.</summary>
+        void Unwired(ushort channel, Unwiring unwiring, ulong sender, bool fromServer)
+        {
+            if (!NetworkChannel.Network.IsServer)
+                return;
+
+            var said = Who(sender) + " let go of the buttons picked for block " + unwiring.Block;
+            if (!Holds(unwiring.Block, sender))
+            {
+                Told.Say(said + ", and was ignored: they do not hold it");
+                return;
+            }
+
+            SprocketUnit unit = _find(unwiring.Block);
+            if (unit == null)
+            {
+                Told.Say(said + ", which carries no Sprocket here");
+                return;
+            }
+
+            Told.Say(said);
+            unit.Unwire();
         }
 
         /// <summary>An order arriving at the server, which it takes only from whoever holds that Sprocket.</summary>

@@ -137,6 +137,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             // wired yet - as one somebody cleared, and drop it.
             rebuilt._adopted = _adopted;
             rebuilt._wanted.AddRange(_wanted);
+
+            // And what was picked and not written yet, which a new trigger's button is until the edit that adds it.
+            rebuilt._asserted.AddRange(_asserted);
             return rebuilt;
         }
 
