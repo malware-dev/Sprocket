@@ -24,6 +24,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>What is switched off, as the block holds it, where it is given.</summary>
         public string State;
 
+        /// <summary>Whether the one who asked gives lengths of time in ticks, by their settings in this world.</summary>
+        public bool Ticks;
+
         /// <summary>How many bytes <paramref name="grant" /> takes on the wire.</summary>
         public static int SizeOf(ref Grant grant)
         {
@@ -36,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             ByteData.Write(grant.Block, data, ref offset);
-            ByteData.Write((grant.Given ? 1 : 0) | (grant.Foreign ? 2 : 0), data, ref offset);
+            ByteData.Write((grant.Given ? 1 : 0) | (grant.Foreign ? 2 : 0) | (grant.Ticks ? 4 : 0), data, ref offset);
             ByteData.WriteString(grant.Holder, data, ref offset);
             ByteData.WriteString(grant.Program, data, ref offset);
             ByteData.WriteString(grant.State, data, ref offset);
@@ -54,6 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteData.TryReadInt32(data, ref offset, out given);
             grant.Given = (given & 1) != 0;
             grant.Foreign = (given & 2) != 0;
+            grant.Ticks = (given & 4) != 0;
 
             ByteData.TryReadString(data, ref offset, out grant.Holder);
             ByteData.TryReadString(data, ref offset, out grant.Program);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -29,6 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         readonly Action<long> _foreign;
         readonly Action<long, string, string> _changed;
         readonly Action<long, string, string> _stored;
+        readonly Func<long, PlayerMemory> _player;
 
         readonly Dictionary<long, Sent> _sent = new Dictionary<long, Sent>();
 
@@ -68,9 +70,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <param name="foreign">A claim turned down because the one who asked is none of the construct's big owners: the block.</param>
         /// <param name="changed">On the server, the holder's program and switches after a change of theirs.</param>
         /// <param name="stored">On a client, the program and switches the server wrote into a block.</param>
+        /// <param name="player">A player's settings in this world, by identity: anybody's on the server, a client's own on a client.</param>
         public Handover(Func<long, SprocketUnit> find, Action<long, string, string> given,
             Action<long, string, string, string> refused, Action<long> foreign, Action<long, string, string> changed,
-            Action<long, string, string> stored)
+            Action<long, string, string> stored, Func<long, PlayerMemory> player)
         {
             _find = find;
             _given = given;
@@ -78,6 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _foreign = foreign;
             _changed = changed;
             _stored = stored;
+            _player = player;
         }
 
         /// <summary>Registers what a handover sends on the channel being built, and answers the builder.</summary>
@@ -90,7 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 .UsingModel<Change>(Change.SizeOf, Change.Read, Change.Write)
                 .UsingModel<Order>(Order.SizeOf, Order.Read, Order.Write)
                 .UsingModel<Wiring>(Wiring.SizeOf, Wiring.Read, Wiring.Write)
-                .UsingModel<Unwiring>(Unwiring.SizeOf, Unwiring.Read, Unwiring.Write);
+                .UsingModel<Unwiring>(Unwiring.SizeOf, Unwiring.Read, Unwiring.Write)
+                .UsingModel<Preference>(Preference.SizeOf, Preference.Read, Preference.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
@@ -104,6 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.ListenFor<Order>(Ordered);
             _channel.ListenFor<Wiring>(Wired);
             _channel.ListenFor<Unwiring>(Unwired);
+            _channel.ListenFor<Preference>(Preferred);
         }
 
         /// <summary>Asks the server for the Sprocket on <paramref name="block" />, as <paramref name="name" />.</summary>
@@ -111,6 +117,12 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             Told.Say("asking the server for the Sprocket on block " + block);
             _channel.SendToServer(new Claim { Block = block, Name = name ?? "" }, true);
+        }
+
+        /// <summary>Tells the server this client's player gives lengths of time in ticks where <paramref name="ticks" /> says, or in seconds.</summary>
+        public void Prefer(bool ticks)
+        {
+            _channel.SendToServer(new Preference { Ticks = ticks }, true);
         }
 
         /// <summary>Hands back the Sprocket on <paramref name="block" />, finished with.</summary>
@@ -257,10 +269,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             // one construct has one lease, and the client works with that block from here on.
             SprocketUnit unit = _find(claim.Block);
             long lent = unit == null ? claim.Block : unit.Block.EntityId;
-            var grant = new Grant { Block = lent, Holder = "", Program = "", State = "" };
+            var identity = Identity(sender);
+            var grant = new Grant { Block = lent, Holder = "", Program = "", State = "", Ticks = _player(identity).Ticks };
 
             // Only a big owner opens the automation, whoever holds it.
-            if (unit != null && !unit.Owns(MyAPIGateway.Players == null ? 0L : MyAPIGateway.Players.TryGetIdentityId(sender)))
+            if (unit != null && !unit.Owns(identity))
             {
                 grant.Foreign = true;
                 Told.Say(Who(claim.Name, sender) + " asked for block " + claim.Block + ", and was refused: they own none of it");
@@ -293,6 +306,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!fromServer)
                 return;
 
+            var me = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
+            _player(me).Ticks = grant.Ticks;
+
             if (grant.Foreign)
             {
                 Told.Say("the server refused block " + grant.Block + ": its automation belongs to its owners");
@@ -311,6 +327,20 @@ namespace Sprocket.Host.SpaceEngineers.Network
                     + (grant.Holder.Length > 0 ? ": " + grant.Holder + " holds it" : ": nobody can have it"));
                 _refused(grant.Block, grant.Holder, grant.Program, grant.State);
             }
+        }
+
+        void Preferred(ushort channel, Preference preference, ulong sender, bool fromServer)
+        {
+            if (!NetworkChannel.Network.IsServer)
+                return;
+
+            _player(Identity(sender)).Ticks = preference.Ticks;
+        }
+
+        /// <summary>The identity of the player on the client <paramref name="sender" />, or nought where the game has none.</summary>
+        static long Identity(ulong sender)
+        {
+            return MyAPIGateway.Players == null ? 0L : MyAPIGateway.Players.TryGetIdentityId(sender);
         }
 
         void Released(ushort channel, Release release, ulong sender, bool fromServer)

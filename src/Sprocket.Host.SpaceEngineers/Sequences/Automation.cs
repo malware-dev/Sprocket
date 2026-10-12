@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
@@ -93,11 +94,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What somebody wrote above the program's first line, or empty.</summary>
         public string Annotation { get; set; } = "";
 
+        /// <summary>What the construct's automation is doing, which the world keeps apart from the program; one of its own until a Sprocket hands over the construct's.</summary>
+        public ConstructMemory Memory { get; set; } = new ConstructMemory();
+
         /// <summary>The construct's big owners the automation was last confirmed for, as the game's player identities; empty until the construct had any.</summary>
-        public List<long> Owners { get; } = new List<long>();
+        public List<long> Owners => Memory.Owners;
 
         /// <summary>Who the automation belonged to when it changed hands outside sharing and paused, as the game's player identities; empty while it runs.</summary>
-        public List<long> PausedFrom { get; } = new List<long>();
+        public List<long> PausedFrom => Memory.PausedFrom;
 
         /// <summary>Whether it is paused, running and firing nothing until a big owner resumes it.</summary>
         public bool Paused => PausedFrom.Count > 0;

@@ -27,7 +27,7 @@ namespace Sprocket.Sim.Simulation
     public sealed class EditorScene
     {
         readonly Ship _ship;
-        readonly EditorView _view;
+        EditorView _view;
 
         Vector2 _at;
 
@@ -140,6 +140,23 @@ namespace Sprocket.Sim.Simulation
         public void Save()
         {
             _ship.Save();
+        }
+
+        /// <summary>The ship under the screen, for a test about what it does rather than what it shows.</summary>
+        public Ship Ship => _ship;
+
+        /// <summary>The world saved and loaded again, and the screen opened anew on the editor that comes back.</summary>
+        public void Reload()
+        {
+            _ship.Reload();
+            Reopen();
+        }
+
+        /// <summary>The screen closed and opened again, as a player looking again does.</summary>
+        public void Reopen()
+        {
+            _view = new EditorView(_ship.Editor);
+            _ship.Editor.Opened();
         }
 
         /// <summary>Advances the ship one frame. The clock is the window's, as it is the game's in the mod.</summary>

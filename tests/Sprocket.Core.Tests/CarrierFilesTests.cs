@@ -27,7 +27,7 @@ public class CarrierFilesTests
         var read = new CarrierFiles();
         Assert.Equal("", read.Unpack(written.Pack()));
 
-        Assert.True(read.Intact);
+        Assert.False(read.Changed);
         Assert.Equal(files.Count, read.Count);
         foreach (var file in files)
             Assert.Equal(file.Value, read.Read(file.Key));
@@ -50,23 +50,25 @@ public class CarrierFilesTests
         var files = new CarrierFiles();
 
         Assert.Equal("", files.Unpack(""));
-        Assert.True(files.Intact);
         Assert.Equal(0, files.Count);
         Assert.False(files.Changed);
     }
 
-    /// <summary>Text that will not read gives no files, says what was wrong, and is marked never to be packed over.</summary>
+    /// <summary>Text that will not read gives no files, says what was wrong, and is packed over at the next save.</summary>
     [Theory]
     [InlineData("files 2\n")]
     [InlineData("files 1\nno file\n")]
     [InlineData("backups 1\nbackup 2026-10-02T14:30:00.0000000Z 1 7 4 1\nShip\n")]
-    public void FilesThatWillNotReadAreNotTaken(string text)
+    public void FilesThatWillNotReadAreIgnoredAndWrittenOver(string text)
     {
         var files = new CarrierFiles();
 
         Assert.NotEqual("", files.Unpack(text));
-        Assert.False(files.Intact);
         Assert.Equal(0, files.Count);
+        Assert.True(files.Changed);
+
+        files.Write("state", "x");
+        Assert.Equal("files 1\n= state\nx\n", files.Pack());
     }
 
     /// <summary>Writing or deleting a file marks the files changed, and packing them marks them unchanged.</summary>

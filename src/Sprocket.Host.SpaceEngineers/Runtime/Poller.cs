@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -42,41 +43,52 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Rota _rota;
         readonly Shift _shift;
 
-        readonly Dictionary<string, bool> _kept = new Dictionary<string, bool>();
+        /// <summary>Everything it remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
+        readonly WatchMemory _memory;
+
         readonly List<string> _watched = new List<string>();
         readonly List<IDisposable> _listening = new List<IDisposable>();
         readonly Action _heard;
 
-        string[] _names = new string[0];
         GridEntity[] _entities = new GridEntity[0];
         Probe[] _probes = new Probe[0];
-        Recall[] _ruling = new Recall[0];
-        bool[] _previous = new bool[0];
-        bool[] _known = new bool[0];
+        ReadingMemory[] _reads = new ReadingMemory[0];
+        int _generation;
 
         int _compiledBindings = -1;
         int _compiledEdits = -1;
         bool _announced;
         bool _possible;
 
-        int _all = -1;
-        int _due = -1;
         int _since = -1;
         int _tick;
         Bindings _bindings;
 
-        /// <summary>A watch on <paramref name="trigger" /> of <paramref name="system" />, on <paramref name="instance" />.</summary>
-        public Poller(AutomationSystem system, Trigger trigger, SystemInstance instance, AutomationRunner owner)
+        /// <summary>A watch on <paramref name="trigger" /> of <paramref name="system" />, on <paramref name="instance" />, remembering in <paramref name="memory" />.</summary>
+        /// <remarks>A watch the world remembers takes up where it was, on the rota as well; a new one looks at once.</remarks>
+        public Poller(AutomationSystem system, Trigger trigger, SystemInstance instance, AutomationRunner owner, WatchMemory memory)
         {
             _system = system;
             _trigger = trigger;
             _instance = instance;
             _owner = owner;
             _rota = owner.Rota;
-            _shift = new Shift(_rota.Join(), Look);
+            _memory = memory;
             _heard = Heard;
-            _rota.At(_shift, int.MinValue);
+
+            var kept = memory.Shift != null;
+            if (!kept)
+                memory.Shift = new ShiftMemory { Place = _rota.Join() };
+
+            _shift = new Shift(memory.Shift, Look);
+            if (kept)
+                _rota.Restore(_shift);
+            else
+                _rota.At(_shift, int.MinValue);
         }
+
+        /// <summary>What it remembers, which the world's save writes.</summary>
+        public WatchMemory Memory => _memory;
 
         /// <summary>The trigger watched.</summary>
         public Trigger Trigger => _trigger;
@@ -85,13 +97,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public SystemInstance Instance => _instance;
 
         /// <summary>Whether the comparison it watches held at the last look, on any block or on what it asks of them all; false until the first look.</summary>
-        public bool Live { get; private set; }
+        public bool Live
+        {
+            get { return _memory.Live; }
+            private set { _memory.Live = value; }
+        }
 
         /// <summary>Whether one or more of the blocks it watches is no longer on the construct.</summary>
         public bool HasMissingSources { get; private set; }
 
         /// <summary>How many times it has fired.</summary>
-        public int FiredCount { get; private set; }
+        public int FiredCount
+        {
+            get { return _memory.Fired; }
+            private set { _memory.Fired = value; }
+        }
 
         /// <summary>
         /// How often it looks, in ticks: what the program says, or <c>10t</c> where a <c>when</c> leaves it out, and never more
@@ -122,43 +142,49 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             get
             {
-                for (var i = 0; i < _names.Length; i++)
+                var reads = _memory.Readings;
+                for (var i = 0; i < reads.Count; i++)
                 {
-                    if (_known[i])
-                        yield return new KeyValuePair<string, bool>(_names[i], _previous[i]);
+                    if (reads[i].Known)
+                        yield return new KeyValuePair<string, bool>(reads[i].Block, reads[i].Held);
                 }
-
-                foreach (var kept in _kept)
-                    yield return kept;
             }
         }
 
         /// <summary>Whether the comparison held on every block, or on their sum, at the last look of a <c>when all</c> or a <c>when sum</c>: 1 or 0, or -1 before its first look.</summary>
-        public int All => _all;
+        public int All => _memory.All;
 
         /// <summary>Ticks since an <c>every</c> last fell due, or -1 before its first look.</summary>
-        public int Since => _due < 0 ? -1 : _owner.CurrentTick - _due;
+        public int Since => _memory.Due < 0 ? -1 : _owner.CurrentTick - _memory.Due;
 
-        /// <summary>Takes back what a save says it read of <paramref name="block" /> at its last look before the world was written.</summary>
+        /// <summary>Takes back what a copy was sent of what it read of <paramref name="block" /> at its last look.</summary>
         public void Recall(string block, bool was)
         {
-            for (var i = 0; i < _names.Length; i++)
-            {
-                if (_names[i] == block)
-                {
-                    _previous[i] = was;
-                    _known[i] = true;
-                    return;
-                }
-            }
+            var read = Reading(block);
+            if (!_memory.Readings.Contains(read))
+                _memory.Readings.Add(read);
 
-            _kept[block] = was;
+            read.Held = was;
+            read.Known = true;
         }
 
-        /// <summary>Takes back whether every block was there at the last look before the world was written.</summary>
+        /// <summary>Takes back whether every block was there at the last look a copy was sent.</summary>
         public void RecallAll(bool all)
         {
-            _all = all ? 1 : 0;
+            _memory.All = all ? 1 : 0;
+        }
+
+        /// <summary>What it remembers of <paramref name="block" />, by the name the program gives it; a fresh memory where it remembers nothing.</summary>
+        ReadingMemory Reading(string block)
+        {
+            var reads = _memory.Readings;
+            for (var i = 0; i < reads.Count; i++)
+            {
+                if (reads[i].Block == block)
+                    return reads[i];
+            }
+
+            return new ReadingMemory { Block = block };
         }
 
         /// <summary>Takes back how long it had been since an <c>every</c> last fell due when the world was written.</summary>
@@ -168,9 +194,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _since = ticks;
         }
 
-        /// <summary>Takes it off the rota for good, when its trigger or its instance no longer exists.</summary>
+        /// <summary>Takes it off the rota for good, when its trigger, its instance or its Sprocket no longer exists, leaving what it remembers as it was.</summary>
         public void Retire()
         {
+            _shift.Forget();
             _rota.Leave(_shift);
             Deafen();
         }
@@ -197,10 +224,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var cadence = _announced && !_possible && Cadence < Backstop ? Backstop : Cadence;
             if (cadence == Rota.Each || cadence == Rota.Ten || cadence == Rota.Hundred)
                 _rota.Every(_shift, cadence);
-            else if (_trigger is EveryTrigger && _due >= 0)
-                // When it falls due rather than a whole cadence on, which is the same tick except after a load, where it
-                // takes up the beat it had.
-                _rota.At(_shift, Math.Max(_tick + 1, _due + cadence));
+            else if (_trigger is EveryTrigger && _memory.Due >= 0)
+                // When it falls due rather than a whole cadence on, which is the same tick except where a copy was sent its beat.
+                _rota.At(_shift, Math.Max(_tick + 1, _memory.Due + cadence));
             else
                 _rota.At(_shift, _tick + cadence);
         }
@@ -218,7 +244,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>
         /// Done again only where the blocks the names point at, or the program, have changed since, so a look reads arrays
         /// and asks nothing by name. What it read of a block at its last look is kept across, by the block's name, and let
-        /// go of for any block it no longer watches.
+        /// go of for any block it no longer watches. What each block was remembered by is taken up from what the world kept
+        /// the first time after a load, and let go of every time after, since the blocks may be other blocks.
         /// </remarks>
         void Compile()
         {
@@ -231,43 +258,43 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _compiledBindings = _bindings.Revision;
             _compiledEdits = _owner.Program.Edits;
             Deafen();
-
-            for (var i = 0; i < _names.Length; i++)
-            {
-                if (_known[i])
-                    _kept[_names[i]] = _previous[i];
-            }
+            _generation++;
 
             Watched(watched.Sources);
             var count = _watched.Count;
-            _names = new string[count];
             _entities = new GridEntity[count];
             _probes = new Probe[count];
-            _ruling = new Recall[count];
-            _previous = new bool[count];
-            _known = new bool[count];
+            var reads = new ReadingMemory[count];
 
             var all = count > 0;
             for (var i = 0; i < count; i++)
             {
                 var name = _watched[i];
                 var entity = _bindings.Entity(name);
+                var read = Reading(name);
+                if (_generation > 1)
+                {
+                    read.Ruling = null;
+                    read.Seen = null;
+                    read.Gauge = null;
+                }
+
                 var probe = when != null
-                    ? Probe.Of(entity, when.Provider, when.EventId, when.Arguments, when.Quantifier, when.Relation, when.Value)
-                    : Probe.Watching(entity, signal.Provider, signal.EventId);
+                    ? Probe.Of(entity, when.Provider, when.EventId, when.Arguments, when.Quantifier, when.Relation, when.Value, read,
+                        _owner.Clock)
+                    : Probe.Watching(entity, signal.Provider, signal.EventId, read, _owner.Clock);
 
                 var ruling = probe == null ? null : probe.RuledOutBy;
-                _names[i] = name;
                 _entities[i] = entity;
                 _probes[i] = probe;
-                _ruling[i] = ruling != null && ruling.Remembers ? new Recall() : null;
+                if (ruling == null || !ruling.Remembers)
+                    read.Ruling = null;
+                else if (read.Ruling == null)
+                    read.Ruling = new Recall { Clock = _owner.Clock };
+                else
+                    read.Ruling.Clock = _owner.Clock;
 
-                bool was;
-                if (_kept.TryGetValue(name, out was))
-                {
-                    _previous[i] = was;
-                    _known[i] = true;
-                }
+                reads[i] = read;
 
                 var heard = probe != null && (probe.Announced || ruling != null);
                 var listening = heard ? entity.Listen(_heard) : null;
@@ -280,7 +307,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _listening.Add(listening);
             }
 
-            _kept.Clear();
+            _reads = reads;
+            _memory.Readings.Clear();
+            _memory.Readings.AddRange(reads);
             _announced = all;
         }
 
@@ -348,18 +377,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (probe == null)
                     continue;
 
-                Mark(probe, _ruling[i]);
+                Mark(probe, _reads[i].Ruling);
                 var now = probe.Holds();
                 if (now)
                     anyTrue = true;
 
                 // No previous look means the trigger has only just come into existence, and an edge needs two.
                 // Firing on the first look would set every trigger off the moment it was made.
-                if (_known[i] && !_previous[i] && now)
+                if (_reads[i].Known && !_reads[i].Held && now)
                     fired++;
 
-                _previous[i] = now;
-                _known[i] = true;
+                _reads[i].Held = now;
+                _reads[i].Known = true;
             }
 
             Live = anyTrue;
@@ -407,7 +436,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
-                Mark(probe, _ruling[i]);
+                Mark(probe, _reads[i].Ruling);
                 if (!probe.Holds())
                     all = false;
             }
@@ -443,7 +472,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
-                Mark(probe, _ruling[i]);
+                Mark(probe, _reads[i].Ruling);
                 total += probe.Number();
             }
 
@@ -457,8 +486,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool Edge(bool holds)
         {
             var now = holds ? 1 : 0;
-            var fired = _all == 0 && now == 1;
-            _all = now;
+            var fired = _memory.All == 0 && now == 1;
+            _memory.All = now;
             return fired;
         }
 
@@ -470,24 +499,24 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool SampleEvery(EveryTrigger every)
         {
             var interval = every.IntervalTicks < 1 ? 1 : every.IntervalTicks;
-            if (_due < 0 && _since >= 0)
+            if (_memory.Due < 0 && _since >= 0)
             {
-                _due = _tick - _since;
+                _memory.Due = _tick - _since;
                 _since = -1;
             }
 
-            if (_due < 0 || _tick < _due)
+            if (_memory.Due < 0 || _tick < _memory.Due)
             {
-                _due = _tick;
+                _memory.Due = _tick;
                 return false;
             }
 
-            if (_tick - _due < interval)
+            if (_tick - _memory.Due < interval)
                 return false;
 
             // A world that was paused, or a clock that was not looked at, starts counting again rather than firing once
             // for every period it missed.
-            _due = _tick - _due < 2 * interval ? _due + interval : _tick;
+            _memory.Due = _tick - _memory.Due < 2 * interval ? _memory.Due + interval : _tick;
             return true;
         }
 

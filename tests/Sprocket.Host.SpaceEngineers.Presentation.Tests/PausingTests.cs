@@ -75,9 +75,26 @@ public class PausingTests
         Assert.True(run == null || !run.IsRunning, "a paused automation ran");
     }
 
-    /// <summary>Being paused is saved, so a reload keeps it paused.</summary>
+    /// <summary>Being paused is saved with the world, so a reload keeps it paused.</summary>
     [Fact]
     public void APauseOutlivesAReload()
+    {
+        var sim = Simulation.On(Store.Nowhere());
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Tick();
+        Owned(sim, Anna, Sharing.Nobody);
+        Owned(sim, Bert, Sharing.Nobody);
+
+        sim.Reload();
+        sim.Tick();
+
+        Assert.True(sim.Editor.Program.Paused);
+        Assert.Equal(new[] { Anna }, sim.Editor.Program.PausedFrom);
+    }
+
+    /// <summary>A copy of a paused construct, pasted from what its block keeps, is nobody's and runs.</summary>
+    [Fact]
+    public void APastedCopyStartsUnpaused()
     {
         var store = Store.Nowhere();
         var sim = Simulation.On(store);
@@ -87,12 +104,10 @@ public class PausingTests
         Owned(sim, Bert, Sharing.Nobody);
         sim.Save();
 
-        var again = Simulation.On(store);
-        again.Machine.Own(Bert);
-        again.Tick();
+        var pasted = Simulation.Pasted(store);
+        pasted.Tick();
 
-        Assert.True(again.Editor.Program.Paused);
-        Assert.Equal(new[] { Anna }, again.Editor.Program.PausedFrom);
+        Assert.False(pasted.Editor.Program.Paused);
     }
 
     /// <summary>Opening paused automation lands on the resume screen, which says why and how much it holds.</summary>

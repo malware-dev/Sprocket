@@ -37,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _panel = new DurationPanel(editor.Texts, editor.Input, start) { Cautions = rate };
             _panel.Submitted += delegate { Finish(false); };
             _panel.Cancelled += delegate { Finish(true); };
+            _panel.Switched += editor.Prefer;
 
             _window = new Popup { Style = Styles.List, Flush = true, Content = _panel };
             _window.Closed += delegate { Finish(false); };

@@ -56,9 +56,9 @@ public class BudgetTests
     /// costs the reading and nothing besides.
     /// </summary>
     /// <remarks>
-    /// A full room is read to the end of the reading: whether the vent works, how full the room is, the gas it is still
-    /// moving and the frame that is seen on. The gas is the harness's own meter here, which finds the vent by its id; the
-    /// game's reads the vent's components instead.
+    /// A full room is read to the end of the reading: whether the vent works, how full the room is, and the gas it is still
+    /// moving, seen on Sprocket's own clock, which asks the game nothing. The gas is the harness's own meter here, which finds
+    /// the vent by its id; the game's reads the vent's components instead.
     /// </remarks>
     [Fact]
     public void ALookedForMomentIsLookedAtOnItsCadence()
@@ -75,8 +75,7 @@ public class BudgetTests
         var look = Look(runner, ref frame, 10);
         Assert.Equal(new[]
         {
-            "IMyCubeBlock.get_IsWorking", "IMyAirVent.GetOxygenLevel", "IMyEntity.get_EntityId", "IMyEntity.get_EntityId",
-            "IMySession.get_GameplayFrameCounter"
+            "IMyCubeBlock.get_IsWorking", "IMyAirVent.GetOxygenLevel", "IMyEntity.get_EntityId", "IMyEntity.get_EntityId"
         }, look);
         Assert.Equal(Span / 10 * look.Count, Counted(runner, ref frame));
     }

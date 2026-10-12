@@ -150,6 +150,69 @@ public class WaitTests
         Assert.True(screen.Shows("= 600 ticks"));
     }
 
+    /// <summary>A wait added after ticks were chosen starts at a second, in ticks, and its panel opens in ticks.</summary>
+    [Fact]
+    public void ANewWaitStartsInTheUnitLastChosen()
+    {
+        var screen = Added();
+        Panel(screen).Give("90", true);
+        Panel(screen).Box.Submit!.Execute();
+        screen.Run(2);
+
+        screen.Editor.PressAdd("wait");
+        screen.Run(3);
+
+        var panel = Panel(screen);
+        Assert.False(panel.InSeconds);
+        Assert.Equal("60", panel.Box.Text);
+        var wait = Assert.IsType<Wait>(screen.Editor.Program.Sequences[0].Steps[1]);
+        Assert.False(wait.Length.InSeconds);
+        Assert.Equal(60, wait.Length.Ticks);
+    }
+
+    /// <summary>A wait opens in the unit it was given in, whichever unit was chosen last.</summary>
+    [Fact]
+    public void AWaitOpensInItsOwnUnit()
+    {
+        var screen = Added();
+        Panel(screen).Box.Submit!.Execute();
+        screen.Run(2);
+        screen.Editor.PressAdd("wait");
+        screen.Run(3);
+        Panel(screen).Give("90", true);
+        Panel(screen).Box.Submit!.Execute();
+        screen.Run(2);
+
+        var first = Page(screen).View!.Within().OfType<StepRow>().First();
+        first.Slots.OfType<DurationSlot>().Single().Opens!.Execute();
+        screen.Run(2);
+
+        Assert.True(Panel(screen).InSeconds);
+        Assert.Equal("1", Panel(screen).Box.Text);
+    }
+
+    /// <summary>The unit chosen last is kept with the world, so a wait added after a reload starts in it.</summary>
+    [Fact]
+    public void TheUnitChosenOutlivesAReload()
+    {
+        var screen = Added();
+        Panel(screen).Give("90", true);
+        Panel(screen).Box.Submit!.Execute();
+        screen.Run(2);
+
+        screen.Scene.Reload();
+        screen.Run(2);
+        screen.Editor.PressRow(0);
+        screen.Run(2);
+        screen.Editor.PressRow(0);
+        screen.Run(2);
+        screen.Editor.PressAdd("wait");
+        screen.Run(3);
+
+        Assert.False(Panel(screen).InSeconds);
+        Assert.Equal("60", Panel(screen).Box.Text);
+    }
+
     static Screen Added()
     {
         var screen = Screen.Fresh();

@@ -1,4 +1,3 @@
-using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -75,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (flow < 0f)
                 return false;
 
-            int frame = Frame();
+            int frame = seen.Now;
             if (frame < 0)
                 return false;
 
@@ -100,11 +99,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public static float Out(IMyAirVent vent)
         {
             return _meter.Out(vent);
-        }
-
-        static int Frame()
-        {
-            return MyAPIGateway.Session == null ? -1 : MyAPIGateway.Session.GameplayFrameCounter;
         }
     }
 }

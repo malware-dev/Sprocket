@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
@@ -25,17 +26,22 @@ public sealed class Simulation
 {
     const int SaveEvery = 60;
 
+    /// <summary>The identity of the player at the harness's screen, which is the one its stand-in session answers with.</summary>
+    public const long Viewer = 0;
+
     readonly Rig _rig;
     readonly Store _store;
-    readonly SprocketUnit _unit;
+    SprocketUnit _unit;
 
-    readonly Rota _rota = new Rota();
+    Rota _rota = new Rota();
 
     readonly Folder _folder = new Folder();
 
     readonly Folder _worldFolder = new Folder();
 
     readonly Backups _backups;
+
+    readonly Memories _memories = new Memories(new ProtoBinary());
 
     readonly Preferences _preferences;
 
@@ -114,18 +120,7 @@ public sealed class Simulation
         if (store.TryGetValue(Wiring.Key, out wired))
             Wiring.Load(wired, _rig);
 
-        // Said outright rather than read: the harness has no mod storage. A test that wants the
-        // developer tools sets Editor.DeveloperMode on the way past.
-        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota, _texts, _backups);
-
-        // The harness is always drawing the screen, which is what the unit ticks its editor for.
-        _unit.Showing = true;
-        _unit.Shelf = _shelf;
-        _unit.Preferences = _preferences;
-
-        // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
-        // removed the hero has finished changing.
-        _unit.HeroRemoved += delegate { _rehoming = true; };
+        Adopt();
 
         // A slot used invokes what it holds, and what that means is the unit's to say - which is
         // the game's arrangement exactly: the slot carries a key and Sprocket resolves it.
@@ -137,6 +132,48 @@ public sealed class Simulation
         // built a moment ago as one loaded from a save whose buttons somebody has since cleared.
         Tick();
     }
+
+    /// <summary>Builds Sprocket on the block that keeps it, from what that block's storage holds.</summary>
+    void Adopt()
+    {
+        // Said outright rather than read: the harness has no mod storage. A test that wants the
+        // developer tools sets Editor.DeveloperMode on the way past.
+        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota, _texts,
+            _memories.Claim(_rig.Sprocket.Block.EntityId), _backups);
+        _unit.Begin(Now);
+
+        // The harness is always drawing the screen, which is what the unit ticks its editor for.
+        _unit.Showing = true;
+        _unit.Shelf = _shelf;
+        _unit.Preferences = _preferences;
+        _unit.Viewer = _memories.Player(Viewer);
+
+        // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
+        // removed the hero has finished changing.
+        _unit.HeroRemoved += delegate { _rehoming = true; };
+    }
+
+    /// <summary>
+    /// The world saved and loaded again: the blocks stay as they are, and everything of Sprocket's is built again from
+    /// what was saved.
+    /// </summary>
+    /// <remarks>
+    /// What a reload does to the mod. The game brings the grid back itself, toolbars and all, so the rig stands still;
+    /// the unit, its runner and the world's rota are made anew, and the frame counter starts again from nought, as the
+    /// game's own does with every session.
+    /// </remarks>
+    public void Reload()
+    {
+        Save();
+        _unit.Dispose();
+        _rota = new Rota();
+        _frame = 0;
+        _memories.Read(_worldFolder.Has(Memories.File) ? _worldFolder.Read(Memories.File) : null, _frame);
+        Adopt();
+    }
+
+    /// <summary>Sprocket's clock: the harness's frame carried on from where the world was saved, as the session keeps it.</summary>
+    public int Now => _memories.Now(_frame);
 
     /// <summary>The Sprocket the construct carries, as the machine keeping it holds it.</summary>
     public SprocketUnit Unit => _unit;
@@ -184,11 +221,13 @@ public sealed class Simulation
         _unit.BackUp(_backups, saved, _shelf);
     }
 
-    /// <summary>Writes the program and the wiring out now, whatever the clock says.</summary>
+    /// <summary>Writes the program, the wiring and what the world remembers out now, whatever the clock says.</summary>
     public void Save()
     {
         _unit.Persist();
         _store.SetValue(Wiring.Key, Wiring.Save(_rig));
+        _worldFolder.Write(Memories.File, _memories.Write(_frame, _unit.Lost ? new List<ConstructMemory>() : new List<ConstructMemory> { _unit.Memory },
+            new List<DoorMemory>()));
     }
 
     /// <summary>
@@ -220,10 +259,10 @@ public sealed class Simulation
 
         _rig.Tick();
         if (!_unit.Lost)
-            _unit.Tick(_frame);
+            _unit.Tick(Now);
 
         // After the unit, as the session does it, so its bindings are current when its sequences run.
-        _rota.Run(_frame);
+        _rota.Run(Now);
 
         if (_frame % SaveEvery == 0)
             Save();

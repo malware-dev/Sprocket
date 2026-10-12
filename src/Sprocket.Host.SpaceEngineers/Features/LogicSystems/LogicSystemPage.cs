@@ -410,7 +410,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 new Adder(texts.SystemWhen, texts.SystemWhenAbout,
                     Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); })),
                 new Adder(texts.SystemEvery, texts.SystemEveryAbout,
-                    Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Duration.OfSeconds(1))); }))
+                    Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Editor.NewLength)); }))
             }));
 
             _runs.Clear();

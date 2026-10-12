@@ -399,9 +399,10 @@ public class RotorTests
 
         Assert.NotEqual(SequenceProblem.Stuck, Faulted(runner, sequence).Problem);
 
-        // Something leans on it: the speed and the torque say nothing, and the angle stops.
+        // Something leans on it: the speed and the torque say nothing, and the angle stops. A turn this long is looked at
+        // every hundred ticks, and the run calls it held at its second look after the angle stopped.
         rotor.Held = true;
-        for (var end = frame + 120; frame < end; frame++)
+        for (var end = frame + 200; frame < end; frame++)
         {
             ship.Tick();
             runner.Tick(frame + 1);
@@ -426,7 +427,7 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
 
         var block = (IMyMotorStator)rotor.Block;
-        var seen = new Recall();
+        var seen = new Recall { Clock = () => MyAPIGateway.Session.GameplayFrameCounter };
         Assert.True(Blocks.RotorTurn.Turning(block, seen), "a rotor just looked at is already called held");
 
         for (var frame = 0; frame < 120; frame++)
@@ -465,7 +466,8 @@ public class RotorTests
         else
             rotor.Torque = 0f;
 
-        for (var frame = 2; frame < 20; frame++)
+        // Read at the run's first look while it waits, which for a turn this long is a hundred ticks after it began.
+        for (var frame = 2; frame < 110; frame++)
         {
             ship.Tick();
             runner.Tick(frame);

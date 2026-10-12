@@ -89,6 +89,31 @@ public class RateTests
         Assert.Equal(Duration.OfSeconds(1), every.Interval);
     }
 
+    /// <summary>A timer made after ticks were chosen starts at a second, in ticks.</summary>
+    [Fact]
+    public void ANewTimerStartsInTheUnitLastChosen()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewSystem("Housekeeping");
+        screen.Editor.PressStart("every");
+        screen.Run(2);
+        screen.Editor.TimerRate().Give("30", true);
+        screen.Editor.PressPrimary();
+        screen.Editor.Back();
+        screen.Run(2);
+
+        screen.Editor.PressStart("every");
+        screen.Run(2);
+        Assert.False(screen.Editor.TimerRate().InSeconds);
+        screen.Editor.PressPrimary();
+        screen.Editor.Back();
+        screen.Run(2);
+
+        var every = Assert.IsType<EveryTrigger>(System(screen).Triggers[1]);
+        Assert.False(every.Interval.InSeconds);
+        Assert.Equal(60, every.Interval.Ticks);
+    }
+
     /// <summary>A logic system with a timer made at its starting rate, back on the system's page.</summary>
     static Screen Made()
     {

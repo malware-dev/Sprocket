@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
@@ -19,15 +20,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         readonly Rota _rota;
         readonly Func<int> _now;
 
+        readonly Func<long, int> _kept;
+
         readonly Dictionary<long, Closer> _closers = new Dictionary<long, Closer>();
 
         NetworkChannel _channel;
 
-        /// <summary>Auto-close counting on <paramref name="rota" />, from the tick <paramref name="now" /> answers.</summary>
-        public AutoClose(Rota rota, Func<int> now)
+        /// <summary>
+        /// Auto-close counting on <paramref name="rota" />, from the tick <paramref name="now" /> answers, carrying on with the
+        /// close <paramref name="kept" /> says a door was waiting for when the world was saved, or -1.
+        /// </summary>
+        public AutoClose(Rota rota, Func<int> now, Func<long, int> kept)
         {
             _rota = rota;
             _now = now;
+            _kept = kept;
         }
 
         /// <summary>Registers what auto-close sends on the channel being built, and answers the builder.</summary>
@@ -66,7 +73,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         public void Arrived(IMyDoor door)
         {
             if (NetworkChannel.Network.IsServer)
-                Follow(door, CloseDelay.Stored(door));
+                Follow(door, CloseDelay.Stored(door), _kept(door.EntityId));
+        }
+
+        /// <summary>Adds every door whose close is coming to <paramref name="into" />, for the world's save.</summary>
+        public void Remember(List<DoorMemory> into)
+        {
+            foreach (var closer in _closers.Values)
+            {
+                var due = closer.ClosesAt;
+                if (due >= 0)
+                    into.Add(new DoorMemory { Door = closer.Door.EntityId, Due = due });
+            }
         }
 
         /// <summary>A door gone from the world, whose closer goes with it.</summary>
@@ -95,13 +113,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         void Keep(IMyDoor door, int seconds)
         {
             CloseDelay.Store(door, seconds);
-            Follow(door, seconds);
+            Follow(door, seconds, -1);
             if (_channel != null)
                 _channel.Broadcast(new Closing { Door = door.EntityId, Seconds = seconds }, true);
         }
 
-        /// <summary>Closes <paramref name="door" /> <paramref name="seconds" /> after it opens, or never where that is none.</summary>
-        void Follow(IMyDoor door, int seconds)
+        /// <summary>Closes <paramref name="door" /> <paramref name="seconds" /> after it opens, or never where that is none; on <paramref name="due" /> where it is open and that is not -1.</summary>
+        void Follow(IMyDoor door, int seconds, int due)
         {
             Closer closer;
             _closers.TryGetValue(door.EntityId, out closer);
@@ -121,7 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
                 _closers.Add(door.EntityId, closer);
             }
 
-            closer.Set(seconds);
+            closer.Set(seconds, due);
         }
 
         /// <summary>

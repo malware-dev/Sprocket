@@ -1,4 +1,5 @@
 using VRage.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.Memory;
 using System.Collections.Generic;
 using System;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -54,6 +55,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         Preferences _preferences;
 
+        PlayerMemory _viewer;
+
         readonly bool _copy;
 
         readonly GridWorld _world;
@@ -61,6 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly AutomationRunner _runner;
 
         readonly Texts _texts;
+        readonly ConstructMemory _memory;
         readonly string _author;
         readonly bool _developerMode;
 
@@ -83,13 +87,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text);
         }
 
-        /// <summary>The Sprocket a block carries, reading its program out of the block.</summary>
+        /// <summary>The Sprocket a block carries, reading its program out of the block and what it is doing out of <paramref name="memory" />.</summary>
         /// <remarks>
         /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
         /// <paramref name="texts" /> are what its editor says, in the player's language.
         /// </remarks>
-        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, Backups backups = null)
-            : this(block, settings, rota, texts, false, Stored(block, ProgramKey), Stored(block, StateKey))
+        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, ConstructMemory memory, Backups backups = null)
+            : this(block, settings, rota, texts, false, Stored(block, ProgramKey), Stored(block, StateKey), memory)
         {
             _backups = backups;
         }
@@ -105,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, Texts texts, string program,
             string state)
         {
-            return new SprocketUnit(block, settings, new Rota(), texts, true, program, state);
+            return new SprocketUnit(block, settings, new Rota(), texts, true, program, state, new ConstructMemory { Keeper = block.EntityId });
         }
 
         /// <summary>
@@ -113,21 +117,19 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// carrying on with whatever it was running.
         /// </summary>
         /// <remarks>
-        /// What a client's edit becomes on the server. The runs are carried across the way a save and a
-        /// reload carries them, which is already built to meet a program changed in between: a step
-        /// that is no longer there, or a sequence that may no longer run, is not resumed.
+        /// What a client's edit becomes on the server. What it remembers is handed on whole, the way a save and a reload hands
+        /// it on: a sequence or trigger the edit took away is forgotten as the new one is checked.
         /// <para>
         /// This one is let go of: the caller puts the new one in its place and disposes of this.
         /// </para>
         /// </remarks>
         public SprocketUnit Rebuilt(string program, string switches, Settings settings, Rota rota)
         {
-            var running = StateText.Running(_program, _runner);
-            var rebuilt = new SprocketUnit(_block, settings, rota, _texts, false, program,
-                switches + "\n" + running);
+            var rebuilt = new SprocketUnit(_block, settings, rota, _texts, false, program, switches, _memory);
             rebuilt._backups = _backups;
             rebuilt._shelf = _shelf;
             rebuilt._preferences = _preferences;
+            rebuilt._viewer = _viewer;
             rebuilt.Showing = Showing;
             if (_editor != null)
                 rebuilt.Editor.Habits = _editor.Habits;
@@ -144,9 +146,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, bool copy, string program,
-            string state)
+            string state, ConstructMemory memory)
         {
             _block = block;
+            _memory = memory;
+            _program.Memory = memory;
             _copy = copy;
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
@@ -240,6 +244,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>Another programmable block on the construct takes over when this one is gone - see <see cref="Seek" />.</remarks>
         public IMyTerminalBlock Block => _block;
 
+        /// <summary>What the construct's automation is doing, filed under the block that keeps it, which the world's save writes.</summary>
+        public ConstructMemory Memory => _memory;
+
+        /// <summary>Starts its clock at <paramref name="now" />, Sprocket's tick as it is made, so anything before its first tick is told the time.</summary>
+        public void Begin(int now)
+        {
+            _runner.Begin(now);
+        }
+
         /// <summary>Whether the construct has no programmable block left to keep the automation in, which ends it.</summary>
         public bool Lost { get; private set; }
 
@@ -284,6 +297,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>The settings in this world of the player at the screen, which the editor is given.</summary>
+        public PlayerMemory Viewer
+        {
+            get { return _viewer; }
+            set
+            {
+                _viewer = value;
+                if (_editor != null)
+                    _editor.Viewer = value;
+            }
+        }
+
         /// <summary>The editor, made the first time it is asked for, building its first screen out of whatever the program says by then.</summary>
         public SprocketEditor Editor
         {
@@ -296,6 +321,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Backups = _backups;
                 _editor.Shelf = _shelf;
                 _editor.Preferences = _preferences;
+                _editor.Viewer = _viewer;
 
                 // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
                 if (!_copy)
@@ -428,6 +454,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>A block fired one of the actions Sprocket put in it.</summary>
         public void Fire(string key)
         {
+            // A press can come before the first tick after a load, as a timer block's can, and finds what it starts all the same.
+            if (_byKey.Count == 0)
+            {
+                Reindex();
+                _runner.Prepare();
+            }
+
             // Said every time, because a press that does nothing is otherwise invisible: this says whether it arrived.
             Target target;
             if (!_byKey.TryGetValue(key, out target))
@@ -1524,10 +1557,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Told.Say(Logged(_block) + " has a program with a warning: " + warning);
 
             // What is switched off, read after the program, because it names what the program
-            // declared. A construct that has nothing parked has nothing here at all.
+            // declared. A construct that has nothing parked has nothing here at all. What runs and what the triggers read is
+            // the world's to remember where the automation runs; only a copy being edited is sent them, for show.
             if (!string.IsNullOrEmpty(state))
             {
-                var wrong = StateText.Load(state, _program, _runner);
+                var wrong = StateText.Load(state, _program, _copy ? _runner : null);
                 if (wrong.Length > 0)
                     Told.Say(Logged(_block) + " has switches that would not read: " + wrong);
             }
@@ -1579,9 +1613,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!_program.Intact)
                 return;
 
-            string program;
-            string state;
-            Written(out program, out state);
+            if (_editor != null)
+                _editor.Stamp(true);
+
+            var program = ProgramText.Save(_program, _world.Values);
+            var state = StateText.Save(_program, null, false);
             storage.SetValue(ProgramKey, program);
             // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
             // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
@@ -1793,6 +1829,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Told.Say(Logged(_block) + " is gone; " + Logged(block) + " keeps the automation now");
 
             _block = block;
+            _memory.Keeper = block.EntityId;
             _world.Anchor(block);
             _heldAt = int.MinValue;
             Hold();

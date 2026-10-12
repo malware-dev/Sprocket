@@ -11,6 +11,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.Ownership;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel.Input;
@@ -49,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _author = "";
         string _holder;
         Habits _habits = new Habits();
+        PlayerMemory _viewer = new PlayerMemory();
         readonly List<EditorPage> _stack = new List<EditorPage>();
 
         readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
@@ -148,6 +150,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Where the buttons picked and not yet written are let go of, as a pick is backed out of.</summary>
         /// <remarks>Set beside <see cref="Wire" />, and like it, on a copy a client is editing it asks the server.</remarks>
         public Action Unwire { get; set; }
+
+        /// <summary>Where a change of the unit the player gives lengths of time in is told on, or null where <see cref="Viewer" /> is the world's own.</summary>
+        /// <remarks>Set on a copy a client is editing, which tells the server.</remarks>
+        public Action Preferred { get; set; }
 
         /// <summary>Who holds the Sprocket this editor shows, or null where this editor may change it.</summary>
         /// <remarks>
@@ -756,6 +762,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             get { return _habits; }
             set { _habits = value ?? new Habits(); }
         }
+
+        /// <summary>The settings in this world of the player at the screen.</summary>
+        public PlayerMemory Viewer
+        {
+            get { return _viewer; }
+            set { _viewer = value ?? new PlayerMemory(); }
+        }
+
+        /// <summary>The length a new wait or timer starts at: a second, in the unit the player gives lengths in.</summary>
+        public Duration NewLength => _viewer.Ticks ? Duration.OfTicks(Duration.PerSecond) : Duration.OfSeconds(1);
 
         /// <summary>Whether the list of what to do shows the block's own vocabulary rather than Sprocket's.</summary>
         /// <remarks>
@@ -2739,9 +2755,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             ForgetSequence(sequence);
         }
 
+        /// <summary>Remembers that the player gives lengths of time in <paramref name="seconds" />, or in ticks.</summary>
+        public void Prefer(bool seconds)
+        {
+            if (_viewer.Ticks == !seconds)
+                return;
+
+            _viewer.Ticks = !seconds;
+            if (Preferred != null)
+                Preferred();
+        }
+
         /// <summary>Shows the editor as it opens: on the resume screen while the automation is paused.</summary>
         public void Opened()
         {
+            // Looked at, worded and counted at once, however soon after it last closed, so an opened screen always starts from
+            // what is there.
+            _looked.Restart();
+            _worded.Restart();
+            Current.Resay();
+
             if (_program.Paused)
                 Review();
         }

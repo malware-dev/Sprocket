@@ -18,7 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </code>
     /// <para>
     /// The game holds the whole text from the moment the world loads, so the files are unpacked once, as it starts, and
-    /// packed again only for a save that follows a change. Where they will not read, nothing is written over them.
+    /// packed again only for a save that follows a change. A text that is not these files is ignored, and the next save
+    /// writes the files over it.
     /// </para>
     /// </remarks>
     public sealed class CarrierFiles : IFiles
@@ -28,9 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         const char Mark = '=';
 
         readonly Dictionary<string, string> _files = new Dictionary<string, string>();
-
-        /// <summary>Whether what was unpacked was read whole; where it was not, the files are never packed over it.</summary>
-        public bool Intact { get; private set; } = true;
 
         /// <summary>Whether a file has been written or deleted since the files were last unpacked or packed.</summary>
         public bool Changed { get; private set; }
@@ -69,19 +67,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Takes the files packed in <paramref name="text" />, answering what was wrong with it, or empty.</summary>
-        /// <remarks>Whole or not at all: where any of it will not read, no file is taken and none is ever packed over it.</remarks>
+        /// <remarks>Whole or not at all: where any of it will not read, no file is taken, and the files are marked changed so the next save writes them over it.</remarks>
         public string Unpack(string text)
         {
             _files.Clear();
             Changed = false;
-            Intact = true;
             if (string.IsNullOrEmpty(text))
                 return "";
 
             var lines = text.Split('\n');
             if (lines[0] != Head)
             {
-                Intact = false;
+                Changed = true;
                 return "the carrier's files do not start with \"" + Head + "\"";
             }
 
@@ -107,7 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (name == null)
                 {
                     _files.Clear();
-                    Intact = false;
+                    Changed = true;
                     return "a line of the carrier's files is in no file: " + line;
                 }
 

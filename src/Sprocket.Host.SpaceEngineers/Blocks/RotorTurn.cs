@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public static void Began(IMyMotorStator rotor, Recall seen)
         {
-            int frame = Frame();
+            int frame = seen.Now;
             if (rotor == null || frame < 0)
                 return;
 
@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (rotor == null)
                 return false;
 
-            int frame = Frame();
+            int frame = seen.Now;
             if (frame < 0)
                 return true;
 
@@ -64,11 +64,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             return frame - seen.Frame < Beat;
-        }
-
-        static int Frame()
-        {
-            return MyAPIGateway.Session == null ? -1 : MyAPIGateway.Session.GameplayFrameCounter;
         }
     }
 }

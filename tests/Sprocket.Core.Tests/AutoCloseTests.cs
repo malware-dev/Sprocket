@@ -1,5 +1,6 @@
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Doors;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -187,7 +188,7 @@ public class AutoCloseTests
     [Fact]
     public void TheServerClosesDoorsByWhatTheyKeep()
     {
-        using (var doors = new AutoClose(_rota, () => _tick))
+        using (var doors = new AutoClose(_rota, () => _tick, _ => -1))
         {
             CloseDelay.Store(_door.Block, 1);
             doors.Arrived(Block);
@@ -206,11 +207,44 @@ public class AutoCloseTests
         }
     }
 
+    /// <summary>A door saved while its close was coming closes on the tick it would have, once the world is loaded again.</summary>
+    [Fact]
+    public void ADoorSavedWhileCountingClosesWhenItWould()
+    {
+        CloseDelay.Store(_door.Block, 2);
+        var memories = new Memories(new ProtoBinary());
+        string packed;
+        int due;
+        using (var doors = new AutoClose(_rota, () => _tick, _ => -1))
+        {
+            doors.Arrived(Block);
+            _door.Perform("Open_On");
+            Run(Travel + 30);
+
+            var closing = new List<DoorMemory>();
+            doors.Remember(closing);
+            due = Assert.Single(closing).Due;
+            Assert.Equal(_door.Id, closing[0].Door);
+            packed = memories.Write(_tick, new List<ConstructMemory>(), closing);
+        }
+
+        memories.Read(packed, _tick);
+        using (var doors = new AutoClose(_rota, () => _tick, memories.Closing))
+        {
+            doors.Arrived(Block);
+            Run(due - _tick - 1);
+            Assert.Equal(0, Closes);
+
+            Run(1);
+            Assert.Equal(1, Closes);
+        }
+    }
+
     /// <summary>A door gone from the world stops being closed.</summary>
     [Fact]
     public void ADoorThatLeftIsLetBe()
     {
-        using (var doors = new AutoClose(_rota, () => _tick))
+        using (var doors = new AutoClose(_rota, () => _tick, _ => -1))
         {
             doors.Set(Block, 1);
             doors.Left(Block);

@@ -37,7 +37,7 @@
     -->
     <Target Name="ReferenceOnlyWhatCoreUses" AfterTargets="SpaceEngineers">
         <ItemGroup>
-            <Reference Remove="System.Collections.Immutable;Sandbox.Graphics;VRage.Audio;VRage.Render;VRage.Render11;VRage.Scripting;ProtoBuf.Net.Core" />
+            <Reference Remove="System.Collections.Immutable;Sandbox.Graphics;VRage.Audio;VRage.Render;VRage.Render11;VRage.Scripting" />
         </ItemGroup>
     </Target>
 </Project>

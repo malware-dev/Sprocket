@@ -84,6 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _rates = new StageColumn(_strip.Width, false, null, Editor.Texts);
                 _rates.Title = Editor.Texts.PickHowOften;
                 _rate = new DurationPanel(Editor.Texts, Editor.Input, _start) { Cautions = true };
+                _rate.Switched += Editor.Prefer;
                 _rate.Submitted += delegate
                 {
                     if (_finish != null && CanPrimary)

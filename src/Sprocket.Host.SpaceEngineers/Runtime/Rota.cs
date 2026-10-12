@@ -74,6 +74,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Leave(shift);
             shift.Once = false;
             Put(shift, list);
+
+            var kept = shift.Kept;
+            if (kept == null)
+                return;
+
+            kept.Period = period <= Each ? Each : period <= Ten ? Ten : Hundred;
+            kept.Once = false;
         }
 
         /// <summary>Looks at a shift once, on the given tick, or on the next one run if that has passed.</summary>
@@ -87,6 +94,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // ticks at most and done on the tick itself.
             var soon = !_started || tick <= _last + 1;
             Put(shift, soon ? _each : _hundreds[Place(tick, Hundred)]);
+
+            var kept = shift.Kept;
+            if (kept == null)
+                return;
+
+            kept.Period = 0;
+            kept.Once = true;
+            kept.At = tick;
+        }
+
+        /// <summary>Puts a shift back where what it keeps says it stood when the world was saved: on its turn, or due once on its tick.</summary>
+        public void Restore(Shift shift)
+        {
+            var kept = shift.Kept;
+            if (kept == null)
+                return;
+
+            if (kept.Once)
+                At(shift, kept.At);
+            else if (kept.Period > 0)
+                Every(shift, kept.Period);
         }
 
         /// <summary>Takes a shift off the rota.</summary>
@@ -95,6 +123,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var list = shift.List;
             if (list == null)
                 return;
+
+            var kept = shift.Kept;
+            if (kept != null)
+            {
+                kept.Period = 0;
+                kept.Once = false;
+            }
 
             var last = list.Count - 1;
             var moved = list[last];

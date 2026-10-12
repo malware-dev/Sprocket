@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 
 namespace Sprocket.Host.SpaceEngineers.Runtime
 {
@@ -12,11 +13,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class Shift
     {
+        /// <summary>A shift at <paramref name="place" /> in the turn, doing <paramref name="due" /> when it comes round, remembering nothing.</summary>
         public Shift(int place, Action<int> due)
         {
             Place = place;
             Due = due;
             Ran = int.MinValue;
+        }
+
+        /// <summary>A shift whose place and standing on the rota are kept in <paramref name="kept" />, doing <paramref name="due" /> when it comes round.</summary>
+        public Shift(ShiftMemory kept, Action<int> due) : this(kept.Place, due)
+        {
+            Kept = kept;
+        }
+
+        /// <summary>Where this stands on the rota, kept for the world's save as the rota moves it; null for a shift nothing remembers.</summary>
+        public ShiftMemory Kept { get; private set; }
+
+        /// <summary>Stops keeping where this stands, so what it kept stays as it was whatever the rota does to it after.</summary>
+        public void Forget()
+        {
+            Kept = null;
         }
 
         /// <summary>Where this sits in the turn. See <see cref="Rota.Join" />.</summary>

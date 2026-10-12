@@ -894,11 +894,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return null;
         }
 
-        /// <summary>Adds a timed wait, for the things that have no finishing to wait on.</summary>
-        /// <summary>Adds a wait of a second at <paramref name="at" />, and opens the panel its length is given in.</summary>
+        /// <summary>Adds a wait of a second at <paramref name="at" />, in the player's unit, and opens the panel its length is given in.</summary>
         void AddWait(int at)
         {
-            var wait = new Wait(Duration.OfSeconds(1));
+            var wait = new Wait(Editor.NewLength);
             Editor.Do(_sequence, new AddStep(Change.AddWait, at, wait));
             Open(wait, true);
         }

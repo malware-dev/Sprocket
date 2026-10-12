@@ -89,6 +89,7 @@ namespace Sprocket.Sim.Simulation
                 // saturation and value shifted so that nought is unpainted armor. The mod converts these as it would a
                 // real player's.
                 .Gives("BuildColorSlots", () => Painted)
+                .Gives("IdentityId", () => Machine.Simulation.Viewer)
                 .Done();
 
             MyAPIGateway.Session = Pretend.To<IMySession>()

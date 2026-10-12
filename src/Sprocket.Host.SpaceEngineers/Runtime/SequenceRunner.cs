@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -11,13 +12,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </summary>
     public sealed class SequenceRunner
     {
+        /// <summary>How often a run held at an await looks for something that has sent its blocks the other way.</summary>
+        const int Conflicts = 60;
+
         readonly Sequence _sequence;
 
-        int _stepIndex = -1;
+        /// <summary>Everything the run remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
+        readonly RunMemory _memory;
 
-        int _waitTicks;
+        Trouble _quit;
 
-        int _waitUntil = -1;
+        SequenceFault _found;
 
         /// <summary>
         /// One sequence, running for one of a system.
@@ -30,20 +35,44 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <para>
         /// The owner is the runner for the whole program, which knows the world, its bindings and the rota.
         /// </para>
+        /// <para>
+        /// What it remembers is <paramref name="memory" />: a run the world kept takes up where it was, on the rota as well, and
+        /// a new one is given the next place.
+        /// </para>
         /// </remarks>
-        public SequenceRunner(Sequence sequence, SystemInstance instance, AutomationRunner owner)
+        public SequenceRunner(Sequence sequence, SystemInstance instance, AutomationRunner owner, RunMemory memory)
         {
             _sequence = sequence;
             _instance = instance;
             _owner = owner;
             _rota = owner.Rota;
+            _memory = memory;
 
-            var place = _rota.Join();
-            _sampling = new Shift(place, Sample);
-            _busy = new Shift(place, Continued);
-            LastFiredTick = -1;
-            LastSkippedTick = -1;
+            var kept = memory.Busy != null && memory.Sampling != null;
+            if (!kept)
+            {
+                var place = _rota.Join();
+                memory.Sampling = new ShiftMemory { Place = place };
+                memory.Busy = new ShiftMemory { Place = place };
+                memory.ConflictsAt = -Conflicts;
+            }
+
+            _sampling = new Shift(memory.Sampling, Sample);
+            _busy = new Shift(memory.Busy, Continued);
+            _quit = Spellings.Trouble(memory.Quit);
+            _met = Spellings.Fault(memory.Met);
+            _found = Spellings.Fault(memory.Found);
+            _restored = kept;
+
+            if (!kept)
+                return;
+
+            _rota.Restore(_sampling);
+            _rota.Restore(_busy);
         }
+
+        /// <summary>What it remembers, which the world's save writes.</summary>
+        public RunMemory Memory => _memory;
 
         /// <summary>
         /// Starts another sequence of the same system, on the same one of it.
@@ -92,22 +121,42 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public Sequence Sequence => _sequence;
 
         /// <summary>Whether a run of it is under way.</summary>
-        public bool IsRunning { get; private set; }
+        public bool IsRunning
+        {
+            get { return _memory.Running; }
+            private set { _memory.Running = value; }
+        }
 
         /// <summary>What stopped the last run from outside before it finished, or none.</summary>
-        public Stopper StoppedBy { get; private set; }
+        public Stopper StoppedBy
+        {
+            get { return (Stopper)_memory.StoppedBy; }
+            private set { _memory.StoppedBy = (int)value; }
+        }
 
         /// <summary>The step the last run was at when something stopped it.</summary>
-        public int StoppedAt { get; private set; }
+        public int StoppedAt
+        {
+            get { return _memory.StoppedAt; }
+            private set { _memory.StoppedAt = value; }
+        }
 
         /// <summary>The number of the sequence that stopped the last run, where <see cref="StoppedBy" /> is a sequence.</summary>
-        public int StoppedFrom { get; private set; }
+        public int StoppedFrom
+        {
+            get { return _memory.StoppedFrom; }
+            private set { _memory.StoppedFrom = value; }
+        }
 
         /// <summary>Which step is executing or waiting, or -1 when idle.</summary>
-        public int CurrentStep => _stepIndex;
+        public int CurrentStep => _memory.Step;
 
         /// <summary>True while the sequence is held at an await or a wait.</summary>
-        public bool IsWaiting { get; private set; }
+        public bool IsWaiting
+        {
+            get { return _memory.Waiting; }
+            private set { _memory.Waiting = value; }
+        }
 
         /// <summary>
         /// Why the last run ended before its last step, or none where it did not.
@@ -117,11 +166,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// sequence is no longer running and nothing is outstanding to be asked. Cleared when the
         /// sequence next runs, so it says what happened last time and never what happened once.
         /// </remarks>
-        public Trouble Quit { get; private set; }
+        public Trouble Quit
+        {
+            get { return _quit; }
+            private set
+            {
+                _quit = value;
+                _memory.Quit = Spellings.Kept(value);
+            }
+        }
 
         /// <summary>What was wrong with the program for this sequence when it was last built, or none.</summary>
         /// <remarks>Set by the runner of the whole program when the program or its wiring changes, and on no tick.</remarks>
-        public SequenceFault Found { get; private set; }
+        public SequenceFault Found
+        {
+            get { return _found; }
+            private set
+            {
+                _found = value;
+                _memory.Found = Spellings.Kept(value);
+            }
+        }
 
         /// <summary>What an open editor last saw gone, or possibly swapped, among the blocks this names, or none.</summary>
         public SequenceFault Looked { get; set; }
@@ -160,8 +225,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        Interval _conflicts = new Interval(60);
-
         readonly AutomationRunner _owner;
         readonly Rota _rota;
 
@@ -169,16 +232,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         readonly Shift _busy;
 
-        Hold _hold;
-        bool _holding;
-
         SequenceFault _met;
+
+        /// <summary>Whether it was made from what the world remembered and has not been checked since, so the first check keeps what its last run met.</summary>
+        bool _restored;
+
+        /// <summary>How many times what every act comes to has been worked out afresh; the first takes up what the world remembered of each block waited on, and every later one lets it go.</summary>
+        int _generation;
         SequenceFault _stuck;
 
         int _missingSeen = -1;
         bool _missing;
 
-        int _tick;
 
         /// <summary>
         /// What a block being waited on says has taken it out of this sequence's hands, or none; and keeps what one says
@@ -197,9 +262,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         Trouble Troubled()
         {
             _stuck = SequenceFault.None;
-            for (var i = 0; i < _outstanding.Count; i++)
+            for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
-                var step = _outstanding[i];
+                var step = _memory.Outstanding[i];
                 var compiled = Compile(step);
                 for (var t = 0; t < compiled.Acts.Count; t++)
                 {
@@ -244,19 +309,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             get
             {
-                if (_waitUntil < 0)
-                    return _waitTicks;
+                if (_memory.WaitUntil < 0)
+                    return _memory.WaitTicks;
 
-                var left = _waitUntil - _tick;
+                var left = _memory.WaitUntil - _memory.Looked;
                 return left > 0 ? left : 0;
             }
         }
 
         /// <summary>The tick the last run started on.</summary>
-        public int LastFiredTick { get; private set; }
+        public int LastFiredTick
+        {
+            get { return _memory.LastFired; }
+            private set { _memory.LastFired = value; }
+        }
 
         /// <summary>How many runs have started.</summary>
-        public int FiredCount { get; private set; }
+        public int FiredCount
+        {
+            get { return _memory.Fired; }
+            private set { _memory.Fired = value; }
+        }
 
         /// <summary>
         /// How often the trigger fired while the sequence was already running.
@@ -268,10 +341,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// gates the wait is legible - "waiting for the inner door to shut" - so busy
         /// explains itself instead of being a mystery.
         /// </remarks>
-        public int SkippedCount { get; private set; }
+        public int SkippedCount
+        {
+            get { return _memory.Skipped; }
+            private set { _memory.Skipped = value; }
+        }
 
         /// <summary>The tick the trigger last fired while the sequence was already running.</summary>
-        public int LastSkippedTick { get; private set; }
+        public int LastSkippedTick
+        {
+            get { return _memory.LastSkipped; }
+            private set { _memory.LastSkipped = value; }
+        }
 
         /// <summary>
         /// How often something called this sequence while it was switched off.
@@ -285,7 +366,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// counting it would report a door somebody opened ten times as ten refusals.
         /// </para>
         /// </remarks>
-        public int RefusedCount { get; private set; }
+        public int RefusedCount
+        {
+            get { return _memory.Refused; }
+            private set { _memory.Refused = value; }
+        }
 
         /// <summary>
         /// Keeps an eye on a run: done every ten ticks while one is under way.
@@ -311,7 +396,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 // A run somebody started by hand is theirs, and the switch is not about them: they
                 // are standing at the screen watching it. Everything else a switched-off sequence
                 // refuses.
-                if (!CanRun && !_byHand)
+                if (!CanRun && !_memory.ByHand)
                 {
                     if (IsRunning)
                         Stop();
@@ -339,7 +424,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            if (!CanRun && !_byHand)
+            if (!CanRun && !_memory.ByHand)
             {
                 Stop();
                 return;
@@ -351,7 +436,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         void Enter(int tick)
         {
-            _tick = tick;
+            _memory.Looked = tick;
             // Held for the tick rather than passed down, because every step of a tick wants it. Both entry points
             // set it, so nothing reads one left from a previous tick.
             _bindings = _owner.Current;
@@ -366,19 +451,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            if (_holding)
+            if (_memory.Holding)
             {
-                _rota.Every(_busy, _hold.Period(_tick));
+                _rota.Every(_busy, new Hold(_memory.HoldSince, _memory.HoldExpected).Period(_memory.Looked));
                 return;
             }
 
-            if (_waitUntil >= 0)
+            if (_memory.WaitUntil >= 0)
             {
-                _rota.At(_busy, _waitUntil);
+                _rota.At(_busy, _memory.WaitUntil);
                 return;
             }
 
-            _rota.At(_busy, _tick + 1);
+            _rota.At(_busy, _memory.Looked + 1);
         }
 
         /// <summary>
@@ -407,9 +492,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _rota.Leave(_sampling);
         }
 
-        /// <summary>Takes this sequence off the rota for good, when it no longer exists.</summary>
+        /// <summary>Takes this sequence off the rota for good, when it or its Sprocket no longer exists, leaving what it remembers as it was.</summary>
+        /// <remarks>What it remembers may be another runner's now, as where a client's edit builds the Sprocket again, so letting go of the rota must not change it.</remarks>
         public void Retire()
         {
+            _sampling.Forget();
+            _busy.Forget();
             _rota.Leave(_sampling);
             _rota.Leave(_busy);
         }
@@ -432,7 +520,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             bool byHand = false)
         {
             _bindings = bindings;
-            _tick = tick;
+            _memory.Looked = tick;
 
             // Power is refused whoever asks: a machine with none does nothing, and a person at the
             // screen of a dead block is not an exception to that.
@@ -458,14 +546,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            _byHand = byHand;
+            _memory.ByHand = byHand;
             Start(tick);
         }
 
-        bool _byHand;
-
         /// <summary>Whether the run under way was started by hand, which lets it run where its sequence is switched off.</summary>
-        public bool ByHand => _byHand;
+        public bool ByHand => _memory.ByHand;
 
         /// <summary>
         /// Starts the sequence because its trigger fired, where it may run and is not already running.
@@ -478,7 +564,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void Triggered(Bindings bindings, int tick)
         {
             _bindings = bindings;
-            _tick = tick;
+            _memory.Looked = tick;
 
             if (!CanRun)
                 return;
@@ -490,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            _byHand = false;
+            _memory.ByHand = false;
             Start(tick);
         }
 
@@ -518,18 +604,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if ((!CanRun && !byHand) || step < 0 || step >= _sequence.Steps.Count)
                 return;
 
-            _byHand = byHand;
+            _memory.ByHand = byHand;
             IsRunning = true;
             IsWaiting = waiting;
-            _stepIndex = step;
+            _memory.Step = step;
             // What was left when the world was written down, and the first tick after loading is the
             // one after that: pinning the whole of it there would end the wait a tick late.
-            _waitTicks = waitTicks > 1 ? waitTicks - 1 : 0;
-            _waitUntil = -1;
-            _holding = false;
+            _memory.WaitTicks = waitTicks > 1 ? waitTicks - 1 : 0;
+            _memory.WaitUntil = -1;
+            _memory.Holding = false;
 
             Release();
-            _started.Clear();
+            _memory.Started.Clear();
 
             // Backwards to the await before this step, because that is the span an await covers. An
             // act that has already arrived is no burden: Settled says so at once, and a sequence no
@@ -553,11 +639,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     break;
 
                 if (earlier is Act)
-                    _outstanding.Add(i);
+                    _memory.Outstanding.Add(i);
 
                 var run = earlier as Run;
                 if (run != null && !run.Stops)
-                    _started.Add(run.Number);
+                    _memory.Started.Add(run.Number);
             }
 
             // Looked at on the first tick the rota runs: the world has only just loaded, and what the
@@ -591,7 +677,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void Interrupt(Stopper by, int sequence)
         {
             var running = IsRunning;
-            var at = _stepIndex;
+            var at = _memory.Step;
             Stop();
             if (!running)
                 return;
@@ -607,13 +693,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             IsRunning = false;
             IsWaiting = false;
-            _byHand = false;
-            _stepIndex = -1;
-            _waitTicks = 0;
-            _waitUntil = -1;
-            _holding = false;
+            _memory.ByHand = false;
+            _memory.Step = -1;
+            _memory.WaitTicks = 0;
+            _memory.WaitUntil = -1;
+            _memory.Holding = false;
             Release();
-            _started.Clear();
+            _memory.Started.Clear();
             _rota.Leave(_busy);
             _rota.Leave(_sampling);
         }
@@ -624,13 +710,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (_bindings == null)
                 return;
 
-            for (var i = 0; i < _outstanding.Count; i++)
+            for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
-                var act = (Act)_sequence.Steps[_outstanding[i]];
+                var act = (Act)_sequence.Steps[_memory.Outstanding[i]];
                 if (!act.HasAction || act.Sets)
                     continue;
 
-                var compiled = Compile(_outstanding[i]);
+                var compiled = Compile(_memory.Outstanding[i]);
                 for (var t = 0; t < compiled.Acts.Count; t++)
                 {
                     var acted = compiled.Acts[t];
@@ -679,14 +765,54 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Lets go of everything being waited on, forgetting what any block said it was done with.</summary>
         void Release()
         {
-            for (var i = 0; i < _outstanding.Count; i++)
+            for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
-                var compiled = _outstanding[i] < _steps.Length ? _steps[_outstanding[i]] : null;
+                var compiled = _memory.Outstanding[i] < _steps.Length ? _steps[_memory.Outstanding[i]] : null;
                 for (var t = 0; compiled != null && t < compiled.Acts.Count; t++)
                     compiled.Acts[t].Done = false;
             }
 
-            _outstanding.Clear();
+            _memory.Outstanding.Clear();
+            _memory.Acts.Clear();
+        }
+
+        /// <summary>Waits on the act at <paramref name="step" />, keeping what is remembered of each of its blocks in what the world saves.</summary>
+        void WaitOn(int step)
+        {
+            _memory.Outstanding.Add(step);
+            Listed(Compile(step));
+        }
+
+        /// <summary>Keeps what is remembered of each block of <paramref name="compiled" /> in what the world saves, where it is not kept already.</summary>
+        void Listed(Compiled compiled)
+        {
+            for (var i = 0; i < compiled.Acts.Count; i++)
+            {
+                if (!_memory.Acts.Contains(compiled.Acts[i].Kept))
+                    _memory.Acts.Add(compiled.Acts[i].Kept);
+            }
+        }
+
+        /// <summary>
+        /// What is remembered of the block at <paramref name="index" /> of the act at <paramref name="step" />: what the world kept
+        /// where this is the first working out since a load, and a fresh one otherwise, remembering what the block does where
+        /// <paramref name="remembers" /> says.
+        /// </summary>
+        ActMemory Kept(int step, int index, bool remembers)
+        {
+            for (var i = 0; _generation == 1 && i < _memory.Acts.Count; i++)
+            {
+                var kept = _memory.Acts[i];
+                if (kept.Step != step || kept.Index != index)
+                    continue;
+
+                if (kept.Seen != null)
+                    kept.Seen.Clock = _owner.Clock;
+
+                return kept;
+            }
+
+            return new ActMemory { Step = step, Index = index, Seen = remembers ? new Recall { Clock = _owner.Clock } : null };
         }
 
         void Start(int tick)
@@ -698,10 +824,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // What stopped the last run is about the last run. Somebody starting this one has
             // either mended it or is about to find out again.
             Quit = Trouble.None;
-            _met = SequenceFault.None;
+            Met(SequenceFault.None);
             _stuck = SequenceFault.None;
             StoppedBy = Stopper.None;
-            _stepIndex = 0;
+            _memory.Step = 0;
             EnterStep();
             Advance();
             Schedule();
@@ -710,14 +836,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         void EnterStep()
         {
-            _waitTicks = 0;
-            _waitUntil = -1;
-            if (_stepIndex < 0 || _stepIndex >= _sequence.Steps.Count)
+            _memory.WaitTicks = 0;
+            _memory.WaitUntil = -1;
+            if (_memory.Step < 0 || _memory.Step >= _sequence.Steps.Count)
                 return;
 
-            var wait = _sequence.Steps[_stepIndex] as Wait;
+            var wait = _sequence.Steps[_memory.Step] as Wait;
             if (wait != null)
-                _waitTicks = wait.Ticks;
+                _memory.WaitTicks = wait.Ticks;
         }
 
         /// <summary>
@@ -730,15 +856,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         void Advance()
         {
-            while (_stepIndex >= 0 && _stepIndex < _sequence.Steps.Count)
+            while (_memory.Step >= 0 && _memory.Step < _sequence.Steps.Count)
             {
-                var step = _sequence.Steps[_stepIndex];
+                var step = _sequence.Steps[_memory.Step];
 
                 // Switched off: kept, and never done, and an if switched off takes its branches with it.
                 if (step.IsOff)
                 {
                     if (step is If)
-                        Go(_sequence.EndOf(_stepIndex) + 1);
+                        Go(_sequence.EndOf(_memory.Step) + 1);
                     else
                         Step();
 
@@ -752,10 +878,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     // A block the step needs that is gone, or may have been swapped, is found here, where the run needs
                     // it; the working-out it rests on is already done once per change.
-                    var needed = act.HasAction ? Compile(_stepIndex) : null;
+                    var needed = act.HasAction ? Compile(_memory.Step) : null;
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
-                        Meet(new SequenceFault(needed.Problem, _stepIndex, Trouble.None, needed.Which));
+                        Meet(new SequenceFault(needed.Problem, _memory.Step, Trouble.None, needed.Which));
                         return;
                     }
 
@@ -767,10 +893,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
-                    Execute(_stepIndex);
+                    Execute(_memory.Step);
 
                     // Refused on the spot, as a script that does not run is: the run ends there and says which block.
-                    var refused = Refused(_stepIndex);
+                    var refused = Refused(_memory.Step);
                     if (refused.Exists)
                     {
                         Meet(refused);
@@ -780,8 +906,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     // Kept so an await below knows what it is waiting for. Nothing with a
                     // destination is nothing to wait on, which is how an instant action stays
                     // instant.
-                    if (!Settled(_stepIndex))
-                        _outstanding.Add(_stepIndex);
+                    if (!Settled(_memory.Step))
+                        WaitOn(_memory.Step);
 
                     Step();
                     continue;
@@ -797,14 +923,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         Calls(run.Number, run.Stops);
 
                     if (!run.Stops)
-                        _started.Add(run.Number);
+                        _memory.Started.Add(run.Number);
 
                     // Stopped by that: by stopping itself, or by a sequence it ran; or the one it ran met trouble and
                     // switched the system off. The run ends here.
                     if (!IsRunning)
                         return;
 
-                    if (!CanRun && !_byHand)
+                    if (!CanRun && !_memory.ByHand)
                     {
                         Stop();
                         return;
@@ -828,7 +954,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 // whole if.
                 if (step is Else)
                 {
-                    Go(_sequence.EndOf(_stepIndex) + 1);
+                    Go(_sequence.EndOf(_memory.Step) + 1);
                     continue;
                 }
 
@@ -857,10 +983,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     if (!Finished())
                     {
-                        if (!_holding)
+                        if (!_memory.Holding)
                         {
-                            _hold = new Hold(_tick, Expected());
-                            _holding = true;
+                            _memory.HoldSince = _memory.Looked;
+                            _memory.HoldExpected = Expected();
+                            _memory.Holding = true;
                         }
 
                         // A block that has been sent the other way by something else is not worth
@@ -871,7 +998,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         // something or a trigger firing, so it cannot arrive faster than that, and
                         // giving up a second later than it could have is a second nobody can
                         // measure against a machine that has already stopped moving.
-                        var quit = _conflicts.Due(_tick) ? Troubled() : Trouble.None;
+                        var quit = ConflictsDue() ? Troubled() : Trouble.None;
                         if (quit.Exists)
                         {
                             Stop();
@@ -884,21 +1011,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     }
 
                     Release();
-                    _started.Clear();
-                    _holding = false;
+                    _memory.Started.Clear();
+                    _memory.Holding = false;
                     _stuck = SequenceFault.None;
                     IsWaiting = false;
                     Step();
                     continue;
                 }
 
-                if (_waitUntil < 0)
+                if (_memory.WaitUntil < 0)
                     // A tick of the game's rather than a count of calls, so a wait lasts as long as it says however often
                     // the runner is woken. Pinned when the step is first reached rather than entered, because a run resumed
                     // from a save is entered before it knows what tick it is.
-                    _waitUntil = _tick + _waitTicks;
+                    _memory.WaitUntil = _memory.Looked + _memory.WaitTicks;
 
-                if (_tick < _waitUntil)
+                if (_memory.Looked < _memory.WaitUntil)
                 {
                     IsWaiting = true;
                     return;
@@ -913,12 +1040,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         void Step()
         {
-            Go(_stepIndex + 1);
+            Go(_memory.Step + 1);
         }
 
         void Go(int step)
         {
-            _stepIndex = step;
+            _memory.Step = step;
             EnterStep();
         }
 
@@ -928,7 +1055,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </summary>
         bool Branch(Comparison test)
         {
-            var at = _stepIndex;
+            var at = _memory.Step;
             while (true)
             {
                 var tested = Test(at, test);
@@ -992,7 +1119,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 if (acted.Entity.Refuses(acted.Action))
-                    return new SequenceFault(SequenceProblem.Unable, _stepIndex, Trouble.None, acted.Entity.Name);
+                    return new SequenceFault(SequenceProblem.Unable, _memory.Step, Trouble.None, acted.Entity.Name);
             }
 
             return SequenceFault.None;
@@ -1005,54 +1132,75 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         SequenceFault Gone()
         {
-            for (var i = 0; i < _outstanding.Count; i++)
+            for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
-                if (!((Act)_sequence.Steps[_outstanding[i]]).HasAction)
+                if (!((Act)_sequence.Steps[_memory.Outstanding[i]]).HasAction)
                     continue;
 
-                var compiled = Compile(_outstanding[i]);
+                var compiled = Compile(_memory.Outstanding[i]);
                 if (compiled.Problem != SequenceProblem.None)
-                    return new SequenceFault(compiled.Problem, _outstanding[i], Trouble.None, compiled.Which);
+                    return new SequenceFault(compiled.Problem, _memory.Outstanding[i], Trouble.None, compiled.Which);
             }
 
             return SequenceFault.None;
-        }
-
-        /// <summary>Asks the blocks being waited on whether they can finish, for an open editor to show, changing nothing about the run.</summary>
-        public void Glance()
-        {
-            if (IsWaiting && _outstanding.Count > 0 && _bindings != null)
-                Troubled();
         }
 
         /// <summary>Ends the run at a step it cannot do, keeping why, and has what it runs on switched off.</summary>
         void Meet(SequenceFault fault)
         {
             Stop();
-            _met = fault;
+            Met(fault);
             _owner.Faulted(_sequence, _instance, fault);
         }
 
         /// <summary>Takes what the program says is wrong, now it has been built again, forgetting what the last run met.</summary>
+        /// <remarks>
+        /// The first check of a run the world remembered is of the same program it was last checked as, so what that check
+        /// found, and what the run met, still stand: a construct changed since is found by a run, at the step that needs it,
+        /// as it would have been had the world not been saved.
+        /// </remarks>
         public void Checked(SequenceFault found)
         {
-            Found = found;
-            _met = SequenceFault.None;
+            if (!_restored)
+            {
+                Found = found;
+                Met(SequenceFault.None);
+            }
+
+            _restored = false;
+        }
+
+        /// <summary>Keeps what the run met.</summary>
+        void Met(SequenceFault fault)
+        {
+            _met = fault;
+            _memory.Met = Spellings.Kept(fault);
+        }
+
+        /// <summary>Whether conflicts are due to be looked for, once every <see cref="Conflicts" /> ticks, and notes that they are.</summary>
+        bool ConflictsDue()
+        {
+            var last = _memory.ConflictsAt;
+            if (_memory.Looked - last < Conflicts && _memory.Looked >= last)
+                return false;
+
+            _memory.ConflictsAt = _memory.Looked;
+            return true;
         }
 
         /// <summary>How many ticks the slowest of what is being waited on should take, or unknown if any cannot say.</summary>
         int Expected()
         {
-            if (_started.Count > 0)
+            if (_memory.Started.Count > 0)
                 return GridEntity.Unestimated;
 
             var longest = 0;
-            for (var i = 0; i < _outstanding.Count; i++)
+            for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
-                if (!((Act)_sequence.Steps[_outstanding[i]]).HasAction)
+                if (!((Act)_sequence.Steps[_memory.Outstanding[i]]).HasAction)
                     continue;
 
-                var compiled = Compile(_outstanding[i]);
+                var compiled = Compile(_memory.Outstanding[i]);
                 for (var q = 0; q < compiled.Acts.Count; q++)
                 {
                     var acted = compiled.Acts[q];
@@ -1071,16 +1219,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Whether everything started since the last await has got where it was going, and every sequence started since has finished.</summary>
         bool Finished()
         {
-            for (var i = 0; i < _outstanding.Count; i++)
+            for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
-                if (!Settled(_outstanding[i]))
+                if (!Settled(_memory.Outstanding[i]))
                     return false;
             }
 
             var system = _sequence.System;
-            for (var i = 0; i < _started.Count && system != null; i++)
+            for (var i = 0; i < _memory.Started.Count && system != null; i++)
             {
-                var started = system.FindSequence(_started[i]);
+                var started = system.FindSequence(_memory.Started[i]);
                 var running = started == null ? null : _owner.Get(started, _instance);
                 if (running != null && running.IsRunning)
                     return false;
@@ -1089,9 +1237,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return true;
         }
 
-        readonly List<int> _outstanding = new List<int>();
-
-        readonly List<int> _started = new List<int>();
 
         void Execute(int step)
         {
@@ -1172,10 +1317,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public IList<Literal> Arguments;
             public Bound Bound;
             public Order Order;
-            public Recall Seen;
+
+            /// <summary>What is remembered of the block, kept in what the world saves while its act is waited on.</summary>
+            public ActMemory Kept;
+
+            /// <summary>What the action remembers of the block between looks, or null.</summary>
+            public Recall Seen => Kept.Seen;
 
             /// <summary>Whether the block has said it is done with what it was told, short of what the action waits for.</summary>
-            public bool Done;
+            public bool Done
+            {
+                get { return Kept.Done; }
+                set { Kept.Done = value; }
+            }
         }
 
         /// <summary>
@@ -1248,11 +1402,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Arguments = shared.Arguments,
                     Bound = shared.Bound,
                     Order = entity.Prepare(action, shared.Bound, shared.Arguments),
-                    Seen = action.Doing == null ? null : new Recall()
+                    Kept = Kept(step, compiled.Acts.Count, action.Doing != null)
                 });
             }
 
             _steps[step] = compiled;
+            if (_memory.Outstanding.Contains(step))
+                Listed(compiled);
+
             return compiled;
         }
 
@@ -1273,7 +1430,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var i = 0; i < reading.Count; i++)
             {
                 var probe = Probe.Of(_bindings.Entity(reading[i]), test.Provider, test.MemberId, test.Arguments,
-                    test.Quantifier, test.Relation, test.Value);
+                    test.Quantifier, test.Relation, test.Value, null, _owner.Clock);
 
                 if (probe != null)
                     tested.Reads.Add(probe);
@@ -1296,6 +1453,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _tests = new Tested[count];
             _boundAt = bound;
             _editedAt = edited;
+
+            // Worked out again after something changed: the blocks may be other blocks, so nothing remembered of them stands.
+            _generation++;
+            if (_generation > 1)
+                _memory.Acts.Clear();
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -14,7 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class Probe
     {
-        Probe(GridEntity entity, Gauge gauge, Relation relation, Literal operand, EntityEvent signal, EntityAction own)
+        Probe(GridEntity entity, Gauge gauge, Relation relation, Literal operand, EntityEvent signal, EntityAction own, ReadingMemory kept,
+            Func<int> clock)
         {
             Entity = entity;
             Gauge = gauge;
@@ -22,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Operand = operand;
             Signal = signal;
             Own = own;
-            Seen = signal != null && signal.Flag.Remembers ? new Recall() : null;
+            Seen = signal != null && signal.Flag.Remembers ? Remembered(kept, false, clock) : null;
         }
 
         /// <summary>The block read.</summary>
@@ -64,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Only numbers are ordered or summed.
         /// </remarks>
         public static Probe Of(GridEntity entity, string provider, string id, IList<Literal> arguments, Quantifier quantifier,
-            Relation relation, Literal value)
+            Relation relation, Literal value, ReadingMemory kept = null, Func<int> clock = null)
         {
             if (entity == null || (provider.Length > 0 && provider != BlockKinds.Own))
                 return null;
@@ -93,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
             else
             {
-                gauge = being.Gauge(entity.Block, arguments, being.Remembers ? new Recall() : null);
+                gauge = being.Gauge(entity.Block, arguments, being.Remembers ? Remembered(kept, true, clock) : null);
                 if (kind == ValueKind.Name)
                 {
                     var at = being.Position(operand.Text);
@@ -112,14 +115,40 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (quantifier == Quantifier.Sum)
                 operand = value;
 
-            return new Probe(entity, gauge, relation, operand, null, being == null ? null : written);
+            return new Probe(entity, gauge, relation, operand, null, being == null ? null : written, kept, clock);
+        }
+
+        /// <summary>
+        /// What a reader remembers of the block between looks: the recall <paramref name="kept" /> holds for the value read or the
+        /// signal watched, as <paramref name="gauge" /> says, made and kept there where it holds none; a fresh one where nothing
+        /// keeps it; told the tick by <paramref name="clock" />.
+        /// </summary>
+        static Recall Remembered(ReadingMemory kept, bool gauge, Func<int> clock)
+        {
+            if (kept == null)
+                return new Recall { Clock = clock };
+
+            var recall = gauge ? kept.Gauge : kept.Seen;
+            if (recall != null)
+            {
+                recall.Clock = clock;
+                return recall;
+            }
+
+            recall = new Recall { Clock = clock };
+            if (gauge)
+                kept.Gauge = recall;
+            else
+                kept.Seen = recall;
+
+            return recall;
         }
 
         /// <summary>
         /// The signal <paramref name="id" /> qualified by <paramref name="provider" /> as <paramref name="entity" /> sends it,
         /// watched for by Sprocket; null where the block sends no such signal, or one only a toolbar sends.
         /// </summary>
-        public static Probe Watching(GridEntity entity, string provider, string id)
+        public static Probe Watching(GridEntity entity, string provider, string id, ReadingMemory kept = null, Func<int> clock = null)
         {
             if (entity == null || provider != BlockKinds.Own)
                 return null;
@@ -128,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (signal == null || signal.Flag == null)
                 return null;
 
-            return new Probe(entity, null, Relation.Is, Literal.Of(true), signal, null);
+            return new Probe(entity, null, Relation.Is, Literal.Of(true), signal, null, kept, clock);
         }
 
         /// <summary>The value <paramref name="id" /> a block of <paramref name="kind" /> has: Sprocket's own where <paramref name="provider" /> says so, the block's own otherwise.</summary>

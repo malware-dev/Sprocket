@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -64,6 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _world = world;
             _rota = rota;
             Live = true;
+            Clock = delegate { return CurrentTick; };
 
             _automation.Reshaped += delegate { _reshaped = true; };
         }
@@ -83,6 +85,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <c>now - then</c> and stays exact however irregularly the runner is woken.
         /// </remarks>
         public int CurrentTick { get; private set; }
+
+        /// <summary>Sprocket's clock as the readers of blocks are given it, which tells them the tick they read on.</summary>
+        public Func<int> Clock { get; }
 
         /// <summary>
         /// What the program's declarations currently point at.
@@ -134,6 +139,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // has ticked, so every runner's bindings are current when its sequences are called.
             if (_runsRota)
                 _rota.Run(tick);
+        }
+
+        /// <summary>Starts the clock at <paramref name="tick" />, which is where a world just loaded stands before its first tick.</summary>
+        public void Begin(int tick)
+        {
+            CurrentTick = tick;
+        }
+
+        /// <summary>Makes the runners and checks the program now, rather than on the next tick, for a press that arrives first.</summary>
+        public void Prepare()
+        {
+            _bindings.Refresh(_world, _automation);
+            Checking();
         }
 
         /// <summary>Takes everything this program put on the rota off it, when its Sprocket goes away.</summary>
@@ -457,7 +475,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         if (_runners.ContainsKey(key))
                             continue;
 
-                        var runner = new SequenceRunner(sequences[q], instances[n], this);
+                        var runner = new SequenceRunner(sequences[q], instances[n], this,
+                            Remembered(system, instances[n].Number, sequences[q].Number));
 
                         // What a run step reaches: the same system, the same one of it, by number.
                         var owner = system;
@@ -493,9 +512,54 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < _stale.Count; i++)
             {
-                _runners[_stale[i]].Retire();
+                Forget(_runners[_stale[i]]);
                 _runners.Remove(_stale[i]);
             }
+        }
+
+        /// <summary>
+        /// What the world remembers of sequence <paramref name="sequence" /> on installation <paramref name="instance" /> of
+        /// <paramref name="system" />, kept from now on where it remembers nothing yet.
+        /// </summary>
+        /// <remarks>Asked as a runner is made, which is when the program gains something, never on a tick.</remarks>
+        RunMemory Remembered(AutomationSystem system, int instance, int sequence)
+        {
+            var runs = _automation.Memory.Runs;
+            for (var i = 0; i < runs.Count; i++)
+            {
+                if (runs[i].System == system.Identity && runs[i].Instance == instance && runs[i].Sequence == sequence)
+                    return runs[i];
+            }
+
+            var made = new RunMemory { System = system.Identity, Instance = instance, Sequence = sequence };
+            runs.Add(made);
+            return made;
+        }
+
+        /// <summary>
+        /// What the world remembers of trigger <paramref name="trigger" />, counted from one, on installation
+        /// <paramref name="instance" /> of <paramref name="system" />, kept from now on where it remembers nothing yet.
+        /// </summary>
+        /// <remarks>Asked as a poller is made, which is when the program gains something, never on a tick.</remarks>
+        WatchMemory Watched(AutomationSystem system, int instance, int trigger)
+        {
+            var watches = _automation.Memory.Watches;
+            for (var i = 0; i < watches.Count; i++)
+            {
+                if (watches[i].System == system.Identity && watches[i].Instance == instance && watches[i].Trigger == trigger)
+                    return watches[i];
+            }
+
+            var made = new WatchMemory { System = system.Identity, Instance = instance, Trigger = trigger };
+            watches.Add(made);
+            return made;
+        }
+
+        /// <summary>Retires a runner whose sequence or trigger is gone, and forgets what it remembered.</summary>
+        void Forget(SequenceRunner runner)
+        {
+            runner.Retire();
+            _automation.Memory.Runs.Remove(runner.Memory);
         }
 
         /// <summary>Matches the runners to the program where it gained or lost something, and checks it where it or its wiring changed; nothing otherwise.</summary>
@@ -633,10 +697,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     for (var n = 0; n < instances.Count; n++)
                     {
                         if (watched)
-                            _keptPollers.Add(Watching(system, trigger, instances[n]));
+                            _keptPollers.Add(Watching(system, t, trigger, instances[n]));
 
                         if (alone != null)
-                            _keptActing.Add(Acting(alone, instances[n]));
+                            _keptActing.Add(Acting(system, t, alone, instances[n]));
                     }
                 }
             }
@@ -652,6 +716,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         continue;
 
                     pollers[i].Retire();
+                    _automation.Memory.Watches.Remove(pollers[i].Memory);
                     pollers.RemoveAt(i);
                 }
 
@@ -671,7 +736,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             for (var i = 0; i < _stale.Count; i++)
             {
-                _acting[_stale[i]].Retire();
+                Forget(_acting[_stale[i]]);
                 _acting.Remove(_stale[i]);
             }
 
@@ -687,13 +752,19 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _alone.Remove(_goneTriggers[i]);
         }
 
-        /// <summary>The poller for <paramref name="trigger" /> on <paramref name="instance" />, made where there is none.</summary>
-        /// <remarks>One just made is handed whatever a save remembered for it.</remarks>
-        Poller Watching(AutomationSystem system, Trigger trigger, SystemInstance instance)
+        /// <summary>The poller for <paramref name="trigger" />, at <paramref name="place" /> among its system's, on <paramref name="instance" />, made where there is none.</summary>
+        /// <remarks>
+        /// One just made takes up what the world remembers of it, and is handed whatever a copy was sent. Its place is written
+        /// again on every check, so what it remembers follows the trigger when one before it goes.
+        /// </remarks>
+        Poller Watching(AutomationSystem system, int place, Trigger trigger, SystemInstance instance)
         {
             var poller = Poller(trigger, instance);
             if (poller != null)
+            {
+                poller.Memory.Trigger = place + 1;
                 return poller;
+            }
 
             List<Poller> pollers;
             if (!_pollers.TryGetValue(trigger, out pollers))
@@ -702,7 +773,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _pollers.Add(trigger, pollers);
             }
 
-            poller = new Poller(system, trigger, instance, this);
+            poller = new Poller(system, trigger, instance, this, Watched(system, instance.Number, place + 1));
             pollers.Add(poller);
 
             for (var i = _recalling.Count - 1; i >= 0; i--)
@@ -745,13 +816,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             public Action<Poller> Recall;
         }
 
-        /// <summary>The key of the runner for a trigger's own act on <paramref name="instance" />, made where there is none.</summary>
-        long Acting(Sequence alone, SystemInstance instance)
+        /// <summary>The key of the runner for the own act of trigger <paramref name="trigger" /> of <paramref name="system" /> on <paramref name="instance" />, made where there is none.</summary>
+        /// <remarks>
+        /// Remembered as a sequence numbered below nought, minus the trigger's place counted from one, which no sequence of the
+        /// system's is. The place is written again on every check, so it follows the trigger when one before it goes.
+        /// </remarks>
+        long Acting(AutomationSystem system, int trigger, Sequence alone, SystemInstance instance)
         {
             var key = Key(alone.Id, instance.Number);
-            if (!_acting.ContainsKey(key))
-                _acting.Add(key, new SequenceRunner(alone, instance, this));
+            SequenceRunner runner;
+            if (!_acting.TryGetValue(key, out runner))
+            {
+                runner = new SequenceRunner(alone, instance, this, Remembered(system, instance.Number, -(trigger + 1)));
+                _acting.Add(key, runner);
+            }
 
+            runner.Memory.Sequence = -(trigger + 1);
             return key;
         }
 
@@ -791,18 +871,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>
         /// Only for somebody looking, and nothing is switched off here: a run finds the same at the step that needs it. The
         /// blocks are looked at only where what the names point at, or the program, has changed since the last look, so an
-        /// idle editor costs a pass over the runners asking which are waiting, however large the construct.
+        /// idle editor costs three comparisons, however large the construct. What a block being waited on says about
+        /// finishing is the run's own to read, on its own looks, so an open editor leaves every run's timing as it was.
         /// </remarks>
         public void Look()
         {
-            // What a step being waited on says about finishing changes without anything saying so, so it is asked each
-            // look - of the few runs that are waiting, and of their blocks alone.
-            foreach (var runner in _runners.Values)
-                runner.Glance();
-
-            foreach (var runner in _acting.Values)
-                runner.Glance();
-
             var bindings = Bindings;
             if (bindings.Revision == _lookedBindings && _automation.Edits == _lookedEdits && Reconciled == _lookedRunners)
                 return;

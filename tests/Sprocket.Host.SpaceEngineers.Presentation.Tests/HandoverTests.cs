@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -53,6 +54,17 @@ public class HandoverTests : IDisposable
         public string Program = "";
         public string State = "";
         public string Switches = "";
+
+        /// <summary>The players' settings this end keeps: anybody's on the server, its own on a client.</summary>
+        public readonly Dictionary<long, PlayerMemory> Players = new Dictionary<long, PlayerMemory>();
+
+        public PlayerMemory Player(long identity)
+        {
+            if (!Players.TryGetValue(identity, out var player))
+                Players.Add(identity, player = new PlayerMemory { Player = identity });
+
+            return player;
+        }
     }
 
     readonly Heard _atServer = new Heard();
@@ -84,7 +96,8 @@ public class HandoverTests : IDisposable
                     heard.Changed.Add(program);
                     heard.Switches = switches;
                 },
-                (_, program, _) => heard.Stored.Add(program));
+                (_, program, _) => heard.Stored.Add(program),
+                heard.Player);
 
             made.Listen(Network.Handover.Carry(NetworkChannel.Create("Sprocket.HandoverTests")).Build());
         });
@@ -343,6 +356,54 @@ public class HandoverTests : IDisposable
 
         Assert.Equal(new[] { _block.ToString() }, heard.Foreign);
         Assert.Empty(heard.Given);
+    }
+
+    /// <summary>A client is lent a Sprocket with the unit its player gives lengths of time in, as the server keeps it.</summary>
+    [Fact]
+    public void AClientIsLentItsPlayersUnit()
+    {
+        var anna = _wire.Client("Anna");
+        var heard = new Heard();
+        var annas = Client(anna, heard);
+        _atServer.Player(Anna).Ticks = true;
+        MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
+            .Does("TryGetIdentityId", _ => Anna)
+            .Done();
+        try
+        {
+            _wire.As(anna, () => annas.Ask(_block, "Anna"));
+            _wire.Settle();
+        }
+        finally
+        {
+            MyAPIGateway.Players = null;
+        }
+
+        Assert.Equal(new[] { _block.ToString() }, heard.Given);
+        Assert.True(Assert.Single(heard.Players.Values).Ticks);
+    }
+
+    /// <summary>The unit a client's player chooses is kept by the server, with that player's settings and nobody else's.</summary>
+    [Fact]
+    public void AClientsChoiceOfUnitIsKeptOnTheServer()
+    {
+        var anna = _wire.Client("Anna");
+        var annas = Client(anna, new Heard());
+        MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
+            .Does("TryGetIdentityId", _ => Anna)
+            .Done();
+        try
+        {
+            _wire.As(anna, () => annas.Prefer(true));
+            _wire.Settle();
+        }
+        finally
+        {
+            MyAPIGateway.Players = null;
+        }
+
+        Assert.True(_atServer.Player(Anna).Ticks);
+        Assert.False(_atServer.Player(Bert).Ticks);
     }
 
     [Fact]

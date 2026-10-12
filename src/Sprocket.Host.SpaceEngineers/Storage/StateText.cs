@@ -35,16 +35,21 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         const string Paused = "paused";
 
         /// <summary>
-        /// What is switched off and what is running, as a document.
+        /// What is switched off and what is running, as a document, and who the automation belongs to where
+        /// <paramref name="players" /> says.
         /// </summary>
         /// <remarks>
-        /// A null runner writes the switches alone, which is what a caller with no runtime has.
+        /// A null runner writes the switches alone, which is what a caller with no runtime has. Who it belongs to goes only
+        /// to a copy being edited: what a block keeps travels with every copy of the construct, which starts as nobody's.
         /// </remarks>
-        public static string Save(Automation program, AutomationRunner runner)
+        public static string Save(Automation program, AutomationRunner runner, bool players = true)
         {
             var pen = new Pen();
-            Players(pen, Owned, program.Owners);
-            Players(pen, Paused, program.PausedFrom);
+            if (players)
+            {
+                Players(pen, Owned, program.Owners);
+                Players(pen, Paused, program.PausedFrom);
+            }
 
             var systems = program.Systems;
 

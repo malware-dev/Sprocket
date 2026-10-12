@@ -7,6 +7,7 @@ using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Runtime;
@@ -49,6 +50,12 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly CarrierFiles _carried = new CarrierFiles();
 
+        readonly Memories _memories = new Memories(new GameBinary());
+
+        readonly List<ConstructMemory> _remembered = new List<ConstructMemory>();
+
+        readonly List<DoorMemory> _closing = new List<DoorMemory>();
+
         Carrier _carrier;
 
         bool _carries;
@@ -87,6 +94,9 @@ namespace Sprocket.Host.SpaceEngineers
         long _asked;
 
         readonly Dictionary<long, Habits> _habits = new Dictionary<long, Habits>();
+
+        /// <summary>This client's player's settings, as the server last lent them; the world's own are on the server.</summary>
+        readonly PlayerMemory _mine = new PlayerMemory();
 
         Interval _keeping = new Interval(Keeping);
 
@@ -267,20 +277,21 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Unpacks the files in the world's carrier, once, as the world starts.</summary>
-        /// <remarks>Files that will not read are logged and never written over: nothing written to them this session is kept.</remarks>
+        /// <remarks>Files that will not read are logged and ignored, and the next save writes the files over them.</remarks>
         void FindCarrier()
         {
             var found = Carrier.Find();
             var trouble = found == null ? "" : _carried.Unpack(found.Text);
-            if (trouble.Length > 0)
-            {
-                Told.Say(trouble + "; the carrier's files are not kept this session");
-                return;
-            }
+            Told.Say(trouble.Length > 0
+                ? trouble + "; what the carrier held is ignored, and the next save writes the files over it"
+                : "read " + _carried.Count + " files from the carrier");
 
             _carrier = found;
             _carries = true;
-            Told.Say("read " + _carried.Count + " files from the carrier");
+
+            _memories.Read(_carried.Has(Memories.File) ? _carried.Read(Memories.File) : null, GameFrame());
+            if (_memories.Trouble.Length > 0)
+                Told.Say(_memories.Trouble);
         }
 
         /// <inheritdoc />
@@ -293,8 +304,8 @@ namespace Sprocket.Host.SpaceEngineers
 
             Speak();
 
-            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored);
-            _doors = new AutoClose(_rota, Frame);
+            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player);
+            _doors = new AutoClose(_rota, Frame, _memories.Closing);
             _channel = AutoClose.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
             _doors.Listen(_channel);
@@ -493,6 +504,12 @@ namespace Sprocket.Host.SpaceEngineers
             Told.Say(was.Block.CustomName + " was built again from the change, and saved");
         }
 
+        /// <summary>The settings in this world of the player with <paramref name="identity" />; on a client, which knows its own alone, its own.</summary>
+        PlayerMemory Player(long identity)
+        {
+            return IsServer ? _memories.Player(identity) : _mine;
+        }
+
         /// <summary>How this player has been working in the editor for a block, made the first time it is asked.</summary>
         Habits HabitsFor(long id)
         {
@@ -520,7 +537,7 @@ namespace Sprocket.Host.SpaceEngineers
             string program;
             string state;
             unit.Written(out program, out state);
-            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Program, null));
+            _handover.Tell(unit.Block.EntityId, program, StateText.Save(unit.Program, null, false));
         }
 
         /// <summary>What the server wrote into a block, arriving at this client for its copy of the block.</summary>
@@ -658,7 +675,8 @@ namespace Sprocket.Host.SpaceEngineers
                 return unit;
             }
 
-            unit = new SprocketUnit(block, Asked, _rota, _texts, _backups);
+            unit = new SprocketUnit(block, Asked, _rota, _texts, _memories.Claim(block.EntityId), _backups);
+            unit.Begin(Frame());
             unit.HeroRemoved += Removed;
             _units.Add(block.EntityId, unit);
             return unit;
@@ -797,6 +815,9 @@ namespace Sprocket.Host.SpaceEngineers
             unit.Shelf = _shelf;
             unit.Preferences = _preferences;
             unit.Editor.PlayerName = Named;
+            var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
+            unit.Viewer = Player(player);
+            unit.Editor.Preferred = IsServer ? null : (Action)delegate { _handover.Prefer(_mine.Ticks); };
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
                 if (_screen != null)
@@ -826,7 +847,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Session == null)
                 return;
 
-            int frame = MyAPIGateway.Session.GameplayFrameCounter;
+            int frame = Frame();
 
             // Ticked for its editor, which is all a copy has that moves, and compared with what the
             // server was last sent on a cadence of its own. A copy lent to look at sends nothing.
@@ -852,8 +873,14 @@ namespace Sprocket.Host.SpaceEngineers
             _rota.Run(frame);
         }
 
-        /// <summary>The frame the game is on, which is what the rota counts in.</summary>
-        static int Frame()
+        /// <summary>Sprocket's clock, which the rota counts in: the game's frame carried on from where the world was saved.</summary>
+        int Frame()
+        {
+            return _memories.Now(GameFrame());
+        }
+
+        /// <summary>The frame the game is on, which starts again from nought with every session.</summary>
+        static int GameFrame()
         {
             return MyAPIGateway.Session == null ? 0 : MyAPIGateway.Session.GameplayFrameCounter;
         }
@@ -910,8 +937,31 @@ namespace Sprocket.Host.SpaceEngineers
             }
 
             _saving.Clear();
+            Remember();
             Carry();
             return base.GetObjectBuilder();
+        }
+
+        /// <summary>Writes what every live Sprocket is doing into the carrier's files, whole, as the world saves.</summary>
+        void Remember()
+        {
+            if (!_carries || !IsServer)
+                return;
+
+            _remembered.Clear();
+            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+            {
+                if (!unit.Value.Lost)
+                    _remembered.Add(unit.Value.Memory);
+            }
+
+            _closing.Clear();
+            if (_doors != null)
+                _doors.Remember(_closing);
+
+            _carried.Write(Memories.File, _memories.Write(GameFrame(), _remembered, _closing));
+            _remembered.Clear();
+            _closing.Clear();
         }
 
         /// <summary>Packs the carrier's files into the world's carrier where they changed, making it where the world has none yet.</summary>

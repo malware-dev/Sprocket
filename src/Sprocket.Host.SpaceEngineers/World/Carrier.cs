@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Claimed in <c>Content/Data/EntityComponents.sbc</c>, without which the game drops it at save, and never to change:
         /// another key reads as a world with no files.
         /// </remarks>
-        static readonly Guid Key = new Guid("24B4675F-1A0D-410A-8044-BFD7124C8588");
+        public static readonly Guid Key = new Guid("24B4675F-1A0D-410A-8044-BFD7124C8588");
 
         /// <summary>The world variable that holds the carrier's entity id.</summary>
         /// <remarks>

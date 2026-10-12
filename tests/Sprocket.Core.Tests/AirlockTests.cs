@@ -276,6 +276,35 @@ public class AirlockTests
         Assert.False(a.State.IsRunning);
     }
 
+    /// <summary>A screen looking at a cycle on every tick leaves it to open the outer door on the tick it would with nobody looking.</summary>
+    [Fact]
+    public void LookingAtACycleLeavesItsTimingAlone()
+    {
+        Assert.Equal(Opened(false), Opened(true));
+    }
+
+    /// <summary>The tick the outer door is told to open on, with the construct looked at on every tick where <paramref name="looked" /> says.</summary>
+    static int Opened(bool looked)
+    {
+        var a = Build();
+        a.Inner.ForceOpen();
+        a.Tick(3);
+        a.Log.Clear();
+
+        a.Press();
+        for (var tick = 1; tick <= 400; tick++)
+        {
+            a.Tick();
+            if (looked)
+                a.Runner.Look();
+
+            if (a.Log.Contains("Outer Door:open"))
+                return tick;
+        }
+
+        return -1;
+    }
+
     /// <summary>
     /// An emptied airlock counts as empty, although the vent never says so.
     /// </summary>

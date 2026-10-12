@@ -5,6 +5,7 @@ using System.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Measuring;
+using Sprocket.Sim.Saves;
 using Sprocket.Sim.Shell;
 using Sprocket.Sim.Simulation;
 
@@ -32,6 +33,13 @@ namespace Sprocket.Sim
                 Console.WriteLine(raised == 0
                     ? "no simulator window is open"
                     : "brought " + raised + " forward");
+                return;
+            }
+
+            // What a saved world remembers of the runtime, which the save keeps in binary.
+            if (args.Length > 1 && args[0] == "--state")
+            {
+                Console.Write(SavedState.Render(args[1]));
                 return;
             }
 

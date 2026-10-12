@@ -16,6 +16,10 @@
         <AssemblyName>Sprocket.Host.SpaceEngineers.Sim</AssemblyName>
         <Platforms>x64</Platforms>
 
+        <!-- The game's assemblies were built against older System.Memory and its kin than the harness carries. -->
+        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+        <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+
         <!-- Picks DirectXTexNet's 64-bit native half, which the game's 64-bit assemblies need. -->
         <PlatformTarget>x64</PlatformTarget>
         <Configurations>Debug;Release</Configurations>
@@ -85,6 +89,20 @@
              it loads when it is first called and not before. -->
         <PackageReference Include="DirectXTexNet" Version="1.0.1" />
     </ItemGroup>
+
+    <!--
+        The game's protobuf model, which the game installs as it starts and the harness has to install itself, to measure
+        the game's binary serialization the way the game runs it. The package references only the attributes and the
+        serializer.
+    -->
+    <Target Name="ReferenceTheGamesProtobufModel" AfterTargets="SpaceEngineers">
+        <ItemGroup>
+            <Reference Include="ProtoBuf.Net">
+                <HintPath>$(SpaceEngineersBinPath)\ProtoBuf.Net.dll</HintPath>
+                <Private>true</Private>
+            </Reference>
+        </ItemGroup>
+    </Target>
 
     <!--
         The mod itself: core, the screens, the world layer and the session, as one assembly.

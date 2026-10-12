@@ -114,6 +114,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Show();
         }
 
+        /// <summary>Raised when the unit is chosen, with whether it is seconds.</summary>
+        public event Action<bool> Switched;
+
         /// <summary>Raised when Enter is pressed in the box.</summary>
         public event Action Submitted;
 
@@ -197,6 +200,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _box.SelectAll();
             Show();
+
+            if (Switched != null)
+                Switched(seconds);
         }
 
         /// <summary>Sets the box, the choice of unit and the lengths to pick for <paramref name="seconds" /> or ticks.</summary>

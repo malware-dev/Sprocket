@@ -10,7 +10,7 @@ To add one, press `+ trigger` under `Triggers` on the ![](mark:logic-system) [lo
 - Blocks reaching a state, such as a door being closed. With several blocks, `any one` starts it when the first gets there, and `all of them` when the last one does.
 - A set time passing, again and again, such as every minute.
 
-Where the game reports a change, such as a door closing or a block being switched on, the trigger starts at once. For other changes, such as a room's air filling or emptying, the trigger checks the block itself, often enough to catch it. A trigger that starts on a set time chooses that time under `How often`, in seconds or in ticks, sixty to a second. Pressing the time on its row opens the same choice beside it, and the time changes as that closes; Escape leaves it as it was.
+Where the game reports a change, such as a door closing or a block being switched on, the trigger starts at once. For other changes, such as a room's air filling or emptying, the trigger checks the block itself, often enough to catch it. A trigger that starts on a set time chooses that time under `How often`, in seconds or in ticks, sixty to a second. A new one starts at a second, in whichever unit was chosen last. Pressing the time on its row opens the same choice beside it, and the time changes as that closes; Escape leaves it as it was.
 
 ## What it does
 

@@ -45,12 +45,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <summary>Whether a close is coming.</summary>
         public bool Waiting => _shift.Listed;
 
+        /// <summary>The tick a close is coming on, or -1 where none is.</summary>
+        public int ClosesAt => _shift.Listed ? _shift.At : -1;
+
         /// <summary>Closes the door <paramref name="seconds" /> after it finishes opening, counting from now where it is open already.</summary>
         public void Set(int seconds)
         {
+            Set(seconds, -1);
+        }
+
+        /// <summary>
+        /// Closes the door <paramref name="seconds" /> after it finishes opening; where it is open already, on the tick
+        /// <paramref name="due" /> names, the close a saved world was waiting for, or counting from now where that is -1.
+        /// </summary>
+        public void Set(int seconds, int due)
+        {
             _ticks = seconds * CloseDelay.TicksPerSecond;
             _rota.Leave(_shift);
-            if (_door.Status == DoorStatus.Open)
+            if (_door.Status != DoorStatus.Open)
+                return;
+
+            if (due >= 0)
+                _rota.At(_shift, due);
+            else
                 Opened(_door);
         }
 
