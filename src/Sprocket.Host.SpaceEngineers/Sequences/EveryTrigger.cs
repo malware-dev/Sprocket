@@ -12,11 +12,21 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class EveryTrigger : Trigger
     {
-        public EveryTrigger(int intervalTicks)
+        /// <summary>A trigger every <paramref name="intervalTicks" /> ticks.</summary>
+        public EveryTrigger(int intervalTicks) : this(Duration.OfTicks(intervalTicks))
         {
-            IntervalTicks = intervalTicks;
         }
 
-        public int IntervalTicks { get; set; }
+        /// <summary>A trigger every <paramref name="interval" />.</summary>
+        public EveryTrigger(Duration interval)
+        {
+            Interval = interval;
+        }
+
+        /// <summary>How long between one start and the next, as the script writes it.</summary>
+        public Duration Interval { get; set; }
+
+        /// <summary>How long between one start and the next, in ticks.</summary>
+        public int IntervalTicks => Interval.Ticks;
     }
 }

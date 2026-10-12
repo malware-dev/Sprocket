@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                return "Every " + TimeText.Rate(every.IntervalTicks);
+                return "Every " + TimeText.Rate(every.Interval);
 
             // A required trigger that names nothing: whatever answers it is on the ship's toolbars
             // and not in the system, so there is nothing to name and the line says that.
@@ -392,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             var wait = step as Wait;
             if (wait != null)
-                return "wait " + TimeText.Duration(wait.Ticks);
+                return "wait " + TimeText.Duration(wait.Length);
 
             var run = step as SpaceEngineers.Sequences.Run;
             if (run != null)

@@ -86,15 +86,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>What a slot of a trigger reads as.</summary>
         /// <remarks>
-        /// A duration in a trigger is a rate, and rates are said in ticks. Seconds would be a promise
-        /// the simulation does not keep - it sags under load, and a repeat that claimed seconds would
-        /// drift exactly when the machine matters most.
+        /// A duration in a trigger is a rate, said in the unit the program writes it in.
         /// </remarks>
         public static string InTrigger(GridWorld world, SentenceSlot slot)
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Rate(duration.Ticks);
+                return TimeText.Rate(duration.Length);
 
             return Of(world, slot);
         }
@@ -215,13 +213,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>What a slot of a step reads as.</summary>
         /// <remarks>
-        /// A duration is said in the unit it was written in, which is ticks.
+        /// A duration is said in the unit it was written in.
         /// </remarks>
         public static string InStep(GridWorld world, SentenceSlot slot)
         {
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Duration(duration.Ticks);
+                return TimeText.Duration(duration.Length);
 
             return Of(world, slot);
         }
@@ -460,7 +458,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var duration = slot as DurationSlot;
             if (duration != null)
-                return TimeText.Duration(duration.Ticks);
+                return TimeText.Duration(duration.Length);
 
             var given = slot as ArgumentsSlot;
             if (given != null)

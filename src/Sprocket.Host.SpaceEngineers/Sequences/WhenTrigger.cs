@@ -47,8 +47,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What the value is given, for a function, in the order it declares its parameters.</summary>
         public IList<Literal> Arguments => _arguments;
 
+        /// <summary>How often the blocks are looked at, as the script writes it, or no length where the program leaves it to the default.</summary>
+        public Duration Interval { get; set; }
+
         /// <summary>How often the blocks are looked at, in ticks, or 0 where the program leaves it to the default.</summary>
-        public int IntervalTicks { get; set; }
+        public int IntervalTicks => Interval.Ticks;
 
         /// <summary>The namespace the member is qualified by: <c>ext</c> for Sprocket's own, or empty for one of the block's.</summary>
         /// <remarks>Kept as the program says it, so a member added by something this host does not have is never taken for one it does.</remarks>

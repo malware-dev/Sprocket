@@ -644,14 +644,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var every = trigger as EveryTrigger;
             var when = trigger as WhenTrigger;
             if (every != null)
-                copy = new EveryTrigger(every.IntervalTicks);
+                copy = new EveryTrigger(every.Interval);
             else if (when != null)
             {
                 var made = new WhenTrigger(when.EventId);
                 made.Quantifier = when.Quantifier;
                 made.Relation = when.Relation;
                 made.Value = when.Value;
-                made.IntervalTicks = when.IntervalTicks;
+                made.Interval = when.Interval;
                 made.Provider = when.Provider;
                 for (var i = 0; i < when.Arguments.Count; i++)
                     made.Arguments.Add(when.Arguments[i]);

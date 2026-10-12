@@ -1385,7 +1385,7 @@ public class AirlockTests
         var a = Build();
         var system = a.Automation.Systems[0];
 
-        var on = new WhenTrigger("room-status") { Value = Literal.Name("full"), IntervalTicks = 30 };
+        var on = new WhenTrigger("room-status") { Value = Literal.Name("full"), Interval = Duration.OfTicks(30) };
         on.Sources.Add(a.Ref(a.Seen(a.Vent)));
         on.Does = Do("close", a.Ref(a.Seen(a.Inner)));
         system.AddTrigger(on);

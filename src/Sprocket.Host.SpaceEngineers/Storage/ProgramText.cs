@@ -1737,7 +1737,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Says(Said(when.Relation));
                 Written(pen, when.Value);
                 if (when.IntervalTicks > 0)
-                    pen.Says(Keyword.Every).Ticks(when.IntervalTicks);
+                    Lasting(pen.Says(Keyword.Every), when.Interval);
 
                 pen.Says(Keyword.Then);
                 WriteDoes(pen, trigger.Does);
@@ -1748,7 +1748,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var every = trigger as EveryTrigger;
             if (every != null)
             {
-                pen.Start(Keyword.Every).Ticks(every.IntervalTicks);
+                Lasting(pen.Start(Keyword.Every), every.Interval);
                 WriteDoes(pen, trigger.Does);
                 pen.End();
             }
@@ -1951,14 +1951,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var at = 4;
             if (statement.Says(at, Keyword.Every))
             {
-                int ticks;
-                if (!Ticks(statement.ValueAt(at + 1), 1, out ticks))
+                Duration interval;
+                if (!Lasting(statement.ValueAt(at + 1), 1, out interval))
                 {
                     trouble.Say(statement, "expected a duration after 'every', like 30t.");
                     return null;
                 }
 
-                when.IntervalTicks = ticks;
+                when.Interval = interval;
                 at += 2;
             }
 
@@ -1973,32 +1973,42 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         static Trigger Every(Statement statement, Trouble trouble)
         {
-            int ticks;
-            if (!Ticks(statement.ValueAt(0), 1, out ticks))
+            Duration interval;
+            if (!Lasting(statement.ValueAt(0), 1, out interval))
             {
                 trouble.Say(statement, "expected a duration after 'every', like 600t.");
                 return null;
             }
 
-            return new EveryTrigger(ticks);
+            return new EveryTrigger(interval);
         }
 
         /// <summary>
-        /// A duration as a count of ticks, or false where it was no length of time that can be kept.
+        /// A duration as it was written, or false where it was no length of time that can be kept.
         /// </summary>
         /// <remarks>
         /// The text reads into a long and ticks are counted in an int, so the bound is the language's
         /// as much as the reader's: <c>every 4294967296t</c> is not an interval, it is a number that
-        /// wraps onto one, and <c>every -600t</c> is not a rate at all.
+        /// wraps onto one, and <c>every -600t</c> is not a rate at all. Seconds are held to the same
+        /// bound by the ticks they come to.
         /// </remarks>
-        static bool Ticks(Value value, long least, out int ticks)
+        static bool Lasting(Value value, long least, out Duration length)
         {
-            ticks = 0;
+            length = default(Duration);
             if (value.Form != ValueForm.Duration || value.Whole < least || value.Whole > int.MaxValue)
                 return false;
 
-            ticks = (int)value.Whole;
+            length = value.Word == Parser.Seconds ? Duration.OfSeconds(value.Real) : Duration.OfTicks((int)value.Whole);
             return true;
+        }
+
+        /// <summary>Writes <paramref name="length" /> as the script had it: in seconds, or in ticks.</summary>
+        static void Lasting(Pen pen, Duration length)
+        {
+            if (length.InSeconds)
+                pen.Seconds(length.Seconds);
+            else
+                pen.Ticks(length.Ticks);
         }
 
         /// <summary>A step: an action on some parts, a value set on them, a sequence run or stopped, an await, or a length of time.</summary>
@@ -2057,7 +2067,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var wait = step as Wait;
             if (wait != null)
             {
-                pen.Ticks(wait.Ticks);
+                Lasting(pen, wait.Length);
                 return;
             }
 
@@ -2077,9 +2087,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (statement.Key == Keyword.Wait)
             {
-                int ticks;
-                if (Ticks(statement.ValueAt(0), 0, out ticks))
-                    return Ends(statement, 1, trouble) ? Noted(new Wait(ticks), statement) : null;
+                Duration length;
+                if (Lasting(statement.ValueAt(0), 0, out length))
+                    return Ends(statement, 1, trouble) ? Noted(new Wait(length), statement) : null;
 
                 trouble.Say(statement, "expected a duration after 'wait', like 60t.");
                 return null;
@@ -2381,6 +2391,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (value.Form == ValueForm.Integer)
                 return value.Whole.ToString(CultureInfo.InvariantCulture);
+
+            if (value.Form == ValueForm.Duration && value.Word == Parser.Seconds)
+                return value.Real.ToString("R", CultureInfo.InvariantCulture) + "s";
 
             if (value.Form == ValueForm.Duration)
                 return value.Whole.ToString(CultureInfo.InvariantCulture) + "t";

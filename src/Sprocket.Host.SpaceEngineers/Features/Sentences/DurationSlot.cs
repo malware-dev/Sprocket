@@ -1,23 +1,19 @@
 using Lumel.Input;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
-    /// <summary>
-    /// A length of time, in ticks.
-    /// </summary>
-    /// <remarks>
-    /// Ticks, because that is what the runtime counts. Nobody says "wait three hundred ticks", so a
-    /// target says it in whatever units its language says time in - and which units those are, and
-    /// where the plural falls, is not the same question twice.
-    /// </remarks>
+    /// <summary>A length of time, in the unit the program writes it in.</summary>
     public sealed class DurationSlot : SentenceSlot
     {
-        public DurationSlot(int ticks, ICommand opens) : base(opens)
+        /// <summary>A part saying <paramref name="length" />, pressed by <paramref name="opens" />.</summary>
+        public DurationSlot(Duration length, ICommand opens) : base(opens)
         {
-            Ticks = ticks;
+            Length = length;
         }
 
-        public int Ticks { get; private set; }
+        /// <summary>The length it says.</summary>
+        public Duration Length { get; private set; }
 
         /// <summary>Never. A duration always has a value, even if it is none.</summary>
         public override bool IsEmpty => false;

@@ -11,10 +11,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class SetCadence : SystemEdit
     {
         readonly EveryTrigger _trigger;
-        readonly int _was;
-        readonly int _now;
+        readonly Duration _was;
+        readonly Duration _now;
 
-        public SetCadence(EveryTrigger trigger, int was, int now)
+        /// <summary>The repeat <paramref name="trigger" /> made to come round every <paramref name="now" /> from every <paramref name="was" />.</summary>
+        public SetCadence(EveryTrigger trigger, Duration was, Duration now)
         {
             _trigger = trigger;
             _was = was;
@@ -30,25 +31,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
-            return _trigger.IntervalTicks == _now && Holds(system, _trigger, null, null);
+            return _trigger.Interval == _now && Holds(system, _trigger, null, null);
         }
 
         /// <inheritdoc />
         public override bool Redoable(AutomationSystem system)
         {
-            return _trigger.IntervalTicks == _was && Holds(system, _trigger, null, null);
+            return _trigger.Interval == _was && Holds(system, _trigger, null, null);
         }
 
         /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
-            _trigger.IntervalTicks = _now;
+            _trigger.Interval = _now;
         }
 
         /// <inheritdoc />
         public override void Undo(AutomationSystem system)
         {
-            _trigger.IntervalTicks = _was;
+            _trigger.Interval = _was;
         }
     }
 }

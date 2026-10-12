@@ -131,7 +131,7 @@ public class DuplicateTests
 
         ((Act)copy.Steps[0]).Targets[0] = "outer";
         ((Act)copy.Steps[0]).ActionId = "open";
-        ((Wait)copy.Steps[2]).Ticks = 1;
+        ((Wait)copy.Steps[2]).Length = Duration.OfTicks(1);
         ((Run)copy.Steps[4]).Number = 9;
         copy.Steps.RemoveAt(1);
 

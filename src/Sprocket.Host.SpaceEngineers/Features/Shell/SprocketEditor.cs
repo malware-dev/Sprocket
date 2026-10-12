@@ -1636,7 +1636,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var timer = new TimerPage(this, every.IntervalTicks, aim, delegate(int ticks)
             {
-                every.IntervalTicks = ticks;
+                every.Interval = Duration.OfTicks(ticks);
                 Aimed(system, every, aim, origin, true, null);
             });
 
@@ -2575,11 +2575,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var every = trigger as EveryTrigger;
             if (every != null)
             {
-                var rate = every.IntervalTicks;
-                var timer = new TimerPage(this, rate, aim, delegate(int ticks)
+                var rate = every.Interval;
+                var timer = new TimerPage(this, rate.Ticks, aim, delegate(int ticks)
                 {
                     Aimed(system, every, aim, origin, false,
-                        ticks == rate ? null : new SetCadence(every, rate, ticks));
+                        ticks == rate.Ticks ? null : new SetCadence(every, rate, Duration.OfTicks(ticks)));
                 });
 
                 Push(timer);

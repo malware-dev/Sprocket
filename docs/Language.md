@@ -43,7 +43,7 @@ An annotation describes the statement below it. An annotation with nothing under
 | Text | `"Airlock Inner Door"` | Write `""` for a quote within one: `"the ""inner"" door"` |
 | Integer | `60`, `74857693847562934` | Whole, 64-bit |
 | Real | `0.25`, `1E-05` | A dot or an exponent makes a real |
-| Duration | `600t` | A number and its unit as one token. `t` is ticks |
+| Duration | `600t`, `2s`, `1.5s` | A number and its unit as one token. `t` is ticks, `s` is seconds of sixty ticks each. Seconds may have a fraction, and count as the nearest whole tick: `0.25s` is 15 ticks, `0.01s` is 1 |
 | Flag | `on`, `off` | |
 | Color | `#FF8800`, `#FF8800CC` | |
 | Vector | `(3 0 -2)` | Three integers or reals, separated by spaces |

@@ -580,7 +580,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Ticks, Changes(Cmd.StepSlot, delegate { EditWait(wait); })));
+                row.Slots.Add(new DurationSlot(wait.Length, Changes(Cmd.StepSlot, delegate { EditWait(wait); })));
                 return;
             }
 
@@ -883,9 +883,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddWait(int at)
         {
             var origin = Editor.Depth;
-            Editor.Push(WaitPage(delegate(int ticks)
+            Editor.Push(WaitPage(delegate(Duration length)
             {
-                Editor.Do(_sequence, new AddStep(Change.AddWait, at, new Wait(ticks)));
+                Editor.Do(_sequence, new AddStep(Change.AddWait, at, new Wait(length)));
                 Editor.UnwindTo(origin);
             }));
         }
@@ -941,18 +941,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return page;
         }
 
-        ChoicePage WaitPage(Action<int> chosen)
+        /// <summary>The question how long a wait is: a few lengths in seconds, as they are named, or a number of ticks typed.</summary>
+        ChoicePage WaitPage(Action<Duration> chosen)
         {
             var page = new ChoicePage(Editor, Editor.Texts.SequenceWaitQuestion);
             for (var i = 0; i < WaitPresets.Length; i++)
             {
                 var ticks = WaitPresets[i];
-                page.Add(TimeText.WaitChoice(Editor.Texts, ticks), false, delegate { chosen(ticks); });
+                page.Add(TimeText.WaitChoice(Editor.Texts, ticks), false,
+                    delegate { chosen(Duration.OfSeconds((double)ticks / Duration.PerSecond)); });
             }
 
             page.TypedAbout = Editor.Texts.SequenceWaitTypedAbout;
             page.TypeFirst = Editor.Texts.SequenceWaitTypeFirst;
-            page.AddNumber(Editor.Texts.TimeOtherWait, Editor.Texts.TimeUse, LongestWait, MostTicks, chosen);
+            page.AddNumber(Editor.Texts.TimeOtherWait, Editor.Texts.TimeUse, LongestWait, MostTicks,
+                delegate(int ticks) { chosen(Duration.OfTicks(ticks)); });
 
             return page;
         }
@@ -960,9 +963,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void EditWait(Wait step)
         {
             var origin = Editor.Depth;
-            Editor.Push(WaitPage(delegate(int ticks)
+            Editor.Push(WaitPage(delegate(Duration length)
             {
-                Editor.Do(_sequence, new SetWait(_sequence.Steps.IndexOf(step), step.Ticks, ticks));
+                Editor.Do(_sequence, new SetWait(_sequence.Steps.IndexOf(step), step.Length, length));
                 Editor.UnwindTo(origin);
             }));
         }

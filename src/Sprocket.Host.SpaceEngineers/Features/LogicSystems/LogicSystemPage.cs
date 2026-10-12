@@ -730,7 +730,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.IntervalTicks, Starts(trigger, Opening.Nothing)));
+                row.Starts.Add(new DurationSlot(every.Interval, Starts(trigger, Opening.Nothing)));
 
             Doing(row, trigger);
 

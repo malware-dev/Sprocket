@@ -217,6 +217,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>A number of seconds, written as a real reads back, with its unit: <c>1.5s</c>.</summary>
+        public Pen Seconds(double seconds)
+        {
+            Space();
+            _text.Append(seconds.ToString("R", CultureInfo.InvariantCulture));
+            _text.Append('s');
+            return this;
+        }
+
         /// <summary>
         /// A real, written so it reads back as the same double.
         /// </summary>

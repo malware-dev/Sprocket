@@ -269,16 +269,19 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// A length of time is a number and its unit as one word, and ticks are the only unit.
+    /// A length of time is a number and its unit as one word, in ticks or in seconds.
     /// </summary>
     /// <remarks>
-    /// Loud rather than lenient about the unit: <c>600s</c> is somebody meaning seconds, and reading it as
-    /// 600 ticks would run their airlock ten times too fast.
+    /// Loud rather than lenient about the unit: <c>600m</c> is somebody meaning minutes, and reading it as anything else
+    /// would run their airlock at the wrong pace. Ticks are whole; seconds may have a fraction.
     /// </remarks>
     [Theory]
     [InlineData("wait 60t", "")]
-    [InlineData("wait 60s", "Line 5")]
+    [InlineData("wait 60s", "")]
+    [InlineData("wait 1.5s", "")]
     [InlineData("wait 60", "Line 5")]
+    [InlineData("wait 60m", "Line 5")]
+    [InlineData("wait 1.5t", "Line 5")]
     public void ADurationIsANumberAndItsUnit(string written, string trouble)
     {
         var after = new Automation();
@@ -286,6 +289,36 @@ public class ScriptTests
             Head + "Airlock {\n    sequence 1 {\n        " + written + "\n    }\n}\n", after);
 
         Assert.StartsWith(trouble, said);
+    }
+
+    /// <summary>A length in seconds lasts the nearest whole tick, and is written back as it was written.</summary>
+    [Theory]
+    [InlineData("wait 2s", 120)]
+    [InlineData("wait 1.5s", 90)]
+    [InlineData("wait 0.25s", 15)]
+    [InlineData("wait 0.01s", 1)]
+    [InlineData("wait 120t", 120)]
+    public void ALengthInSecondsIsKeptAndRounded(string written, int ticks)
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Head + "Airlock {\n    sequence 1 {\n        " + written + "\n    }\n}\n", after));
+
+        var wait = Assert.IsType<Wait>(after.Systems[0].Sequences[0].Steps[0]);
+        Assert.Equal(ticks, wait.Ticks);
+        Assert.Contains("\n        " + written + "\n", Save(after).Replace("\r\n", "\n"));
+    }
+
+    /// <summary>A repeat takes seconds as a wait does, and keeps them.</summary>
+    [Fact]
+    public void ARepeatKeepsItsSeconds()
+    {
+        var text = Head + "Airlock {\n    every 10s run 1\n    sequence 1 {\n        wait 1t\n    }\n}\n";
+        var after = new Automation();
+        Assert.Equal("", Load(text, after));
+
+        var every = Assert.IsType<EveryTrigger>(after.Systems[0].Triggers[0]);
+        Assert.Equal(600, every.IntervalTicks);
+        Assert.Contains("every 10s run 1", Save(after));
     }
 
     [Fact]

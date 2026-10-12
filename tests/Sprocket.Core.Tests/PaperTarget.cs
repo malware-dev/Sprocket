@@ -160,7 +160,7 @@ static class PaperTarget
             return action.Action.Text;
 
         if (slot is DurationSlot duration)
-            return duration.Ticks + " ticks";
+            return duration.Length.Ticks + " ticks";
 
         if (slot is ArgumentsSlot arguments)
             return string.Join(", ", arguments.Arguments.Select(argument => argument.Said));

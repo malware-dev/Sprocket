@@ -17,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// </remarks>
     public sealed class Parser
     {
+        /// <summary>The word a duration in seconds carries, where one in ticks carries none.</summary>
+        public const string Seconds = "s";
+
         readonly Lexer _lexer;
         readonly Reading _reading = new Reading();
 
@@ -369,7 +372,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 case TokenKind.Duration:
                     Step();
-                    return new Value(ValueForm.Duration, null, token.Whole);
+                    return new Value(ValueForm.Duration, token.Text[0] == 's' ? Seconds : null, token.Whole, token.Real);
 
                 case TokenKind.Color:
                     Step();

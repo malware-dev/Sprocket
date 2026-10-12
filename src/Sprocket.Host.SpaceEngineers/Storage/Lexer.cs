@@ -333,7 +333,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!double.TryParse(body, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
                     return Bad(start, "expected a number, not '" + body + "'.");
 
-                return new Token(TokenKind.Real, start.Index, default(StringSegment), 0, value);
+                return Letter(_ptr.Char)
+                    ? Duration(start, 0, value, true)
+                    : new Token(TokenKind.Real, start.Index, default(StringSegment), 0, value);
             }
 
             long whole;
@@ -341,19 +343,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return Bad(start, "'" + body + "' is too large for a whole number.");
 
             return Letter(_ptr.Char)
-                ? Duration(start, whole)
+                ? Duration(start, whole, whole, false)
                 : new Token(TokenKind.Integer, start.Index, default(StringSegment), whole);
         }
 
         /// <summary>
-        /// A number that had a unit written against it, as ticks.
+        /// A number that had a unit written against it: ticks, or seconds counted as the nearest whole tick.
         /// </summary>
         /// <remarks>
-        /// Ticks are the only unit, so anything else is trouble rather than a number followed by a word:
-        /// <c>600s</c> is somebody meaning seconds, and reading it as 600 would run their airlock ten times
-        /// too fast.
+        /// Any other unit is trouble rather than a number followed by a word: <c>600m</c> is somebody meaning minutes, and
+        /// reading it as anything else would run their airlock at the wrong pace. The token's text is its unit, and its real
+        /// the number as written, so seconds are written back as they were.
         /// </remarks>
-        Token Duration(TextPtr start, long ticks)
+        Token Duration(TextPtr start, long whole, double number, bool real)
         {
             var from = _ptr;
 
@@ -365,10 +367,21 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _ptr = ptr;
 
             var unit = Since(from);
-            if (unit.Length != 1 || unit[0] != 't')
-                return Bad(start, "expected a duration like 600t, not '" + Since(start) + "'.");
+            if (unit.Length == 1 && unit[0] == 't')
+            {
+                return real
+                    ? Bad(start, "expected a whole number of ticks, not '" + Since(start) + "'.")
+                    : new Token(TokenKind.Duration, start.Index, unit, whole, number);
+            }
 
-            return new Token(TokenKind.Duration, start.Index, default(StringSegment), ticks);
+            if (unit.Length != 1 || unit[0] != 's')
+                return Bad(start, "expected a duration like 600t or 2s, not '" + Since(start) + "'.");
+
+            var ticks = number * Sequences.Duration.PerSecond;
+            if (ticks > int.MaxValue || ticks < int.MinValue)
+                return Bad(start, "'" + Since(start) + "' is too long a time.");
+
+            return new Token(TokenKind.Duration, start.Index, unit, Sequences.Duration.TicksIn(number), number);
         }
 
         int Run()

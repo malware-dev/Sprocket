@@ -1,13 +1,15 @@
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
+    /// <summary>How long a wait step waits.</summary>
     public sealed class SetWait : SequenceEdit
     {
         readonly int _index;
-        readonly int _was;
-        readonly int _now;
+        readonly Duration _was;
+        readonly Duration _now;
 
-        public SetWait(int index, int was, int now)
+        /// <summary>The wait at <paramref name="index" /> made <paramref name="now" /> long from <paramref name="was" />.</summary>
+        public SetWait(int index, Duration was, Duration now)
         {
             _index = index;
             _was = was;
@@ -32,11 +34,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Put(sequence, _was);
         }
 
-        void Put(Sequence sequence, int ticks)
+        void Put(Sequence sequence, Duration length)
         {
             var wait = sequence.Steps[_index] as Wait;
             if (wait != null)
-                wait.Ticks = ticks;
+                wait.Length = length;
         }
     }
 }

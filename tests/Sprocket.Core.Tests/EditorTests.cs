@@ -1897,7 +1897,7 @@ public class EditorTests
 
         var step = Assert.Single(editor.StepRows());
         Assert.Equal(StepKind.Wait, step.Kind);
-        Assert.Equal(300, Assert.IsType<DurationSlot>(step.Slots[0]).Ticks);
+        Assert.Equal(300, Assert.IsType<DurationSlot>(step.Slots[0]).Length.Ticks);
     }
 
     /// <summary>

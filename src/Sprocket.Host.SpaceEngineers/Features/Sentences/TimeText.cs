@@ -8,19 +8,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// How long, and how long ago, in the units a person would say them in.
     /// </summary>
     /// <remarks>
-    /// Core counts in ticks and only in ticks, which is the one honest unit it has: the simulation
-    /// sags under load, so anything promising seconds would drift exactly when the machine matters
-    /// most. Saying that in seconds and minutes is this target choosing readability over precision,
-    /// which is the right trade for "recently, or ages ago" and the wrong one for deciding when to
-    /// act - and nothing decides when to act from these. A length in ticks is the program's own,
-    /// so it stays in the program's words; how long ago is <see cref="Ago" />'s.
+    /// The runtime counts in ticks, and a second is sixty of them whatever the simulation's speed. A length the program
+    /// writes is the program's own, so it is said in the unit the program writes it in; how long ago is
+    /// <see cref="Ago" />'s, in seconds and minutes, which is readability over precision and right for "recently, or ages
+    /// ago".
     /// </remarks>
     public static class TimeText
     {
-        /// <summary>A length of time, in ticks, which is the only unit a program writes one in.</summary>
+        /// <summary>A length of time in ticks.</summary>
         public static string Duration(int ticks)
         {
             return ticks == 1 ? "1 tick" : ticks + " ticks";
+        }
+
+        /// <summary>A length of time in the unit the program writes it in: seconds, or ticks.</summary>
+        public static string Duration(SpaceEngineers.Sequences.Duration length)
+        {
+            if (!length.InSeconds)
+                return Duration(length.Ticks);
+
+            var seconds = length.Seconds;
+            return seconds == 1 ? "1 second" : seconds.ToString("R", CultureInfo.InvariantCulture) + " seconds";
         }
 
         /// <summary>One of the lengths offered for a wait, said aloud in <paramref name="texts" /> and then in ticks.</summary>
@@ -33,9 +41,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
+        /// <summary>How often, after "every", in ticks.</summary>
         public static string Rate(int ticks)
         {
             return ticks == 1 ? "tick" : ticks + " ticks";
+        }
+
+        /// <summary>How often, after "every", in the unit the program writes it in: seconds, or ticks.</summary>
+        public static string Rate(SpaceEngineers.Sequences.Duration interval)
+        {
+            if (!interval.InSeconds)
+                return Rate(interval.Ticks);
+
+            var seconds = interval.Seconds;
+            return seconds == 1 ? "second" : seconds.ToString("R", CultureInfo.InvariantCulture) + " seconds";
         }
 
         /// <summary>A length of time as it would be said aloud, for a choice that also gives its ticks.</summary>
