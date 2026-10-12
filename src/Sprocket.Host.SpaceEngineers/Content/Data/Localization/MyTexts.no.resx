@@ -587,12 +587,6 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Pick.HowOften" xml:space="preserve">
     <value>Hvor ofte</value>
   </data>
-  <data name="Sprocket.Pick.EveryTick" xml:space="preserve">
-    <value>hvert tikk</value>
-  </data>
-  <data name="Sprocket.Pick.Rate" xml:space="preserve">
-    <value>{name} - hvert {ticks}. tikk</value>
-  </data>
 
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>Navnet på denne installasjonen.</value>
@@ -1120,29 +1114,11 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Category.Other" xml:space="preserve">
     <value>Annet</value>
   </data>
-  <data name="Sprocket.Rate.Fast" xml:space="preserve">
-    <value>rask</value>
-  </data>
-  <data name="Sprocket.Rate.Steady" xml:space="preserve">
-    <value>jevn</value>
-  </data>
-  <data name="Sprocket.Rate.Slow" xml:space="preserve">
-    <value>langsom</value>
-  </data>
-  <data name="Sprocket.Rate.VerySlow" xml:space="preserve">
-    <value>svært langsom</value>
-  </data>
-  <data name="Sprocket.Rate.Occasional" xml:space="preserve">
-    <value>av og til</value>
-  </data>
-  <data name="Sprocket.Rate.Rare" xml:space="preserve">
-    <value>sjelden</value>
-  </data>
   <data name="Sprocket.Rate.EveryTickCost" xml:space="preserve">
-    <value>Kjører seksti ganger i sekundet. Tungt for serveren - bare verdt det om ingenting langsommere holder.</value>
+    <value>Seksti ganger i sekundet er kostbart; bare verdt det der ingenting langsommere holder.</value>
   </data>
   <data name="Sprocket.Rate.FastCost" xml:space="preserve">
-    <value>Seks ganger i sekundet. Fortsatt kostbart; prøv noe langsommere først.</value>
+    <value>Seks ganger i sekundet er fortsatt kostbart; prøv noe langsommere først.</value>
   </data>
   <data name="Sprocket.Wait.Shorter" xml:space="preserve">
     <value>Kortere</value>

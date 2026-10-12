@@ -1832,7 +1832,7 @@ public class EditorTests
 
         editor.NewSystem("Airlock");
         editor.PressStart("every");
-        editor.PressChoice("steady - every 100 ticks");
+        editor.TimerRate().Give("100", true);
         editor.PressPrimary();
 
         // The view must survive, or its controls are made again and the field loses focus and the caret mid-word.

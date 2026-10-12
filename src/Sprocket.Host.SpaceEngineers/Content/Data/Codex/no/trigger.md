@@ -2,7 +2,7 @@
 
 En utløser sier når en ![](mark:sequence) [sekvens](#sequence) kjører. Den er én linje: når noe skjer, gjør én ting. For eksempel: når knappen til luftslusen trykkes, kjør *Sluse ut*.
 
-For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til ![](mark:logic-system) [logikksystemet](#logic-system), og velger `når`, eller `hver` for en som starter på en fast tid. Trykker du en del av en utløser, åpnes [velgeren](#picking) på den delen, så du kan endre den.
+For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til ![](mark:logic-system) [logikksystemet](#logic-system), og velger `når`, eller `hver` for en som starter på en fast tid. Trykker du en del av en utløser, kan du endre den: tiden åpnes ved siden av den, og enhver annen del åpner [velgeren](#picking) på den delen.
 
 ## Hva som starter den
 
@@ -10,7 +10,7 @@ For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til !
 - Blokker som kommer i en tilstand, som at en dør er lukket. Med flere blokker starter `hvilken som helst` den når den første kommer dit, og `alle sammen` når den siste gjør det.
 - En fastsatt tid som går, om og om igjen, som hvert minutt.
 
-Der spillet melder en endring, som at en dør lukker seg eller en blokk slås på, starter utløseren med én gang. For andre endringer, som at lufta i et rom fylles eller tømmes, sjekker utløseren selve blokken, ofte nok til å fange den opp. En utløser som starter på en fast tid, velger den tiden under `Hvor ofte`.
+Der spillet melder en endring, som at en dør lukker seg eller en blokk slås på, starter utløseren med én gang. For andre endringer, som at lufta i et rom fylles eller tømmes, sjekker utløseren selve blokken, ofte nok til å fange den opp. En utløser som starter på en fast tid, velger den tiden under `Hvor ofte`, i sekunder eller i tikk, seksti på et sekund. Trykker du tiden på raden, åpnes det samme valget ved siden av den, og tiden endres når det lukkes; Escape lar den være som den var.
 
 ## Hva den gjør
 

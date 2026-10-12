@@ -771,14 +771,6 @@ Renaming it here renames the grid.</value>
     <value>How often</value>
     <comment>Title of the column of rates a timer fires at.</comment>
   </data>
-  <data name="Sprocket.Pick.EveryTick" xml:space="preserve">
-    <value>every tick</value>
-    <comment>The fastest rate a timer fires at.</comment>
-  </data>
-  <data name="Sprocket.Pick.Rate" xml:space="preserve">
-    <value>{name} - every {ticks} ticks</value>
-    <comment>A rate a timer fires at. {name} is its word, such as steady; {ticks} how many ticks apart.</comment>
-  </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>This installation's name.</value>
     <comment>Note on an installation's name at the head of its screen.</comment>
@@ -1471,37 +1463,13 @@ Renaming it here renames the grid.</value>
     <value>Other</value>
     <comment>Heading over a group of members.</comment>
   </data>
-  <data name="Sprocket.Rate.Fast" xml:space="preserve">
-    <value>fast</value>
-    <comment>Name of the 10-tick rate.</comment>
-  </data>
-  <data name="Sprocket.Rate.Steady" xml:space="preserve">
-    <value>steady</value>
-    <comment>Name of the 100-tick rate.</comment>
-  </data>
-  <data name="Sprocket.Rate.Slow" xml:space="preserve">
-    <value>slow</value>
-    <comment>Name of the 300-tick rate.</comment>
-  </data>
-  <data name="Sprocket.Rate.VerySlow" xml:space="preserve">
-    <value>very slow</value>
-    <comment>Name of the 600-tick rate.</comment>
-  </data>
-  <data name="Sprocket.Rate.Occasional" xml:space="preserve">
-    <value>occasional</value>
-    <comment>Name of the 1800-tick rate.</comment>
-  </data>
-  <data name="Sprocket.Rate.Rare" xml:space="preserve">
-    <value>rare</value>
-    <comment>Name of the 3600-tick rate.</comment>
-  </data>
   <data name="Sprocket.Rate.EveryTickCost" xml:space="preserve">
-    <value>Runs sixty times a second. Hard on the server - only worth it if nothing slower will do.</value>
-    <comment>Note on the every-tick rate.</comment>
+    <value>Sixty times a second is costly; worth it only where nothing slower will do.</value>
+    <comment>Caution under a rate of one tick.</comment>
   </data>
   <data name="Sprocket.Rate.FastCost" xml:space="preserve">
-    <value>Six times a second. Still costly; try something slower first.</value>
-    <comment>Note on the 10-tick rate.</comment>
+    <value>Six times a second is still costly; try something slower first.</value>
+    <comment>Caution under a rate of two to ten ticks.</comment>
   </data>
   <data name="Sprocket.Wait.Shorter" xml:space="preserve">
     <value>Shorter</value>

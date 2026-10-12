@@ -10,7 +10,6 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -48,10 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         string _madeName;
         int _madeEdits;
         Keyed<object, StepRow> _rows;
-        DurationPanel _lengths;
-        Popup _hanging;
-        Wait _lengthOf;
-        bool _added;
+        LengthQuestion _length;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
         public SequencePage(SprocketEditor editor, Sequence sequence) : base(editor)
@@ -63,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public int SequenceId => _sequence.Id;
 
         /// <summary>The panel a wait's length is being given in, or null while none is open.</summary>
-        public DurationPanel Lengths => _lengths;
+        public DurationPanel Lengths => _length != null && _length.IsOpen ? _length.Panel : null;
 
         /// <summary>A named sequence is called by its name, and an unnamed one by its number.</summary>
         /// <remarks>
@@ -310,32 +306,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _bar.Show(texts);
             _steps.Slide();
 
-            if (_lengths != null)
-                Hang();
+            if (_length != null)
+                _length.Hang();
         }
 
-        /// <summary>Hangs the open panel from the length's chip, once its row shows the chip on a screen.</summary>
-        /// <remarks>The panel is the page's whether or not it hangs anywhere, so the editor gives a length the same way without a screen.</remarks>
-        void Hang()
+        /// <summary>The chip of <paramref name="wait" />'s length, or null where its row does not show one.</summary>
+        Element LengthChip(Wait wait)
         {
-            if (_hanging.IsOpen || _rows == null || !_keys.Contains(_lengthOf))
-                return;
+            var row = _rows == null || !_keys.Contains(wait) ? null : _rows[wait];
+            if (row == null)
+                return null;
 
-            var row = _rows[_lengthOf];
             for (var i = 0; i < row.Slots.Count; i++)
             {
-                var chip = row.ChipOf(row.Slots[i]);
-                if (!(row.Slots[i] is DurationSlot) || chip == null || chip.Windows == null)
-                    continue;
-
-                _hanging.Anchor = chip;
-                _hanging.Open();
-                if (Editor.Input != null)
-                    Editor.Input.Focus(_lengths.Box);
-
-                _lengths.Box.SelectAll();
-                return;
+                if (row.Slots[i] is DurationSlot)
+                    return row.ChipOf(row.Slots[i]);
             }
+
+            return null;
         }
 
         /// <summary>Puts a row in place for each step with the parts of its sentence, and offers what may be done now.</summary>
@@ -974,33 +962,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// </remarks>
         void Open(Wait wait, bool added)
         {
-            if (_lengths != null)
-                Finish(false);
+            if (_length != null)
+                _length.Finish(false);
 
-            var panel = new DurationPanel(Editor.Texts, Editor.Input, wait.Length);
-            panel.Submitted += delegate { Finish(false); };
-            panel.Cancelled += delegate { Finish(true); };
-
-            _hanging = new Popup { Style = Styles.List, Flush = true, Content = panel };
-            _hanging.Closed += delegate { Finish(false); };
-
-            _lengths = panel;
-            _lengthOf = wait;
-            _added = added;
-            Hang();
-        }
-
-        /// <summary>Puts the panel away and gives the wait what it says, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
-        /// <remarks>Once, however it closes: putting it away here closes the window, which comes back here and finds nothing open.</remarks>
-        void Finish(bool cancelled)
-        {
-            var panel = _lengths;
-            if (panel == null)
-                return;
-
-            _lengths = null;
-            _hanging.Close();
-            Closed(_lengthOf, panel.Length, _added, cancelled);
+            _length = new LengthQuestion(Editor, wait.Length, false, delegate { return LengthChip(wait); },
+                delegate(Duration? length, bool cancelled) { Closed(wait, length, added, cancelled); });
+            _length.Hang();
         }
 
         /// <summary>Gives <paramref name="wait" /> the <paramref name="length" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>

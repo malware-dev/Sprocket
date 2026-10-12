@@ -85,16 +85,19 @@ public class ChangingTests
         var screen = Screen.Fresh();
         screen.Editor.NewSystem("Housekeeping");
         screen.Editor.PressStart("every");
-        screen.Editor.PressChoice("steady - every 100 ticks");
+        screen.Editor.TimerRate().Give("100", true);
         screen.Editor.PressPrimary();
         screen.Editor.Back();
         screen.Run(2);
 
         Trigger was = System(screen).Triggers[0];
+        Assert.Equal(100, Assert.IsType<EveryTrigger>(was).IntervalTicks);
 
         screen.Editor.PressWhen(0);
-        screen.Editor.PressChoice("slow - every 300 ticks");
-        screen.Editor.PressPrimary();
+        screen.Run(2);
+        var rate = screen.Editor.RateLengths();
+        rate.Give("300", true);
+        rate.Box.Submit!.Execute();
         screen.Run(2);
 
         Assert.Same(was, System(screen).Triggers[0]);

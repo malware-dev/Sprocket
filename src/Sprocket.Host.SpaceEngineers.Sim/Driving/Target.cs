@@ -328,6 +328,27 @@ namespace Sprocket.Sim.Driving
         public static DurationPanel Lengths(this SprocketEditor editor) =>
             (editor.Current as SequencePage)?.Lengths ?? throw new InvalidOperationException($"no wait's length is being given on '{editor.Screen.Title()}'.");
 
+        /// <summary>The panel the rate is given in on the timer's picker the editor is on.</summary>
+        public static DurationPanel TimerRate(this SprocketEditor editor) =>
+            (editor.Current as TimerPage)?.Rate ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a timer's picker.");
+
+        /// <summary>The panel a timer's rate is being given in on the logic system's page the editor is on.</summary>
+        public static DurationPanel RateLengths(this SprocketEditor editor) =>
+            (editor.Current as LogicSystemPage)?.Rate ?? throw new InvalidOperationException($"no timer's rate is being given on '{editor.Screen.Title()}'.");
+
+        /// <summary>Types <paramref name="said" /> over the panel's number, pressing ticks or seconds first where the panel is in the other.</summary>
+        public static void Give(this DurationPanel panel, string said, bool ticks)
+        {
+            if (panel.InSeconds == ticks)
+            {
+                var unit = Within(panel).OfType<OptionRow>().Single(row => row.Text == (ticks ? "ticks" : "seconds"));
+                unit.Command!.Execute();
+            }
+
+            panel.Box.SelectAll();
+            panel.Box.Insert(said);
+        }
+
         /// <summary>Types <paramref name="said" /> over the length in the open panel, in its unit, and enters it.</summary>
         public static void GiveLength(this SprocketEditor editor, string said)
         {

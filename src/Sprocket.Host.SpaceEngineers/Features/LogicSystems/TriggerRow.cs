@@ -171,6 +171,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return Locked.Length == 0 ? null : Locked;
         }
 
+        /// <summary>The chip <paramref name="part" /> is drawn as, or null where the row does not show it yet.</summary>
+        public Element ChipOf(SentenceSlot part)
+        {
+            var at = Starts.IndexOf(part);
+            if (at >= 0)
+                return at < _starts.Count ? _starts[at] : null;
+
+            at = Does.IndexOf(part);
+            return at >= 0 && at < _does.Count ? _does[at] : null;
+        }
+
         void Part(Slot chip, int at, SentenceSlot part, GridWorld world)
         {
             if (ReferenceEquals(_shown[at], part))

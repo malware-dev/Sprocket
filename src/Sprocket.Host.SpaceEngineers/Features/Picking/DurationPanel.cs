@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         const string SecondsWidest = "0000.00";
         const string TicksWidest = "000000";
         const string SecondsFormat = "0.##";
+        const int CostlyTicks = 10;
 
         static readonly double[] SecondsPicks = { 0.5, 1, 2, 5, 10, 30, 60 };
         static readonly int[] TicksPicks = { 1, 10, 30, 60, 100, 300 };
@@ -32,10 +33,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly OptionRow _seconds;
         readonly OptionRow _ticks;
         readonly Label _other;
+        readonly Label _caution;
         readonly HStack _secondsPicks;
         readonly HStack _ticksPicks;
 
         bool _inSeconds;
+        bool _cautions;
 
         /// <summary>A panel showing <paramref name="start" /> in the unit it is written in, whose box keeps the keyboard of <paramref name="input" /> whatever in it is pressed.</summary>
         public DurationPanel(Texts texts, InputRoot input, Duration start)
@@ -74,6 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Children.Add(number);
 
             Children.Add(new Label { Style = Styles.Aside }.As(out _other));
+            Children.Add(new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution));
 
             _secondsPicks = new HStack { Spacing = 6f };
             for (var i = 0; i < SecondsPicks.Length; i++)
@@ -122,6 +126,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether the number is in seconds rather than ticks.</summary>
         public bool InSeconds => _inSeconds;
 
+        /// <summary>Whether it says what a length costs as a rate, where it is short enough to be costly.</summary>
+        public bool Cautions
+        {
+            get { return _cautions; }
+            set
+            {
+                _cautions = value;
+                Show();
+            }
+        }
+
         /// <summary>The length given, or null where the box holds nothing that reads as one.</summary>
         public Duration? Length
         {
@@ -144,10 +159,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <inheritdoc />
-        /// <remarks>Escape is said as <see cref="Cancelled" />, whatever in the panel holds the keyboard.</remarks>
+        /// <remarks>Escape is said as <see cref="Cancelled" />, whatever in the panel holds the keyboard, where anything listens.</remarks>
         public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
-            if (key != MyKeys.Escape)
+            if (key != MyKeys.Escape || Cancelled == null)
                 return base.OnKey(input, key, shift, ctrl);
 
             Raise(Cancelled);
@@ -206,11 +221,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _box.Insert(said);
         }
 
-        /// <summary>Says the length in the other unit, and marks the length to pick that it is.</summary>
+        /// <summary>Says the length in the other unit and what it costs as a rate, and marks the length to pick that it is.</summary>
         void Show()
         {
             var length = Length;
             _other.Text = length.HasValue ? Other(length.Value) : "";
+
+            var costly = _cautions && length.HasValue && length.Value.Ticks <= CostlyTicks;
+            _caution.IsVisible = costly;
+            if (costly)
+                _caution.Text = length.Value.Ticks <= 1 ? _texts.RateEveryTickCost : _texts.RateFastCost;
 
             var picks = _inSeconds ? _secondsPicks : _ticksPicks;
             for (var i = 0; i < picks.Children.Count; i++)

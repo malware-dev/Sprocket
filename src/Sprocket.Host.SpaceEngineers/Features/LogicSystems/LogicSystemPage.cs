@@ -52,6 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Keyed<Trigger, TriggerRow> _triggerRows;
         Keyed<Sequence, StatusRow> _sequenceRows;
         Keyed<Part, PartRow> _slotRows;
+        LengthQuestion _rate;
 
         /// <summary>The page of <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public LogicSystemPage(SprocketEditor editor, AutomationSystem system) : base(editor)
@@ -68,6 +69,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <inheritdoc />
         public override bool Edits => true;
+
+        /// <summary>The panel a timer's rate is being given in, or null while none is open.</summary>
+        public DurationPanel Rate => _rate != null && _rate.IsOpen ? _rate.Panel : null;
 
         /// <summary>What the author said this thing is, for one logic system; a blueprint's is written at the top of the page.</summary>
         /// <remarks>
@@ -354,6 +358,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
                 row.Show(texts);
             }
+
+            if (_rate != null)
+                _rate.Hang();
+        }
+
+        /// <summary>Opens the panel the rate of <paramref name="every" /> is given in, which changes it as it closes.</summary>
+        void OpenRate(EveryTrigger every)
+        {
+            if (_rate != null)
+                _rate.Finish(false);
+
+            _rate = new LengthQuestion(Editor, every.Interval, true, delegate { return RateChip(every); },
+                delegate(Duration? interval, bool cancelled)
+                {
+                    if (!cancelled && interval.HasValue && interval.Value != every.Interval && _system.IndexOfTrigger(every) >= 0)
+                        Editor.Do(_system, new SetCadence(every, every.Interval, interval.Value));
+                });
+            _rate.Hang();
+        }
+
+        /// <summary>The chip of <paramref name="every" />'s rate, or null where its row does not show one.</summary>
+        Element RateChip(EveryTrigger every)
+        {
+            var row = _triggerRows == null ? null : _triggerRows[every];
+            if (row == null)
+                return null;
+
+            for (var i = 0; i < row.Starts.Count; i++)
+            {
+                if (row.Starts[i] is DurationSlot)
+                    return row.ChipOf(row.Starts[i]);
+            }
+
+            return null;
         }
 
         void Arrange(Texts texts)
@@ -372,7 +410,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 new Adder(texts.SystemWhen, texts.SystemWhenAbout,
                     Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); })),
                 new Adder(texts.SystemEvery, texts.SystemEveryAbout,
-                    Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Cadences.Default)); }))
+                    Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Duration.OfSeconds(1))); }))
             }));
 
             _runs.Clear();
@@ -730,7 +768,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.Interval, Starts(trigger, Opening.Nothing)));
+                row.Starts.Add(new DurationSlot(every.Interval, Changes(Cmd.OpenTrigger, delegate { OpenRate(every); })));
 
             Doing(row, trigger);
 
