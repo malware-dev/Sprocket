@@ -138,6 +138,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public Action<long> Wire { get; set; }
 
+        /// <summary>Where the buttons picked and not yet written are let go of, as a pick is backed out of.</summary>
+        /// <remarks>
+        /// Set beside <see cref="Wire" />. A copy a client is editing has none: every edit it sends rebuilds the Sprocket it
+        /// was lent, which ends what that was asked to write.
+        /// </remarks>
+        public Action Unwire { get; set; }
+
         /// <summary>Who holds the Sprocket this editor shows, or null where this editor may change it.</summary>
         /// <remarks>
         /// Set on a copy lent to look at while somebody else edits it. Every command but the ones that
@@ -832,6 +839,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void Leave()
         {
+            // A pick backed out of leaves its buttons unwritten; going on with it picks them again.
+            if (Unwire != null)
+                Unwire();
+
             var page = Current;
             if (!page.Leaving())
                 return;

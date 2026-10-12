@@ -598,6 +598,30 @@ public class HandoverTests : IDisposable
     }
 
     /// <summary>
+    /// A client picking a button again mends a slot cleared by hand, though the program it sends is the one the server
+    /// already holds.
+    /// </summary>
+    [Fact]
+    public void AButtonAClientPicksAgainIsWritten()
+    {
+        _sim.Editor.NewButtonSystem("Airlock");
+        for (var i = 0; i < 3; i++)
+            _sim.Tick();
+
+        var panel = Assert.Single(_sim.Panels(), each => each.Toolbar.Holds(0));
+        panel.Toolbar.Changing().Clear(0).Apply();
+        _sim.Tick();
+
+        var (anna, hers, _) = Lent();
+        _wire.As(anna, () => hers.Wire(_block, panel.Id));
+        _wire.Settle();
+        for (var i = 0; i < 3; i++)
+            _sim.Tick();
+
+        Assert.True(panel.Toolbar.Holds(0), "the server did not write the button picked again");
+    }
+
+    /// <summary>
     /// The copy a client edits holds the program and runs none of it, and what it makes is named after
     /// the client's player.
     /// </summary>

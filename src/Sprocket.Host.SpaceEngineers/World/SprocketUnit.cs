@@ -246,7 +246,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
                 if (!_copy)
+                {
                     _editor.Wire = Wire;
+                    _editor.Unwire = Unwire;
+                }
 
                 if (_author != null)
                     _editor.Author = _author;
@@ -536,6 +539,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             List<Want> was = _wanted;
             _wanted = _wanting;
             _wanting = was;
+
+            // Here alone, because what the program wants changes only when its wiring does.
+            if (_asserted.Count > 0)
+                Assert();
         }
 
         /// <summary>
@@ -1207,9 +1214,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             //
             // Firing does not depend on any of it: a slot invokes Sprocket's action itself and arrives
             // carrying its key, so a button works whether or not anything has ever looked at it.
-            if (_asserted.Count > 0)
-                Assert();
-
             if (_world.TakeLook() || !_read)
             {
                 _read = true;
@@ -1228,10 +1232,27 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _asserted.Add(panel);
         }
 
+        /// <summary>Lets go of every panel <see cref="Wire" /> asked for and no pass has written yet, as a pick is backed out of.</summary>
+        public void Unwire()
+        {
+            _asserted.Clear();
+        }
+
+        /// <summary>Brings the toolbars into line with the program on the next tick, as though its wiring had changed.</summary>
+        /// <remarks>
+        /// For a button picked on a client's copy. The client's edit arrives as a program, and none arrives where the same
+        /// button was picked again, so nothing here changes to bring that pass about.
+        /// </remarks>
+        public void Revisit()
+        {
+            _reconciled = int.MinValue;
+        }
+
         /// <summary>Writes the slots <see cref="Wire" /> asked for that do not hold what the program wants of them.</summary>
         /// <remarks>
-        /// After the program's own pass, so what is wanted is what the edit that picked the button left. A panel nothing wants
-        /// yet stays asked for: a trigger joins the program only once what it does is chosen, some screens after its button.
+        /// On the program's own pass, after it, so what is wanted is what the edit that picked the button left. A panel nothing
+        /// wants yet stays asked for until <see cref="Unwire" />: a trigger joins the program only once what it does is chosen,
+        /// some screens after its button.
         /// </remarks>
         void Assert()
         {

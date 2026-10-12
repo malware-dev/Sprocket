@@ -328,6 +328,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             Told.Say(said);
             unit.Wire(wiring.Panel);
+            unit.Revisit();
         }
 
         /// <summary>An order arriving at the server, which it takes only from whoever holds that Sprocket.</summary>

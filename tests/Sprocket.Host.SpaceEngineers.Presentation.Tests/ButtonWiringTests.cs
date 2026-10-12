@@ -35,6 +35,43 @@ public class ButtonWiringTests
         Assert.EndsWith("/2/1", KeyIn(port));
     }
 
+    /// <summary>A button picked is written on the pass after the program's wiring changes.</summary>
+    [Fact]
+    public void AButtonPickedIsWrittenWhenTheWiringChanges()
+    {
+        var sim = Blueprinted();
+        var port = PanelNamed(sim, "Port Button");
+        FillWith(sim, "Port Button");
+        port.Toolbar.Changing().Clear(0).Apply();
+        Tick(sim);
+
+        sim.Editor.Wire!(port.Id);
+        Tick(sim);
+        Assert.False(port.Toolbar.TryGetItem(0, out _));
+
+        sim.Editor.Program.Rewire();
+        Tick(sim);
+        Assert.EndsWith("/2/1", KeyIn(port));
+    }
+
+    /// <summary>A pick backed out of leaves its button unwritten, so a slot cleared by hand stays clear when the wiring next changes.</summary>
+    [Fact]
+    public void APickBackedOutOfWritesNothing()
+    {
+        var sim = Blueprinted();
+        var port = PanelNamed(sim, "Port Button");
+        FillWith(sim, "Port Button");
+        port.Toolbar.Changing().Clear(0).Apply();
+        Tick(sim);
+
+        sim.Editor.Wire!(port.Id);
+        sim.Editor.Back();
+        sim.Editor.Program.Rewire();
+        Tick(sim);
+
+        Assert.False(port.Toolbar.TryGetItem(0, out _));
+    }
+
     /// <summary>A button picked for a signal slot is named after the slot, as the game names a button after what its slot holds.</summary>
     [Fact]
     public void AButtonPickedIsNamedAfterItsSlot()
