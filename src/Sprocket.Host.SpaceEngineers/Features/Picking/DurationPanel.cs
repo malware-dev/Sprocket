@@ -19,8 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     {
         const double SecondsStep = 0.5;
         const int TicksStep = 10;
-        const string SecondsWidest = "0000.00";
-        const string TicksWidest = "000000";
+        // The widest number in either unit, kept in both so the panel holds its size as the unit changes: seconds' six digits
+        // and a point outmeasure ticks' six digits.
+        const string Widest = "0000.00";
         const string SecondsFormat = "0.##";
         const int CostlyTicks = 10;
 
@@ -34,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly OptionRow _ticks;
         readonly Label _other;
         readonly Label _caution;
+        readonly Deck _picks;
         readonly HStack _secondsPicks;
         readonly HStack _ticksPicks;
 
@@ -61,6 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Style = Styles.Value,
                 Focusable = true,
                 Least = 0,
+                Widest = Widest,
                 Submit = new Relay(delegate { Raise(Submitted); }),
                 Tip = Tip.For(null, texts.SequenceWaitTypedAbout)
             }.As(out _box));
@@ -91,8 +94,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 });
             }
 
-            Children.Add(_secondsPicks);
-
             _ticksPicks = new HStack { Spacing = 6f };
             for (var i = 0; i < TicksPicks.Length; i++)
             {
@@ -105,7 +106,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 });
             }
 
-            Children.Add(_ticksPicks);
+            // One over the other, so the panel is as wide as the wider of the two rows whichever unit shows.
+            Children.Add(new Deck { Children = { _secondsPicks, _ticksPicks } }.As(out _picks));
 
             _box.Edited += Show;
 
@@ -212,11 +214,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _box.Whole = !seconds;
             _box.Step = seconds ? SecondsStep : TicksStep;
             _box.Format = seconds ? SecondsFormat : "0";
-            _box.Widest = seconds ? SecondsWidest : TicksWidest;
             _seconds.IsCurrent = seconds;
             _ticks.IsCurrent = !seconds;
-            _secondsPicks.IsVisible = seconds;
-            _ticksPicks.IsVisible = !seconds;
+            _picks.Top = seconds ? _secondsPicks : _ticksPicks;
         }
 
         /// <summary>Puts <paramref name="said" /> in the box, as an edit.</summary>

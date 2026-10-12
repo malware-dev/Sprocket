@@ -10,7 +10,7 @@ For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til !
 - Blokker som kommer i en tilstand, som at en dør er lukket. Med flere blokker starter `hvilken som helst` den når den første kommer dit, og `alle sammen` når den siste gjør det.
 - En fastsatt tid som går, om og om igjen, som hvert minutt.
 
-Der spillet melder en endring, som at en dør lukker seg eller en blokk slås på, starter utløseren med én gang. For andre endringer, som at lufta i et rom fylles eller tømmes, sjekker utløseren selve blokken, ofte nok til å fange den opp. En utløser som starter på en fast tid, velger den tiden under `Hvor ofte`, i sekunder eller i tikk, seksti på et sekund. En ny starter på ett sekund, i den enheten som ble valgt sist. Trykker du tiden på raden, åpnes det samme valget ved siden av den, og tiden endres når det lukkes; Escape lar den være som den var.
+Der spillet melder en endring, som at en dør lukker seg eller en blokk slås på, starter utløseren med én gang. For andre endringer, som at lufta i et rom fylles eller tømmes, sjekker utløseren selve blokken, ofte nok til å fange den opp. En utløser som starter på en fast tid, velger den tiden under `Hvor ofte`, i sekunder eller i tikk, seksti på et sekund. En ny starter på ett sekund, i den enheten som ble valgt sist. Trykker du tiden på raden, åpnes det samme valget ved siden av den: `Ferdig` beholder tiden, og Escape eller et trykk et annet sted lar den være som den var.
 
 ## Hva den gjør
 

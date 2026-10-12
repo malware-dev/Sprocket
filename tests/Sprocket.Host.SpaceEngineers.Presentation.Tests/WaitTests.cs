@@ -1,3 +1,4 @@
+using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -12,8 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// How long a step waits is given in a panel hanging from the length in its sentence.
 /// </summary>
 /// <remarks>
-/// The length changes as the panel closes: a press anywhere else or Enter keeps what it says, and Escape leaves the wait
-/// as it was. A wait added a moment ago is added with the length it closes on, as one change, and Escape takes it away.
+/// The length changes as the panel closes: Done or Enter keeps what it says, and Escape or a press anywhere else leaves
+/// the wait as it was. A wait added a moment ago is added with the length it closes on, as one change, and backing out
+/// takes it away.
 /// </remarks>
 public class WaitTests
 {
@@ -71,9 +73,9 @@ public class WaitTests
         Assert.Empty(screen.Editor.Program.Sequences[0].Steps);
     }
 
-    /// <summary>A press anywhere else closes the panel and keeps what it says.</summary>
+    /// <summary>A press anywhere else backs out of a wait just added, as Escape does, taking it away.</summary>
     [Fact]
-    public void APressElsewhereKeepsTheLength()
+    public void APressElsewhereTakesAWaitJustAddedAway()
     {
         var screen = Added();
 
@@ -82,8 +84,26 @@ public class WaitTests
         screen.Run(2);
 
         Assert.Null(Page(screen).Lengths);
+        Assert.Empty(screen.Editor.Program.Sequences[0].Steps);
+    }
+
+    /// <summary>A press anywhere else closes the panel of a wait already there and leaves its length as it was.</summary>
+    [Fact]
+    public void APressElsewhereLeavesAWaitAsItWas()
+    {
+        var screen = Added();
+        Panel(screen).Box.Submit!.Execute();
+        screen.Run(2);
+
+        PressLength(screen);
+        Panel(screen).Box.SelectAll();
+        Panel(screen).Box.Insert("4");
+        screen.Do("800", "900");
+        screen.Run(2);
+
+        Assert.Null(Page(screen).Lengths);
         var wait = Assert.IsType<Wait>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
-        Assert.Equal(240, wait.Ticks);
+        Assert.Equal(Duration.OfSeconds(1), wait.Length);
     }
 
     /// <summary>Pressing a wait's length opens its panel on it, and a change in ticks is kept in ticks.</summary>
@@ -211,6 +231,43 @@ public class WaitTests
 
         Assert.False(Panel(screen).InSeconds);
         Assert.Equal("60", Panel(screen).Box.Text);
+    }
+
+    /// <summary>Done keeps the length and puts the panel away, and it is drawn as the button Enter presses.</summary>
+    [Fact]
+    public void DoneKeepsTheLength()
+    {
+        var screen = Added();
+        Panel(screen).Box.SelectAll();
+        Panel(screen).Box.Insert("4");
+
+        var done = Panel(screen).Parent!.Within().OfType<Button>().Single(button => button.Text == "Done");
+        Assert.Same(Styles.Primary, done.Style);
+        done.Command!.Execute();
+        screen.Run(2);
+
+        Assert.Null(Page(screen).Lengths);
+        var wait = Assert.IsType<Wait>(Assert.Single(screen.Editor.Program.Sequences[0].Steps));
+        Assert.Equal(Duration.OfSeconds(4), wait.Length);
+    }
+
+    /// <summary>The panel keeps its size as the unit changes, both ways.</summary>
+    [Fact]
+    public void ThePanelKeepsItsSizeAcrossUnits()
+    {
+        var screen = Added();
+        var panel = Panel(screen);
+        var seconds = panel.Bounds;
+
+        panel.Give("90", true);
+        screen.Run(1);
+        Assert.Equal(seconds.Width, panel.Bounds.Width);
+        Assert.Equal(seconds.Height, panel.Bounds.Height);
+
+        panel.Give("2", false);
+        screen.Run(1);
+        Assert.Equal(seconds.Width, panel.Bounds.Width);
+        Assert.Equal(seconds.Height, panel.Bounds.Height);
     }
 
     static Screen Added()

@@ -1,5 +1,8 @@
 using System;
 using Lumel;
+using Lumel.Controls;
+using Lumel.Input;
+using Lumel.Layout;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -10,8 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// <summary>A length being given in a panel, hung from the part of a sentence it is the length of whenever that part is on a screen.</summary>
     /// <remarks>
     /// The page's whether or not it hangs anywhere, so the editor gives a length the same way without a screen. It is answered
-    /// once, as it closes: a press anywhere else or Enter answers with what the panel says, and Escape answers that it was
-    /// put away.
+    /// once, as it closes: Done or Enter answers with what the panel says, and Escape or a press anywhere else answers that
+    /// it was put away, as every popup is. Done is drawn as the button Enter presses.
     /// </remarks>
     public class LengthQuestion
     {
@@ -39,8 +42,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _panel.Cancelled += delegate { Finish(true); };
             _panel.Switched += editor.Prefer;
 
-            _window = new Popup { Style = Styles.List, Flush = true, Content = _panel };
-            _window.Closed += delegate { Finish(false); };
+            _window = new Popup
+            {
+                Style = Styles.List,
+                Flush = true,
+                Content = new VStack
+                {
+                    Spacing = 12f,
+                    Children =
+                    {
+                        _panel,
+                        new Button
+                        {
+                            Style = Styles.Primary,
+                            Text = editor.Texts.ChromeDone,
+                            Align = Align.Right,
+                            Command = new Relay(delegate { Finish(false); })
+                        }
+                    }
+                }
+            };
+            _window.Closed += delegate { Finish(true); };
         }
 
         /// <summary>The panel the length is given in.</summary>
