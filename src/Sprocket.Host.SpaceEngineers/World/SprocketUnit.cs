@@ -161,32 +161,73 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Load(program, state);
 
-            // Asked once and then listened for. Whether this machine is working decides whether the
-            // automation runs at all, and it changes when the lights go out rather than on a tick -
-            // so asking the block sixty times a second would be two questions for one answer that
-            // hardly ever moves. Released in Dispose, because a listener left on a block the game has
-            // let go of is a leak that holds the whole unit alive.
-            _working = _block.IsWorking;
+            // Asked once and then listened for. Whether the construct's programmable blocks are working decides whether the
+            // automation runs at all, and it changes when the lights go out rather than on a tick - so asking them sixty times
+            // a second would be many questions for one answer that hardly ever moves. Released in Dispose, because a listener
+            // left on a block the game has let go of is a leak that holds the whole unit alive.
+            Hold();
             _runner.Live = _working && !_program.Paused;
-            _block.IsWorkingChanged += Working;
             _world.AnchorRemoved += Removed;
             _world.AnchorClosed += Closed;
             _world.HandsChanged += Handed;
         }
 
         /// <summary>
-        /// The machine losing or regaining power, or being switched off.
+        /// A programmable block on the construct losing or regaining power, or being switched off or on.
         /// </summary>
         /// <remarks>
-        /// The automation holds while it is not working, rather than stopping: a cycle interrupted by
-        /// a blackout carries on when the lights come back, which is the same promise as one
-        /// interrupted by a reload. The programmable block refuses to instantiate a script on a block
-        /// that is not working, and this is the same rule for a machine that is already running one.
+        /// The automation is the construct's, kept in its programmable blocks alike, so it runs while any of them works and
+        /// holds only while none does, rather than stopping: a cycle interrupted by a blackout carries on when the lights come
+        /// back, which is the same promise as one interrupted by a reload.
         /// </remarks>
         void Working(IMyCubeBlock block)
         {
-            _working = _block.IsWorking;
+            _working = AnyWorking();
             _runner.Live = _working && !_program.Paused;
+        }
+
+        /// <summary>Listens to every programmable block on the construct for its working state, gathering them again only when the construct was read again.</summary>
+        /// <remarks>
+        /// Called on every tick, and one comparison on a tick where nothing on the construct changed. The runner reads the same
+        /// revision on that tick, so a construct that changed is read again once whoever asks first.
+        /// </remarks>
+        void Hold()
+        {
+            var revision = _world.Revision;
+            if (revision == _heldAt)
+                return;
+
+            _heldAt = revision;
+            for (var i = 0; i < _holders.Count; i++)
+                _holders[i].IsWorkingChanged -= Working;
+
+            _holders.Clear();
+            var entities = _world.Entities;
+            for (var i = 0; i < entities.Count; i++)
+            {
+                if (entities[i].Block is IMyProgrammableBlock)
+                    _holders.Add(entities[i].Block);
+            }
+
+            if (!_holders.Contains(_block))
+                _holders.Add(_block);
+
+            for (var i = 0; i < _holders.Count; i++)
+                _holders[i].IsWorkingChanged += Working;
+
+            _working = AnyWorking();
+        }
+
+        /// <summary>Whether any programmable block on the construct is working.</summary>
+        bool AnyWorking()
+        {
+            for (var i = 0; i < _holders.Count; i++)
+            {
+                if (_holders[i].IsWorking)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>A block on the construct changing hands, or sharing changing, which the next tick looks at.</summary>
@@ -291,6 +332,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool _read;
 
         bool _working;
+
+        /// <summary>The construct's programmable blocks, listened to for their working state.</summary>
+        readonly List<IMyTerminalBlock> _holders = new List<IMyTerminalBlock>();
+
+        /// <summary>The construct's revision <see cref="_holders" /> were gathered at.</summary>
+        int _heldAt = int.MinValue;
 
         /// <summary>The blocks the automation could reach again when it paused, which the resume screen names.</summary>
         readonly List<string> _returned = new List<string>();
@@ -1217,6 +1264,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!_copy)
                 Touch();
 
+            Hold();
+
             // Two flags read, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
             _runner.Live = _working && !_program.Paused;
             _runner.Tick(frame);
@@ -1743,11 +1792,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Told.Say(Logged(_block) + " is gone; " + Logged(block) + " keeps the automation now");
 
-            _block.IsWorkingChanged -= Working;
             _block = block;
-            _block.IsWorkingChanged += Working;
-            _working = _block.IsWorking;
             _world.Anchor(block);
+            _heldAt = int.MinValue;
+            Hold();
             Destroyed = false;
 
             // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
@@ -1758,7 +1806,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <inheritdoc />
         public void Dispose()
         {
-            _block.IsWorkingChanged -= Working;
+            for (var i = 0; i < _holders.Count; i++)
+                _holders[i].IsWorkingChanged -= Working;
+
             _world.AnchorRemoved -= Removed;
             _world.AnchorClosed -= Closed;
             _world.HandsChanged -= Handed;

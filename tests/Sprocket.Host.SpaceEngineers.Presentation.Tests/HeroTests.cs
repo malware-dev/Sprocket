@@ -88,6 +88,78 @@ public class HeroTests
         Assert.Same(was, rig.Unit.Block);
     }
 
+    /// <summary>The block that keeps the automation switched off, another programmable block on the construct keeps it running.</summary>
+    [Fact]
+    public void AnyWorkingProgrammableBlockKeepsTheAutomationRunning()
+    {
+        Simulation rig = Wired();
+        rig.Machine.Programmable(200, "Spare");
+        rig.Tick();
+
+        rig.Machine.Sprocket.Enabled = false;
+        rig.Tick();
+
+        Assert.True(rig.Runner.Live, "another programmable block works and the automation held");
+
+        Sequence sequence = rig.Editor.Program.Sequences[0];
+        rig.Press("Airlock Button");
+        rig.Tick();
+
+        Assert.True(Running(rig, sequence), "the press did nothing while a programmable block works");
+    }
+
+    /// <summary>Every programmable block on the construct switched off holds the automation, and any one switched on again lets it go.</summary>
+    [Fact]
+    public void NoWorkingProgrammableBlockHoldsTheAutomation()
+    {
+        Simulation rig = Wired();
+        Programmable spare = rig.Machine.Programmable(200, "Spare");
+        rig.Tick();
+
+        rig.Machine.Sprocket.Enabled = false;
+        spare.Enabled = false;
+        rig.Tick();
+
+        Assert.False(rig.Runner.Live, "no programmable block works and the automation ran");
+
+        spare.Enabled = true;
+        rig.Tick();
+
+        Assert.True(rig.Runner.Live, "the spare came back and the automation held");
+    }
+
+    /// <summary>A programmable block welded on after the one that keeps it is off lets the automation run.</summary>
+    [Fact]
+    public void AProgrammableBlockWeldedOnLetsAHeldAutomationRun()
+    {
+        Simulation rig = Wired();
+        rig.Machine.Sprocket.Enabled = false;
+        rig.Tick();
+
+        Assert.False(rig.Runner.Live);
+
+        rig.Machine.Programmable(200, "Spare");
+        rig.Tick();
+
+        Assert.True(rig.Runner.Live, "the new programmable block works and the automation held");
+    }
+
+    /// <summary>The last working programmable block ground off holds the automation kept in one that is off.</summary>
+    [Fact]
+    public void GrindingTheLastWorkingProgrammableBlockHoldsTheAutomation()
+    {
+        Simulation rig = Wired();
+        Programmable spare = rig.Machine.Programmable(200, "Spare");
+        rig.Tick();
+
+        rig.Machine.Sprocket.Enabled = false;
+        rig.Tick();
+        rig.Machine.Grind(spare);
+        rig.Tick();
+
+        Assert.False(rig.Runner.Live, "the only working programmable block is gone and the automation ran");
+    }
+
     /// <summary>An airlock whose button runs a sequence that opens the inner door, switched on.</summary>
     static Simulation Wired()
     {
