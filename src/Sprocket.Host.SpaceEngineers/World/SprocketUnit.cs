@@ -166,10 +166,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             // so asking the block sixty times a second would be two questions for one answer that
             // hardly ever moves. Released in Dispose, because a listener left on a block the game has
             // let go of is a leak that holds the whole unit alive.
-            _runner.Live = _block.IsWorking;
+            _working = _block.IsWorking;
+            _runner.Live = _working && !_program.Paused;
             _block.IsWorkingChanged += Working;
             _world.AnchorRemoved += Removed;
             _world.AnchorClosed += Closed;
+            _world.HandsChanged += Handed;
         }
 
         /// <summary>
@@ -183,7 +185,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         void Working(IMyCubeBlock block)
         {
-            _runner.Live = _block.IsWorking;
+            _working = _block.IsWorking;
+            _runner.Live = _working && !_program.Paused;
+        }
+
+        /// <summary>A block on the construct changing hands, or sharing changing, which the next tick looks at.</summary>
+        void Handed()
+        {
+            _handsChanged = true;
         }
 
         /// <summary>The programmable block the automation is kept in: the construct's hero.</summary>
@@ -252,6 +261,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 {
                     _editor.Wire = Wire;
                     _editor.Unwire = Unwire;
+                    _editor.Returned = _returned;
                 }
 
                 if (_author != null)
@@ -279,6 +289,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         bool _adopted;
 
         bool _read;
+
+        bool _working;
+
+        /// <summary>The blocks the automation could reach again when it paused, which the resume screen names.</summary>
+        readonly List<string> _returned = new List<string>();
+
+        /// <summary>Whether the construct's owners are to be looked at, which a load and every change of hands asks for.</summary>
+        bool _handsChanged = true;
 
         /// <summary>What a key names: a sequence, which one of its system, and what to do to it.</summary>
         struct Target
@@ -1199,15 +1217,102 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!_copy)
                 Touch();
 
+            // Two flags read, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
+            _runner.Live = _working && !_program.Paused;
             _runner.Tick(frame);
 
             if (Showing && _editor != null)
                 _editor.Tick(frame);
         }
 
+        /// <summary>
+        /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing.
+        /// </summary>
+        /// <remarks>
+        /// Sharing works both ways: an owner the automation had who may still use its block now is exactly the case where the new
+        /// owner could use it before, such as a faction mate handed a ship shared with the faction. A capture, or a hand-over to
+        /// somebody it was not shared with, pauses it until a big owner resumes it. Once paused it stays paused, whoever owns it
+        /// next, and remembers who it was taken from.
+        /// </remarks>
+        void Owned()
+        {
+            _handsChanged = false;
+            var now = _world.BigOwners;
+            var owners = _program.Owners;
+            if (Same(owners, now))
+                return;
+
+            if (!_program.Paused && !Shared(owners, now))
+            {
+                Told.Say(_world.Name + " changed hands outside sharing, and its automation is paused");
+                _program.PausedFrom.AddRange(owners);
+                _runner.Live = false;
+                _returned.Clear();
+                _returned.AddRange(_world.Returned);
+            }
+
+            owners.Clear();
+            for (var i = 0; i < now.Count; i++)
+                owners.Add(now[i]);
+
+            Persist();
+        }
+
+        /// <summary>Whether <paramref name="before" />, the owners the automation had, holds one who is among <paramref name="now" /> or may still use its block.</summary>
+        bool Shared(List<long> before, IReadOnlyList<long> now)
+        {
+            if (before.Count == 0)
+                return true;
+
+            for (var i = 0; i < before.Count; i++)
+            {
+                if (Among(now, before[i]) || _block.HasPlayerAccess(before[i]))
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether <paramref name="player" /> may open the automation: one of the construct's big owners, or anybody where nobody owns any of it.</summary>
+        public bool Owns(long player)
+        {
+            var owners = _world.BigOwners;
+            return owners.Count == 0 || Among(owners, player);
+        }
+
+        /// <summary>Whether <paramref name="player" /> is among <paramref name="players" />.</summary>
+        static bool Among(IReadOnlyList<long> players, long player)
+        {
+            for (var i = 0; i < players.Count; i++)
+            {
+                if (players[i] == player)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether <paramref name="one" /> and <paramref name="other" /> name the same players, both in order.</summary>
+        static bool Same(List<long> one, IReadOnlyList<long> other)
+        {
+            if (one.Count != other.Count)
+                return false;
+
+            for (var i = 0; i < one.Count; i++)
+            {
+                if (one[i] != other[i])
+                    return false;
+            }
+
+            return true;
+        }
+
         /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
         void Touch()
         {
+            if (_handsChanged)
+                Owned();
+
             Reconcile();
 
             // Only when something asks. Reading a toolbar is the expensive thing Sprocket does, and what
@@ -1641,7 +1746,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _block.IsWorkingChanged -= Working;
             _block = block;
             _block.IsWorkingChanged += Working;
-            _runner.Live = _block.IsWorking;
+            _working = _block.IsWorking;
             _world.Anchor(block);
             Destroyed = false;
 
@@ -1656,6 +1761,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _block.IsWorkingChanged -= Working;
             _world.AnchorRemoved -= Removed;
             _world.AnchorClosed -= Closed;
+            _world.HandsChanged -= Handed;
             _runner.Retire();
             _world.Dispose();
         }

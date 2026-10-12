@@ -42,6 +42,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
         readonly List<IMyCubeGrid> _watched = new List<IMyCubeGrid>();
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
+        readonly List<IMyTerminalBlock> _found = new List<IMyTerminalBlock>();
+        readonly HashSet<long> _seen = new HashSet<long>();
+        readonly Dictionary<long, int> _counted = new Dictionary<long, int>();
+        readonly List<long> _bigOwners = new List<long>();
+        readonly List<string> _unshared = new List<string>();
+        readonly List<string> _wasUnshared = new List<string>();
+        readonly List<string> _returned = new List<string>();
 
         bool _stale = true;
         int _revision;
@@ -52,6 +59,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             _kinds = new BlockKinds(_catalogue, _capabilities);
             Follow(anchor);
         }
+
+        /// <summary>Raised when a block on the construct changes hands, or when what is shared with whom may have changed.</summary>
+        /// <remarks>From the grid's own event, or from <see cref="Reshare" />; the construct is read again before it is next asked about.</remarks>
+        public event Action HandsChanged;
 
         /// <summary>Raised from the grid's own event when the anchor is removed from the construct, in the middle of the grid changing.</summary>
         /// <remarks>Whatever answers it waits until the grid has finished, before it reads the construct again - see <see cref="SprocketUnit" />.</remarks>
@@ -131,6 +142,54 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 return _entities;
             }
+        }
+
+        /// <summary>The players who own most of the construct's blocks, counted over every grid of it; empty where nobody owns any.</summary>
+        /// <remarks>
+        /// The game's big owners, taken over the whole construct rather than one grid, so a programmable block placed on a wing
+        /// makes nobody the owner of the construct's automation. Several where they tie.
+        /// </remarks>
+        public IReadOnlyList<long> BigOwners
+        {
+            get
+            {
+                if (_stale)
+                    Rebuild();
+
+                return _bigOwners;
+            }
+        }
+
+        /// <summary>The names of the construct's blocks none of its big owners may use, which the automation cannot reach.</summary>
+        public IReadOnlyList<string> Unshared
+        {
+            get
+            {
+                if (_stale)
+                    Rebuild();
+
+                return _unshared;
+            }
+        }
+
+        /// <summary>The names of the blocks the read before this one left out and this one let back in.</summary>
+        public IReadOnlyList<string> Returned
+        {
+            get
+            {
+                if (_stale)
+                    Rebuild();
+
+                return _returned;
+            }
+        }
+
+        /// <summary>Has the construct read again, as what is shared with whom may have changed: a faction joined, left or at peace.</summary>
+        public void Reshare()
+        {
+            _stale = true;
+            if (HandsChanged != null)
+                HandsChanged();
         }
 
         /// <summary>
@@ -495,6 +554,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             _grids.RemoveAll(Closing);
             Watch(_grids);
 
+            _found.Clear();
+            _seen.Clear();
+            _counted.Clear();
             for (int i = 0; i < _grids.Count; i++)
             {
                 _slim.Clear();
@@ -503,14 +565,85 @@ namespace Sprocket.Host.SpaceEngineers.World
                 for (int b = 0; b < _slim.Count; b++)
                 {
                     IMyTerminalBlock block = _slim[b].FatBlock as IMyTerminalBlock;
-                    if (block == null || _byId.ContainsKey(block.EntityId))
+                    if (block == null || !_seen.Add(block.EntityId))
                         continue;
 
-                    GridEntity entity = new GridEntity(block, _kinds.For(block));
-                    _byId.Add(block.EntityId, entity);
-                    _entities.Add(entity);
+                    _found.Add(block);
+                    var owner = block.OwnerId;
+                    if (owner == 0)
+                        continue;
+
+                    int count;
+                    _counted.TryGetValue(owner, out count);
+                    _counted[owner] = count + 1;
                 }
             }
+
+            Crown();
+
+            _wasUnshared.Clear();
+            _wasUnshared.AddRange(_unshared);
+            _unshared.Clear();
+            _returned.Clear();
+
+            // A block none of the big owners may use is no part of their automation, and reads as gone; the next read after
+            // its sharing changes finds it again.
+            for (int i = 0; i < _found.Count; i++)
+            {
+                IMyTerminalBlock block = _found[i];
+                if (_byId.ContainsKey(block.EntityId))
+                    continue;
+
+                if (block != _anchor && !Shared(block))
+                {
+                    _unshared.Add(block.CustomName);
+                    continue;
+                }
+
+                if (_wasUnshared.Contains(block.CustomName))
+                    _returned.Add(block.CustomName);
+
+                GridEntity entity = new GridEntity(block, _kinds.For(block));
+                _byId.Add(block.EntityId, entity);
+                _entities.Add(entity);
+            }
+        }
+
+        /// <summary>Makes the players owning the most blocks counted the construct's big owners.</summary>
+        void Crown()
+        {
+            _bigOwners.Clear();
+            var most = 0;
+            foreach (KeyValuePair<long, int> owner in _counted)
+            {
+                if (owner.Value < most)
+                    continue;
+
+                if (owner.Value > most)
+                {
+                    most = owner.Value;
+                    _bigOwners.Clear();
+                }
+
+                _bigOwners.Add(owner.Key);
+            }
+
+            _bigOwners.Sort();
+        }
+
+        /// <summary>Whether any of the big owners may use <paramref name="block" />, as the game's own access test answers it; every block where nobody owns the construct.</summary>
+        bool Shared(IMyTerminalBlock block)
+        {
+            if (_bigOwners.Count == 0)
+                return true;
+
+            for (var i = 0; i < _bigOwners.Count; i++)
+            {
+                if (block.HasPlayerAccess(_bigOwners[i]))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>The grid the construct is found from: the anchor's, or where the anchor is gone, one the construct had that is still there.</summary>
@@ -568,6 +701,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 _watched[i].OnBlockAdded -= OnBlocksChanged;
                 _watched[i].OnBlockRemoved -= OnBlockRemoved;
+                _watched[i].OnBlockOwnershipChanged -= OnOwnership;
             }
 
             _watched.Clear();
@@ -576,8 +710,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 grids[i].OnBlockAdded += OnBlocksChanged;
                 grids[i].OnBlockRemoved += OnBlockRemoved;
+                grids[i].OnBlockOwnershipChanged += OnOwnership;
                 _watched.Add(grids[i]);
             }
+        }
+
+        void OnOwnership(IMyCubeGrid grid)
+        {
+            Reshare();
         }
 
         void OnBlocksChanged(IMySlimBlock block)

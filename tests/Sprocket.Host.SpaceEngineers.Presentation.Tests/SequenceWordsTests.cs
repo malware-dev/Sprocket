@@ -17,7 +17,7 @@ public class SequenceWordsTests
     [Fact]
     public void ATriggerTheShipAnswersSaysThatItIsOne()
     {
-        Assert.Equal("When something on this construct starts it", SequenceText.Trigger(null!, new SignalTrigger(), null));
+        Assert.Equal("When something on this construct starts it", SequenceText.Trigger(null!, null!, null!, new SignalTrigger(), null));
     }
 
     [Fact]

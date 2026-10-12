@@ -15,6 +15,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Features.Gravity;
 using Sprocket.Host.SpaceEngineers.Features.Doors;
+using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -204,11 +205,40 @@ namespace Sprocket.Host.SpaceEngineers
                 FindCarrier();
             }
 
+            // Who shares a construct's blocks with whom moves with the factions, which no block reports.
+            if (MyAPIGateway.Session != null && MyAPIGateway.Session.Factions != null)
+                MyAPIGateway.Session.Factions.FactionStateChanged += Refactioned;
+
             if (MyAPIGateway.Utilities != null && !MyAPIGateway.Utilities.IsDedicated)
             {
                 FindShelf();
                 _preferences.Read();
             }
+        }
+
+        /// <summary>The name the game knows the player <paramref name="identity" /> by, online or not; empty where it knows none.</summary>
+        /// <remarks>Asked only as the resume screen is made, so the game's list of identities is walked a handful of times a session.</remarks>
+        static string Named(long identity)
+        {
+            if (MyAPIGateway.Players == null)
+                return "";
+
+            var identities = new List<IMyIdentity>();
+            MyAPIGateway.Players.GetAllIdentites(identities);
+            for (var i = 0; i < identities.Count; i++)
+            {
+                if (identities[i].IdentityId == identity)
+                    return identities[i].DisplayName;
+            }
+
+            return "";
+        }
+
+        /// <summary>A faction joined, left, made peace or went to war, which may change what every construct shares with whom.</summary>
+        void Refactioned(MyFactionStateChange change, long fromFaction, long toFaction, long playerId, long senderId)
+        {
+            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+                unit.Value.World.Reshare();
         }
 
         /// <summary>Reads the player's library out of the global store, once, as the world starts.</summary>
@@ -263,7 +293,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             Speak();
 
-            _handover = new Handover(Found, Given, Refused, Changed, Stored);
+            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored);
             _doors = new AutoClose(_rota, Frame);
             _channel = AutoClose.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
@@ -527,6 +557,14 @@ namespace Sprocket.Host.SpaceEngineers
             Look(block, holder, program, state);
         }
 
+        /// <summary>Tells the player that the automation on <paramref name="id" />'s construct belongs to its owners, and opens nothing.</summary>
+        void Foreign(long id)
+        {
+            var block = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
+            var construct = block == null || block.CubeGrid == null ? "" : block.CubeGrid.CustomName;
+            Say(Template.Fill(_texts.TerminalForeign, "construct", construct));
+        }
+
         /// <summary>
         /// Opens the editor on a copy to look at while <paramref name="holder" /> edits the real one.
         /// </summary>
@@ -726,6 +764,13 @@ namespace Sprocket.Host.SpaceEngineers
             if (unit == null)
                 return;
 
+            var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
+            if (!unit.Owns(player))
+            {
+                _current.Foreign(block.EntityId);
+                return;
+            }
+
             var id = multiplayer == null ? 0UL : multiplayer.MyId;
             long lent = unit.Block.EntityId;
             Handover handover = _current._handover;
@@ -751,6 +796,7 @@ namespace Sprocket.Host.SpaceEngineers
         {
             unit.Shelf = _shelf;
             unit.Preferences = _preferences;
+            unit.Editor.PlayerName = Named;
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
                 if (_screen != null)
@@ -896,6 +942,9 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (_gameTexts != null && MyAPIGateway.Gui != null)
                 MyAPIGateway.Gui.GuiControlRemoved -= Closed;
+
+            if (MyAPIGateway.Session != null && MyAPIGateway.Session.Factions != null)
+                MyAPIGateway.Session.Factions.FactionStateChanged -= Refactioned;
 
             _gameTexts = null;
 

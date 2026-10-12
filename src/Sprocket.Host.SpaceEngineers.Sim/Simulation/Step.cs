@@ -48,6 +48,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>A press on whatever says <see cref="Text" />, found where it is drawn at the moment it is pressed.</summary>
         public const int Named = 13;
 
+        /// <summary>Hands the whole construct to the player <see cref="Count" /> names, then opens the editor again, as a capture and a look do.</summary>
+        public const int Own = 14;
+
         /// <summary>Which of the kinds above it is.</summary>
         public int Kind;
 

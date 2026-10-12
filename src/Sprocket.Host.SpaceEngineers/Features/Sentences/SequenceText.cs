@@ -63,7 +63,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
         /// </para>
         /// </remarks>
-        public static string Trigger(Bindings bindings, Trigger trigger, SystemInstance through)
+        public static string Trigger(Automation program, Bindings bindings, AutomationSystem system, Trigger trigger,
+            SystemInstance through)
         {
             var moment = trigger as MomentTrigger;
             if (moment != null && moment.Sources.Count > 0)
@@ -74,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     return "When " + Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources);
 
                 return "When " + SentenceText.Named(bindings, sources,
-                    when != null && when.Quantifier == Quantifier.All) + " " + Happening(bindings, Vocabulary.EventOf(null, bindings, null, moment, through), sources);
+                    when != null && when.Quantifier == Quantifier.All) + " " + Happening(bindings, Vocabulary.EventOf(program, bindings, system, moment, through), sources);
             }
 
             var every = trigger as EveryTrigger;

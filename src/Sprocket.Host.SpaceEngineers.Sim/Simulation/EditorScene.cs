@@ -110,6 +110,16 @@ namespace Sprocket.Sim.Simulation
             return trouble;
         }
 
+        /// <summary>Hands the whole construct to <paramref name="player" />, lets the automation hear it, and opens the editor again.</summary>
+        public void Own(long player)
+        {
+            _ship.Machine.Own(player);
+            _ship.Tick();
+            _ship.Tick();
+            _ship.Editor.Opened();
+            _ship.Editor.Invalidate();
+        }
+
         /// <summary>Where the program is being kept, for the line at the bottom of the window.</summary>
         public string Where => _ship.Where;
 

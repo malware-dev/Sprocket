@@ -1381,6 +1381,60 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
     <value>Automasjonssignal</value>
   </data>
+  <data name="Sprocket.Paused.Title" xml:space="preserve">
+    <value>Satt på pause</value>
+  </data>
+  <data name="Sprocket.Paused.Why" xml:space="preserve">
+    <value>{construct} gikk fra {before} til {now}, så automasjonen er satt på pause til du fortsetter den.</value>
+  </data>
+  <data name="Sprocket.Paused.Someone" xml:space="preserve">
+    <value>noen andre</value>
+  </data>
+  <data name="Sprocket.Paused.Heading" xml:space="preserve">
+    <value>Automasjonen er satt på pause</value>
+  </data>
+  <data name="Sprocket.Paused.Size" xml:space="preserve">
+    <value>Den har {count} logikksystemer.</value>
+  </data>
+  <data name="Sprocket.Paused.SizeOne" xml:space="preserve">
+    <value>Den har ett logikksystem.</value>
+  </data>
+  <data name="Sprocket.Paused.LostOne" xml:space="preserve">
+    <value>Én av blokkene er utenfor rekkevidde.</value>
+  </data>
+  <data name="Sprocket.Paused.ReturnedOne" xml:space="preserve">
+    <value>Én er innenfor rekkevidde igjen.</value>
+  </data>
+  <data name="Sprocket.Paused.RemoveOneQuestion" xml:space="preserve">
+    <value>Fjerne logikksystemet på {construct}?</value>
+  </data>
+  <data name="Sprocket.Paused.Lost" xml:space="preserve">
+    <value>{count} av blokkene er utenfor rekkevidde.</value>
+  </data>
+  <data name="Sprocket.Paused.Returned" xml:space="preserve">
+    <value>{count} er innenfor rekkevidde igjen.</value>
+  </data>
+  <data name="Sprocket.Paused.Resume" xml:space="preserve">
+    <value>Fortsett</value>
+  </data>
+  <data name="Sprocket.Paused.Leave" xml:space="preserve">
+    <value>La den stå på pause</value>
+  </data>
+  <data name="Sprocket.Paused.RemoveAll" xml:space="preserve">
+    <value>Fjern alt</value>
+  </data>
+  <data name="Sprocket.Paused.RemoveQuestion" xml:space="preserve">
+    <value>Fjerne alle {count} logikksystemene på {construct}?</value>
+  </data>
+  <data name="Sprocket.Paused.Banner" xml:space="preserve">
+    <value>Satt på pause da {construct} skiftet eier.</value>
+  </data>
+  <data name="Sprocket.Paused.Review" xml:space="preserve">
+    <value>Se over</value>
+  </data>
+  <data name="Sprocket.Terminal.Foreign" xml:space="preserve">
+    <value>Bare eierne av {construct} kan åpne automasjonen dens.</value>
+  </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automasjonen i denne blokken kan ikke redigeres.</value>
   </data>

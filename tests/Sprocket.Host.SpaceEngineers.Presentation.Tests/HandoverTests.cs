@@ -2,6 +2,8 @@ using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using Sandbox.ModAPI;
+using Sprocket.Sim.Fakes;
 using Sprocket.Sim.Machine;
 using VRage.Game.ModAPI;
 using Xunit;
@@ -45,6 +47,7 @@ public class HandoverTests : IDisposable
     {
         public readonly List<string> Given = new List<string>();
         public readonly List<string> Refused = new List<string>();
+        public readonly List<string> Foreign = new List<string>();
         public readonly List<string> Changed = new List<string>();
         public readonly List<string> Stored = new List<string>();
         public string Program = "";
@@ -53,6 +56,9 @@ public class HandoverTests : IDisposable
     }
 
     readonly Heard _atServer = new Heard();
+
+    const long Anna = 144115188075855873;
+    const long Bert = 144115188075855874;
 
     Handover Handover(Peer peer, Func<long, SprocketUnit?> find, Heard heard)
     {
@@ -72,6 +78,7 @@ public class HandoverTests : IDisposable
                     heard.Program = program;
                     heard.State = state;
                 },
+                block => heard.Foreign.Add(block.ToString()),
                 (_, program, switches) =>
                 {
                     heard.Changed.Add(program);
@@ -309,6 +316,33 @@ public class HandoverTests : IDisposable
         _wire.Settle();
 
         Assert.Equal(new[] { "Host" }, heard.Refused);
+    }
+
+    /// <summary>Somebody who owns none of the construct is told it is not theirs, and is lent nothing.</summary>
+    [Fact]
+    public void SomebodyOwningNoneOfItIsRefused()
+    {
+        _sim.Machine.Own(Anna);
+        _sim.Tick();
+
+        var bert = _wire.Client("Bert");
+        var heard = new Heard();
+        var his = Client(bert, heard);
+        MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
+            .Does("TryGetIdentityId", arguments => (ulong)arguments[0] == bert.Id ? Bert : Anna)
+            .Done();
+        try
+        {
+            _wire.As(bert, () => his.Ask(_block, "Bert"));
+            _wire.Settle();
+        }
+        finally
+        {
+            MyAPIGateway.Players = null;
+        }
+
+        Assert.Equal(new[] { _block.ToString() }, heard.Foreign);
+        Assert.Empty(heard.Given);
     }
 
     [Fact]

@@ -10,6 +10,7 @@ using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.Features.Library;
+using Sprocket.Host.SpaceEngineers.Features.Ownership;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel.Input;
@@ -83,6 +84,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>What to show right now.</summary>
         public EditorScreen Screen => _screen;
+
+        /// <summary>The name the game knows a player by, from their identity, set by whatever shows the editor; null where nothing can say.</summary>
+        public Func<long, string> PlayerName { get; set; }
+
+        /// <summary>The blocks the automation could not reach before its construct changed hands and can now, set by whatever keeps it.</summary>
+        public IList<string> Returned { get; set; } = new List<string>();
 
         /// <summary>What the editor says, in the player's language.</summary>
         public Texts Texts { get; }
@@ -396,6 +403,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
+            if (_program.Trouble.Length == 0 && _program.Paused && !(Current is PausedPage))
+            {
+                Paused();
+                return;
+            }
+
             if (_program.Trouble.Length == 0)
             {
                 if (_notice == null)
@@ -478,7 +491,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _notice.Offers = null;
         }
 
+        /// <summary>Says, on every screen but the resume screen, that the automation is paused, with the way back to that screen.</summary>
+        void Paused()
+        {
+            if (_notice == null)
+                _notice = new Notice();
+
+            _notice.Leaving = false;
+            _notice.Level = NoticeLevel.Warning;
+            _notice.Text = Template.Fill(Texts.PausedBanner, "construct", _world.Name);
+            _notice.Detail = "";
+            _notice.Diagnostic = "";
+            _notice.Expanded = false;
+            _notice.Expands = null;
+            _notice.OfferText = Texts.PausedReview;
+            _notice.Offers = Reviews;
+        }
+
         Notice _notice;
+
+        ICommand _reviews;
+
+        ICommand Reviews => _reviews ?? (_reviews = Act(Cmd.ReviewPaused, Review));
 
         ICommand _expands;
         ICommand _resolves;
@@ -2704,6 +2738,51 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             Do(sequence.System, new TakeSequenceOut(_program, sequence));
             ForgetSequence(sequence);
+        }
+
+        /// <summary>Shows the editor as it opens: on the resume screen while the automation is paused.</summary>
+        public void Opened()
+        {
+            if (_program.Paused)
+                Review();
+        }
+
+        /// <summary>Shows the resume screen over the home screen.</summary>
+        public void Review()
+        {
+            UnwindTo(1);
+            Push(new PausedPage(this));
+        }
+
+        /// <summary>Starts paused automation again as it was, and goes on to the home screen.</summary>
+        public void Resume()
+        {
+            _program.PausedFrom.Clear();
+            UnwindTo(1);
+        }
+
+        /// <summary>Keeps the automation paused and goes on to the home screen, whose banner leads back.</summary>
+        public void LeavePaused()
+        {
+            UnwindTo(1);
+        }
+
+        /// <summary>Asks before taking every logic system out of paused automation; each one comes back with undo on the home screen.</summary>
+        public void RemoveAll()
+        {
+            var systems = new List<AutomationSystem>(_program.Systems);
+            var question = Template.Fill(systems.Count == 1 ? Texts.PausedRemoveOneQuestion : Texts.PausedRemoveQuestion, "construct",
+                _world.Name);
+            Ask(Template.Fill(question, "count", systems.Count.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            Answer(Texts.PausedRemoveAll, delegate
+            {
+                for (var i = 0; i < systems.Count; i++)
+                    DeleteSystem(systems[i]);
+
+                _program.PausedFrom.Clear();
+                UnwindTo(1);
+            });
+            Answer(Texts.ButtonLeaveAlone, delegate { }, true);
         }
 
         /// <summary>Takes <paramref name="system" /> out of the program, with its sequences, its triggers and its installations, as a step home's undo takes back.</summary>

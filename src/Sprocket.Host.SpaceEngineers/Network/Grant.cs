@@ -12,6 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>Whether it is lent to the one who asked.</summary>
         public bool Given;
 
+        /// <summary>Whether it is refused because the one who asked is none of the construct's big owners.</summary>
+        public bool Foreign;
+
         /// <summary>Who holds it where it is not given, or empty where nobody can have it.</summary>
         public string Holder;
 
@@ -33,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             ByteData.Write(grant.Block, data, ref offset);
-            ByteData.Write(grant.Given ? 1 : 0, data, ref offset);
+            ByteData.Write((grant.Given ? 1 : 0) | (grant.Foreign ? 2 : 0), data, ref offset);
             ByteData.WriteString(grant.Holder, data, ref offset);
             ByteData.WriteString(grant.Program, data, ref offset);
             ByteData.WriteString(grant.State, data, ref offset);
@@ -49,7 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             int given;
             ByteData.TryReadInt32(data, ref offset, out given);
-            grant.Given = given != 0;
+            grant.Given = (given & 1) != 0;
+            grant.Foreign = (given & 2) != 0;
 
             ByteData.TryReadString(data, ref offset, out grant.Holder);
             ByteData.TryReadString(data, ref offset, out grant.Program);

@@ -55,9 +55,23 @@ public sealed class Rig
     {
         _grids.Add(_grid);
         _welding = _grid;
-        Sprocket = _grid.Weld(new Programmable(sprocket, "Automation",
+        Sprocket = Weld(new Programmable(sprocket, "Automation",
             Type<MyObjectBuilder_MyProgrammableBlock>(), "LargeProgrammableBlock",
             "Programmable Block"));
+    }
+
+    /// <summary>Which faction each player is in, for every block on the construct.</summary>
+    public Factions Factions { get; } = new Factions();
+
+    /// <summary>Hands every block on the construct to <paramref name="identity" />, shared as <paramref name="share" /> says, as the game's transfer of a whole ship does.</summary>
+    public void Own(long identity, Sharing share = Sharing.Nobody)
+    {
+        var fitted = Fitted;
+        for (var i = 0; i < fitted.Count; i++)
+        {
+            fitted[i].Share = share;
+            fitted[i].Owner = identity;
+        }
     }
 
     /// <summary>
@@ -136,6 +150,7 @@ public sealed class Rig
     /// <summary>Welds a block on, as building one does.</summary>
     public T Weld<T>(T fitting) where T : Fitting
     {
+        fitting.Factions = Factions;
         return _welding.Weld(fitting);
     }
 

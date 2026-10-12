@@ -93,6 +93,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What somebody wrote above the program's first line, or empty.</summary>
         public string Annotation { get; set; } = "";
 
+        /// <summary>The construct's big owners the automation was last confirmed for, as the game's player identities; empty until the construct had any.</summary>
+        public List<long> Owners { get; } = new List<long>();
+
+        /// <summary>Who the automation belonged to when it changed hands outside sharing and paused, as the game's player identities; empty while it runs.</summary>
+        public List<long> PausedFrom { get; } = new List<long>();
+
+        /// <summary>Whether it is paused, running and firing nothing until a big owner resumes it.</summary>
+        public bool Paused => PausedFrom.Count > 0;
+
         /// <summary>The text that would not read, kept so it can be shown and mended; empty where everything read.</summary>
         public string Unread { get; private set; } = "";
 

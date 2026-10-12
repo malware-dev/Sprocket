@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -25,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         readonly Func<long, SprocketUnit> _find;
         readonly Action<long, string, string> _given;
         readonly Action<long, string, string, string> _refused;
+        readonly Action<long> _foreign;
         readonly Action<long, string, string> _changed;
         readonly Action<long, string, string> _stored;
 
@@ -63,15 +65,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// A claim turned down: the block, who holds it or empty where nobody can have it, and the
         /// program and what is switched off where somebody holds it, to look at.
         /// </param>
+        /// <param name="foreign">A claim turned down because the one who asked is none of the construct's big owners: the block.</param>
         /// <param name="changed">On the server, the holder's program and switches after a change of theirs.</param>
         /// <param name="stored">On a client, the program and switches the server wrote into a block.</param>
         public Handover(Func<long, SprocketUnit> find, Action<long, string, string> given,
-            Action<long, string, string, string> refused, Action<long, string, string> changed,
+            Action<long, string, string, string> refused, Action<long> foreign, Action<long, string, string> changed,
             Action<long, string, string> stored)
         {
             _find = find;
             _given = given;
             _refused = refused;
+            _foreign = foreign;
             _changed = changed;
             _stored = stored;
         }
@@ -255,6 +259,15 @@ namespace Sprocket.Host.SpaceEngineers.Network
             long lent = unit == null ? claim.Block : unit.Block.EntityId;
             var grant = new Grant { Block = lent, Holder = "", Program = "", State = "" };
 
+            // Only a big owner opens the automation, whoever holds it.
+            if (unit != null && !unit.Owns(MyAPIGateway.Players == null ? 0L : MyAPIGateway.Players.TryGetIdentityId(sender)))
+            {
+                grant.Foreign = true;
+                Told.Say(Who(claim.Name, sender) + " asked for block " + claim.Block + ", and was refused: they own none of it");
+                _channel.Send(grant, sender, true);
+                return;
+            }
+
             var holder = "";
             if (unit != null && Lend(lent, sender, claim.Name, out holder))
             {
@@ -279,6 +292,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             if (!fromServer)
                 return;
+
+            if (grant.Foreign)
+            {
+                Told.Say("the server refused block " + grant.Block + ": its automation belongs to its owners");
+                _foreign(grant.Block);
+                return;
+            }
 
             if (grant.Given)
             {

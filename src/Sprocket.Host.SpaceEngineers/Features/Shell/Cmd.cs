@@ -94,6 +94,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Copying a trigger.</summary>
         DuplicateTrigger,
 
+        // Changing hands.
+        /// <summary>Starting paused automation again as it was.</summary>
+        Resume,
+
+        /// <summary>Keeping paused automation stopped, and going on into the editor.</summary>
+        LeavePaused,
+
+        /// <summary>Removing every logic system of paused automation, after asking.</summary>
+        RemoveAll,
+
+        /// <summary>Opening the resume screen again from the banner.</summary>
+        ReviewPaused,
+
         // A logic system's switch, and one of a blueprint's.
         /// <summary>Switching a logic system on or off.</summary>
         EnableSystem,

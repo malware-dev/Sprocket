@@ -66,6 +66,14 @@ namespace Sprocket.Sim.Simulation
                     continue;
                 }
 
+                // The construct handed to a player by number, so a shot can show what changing hands does.
+                if (word == "own" && i + 1 < args.Length)
+                {
+                    script.Add(Step.Own).Count = int.Parse(args[i + 1], CultureInfo.InvariantCulture);
+                    i += 1;
+                    continue;
+                }
+
                 if (word == "load" && i + 1 < args.Length)
                 {
                     script.Add(Step.Load).Text = args[i + 1];
@@ -243,6 +251,13 @@ namespace Sprocket.Sim.Simulation
             if (step.Kind == Step.Move)
             {
                 scene.MoveTo(step.At);
+                drawn();
+                return;
+            }
+
+            if (step.Kind == Step.Own)
+            {
+                scene.Own(step.Count);
                 drawn();
                 return;
             }

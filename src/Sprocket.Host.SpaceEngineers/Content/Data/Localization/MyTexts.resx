@@ -1819,6 +1819,78 @@ Renaming it here renames the grid.</value>
     <value>Automation Signal</value>
     <comment>The block's toolbar action, as the game lists it.</comment>
   </data>
+  <data name="Sprocket.Paused.Title" xml:space="preserve">
+    <value>Paused</value>
+    <comment>The heading of the screen shown while automation is paused because its construct changed hands.</comment>
+  </data>
+  <data name="Sprocket.Paused.Why" xml:space="preserve">
+    <value>{construct} passed from {before} to {now}, so its automation is paused until you resume it.</value>
+    <comment>The first line of the resume screen. {construct} is the construct; {before} and {now} name players.</comment>
+  </data>
+  <data name="Sprocket.Paused.Someone" xml:space="preserve">
+    <value>someone else</value>
+    <comment>Stands in a sentence of the resume screen for a player whose name is not known.</comment>
+  </data>
+  <data name="Sprocket.Paused.Heading" xml:space="preserve">
+    <value>Automation is paused</value>
+    <comment>The heading in the middle of the resume screen, under its picture.</comment>
+  </data>
+  <data name="Sprocket.Paused.Size" xml:space="preserve">
+    <value>It holds {count} logic systems.</value>
+    <comment>The resume screen's line saying how much automation is paused. {count} is a number.</comment>
+  </data>
+  <data name="Sprocket.Paused.SizeOne" xml:space="preserve">
+    <value>It holds one logic system.</value>
+    <comment>Paused.Size where there is one.</comment>
+  </data>
+  <data name="Sprocket.Paused.LostOne" xml:space="preserve">
+    <value>One of its blocks is out of its reach.</value>
+    <comment>Paused.Lost where there is one.</comment>
+  </data>
+  <data name="Sprocket.Paused.ReturnedOne" xml:space="preserve">
+    <value>One is back in its reach.</value>
+    <comment>Paused.Returned where there is one.</comment>
+  </data>
+  <data name="Sprocket.Paused.RemoveOneQuestion" xml:space="preserve">
+    <value>Remove the logic system on {construct}?</value>
+    <comment>Paused.RemoveQuestion where there is one.</comment>
+  </data>
+  <data name="Sprocket.Paused.Lost" xml:space="preserve">
+    <value>{count} of its blocks are out of its reach.</value>
+    <comment>Blocks the new owners may not use. {blocks} is a list of names.</comment>
+  </data>
+  <data name="Sprocket.Paused.Returned" xml:space="preserve">
+    <value>{count} are back in its reach.</value>
+    <comment>Blocks the old owners could not use and the new owners may. {blocks} is a list of names.</comment>
+  </data>
+  <data name="Sprocket.Paused.Resume" xml:space="preserve">
+    <value>Resume</value>
+    <comment>Button on the resume screen: starts the automation again as it was.</comment>
+  </data>
+  <data name="Sprocket.Paused.Leave" xml:space="preserve">
+    <value>Leave paused</value>
+    <comment>Button on the resume screen: keeps it stopped and opens the editor.</comment>
+  </data>
+  <data name="Sprocket.Paused.RemoveAll" xml:space="preserve">
+    <value>Remove all</value>
+    <comment>Button on the resume screen, and the answer to its question: deletes every logic system.</comment>
+  </data>
+  <data name="Sprocket.Paused.RemoveQuestion" xml:space="preserve">
+    <value>Remove all {count} logic systems on {construct}?</value>
+    <comment>Asked before Remove all on the resume screen.</comment>
+  </data>
+  <data name="Sprocket.Paused.Banner" xml:space="preserve">
+    <value>Paused when {construct} changed hands.</value>
+    <comment>Banner over the editor while automation is left paused.</comment>
+  </data>
+  <data name="Sprocket.Paused.Review" xml:space="preserve">
+    <value>Review</value>
+    <comment>Button on that banner: opens the resume screen again.</comment>
+  </data>
+  <data name="Sprocket.Terminal.Foreign" xml:space="preserve">
+    <value>Only the owners of {construct} can open its automation.</value>
+    <comment>The game's message when somebody who is not among a construct's owners, the players owning most of its blocks, opens its automation. {construct} is the construct's name.</comment>
+  </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>This block's automation cannot be edited.</value>
     <comment>The game's message when the editor cannot open.</comment>

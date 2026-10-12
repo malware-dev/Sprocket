@@ -510,8 +510,8 @@ public class VocabularyTests
         ship.Start();
 
         Assert.Equal("When the sum of Radius on Left Lamp and Right Lamp is at least 7",
-            SequenceText.Trigger(ship.Runner.Bindings, radius, null));
-        Assert.Equal("When Door is not closed", SequenceText.Trigger(ship.Runner.Bindings, open, null));
+            SequenceText.Trigger(null!, ship.Runner.Bindings, null!, radius, null));
+        Assert.Equal("When Door is not closed", SequenceText.Trigger(null!, ship.Runner.Bindings, null!, open, null));
     }
 
     /// <summary>A comparison a block's member cannot be read for is a fault found before anything runs.</summary>

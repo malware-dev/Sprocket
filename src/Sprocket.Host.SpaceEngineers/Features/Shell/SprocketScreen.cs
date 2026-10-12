@@ -57,6 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _unit.Showing = true;
             Hud(false);
+            _unit.Editor.Opened();
 
             // A piston or rotor may have attached since this was last looked at, which changes which grids
             // are part of the construct without adding a block to any of them.

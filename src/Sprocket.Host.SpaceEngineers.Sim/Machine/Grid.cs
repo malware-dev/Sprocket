@@ -32,6 +32,7 @@ public sealed class Grid
 
     Action<IMySlimBlock> _added;
     Action<IMySlimBlock> _removed;
+    Action<IMyCubeGrid> _owned;
 
     /// <summary>A grid called <paramref name="name" />, <paramref name="id" /> its entity id, with a journal of its own.</summary>
     public Grid(string name, long id = 9000) : this(name, new List<string>(), id)
@@ -61,6 +62,8 @@ public sealed class Grid
             .Answers("remove_OnBlockAdded", invocation => Listen(ref _added, invocation, false))
             .Answers("add_OnBlockRemoved", invocation => Listen(ref _removed, invocation, true))
             .Answers("remove_OnBlockRemoved", invocation => Listen(ref _removed, invocation, false))
+            .Answers("add_OnBlockOwnershipChanged", invocation => Hear(invocation, true))
+            .Answers("remove_OnBlockOwnershipChanged", invocation => Hear(invocation, false))
             .Does("add_OnBlockIntegrityChanged", () => null)
             .Does("remove_OnBlockIntegrityChanged", () => null)
             .Does("add_OnGridBlockDamaged", () => null)
@@ -86,6 +89,7 @@ public sealed class Grid
             fitting.Cell = new Vector3I(_next++, 0, 0);
 
         _fitted.Add(fitting);
+        fitting.Owning = Owned;
         _slim[fitting] = Pretend.To<IMySlimBlock>()
             .Gives("FatBlock", () => fitting.Block)
             .Gives("CubeGrid", () => Block)
@@ -177,6 +181,20 @@ public sealed class Grid
                 return _tops[i];
         }
 
+        return null;
+    }
+
+    /// <summary>Tells whoever listens that a block on this grid changed hands, as the game does once per change.</summary>
+    void Owned()
+    {
+        if (_owned != null)
+            _owned(Block);
+    }
+
+    object Hear(Castle.DynamicProxy.IInvocation invocation, bool adding)
+    {
+        var handler = (Delegate)invocation.Arguments[0];
+        _owned = (Action<IMyCubeGrid>)(adding ? Delegate.Combine(_owned, handler) : Delegate.Remove(_owned, handler));
         return null;
     }
 

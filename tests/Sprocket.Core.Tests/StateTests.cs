@@ -45,6 +45,24 @@ public class StateTests
         Assert.Equal("", StateText.Save(Ship(), null));
     }
 
+    /// <summary>Who the automation belongs to, and who it was taken from while it is paused, are written by the players' identities and read back.</summary>
+    [Fact]
+    public void OwnersAndAPauseAreWrittenAndReadBack()
+    {
+        var before = Ship();
+        before.Owners.Add(144115188075855874);
+        before.PausedFrom.Add(144115188075855873);
+
+        var text = StateText.Save(before, null);
+        Assert.StartsWith("owned 144115188075855874\npaused 144115188075855873\n", text);
+
+        var after = Ship();
+        Assert.Equal("", StateText.Load(text, after, null));
+        Assert.Equal(new[] { 144115188075855874L }, after.Owners);
+        Assert.Equal(new[] { 144115188075855873L }, after.PausedFrom);
+        Assert.True(after.Paused);
+    }
+
     /// <summary>What is off is written and read back, with why where Sprocket switched it off.</summary>
     [Fact]
     public void WhatIsOffAndWhyIsWrittenAndReadBack()

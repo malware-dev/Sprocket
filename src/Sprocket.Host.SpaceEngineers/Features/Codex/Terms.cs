@@ -42,6 +42,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Writing rich text, which every description box's guide button opens.</summary>
         public const string Writing = "writing";
 
+        /// <summary>A construct changing hands, which the resume screen's guide button opens.</summary>
+        public const string ChangingHands = "changing-hands";
+
         const string Index = "index";
 
         /// <summary>What a line of the index starts with where its term begins a section of the contents.</summary>

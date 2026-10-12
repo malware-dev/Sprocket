@@ -26,6 +26,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <remarks>Persisted, and a phrase rather than a keyword, so it reserves no word in a script.</remarks>
         const string ByHand = "by hand";
 
+        /// <summary>What heads the line naming the big owners the automation was last confirmed for.</summary>
+        /// <remarks>Persisted. A name rather than a keyword, so it reserves no word in a script.</remarks>
+        const string Owned = "owned";
+
+        /// <summary>What heads the line naming who the automation belonged to when it paused, present only while it is paused.</summary>
+        /// <remarks>Persisted. A name rather than a keyword, so it reserves no word in a script.</remarks>
+        const string Paused = "paused";
+
         /// <summary>
         /// What is switched off and what is running, as a document.
         /// </summary>
@@ -35,6 +43,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public static string Save(Automation program, AutomationRunner runner)
         {
             var pen = new Pen();
+            Players(pen, Owned, program.Owners);
+            Players(pen, Paused, program.PausedFrom);
+
             var systems = program.Systems;
 
             for (var i = 0; i < systems.Count; i++)
@@ -68,6 +79,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             return pen.ToString();
+        }
+
+        /// <summary>Writes a line headed <paramref name="head" /> naming <paramref name="players" />, where there are any.</summary>
+        static void Players(Pen pen, string head, List<long> players)
+        {
+            if (players.Count == 0)
+                return;
+
+            pen.Head(head);
+            for (var i = 0; i < players.Count; i++)
+                pen.Whole(players[i]);
+
+            pen.End();
         }
 
         /// <summary>
@@ -358,13 +382,37 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
-                trouble.Say(line, "expected 'off', 'running', 'when' or 'every'.");
+                if (line.Key == Keyword.None && (line.Head == Owned || line.Head == Paused))
+                {
+                    Players(line, line.Head == Owned ? program.Owners : program.PausedFrom, trouble);
+                    continue;
+                }
+
+                trouble.Say(line, "expected 'off', 'running', 'when', 'every', 'owned' or 'paused'.");
             }
 
             if (trouble.What.Length > 0)
                 program.Damaged(trouble.What);
 
             return trouble.What;
+        }
+
+        /// <summary>Reads the players a line names into <paramref name="into" />, in place of what it held.</summary>
+        static void Players(Statement line, List<long> into, Trouble trouble)
+        {
+            into.Clear();
+            for (var i = 0; i < line.Count; i++)
+            {
+                var player = line.ValueAt(i);
+                if (player.Form != ValueForm.Integer)
+                {
+                    trouble.Say(line, "expected players, each as a whole number.");
+                    into.Clear();
+                    return;
+                }
+
+                into.Add(player.Whole);
+            }
         }
 
         /// <summary>
