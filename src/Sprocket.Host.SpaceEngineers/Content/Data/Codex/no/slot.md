@@ -19,9 +19,9 @@ Plassene regnes ut på nytt etter hver endring. Seks lys som velges for et steg 
 
 En plass som blir stående, beholder navnet sitt, hva den er til, og blokkene til hver installasjon. Angre tar tilbake et valg sammen med alle endringene det gjorde på plassene.
 
-## Bytte blokkene til et steg
+## Bytte blokkene til et steg eller en utløser
 
-Brukes plassen til et steg bare av det steget, beholdes plassen når du velger andre blokker for steget, med navnet, hva den er til, og blokkene til de andre installasjonene. De nye blokkene fyller den for installasjonen som vises, så lenge de er av et slag plassen forventer. Ellers er de nye blokkene et sett som alle andre, og blir til en plass etter reglene over.
+Brukes plassen til et steg eller en utløser bare av det, beholdes plassen når du velger andre blokker for det, med navnet, hva den er til, og blokkene til de andre installasjonene. De nye blokkene fyller den for installasjonen som vises, så lenge de er av et slag plassen forventer. Ellers er de nye blokkene et sett som alle andre, og blir til en plass etter reglene over.
 
 Fjerner du det siste steget eller den siste utløseren som bruker en plass, fjernes plassen. Blokker en annen installasjon hadde i den, legges til side for den installasjonen, og tilbys først når den fyller plassene sine på nytt.
 

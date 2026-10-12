@@ -19,9 +19,9 @@ Slots are worked out again after every change. Six lights picked for a step that
 
 A slot that stays keeps its name, what it is for, and every installation's blocks. Undo takes back a pick together with every change it made to the slots.
 
-## Changing a step's blocks
+## Changing the blocks of a step or a trigger
 
-Where a step's slot is used by that step alone, picking other blocks for the step keeps the slot, with its name, what it is for, and the other installations' blocks. The new blocks fill it for the installation shown, as long as they are of a kind the slot expects. Otherwise the new blocks are a set like any other, and make their slot by the rules above.
+Where the slot of a step or a trigger is used by it alone, picking other blocks for it keeps the slot, with its name, what it is for, and the other installations' blocks. The new blocks fill it for the installation shown, as long as they are of a kind the slot expects. Otherwise the new blocks are a set like any other, and make their slot by the rules above.
 
 Removing the last step or trigger that uses a slot removes the slot. Blocks another installation had in it are set aside for that installation, and offered first when it fills its slots again.
 

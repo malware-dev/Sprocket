@@ -1563,7 +1563,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         // history for it and nothing to take back to - which is why the trigger
                         // losing the button here loses it outright, the way the bin on its row is
                         // the way back from making one at all.
-                        MomentTrigger made = Starter(system, answer, null);
+                        MomentTrigger made = Starter(system, answer, null, null);
                         Unless(system, made, answer, null, delegate(Occupant taken)
                         {
                             // Settled now, so the questions that follow see it, and recorded, so adding the trigger takes it
@@ -1985,9 +1985,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <see cref="Vocabulary.Starter" />. In a system blueprint a button names a signal slot, new or, picked again for
         /// <paramref name="keeping" />, that trigger's own; the slot is taken and answered once the question of whether
         /// the buttons are free is answered - see <see cref="Answering" />. In a system it names the variable holding the
-        /// first button picked, defined at that answer too.
+        /// first button picked, defined at that answer too. Blocks picked again for a trigger watching <paramref name="replacing" />
+        /// keep its slot where they are one block of the kind it expects, as a step's do.
         /// </remarks>
-        public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, SignalTrigger keeping)
+        public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, SignalTrigger keeping, IList<string> replacing)
         {
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
@@ -1995,7 +1996,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var signal = made as SignalTrigger;
             if (signal == null || signal.IsWatched)
             {
-                var named = Named(system, answer.Targets);
+                var named = Named(system, answer.Targets, replacing);
                 for (var i = 0; i < named.Count; i++)
                     made.Sources.Add(named[i]);
 
@@ -2365,6 +2366,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return named;
         }
 
+        /// <summary>Whether the picks since the last edit change any slot of <paramref name="system" />.</summary>
+        bool Reslots(AutomationSystem system)
+        {
+            for (var i = 0; i < _picked.Count; i++)
+            {
+                if (_picked[i].System == system && !_picked[i].IsEmpty)
+                    return true;
+            }
+
+            return false;
+        }
+
         /// <summary>The changes the picks since the last edit worked out for <paramref name="system" />, in order, forgetting them; none where they were for another.</summary>
         List<Reslot> Unpicked(AutomationSystem system)
         {
@@ -2559,7 +2572,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     if (keeping != null && keeping.IsWritten)
                         keeping = null;
 
-                    MomentTrigger made = Starter(system, answer, keeping);
+                    MomentTrigger made = Starter(system, answer, keeping, moment.Sources);
                     Unless(system, made, answer, moment, delegate(Occupant taken)
                     {
                         if (Shares(taken, system))
@@ -2585,8 +2598,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             return;
                         }
 
+                        // A trigger left as it was by a block traded within its slot still changes that slot.
                         var change = new ChangeTrigger(moment, made);
-                        if (!change.Changes && taken == null)
+                        if (!change.Changes && taken == null && !Reslots(system))
                         {
                             Aimed(system, moment, aim, origin, false, null);
                             return;
