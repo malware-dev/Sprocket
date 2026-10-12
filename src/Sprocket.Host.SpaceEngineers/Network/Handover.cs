@@ -31,6 +31,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
         readonly Action<long, string, string> _changed;
         readonly Action<long, string, string> _stored;
         readonly Func<long, PlayerMemory> _player;
+        readonly Func<string> _settings;
+        readonly Action<string> _settled;
+        readonly Action<string> _ruled;
 
         readonly Dictionary<long, Sent> _sent = new Dictionary<long, Sent>();
 
@@ -71,9 +74,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <param name="changed">On the server, the holder's program and switches after a change of theirs.</param>
         /// <param name="stored">On a client, the program and switches the server wrote into a block.</param>
         /// <param name="player">A player's settings in this world, by identity: anybody's on the server, a client's own on a client.</param>
+        /// <param name="settings">On the server, the settings the world runs by, written as one text.</param>
+        /// <param name="settled">On a client, the server's settings arriving, which it takes as its own.</param>
+        /// <param name="ruled">On the server, settings an admin's client proposed, which it takes and keeps before telling every client.</param>
         public Handover(Func<long, SprocketUnit> find, Action<long, string, string> given,
             Action<long, string, string, string> refused, Action<long> foreign, Action<long, string, string> changed,
-            Action<long, string, string> stored, Func<long, PlayerMemory> player)
+            Action<long, string, string> stored, Func<long, PlayerMemory> player, Func<string> settings, Action<string> settled,
+            Action<string> ruled)
         {
             _find = find;
             _given = given;
@@ -82,6 +89,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _changed = changed;
             _stored = stored;
             _player = player;
+            _settings = settings;
+            _settled = settled;
+            _ruled = ruled;
         }
 
         /// <summary>Registers what a handover sends on the channel being built, and answers the builder.</summary>
@@ -95,7 +105,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 .UsingModel<Order>(Order.SizeOf, Order.Read, Order.Write)
                 .UsingModel<Wiring>(Wiring.SizeOf, Wiring.Read, Wiring.Write)
                 .UsingModel<Unwiring>(Unwiring.SizeOf, Unwiring.Read, Unwiring.Write)
-                .UsingModel<Preference>(Preference.SizeOf, Preference.Read, Preference.Write);
+                .UsingModel<Preference>(Preference.SizeOf, Preference.Read, Preference.Write)
+                .UsingModel<Ruling>(Ruling.SizeOf, Ruling.Read, Ruling.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
@@ -110,6 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.ListenFor<Wiring>(Wired);
             _channel.ListenFor<Unwiring>(Unwired);
             _channel.ListenFor<Preference>(Preferred);
+            _channel.ListenFor<Ruling>(Ruled);
         }
 
         /// <summary>Asks the server for the Sprocket on <paramref name="block" />, as <paramref name="name" />.</summary>
@@ -123,6 +135,19 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public void Prefer(bool ticks)
         {
             _channel.SendToServer(new Preference { Ticks = ticks }, true);
+        }
+
+        /// <summary>Proposes <paramref name="settings" />, written as one text, to the server, which takes them where this client's player is an admin.</summary>
+        public void Propose(string settings)
+        {
+            _channel.SendToServer(new Ruling { Settings = settings }, true);
+        }
+
+        /// <summary>Tells every client the settings the server runs the world by now.</summary>
+        /// <remarks>On the server, after an admin changed them.</remarks>
+        public void Rule()
+        {
+            _channel.Broadcast(new Ruling { Settings = _settings() }, true);
         }
 
         /// <summary>Hands back the Sprocket on <paramref name="block" />, finished with.</summary>
@@ -270,7 +295,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
             SprocketUnit unit = _find(claim.Block);
             long lent = unit == null ? claim.Block : unit.Block.EntityId;
             var identity = Identity(sender);
-            var grant = new Grant { Block = lent, Holder = "", Program = "", State = "", Ticks = _player(identity).Ticks };
+            var grant = new Grant
+            {
+                Block = lent, Holder = "", Program = "", State = "", Ticks = _player(identity).Ticks, Settings = _settings()
+            };
 
             // Only a big owner opens the automation, whoever holds it.
             if (unit != null && !unit.Owns(identity))
@@ -308,6 +336,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             var me = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             _player(me).Ticks = grant.Ticks;
+            _settled(grant.Settings);
 
             if (grant.Foreign)
             {
@@ -335,6 +364,31 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
 
             _player(Identity(sender)).Ticks = preference.Ticks;
+        }
+
+        /// <summary>
+        /// Settings arriving: at the server, proposed by a client, taken only from an admin and then told to every client; at a
+        /// client, the server's, which it takes as its own.
+        /// </summary>
+        void Ruled(ushort channel, Ruling ruling, ulong sender, bool fromServer)
+        {
+            if (!NetworkChannel.Network.IsServer)
+            {
+                if (fromServer)
+                    _settled(ruling.Settings);
+
+                return;
+            }
+
+            if (MyAPIGateway.Session == null || !MyAPIGateway.Session.IsUserAdmin(sender))
+            {
+                Told.Say(Who(sender) + " proposed settings for this world, and was refused: they are no admin");
+                return;
+            }
+
+            Told.Say(Who(sender) + " changed the settings for this world");
+            _ruled(ruling.Settings);
+            Rule();
         }
 
         /// <summary>The identity of the player on the client <paramref name="sender" />, or nought where the game has none.</summary>

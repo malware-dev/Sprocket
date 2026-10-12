@@ -35,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly List<string> _words = new List<string>();
         readonly List<StringBuilder> _spelled = new List<StringBuilder>();
         readonly List<Element> _rows = new List<Element>();
+        readonly List<Label> _named = new List<Label>();
         readonly Label _said;
         readonly Action _close;
 
@@ -58,13 +59,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _words.Add(word);
                 _spelled.Add(new StringBuilder(word));
 
+                var at = i;
+                var named = new Label { Style = Styles.ListWord, Text = word };
                 var row = new HStack
                 {
                     Style = Styles.ListRow,
-                    Command = new Relay(delegate { Choose(word); }),
-                    Children = { new Label { Style = Styles.ListWord, Text = word } }
+                    Command = new Relay(delegate { Choose(_words[at]); }),
+                    Children = { named }
                 };
 
+                _named.Add(named);
                 _rows.Add(row);
                 rows.Children.Add(row);
             }
@@ -135,6 +139,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             // Exactly that, never the room it was offered: the word grows into whatever it is given when it is placed.
             size.X = widest + Spacing + Mark;
             return size;
+        }
+
+        /// <summary>Spells the word at <paramref name="index" /> as <paramref name="word" />, the line too where that word is the one given.</summary>
+        public void Respell(int index, string word)
+        {
+            var was = _words[index];
+            if (was == word)
+                return;
+
+            _words[index] = word;
+            _spelled[index].Clear().Append(word);
+            _named[index].Text = word;
+            if (_text == was)
+                Text = word;
+
+            InvalidateMeasure();
+        }
+
+        /// <summary>Has the word at <paramref name="index" /> say <paramref name="about" /> under the pointer, in the list.</summary>
+        public void Explain(int index, Tip about)
+        {
+            _rows[index].Tip = about;
         }
 
         /// <inheritdoc />

@@ -2565,4 +2565,124 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>The game gives mods no access to the clipboard, so text copied anywhere else, outside the game or from the game's own text boxes, can't be pasted here. To bring it in, put it in sprocket-clipboard.txt in the game's Storage folder, then paste.</value>
     <comment>Shown under a text box the first time something is pasted into one. The file name is the real one and is not translated.</comment>
   </data>
+  <data name="Sprocket.Admin.Button" xml:space="preserve">
+    <value>Admin</value>
+    <comment>The striped button in the home screen heading that opens the admin settings; only admins see it.</comment>
+  </data>
+  <data name="Sprocket.Admin.Title" xml:space="preserve">
+    <value>Admin settings</value>
+    <comment>Title of the admin settings dialog.</comment>
+  </data>
+  <data name="Sprocket.Admin.Line" xml:space="preserve">
+    <value>Changes apply at once to everyone on this world.</value>
+    <comment>Under the admin settings title.</comment>
+  </data>
+  <data name="Sprocket.Admin.Rules" xml:space="preserve">
+    <value>World rules</value>
+    <comment>Heading over the world-wide rules in the admin settings.</comment>
+  </data>
+  <data name="Sprocket.Admin.Fastest" xml:space="preserve">
+    <value>Fastest update</value>
+    <comment>Name of the setting capping how often anything repeats.</comment>
+  </data>
+  <data name="Sprocket.Admin.FastestAbout" xml:space="preserve">
+    <value>How often timers and block checks may repeat. Button presses, other game events and timed waits are not affected.</value>
+    <comment>Under Fastest update.</comment>
+  </data>
+  <data name="Sprocket.Admin.EveryTick" xml:space="preserve">
+    <value>Every tick (most accurate)</value>
+    <comment>Fastest update choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.EveryTen" xml:space="preserve">
+    <value>Every 10 ticks</value>
+    <comment>Fastest update choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.EveryHundred" xml:space="preserve">
+    <value>Every 100 ticks (lightest)</value>
+    <comment>Fastest update choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.Developer" xml:space="preserve">
+    <value>Developer mode</value>
+    <comment>Name of the developer mode switch in the admin settings.</comment>
+  </data>
+  <data name="Sprocket.Admin.DeveloperAbout" xml:space="preserve">
+    <value>Shows each automation's script as text you can edit, and adds extra tools to screens. Meant for testing and making content, not normal play.</value>
+    <comment>Under Developer mode.</comment>
+  </data>
+  <data name="Sprocket.Admin.Trials" xml:space="preserve">
+    <value>Trials</value>
+    <comment>Heading over the designs being compared in the admin settings.</comment>
+  </data>
+  <data name="Sprocket.Admin.TrialsAbout" xml:space="preserve">
+    <value>Designs still being compared. A trial is removed once its design is chosen.</value>
+    <comment>Under Trials.</comment>
+  </data>
+  <data name="Sprocket.Admin.Waits" xml:space="preserve">
+    <value>Waits in sequences</value>
+    <comment>Name of the trial of how waits are shown and edited.</comment>
+  </data>
+  <data name="Sprocket.Admin.WaitsAbout" xml:space="preserve">
+    <value>Changes only how waits are shown and edited. Sequences run the same either way.</value>
+    <comment>Under Waits in sequences.</comment>
+  </data>
+  <data name="Sprocket.Admin.WaitsSwitch" xml:space="preserve">
+    <value>Switch on each step</value>
+    <comment>Waits in sequences choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.WaitsStep" xml:space="preserve">
+    <value>Wait as its own step</value>
+    <comment>Waits in sequences choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.Close" xml:space="preserve">
+    <value>Close</value>
+    <comment>Button closing the admin settings; changes apply as they are made.</comment>
+  </data>
+  <data name="Sprocket.Admin.ThisWorld" xml:space="preserve">
+    <value>This world</value>
+    <comment>Admin settings tab for the settings of the world being played.</comment>
+  </data>
+  <data name="Sprocket.Admin.ThisWorldAbout" xml:space="preserve">
+    <value>Settings for this world only.</value>
+    <comment>Under the pointer on the This world tab.</comment>
+  </data>
+  <data name="Sprocket.Admin.EveryWorld" xml:space="preserve">
+    <value>Every world</value>
+    <comment>Admin settings tab for the defaults every world follows.</comment>
+  </data>
+  <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
+    <value>The defaults, used by any world that does not set a value itself. On a dedicated server, they cover every world the server hosts. In single player or a game you host, they cover all your worlds.</value>
+    <comment>Under the pointer on the Every world tab.</comment>
+  </data>
+  <data name="Sprocket.Admin.On" xml:space="preserve">
+    <value>On</value>
+    <comment>Developer mode choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.Off" xml:space="preserve">
+    <value>Off</value>
+    <comment>Developer mode choice.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultAbout" xml:space="preserve">
+    <value>Use the value set under Every world, and follow it if it changes later.</value>
+    <comment>Under the pointer on the Default choice of each setting on the This world tab. Every world is the tab name.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultEveryTick" xml:space="preserve">
+    <value>Default (every tick)</value>
+    <comment>This world choice leaving Fastest update to Every world, which gives every tick.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultEveryTen" xml:space="preserve">
+    <value>Default (every 10 ticks)</value>
+    <comment>This world choice leaving Fastest update to Every world, which gives every 10 ticks.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultEveryHundred" xml:space="preserve">
+    <value>Default (every 100 ticks)</value>
+    <comment>This world choice leaving Fastest update to Every world, which gives every 100 ticks.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultOn" xml:space="preserve">
+    <value>Default (on)</value>
+    <comment>This world choice leaving Developer mode to Every world, which has it on.</comment>
+  </data>
+  <data name="Sprocket.Admin.DefaultOff" xml:space="preserve">
+    <value>Default (off)</value>
+    <comment>This world choice leaving Developer mode to Every world, which has it off.</comment>
+  </data>
 </root>

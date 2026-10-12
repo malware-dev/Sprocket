@@ -120,9 +120,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public bool Live { get; set; }
 
-        /// <summary>The fewest ticks between two looks of a <c>when</c> or an <c>every</c>, whatever the program asks for.</summary>
-        /// <remarks>Set by whatever owns the runner, from what the server says it can afford; 1 by default, which holds nothing back.</remarks>
-        public int QuickestLook { get; set; } = 1;
+        /// <summary>The fewest ticks between two runs of anything on a repeat, whatever the program asks for: a timer, a <c>when</c>'s look, a run's look at a step it waits on.</summary>
+        /// <remarks>
+        /// Set by whatever owns the runner, from the world's fastest update; 1 by default, which holds nothing back. A change the
+        /// game announces and a timed wait are not on a repeat, and keep their own moment.
+        /// </remarks>
+        public int FastestUpdate { get; set; } = 1;
 
         /// <summary>Advances everything to the given frame.</summary>
         public void Tick(int tick)

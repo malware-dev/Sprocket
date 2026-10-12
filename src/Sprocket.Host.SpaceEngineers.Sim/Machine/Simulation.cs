@@ -51,6 +51,8 @@ public sealed class Simulation
 
     readonly Texts _texts = new Texts();
 
+    Settings _settings = new Settings(developerMode: false);
+
     readonly int _saidBefore;
 
     int _frame;
@@ -138,7 +140,7 @@ public sealed class Simulation
     {
         // Said outright rather than read: the harness has no mod storage. A test that wants the
         // developer tools sets Editor.DeveloperMode on the way past.
-        _unit = new SprocketUnit(_rig.Sprocket.Block, new Settings(developerMode: false), _rota, _texts,
+        _unit = new SprocketUnit(_rig.Sprocket.Block, _settings, _rota, _texts,
             _memories.Claim(_rig.Sprocket.Block.EntityId), _backups);
         _unit.Begin(Now);
 
@@ -147,6 +149,9 @@ public sealed class Simulation
         _unit.Shelf = _shelf;
         _unit.Preferences = _preferences;
         _unit.Viewer = _memories.Player(Viewer);
+        _unit.Administers = () => Admin;
+        _unit.WorldSettings = () => _settings;
+        _unit.ChangeSettings = Settle;
 
         // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
         // removed the hero has finished changing.
@@ -199,8 +204,21 @@ public sealed class Simulation
     /// <summary>The editor on the rig's programmable block.</summary>
     public SprocketEditor Editor => _unit.Editor;
 
+    /// <summary>Whether the player at the harness's screen is an admin with creative tools on, who sees the world's settings.</summary>
+    public bool Admin { get; set; }
+
+    /// <summary>The settings the harness's world runs by, as an admin last left them.</summary>
+    public Settings Settings => _settings;
+
     /// <summary>The blocks the automation sees.</summary>
     public GridWorld World => _unit.World;
+
+    /// <summary>Runs the harness's world by <paramref name="next" /> from now on, as the server does when an admin changes them.</summary>
+    public void Settle(Settings next)
+    {
+        _settings = next;
+        _unit.Apply(next);
+    }
 
     /// <summary>What runs the automation's sequences.</summary>
     public AutomationRunner Runner => _unit.Runner;

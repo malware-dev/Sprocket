@@ -55,6 +55,15 @@ public class HandoverTests : IDisposable
         public string State = "";
         public string Switches = "";
 
+        /// <summary>The settings this end runs the world by, written as one text, where it is the server.</summary>
+        public string Served = new Settings(false).Written();
+
+        /// <summary>The server's settings as they last arrived, where this end is a client.</summary>
+        public string? Settled;
+
+        /// <summary>Settings an admin's client proposed that this end, the server, took.</summary>
+        public readonly List<string> Ruled = new List<string>();
+
         /// <summary>The players' settings this end keeps: anybody's on the server, its own on a client.</summary>
         public readonly Dictionary<long, PlayerMemory> Players = new Dictionary<long, PlayerMemory>();
 
@@ -97,7 +106,14 @@ public class HandoverTests : IDisposable
                     heard.Switches = switches;
                 },
                 (_, program, _) => heard.Stored.Add(program),
-                heard.Player);
+                heard.Player,
+                () => heard.Served,
+                settled => heard.Settled = settled,
+                ruled =>
+                {
+                    heard.Ruled.Add(ruled);
+                    heard.Served = ruled;
+                });
 
             made.Listen(Network.Handover.Carry(NetworkChannel.Create("Sprocket.HandoverTests")).Build());
         });
@@ -356,6 +372,87 @@ public class HandoverTests : IDisposable
 
         Assert.Equal(new[] { _block.ToString() }, heard.Foreign);
         Assert.Empty(heard.Given);
+    }
+
+    /// <summary>A client is lent a Sprocket with the settings the server runs the world by, and takes them as its own.</summary>
+    [Fact]
+    public void AClientIsLentTheServersSettings()
+    {
+        _atServer.Served = new Settings(true, 10).Written();
+        var anna = _wire.Client("Anna");
+        var heard = new Heard();
+        var annas = Client(anna, heard);
+
+        _wire.As(anna, () => annas.Ask(_block, "Anna"));
+        _wire.Settle();
+
+        Assert.Equal(new[] { _block.ToString() }, heard.Given);
+        var settled = Settings.Of(heard.Settled);
+        Assert.True(settled.DeveloperMode);
+        Assert.Equal(10, settled.FastestUpdate);
+    }
+
+    /// <summary>Settings proposed by a client whose player is no admin change nothing and reach nobody, whatever the message says.</summary>
+    [Fact]
+    public void ANonAdminsSettingsAreRefused()
+    {
+        var anna = _wire.Client("Anna");
+        var heard = new Heard();
+        var annas = Client(anna, heard);
+        var was = _atServer.Served;
+
+        Admins(_ => false, () =>
+        {
+            _wire.As(anna, () => annas.Propose(new Settings(true, 100).Written()));
+            _wire.Settle();
+        });
+
+        Assert.Empty(_atServer.Ruled);
+        Assert.Equal(was, _atServer.Served);
+        Assert.Null(heard.Settled);
+    }
+
+    /// <summary>Settings an admin's client proposes are taken by the server and told to every client.</summary>
+    [Fact]
+    public void AnAdminsSettingsAreTakenAndToldToEveryone()
+    {
+        var anna = _wire.Client("Anna");
+        var bert = _wire.Client("Bert");
+        var hers = new Heard();
+        var his = new Heard();
+        var annas = Client(anna, hers);
+        Client(bert, his);
+        var proposed = new Settings(true, 100, World.Waiting.Step).Written();
+
+        Admins(id => id == anna.Id, () =>
+        {
+            _wire.As(anna, () => annas.Propose(proposed));
+            _wire.Settle();
+        });
+
+        Assert.Equal(new[] { proposed }, _atServer.Ruled);
+        var told = Settings.Of(his.Settled);
+        Assert.True(told.DeveloperMode);
+        Assert.Equal(100, told.FastestUpdate);
+        Assert.Equal(World.Waiting.Step, told.Waiting);
+        Assert.Equal(his.Settled, hers.Settled);
+    }
+
+    /// <summary>Runs <paramref name="act" /> with the game saying which players are admins as <paramref name="admin" /> answers.</summary>
+    static void Admins(Func<ulong, bool> admin, Action act)
+    {
+        var was = MyAPIGateway.Session;
+        MyAPIGateway.Session = Pretend.To<IMySession>()
+            .Does("IsUserAdmin", arguments => admin((ulong)arguments[0]))
+            .Done();
+        try
+        {
+            act();
+        }
+        finally
+        {
+            MyAPIGateway.Session = was;
+        }
     }
 
     /// <summary>A client is lent a Sprocket with the unit its player gives lengths of time in, as the server keeps it.</summary>

@@ -56,6 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly Glyph _redo;
         readonly Switch _switch;
         readonly Button _done;
+        readonly HazardButton _admin;
         readonly Glyph _close;
         readonly Glyph _help;
         readonly Button _library;
@@ -142,6 +143,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                     _title,
                                     // Quietest first, and Done or the close cross last: the row stands against the right edge, so a
                                     // control's place depends only on what stands to its right, and the last cannot be moved by anything.
+                                    // Meant to stand out: it changes the whole world for everyone, and only an admin sees it.
+                                    new HazardButton { Style = Styles.Button, Command = new Relay(OpenAdmin) }.As(out _admin),
                                     new Glyph { Symbol = "?", Style = Styles.Help, Placement = Fixed.Size(32f, 32f), Command = _helps }.As(out _help),
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
                                     new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
@@ -652,6 +655,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _close.IsVisible = closes;
             _close.Tip = Tip.For(_close.Tip, !closes ? null : texts.ChromeClose);
 
+            // On the home screen alone, which is where the whole world's automation starts from. Asked as the screen is
+            // dressed, which it is as the editor opens: creative tools are switched on and off with the editor put away.
+            _admin.IsVisible = !screen.CanGoBack && _editor.MayAdminister;
+            _admin.Text = texts.AdminButton;
             _help.IsVisible = screen.Help != null;
             _helps.CanExecute = screen.Help != null;
             _help.Tip = Tip.For(_help.Tip, screen.Help == null ? null : _editor.CodexOpen ? texts.CodexClose : texts.CodexHelp);
@@ -850,7 +857,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _input.Focus(box);
         }
 
+        /// <summary>Opens the world's settings over the screen, for an admin.</summary>
+        void OpenAdmin()
+        {
+            if (_editor.MayAdminister)
+                _windows.Open(new Admin.AdminDialog(_editor));
+        }
+
         /// <summary>Carries out <paramref name="command" />, where there is one that can be.</summary>
+
         static void Run(ICommand command)
         {
             if (command != null && command.CanExecute)

@@ -21,20 +21,20 @@ namespace Sprocket.Sim.Simulation
             Save(path, width, height, null);
         }
 
-        /// <summary>Runs the script and writes what the last step left on screen; the block starts holding <paramref name="holding" />, or nothing, the screen speaks <paramref name="culture" />, or English, and offers the developer tools where <paramref name="developer" />.</summary>
+        /// <summary>Runs the script and writes what the last step left on screen; the block starts holding <paramref name="holding" />, or nothing, the screen speaks <paramref name="culture" />, or English, offers the developer tools where <paramref name="developer" />, and is an admin's where <paramref name="admin" />.</summary>
         public static string Save(string path, int width, int height, Script script, string holding = null,
-            string culture = null, bool developer = false)
+            string culture = null, bool developer = false, bool admin = false)
         {
             // A construct that remembers nothing, the same as the suite uses. A shot that ran on the
             // playground both depended on what somebody last built by hand and wrote its own script
             // into it, so taking a picture quietly edited the thing being photographed.
             var scene = holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding);
-            return Save(path, width, height, script, scene, culture, developer);
+            return Save(path, width, height, script, scene, culture, developer, admin);
         }
 
         /// <summary>The same, of <paramref name="scene" />, for a construct somebody fitted out for the picture.</summary>
         public static string Save(string path, int width, int height, Script script, EditorScene scene,
-            string culture = null, bool developer = false)
+            string culture = null, bool developer = false, bool admin = false)
         {
             // Drawn at exactly the size asked for, so a shot is the screen at that resolution rather
             // than a picture of it scaled to fit something else.
@@ -47,6 +47,14 @@ namespace Sprocket.Sim.Simulation
             if (developer)
             {
                 scene.Editor.DeveloperMode = true;
+                scene.Tick();
+            }
+
+            // Asked as the editor opens, as the game asks, so it opens again for an admin.
+            if (admin)
+            {
+                scene.Ship.Admin = true;
+                scene.Reopen();
                 scene.Tick();
             }
 

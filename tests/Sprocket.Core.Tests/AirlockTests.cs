@@ -1113,10 +1113,10 @@ public class AirlockTests
     /// decide.
     /// </remarks>
     [Fact]
-    public void AWhenIsHeldToTheQuickestLook()
+    public void AWhenIsHeldToTheFastestUpdate()
     {
         var a = Build();
-        a.Runner.QuickestLook = 30;
+        a.Runner.FastestUpdate = 30;
         var system = a.Automation.Systems[0];
 
         var on = new WhenTrigger("room-status") { Value = Literal.Name("full") };
@@ -1223,6 +1223,54 @@ public class AirlockTests
 
         // One each for finishing opening, finishing closing, and being told to move.
         Assert.Equal(3, a.Outer.Listeners);
+    }
+
+    /// <summary>A moment the block announces is seen on the tick after however slow the world's fastest update, as nothing repeats.</summary>
+    [Fact]
+    public void AnAnnouncedMomentIsNotHeldBackByTheFastestUpdate()
+    {
+        var a = Build();
+        a.Runner.FastestUpdate = 100;
+        var system = a.Automation.Systems[0];
+
+        var opened = SignalTrigger.Written("ext", "finishes-opening");
+        opened.Sources.Add(a.Ref(a.Seen(a.Outer)));
+        opened.Does = Do("close", a.Ref(a.Seen(a.Inner)));
+        system.AddTrigger(opened);
+        a.Automation.Edited();
+
+        a.Inner.ForceOpen();
+        a.Tick(39);
+        a.Log.Clear();
+
+        a.Outer.ForceOpen();
+        a.Tick();
+
+        Assert.Equal(["Inner Door:close"], a.Log);
+    }
+
+    /// <summary>A run looking at a step it waits on, again and again until the blocks finish, is held to the world's fastest update.</summary>
+    [Fact]
+    public void ARunsLooksAtAStepAreHeldToTheFastestUpdate()
+    {
+        var a = Build();
+        a.Runner.FastestUpdate = 100;
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        var held = 0;
+        for (var tick = 0; tick < 400 && a.State.IsRunning; tick++)
+        {
+            a.Tick();
+            if (!a.State.Memory.Holding)
+                continue;
+
+            held++;
+            Assert.Equal(Rota.Hundred, a.State.Memory.Busy.Period);
+        }
+
+        Assert.True(held > 0, "the run never held at a step");
     }
 
     /// <summary>A door starting to open is seen on the tick after it is told to, whatever the <c>when</c> asks for.</summary>

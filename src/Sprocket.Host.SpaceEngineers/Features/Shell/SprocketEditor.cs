@@ -151,6 +151,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Set beside <see cref="Wire" />, and like it, on a copy a client is editing it asks the server.</remarks>
         public Action Unwire { get; set; }
 
+        /// <summary>Whether the player at the screen may change the world's settings now, or null where nobody may.</summary>
+        public Func<bool> Administers { get; set; }
+
+        /// <summary>The settings the world runs by, or null where nothing gives them.</summary>
+        public Func<Settings> WorldSettings { get; set; }
+
+        /// <summary>Where a change of the world's settings is made, or null where nobody may change them.</summary>
+        public Action<Settings> ChangeSettings { get; set; }
+
+        /// <summary>Whether the admin's button belongs on the screen now: the player may change the world's settings.</summary>
+        public bool MayAdminister => Administers != null && WorldSettings != null && ChangeSettings != null && Administers();
+
         /// <summary>Where a change of the unit the player gives lengths of time in is told on, or null where <see cref="Viewer" /> is the world's own.</summary>
         /// <remarks>Set on a copy a client is editing, which tells the server.</remarks>
         public Action Preferred { get; set; }

@@ -115,7 +115,8 @@ namespace Sprocket.Host.SpaceEngineers
         GameCodex _codex;
 
         /// <summary>
-        /// What the player asked for, read the first time anything wants to know.
+        /// The settings the world runs by: read the first time anything wants to know where this machine runs the world, and
+        /// as the server last said on a client, every default until it has.
         /// </summary>
         /// <remarks>
         /// Not in <see cref="LoadData" />: mod storage is not reliably there that early, and a read
@@ -124,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         Settings Asked
         {
-            get { return _settings ?? (_settings = Settings.Read()); }
+            get { return _settings ?? (_settings = IsServer ? Settings.Read() : new Settings(false)); }
         }
 
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
@@ -304,7 +305,8 @@ namespace Sprocket.Host.SpaceEngineers
 
             Speak();
 
-            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player);
+            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, delegate { return Asked.Written(); },
+                Settled, delegate(string written) { Rule(Settings.Of(written)); });
             _doors = new AutoClose(_rota, Frame, _memories.Closing);
             _channel = AutoClose.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
@@ -502,6 +504,49 @@ namespace Sprocket.Host.SpaceEngineers
             File(id, rebuilt);
             Spread(rebuilt);
             Told.Say(was.Block.CustomName + " was built again from the change, and saved");
+        }
+
+        /// <summary>Whether the player at this machine may change the world's settings now: an admin, or higher, with creative tools on or in a creative world.</summary>
+        /// <remarks>
+        /// The game gives a mod no way to ask about creative tools directly. Copy and paste is on for the local player exactly
+        /// while they have creative tools on, or the world is creative and allows it.
+        /// </remarks>
+        static bool Administers()
+        {
+            var session = MyAPIGateway.Session;
+            return session != null && session.PromoteLevel >= MyPromoteLevel.Admin && (session.EnableCopyPaste || session.CreativeMode);
+        }
+
+        /// <summary>Changes the world's settings to <paramref name="next" />: at once where this machine runs the world, by asking the server otherwise.</summary>
+        void ChangeSettings(Settings next)
+        {
+            if (!IsServer)
+            {
+                _handover.Propose(next.Written());
+                return;
+            }
+
+            Rule(next);
+            _handover.Rule();
+        }
+
+        /// <summary>Runs the world by <paramref name="next" /> from now on, keeps each level that changed in its own file, and has every Sprocket here follow.</summary>
+        /// <remarks>On the machine that runs the world.</remarks>
+        void Rule(Settings next)
+        {
+            var was = Asked;
+            _settings = next;
+            next.Keep(was);
+            foreach (var unit in _units.Values)
+                unit.Apply(next);
+        }
+
+        /// <summary>The server's settings arriving at this client, which it takes as its own, the Sprocket it shows included.</summary>
+        void Settled(string written)
+        {
+            _settings = Settings.Of(written);
+            if (_copy != null)
+                _copy.Apply(_settings);
         }
 
         /// <summary>The settings in this world of the player with <paramref name="identity" />; on a client, which knows its own alone, its own.</summary>
@@ -818,6 +863,9 @@ namespace Sprocket.Host.SpaceEngineers
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
             unit.Editor.Preferred = IsServer ? null : (Action)delegate { _handover.Prefer(_mine.Ticks); };
+            unit.Administers = Administers;
+            unit.WorldSettings = delegate { return Asked; };
+            unit.ChangeSettings = ChangeSettings;
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
                 if (_screen != null)

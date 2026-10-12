@@ -133,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     asked = every == null || every.IntervalTicks < 1 ? Default : every.IntervalTicks;
                 }
 
-                return asked < _owner.QuickestLook ? _owner.QuickestLook : asked;
+                return asked < _owner.FastestUpdate ? _owner.FastestUpdate : asked;
             }
         }
 
@@ -231,10 +231,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _rota.At(_shift, _tick + cadence);
         }
 
-        /// <summary>A block announced a change: looks on the next tick, and no sooner than the runner allows after the last look.</summary>
+        /// <summary>A block announced a change: looks on the next tick, which the world's fastest update does not hold back, as nothing repeats.</summary>
         void Heard()
         {
-            _rota.At(_shift, _tick + _owner.QuickestLook);
+            _rota.At(_shift, _tick + 1);
         }
 
         /// <summary>

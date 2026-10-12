@@ -1,0 +1,217 @@
+using System;
+using System.Collections.Generic;
+using Lumel;
+using Lumel.Controls;
+using Lumel.Input;
+using Lumel.Layout;
+using Lumel.Text;
+using Lumel.Windows;
+using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.World;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Admin
+{
+    /// <summary>The world's settings, for an admin to change: a tab for this world and one for every world, each setting a list of its choices.</summary>
+    /// <remarks>
+    /// Read top to bottom, each setting with what it does under its name and its choices under that. A change applies as it is
+    /// made. Under this world each rule's list starts with the default, which leaves the rule to every world; a trial has no
+    /// default, as it lasts only until its design is chosen.
+    /// </remarks>
+    public sealed class AdminDialog : Dialog
+    {
+        /// <summary>How wide the dialog stands.</summary>
+        const float Wide = 600f;
+
+        readonly SprocketEditor _editor;
+        readonly List<Choice> _choices = new List<Choice>();
+
+        Settings _shown;
+
+        /// <summary>The dialog for <paramref name="editor" />, showing the settings the world runs by now, on this world's tab.</summary>
+        public AdminDialog(SprocketEditor editor)
+        {
+            _editor = editor;
+            var texts = editor.Texts;
+            Style = Styles.Dialog;
+            Placement = Fixed.Wide(Wide);
+            var close = new Relay(Close);
+            Cancel = close;
+            Accept = close;
+
+            var tabs = new Tabs { HeaderStyle = Styles.Tab, CurrentStyle = Styles.TabCurrent };
+            tabs.Add(texts.AdminThisWorld, Page(texts, true), Tip.For(null, texts.AdminThisWorldAbout));
+            tabs.Add(texts.AdminEveryWorld, Page(texts, false), Tip.For(null, texts.AdminEveryWorldAbout));
+
+            Content = new VStack
+            {
+                Spacing = 16f,
+                Children =
+                {
+                    new Label { Style = Styles.Phrase, Text = texts.AdminTitle },
+                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminLine },
+                    tabs,
+                    new Button { Style = Styles.Primary, Text = texts.AdminClose, Align = Align.Right, Command = close }
+                }
+            };
+
+            Show(editor.WorldSettings());
+        }
+
+        /// <summary>The settings it shows, which are what it changes from.</summary>
+        public Settings Shown => _shown;
+
+        /// <summary>The page of one level: this world's where <paramref name="world" /> says, every world's otherwise.</summary>
+        Element Page(Texts texts, bool world)
+        {
+            return new VStack
+            {
+                Spacing = 16f,
+                Children =
+                {
+                    new Label { Style = Styles.Heading, Text = texts.AdminRules },
+                    Setting(texts.AdminFastest, texts.AdminFastestAbout, Choose(texts, world,
+                        new[] { texts.AdminEveryTick, texts.AdminEveryTen, texts.AdminEveryHundred },
+                        new[] { texts.AdminDefaultEveryTick, texts.AdminDefaultEveryTen, texts.AdminDefaultEveryHundred },
+                        delegate(Layer layer) { return layer.FastestUpdate.HasValue ? Array.IndexOf(World.Layer.Updates, layer.FastestUpdate.Value) : -1; },
+                        delegate(Settings settings) { return Array.IndexOf(World.Layer.Updates, settings.DefaultFastestUpdate); },
+                        delegate(Layer layer, int at) { return layer.WithFastestUpdate(at < 0 ? (int?)null : World.Layer.Updates[at]); })),
+                    Setting(texts.AdminDeveloper, texts.AdminDeveloperAbout, Choose(texts, world,
+                        new[] { texts.AdminOn, texts.AdminOff },
+                        new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
+                        delegate(Layer layer) { return layer.DeveloperMode.HasValue ? Developer(layer.DeveloperMode.Value) : -1; },
+                        delegate(Settings settings) { return Developer(settings.DefaultDeveloperMode); },
+                        delegate(Layer layer, int at) { return layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0); })),
+                    new Label { Style = Styles.Heading, Text = texts.AdminTrials },
+                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminTrialsAbout },
+                    Setting(texts.AdminWaits, texts.AdminWaitsAbout, Choose(texts, world,
+                        new[] { texts.AdminWaitsSwitch, texts.AdminWaitsStep },
+                        null,
+                        delegate(Layer layer) { return layer.Waiting.HasValue ? Waits(layer.Waiting.Value) : -1; },
+                        delegate(Settings settings) { return Waits(settings.DefaultWaiting); },
+                        delegate(Layer layer, int at) { return layer.WithWaiting(at < 0 ? (Waiting?)null : at == 0 ? Waiting.Switch : Waiting.Step); }))
+                }
+            };
+        }
+
+        /// <summary>
+        /// The list of one setting at one level: <paramref name="words" /> for its values, and under this world, first, the default,
+        /// spelled as <paramref name="defaults" /> has the value it stands for, where the setting has one.
+        /// </summary>
+        Element Choose(Texts texts, bool world, string[] words, string[] defaults, Func<Layer, int> given, Func<Settings, int> standing,
+            Func<Layer, int, Layer> giving)
+        {
+            var defaulted = world && defaults != null;
+            var listed = new List<string>();
+            if (defaulted)
+                listed.Add(defaults[0]);
+            listed.AddRange(words);
+
+            var field = new ListField(listed) { Align = Align.Left };
+            if (defaulted)
+                field.Explain(0, Tip.For(null, texts.AdminDefaultAbout));
+
+            var choice = new Choice(world, field, words, defaulted ? defaults : null, given, standing, giving);
+            field.Edited += delegate { Change(choice); };
+            _choices.Add(choice);
+            return field;
+        }
+
+        /// <summary>Makes the change the word <paramref name="choice" /> now gives asks for, at its level.</summary>
+        void Change(Choice choice)
+        {
+            var at = Array.IndexOf(choice.Words, choice.Field.Text);
+            var next = choice.World
+                ? _shown.WithWorld(choice.Giving(_shown.World, at))
+                : _shown.WithGlobal(choice.Giving(_shown.Global, at));
+
+            _editor.ChangeSettings(next);
+            Show(next);
+        }
+
+        /// <summary>Gives each list the word <paramref name="settings" /> has for it, each default spelled with the value it stands for.</summary>
+        void Show(Settings settings)
+        {
+            _shown = settings;
+            foreach (var choice in _choices)
+            {
+                var standing = choice.Standing(settings);
+                var given = choice.World ? choice.Given(settings.World) : -1;
+                if (choice.Defaults == null || !choice.World)
+                {
+                    choice.Field.Text = choice.Words[given < 0 ? standing : given];
+                    continue;
+                }
+
+                choice.Field.Respell(0, choice.Defaults[standing]);
+                choice.Field.Text = given < 0 ? choice.Defaults[standing] : choice.Words[given];
+            }
+        }
+
+        /// <summary>Where developer mode being <paramref name="on" /> stands among its words: on, then off.</summary>
+        static int Developer(bool on)
+        {
+            return on ? 0 : 1;
+        }
+
+        /// <summary>Where <paramref name="waiting" /> stands among its words: a switch, then a step.</summary>
+        static int Waits(Waiting waiting)
+        {
+            return waiting == Waiting.Switch ? 0 : 1;
+        }
+
+        /// <summary>A setting as it reads: its name, what it does, then <paramref name="control" />.</summary>
+        static Element Setting(string name, string about, Element control)
+        {
+            return new VStack
+            {
+                Spacing = 6f,
+                Children =
+                {
+                    new Label { Style = Styles.Phrase, Text = name },
+                    new Label { Style = Styles.Detail, Wraps = true, Text = about },
+                    control
+                }
+            };
+        }
+
+        /// <summary>One setting's list at one level, and how its words stand for the setting's values.</summary>
+        sealed class Choice
+        {
+            public Choice(bool world, ListField field, string[] words, string[] defaults, Func<Layer, int> given,
+                Func<Settings, int> standing, Func<Layer, int, Layer> giving)
+            {
+                World = world;
+                Field = field;
+                Words = words;
+                Defaults = defaults;
+                Given = given;
+                Standing = standing;
+                Giving = giving;
+            }
+
+            /// <summary>Whether it is this world's list, every world's otherwise.</summary>
+            public bool World { get; }
+
+            /// <summary>The list.</summary>
+            public ListField Field { get; }
+
+            /// <summary>The setting's values, as words.</summary>
+            public string[] Words { get; }
+
+            /// <summary>The default, spelled with each value it may stand for, in the order of <see cref="Words" />; null where the list has none.</summary>
+            public string[] Defaults { get; }
+
+            /// <summary>Where the value a level gives stands among <see cref="Words" />, or -1 where the level leaves it.</summary>
+            public Func<Layer, int> Given { get; }
+
+            /// <summary>Where the value a world that leaves the setting takes stands among <see cref="Words" />.</summary>
+            public Func<Settings, int> Standing { get; }
+
+            /// <summary>A level giving the value at a place among <see cref="Words" />, or leaving it at -1.</summary>
+            public Func<Layer, int, Layer> Giving { get; }
+        }
+    }
+}

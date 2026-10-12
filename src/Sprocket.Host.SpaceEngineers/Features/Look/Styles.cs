@@ -524,6 +524,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Color = Palette.Dim }
         };
 
+        /// <summary>One page of several to look at, as the game draws the tabs across its terminal.</summary>
+        public static readonly ButtonStyle Tab = new ButtonStyle
+        {
+            Base =
+            {
+                Font = MyFontEnum.White,
+                FontSize = 20f,
+                Color = Palette.Muted,
+                Background = Palette.Panel,
+                Edge = Palette.Line,
+                Padding = new Thickness(8f, 8f)
+            },
+            Hot = { Background = Palette.PanelHot, Color = Palette.Ink }
+        };
+
+        /// <summary>The page that is showing, the lightest plate as the game has it.</summary>
+        public static readonly ButtonStyle TabCurrent = new ButtonStyle(Tab)
+        {
+            Base = { Background = Palette.Line },
+            Hot = { Background = Palette.Line }
+        };
+
         /// <summary>The button that finishes a screen or answers a dialog as Enter would, greyed while there is nothing to finish.</summary>
         public static readonly ButtonStyle Primary = new ButtonStyle
         {

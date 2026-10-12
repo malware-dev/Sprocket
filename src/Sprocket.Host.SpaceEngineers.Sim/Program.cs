@@ -144,7 +144,12 @@ namespace Sprocket.Sim
                 if (developer)
                     from += 1;
 
-                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer);
+                // The player an admin with creative tools on, who sees the world's settings: "admin".
+                var admin = args.Length > from && args[from] == "admin";
+                if (admin)
+                    from += 1;
+
+                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer, admin);
                 Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;

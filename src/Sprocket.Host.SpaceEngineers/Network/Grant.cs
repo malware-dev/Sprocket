@@ -27,11 +27,14 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>Whether the one who asked gives lengths of time in ticks, by their settings in this world.</summary>
         public bool Ticks;
 
+        /// <summary>The settings the server runs the world by, written as one text, which the client takes as its own.</summary>
+        public string Settings;
+
         /// <summary>How many bytes <paramref name="grant" /> takes on the wire.</summary>
         public static int SizeOf(ref Grant grant)
         {
             return sizeof(long) + sizeof(int) + ByteData.SizeOfString(grant.Holder)
-                + ByteData.SizeOfString(grant.Program) + ByteData.SizeOfString(grant.State);
+                + ByteData.SizeOfString(grant.Program) + ByteData.SizeOfString(grant.State) + ByteData.SizeOfString(grant.Settings);
         }
 
         /// <summary>Writes <paramref name="grant" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
@@ -43,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteData.WriteString(grant.Holder, data, ref offset);
             ByteData.WriteString(grant.Program, data, ref offset);
             ByteData.WriteString(grant.State, data, ref offset);
+            ByteData.WriteString(grant.Settings, data, ref offset);
             return offset - start;
         }
 
@@ -62,6 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             ByteData.TryReadString(data, ref offset, out grant.Holder);
             ByteData.TryReadString(data, ref offset, out grant.Program);
             ByteData.TryReadString(data, ref offset, out grant.State);
+            ByteData.TryReadString(data, ref offset, out grant.Settings);
             return offset - start;
         }
     }

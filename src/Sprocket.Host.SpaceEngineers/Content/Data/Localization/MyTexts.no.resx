@@ -1941,4 +1941,94 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Writing.PasteNote" xml:space="preserve">
     <value>Spillet gir ikke mods tilgang til utklippstavlen, så tekst kopiert andre steder, utenfor spillet eller fra spillets egne tekstbokser, kan ikke limes inn her. For å få den inn, legg den i sprocket-clipboard.txt i Storage-mappa til spillet, og lim inn.</value>
   </data>
+  <data name="Sprocket.Admin.Button" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="Sprocket.Admin.Title" xml:space="preserve">
+    <value>Admininnstillinger</value>
+  </data>
+  <data name="Sprocket.Admin.Line" xml:space="preserve">
+    <value>Endringer gjelder med én gang for alle i denne verdenen.</value>
+  </data>
+  <data name="Sprocket.Admin.Rules" xml:space="preserve">
+    <value>Regler for verdenen</value>
+  </data>
+  <data name="Sprocket.Admin.Fastest" xml:space="preserve">
+    <value>Raskeste oppdatering</value>
+  </data>
+  <data name="Sprocket.Admin.FastestAbout" xml:space="preserve">
+    <value>Hvor ofte tidtakere og blokksjekker kan gjentas. Knappetrykk, andre hendelser i spillet og tidsbestemte ventinger påvirkes ikke.</value>
+  </data>
+  <data name="Sprocket.Admin.EveryTick" xml:space="preserve">
+    <value>Hvert tikk (mest nøyaktig)</value>
+  </data>
+  <data name="Sprocket.Admin.EveryTen" xml:space="preserve">
+    <value>Hvert 10. tikk</value>
+  </data>
+  <data name="Sprocket.Admin.EveryHundred" xml:space="preserve">
+    <value>Hvert 100. tikk (lettest)</value>
+  </data>
+  <data name="Sprocket.Admin.Developer" xml:space="preserve">
+    <value>Utviklermodus</value>
+  </data>
+  <data name="Sprocket.Admin.DeveloperAbout" xml:space="preserve">
+    <value>Viser skriptet til hver automasjon som tekst du kan redigere, og legger til ekstra verktøy på skjermene. Ment for testing og for å lage innhold, ikke for vanlig spilling.</value>
+  </data>
+  <data name="Sprocket.Admin.Trials" xml:space="preserve">
+    <value>Utprøvinger</value>
+  </data>
+  <data name="Sprocket.Admin.TrialsAbout" xml:space="preserve">
+    <value>Design som fortsatt sammenlignes. En utprøving fjernes når designet er valgt.</value>
+  </data>
+  <data name="Sprocket.Admin.Waits" xml:space="preserve">
+    <value>Venting i sekvenser</value>
+  </data>
+  <data name="Sprocket.Admin.WaitsAbout" xml:space="preserve">
+    <value>Endrer bare hvordan ventinger vises og redigeres. Sekvensene kjører likt uansett.</value>
+  </data>
+  <data name="Sprocket.Admin.WaitsSwitch" xml:space="preserve">
+    <value>Bryter på hvert steg</value>
+  </data>
+  <data name="Sprocket.Admin.WaitsStep" xml:space="preserve">
+    <value>Venting som eget steg</value>
+  </data>
+  <data name="Sprocket.Admin.Close" xml:space="preserve">
+    <value>Lukk</value>
+  </data>
+  <data name="Sprocket.Admin.ThisWorld" xml:space="preserve">
+    <value>Denne verdenen</value>
+  </data>
+  <data name="Sprocket.Admin.ThisWorldAbout" xml:space="preserve">
+    <value>Innstillinger bare for denne verdenen.</value>
+  </data>
+  <data name="Sprocket.Admin.EveryWorld" xml:space="preserve">
+    <value>Alle verdener</value>
+  </data>
+  <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
+    <value>Standardverdiene, brukt av alle verdener som ikke setter en verdi selv. På en dedikert server gjelder de alle verdener serveren kjører. I enspiller eller et spill du er vert for, gjelder de alle verdenene dine.</value>
+  </data>
+  <data name="Sprocket.Admin.On" xml:space="preserve">
+    <value>På</value>
+  </data>
+  <data name="Sprocket.Admin.Off" xml:space="preserve">
+    <value>Av</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultAbout" xml:space="preserve">
+    <value>Bruk verdien som er satt under Alle verdener, og følg den om den endres senere.</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultEveryTick" xml:space="preserve">
+    <value>Standard (hvert tikk)</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultEveryTen" xml:space="preserve">
+    <value>Standard (hvert 10. tikk)</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultEveryHundred" xml:space="preserve">
+    <value>Standard (hvert 100. tikk)</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultOn" xml:space="preserve">
+    <value>Standard (på)</value>
+  </data>
+  <data name="Sprocket.Admin.DefaultOff" xml:space="preserve">
+    <value>Standard (av)</value>
+  </data>
 </root>

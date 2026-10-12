@@ -57,6 +57,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         PlayerMemory _viewer;
 
+        Func<bool> _administers;
+
+        Func<Settings> _worldSettings;
+
+        Action<Settings> _changeSettings;
+
         readonly bool _copy;
 
         readonly GridWorld _world;
@@ -66,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Texts _texts;
         readonly ConstructMemory _memory;
         readonly string _author;
-        readonly bool _developerMode;
+        bool _developerMode;
 
         SprocketEditor _editor;
 
@@ -154,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _copy = copy;
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
-            _runner.QuickestLook = settings == null ? 1 : settings.QuickestLook;
+            _runner.FastestUpdate = settings == null ? 1 : settings.FastestUpdate;
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
@@ -297,6 +303,51 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>Whether the player at the screen may change the world's settings now, which the editor is given.</summary>
+        public Func<bool> Administers
+        {
+            get { return _administers; }
+            set
+            {
+                _administers = value;
+                if (_editor != null)
+                    _editor.Administers = value;
+            }
+        }
+
+        /// <summary>The settings the world runs by, which the editor is given.</summary>
+        public Func<Settings> WorldSettings
+        {
+            get { return _worldSettings; }
+            set
+            {
+                _worldSettings = value;
+                if (_editor != null)
+                    _editor.WorldSettings = value;
+            }
+        }
+
+        /// <summary>Where a change of the world's settings is made, which the editor is given.</summary>
+        public Action<Settings> ChangeSettings
+        {
+            get { return _changeSettings; }
+            set
+            {
+                _changeSettings = value;
+                if (_editor != null)
+                    _editor.ChangeSettings = value;
+            }
+        }
+
+        /// <summary>Runs by <paramref name="settings" /> from now on, the world's settings an admin has just changed.</summary>
+        public void Apply(Settings settings)
+        {
+            _runner.FastestUpdate = settings.FastestUpdate;
+            _developerMode = settings.DeveloperMode;
+            if (_editor != null)
+                _editor.DeveloperMode = _developerMode;
+        }
+
         /// <summary>The settings in this world of the player at the screen, which the editor is given.</summary>
         public PlayerMemory Viewer
         {
@@ -322,6 +373,9 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Shelf = _shelf;
                 _editor.Preferences = _preferences;
                 _editor.Viewer = _viewer;
+                _editor.Administers = _administers;
+                _editor.WorldSettings = _worldSettings;
+                _editor.ChangeSettings = _changeSettings;
 
                 // A copy's buttons are written where the Sprocket is kept, which is asked by whoever lent it.
                 if (!_copy)

@@ -575,6 +575,7 @@ public sealed class Rig
         {
             MyAPIGateway.Session = Pretend.To<IMySession>()
                 .Gives("GameplayFrameCounter", () => Clock.Frame)
+                .Gives("Player", () => null)
                 .Done();
         }
     }

@@ -453,7 +453,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             if (_memory.Holding)
             {
-                _rota.Every(_busy, new Hold(_memory.HoldSince, _memory.HoldExpected).Period(_memory.Looked));
+                // Looking at the blocks again and again until they have finished is a repeat, so the world's fastest update holds it.
+                var period = new Hold(_memory.HoldSince, _memory.HoldExpected).Period(_memory.Looked);
+                _rota.Every(_busy, Math.Max(period, _owner.FastestUpdate));
                 return;
             }
 
