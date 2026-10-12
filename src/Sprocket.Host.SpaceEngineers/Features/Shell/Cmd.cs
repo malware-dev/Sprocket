@@ -239,9 +239,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Picking one of a list of answers.</summary>
         Choice,
 
-        /// <summary>Answering with what was typed into the box under a list of answers.</summary>
-        ChoiceTaken,
-
         /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>
         ShowScript
     }

@@ -1,3 +1,4 @@
+using System;
 using Lumel.Drawing;
 using VRageMath;
 
@@ -10,6 +11,9 @@ namespace Lumel.Windows
     /// </remarks>
     public class Window : ContentControl
     {
+        /// <summary>Raised when the layer it was open in takes it away, however it was closed.</summary>
+        public event Action Closed;
+
         /// <summary>Whether nothing beneath the window takes input while it is open.</summary>
         public bool IsModal { get; set; }
 
@@ -28,6 +32,14 @@ namespace Lumel.Windows
             var layer = Layer;
             if (layer != null)
                 layer.Close(this);
+        }
+
+        /// <summary>Raises <see cref="Closed" />; called by the layer as it takes the window away.</summary>
+        public void OnClosed()
+        {
+            var closed = Closed;
+            if (closed != null)
+                closed();
         }
 
         /// <summary>The room <paramref name="area" /> gives the window to be measured in: all of it, unless a kind of window says otherwise.</summary>

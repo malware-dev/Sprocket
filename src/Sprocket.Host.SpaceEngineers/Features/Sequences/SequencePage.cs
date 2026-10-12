@@ -10,6 +10,7 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -31,14 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     {
         const int JustRanTicks = 10;
 
-        // As many digits as fit an int.
-        const int MostTicks = 999999999;
-
-        // An hour is 216000 ticks.
-        const string LongestWait = "000000";
-
-        static readonly int[] WaitPresets = { 60, 120, 300, 600, 1800, 3600 };
-
         readonly Sequence _sequence;
         readonly List<object> _keys = new List<object>();
         readonly List<int> _shown = new List<int>();
@@ -55,6 +48,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         string _madeName;
         int _madeEdits;
         Keyed<object, StepRow> _rows;
+        DurationPanel _lengths;
+        Popup _hanging;
+        Wait _lengthOf;
+        bool _added;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
         public SequencePage(SprocketEditor editor, Sequence sequence) : base(editor)
@@ -64,6 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>The id of the sequence the page shows.</summary>
         public int SequenceId => _sequence.Id;
+
+        /// <summary>The panel a wait's length is being given in, or null while none is open.</summary>
+        public DurationPanel Lengths => _lengths;
 
         /// <summary>A named sequence is called by its name, and an unnamed one by its number.</summary>
         /// <remarks>
@@ -309,6 +309,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             _bar.Show(texts);
             _steps.Slide();
+
+            if (_lengths != null)
+                Hang();
+        }
+
+        /// <summary>Hangs the open panel from the length's chip, once its row shows the chip on a screen.</summary>
+        /// <remarks>The panel is the page's whether or not it hangs anywhere, so the editor gives a length the same way without a screen.</remarks>
+        void Hang()
+        {
+            if (_hanging.IsOpen || _rows == null || !_keys.Contains(_lengthOf))
+                return;
+
+            var row = _rows[_lengthOf];
+            for (var i = 0; i < row.Slots.Count; i++)
+            {
+                var chip = row.ChipOf(row.Slots[i]);
+                if (!(row.Slots[i] is DurationSlot) || chip == null || chip.Windows == null)
+                    continue;
+
+                _hanging.Anchor = chip;
+                _hanging.Open();
+                if (Editor.Input != null)
+                    Editor.Input.Focus(_lengths.Box);
+
+                _lengths.Box.SelectAll();
+                return;
+            }
         }
 
         /// <summary>Puts a row in place for each step with the parts of its sentence, and offers what may be done now.</summary>
@@ -580,7 +607,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Length, Changes(Cmd.StepSlot, delegate { EditWait(wait); })));
+                row.Slots.Add(new DurationSlot(wait.Length, Changes(Cmd.StepSlot, delegate { Open(wait, false); })));
                 return;
             }
 
@@ -880,14 +907,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Adds a timed wait, for the things that have no finishing to wait on.</summary>
+        /// <summary>Adds a wait of a second at <paramref name="at" />, and opens the panel its length is given in.</summary>
         void AddWait(int at)
         {
-            var origin = Editor.Depth;
-            Editor.Push(WaitPage(delegate(Duration length)
-            {
-                Editor.Do(_sequence, new AddStep(Change.AddWait, at, new Wait(length)));
-                Editor.UnwindTo(origin);
-            }));
+            var wait = new Wait(Duration.OfSeconds(1));
+            Editor.Do(_sequence, new AddStep(Change.AddWait, at, wait));
+            Open(wait, true);
         }
 
         /// <summary>Asks which other sequence of the system to run, or to stop where <paramref name="stops" /> says so, and adds the step that does.</summary>
@@ -941,33 +966,63 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return page;
         }
 
-        /// <summary>The question how long a wait is: a few lengths in seconds, as they are named, or a number of ticks typed.</summary>
-        ChoicePage WaitPage(Action<Duration> chosen)
+        /// <summary>Opens the panel the length of <paramref name="wait" /> is given in, hung from its chip once the chip is on a screen.</summary>
+        /// <remarks>
+        /// The length is changed as the panel closes, as one change: a press anywhere else or Enter keeps what it says, and
+        /// Escape leaves the wait as it was. A wait <paramref name="added" /> a moment ago is added again with its length,
+        /// so adding it and giving it a length are one change, and Escape takes it away.
+        /// </remarks>
+        void Open(Wait wait, bool added)
         {
-            var page = new ChoicePage(Editor, Editor.Texts.SequenceWaitQuestion);
-            for (var i = 0; i < WaitPresets.Length; i++)
-            {
-                var ticks = WaitPresets[i];
-                page.Add(TimeText.WaitChoice(Editor.Texts, ticks), false,
-                    delegate { chosen(Duration.OfSeconds((double)ticks / Duration.PerSecond)); });
-            }
+            if (_lengths != null)
+                Finish(false);
 
-            page.TypedAbout = Editor.Texts.SequenceWaitTypedAbout;
-            page.TypeFirst = Editor.Texts.SequenceWaitTypeFirst;
-            page.AddNumber(Editor.Texts.TimeOtherWait, Editor.Texts.TimeUse, LongestWait, MostTicks,
-                delegate(int ticks) { chosen(Duration.OfTicks(ticks)); });
+            var panel = new DurationPanel(Editor.Texts, Editor.Input, wait.Length);
+            panel.Submitted += delegate { Finish(false); };
+            panel.Cancelled += delegate { Finish(true); };
 
-            return page;
+            _hanging = new Popup { Style = Styles.List, Flush = true, Content = panel };
+            _hanging.Closed += delegate { Finish(false); };
+
+            _lengths = panel;
+            _lengthOf = wait;
+            _added = added;
+            Hang();
         }
 
-        void EditWait(Wait step)
+        /// <summary>Puts the panel away and gives the wait what it says, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
+        /// <remarks>Once, however it closes: putting it away here closes the window, which comes back here and finds nothing open.</remarks>
+        void Finish(bool cancelled)
         {
-            var origin = Editor.Depth;
-            Editor.Push(WaitPage(delegate(Duration length)
+            var panel = _lengths;
+            if (panel == null)
+                return;
+
+            _lengths = null;
+            _hanging.Close();
+            Closed(_lengthOf, panel.Length, _added, cancelled);
+        }
+
+        /// <summary>Gives <paramref name="wait" /> the <paramref name="length" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
+        void Closed(Wait wait, Duration? length, bool added, bool cancelled)
+        {
+            var index = _sequence.Steps.IndexOf(wait);
+            if (index < 0)
+                return;
+
+            if (added && cancelled)
             {
-                Editor.Do(_sequence, new SetWait(_sequence.Steps.IndexOf(step), step.Length, length));
-                Editor.UnwindTo(origin);
-            }));
+                Editor.Withdraw(_sequence);
+                return;
+            }
+
+            if (cancelled || !length.HasValue || length.Value == wait.Length)
+                return;
+
+            if (added && Editor.Withdraw(_sequence))
+                Editor.Do(_sequence, new AddStep(Change.AddWait, index, new Wait(length.Value)));
+            else
+                Editor.Do(_sequence, new SetWait(index, wait.Length, length.Value));
         }
 
         /// <summary>Deletes the row's step; an if, or a branch of one, asks first whether the steps in it go too.</summary>

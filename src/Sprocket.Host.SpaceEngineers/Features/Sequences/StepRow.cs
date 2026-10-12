@@ -225,6 +225,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return part is DurationSlot ? texts.SequenceLengthAbout : null;
         }
 
+        /// <summary>The chip <paramref name="part" /> is drawn as, or null where the row does not show it yet.</summary>
+        public Element ChipOf(SentenceSlot part)
+        {
+            var at = Slots.IndexOf(part);
+            return at >= 0 && at < _chips.Count ? _chips[at] : null;
+        }
+
         void Part(int at, SentenceSlot part, GridWorld world)
         {
             if (ReferenceEquals(_shown[at], part))

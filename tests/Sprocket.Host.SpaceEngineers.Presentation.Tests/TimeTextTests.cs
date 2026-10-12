@@ -1,6 +1,7 @@
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -47,11 +48,13 @@ public class TimeTextTests
         Assert.Same(_ago.Said(0), _ago.Said(60));
     }
 
-    /// <summary>Choosing a wait is where the two vocabularies have to meet.</summary>
+    /// <summary>A length is said in the unit the program writes it in.</summary>
     [Fact]
-    public void AWaitIsOfferedInBothUnitsAtOnce()
+    public void ALengthIsSaidInItsOwnUnit()
     {
-        Assert.Equal("5 seconds - 300 ticks", TimeText.WaitChoice(new Texts(), 300));
-        Assert.Equal("a minute - 3600 ticks", TimeText.WaitChoice(new Texts(), 3600));
+        Assert.Equal("5 seconds", TimeText.Duration(Duration.OfSeconds(5)));
+        Assert.Equal("1.5 seconds", TimeText.Duration(Duration.OfSeconds(1.5)));
+        Assert.Equal("1 second", TimeText.Duration(Duration.OfSeconds(1)));
+        Assert.Equal("3600 ticks", TimeText.Duration(Duration.OfTicks(3600)));
     }
 }

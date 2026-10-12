@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Xunit;
 
@@ -24,18 +25,16 @@ public class StepMenuTests
             Assert.True(screen.Shows(kind), "the menu does not offer " + kind);
     }
 
-    /// <summary>Choosing a kind puts the menu away and adds that step, asking what it asks as its own button did.</summary>
+    /// <summary>Choosing a kind puts the menu away and adds that step, opening what it opens as its own button did.</summary>
     [Fact]
     public void ChoosingAKindAddsIt()
     {
         var screen = Screen.Fresh((Kinds + " press step press wait").Split(' '));
-
-        Assert.Equal(0, screen.Editor.Windows!.Count);
-
-        screen.Editor.PressChoice(screen.Editor.Choices()[0].Text);
         screen.Run(1);
 
+        Assert.False(screen.Shows("task"), "the menu was left open");
         Assert.IsType<Wait>(screen.Editor.Program.Systems[0].Sequences[0].Steps[0]);
+        Assert.NotNull(Assert.IsType<SequencePage>(screen.Editor.Current).Lengths);
     }
 
     /// <summary>An if's closing row offers both branches under one plus, and once it has an otherwise, the one left as itself.</summary>
@@ -77,7 +76,6 @@ public class StepMenuTests
         Assert.Single(rows, row => row.Kind == StepKind.Adds);
 
         screen.Do("press", "step", "press", "wait");
-        screen.Editor.PressChoice(screen.Editor.Choices()[0].Text);
         screen.Run(1);
 
         var steps = screen.Editor.Program.Systems[0].Sequences[0].Steps;

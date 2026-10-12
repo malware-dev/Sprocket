@@ -460,17 +460,9 @@ Renaming it here renames the grid.</value>
     <value>skipped {busy}x while busy, {off}x while off</value>
     <comment>The two above at once.</comment>
   </data>
-  <data name="Sprocket.Sequence.WaitQuestion" xml:space="preserve">
-    <value>How long should it wait?</value>
-    <comment>Title of the question that chooses how long a waiting step waits.</comment>
-  </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 ticks is one second.</value>
     <comment>Note on the box a length of wait is typed into.</comment>
-  </data>
-  <data name="Sprocket.Sequence.WaitTypeFirst" xml:space="preserve">
-    <value>Type a whole number of ticks first.</value>
-    <comment>Note on the button that takes a typed wait, while nothing is typed.</comment>
   </data>
 
   <data name="Sprocket.Salvage.Different" xml:space="preserve">
@@ -1511,13 +1503,53 @@ Renaming it here renames the grid.</value>
     <value>Six times a second. Still costly; try something slower first.</value>
     <comment>Note on the 10-tick rate.</comment>
   </data>
-  <data name="Sprocket.Time.OtherWait" xml:space="preserve">
-    <value>Another length, in ticks</value>
-    <comment>Said beside the box a length of wait is typed into.</comment>
+  <data name="Sprocket.Wait.Shorter" xml:space="preserve">
+    <value>Shorter</value>
+    <comment>Tip on the minus beside the length of a wait.</comment>
   </data>
-  <data name="Sprocket.Time.Use" xml:space="preserve">
-    <value>Use</value>
-    <comment>The button that takes a typed length of wait.</comment>
+  <data name="Sprocket.Wait.Longer" xml:space="preserve">
+    <value>Longer</value>
+    <comment>Tip on the plus beside the length of a wait.</comment>
+  </data>
+  <data name="Sprocket.Wait.InSeconds" xml:space="preserve">
+    <value>seconds</value>
+    <comment>The choice of giving a length of wait in seconds.</comment>
+  </data>
+  <data name="Sprocket.Wait.InTicks" xml:space="preserve">
+    <value>ticks</value>
+    <comment>The choice of giving a length of wait in ticks.</comment>
+  </data>
+  <data name="Sprocket.Wait.TickAbout" xml:space="preserve">
+    <value>A tick is the smallest step of time, sixty to a second.</value>
+    <comment>Tip on the choice of giving a length of wait in ticks.</comment>
+  </data>
+  <data name="Sprocket.Wait.AsSecond" xml:space="preserve">
+    <value>= 1 second</value>
+    <comment>A length of wait in seconds, beneath the same length in ticks, where it is one.</comment>
+  </data>
+  <data name="Sprocket.Wait.AsSeconds" xml:space="preserve">
+    <value>= {count} seconds</value>
+    <comment>A length of wait in seconds, beneath the same length in ticks.</comment>
+  </data>
+  <data name="Sprocket.Wait.AsTick" xml:space="preserve">
+    <value>= 1 tick</value>
+    <comment>A length of wait in ticks, beneath the same length in seconds, where it is one.</comment>
+  </data>
+  <data name="Sprocket.Wait.AsTicks" xml:space="preserve">
+    <value>= {count} ticks</value>
+    <comment>A length of wait in ticks, beneath the same length in seconds.</comment>
+  </data>
+  <data name="Sprocket.Wait.PickSeconds" xml:space="preserve">
+    <value>{count} s</value>
+    <comment>A length of wait to pick, in seconds.</comment>
+  </data>
+  <data name="Sprocket.Wait.PickMinute" xml:space="preserve">
+    <value>1 min</value>
+    <comment>A minute, as a length of wait to pick.</comment>
+  </data>
+  <data name="Sprocket.Wait.PickTicks" xml:space="preserve">
+    <value>{count} t</value>
+    <comment>A length of wait to pick, in ticks.</comment>
   </data>
   <data name="Sprocket.Time.JustNow" xml:space="preserve">
     <value>just now</value>
@@ -1539,14 +1571,6 @@ Renaming it here renames the grid.</value>
     <value>over an hour ago</value>
     <comment>When a sequence last ran.</comment>
   </data>
-  <data name="Sprocket.Time.Second" xml:space="preserve">
-    <value>1 second</value>
-    <comment>A length of wait, said aloud.</comment>
-  </data>
-  <data name="Sprocket.Time.Seconds" xml:space="preserve">
-    <value>{count} seconds</value>
-    <comment>A length of wait, said aloud.</comment>
-  </data>
   <data name="Sprocket.Time.Minute" xml:space="preserve">
     <value>a minute</value>
     <comment>A length of wait, said aloud.</comment>
@@ -1554,10 +1578,6 @@ Renaming it here renames the grid.</value>
   <data name="Sprocket.Time.Minutes" xml:space="preserve">
     <value>{count} minutes</value>
     <comment>A length of wait, said aloud.</comment>
-  </data>
-  <data name="Sprocket.Time.Choice" xml:space="preserve">
-    <value>{spoken} - {ticks}</value>
-    <comment>A length of wait offered: said aloud, then in ticks.</comment>
   </data>
   <data name="Sprocket.Value.AtLeast" xml:space="preserve">
     <value>({least} or more)</value>

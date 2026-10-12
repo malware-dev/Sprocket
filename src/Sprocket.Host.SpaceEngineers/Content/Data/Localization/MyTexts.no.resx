@@ -350,14 +350,8 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
     <value>hoppet over {busy}x mens den var opptatt, {off}x mens den var av</value>
   </data>
-  <data name="Sprocket.Sequence.WaitQuestion" xml:space="preserve">
-    <value>Hvor lenge skal den vente?</value>
-  </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 tikk er ett sekund.</value>
-  </data>
-  <data name="Sprocket.Sequence.WaitTypeFirst" xml:space="preserve">
-    <value>Skriv et helt antall tikk først.</value>
   </data>
 
   <data name="Sprocket.Salvage.Different" xml:space="preserve">
@@ -1150,11 +1144,41 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Rate.FastCost" xml:space="preserve">
     <value>Seks ganger i sekundet. Fortsatt kostbart; prøv noe langsommere først.</value>
   </data>
-  <data name="Sprocket.Time.OtherWait" xml:space="preserve">
-    <value>En annen lengde, i tikk</value>
+  <data name="Sprocket.Wait.Shorter" xml:space="preserve">
+    <value>Kortere</value>
   </data>
-  <data name="Sprocket.Time.Use" xml:space="preserve">
-    <value>Bruk</value>
+  <data name="Sprocket.Wait.Longer" xml:space="preserve">
+    <value>Lengre</value>
+  </data>
+  <data name="Sprocket.Wait.InSeconds" xml:space="preserve">
+    <value>sekunder</value>
+  </data>
+  <data name="Sprocket.Wait.InTicks" xml:space="preserve">
+    <value>tikk</value>
+  </data>
+  <data name="Sprocket.Wait.TickAbout" xml:space="preserve">
+    <value>Et tikk er det minste steget i tid, seksti på et sekund.</value>
+  </data>
+  <data name="Sprocket.Wait.AsSecond" xml:space="preserve">
+    <value>= 1 sekund</value>
+  </data>
+  <data name="Sprocket.Wait.AsSeconds" xml:space="preserve">
+    <value>= {count} sekunder</value>
+  </data>
+  <data name="Sprocket.Wait.AsTick" xml:space="preserve">
+    <value>= 1 tikk</value>
+  </data>
+  <data name="Sprocket.Wait.AsTicks" xml:space="preserve">
+    <value>= {count} tikk</value>
+  </data>
+  <data name="Sprocket.Wait.PickSeconds" xml:space="preserve">
+    <value>{count} s</value>
+  </data>
+  <data name="Sprocket.Wait.PickMinute" xml:space="preserve">
+    <value>1 min</value>
+  </data>
+  <data name="Sprocket.Wait.PickTicks" xml:space="preserve">
+    <value>{count} t</value>
   </data>
   <data name="Sprocket.Time.JustNow" xml:space="preserve">
     <value>akkurat nå</value>
@@ -1171,20 +1195,11 @@ Nytt navn her gir gridet nytt navn.</value>
   <data name="Sprocket.Time.HourAgo" xml:space="preserve">
     <value>for over en time siden</value>
   </data>
-  <data name="Sprocket.Time.Second" xml:space="preserve">
-    <value>1 sekund</value>
-  </data>
-  <data name="Sprocket.Time.Seconds" xml:space="preserve">
-    <value>{count} sekunder</value>
-  </data>
   <data name="Sprocket.Time.Minute" xml:space="preserve">
     <value>ett minutt</value>
   </data>
   <data name="Sprocket.Time.Minutes" xml:space="preserve">
     <value>{count} minutter</value>
-  </data>
-  <data name="Sprocket.Time.Choice" xml:space="preserve">
-    <value>{spoken} - {ticks}</value>
   </data>
   <data name="Sprocket.Value.AtLeast" xml:space="preserve">
     <value>({least} eller mer)</value>

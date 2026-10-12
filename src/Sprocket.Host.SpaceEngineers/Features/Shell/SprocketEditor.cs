@@ -3180,6 +3180,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return system.Enabled ? Texts.RowSwitchBlueprintOff : Texts.RowSwitchBlueprintOn;
         }
 
+        /// <summary>Takes back the last change to <paramref name="sequence" /> as though it was never made, where it is the last change to its system.</summary>
+        /// <remarks>For a step added a moment ago and left at once: leaving it is a cancel, not a step to walk.</remarks>
+        public bool Withdraw(Sequence sequence)
+        {
+            var system = sequence.System;
+            var last = system == null ? null : _systemHistory.Last(system) as OnSequence;
+            if (last == null || last.Sequence != sequence || !_systemHistory.Withdraw(system, last))
+                return false;
+
+            Settled(last);
+            return true;
+        }
+
         /// <summary>Takes <paramref name="sequence" /> out of the program without asking, and any page showing it.</summary>
         /// <remarks>For one made a moment ago and left untouched: the step that made it is withdrawn rather than walked back.</remarks>
         public void TakeOut(Sequence sequence)

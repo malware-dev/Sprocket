@@ -324,9 +324,18 @@ namespace Sprocket.Sim.Driving
         public static IReadOnlyList<ChoiceRow> Choices(this SprocketEditor editor) =>
             Asking(editor)?.Answers ?? new ChoiceRow[0];
 
-        /// <summary>The box an answer is typed into on a question's page, or null where there is none.</summary>
-        public static TextBox? TypedBox(this SprocketEditor editor) =>
-            Asking(editor)?.Box;
+        /// <summary>The panel a wait's length is being given in, on the sequence's page the editor is on.</summary>
+        public static DurationPanel Lengths(this SprocketEditor editor) =>
+            (editor.Current as SequencePage)?.Lengths ?? throw new InvalidOperationException($"no wait's length is being given on '{editor.Screen.Title()}'.");
+
+        /// <summary>Types <paramref name="said" /> over the length in the open panel, in its unit, and enters it.</summary>
+        public static void GiveLength(this SprocketEditor editor, string said)
+        {
+            var box = editor.Lengths().Box;
+            box.SelectAll();
+            box.Insert(said);
+            box.Submit!.Execute();
+        }
 
         /// <summary>The question's page the editor is on, its view made, or null.</summary>
         static ChoicePage? Asking(SprocketEditor editor)

@@ -1602,7 +1602,7 @@ public class EditorTests
         StartOnTheButton(editor);
 
         editor.PressAdd("wait");
-        editor.PressChoice("2 seconds - 120 ticks");
+        editor.GiveLength("2");
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
@@ -1891,9 +1891,11 @@ public class EditorTests
         StartOnTheButton(editor);
 
         editor.PressAdd("wait");
-        Assert.Equal("How long should it wait?", editor.Screen.Title());
+        Assert.NotNull(editor.Lengths());
 
-        editor.PressChoice("5 seconds - 300 ticks");
+        editor.GiveLength("5");
+        Assert.Equal(300, Assert.IsType<Wait>(Assert.Single(ship.Automation.Sequences[0].Steps)).Ticks);
+        ship.Tick();
 
         var step = Assert.Single(editor.StepRows());
         Assert.Equal(StepKind.Wait, step.Kind);
@@ -2005,7 +2007,7 @@ public class EditorTests
         editor.PressStart("sequence");
         ship.Tick();
         editor.PressAdd("wait");
-        editor.PressChoice("2 seconds - 120 ticks");
+        editor.GiveLength("2");
         ship.Tick();
 
         editor.GoToRoot();

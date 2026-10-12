@@ -701,7 +701,7 @@ public class RigTests
         rig.Editor.NewButtonSystem("Airlock");
         // A wait, so the run lasts long enough to be stopped.
         rig.Editor.PressAdd("wait");
-        rig.Editor.PressChoice(TimeText.WaitChoice(new Texts(), 600));
+        rig.Editor.GiveLength("10");
         rig.Editor.SwitchOn();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];

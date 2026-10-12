@@ -69,8 +69,11 @@ namespace Lumel.Windows
         /// <summary>Takes <paramref name="window" /> away, if it is open.</summary>
         public void Close(Window window)
         {
-            if (_open.Remove(window))
-                window.Layer = null;
+            if (!_open.Remove(window))
+                return;
+
+            window.Layer = null;
+            window.OnClosed();
         }
 
         /// <summary>Whether <paramref name="window" /> is open.</summary>
@@ -127,6 +130,7 @@ namespace Lumel.Windows
 
                 _open.RemoveAt(i);
                 window.Layer = null;
+                window.OnClosed();
                 closed = true;
             }
 

@@ -1,5 +1,4 @@
 using Lumel;
-using Lumel.Controls;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -10,10 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     {
         Label _empty;
         VStack _answers;
-        HStack _typed;
-        Label _called;
-        NumberBox _box;
-        Button _give;
 
         /// <inheritdoc />
         protected override Element CreateView()
@@ -24,21 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Children =
                 {
                     new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _empty),
-                    new VStack { Spacing = 8f }.As(out _answers),
-
-                    // Typed in the list itself, beside the answers that are listed, rather than on a screen of its own.
-                    new HStack
-                    {
-                        Spacing = 16f,
-                        Style = Styles.Answer,
-                        IsVisible = false,
-                        Children =
-                        {
-                            new Label { Style = Styles.Name, Placement = Flex.Grow }.As(out _called),
-                            new NumberBox { Style = Styles.Field, Focusable = true }.As(out _box),
-                            new Button { Style = Styles.Button }.As(out _give)
-                        }
-                    }.As(out _typed)
+                    new VStack { Spacing = 8f }.As(out _answers)
                 }
             };
         }

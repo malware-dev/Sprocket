@@ -118,8 +118,6 @@ public class IfStepTests
         var end = rig.Editor.StepRows().Single(row => row.Kind == StepKind.Adds);
         end.Adds.Single().Choices!.Single(adder => adder.Text == rig.Texts.SequenceWait).Adds!.Execute();
         rig.Tick();
-        rig.Editor.PressChoice(rig.Editor.Choices().First().Text);
-        rig.Tick();
 
         Assert.IsType<If>(sequence.Steps[0]);
         Assert.IsType<Wait>(sequence.Steps[1]);

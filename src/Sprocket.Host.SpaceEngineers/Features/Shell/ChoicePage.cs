@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using Lumel;
-using Lumel.Input;
-using Lumel.Text;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
@@ -18,13 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly string _title;
         readonly List<Option> _options = new List<Option>();
         readonly List<ChoiceRow> _rows = new List<ChoiceRow>();
-
-        string _named;
-        string _takes;
-        string _widest;
-        int _most;
-        Action<int> _take;
-        Relay _taking;
 
         /// <summary>A question called <paramref name="title" />, in the editor <paramref name="editor" />, with no answers yet.</summary>
         public ChoicePage(SprocketEditor editor, string title) : base(editor)
@@ -55,17 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public string Caption { get; set; }
 
-        /// <summary>What the box a number is typed into is for, said where the pointer rests on it; null for nothing.</summary>
-        public string TypedAbout { get; set; }
-
-        /// <summary>Why the button that takes a typed number cannot be pressed while nothing is typed; null for nothing.</summary>
-        public string TypeFirst { get; set; }
-
         /// <summary>The answers, in the order they are offered, for whoever reads them back.</summary>
         public IReadOnlyList<ChoiceRow> Answers => _rows;
-
-        /// <summary>The box a number is typed into, or null where the question offers none.</summary>
-        public NumberBox Box => _take == null ? null : _box;
 
         /// <summary>Offers <paramref name="text" /> as an answer, <paramref name="choose" /> carried out when it is given.</summary>
         public void Add(string text, bool isCurrent, Action choose)
@@ -80,20 +60,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _options[_options.Count - 1].Mark = mark;
         }
 
-        /// <summary>
-        /// Offers a whole number from one to <paramref name="most" /> to be typed beside what it is <paramref name="named" />,
-        /// in a box as wide as <paramref name="widest" />, and <paramref name="take" /> given it on Enter or the button.
-        /// </summary>
-        /// <remarks>For an answer that is one of too many to list, such as a length of time.</remarks>
-        public void AddNumber(string named, string takes, string widest, int most, Action<int> take)
-        {
-            _named = named;
-            _takes = takes;
-            _widest = widest;
-            _most = most;
-            _take = take;
-        }
-
         /// <summary>Sets the caution shown under the answer added last.</summary>
         public void WarnOnLast(string warning)
         {
@@ -106,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
         }
 
-        /// <summary>Makes a row for each answer, each given by its own press, and the box to type one in where there is one.</summary>
+        /// <summary>Makes a row for each answer, each given by its own press.</summary>
         protected override void ViewCreated()
         {
             _empty.Text = EmptyText;
@@ -127,47 +93,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _rows.Add(row);
                 _answers.Children.Add(row);
             }
-
-            if (_take == null)
-                return;
-
-            _typed.IsVisible = true;
-            _called.Text = _named;
-            _box.Widest = _widest;
-            _box.Most = _most;
-            _box.Accepts = Fits;
-            _give.Text = _takes;
-            _box.Tip = Tip.For(_box.Tip, TypedAbout);
-            _give.Tip = Tip.For(_give.Tip, TypeFirst);
-
-            var takes = Editor.Act(Cmd.ChoiceTaken, delegate
-            {
-                int number;
-                if (int.TryParse(_box.Text, NumberStyles.None, CultureInfo.InvariantCulture, out number) && number > 0)
-                    _take(number);
-            });
-            _taking = new Relay(delegate
-            {
-                if (takes != null && takes.CanExecute)
-                    takes.Execute();
-            }) { CanExecute = false };
-
-            // Offered only while there is something to take, and told so by the box as it is typed into.
-            _box.Edited += delegate
-            {
-                _taking.CanExecute = _box.Text.Length > 0;
-                _give.Tip = Tip.For(_give.Tip, _taking.CanExecute ? null : TypeFirst);
-            };
-
-            _give.Command = _taking;
-            _box.Submit = _taking;
-        }
-
-        /// <summary>Whether <paramref name="said" /> is nothing yet, or a number no larger than the most the box takes.</summary>
-        bool Fits(string said)
-        {
-            int number;
-            return said.Length == 0 || int.TryParse(said, NumberStyles.None, CultureInfo.InvariantCulture, out number) && number <= _most;
         }
 
         sealed class Option
