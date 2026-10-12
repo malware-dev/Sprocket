@@ -1054,9 +1054,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < named.Count; i++)
                 test.Targets.Add(named[i]);
 
+            // The blocks the names stand for: in a blueprint a name is a slot, which only its installation answers.
+            var seen = Editor.Seen(_sequence.System, named);
             if (answer.Form == Form.Value)
             {
-                var value = Valued(Vocabulary.ActionsFor(Editor.Runner.Bindings, named), answer.Chosen);
+                var value = Valued(Vocabulary.ActionsFor(Editor.Runner.Bindings, seen), answer.Chosen);
                 test.MemberId = answer.Chosen;
                 test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";
                 test.Value = answer.Arguments != null && answer.Arguments.Count > 0 ? answer.Arguments[0] : Literal.Of(true);
@@ -1076,7 +1078,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // A state is a value of Sprocket's own, said by the signal that is its coming to be so.
             var not = answer.Chosen.StartsWith(PickPage.Not, StringComparison.Ordinal);
             var id = not ? answer.Chosen.Substring(PickPage.Not.Length) : answer.Chosen;
-            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, named);
+            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, seen);
             for (var i = 0; i < events.Count; i++)
             {
                 if (events[i].Id != id || events[i].Value.Length == 0)
