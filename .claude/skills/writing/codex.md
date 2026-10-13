@@ -65,7 +65,14 @@ grep -n "^#.*mark:" <page>
 
 # Both languages: every page and tooltip has its partner
 diff <(ls Content/Data/Codex/en) <(ls Content/Data/Codex/no)
+
+# Habits that make a page read as machine-written, counted per page; --show <page> lists every hit
+python .claude/skills/writing/tells.py Content/Data/Codex/en/*.md
 ```
+
+The tester's first remark on the codex was that it reads as AI-written. `tells.py` counts the habits behind
+that: a page opening on a definition, "such as" and lists of three, pointing elsewhere, padding, uncontracted
+negatives, every sentence the same length, and sheer length. Its counts are signals, never verdicts.
 
 ## The reader test
 
