@@ -557,7 +557,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             // Two ways of looking only at what somebody does to a block. What happens to one, and what is checked of one, is
             // Sprocket's own wording throughout, so there is no second way to look at it.
-            var views = _forEvents || _forTests ? null : new[] { Editor.Texts.PickToOrganized, Editor.Texts.PickToTerminal };
+            // The angle marks point the way each link goes; the words alone are translated.
+            var views = _forEvents || _forTests ? null : new[] { "‹ " + Editor.Texts.PickToOrganized, Editor.Texts.PickToTerminal + " ›" };
 
             _what = new StageColumn(_strip.Width, true, views, Editor.Texts);
             _what.Title = _forTests ? Editor.Texts.PickWhatToCheck : _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
@@ -1414,7 +1415,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether the view now showing lists this one.</summary>
         /// <remarks>
         /// The terminal view lists what the block declares, whether or not something has been offered in its place; the
-        /// organized view lists what is on offer, whoever worded it, and nothing known to be out of reach. A value of
+        /// organized view lists what is on offer and usable, whoever worded it. A value of
         /// Sprocket's own is a step only where it can be set; a test lists it itself.
         /// </remarks>
         bool Lists(EntityAction one)
@@ -1425,7 +1426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (Editor.ShowsTerminal)
                 return one.Unaltered;
 
-            return one.Vetted && !one.Hidden && one.Readiness != Readiness.Unsupported;
+            return one.Vetted && !one.Hidden && one.Readiness == Readiness.Ready;
         }
 
         /// <summary>Which group of the view now showing this one is listed in: the terminal's two kinds of member, or the organized view's categories.</summary>

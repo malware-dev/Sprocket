@@ -104,6 +104,55 @@ public class GeneratorTests
         Assert.Contains("Mod.Farewell", problem.GetMessage());
     }
 
+    /// <summary>A text with no comment is reported, since a translator reads each one alone.</summary>
+    [Fact]
+    public void ATextWithNoCommentIsReported()
+    {
+        var run = Run(("MyTexts.resx", Noted(("Mod.Greeting", "Hello", null))));
+
+        Assert.Equal("LOC016", Assert.Single(run.Diagnostics).Id);
+    }
+
+    /// <summary>A comment pointing at the texts beside it is reported, naming the words that do.</summary>
+    [Fact]
+    public void ACommentLeaningOnItsNeighboursIsReported()
+    {
+        var run = Run(("MyTexts.resx", Noted(("Mod.Greeting", "Hello", "Note on the button above."))));
+
+        var problem = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC017", problem.Id);
+        Assert.Contains("above", problem.GetMessage());
+    }
+
+    /// <summary>A placeholder its comment does not mention is reported; one it mentions is not.</summary>
+    [Fact]
+    public void APlaceholderTheCommentLeavesOutIsReported()
+    {
+        var run = Run(("MyTexts.resx", Noted(
+            ("Mod.Greeting", "Hello, {name}, from {place}", "The home screen's heading; {name} is the player's name."))));
+
+        var problem = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC018", problem.Id);
+        Assert.Contains("{place}", problem.GetMessage());
+    }
+
+    /// <summary>Several sentences ending without a period are reported; a single line, sentence or fragment, is left to a reader.</summary>
+    [Fact]
+    public void SeveralSentencesEndWithAPeriod()
+    {
+        var run = Run(("MyTexts.resx", Resx(
+            ("Mod.Many", "Opens the library. Puts a blueprint on"),
+            ("Mod.Done", "Opens the library. Puts a blueprint on."),
+            ("Mod.Asks", "Opens the library. Put it on?"),
+            ("Mod.Bold", "**Idle**\nLights green when it runs."),
+            ("Mod.Command", "Close the editor"),
+            ("Mod.Sentence", "Switch this logic system on."))));
+
+        var problem = Assert.Single(run.Diagnostics);
+        Assert.Equal("LOC019", problem.Id);
+        Assert.Contains("Mod.Many", problem.GetMessage());
+    }
+
     /// <summary>The generator run over <paramref name="files" />, with the prefix and namespaces a mod would set.</summary>
     static GeneratorDriverRunResult Run(params (string Path, string Text)[] files)
     {
@@ -123,10 +172,24 @@ public class GeneratorTests
     }
 
     /// <summary>A file of texts holding <paramref name="texts" />, in the shape the game reads.</summary>
-    static string Resx(params (string Key, string Value)[] texts)
+    /// <summary>A file of texts, each with a comment saying where it shows and naming each of its placeholders.</summary>
+    static string Resx(params (string Key, string Value)[] texts) =>
+        Noted(texts.Select(text => (text.Key, text.Value, (string?)Shown(text.Value))).ToArray());
+
+    /// <summary>A file of texts, each with the comment given, or none for null.</summary>
+    static string Noted(params (string Key, string Value, string? Comment)[] texts)
     {
         var data = string.Join("\n", texts.Select(text =>
-            $"  <data name=\"{text.Key}\" xml:space=\"preserve\">\n    <value>{text.Value}</value>\n  </data>"));
+            $"  <data name=\"{text.Key}\" xml:space=\"preserve\">\n    <value>{text.Value}</value>\n"
+            + (text.Comment == null ? "" : $"    <comment>{text.Comment}</comment>\n") + "  </data>"));
         return "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<root>\n" + data + "\n</root>\n";
+    }
+
+    /// <summary>A comment for <paramref name="value" /> that a reader alone could use: where it shows, and what fills it.</summary>
+    static string Shown(string value)
+    {
+        var placeholders = System.Text.RegularExpressions.Regex.Matches(value, @"\{[A-Za-z][A-Za-z0-9]*\}")
+            .Cast<System.Text.RegularExpressions.Match>().Select(m => m.Value).Distinct().Select(p => " " + p + " is a test value.");
+        return "Shown on the test screen." + string.Concat(placeholders);
     }
 }

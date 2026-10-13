@@ -151,7 +151,7 @@ public class ProblemTests
         ship.Editor.Tick(1200);
 
         var row = ship.Editor.Rows()[1];
-        Assert.Equal("Nothing starts this yet.", row.Problem);
+        Assert.Equal("This sequence has no trigger, and no sequence runs it.", row.Problem);
         Assert.Equal(NoticeLevel.Warning, row.Level);
         Assert.Equal(0, row.Problems);
 
@@ -161,7 +161,7 @@ public class ProblemTests
         ship.Editor.Tick(1800);
 
         var sentence = ship.Editor.Sentence();
-        Assert.Equal("Nothing starts this yet.", sentence.Bar.Problem);
+        Assert.Equal("This sequence has no trigger, and no sequence runs it.", sentence.Bar.Problem);
         Assert.Equal(NoticeLevel.Warning, sentence.Bar.Level);
     }
 
@@ -230,7 +230,7 @@ public class ProblemTests
 
         var rows = ship.Editor.Rows();
         Assert.Equal(1, rows[0].Problems);
-        Assert.Equal("This affects something that isn't here any more.", rows[0].Problem);
+        Assert.Equal("A block this step acts on is gone.", rows[0].Problem);
     }
 
     /// <summary>
@@ -252,7 +252,7 @@ public class ProblemTests
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
 
-        Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
+        Assert.Equal("This trigger can't fire, for an unknown reason.", ship.Editor.Triggers()[0].Problem);
 
         Assert.Equal("", ship.Editor.Rows()[0].Problem);
         Assert.Equal(0, ship.Editor.Rows()[0].Problems);
@@ -277,7 +277,7 @@ public class ProblemTests
         ship.Editor.PressRow(0);
 
         var sentence = ship.Editor.Sentence();
-        Assert.Equal("Nothing can start this.", sentence.Bar.Problem);
+        Assert.Equal("This trigger can't fire, for an unknown reason.", sentence.Bar.Problem);
         Assert.All(ship.Editor.StepRows(), step => Assert.False(step.HasProblem));
     }
 
@@ -345,7 +345,7 @@ public class ProblemTests
         ship.Editor.Tick(1200);
 
         Assert.False(installation.Enabled);
-        Assert.Equal("Stopped in " + ship.Sequence.Name + ": nothing could start it.",
+        Assert.Equal("Stopped in " + ship.Sequence.Name + ": its trigger couldn't fire, for an unknown reason.",
             SequenceText.Stopped(new Texts(), installation.Halt, system, false));
     }
 
@@ -378,7 +378,7 @@ public class ProblemTests
         ship.Editor.PressRow(0);
         ship.Runner.Tick(1200);
         ship.Editor.Tick(1200);
-        Assert.Equal("Nothing can start this.", ship.Editor.Triggers()[0].Problem);
+        Assert.Equal("This trigger can't fire, for an unknown reason.", ship.Editor.Triggers()[0].Problem);
 
         ship.Rig.CanStart(ship.Sequence);
         ship.Runner.Tick(1800);

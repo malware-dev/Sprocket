@@ -66,11 +66,11 @@ public class EditorTests
     }
 
     /// <summary>
-    /// A member that cannot be made into a step is still listed, and says why when it is chosen.
+    /// A member that cannot be made into a step yet is left out of the organized view and listed in the terminal view,
+    /// where it says why when it is chosen.
     /// </summary>
     /// <remarks>
-    /// Left out, it would read as a block that does not have it. Offered as a number box, it would be
-    /// a number nobody can know the meaning of, declined in silence when the step runs.
+    /// Offered as a number box, it would be a number nobody can know the meaning of, declined in silence when the step runs.
     /// </remarks>
     [Fact]
     public void AMemberThatCannotBeAStepSaysWhy()
@@ -87,18 +87,21 @@ public class EditorTests
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
 
+        Assert.DoesNotContain(editor.Pick().Stages.SelectMany(s => s.Entries()), e => e.Text == "Pattern");
+        editor.Pick().Stages.Last().Views[1].Command!.Execute();
+
         StageColumn What() => editor.Pick().Stages
             .Single(s => s.Entries().Any(e => e.Text == "Pattern"));
 
         var pattern = What().Entries().Single(e => e.Text == "Pattern");
         Assert.True(pattern.IsWithheld);
         Assert.Equal("pending", pattern.Status);
-        Assert.False(What().Entries().Single(e => e.Text == "Power" && !e.IsHeading).IsWithheld);
+        Assert.False(What().Entries().Single(e => e.Text == "Toggle block On/Off").IsWithheld);
 
         // It says why where the pointer rests, and gives a press nothing to do.
-        Assert.StartsWith("Set this in the terminal", pattern.Why);
+        Assert.StartsWith("*The game doesn't hand over this value's list of choices", pattern.Why);
         Assert.False(pattern.IsPickable);
-        Assert.Null(What().Entries().Single(e => e.Text == "Power" && !e.IsHeading).Why);
+        Assert.Null(What().Entries().Single(e => e.Text == "Toggle block On/Off").Why);
     }
 
     /// <summary>

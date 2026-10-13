@@ -49,17 +49,17 @@ public class FieldTests
     {
         Field red = Field.Between("Red", "0", "255");
 
-        Assert.Equal("Red has to be between 0 and 255.", red.Refuses(new Texts(), "Red", "256"));
-        Assert.Equal("Red has to be between 0 and 255.", red.Refuses(new Texts(), "Red", "-1"));
-        Assert.Equal("Angle has to be 0 or more.", Field.Between("Angle", "0", "").Refuses(new Texts(), "Angle", "-4"));
-        Assert.Equal("Angle has to be 90 or less.", Field.Between("Angle", "", "90").Refuses(new Texts(), "Angle", "91"));
+        Assert.Equal("Red must be between 0 and 255.", red.Refuses(new Texts(), "Red", "256"));
+        Assert.Equal("Red must be between 0 and 255.", red.Refuses(new Texts(), "Red", "-1"));
+        Assert.Equal("Angle must be 0 or more.", Field.Between("Angle", "0", "").Refuses(new Texts(), "Angle", "-4"));
+        Assert.Equal("Angle must be 90 or less.", Field.Between("Angle", "", "90").Refuses(new Texts(), "Angle", "91"));
     }
 
     /// <summary>And so is one that is not a number at all, since a bound is something to compare with.</summary>
     [Fact]
     public void SoIsOneThatIsNotANumber()
     {
-        Assert.Equal("Red has to be a number.", Field.Between("Red", "0", "255").Refuses(new Texts(), "Red", "crimson"));
+        Assert.Equal("Red must be a number.", Field.Between("Red", "0", "255").Refuses(new Texts(), "Red", "crimson"));
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public class FieldTests
         Assert.Equal("", form.Wrong);
 
         form.Fields[1].Text = "300";
-        Assert.Equal("Green has to be between 0 and 255.", form.Wrong);
+        Assert.Equal("Green must be between 0 and 255.", form.Wrong);
     }
 
     /// <summary>The first one, because one reason is what there is room to say.</summary>
@@ -129,7 +129,7 @@ public class FieldTests
         form.Fields[1].Text = "400";
         form.Judge();
 
-        Assert.Equal("Red has to be between 0 and 255.", form.Wrong);
+        Assert.Equal("Red must be between 0 and 255.", form.Wrong);
     }
 
     /// <summary>A value nobody named is refused by its place in the order, which is what is beside it.</summary>
@@ -142,7 +142,7 @@ public class FieldTests
         form.Fields[1].Text = "900";
         form.Judge();
 
-        Assert.Equal("Option 2 has to be between 0 and 255.", form.Wrong);
+        Assert.Equal("Option 2 must be between 0 and 255.", form.Wrong);
     }
 
     /// <summary>What a field is about is told where it is filled in, on its name and on the field itself; a field about nothing more tells nothing.</summary>

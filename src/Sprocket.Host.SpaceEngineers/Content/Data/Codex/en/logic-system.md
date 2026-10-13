@@ -14,7 +14,7 @@ Because the blocks are kept apart from the job, one logic system can run every a
 
 1. On the home screen, press `+ logic system`, and name it *Airlock* on its heading.
 2. Under `Sequences`, press `+ sequence`, and name it *Cycle Out*.
-3. Press `+ step`, then `task`, [pick](#picking) the inner door, and choose the `close` with the clock beside it. The sequence page explains the clock.
+3. Press `+ step`, then `task`, [pick](#picking) the inner door, and select the `close` with the clock beside it. The sequence page explains the clock.
 4. Add `depressurize` for the vent and `open` for the outer door the same way.
 5. Go back. Under `Triggers`, press `+ trigger`, then `when`, pick the airlock's button, and have it run *Cycle Out*.
 6. Leave the screen, and switch the logic system on when asked.
@@ -38,7 +38,7 @@ The blocks you pick become [slots](#slot), listed under `Slots`. There are two k
 
 Each slot shows its name, what it is for, and the blocks that fill it. Pressing its blocks picks others, and pressing its name opens the slot's own page, to rename it and say what it is for.
 
-`Showing the slots filled by installation`, at the top of the logic system's screen, chooses which installation's blocks the steps and the slots show, and which installation a block you pick fills.
+The `Installation` list, at the top of the logic system's screen, selects which installation's blocks the steps and the slots show, and which installation a block you pick fills.
 
 ## The description
 

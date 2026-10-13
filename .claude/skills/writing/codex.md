@@ -33,6 +33,9 @@ lists the terms in the order the contents show them. Every page and tooltip exis
 - **Say a thing once,** on the page that owns it, and link there from the others.
 - **Explain what a player would get wrong, and trust them with the rest.** A page that spells out what a
   player sees for themselves on the screen talks down to them.
+- **Table-talk goes in the `::: player` box.** A passage about the game itself rather than the world (a file
+  on the player's computer, a limit the game puts on mods) is table-talk, as `screen.md` defines it, and on a
+  page it sits in that box.
 - **A page describes the product for its own purpose.** A guide once said text "draws as a sign" because
   signs were the test case; what the format was tested on is not what it is for.
 

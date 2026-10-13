@@ -38,7 +38,7 @@ Blokkene du velger, blir [plasser](#slot), som står under `Plasser`. Det finnes
 
 Hver plass viser navnet sitt, hva den er til, og blokkene som fyller den. Trykker du blokkene, velger du andre, og trykker du navnet, åpnes plassens egen side, der du gir den navn og sier hva den er til.
 
-`Viser plassene fylt av installasjonen`, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene og plassene viser, og hvilken installasjon en blokk du velger, fyller.
+`Installasjon`-listen, øverst på skjermen til logikksystemet, velger hvilken installasjons blokker stegene og plassene viser, og hvilken installasjon en blokk du velger, fyller.
 
 ## Beskrivelsen
 

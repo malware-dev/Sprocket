@@ -830,7 +830,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Does(trigger, Opening.Arguments));
+            var given = new ArgumentsSlot(act.Arguments, fields, Does(trigger, Opening.Arguments), act.Sets ? Given.NewValue : Given.Options);
             if (!given.Quiet)
                 row.Does.Add(given);
         }

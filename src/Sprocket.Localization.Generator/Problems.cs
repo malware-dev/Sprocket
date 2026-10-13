@@ -65,5 +65,25 @@ namespace Sprocket.Localization.Generator
         public static readonly DiagnosticDescriptor Twice = new DiagnosticDescriptor(
             "LOC015", "Codex index lists a term twice", "The index lists {0} again here",
             Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Uncommented = new DiagnosticDescriptor(
+            "LOC016", "Text has no comment", "{0} has no comment saying where it shows; a translator sees it alone",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Leaning = new DiagnosticDescriptor(
+            "LOC017", "Comment leans on the texts beside it", "The comment on {0} says \"{1}\"; it is read alone, so it names its own screen and element",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unexplained = new DiagnosticDescriptor(
+            "LOC018", "Comment leaves a placeholder unexplained", "{0} has {1}, which its comment does not say what is filled with",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unfinished = new DiagnosticDescriptor(
+            "LOC019", "Sentences end without a period", "{0} is several sentences and the last ends without a period",
+            Category, DiagnosticSeverity.Warning, true);
+
+        public static readonly DiagnosticDescriptor Unused = new DiagnosticDescriptor(
+            "LOC020", "Text is never used", "{0} is said by {1}, which no code reads and no definition names",
+            Category, DiagnosticSeverity.Warning, true, customTags: WellKnownDiagnosticTags.CompilationEnd);
     }
 }

@@ -36,7 +36,7 @@ public class TextsTests
         texts.Book.Load(new ResxTexts(ResxTexts.Beside, "no"));
 
         Assert.Equal("Automasjon for {name}", texts.SystemsTitle);
-        Assert.Equal("Installer logikksystemet **{name}** på et annet sett blokker, og velg hvilke blokker det bruker.", texts.SystemsAddAnotherAbout);
+        Assert.Equal("Installer logikksystemet **{name}** på et annet sett med blokker.", texts.SystemsAddAnotherAbout);
     }
 
     static HashSet<string> Keys(string file)

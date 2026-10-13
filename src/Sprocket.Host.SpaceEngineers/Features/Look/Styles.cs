@@ -309,6 +309,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Faint }
         };
 
+        /// <summary>Table-talk said in a line of its own: a word about the game itself rather than the world, in italics.</summary>
+        public static readonly TextStyle TableTalk = new TextStyle
+        {
+            Base = { Font = Lettering.Italic, FontSize = 16f, Color = Palette.Faint }
+        };
+
         /// <summary>What a thing is doing, said in a line of its own tools rather than under its name.</summary>
         public static readonly TextStyle Status = new TextStyle
         {

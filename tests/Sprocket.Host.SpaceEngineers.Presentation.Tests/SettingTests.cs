@@ -61,7 +61,7 @@ public class SettingTests
         // falloff stops at two where another light's stops somewhere else.
         Field one = Assert.Single(screen.Editor.Picking().Fields);
         Assert.Equal("falloff (0 - 2)", one.Label(new Texts()));
-        Assert.Equal("Falloff has to be between 0 and 2.", one.Refuses(new Texts(), "Falloff", "5"));
+        Assert.Equal("Falloff must be between 0 and 2.", one.Refuses(new Texts(), "Falloff", "5"));
     }
 
     /// <summary>And the step holds the value the way an action's values are held.</summary>

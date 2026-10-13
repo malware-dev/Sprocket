@@ -109,9 +109,32 @@ namespace Sprocket.Localization.Generator
 
                 members[member] = entry.Key;
                 texts.Add(new Said(entry.Key, member, entry.Value, entry.Comment));
+                Read(output, path, entry);
             }
 
             return texts;
+        }
+
+        /// <summary>Reports what a reader of <paramref name="entry" /> alone cannot make out: where it shows, what fills it, and where a sentence ends.</summary>
+        static void Read(SourceProductionContext output, string path, Entry entry)
+        {
+            var at = At(path, entry.Line);
+            var comment = entry.Comment == null ? "" : entry.Comment.Trim();
+            if (comment.Length == 0)
+                output.ReportDiagnostic(Diagnostic.Create(Problems.Uncommented, at, entry.Key));
+
+            var leaning = Notes.Leaning(comment);
+            if (leaning != null)
+                output.ReportDiagnostic(Diagnostic.Create(Problems.Leaning, at, entry.Key, leaning));
+
+            foreach (var placeholder in Notes.Placeholders(entry.Value))
+            {
+                if (comment.Length != 0 && comment.IndexOf(placeholder, StringComparison.Ordinal) < 0)
+                    output.ReportDiagnostic(Diagnostic.Create(Problems.Unexplained, at, entry.Key, placeholder));
+            }
+
+            if (Notes.Unfinished(entry.Value))
+                output.ReportDiagnostic(Diagnostic.Create(Problems.Unfinished, at, entry.Key));
         }
 
         /// <summary>Reports each text in a translation that the original lacks, and each text of the original the translation lacks.</summary>

@@ -25,7 +25,7 @@ public class SystemSwitchTests
         sim.Tick();
 
         Assert.False(page.Editable);
-        Assert.Equal("Airlock is on. Turn it off to edit.", page.LockedText);
+        Assert.Equal("Airlock must be turned off in order to be edited safely.", page.LockedText);
         Assert.Null(sim.Editor.Triggers()[0].Deletes);
         Assert.False(page.CanUndo);
 
@@ -53,14 +53,14 @@ public class SystemSwitchTests
 
         var chips = sim.Editor.Triggers()[0].Within().OfType<Slot>().ToList();
         Assert.NotEmpty(chips);
-        Assert.All(chips, chip => Assert.Equal("Turn the system off to edit.", chip.Tip?.Text));
+        Assert.All(chips, chip => Assert.Equal("The system must be turned off in order to make changes safely.", chip.Tip?.Text));
 
         sim.Editor.Screen.Flip!.Execute();
         sim.Tick();
         sim.Editor.PressChoice("Switch them off");
         sim.Tick();
 
-        Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.NotEqual("Turn the system off to edit.", chip.Tip?.Text));
+        Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.NotEqual("The system must be turned off in order to make changes safely.", chip.Tip?.Text));
     }
 
     /// <summary>Switching a blueprint off asks first, naming each logic system it stops; keeping them running changes nothing.</summary>
@@ -129,7 +129,7 @@ public class SystemSwitchTests
 
         var row = sim.Editor.RootRows()[0];
         Assert.True(row.SwitchIsOn);
-        Assert.Equal("Switch the logic system on first", row.SwitchLocked);
+        Assert.Equal("The logic system must be switched on first.", row.SwitchLocked);
 
         row.Flips!.Execute();
         sim.Editor.Tick(1001);

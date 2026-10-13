@@ -32,6 +32,9 @@
         <!-- For copying the decoded font page about, which is a megapixel of bytes and is done once per
              colour. Confined to the two loops in GlyphAtlas that actually need it. -->
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <!-- STD002 asks what the mod uses, and the harness is no mod: its helpers are there for the tests. -->
+        <NoWarn>$(NoWarn);STD002</NoWarn>
     </PropertyGroup>
 
     <!--

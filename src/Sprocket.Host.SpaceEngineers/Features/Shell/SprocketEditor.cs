@@ -1534,7 +1534,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Anchor = Input.Focused,
                 Gap = 4f,
                 Placement = Fixed.Wide(360f),
-                Content = new Label { Style = Styles.Detail, Wraps = true, Text = Texts.WritingPasteNote }
+                Content = new Label { Style = Styles.TableTalk, Wraps = true, Text = Texts.WritingPasteNote }
             }.Open();
         }
 
@@ -3018,7 +3018,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
         /// <remarks>
         /// Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.
-        /// Where the logic system was changed after its blueprint in the library, the question also asks whether the blueprint
+        /// Where the logic system was changed after its blueprint in the library, a second question asks whether the blueprint
         /// is brought up to date; otherwise the blueprint is left as it is, unasked.
         /// </remarks>
         public void AskTakeOff(AutomationSystem system)
@@ -3036,10 +3036,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
-            Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffChanged, arguments);
+            Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffGoes, arguments);
             Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
+            Answer(Texts.LibraryTakeOffConfirm, delegate { AskTakeOffBlueprint(system); });
+        }
+
+        /// <summary>
+        /// Asks whether taking off the logic system <paramref name="system" /> brings its blueprint in the library up to date;
+        /// leaving the blueprint is the answer Enter takes, and backing out takes nothing off.
+        /// </summary>
+        void AskTakeOffBlueprint(AutomationSystem system)
+        {
+            var arguments = new Arguments();
+            arguments.Set("named", system.Name);
+
+            Ask(Texts.LibraryTakeOffChanged, arguments);
             Answer(Texts.LibraryTakeOffUpdate, delegate { TakeOff(system, true); });
-            Answer(Texts.LibraryTakeOffLeave, delegate { TakeOff(system, false); });
+            Answer(Texts.LibraryTakeOffLeave, delegate { TakeOff(system, false); }, true);
         }
 
         /// <summary>Asks before putting the logic system <paramref name="system" /> in place of its blueprint in the library; keeping the blueprint is the answer Enter takes.</summary>

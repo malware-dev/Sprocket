@@ -162,7 +162,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (part is EntitiesSlot)
                 return texts.TriggerTargetsAbout;
 
-            return part is ArgumentsSlot ? texts.SequenceArgumentsAbout : null;
+            var given = part as ArgumentsSlot;
+            return given == null ? null : given.About(texts);
         }
 
         /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>

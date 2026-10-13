@@ -247,10 +247,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     : Template.Fill(texts.ProblemNoMomentOf, "block", block);
             if (string.IsNullOrEmpty(block))
                 return texts.ProblemNeverTriggered;
-            if (why == Unwired.Cleared)
-                return Template.Fill(texts.ProblemCleared, "block", block);
-            if (why == Unwired.Taken)
-                return Template.Fill(texts.ProblemTaken, "block", block);
+            if (why == Unwired.Cleared || why == Unwired.Taken)
+                return Template.Fill(texts.ProblemButtonChanged, "block", block);
 
             return Template.Fill(texts.ProblemUnset, "block", block);
         }

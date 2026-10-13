@@ -963,7 +963,7 @@ public class RigTests
 
         // And it says whose button, and why.
         var fault = SequenceSummary.Fault(pasted.Runner.Get(sequence, sequence.System.First));
-        Assert.Equal("Airlock Button's button does something else, so it can't start this.", SequenceText.Problem(new Texts(), fault, sequence));
+        Assert.Equal("Airlock Button's button was changed in its toolbar.", SequenceText.Problem(new Texts(), fault, sequence));
 
         Panel panel = null!;
         foreach (Panel found in pasted.Panels())

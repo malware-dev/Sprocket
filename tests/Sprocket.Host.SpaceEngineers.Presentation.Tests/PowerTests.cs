@@ -75,7 +75,7 @@ public class PowerTests
         screen.Run(2);
         var field = Assert.Single(screen.Editor.Picking().Fields);
         Assert.Equal("override (0 - 100)", field.Label(new Texts()));
-        Assert.Equal("Override has to be between 0 and 100.", field.Refuses(new Texts(), "Override", "101"));
+        Assert.Equal("Override must be between 0 and 100.", field.Refuses(new Texts(), "Override", "101"));
 
         screen.Editor.Typed("40");
         screen.Run(2);

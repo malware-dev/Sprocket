@@ -62,7 +62,7 @@ public class StoreTests
         ship.World.Invoke(entity, Blocks.Battery.Recharge);
 
         var trouble = entity.Trouble(Blocks.Battery.Recharge, new Literal[0]);
-        Assert.Equal("cannot charge - no power coming in", TroubleText.Of(new Texts(), trouble));
+        Assert.Equal("cannot charge because no power is coming in", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
 
@@ -147,7 +147,7 @@ public class StoreTests
         ship.World.Invoke(entity, Blocks.Tank.Stockpile);
 
         var trouble = entity.Trouble(Blocks.Tank.Stockpile, new Literal[0]);
-        Assert.Equal("cannot fill - it is switched off or has no power", TroubleText.Of(new Texts(), trouble));
+        Assert.Equal("cannot fill because it is switched off or has no power", TroubleText.Of(new Texts(), trouble));
         Assert.False(trouble.Ends);
     }
 

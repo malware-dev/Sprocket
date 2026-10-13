@@ -27,7 +27,7 @@ Removing the last step or trigger that uses a slot removes the slot. Blocks anot
 
 ## Filling a slot
 
-The blocks you pick for a step or a trigger fill its slot for the installation chosen under `Showing the slots filled by installation`. Every other installation fills it on its own [installation panel](#installation-panel).
+The blocks you pick for a step or a trigger fill its slot for the installation selected under `Installation`. Every other installation fills it on its own [installation panel](#installation-panel).
 
 The logic system's screen lists its slots under `Slots`, each with the blocks the installation shown fills it with. Under them, each other installation with something still to do says so, for example *Installation 2: new, fill it*, *Installation 2: changed, fill it again* or *Installation 2: lost a block*.
 
@@ -44,7 +44,7 @@ Pressing a slot's name on the logic system's screen opens the slot's page. What 
 - **`What it is for`** is a box to write in, with headings, lists, and bold or italic text. `Markup` opens the page on [writing text](#writing).
 - **`Expects`** lists the kinds of block the slot takes, for example *Door, Sliding Door*, or `Any block`.
 
-Write them for someone who has never seen your construct. A slot named *Interior Door 2* or *Slot 1* leaves whoever fills it guessing. Rename it *Inner door* and say it is the door on the pressurized side, and they know which door to choose.
+Write them for someone who has never seen your construct. A slot named *Interior Door 2* or *Slot 1* leaves whoever fills it guessing. Rename it *Inner door* and say it is the door on the pressurized side, and they know which door to select.
 
 ## An empty slot
 

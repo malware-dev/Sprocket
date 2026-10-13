@@ -77,7 +77,7 @@ public class DuplicatingTests
         Assert.Null(row.Deletes);
         Assert.True(row.DeletePart.IsVisible, "the bin went away while the system is on");
         Assert.False(row.DeletePart.IsEnabled, "the bin can still be pressed while the system is on");
-        Assert.Equal("Turn the system off to edit.", row.DeletePart.Tip?.Text);
+        Assert.Equal("The system must be turned off in order to make changes safely.", row.DeletePart.Tip?.Text);
     }
 
     /// <summary>

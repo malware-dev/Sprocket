@@ -279,7 +279,7 @@ public class CompileTests
         var field = Field.Between("count", "0", "10");
         field.Entry = Entry.Whole;
 
-        Assert.Equal("count has to be a whole number.", field.Refuses(new Texts(), "count", "2.5"));
+        Assert.Equal("count must be a whole number.", field.Refuses(new Texts(), "count", "2.5"));
         Assert.Equal("", field.Refuses(new Texts(), "count", "2"));
     }
 

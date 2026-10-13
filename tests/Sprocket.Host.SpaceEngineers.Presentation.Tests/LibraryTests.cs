@@ -829,7 +829,7 @@ public class LibraryTests
         arrived.Enabled = false;
         rig.Tick();
 
-        Assert.Equal("putting a logic system on", rig.Editor.Screen.UndoText);
+        Assert.Equal("adding a logic system from the library", rig.Editor.Screen.UndoText);
         rig.Editor.Screen.Undo!.Execute();
         rig.Tick();
         Assert.Empty(rig.Editor.Program.Systems);
@@ -868,27 +868,55 @@ public class LibraryTests
     }
 
     /// <summary>
-    /// Taking off a logic system changed after its blueprint in the library asks whether to bring the blueprint up to date,
-    /// and answering to leave it takes the logic system off with the blueprint as it was.
+    /// Taking off a logic system changed after its blueprint in the library first says its installations go with it, then
+    /// asks on its own whether to bring the blueprint up to date; answering to leave it takes the logic system off with the
+    /// blueprint as it was.
     /// </summary>
     [Fact]
     public void TakingOffAChangedLogicSystemAsksAboutItsBlueprint()
     {
-        var rig = Blueprinted();
-        var blueprint = rig.Editor.Program.Systems[0];
-        blueprint.Changed = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        rig.Shelf.Keep(blueprint);
+        var rig = Changed(out _);
 
-        blueprint.Name = "Airlock Mk II";
-        rig.Editor.AskTakeOff(blueprint);
+        Assert.Contains(rig.Texts.LibraryTakeOffGoes, rig.Editor.Question());
+        Assert.False(rig.Editor.HasChoice(rig.Texts.LibraryTakeOffUpdate));
+        rig.Editor.PressChoice(rig.Texts.LibraryTakeOffConfirm);
+        rig.Tick();
 
-        Assert.Contains(rig.Texts.LibraryTakeOffChanged, rig.Editor.Question());
+        Assert.StartsWith("Airlock Mk II was changed after its blueprint", rig.Editor.Question());
         Assert.True(rig.Editor.HasChoice(rig.Texts.LibraryTakeOffUpdate));
         rig.Editor.PressChoice(rig.Texts.LibraryTakeOffLeave);
         rig.Tick();
 
         Assert.Empty(rig.Editor.Program.Systems);
         Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
+    }
+
+    /// <summary>Backing out of the question about the blueprint takes nothing off and leaves the blueprint as it was.</summary>
+    [Fact]
+    public void BackingOutOfTheBlueprintQuestionTakesNothingOff()
+    {
+        var rig = Changed(out var blueprint);
+        rig.Editor.PressChoice(rig.Texts.LibraryTakeOffConfirm);
+        rig.Tick();
+
+        rig.Editor.Unask();
+        rig.Tick();
+
+        Assert.Same(blueprint, Assert.Single(rig.Editor.Program.Systems));
+        Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
+    }
+
+    /// <summary>A blueprinted logic system renamed after its blueprint was kept, with the question to take it off standing.</summary>
+    static Simulation Changed(out AutomationSystem blueprint)
+    {
+        var rig = Blueprinted();
+        blueprint = rig.Editor.Program.Systems[0];
+        blueprint.Changed = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        rig.Shelf.Keep(blueprint);
+
+        blueprint.Name = "Airlock Mk II";
+        rig.Editor.AskTakeOff(blueprint);
+        return rig;
     }
 
     /// <summary>Taking off a logic system unchanged since its blueprint asks only whether to take it off, nothing about the blueprint.</summary>

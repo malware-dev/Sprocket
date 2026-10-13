@@ -820,7 +820,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Arguments); }));
+            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Arguments); }),
+                act.Sets ? Given.NewValue : Given.Options);
             if (!given.Quiet)
                 row.Slots.Add(given);
         }
@@ -855,7 +856,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var fields = new List<Field>();
             value.Fields(fields);
             row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields,
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); })));
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked));
         }
 
         static StepKind Kind(Step step)

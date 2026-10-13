@@ -260,7 +260,7 @@ public class ActionTests
 
         Assert.True(screen.Editor.ShowsTerminal, "pressing the link did not change the view");
         Assert.True(screen.Shows("Toggle block On/Off"), "the block's own words are not listed");
-        Assert.StartsWith("Everything these blocks offer in the game's terminal", what.Note);
+        Assert.StartsWith("Everything these blocks offer in the terminal", what.Note);
         Assert.True(screen.Shows("‹ Organized"), "there is no way back from the terminal's list");
         Assert.False(screen.Shows("Terminal ›"), "the link to the list showing still shows");
     }

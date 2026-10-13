@@ -134,7 +134,7 @@ public class StateTests
         var because = after.Systems[0].Halt!.Because;
         Assert.Equal(Cause.TankNoGas, because.Cause);
         Assert.Equal("hydrogen", because.About);
-        Assert.Equal("cannot fill - no hydrogen coming in", TroubleText.Of(new Texts(), because));
+        Assert.Equal("cannot fill because no hydrogen is coming in", TroubleText.Of(new Texts(), because));
     }
 
     /// <summary>A system switched off by its identity alone is its own switch, and leaves each one's switch and each sequence as they were.</summary>

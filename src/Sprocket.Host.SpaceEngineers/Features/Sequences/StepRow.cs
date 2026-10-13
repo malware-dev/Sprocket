@@ -332,8 +332,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (part is EntitiesSlot)
                 return texts.SequenceBlocksAbout;
 
-            if (part is ArgumentsSlot)
-                return texts.SequenceArgumentsAbout;
+            var given = part as ArgumentsSlot;
+            if (given != null)
+                return given.About(texts);
 
             if (part is StateSlot)
                 return texts.SequenceStateAbout;

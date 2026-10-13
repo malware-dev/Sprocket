@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using VRageMath;
 using Lumel.Input;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -20,10 +21,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<Literal> _arguments = new List<Literal>();
         readonly List<Field> _fields = new List<Field>();
         readonly List<string> _filled = new List<string>();
+        readonly Given _holds;
 
-        /// <summary>The arguments <paramref name="arguments" />, asked for by <paramref name="fields" />, pressed to <paramref name="opens" />.</summary>
-        public ArgumentsSlot(IList<Literal> arguments, IList<Field> fields, ICommand opens) : base(opens)
+        /// <summary>The arguments <paramref name="arguments" />, asked for by <paramref name="fields" />, pressed to <paramref name="opens" />, which are <paramref name="holds" /> to what holds them.</summary>
+        public ArgumentsSlot(IList<Literal> arguments, IList<Field> fields, ICommand opens, Given holds = Given.Options) : base(opens)
         {
+            _holds = holds;
+
             for (var i = 0; i < arguments.Count; i++)
                 _arguments.Add(arguments[i]);
 
@@ -116,5 +120,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </para>
         /// </remarks>
         public override IList<string> Filled => _filled;
+
+        /// <summary>What pressing this part does, worded for what it holds.</summary>
+        public string About(Texts texts)
+        {
+            if (_holds == Given.NewValue)
+                return texts.SequenceNewValueAbout;
+
+            return _holds == Given.Checked ? texts.SequenceCheckedAbout : texts.SequenceOptionsAbout;
+        }
     }
 }

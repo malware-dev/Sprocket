@@ -277,8 +277,8 @@ public class RotorTests
 
         var speed = fields[2];
         Assert.Equal("speed must be given.", speed.Refuses(new Texts(), "speed", ""));
-        Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "0"));
-        Assert.Equal("speed has to be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "31"));
+        Assert.Equal("speed must be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "0"));
+        Assert.Equal("speed must be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "31"));
         Assert.Equal("", speed.Refuses(new Texts(), "speed", "0.5"));
         Assert.Equal("(0 - 30)", speed.Takes(new Texts()));
 
@@ -412,7 +412,7 @@ public class RotorTests
         // finish by itself.
         var fault = Faulted(runner, sequence);
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
-        Assert.Equal("cannot turn - something is holding it", TroubleText.Of(new Texts(), fault.Because));
+        Assert.Equal("cannot turn because something is holding it", TroubleText.Of(new Texts(), fault.Because));
         Assert.True(runner.Get(sequence)!.IsRunning);
     }
 
@@ -442,9 +442,9 @@ public class RotorTests
     /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>
     [Theory]
     [InlineData("power", "Rotor")]
-    [InlineData("head", "cannot turn - it has no head")]
-    [InlineData("lock", "cannot turn - it is locked")]
-    [InlineData("torque", "cannot turn - its torque is nought")]
+    [InlineData("head", "cannot turn because it has no head")]
+    [InlineData("lock", "cannot turn because it is locked")]
+    [InlineData("torque", "cannot turn because its torque is zero")]
     public void ARotorThatCannotTurnSaysWhy(string what, string said)
     {
         var ship = new Rigged();
@@ -522,7 +522,7 @@ public class RotorTests
 
         var fault = Faulted(runner, sequence);
         Assert.Equal(SequenceProblem.Unfilled, fault.Problem);
-        Assert.Equal("This step is missing its angle. Fill it in.", SequenceText.Problem(new Texts(), fault, sequence));
+        Assert.Equal("This step is missing its angle.", SequenceText.Problem(new Texts(), fault, sequence));
 
         // Switched off for it, the reason it stopped names the option as well.
         for (var frame = 2; frame < 600; frame++)
@@ -551,7 +551,7 @@ public class RotorTests
 
         var fault = Faulted(runner, sequence);
         Assert.Equal(SequenceProblem.Mistyped, fault.Problem);
-        Assert.Equal("This step's angle doesn't fit its action. Fill it in again.", SequenceText.Problem(new Texts(), fault, sequence));
+        Assert.Equal("This step's angle doesn't fit its action.", SequenceText.Problem(new Texts(), fault, sequence));
     }
 
     [Fact]

@@ -139,7 +139,7 @@ public class DefinitionTests
         var fields = Fields(3);
 
         Assert.Equal("", fields[0].Refuses(new Texts(), "Red", "255"));
-        Assert.Equal("Red has to be between 0 and 255.", fields[0].Refuses(new Texts(), "Red", "256"));
+        Assert.Equal("Red must be between 0 and 255.", fields[0].Refuses(new Texts(), "Red", "256"));
     }
 
     static List<Field> Fields(int action)

@@ -2,7 +2,7 @@
 
 A signal is what a block sends to start a [trigger](#trigger). It comes from one of two places: a slot on the block's toolbar, or a change in the block itself. Once it arrives, both kinds work the same way.
 
-To start a trigger with one, add the trigger with `when`, pick the block, and choose the signal under `What happens`. Both kinds carry the ![](mark:signal) **signal mark** wherever they are listed.
+To start a trigger with one, add the trigger with `when`, pick the block, and select the signal under `What happens`. Both kinds carry the ![](mark:signal) **signal mark** wherever they are listed.
 
 ## From a toolbar slot
 

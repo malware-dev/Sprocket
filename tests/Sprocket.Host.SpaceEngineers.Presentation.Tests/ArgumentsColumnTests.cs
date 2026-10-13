@@ -84,7 +84,7 @@ public class ArgumentsColumnTests
         var screen = Open(SetRadius + " " + RadiusBox + " type 50 " + Done);
 
         Assert.Equal("Radius on Airlock Light", screen.Ended);
-        Assert.True(screen.Shows("radius has to be between 0.1 and 20."), "nothing said why");
+        Assert.True(screen.Shows("radius must be between 0.1 and 20."), "nothing said why");
     }
 
     /// <summary>Nothing is held against what is typed until Done has been tried.</summary>
@@ -93,7 +93,7 @@ public class ArgumentsColumnTests
     {
         var screen = Open(SetRadius + " " + RadiusBox + " type 50");
 
-        Assert.False(screen.Shows("has to be"), "the value was refused before Done was pressed");
+        Assert.False(screen.Shows("must be"), "the value was refused before Done was pressed");
     }
 
     /// <summary>What was entered for one thing is there again on going back to it.</summary>

@@ -27,7 +27,7 @@ Fjerner du det siste steget eller den siste utløseren som bruker en plass, fjer
 
 ## Fylle en plass
 
-Blokkene du velger for et steg eller en utløser, fyller plassen for installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Alle andre installasjoner fyller den på sitt eget [installasjonspanel](#installation-panel).
+Blokkene du velger for et steg eller en utløser, fyller plassen for installasjonen som er valgt under `Installasjon`. Alle andre installasjoner fyller den på sitt eget [installasjonspanel](#installation-panel).
 
 Skjermen til logikksystemet viser plassene under `Plasser`, hver med blokkene installasjonen som vises, fyller den med. Under blokkene står det hva hver av de andre installasjonene fortsatt må gjøre, for eksempel *Installasjon 2: ny, fyll den*, *Installasjon 2: endret, fyll den på nytt* eller *Installasjon 2: mistet en blokk*.
 

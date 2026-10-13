@@ -8,15 +8,15 @@ On the [home screen](#home), `Make blueprint` on a logic system's heading saves 
 
 ## Putting it on a construct
 
-In the library, choose a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its [installation panel](#installation-panel).
+In the library, select a blueprint and press `Add to this construct`. It becomes a logic system on this construct, with one installation whose slots are still empty. Fill them on its [installation panel](#installation-panel).
 
 A construct can hold a blueprint only once. To have a second, make a copy.
 
 ## Making a copy
 
-`Make a copy`, in the library, puts a new logic system on this construct that starts as a copy of the chosen one. Use it to build something that works like an existing logic system, for example a hangar door made from an airlock, without changing the original.
+`Make a copy`, in the library, puts a new logic system on this construct that starts as a copy of the selected one. Use it to build something that works like an existing logic system, for example a hangar door made from an airlock, without changing the original.
 
-- It is copied from the row you chose: the logic system on this construct, the backup, or the blueprint in storage.
+- It is copied from the row you selected: the logic system on this construct, the backup, or the blueprint in storage.
 - It is named with a number, for example *Airlock 2*, and you are its maker.
 - It has one installation, whose slots are still empty.
 - It has no blueprint until you press `Make blueprint`. It and the original are separate from then on, and a change to one leaves the other as it is.

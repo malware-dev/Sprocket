@@ -16,7 +16,7 @@ A logic system doesn't name your blocks. It names [slots](#slot), such as *the i
 
 ## Take it with you
 
-Because the job is kept apart from the blocks, it can travel. Kept in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint), it can be put on another [construct](#construct), and whoever installs it only chooses their own blocks on the [installation panel](#installation-panel).
+Because the job is kept apart from the blocks, it can travel. Kept in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint), it can be put on another [construct](#construct), and whoever installs it only selects their own blocks on the [installation panel](#installation-panel).
 
 ## Undo and redo
 

@@ -1,6 +1,6 @@
 # Handling
 
-En handling er noe en blokk gjør, en av funksjonene dens, som å åpne en dør eller slå på et lys. Hver slags blokk har sine egne: en dør kan åpnes og lukkes, og et stempel kan skyves ut og trekkes inn.
+En handling er noe en blokk gjør, en av funksjonene dens, som å åpne en dør eller skyve ut et stempel. Hver slags blokk har sine egne: en dør kan åpnes og lukkes, og en lydblokk kan spille og stoppe.
 
 For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`.
 
@@ -8,11 +8,11 @@ For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`.
 
 [Velg](#picking) blokkene, så viser `Hva som skal gjøres` hva de kan gjøre, samlet under overskrifter som `Kraft`, `Bevegelse` og `Utseende`. For blokkene automasjonen kjenner, har de vanlige handlingene enkle navn, som `Move to` på et stempel.
 
-`Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i spillets terminal, under spillets egne navn. Å bruke dem er ditt eget valg: kodeksen forklarer dem ikke, og automasjonen sjekker dem ikke. `‹ Ordnet` går tilbake.
+`Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i terminalen, under terminalens egne navn. Å bruke dem er ditt eget valg. Den ordnede listen viser dem som er kjent for å virke med automasjonen. Noe automasjonen ikke kan sette ennå, står bare her, dempet, og sier hvorfor når pekeren hviler på det. `‹ Ordnet` går tilbake.
 
 ## Hvilke handlinger som tar tid
 
-For de fleste handlinger sier ![](mark:sequence) [sekvensen](#sequence) fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å slå på et lys eller spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg, at en ventil fyller eller tømmer et rom, eller at et stempel eller en rotor beveger seg dit det ble sendt, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Siden om sekvenser forklarer hvordan et steg går rett videre mens blokken fortsatt holder på.
+For de fleste handlinger sier ![](mark:sequence) [sekvensen](#sequence) fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg, at en ventil fyller eller tømmer et rom, eller at et stempel eller en rotor beveger seg dit det ble sendt, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Siden om sekvenser forklarer hvordan et steg går rett videre mens blokken fortsatt holder på.
 
 I velgeren har hver handling et merke:
 
@@ -42,7 +42,7 @@ Et valg som må gis, sier fra når det står tomt. Et som kan utelates, kan stå
 
 En verdi er en av egenskapene til en blokk, som fargen eller radiusen til et lys, og å sette en er en egen oppgave, ved siden av handlingene. Verdiene står under `Hva som skal gjøres` sammen med handlingene, hver merket med ![](mark:value) **`=?`**, merket en verdi har overalt der den nevnes. Velg en, og gi den nye verdien i kolonnen med navnet dens øverst. Sekvensen går rett videre, slik den gjør etter en handling med lyn.
 
-For å sjekke en verdi, og gjøre noe bare der den stemmer, bruker du et [hvis](#if).
+For å sjekke en verdi, og gjøre noe bare hvis betingelsen er oppfylt, bruker du et [hvis](#if).
 
 ## Eksempler
 

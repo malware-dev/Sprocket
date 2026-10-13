@@ -32,6 +32,6 @@ Slots are filled while the installation or its logic system is switched off. Whi
 
 Slots are worked out again after every change to the logic system, so a slot this installation filled can be split in two, or merged into a bigger one. Each slot that changed reads `Changed: fill it again` in place of its blocks, and the heading over the slots counts them, for example `1 slot to fill again`.
 
-The blocks the installation had are set aside, and listed under the slot after `Set aside, offered first:`. Press the slot, and the picker lists them first, each marked `Set aside`. Choose the ones that belong in this slot.
+The blocks the installation had are set aside, and listed under the slot after `Set aside, offered first:`. Press the slot, and the picker lists them first, each marked `Set aside`. Select the ones that belong in this slot.
 
 The blocks set aside are kept until every slot of the installation is filled again, and then let go.

@@ -2,7 +2,7 @@
 
 ## Running a sequence
 
-Choosing `run` under `+ step` adds a [step](#step) that starts another ![](mark:sequence) [sequence](#sequence) of the same logic system, chosen from a list of its sequences. A run step takes time, as an action with a clock does: the sequence can wait for the run to finish or go straight on, and a new run step waits, so the next step begins once that sequence has finished.
+Selecting `run` under `+ step` adds a [step](#step) that starts another ![](mark:sequence) [sequence](#sequence) of the same logic system, selected from a list of its sequences. A run step takes time, as an action with a clock does: the sequence can wait for the run to finish or go straight on, and a new run step waits, so the next step begins once that sequence has finished.
 
 An ![](mark:installation) [installation](#installation) runs a sequence once at a time. Where the sequence is already running, waiting for the run step means waiting for that run to finish, and the sequence counts the start as skipped, as it does for a [trigger](#trigger): `skipped 1x while busy`.
 
@@ -12,7 +12,7 @@ A sequence that would start itself again, through the sequences it runs, is a pr
 
 ## Stopping a sequence
 
-Choosing `stop` under `+ step` adds a step that stops another sequence of the same logic system. It acts at once, and the next step begins straight away. The stopped sequence's screen names what stopped it, for example `stopped at step 2 by Lockdown`. A stop that finds the sequence idle leaves it as it is.
+Selecting `stop` under `+ step` adds a step that stops another sequence of the same logic system. It acts at once, and the next step begins straight away. The stopped sequence's screen names what stopped it, for example `stopped at step 2 by Lockdown`. A stop that finds the sequence idle leaves it as it is.
 
 A stop leaves the blocks as a stop by hand does, which the sequence page explains under *Starting it*.
 

@@ -14,7 +14,7 @@ Når en plass fylles, blir bare blokker av riktig slag tilbudt.
 
 ## Hva som skal gjøres
 
-`Hva som skal gjøres` viser hva de valgte blokkene kan gjøre, samlet under overskrifter som `Kraft` og `Åpning`. `Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i spillets terminal, under spillets egne navn, og `‹ Ordnet` går tilbake. Se [Handling](#action).
+`Hva som skal gjøres` viser hva de valgte blokkene kan gjøre, samlet under overskrifter som `Kraft` og `Åpning`. `Terminal ›`, ytterst i overskriften, viser i stedet alt blokkene tilbyr i terminalen, under terminalens egne navn, og `‹ Ordnet` går tilbake. Se [Handling](#action).
 
 Hvert valg har et merke for slaget sitt:
 

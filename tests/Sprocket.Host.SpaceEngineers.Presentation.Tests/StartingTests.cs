@@ -56,7 +56,7 @@ public class StartingTests
         var screen = WithOne();
 
         var sentence = screen.Editor.Sentence();
-        Assert.Equal("Nothing starts this yet.", sentence.Bar.Problem);
+        Assert.Equal("This sequence has no trigger, and no sequence runs it.", sentence.Bar.Problem);
         Assert.Equal(NoticeLevel.Warning, sentence.Bar.Level);
 
         // And nothing on this screen offers to mend it, because what starts a sequence is not here.
@@ -81,7 +81,7 @@ public class StartingTests
         screen.Run(120);
 
         // The row for it says the same thing, one screen out.
-        Assert.Equal("Nothing starts this yet.", screen.Editor.Rows()[0].Problem);
+        Assert.Equal("This sequence has no trigger, and no sequence runs it.", screen.Editor.Rows()[0].Problem);
 
         screen.Editor.PressStart("when");
         screen.Editor.PressBlock("Airlock Button");
@@ -94,6 +94,6 @@ public class StartingTests
         Assert.Equal("then run Sequence 1", screen.Editor.Doing(0));
 
         // Mended.
-        Assert.NotEqual("Nothing starts this yet.", screen.Editor.Rows()[0].Problem);
+        Assert.NotEqual("This sequence has no trigger, and no sequence runs it.", screen.Editor.Rows()[0].Problem);
     }
 }

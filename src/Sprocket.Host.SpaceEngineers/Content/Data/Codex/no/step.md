@@ -6,7 +6,7 @@ Et steg er én linje i en ![](mark:sequence) [sekvens](#sequence). `+ steg`, på
 - `vent` [venter](#wait) en fastsatt tid.
 - `kjør` og `stopp` [kjører eller stopper en annen sekvens](#run-and-stop).
 - `avvent alle ventende oppgaver`, som tilbys der hver venting er en egen linje, venter på stegene som tar tid over den, slik siden om sekvenser forklarer.
-- `hvis` [sjekker blokker](#if), og kjører stegene under det der det som sjekkes stemmer.
+- `hvis` [sjekker blokker](#if), og kjører stegene under det bare hvis betingelsen er oppfylt.
 
 ## Flytte og kopiere steg
 

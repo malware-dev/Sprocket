@@ -6,7 +6,7 @@ Under `Sekvenser` på skjermen til logikksystemet legger `+ sekvens` til en, og 
 
 ## Starte den
 
-En [utløser](#trigger) starter den, for eksempel når knappen til luftslusen trykkes. Spill-merket på raden kjører den for hånd, også mens logikksystemet er slått av, på installasjonen som er valgt under `Viser plassene fylt av installasjonen`. Slik prøver du en sekvens mens du bygger den.
+En [utløser](#trigger) starter den, for eksempel når knappen til luftslusen trykkes. Spill-merket på raden kjører den for hånd, også mens logikksystemet er slått av, på installasjonen som er valgt under `Installasjon`. Slik prøver du en sekvens mens du bygger den.
 
 En installasjon kjører en sekvens én gang om gangen. En utløser som går av mens den fortsatt kjører, hoppes over, og sekvensen teller hvor ofte det skjer.
 
@@ -42,7 +42,7 @@ Rett det den nevner, og slå på installasjonen igjen. En blokk som er borte, el
 
 ## Når et steg venter
 
-Et steg venter når blokken sitter fast, som en rotor som holdes, eller en ventil der lufta ikke har noe sted å gjøre av seg. Steget venter og sier hvorfor, for eksempel `kan ikke tømme - ingen steder å gjøre av luften`.
+Et steg venter når blokken sitter fast, som en rotor som holdes, eller en ventil der lufta ikke har noe sted å gjøre av seg. Steget venter og sier hvorfor, for eksempel `kan ikke tømme fordi det ikke er noe sted å gjøre av luften`.
 
 Rydd veien, så fortsetter det av seg selv: frigjør rotoren, eller gi lufta et sted å gjøre av seg, som en oksygentank med plass i. Vil du gi opp kjøringen, stopper du den for hånd.
 
