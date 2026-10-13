@@ -12,6 +12,8 @@ An installation runs a sequence once at a time. A trigger that fires while it is
 
 While it runs, the play mark turns into a stop mark, which stops it. A stopped run starts nothing more. A door already moving finishes, and a vent goes on filling or emptying the room, while a piston or a rotor stops where it is.
 
+Switching the logic system or the installation off stops its runs at the step they reached, and once it is switched on again the sequence reads `stopped at step 2 when switched off`. A run started by hand ignores the switch and carries on.
+
 ## Steps that take time
 
 For most actions, the sequence tells the block and moves straight on to the next step, without waiting for the block to finish, such as switching a light on or playing a sound. A few take time to finish, such as a door closing or a vent emptying a room, and a new step that does one waits for it: the next step begins only once the block is done. So the vent starts once the inner door is shut, and the outer door opens once the room is empty.
@@ -42,9 +44,17 @@ Put right what it names, and switch the installation on again. A block that is g
 
 ## When a step holds
 
-A step holds when its block is stuck, such as a rotor that is held or a vent whose air has nowhere to go. The step waits and says why, for example `cannot empty because there is nowhere to put the air`.
+A step holds when its block is stuck, such as a rotor that is held or a vent whose air has nowhere to go. The step waits and says why, for example `Airlock Vent cannot empty because there is nowhere to put the air.`
 
 Clear the way, and it carries on by itself: free the rotor, or give the air somewhere to go, such as an oxygen tank with room in it. To give up on the run, stop it by hand.
+
+## When something else takes over
+
+A run ends at its step when something else takes a block over while the step waits on it, such as somebody opening the inner door from the terminal while *Cycle Out* waits for it to close. The installation stays switched on. The step's line shows an amber warning naming the block and what happened, until the sequence next runs:
+
+`Airlock Inner Door stopped closing because something else opened it.`
+
+Run the sequence again, and it starts afresh.
 
 ## Example: the airlock's Cycle Out
 

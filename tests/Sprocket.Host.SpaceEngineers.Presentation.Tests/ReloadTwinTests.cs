@@ -65,6 +65,68 @@ public class ReloadTwinTests
         });
     }
 
+    /// <summary>A cycle cut short by switching its logic system off says where it stopped, and keeps saying it once switched on.</summary>
+    [Theory]
+    [MemberData(nameof(Every), 3, 250, 9)]
+    public void ASwitchOffPartWayIsRemembered(int reloadAt)
+    {
+        Twins(Cycle, reloadAt, delegate(Screen screen, int tick)
+        {
+            if (tick == 12)
+                screen.Scene.Ship.Press("Airlock Button");
+            if (tick == 25)
+                screen.Editor.Program.Systems[0].Enabled = false;
+            if (tick == 140)
+                screen.Editor.Program.Systems[0].Enabled = true;
+        });
+    }
+
+    /// <summary>A vent sent the other way while its step waits ends the run, and what it said is kept, at its step and naming it.</summary>
+    [Theory]
+    [MemberData(nameof(Every), 3, 250, 9)]
+    public void AVentSentTheOtherWayIsRemembered(int reloadAt)
+    {
+        Twins(Vented, reloadAt, delegate(Screen screen, int tick)
+        {
+            if (tick == 12)
+                screen.Scene.Ship.Press("Airlock Button");
+            if (tick == 30)
+                Overruled(screen);
+        });
+    }
+
+    /// <summary>The scenes the twins compare do what the twins are about: the switch is said and the vent's overruling is kept.</summary>
+    [Fact]
+    public void TheScenesMeetWhatTheyAreAbout()
+    {
+        var cut = Screen.Fresh();
+        Cycle(cut);
+        cut.Scene.Ship.Press("Airlock Button");
+        cut.Run(13);
+        cut.Editor.Program.Systems[0].Enabled = false;
+        cut.Run(110);
+        var cycle = cut.Editor.Program.Sequences[0];
+        Assert.Equal(Stopper.Switch, cut.Scene.Ship.Runner.Get(cycle, cycle.System.First)!.StoppedBy);
+
+        var vented = Screen.Fresh();
+        Vented(vented);
+        vented.Scene.Ship.Press("Airlock Button");
+        vented.Run(18);
+        Overruled(vented);
+        vented.Run(100);
+        var cycled = vented.Editor.Program.Sequences[0];
+        var fault = SequenceSummary.Fault(vented.Scene.Ship.Runner.Get(cycled, cycled.System.First));
+        Assert.Equal(SequenceProblem.Conflicted, fault.Problem);
+        Assert.Equal("Airlock Vent", fault.Which);
+    }
+
+    /// <summary>Something other than the cycle tells the airlock's vent to fill the room.</summary>
+    static void Overruled(Screen screen)
+    {
+        var vent = screen.Scene.Ship.Machine.Fitted.First(fitting => fitting.Name == "Airlock Vent");
+        vent.Perform("Depressurize_Off", new List<Literal>());
+    }
+
     /// <summary>A construct taken outside its sharing pauses, and stays paused, its cycle held where it was.</summary>
     [Theory]
     [MemberData(nameof(Every), 3, 120, 7)]
@@ -333,7 +395,10 @@ public class ReloadTwinTests
     static string Run(SequenceRunner run) =>
         (run.IsRunning ? "running" : "idle") + " step " + run.CurrentStep + " wait " + run.WaitTicks + (run.IsWaiting ? " waiting" : "")
         + " fired " + run.FiredCount + " skipped " + run.SkippedCount + " refused " + run.RefusedCount + " stopped " + run.StoppedBy
-        + " at " + run.StoppedAt;
+        + " at " + run.StoppedAt + " fault " + Fault(SequenceSummary.Fault(run));
+
+    static string Fault(SequenceFault fault) =>
+        fault.Problem + " step " + fault.Step + " block " + fault.Which + " because " + fault.Because.Cause + " " + fault.Because.About;
 
     /// <summary>The first line the two differ on, with each side's.</summary>
     static string Difference(string was, string now)

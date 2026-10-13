@@ -13,6 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         Trigger,
 
         /// <summary>Somebody at the editor.</summary>
-        Hand
+        Hand,
+
+        /// <summary>Its logic system, or the installation it ran on, switched off.</summary>
+        Switch
     }
 }

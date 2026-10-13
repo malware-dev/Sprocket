@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -189,6 +190,100 @@ public class AirlockTests
         var fault = SequenceSummary.Fault(a.State);
         Assert.Equal(SequenceProblem.Stuck, fault.Problem);
         Assert.Equal(Cause.VentNowhere, fault.Because.Cause);
+        Assert.Equal(2, fault.Step);
+        Assert.Equal("Airlock Vent", fault.Which);
+        Assert.Equal("Airlock Vent cannot empty because there is nowhere to put the air.",
+            SequenceText.Problem(new Texts(), fault, a.LetMeOut));
+    }
+
+    /// <summary>A door opened by something else while the cycle waits for it to close ends the run, and says so at its step, naming it.</summary>
+    [Fact]
+    public void ADoorOpenedWhileItClosesEndsTheRunAndSaysSo()
+    {
+        var a = Build();
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(5);
+        Assert.Equal(DoorStatus.Closing, a.Inner.Status);
+
+        a.Inner.Perform("Open_On", new List<Literal>());
+        a.Tick(100);
+
+        Assert.False(a.State.IsRunning);
+        Assert.DoesNotContain("Airlock Vent:depressurize", a.Log);
+        var fault = SequenceSummary.Fault(a.State);
+        Assert.Equal(SequenceProblem.Conflicted, fault.Problem);
+        Assert.Equal(Cause.DoorToldToOpen, fault.Because.Cause);
+        Assert.Equal(0, fault.Step);
+        Assert.Equal("Inner Door stopped closing because something else opened it.",
+            SequenceText.Problem(new Texts(), fault, a.LetMeOut));
+    }
+
+    /// <summary>A door closed by something else while the cycle waits for it to open ends the run in the same way.</summary>
+    [Fact]
+    public void ADoorClosedWhileItOpensEndsTheRunAndSaysSo()
+    {
+        var a = Build();
+        a.Tick(3);
+
+        a.Press();
+        for (var i = 0; i < 600 && !a.Log.Contains("Outer Door:open"); i++)
+            a.Tick();
+        a.Tick(5);
+        Assert.Equal(DoorStatus.Opening, a.Outer.Status);
+
+        a.Outer.Perform("Open_Off", new List<Literal>());
+        a.Tick(100);
+
+        Assert.False(a.State.IsRunning);
+        var fault = SequenceSummary.Fault(a.State);
+        Assert.Equal(SequenceProblem.Conflicted, fault.Problem);
+        Assert.Equal(Cause.DoorToldToClose, fault.Because.Cause);
+        Assert.Equal(4, fault.Step);
+        Assert.Equal("Outer Door", fault.Which);
+    }
+
+    /// <summary>A door left to close while the cycle waits finishes as ever, with nothing said.</summary>
+    [Fact]
+    public void ADoorLeftAloneClosesWithNothingSaid()
+    {
+        var a = Build();
+        a.Inner.ForceOpen();
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(100);
+
+        Assert.Contains("Airlock Vent:depressurize", a.Log);
+        Assert.False(SequenceSummary.Fault(a.State).Exists);
+    }
+
+    /// <summary>A vent sent the other way while the cycle waits on it ends the run, and says so at its step, naming the vent.</summary>
+    [Fact]
+    public void AVentSentTheOtherWayEndsTheRunAndSaysWhereAndWhich()
+    {
+        var a = Build();
+        a.Inner.ForceOpen();
+        a.Vent.Nowhere = true;
+        a.Tick(3);
+
+        a.Press();
+        a.Tick(100);
+        Assert.True(a.State.IsRunning);
+
+        a.Vent.Perform("Depressurize_Off", new List<Literal>());
+        a.Tick(100);
+
+        Assert.False(a.State.IsRunning);
+        var fault = SequenceSummary.Fault(a.State);
+        Assert.Equal(SequenceProblem.Conflicted, fault.Problem);
+        Assert.Equal(Cause.VentToldToFill, fault.Because.Cause);
+        Assert.Equal(2, fault.Step);
+        Assert.Equal("Airlock Vent", fault.Which);
+        Assert.Equal("Airlock Vent stopped because something else told this vent to fill the room.",
+            SequenceText.Problem(new Texts(), fault, a.LetMeOut));
     }
 
     /// <summary>A room told to carry on where its air has nowhere to go counts as empty, and the outer door opens.</summary>

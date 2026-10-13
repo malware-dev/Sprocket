@@ -30,7 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             "rotor no power", "rotor no head", "rotor locked", "rotor no torque", "rotor stopped", "rotor held",
             "tank stockpile off", "tank no power", "tank no gas",
             "jump drive recharge off",
-            "script not run"
+            "script not run",
+            "door told to open", "door told to close"
         };
 
         static readonly Cause[] Troubles =
@@ -42,7 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             Cause.RotorNoPower, Cause.RotorNoHead, Cause.RotorLocked, Cause.RotorNoTorque, Cause.RotorStopped, Cause.RotorHeld,
             Cause.TankStockpileOff, Cause.TankNoPower, Cause.TankNoGas,
             Cause.JumpDriveRechargeOff,
-            Cause.ScriptNotRun
+            Cause.ScriptNotRun,
+            Cause.DoorToldToOpen, Cause.DoorToldToClose
         };
 
         /// <summary>How <paramref name="problem" /> is kept, or "unknown" where it has no spelling.</summary>

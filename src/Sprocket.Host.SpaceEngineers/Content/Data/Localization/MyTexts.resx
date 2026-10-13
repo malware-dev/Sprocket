@@ -954,6 +954,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>stopped at step {step} by a trigger</value>
     <comment>A sequence's state, shown in the line saying what it is doing on its own screen, when a trigger stopped its last run before it finished; said until it runs again. {step} is filled with the number of the step it was at.</comment>
   </data>
+  <data name="Sprocket.Sequence.StoppedBySwitch" xml:space="preserve">
+    <value>stopped at step {step} when switched off</value>
+    <comment>A sequence's state, shown in the line saying what it is doing on its own screen, when its logic system, or the installation it ran on, was switched off during its last run; said once it is switched on again, until it runs again. {step} is filled with the number of the step it was at.</comment>
+  </data>
   <data name="Sprocket.Sequence.StoppedByHand" xml:space="preserve">
     <value>stopped at step {step} by hand</value>
     <comment>A sequence's state, shown in the line saying what it is doing on its own screen, when somebody stopped its last run from the editor before it finished; said until it runs again. {step} is filled with the number of the step it was at.</comment>
@@ -981,6 +985,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Problem.BlockStalled" xml:space="preserve">
     <value>Waiting for {block} to work again.</value>
     <comment>Problem while a step waits on a block that is switched off, unpowered or broken, so the run holds; {block} is the block's name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Problem.BlockTrouble" xml:space="preserve">
+    <value>{block} {trouble}.</value>
+    <comment>What a block says is wrong, as a sentence naming it, such as "Airlock Vent cannot fill because the room is not airtight."; {block} is the block's name and {trouble} the block's own words for what is wrong, a phrase beginning with a verb, such as "cannot fill because the room is not airtight". Shown under the step's line on a sequence's screen, on the sequence's row on a logic system's screen, and after the step number on the home screen and the installation panel, as in "Step 3: ..." or "Stopped at step 3: ...".</comment>
   </data>
   <data name="Sprocket.Problem.AtStep" xml:space="preserve">
     <value>Step {step}: {problem}</value>
@@ -1060,7 +1068,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Problem.Conflicted" xml:space="preserve">
     <value>This sequence stopped because something else took over one of its blocks.</value>
-    <comment>Warning after a sequence's last run gave up because something else took over one of its blocks, used where the block gives no words of its own for what happened. Shown on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Warning after a sequence's last run gave up because something else took over one of its blocks, used where the block gives no words of its own for what happened. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Problem.Circular" xml:space="preserve">
     <value>This step runs a sequence that runs this sequence again. Remove one of the two.</value>
@@ -1168,107 +1176,115 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Trouble.VentNowhere" xml:space="preserve">
     <value>cannot empty because there is nowhere to put the air</value>
-    <comment>Said as a sequence's problem while a step waits on an air vent that cannot empty the room because there is nowhere to put the air: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on an air vent that cannot empty the room because there is nowhere to put the air. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.VentNotAirtight" xml:space="preserve">
     <value>cannot fill because the room is not airtight</value>
-    <comment>Said as a sequence's problem while a step waits on an air vent that cannot fill the room because it leaks: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on an air vent that cannot fill the room because it leaks. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.VentNoOxygen" xml:space="preserve">
     <value>cannot fill because there is no oxygen to fill it with</value>
-    <comment>Said as a sequence's problem while a step waits on an air vent that cannot fill the room because it has no oxygen: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on an air vent that cannot fill the room because it has no oxygen. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.VentToldToFill" xml:space="preserve">
     <value>stopped because something else told this vent to fill the room</value>
-    <comment>Said as a warning after a run gave up because something else told an air vent to fill the room while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else told an air vent to fill the room while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.VentToldToEmpty" xml:space="preserve">
     <value>stopped because something else told this vent to empty the room</value>
-    <comment>Said as a warning after a run gave up because something else told an air vent to empty the room while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else told an air vent to empty the room while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.BatteryToldToDischarge" xml:space="preserve">
     <value>stopped because something else set this battery to discharge</value>
-    <comment>Said as a warning after a run gave up because something else set a battery to discharge while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else set a battery to discharge while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.BatteryToldToAuto" xml:space="preserve">
     <value>stopped because something else set this battery to auto</value>
-    <comment>Said as a warning after a run gave up because something else set a battery to auto while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else set a battery to auto while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.BatteryOff" xml:space="preserve">
     <value>cannot charge because it is switched off</value>
-    <comment>Said as a sequence's problem while a step waits on a battery that cannot charge because it is switched off: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a battery that cannot charge because it is switched off. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.BatteryDamaged" xml:space="preserve">
     <value>cannot charge because it is damaged</value>
-    <comment>Said as a sequence's problem while a step waits on a battery that cannot charge because it is damaged: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a battery that cannot charge because it is damaged. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.BatteryNoPower" xml:space="preserve">
     <value>cannot charge because no power is coming in</value>
-    <comment>Said as a sequence's problem while a step waits on a battery that cannot charge because no power comes in: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a battery that cannot charge because no power comes in. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.PistonNoPower" xml:space="preserve">
     <value>cannot move because it is switched off or has no power</value>
-    <comment>Said as a sequence's problem while a step waits on a piston that is switched off or unpowered: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a piston that is switched off or unpowered. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.PistonNoHead" xml:space="preserve">
     <value>cannot move because it has no head</value>
-    <comment>Said as a sequence's problem while a step waits on a piston that has no head: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a piston that has no head. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.PistonStopped" xml:space="preserve">
     <value>stopped moving because its speed was set to zero</value>
-    <comment>Said as a warning after a run gave up because something else set a piston's speed to 0 while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else set a piston's speed to 0 while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.PistonReversedExtending" xml:space="preserve">
     <value>stopped extending because it was sent the other way</value>
-    <comment>Said as a warning after a run gave up because something else reversed a piston that was extending while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else reversed a piston that was extending while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.PistonReversedRetracting" xml:space="preserve">
     <value>stopped retracting because it was sent the other way</value>
-    <comment>Said as a warning after a run gave up because something else reversed a piston that was retracting while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else reversed a piston that was retracting while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.RotorNoPower" xml:space="preserve">
     <value>cannot turn because it is switched off or has no power</value>
-    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that is switched off or unpowered: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that is switched off or unpowered. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.RotorNoHead" xml:space="preserve">
     <value>cannot turn because it has no head</value>
-    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that has no head: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that has no head. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.RotorLocked" xml:space="preserve">
     <value>cannot turn because it is locked</value>
-    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that is locked: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that is locked. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.RotorNoTorque" xml:space="preserve">
     <value>cannot turn because its torque is zero</value>
-    <comment>Said as a sequence's problem while a step waits on a rotor or hinge whose torque is 0: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a rotor or hinge whose torque is 0. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.RotorStopped" xml:space="preserve">
     <value>stopped turning because its speed was set to zero</value>
-    <comment>Said as a warning after a run gave up because something else set a rotor's or hinge's speed to 0 while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else set a rotor's or hinge's speed to 0 while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.RotorHeld" xml:space="preserve">
     <value>cannot turn because something is holding it</value>
-    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that something is physically blocking: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a rotor or hinge that something is physically blocking. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.TankStockpileOff" xml:space="preserve">
     <value>stopped because something else switched stockpile off</value>
-    <comment>Said as a warning after a run gave up because something else switched a tank's stockpile off while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else switched a tank's stockpile off while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.TankNoPower" xml:space="preserve">
     <value>cannot fill because it is switched off or has no power</value>
-    <comment>Said as a sequence's problem while a step waits on a tank that is switched off or unpowered: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a tank that is switched off or unpowered. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.TankNoGas" xml:space="preserve">
     <value>cannot fill because no {gas} is coming in</value>
-    <comment>Said as a sequence's problem while a step waits on a tank that gets no gas; {gas} is the gas as the game names it, such as hydrogen: under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <comment>Said as a sequence's problem while a step waits on a tank that gets no gas; {gas} is the gas as the game names it, such as hydrogen. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen and the installation panel that sentence follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Trouble.JumpDriveRechargeOff" xml:space="preserve">
     <value>stopped because something else switched recharging off</value>
-    <comment>Said as a warning after a run gave up because something else switched a jump drive's recharging off while a step waited on it: on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+    <comment>Said as a warning after a run gave up because something else switched a jump drive's recharging off while a step waited on it. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Trouble.ScriptNotRun" xml:space="preserve">
     <value>did not run - no script, a script that would not compile, or one already running</value>
-    <comment>Said when a step told a programmable block to run and its script did not run, which ends the run and switches the logic system off. Shown under the step's line on a sequence's screen and as the reason in the sentence saying why Sprocket switched off the logic system, such as "Stopped at step 3: ...".</comment>
+    <comment>Said when a step told a programmable block to run and its script did not run, which ends the run and switches the logic system off. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and as the reason in the sentence saying why Sprocket switched off the logic system, such as "Stopped at step 3: ...".</comment>
+  </data>
+  <data name="Sprocket.Trouble.DoorToldToOpen" xml:space="preserve">
+    <value>stopped closing because something else opened it</value>
+    <comment>Said as a warning after a run gave up because something else told a door to open while a step waited for it to close. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
+  </data>
+  <data name="Sprocket.Trouble.DoorToldToClose" xml:space="preserve">
+    <value>stopped opening because something else closed it</value>
+    <comment>Said as a warning after a run gave up because something else told a door to close while a step waited for it to open. It follows the block's name to make a sentence, shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen, until the sequence runs again.</comment>
   </data>
   <data name="Sprocket.Status.Damaged" xml:space="preserve">
     <value>broken</value>

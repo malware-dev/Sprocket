@@ -102,6 +102,58 @@ public class StoppedTests
         Assert.Equal(by, a.State.StoppedBy);
     }
 
+    /// <summary>A run cut short by switching its logic system off keeps the step it got to, and says so once it is switched on.</summary>
+    [Fact]
+    public void ASwitchOffPartWayIsSaid()
+    {
+        var a = new Airlock();
+        a.Runner.Call(a.Cycle, a.Cycle.System.First);
+        a.Tick(5);
+        Assert.True(a.State.IsRunning);
+        var at = a.State.CurrentStep;
+
+        a.Cycle.System.Enabled = false;
+        a.Tick(101);
+
+        Assert.False(a.State.IsRunning);
+        Assert.Equal(SequenceStatus.Off, a.Status);
+        Assert.Equal(Stopper.Switch, a.State.StoppedBy);
+        Assert.Equal(at, a.State.StoppedAt);
+
+        a.Cycle.System.Enabled = true;
+        Assert.Equal(SequenceStatus.Stopped, a.Status);
+    }
+
+    /// <summary>An installation switched off part way through is said the same way.</summary>
+    [Fact]
+    public void AnInstallationSwitchedOffPartWayIsSaid()
+    {
+        var a = new Airlock();
+        a.Runner.Call(a.Cycle, a.Cycle.System.First);
+        a.Tick(5);
+
+        a.Cycle.System.First.Enabled = false;
+        a.Tick(101);
+
+        Assert.False(a.State.IsRunning);
+        Assert.Equal(Stopper.Switch, a.State.StoppedBy);
+    }
+
+    /// <summary>A run started by hand ignores the switch, so switching off leaves it running.</summary>
+    [Fact]
+    public void ARunByHandIsLeftToRun()
+    {
+        var a = new Airlock();
+        a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
+        a.Tick(5);
+
+        a.Cycle.System.Enabled = false;
+        a.Tick(5);
+
+        Assert.True(a.State.IsRunning);
+        Assert.Equal(Stopper.None, a.State.StoppedBy);
+    }
+
     /// <summary>The next run forgets the stop, and a sequence stopped while at rest has nothing to say.</summary>
     [Fact]
     public void TheNextRunForgetsTheStop()

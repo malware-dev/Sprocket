@@ -47,5 +47,41 @@ public class StoppedWordsTests
         Assert.NotEqual(Template(rig.Texts.SequenceStoppedByHand, "1"), page.Bar.Status);
     }
 
+    /// <summary>Cut short by switching its logic system off, it says so with its step once the system is on again.</summary>
+    [Fact]
+    public void ASwitchOffPartWayIsSaidWithItsStep()
+    {
+        var rig = Simulation.Fresh();
+        rig.Editor.NewButtonSystem("Airlock");
+        rig.Tick();
+
+        var system = rig.Editor.Program.Systems[0];
+        var sequence = system.Sequences[0];
+        var door = rig.World.Entities.First(entity => entity.Name == "Airlock Outer Door");
+        var act = new Act("open");
+        act.Targets.Add(rig.Editor.Program.Declare(rig.World, door).Name);
+        sequence.Steps.Clear();
+        sequence.Steps.Add(act);
+        sequence.Steps.Add(new Await());
+        rig.Editor.Program.Edited();
+
+        rig.Editor.GoToRoot();
+        rig.Tick();
+        rig.Editor.Push(new SequencePage(rig.Editor, sequence));
+        var page = rig.Editor.Sentence();
+        rig.Tick();
+
+        rig.Runner.Call(sequence, system.First);
+        rig.Tick();
+        rig.Tick();
+        system.Enabled = false;
+        for (var i = 0; i < 101; i++)
+            rig.Tick();
+        system.Enabled = true;
+        rig.Tick();
+
+        Assert.Equal(Template(rig.Texts.SequenceStoppedBySwitch, "1"), page.Bar.Status);
+    }
+
     static string Template(string text, string step) => text.Replace("{step}", step);
 }

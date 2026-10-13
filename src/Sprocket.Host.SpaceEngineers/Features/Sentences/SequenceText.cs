@@ -185,6 +185,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (state.StoppedBy == Stopper.Trigger)
                 return Template.Fill(texts.SequenceStoppedByTrigger, "step", step);
 
+            if (state.StoppedBy == Stopper.Switch)
+                return Template.Fill(texts.SequenceStoppedBySwitch, "step", step);
+
             var system = sequence.System;
             var from = system == null ? null : system.FindSequence(state.StoppedFrom);
             return Fill(texts.SequenceStoppedBySequence, "step", step, "sequence",
@@ -212,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (fault.Problem == SequenceProblem.Mistyped && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(texts.ProblemOptionWrong, "name", fault.Which);
 
-            return fault.Because.Exists ? TroubleText.Of(texts, fault.Because) : Problem(texts, fault.Problem);
+            return fault.Because.Exists ? TroubleText.Of(texts, fault.Because, fault.Which) : Problem(texts, fault.Problem);
         }
 
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
@@ -263,7 +266,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var sequence = system == null ? null : system.FindSequence(halt.Sequence);
             var row = Row(sequence, halt.Step, awaitRows);
             var step = row.ToString(CultureInfo.InvariantCulture);
-            var reason = halt.Because.Exists ? TroubleText.Of(texts, halt.Because) : Because(texts, halt.Problem, halt.Block);
+            var reason = halt.Because.Exists ? TroubleText.Of(texts, halt.Because, halt.Block) : Because(texts, halt.Problem, halt.Block);
 
             if (sequence == null || !sequence.HasName)
                 return row > 0 ? Fill(texts.StoppedAtStep, "step", step, "reason", reason) : Template.Fill(texts.StoppedPlain, "reason", reason);

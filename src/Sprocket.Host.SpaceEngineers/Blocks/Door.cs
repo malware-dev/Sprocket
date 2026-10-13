@@ -29,9 +29,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // The game's ratio is nought to one; the terminal and a sentence say a percentage.
         static readonly Being Ratio = Being.Number<IMyDoor>(door => door.OpenRatio * 100.0);
 
-        static readonly Doing Opens = Doing.Of<IMyDoor>(door => door.OpenDoor(), Opened);
+        static readonly Doing Opens = Doing.Of<IMyDoor>(door => door.OpenDoor(), Opened, Closing);
 
-        static readonly Doing Closes = Doing.Of<IMyDoor>(door => door.CloseDoor(), Shut);
+        static readonly Doing Closes = Doing.Of<IMyDoor>(door => door.CloseDoor(), Shut, Opening);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -81,6 +81,23 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 kind.Announced();
             else
                 kind.RuledOutBy(Shut);
+        }
+
+        /// <summary>Why a door told to close is not getting there: something else has told it to open.</summary>
+        /// <remarks>A door's status follows the last order it was given, so opening or open means it was told to.</remarks>
+        static Trouble Opening(IMyDoor door)
+        {
+            return door.Status == DoorStatus.Opening || door.Status == DoorStatus.Open
+                ? Trouble.Fatal(Cause.DoorToldToOpen)
+                : Trouble.None;
+        }
+
+        /// <summary>Why a door told to open is not getting there: something else has told it to close.</summary>
+        static Trouble Closing(IMyDoor door)
+        {
+            return door.Status == DoorStatus.Closing || door.Status == DoorStatus.Closed
+                ? Trouble.Fatal(Cause.DoorToldToClose)
+                : Trouble.None;
         }
 
         /// <summary>Where <paramref name="status" /> stands among the door's statuses.</summary>

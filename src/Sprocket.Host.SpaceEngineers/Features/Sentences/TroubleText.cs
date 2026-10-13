@@ -38,8 +38,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 case Cause.TankNoGas: return Template.Fill(texts.TroubleTankNoGas, "gas", trouble.About ?? "");
                 case Cause.JumpDriveRechargeOff: return texts.TroubleJumpDriveRechargeOff;
                 case Cause.ScriptNotRun: return texts.TroubleScriptNotRun;
+                case Cause.DoorToldToOpen: return texts.TroubleDoorToldToOpen;
+                case Cause.DoorToldToClose: return texts.TroubleDoorToldToClose;
                 default: return "";
             }
+        }
+
+        /// <summary>The words for <paramref name="trouble" /> as a sentence about <paramref name="block" />, by its name, or the words alone where no block is named.</summary>
+        public static string Of(Texts texts, Trouble trouble, string block)
+        {
+            var words = Of(texts, trouble);
+            return string.IsNullOrEmpty(block) || words.Length == 0 ? words : Template.Fill(Template.Fill(texts.ProblemBlockTrouble, "block", block), "trouble", words);
         }
 
         /// <summary>The words for <paramref name="status" /> in <paramref name="texts" />, or empty where there is nothing to say.</summary>

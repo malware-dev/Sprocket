@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Everything the run remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
         readonly RunMemory _memory;
 
-        Trouble _quit;
+        SequenceFault _quit;
 
         SequenceFault _found;
 
@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _sampling = new Shift(memory.Sampling, Sample);
             _busy = new Shift(memory.Busy, Continued);
-            _quit = Spellings.Trouble(memory.Quit);
+            _quit = Spellings.Fault(memory.Quit);
             _met = Spellings.Fault(memory.Met);
             _found = Spellings.Fault(memory.Found);
             _restored = kept;
@@ -166,7 +166,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// sequence is no longer running and nothing is outstanding to be asked. Cleared when the
         /// sequence next runs, so it says what happened last time and never what happened once.
         /// </remarks>
-        public Trouble Quit
+        public SequenceFault Quit
         {
             get { return _quit; }
             private set
@@ -220,7 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (_stuck.Exists && IsWaiting)
                     return _stuck;
                 if (Quit.Exists)
-                    return new SequenceFault(SequenceProblem.Conflicted, SequenceFault.Trigger, Quit);
+                    return Quit;
                 return Found;
             }
         }
@@ -246,8 +246,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
 
         /// <summary>
-        /// What a block being waited on says has taken it out of this sequence's hands, or none; and keeps what one says
-        /// stops it finishing.
+        /// What a block being waited on says has taken it out of this sequence's hands, at its step and naming it, or none;
+        /// and keeps what one says stops it finishing.
         /// </summary>
         /// <remarks>
         /// Asked of a run that is already held, and only of the blocks of the steps holding it -
@@ -259,7 +259,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// knows which it is owed.
         /// </para>
         /// </remarks>
-        Trouble Troubled()
+        SequenceFault Troubled()
         {
             _stuck = SequenceFault.None;
             for (var i = 0; i < _memory.Outstanding.Count; i++)
@@ -293,14 +293,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     Trouble said = acted.Bound.Trouble(entity.Block, acted.Seen);
                     if (said.Ends)
-                        return said;
+                        return new SequenceFault(SequenceProblem.Conflicted, step, said, entity.Name);
 
                     if (said.Exists && !_stuck.Exists)
-                        _stuck = new SequenceFault(SequenceProblem.Stuck, step, said);
+                        _stuck = new SequenceFault(SequenceProblem.Stuck, step, said, entity.Name);
                 }
             }
 
-            return Trouble.None;
+            return SequenceFault.None;
         }
 
         /// <summary>How much of a wait is left to spend, in ticks.</summary>
@@ -399,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!CanRun && !_memory.ByHand)
                 {
                     if (IsRunning)
-                        Stop();
+                        Interrupt(Stopper.Switch, 0);
                 }
                 else if (IsRunning)
                 {
@@ -426,7 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             if (!CanRun && !_memory.ByHand)
             {
-                Stop();
+                Interrupt(Stopper.Switch, 0);
                 return;
             }
 
@@ -825,7 +825,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             // What stopped the last run is about the last run. Somebody starting this one has
             // either mended it or is about to find out again.
-            Quit = Trouble.None;
+            Quit = SequenceFault.None;
             Met(SequenceFault.None);
             _stuck = SequenceFault.None;
             StoppedBy = Stopper.None;
@@ -934,7 +934,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     if (!CanRun && !_memory.ByHand)
                     {
-                        Stop();
+                        Interrupt(Stopper.Switch, 0);
                         return;
                     }
 
@@ -1000,7 +1000,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         // something or a trigger firing, so it cannot arrive faster than that, and
                         // giving up a second later than it could have is a second nobody can
                         // measure against a machine that has already stopped moving.
-                        var quit = ConflictsDue() ? Troubled() : Trouble.None;
+                        var quit = ConflictsDue() ? Troubled() : SequenceFault.None;
                         if (quit.Exists)
                         {
                             Stop();

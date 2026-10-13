@@ -83,6 +83,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         JumpDriveRechargeOff,
 
         /// <summary>The programmable block did not run its script: it has none, it would not compile, or it is already running.</summary>
-        ScriptNotRun
+        ScriptNotRun,
+
+        /// <summary>Something else told the door to open while a step waited for it to close.</summary>
+        DoorToldToOpen,
+
+        /// <summary>Something else told the door to close while a step waited for it to open.</summary>
+        DoorToldToClose
     }
 }

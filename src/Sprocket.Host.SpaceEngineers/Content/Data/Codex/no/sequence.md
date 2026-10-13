@@ -12,6 +12,8 @@ En installasjon kjører en sekvens én gang om gangen. En utløser som går av m
 
 Mens den kjører, blir spill-merket til et stopp-merke, som stopper den. En stoppet kjøring starter ikke noe mer. En dør som allerede beveger seg, går ferdig, og en ventil fortsetter å fylle eller tømme rommet, mens et stempel eller en rotor stopper der det er.
 
+Slår du av logikksystemet eller installasjonen, stopper kjøringene ved steget de var kommet til, og når det er slått på igjen, står det `stoppet ved steg 2 da den ble slått av` på sekvensen. En kjøring som er startet for hånd, bryr seg ikke om bryteren og fortsetter.
+
 ## Steg som tar tid
 
 For de fleste handlinger sier sekvensen fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å slå på et lys eller spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg eller en ventil tømmer et rom, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Så ventilen starter når den indre døra er lukket, og den ytre døra åpnes når rommet er tomt.
@@ -42,9 +44,17 @@ Rett det den nevner, og slå på installasjonen igjen. En blokk som er borte, el
 
 ## Når et steg venter
 
-Et steg venter når blokken sitter fast, som en rotor som holdes, eller en ventil der lufta ikke har noe sted å gjøre av seg. Steget venter og sier hvorfor, for eksempel `kan ikke tømme fordi det ikke er noe sted å gjøre av luften`.
+Et steg venter når blokken sitter fast, som en rotor som holdes, eller en ventil der lufta ikke har noe sted å gjøre av seg. Steget venter og sier hvorfor, for eksempel `Luftsluseventil kan ikke tømme fordi det ikke er noe sted å gjøre av luften.`
 
 Rydd veien, så fortsetter det av seg selv: frigjør rotoren, eller gi lufta et sted å gjøre av seg, som en oksygentank med plass i. Vil du gi opp kjøringen, stopper du den for hånd.
+
+## Når noe annet tar over
+
+En kjøring slutter ved steget sitt når noe annet tar over en blokk mens steget venter på den, for eksempel at noen åpner den indre døra fra terminalen mens *Sluse ut* venter på at den skal lukke seg. Installasjonen forblir på. Linjen til steget viser en gul advarsel som nevner blokken og hva som skjedde, til sekvensen kjører neste gang:
+
+`Luftsluse indre dør sluttet å lukke seg fordi noe annet åpnet den.`
+
+Kjør sekvensen igjen, så begynner den på nytt.
 
 ## Eksempel: Sluse ut for luftslusen
 

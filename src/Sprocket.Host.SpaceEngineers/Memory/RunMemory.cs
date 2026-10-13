@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         [ProtoMember(12)]
         public bool ByHand { get; set; }
 
-        /// <summary>What stopped the last run from outside, by its kept number: nought nothing, one a sequence, two a trigger, three a hand.</summary>
+        /// <summary>What stopped the last run from outside, by its kept number: nought nothing, one a sequence, two a trigger, three a hand, four a switch.</summary>
         [ProtoMember(13)]
         public int StoppedBy { get; set; }
 
@@ -67,10 +67,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>The number of the sequence that stopped the last run, where one did.</summary>
         [ProtoMember(15)]
         public int StoppedFrom { get; set; }
-
-        /// <summary>Why the last run ended before its last step, or null.</summary>
-        [ProtoMember(16)]
-        public TroubleMemory Quit { get; set; }
 
         /// <summary>What the last run met that ended it, or null.</summary>
         [ProtoMember(17)]
@@ -127,5 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>What the program said was wrong with it when it was last checked, or null.</summary>
         [ProtoMember(30)]
         public FaultMemory Found { get; set; }
+
+        /// <summary>Why the last run gave up before its last step, at which step and on which block, or null.</summary>
+        [ProtoMember(31)]
+        public FaultMemory Quit { get; set; }
     }
 }
