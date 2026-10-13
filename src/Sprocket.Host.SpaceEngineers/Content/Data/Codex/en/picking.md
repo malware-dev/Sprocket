@@ -8,7 +8,7 @@ Press a block to select it, or tick several to select them all.
 
 Type in `Search` to show only the blocks whose name holds what you type, and select a kind to show only blocks of that kind, or a family, such as `Door`, to show every kind in it. The search stays as typed for the screen the picker was opened from, until you leave that screen, so a search for *Airlock* still holds when you pick for the next step.
 
-Blocks the game's toolbar configuration doesn't show are left out. The eye at the end of the `Blocks` heading shows them as well, and pressed again hides them. It stays as you left it, in every picker and every world.
+Blocks with `Show block in toolbar config` switched off in their terminal are left out. The eye at the end of the `Blocks` heading shows them as well, and pressed again hides them. It stays as you left it, in every picker and every world.
 
 When a slot is being filled, only blocks of the right kind are offered.
 

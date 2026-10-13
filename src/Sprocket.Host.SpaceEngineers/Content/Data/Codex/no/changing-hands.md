@@ -8,7 +8,7 @@ Bare eierne av konstruksjonen kan åpne automasjonen. Alle andre som trykker `Au
 
 ## Blokkene den kan bruke
 
-Automasjonen bruker blokkene eierne kan bruke etter spillets regler for eierskap og deling: blokkene de eier, og dem som er delt med fraksjonen deres eller med alle. Enhver annen blokk, som en dør en annen spiller har bygd og holdt for seg selv, er borte for automasjonen, slik en ødelagt blokk er. Den kommer tilbake av seg selv når den blir delt.
+Automasjonen bruker blokkene eierne kan bruke: blokkene de eier, og dem som er delt med fraksjonen deres eller med alle. Enhver annen blokk, som en dør en annen spiller har bygd og holdt for seg selv, er borte for automasjonen, slik en ødelagt blokk er. Den kommer tilbake av seg selv når den blir delt.
 
 ## Når konstruksjonen skifter eier
 

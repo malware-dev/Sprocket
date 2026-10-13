@@ -8,7 +8,7 @@ Only the construct's owners can open its automation. Anyone else who presses `Au
 
 ## The blocks it can use
 
-The automation uses the blocks its owners may use under the game's ownership and sharing: the blocks they own, and those shared with their faction or with everyone. Any other block, such as a door another player built and kept to themselves, reads to the automation as gone, as a destroyed block does. It comes back by itself once it is shared.
+The automation uses the blocks its owners may use: the blocks they own, and those shared with their faction or with everyone. Any other block, such as a door another player built and kept to themselves, reads to the automation as gone, as a destroyed block does. It comes back by itself once it is shared.
 
 ## When the construct changes hands
 
