@@ -284,12 +284,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // Again after the page, which writes a box the keyboard has just left into the program.
             Stamp();
 
-            // The heading's words are made of things that can change without anything saying so: the
-            // grid's own name, and the name of a block inside a sentence. Nothing in the game's own
-            // interface announces either, so they are read again on a cadence - a second, the same
-            // cadence the rest of this class already keeps time by. A name changed here shows at once,
-            // because renaming reads them back the moment it lands; somebody else's shows within a
-            // second, which nobody can tell from at once.
+            // The heading's words include the grid's own name, which the game's interface announces no
+            // change to, so they are read again on a cadence - a second, the same cadence the rest of this
+            // class already keeps time by. A block renamed is announced, and builds the screen again. A
+            // name changed here shows at once, because renaming reads it back the moment it lands;
+            // somebody else's shows within a second, which nobody can tell from at once.
             //
             // Its words only. The heading's shape was settled when the screen was made, and the target
             // has already built controls to match it.

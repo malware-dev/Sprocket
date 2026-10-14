@@ -184,6 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world.AnchorRemoved += Removed;
             _world.AnchorClosed += Closed;
             _world.HandsChanged += Handed;
+            _world.Renamed += Renamed;
         }
 
         /// <summary>
@@ -248,6 +249,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Handed()
         {
             _handsChanged = true;
+        }
+
+        /// <summary>A block on the construct renamed, so the screen names it anew: at once where it is open, as it next opens otherwise.</summary>
+        /// <remarks>Only marks the screen to be built again, since the game raises this in the middle of renaming.</remarks>
+        void Renamed()
+        {
+            if (_editor != null)
+                _editor.Invalidate();
         }
 
         /// <summary>The programmable block the automation is kept in: the construct's hero.</summary>
@@ -1925,6 +1934,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world.AnchorRemoved -= Removed;
             _world.AnchorClosed -= Closed;
             _world.HandsChanged -= Handed;
+            _world.Renamed -= Renamed;
             _runner.Retire();
             _world.Dispose();
         }

@@ -44,6 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         IMyGridGroupData _group;
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
         readonly List<IMyTerminalBlock> _found = new List<IMyTerminalBlock>();
+        readonly List<IMyTerminalBlock> _named = new List<IMyTerminalBlock>();
         readonly HashSet<long> _seen = new HashSet<long>();
         readonly Dictionary<long, int> _counted = new Dictionary<long, int>();
         readonly List<long> _bigOwners = new List<long>();
@@ -75,6 +76,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// it and reports none of them removed, so this is all that is heard of it. Answered as that is.
         /// </remarks>
         public event Action AnchorClosed;
+
+        /// <summary>Raised from a block's own event when one on the construct is renamed, by anybody.</summary>
+        /// <remarks>Everything that names a block on screen reads its current name, so what shows one says it again.</remarks>
+        public event Action Renamed;
 
         /// <summary>
         /// Makes and reads the values this construct deals in, and the lists behind the wide ones.
@@ -603,6 +608,28 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _byId.Add(block.EntityId, entity);
                 _entities.Add(entity);
             }
+
+            Hear(_found);
+        }
+
+        /// <summary>Listens for <paramref name="blocks" /> being renamed, and for no others.</summary>
+        void Hear(List<IMyTerminalBlock> blocks)
+        {
+            for (int i = 0; i < _named.Count; i++)
+                _named[i].CustomNameChanged -= OnRenamed;
+
+            _named.Clear();
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                blocks[i].CustomNameChanged += OnRenamed;
+                _named.Add(blocks[i]);
+            }
+        }
+
+        void OnRenamed(IMyTerminalBlock block)
+        {
+            if (Renamed != null)
+                Renamed();
         }
 
         /// <summary>Makes the players owning the most blocks counted the construct's big owners.</summary>
@@ -786,6 +813,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Watch(new List<IMyCubeGrid>());
             Join(null);
+            Hear(new List<IMyTerminalBlock>());
             Follow(null);
         }
     }

@@ -65,8 +65,24 @@ public abstract class Fitting
     /// <summary>The block's id.</summary>
     public long Id { get; private set; }
 
-    /// <summary>The block's name.</summary>
-    public string Name { get; set; }
+    /// <summary>The block's name, raising <c>CustomNameChanged</c> as it changes, as the game does.</summary>
+    public string Name
+    {
+        get { return _name; }
+        set
+        {
+            if (_name == value)
+                return;
+
+            _name = value;
+            for (var i = 0; i < _renaming.Count; i++)
+                _renaming[i](Block);
+        }
+    }
+
+    string _name = "";
+
+    readonly List<Action<IMyTerminalBlock>> _renaming = new List<Action<IMyTerminalBlock>>();
 
     /// <summary>
     /// Whether this block is switched on, and working, which the rig treats as one thing.
@@ -240,6 +256,8 @@ public abstract class Fitting
             .Does("remove_OnMarkForClose", args => { _closing.Remove((Action<IMyEntity>)args[0]); })
             .Gives("CustomName", () => Name)
             .Takes("CustomName", value => Name = (string)value)
+            .Does("add_CustomNameChanged", args => { _renaming.Add((Action<IMyTerminalBlock>)args[0]); })
+            .Does("remove_CustomNameChanged", args => { _renaming.Remove((Action<IMyTerminalBlock>)args[0]); })
             .Gives("DisplayNameText", () => Name)
             .Gives("BlockDefinition", () => _definition)
             .Gives("DefinitionDisplayNameText", () => _display)
