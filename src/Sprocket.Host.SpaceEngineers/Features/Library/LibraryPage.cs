@@ -8,6 +8,7 @@ using Lumel.Input;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -62,6 +63,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
         /// <summary>The list, its headings and lines included, for whoever reads it back.</summary>
         public Element.Collection Rows => _list.Children;
+
+        /// <summary>The box that narrows the list.</summary>
+        public TextBox SearchBox => _search;
 
         /// <summary>Makes the list again, once the view is made; until then <see cref="ViewCreated" /> does.</summary>
         public override void Build()
@@ -280,14 +284,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _list.Children.Add(new Label { Style = style, Text = text, Wraps = true });
         }
 
-        /// <summary>Shows only the rows whose name holds what is typed in the search box.</summary>
+        /// <summary>Shows only the rows whose name holds the words typed in the search box, as every search box matches them.</summary>
         void Narrow()
         {
-            var typed = _search.Text.Trim();
             for (var i = 0; i < _entries.Count; i++)
             {
                 var row = _entries[i].Row;
-                row.IsVisible = typed.Length == 0 || row.Summary.IndexOf(typed, StringComparison.CurrentCultureIgnoreCase) >= 0;
+                row.IsVisible = EntityQuery.MatchesText(row.Summary, _search.Text);
             }
         }
 

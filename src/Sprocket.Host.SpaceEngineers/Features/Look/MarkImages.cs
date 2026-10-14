@@ -8,13 +8,14 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Look
 {
     /// <summary>
-    /// The pictures Sprocket's screens find by locator: a kind's mark for <c>mark:&lt;kind&gt;</c>, and what the catalog it is
-    /// given finds for anything else.
+    /// The pictures Sprocket's screens find by locator: a kind's or a button's mark for <c>mark:&lt;name&gt;</c>, and what the
+    /// catalog it is given finds for anything else.
     /// </summary>
     /// <remarks>
-    /// A mark is the symbol the screens show beside a thing of its kind, so a page of rich text can show it beside a word that
-    /// means that thing: <c>![signal](mark:signal)</c>. Each mark is made once and kept. A kind with no mark is no picture, and
-    /// the image says its words instead.
+    /// A mark is the symbol the screens show beside a thing of its kind, or on a button, so a page of rich text can show it
+    /// beside a word that means that thing, or name the button by what it shows: <c>![signal](mark:signal)</c>,
+    /// <c>![](mark:play)</c>. Each mark is made once and kept. A name with no mark is no picture, and the image says its
+    /// words instead.
     /// </remarks>
     public sealed class MarkImages : IImageCatalog
     {
@@ -37,6 +38,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Add("blueprint", Symbols.Blueprint);
             Add("logic-system", Symbols.LogicSystem);
             Add("installation", Symbols.Installation);
+            Add("play", Symbols.Play);
+            Add("stop", Symbols.Stop);
+            Add("pause", Symbols.Pause);
+            Add("delete", Symbols.Delete);
+            Add("duplicate", Symbols.Duplicate);
+            Add("rename", Symbols.Pencil);
+            Add("undo", Symbols.Undo);
+            Add("redo", Symbols.Redo);
         }
 
         /// <inheritdoc />
@@ -52,9 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             return _marks.TryGetValue(locator, out mark) ? mark : null;
         }
 
-        void Add(string kind, string symbol)
+        void Add(string name, string symbol)
         {
-            _marks.Add(Prefix + kind, new Mark(symbol));
+            _marks.Add(Prefix + name, new Mark(symbol));
         }
 
         /// <summary>One symbol, drawn in the color the screens draw marks in, three quarters the height of its line and centered in its room.</summary>

@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>The marks found by locator, and every other locator handed on to the catalog the marks were given.</summary>
 public class MarkImagesTests
 {
-    /// <summary>Each kind's mark is found by <c>mark:</c> and the kind, and is the same picture every time it is asked for.</summary>
+    /// <summary>Each kind's and each button's mark is found by <c>mark:</c> and its name, and is the same picture every time it is asked for.</summary>
     [Theory]
     [InlineData("mark:sequence")]
     [InlineData("mark:signal")]
@@ -18,7 +18,15 @@ public class MarkImagesTests
     [InlineData("mark:blueprint")]
     [InlineData("mark:logic-system")]
     [InlineData("mark:installation")]
-    public void EachKindsMarkIsFound(string locator)
+    [InlineData("mark:play")]
+    [InlineData("mark:stop")]
+    [InlineData("mark:pause")]
+    [InlineData("mark:delete")]
+    [InlineData("mark:duplicate")]
+    [InlineData("mark:rename")]
+    [InlineData("mark:undo")]
+    [InlineData("mark:redo")]
+    public void EachMarkIsFound(string locator)
     {
         var marks = new MarkImages(new Nothing());
 
@@ -28,9 +36,9 @@ public class MarkImagesTests
         Assert.Same(mark, marks.Find(locator));
     }
 
-    /// <summary>A kind with no mark is no picture, and is never handed on.</summary>
+    /// <summary>A name with no mark is no picture, and is never handed on.</summary>
     [Fact]
-    public void AKindWithNoMarkIsNoPicture()
+    public void ANameWithNoMarkIsNoPicture()
     {
         var rest = new Nothing();
 

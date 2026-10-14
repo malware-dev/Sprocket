@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Home;
+using Sprocket.Host.SpaceEngineers.Features.Library;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
@@ -140,6 +141,9 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>Types <paramref name="words" /> over whatever is in the box that narrows a column, as a keyboard would.</summary>
         public static void Search(this StageColumn column, string words) => Retype(column.Narrow, words);
+
+        /// <summary>Types <paramref name="words" /> over whatever is in the library's search box, as a keyboard would.</summary>
+        public static void Search(this LibraryPage page, string words) => Retype(page.SearchBox, words);
 
         /// <summary>Types <paramref name="words" /> over whatever is in the box that narrows a column's kinds, as a keyboard would.</summary>
         public static void SearchKinds(this StageColumn column, string words) => Retype(column.KindNarrow, words);

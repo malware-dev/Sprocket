@@ -87,7 +87,7 @@ For å utelate overskriften starter du tabellen med en rad tomme celler:
 | Luftsluse | 1 |
 | Hangar | 4 |
 
-En tabell er vanligvis så bred som cellene sine. Legg en stjerne i strekene til en kolonne, som i `:--*`, for å strekke tabellen over hele siden, der den kolonnen får en del av bredden. Stjernene bestemmer delene: `|:--*|:--*|` gir to kolonner halvparten hver, mens `|:--*|:--***|` gir den ene kolonnen en fjerdedel og den andre tre fjerdedeler. En kolonne uten stjerne beholder bredden til cellene sine, og de med stjerne deler det som er igjen.
+En tabell er så bred som cellene sine. Legg en stjerne i strekene til en kolonne, som i `:--*`, for å strekke tabellen over hele siden, der den kolonnen får en del av bredden. Stjernene bestemmer delene: `|:--*|:--*|` gir to kolonner halvparten hver, mens `|:--*|:--***|` gir den ene kolonnen en fjerdedel og den andre tre fjerdedeler. En kolonne uten stjerne beholder bredden til cellene sine, og de med stjerne deler det som er igjen.
 
 `| Rom | Ventiler |`
 `|:--*|--:|`

@@ -469,6 +469,32 @@ public class LibraryTests
         Assert.True(rows[0].Chosen);
     }
 
+    /// <summary>The library's search finds the words typed in a row's name in the order typed, as every search box does.</summary>
+    [Theory]
+    [InlineData("", new[] { "Airlock", "Hangar", "Airlock" })]
+    [InlineData("airl", new[] { "Airlock", "Airlock" })]
+    [InlineData("air lock", new[] { "Airlock", "Airlock" })]
+    [InlineData("lock air", new string[0])]
+    [InlineData("HANG", new[] { "Hangar" })]
+    public void TheLibrarySearchMatchesAsEverySearchDoes(string typed, string[] shown)
+    {
+        var rig = Blueprinted();
+        rig.Editor.Program.Systems[0].Changed = Saved;
+        rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
+        rig.Backups.Take("Lost Ship", Saved, new[] { Other() });
+        rig.Editor.GoToRoot();
+        rig.Editor.OpenLibrary();
+        rig.Tick();
+        var page = Assert.IsType<LibraryPage>(rig.Editor.Current);
+        Assert.NotNull(page.View);
+
+        page.Search(typed);
+        rig.Tick();
+
+        var rows = page.Rows.OfType<StatusRow>().Where(r => r.IsVisible);
+        Assert.Equal(shown, rows.Select(r => r.Summary));
+    }
+
     /// <summary>
     /// A logic system's heading offers to make its blueprint, offers nothing while the library's copy is the same, and offers
     /// to update it once the logic system has changed.

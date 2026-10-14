@@ -87,7 +87,7 @@ To leave out the heading, start the table with a row of empty cells:
 | Airlock | 1 |
 | Hangar | 4 |
 
-A table is usually as wide as its cells. Add a star into a column's dashes, as in `:--*`, to stretch the table across the page, that column taking a share of it. Stars set the shares: `|:--*|:--*|` gives two columns half each, while `|:--*|:--***|` gives one column a quarter and the other three quarters. A column without a star keeps the width of its cells, and the starred ones share what is left.
+A table is as wide as its cells. Add a star into a column's dashes, as in `:--*`, to stretch the table across the page, that column taking a share of it. Stars set the shares: `|:--*|:--*|` gives two columns half each, while `|:--*|:--***|` gives one column a quarter and the other three quarters. A column without a star keeps the width of its cells, and the starred ones share what is left.
 
 `| Room | Vents |`
 `|:--*|--:|`
