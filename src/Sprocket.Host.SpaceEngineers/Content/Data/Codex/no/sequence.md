@@ -8,7 +8,7 @@ Mens logikksystemet er slått på, starter en [utløser](trigger) en sekvens, fo
 
 For å prøve en sekvens mens du bygger den, kjører du den for hånd med ![](mark:play)&nbsp;på raden. En kjøring for hånd virker selv om logikksystemet er slått av, og bruker installasjonen som er valgt under `Installasjon`.
 
-En installasjon kjører en sekvens bare én gang om gangen, så en utløser som utløses mens den fortsatt kjører, hoppes over.
+En installasjon kjører en sekvens bare én gang om gangen, så sekvensen går glipp av en utløser som utløses mens den fortsatt kjører, og skjermen dens teller hvor mange.
 
 Å stoppe en kjøring avslutter den ved steget den har nådd, men en blokk som allerede beveger seg, kan likevel gå ferdig: en dør som lukker seg, lukker seg ferdig, og en ventil fortsetter å tømme rommet, mens et stempel eller en rotor stopper der det er. Å slå av logikksystemet eller installasjonen stopper kjøringene på samme måte, bortsett fra de som er startet for hånd.
 

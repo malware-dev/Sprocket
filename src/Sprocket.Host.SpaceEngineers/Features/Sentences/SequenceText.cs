@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             Sequence sequence = system == null ? null : system.FindSequence(trigger.Runs);
             if (sequence == null)
-                return trigger.Stops ? "stops a sequence that is gone" : "runs a sequence that is gone";
+                return trigger.Stops ? "stops a sequence that was deleted" : "runs a sequence that was deleted";
 
             return (trigger.Stops ? "stops " : "runs ") + (sequence.HasName ? sequence.Name : Written + sequence.Number);
         }
@@ -74,8 +74,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 if (when != null && !Watched(bindings, when, sources))
                     return "When " + Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources);
 
-                return "When " + SentenceText.Named(bindings, sources,
-                    when != null && when.Quantifier == Quantifier.All) + " " + Happening(bindings, Vocabulary.EventOf(program, bindings, system, moment, through), sources);
+                var all = when != null && when.Quantifier == Quantifier.All;
+                var happening = Happening(bindings, Vocabulary.EventOf(program, bindings, system, moment, through), sources);
+                return "When " + SentenceText.Named(bindings, sources, all) + " "
+                       + (all && sources.Count > 1 ? SentenceText.Plural(happening) : happening);
             }
 
             var every = trigger as EveryTrigger;
@@ -434,7 +436,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return SentenceText.Empty + " on " + blocks;
 
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, targets));
-            var given = SentenceText.Given(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields, null));
+            var given = SentenceText.Given(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields, null,
+                Given.Checked, test.Quantifier == Quantifier.All && targets.Count > 1));
             var read = value.IsStatus ? blocks : blocks + " " + SentenceText.Value(value);
             return (test.Quantifier == Quantifier.Sum ? "the sum of " + read : read) + " " + given;
         }
@@ -452,7 +455,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 bool inState;
                 var state = Vocabulary.Change(Vocabulary.EventsFor(bindings, targets), id, relation, compared, out inState);
                 if (state != null)
-                    return blocks + " " + (inState ? state.State : state.Unstate);
+                {
+                    var said = inState ? state.State : state.Unstate;
+                    return blocks + " " + (quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said);
+                }
             }
 
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), provider, id);

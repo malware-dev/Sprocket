@@ -75,6 +75,32 @@ public class CheckViewTests
         Assert.Equal("if Airlock Outer Door is not open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, null));
     }
 
+    /// <summary>A check on several blocks reads their state as any one of them has it, and in the plural where all of them must.</summary>
+    [Fact]
+    public void SeveralBlocksAreInAState()
+    {
+        var rig = Airlock();
+        var sequence = rig.Editor.Program.Systems[0].Sequences[0];
+        rig.Editor.PressAdd(rig.Texts.SequenceIf);
+        rig.Tick();
+        rig.Editor.TickBlock("Airlock Inner Door");
+        rig.Editor.TickBlock("Airlock Outer Door");
+        rig.Tick();
+        rig.Tick();
+
+        What(rig).Entries().First(entry => entry.Text == "open" && !entry.IsHeading).Pick(Held.Alone, 1);
+        rig.Tick();
+        rig.Editor.Typed("is");
+        rig.Tick();
+
+        var opens = sequence.Steps.OfType<If>().Single();
+        var through = rig.Editor.StandIn(sequence.System);
+        Assert.Equal("if Airlock Inner Door or Airlock Outer Door is open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
+
+        opens.Test.Quantifier = Quantifier.All;
+        Assert.Equal("if Airlock Inner Door and Airlock Outer Door are open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
+    }
+
     /// <summary>Any other value is named in the check, and a number is offered more than sameness.</summary>
     [Fact]
     public void AValueIsNamedAndANumberMeasured()

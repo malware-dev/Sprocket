@@ -66,6 +66,30 @@ public class WatchingTests
         return places;
     }
 
+    /// <summary>A sequence started while switched off counts the starts it refused, one start said as one.</summary>
+    [Fact]
+    public void TheRefusedStartsAreCounted()
+    {
+        var screen = Screen.Fresh();
+        var editor = screen.Editor;
+
+        Sequence(editor);
+        editor.PressAdd("task");
+        editor.PressBlock("Airlock Light");
+        editor.PressChoice("power");
+        editor.Pick().Arguments!.Form.Fields[0].Text = "on";
+        editor.PressPrimary();
+        screen.Run(5);
+
+        screen.Scene.Ship.Press("Airlock Button");
+        screen.Run(2);
+        Assert.True(screen.Shows("1 start refused while switched off"), string.Join(" | ", screen.Legible));
+
+        screen.Scene.Ship.Press("Airlock Button");
+        screen.Run(2);
+        Assert.True(screen.Shows("2 starts refused while switched off"), string.Join(" | ", screen.Legible));
+    }
+
     /// <summary>The sentence stays readable while it runs, because reading it is the point.</summary>
     [Fact]
     public void TheSentenceIsStillFullyLegibleWhileItRuns()

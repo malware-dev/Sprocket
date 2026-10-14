@@ -8,7 +8,7 @@ While the logic system is switched on, a [trigger](trigger) starts a sequence, f
 
 To try a sequence while you build it, run it by hand with ![](mark:play)&nbsp;on its row. A run by hand works even while the logic system is switched off, and uses the installation selected under `Installation`.
 
-An installation runs a sequence only once at a time, so a trigger that fires while it's still running is skipped.
+An installation runs a sequence only once at a time, so a trigger that fires while it's still running is missed, and the sequence's screen counts how many.
 
 Stopping a run ends it at the step it has reached, but a block that is already moving may still finish: a closing door still closes, and a vent goes on emptying the room, while a piston or a rotor stops where it is. Switching off the logic system or the installation stops its runs the same way, apart from those started by hand.
 

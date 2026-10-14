@@ -23,8 +23,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<string> _filled = new List<string>();
         readonly Given _holds;
 
-        /// <summary>The arguments <paramref name="arguments" />, asked for by <paramref name="fields" />, pressed to <paramref name="opens" />, which are <paramref name="holds" /> to what holds them.</summary>
-        public ArgumentsSlot(IList<Literal> arguments, IList<Field> fields, ICommand opens, Given holds = Given.Options) : base(opens)
+        /// <summary>
+        /// The arguments <paramref name="arguments" />, asked for by <paramref name="fields" />, pressed to <paramref name="opens" />,
+        /// which are <paramref name="holds" /> to what holds them; the first said for several blocks together where
+        /// <paramref name="plural" /> says so: "are open".
+        /// </summary>
+        public ArgumentsSlot(IList<Literal> arguments, IList<Field> fields, ICommand opens, Given holds = Given.Options,
+            bool plural = false) : base(opens)
         {
             _holds = holds;
 
@@ -37,6 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // One per field and not one per argument, and worked out where the question that fills a
             // step in works it out, so the two cannot arrive at different words for one argument.
             Channels.Shown(_arguments, _fields, _filled);
+            if (plural && _filled.Count > 0)
+                _filled[0] = SentenceText.Plural(_filled[0]);
 
             // Only where the whole slot is one colour. A slot showing a colour and two other arguments
             // has no one thing to draw, and a rectangle standing for part of it would say the rest

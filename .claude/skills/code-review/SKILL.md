@@ -122,7 +122,7 @@ Then the structural questions, in this order, because the early ones invalidate 
    short-circuit is cheap and the comment should say so; a reading on its own is not.
 4. **The same sentence in two places.** Two views carrying one sentence is the symptom. Where a
    phrase is written is not a finding: the text is legacy and due a complete rework, done on the
-   screens rather than string by string - see `docs/Wording.md`.
+   screens rather than string by string.
 5. **Member order**: constants, fields, constructors, properties, methods. A field among the
    properties is the common slip.
 6. **Names**: a word, not a description, and no role suffixes.

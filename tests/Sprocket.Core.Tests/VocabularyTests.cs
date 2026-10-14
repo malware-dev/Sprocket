@@ -514,6 +514,17 @@ public class VocabularyTests
         Assert.Equal("When Door is not closed", SequenceText.Trigger(null!, ship.Runner.Bindings, null!, open, null));
     }
 
+    /// <summary>A <c>when</c> over several blocks that must all get there says its blocks' words in the plural.</summary>
+    [Fact]
+    public void AWhenOverSeveralBlocksTakesThePlural()
+    {
+        var ship = new Ship();
+        var on = ship.When(BlockKinds.Own, "power", Quantifier.All, Relation.Is, Literal.Of(true), ship.Left, ship.Right);
+        ship.Start();
+
+        Assert.Equal("When Left Lamp and Right Lamp turn on", SequenceText.Trigger(null!, ship.Runner.Bindings, null!, on, null));
+    }
+
     /// <summary>A comparison a block's member cannot be read for is a fault found before anything runs.</summary>
     [Theory]
     [InlineData("ext", "status", Quantifier.Sum, Relation.Is, "closed")]

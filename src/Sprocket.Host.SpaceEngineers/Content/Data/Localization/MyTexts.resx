@@ -455,17 +455,29 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Paused: the sequence skips this step. Press to resume it.</value>
     <comment>Tooltip on the pause mark of a step's row on a sequence's screen, lit while the step is paused; pressing it resumes the step.</comment>
   </data>
+  <data name="Sprocket.Sequence.SkippedBusyOne" xml:space="preserve">
+    <value>1 start missed while running</value>
+    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started once while it was already running and so did not run that time.</comment>
+  </data>
   <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
-    <value>skipped {busy}x while busy</value>
-    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started while it was already running and so did not run. {busy} is filled with how many times.</comment>
+    <value>{busy} starts missed while running</value>
+    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started while it was already running and so did not run. {busy} is filled with how many times, always more than one.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SkippedOffOne" xml:space="preserve">
+    <value>1 start refused while switched off</value>
+    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started once while it was switched off and so did not run that time.</comment>
   </data>
   <data name="Sprocket.Sequence.SkippedOff" xml:space="preserve">
-    <value>skipped {off}x while off</value>
-    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started while it was switched off and so did not run. {off} is filled with how many times.</comment>
+    <value>{off} starts refused while switched off</value>
+    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started while it was switched off and so did not run. {off} is filled with how many times, always more than one.</comment>
+  </data>
+  <data name="Sprocket.Sequence.SkippedBothOne" xml:space="preserve">
+    <value>1 start missed while running, {off} refused while switched off</value>
+    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started once while already running and also while switched off, and so did not run those times. {off} is filled with how many times it was started while switched off.</comment>
   </data>
   <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
-    <value>skipped {busy}x while busy, {off}x while off</value>
-    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started both while already running and while switched off, and so did not run. {busy} is filled with how many times it was started while running, {off} with how many times while switched off.</comment>
+    <value>{busy} starts missed while running, {off} refused while switched off</value>
+    <comment>Shown in the line saying what a sequence is doing, on the sequence's screen, when the sequence was started both while already running and while switched off, and so did not run. {busy} is filled with how many times it was started while running, always more than one, {off} with how many times while switched off.</comment>
   </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 ticks is one second.</value>

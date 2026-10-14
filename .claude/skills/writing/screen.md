@@ -47,9 +47,8 @@ understandable alone", and of the comments, "We can't make assumptions on how pe
 translations, they may use tools". A reviewer and a translation tool see one text at a time.
 
 **The wording as a whole is reworked on the screens.** Mal: "It must be done looking at the screens in
-question and figuring out the best way to display it." A sentence that reads wrong goes into
-`docs/Wording.md` - what is on screen, where it shows, what is wrong with it - with no replacement
-proposed, and is not debated string by string.
+question and figuring out the best way to display it." A sentence that reads wrong is mended on the screen
+it shows on, and is not debated string by string.
 
 ## How a tooltip reads
 

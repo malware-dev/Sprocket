@@ -760,10 +760,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (moment != null)
             {
                 var when = moment as WhenTrigger;
-                row.Starts.Add(new EntitiesSlot(Editor.Blocks(_system, moment.Sources),
-                    when != null && when.Quantifier != Quantifier.Any, Starts(trigger, Opening.Blocks)));
-
-                row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, Opening.What)));
+                var all = when != null && when.Quantifier != Quantifier.Any;
+                var blocks = Editor.Blocks(_system, moment.Sources);
+                row.Starts.Add(new EntitiesSlot(blocks, all, Starts(trigger, Opening.Blocks)));
+                row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, Opening.What), all && blocks.Count > 1));
             }
 
             var every = trigger as EveryTrigger;

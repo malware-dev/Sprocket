@@ -753,15 +753,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _busy = busy;
             _off = off;
 
+            var missed = busy.ToString(CultureInfo.InvariantCulture);
+            var refused = off.ToString(CultureInfo.InvariantCulture);
             if (busy == 0 && off == 0)
                 _skips = "";
             else if (busy == 0)
-                _skips = Template.Fill(texts.SequenceSkippedOff, "off", off.ToString(CultureInfo.InvariantCulture));
+                _skips = off == 1 ? texts.SequenceSkippedOffOne : Template.Fill(texts.SequenceSkippedOff, "off", refused);
             else if (off == 0)
-                _skips = Template.Fill(texts.SequenceSkippedBusy, "busy", busy.ToString(CultureInfo.InvariantCulture));
+                _skips = busy == 1 ? texts.SequenceSkippedBusyOne : Template.Fill(texts.SequenceSkippedBusy, "busy", missed);
             else
-                _skips = Template.Fill(Template.Fill(texts.SequenceSkippedBoth, "busy", busy.ToString(CultureInfo.InvariantCulture)),
-                    "off", off.ToString(CultureInfo.InvariantCulture));
+                _skips = busy == 1
+                    ? Template.Fill(texts.SequenceSkippedBothOne, "off", refused)
+                    : Template.Fill(Template.Fill(texts.SequenceSkippedBoth, "busy", missed), "off", refused);
 
             return _skips;
         }
@@ -846,7 +849,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
             row.Slots.Add(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields,
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked));
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked,
+                test.Quantifier == Quantifier.All && blocks.Count > 1));
         }
 
         static StepKind Kind(Step step)
@@ -1032,11 +1036,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < named.Count; i++)
                 test.Targets.Add(named[i]);
 
-            // The blocks the names stand for: in a blueprint a name is a slot, which only its installation answers.
-            var seen = Editor.Seen(_sequence.System, named);
+            // Read off the blocks picked, since a slot made for them is not filled until the edit is done.
             string id, state;
             var stated = Comparing.Split(answer.Chosen, out id, out state);
-            var value = Valued(Vocabulary.ActionsFor(Editor.Runner.Bindings, seen), id);
+            var value = Valued(Vocabulary.ActionsOf(Editor.World, answer.Targets), id);
             var given = answer.Arguments;
             test.MemberId = id;
             test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";

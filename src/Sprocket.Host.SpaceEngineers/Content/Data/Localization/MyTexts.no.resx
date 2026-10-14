@@ -346,14 +346,23 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Sequence.UnpauseStep" xml:space="preserve">
     <value>På pause: sekvensen hopper over dette steget. Trykk for å gjenoppta det.</value>
   </data>
+  <data name="Sprocket.Sequence.SkippedBusyOne" xml:space="preserve">
+    <value>1 start gått glipp av mens den kjørte</value>
+  </data>
   <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
-    <value>hoppet over {busy}x mens den var opptatt</value>
+    <value>{busy} starter gått glipp av mens den kjørte</value>
+  </data>
+  <data name="Sprocket.Sequence.SkippedOffOne" xml:space="preserve">
+    <value>1 start avvist mens den var slått av</value>
   </data>
   <data name="Sprocket.Sequence.SkippedOff" xml:space="preserve">
-    <value>hoppet over {off}x mens den var av</value>
+    <value>{off} starter avvist mens den var slått av</value>
+  </data>
+  <data name="Sprocket.Sequence.SkippedBothOne" xml:space="preserve">
+    <value>1 start gått glipp av mens den kjørte, {off} avvist mens den var slått av</value>
   </data>
   <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
-    <value>hoppet over {busy}x mens den var opptatt, {off}x mens den var av</value>
+    <value>{busy} starter gått glipp av mens den kjørte, {off} avvist mens den var slått av</value>
   </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 tikk er ett sekund.</value>

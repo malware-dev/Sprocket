@@ -43,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>Something the sentence names that is no longer on the construct.</summary>
-        public const string Missing = "something that's gone";
+        public const string Missing = "a lost block";
 
         static readonly NameOrder ByName = new NameOrder();
 
@@ -170,6 +170,49 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return tests ? IsWord : ToWord;
         }
 
+
+        /// <summary>
+        /// <paramref name="said" /> as several subjects take it, its first word made plural: "finish closing", "are open".
+        /// </summary>
+        /// <remarks>
+        /// A block's words are written for one block, and a list joined with "and" puts several before them. Only the
+        /// verb's own ending changes, so the rest of what the block says stays as it was written.
+        /// </remarks>
+        public static string Plural(string said)
+        {
+            if (string.IsNullOrEmpty(said))
+                return said;
+
+            var space = said.IndexOf(' ');
+            var first = space < 0 ? said : said.Substring(0, space);
+            var rest = space < 0 ? "" : said.Substring(space);
+            return Many(first) + rest;
+        }
+
+        /// <summary>The plural of a verb written for one: are, have, finish, become.</summary>
+        static string Many(string verb)
+        {
+            switch (verb)
+            {
+                case "is": return "are";
+                case "has": return "have";
+                case "was": return "were";
+                case "does": return "do";
+                case "goes": return "go";
+            }
+
+            if (verb.EndsWith("ies", StringComparison.Ordinal) && verb.Length > 3)
+                return verb.Substring(0, verb.Length - 3) + "y";
+
+            if (verb.EndsWith("ches", StringComparison.Ordinal) || verb.EndsWith("shes", StringComparison.Ordinal)
+                || verb.EndsWith("sses", StringComparison.Ordinal) || verb.EndsWith("xes", StringComparison.Ordinal)
+                || verb.EndsWith("zes", StringComparison.Ordinal))
+                return verb.Substring(0, verb.Length - 2);
+
+            return verb.EndsWith("s", StringComparison.Ordinal) && !verb.EndsWith("ss", StringComparison.Ordinal)
+                ? verb.Substring(0, verb.Length - 1)
+                : verb;
+        }
 
         /// <summary>A value as a sentence names it: in lower case where Sprocket worded it, and as the game declared it where it did.</summary>
         /// <remarks>The game's own names are the terminal's, as-is, as the terminal view lists them.</remarks>
@@ -496,7 +539,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var happening = slot as EventSlot;
             if (happening != null)
-                return happening.Event == null ? Empty : happening.Event.Text;
+                return happening.Event == null ? Empty : happening.Plural ? Plural(happening.Event.Text) : happening.Event.Text;
 
             var state = slot as StateSlot;
             if (state != null)
