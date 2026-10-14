@@ -1,59 +1,40 @@
 <p align="center"><img src="art/thumbnail/sprocket-mark.svg" width="180" alt="Sprocket"></p>
 
-**Stop Building Disposable Chains.**
+<h1 align="center">Sprocket Automation</h1>
 
-You wire a button panel to start an airlock sequence and guess the countdown. When a door runs slow,
-the next timer fires anyway and vents the room. You build a second airlock, but you still have to
-wire an entirely new chain of timers from scratch. Then a strike destroys your logic bay, and
-welding replacement blocks just leaves you with empty boxes.
+Event controllers, timer blocks, sensors... there is already a means for automation in Space Engineers, sure. But it
+takes up a whole bunch of space, is limited in what it can do, and fragile. One railgun shot to your automation bay and
+you have to set _everything_ up again.
 
-Maltek Industrial presents Sprocket.
+## Enter Sprocket Automation
 
-Select blocks from your terminal list and choose your actions. Sprocket writes your setup as a plain
-English sentence. The sequence runs exactly as you read it, from top to bottom, every time.
+Describe your automation in simple but powerful **logic systems**. Set up **triggers** to run sequential steps. Easily
+wait until a door is actually closed before pressurizing that airlock, without manual timing. Go one step further, with
+more complex expressions and states.
 
-Steps wait for completion. A sequence proceeds only when the door is actually shut.
+Sprocket lives within _all_ of your programmable blocks. If you lose one, but there's still another on your ship, your
+automation is still fully functional. And even if the last programmable block is lost, the automatic backup system has
+stored away your logic, so you can restore it to a new ship or back to your repaired old one.
 
-Systems scale immediately. Build a sequence once and apply it to every matching airlock on your
-ship. Write another for your docking clamps, mining rigs, or cargo sorting, and run every instance
-from that single setup. Your logic lives safely on your terminal screens, immune to a single lost
-block.
+## One logic system, multiple installations
 
-Command your ship in plain words.
+Describe your airlock logic _once_, then add **installations** to run the same logic on several airlocks, without
+adding more programmable blocks.
 
----
+## Share
 
-## What this actually is
+Keep **blueprints** of your logic systems in the library, and share them, whether it's just with your best friend,
+your faction, or the entire system.
 
-Sprocket adds an automation editor directly to the Space Engineers terminal. Choose blocks from your
-construct and assign their actions. Sprocket writes your choices as a sequence in plain English. The
-sentence you read is the program that runs.
+The mod API gives no way to share them through the Workshop, so sharing happens within a world. To share outside the
+game, share a grid blueprint holding the logic, or the blueprint files themselves, which live in the game's Storage folder
+(`%AppData%\SpaceEngineers\Storage` by default).
 
-Everything is selected from menus rather than typed. A sequence is a straight path read from top to
-bottom. Understanding your machinery is as simple as reading a sentence.
+## Getting started
 
-## Accessing the editor
-
-Enable the mod in your world. Build a **Programmable Block** on your construct, open its terminal
-panel, and press **Automation**.
-
-A single block holds and runs the systems for your entire construct.
-
-The Programmable Block is simply where Sprocket lives. The automation belongs entirely to the mod.
-Because it runs independently, Sprocket works seamlessly even on worlds that disable in-game
-scripts.
-
-## How a sequence works
-
-**Triggers start the sequence.** It begins with a button press, a closed door, a filling tank, or a
-schedule.
-
-**Steps run in order.** Each action finishes before the next begins. "Close the inner door"
-completes only when the door is physically shut. Your sequence holds together even when hardware
-runs slow.
-
-**Systems separate logic from hardware.** A single airlock system runs every airlock on your ship.
-You simply assign the specific doors, vents, and buttons for each location.
+Subscribe to Sprocket Automation on the Steam Workshop, then find any programmable block in
+the terminal and press **Automation**. The in-game codex, behind the question mark on every screen, walks you through
+your first airlock step by step.
 
 ## Why I made it
 
