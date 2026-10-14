@@ -98,6 +98,23 @@ public class BoxTests
         Assert.Equal(Stressed, Word(easel, "door").Color);
     }
 
+    /// <summary>A style asking for italics draws the box's words in the emphasized face, inside boxes within it too, and code in its own.</summary>
+    [Fact]
+    public void AnItalicStyleFacesTheBoxsWords()
+    {
+        var (text, easel) = Laid("Before\n\n::: aside\nMind the `door`\n\n::: center\nInside\n:::\n:::\n\nAfter");
+        text.EmphasisFont = "Italic";
+        text.CodeFont = "Mono";
+        text.Boxes = new BoxStyles(new BoxStyle("aside", italic: true));
+        easel.Draw(Wide, High);
+
+        Assert.Equal("Italic", Word(easel, "Mind the").Font);
+        Assert.Equal("Italic", Word(easel, "Inside").Font);
+        Assert.Equal("Mono", Word(easel, "door").Font);
+        Assert.NotEqual("Italic", Word(easel, "Before").Font);
+        Assert.NotEqual("Italic", Word(easel, "After").Font);
+    }
+
     /// <summary>A name the host gives nothing changes nothing: no bar, no fill, and the words where any others would be.</summary>
     [Fact]
     public void AnUnknownNameChangesNothing()

@@ -10,6 +10,8 @@ A selector is where you select blocks, and what to do with them or check on them
 
 Blocks with `Show block in toolbar config` switched off in the terminal are left out. `Show blocks hidden from toolbars`, at the end of the `Blocks` heading, shows them too, and it stays as you left it, in every selector and wherever you are.
 
+The block selector and the value selector list only what is known to work with the automation. `Terminal ›` switches either one to everything the blocks offer in the terminal, under the terminal's own names, without that promise.
+
 Each thing the blocks can do carries a mark for its kind:
 
 - ![](mark:action)&nbsp;An [action](action) the sequence starts and moves on from, regardless of how long the block takes to finish it.

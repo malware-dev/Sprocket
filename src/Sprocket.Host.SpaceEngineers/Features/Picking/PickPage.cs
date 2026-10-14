@@ -555,10 +555,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void MakeWhat()
         {
-            // Two ways of looking only at what somebody does to a block. What happens to one, and what is checked of one, is
-            // Sprocket's own wording throughout, so there is no second way to look at it.
+            // Two ways of looking at what somebody does to a block or checks of one. What happens to one is Sprocket's own
+            // wording throughout, so there is no second way to look at it.
             // The angle marks point the way each link goes; the words alone are translated.
-            var views = _forEvents || _forTests ? null : new[] { "‹ " + Editor.Texts.PickToOrganized, Editor.Texts.PickToTerminal + " ›" };
+            var views = _forEvents ? null : new[] { "‹ " + Editor.Texts.PickToOrganized, Editor.Texts.PickToTerminal + " ›" };
 
             _what = new StageColumn(_strip.Width, true, views, Editor.Texts);
             _what.Title = _forTests ? Editor.Texts.PickWhatToCheck : _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
@@ -1085,7 +1085,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var texts = Editor.Texts;
             var note = "";
-            if (!_forEvents && !_forTests)
+            if (_forTests && Editor.ShowsTerminal)
+            {
+                note = texts.PickTerminalNote;
+            }
+            else if (!_forEvents && !_forTests)
             {
                 note = Editor.ShowsTerminal ? texts.PickTerminalNote : PlanText.Note(texts, Vocabulary.Planned(Editor.World, _selection));
                 if (Vocabulary.Narrowed(Editor.World, _selection, Editor.ShowsTerminal))
@@ -1133,7 +1137,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < _matched.Count; i++)
             {
                 var at = _matched[i];
-                var mine = _forEvents || _forTests ? group : _groups.Count > at ? _groups[at] : group;
+                var mine = _forEvents ? group : _groups.Count > at ? _groups[at] : group;
                 if (mine != group)
                 {
                     group = mine;
@@ -1203,42 +1207,74 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Editor.Invalidate();
         }
 
-        /// <summary>What a test can read of the blocks: each state they can be in, and then not, and then each of their values.</summary>
+        /// <summary>What a test can read of the blocks, in the view now showing.</summary>
         /// <remarks>
-        /// A state read the same as one already listed is left out: switched on and switched off are one state, read from
-        /// either side. A value of Sprocket's own that its signals say as states is read through them, and one they do not is
-        /// listed by its name with the block's own.
+        /// The organized view lists each state the blocks can be in, and then not, and each value no state says, under the
+        /// heading of the value it reads, as the actions are grouped. A state read the same as one already listed is left out:
+        /// switched on and switched off are one state, read from either side. The terminal view lists the values the blocks
+        /// declare, under the terminal's own names, in the order the game declared them.
         /// </remarks>
         void Testable()
         {
-            var events = Vocabulary.EventsOf(Editor.World, _selection);
-            for (var i = 0; i < events.Count; i++)
+            var actions = Vocabulary.ActionsOf(Editor.World, _selection);
+            if (Editor.ShowsTerminal)
             {
-                if (!events[i].IsState || _names.Contains(events[i].State))
-                    continue;
+                actions.Sort(ByDeclared);
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    if (actions[i].Sets && actions[i].Unaltered)
+                        Read(actions[i], Values);
+                }
 
-                Offer(events[i].State, events[i].Id);
-                Offer(events[i].Unstate, Not + events[i].Id);
+                return;
             }
 
-            var actions = Vocabulary.ActionsOf(Editor.World, _selection);
             actions.Sort(BySaid);
+            var events = Vocabulary.EventsOf(Editor.World, _selection);
+            for (var group = 0; group <= (int)Category.Other; group++)
+            {
+                for (var i = 0; i < events.Count; i++)
+                {
+                    if (!events[i].IsState || _names.Contains(events[i].State) || (int)CategoryOf(actions, events[i].Value) != group)
+                        continue;
+
+                    Offer(events[i].State, events[i].Id, group);
+                    Offer(events[i].Unstate, Not + events[i].Id, group);
+                }
+
+                for (var i = 0; i < actions.Count; i++)
+                {
+                    var one = actions[i];
+                    var own = one.Being != null && !Stated(events, one.Id);
+                    if ((own || (one.Sets && Lists(one))) && (int)one.Category == group)
+                        Read(one, group);
+                }
+            }
+        }
+
+        /// <summary>Lists the value <paramref name="one" /> to be read, under <paramref name="group" />.</summary>
+        void Read(EntityAction one, int group)
+        {
+            _names.Add(Said(one));
+            _ids.Add(one.Id);
+            _forms.Add(Form.Value);
+            _groups.Add(group);
+            _marks.Add(Symbols.Value);
+            _sets.Add(true);
+            _ready.Add(one.Readiness);
+            _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
+        }
+
+        /// <summary>The category of the value <paramref name="value" /> among <paramref name="actions" />, or the last where none is listed.</summary>
+        static Category CategoryOf(List<EntityAction> actions, string value)
+        {
             for (var i = 0; i < actions.Count; i++)
             {
-                var one = actions[i];
-                var own = one.Being != null && !Stated(events, one.Id);
-                if (!own && (!one.Sets || !Lists(one)))
-                    continue;
-
-                _names.Add(Said(one));
-                _ids.Add(one.Id);
-                _forms.Add(Form.Value);
-                _groups.Add(0);
-                _marks.Add(Symbols.Value);
-                _sets.Add(true);
-                _ready.Add(one.Readiness);
-                _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
+                if (actions[i].Id == value && (actions[i].Sets || actions[i].Being != null))
+                    return actions[i].Category;
             }
+
+            return Category.Other;
         }
 
         /// <summary>Whether a signal among <paramref name="events" /> says the value <paramref name="value" /> as a state.</summary>
@@ -1253,13 +1289,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
-        /// <summary>Lists a state to be read, by the words it reads in and the choice it makes.</summary>
-        void Offer(string said, string id)
+        /// <summary>Lists a state to be read, by the words it reads in and the choice it makes, under <paramref name="group" />.</summary>
+        void Offer(string said, string id, int group)
         {
             _names.Add(said);
             _ids.Add(id);
             _forms.Add(Form.Native);
-            _groups.Add(0);
+            _groups.Add(group);
             _marks.Add(Symbols.Value);
             _sets.Add(false);
             _ready.Add(Readiness.Ready);

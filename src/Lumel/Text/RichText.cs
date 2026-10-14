@@ -79,6 +79,8 @@ namespace Lumel.Text
         Link _pieceLink;
         bool _pieceCode;
 
+        bool _italic;
+
         /// <summary>An empty document in white, with lines 24 units tall.</summary>
         public RichText()
         {
@@ -657,6 +659,7 @@ namespace Lumel.Text
             Color? bar = null;
             Color? fill = null;
             Color? color = null;
+            bool? italic = null;
             var inner = align;
             for (var i = 0; i < box.Names.Count; i++)
             {
@@ -675,6 +678,7 @@ namespace Lumel.Text
                 bar = style.Bar ?? bar;
                 fill = style.Fill ?? fill;
                 color = style.Color ?? color;
+                italic = style.Italic ?? italic;
             }
 
             var top = y;
@@ -683,10 +687,16 @@ namespace Lumel.Text
             var indent = _indent;
             var margin = fill.HasValue ? _fontSize * 0.25f : 0f;
 
+            // Its face reaches the boxes inside it, as its color does, until one of them says otherwise.
+            var italicWas = _italic;
+            _italic = italic ?? _italic;
+
             y += margin;
             Stack(g, box.Blocks, bar.HasValue || fill.HasValue ? left + indent : left,
                 fill.HasValue && width < Unbounded ? width - indent * 0.5f : width, inner, ref y, ref widest);
             y += margin;
+
+            _italic = italicWas;
 
             if (fill.HasValue)
                 _marks.Insert(behind, new Mark { Where = new RectangleF(left, top, 0f, y - top), Across = true, Color = fill });
@@ -1157,7 +1167,8 @@ namespace Lumel.Text
             if ((run.Kind & RunKind.Code) != 0)
                 return _codeFont;
 
-            return heading ? HeadingFaceOf(run.Kind) : FaceOf(run.Kind);
+            var kind = _italic ? run.Kind | RunKind.Emphasis : run.Kind;
+            return heading ? HeadingFaceOf(kind) : FaceOf(kind);
         }
 
         /// <summary>Ends the piece being built at line <paramref name="y" />, moving <paramref name="x" /> past it; a piece that ends a line drops its trailing spaces.</summary>

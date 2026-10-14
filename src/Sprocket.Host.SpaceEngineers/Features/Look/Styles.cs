@@ -69,10 +69,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
         };
 
-        /// <summary>The looks a box in a description or the codex can ask for: <c>warning</c> for what can go wrong, <c>player</c> for a note on the player's own computer.</summary>
+        /// <summary>The looks a box in a description or the codex can ask for: <c>warning</c> for what can go wrong, <c>player</c> for table-talk, in italics.</summary>
         public static readonly BoxStyles Boxes = new BoxStyles(
             new BoxStyle("warning", bar: Palette.Notice, fill: Palette.NoticeWash, color: Palette.Ink),
-            new BoxStyle("player", bar: Palette.Accent, fill: Palette.Panel));
+            new BoxStyle("player", bar: Palette.Accent, fill: Palette.Panel, italic: true));
 
         /// <summary>What the author of a blueprint wrote about it, read by whoever fills it in.</summary>
         public static readonly RichTextStyle Description = new RichTextStyle

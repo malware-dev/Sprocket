@@ -8,14 +8,16 @@ namespace Lumel.Text
     {
         /// <summary>
         /// What the attribute <paramref name="name" /> asks for: <paramref name="bar" /> down the box's edge, <paramref name="fill" />
-        /// behind it, and <paramref name="color" /> for its plain words, each null to leave it alone.
+        /// behind it, <paramref name="color" /> for its plain words, and whether <paramref name="italic" /> faces its words, each
+        /// null to leave it alone.
         /// </summary>
-        public BoxStyle(string name, Color? bar = null, Color? fill = null, Color? color = null)
+        public BoxStyle(string name, Color? bar = null, Color? fill = null, Color? color = null, bool? italic = null)
         {
             Name = name;
             Bar = bar;
             Fill = fill;
             Color = color;
+            Italic = italic;
         }
 
         /// <summary>The attribute a box's fence names for this, as in <c>::: warning</c>.</summary>
@@ -29,5 +31,8 @@ namespace Lumel.Text
 
         /// <summary>The color of the box's plain words, or null for the text's own; strong, emphasized and linked words keep theirs.</summary>
         public Color? Color { get; }
+
+        /// <summary>Whether the box's words are drawn in the emphasized face, or null to leave that to the words; code keeps its own.</summary>
+        public bool? Italic { get; }
     }
 }

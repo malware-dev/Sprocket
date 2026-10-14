@@ -10,6 +10,8 @@ En velger er der du velger blokker, og hva som skal gjøres med dem eller sjekke
 
 Blokker med `Show block in toolbar config` slått av i terminalen, er utelatt. `Vis blokker som er skjult fra verktøylinjer`, ytterst på overskriften `Blokker`, viser dem også, og det blir stående slik du forlot det, i hver velger og hvor du enn er.
 
+Blokkvelgeren og verdivelgeren lister bare det som er kjent for å virke med automasjonen. `Terminal ›` bytter hvilken som helst av dem til alt blokkene tilbyr i terminalen, under terminalens egne navn, uten det løftet.
+
 Alt blokkene kan gjøre, har et merke for slaget sitt:
 
 - ![](mark:action)&nbsp;En [handling](action) sekvensen starter og går videre fra, uansett hvor lang tid blokken bruker på å fullføre den.
