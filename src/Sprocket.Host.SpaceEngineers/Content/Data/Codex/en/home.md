@@ -28,8 +28,8 @@ Unfortunately the mod API prevents actual direct sharing through, say, the works
 
 ## Getting Started
 
-_pending_
+Find any programmable block in the terminal and press `Automation`. That opens the home screen of its construct, where every logic system on it is listed. From there, the [simple airlock](#simple-airlock) takes you through your first one, step by step.
 
 ## Recommended Reading
 
-The [examples](#examples) build logic systems step by step, starting with a [simple airlock](#simple-airlock).
+Once the airlock works, the other [examples](#examples) build more logic systems the same way.

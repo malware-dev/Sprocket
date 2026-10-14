@@ -19,9 +19,10 @@ lists the terms in the order the contents show them. Every page and tooltip exis
   script's syntax and keywords do not appear in a page.
 - **Link a term once per page**, the first time it matters: `[logic systems](#logic-system)`. Mal: the
   wiki rule.
-- **A kind's mark sits beside a link or a bold term**, never beside plain running text, and never in a
-  title: `![](mark:blueprint) [blueprints](#blueprint)`, with empty words. Mal: "[icon] signal slot"
-  makes sense, "sends the [icon] signal" does not.
+- **A kind's mark sits beside a link or a bold term**, never beside plain running text:
+  `![](mark:blueprint) [blueprints](#blueprint)`, with empty words. Mal: "[icon] signal slot" makes sense,
+  "sends the [icon] signal" does not. A page's title carries no mark, since the contents and the history
+  name the page by its title; a heading inside a page may.
 - **What is on screen is quoted as it is on screen**, in backticks: `Make blueprint`.
 - **A detail belongs to the page about the thing it is a detail of.** What only one kind of block or
   one action does goes on that block's or action's page, not on a general page that happens to meet it.
@@ -74,7 +75,7 @@ lists the terms in the order the contents show them. Every page and tooltip exis
 ## Checks of its own
 
 ```
-# The name in running text, a term linked twice, a mark in a title, a page without its partner language
+# The name in running text, a term linked twice, a mark in a page's title, a page without its partner language
 python .claude/skills/writing/codex-check.py
 
 # Habits that make a page read as machine-written, counted per page; --show <page> lists every hit

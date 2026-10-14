@@ -26,8 +26,8 @@ Dessverre hindrer mod-API-et ekte direkte deling gjennom for eksempel workshopen
 
 ## Kom i gang
 
-_kommer_
+Finn en hvilken som helst programmerbar blokk i terminalen og trykk `Automasjon`. Da åpnes startskjermen for konstruksjonen dens, der alle logikksystemene på den står oppført. Derfra tar [den enkle luftslusen](#simple-airlock) deg gjennom ditt første, steg for steg.
 
 ## Anbefalt lesning
 
-[Eksemplene](#examples) bygger logikksystemer steg for steg, og begynner med en [enkel luftsluse](#simple-airlock).
+Når luftslusen virker, bygger de andre [eksemplene](#examples) flere logikksystemer på samme måte.

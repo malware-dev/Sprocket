@@ -3,7 +3,7 @@
     name      the product's name in running text; a ::: player box and `quoted` text are left out, since a
               file name or a path can carry it there
     links     a term linked more than once on one page
-    title     a mark in a title
+    title     a mark in a page's title, which the contents and the history name the page by
     pairs     a page or tooltip in one language with no partner in the other
 
 Every hit is a fault; a check that has to be argued with is a check that needs mending.
@@ -58,7 +58,7 @@ def check(language, name, text, say):
             say("links", "%s/%s: #%s linked %d times" % (language, name, target, count))
 
     for number, line in enumerate(text.splitlines(), 1):
-        if line.startswith("#") and "mark:" in line:
+        if line.startswith("# ") and "mark:" in line:
             say("title", "%s/%s:%d: %s" % (language, name, number, line.strip()))
 
 
