@@ -22,6 +22,18 @@ public class UpgradeTests
         + "    }\n"
         + "}\n";
 
+    /// <summary>An alpha 14 blueprint that sets, checks and watches the power value by the id it had before it was named power.</summary>
+    const string SwitchedOn = "sprocket 1 alpha 14\n\n"
+        + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Lamp {\n"
+        + "    required slot lamp expects InteriorLight\n\n"
+        + "    when any ext.'switched-on' on [ lamp ] == off then run 1\n\n"
+        + "    sequence 1 as Flash {\n"
+        + "        set ext.'switched-on' on [ lamp ] to on\n"
+        + "        if any ext.'switched-on' on [ lamp ] == on then {\n"
+        + "        }\n"
+        + "    }\n"
+        + "}\n";
+
     /// <summary>Each of Sprocket's old switch actions becomes the setting of its power value, on the same blocks.</summary>
     [Fact]
     public void AnAlpha14SwitchSetsPower()
@@ -32,6 +44,23 @@ public class UpgradeTests
         Power((Act)steps[0], true);
         Power((Act)steps[2], false);
         Power((Act)read.Triggers[0].Does, false);
+    }
+
+    /// <summary>The power value named switched-on is named power wherever it is set, checked or watched.</summary>
+    [Fact]
+    public void AnAlpha14SwitchedOnIsPower()
+    {
+        Assert.Equal("", ProgramText.Lone(SwitchedOn, new Values(), out var read));
+
+        var steps = read!.Sequences[0].Steps;
+        Assert.Equal("power", ((Act)steps[0]).ActionId);
+        Assert.Equal("power", ((If)steps[1]).Test.MemberId);
+        Assert.Equal("power", ((WhenTrigger)read.Triggers[0]).EventId);
+
+        var written = ProgramText.Blueprint(read);
+        Assert.DoesNotContain("switched-on", written);
+        Assert.Equal("", ProgramText.Lone(written, new Values(), out var again));
+        Assert.Equal(written, ProgramText.Blueprint(again!));
     }
 
     /// <summary>What was upgraded is written in the current format, and reads back the same.</summary>

@@ -19,6 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         const string Power = "power";
 
+        // The power value's id as alpha 14 programs written before it was named power persist it.
+        const string SwitchedOn = "switched-on";
+
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>
         public static bool From(int version, int draft)
         {
@@ -30,14 +33,72 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public static string Apply(int draft, Automation program)
         {
             var switched = 0;
+            var renamed = 0;
             if (draft == 14)
             {
                 var systems = program.Systems;
                 for (var i = 0; i < systems.Count; i++)
+                {
                     switched += Switches(systems[i]);
+                    renamed += Renames(systems[i]);
+                }
             }
 
-            return switched == 0 ? "" : "alpha " + draft + ": " + switched + " switch step" + (switched == 1 ? "" : "s") + " set power.";
+            if (switched == 0 && renamed == 0)
+                return "";
+
+            return "alpha " + draft + ": " + switched + " switch step" + (switched == 1 ? "" : "s") + " set power, "
+                   + renamed + " use" + (renamed == 1 ? "" : "s") + " of switched-on named power.";
+        }
+
+        /// <summary>Names the power value <c>power</c> wherever <paramref name="system" /> names it <c>switched-on</c>: set, checked or watched.</summary>
+        static int Renames(AutomationSystem system)
+        {
+            var count = 0;
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                var steps = sequences[i].Steps;
+                for (var s = 0; s < steps.Count; s++)
+                {
+                    if (Rename(steps[s]))
+                        count++;
+                }
+            }
+
+            var triggers = system.Triggers;
+            for (var i = 0; i < triggers.Count; i++)
+            {
+                var when = triggers[i] as WhenTrigger;
+                if (when != null && when.Provider == BlockKinds.Own && when.EventId == SwitchedOn)
+                {
+                    when.EventId = Power;
+                    count++;
+                }
+
+                if (Rename(triggers[i].Does))
+                    count++;
+            }
+
+            return count;
+        }
+
+        /// <summary>Names the power value <c>power</c> where <paramref name="step" /> sets or checks it as <c>switched-on</c>.</summary>
+        static bool Rename(Step step)
+        {
+            var act = step as Act;
+            if (act != null && act.Provider == BlockKinds.Own && act.ActionId == SwitchedOn)
+            {
+                act.ActionId = Power;
+                return true;
+            }
+
+            var branch = step as Branch;
+            if (branch == null || branch.Test == null || branch.Test.Provider != BlockKinds.Own || branch.Test.MemberId != SwitchedOn)
+                return false;
+
+            branch.Test.MemberId = Power;
+            return true;
         }
 
         /// <summary>Turns every <c>call ext.on</c> and <c>call ext.off</c> of <paramref name="system" /> into the setting of its power value.</summary>
