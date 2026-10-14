@@ -8,6 +8,7 @@ Dette bygger en sekvens som skyver en borearm sakte ut med boreren i gang, og he
 4. Legg til en oppgave for stemplene i armen med `move to`, og oppgi 5 som posisjon og 0,5 som fart. Hvert stempel flytter seg ut til 5 m, og steget varer til det siste av dem er framme.
 5. Legg til en `move to` til for stemplene, med 0 som posisjon og 2 som fart, for å hente armen inn igjen.
 6. Legg til en oppgave som setter `power` på boremaskinene til av.
+7. Forlat skjermen, og slå på logikksystemet når du blir spurt.
 
 Kjør *Grav* for hånd med ![](mark:play) for å prøve den, eller gi den en [utløser](#trigger), som en knapp på kontrollpanelet til armen.
 

@@ -9,6 +9,7 @@ This builds a hangar whose lights come on while its doors open or close, with on
 5. Add a task that sets the lights' `power` to off again.
 6. Go back and make a second sequence, *Close*, the same way, with `close` for the doors.
 7. Under `Triggers`, press `+ trigger`, then `when`, select the button panel's first button, and have it run *Open*. Add a second trigger for the second button that runs *Close*.
+8. Leave the screen, and switch the logic system on when asked.
 
 Press the first button to try it.
 

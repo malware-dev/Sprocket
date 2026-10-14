@@ -9,6 +9,7 @@ Dette bygger en hangar der lysene kommer på mens dørene åpner eller lukker se
 5. Legg til en oppgave som setter `power` på lysene til av igjen.
 6. Gå tilbake og lag en andre sekvens, *Lukk*, på samme måte, med `close` for dørene.
 7. Under `Utløsere` trykker du `+ utløser` og så `når`, velger den første knappen på knappepanelet og lar den kjøre *Åpne*. Legg til en andre utløser for den andre knappen som kjører *Lukk*.
+8. Forlat skjermen, og slå på logikksystemet når du blir spurt.
 
 Trykk den første knappen for å prøve.
 

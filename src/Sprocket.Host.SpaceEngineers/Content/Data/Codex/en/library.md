@@ -12,7 +12,7 @@ Blueprints in storage are saved on your computer, so every world you play on it 
 
 Select a row to see who made it, when it last changed and what it's for.
 
-## Keeping a blueprint
+## Making a blueprint
 
 `Make blueprint` puts a copy of a logic system in storage. From then on the two are linked: a change to the logic system stays on its construct until you press `Update blueprint`, and a change to the blueprint reaches a construct only where somebody presses `Update from library` there. Either update asks first, since it replaces what was there.
 
@@ -26,13 +26,13 @@ Select a row to see who made it, when it last changed and what it's for.
 
 ## Deleting
 
-Deleting a blueprint from storage is for good, but the logic systems already made from it keep running, and any of them can be kept again with `Make blueprint`.
+Deleting a blueprint from storage is for good, but the logic systems already made from it keep running, and `Make blueprint` makes a new blueprint of any of them.
 
 ## Backups
 
 When a construct loses its last programmable block, its logic systems are kept under `Backups`, listed under the construct's name with the latest first. A logic system the library already has, unchanged since its blueprint was last updated, is left to that blueprint.
 
-A backup works like a blueprint, and `Make blueprint` keeps it for use everywhere: as an update to the blueprint it came from, where that is still in storage, or as a new one. Its installations stayed behind with the construct it came from, so it comes with one new installation to fill.
+A backup works like a blueprint: `Add to this construct` puts it on this construct as it is, and `Make blueprint` turns it into a blueprint, either updating the one it came from, if that's still in storage, or as a new one. Its installations stayed behind with the construct it came from, so it comes with one new installation to fill.
 
 ::: player
 Backups are saved with the world they were taken in, so another world's library doesn't show them.

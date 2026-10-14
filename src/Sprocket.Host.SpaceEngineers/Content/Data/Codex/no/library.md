@@ -12,7 +12,7 @@ Plantegninger i lageret lagres på datamaskinen din, så alle verdener du spille
 
 Velg en rad for å se hvem som lagde den, når den sist ble endret og hva den er til.
 
-## Ta vare på en plantegning
+## Lage en plantegning
 
 `Lag plantegning` legger en kopi av et logikksystem i lageret. Fra da av er de to koblet: en endring i logikksystemet blir stående på konstruksjonen til du trykker `Oppdater plantegning`, og en endring i plantegningen når en konstruksjon bare der noen trykker `Oppdater fra biblioteket`. Begge oppdateringene spør først, siden de erstatter det som var der.
 
@@ -26,13 +26,13 @@ Velg en rad for å se hvem som lagde den, når den sist ble endret og hva den er
 
 ## Slette
 
-Å slette en plantegning fra lageret er for godt, men logikksystemene som allerede er laget av den, fortsetter å kjøre, og hvert av dem kan tas vare på igjen med `Lag plantegning`.
+Å slette en plantegning fra lageret er for godt, men logikksystemene som allerede er laget av den, fortsetter å kjøre, og `Lag plantegning` lager en ny plantegning av hvilket som helst av dem.
 
 ## Sikkerhetskopier
 
 Når en konstruksjon mister den siste programmerbare blokken sin, tas logikksystemene dens vare på under `Sikkerhetskopier`, oppført under navnet til konstruksjonen med den nyeste først. Et logikksystem biblioteket allerede har, uendret siden plantegningen sist ble oppdatert, overlates til den plantegningen.
 
-En sikkerhetskopi virker som en plantegning, og `Lag plantegning` tar vare på den til bruk overalt: som en oppdatering av plantegningen den kom fra, der den fortsatt ligger i lageret, eller som en ny. Installasjonene dens ble igjen hos konstruksjonen den kom fra, så den kommer med én ny installasjon å fylle.
+En sikkerhetskopi virker som en plantegning: `Legg til på denne konstruksjonen` setter den på denne konstruksjonen slik den er, og `Lag plantegning` gjør den om til en plantegning, enten som en oppdatering av den den kom fra, hvis den fortsatt ligger i lageret, eller som en ny. Installasjonene dens ble igjen hos konstruksjonen den kom fra, så den kommer med én ny installasjon å fylle.
 
 ::: player
 Sikkerhetskopier lagres sammen med verdenen de ble tatt i, så biblioteket til en annen verden viser dem ikke.
