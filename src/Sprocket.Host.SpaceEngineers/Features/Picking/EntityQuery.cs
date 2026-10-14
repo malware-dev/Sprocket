@@ -13,20 +13,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// its own matching would quietly behave differently from the others.
     ///
     /// Matching is deliberately forgiving. Someone hunting for a door types "door",
-    /// not a prefix, and case is never their problem. Each word typed is looked for on its own,
-    /// in any order, so "airloc 2" finds "Airlock 2" and "door inner" finds "Airlock Inner Door".
+    /// not a prefix, and case is never their problem. Each word typed is looked for anywhere,
+    /// but in the order typed, so "airl 1" finds "Airlock 1", "Airlock 10" and "Airlock Door 1",
+    /// and leaves out "1 Airlock".
     /// </remarks>
     public static class EntityQuery
     {
         /// <summary>Whether a plain label matches a search, just as forgivingly.</summary>
         public static bool MatchesText(string text, string search)
         {
-            return string.IsNullOrEmpty(search) || EveryWord(search, text, null);
+            return string.IsNullOrEmpty(search) || EveryWord(search, text);
         }
 
         /// <summary>
         /// Whether <paramref name="entity" /> is of <paramref name="family" />, or of the kind <paramref name="kindId" /> where it
-        /// names no family, with every word of <paramref name="search" /> in its name or its kind's.
+        /// names no family, with every word of <paramref name="search" /> in its name.
         /// </summary>
         public static bool Matches(GridEntity entity, string search, string kindId, Family family)
         {
@@ -44,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (string.IsNullOrEmpty(search))
                 return true;
 
-            return EveryWord(search, entity.Name, entity.Kind.DisplayName);
+            return EveryWord(search, entity.Name);
         }
 
         /// <summary>
@@ -71,14 +72,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
-        /// <summary>Whether every word of <paramref name="search" /> is found in <paramref name="first" /> or <paramref name="second" />.</summary>
+        /// <summary>
+        /// Whether every word of <paramref name="search" /> is found in <paramref name="text" /> in the order typed, each after
+        /// the one before it.
+        /// </summary>
         /// <remarks>
         /// Asked of every block on every keystroke, so the words are walked where they stand in the search rather than split
         /// out of it, which would make a string for each.
         /// </remarks>
-        static bool EveryWord(string search, string first, string second)
+        static bool EveryWord(string search, string text)
         {
             var at = 0;
+            var next = 0;
             while (at < search.Length)
             {
                 while (at < search.Length && char.IsWhiteSpace(search[at]))
@@ -92,22 +97,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (length == 0)
                     break;
 
-                if (!ContainsIgnoreCase(first, search, start, length) && !ContainsIgnoreCase(second, search, start, length))
+                var found = IndexIgnoreCase(text, next, search, start, length);
+                if (found < 0)
                     return false;
+
+                next = found + length;
             }
 
             return true;
         }
 
-        // Written out rather than using string.IndexOf with a relation enum, which
-        // is one of the overloads that is easy to lose on an older target framework.
-        static bool ContainsIgnoreCase(string haystack, string needle, int from, int length)
+        /// <summary>
+        /// Where the word at <paramref name="from" /> in <paramref name="needle" /> first stands in <paramref name="haystack" />,
+        /// at or after <paramref name="after" />; -1 where it does not.
+        /// </summary>
+        /// <remarks>
+        /// Written out rather than using string.IndexOf with a relation enum, which is one of the overloads that is easy to lose
+        /// on an older target framework.
+        /// </remarks>
+        static int IndexIgnoreCase(string haystack, int after, string needle, int from, int length)
         {
-            if (string.IsNullOrEmpty(haystack) || length > haystack.Length)
-                return false;
+            if (string.IsNullOrEmpty(haystack))
+                return -1;
 
             var limit = haystack.Length - length;
-            for (var start = 0; start <= limit; start++)
+            for (var start = after; start <= limit; start++)
             {
                 var matched = true;
                 for (var offset = 0; offset < length; offset++)
@@ -119,9 +133,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     }
                 }
                 if (matched)
-                    return true;
+                    return start;
             }
-            return false;
+            return -1;
         }
 
         static bool SameLetter(char a, char b)

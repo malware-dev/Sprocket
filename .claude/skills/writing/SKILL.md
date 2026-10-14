@@ -63,8 +63,9 @@ The vocabulary is settled; use it exactly, on screen, in the codex, in tickets a
   itself called a logic system. **A blueprint** is a copy, kept in the library.
 - **Signal slot** and **toolbar slot** are the Space Engineers host's words for where a signal comes from.
 - A word for one thing is the same word everywhere.
-- **Select** is the verb for taking something from a list, on screen and in the codex (Mal, 2026-10-13); the
-  picker keeps its name.
+- **Select** is the verb for taking something from a list, on screen and in the codex (Mal, 2026-10-13). The
+  screen it is done on is a **selector**: block selector, value selector, signal selector (Mal, 2026-10-14). "Picker"
+  is the code's name, never the player's.
 
 Each term in one line, with its Norwegian word.
 
@@ -85,7 +86,7 @@ Each term in one line, with its Norwegian word.
   its own blocks or signal.
 - **Task** (oppgave): one operation: run, stop, an action, or setting a value.
 - **Tick** (tikk): the smallest step of time, sixty to a second.
-- **Trigger** (utløser): a line that runs or stops a sequence, or does one task, when a signal arrives, blocks
+- **Trigger** (utløser): a line that runs or stops a sequence when a signal arrives, blocks
   reach a state, or a set time passes. A trigger **fires** (utløses) (Mal, 2026-10-13; "goes off" read
   as switching off).
 - **Value** (verdi): a block's property, such as a light's color.
