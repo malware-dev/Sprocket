@@ -7,14 +7,8 @@ are in the code today.
 
 The guide's other pages:
 
-- [Building and testing](Building.md): what a checkout needs, building, the tests, the simulator, and seeing a change
-  in the game.
-- [The model](Model.md): what a player builds, as the code holds it.
-- [The runtime](Runtime.md): how it runs, from the game's update to what reaches the screens.
-- [Blocks](Blocks.md): how Sprocket knows what a block can do, and teaching it a new one.
-- [Screens](Screens.md): Lumel, the editor's pages, the look, and how a screen is proved.
+- [The runtime](Runtime.md): how what a player built runs, from the game's update to triggers firing.
 - [Saves and storage](Saves.md): where everything is kept, its formats, and what must never change.
-- [Text](Text.md): where every word comes from, and the translations.
 - [Language](Language.md): the script language Sprocket stores its programs in.
 - [Codex](Codex.md): the in-game codex, and the wiki written from it.
 
@@ -69,6 +63,28 @@ that shows it.
 | `tests/Sprocket.Wiki.Tests` | The wiki tool |
 | `tests/Sprocket.Benchmarks` | How long laying out a screen and reading a program take |
 
+## Building and testing
+
+A checkout needs Windows with Space Engineers installed, and the .NET SDK. [MDK2](https://github.com/malforge/mdk2)
+builds and packs the mods; the build restores it. Each mod project reads an `mdk.local.ini` beside it, kept out of git
+because it belongs to the machine:
+
+```ini
+[mdk]
+; Where the packed mod is written; auto is the game's own Mods folder.
+output=auto
+; The game's Bin64, which the mod is compiled against; auto finds a Steam install.
+binarypath=auto
+```
+
+```
+dotnet build src/Sprocket.Host.SpaceEngineers                                # builds and packs into the Mods folder
+dotnet build src/Sprocket.Host.SpaceEngineers -p:MdkBuildConfiguration=none  # builds without packing
+dotnet test -p:MdkBuildConfiguration=none                                    # every test project
+```
+
+Pack only while no world with the mod is loaded: packing replaces the mod's folder.
+
 ## What shapes the code
 
 **The game compiles the mod.** Space Engineers compiles a mod from its source when a world loads, with C# 6 and only
@@ -87,9 +103,8 @@ types.
 measures text while drawing and nothing lays out unless something changed. A property that changes a size or a
 position invalidates the layout; a color changes nothing else.
 
-**Repeating work joins the rota.** One rota a world wakes every Sprocket on it at the three rates the game offers a
-mod, each tick, every ten and every hundred, and spreads machines built alike across the ticks. Nothing keeps a clock
-of its own.
+**Repeating work joins the rota.** One rota a world runs every Sprocket on it at three periods, each tick, every ten
+and every hundred, and spreads machines built alike across the ticks. Nothing keeps a clock of its own.
 
 **Saves outlive builds.** A program is stored as text in the world, and a format it was written in earlier loads
 through an upgrade in `Storage/Upgrades.cs`, where one is written for it, rather than being misread. What the text says

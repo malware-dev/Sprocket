@@ -19,9 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// own place in the toolbar, across pages where a panel has more buttons than a page has slots.
     /// <para>
     /// <b>The button's toolbar slot has to have something in it.</b> <c>MyButtonPanel.ActivateButton</c>
-    /// returns before raising anything when the slot is empty, and no mod can fill a slot. Sprocket can at
-    /// least see the problem: <c>IsButtonAssigned</c> says which buttons are wired, so an unassigned button
-    /// can be explained rather than silently doing nothing.
+    /// returns before raising anything when the slot is empty. Sprocket fills the slot of each button its
+    /// program listens to with <see cref="Features.Terminal.SignalAction" />, and <c>IsButtonAssigned</c> says
+    /// which buttons hold anything, so an empty one can be explained.
     /// </para>
     /// </remarks>
     public sealed class ButtonPanel : Capability
@@ -94,8 +94,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         /// <summary>Not wired where none of its buttons is, because an unwired button cannot report a press.</summary>
         /// <remarks>
-        /// The one place Sprocket can warn somebody before they build a sequence on a button that will never fire. A
-        /// panel's buttons only raise anything when their toolbar slot holds an item, and no mod can fill a slot.
+        /// A panel's buttons raise nothing while their toolbar slots are empty, and Sprocket fills a slot only for a
+        /// button its program listens to.
         /// </remarks>
         public override Status StatusOf(IMyTerminalBlock block)
         {

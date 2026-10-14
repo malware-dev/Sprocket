@@ -18,10 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     /// The action Sprocket puts into somebody else's block so that block can start a sequence.
     /// </summary>
     /// <remarks>
-    /// The mechanism every signal rests on. A button panel raises nothing at all
-    /// unless its slot holds an item, and before this API no mod could fill one - so without this,
-    /// "when the airlock button is pressed" needs the player to have wired the button by hand in the
-    /// game's own UI first.
+    /// The mechanism every signal rests on. A button panel raises nothing at all unless its slot holds
+    /// an item, so Sprocket writes this action into the slot of each button its program listens to.
     /// <para>
     /// <b>Registered on every machine, and that is not an oversight.</b> A slot stores this action's
     /// id as a string and each machine resolves it against its own terminal controls to draw the

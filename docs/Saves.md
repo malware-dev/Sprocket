@@ -1,8 +1,7 @@
 # Saves and storage
 
 Where Sprocket keeps everything, what format each is in, and what must never change, since a player's saved world
-outlives every build. What is being stored is set out in [The model](Model.md); editing a saved world by hand is in
-[Building and testing](Building.md#editing-a-saved-world-by-hand).
+outlives every build.
 
 ## Where everything is kept
 
@@ -45,9 +44,9 @@ carries forward, and turns what the parser read in an older one into the current
 model, never on the text, so a name that happens to hold a keyword is left as it is. The program is written in the
 current format at its next save.
 
-Every format so far is an alpha draft. A draft is upgraded only where an upgrade is chosen for it; today alpha 14 is,
-whose on and off actions become setting a block's power. Any other draft is refused rather than misread. An upgrade
-between released formats is kept for good, since every program behind it reads through it.
+Every format so far is an alpha draft. A draft is upgraded only where an upgrade is chosen for it, named in
+`Upgrades.From`; any other draft is refused rather than misread. An upgrade between released formats is kept for good, since every program behind
+it reads through it.
 
 Changing what the text says:
 
@@ -93,6 +92,25 @@ Each of these is written into saves, and a change reads an old world as empty or
 
 ## Tools
 
-The simulator reads a saved world's memory, `--state <world>`, writing each member by name. `--profile` times saving
-and loading programs of every size, and is the guard on the parser's speed; it means something only in a Release
-build. Both are in [Building and testing](Building.md#the-simulator).
+The simulator (`src/Sprocket.Host.SpaceEngineers.Sim`) reads a saved world's memory, `--state <world>`, writing each
+member by name. `--profile` times saving and loading programs of every size, and is the guard on the parser's speed;
+it means something only in a Release build.
+
+## Editing a saved world by hand
+
+A save keeps its sector twice. `SANDBOX_0_0_0_.sbs` is XML and readable; `SANDBOX_0_0_0_.sbsB5` is a binary copy
+beside it, and the game reads the binary whenever it is there. So an edit to the XML takes effect only once the
+`.sbsB5` is deleted: the game writes a fresh one from the XML at its next save.
+
+The binary holds its strings as they are, so a replacement of exactly the same length can be made in both files, and
+each stays valid. Anything that changes a length goes through the XML, with the binary deleted.
+
+Unload the world first, and copy both files somewhere before touching either.
+
+A stored program can be read straight out of the XML, and the version on its first line says which build wrote it:
+
+```
+grep -a "sprocket " SANDBOX_0_0_0_.sbs
+```
+
+`tools/rename-world.py` points a saved world at the mod under a new name, changing every place the save names it.
