@@ -119,7 +119,7 @@ public class GasTests
         stockpile.Targets.Add(automation.Declare(ship.World, ship.Entity(tank.Id)).Name);
         sequence.Steps.Add(stockpile);
         sequence.Steps.Add(new Await());
-        var on = new Act(BlockKinds.SwitchOn);
+        var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(on);
 
@@ -312,7 +312,7 @@ public class GasTests
         var automation = new Automation();
         ((MomentTrigger)trigger).Sources.Add(automation.Declare(ship.World, ship.Entity(fitting.Id)).Name);
         var sequence = automation.AddSequence(trigger);
-        var on = new Act(BlockKinds.SwitchOn);
+        var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(on);
 

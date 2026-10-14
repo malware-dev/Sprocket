@@ -126,7 +126,7 @@ public class BudgetTests
         var when = SignalTrigger.Written(BlockKinds.Own, signal);
         when.Sources.Add(automation.Declare(ship.World, ship.Entity(watched)).Name);
         var sequence = automation.AddSequence(when);
-        var act = new Act(BlockKinds.SwitchOn);
+        var act = Given.Power(true);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lit)).Name);
         sequence.Steps.Add(act);
     }

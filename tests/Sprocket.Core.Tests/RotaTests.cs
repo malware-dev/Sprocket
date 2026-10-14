@@ -123,7 +123,7 @@ public class RotaTests
         var sequence = automation.AddSequence((Trigger)null!);
         Then(sequence, "close", automation.Declare(ship.World, ship.Entity(door.Id)).Name);
         sequence.Steps.Add(new Wait(30));
-        Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        Then(sequence, Given.Power(true, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name));
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = 0;
@@ -242,7 +242,7 @@ public class RotaTests
         var lamp = ship.Light(1, "Lamp");
 
         var sequence = automation.AddSequence(new EveryTrigger(35));
-        Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        Then(sequence, Given.Power(true, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name));
 
         var runner = new AutomationRunner(automation, ship.World);
         for (var frame = 1; frame <= 3500; frame++)
@@ -275,7 +275,7 @@ public class RotaTests
         var on = SignalTrigger.Written("ext", "finishes-filling");
         on.Sources.Add(automation.Declare(ship.World, ship.Entity(vent.Id)).Name);
         var sequence = automation.AddSequence(on);
-        Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        Then(sequence, Given.Power(true, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name));
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = 0;
@@ -307,7 +307,7 @@ public class RotaTests
 
         var sequence = automation.AddSequence((Trigger)null!);
         sequence.Steps.Add(new Wait(35));
-        Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        Then(sequence, Given.Power(true, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name));
 
         var runner = new AutomationRunner(automation, ship.World);
         runner.Tick(10);
@@ -336,7 +336,7 @@ public class RotaTests
         var sequence = automation.AddSequence((Trigger)null!);
         Then(sequence, "close", automation.Declare(ship.World, ship.Entity(door.Id)).Name);
         sequence.Steps.Add(new Wait(35));
-        Then(sequence, BlockKinds.SwitchOn, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
+        Then(sequence, Given.Power(true, automation.Declare(ship.World, ship.Entity(lamp.Id)).Name));
 
         var runner = new AutomationRunner(automation, ship.World);
         var frame = 0;
@@ -463,6 +463,13 @@ public class RotaTests
         var act = new Act(actionId);
         act.Targets.Add(target);
         sequence.Steps.Add(Given.Defaults(act));
+        sequence.Steps.Add(new Await());
+    }
+
+    /// <summary>A step written whole, and the await after it.</summary>
+    static void Then(Sequence sequence, Act step)
+    {
+        sequence.Steps.Add(step);
         sequence.Steps.Add(new Await());
     }
 }

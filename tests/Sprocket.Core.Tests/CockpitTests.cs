@@ -26,7 +26,7 @@ public class CockpitTests
         var heard = SignalTrigger.Written("ext", signal);
         heard.Sources.Add(automation.Declare(ship.World, ship.Entity(seat.Id)).Name);
         var sequence = automation.AddSequence(heard);
-        var act = new Act(BlockKinds.SwitchOff);
+        var act = Given.Power(false);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(act);
 

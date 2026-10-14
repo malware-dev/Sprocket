@@ -49,7 +49,7 @@ public class MechanicsTests
 
         Act Off()
         {
-            var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+            var off = Given.Power(false);
             off.Targets.Add(Name(Lamp));
             return off;
         }

@@ -77,7 +77,7 @@ public class CommonMembersTests
 
         Act Off()
         {
-            var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+            var off = Given.Power(false);
             off.Targets.Add(Name(Door));
             return off;
         }
@@ -207,17 +207,19 @@ public class CommonMembersTests
         Assert.Equal("Toggle on/off", toggle.Named);
         Assert.Equal("toggle on/off", toggle.Text);
 
-        // The switch is one value, set off, on or flipped, and the acts beside it are kept to the script and the terminal view.
+        // The switch is one value, set off, on or flipped; the game's acts beside it are kept to the terminal view.
         var switched = kind.FindAction("power", Form.Value)!;
         Assert.True(switched.Sets);
         Assert.Equal("OnOff", switched.FlippedBy);
         Assert.True(toggle.Hidden);
-        Assert.True(kind.FindAction(BlockKinds.SwitchOn, Form.Native)!.Hidden);
-        Assert.True(kind.FindAction(BlockKinds.SwitchOff, Form.Native)!.Hidden);
+        Assert.True(kind.FindAction("OnOff_On", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("OnOff_Off", Form.Action)!.Hidden);
+        Assert.Null(kind.FindAction("on", Form.Native));
+        Assert.Null(kind.FindAction("off", Form.Native));
     }
 
     /// <summary>
-    /// What every block shares is vetted, the switch's and the HUD mark's members with it, and the game's pairs beside the
+    /// What every block shares is vetted, the switch's and the HUD mark's values with it, and the game's pairs beside the
     /// switch and the HUD mark, the switch's value, and the block's name are not.
     /// </summary>
     [Fact]
@@ -233,9 +235,6 @@ public class CommonMembersTests
 
         foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level", "power", "ShowOnHUD" })
             Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
-
-        foreach (var id in new[] { BlockKinds.SwitchOn, BlockKinds.SwitchOff })
-            Assert.True(kind.FindAction(id, Form.Native)!.Vetted, id + " is not vetted");
 
         foreach (var id in new[] { "OnOff", "ShowOnHUD" })
             Assert.True(kind.FindAction(id, Form.Action)!.Vetted, id + " is not vetted");

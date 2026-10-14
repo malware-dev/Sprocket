@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>Every capability Sprocket knows, in the order a kind of block is described by them.</summary>
     /// <remarks>
-    /// What a block is comes before what every block is, so a door offers "open" above "switch on": the block's own
+    /// What a block is comes before what every block is, so a door offers "open" above "power": the block's own
     /// capabilities first, and the floor every block stands on after them. A block is every capability that claims it.
     /// </remarks>
     public sealed class Capabilities

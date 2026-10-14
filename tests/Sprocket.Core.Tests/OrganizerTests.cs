@@ -105,7 +105,7 @@ public class OrganizerTests
         lamp.Carrying("Radius", "Radius", ValueKind.Real).Offering("Strobe", "Strobe", 0);
 
         var kind = ship.Entity(lamp.Id).Kind;
-        Assert.True(kind.FindAction(BlockKinds.SwitchOn, Form.Native)!.Vetted);
+        Assert.True(kind.FindAction("power", Form.Value)!.Vetted);
 
         var renamed = kind.FindAction("Radius", Form.Value)!;
         Assert.True(renamed.Renamed);

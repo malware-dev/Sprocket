@@ -126,7 +126,7 @@ public class PowerTests
         };
 
         when.Sources.Add(automation.Declare(ship.World, ship.Entity(battery.Id)).Name);
-        var on = new Act(BlockKinds.SwitchOn);
+        var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         when.Does = on;
         automation.AddSequence((Trigger)null!).System.AddTrigger(when);
@@ -250,7 +250,7 @@ public class PowerTests
         };
 
         when.Sources.Add(automation.Declare(ship.World, ship.Entity(thruster.Id)).Name);
-        var on = new Act(BlockKinds.SwitchOn);
+        var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         when.Does = on;
         automation.AddSequence((Trigger)null!).System.AddTrigger(when);
@@ -352,7 +352,7 @@ public class PowerTests
         sequence.Steps.Add(act);
         sequence.Steps.Add(new Await());
 
-        var on = new Act(BlockKinds.SwitchOn);
+        var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(on);
 

@@ -609,7 +609,7 @@ public class RotorTests
         sequence.Steps.Add(turn);
         sequence.Steps.Add(new Await());
 
-        var on = new Act(BlockKinds.SwitchOn);
+        var on = Given.Power(true);
         on.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(on);
         sequence.Steps.Add(new Await());

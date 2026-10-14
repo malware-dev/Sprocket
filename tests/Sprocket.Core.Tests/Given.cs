@@ -21,4 +21,14 @@ public static class Given
 
         return act;
     }
+
+    /// <summary>A step that switches <paramref name="targets" /> on or off, as the editor writes one: by setting their power.</summary>
+    public static Act Power(bool on, params string[] targets)
+    {
+        var act = new Act("power") { Form = Form.Value, Provider = BlockKinds.Own };
+        act.Arguments.Add(Literal.Of(on));
+        foreach (var target in targets)
+            act.Targets.Add(target);
+        return act;
+    }
 }

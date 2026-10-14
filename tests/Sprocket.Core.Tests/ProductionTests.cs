@@ -263,7 +263,7 @@ public class ProductionTests
         /// <summary>Has <paramref name="trigger" /> switch the lamp off.</summary>
         public void Switching(Trigger trigger)
         {
-            var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+            var off = Given.Power(false);
             off.Targets.Add(Name(Lamp));
             trigger.Does = off;
             Program.AddSequence((Trigger)null!).System.AddTrigger(trigger);

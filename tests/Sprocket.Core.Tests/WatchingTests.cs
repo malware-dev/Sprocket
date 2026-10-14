@@ -76,7 +76,7 @@ public class WatchingTests
         var on = SignalTrigger.Written("ext", "turns-on");
         on.Sources.Add(automation.Declare(ship.World, ship.Entity(door.Id)).Name);
         var sequence = automation.AddSequence(on);
-        var act = new Act(BlockKinds.SwitchOn);
+        var act = Given.Power(true);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(act);
 
@@ -115,7 +115,7 @@ public class WatchingTests
         var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
         var sequence = automation.AddSequence(closing);
-        var act = new Act(BlockKinds.SwitchOn);
+        var act = Given.Power(true);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(act);
 
@@ -150,7 +150,7 @@ public class WatchingTests
         var closing = SignalTrigger.Written("ext", "starts-closing");
         closing.Sources.Add(automation.Declare(ship.World, ship.Entity(hangar.Id)).Name);
         var sequence = automation.AddSequence(closing);
-        var act = new Act(BlockKinds.SwitchOn);
+        var act = Given.Power(true);
         act.Targets.Add(automation.Declare(ship.World, ship.Entity(lamp.Id)).Name);
         sequence.Steps.Add(act);
 

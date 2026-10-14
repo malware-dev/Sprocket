@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 public class BlueprintTestTests
 {
-    const string Program = "sprocket 1 alpha 14\n\n"
+    const string Program = "sprocket 1 alpha 15\n\n"
                            + "let 'Airlock Inner Door' = block 'Door/LargeBlockDoor' [ 2, [ (2 0 0) ], \"Airlock Inner Door\" ]\n"
                            + "let 'Airlock Outer Door' = block 'Door/LargeBlockDoor' [ 3, [ (3 0 0) ], \"Airlock Outer Door\" ]\n\n"
                            + "system blueprint \"61da898f-e0f5-4b57-8c81-3194c3357d4e\" as Malware.'Airlock System' changed \"2026-10-07T20:49:07Z\" {\n"

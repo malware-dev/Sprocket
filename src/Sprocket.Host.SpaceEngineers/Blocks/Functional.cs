@@ -9,19 +9,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// Only a block with a switch gets the words for one. A cargo container has no on and off, and offering them would be
     /// offering a sentence that cannot come true.
     /// <para>
-    /// The switch is one value, set off, on, or flipped by the game's toggle. Switching on and off are kept for the script and
-    /// the terminal view, where a step says them as they always read.
+    /// The switch is one value, set off, on, or flipped by the game's toggle.
     /// </para>
     /// </remarks>
     public sealed class Functional : Capability
     {
         static readonly Reading On = Reading.Of<IMyFunctionalBlock>(block => block.Enabled);
-
-        static readonly Reading Off = Reading.Of<IMyFunctionalBlock>(block => !block.Enabled);
-
-        static readonly Doing SwitchOn = Doing.Of<IMyFunctionalBlock>(block => block.Enabled = true, On);
-
-        static readonly Doing SwitchOff = Doing.Of<IMyFunctionalBlock>(block => block.Enabled = false, Off);
 
         static readonly Being SwitchedOn = Being.Flag(On)
             .Writing<IMyFunctionalBlock>((block, value) => block.Enabled = value.Flag);
@@ -38,8 +31,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithValue("power", "power", SwitchedOn).In(Category.Power).Announced()
                 .WithChange("turns-on", "turns on", "power", Literal.Of(true)).Reading("is on", "is off").Announced()
                 .WithChange("turns-off", "turns off", "power", Literal.Of(false)).Reading("is off", "is on").Announced()
-                .WithAction(BlockKinds.SwitchOn, "switch on", SwitchOn, "OnOff_On")
-                .WithAction(BlockKinds.SwitchOff, "switch off", SwitchOff, "OnOff_Off")
                 .Renaming("OnOff", false, "toggle on/off")
                 .Flipping("power", "OnOff")
                 .Hiding("OnOff_On", "OnOff_Off");

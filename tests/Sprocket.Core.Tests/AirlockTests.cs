@@ -99,6 +99,13 @@ public class AirlockTests
         sequence.Steps.Add(new Await());
     }
 
+    /// <summary>A step written whole, and the await after it.</summary>
+    static void Then(Sequence sequence, Act step)
+    {
+        sequence.Steps.Add(step);
+        sequence.Steps.Add(new Await());
+    }
+
     static Airlock Build()
     {
         var a = new Airlock();
@@ -564,7 +571,7 @@ public class AirlockTests
         var beacon = a.Ship.Light(5, "Beacon");
 
         var sequence = a.Automation.AddSequence(new EveryTrigger(1));
-        Then(sequence, BlockKinds.SwitchOn, a.Ref(a.Seen(beacon)));
+        Then(sequence, Given.Power(true, a.Ref(a.Seen(beacon))));
         Then(sequence, "close", a.Ref(a.Seen(a.Inner)));
 
         // Fired on the first turn it is sampled, and both land in the tick it fired.
@@ -641,11 +648,11 @@ public class AirlockTests
         }
 
         // Both off to begin with, so switching one on is an edge either trigger could miss.
-        a.World.Invoke(a.Seen(one), BlockKinds.SwitchOff);
-        a.World.Invoke(a.Seen(other), BlockKinds.SwitchOff);
+        one.Enabled = false;
+        other.Enabled = false;
         a.Tick(Rota.Ten);
 
-        a.World.Invoke(a.Seen(one), BlockKinds.SwitchOn);
+        one.Enabled = true;
         a.Tick(Rota.Ten);
         Assert.Equal(1, a.State.FiredCount);
 
@@ -653,7 +660,7 @@ public class AirlockTests
         a.Tick(220);
         Assert.False(a.State.IsRunning);
 
-        a.World.Invoke(a.Seen(other), BlockKinds.SwitchOn);
+        other.Enabled = true;
         a.Tick(Rota.Ten);
         Assert.Equal(2, a.State.FiredCount);
     }
@@ -973,7 +980,7 @@ public class AirlockTests
         var system = a.Automation.Systems[0];
 
         var cycle = a.Automation.AddSequence(system);
-        cycle.Steps.Add(Do(BlockKinds.SwitchOff, a.Ref(a.Seen(a.Outer))));
+        cycle.Steps.Add(Given.Power(false, a.Ref(a.Seen(a.Outer))));
         Then(cycle, "open", a.Ref(a.Seen(a.Outer)));
 
         system.Enabled = true;
@@ -1049,7 +1056,7 @@ public class AirlockTests
         var system = a.Automation.Systems[0];
 
         var cycle = a.Automation.AddSequence(system);
-        cycle.Steps.Add(Do(BlockKinds.SwitchOn, a.Ref(a.Seen(a.Inner))));
+        cycle.Steps.Add(Given.Power(true, a.Ref(a.Seen(a.Inner))));
         Then(cycle, "close", a.Ref(a.Seen(a.Inner)));
 
         a.Inner.ForceOpen();
@@ -1598,9 +1605,9 @@ public class AirlockTests
         var sequence = a.Automation.AddSequence(a.Automation.Systems[0]);
         sequence.Name = name;
         Then(sequence, "close", a.Ref(a.Seen(leave)));
-        Then(sequence, BlockKinds.SwitchOff, a.Ref(a.Seen(leave)));
+        Then(sequence, Given.Power(false, a.Ref(a.Seen(leave))));
         Then(sequence, pump, a.Ref(a.Seen(a.Vent)));
-        Then(sequence, BlockKinds.SwitchOn, a.Ref(a.Seen(enter)));
+        Then(sequence, Given.Power(true, a.Ref(a.Seen(enter))));
         Then(sequence, "open", a.Ref(a.Seen(enter)));
         return sequence;
     }
@@ -1684,13 +1691,13 @@ public class AirlockTests
         opened.Sources.Add(a.Ref(a.Seen(door)));
         var secure = a.Automation.AddSequence(opened);
         secure.Name = $"Secure the other door while {door.Name} is open";
-        Then(secure, BlockKinds.SwitchOff, a.Ref(a.Seen(other)));
+        Then(secure, Given.Power(false, a.Ref(a.Seen(other))));
 
         var shut = SignalTrigger.Written("ext", "finishes-closing");
         shut.Sources.Add(a.Ref(a.Seen(door)));
         var release = a.Automation.AddSequence(shut);
         release.Name = $"Release the other door when {door.Name} shuts";
-        Then(release, BlockKinds.SwitchOn, a.Ref(a.Seen(other)));
+        Then(release, Given.Power(true, a.Ref(a.Seen(other))));
     }
 
     [Fact]

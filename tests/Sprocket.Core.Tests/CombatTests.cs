@@ -56,7 +56,7 @@ public class CombatTests
         /// <summary>A step that switches the door off, which is how a test sees that something ran.</summary>
         public Act Off()
         {
-            var off = new Act(BlockKinds.SwitchOff) { Form = Form.Native };
+            var off = Given.Power(false);
             off.Targets.Add(Name(Door));
             return off;
         }

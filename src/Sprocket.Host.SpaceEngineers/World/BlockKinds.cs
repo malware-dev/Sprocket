@@ -19,12 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class BlockKinds
     {
-        /// <summary>The action that switches a block on.</summary>
-        public const string SwitchOn = "on";
-
-        /// <summary>The action that switches a block off.</summary>
-        public const string SwitchOff = "off";
-
         /// <summary>What Sprocket's own members and moments are qualified by: <c>ext.close</c>.</summary>
         /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
         public const string Own = "ext";
@@ -61,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // type is this".
             kind = new EntityKind(id, name).WithIcon(id).WithFamily(Families.Of(block.BlockDefinition.TypeIdString));
 
-            // What this block is, before what every block is, so a door offers "open" above "switch on".
+            // What this block is, before what every block is, so a door offers "open" above "power".
             Describe(kind, block, _capabilities.Blocks);
 
             if (!Signalled(kind))

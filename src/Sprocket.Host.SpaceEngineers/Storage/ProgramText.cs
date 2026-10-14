@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 14;
+        const int Draft = 15;
 
         /// <summary>The function this host names a signal with: a slot on a block's toolbar.</summary>
         /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Signal" />.</remarks>
@@ -379,7 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 refused = (constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0])) + "expected sprocket <format>.";
             else if (header != null && header.Whole(0) != Version)
                 refused = trouble.Line(header) + "written for sprocket " + header.Whole(0) + "; this reads sprocket " + Version + ".";
-            else if (header != null && DraftOf(header) != Draft)
+            else if (header != null && DraftOf(header) != Draft && !Upgrades.From(Version, DraftOf(header)))
                 refused = trouble.Line(header) + "written for " + (DraftOf(header) < 0 ? "the finished format" : "alpha " + DraftOf(header))
                     + "; this reads alpha " + Draft + ".";
 
@@ -418,6 +418,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 program.Unreadable(saved);
                 program.Damaged(trouble.What);
+            }
+            else if (header != null && DraftOf(header) != Draft)
+            {
+                var upgraded = Upgrades.Apply(DraftOf(header), program);
+                if (upgraded.Length > 0)
+                    Told.Say("upgraded a program from " + upgraded);
             }
 
             warning = trouble.Warning;
