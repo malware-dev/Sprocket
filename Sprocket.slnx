@@ -12,6 +12,7 @@
     <Project Path="src/Lumel/Lumel.shproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Sprocket.Benchmarks/Sprocket.Benchmarks.csproj" />
     <Project Path="tests/Sprocket.Core.Tests/Sprocket.Core.Tests.csproj" />
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Tests/Sprocket.Host.SpaceEngineers.Tests.csproj" />
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Presentation.Tests/Sprocket.Host.SpaceEngineers.Presentation.Tests.csproj" />

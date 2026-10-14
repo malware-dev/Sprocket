@@ -132,7 +132,7 @@ namespace Sprocket.Sim.Content
         /// Loads the font the game's white UI text uses, from the game or the cache. Null when neither has
         /// it, which is a thing to fall back from rather than to fail on.
         /// </summary>
-        public static SeFontMetrics Load(ScreenSpaceDevice device)
+        public static SeFontMetrics? Load(ScreenSpaceDevice device)
         {
             string path = GameContent.Resolve(Path.Combine("Fonts", "white", "FontDataPA.xml"));
             if (path == null)

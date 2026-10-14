@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\build\Sprocket.GameReferences.props" />
+
+    <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Sprocket.Benchmarks</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Sprocket.Host.SpaceEngineers.Sim\Sprocket.Host.SpaceEngineers.Sim.csproj" />
+    </ItemGroup>
+</Project>
