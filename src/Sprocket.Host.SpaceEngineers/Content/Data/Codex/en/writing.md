@@ -1,8 +1,6 @@
-# Writing text
+# Writing rich text
 
-The description of a ![](mark:logic-system) [logic system](#logic-system) is written on its screen, and what each of its [slots](#slot) is for on the slot's page, in boxes with a `Markup` and a `Preview` button. A few marks typed into the text give it headings, lists, tables, and bold or italic words. `Markup` opens this page, and `Preview` shows the text as others will see it.
-
-Each part below shows what to write, then what it gives.
+Sprocket supports rich formatted text in several locations. This formatting is based on a subset of the Markdown format. Here is what is supported, and how to type it.
 
 ## Bold, italic and code
 
@@ -89,7 +87,7 @@ To leave out the heading, start the table with a row of empty cells:
 | Airlock | 1 |
 | Hangar | 4 |
 
-A table is as wide as its cells. A star in a column's dashes, as in `:--*`, gives that column the width to spare, so the table reaches across. With stars in more than one column, each star is an equal share.
+A table is usually as wide as its cells. Add a star into a column's dashes, as in `:--*`, to stretch that column to fill any free space. Use multiple stars to indicate proportion: '|:--*|:--*' gives two columns with 50% each, while '|:--*|:--****' will give one column at 25%, and one column at 75%.
 
 `| Room | Vents |`
 `|:--*|--:|`
@@ -99,7 +97,7 @@ A table is as wide as its cells. A star in a column's dashes, as in `:--*`, give
 |:--*|--:|
 | Airlock | 1 |
 
-## Writing a mark as itself
+## Writing a mark as itself (escape character)
 
 `\*Inner door\*`
 

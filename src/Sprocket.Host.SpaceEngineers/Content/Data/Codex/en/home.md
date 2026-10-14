@@ -4,26 +4,31 @@
 # Welcome to Sprocket Automation
 :::
 
-Timer blocks and event controllers can make blocks act on their own, but each is set up by hand, for one set of blocks. The automation lets you describe a job once and use it wherever it is needed.
+Event controllers, timer blocks, sensors... there is already a means for automation, sure. But it takes up a whole bunch of space, is limited in what it can do, and fragile. One railgun shot to your automation bay and you have to set _everything_ up again.
 
-## Describe a job once
+## Enter Sprocket Automation.
 
-A job is described as a ![](mark:logic-system) [logic system](#logic-system), which says what happens, step by step, and what starts it. For example, when the airlock's button is pressed, close the inner door, depressurize the airlock and open the outer door.
+Describe your automation in simple but powerful ![](mark:logic-system) [logic systems](#logic-system). Set up ![](mark:trigger) [triggers](#trigger) to run sequential steps. Easily wait until a door is actually closed before pressurizing that airlock, without manual timing. Go one step further, with more complex expressions and states.
 
-## Run it in many places
+Sprocket Automation lives within _all_ of your programmable blocks: If you lose one, but there's still another on your ship, your automation is still
+fully functional. And... even if the last programmable block is lost, the automatic backup system has stored away your actual logic, so you can restore
+it to a new ship or back to your repaired old one.
 
-A logic system doesn't name your blocks. It names [slots](#slot), such as *the inner door*, and each ![](mark:installation) [installation](#installation) fills them with real blocks. So one airlock logic system runs every airlock on the ship, and fixing it fixes all of them.
+## One logic system, multiple ![](mark:installation) [installations](#installation)
 
-## Take it with you
+Describe your airlock logic *once* then add installations to run the same logic on several airlocks, without having to add more programmable blocks. 
 
-Because the job is kept apart from the blocks, it can travel. Kept in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint), it can be put on another [construct](#construct), and whoever installs it only selects their own blocks on the [installation panel](#installation-panel).
+## Share
 
-## Undo and redo
+You can use the [library](#library) to store ![](mark:blueprint) [blueprints](#blueprint) of your logic systems. These blueprints can be shared, whether it's just with your best friend, your faction, or going public to the entire system.
 
-The undo and redo arrows on this screen walk the construct's own list of changes: adding and deleting logic systems and installations, `Add to this construct` and `Make a copy` in the library, `Update from library` and `Reset to blueprint`, and renaming the construct. Everything done inside a logic system is on that logic system's own list, which the logic system page explains.
+> !PLAYER
+> Unfortunately the mod API prevents actual direct sharing through, say, the workshop, but direct sharing is possible within a world. If you want to share your logic outside of the game, you can share grid blueprints holding the logic, or share the blueprint files directly. You can find these in the game's app data folder (defaults to %appdata%\SpaceEngineers\Storage").
 
-Taking away a logic system or an installation that may be running waits until it is switched off. Whatever undo or redo brings back comes back switched off, and a logic system brought back has its own list of changes again. The list lasts for the game session.
+## Getting Started
 
-## Where to start
+_pending_
 
-This screen lists every logic system on this construct. To build your own, start with the logic system page.
+## Recommended Reading
+
+_link to glossary and the example logics_
