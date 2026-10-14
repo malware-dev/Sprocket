@@ -171,7 +171,57 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>A set as one line: "set Charge Mode on Standby Battery to Recharge".</summary>
+        /// <summary>A value as a sentence names it: in lower case where Sprocket worded it, and as the game declared it where it did.</summary>
+        /// <remarks>The game's own names are the terminal's, as-is, as the terminal view lists them.</remarks>
+        public static string Value(EntityAction value)
+        {
+            return value.Unaltered && !value.Renamed ? value.Named : Lowered(value.Named);
+        }
+
+        /// <summary><paramref name="words" /> in lower case, an acronym among them kept as it is: "AI behavior on/off".</summary>
+        public static string Lowered(string words)
+        {
+            if (string.IsNullOrEmpty(words))
+                return words;
+
+            var said = new StringBuilder(words.Length);
+            var start = 0;
+            while (start < words.Length)
+            {
+                var end = words.IndexOf(' ', start);
+                if (end < 0)
+                    end = words.Length;
+
+                var word = words.Substring(start, end - start);
+                said.Append(Acronym(word) ? word : word.ToLowerInvariant());
+                if (end < words.Length)
+                    said.Append(' ');
+
+                start = end + 1;
+            }
+
+            return said.ToString();
+        }
+
+        /// <summary>Whether <paramref name="word" /> is two letters or more, all of them capitals.</summary>
+        static bool Acronym(string word)
+        {
+            var letters = 0;
+            for (var i = 0; i < word.Length; i++)
+            {
+                if (!char.IsLetter(word[i]))
+                    continue;
+
+                if (!char.IsUpper(word[i]))
+                    return false;
+
+                letters++;
+            }
+
+            return letters >= 2;
+        }
+
+        /// <summary>A set as one line: "set charge mode on Standby Battery to recharge".</summary>
         /// <remarks>
         /// The words its step reads in, for where it is said as a line rather than drawn as slots.
         /// </remarks>
@@ -181,18 +231,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>A test being picked, as far as it has got: "If Inner Door is closed", "If On/Off on Airlock Light is …".</summary>
+        /// <summary>A test being picked, as far as it has got: "If Inner Door is open", "If Airlock Light power is …".</summary>
         /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
         /// <param name="chosen">The state or the value chosen, in the words its list shows it in, or empty.</param>
-        /// <param name="value">Whether what is chosen is a value, which reads "the value on the blocks is".</param>
-        public static string Testing(string blocks, string chosen, bool value)
+        /// <param name="state">Whether what is chosen is a state of the blocks' status, which reads as the blocks themselves.</param>
+        public static string Testing(string blocks, string chosen, bool state)
         {
             if (chosen.Length == 0)
-                chosen = Empty;
+                return "If " + blocks + " " + Empty;
 
-            return value
-                ? "If " + chosen + " " + OnWord + " " + blocks + " " + IsWord + " " + Empty
-                : "If " + blocks + " " + chosen;
+            return state
+                ? "If " + blocks + " " + IsWord + " " + chosen
+                : "If " + blocks + " " + chosen + " " + IsWord + " " + Empty;
         }
 
         /// <summary>
@@ -460,7 +510,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 if (action.Action == null)
                     return Empty;
 
-                return action.Action.Sets ? action.Action.Named : action.Action.Text;
+                return action.Action.Sets ? Value(action.Action) : action.Action.Text;
             }
 
             var duration = slot as DurationSlot;

@@ -23,7 +23,7 @@ public class WatchingTests
         Sequence(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         screen.Run(5);
@@ -76,7 +76,7 @@ public class WatchingTests
         Sequence(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         screen.Run(5);
@@ -119,7 +119,7 @@ public class WatchingTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         screen.Run(5);

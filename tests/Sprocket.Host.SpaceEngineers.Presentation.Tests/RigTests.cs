@@ -86,7 +86,7 @@ public class RigTests
 
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -130,7 +130,7 @@ public class RigTests
 
         sim.Editor.PressAdd("task");
         sim.Editor.PressBlock("Inner Door");
-        sim.Editor.PressChoice("Open");
+        sim.Editor.PressChoice("open");
         sim.Editor.PressPrimary();
         sim.Editor.SwitchOn();
 
@@ -168,7 +168,7 @@ public class RigTests
             sim.Editor.PressPrimary();
             sim.Editor.PressAdd("task");
             sim.Editor.PressBlock(door);
-            sim.Editor.PressChoice("Open");
+            sim.Editor.PressChoice("open");
             sim.Editor.PressPrimary();
             sim.Editor.Back();
             sim.Tick();
@@ -420,7 +420,7 @@ public class RigTests
 
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
 
         // Long enough for the slot to be written and looked at again. Left switched off, which is where
@@ -537,7 +537,7 @@ public class RigTests
         Airlock(rig.Editor);
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -583,7 +583,7 @@ public class RigTests
         Airlock(rig.Editor);
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Editor.Back();
 
@@ -745,7 +745,7 @@ public class RigTests
         Airlock(rig.Editor);
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -785,7 +785,7 @@ public class RigTests
         rig.Editor.NewButtonSystem("Airlock");
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 
@@ -889,7 +889,7 @@ public class RigTests
 
         built.Editor.PressAdd("task");
         built.Editor.PressBlock("Airlock Inner Door");
-        built.Editor.PressChoice("Open");
+        built.Editor.PressChoice("open");
         built.Editor.PressPrimary();
         built.Editor.SwitchOn();
 
@@ -940,7 +940,7 @@ public class RigTests
 
         built.Editor.PressAdd("task");
         built.Editor.PressBlock("Airlock Inner Door");
-        built.Editor.PressChoice("Open");
+        built.Editor.PressChoice("open");
         built.Editor.PressPrimary();
         built.Editor.SwitchOn();
 

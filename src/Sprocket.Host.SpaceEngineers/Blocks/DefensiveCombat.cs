@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction("flee", "flee", Flees).In(Category.Behaviour)
-                .WithValue("fleeing", "fleeing", Fleeing).Announced()
+                .WithValue("fleeing", "fleeing", Fleeing).Status().Announced()
                 .WithChange("starts-fleeing", "starts fleeing", "fleeing", Literal.Of(true)).Announced()
                 .Reading("is fleeing", "is not fleeing")
                 .WithChange("stops-fleeing", "stops fleeing", "fleeing", Literal.Of(false)).Announced()

@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>Starting to connect is the link leaving idle, and disconnecting is its leaving connected.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("link", "link", Link).RuledOutBy(Idle)
+            kind.WithValue("link", "link", Link).Status().RuledOutBy(Idle)
                 .WithEvent("starts-connecting", Idle, Edge.Falling, "starts connecting").RuledOutBy(Idle)
                 .WithChange("connects", "connects", "link", Literal.Name("connected")).RuledOutBy(Idle)
                 .Reading("is connected", "is not connected")

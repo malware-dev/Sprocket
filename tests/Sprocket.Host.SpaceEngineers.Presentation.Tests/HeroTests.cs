@@ -167,7 +167,7 @@ public class HeroTests
         rig.Editor.NewButtonSystem("Airlock");
         rig.Editor.PressAdd("task");
         rig.Editor.PressBlock("Airlock Inner Door");
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Editor.SwitchOn();
 

@@ -41,6 +41,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Charging = Being.Flag(Reading.Of<IMyBatteryBlock>(battery => battery.IsCharging));
 
+        static readonly Being Topped = Being.Flag(Full);
+
         static readonly Being Input = Being.Number<IMyBatteryBlock>(battery => battery.CurrentInput);
 
         static readonly Being MostIn = Being.Number<IMyBatteryBlock>(battery => battery.MaxInput);
@@ -70,7 +72,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("charge", "charge", Charge).Announced().In(Category.Power)
                 .WithValue("stored-power", "stored power", Stored).Announced().In(Category.Power)
                 .WithValue("capacity", "capacity", Capacity).Announced().In(Category.Power)
-                .WithValue("charging", "charging", Charging).Looked(Unheard).In(Category.Power)
+                .WithValue("charging", "charging", Charging).Status().Looked(Unheard).In(Category.Power)
+                .WithValue("charged", "charged", Topped).Status().Announced().In(Category.Power)
                 .WithValue("input", "input", Input).Looked(Unheard).In(Category.Power)
                 .WithValue("maximum-input", "maximum input", MostIn).Looked(Unheard).In(Category.Power)
                 .WithValue("output", "output", Output).Announced().In(Category.Power)

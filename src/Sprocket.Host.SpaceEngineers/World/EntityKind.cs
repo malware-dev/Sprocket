@@ -150,6 +150,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
 
+        /// <summary>Says the value of Sprocket's own added last is the status of the block, which a check reads as the block itself.</summary>
+        public EntityKind Status()
+        {
+            if (_value == null)
+                throw new InvalidOperationException("A status is a value of Sprocket's own, and none was added last.");
+
+            _value.IsStatus = true;
+            return this;
+        }
+
         /// <summary>
         /// Holds what a step sets the value of Sprocket's own added last to between <paramref name="least" /> and
         /// <paramref name="most" />, each written as a number or empty for none.

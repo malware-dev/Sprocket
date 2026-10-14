@@ -14,10 +14,10 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class KeepingTests
 {
     const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press Radius 1315 209 type 5 enter";
+        + "press step press task 200 485 press radius 1315 209 type 5 enter";
 
     const string AColourStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press Color 1049 374 type #FF8800 enter";
+        + "press step press task 200 485 press color 1049 374 type #FF8800 enter";
 
     const string Again = "208 182";
 
@@ -123,7 +123,7 @@ public class KeepingTests
         screen.Run(2);
         screen.Editor.PressBlock("Cockpit Light");
         screen.Run(2);
-        screen.Editor.DoublePressChoice("Falloff");
+        screen.Editor.DoublePressChoice("falloff");
         screen.Run(2);
 
         Assert.Equal("Falloff on Cockpit Light", screen.Editor.Screen.Title());

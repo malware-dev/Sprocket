@@ -61,7 +61,7 @@ public class SequenceDeleteTests
         screen.Editor.PressAdd("task");
         screen.Run(2);
         screen.Editor.PressBlock(light);
-        screen.Editor.PressChoice("Power");
+        screen.Editor.PressChoice("power");
         screen.Editor.Pick().Arguments!.Form.Fields[0].Text = "off";
         screen.Editor.PressPrimary();
         screen.Run(2);

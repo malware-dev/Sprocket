@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>Only an enclosed cockpit has air of its own, and only it is offered its oxygen level.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue(Occupied, "occupied", Seated).Announced()
+            kind.WithValue(Occupied, "occupied", Seated).Status().Announced()
                 .WithChange("becomes-occupied", "becomes occupied", Occupied, Literal.Of(true))
                 .Reading("is occupied", "is empty").Announced()
                 .WithChange("becomes-empty", "becomes empty", Occupied, Literal.Of(false))

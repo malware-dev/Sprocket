@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class OpeningTests
 {
     const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press Radius 1315 209 type 5 enter";
+        + "press step press task 200 485 press radius 1315 209 type 5 enter";
 
     /// <summary>A stage of the page showing, counted from its first.</summary>
     static StageColumn Stage(Screen screen, int at)
@@ -100,7 +100,7 @@ public class OpeningTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -137,7 +137,7 @@ public class OpeningTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -168,7 +168,7 @@ public class OpeningTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -195,7 +195,7 @@ public class OpeningTests
     public void ADoublePressOnAnotherBlockFinishes()
     {
         const string anOpenStep = "60 196 type Airlock enter press trigger press when 200 351 560 333 1394 72 "
-            + "press step press task 400 396 press Open 1394 72";
+            + "press step press task 400 396 press open 1394 72";
 
         // The step's blocks, then the outer door pressed twice.
         var screen = Screen.Fresh((anOpenStep + " 270 187 tick 2 double 138 545 tick 2").Split(' '));

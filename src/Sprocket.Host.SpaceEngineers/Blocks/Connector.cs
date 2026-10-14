@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             // A ship renamed while docked is not told, and is seen at the next look.
-            kind.WithValue("status", "status", State).Announced().In(Category.Locking)
+            kind.WithValue("status", "status", State).Status().Announced().In(Category.Locking)
                 .WithChange("becomes-ready-to-lock", "becomes ready to lock", "status", Literal.Name("ready-to-lock"))
                 .Announced().Reading("is ready to lock", "is not ready to lock")
                 .WithChange("locks", "locks", "status", Literal.Name("locked")).Announced()

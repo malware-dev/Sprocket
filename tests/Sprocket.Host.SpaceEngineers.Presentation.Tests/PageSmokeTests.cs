@@ -39,7 +39,7 @@ public class PageSmokeTests
 
         editor.PressAdd("task");
         editor.PressBlock("Landing Lights");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
 

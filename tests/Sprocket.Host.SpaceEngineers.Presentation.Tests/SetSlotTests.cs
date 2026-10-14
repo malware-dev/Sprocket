@@ -326,7 +326,7 @@ public class SetSlotTests
         for (var i = 1; i < blocks.Length; i++)
             screen.Editor.TickBlock(blocks[i]);
 
-        screen.Editor.PressChoice("Power");
+        screen.Editor.PressChoice("power");
         screen.Editor.Pick().Arguments!.Form.Fields[0].Text = "off";
         screen.Editor.PressPrimary();
         screen.Run(2);

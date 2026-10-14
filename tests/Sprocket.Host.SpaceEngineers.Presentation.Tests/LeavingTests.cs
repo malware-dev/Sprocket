@@ -17,7 +17,7 @@ public class LeavingTests
     const string Back = "25 62";
 
     const string WantsValues = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press Radius";
+        + "press step press task 200 485 press radius";
 
     [Fact]
     public void LeavingAFilledPickerAsksFirst()

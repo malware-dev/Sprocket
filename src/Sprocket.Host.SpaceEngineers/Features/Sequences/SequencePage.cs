@@ -827,35 +827,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>
-        /// Gives the row of an if, or of a branch that tests, the parts of its test: the blocks and the state they are read for,
-        /// or the value, the blocks and what it is compared with, as a set says them.
+        /// Gives the row of an if, or of a branch that tests, the parts of its test: the blocks, the value unless it is their
+        /// status, and how it is compared with what.
         /// </summary>
         void Tested(StepRow row, Step step, Comparison test)
         {
             var blocks = Editor.Blocks(_sequence.System, test.Targets);
             var seen = Editor.Seen(_sequence.System, test.Targets);
             var bindings = Editor.Runner.Bindings;
-            bool inState;
-            var state = Stated(test, seen, out inState);
-            if (state != null)
-            {
-                row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
-                    Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
-                row.Slots.Add(new StateSlot(state, inState,
-                    Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
-                return;
-            }
-
             var value = test.Names(Vocabulary.ActionsFor(bindings, seen));
-            row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
             row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
                 Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
+            if (value == null || !value.IsStatus)
+                row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
+
             if (value == null)
                 return;
 
-            var fields = new List<Field>();
-            value.Fields(fields);
-            row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields,
+            var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
+            row.Slots.Add(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields,
                 Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked));
         }
 
@@ -1009,43 +999,30 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }));
         }
 
-        /// <summary>
-        /// The signal whose state words say <paramref name="test" /> on the blocks <paramref name="seen" /> names, with whether it
-        /// asks for the block in that state rather than out of it; null where the test is on no value of Sprocket's own that a
-        /// signal says.
-        /// </summary>
-        EntityEvent Stated(Comparison test, IList<string> seen, out bool inState)
-        {
-            inState = true;
-            if (test.Provider != BlockKinds.Own)
-                return null;
-
-            return Vocabulary.Change(Vocabulary.EventsFor(Editor.Runner.Bindings, seen), test.MemberId, test.Relation, test.Value,
-                out inState);
-        }
-
         /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
         PickPage TestPage(Comparison test, Opening opens, Action<Comparison> chosen)
         {
-            bool inState = true;
-            var state = test == null ? null : Stated(test, Editor.Seen(_sequence.System, test.Targets), out inState);
-            var stated = test == null || state != null;
-            var id = test == null ? "" : state == null ? test.MemberId : inState ? state.Id : PickPage.Not + state.Id;
+            // A sameness on a status opens on its state, chosen as it is listed; anything else on its value.
+            var value = test == null ? null : test.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, test.Targets)));
+            var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
             return new PickPage(Editor, "Check something", false,
-                test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets), id,
+                test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets),
+                test == null ? "" : stated ? Comparing.Id(test.MemberId, test.Value.Said) : test.MemberId,
                 stated ? Form.Native : Form.Value,
                 delegate(PickAnswer answer)
                 {
                     chosen(Test(answer, test));
                 },
-                true, test != null && test.Quantifier == Quantifier.All, stated ? null : new[] { test.Value }, opens, forTests: true);
+                true, test != null && test.Quantifier == Quantifier.All,
+                test == null ? null : stated ? new[] { Comparing.Of(test.Relation) } : new[] { Comparing.Of(test.Relation), test.Value },
+                opens, forTests: true);
         }
 
         /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>
         /// <remarks>
-        /// The picker asks for the blocks, the value and what it is compared with. How it is compared, a sum, and a function's
-        /// arguments are kept from <paramref name="was" /> where the same value is picked again, so changing the blocks of a
-        /// test written in the script changes nothing else.
+        /// The picker asks for the blocks, the value, how it is compared and with what. A sum and a function's arguments are
+        /// kept from <paramref name="was" /> where the same value is picked again, so changing the blocks of a test written in
+        /// the script changes nothing else.
         /// </remarks>
         Comparison Test(PickAnswer answer, Comparison was)
         {
@@ -1057,42 +1034,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             // The blocks the names stand for: in a blueprint a name is a slot, which only its installation answers.
             var seen = Editor.Seen(_sequence.System, named);
-            if (answer.Form == Form.Value)
-            {
-                var value = Valued(Vocabulary.ActionsFor(Editor.Runner.Bindings, seen), answer.Chosen);
-                test.MemberId = answer.Chosen;
-                test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";
-                test.Value = answer.Arguments != null && answer.Arguments.Count > 0 ? answer.Arguments[0] : Literal.Of(true);
-                if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
-                    return test;
-
-                test.Relation = was.Relation;
-                if (was.Quantifier == Quantifier.Sum)
-                    test.Quantifier = Quantifier.Sum;
-
-                for (var i = 0; i < was.Arguments.Count; i++)
-                    test.Arguments.Add(was.Arguments[i]);
-
+            string id, state;
+            var stated = Comparing.Split(answer.Chosen, out id, out state);
+            var value = Valued(Vocabulary.ActionsFor(Editor.Runner.Bindings, seen), id);
+            var given = answer.Arguments;
+            test.MemberId = id;
+            test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";
+            test.Relation = given != null && given.Count > 0 ? Comparing.Read(given[0]) : Relation.Is;
+            test.Value = stated ? Stated(state) : given != null && given.Count > 1 ? given[1] : Literal.Of(true);
+            if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
                 return test;
-            }
 
-            // A state is a value of Sprocket's own, said by the signal that is its coming to be so.
-            var not = answer.Chosen.StartsWith(PickPage.Not, StringComparison.Ordinal);
-            var id = not ? answer.Chosen.Substring(PickPage.Not.Length) : answer.Chosen;
-            var events = Vocabulary.EventsFor(Editor.Runner.Bindings, seen);
-            for (var i = 0; i < events.Count; i++)
-            {
-                if (events[i].Id != id || events[i].Value.Length == 0)
-                    continue;
+            if (was.Quantifier == Quantifier.Sum)
+                test.Quantifier = Quantifier.Sum;
 
-                test.MemberId = events[i].Value;
-                test.Value = events[i].Becomes;
-                break;
-            }
+            for (var i = 0; i < was.Arguments.Count; i++)
+                test.Arguments.Add(was.Arguments[i]);
 
-            test.Provider = BlockKinds.Own;
-            test.Relation = not ? Relation.IsNot : Relation.Is;
             return test;
+        }
+
+        /// <summary>The state a choice checking a status names, as the program holds it: on or off for a switch, a name otherwise.</summary>
+        static Literal Stated(string state)
+        {
+            if (state == Literal.Of(true).Said)
+                return Literal.Of(true);
+
+            return state == Literal.Of(false).Said ? Literal.Of(false) : Literal.Name(state);
         }
 
         /// <summary>The value called <paramref name="id" /> among <paramref name="actions" />, or null where there is none.</summary>

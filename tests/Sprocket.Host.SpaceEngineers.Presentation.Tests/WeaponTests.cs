@@ -20,11 +20,11 @@ public class WeaponTests
         screen.Editor.PressBlock("Turret");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Open fire"), "open fire is not offered");
-        Assert.True(screen.Shows("Toggle firing"), "toggle firing is not offered");
+        Assert.True(screen.Shows("open fire"), "open fire is not offered");
+        Assert.True(screen.Shows("toggle firing"), "toggle firing is not offered");
         Assert.False(screen.Shows("Shoot On"), "the game's own words are offered beside Sprocket's");
 
-        screen.Editor.PressChoice("Open fire");
+        screen.Editor.PressChoice("open fire");
         screen.Run(2);
         screen.Editor.PressPrimary();
         screen.Run(2);
@@ -46,9 +46,9 @@ public class WeaponTests
         screen.Editor.PressBlock("Warhead");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Armed"), "armed is not offered");
-        Assert.False(screen.Shows("Toggle armed"), "the toggle is listed beside the switch that flips");
-        Assert.True(screen.Shows("Detonate"), "detonate is not offered");
-        Assert.False(screen.Shows("Arm"), "the game's own word is offered beside Sprocket's");
+        Assert.True(screen.Shows("armed"), "armed is not offered");
+        Assert.False(screen.Shows("toggle armed"), "the toggle is listed beside the switch that flips");
+        Assert.True(screen.Shows("detonate"), "detonate is not offered");
+        Assert.False(screen.Shows("arm"), "the game's own word is offered beside Sprocket's");
     }
 }

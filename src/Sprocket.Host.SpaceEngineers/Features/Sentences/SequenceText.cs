@@ -424,11 +424,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return act == null ? "wait for it to finish" : Action(bindings, act, through);
         }
 
-        /// <summary>A test as its row reads: the blocks and the state they are read for, or the value on the blocks and what it is compared with.</summary>
+        /// <summary>A test as its row reads: the blocks, the value unless it is their status, and how it is compared with what.</summary>
         static string Tested(Bindings bindings, Comparison test, SystemInstance through)
         {
-            return Compared(bindings, test.Provider, test.MemberId, test.Quantifier, test.Relation, test.Value,
-                SystemInstance.Through(through, test.Targets));
+            var targets = SystemInstance.Through(through, test.Targets);
+            var blocks = SentenceText.Named(bindings, targets, test.Quantifier != Quantifier.Any);
+            var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
+            if (value == null)
+                return SentenceText.Empty + " on " + blocks;
+
+            var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, targets));
+            var given = SentenceText.Given(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields, null));
+            var read = value.IsStatus ? blocks : blocks + " " + SentenceText.Value(value);
+            return (test.Quantifier == Quantifier.Sum ? "the sum of " + read : read) + " " + given;
         }
 
         /// <summary>
@@ -454,7 +462,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var fields = new List<Field>();
             value.Fields(fields);
-            var read = value.Named + " on " + blocks;
+            var read = SentenceText.Value(value) + " on " + blocks;
             return (quantifier == Quantifier.Sum ? "the sum of " + read : read) + " " + Compared(relation) + " "
                    + SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null));
         }
@@ -504,7 +512,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var given = SentenceText.Given(slot);
 
             if (step.Sets)
-                return SentenceText.Setting(named.Named, blocks, given);
+                return SentenceText.Setting(SentenceText.Value(named), blocks, given);
 
             return step.Arguments.Count == 0 || slot.Quiet ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
         }

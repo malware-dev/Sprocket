@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("targeting", "targeting", Targeting).Announced()
+            kind.WithValue("targeting", "targeting", Targeting).Status().Announced()
                 .WithChange("finds-a-target", "finds a target", "targeting", Literal.Of(true)).Announced()
                 .Reading("is targeting", "is not targeting")
                 .WithChange("loses-its-target", "loses its target", "targeting", Literal.Of(false)).Announced()

@@ -18,11 +18,11 @@ public class PowerTests
     {
         var screen = OnABattery();
 
-        foreach (var words in new[] { "Recharge", "Toggle recharge", "Toggle discharge", "Charge mode" })
+        foreach (var words in new[] { "recharge", "toggle recharge", "toggle discharge", "charge mode" })
             Assert.True(screen.Shows(words), "the battery does not offer \"" + words + "\"");
 
-        Assert.False(screen.Shows("Recharge On"), "the game's own recharge is listed beside Sprocket's");
-        Assert.False(screen.Shows("Enable Auto"), "auto is listed beside charge mode");
+        Assert.False(screen.Shows("recharge on"), "the game's own recharge is listed beside Sprocket's");
+        Assert.False(screen.Shows("enable auto"), "auto is listed beside charge mode");
     }
 
     /// <summary>A recharge told to move on is written so, and its sentence says it.</summary>
@@ -30,7 +30,7 @@ public class PowerTests
     public void ARechargeThatMovesOnSaysSo()
     {
         var screen = OnABattery();
-        screen.Editor.PressChoice("Recharge");
+        screen.Editor.PressChoice("recharge");
         screen.Run(2);
         screen.Do("press", "\"move", "on\"");
         screen.Editor.PressPrimary();
@@ -47,7 +47,7 @@ public class PowerTests
     public void ARechargeLeftAloneWaits()
     {
         var screen = OnABattery();
-        screen.Editor.PressChoice("Recharge");
+        screen.Editor.PressChoice("recharge");
         screen.Run(2);
         screen.Editor.PressPrimary();
         screen.Run(2);
@@ -67,11 +67,11 @@ public class PowerTests
     {
         var screen = OnA(rig => rig.Thruster(30, "Main Thruster"), "Main Thruster");
 
-        Assert.False(screen.Shows("Thrust override"), "the game's override in newtons is listed beside Sprocket's");
-        Assert.False(screen.Shows("Set override"), "the game's setter is listed beside Sprocket's override");
-        Assert.False(screen.Shows("Increase Thrust override"), "the game's step is listed beside Sprocket's override");
+        Assert.False(screen.Shows("thrust override"), "the game's override in newtons is listed beside Sprocket's");
+        Assert.False(screen.Shows("set override"), "the game's setter is listed beside Sprocket's override");
+        Assert.False(screen.Shows("increase thrust override"), "the game's step is listed beside Sprocket's override");
 
-        screen.Editor.PressChoice("Override");
+        screen.Editor.PressChoice("override");
         screen.Run(2);
         var field = Assert.Single(screen.Editor.Picking().Fields);
         Assert.Equal("override (0 - 100)", field.Label(new Texts()));

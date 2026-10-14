@@ -41,7 +41,7 @@ public class StepMenuTests
     [Fact]
     public void APlusWithOneChoiceLeftShowsThatChoice()
     {
-        var screen = Screen.Fresh((Kinds + " press step press if press \"Airlock Outer Door\" press \"is closed\" press Done").Split(' '));
+        var screen = Screen.Fresh((Kinds + " press step press if press \"Airlock Outer Door\" press closed press Done").Split(' '));
 
         Assert.True(screen.Shows("+ branch"));
         Assert.False(screen.Shows("+ otherwise if"), "the branches were offered apart before one was taken");
@@ -70,7 +70,7 @@ public class StepMenuTests
     [Fact]
     public void TheEndOfABranchHasItsOwnPlus()
     {
-        var screen = Screen.Fresh((Kinds + " press step press if press \"Airlock Outer Door\" press \"is closed\" press Done").Split(' '));
+        var screen = Screen.Fresh((Kinds + " press step press if press \"Airlock Outer Door\" press closed press Done").Split(' '));
 
         var rows = screen.Editor.StepRows();
         Assert.Single(rows, row => row.Kind == StepKind.Adds);

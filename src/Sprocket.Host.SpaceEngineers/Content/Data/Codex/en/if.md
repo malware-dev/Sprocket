@@ -4,6 +4,8 @@ Sometimes you need a ![](mark:sequence)&nbsp;[sequence](sequence) to do one thin
 
 An if, also known as a "conditional", is the [step](step) for that. It checks blocks, and runs the steps under it only when its condition passes. Add its `otherwise`, and the steps there run when the condition doesn't pass, so one sequence covers both ways through the airlock.
 
+The states a block can be in come first in the list, like a door being open or working, and read as the block itself: *if Airlock Door is open*. Any other value is named in the check, *if Airlock Door power is on*, with how it compares chosen beside it.
+
 ## More than two ways
 
 An airlock's room isn't always full or empty. Caught halfway, it's neither, and then the safest thing is to close both doors. For a case like that, add an `otherwise if` with a condition of its own:

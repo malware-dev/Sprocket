@@ -4,6 +4,8 @@ Noen ganger trenger du at en ![](mark:sequence)&nbsp;[sekvens](sequence) gjør d
 
 Et hvis, også kalt en "betingelse", er [steget](step) for det. Det sjekker blokker, og kjører stegene under seg bare når betingelsen er oppfylt. Legg til `ellers`, så kjører stegene der når betingelsen ikke er oppfylt, og én sekvens dekker begge veiene gjennom luftslusen.
 
+Tilstandene en blokk kan være i, kommer først i listen, som at en dør er åpen eller virker, og leses som blokken selv: *hvis Luftsluse dør er åpen*. Alle andre verdier nevnes i sjekken, *hvis Luftsluse dør power er på*, med hvordan den sammenlignes valgt ved siden av.
+
 ## Mer enn to veier
 
 Rommet i en luftsluse er ikke alltid fullt eller tomt. Står det halvveis, er det ingen av delene, og da er det tryggest å lukke begge dørene. For et slikt tilfelle legger du til et `ellers hvis` med en egen betingelse:

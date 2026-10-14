@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("status", "status", State).Announced().In(Category.Locking)
+            kind.WithValue("status", "status", State).Status().Announced().In(Category.Locking)
                 .WithChange("becomes-ready-to-lock", "becomes ready to lock", "status", Literal.Name("ready-to-lock"))
                 .Announced().Reading("is ready to lock", "is not ready to lock")
                 .WithChange("locks", "locks", "status", Literal.Name("locked")).Announced()

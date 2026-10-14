@@ -236,6 +236,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public Category Category { get; set; }
 
+        /// <summary>Whether this value is the status of the block, which a check in the organized view reads as the block itself: "Airlock Door is open".</summary>
+        /// <remarks>The editor's wording alone; the script names the value as it names any other.</remarks>
+        public bool IsStatus { get; set; }
+
+        /// <summary>The kind of value this holds, where it is a value.</summary>
+        public ValueKind Holds => _holds;
+
         /// <summary>Vouches for this one of the block's own members as the game declares it.</summary>
         public void Vouch()
         {

@@ -523,6 +523,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Pick.AllOfThem" xml:space="preserve">
     <value>alle sammen</value>
   </data>
+  <data name="Sprocket.Pick.Status" xml:space="preserve">
+    <value>Tilstand</value>
+  </data>
   <data name="Sprocket.Pick.Values" xml:space="preserve">
     <value>Verdier</value>
   </data>

@@ -76,8 +76,8 @@ public class ActionTests
         screen.Run(2);
 
         Assert.True(ListsPower(screen), "a block with a switch cannot be switched on");
-        Assert.False(screen.Shows("Switch on"), "switching on is offered beside the switch's value");
-        Assert.False(screen.Shows("Turn block On"), "the game's own on/off is offered twice");
+        Assert.False(screen.Shows("switch on"), "switching on is offered beside the switch's value");
+        Assert.False(screen.Shows("turn block on"), "the game's own on/off is offered twice");
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class ActionTests
         screen.Editor.PressBlock("Hydrogen Tank");
         screen.Run(2);
 
-        Assert.False(screen.Shows("Turn block On"), "what the switch stands in for is showing");
+        Assert.False(screen.Shows("turn block on"), "what the switch stands in for is showing");
 
         Terminal(screen).Command!.Execute();
         screen.Run(2);
@@ -108,7 +108,7 @@ public class ActionTests
         Organized(screen).Command!.Execute();
         screen.Run(2);
 
-        Assert.False(screen.Shows("Turn block On"), "going back did not put it away again");
+        Assert.False(screen.Shows("turn block on"), "going back did not put it away again");
         Assert.True(ListsPower(screen));
     }
 
@@ -129,7 +129,7 @@ public class ActionTests
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
-        Assert.False(screen.Shows("Name"), "a sequence is offered the block's own name");
+        Assert.False(screen.Shows("name"), "a sequence is offered the block's own name");
 
         Terminal(screen).Command!.Execute();
         screen.Run(2);
@@ -209,8 +209,8 @@ public class ActionTests
         screen.Run(2);
 
         var entries = What(screen).Entries();
-        Assert.Equal(Symbols.Lasting, entries.Single(entry => entry.Text == "Open").Mark);
-        Assert.Equal(Symbols.Action, entries.Single(entry => entry.Text == "Reverse").Mark);
+        Assert.Equal(Symbols.Lasting, entries.Single(entry => entry.Text == "open").Mark);
+        Assert.Equal(Symbols.Action, entries.Single(entry => entry.Text == "reverse").Mark);
     }
 
     /// <summary>A step's member is marked in its sentence as it is in the picker: the clock for what the step waits for, the bolt for the rest.</summary>
@@ -221,13 +221,13 @@ public class ActionTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("Open");
+        screen.Editor.PressChoice("open");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("Reverse");
+        screen.Editor.PressChoice("reverse");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -269,7 +269,7 @@ public class ActionTests
     static string Given(Screen screen) => screen.Editor.Pick().Arguments!.Form.Fields[0].Text;
 
     /// <summary>Whether the column of what to do lists the power value, apart from the heading of the same name.</summary>
-    static bool ListsPower(Screen screen) => What(screen).Entries().Any(e => e.Text == "Power" && !e.IsHeading);
+    static bool ListsPower(Screen screen) => What(screen).Entries().Any(e => e.Text == "power" && !e.IsHeading);
 
     static StageColumn What(Screen screen)
     {
@@ -492,7 +492,7 @@ public class ActionTests
     public void AColourIsChosenByPressingOne()
     {
         var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 200 485 press Color").Split(' '));
+            + "press step press task 200 485 press color").Split(' '));
 
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
@@ -581,7 +581,7 @@ public class ActionTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Vent");
-        screen.Editor.PressChoice("Depressurize");
+        screen.Editor.PressChoice("depressurize");
         screen.Run(2);
         screen.Editor.PressPrimary();
         screen.Run(2);
@@ -602,7 +602,7 @@ public class ActionTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Rotor");
-        screen.Editor.PressChoice("Rotate to");
+        screen.Editor.PressChoice("rotate to");
         screen.Run(2);
 
         var fields = screen.Editor.Pick().Arguments!.Form.Fields;

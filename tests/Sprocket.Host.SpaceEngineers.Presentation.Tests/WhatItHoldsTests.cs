@@ -37,7 +37,7 @@ public class WhatItHoldsTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Vent");
-        screen.Editor.PressChoice("Depressurize");
+        screen.Editor.PressChoice("depressurize");
         screen.Run(2);
         screen.Do("press", "move on");
         screen.Editor.PressPrimary();
@@ -55,7 +55,7 @@ public class WhatItHoldsTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("falloff");
         screen.Editor.Typed("2");
         screen.Run(2);
 
@@ -80,7 +80,7 @@ public class WhatItHoldsTests
             rig.Tick();
         rig.Editor.StepRows()[0].Slots[0].Opens!.Execute();
         rig.Tick();
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "How far open").Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "how far open").Pick(Held.Alone, 1);
         rig.Tick();
         rig.Editor.Typed("50");
         rig.Tick();

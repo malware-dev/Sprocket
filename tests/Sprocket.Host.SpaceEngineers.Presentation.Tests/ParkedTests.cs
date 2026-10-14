@@ -24,7 +24,7 @@ public class ParkedTests
         screen.Editor.NewButtonSystem("Airlock");
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Editor.GoToRoot();
 

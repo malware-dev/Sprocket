@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("status", "status", State).Announced().In(Category.Locking)
+            kind.WithValue("status", "status", State).Status().Announced().In(Category.Locking)
                 .WithChange("becomes-ready-to-merge", "becomes ready to merge", "status", Literal.Name("ready-to-merge"))
                 .Announced().Reading("is ready to merge", "is not ready to merge")
                 .WithChange("merges", "merges", "status", Literal.Name("merged")).Announced()

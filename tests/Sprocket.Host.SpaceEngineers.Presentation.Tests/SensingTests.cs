@@ -52,10 +52,10 @@ public class SensingTests
         screen.Editor.PressBlock("Hold Timer");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Start the countdown"), "the timer does not offer starting its countdown");
-        Assert.True(screen.Shows("Go off now"), "the timer does not offer going off now");
-        Assert.False(screen.Shows("Toggle silent"), "the toggle is listed beside the switch that flips");
-        Assert.True(screen.Shows("Delay"), "the timer does not offer its delay");
+        Assert.True(screen.Shows("start the countdown"), "the timer does not offer starting its countdown");
+        Assert.True(screen.Shows("go off now"), "the timer does not offer going off now");
+        Assert.False(screen.Shows("toggle silent"), "the toggle is listed beside the switch that flips");
+        Assert.True(screen.Shows("delay"), "the timer does not offer its delay");
     }
 
     /// <summary>A sensor's task picker offers what it watches for, flipped on its own switch rather than by a toggle beside it.</summary>
@@ -68,8 +68,8 @@ public class SensingTests
         screen.Editor.PressBlock("Bay Sensor");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Watching for people"), "the sensor does not offer what it watches for");
-        Assert.False(screen.Shows("Toggle watching for people"), "the toggle is listed beside the switch that flips");
+        Assert.True(screen.Shows("watching for people"), "the sensor does not offer what it watches for");
+        Assert.False(screen.Shows("toggle watching for people"), "the toggle is listed beside the switch that flips");
     }
 
     /// <summary>A trigger on a sensor starts as it starts detecting, which is its toolbar's first slot.</summary>

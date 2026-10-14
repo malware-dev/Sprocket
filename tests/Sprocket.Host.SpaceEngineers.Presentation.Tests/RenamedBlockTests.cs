@@ -59,7 +59,7 @@ public class RenamedBlockTests
         editor.NewButtonSystem("Airlock");
         editor.PressAdd("task");
         editor.PressBlock("Airlock Inner Door");
-        editor.PressChoice("Close");
+        editor.PressChoice("close");
         editor.PressPrimary();
         screen.Run(2);
         return screen;

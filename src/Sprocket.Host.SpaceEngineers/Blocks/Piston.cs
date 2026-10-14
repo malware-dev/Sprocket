@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // Where it is, and whether it is going anywhere, change as it moves, which it says nothing of; it says when it
             // reaches either end.
             kind.WithValue("position", "position", Travelled).Looked(Moving).In(Category.Movement)
-                .WithValue("status", "status", State).Looked(Moving).In(Category.Movement)
+                .WithValue("status", "status", State).Status().Looked(Moving).In(Category.Movement)
                 .WithChange("finishes-extending", "finishes extending", "status", Literal.Name("extended")).Announced()
                 .Reading("is extended", "is not extended")
                 .WithChange("finishes-retracting", "finishes retracting", "status", Literal.Name("retracted")).Announced()

@@ -459,7 +459,7 @@ public class ProblemTests
 
         ship.Editor.PressAdd("task");
         ship.Editor.PressBlock("Inner Door");
-        ship.Editor.PressChoice("Close");
+        ship.Editor.PressChoice("close");
         ship.Editor.PressPrimary();
 
         ship.Editor.GoToRoot();

@@ -57,7 +57,7 @@ public class BlocksetTriggerTests
         sim.Editor.NewButtonSystem("Airlock");
         sim.Editor.PressAdd("task");
         sim.Editor.PressBlock("Airlock Inner Door");
-        sim.Editor.PressChoice("Open");
+        sim.Editor.PressChoice("open");
         sim.Editor.PressPrimary();
         sim.Editor.Back();
         sim.Editor.GoToRoot();
@@ -94,7 +94,7 @@ public class BlocksetTriggerTests
         sim.Tick();
         sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
-        sim.Editor.PressChoice("Open");
+        sim.Editor.PressChoice("open");
         sim.Editor.PressPrimary();
         for (var i = 0; i < 70; i++)
             sim.Tick();

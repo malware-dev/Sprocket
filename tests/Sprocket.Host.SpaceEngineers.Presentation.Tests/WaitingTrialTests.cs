@@ -124,7 +124,7 @@ public class WaitingTrialTests
 
         rig.Editor.StepRows()[0].Slots[0].Opens!.Execute();
         rig.Tick();
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Tick();
 
@@ -142,7 +142,7 @@ public class WaitingTrialTests
 
         rig.Editor.StepRows()[1].Slots[0].Opens!.Execute();
         rig.Tick();
-        rig.Editor.PressChoice("Open");
+        rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
         rig.Tick();
 

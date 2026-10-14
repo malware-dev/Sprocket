@@ -211,10 +211,10 @@ public class ReloadTwinTests
     {
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
-        Task(editor, "Airlock Vent", "Depressurize");
+        Task(editor, "Airlock Vent", "depressurize");
         editor.PressAdd("wait");
         editor.GiveLength("1");
-        Task(editor, "Airlock Vent", "Pressurize");
+        Task(editor, "Airlock Vent", "pressurize");
         editor.SwitchOn();
         editor.GoToRoot();
         screen.Run(2);
@@ -261,10 +261,10 @@ public class ReloadTwinTests
         screen.Run(1);
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
-        Task(editor, "Airlock Inner Door", "Close");
+        Task(editor, "Airlock Inner Door", "close");
         editor.PressAdd("wait");
         editor.GiveLength("2");
-        Task(editor, "Airlock Outer Door", "Open");
+        Task(editor, "Airlock Outer Door", "open");
         editor.Back();
         editor.PressStart(editor.Texts.SystemWhen);
         editor.PressBlock("Stop Button");
@@ -288,7 +288,7 @@ public class ReloadTwinTests
     {
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = power;
         editor.PressPrimary();
     }
@@ -298,13 +298,13 @@ public class ReloadTwinTests
     {
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
-        Task(editor, "Airlock Inner Door", "Close");
+        Task(editor, "Airlock Inner Door", "close");
         editor.PressAdd("wait");
         editor.GiveLength("2");
-        Task(editor, "Airlock Outer Door", "Open");
+        Task(editor, "Airlock Outer Door", "open");
         editor.PressAdd("wait");
         editor.GiveLength("1.5");
-        Task(editor, "Airlock Outer Door", "Close");
+        Task(editor, "Airlock Outer Door", "close");
         editor.SwitchOn();
         editor.GoToRoot();
         screen.Run(2);

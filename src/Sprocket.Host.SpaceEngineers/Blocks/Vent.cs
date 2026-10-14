@@ -116,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>Nothing to call off: a vent goes on with the air it was moving, and a room half emptied is no kind of stop.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("room-status", "room status", Room).Looked(Unheard).In(Category.Air)
+            kind.WithValue("room-status", "room status", Room).Status().Looked(Unheard).In(Category.Air)
                 .WithChange("finishes-filling", "finishes filling", "room-status", Literal.Name("full"))
                 .Reading("has air", "has no air").Looked(Unheard)
                 .WithChange("finishes-emptying", "finishes emptying", "room-status", Literal.Name("empty"))

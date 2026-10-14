@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("occupied", "occupied", Sleeping).Announced()
+            kind.WithValue("occupied", "occupied", Sleeping).Status().Announced()
                 .WithChange("becomes-occupied", "becomes occupied", "occupied", Literal.Of(true))
                 .Reading("is occupied", "is empty").Announced()
                 .WithChange("becomes-empty", "becomes empty", "occupied", Literal.Of(false))

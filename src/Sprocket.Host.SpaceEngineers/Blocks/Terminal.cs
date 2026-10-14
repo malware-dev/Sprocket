@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("working", "working", Working).In(Category.Power).Announced()
+            kind.WithValue("working", "working", Working).Status().In(Category.Power).Announced()
                 .WithChange("starts-working", "starts working", "working", Literal.Of(true))
                 .Reading("is working", "is not working").Announced()
                 .WithChange("stops-working", "stops working", "working", Literal.Of(false))

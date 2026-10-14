@@ -31,8 +31,8 @@ public class SettingTests
 
         // The game hands out an action for a light's radius and none at all for its falloff, which
         // is the arbitrariness this exists to end.
-        Assert.True(screen.Shows("Falloff"), "the light does not offer its falloff");
-        Assert.True(screen.Shows("Color"), "the light does not offer its colour");
+        Assert.True(screen.Shows("falloff"), "the light does not offer its falloff");
+        Assert.True(screen.Shows("color"), "the light does not offer its colour");
 
         // Said as setting them, since values and actions are listed together, and under a heading
         // saying what they are about.
@@ -54,7 +54,7 @@ public class SettingTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("falloff");
         screen.Run(2);
 
         // The numbers this block's own definition declares, and nobody else's: a corner light's
@@ -72,7 +72,7 @@ public class SettingTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("falloff");
         screen.Editor.Typed("2");
         screen.Run(2);
 
@@ -214,7 +214,7 @@ public class SettingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Inner Door");
-        screen.Editor.PressChoice("Speed");
+        screen.Editor.PressChoice("speed");
         screen.Run(2);
         screen.Editor.Current!.View.Within().OfType<WordsField>().Single().Within().OfType<Lumel.Controls.Button>()
             .Single(word => word.Text == "high").Command!.Execute();
@@ -224,7 +224,7 @@ public class SettingTests
         var set = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Triggers[0].Does);
         Assert.Equal(BlockKinds.Own, set.Provider);
         Assert.Equal(Literal.Name("high"), Assert.Single(set.Arguments));
-        Assert.Equal("then set Speed on Airlock Inner Door to high", screen.Editor.Doing(0));
+        Assert.Equal("then set speed on Airlock Inner Door to high", screen.Editor.Doing(0));
     }
 
     /// <summary>Choosing something else for a step keeps what was given for the new choice.</summary>
@@ -239,12 +239,12 @@ public class SettingTests
 
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Falloff");
+        screen.Editor.PressChoice("falloff");
         screen.Editor.Typed("2");
         screen.Run(2);
 
         screen.Editor.PressStepSlot(0, 0);
-        screen.Editor.PressChoice("Radius");
+        screen.Editor.PressChoice("radius");
         screen.Editor.Typed("4");
         screen.Run(2);
 
@@ -275,10 +275,10 @@ public class SettingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Run(2);
 
-        Assert.True(screen.Editor.HasChoice("Speed"), "a value of Sprocket's own that can be set is not offered");
-        Assert.False(screen.Editor.HasChoice("Status"), "a value of Sprocket's own that is only read is offered as a step");
+        Assert.True(screen.Editor.HasChoice("speed"), "a value of Sprocket's own that can be set is not offered");
+        Assert.False(screen.Editor.HasChoice("status"), "a value of Sprocket's own that is only read is offered as a step");
 
-        screen.Editor.PressChoice("Speed");
+        screen.Editor.PressChoice("speed");
         screen.Run(2);
         screen.Editor.Current!.View.Within().OfType<WordsField>().Single().Within().OfType<Lumel.Controls.Button>().Single(word => word.Text == "high").Command!.Execute();
         screen.Editor.PressPrimary();
@@ -314,7 +314,7 @@ public class SettingTests
         screen.Editor.PressBlock("Warning Beacon");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Radius"), "the beacon does not offer its radius");
+        Assert.True(screen.Shows("radius"), "the beacon does not offer its radius");
         Assert.True(screen.Shows("SIGNALS"), "a beacon's radius is not grouped with what it says");
         Assert.False(screen.Shows("APPEARANCE"), "a beacon's radius is grouped as how it looks");
     }
@@ -332,7 +332,7 @@ public class SettingTests
         Assert.False(screen.Shows("Chime On Approach"), "a member nothing vouches for is offered");
         var entries = What(screen).Entries().ToList();
         var other = entries.FindIndex(entry => entry.IsHeading && entry.Text == "Other");
-        Assert.Equal(new[] { "Custom data" }, entries.Skip(other + 1).TakeWhile(entry => !entry.IsHeading).Select(entry => entry.Text));
+        Assert.Equal(new[] { "custom data" }, entries.Skip(other + 1).TakeWhile(entry => !entry.IsHeading).Select(entry => entry.Text));
 
         What(screen).PressView("Terminal");
         screen.Run(2);

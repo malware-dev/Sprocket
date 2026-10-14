@@ -113,7 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.WithValue("angle", "angle", hinge ? HingeAngle : RotorAngle).Looked(Turning).In(Category.Movement)
                 .WithValue("locked", "locked", Locked).Looked(Unheard).In(Category.Locking)
-                .WithValue("attached", "attached", Attached).Announced()
+                .WithValue("attached", "attached", Attached).Status().Announced()
                 .WithChange("attaches", "attaches", "attached", Literal.Of(true)).Announced()
                 .Reading("is attached", "is not attached")
                 .WithChange("detaches", "detaches", "attached", Literal.Of(false)).Announced()

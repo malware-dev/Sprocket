@@ -248,7 +248,7 @@ public class PausingTests
         sim.Editor.NewButtonSystem("Airlock");
         sim.Editor.PressAdd("task");
         sim.Editor.PressBlock("Airlock Inner Door");
-        sim.Editor.PressChoice("Open");
+        sim.Editor.PressChoice("open");
         sim.Editor.PressPrimary();
         sim.Editor.SwitchOn();
         sequence = sim.Editor.Program.Sequences[0];

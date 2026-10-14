@@ -152,7 +152,7 @@ public class RootTests
         sim.Tick();
         sim.Editor.PressChoice("A task on blocks…");
         sim.Editor.PressBlock("Airlock Outer Door");
-        sim.Editor.PressChoice("Close");
+        sim.Editor.PressChoice("close");
         sim.Editor.PressPrimary();
         sim.Editor.SwitchOn();
         sim.Editor.GoToRoot();

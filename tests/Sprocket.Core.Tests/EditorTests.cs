@@ -133,9 +133,9 @@ public class EditorTests
         IEnumerable<PickRow> Offered() =>
             editor.Pick().Stages.SelectMany(s => s.Entries());
 
-        editor.PressChoice("AI Behavior On/Off");
-        Assert.True(Offered().Single(e => e.Text == "AI Behavior On/Off").IsChosen);
-        Assert.False(Offered().Single(e => e.Text == "AI Behavior").IsChosen);
+        editor.PressChoice("AI behavior on/off");
+        Assert.True(Offered().Single(e => e.Text == "AI behavior on/off").IsChosen);
+        Assert.False(Offered().Single(e => e.Text == "AI behavior").IsChosen);
         Assert.Empty(editor.Picking().Fields);
 
         editor.PressPrimary();
@@ -169,7 +169,7 @@ public class EditorTests
 
         IEnumerable<StageColumn> Stages() => editor.Pick().Stages;
 
-        Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "Mode");
+        Assert.Contains(Stages().SelectMany(s => s.Entries()), e => e.Text == "mode");
         Assert.DoesNotContain(Stages().SelectMany(s => s.Entries()), e => e.Text == "Mode:");
 
         Stages().Single(s => s.Views.Count > 0).PressView("Terminal");
@@ -331,7 +331,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -362,7 +362,7 @@ public class EditorTests
         {
             editor.PressAdd("task");
             editor.PressBlock("Airlock Light");
-            editor.PressChoice("Power");
+            editor.PressChoice("power");
             editor.Pick().Arguments!.Form.Fields[0].Text = "on";
             editor.PressPrimary();
             ship.Tick();
@@ -749,14 +749,14 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
 
         editor.PressAdd("task");
         editor.PressBlock("Outer Door");
-        editor.PressChoice("Open");
+        editor.PressChoice("open");
         editor.PressPrimary();
         ship.Tick();
 
@@ -779,7 +779,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -829,7 +829,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.Screen.Undo!.Execute();
@@ -856,7 +856,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Inner Door");
-        editor.PressChoice("Close");
+        editor.PressChoice("close");
         editor.PressPrimary();
         ship.Tick();
 
@@ -864,7 +864,7 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Outer Door");
-        editor.PressChoice("Open");
+        editor.PressChoice("open");
         editor.PressPrimary();
         ship.Tick();
 
@@ -1295,7 +1295,7 @@ public class EditorTests
 
         ship.Editor.PressStepSlot(0, 0);
         ship.Tick();
-        ship.Editor.PressChoice("Open");
+        ship.Editor.PressChoice("open");
         ship.Editor.PressPrimary();
         ship.Tick();
 
@@ -1331,7 +1331,7 @@ public class EditorTests
 
         ship.Editor.PressAdd("task");
         ship.Editor.PressBlock("Inner Door");
-        ship.Editor.PressChoice("Close");
+        ship.Editor.PressChoice("close");
         ship.Editor.PressPrimary();
         ship.Tick();
 
@@ -1503,7 +1503,7 @@ public class EditorTests
         editor.PressAdd("task");
         editor.PressBlock("Inner Door");
         editor.TickBlock("Outer Door");
-        editor.PressChoice("Close");
+        editor.PressChoice("close");
         editor.PressPrimary();
 
         var targets = Assert.IsType<EntitiesSlot>(editor.StepRows()[0].Slots[1]);
@@ -1530,7 +1530,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.SwitchOn();
@@ -1569,7 +1569,7 @@ public class EditorTests
         StartOnTheButton(editor);
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -1608,7 +1608,7 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         ship.Tick();
@@ -1697,7 +1697,7 @@ public class EditorTests
 
         editor.PressAdd("task");
         editor.PressBlock("Airlock Light");
-        editor.PressChoice("Power");
+        editor.PressChoice("power");
         editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         editor.PressPrimary();
         editor.SwitchOn();
@@ -1858,7 +1858,7 @@ public class EditorTests
         editor.PressBlock("Inner Door");
         Assert.Equal(2, editor.Pick().Stages.Count);
 
-        editor.PressChoice("Close");
+        editor.PressChoice("close");
         editor.PressPrimary();
 
         // One row, even though the sequence has the step and the await after it.

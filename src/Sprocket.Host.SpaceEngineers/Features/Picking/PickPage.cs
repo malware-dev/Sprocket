@@ -24,17 +24,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public sealed partial class PickPage : EditorPage
     {
-        /// <summary>What a test's choice starts with where it is for its blocks not being in the state it names.</summary>
-        public const string Not = "!";
-
         const bool AsksAll = false;
         const string FamilyPrefix = "family:";
         const int Actions = 0;
         const int Values = 1;
 
+        // The group a check's status values stand in, first, past every category's.
+        const int Statuses = (int)Category.Other + 1;
+
         static readonly NameOrder ByName = new NameOrder();
-        static readonly SaidOrder BySaid = new SaidOrder(false);
-        static readonly SaidOrder ByDeclared = new SaidOrder(true);
+        static readonly SaidOrder ByDeclared = new SaidOrder();
 
         readonly string _title;
         readonly List<long> _selection = new List<long>();
@@ -125,8 +124,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
         /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
         /// them. <paramref name="signalsOnly" /> offers only what the construct does to start something, for a signal slot.
-        /// <paramref name="forTests" /> offers what an if can test: the states its blocks can be in or not, each a choice of
-        /// its own marked with <see cref="Not" /> for not, and their values. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
+        /// <paramref name="forTests" /> offers what an if can test: the values of its blocks, each compared as its options say.
+        /// Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
         /// not have is dropped later, where it is.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
@@ -692,7 +691,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         List<Field> Wanted()
         {
-            return IsComplete ? Editor.Fields(_selection, _chosen, _chosenForm) : _nothing;
+            if (!IsComplete)
+                return _nothing;
+
+            if (!_forTests)
+                return Editor.Fields(_selection, _chosen, _chosenForm);
+
+            string value, state;
+            return Comparing.Split(_chosen, out value, out state)
+                ? Comparing.StateFields()
+                : Comparing.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
         }
 
         /// <summary>
@@ -705,8 +713,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         void FillGiven()
         {
-            // A state is chosen whole, being in it or not, so only a value is given anything.
-            if (_forEvents || _forTests && _chosenForm != Form.Value)
+            if (_forEvents)
             {
                 _strip.ShowsArguments = false;
                 return;
@@ -762,6 +769,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _openedArguments = true;
                 arguments.Form.Take(Editor.Input);
             }
+        }
+
+        /// <summary>The value <paramref name="id" /> among <paramref name="actions" />, or null where none of them is.</summary>
+        static EntityAction Valued(List<EntityAction> actions, string id)
+        {
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].Id == id && (actions[i].Sets || actions[i].Being != null))
+                    return actions[i];
+            }
+
+            return null;
+        }
+
+        /// <summary>Whether <paramref name="id" /> checks the blocks' status for one of its states, which reads as the blocks themselves.</summary>
+        static bool IsState(string id)
+        {
+            string value, state;
+            return Comparing.Split(id, out value, out state);
         }
 
         static bool Same(IList<Field> held, IList<Field> fields)
@@ -1209,10 +1235,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>What a test can read of the blocks, in the view now showing.</summary>
         /// <remarks>
-        /// The organized view lists each state the blocks can be in, and then not, and each value no state says, under the
-        /// heading of the value it reads, as the actions are grouped. A state read the same as one already listed is left out:
-        /// switched on and switched off are one state, read from either side. The terminal view lists the values the blocks
-        /// declare, under the terminal's own names, in the order the game declared them.
+        /// The values a step can set, and Sprocket's own besides, which a test reads whether or not a step could set them; how
+        /// each is compared is its options' to say. The organized view lists first each state the blocks' status can be in,
+        /// to be checked for as it is, then the other values under the headings the actions stand under, each in the order its
+        /// capability declares it; the terminal view lists the values the blocks declare, under the terminal's own names, by
+        /// those names.
         /// </remarks>
         void Testable()
         {
@@ -1229,26 +1256,43 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            actions.Sort(BySaid);
             var events = Vocabulary.EventsOf(Editor.World, _selection);
+            for (var i = 0; i < actions.Count; i++)
+            {
+                if (actions[i].IsStatus)
+                    States(actions[i], events);
+            }
+
             for (var group = 0; group <= (int)Category.Other; group++)
             {
-                for (var i = 0; i < events.Count; i++)
-                {
-                    if (!events[i].IsState || _names.Contains(events[i].State) || (int)CategoryOf(actions, events[i].Value) != group)
-                        continue;
-
-                    Offer(events[i].State, events[i].Id, group);
-                    Offer(events[i].Unstate, Not + events[i].Id, group);
-                }
-
                 for (var i = 0; i < actions.Count; i++)
                 {
                     var one = actions[i];
-                    var own = one.Being != null && !Stated(events, one.Id);
-                    if ((own || (one.Sets && Lists(one))) && (int)one.Category == group)
+                    if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && (int)one.Category == group)
                         Read(one, group);
                 }
+            }
+        }
+
+        /// <summary>Lists each state the status <paramref name="status" /> can be in, in the words <paramref name="events" /> say it in, to be checked for.</summary>
+        void States(EntityAction status, List<EntityEvent> events)
+        {
+            var fields = Comparing.Fields(status, events);
+            var states = fields.Count > 1 ? fields[1] : default(Field);
+            if (states.Words == null)
+                return;
+
+            for (var i = 0; i < states.Words.Count; i++)
+            {
+                var word = states.Words[i];
+                _names.Add(word);
+                _ids.Add(Comparing.Id(status.Id, states.Means == null ? word : states.Means[i]));
+                _forms.Add(Form.Native);
+                _groups.Add(Statuses);
+                _marks.Add(Symbols.Value);
+                _sets.Add(false);
+                _ready.Add(status.Readiness);
+                _why.Add(ReadinessText.Why(Editor.Texts, status.Why));
             }
         }
 
@@ -1265,55 +1309,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
         }
 
-        /// <summary>The category of the value <paramref name="value" /> among <paramref name="actions" />, or the last where none is listed.</summary>
-        static Category CategoryOf(List<EntityAction> actions, string value)
-        {
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == value && (actions[i].Sets || actions[i].Being != null))
-                    return actions[i].Category;
-            }
-
-            return Category.Other;
-        }
-
-        /// <summary>Whether a signal among <paramref name="events" /> says the value <paramref name="value" /> as a state.</summary>
-        static bool Stated(List<EntityEvent> events, string value)
-        {
-            for (var i = 0; i < events.Count; i++)
-            {
-                if (events[i].IsState && events[i].Value == value)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Lists a state to be read, by the words it reads in and the choice it makes, under <paramref name="group" />.</summary>
-        void Offer(string said, string id, int group)
-        {
-            _names.Add(said);
-            _ids.Add(id);
-            _forms.Add(Form.Native);
-            _groups.Add(group);
-            _marks.Add(Symbols.Value);
-            _sets.Add(false);
-            _ready.Add(Readiness.Ready);
-            _why.Add(null);
-        }
-
         /// <summary>Everything the blocks offer, values first and each group in its own order.</summary>
         /// <remarks>
-        /// Sorted by the words rather than left in the order the game declared them, because a block hands its actions out in
-        /// the order its code happens to create them and a person reading twenty of them is looking one up. The headings are
-        /// not in here: a search matches only what somebody can choose.
+        /// The organized view keeps the order the blocks' capabilities declare their members in, which is a deliberate one:
+        /// open before close, the block's own before what every block shares. The terminal view is sorted by the terminal's
+        /// names, because a block hands its members out in the order its code happens to create them and a person reading
+        /// twenty of them is looking one up. The headings are not in here: a search matches only what somebody can choose.
         /// </remarks>
         void Grouped(List<EntityAction> actions)
         {
-            actions.Sort(Editor.ShowsTerminal ? ByDeclared : BySaid);
-
             if (Editor.ShowsTerminal)
             {
+                actions.Sort(ByDeclared);
                 Listed(actions, Values);
                 Listed(actions, Actions);
                 return;
@@ -1344,7 +1351,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
-        /// <summary>What the view now showing calls this one: the block's own words in the terminal view, and Sprocket's in the organized one.</summary>
+        /// <summary>What the view now showing calls this one: the block's own words in the terminal view, as-is, and Sprocket's in the organized one, in lower case.</summary>
         /// <remarks>Values and actions are listed together in the organized view, so everything is said as something to do.</remarks>
         string Said(EntityAction one)
         {
@@ -1355,7 +1362,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (one.Unaltered && !one.Renamed)
                 said = Unlabelled(said);
 
-            return string.IsNullOrEmpty(said) ? said : char.ToUpperInvariant(said[0]) + said.Substring(1);
+            return SentenceText.Lowered(said);
         }
 
         /// <summary>The game's name for a member, without the colon it ends a terminal label with.</summary>
@@ -1408,7 +1415,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _said = _selection.Count == 0 && chosen.Length == 0
                 ? _title
                 : _forTests
-                    ? SentenceText.Testing(blocks, chosen, at >= 0 && _sets[at])
+                    ? SentenceText.Testing(blocks, chosen, IsState(_chosen))
                     : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
 
             _retitled = true;
@@ -1480,7 +1487,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (Editor.ShowsTerminal)
                 return group == Values ? Editor.Texts.PickValues : Editor.Texts.PickToolbarActions;
 
-            return CategoryText.Of(Editor.Texts, (Category)group);
+            return group == Statuses ? Editor.Texts.PickStatus : CategoryText.Of(Editor.Texts, (Category)group);
         }
 
         int CountOfKind(string kindId)
@@ -1731,29 +1738,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
+        /// <summary>Members in the order of the terminal's names for them.</summary>
         sealed class SaidOrder : IComparer<EntityAction>
         {
-            readonly bool _declared;
-
-            public SaidOrder(bool declared)
-            {
-                _declared = declared;
-            }
-
             public int Compare(EntityAction left, EntityAction right)
             {
-                return string.Compare(Said(left), Said(right), StringComparison.OrdinalIgnoreCase);
-            }
-
-            string Said(EntityAction one)
-            {
-                if (one == null)
-                    return "";
-
-                if (_declared)
-                    return one.Declared;
-
-                return one.Sets ? one.Text : one.Named;
+                return string.Compare(left == null ? "" : left.Declared, right == null ? "" : right.Declared,
+                    StringComparison.OrdinalIgnoreCase);
             }
         }
     }

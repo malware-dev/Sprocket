@@ -38,7 +38,7 @@ public class BlueprintTestTests
         var rig = Opened(out var sequence);
         Assert.NotEmpty(rig.Editor.StepRows()[0].Problem);
 
-        Pick(rig, "is on", null);
+        Pick(rig, "power", "is on");
 
         var test = Assert.IsType<If>(sequence.Steps[0]).Test;
         Assert.Equal("power", test.MemberId);
@@ -57,7 +57,7 @@ public class BlueprintTestTests
     {
         var rig = Opened(out var sequence);
 
-        Pick(rig, "How far open", "50");
+        Pick(rig, "how far open", "is 50");
 
         var test = Assert.IsType<If>(sequence.Steps[0]).Test;
         Assert.Equal("how-far-open", test.MemberId);
@@ -72,7 +72,7 @@ public class BlueprintTestTests
     {
         rig.Editor.StepRows()[0].Slots[0].Opens!.Execute();
         rig.Tick();
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text).Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text && !entry.IsHeading).Pick(Held.Alone, 1);
         rig.Tick();
         if (value != null)
             rig.Editor.Typed(value);

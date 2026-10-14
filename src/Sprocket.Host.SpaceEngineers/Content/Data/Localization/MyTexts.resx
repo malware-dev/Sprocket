@@ -686,6 +686,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>all of them</value>
     <comment>Choice in the picker's column of blocks, while picking what an if checks, meaning that all of the chosen blocks are needed together for the check to hold.</comment>
   </data>
+  <data name="Sprocket.Pick.Status" xml:space="preserve">
+    <value>Status</value>
+    <comment>The first group heading in the picker's column of what an if can check, in the organized view: over the values that are each a block's status, such as a door's status or whether it is working, which a check reads as the block itself ("if Airlock Door is open").</comment>
+  </data>
   <data name="Sprocket.Pick.Values" xml:space="preserve">
     <value>Values</value>
     <comment>Group heading in the picker's column of what can be done to the chosen blocks while it lists them the way the game's terminal does, over a block's values.</comment>

@@ -94,7 +94,7 @@ public class SlotSwapTests
         screen.Editor.PressAdd("task");
         screen.Run(2);
         screen.Editor.PressBlock(door);
-        screen.Editor.PressChoice("Open");
+        screen.Editor.PressChoice("open");
         screen.Editor.PressPrimary();
         screen.Run(2);
     }

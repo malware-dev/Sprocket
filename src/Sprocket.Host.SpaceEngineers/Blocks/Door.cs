@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // looked at for starting to close only between starting to open and having closed, which it does say, and so
             // is its status as a whole.
             var hangar = block is IMyAirtightHangarDoor;
-            kind.WithValue("status", "status", State);
+            kind.WithValue("status", "status", State).Status();
             Watched(kind, hangar);
 
             kind.WithChange("finishes-opening", "finishes opening", "status", Literal.Name("open")).Announced()

@@ -20,9 +20,9 @@ public class GasPickerTests
         screen.Editor.PressBlock("Airlock Vent");
         screen.Run(2);
 
-        Assert.True(screen.Shows("Pressurize"), "the vent's own actions are not listed");
-        Assert.False(screen.Shows("Toggle depressurize"), "the toggle is listed beside the switch that flips");
-        Assert.False(screen.Shows("Depressurize On/Off"), "the game's own words are listed beside Sprocket's");
+        Assert.True(screen.Shows("pressurize"), "the vent's own actions are not listed");
+        Assert.False(screen.Shows("toggle depressurize"), "the toggle is listed beside the switch that flips");
+        Assert.False(screen.Shows("depressurize on/off"), "the game's own words are listed beside Sprocket's");
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ public class GasPickerTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Airlock Vent");
-        screen.Editor.PressChoice("Depressurizing");
+        screen.Editor.PressChoice("depressurizing");
         screen.Run(2);
 
         Assert.True(screen.Shows("on") && screen.Shows("off") && screen.Shows("toggle"), "the switch does not offer on, off and toggle");
@@ -55,7 +55,7 @@ public class GasPickerTests
         screen.Editor.StepRows()[0].Slots[0].Opens!.Execute();
         screen.Run(2);
         var chosen = screen.Editor.Pick().Stages.Last().Entries().Single(entry => entry.IsChosen);
-        Assert.Equal("Depressurizing", chosen.Text);
+        Assert.Equal("depressurizing", chosen.Text);
         Assert.Equal(EntityAction.Toggle, screen.Editor.Pick().Arguments!.Form.Answer);
     }
 
@@ -73,7 +73,7 @@ public class GasPickerTests
         screen.Run(2);
         screen.Editor.PressAdd("task");
         screen.Editor.PressBlock("Reserve Tank");
-        screen.Editor.PressChoice("Stockpile");
+        screen.Editor.PressChoice("stockpile");
         screen.Run(2);
 
         Assert.True(screen.Shows("wait until full"), "stockpile does not ask whether to wait");

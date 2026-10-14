@@ -127,7 +127,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -159,7 +159,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -257,7 +257,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -307,7 +307,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -322,7 +322,7 @@ public class ChangingTests
         var pick = screen.Editor.Pick();
         Assert.Contains(pick.Stages[pick.Page].Entries(), e => e.Text == "Airlock Outer Door" && e.IsChosen);
 
-        screen.Editor.PressChoice("Open");
+        screen.Editor.PressChoice("open");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -451,7 +451,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -533,7 +533,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 

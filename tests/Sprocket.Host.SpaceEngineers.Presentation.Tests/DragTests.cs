@@ -230,9 +230,9 @@ public class DragTests
 
         editor.NewButtonSystem("Airlock");
 
-        Step(editor, "Airlock Inner Door", "Close");
-        Step(editor, "Airlock Vent", "Depressurize");
-        Step(editor, "Airlock Outer Door", "Open");
+        Step(editor, "Airlock Inner Door", "close");
+        Step(editor, "Airlock Vent", "depressurize");
+        Step(editor, "Airlock Outer Door", "open");
 
         screen.Run(5);
         return screen;

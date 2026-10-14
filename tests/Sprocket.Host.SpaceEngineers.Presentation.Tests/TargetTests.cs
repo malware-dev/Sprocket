@@ -76,7 +76,7 @@ public class TargetTests
         screen.Editor.PressChoice("button 1 is pressed");
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -173,7 +173,7 @@ public class TargetTests
 
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 
@@ -198,7 +198,7 @@ public class TargetTests
 
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.PressChoice("Close");
+        screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
 

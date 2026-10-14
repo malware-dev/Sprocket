@@ -20,6 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         readonly Being _remaining;
         readonly Being _charged;
 
+        readonly Being _charging;
+
         /// <summary>
         /// The type the game keeps a capacitor under among a block's components, learned from the first one found; null until
         /// then.
@@ -50,6 +52,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 var capacitor = Capacitor(block);
                 return capacitor != null && capacitor.IsCharged;
             }));
+
+            _charging = Being.Flag(Reading.Of<IMyTerminalBlock>(block =>
+            {
+                var capacitor = Capacitor(block);
+                return capacitor != null && !capacitor.IsCharged && capacitor.TimeRemaining > 0f;
+            }));
         }
 
         /// <inheritdoc />
@@ -63,7 +71,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithValue("charge", "charge", _charge).Looked(Uncounted)
                 .WithValue("time-until-charged", "time until charged", _remaining).Looked(Uncounted)
-                .WithValue("charged", "charged", _charged).Announced()
+                .WithValue("charging", "charging", _charging).Status().Looked(Uncounted)
+                .WithValue("charged", "charged", _charged).Status().Announced()
                 .WithChange("finishes-charging", "finishes charging", "charged", Literal.Of(true)).Announced()
                 .Reading("is charged", "is not charged");
         }

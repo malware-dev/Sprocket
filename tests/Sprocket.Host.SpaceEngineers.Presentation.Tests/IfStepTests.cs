@@ -66,9 +66,7 @@ public class IfStepTests
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Tick();
-        What(rig, "is open");
-        rig.Editor.PressPrimary();
-        rig.Tick();
+        Check(rig, "is open");
 
         var tested = Assert.IsType<Else>(sequence.Steps[sequence.Steps.Count - 2]);
         Assert.Equal("status", tested.Test.MemberId);
@@ -92,9 +90,7 @@ public class IfStepTests
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Tick();
-        What(rig, "is open");
-        rig.Editor.PressPrimary();
-        rig.Tick();
+        Check(rig, "is open");
 
         Assert.IsType<If>(sequence.Steps[0]);
         var tested = Assert.IsType<Else>(sequence.Steps[1]).Test;
@@ -383,14 +379,22 @@ public class IfStepTests
         rig.Tick();
         rig.Editor.PressBlock(block);
         rig.Tick();
-        What(rig, state);
-        rig.Editor.PressPrimary();
+        Check(rig, state);
+    }
+
+    /// <summary>Checks the door for the state <paramref name="state" /> says, "is open" or "is not open", and finishes the check.</summary>
+    static void Check(Simulation rig, string state)
+    {
+        var not = state.StartsWith("is not ", StringComparison.Ordinal);
+        var word = state.Substring(not ? 7 : 3);
+        What(rig, word);
+        rig.Editor.Typed(not ? "is-not" : "is");
         rig.Tick();
     }
 
     static void What(Simulation rig, string text)
     {
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text).Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text && !entry.IsHeading).Pick(Held.Alone, 1);
         rig.Tick();
     }
 

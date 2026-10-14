@@ -236,7 +236,7 @@ public class UndoTests
         screen.Editor.PressAdd("task");
         screen.Run(2);
         screen.Editor.PressBlock("Airlock Light");
-        screen.Editor.PressChoice("Power");
+        screen.Editor.PressChoice("power");
         screen.Editor.Pick().Arguments!.Form.Fields[0].Text = "on";
         screen.Editor.PressPrimary();
         screen.Run(2);

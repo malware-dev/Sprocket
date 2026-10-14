@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var turret = block is IMyLargeTurretBase;
-            kind.WithValue("targeting", "targeting", turret ? TurretTargeting : ControllerTargeting).Looked(Unaimed)
+            kind.WithValue("targeting", "targeting", turret ? TurretTargeting : ControllerTargeting).Status().Looked(Unaimed)
                 .WithValue("on-target", "on target", turret ? TurretOnTarget : ControllerOnTarget).Looked(Unaimed)
                 .WithValue("controlled-by-a-person", "controlled by a person", turret ? TurretControlled : ControllerControlled)
                 .Announced();

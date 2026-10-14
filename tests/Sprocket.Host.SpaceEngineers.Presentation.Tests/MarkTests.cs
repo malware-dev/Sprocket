@@ -97,7 +97,7 @@ public class MarkTests
         screen.Editor.PressBlock("Airlock Light");
         screen.Run(2);
 
-        Assert.Equal(Symbols.Value, Entry(screen, "Radius").Mark);
+        Assert.Equal(Symbols.Value, Entry(screen, "radius").Mark);
 
         var light = screen.Editor.World.Entities.Single(entity => entity.Name == "Airlock Light");
         Assert.Equal(Symbols.Value, MarkText.Of(light.Kind.FindAction("Radius", Form.Value)!));
@@ -184,7 +184,7 @@ public class MarkTests
         {
             editor.PressAdd("task");
             editor.PressBlock(door);
-            editor.PressChoice("Close");
+            editor.PressChoice("close");
             editor.PressPrimary();
             screen.Run(2);
         }
