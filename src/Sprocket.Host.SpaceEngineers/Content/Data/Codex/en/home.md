@@ -28,3 +28,7 @@ You can use the [library](#library) to store ![](mark:blueprint) [blueprints](#b
 ## Getting Started
 
 _pending_
+
+## Recommended Reading
+
+_link to glossary and the example logics_
