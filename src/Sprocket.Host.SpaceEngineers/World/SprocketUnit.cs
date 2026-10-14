@@ -1368,7 +1368,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Two flags read, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
             _runner.Live = _working && !_program.Paused;
             _runner.Tick(frame);
+        }
 
+        /// <summary>Brings an open screen up to the frame <paramref name="frame" />, after the rota has run its sequences for it.</summary>
+        /// <remarks>After the runs, so what a run changed on a frame is on the screen drawn for that frame.</remarks>
+        public void Show(int frame)
+        {
             if (Showing && _editor != null)
                 _editor.Tick(frame);
         }
@@ -1592,9 +1597,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
         /// <remarks>
         /// Set by the screen as it opens and closes. The editor has nothing to do while nobody is
-        /// looking, so it is ticked only while this holds; the program runs either way.
+        /// looking, so it is ticked only while this holds; the program runs either way, and looks at
+        /// its blocks for the screen only while it holds.
         /// </remarks>
-        public bool Showing { get; set; }
+        public bool Showing
+        {
+            get { return _runner.Looking; }
+            set { _runner.Looking = value; }
+        }
 
         /// <summary>What a block holds under one of Sprocket's keys, or empty.</summary>
         static string Stored(IMyTerminalBlock block, Guid key)

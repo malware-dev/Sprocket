@@ -101,5 +101,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// anybody editing anything, at which point it carries on by itself.
         /// </remarks>
         public bool Parks => Exists && !IsWarning && Problem != SequenceProblem.Stuck && Problem != SequenceProblem.Stalled;
+
+        /// <summary>Whether <paramref name="other" /> says the same thing at the same line.</summary>
+        public bool Same(SequenceFault other)
+        {
+            return Problem == other.Problem && Step == other.Step && Which == other.Which && Unwired == other.Unwired
+                && Because.Same(other.Because);
+        }
     }
 }

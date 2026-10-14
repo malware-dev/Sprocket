@@ -17,6 +17,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     {
         Interval _asked = new Interval(Second);
 
+        int _revision = -1;
+
         Element _view;
 
         const int Second = 60;
@@ -29,6 +31,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>The editor this page is part of.</summary>
         protected SprocketEditor Editor { get; private set; }
+
+        /// <summary>How many times the page has recounted what the runs show.</summary>
+        /// <remarks>Counted so it can be shown that an idle page recounts nothing.</remarks>
+        public int Recounts { get; private set; }
 
         /// <summary>
         /// What this page is called, when it is called one thing.
@@ -354,17 +360,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public virtual void Resay()
         {
             _asked.Restart();
+            _revision = -1;
         }
 
         /// <summary>
-        /// True about once a second, for facts too dear to work out on a tick.
+        /// True about once a second, for words made of what nothing announces changing.
         /// </summary>
         /// <remarks>
-        /// Whether a sequence is broken is the one that needs this. A host may have to read a
-        /// toolbar to answer, and something outside Sprocket can break a sequence while the screen
-        /// is open - somebody clearing a button from the game's own terminal - so an answer taken
-        /// only when the screen was built would never notice. Asking sixty times a second about
-        /// something that changes by hand is the other mistake.
+        /// A sentence joined out of block names is the one that needs this: the game raises nothing
+        /// when a block is renamed in its terminal, so the words are made again on a cadence.
         /// <para>
         /// Ask once per <see cref="Refresh" />. It records that it said yes, so a second ask in the
         /// same tick is told no and whatever depended on it silently does not happen.
@@ -374,6 +378,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var now = Editor.CurrentTick;
             return _asked.Due(now);
+        }
+
+        /// <summary>
+        /// True on the tick what the runs show has changed since this page last asked: a fault, a hold, a stop or a halt.
+        /// </summary>
+        /// <remarks>
+        /// One comparison against <see cref="AutomationRunner.Revision" /> on every tick, so a fault shows on the tick it
+        /// is found and an idle page recounts nothing. Ask once per <see cref="Refresh" />, as with <see cref="SecondPassed" />.
+        /// </remarks>
+        protected bool Revised()
+        {
+            var now = Editor.Runner.Revision;
+            if (now == _revision)
+                return false;
+
+            _revision = now;
+            Recounts++;
+            return true;
         }
 
         /// <summary>

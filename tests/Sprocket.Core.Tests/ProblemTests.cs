@@ -450,6 +450,9 @@ public class ProblemTests
         ship.Rig.Door(2, "Inner Door");
 
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
+
+        // A screen is open on it, which the block's unit tells the runner as its screen opens.
+        ship.Runner.Looking = true;
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
 
         ship.Editor.NewButtonSystem("Airlock");

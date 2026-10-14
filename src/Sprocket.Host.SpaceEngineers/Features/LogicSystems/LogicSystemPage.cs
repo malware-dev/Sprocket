@@ -296,8 +296,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             // What a row is doing, how long ago it ran and whether a trigger's signal is true are read every tick,
             // because none of them costs anything and a badge read on a cadence would lag behind the door it is about.
-            // What a sequence is called is a sentence joined out of its blocks and actions, so it is said again on a
-            // cadence, with what is wrong.
+            // What a sequence is called changes only by an edit, which builds the rows again. What is wrong is said again on
+            // the tick the runs change.
 
             if (_triggerRows == null)
                 return;
@@ -305,7 +305,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var texts = Editor.Texts;
 
             // Counted when the rows are new as well, so a broken one is marked from the first frame.
-            var recount = SecondPassed() || reshaped;
+            var recount = Revised() || reshaped;
 
             if (reshaped)
                 Arrange(texts);
@@ -350,11 +350,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
                 Live(row, sequence, tick);
 
-                if (recount)
-                {
+                if (reshaped)
                     row.Summary = SequenceText.Called(texts, sequence);
+
+                if (recount)
                     Mark(texts, row, Fault(sequence, through), sequence);
-                }
 
                 row.Show(texts);
             }

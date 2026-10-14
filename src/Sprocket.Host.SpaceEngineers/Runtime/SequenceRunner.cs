@@ -24,6 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         SequenceFault _found;
 
+        SequenceFault _looked;
+
         /// <summary>
         /// One sequence, running for one of a system.
         /// </summary>
@@ -131,7 +133,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public Stopper StoppedBy
         {
             get { return (Stopper)_memory.StoppedBy; }
-            private set { _memory.StoppedBy = (int)value; }
+            private set
+            {
+                if (_memory.StoppedBy != (int)value)
+                    _owner.Revise();
+
+                _memory.StoppedBy = (int)value;
+            }
         }
 
         /// <summary>The step the last run was at when something stopped it.</summary>
@@ -155,7 +163,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public bool IsWaiting
         {
             get { return _memory.Waiting; }
-            private set { _memory.Waiting = value; }
+            private set
+            {
+                if (_memory.Waiting != value)
+                    _owner.Revise();
+
+                _memory.Waiting = value;
+            }
         }
 
         /// <summary>
@@ -171,6 +185,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             get { return _quit; }
             private set
             {
+                if (!_quit.Same(value))
+                    _owner.Revise();
+
                 _quit = value;
                 _memory.Quit = Spellings.Kept(value);
             }
@@ -183,13 +200,26 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             get { return _found; }
             private set
             {
+                if (!_found.Same(value))
+                    _owner.Revise();
+
                 _found = value;
                 _memory.Found = Spellings.Kept(value);
             }
         }
 
         /// <summary>What an open editor last saw gone, or possibly swapped, among the blocks this names, or none.</summary>
-        public SequenceFault Looked { get; set; }
+        public SequenceFault Looked
+        {
+            get { return _looked; }
+            set
+            {
+                if (!_looked.Same(value))
+                    _owner.Revise();
+
+                _looked = value;
+            }
+        }
 
         /// <summary>The one of its system this runs on, or null where the system has none.</summary>
         public SystemInstance Instance => _instance;
@@ -261,7 +291,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         SequenceFault Troubled()
         {
-            _stuck = SequenceFault.None;
+            var stuck = SequenceFault.None;
             for (var i = 0; i < _memory.Outstanding.Count; i++)
             {
                 var step = _memory.Outstanding[i];
@@ -278,8 +308,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     var reached = until.Holds(entity.Block, acted.Seen);
                     if (!reached && entity.Stalls(acted.Action))
                     {
-                        if (!_stuck.Exists)
-                            _stuck = new SequenceFault(SequenceProblem.Stalled, step, Trouble.None, entity.Name);
+                        if (!stuck.Exists)
+                            stuck = new SequenceFault(SequenceProblem.Stalled, step, Trouble.None, entity.Name);
 
                         continue;
                     }
@@ -293,14 +323,27 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     Trouble said = acted.Bound.Trouble(entity.Block, acted.Seen);
                     if (said.Ends)
+                    {
+                        Hold(stuck);
                         return new SequenceFault(SequenceProblem.Conflicted, step, said, entity.Name);
+                    }
 
-                    if (said.Exists && !_stuck.Exists)
-                        _stuck = new SequenceFault(SequenceProblem.Stuck, step, said, entity.Name);
+                    if (said.Exists && !stuck.Exists)
+                        stuck = new SequenceFault(SequenceProblem.Stuck, step, said, entity.Name);
                 }
             }
 
+            Hold(stuck);
             return SequenceFault.None;
+        }
+
+        /// <summary>Keeps what the blocks of a step being waited on said stops it finishing, and says so where it changed.</summary>
+        void Hold(SequenceFault stuck)
+        {
+            if (!_stuck.Same(stuck))
+                _owner.Revise();
+
+            _stuck = stuck;
         }
 
         /// <summary>How much of a wait is left to spend, in ticks.</summary>
@@ -827,7 +870,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // either mended it or is about to find out again.
             Quit = SequenceFault.None;
             Met(SequenceFault.None);
-            _stuck = SequenceFault.None;
+            Hold(SequenceFault.None);
             StoppedBy = Stopper.None;
             _memory.Step = 0;
             EnterStep();
@@ -1015,7 +1058,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Release();
                     _memory.Started.Clear();
                     _memory.Holding = false;
-                    _stuck = SequenceFault.None;
+                    Hold(SequenceFault.None);
                     IsWaiting = false;
                     Step();
                     continue;
@@ -1175,6 +1218,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Keeps what the run met.</summary>
         void Met(SequenceFault fault)
         {
+            if (!_met.Same(fault))
+                _owner.Revise();
+
             _met = fault;
             _memory.Met = Spellings.Kept(fault);
         }

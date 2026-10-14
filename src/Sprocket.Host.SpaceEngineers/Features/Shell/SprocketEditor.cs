@@ -273,12 +273,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             Stamp();
 
-            // Somebody is looking, so the construct is looked at for them: what a run would only find at the step that
-            // needs it is shown before anything runs into it. See AutomationRunner.Look for what it costs. On a tick that
-            // rebuilds the screen as well, which an editor made for a world with settings of its own does on its first.
-            if (_looked.Due(tick))
-                _runner.Look();
-
             if (_structureDirty)
             {
                 Rebuild();
@@ -344,7 +338,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         const int Second = 60;
 
         Interval _worded = new Interval(Second);
-        Interval _looked = new Interval(Second);
 
         /// <summary>
         /// Puts a short question on the screen, to be answered before anything else.
@@ -2819,8 +2812,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Opened()
         {
             // Looked at, worded and counted at once, however soon after it last closed, so an opened screen always starts from
-            // what is there.
-            _looked.Restart();
+            // what is there. While it stays open the runner looks again whenever the blocks or the program change.
+            _runner.Look();
             _worded.Restart();
             Current.Resay();
 
@@ -3261,8 +3254,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void SwitchInstance(AutomationSystem system, SystemInstance instance, bool on)
         {
-            if (system.Enabled)
-                instance.Enabled = on;
+            if (!system.Enabled)
+                return;
+
+            // Switched on, it forgets why it was switched off, which an open screen says at once.
+            instance.Enabled = on;
+            _runner.Revise();
         }
 
         /// <summary>What pressing the switch of <paramref name="system" /> would do, said as a note on it.</summary>

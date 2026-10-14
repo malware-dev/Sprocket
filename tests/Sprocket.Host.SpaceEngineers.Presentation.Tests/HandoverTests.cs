@@ -917,7 +917,10 @@ public class HandoverTests : IDisposable
         _wire.As(anna, () =>
         {
             for (var frame = 1; frame <= 300; frame++)
+            {
                 copy.Tick(frame);
+                copy.Show(frame);
+            }
         });
 
         Assert.Empty(_sim.Machine.Log);

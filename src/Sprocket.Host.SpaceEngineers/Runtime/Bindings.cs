@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public int Revision { get; private set; }
 
         /// <summary>
-        /// Works these out again only if something has changed since last time.
+        /// Works these out again only if something has changed since last time, and says whether it did.
         /// </summary>
         /// <remarks>
         /// <b>Called on every tick, and does nothing on almost all of them.</b> Two integer
@@ -47,14 +47,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// and that cost belongs at the moment a block is welded on rather than sixty times a second
         /// forever after.
         /// </remarks>
-        public void Refresh(GridWorld world, Automation program)
+        public bool Refresh(GridWorld world, Automation program)
         {
             if (world.Revision == _world && program.Revision == _program)
-                return;
+                return false;
 
             _world = world.Revision;
             _program = program.Revision;
             Resolve(world, program.Refs, program.SignalRefs);
+            return true;
         }
 
         /// <summary>Resolves every declaration against the world as it is now, unconditionally.</summary>

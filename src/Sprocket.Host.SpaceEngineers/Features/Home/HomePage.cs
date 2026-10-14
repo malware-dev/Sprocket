@@ -292,7 +292,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             var texts = Editor.Texts;
 
             // Counted when the rows are new as well, so a broken system is marked from the first frame.
-            var recount = SecondPassed() || reshaped;
+            var recount = Revised() || reshaped;
 
             if (reshaped)
                 Arrange(texts);

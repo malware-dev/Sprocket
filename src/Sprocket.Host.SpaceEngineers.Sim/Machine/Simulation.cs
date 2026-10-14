@@ -282,6 +282,10 @@ public sealed class Simulation
         // After the unit, as the session does it, so its bindings are current when its sequences run.
         _rota.Run(Now);
 
+        // After the runs, as the session does it, so what a run changed on a tick shows on that tick.
+        if (!_unit.Lost)
+            _unit.Show(Now);
+
         if (_frame % SaveEvery == 0)
             Save();
     }

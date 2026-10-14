@@ -201,7 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 return;
             }
 
-            if (SecondPassed())
+            if (Revised())
                 Troubled(Blockset);
         }
 

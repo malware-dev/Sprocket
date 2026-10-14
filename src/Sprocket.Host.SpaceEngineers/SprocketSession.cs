@@ -902,6 +902,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_copy != null)
             {
                 _copy.Tick(frame);
+                _copy.Show(frame);
                 if (_keeping.Due(frame) && _copy.Editor.Holder == null)
                     _handover.Keep(_copyOf, _copy);
             }
@@ -919,6 +920,9 @@ namespace Sprocket.Host.SpaceEngineers
             // After every Sprocket has ticked, so each one's bindings are current when the rota calls
             // its sequences.
             _rota.Run(frame);
+
+            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+                unit.Value.Show(frame);
         }
 
         /// <summary>Sprocket's clock, which the rota counts in: the game's frame carried on from where the world was saved.</summary>

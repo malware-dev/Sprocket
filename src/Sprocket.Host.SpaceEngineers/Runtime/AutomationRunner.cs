@@ -106,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 // block and reads the sentence back in the same breath - and waiting for the next
                 // frame would show it "something that's gone" for a block it just picked. Two
                 // integer comparisons, so asking costs nothing when nothing moved.
-                _bindings.Refresh(_world, _automation);
+                Refreshed();
                 return _bindings;
             }
         }
@@ -127,13 +127,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public int FastestUpdate { get; set; } = 1;
 
+        /// <summary>Whether a screen is open on this construct, which is who <see cref="Look" /> is for.</summary>
+        /// <remarks>Set by the screen as it opens and closes.</remarks>
+        public bool Looking { get; set; }
+
         /// <summary>Advances everything to the given frame.</summary>
         public void Tick(int tick)
         {
             CurrentTick = tick;
 
             // Two integer comparisons on an ordinary tick. See Bindings.Refresh.
-            _bindings.Refresh(_world, _automation);
+            Refreshed();
 
             Checking();
 
@@ -153,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Makes the runners and checks the program now, rather than on the next tick, for a press that arrives first.</summary>
         public void Prepare()
         {
-            _bindings.Refresh(_world, _automation);
+            Refreshed();
             Checking();
         }
 
@@ -184,6 +188,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>How many times the runners have been matched to the program.</summary>
         /// <remarks>Counted so it can be shown that an ordinary tick matches nothing.</remarks>
         public int Reconciled { get; private set; }
+
+        /// <summary>Counts up on the tick anything an open screen shows of the runs may have changed: a fault found or cleared, a run held or let go, a stop, a halt, the runners themselves.</summary>
+        /// <remarks>Read by an open page on every tick, which recounts its rows only where it moved.</remarks>
+        public int Revision { get; private set; }
 
         /// <summary>The world this program runs in.</summary>
         public GridWorld World => _world;
@@ -286,6 +294,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void MissingChanged()
         {
             _missingStamp++;
+            Revise();
+        }
+
+        /// <summary>Says something an open screen shows of the runs has changed, on the tick it changed.</summary>
+        public void Revise()
+        {
+            Revision++;
         }
 
         /// <summary>Whether a block that something about <paramref name="sequence" /> watches on <paramref name="instance" /> is no longer on the construct.</summary>
@@ -459,6 +474,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Reconcile()
         {
             Reconciled++;
+            Revise();
             _live.Clear();
 
             var systems = _automation.Systems;
@@ -633,6 +649,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 SwitchOffBroken(system);
             }
+
+            // The program, its wiring or its runners changed, which is when what an open screen shows of the blocks it
+            // names may have.
+            if (Looking)
+                Look();
+        }
+
+        /// <summary>Works out what the declarations point at where the blocks or the program changed, and looks for an open screen when they did.</summary>
+        void Refreshed()
+        {
+            if (_bindings.Refresh(_world, _automation) && Looking)
+                Look();
         }
 
         /// <summary>Switches off the system, or each one of a blueprint's, where the program says a sequence of it cannot work.</summary>
@@ -709,6 +737,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             _missingStamp++;
+            Revise();
             _goneTriggers.Clear();
             foreach (var pair in _pollers)
             {
@@ -863,18 +892,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 instance.Enabled = false;
                 instance.Halt = halt;
+                Revise();
                 return;
             }
 
             system.Enabled = false;
             system.Halt = halt;
+            Revise();
         }
 
         /// <summary>Looks at the construct for each sequence, on every system and every blockset of a blueprint, for an open editor to show what is gone or may have been swapped.</summary>
         /// <remarks>
-        /// Only for somebody looking, and nothing is switched off here: a run finds the same at the step that needs it. The
-        /// blocks are looked at only where what the names point at, or the program, has changed since the last look, so an
-        /// idle editor costs three comparisons, however large the construct. What a block being waited on says about
+        /// Only for somebody looking, and nothing is switched off here: a run finds the same at the step that needs it. Asked
+        /// as a screen opens, and while one is open on the tick the names are worked out again or the program is checked,
+        /// never on a tick of its own; it looks only where what the names point at, or the program, has changed since the
+        /// last look. What a block being waited on says about
         /// finishing is the run's own to read, on its own looks, so an open editor leaves every run's timing as it was.
         /// </remarks>
         public void Look()
@@ -884,6 +916,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
 
             Looks++;
+            Revise();
             _lookedBindings = bindings.Revision;
             _lookedEdits = _automation.Edits;
             _lookedRunners = Reconciled;
