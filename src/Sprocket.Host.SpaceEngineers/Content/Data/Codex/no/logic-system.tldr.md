@@ -1,1 +1,1 @@
-Et ![](mark:logic-system) **logikksystem** er automasjonen for én jobb, som en luftsluse: hva som skjer, hva som starter det, og hvilke blokker det bruker.
+Et ![](mark:logic-system)&nbsp;**logikksystem** er automasjonen for én maskin, som en luftsluse, med alle jobbene som hører til å drive den.

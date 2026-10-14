@@ -366,7 +366,7 @@ public class CodexTests
         var term = new Terms(sim.Texts).Find(Terms.LogicSystem)!;
 
         Assert.Equal("Logikksystem", term.Name);
-        Assert.StartsWith("Et ![](mark:logic-system) **logikksystem**", term.Summary);
+        Assert.StartsWith("Et ![](mark:logic-system)&nbsp;**logikksystem**", term.Summary);
         Assert.Contains("[konstruksjonen](#construct)", term.Page);
     }
 

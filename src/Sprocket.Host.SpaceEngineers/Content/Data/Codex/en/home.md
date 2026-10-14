@@ -32,4 +32,4 @@ _pending_
 
 ## Recommended Reading
 
-_link to glossary and the example logics_
+The [examples](#examples) build logic systems step by step, starting with a [simple airlock](#simple-airlock).

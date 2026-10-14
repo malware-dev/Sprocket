@@ -1,1 +1,1 @@
-**Picking** is selecting, in the picker, the blocks a step, trigger or slot uses, and what is done to them or checked on them.
+A **selector** is where you select blocks, and what to do with them or check on them.

@@ -1,34 +1,13 @@
 # Kjøre og stoppe
 
+Et [steg](#step) kan starte eller stoppe en annen ![](mark:sequence)&nbsp;[sekvens](#sequence) i det samme logikksystemet, med `kjør` eller `stopp`. Begge virker på den ![](mark:installation)&nbsp;[installasjonen](#installation) steget kjører på, så sekvensene til babord luftsluse starter eller stopper aldri styrbord luftsluse.
+
 ## Kjøre en sekvens
 
-Velger du `kjør` under `+ steg`, får du et [steg](#step) som starter en annen ![](mark:sequence)&nbsp;[sekvens](#sequence) i det samme logikksystemet, valgt fra en liste over sekvensene i det. Et kjør-steg tar tid, slik en handling med klokke gjør: sekvensen kan vente på at kjøringen blir ferdig, eller gå rett videre, og et nytt kjør-steg venter, så neste steg begynner når den sekvensen er ferdig.
+Et kjør-steg lar en sekvens bygge på en annen: *Gå fra borde* kan kjøre *Sluse ut*, og så skyve ut rampen. Sekvensen venter på den den kjører til den er ferdig, som for ethvert avventbart steg, så rampen begynner å skyves ut når den ytre døra er åpen.
 
-En ![](mark:installation)&nbsp;[installasjon](#installation) kjører en sekvens én gang om gangen. Kjører sekvensen allerede, betyr det å vente på kjør-steget å vente på at den kjøringen blir ferdig, og sekvensen teller starten som hoppet over, slik den gjør for en [utløser](#trigger): `hoppet over 1x mens den var opptatt`.
-
-En sekvens som kjør-steg starter, trenger ingen egen utløser.
-
-En sekvens som ville startet seg selv igjen gjennom sekvensene den kjører, er et problem: for eksempel kjører *Gå fra borde* *Sluse ut*, og *Sluse ut* kjører *Gå fra borde*. Kjør-steget viser `Dette kjører en sekvens som kjører denne igjen. Fjern en av de to.`, og logikksystemet kjører først når ett av de to kjør-stegene er fjernet.
+En sekvens som allerede kjører, startes ikke en gang til. Kjør-steget venter i stedet på kjøringen som allerede pågår.
 
 ## Stoppe en sekvens
 
-Velger du `stopp` under `+ steg`, får du et steg som stopper en annen sekvens i det samme logikksystemet. Det virker med en gang, og neste steg begynner straks. Skjermen til sekvensen som ble stoppet, sier hva som stoppet den, for eksempel `stoppet ved steg 2 av Nedstenging`. Et stopp som finner sekvensen ledig, lar den være som den er.
-
-Et stopp lar blokkene være slik et stopp for hånd gjør, som siden om sekvenser forklarer under *Starte den*.
-
-## Eksempler
-
-### Nedstenging
-
-En *Nedstenging*-sekvens stopper luftslusen uansett hvor i slusingen den er, og stenger den:
-
-1. Stopp *Sluse inn*.
-2. Stopp *Sluse ut*.
-3. Lukk den indre døra, med klokka.
-4. Lukk den ytre døra, med klokka.
-
-De to stoppene virker med en gang, så den indre døra begynner å lukke seg straks. Holdt *Sluse ut* på å tømme rommet, står det `stoppet ved steg 2 av Nedstenging` på skjermen dens.
-
-### Gå fra borde
-
-En *Gå fra borde*-sekvens kjører *Sluse ut* og skyver deretter ut rampen. Kjør-steget venter, så rampen venter på hele *Sluse ut*: den begynner å skyves ut når den ytre døra er åpen.
+Et stopp-steg avslutter den andre sekvensens kjøring ved steget den har nådd, på samme måte som å stoppe den for hånd, og sekvensen med stopp-steget fortsetter med én gang. En *Nedstenging*-sekvens kan stoppe *Sluse inn* og *Sluse ut*, og så lukke begge dørene, uansett hvor luftslusen var i slusingen.

@@ -1,34 +1,13 @@
 # Run and stop
 
+A [step](#step) can start or stop another ![](mark:sequence)&nbsp;[sequence](#sequence) of the same logic system, with `run` or `stop`. Both act on the ![](mark:installation)&nbsp;[installation](#installation) the step runs on, so the port airlock's sequences never start or stop the starboard airlock's.
+
 ## Running a sequence
 
-Selecting `run` under `+ step` adds a [step](#step) that starts another ![](mark:sequence)&nbsp;[sequence](#sequence) of the same logic system, selected from a list of its sequences. A run step takes time, as an action with a clock does: the sequence can wait for the run to finish or go straight on, and a new run step waits, so the next step begins once that sequence has finished.
+A run step lets one sequence build on another: *Disembark* can run *Cycle Out*, then extend the ramp. The sequence waits for the one it runs to finish, as it does for any awaitable step, so the ramp starts extending once the outer door is open.
 
-An ![](mark:installation)&nbsp;[installation](#installation) runs a sequence once at a time. Where the sequence is already running, waiting for the run step means waiting for that run to finish, and the sequence counts the start as skipped, as it does for a [trigger](#trigger): `skipped 1x while busy`.
-
-A sequence that run steps start needs no trigger of its own.
-
-A sequence that would start itself again, through the sequences it runs, is a problem: for example, *Disembark* runs *Cycle Out*, and *Cycle Out* runs *Disembark*. The run step shows `This runs a sequence that runs this one again. Remove one of the two.`, and the logic system runs only once one of the two run steps is removed.
+A sequence that is already running isn't started a second time. The run step waits for the run already going instead.
 
 ## Stopping a sequence
 
-Selecting `stop` under `+ step` adds a step that stops another sequence of the same logic system. It acts at once, and the next step begins straight away. The stopped sequence's screen names what stopped it, for example `stopped at step 2 by Lockdown`. A stop that finds the sequence idle leaves it as it is.
-
-A stop leaves the blocks as a stop by hand does, which the sequence page explains under *Starting it*.
-
-## Examples
-
-### Lockdown
-
-A *Lockdown* sequence stops the airlock wherever it is in its cycle, and shuts it:
-
-1. Stop *Cycle In*.
-2. Stop *Cycle Out*.
-3. Close the inner door, with the clock.
-4. Close the outer door, with the clock.
-
-The two stops act at once, so the inner door starts closing straight away. Where *Cycle Out* was emptying the room, its screen reads `stopped at step 2 by Lockdown`.
-
-### Disembark
-
-A *Disembark* sequence runs *Cycle Out*, then extends the ramp. The run step waits, so the ramp waits for the whole of *Cycle Out*: it starts extending once the outer door is open.
+A stop step ends the other sequence's run at the step it has reached, the same way stopping it by hand does, and the sequence with the stop step carries on straight away. A *Lockdown* sequence can stop *Cycle In* and *Cycle Out*, then close both doors, wherever the airlock was in its cycle.

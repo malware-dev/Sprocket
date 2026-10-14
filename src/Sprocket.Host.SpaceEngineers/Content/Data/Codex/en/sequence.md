@@ -1,75 +1,47 @@
 # Sequence
 
-A sequence is what a ![](mark:logic-system)&nbsp;[logic system](#logic-system) does: a list of [steps](#step), run from top to bottom. Each ![](mark:installation)&nbsp;[installation](#installation) runs it on its own blocks, so one sequence cycles every airlock on the ship.
+A sequence is a list of [steps](#step) that a ![](mark:logic-system)&nbsp;[logic system](#logic-system) runs from top to bottom, like an airlock's *Cycle Out*: close the inner door, empty the room, open the outer door. Each ![](mark:installation)&nbsp;[installation](#installation) runs it on its own blocks and signals.
 
-Under `Sequences` on the logic system's screen, `+ sequence` adds one, and pressing a sequence's row opens it. The bin on its row deletes it at once, and undo brings it back.
+## Starting and stopping
 
-## Starting it
+While the logic system is switched on, a [trigger](#trigger) starts a sequence, for example when the airlock's button is pressed.
 
-A [trigger](#trigger) starts it, for example when the airlock's button is pressed. The play mark on its row runs it by hand, even while the logic system is switched off, on the installation selected under `Installation`. That is how to try a sequence while building it.
+To try a sequence while you build it, run it by hand with ![](mark:play) on its row. A run by hand works even while the logic system is switched off, and uses the installation selected under `Installation`.
 
-An installation runs a sequence once at a time. A trigger that fires while it is still running is skipped, and the sequence counts how often that happens.
+An installation runs a sequence only once at a time, so a trigger that fires while it's still running is skipped.
 
-While it runs, the play mark turns into a stop mark, which stops it. A stopped run starts nothing more. A door already moving finishes, and a vent goes on filling or emptying the room, while a piston or a rotor stops where it is.
+Stopping a run ends it at the step it has reached, but a block that is already moving may still finish: a closing door still closes, and a vent goes on emptying the room, while a piston or a rotor stops where it is. Switching off the logic system or the installation stops its runs the same way, apart from those started by hand.
 
-Switching the logic system or the installation off stops its runs at the step they reached, and once it is switched on again the sequence reads `stopped at step 2 when switched off`. A run started by hand ignores the switch and carries on.
+## Steps that run over more than one [tick](#tick)
 
-## Steps that take time
+Most actions are done within a tick, like switching a light on. Others run longer, like a door closing or a vent emptying a room. Those marked ![](mark:awaited) are **awaitable**: the sequence waits for the block to finish before the next step, so the vent starts once the inner door is shut. A step that [runs another sequence](#run-and-stop) is awaitable too, and waits until that sequence has finished.
 
-For most actions, the sequence tells the block and moves straight on to the next step, without waiting for the block to finish, such as switching a light on or playing a sound. A few take time to finish, such as a door closing or a vent emptying a room, and a new step that does one waits for it: the next step begins only once the block is done. So the vent starts once the inner door is shut, and the outer door opens once the room is empty.
+A sequence can wait only for awaitable actions, which are the ones whose end the block can be watched for. An action marked ![](mark:action) is started, and the sequence moves on even where the block keeps going: a sound plays to its end, and a timer block counts down, while the next steps run. To give a block like that time, add a [wait](#wait) of a set time after it, or have a trigger start the next sequence when the block reaches the state you need.
 
-In the [picker](#picking), each action carries a mark:
+## Running steps together
 
-- ![](mark:action) **An arrow into a block** marks an action the sequence starts without waiting for the block to complete it.
-- ![](mark:awaited) **An arrow into a clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
+An awaitable step can let the sequence go straight on, so the steps after it run while it's still going, like closing both airlock doors together. A wait further down then catches every awaitable step since the wait before it. If the sequence goes straight on from its last awaitable step, the run ends there, and the blocks finish on their own.
 
-## Going straight on
+::: player
+Two ways of showing a wait are being tried, and your world uses one of them. Both are kept here until one is chosen.
+:::
 
-A step that takes time can let the sequence go straight on, so the steps after it run while it is still going, such as closing both airlock doors together. One wait covers every step that takes time since the wait before it, so several steps can run together and one wait catches them all. Where the sequence goes straight on from its last step that takes time, the run is over at its last step, and what it started finishes on its own.
+### A wait under each step
 
-A world shows its waits in one of two ways:
+Under each awaitable step hangs a `Wait for completion` line, which waits for that step and every awaitable step before it since the last wait. Switch it to `Do not wait`, and the sequence goes straight on.
 
-- **`Switch on each step`**: under each step that takes time hangs a line, joined to it as an if's steps are. `Wait for completion` waits there for this step and every step above it since the last wait. Pressing it switches it to `Do not wait`, and the sequence goes straight on; pressing again waits.
-- **`Wait as its own step`**: each wait is a line of its own, reading `await all pending tasks`, after the steps it waits for. It is moved, copied, paused and deleted like a step, and `+ step` offers `await all pending tasks` to add one. A new step that takes time comes with one after it.
+### A wait as a step of its own
 
-Either way, resting the pointer on a wait lights its clock and those of the steps it waits for, and resting it on a step lights the step's clock and the wait that covers it. A pulsing line beside the line numbers joins the lit lines and runs on to lines scrolled out of view; a world can switch it off. A wait with no step above it that takes time is marked with a warning, since it has nothing to wait for.
+Adding an awaitable step also adds an `await all pending tasks` step after it. Move the await further down, and the steps in between run while the block is still going; delete it, and the sequence goes straight on.
 
-## When a run fails
+Rest the pointer on a wait to see which steps it waits for, or on an awaitable step to see which wait catches it.
 
-A run fails when one of its steps can't be done at all, for example because the block it acts on was lost. Its installation is switched off, the other installations keep running, and the installation's row on the [home screen](#home) names the step and what went wrong:
+## When a run goes wrong
 
-`Stopped at step 1 of Cycle Out: Airlock Inner Door was lost.`
+A run **fails** when a step can't be done at all, for example because its block was lost. That installation switches off, the others keep running, and the [home screen](#home) says which step failed and why. Put right what it names, and switch the installation on again. A lost block or an empty [slot](#slot) is filled on the [installation panel](#installation-panel).
 
-Put right what it names, and switch the installation on again. A block that was lost, or a [slot](#slot) that was never filled, is filled on the installation's [installation panel](#installation-panel).
+A step **holds** when its block is stuck, like a rotor that is held or a vent with nowhere to put the air. It waits and says why, and carries on by itself once the way is clear. To give up instead, stop the run.
 
-## When a step holds
+A run **ends** when something else takes over a block a step is waiting on, like somebody opening the inner door from the terminal while *Cycle Out* waits for it to close. The step shows a warning saying what happened, the installation stays on, and the next run starts afresh.
 
-A step holds when its block is stuck, such as a rotor that is held or a vent whose air has nowhere to go. The step waits and says why, for example `Airlock Vent cannot empty because there is nowhere to put the air.`
-
-Clear the way, and it carries on by itself: free the rotor, or give the air somewhere to go, such as an oxygen tank with room in it. To give up on the run, stop it by hand.
-
-## When something else takes over
-
-A run ends at its step when something else takes a block over while the step waits on it, such as somebody opening the inner door from the terminal while *Cycle Out* waits for it to close. The installation stays switched on. The step's line shows an amber warning naming the block and what happened, until the sequence next runs:
-
-`Airlock Inner Door stopped closing because something else opened it.`
-
-Run the sequence again, and it starts afresh.
-
-## Example: the airlock's Cycle Out
-
-*Cycle Out* has three steps, each an action with a clock that the sequence waits for:
-
-1. `close Airlock Inner Door` lasts until the inner door is shut.
-2. `depressurize Airlock Vent` begins once the door is shut, and lasts until the room is empty.
-3. `open Airlock Outer Door` begins once the room is empty, and the run ends when the door is open.
-
-Press the airlock's button, and while it runs:
-
-- On the home screen, the airlock's installation row lights green.
-- On the logic system's screen, the row of *Cycle Out* lights green. While a door moves or the vent empties the room, it reads `running - waiting for this step`.
-- On the screen of *Cycle Out* itself, the step being run is lit.
-
-When the outer door is open, the run is over, and the row of *Cycle Out* reads `ready`.
-
-Press the button again during the run, and the press is skipped. The screen of *Cycle Out* counts it, for example `skipped 1x while busy`. Stop the run by hand during step 2, and its screen reads `stopped at step 2 by hand`. Both doors stay shut.
+The [simple airlock](#simple-airlock) builds a sequence from the start.

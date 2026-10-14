@@ -1,6 +1,6 @@
-# Writing rich text
+# Rich text
 
-Sprocket supports rich formatted text in several locations. This formatting is based on a subset of the Markdown format. Here is what is supported, and how to type it.
+Rich text is plain text with a few marks typed into it, taken from Markdown, that turn it into headings, lists, tables, and bold or italic words. This page shows each mark, and what it gives.
 
 ## Bold, italic and code
 

@@ -30,4 +30,4 @@ _kommer_
 
 ## Anbefalt lesning
 
-_lenke til ordlisten og eksempellogikkene_
+[Eksemplene](#examples) bygger logikksystemer steg for steg, og begynner med en [enkel luftsluse](#simple-airlock).

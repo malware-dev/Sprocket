@@ -1,1 +1,1 @@
-Å **velge blokker** er å velge, i velgeren, blokkene et steg, en utløser eller en plass bruker, og hva som gjøres med dem eller sjekkes på dem.
+En **velger** er der du velger blokker, og hva som skal gjøres med dem eller sjekkes på dem.

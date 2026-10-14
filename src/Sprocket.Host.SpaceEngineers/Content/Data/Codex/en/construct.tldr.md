@@ -1,1 +1,1 @@
-A **construct** is a set of grids joined by mechanical blocks such as pistons, rotors and hinges. Grids held by landing gear or connectors are separate constructs.
+A **construct** is a set of grids joined by mechanical blocks, like rotors and pistons. Grids held by landing gear or connectors stay apart.

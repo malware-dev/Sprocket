@@ -1,1 +1,1 @@
-The **installation panel** is where an installation's slots are filled with blocks and signals. It also explains a blueprint to whoever installs it.
+The **installation panel** is where you set up an installation, selecting the blocks and signals for each of its slots.

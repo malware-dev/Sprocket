@@ -1,1 +1,1 @@
-En **konstruksjon** er et sett med rutenett satt sammen av mekaniske blokker som stempler, rotorer og hengsler. Rutenett som holdes av landingsstell eller koblinger, er egne konstruksjoner.
+En **konstruksjon** er et sett med rutenett som er satt sammen av mekaniske blokker, som rotorer og stempler. Rutenett som holdes av landingsstell eller koblinger, forblir atskilt.

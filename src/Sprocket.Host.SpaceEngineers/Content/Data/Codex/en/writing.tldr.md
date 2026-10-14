@@ -1,1 +1,1 @@
-**Writing text** with a few marks, such as `**bold**` or `# Heading`, gives a description headings, lists, tables, and bold or italic words.
+**Rich text** is plain text with a few marks typed into it that turn it into headings, lists, tables, and bold or italic words.

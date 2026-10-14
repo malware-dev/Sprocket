@@ -38,6 +38,26 @@ lists the terms in the order the contents show them. Every page and tooltip exis
   page it sits in that box.
 - **A page describes the product for its own purpose.** A guide once said text "draws as a sign" because
   signs were the test case; what the format was tested on is not what it is for.
+- **An icon is shown, never described.** `![](mark:<name>)` draws the real symbol, kinds and buttons alike
+  (`mark:play`, `mark:delete`), and the words say what it means. Mal: "it's a very bad idea to describe the
+  icons by words. They can change at any time."
+- **A worked example is a page of its own,** under the `> examples` section of the index, ending "Back to
+  examples"; a reference page links to it in one line. Mal: "I want examples to be a separate thing, in a
+  separate list, able to be looked at standalone."
+- **Out-of-world facts go in the `::: player` box, and the line above stays in the world.** The line says
+  "your blueprints, which you can use everywhere"; the box says they are files on the player's computer.
+  The people in the world are engineers, never players.
+- **A page opens by saying what the thing is,** its scope, and where it is found: "A logic system is the
+  automation for one machine, like an airlock, with all the jobs that go with running that machine." Where
+  the idea is one non-programmers get stuck on, like branching, it opens from the need instead ("Sometimes
+  you need a sequence to do one thing or another") and walks through a case.
+- **The codex describes the finished design,** including what a ticket has settled and is not built yet, and
+  nothing a ticket leaves open. Where a trial shows two designs, both are described, each under a heading of
+  its own beneath a `::: player` box saying both are being tried, so the dropped one is deleted whole.
+- **Small structure is prose, not a heading.** "A logic system consists of the following parts:" and a list,
+  not a heading over three lines.
+- **There is no glossary page.** Every linked term already shows its tooltip; a word that needs a
+  definition gets a term page of its own, as `tick` does.
 
 ## Facts the pages rest on
 
@@ -45,30 +65,24 @@ lists the terms in the order the contents show them. Every page and tooltip exis
   gear dock one construct to another, and each stays its own.
 - A construct keeps its automation in its programmable blocks, and loses it only when the last one is
   destroyed or ground down. The logic systems the library lacks are then kept as backups.
-- Most actions happen at once (the bolt). Only a few take time (the clock), such as a door closing, a vent
-  filling or emptying a room, or a piston or rotor moving to where it was sent. A new step that takes time is
-  waited for; the sequence can instead go straight on from it, and one wait covers every step since the last.
+- Most actions happen at once. A few are awaitable, like a door closing, a vent filling or emptying a room,
+  or a piston or rotor moving to where it was sent, and so is a step that runs another sequence. A sequence
+  waits only for those; an action the block keeps on with after it starts, like a sound, is not waited for.
 - A blueprint is a copy in the library; editing the construct's logic system leaves the blueprint as it
   was.
 
 ## Checks of its own
 
 ```
-# The name, which a player never reads
-grep -ni "sprocket" <pages>
-
-# A term linked twice on one page
-grep -o "](#[a-z-]*)" <page> | sort | uniq -d
-
-# A mark in a title
-grep -n "^#.*mark:" <page>
-
-# Both languages: every page and tooltip has its partner
-diff <(ls Content/Data/Codex/en) <(ls Content/Data/Codex/no)
+# The name in running text, a term linked twice, a mark in a title, a page without its partner language
+python .claude/skills/writing/codex-check.py
 
 # Habits that make a page read as machine-written, counted per page; --show <page> lists every hit
 python .claude/skills/writing/tells.py Content/Data/Codex/en/*.md
 ```
+
+`codex-check.py` leaves `::: player` boxes and `quoted` text out of the name check, since a file name or a
+path can carry the name there. Every hit it reports is a fault.
 
 The tester's first remark on the codex was that it reads as AI-written. `tells.py` counts the habits behind
 that: a page opening on a definition, "such as" and lists of three, pointing elsewhere, padding, uncontracted
@@ -112,5 +126,5 @@ that comes from the screens themselves rather than the words.
 
 ## Open
 
-- Whether pages address the player as "you". The existing pages do ("your blueprints"); that was written
-  that way and not ruled on.
+- Whether pages address the player as "you". Mal's home page and every page he approved on 2026-10-14 do,
+  and he has not ruled on it as a rule.

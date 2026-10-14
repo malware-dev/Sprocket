@@ -1,51 +1,26 @@
 # Slot
 
-A slot is a named place in a ![](mark:logic-system)&nbsp;[logic system](#logic-system), such as *the inner door*. The logic system's [steps](#step) and [triggers](#trigger) use the slot, and each ![](mark:installation)&nbsp;[installation](#installation) fills it with blocks of its own. This is how one logic system can run every airlock on a ship.
+For one ![](mark:logic-system)&nbsp;[logic system](#logic-system) to run every airlock on a ship, its [steps](#step) and [triggers](#trigger) can't name one airlock's doors. They name slots instead: named places like *the inner door*, which each ![](mark:installation)&nbsp;[installation](#installation) fills with blocks of its own.
 
-## Two kinds
+- A ![](mark:block)&nbsp;**block slot** holds the blocks a step acts on or a trigger watches, like a door, or every light in the airlock.
+- A ![](mark:signal)&nbsp;**signal slot** holds a block and the toolbar slot on it that sends the [signal](#signal), like a button panel and one of its buttons.
 
-- A ![](mark:block) **block slot** holds the blocks a step acts on or a trigger watches, for example a door, or every light in the airlock.
-- A ![](mark:signal) **signal slot** holds a block and the toolbar slot on it that sends the ![](mark:signal)&nbsp;[signal](#signal), for example a button panel and one of its buttons.
+The blocks you select fill the slots for the installation selected under `Installation`. Every other installation fills them on its own [installation panel](#installation-panel).
 
-## How a slot is made
+## How slots are made
 
-The blocks [picked](#picking) together for one step, one trigger, or the check of an [if](#if) are one set, and each set is one slot holding all of its blocks. A slot of one block is named after the block, such as *Airlock Inner Door*. A slot of several blocks is named *Slot 1*, *Slot 2* and so on.
+You don't make slots yourself. Each time you [select](#picking) blocks for a step, a trigger or an [if](#if), the blocks you selected together are a group, and the logic system makes its slots from those groups:
 
-- Picking the same blocks again, in any order, uses the same slot.
-- Picking exactly the blocks of two or more slots uses those slots, the fewest that make it up.
-- Any other set is a slot of its own, so a block can be in more than one slot.
+- **The same group twice is one slot.** A step that closes the inner door and another that opens it both use *Airlock Inner Door*.
+- **A group made of other slots uses them.** Where the inner and outer doors each have a slot already, a step that closes both doors uses those two slots, and makes no new one.
+- **Any other group is a slot of its own.** A step that switches off both the inner door and the airlock's light, where the light has no slot yet, makes *Slot 1* of the two. The inner door is then in two slots, and each installation fills both.
 
-Slots are worked out again after every change. Six lights picked for a step that switches them off are *Slot 1*. Pick lights 1 to 3 for a second step and lights 4 to 6 for a third, and those make two slots: *Slot 1* goes, and the first step names the two smaller slots. Remove the second and third steps, and the slot of all six comes back.
+A slot of one block takes the block's name, and a slot of several is numbered.
 
-A slot that stays keeps its name, what it is for, and every installation's blocks. Undo takes back a pick together with every change it made to the slots.
+The logic system works its slots out again after every change, so they can split and merge as you build. Six lights switched off by one step make *Slot 1*. Add a step that turns lights 1 to 3 red and one that turns lights 4 to 6 blue, and those two groups become slots. Together they're exactly the six lights, so the first step now uses both, and *Slot 1* goes. Delete the red and blue steps, and *Slot 1* comes back.
 
-## Changing the blocks of a step or a trigger
-
-Where the slot of a step or a trigger is used by it alone, picking other blocks for it keeps the slot, with its name, what it is for, and the other installations' blocks. The new blocks fill it for the installation shown, as long as they are of a kind the slot expects. Otherwise the new blocks are a set like any other, and make their slot by the rules above.
-
-Removing the last step or trigger that uses a slot removes the slot. Blocks another installation had in it are set aside for that installation, and offered first when it fills its slots again.
-
-## Filling a slot
-
-The blocks you pick for a step or a trigger fill its slot for the installation selected under `Installation`. Every other installation fills it on its own [installation panel](#installation-panel).
-
-The logic system's screen lists its slots under `Slots`, each with the blocks the installation shown fills it with. Under them, each other installation with something still to do says so, for example *Installation 2: new, fill it*, *Installation 2: changed, fill it again* or *Installation 2: lost a block*.
-
-Press a slot's blocks on the logic system's screen, or a slot on an installation panel, to pick what fills it. Only blocks of a kind the slot expects are offered. If nothing on this [construct](#construct) fits, the list says so.
-
-- A block slot can be filled with one block or several.
-- A signal slot needs a block and the toolbar slot on it that sends the signal. That toolbar slot is set up for you, and you are asked first if it already does something else.
+A slot that stays keeps its name, what it is for, and every installation's blocks. So does a slot used by only one step or trigger when you select other blocks for it, as long as the new ones are of a kind the slot expects.
 
 ## Its name and what it is for
 
-Pressing a slot's name on the logic system's screen opens the slot's page. What is written there, every installation's installation panel shows. It is changed while the logic system is switched off.
-
-- **The heading** is the slot's name. Rename it with the pencil there. Each slot's name is its own.
-- **`What it is for`** is a box to write in, with headings, lists, and bold or italic text. `Markup` opens the page on [writing text](#writing).
-- **`Expects`** lists the kinds of block the slot takes, for example *Door, Sliding Door*, or `Any block`.
-
-Write them for someone who has never seen your construct. A slot named *Interior Door 2* or *Slot 1* leaves whoever fills it guessing. Rename it *Inner door* and say it is the door on the pressurized side, and they know which door to select.
-
-## An empty slot
-
-When a sequence reaches a slot that is empty, or whose block was lost, the installation is switched off and its row says why. A trigger whose signal slot is empty can't start, and switches its installation off the same way.
+A slot's name and its `What it is for` show on every installation panel, so write them for someone who has never seen your construct. *Slot 1* leaves them guessing. *Inner door*, with a line saying it's the door on the pressurized side, tells them which door to select.

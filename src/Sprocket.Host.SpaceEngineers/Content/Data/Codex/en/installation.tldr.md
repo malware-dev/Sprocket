@@ -1,1 +1,1 @@
-An ![](mark:installation) **installation** is one place a logic system runs, such as one airlock among several, with its own blocks and signals. It can be switched off without affecting the others.
+An ![](mark:installation)&nbsp;**installation** is a set of blocks and signals a logic system works on, like one airlock among several.

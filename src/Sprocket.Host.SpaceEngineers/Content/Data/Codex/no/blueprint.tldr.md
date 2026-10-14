@@ -1,1 +1,1 @@
-En ![](mark:blueprint) **plantegning** er en kopi av et logikksystem som tas vare på i biblioteket, klar til å installeres på en annen konstruksjon.
+En ![](mark:blueprint)&nbsp;**plantegning** er en kopi av et logikksystem som er lagret i biblioteket, klar til å settes på en annen konstruksjon.

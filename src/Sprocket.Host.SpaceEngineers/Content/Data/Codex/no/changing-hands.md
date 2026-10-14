@@ -1,27 +1,11 @@
 # Eierskifte
 
-Automasjonen til en [konstruksjon](#construct) tilhører eierne av konstruksjonen: spillerne som eier flest blokker på den, talt over alle rutenettene. Eier flere spillere like mange, er alle eiere. Når et skip blir tatt eller gitt til en annen spiller, skifter automasjonen eier sammen med det.
+Automasjonen til en [konstruksjon](#construct) tilhører eierne: ingeniørene som eier flest blokker på den, talt over alle rutenettene, og alle av dem ved uavgjort. Bare de kan åpne den. En konstruksjon uten eier åpnes av hvem som helst. Når et skip kapres eller overleveres, skifter automasjonen eier med det.
 
-## Hvem som kan åpne den
-
-Bare eierne av konstruksjonen kan åpne automasjonen. Alle andre som trykker `Automasjon` i terminalen til en programmerbar blokk, også medlemmer av fraksjonen, får beskjeden `Bare eierne av {construct} kan åpne automasjonen dens.` En eierløs konstruksjon kan alle åpne.
-
-## Blokkene den kan bruke
-
-Automasjonen bruker blokkene eierne kan bruke: blokkene de eier, og dem som er delt med fraksjonen deres eller med alle. Enhver annen blokk, som en dør en annen spiller har bygd og holdt for seg selv, er tapt for automasjonen, slik en ødelagt blokk er. Den kommer tilbake av seg selv når den blir delt.
+Automasjonen kan bruke blokkene eierne har lov til å bruke, altså de de eier og de som er delt med fraksjonen deres eller med alle. Alle andre blokker regnes som tapt, slik en ødelagt blokk gjør, og kommer tilbake av seg selv når de deles.
 
 ## Når konstruksjonen skifter eier
 
-Går konstruksjonen over til en spiller den var delt med, fortsetter automasjonen å kjøre. Et skip som er delt med fraksjonen til eieren og gis til et annet medlem av fraksjonen, går videre som før.
+En konstruksjon som gis til en den er delt med, fortsetter å kjøre, som et skip som er delt med en fraksjon og overleveres til et fraksjonsmedlem. Gis den utenfor delingen, ved en kapring eller en overlevering, settes automasjonen på pause: knappene blir døde, og en ![](mark:sequence)&nbsp;[sekvens](#sequence) som er midt i kjøringen, blir stående ved steget sitt. Den forblir på pause til en av de nye eierne gjenopptar den, omtrent slik en programmerbar blokk ber den nye eieren kompilere skriptet sitt på nytt. En omlasting endrer ikke det.
 
-Går den over utenfor delingen, ved at den blir tatt eller gitt til en spiller den var holdt unna, settes automasjonen på pause. Alt den gjør, stopper: knappene blir døde, og en ![](mark:sequence)&nbsp;[sekvens](#sequence) som er midt i en kjøring, blir stående på steget sitt. Den forblir på pause når verdenen lastes inn igjen, til en av de nye eierne fortsetter den. Spillet ber på samme måte den nye eieren av en programmerbar blokk om å kompilere skriptet på nytt; automasjonen beholder alt som det var og venter på ett trykk.
-
-## Skjermen Satt på pause
-
-Mens automasjonen står på pause, viser den skjermen `Satt på pause` først når den åpnes. Den sier hvem konstruksjonen gikk fra og til, hvor mange ![](mark:logic-system)&nbsp;[logikksystemer](#logic-system) den har, og hvor mange blokker som er utenfor rekkevidde, de nye eierne ikke kan bruke, eller innenfor rekkevidde igjen, de gamle eierne ikke kunne bruke.
-
-Tre knapper fører videre:
-
-- `Fortsett` starter alt igjen som det var, og går videre til [startskjermen](#home).
-- `La den stå på pause` holder den stoppet og går videre til startskjermen, der automasjonen kan leses, og endres som vanlig, før den kjører. Et banner over hver skjerm sier `Satt på pause da {construct} skiftet eier.`, og knappen `Se over` på det åpner skjermen `Satt på pause` igjen.
-- `Fjern alt` spør først, og fjerner så hvert logikksystem på konstruksjonen. Angre på startskjermen henter hvert av dem tilbake.
+Når du åpner en automasjon som står på pause, ser du først hva som er endret, og får se den over før den kjører igjen.

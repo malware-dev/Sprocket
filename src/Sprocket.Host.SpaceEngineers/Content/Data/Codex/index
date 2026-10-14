@@ -12,6 +12,7 @@ step
 action
 run-and-stop
 wait
+tick
 if
 slot
 signal
@@ -19,3 +20,7 @@ blueprint
 construct
 changing-hands
 writing
+> examples
+simple-airlock
+drill-arm
+hangar-door

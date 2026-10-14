@@ -1,1 +1,1 @@
-A ![](mark:signal) **signal** is something a block sends to start a trigger, from a slot on its toolbar, such as a button being pressed, or from a change in the block itself, such as a door finishing closing.
+A ![](mark:signal)&nbsp;**signal** is what a block sends to fire a trigger, from a slot on its toolbar or from a change in the block itself.

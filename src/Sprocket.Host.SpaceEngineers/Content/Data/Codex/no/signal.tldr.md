@@ -1,1 +1,1 @@
-Et ![](mark:signal) **signal** er noe en blokk sender for å starte en utløser, fra en plass på verktøylinja, som at en knapp trykkes, eller fra en endring i selve blokken, som at en dør er ferdig med å lukke seg.
+Et ![](mark:signal)&nbsp;**signal** er det en blokk sender for å utløse en utløser, fra en plass på verktøylinja eller fra en endring i selve blokken.

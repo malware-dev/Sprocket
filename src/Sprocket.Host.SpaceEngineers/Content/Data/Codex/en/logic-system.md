@@ -1,71 +1,45 @@
 # Logic system
 
-A logic system automates one job, for example an airlock, a hangar door or a drill rig. Each one on this [construct](#construct) has its own heading on the [home screen](#home).
+A logic system is the automation for one machine, like an airlock or an elevator, with all the jobs that go with running that machine. It works within a single [construct](#construct), and cannot reach beyond it. You can find an overview of all the logic systems on your construct on the [home screen](#home), which you can reach by finding a programmable block in the terminal and pressing its `Automation` button.
 
-## What it is made of
+A logic system consists of the following parts:
 
 - ![](mark:sequence)&nbsp;[Sequences](#sequence) say what happens, step by step.
-- [Triggers](#trigger) say when, for example when a ![](mark:signal)&nbsp;[signal](#signal) arrives, a door finishes closing or a set time passes.
-- ![](mark:installation)&nbsp;[Installations](#installation) say which blocks take part, for example the doors and the vent, and the blocks that send its signals.
+- ![](mark:trigger)&nbsp;[Triggers](#trigger) say when, for example when a button is pressed or a door finishes closing.
+- ![](mark:installation)&nbsp;[Installations](#installation) say which blocks take part.
 
-Because the blocks are kept apart from the job, one logic system can run every airlock on your ship.
+The job is kept apart from the blocks, so one logic system can run every airlock on the ship. The [simple airlock](#simple-airlock) builds one from the start.
 
-## A first airlock
+## Switch off before you change it
 
-1. On the home screen, press `+ logic system`, and name it *Airlock* on its heading.
-2. Under `Sequences`, press `+ sequence`, and name it *Cycle Out*.
-3. Press `+ step`, then `task`, [pick](#picking) the inner door, and select the `close` with the clock beside it. The sequence page explains the clock.
-4. Add `depressurize` for the vent and `open` for the outer door the same way.
-5. Go back. Under `Triggers`, press `+ trigger`, then `when`, pick the airlock's button, and have it run *Cycle Out*.
-6. Leave the screen, and switch the logic system on when asked.
+A logic system can only be changed while it's switched off, so a half-built sequence never starts by accident. New logic systems are made switched off. The switch sits on the logic system's heading on the home screen, and at the top right of its own screen.
 
-## Switch it off to change it
+Switching it off stops its triggers from firing, and aborts any running sequences, apart from those started by hand.
 
-What a logic system does can only be changed while it is switched off, so a half-built sequence never starts by accident. A new one starts switched off. Its switch is on its heading on the home screen, and at the top right of its own screen.
+![](mark:delete) deletes at once; undo brings back what it took.
 
-Switching it off stops anything running and leaves the blocks as they are. When you leave a changed logic system that is still off, you are asked whether to switch it on.
+## The installation panel
 
-Deleting is a change like any other. A sequence's bin, an installation's bin, and the bin at the top of the logic system's own screen delete at once. Undo on the logic system's screens brings back a sequence, and undo on the home screen an installation or a logic system. While the logic system runs, the bins stay in their places but can't be pressed, and say why. Copying a sequence waits for the switch the same way.
+Below the sequences is what everyone installing this logic system sees on their own [panel](#installation-panel): a description, then the slots.
 
-## Real blocks, kept as slots
+To help people understand what your logic system is for, or just to remind yourself, consider writing a description. Whoever receives your blueprint has never seen your construct, so the description and the slots are all they have to go on. The description is written while the logic system is off, and can hold [rich text](#writing).
 
-Below the sequences, `Installation panel` shows what every installer reads, laid out as their [installation panel](#installation-panel) shows it: the description, then the slots.
+Each set of blocks you select for a step or a trigger becomes a [slot](#slot). A slot of one block takes that block's name; a slot of several is numbered. A ![](mark:block) **block slot**, like *the inner door*, holds the blocks a sequence acts on or watches. A ![](mark:signal) **signal slot**, like *the button*, holds a block and the toolbar slot on it that sends the [signal](#signal).
 
-The blocks you pick become [slots](#slot), listed under `Slots`. There are two kinds:
-
-- A ![](mark:block) **block slot**, such as *the inner door*, holds blocks that a sequence acts on or watches.
-- A ![](mark:signal) **signal slot**, such as *the button*, holds a block and the toolbar slot on it that sends the signal.
-
-Each slot shows its name, what it is for, and the blocks that fill it. Pressing its blocks picks others, and pressing its name opens the slot's own page, to rename it and say what it is for.
-
-The `Installation` list, at the top of the logic system's screen, selects which installation's blocks the steps and the slots show, and which installation a block you pick fills.
-
-## The description
-
-The description, the first part of `Installation panel`, says what the logic system does and what whoever installs it needs to know. While the logic system is switched off it is a box to write in, headed `Description`, with headings, lists, and bold or italic text, and `Markup` opens the page on [writing text](#writing).
-
-It is shown beside the logic system's blueprint in the library, and at the top of every installation's installation panel. Anyone who receives your blueprint has never seen your construct, so the description and the slots are their only guide.
-
-## Undo and redo
-
-Each logic system keeps one list of the changes made to it, on any of its screens: its own, its sequences', its slots' pages, and its installations' installation panels. The undo arrow on each of those screens takes back the last change on that list, wherever it was made, and the redo arrow makes it again. Both walk the list in the order the changes were made, and the list lasts for the game session.
-
-On the list is every change to its steps, sequences and triggers, its slots, its description and its name, and to its installations' names and the blocks that fill their slots. Adding a trigger is one change, together with the sequence it made and any button it took over. Undo passes over switching on and off, running a sequence by hand, which installation is shown, and how the picker shows its blocks.
-
-Undo opens the screen where the change was: a step's sequence, an installation's installation panel for its blocks, and the logic system's own screen for everything else.
-
-A change to what the logic system does, such as a step, is taken back and made again only while the logic system is switched off, as it was made. An installation's blocks are taken back only while that installation, or the logic system, is switched off. Whatever can be changed while it runs, such as a name, is taken back at any time. Until a change can be taken back, its arrow can't be pressed.
+When you have more than one installation, the `Installation` list at the top of the screen selects the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
 
 ## More than one airlock
 
-On the home screen, press `+ installation` under the logic system, and fill its slots with the second airlock's blocks on its installation panel. Both airlocks then run the same sequences on their own blocks, and a change to a sequence reaches both.
+On the home screen, press `+ installation` under the logic system and fill its slots with the second airlock's blocks. Both airlocks then run the same sequences on their own blocks, and a change to a sequence reaches both.
 
 ## When something goes wrong
 
-On the home screen, a row lights green while it runs and red when it needs mending. Open it to see why.
+The home screen will tell you when something goes wrong with a logic system. If a sequence can't carry on, for example because a block was lost or a slot is empty, that installation switches off and its row says why:
 
-If a sequence cannot carry on, for example because a block was lost or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was lost.* Put right what it names, for example by filling the slot on the installation panel, and switch the installation on again.
+*Stopped at step 1 of Cycle Out: Airlock Inner Door was lost.*
 
-## Keeping and sharing it
+Put right what it names, then switch the installation on again.
 
-`Make blueprint` saves a copy in the [library](#library) as a ![](mark:blueprint)&nbsp;[blueprint](#blueprint). From then on, the same button reads `Update blueprint`, and brings the library's copy up to date. Putting the blueprint on another construct makes a logic system with one installation, whose slots are filled on the installation panel.
+## Blueprints
+
+To keep a logic system for later, or to use it on another ship, press `Make blueprint`. It saves a copy to the [library](#library) as a ![](mark:blueprint)&nbsp;[blueprint](#blueprint), and when you change the logic system afterwards, `Update blueprint` brings the copy up to date. Put the blueprint on another construct, and it gets the same logic system, ready for its own blocks.

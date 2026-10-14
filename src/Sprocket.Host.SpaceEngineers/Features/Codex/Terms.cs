@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Picking blocks.</summary>
         public const string Picking = "picking";
 
-        /// <summary>Writing rich text, which every description box's guide button opens.</summary>
+        /// <summary>Rich text, which every description box's guide button opens.</summary>
         public const string Writing = "writing";
 
         /// <summary>A construct changing hands, which the resume screen's guide button opens.</summary>

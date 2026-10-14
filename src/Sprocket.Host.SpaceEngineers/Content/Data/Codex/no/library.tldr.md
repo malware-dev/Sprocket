@@ -1,1 +1,1 @@
-**Biblioteket** holder plantegningene dine, logikksystemene på denne konstruksjonen og sikkerhetskopier fra konstruksjoner som mistet automasjonen.
+**Biblioteket** holder plantegningene dine, sammen med logikksystemene på denne konstruksjonen og sikkerhetskopier av konstruksjoner som mistet automasjonen sin.

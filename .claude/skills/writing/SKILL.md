@@ -77,8 +77,8 @@ Each term in one line, with its Norwegian word.
 - **Construct** (konstruksjon): a set of grids joined by mechanical blocks such as pistons, rotors and hinges.
 - **Installation** (installasjon): a set of blocks and signals a logic system works on, such as one airlock
   among several.
-- **Logic system** (logikksystem): the automation for one job, such as an airlock: what happens, what starts
-  it, and which blocks it uses.
+- **Logic system** (logikksystem): the automation for one machine, like an airlock, with all the jobs that go
+  with running it (Mal, 2026-10-14). A job is one task of it, like cycling out.
 - **Option** (valg): a setting an action takes, such as a piston's position and speed.
 - **Sequence** (sekvens): a list of steps a logic system runs from top to bottom.
 - **Signal** (signal): what a block sends to start a trigger.

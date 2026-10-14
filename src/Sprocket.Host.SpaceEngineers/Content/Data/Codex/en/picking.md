@@ -1,28 +1,18 @@
-# Picking blocks
+# Selector
 
-The picker is where blocks, and what to do with them, are selected for a [step](#step), a [trigger](#trigger) or a [slot](#slot). Its columns run from left to right: `Blocks`, then what to do with them, then, where what is selected takes options, a column headed by its name that asks for them. The column furthest right describes what is selected. `Done` uses it and goes back.
+A selector is where you select blocks, and what to do with them or check on them. There is one for each job:
 
-## Selecting blocks
+- The **block selector** selects the blocks for a [step](#step) and what it does to them, and fills a [slot](#slot).
+- The **signal selector** selects the block and the [signal](#signal) that fire a [trigger](#trigger).
+- The **value selector** selects the blocks and the value an [if](#if) checks.
 
-Press a block to select it, or tick several to select them all.
+`Search` looks for the words you type in the order you type them, each anywhere in a block's name: *airl 1* finds *Airlock 1*, *Airlock 10* and *Airlock Door 1*, and leaves out *1 Airlock*, and every search box matches the same way. What you typed stays until you leave the screen.
 
-Type in `Search` to show only the blocks whose name holds what you type, and select a kind to show only blocks of that kind, or a family, such as `Door`, to show every kind in it. The search stays as typed for the screen the picker was opened from, until you leave that screen, so a search for *Airlock* still holds when you pick for the next step.
+Blocks with `Show block in toolbar config` switched off in the terminal are left out. `Show blocks hidden from toolbars`, at the end of the `Blocks` heading, shows them too, and it stays as you left it, in every selector and wherever you are.
 
-Blocks with `Show block in toolbar config` switched off in their terminal are left out. The eye at the end of the `Blocks` heading shows them as well, and pressed again hides them. It stays as you left it, in every picker and every world.
+Each thing the blocks can do carries a mark for its kind:
 
-When a slot is being filled, only blocks of the right kind are offered.
-
-## What to do
-
-`What to do` lists what the selected blocks can do, grouped under headings such as `Power` and `Opening`. `Terminal ›`, at the end of the heading, lists instead everything the blocks offer in the terminal, under the terminal's own names, and `‹ Organized` goes back. See [Action](#action).
-
-Each choice carries a mark for its kind:
-
-- ![](mark:action) **An action**, marked with an arrow into a block, is started without waiting for the block to complete it, such as switching a light on.
-- ![](mark:awaited) **An action that takes time**, marked with an arrow into a clock, such as closing a door, can be waited for before the next step begins, or left running while the sequence goes straight on.
-- ![](mark:value) **A value**, marked `=?`, is one of the block's properties, to be set or checked, such as a light's `Radius`.
-- ![](mark:signal) **A signal**, marked with a square pulse, is something a block sends, such as a button being pressed or a door finishing closing. Signals are offered when picking for a trigger.
-
-## Changing a choice
-
-Pressing a part of a step or a trigger, such as its blocks or its action, opens the same picker, on the column for that part.
+- ![](mark:action)&nbsp;An [action](#action) the sequence starts and moves on from, regardless of how long the block takes to finish it.
+- ![](mark:awaited)&nbsp;An [awaitable](#sequence) action, one that runs over more than one [tick](#tick) and the sequence can wait for.
+- ![](mark:value)&nbsp;A **value**, one of the block's properties, to set or to check.
+- ![](mark:signal)&nbsp;A **signal** the block sends, offered in the signal selector.

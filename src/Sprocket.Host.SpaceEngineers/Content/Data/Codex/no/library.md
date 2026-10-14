@@ -1,30 +1,43 @@
 # Bibliotek
 
-Biblioteket holder ![](mark:logic-system)&nbsp;[logikksystemene](#logic-system) på denne [konstruksjonen](#construct), sikkerhetskopier fra konstruksjoner som mistet automasjonen, og ![](mark:blueprint)&nbsp;[plantegningene](#blueprint) dine. Åpne det med `Bibliotek` på [startskjermen](#home).
+Biblioteket er der du tar vare på ![](mark:blueprint)&nbsp;[plantegningene](#blueprint) dine og styrer ![](mark:logic-system)&nbsp;[logikksystemene](#logic-system) som er laget av dem. Åpne det med `Bibliotek` på [startskjermen](#home). Det lister tre grupper:
 
-Det viser, ovenfra og ned:
+- `På konstruksjonene dine`: denne [konstruksjonen](#construct), med hvert logikksystem på den.
+- `Sikkerhetskopier`: logikksystemer som er tatt vare på fra konstruksjoner som mistet automasjonen sin.
+- `I lageret`: plantegningene dine, som du kan bruke overalt.
 
-- **`På konstruksjonene dine`**: denne konstruksjonen, med alle logikksystemene på den.
-- **`Sikkerhetskopier`**: logikksystemene som er tatt vare på fra konstruksjoner som mistet automasjonen, hver under navnet på konstruksjonen sin.
-- **`I lageret`**: plantegningene dine, som alle verdener kan bruke.
+::: player
+Plantegninger i lageret lagres på datamaskinen din, så alle verdener du spiller på den, kan bruke dem. Å kopiere filen til en plantegning tar den med til en annen datamaskin.
+:::
 
-Skriv i søkefeltet for å vise bare radene der navnet inneholder det du skriver.
+Velg en rad for å se hvem som lagde den, når den sist ble endret og hva den er til.
 
-## Et logikksystem eller en plantegning
+## Ta vare på en plantegning
 
-Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen, og ![](mark:installation)&nbsp;[installasjonene](#installation) på denne konstruksjonen.
+`Lag plantegning` legger en kopi av et logikksystem i lageret. Fra da av er de to koblet: en endring i logikksystemet blir stående på konstruksjonen til du trykker `Oppdater plantegning`, og en endring i plantegningen når en konstruksjon bare der noen trykker `Oppdater fra biblioteket`. Begge oppdateringene spør først, siden de erstatter det som var der.
 
-- `Legg til på denne konstruksjonen` setter det på denne konstruksjonen. Den er der bare så lenge ingen logikksystemer laget fra det er på denne konstruksjonen.
-- På et logikksystem på denne konstruksjonen tar `Lag plantegning` vare på en kopi i lageret, og `Oppdater plantegning` oppdaterer den kopien. `Oppdater fra biblioteket` henter en nyere kopi fra lageret, og `Tilbakestill til plantegning` går tilbake til kopien i lageret, uten endringene som er gjort siden. Uansett beholder installasjonene blokkene sine.
-- `Lag en kopi` setter et nytt logikksystem på denne konstruksjonen som starter som en kopi av dette.
-- Søppelkassen sletter en plantegning fra lageret for godt, etter å ha spurt. Logikksystemer som allerede er på konstruksjoner, fortsetter å kjøre. På en sikkerhetskopi glemmer søppelkassen den ene sikkerhetskopien.
+`Tilbakestill til plantegning` setter et logikksystem tilbake til plantegningen, og fjerner hver endring som er gjort siden plantegningen sist ble oppdatert. Både denne og `Oppdater fra biblioteket` lar installasjonene beholde blokkene sine, i hver plass plantegningen fortsatt har.
 
-Siden om plantegninger forklarer hver av disse.
+## Sette en på en konstruksjon
+
+`Legg til på denne konstruksjonen` setter logikksystemet til plantegningen her, med én ![](mark:installation)&nbsp;[installasjon](#installation) å fylle. Det tilbys bare mens ingen logikksystem fra den plantegningen står på konstruksjonen, for en andre luftsluse er en andre installasjon av det ene logikksystemet, aldri en andre kopi av det.
+
+`Lag en kopi` setter et nytt logikksystem på denne konstruksjonen, kopiert fra raden du valgte, og åpner det så du kan endre det. Kopien har ingen tilknytning til det den ble kopiert fra, og får en egen plantegning først når du trykker `Lag plantegning`. Slik bygger du noe nytt av noe som virker, som en hangardør av en luftsluse.
+
+## Slette
+
+Å slette en plantegning fra lageret er for godt, men logikksystemene som allerede er laget av den, fortsetter å kjøre, og hvert av dem kan tas vare på igjen med `Lag plantegning`.
 
 ## Sikkerhetskopier
 
-Når den siste programmerbare blokken på en konstruksjon blir ødelagt eller slipt ned, blir logikksystemene den hadde tatt vare på under `Sikkerhetskopier`, med når den gikk tapt. Bare logikksystemene biblioteket ikke allerede har, blir tatt vare på: et logikksystem som har en lik plantegning, overlates til plantegningen. De står under navnet konstruksjonen hadde, de siste først. Sikkerhetskopier tas vare på i verdenen, så biblioteket i en annen verden viser dem ikke.
+Når en konstruksjon mister den siste programmerbare blokken sin, tas logikksystemene dens vare på under `Sikkerhetskopier`, oppført under navnet til konstruksjonen med den nyeste først. Et logikksystem biblioteket allerede har, uendret siden plantegningen sist ble oppdatert, overlates til den plantegningen.
 
-Hver sikkerhetskopi virker som en plantegning. Den kan settes på denne konstruksjonen, kopieres eller tas vare på i lageret med `Lag plantegning`, så alle verdener kan bruke den. Har lageret plantegningen den ble laget fra, står det `Oppdater plantegning` på knappen, og du blir spurt om den plantegningen skal oppdateres, eller sikkerhetskopien tas vare på som en ny. Installasjonene ble igjen med konstruksjonen den ble tatt fra, så når den settes på denne konstruksjonen, kommer den med én ny installasjon som skal fylles.
+En sikkerhetskopi virker som en plantegning, og `Lag plantegning` tar vare på den til bruk overalt: som en oppdatering av plantegningen den kom fra, der den fortsatt ligger i lageret, eller som en ny. Installasjonene dens ble igjen hos konstruksjonen den kom fra, så den kommer med én ny installasjon å fylle.
 
-Søppelkassen glemmer én sikkerhetskopi for godt, etter å ha spurt.
+::: player
+Sikkerhetskopier lagres sammen med verdenen de ble tatt i, så biblioteket til en annen verden viser dem ikke.
+:::
+
+## Deling
+
+Du kan dele en plantegning fra biblioteket med alle, med fraksjonen din eller med ingeniører du velger ved navn, og den dukker opp i biblioteket deres. Du kan trekke tilbake en deling når som helst, men den som allerede har satt plantegningen din på en konstruksjon, beholder det logikksystemet, og kan lage egne plantegninger av det.

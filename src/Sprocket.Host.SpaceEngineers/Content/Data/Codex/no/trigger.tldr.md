@@ -1,1 +1,1 @@
-En **utløser** kjører eller stopper en sekvens når et signal kommer, blokker kommer i en tilstand som at en dør er ferdig med å lukke seg, eller en fastsatt tid har gått.
+En ![](mark:trigger)&nbsp;**utløser** kjører eller stopper en sekvens når noe skjer, som at en knapp trykkes.

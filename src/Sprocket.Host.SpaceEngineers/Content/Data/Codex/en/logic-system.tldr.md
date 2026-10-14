@@ -1,1 +1,1 @@
-A ![](mark:logic-system) **logic system** is the automation for one job, such as an airlock: what happens, what starts it, and which blocks it uses.
+A ![](mark:logic-system)&nbsp;**logic system** is the automation for one machine, like an airlock, with all the jobs that go with running it.

@@ -1,6 +1,6 @@
-# Skrive formatert tekst
+# Formatert tekst
 
-Sprocket støtter formatert tekst flere steder. Formateringen bygger på en del av Markdown-formatet. Her er det som støttes, og hvordan du skriver det.
+Formatert tekst er vanlig tekst med noen få tegn skrevet inn, hentet fra Markdown, som gjør den om til overskrifter, lister, tabeller og fete eller kursive ord. Denne siden viser hvert tegn, og hva det gir.
 
 ## Fet, kursiv og kode
 
