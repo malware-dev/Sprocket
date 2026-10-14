@@ -41,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
         readonly List<IMyCubeGrid> _watched = new List<IMyCubeGrid>();
+        IMyGridGroupData _group;
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
         readonly List<IMyTerminalBlock> _found = new List<IMyTerminalBlock>();
         readonly HashSet<long> _seen = new HashSet<long>();
@@ -94,15 +95,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// reported has to count here before the set is next read, or a block ground off goes on resolving as present.
         /// One flag read when nothing changed.
         /// <para>
-        /// <b>Only as truthful as the staleness that drives it, and that is known to be incomplete.</b>
-        /// A rotor or piston head detaching takes a whole subgrid out of this construct without adding
-        /// or removing a single block, and a grid splitting or merging does the same. None of those
-        /// raises the events this listens to, so both this and <see cref="Entities" /> can be wrong
-        /// after one - a sequence going on cycling a door that floated away.
-        /// </para>
-        /// <para>
-        /// Deferred rather than unknown, and must be closed before release: see
-        /// <c>docs/ApiUnknowns.md</c>, question 3.
+        /// A rotor or piston head detaching, and a grid splitting or merging, take grids out of this construct or bring
+        /// them in without adding or removing a block; the construct's mechanical group says so, and so does each grid
+        /// that splits or merges, and both mark it stale.
         /// </para>
         /// </remarks>
         public int Revision
@@ -553,6 +548,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             MyAPIGateway.GridGroups.GetGroup(home, GridLinkTypeEnum.Mechanical, _grids);
             _grids.RemoveAll(Closing);
             Watch(_grids);
+            Join(MyAPIGateway.GridGroups.GetGridGroup(GridLinkTypeEnum.Mechanical, home));
 
             _found.Clear();
             _seen.Clear();
@@ -702,6 +698,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _watched[i].OnBlockAdded -= OnBlocksChanged;
                 _watched[i].OnBlockRemoved -= OnBlockRemoved;
                 _watched[i].OnBlockOwnershipChanged -= OnOwnership;
+                _watched[i].OnGridSplit -= OnGridsChanged;
+                _watched[i].OnGridMerge -= OnGridsChanged;
             }
 
             _watched.Clear();
@@ -711,8 +709,52 @@ namespace Sprocket.Host.SpaceEngineers.World
                 grids[i].OnBlockAdded += OnBlocksChanged;
                 grids[i].OnBlockRemoved += OnBlockRemoved;
                 grids[i].OnBlockOwnershipChanged += OnOwnership;
+                grids[i].OnGridSplit += OnGridsChanged;
+                grids[i].OnGridMerge += OnGridsChanged;
                 _watched.Add(grids[i]);
             }
+        }
+
+        /// <summary>Listens to the mechanical group the construct's own grid is in, which says when a grid joins or leaves it.</summary>
+        /// <remarks>
+        /// The game moves a grid from one group to another whenever a rotor, piston or hinge attaches or detaches, and when
+        /// grids split or merge, and each group it leaves or joins says so; none of those adds or removes a block. Followed
+        /// again on every rebuild, since the construct's own grid may be the one that moved.
+        /// </remarks>
+        void Join(IMyGridGroupData group)
+        {
+            if (group == _group)
+                return;
+
+            if (_group != null)
+            {
+                _group.OnGridAdded -= OnGroupChanged;
+                _group.OnGridRemoved -= OnGroupChanged;
+                _group.OnReleased -= OnGroupReleased;
+            }
+
+            _group = group;
+            if (_group == null)
+                return;
+
+            _group.OnGridAdded += OnGroupChanged;
+            _group.OnGridRemoved += OnGroupChanged;
+            _group.OnReleased += OnGroupReleased;
+        }
+
+        void OnGroupChanged(IMyGridGroupData group, IMyCubeGrid grid, IMyGridGroupData other)
+        {
+            _stale = true;
+        }
+
+        void OnGroupReleased(IMyGridGroupData group)
+        {
+            _stale = true;
+        }
+
+        void OnGridsChanged(IMyCubeGrid grid, IMyCubeGrid other)
+        {
+            _stale = true;
         }
 
         void OnOwnership(IMyCubeGrid grid)
@@ -739,20 +781,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 AnchorClosed();
         }
 
-        /// <summary>
-        /// Marks the list for rebuilding. For the moments the grid does not report, above all a piston
-        /// or rotor attaching, which changes which grids are in the group without adding a block to any of
-        /// them.
-        /// </summary>
-        public void Invalidate()
-        {
-            _stale = true;
-        }
-
         /// <summary>Stops listening to the grids this was watching.</summary>
         public void Dispose()
         {
             Watch(new List<IMyCubeGrid>());
+            Join(null);
             Follow(null);
         }
     }

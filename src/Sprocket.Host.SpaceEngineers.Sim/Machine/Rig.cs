@@ -33,6 +33,12 @@ public sealed class Rig
     /// <summary>The grid a block is welded to next.</summary>
     Grid _welding;
 
+    /// <summary>What the game would hand the mod for the construct's mechanical group, which says when a grid joins or leaves it.</summary>
+    readonly IMyGridGroupData _group;
+
+    Action<IMyGridGroupData, IMyCubeGrid, IMyGridGroupData> _joined;
+    Action<IMyGridGroupData, IMyCubeGrid, IMyGridGroupData> _left;
+
     /// <summary>
     /// A construct with nothing on it but the block Sprocket runs in.
     /// </summary>
@@ -53,6 +59,15 @@ public sealed class Rig
     /// </remarks>
     public Rig(long sprocket)
     {
+        _group = Pretend.To<IMyGridGroupData>()
+            .Answers("add_OnGridAdded", invocation => Listen(ref _joined, invocation, true))
+            .Answers("remove_OnGridAdded", invocation => Listen(ref _joined, invocation, false))
+            .Answers("add_OnGridRemoved", invocation => Listen(ref _left, invocation, true))
+            .Answers("remove_OnGridRemoved", invocation => Listen(ref _left, invocation, false))
+            .Does("add_OnReleased", () => null)
+            .Does("remove_OnReleased", () => null)
+            .Done();
+
         _grids.Add(_grid);
         _welding = _grid;
         Sprocket = Weld(new Programmable(sprocket, "Automation",
@@ -166,6 +181,8 @@ public sealed class Rig
             head.Top((IMyMechanicalConnectionBlock)rotor.Block);
             rotor.TopGrid = head.Block;
             _grids.Add(head);
+            if (_joined != null)
+                _joined(_group, head.Block, null);
         }
 
         for (var i = 0; i < _grids.Count; i++)
@@ -227,8 +244,41 @@ public sealed class Rig
 
             _grids[i].Delete();
             _grids.RemoveAt(i);
+            if (_left != null)
+                _left(_group, grid, null);
             return;
         }
+    }
+
+    /// <summary>Detaches the head of <paramref name="rotor" />, which floats away with whatever is on it, outside the construct.</summary>
+    /// <remarks>No block is added or removed; the construct's mechanical group says the head's grid left it.</remarks>
+    public void Detach(Rotor rotor)
+    {
+        for (var i = 0; i < _grids.Count; i++)
+        {
+            if (_grids[i].Block != rotor.TopGrid)
+                continue;
+
+            var head = _grids[i];
+            _grids.RemoveAt(i);
+            rotor.TopGrid = null;
+            if (_welding == head)
+                _welding = _grid;
+
+            if (_left != null)
+                _left(_group, head.Block, null);
+            return;
+        }
+    }
+
+    static object Listen(ref Action<IMyGridGroupData, IMyCubeGrid, IMyGridGroupData> held,
+        Castle.DynamicProxy.IInvocation invocation, bool adding)
+    {
+        var handler = (Delegate)invocation.Arguments[0];
+        held = (Action<IMyGridGroupData, IMyCubeGrid, IMyGridGroupData>)(adding
+            ? Delegate.Combine(held, handler)
+            : Delegate.Remove(held, handler));
+        return null;
     }
 
     /// <summary>
@@ -562,6 +612,7 @@ public sealed class Rig
 
                 return null;
             })
+            .Does("GetGridGroup", () => _group)
             .Done();
 
         MyAPIGateway.Multiplayer = Pretend.To<IMyMultiplayer>()

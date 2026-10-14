@@ -67,33 +67,7 @@ surviving a paste rests entirely on it, and nothing has tested it.
 *Affects* R39, R40, R41 and R24, which between them now carry three different meanings for
 "there is no block here".
 
-### 3. When does a construct stop being the same construct
-
-**Must be answered before release. It is a correctness hole, not a question of polish.**
-
-`GridWorld.Entities` is this construct only - the grid the Sprocket sits on plus whatever is
-mechanically connected to it by rotors, pistons and hinges. It keeps that promise by marking itself
-stale on the grids' own `OnBlockAdded` and `OnBlockRemoved`, and rebuilding when somebody looks.
-
-**That signal does not cover every way membership changes**, and at least three ways are ordinary
-play rather than edge cases:
-
-- **A rotor or piston head detaching.** No block is added and none is removed. The subgrid simply
-  stops being part of this construct, and nothing tells us.
-- **A grid splitting.** Cutting or shooting a construct in two leaves blocks that are still there
-  and no longer ours.
-- **Two grids merging**, which is the same problem arriving rather than leaving.
-
-Until this is answered, a sequence can go on cycling a door that floated away five minutes ago, and
-the editor will list it as present. It is also what `GridWorld.Revision` rests on, so a reference
-now resolves against a construct that may quietly be wrong.
-
-**This is not an unknown; it is deferred work.** The game does say enough - `OnGridSplit`,
-`OnGridMerge` and the mechanical connection blocks' attach and detach between them cover it. It sits
-in this file because this is where things that must be settled before release are kept, and because
-somebody reading `GridWorld` needs one place to be sent.
-
-### 4. Measured: a terminal action cannot be registered once for every block
+### 3. Measured: a terminal action cannot be registered once for every block
 
 **Answered by measurement on 2026-09-12, and the answer is no.** It is here rather than in
 Design.md because it closes off a design, and somebody will propose that design again.
@@ -130,7 +104,7 @@ the game. Registering per type across that list was never tested and is not rule
 
 ---
 
-### 5. Whether a mod can read its own localisation table
+### 4. Whether a mod can read its own localisation table
 
 Not blocking anything yet - see decision 11 in `Design.md` and issue #17 - and the first thing
 that decision needs, because it decides whether there is a mechanism to design against or one to invent.
@@ -159,7 +133,8 @@ show them - that is the game's limit and not one a mod can lift with this font.
 Kept listed so nobody re-opens them: how events reach us, whether levels are readable,
 whether appearance is readable, whether a person can be told, what an LCD accepts, whether
 docking is observable, where a program can live, whether a block's position is available,
-whether being attacked is reported, and whether a change can be missed.
+whether being attacked is reported, whether a change can be missed, and when a construct
+stops being the same construct (its mechanical group says, which `GridWorld` follows).
 
 All of them are in Design.md. Two more were struck out earlier for never having been unknown
 at all: a mod sees the entire world, so the one-construct limit is a choice rather than a

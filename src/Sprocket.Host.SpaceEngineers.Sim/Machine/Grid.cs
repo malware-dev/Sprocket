@@ -68,6 +68,10 @@ public sealed class Grid
             .Does("remove_OnBlockIntegrityChanged", () => null)
             .Does("add_OnGridBlockDamaged", () => null)
             .Does("remove_OnGridBlockDamaged", () => null)
+            .Does("add_OnGridSplit", () => null)
+            .Does("remove_OnGridSplit", () => null)
+            .Does("add_OnGridMerge", () => null)
+            .Does("remove_OnGridMerge", () => null)
             .Done();
     }
 
