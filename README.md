@@ -56,3 +56,6 @@ the description and the program the exact same document.
 ## Building the mod
 
 Requires an installed copy of Space Engineers, .NET, and [MDK2](https://github.com/malforge/mdk2).
+
+How the repository is put together, how to build and test it, and how its parts work is in the developer guide,
+starting at [docs/Overview.md](docs/Overview.md).

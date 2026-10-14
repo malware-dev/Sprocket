@@ -3,7 +3,7 @@
     <EntityComponents>
         <!--
         Claims the keys Sprocket keeps a construct's program under, in the mod storage on the block the
-        program belongs to, the key the world's backups are kept under, on the carrier, and the key a
+        program belongs to, the key Sprocket's files for the world are kept under, on the carrier, and the key a
         door keeps its auto-close delay under.
 
         WITHOUT THIS THE PROGRAM IS SILENTLY THROWN AWAY. MyModStorageComponent.Serialize walks the keys
@@ -14,7 +14,7 @@
         The first GUID must match SprocketUnit.ProgramKey exactly, the second SprocketUnit.StateKey, the
         third Carrier.Key and the fourth CloseDelay.Key, and none must ever change. A different one reads as
         a Sprocket nobody has written a program on yet, which discards somebody's ship without saying so, as
-        a world with no backups, or as every door set to stay open.
+        a world that remembers nothing, or as every door set to stay open.
         -->
         <EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
             <Id>

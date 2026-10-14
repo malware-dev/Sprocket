@@ -257,7 +257,10 @@ Six rules, each of which the document has already been wrong about:
 
 ## Documentation
 
-`docs/` holds only what is not code yet: open questions, decisions taken but not implemented, and
-numbers pinned to external evidence. Rationale for things already built is not migrated here during a
-cleanup, it is deleted. Anything renamed by a pass gets its mention in `docs/` and `README.md` fixed
-in the same change.
+`docs/` is a guide for people working on Sprocket: how the repository is put together and how its parts
+work, written from the code as it is. It holds no planning: open questions and unbuilt work are tracked as
+issues and on the work ledger.
+Agent instructions state their own facts and never lean on it, apart from `docs/Language.md`, the spec.
+
+**The guide is kept true like the codex.** A change to something a page describes fixes the page in the
+same change, and anything renamed gets its mention in `docs/` and `README.md` fixed with it.

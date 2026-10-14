@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// The air vent, which the terminal describes only as a switch and which the airlock is built around.
     /// </summary>
     /// <remarks>
-    /// It has no events of any kind - see docs/Catalogue.md - so all of this is sampled, and a room that
+    /// The game's API gives it no events of any kind, so all of this is sampled, and a room that
     /// empties and refills between two ticks is invisible. That bound was accepted knowingly; it is worth
     /// remembering that the vent is the block it bites.
     /// <para>

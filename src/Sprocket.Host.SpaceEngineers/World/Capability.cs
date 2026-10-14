@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// A block is every capability that claims it, and its kind is described by each in turn, so a cryo chamber can be a
     /// seat and a store and a switch at once. Claimed by the interface the game gives the block rather than by a block
     /// type id, which is what makes a modded door that implements <c>IMyDoor</c> a door without its author knowing
-    /// Sprocket exists. See docs/Catalogue.md.
+    /// Sprocket exists.
     /// <para>
     /// <b>Holds nothing about any one block.</b> What a member remembers of a block between looks belongs to whatever
     /// reads it - see <see cref="Recall" /> - so one capability serves every block of every construct.
