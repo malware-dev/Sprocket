@@ -6,7 +6,7 @@ En sekvens er en liste med [steg](step) som et ![](mark:logic-system)&nbsp;[logi
 
 Mens logikksystemet er slått på, starter en [utløser](trigger) en sekvens, for eksempel når knappen til luftslusen trykkes.
 
-For å prøve en sekvens mens du bygger den, kjører du den for hånd med ![](mark:play) på raden. En kjøring for hånd virker selv om logikksystemet er slått av, og bruker installasjonen som er valgt under `Installasjon`.
+For å prøve en sekvens mens du bygger den, kjører du den for hånd med ![](mark:play)&nbsp;på raden. En kjøring for hånd virker selv om logikksystemet er slått av, og bruker installasjonen som er valgt under `Installasjon`.
 
 En installasjon kjører en sekvens bare én gang om gangen, så en utløser som utløses mens den fortsatt kjører, hoppes over.
 
@@ -16,7 +16,7 @@ En installasjon kjører en sekvens bare én gang om gangen, så en utløser som 
 
 De fleste handlinger er gjort innen ett tikk, som å slå på et lys. Andre tar lengre tid, som at en dør lukker seg eller en ventil tømmer et rom. De som er merket ![](mark:awaited), er **avventbare**: sekvensen venter på at blokken blir ferdig før neste steg, så ventilen starter når den indre døra er lukket. Et steg som [kjører en annen sekvens](run-and-stop), er også avventbart, og venter til den sekvensen er ferdig.
 
-En sekvens kan bare vente på avventbare handlinger, altså de der blokken kan følges til slutten. En handling merket ![](mark:action) startes, og sekvensen går videre selv om blokken fortsetter: en lyd spilles til den er slutt, og en timerblokk teller ned, mens de neste stegene kjører. For å gi en slik blokk tid legger du til en [venting](wait) på en fastsatt tid etter den, eller lar en utløser starte den neste sekvensen når blokken når tilstanden du trenger.
+En sekvens kan bare vente på avventbare handlinger, altså de der blokken kan følges til slutten. En handling merket ![](mark:action)&nbsp;startes, og sekvensen går videre selv om blokken fortsetter: en lyd spilles til den er slutt, og en timerblokk teller ned, mens de neste stegene kjører. For å gi en slik blokk tid legger du til en [venting](wait) på en fastsatt tid etter den, eller lar en utløser starte den neste sekvensen når blokken når tilstanden du trenger.
 
 ## Kjøre steg sammen
 

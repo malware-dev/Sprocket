@@ -16,7 +16,7 @@ A logic system can only be changed while it's switched off, so a half-built sequ
 
 Switching it off stops its triggers from firing, and aborts any running sequences, apart from those started by hand.
 
-![](mark:delete) deletes at once; undo brings back what it took.
+![](mark:delete)&nbsp;deletes at once; undo brings back what it took.
 
 ## The installation panel
 
@@ -24,7 +24,7 @@ Below the sequences is what everyone installing this logic system sees on their 
 
 To help people understand what your logic system is for, or just to remind yourself, consider writing a description. Whoever receives your blueprint has never seen your construct, so the description and the slots are all they have to go on. The description is written while the logic system is off, and can hold [rich text](rich-text).
 
-Each set of blocks you select for a step or a trigger becomes a [slot](slot). A slot of one block takes that block's name; a slot of several is numbered. A ![](mark:block) **block slot**, like *the inner door*, holds the blocks a sequence acts on or watches. A ![](mark:signal) **signal slot**, like *the button*, holds a block and the toolbar slot on it that sends the [signal](signal).
+Each set of blocks you select for a step or a trigger becomes a [slot](slot). A slot of one block takes that block's name; a slot of several is numbered. A ![](mark:block)&nbsp;**block slot**, like *the inner door*, holds the blocks a sequence acts on or watches. A ![](mark:signal)&nbsp;**signal slot**, like *the button*, holds a block and the toolbar slot on it that sends the [signal](signal).
 
 When you have more than one installation, the `Installation` list at the top of the screen selects the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
 

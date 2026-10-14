@@ -24,23 +24,23 @@ index leaves out, is said in the game's log as the codex is read.
 | `home` | Welcome to Sprocket Automation | An introduction to the automation, named by the heading under the logo; the one page that names Sprocket |
 | `logic-system` | Logic system |  |
 | `installation` | Installation |  |
-| `sequence` | Sequence | Its player note shows both ways of showing a wait while one is chosen |
 | `installation-panel` | Installation panel | The panel fills one installation's slots; the description and slots are written on the logic system's screen and the slot's page |
-| `library` | Library | Describes lost constructs as the issue *A lost construct's logic systems can be put on another construct* plans them, and is checked again when that and the library rework are done |
-| `selector` | Selector | The block, signal and value selectors, and the search they share |
-| `trigger` | Trigger |  |
+| `slot` | Slot |  |
+| `rich-text` | Rich text | Opened by every description box's guide button; shows each piece of markdown-lite beside what it gives |
+| `sequence` | Sequence | Its player note shows both ways of showing a wait while one is chosen |
 | `step` | Step |  |
 | `action` | Action |  |
-| `run-and-stop` | Run and stop |  |
 | `wait` | Wait |  |
-| `tick` | Tick |  |
 | `if` | If |  |
-| `slot` | Slot |  |
+| `run-and-stop` | Run and stop |  |
+| `tick` | Tick |  |
+| `selector` | Selector | The block, signal and value selectors, and the search they share |
+| `trigger` | Trigger |  |
 | `signal` | Signal |  |
+| `library` | Library | Describes lost constructs as the issue *A lost construct's logic systems can be put on another construct* plans them, and is checked again when that and the library rework are done |
 | `blueprint` | Blueprint | Its player note tells how to copy a blueprint's file to another computer |
 | `construct` | Construct |  |
 | `changing-hands` | Changing hands | Opened by the resume screen's guide button |
-| `rich-text` | Rich text | Opened by every description box's guide button; shows each piece of markdown-lite beside what it gives |
 | `examples` | Examples | Heads the section of worked examples |
 | `simple-airlock` | Simple airlock |  |
 | `drill-arm` | Drill arm |  |
@@ -80,19 +80,14 @@ note about the player's own computer.
 
 ## The wiki
 
-The codex is to be published as the project's GitHub wiki, in English, by a generator.
-What is decided:
+The project's GitHub wiki is written from the codex, in English, by `tools/Sprocket.Wiki`, into a clone of
+the wiki's repository that is then pushed:
 
-- Each page is a file named for its English title, with a hyphen for each space, so `logic-system` is
-  `Logic-system.md` and the wiki shows it as *Logic system*. `home` is the wiki's `Home.md`. The page's own
-  `#` heading is left out, since the wiki shows the title above it.
-- A link is written as it is in the codex. The wiki matches `[installations](installation)` to
-  `Installation.md` whatever the case, so every link carries over unchanged.
-- A picture is rewritten from a table of Sprocket's own pictures, each kept in the wiki as a PNG: every
-  `mark:` drawn from Maltek Symbols, and `Sprocket_Mark`. A locator outside the table stops the generator,
-  so only Sprocket's own pictures are published. A mark is shown, never described in words.
-- `=WxH` becomes an `<img>` with its width and height, the only sizing the wiki has.
+```
+dotnet run --project tools/Sprocket.Wiki -- <wiki folder>
+```
 
-Still open: what a `::: player` and a `::: center` box become (the wiki has `> [!NOTE]` alerts), whether a
-link carries its term's tooltip as a title (the wiki shows `[words](id "tooltip")` on hover), and where the
-generator lives and when it runs.
+It shows only Sprocket's own pictures, and stops at a locator naming anything else.
+
+Still open: whether a mark's one ink, GitHub's muted grey, reads well enough on both of GitHub's themes or each
+theme gets a copy of its own, and whether the wiki is written on every push to `main` rather than by hand.

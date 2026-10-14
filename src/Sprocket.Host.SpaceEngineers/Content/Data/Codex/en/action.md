@@ -2,7 +2,7 @@
 
 An action is something a block can do, like a door opening or a piston extending. Each kind of block brings its own, and a [step](step) does one when you add it with `task`.
 
-In the [block selector](selector), an action marked ![](mark:awaited) is [awaitable](sequence): it runs over more than one [tick](tick), and the sequence can wait for it to finish. With one marked ![](mark:action), the sequence starts the action and moves on, regardless of how long the block takes to finish it.
+In the [block selector](selector), an action marked ![](mark:awaited)&nbsp;is [awaitable](sequence): it runs over more than one [tick](tick), and the sequence can wait for it to finish. With one marked ![](mark:action), the sequence starts the action and moves on, regardless of how long the block takes to finish it.
 
 The block selector lists the actions known to work with the automation, under plain names. `Terminal ›` lists everything the blocks offer in the terminal instead, under the terminal's own names. These are offered without any promise: they haven't been checked with the automation, and may not work as you expect.
 

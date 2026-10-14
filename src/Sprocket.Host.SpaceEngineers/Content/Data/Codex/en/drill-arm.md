@@ -10,6 +10,6 @@ This builds a sequence that pushes a drill arm out slowly with its drills runnin
 6. Add a task that sets the drills' `power` to off.
 7. Leave the screen, and switch the logic system on when asked.
 
-Run *Dig* by hand with ![](mark:play) to try it, or give it a [trigger](trigger), like a button on the arm's control panel.
+Run *Dig* by hand with ![](mark:play)&nbsp;to try it, or give it a [trigger](trigger), like a button on the arm's control panel.
 
 Back to [examples](examples).

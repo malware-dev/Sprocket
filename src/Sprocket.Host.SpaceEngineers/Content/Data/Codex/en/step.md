@@ -8,4 +8,4 @@ A step is one line of a ![](mark:sequence)&nbsp;[sequence](sequence), and the se
 - `if` [checks blocks](if), and runs the steps under it only when its condition passes.
 - `await all pending tasks` waits for the awaitable steps before it.
 
-Drag a step to move it, into an if or out of one. To try a sequence without some of its steps, pause them with ![](mark:pause) on their rows, and the sequence skips them until they're resumed.
+Drag a step to move it, into an if or out of one. To try a sequence without some of its steps, pause them with ![](mark:pause)&nbsp;on their rows, and the sequence skips them until they're resumed.

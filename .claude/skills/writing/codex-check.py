@@ -4,6 +4,7 @@
               file name or a path can carry it there
     links     a term linked more than once on one page
     title     a mark in a page's title, which the contents and the history name the page by
+    marks     a mark followed by a plain space, where &nbsp; keeps it on one line with the word after it
     pairs     a page or tooltip in one language with no partner in the other
 
 Every hit is a fault; a check that has to be argued with is a check that needs mending.
@@ -18,6 +19,7 @@ LANGUAGES = ("en", "no")
 NAME = re.compile(r"sprocket", re.I)
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([a-z-]+)\)")
 QUOTED = re.compile(r"`[^`]*`")
+SPACED = re.compile(r"\]\(mark:[a-z-]+\)[ \t]+\S")
 # Pages the name may stand on: the home page names the product by design.
 NAMED = {"home.md", "home.tldr.md"}
 
@@ -60,6 +62,8 @@ def check(language, name, text, say):
     for number, line in enumerate(text.splitlines(), 1):
         if line.startswith("# ") and "mark:" in line:
             say("title", "%s/%s:%d: %s" % (language, name, number, line.strip()))
+        if SPACED.search(QUOTED.sub("", line)):
+            say("marks", "%s/%s:%d: %s" % (language, name, number, line.strip()))
 
 
 def main():

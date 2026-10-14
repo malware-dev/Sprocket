@@ -6,7 +6,7 @@ A sequence is a list of [steps](step) that a ![](mark:logic-system)&nbsp;[logic 
 
 While the logic system is switched on, a [trigger](trigger) starts a sequence, for example when the airlock's button is pressed.
 
-To try a sequence while you build it, run it by hand with ![](mark:play) on its row. A run by hand works even while the logic system is switched off, and uses the installation selected under `Installation`.
+To try a sequence while you build it, run it by hand with ![](mark:play)&nbsp;on its row. A run by hand works even while the logic system is switched off, and uses the installation selected under `Installation`.
 
 An installation runs a sequence only once at a time, so a trigger that fires while it's still running is skipped.
 
@@ -14,9 +14,9 @@ Stopping a run ends it at the step it has reached, but a block that is already m
 
 ## Steps that run over more than one [tick](tick)
 
-Most actions are done within a tick, like switching a light on. Others run longer, like a door closing or a vent emptying a room. Those marked ![](mark:awaited) are **awaitable**: the sequence waits for the block to finish before the next step, so the vent starts once the inner door is shut. A step that [runs another sequence](run-and-stop) is awaitable too, and waits until that sequence has finished.
+Most actions are done within a tick, like switching a light on. Others run longer, like a door closing or a vent emptying a room. Those marked ![](mark:awaited)&nbsp;are **awaitable**: the sequence waits for the block to finish before the next step, so the vent starts once the inner door is shut. A step that [runs another sequence](run-and-stop) is awaitable too, and waits until that sequence has finished.
 
-A sequence can wait only for awaitable actions, which are the ones whose end the block can be watched for. An action marked ![](mark:action) is started, and the sequence moves on even where the block keeps going: a sound plays to its end, and a timer block counts down, while the next steps run. To give a block like that time, add a [wait](wait) of a set time after it, or have a trigger start the next sequence when the block reaches the state you need.
+A sequence can wait only for awaitable actions, which are the ones whose end the block can be watched for. An action marked ![](mark:action)&nbsp;is started, and the sequence moves on even where the block keeps going: a sound plays to its end, and a timer block counts down, while the next steps run. To give a block like that time, add a [wait](wait) of a set time after it, or have a trigger start the next sequence when the block reaches the state you need.
 
 ## Running steps together
 

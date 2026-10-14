@@ -29,9 +29,12 @@ Four projects of code, and the first one is the mod:
 - **`src/Sprocket.Localization.Generator`** writes the mod's `Texts` class from its `MyTexts.resx` at
   build time, and reports every text that cannot be said. A Roslyn source generator, so `netstandard2.0`.
 
+Beside them, **`tools/Sprocket.Wiki`** writes the project's GitHub wiki from the codex. It compiles Lumel's
+markdown-lite reader in from `src/Lumel/Text` and needs nothing of the game, so it is `net10.0`.
+
 The mod's three test projects reference the mod, or the harness where they need a screen, and drive the
 editor the way a target would through the harness's `Driving/Target`. The generator has a test project
-of its own, which runs it as the compiler does and needs nothing of the game.
+of its own, which runs it as the compiler does and needs nothing of the game, and so does the wiki tool.
 
 **Two things only the game can do, and each is an interface the mod asks through.**
 `Lumel/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers

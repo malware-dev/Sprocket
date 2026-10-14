@@ -10,6 +10,6 @@ Dette bygger en sekvens som skyver en borearm sakte ut med boreren i gang, og he
 6. Legg til en oppgave som setter `power` på boremaskinene til av.
 7. Forlat skjermen, og slå på logikksystemet når du blir spurt.
 
-Kjør *Grav* for hånd med ![](mark:play) for å prøve den, eller gi den en [utløser](trigger), som en knapp på kontrollpanelet til armen.
+Kjør *Grav* for hånd med ![](mark:play)&nbsp;for å prøve den, eller gi den en [utløser](trigger), som en knapp på kontrollpanelet til armen.
 
 Tilbake til [eksempler](examples).

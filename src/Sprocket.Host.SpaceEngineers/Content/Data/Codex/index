@@ -1,25 +1,25 @@
 # The terms the codex explains, in the order its contents list them: one id a line, and a line starting with # is a
 # comment. A term's page is <id>.md and its tooltip <id>.tldr.md, in the folder of each language.
 home
-logic-system
+> logic-system
 installation
-sequence
 installation-panel
-library
-selector
-trigger
+slot
+rich-text
+> sequence
 step
 action
-run-and-stop
 wait
-tick
 if
-slot
+run-and-stop
+tick
+selector
+> trigger
 signal
+> library
 blueprint
 construct
 changing-hands
-rich-text
 > examples
 simple-airlock
 drill-arm

@@ -10,9 +10,7 @@ Event controllers, timer blocks, sensors... there is already a means for automat
 
 Describe your automation in simple but powerful ![](mark:logic-system)&nbsp;[logic systems](logic-system). Set up ![](mark:trigger)&nbsp;[triggers](trigger) to run sequential steps. Easily wait until a door is actually closed before pressurizing that airlock, without manual timing. Go one step further, with more complex expressions and states.
 
-Sprocket Automation lives within _all_ of your programmable blocks: If you lose one, but there's still another on your ship, your automation is still
-fully functional. And... even if the last programmable block is lost, the automatic backup system has stored away your actual logic, so you can restore
-it to a new ship or back to your repaired old one.
+Sprocket Automation lives within _all_ of your programmable blocks: If you lose one, but there's still another on your ship, your automation is still fully functional. And... even if the last programmable block is lost, the automatic backup system has stored away your actual logic, so you can restore it to a new ship or back to your repaired old one.
 
 ## One logic system, multiple ![](mark:installation)&nbsp;[installations](installation)
 

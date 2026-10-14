@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <!-- Lumel's reader is written for the game's compiler, which has no nullable references. -->
+        <Nullable>disable</Nullable>
+        <RootNamespace>Sprocket.Wiki</RootNamespace>
+    </PropertyGroup>
+
+    <!-- The codex's own reader, as the game compiles it: these files need nothing of the game. -->
+    <ItemGroup>
+        <Compile Include="..\..\src\Lumel\Text\Alignment.cs;..\..\src\Lumel\Text\Block.cs;..\..\src\Lumel\Text\BlockKind.cs;..\..\src\Lumel\Text\Column.cs;..\..\src\Lumel\Text\Document.cs;..\..\src\Lumel\Text\ImageRun.cs;..\..\src\Lumel\Text\Inlines.cs;..\..\src\Lumel\Text\Link.cs;..\..\src\Lumel\Text\LinkRun.cs;..\..\src\Lumel\Text\Markdown.cs;..\..\src\Lumel\Text\Picture.cs;..\..\src\Lumel\Text\Run.cs;..\..\src\Lumel\Text\RunKind.cs"
+                 Link="Lumel\%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="SkiaSharp" Version="3.116.1" />
+    </ItemGroup>
+</Project>
