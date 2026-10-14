@@ -1,1 +1,1 @@
-**Startskjermen** er den første skjermen. Den viser alle logikksystemene på denne konstruksjonen og forklarer hvordan automasjonen virker.
+**Startskjermen** er den samlede oversikten over alle logikksystemene dine på denne konstruksjonen.

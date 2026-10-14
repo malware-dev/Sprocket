@@ -12,7 +12,7 @@ For et [steg](#step) som gjør en handling, velger du `oppgave` under `+ steg`.
 
 ## Hvilke handlinger som tar tid
 
-For de fleste handlinger sier ![](mark:sequence) [sekvensen](#sequence) fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg, at en ventil fyller eller tømmer et rom, eller at et stempel eller en rotor beveger seg dit det ble sendt, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Siden om sekvenser forklarer hvordan et steg går rett videre mens blokken fortsatt holder på.
+For de fleste handlinger sier ![](mark:sequence)&nbsp;[sekvensen](#sequence) fra til blokken og går rett videre til neste steg, uten å vente på at blokken blir ferdig, som å spille av en lyd. Noen få tar tid å fullføre, som at en dør lukker seg, at en ventil fyller eller tømmer et rom, eller at et stempel eller en rotor beveger seg dit det ble sendt, og et nytt steg som gjør en av dem, venter på den: neste steg begynner først når blokken er ferdig. Siden om sekvenser forklarer hvordan et steg går rett videre mens blokken fortsatt holder på.
 
 I velgeren har hver handling et merke:
 

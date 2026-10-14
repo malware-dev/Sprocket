@@ -1,6 +1,6 @@
 # Sekvens
 
-En sekvens er det et ![](mark:logic-system) [logikksystem](#logic-system) gjør: en liste med [steg](#step) som kjøres ovenfra og ned. Hver ![](mark:installation) [installasjon](#installation) kjører den på sine egne blokker, så én sekvens sluser alle luftslusene på skipet.
+En sekvens er det et ![](mark:logic-system)&nbsp;[logikksystem](#logic-system) gjør: en liste med [steg](#step) som kjøres ovenfra og ned. Hver ![](mark:installation)&nbsp;[installasjon](#installation) kjører den på sine egne blokker, så én sekvens sluser alle luftslusene på skipet.
 
 Under `Sekvenser` på skjermen til logikksystemet legger `+ sekvens` til en, og trykker du raden til en sekvens, åpnes den. Søppelkassen på raden sletter den med én gang, og angre henter den tilbake.
 

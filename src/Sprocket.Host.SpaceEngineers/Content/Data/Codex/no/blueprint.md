@@ -1,6 +1,6 @@
 # Plantegning
 
-En plantegning er en kopi av et ![](mark:logic-system) [logikksystem](#logic-system) som tas vare på i [biblioteket](#library). Den holder ![](mark:sequence) [sekvensene](#sequence), [utløserne](#trigger) og [plassene](#slot) til logikksystemet, beskrivelsen, og hva hver plass er til. Den holder ingen blokker, siden hver ![](mark:installation) [installasjon](#installation) tar med sine egne.
+En plantegning er en kopi av et ![](mark:logic-system)&nbsp;[logikksystem](#logic-system) som tas vare på i [biblioteket](#library). Den holder ![](mark:sequence)&nbsp;[sekvensene](#sequence), [utløserne](#trigger) og [plassene](#slot) til logikksystemet, beskrivelsen, og hva hver plass er til. Den holder ingen blokker, siden hver ![](mark:installation)&nbsp;[installasjon](#installation) tar med sine egne.
 
 ## Lage en
 

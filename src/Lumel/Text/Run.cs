@@ -4,6 +4,9 @@ namespace Lumel.Text
     /// <remarks>An image is an <see cref="ImageRun" />, and a link's words are a <see cref="LinkRun" />.</remarks>
     public class Run
     {
+        /// <summary>The space a line never breaks at.</summary>
+        public const char NoBreak = ' ';
+
         /// <summary>A line break.</summary>
         public static readonly Run Break = new Run("", RunKind.Break);
 
@@ -12,6 +15,7 @@ namespace Lumel.Text
         {
             Text = text ?? "";
             Kind = kind;
+            HoldsNoBreak = Text.IndexOf(NoBreak) >= 0;
         }
 
         /// <summary>A slot for the argument named <paramref name="slot" />, whose words are set apart as <paramref name="kind" /> says.</summary>
@@ -29,6 +33,9 @@ namespace Lumel.Text
 
         /// <summary>The name of the argument whose words stand here, or null for a run that carries its own.</summary>
         public string Slot { get; }
+
+        /// <summary>Whether its words hold a no-break space, known once so laying it out need not look for one.</summary>
+        public bool HoldsNoBreak { get; }
 
         /// <summary>Whether this ends a line rather than carrying words.</summary>
         public bool IsBreak => (Kind & RunKind.Break) != 0;

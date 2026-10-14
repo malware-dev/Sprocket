@@ -1,6 +1,6 @@
 # Bibliotek
 
-Biblioteket holder ![](mark:logic-system) [logikksystemene](#logic-system) på denne [konstruksjonen](#construct), sikkerhetskopier fra konstruksjoner som mistet automasjonen, og ![](mark:blueprint) [plantegningene](#blueprint) dine. Åpne det med `Bibliotek` på [startskjermen](#home).
+Biblioteket holder ![](mark:logic-system)&nbsp;[logikksystemene](#logic-system) på denne [konstruksjonen](#construct), sikkerhetskopier fra konstruksjoner som mistet automasjonen, og ![](mark:blueprint)&nbsp;[plantegningene](#blueprint) dine. Åpne det med `Bibliotek` på [startskjermen](#home).
 
 Det viser, ovenfra og ned:
 
@@ -12,7 +12,7 @@ Skriv i søkefeltet for å vise bare radene der navnet inneholder det du skriver
 
 ## Et logikksystem eller en plantegning
 
-Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen, og ![](mark:installation) [installasjonene](#installation) på denne konstruksjonen.
+Velg et for å se hvem som laget det og når det sist ble endret, beskrivelsen, og ![](mark:installation)&nbsp;[installasjonene](#installation) på denne konstruksjonen.
 
 - `Legg til på denne konstruksjonen` setter det på denne konstruksjonen. Den er der bare så lenge ingen logikksystemer laget fra det er på denne konstruksjonen.
 - På et logikksystem på denne konstruksjonen tar `Lag plantegning` vare på en kopi i lageret, og `Oppdater plantegning` oppdaterer den kopien. `Oppdater fra biblioteket` henter en nyere kopi fra lageret, og `Tilbakestill til plantegning` går tilbake til kopien i lageret, uten endringene som er gjort siden. Uansett beholder installasjonene blokkene sine.

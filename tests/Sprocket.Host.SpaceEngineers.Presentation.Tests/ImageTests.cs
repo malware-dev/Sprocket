@@ -211,6 +211,23 @@ public class ImageTests
         Assert.Equal(new[] { "mark:signal", "Textures\\GUI\\Icon.dds" }, pictures.Asked);
     }
 
+    /// <summary>A picture joined to the link after it by a no-break space stays on its line, wherever the line breaks.</summary>
+    [Fact]
+    public void AMarkKeepsToTheLinkAfterItsNoBreakSpace()
+    {
+        for (var n = 1; n < 40; n++)
+        {
+            var easel = Laid(string.Join(" ", Enumerable.Repeat("word", n)) + " ![](Banner =20)&nbsp;[triggers](#trigger) end");
+
+            var drawn = Assert.Single(easel.Sprites, s => s.Material.String == "Banner").Destination;
+            var link = Word(easel, "triggers");
+            // Beside it on one line, the link starts just past the picture; carried to the next line, it starts at the left.
+            var line = 20f * easel.Pixels;
+            Assert.True(link.Position.X > drawn.X && link.Position.X < drawn.X + drawn.Width + line,
+                "with " + n + " words the picture and its link were split across lines");
+        }
+    }
+
     static Easel Laid(string markdown) => Laid(markdown, new Pictures());
 
     static Easel Laid(string markdown, Pictures pictures)

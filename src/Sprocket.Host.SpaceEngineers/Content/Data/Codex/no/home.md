@@ -4,26 +4,30 @@
 # Velkommen til Sprocket Automation
 :::
 
-Timerblokker og hendelseskontrollere kan få blokker til å handle på egen hånd, men hver av dem settes opp for hånd, for ett sett med blokker. Automasjonen lar deg beskrive en jobb én gang og bruke den overalt der den trengs.
+Hendelseskontrollere, timerblokker, sensorer... det finnes allerede en måte å automatisere på, ja visst. Men den tar opp en hel masse plass, kan gjøre lite, og er skjør. Ett railgun-skudd mot automasjonsrommet ditt, og du må sette opp _alt_ på nytt.
 
-## Beskriv en jobb én gang
+## Møt Sprocket Automation.
 
-En jobb beskrives som et ![](mark:logic-system) [logikksystem](#logic-system), som sier hva som skjer, steg for steg, og hva som starter det. For eksempel: når knappen til luftslusen trykkes, lukk den indre døra, tøm luftslusen for luft og åpne den ytre døra.
+Beskriv automasjonen din i enkle, men kraftige ![](mark:logic-system)&nbsp;[logikksystemer](#logic-system). Sett opp ![](mark:trigger)&nbsp;[utløsere](#trigger) som kjører steg etter steg. Vent enkelt til en dør faktisk er lukket før du trykksetter luftslusen, uten å time noe for hånd. Gå et steg videre, med mer sammensatte uttrykk og tilstander.
 
-## Kjør den mange steder
+Sprocket Automation bor i _alle_ de programmerbare blokkene dine: Mister du én, men har en til på skipet, virker automasjonen din fortsatt fullt ut. Og... selv om den siste programmerbare blokken går tapt, har det automatiske sikkerhetskopisystemet tatt vare på selve logikken din, så du kan gjenopprette den på et nytt skip, eller på det gamle når det er reparert.
 
-Et logikksystem nevner ikke blokkene dine. Det nevner [plasser](#slot), som *den indre døra*, og hver ![](mark:installation) [installasjon](#installation) fyller dem med virkelige blokker. Slik kjører ett logikksystem for luftsluser alle luftslusene på skipet, og retter du det, retter du alle.
+## Ett logikksystem, flere ![](mark:installation)&nbsp;[installasjoner](#installation)
 
-## Ta den med deg
+Beskriv luftsluselogikken din *én gang*, og legg så til installasjoner for å kjøre den samme logikken på flere luftsluser, uten å legge til flere programmerbare blokker.
 
-Fordi jobben holdes atskilt fra blokkene, kan den flyttes. Tatt vare på i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint) kan den settes på en annen [konstruksjon](#construct), og den som installerer den, velger bare sine egne blokker på [installasjonspanelet](#installation-panel).
+## Del
 
-## Angre og gjør om
+Du kan bruke [biblioteket](#library) til å lagre ![](mark:blueprint)&nbsp;[plantegninger](#blueprint) av logikksystemene dine. Disse plantegningene kan deles, enten bare med bestevennen din, med fraksjonen din, eller offentlig med hele systemet.
 
-Pilene for å angre og gjøre om på denne skjermen går gjennom konstruksjonens egen liste over endringer: å legge til og slette logikksystemer og installasjoner, `Legg til på denne konstruksjonen` og `Lag en kopi` i biblioteket, `Oppdater fra biblioteket` og `Tilbakestill til plantegning`, og å gi konstruksjonen nytt navn. Alt som gjøres inne i et logikksystem, står på den egne lista til det logikksystemet, som siden om logikksystemer forklarer.
+::: player
+Dessverre hindrer mod-API-et ekte direkte deling gjennom for eksempel workshopen, men direkte deling er mulig innenfor en verden. Vil du dele logikken din utenfor spillet, kan du dele spillets egne plantegninger av konstruksjoner som holder logikken, eller dele plantegningsfilene direkte. Du finner dem i appdatamappen til spillet (som standard %appdata%\SpaceEngineers\Storage).
+:::
 
-Å ta bort et logikksystem eller en installasjon som kan kjøre, venter til det som skal tas bort, er slått av. Det angre eller gjør om henter tilbake, kommer tilbake slått av, og et logikksystem som hentes tilbake, får sin egen liste over endringer igjen. Lista varer hele spilløkten.
+## Kom i gang
 
-## Hvor du begynner
+_kommer_
 
-Denne skjermen viser alle logikksystemene på denne konstruksjonen. Vil du bygge ditt eget, begynner du med siden om logikksystemer.
+## Anbefalt lesning
+
+_lenke til ordlisten og eksempellogikkene_

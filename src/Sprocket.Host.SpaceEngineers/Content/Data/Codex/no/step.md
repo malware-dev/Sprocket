@@ -1,6 +1,6 @@
 # Steg
 
-Et steg er én linje i en ![](mark:sequence) [sekvens](#sequence). `+ steg`, på slutten av en sekvens og av hver gren i et hvis, legger til et av disse slagene:
+Et steg er én linje i en ![](mark:sequence)&nbsp;[sekvens](#sequence). `+ steg`, på slutten av en sekvens og av hver gren i et hvis, legger til et av disse slagene:
 
 - `oppgave` gjør noe med blokker: [en handling](#action) som `open`, eller å sette en av verdiene deres.
 - `vent` [venter](#wait) en fastsatt tid.
@@ -22,4 +22,4 @@ Trykker du en del av et steg, som blokkene eller handlingen, åpnes [velgeren](#
 
 Et steg kan settes på pause med pausemerket på raden: sekvensen hopper over det til det gjenopptas.
 
-Steg kan bare endres mens ![](mark:logic-system) [logikksystemet](#logic-system) er slått av.
+Steg kan bare endres mens ![](mark:logic-system)&nbsp;[logikksystemet](#logic-system) er slått av.

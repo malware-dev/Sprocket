@@ -41,6 +41,8 @@ namespace Lumel.Text
 
         readonly StringBuilder _probe = new StringBuilder(64);
 
+        readonly StringBuilder _tail = new StringBuilder(64);
+
         readonly List<float> _wides = new List<float>();
         readonly List<Spot> _spots = new List<Spot>();
 
@@ -711,11 +713,11 @@ namespace Lumel.Text
 
         /// <summary>Lays a table out from line <paramref name="y" />, a row at a time, moving <paramref name="y" /> below it.</summary>
         /// <remarks>
-        ///     Each column is as wide as its widest cell on one line, a gap of one indent apart. Spare width is
-        ///     shared among the starred columns by their stars; with none starred the table is only as wide as it
-        ///     needs. A table too wide for its room takes the width back from its widest columns, whose cells then
-        ///     wrap. A heading row is drawn in the heading color, with a rule under it. A table narrower than its
-        ///     room stands where <paramref name="align" /> says.
+        ///     Each column is as wide as its widest cell on one line, a gap of one indent apart. Starred columns
+        ///     share the room the others leave by their stars, whatever their cells hold, so their cells wrap to it;
+        ///     with none starred the table is only as wide as it needs. A table too wide for its room takes the width
+        ///     back from its widest columns, whose cells then wrap. A heading row is drawn in the heading color, with a
+        ///     rule under it. A table narrower than its room stands where <paramref name="align" /> says.
         /// </remarks>
         void Table(IGraphics g, Block table, float from, float width, Alignment align, ref float y, ref float widest)
         {
@@ -792,23 +794,32 @@ namespace Lumel.Text
             if (width >= Unbounded)
                 return;
 
-            var across = gap * (count - 1);
+            var least = _fontSize * 3f;
+            var fixedAcross = gap * (count - 1);
             var shares = 0;
             for (var c = 0; c < count; c++)
             {
-                across += _wides[c];
-                shares += table.Columns[c].Shares;
+                if (table.Columns[c].Shares > 0)
+                    shares += table.Columns[c].Shares;
+                else
+                    fixedAcross += _wides[c];
             }
 
-            if (across < width && width < Unbounded && shares > 0)
+            if (shares > 0)
             {
-                var spare = width - across;
+                var room = Math.Max(0f, width - fixedAcross);
                 for (var c = 0; c < count; c++)
-                    _wides[c] += spare * table.Columns[c].Shares / shares;
+                {
+                    if (table.Columns[c].Shares > 0)
+                        _wides[c] = Math.Max(least, room * table.Columns[c].Shares / shares);
+                }
             }
+
+            var across = gap * (count - 1);
+            for (var c = 0; c < count; c++)
+                across += _wides[c];
 
             var over = across - width;
-            var least = _fontSize * 3f;
             while (over > 0.5f)
             {
                 var broadest = 0;
@@ -864,7 +875,7 @@ namespace Lumel.Text
                     var box = Turned(drawn, turn);
                     End(g, y, false, ref x, ref widest);
 
-                    if (!empty && width < Unbounded && x + box.X > width)
+                    if (!empty && width < Unbounded && x + box.X + Tail(g, block, r + 1, size, heading) > width)
                     {
                         Trim(g, line, ref x);
                         Settle(line, x, width, align, y, tall, pictured);
@@ -894,8 +905,9 @@ namespace Lumel.Text
                     : (run.Kind & RunKind.Emphasis) != 0 ? Tone.Emphasis
                     : Tone.Plain;
                 var code = (run.Kind & RunKind.Code) != 0;
-                var font = code ? _codeFont : heading ? HeadingFaceOf(run.Kind) : FaceOf(run.Kind);
+                var font = FaceFor(run, heading);
                 var text = run.Slot == null ? run.Text : _arguments == null ? "" : _arguments.Of(run.Slot);
+                var joins = run.Slot == null ? run.HoldsNoBreak : text.IndexOf(Run.NoBreak) >= 0;
                 var i = 0;
 
                 while (i < text.Length)
@@ -926,7 +938,7 @@ namespace Lumel.Text
                     if (_piece.Length > 0 && (_pieceTone != tone || _pieceFont != font || _pieceLink != link || _pieceCode != code))
                         End(g, y, false, ref x, ref widest);
 
-                    if (!empty && width < Unbounded && !Fits(g, text, i, end, font, size, code, x, width))
+                    if (!empty && width < Unbounded && !Fits(g, text, i, end, joins, font, size, code, x, end == text.Length ? width - Tail(g, block, r + 1, size, heading) : width))
                     {
                         End(g, y, true, ref x, ref widest);
                         Settle(line, x, width, align, y, tall, pictured);
@@ -940,7 +952,7 @@ namespace Lumel.Text
                     if (_piece.Length == 0)
                         Begin(x, font, size, tone, link, code);
 
-                    _piece.Append(text, i, end - i);
+                    Shown(_piece, text, i, end, joins);
                     empty = false;
                     i = end;
                 }
@@ -1068,15 +1080,84 @@ namespace Lumel.Text
 
         /// <summary>Whether the word from <paramref name="start" /> to <paramref name="end" /> fits on the line after the piece being built.</summary>
         /// <remarks>Measures the piece with the word on it, because the game spaces a string as a whole and a sum of its words' widths is short of it.</remarks>
-        bool Fits(IGraphics g, string text, int start, int end, string font, float size, bool code, float x, float width)
+        bool Fits(IGraphics g, string text, int start, int end, bool joins, string font, float size, bool code, float x, float width)
         {
             _probe.Clear();
             _probe.Append(_piece);
-            _probe.Append(text, start, end - start);
+            Shown(_probe, text, start, end, joins);
 
             var room = code ? _codeInset : 0f;
             var from = _piece.Length > 0 ? _pieceX : x + room;
             return from + g.MeasureText(font, _probe, size).X + room <= width;
+        }
+
+        /// <summary>
+        ///     How wide what follows run <paramref name="from" /> is up to the first place a line can break: the words and pictures
+        ///     joined to the one being placed with no space between, which a line keeps together with it.
+        /// </summary>
+        /// <remarks>
+        ///     Asked only of a word or picture that ends its run, and nothing is measured where the next run starts with a space,
+        ///     which is the common case.
+        /// </remarks>
+        float Tail(IGraphics g, Block block, int from, float size, bool heading)
+        {
+            var tail = 0f;
+            for (var r = from; r < block.Runs.Count; r++)
+            {
+                var run = block.Runs[r];
+                if (run.IsBreak)
+                    return tail;
+
+                var shown = run as ImageRun;
+                var image = shown != null && g.Images != null ? g.Images.Find(shown.Picture.Locator) : null;
+                if (image != null)
+                {
+                    tail += Turned(SizeOf(shown.Picture, image, size), MathHelper.ToRadians(shown.Picture.Rotation)).X;
+                    continue;
+                }
+
+                var text = run.Slot == null ? run.Text : _arguments == null ? "" : _arguments.Of(run.Slot);
+                var joins = run.Slot == null ? run.HoldsNoBreak : text.IndexOf(Run.NoBreak) >= 0;
+                var space = text.IndexOf(' ');
+                var end = space < 0 ? text.Length : space;
+                if (end > 0)
+                {
+                    _tail.Clear();
+                    Shown(_tail, text, 0, end, joins);
+                    tail += g.MeasureText(FaceFor(run, heading), _tail, size).X;
+                }
+
+                if (space >= 0)
+                    return tail;
+            }
+
+            return tail;
+        }
+
+        /// <summary>
+        ///     Appends <paramref name="text" /> from <paramref name="start" /> to <paramref name="end" /> to <paramref name="into" /> as it
+        ///     is drawn: a no-break space as a space, which every font has.
+        /// </summary>
+        /// <remarks><paramref name="joins" /> says whether the text holds one at all, known once for its run, so a word without one is appended whole.</remarks>
+        static void Shown(StringBuilder into, string text, int start, int end, bool joins)
+        {
+            if (!joins)
+            {
+                into.Append(text, start, end - start);
+                return;
+            }
+
+            for (var i = start; i < end; i++)
+                into.Append(text[i] == Run.NoBreak ? ' ' : text[i]);
+        }
+
+        /// <summary>The face <paramref name="run" /> is drawn in, within a heading where <paramref name="heading" /> says so.</summary>
+        string FaceFor(Run run, bool heading)
+        {
+            if ((run.Kind & RunKind.Code) != 0)
+                return _codeFont;
+
+            return heading ? HeadingFaceOf(run.Kind) : FaceOf(run.Kind);
         }
 
         /// <summary>Ends the piece being built at line <paramref name="y" />, moving <paramref name="x" /> past it; a piece that ends a line drops its trailing spaces.</summary>

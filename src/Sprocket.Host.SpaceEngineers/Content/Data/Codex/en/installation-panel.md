@@ -1,6 +1,6 @@
 # Installation panel
 
-The installation panel is where an ![](mark:installation) [installation](#installation) gets its blocks and ![](mark:signal) [signals](#signal). Each installation has its own. It also shows what whoever made the ![](mark:logic-system) [logic system](#logic-system) wrote about it, so that someone who has never seen it can install it.
+The installation panel is where an ![](mark:installation)&nbsp;[installation](#installation) gets its blocks and ![](mark:signal)&nbsp;[signals](#signal). Each installation has its own. It also shows what whoever made the ![](mark:logic-system)&nbsp;[logic system](#logic-system) wrote about it, so that someone who has never seen it can install it.
 
 ## Opening it
 
@@ -15,7 +15,7 @@ A logic system put on this [construct](#construct) from the [library](#library) 
 
 - **The installation's name**, which you can change, and the logic system it belongs to. Pressing the logic system's name opens it.
 - **The description** of the logic system, written on its screen.
-- **What is wrong**, if anything, with a button that opens the ![](mark:sequence) [sequence](#sequence) where it went wrong.
+- **What is wrong**, if anything, with a button that opens the ![](mark:sequence)&nbsp;[sequence](#sequence) where it went wrong.
 - **The slots**, with how many still need a block.
 
 Each [slot](#slot) shows its name, what it is for, and what fills it now. A signal slot also shows the toolbar slot that sends its signal, for example `button 2 is pressed`. A slot whose block was lost says so, and names the block.

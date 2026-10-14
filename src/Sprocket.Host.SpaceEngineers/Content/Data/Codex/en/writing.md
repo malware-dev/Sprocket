@@ -87,7 +87,7 @@ To leave out the heading, start the table with a row of empty cells:
 | Airlock | 1 |
 | Hangar | 4 |
 
-A table is usually as wide as its cells. Add a star into a column's dashes, as in `:--*`, to stretch that column to fill any free space. Use multiple stars to indicate proportion: '|:--*|:--*' gives two columns with 50% each, while '|:--*|:--****' will give one column at 25%, and one column at 75%.
+A table is usually as wide as its cells. Add a star into a column's dashes, as in `:--*`, to stretch the table across the page, that column taking a share of it. Stars set the shares: `|:--*|:--*|` gives two columns half each, while `|:--*|:--***|` gives one column a quarter and the other three quarters. A column without a star keeps the width of its cells, and the starred ones share what is left.
 
 `| Room | Vents |`
 `|:--*|--:|`
@@ -104,3 +104,19 @@ A table is usually as wide as its cells. Add a star into a column's dashes, as i
 \*Inner door\*
 
 A backslash before a mark shows the mark as it is typed.
+
+## Keeping words together
+
+`10&nbsp;SC`
+
+10&nbsp;SC
+
+`&nbsp;` is a space a line never breaks at, so the words either side of it stay on one line. It keeps a mark with the link after it too: `![](mark:trigger)&nbsp;[triggers](#trigger)`.
+
+## Writing a character by its name or number
+
+`&lt;Inner door&gt; &amp; &#169;`
+
+&lt;Inner door&gt; &amp; &#169;
+
+`&amp;`, `&lt;`, `&gt;`, `&quot;` and `&apos;` write &amp;, &lt;, &gt;, &quot; and &apos;. Any character can be written by its number, as `&#169;` or `&#xA9;` for &#169;. An `&` that starts none of these is written as it is typed.

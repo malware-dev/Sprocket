@@ -113,6 +113,43 @@ public class MarkdownTests
         Assert.Equal(RunKind.Plain, runs[0].Kind);
     }
 
+    /// <summary>A named or numbered entity reference stands for its character.</summary>
+    [Theory]
+    [InlineData("10&nbsp;SC", "10 SC")]
+    [InlineData("Salt &amp; pepper", "Salt & pepper")]
+    [InlineData("&lt;tag&gt; &quot;said&quot; it&apos;s", "<tag> \"said\" it's")]
+    [InlineData("A&#160;B", "A B")]
+    [InlineData("A&#xA0;B &#X41;", "A B A")]
+    [InlineData("&#0; &#x110000;", "� �")]
+    public void AnEntityStandsForItsCharacter(string written, string read)
+    {
+        var runs = Markdown.Parse(written).Blocks[0].Runs;
+
+        Assert.Equal(read, string.Concat(runs.Select(run => run.Text)));
+    }
+
+    /// <summary>An ampersand that starts no known reference is only a character, and code keeps references as written.</summary>
+    [Theory]
+    [InlineData("Fish & chips")]
+    [InlineData("&nope; and &nbsp")]
+    [InlineData("&#; &#x; &#12a;")]
+    [InlineData("&#12345678;")]
+    public void AnUnknownReferenceIsOnlyCharacters(string written)
+    {
+        var runs = Markdown.Parse(written).Blocks[0].Runs;
+
+        Assert.Equal(written, string.Concat(runs.Select(run => run.Text)));
+    }
+
+    /// <summary>Inside code a reference is the characters it is written with.</summary>
+    [Fact]
+    public void CodeKeepsAReferenceAsWritten()
+    {
+        var runs = Markdown.Parse("`&nbsp;`").Blocks[0].Runs;
+
+        Assert.Equal("&nbsp;", Assert.Single(runs).Text);
+    }
+
     /// <summary>A star with space on both sides opens and closes nothing.</summary>
     [Fact]
     public void ALoneStarIsACharacter()

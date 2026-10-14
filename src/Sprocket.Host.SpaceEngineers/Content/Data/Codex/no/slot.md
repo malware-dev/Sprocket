@@ -1,11 +1,11 @@
 # Plass
 
-En plass er et navngitt sted i et ![](mark:logic-system) [logikksystem](#logic-system), som *den indre døra*. [Stegene](#step) og [utløserne](#trigger) i logikksystemet bruker plassen, og hver ![](mark:installation) [installasjon](#installation) fyller den med sine egne blokker. Slik kan ett logikksystem kjøre alle luftslusene på et skip.
+En plass er et navngitt sted i et ![](mark:logic-system)&nbsp;[logikksystem](#logic-system), som *den indre døra*. [Stegene](#step) og [utløserne](#trigger) i logikksystemet bruker plassen, og hver ![](mark:installation)&nbsp;[installasjon](#installation) fyller den med sine egne blokker. Slik kan ett logikksystem kjøre alle luftslusene på et skip.
 
 ## To slags
 
 - En ![](mark:block) **blokkplass** holder blokkene et steg virker på eller en utløser følger med på, for eksempel en dør, eller alle lysene i luftslusen.
-- En ![](mark:signal) **signalplass** holder en blokk og verktøylinjeplassen på den som sender ![](mark:signal) [signalet](#signal), for eksempel et knappepanel og en av knappene.
+- En ![](mark:signal) **signalplass** holder en blokk og verktøylinjeplassen på den som sender ![](mark:signal)&nbsp;[signalet](#signal), for eksempel et knappepanel og en av knappene.
 
 ## Hvordan en plass blir til
 

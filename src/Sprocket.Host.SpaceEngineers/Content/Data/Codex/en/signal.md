@@ -17,7 +17,7 @@ Each button or toolbar slot sends a signal of its own, so one block can start se
 
 ### Setting one up
 
-The signal reaches a ![](mark:logic-system) [logic system](#logic-system) through a ![](mark:signal) [signal slot](#slot), which holds the block and the toolbar slot that sends it. When the signal slot is filled, that toolbar slot is set up for you, and shows `Automation Signal`. If it already does something else, you are asked whether to take it over, replacing what it did, or leave it alone. Undoing the take-over gives the toolbar slot back what it did, as long as nothing else has been put there since.
+The signal reaches a ![](mark:logic-system)&nbsp;[logic system](#logic-system) through a ![](mark:signal)&nbsp;[signal slot](#slot), which holds the block and the toolbar slot that sends it. When the signal slot is filled, that toolbar slot is set up for you, and shows `Automation Signal`. If it already does something else, you are asked whether to take it over, replacing what it did, or leave it alone. Undoing the take-over gives the toolbar slot back what it did, as long as nothing else has been put there since.
 
 ### When the toolbar slot is changed
 
@@ -35,6 +35,6 @@ The trigger then reads, for example, `When Airlock Inner Door finishes closing`.
 
 ## When a signal arrives
 
-A signal starts its trigger only for the ![](mark:installation) [installation](#installation) whose slot holds the block, so the port airlock's button cycles only the port airlock.
+A signal starts its trigger only for the ![](mark:installation)&nbsp;[installation](#installation) whose slot holds the block, so the port airlock's button cycles only the port airlock.
 
-A signal that arrives while the ![](mark:sequence) [sequence](#sequence) it starts is already running is skipped, and the sequence counts it: `skipped 1x while busy`. One that arrives while the installation is switched off is skipped as well, and only those from a toolbar slot are counted: `skipped 1x while off`.
+A signal that arrives while the ![](mark:sequence)&nbsp;[sequence](#sequence) it starts is already running is skipped, and the sequence counts it: `skipped 1x while busy`. One that arrives while the installation is switched off is skipped as well, and only those from a toolbar slot are counted: `skipped 1x while off`.

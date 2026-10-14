@@ -2,9 +2,9 @@
 
 ## Running a sequence
 
-Selecting `run` under `+ step` adds a [step](#step) that starts another ![](mark:sequence) [sequence](#sequence) of the same logic system, selected from a list of its sequences. A run step takes time, as an action with a clock does: the sequence can wait for the run to finish or go straight on, and a new run step waits, so the next step begins once that sequence has finished.
+Selecting `run` under `+ step` adds a [step](#step) that starts another ![](mark:sequence)&nbsp;[sequence](#sequence) of the same logic system, selected from a list of its sequences. A run step takes time, as an action with a clock does: the sequence can wait for the run to finish or go straight on, and a new run step waits, so the next step begins once that sequence has finished.
 
-An ![](mark:installation) [installation](#installation) runs a sequence once at a time. Where the sequence is already running, waiting for the run step means waiting for that run to finish, and the sequence counts the start as skipped, as it does for a [trigger](#trigger): `skipped 1x while busy`.
+An ![](mark:installation)&nbsp;[installation](#installation) runs a sequence once at a time. Where the sequence is already running, waiting for the run step means waiting for that run to finish, and the sequence counts the start as skipped, as it does for a [trigger](#trigger): `skipped 1x while busy`.
 
 A sequence that run steps start needs no trigger of its own.
 

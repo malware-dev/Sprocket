@@ -2,9 +2,9 @@
 
 ## Kjøre en sekvens
 
-Velger du `kjør` under `+ steg`, får du et [steg](#step) som starter en annen ![](mark:sequence) [sekvens](#sequence) i det samme logikksystemet, valgt fra en liste over sekvensene i det. Et kjør-steg tar tid, slik en handling med klokke gjør: sekvensen kan vente på at kjøringen blir ferdig, eller gå rett videre, og et nytt kjør-steg venter, så neste steg begynner når den sekvensen er ferdig.
+Velger du `kjør` under `+ steg`, får du et [steg](#step) som starter en annen ![](mark:sequence)&nbsp;[sekvens](#sequence) i det samme logikksystemet, valgt fra en liste over sekvensene i det. Et kjør-steg tar tid, slik en handling med klokke gjør: sekvensen kan vente på at kjøringen blir ferdig, eller gå rett videre, og et nytt kjør-steg venter, så neste steg begynner når den sekvensen er ferdig.
 
-En ![](mark:installation) [installasjon](#installation) kjører en sekvens én gang om gangen. Kjører sekvensen allerede, betyr det å vente på kjør-steget å vente på at den kjøringen blir ferdig, og sekvensen teller starten som hoppet over, slik den gjør for en [utløser](#trigger): `hoppet over 1x mens den var opptatt`.
+En ![](mark:installation)&nbsp;[installasjon](#installation) kjører en sekvens én gang om gangen. Kjører sekvensen allerede, betyr det å vente på kjør-steget å vente på at den kjøringen blir ferdig, og sekvensen teller starten som hoppet over, slik den gjør for en [utløser](#trigger): `hoppet over 1x mens den var opptatt`.
 
 En sekvens som kjør-steg starter, trenger ingen egen utløser.
 

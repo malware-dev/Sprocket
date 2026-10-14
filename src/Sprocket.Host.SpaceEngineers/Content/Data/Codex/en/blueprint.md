@@ -1,6 +1,6 @@
 # Blueprint
 
-A blueprint is a copy of a ![](mark:logic-system) [logic system](#logic-system) kept in the [library](#library). It holds the logic system's ![](mark:sequence) [sequences](#sequence), [triggers](#trigger) and [slots](#slot), its description, and what each slot is for. It holds no blocks, since every ![](mark:installation) [installation](#installation) brings its own.
+A blueprint is a copy of a ![](mark:logic-system)&nbsp;[logic system](#logic-system) kept in the [library](#library). It holds the logic system's ![](mark:sequence)&nbsp;[sequences](#sequence), [triggers](#trigger) and [slots](#slot), its description, and what each slot is for. It holds no blocks, since every ![](mark:installation)&nbsp;[installation](#installation) brings its own.
 
 ## Making one
 

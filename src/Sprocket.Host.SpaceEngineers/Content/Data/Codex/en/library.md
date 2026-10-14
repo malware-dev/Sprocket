@@ -1,6 +1,6 @@
 # Library
 
-The library holds the ![](mark:logic-system) [logic systems](#logic-system) on this [construct](#construct), backups of constructs that lost their automation, and your ![](mark:blueprint) [blueprints](#blueprint). Open it with `Library` on the [home screen](#home).
+The library holds the ![](mark:logic-system)&nbsp;[logic systems](#logic-system) on this [construct](#construct), backups of constructs that lost their automation, and your ![](mark:blueprint)&nbsp;[blueprints](#blueprint). Open it with `Library` on the [home screen](#home).
 
 It lists, from top to bottom:
 
@@ -12,7 +12,7 @@ Type in the search box to show only the rows whose name holds what you type.
 
 ## A logic system or a blueprint
 
-Select one to see who made it and when it last changed, its description, and its ![](mark:installation) [installations](#installation) on this construct.
+Select one to see who made it and when it last changed, its description, and its ![](mark:installation)&nbsp;[installations](#installation) on this construct.
 
 - `Add to this construct` puts it on this construct. It's only there while no logic system made from it is on this construct.
 - On a logic system on this construct, `Make blueprint` keeps a copy in storage, and `Update blueprint` brings that copy up to date. `Update from library` takes a newer copy from storage, and `Reset to blueprint` goes back to the copy in storage, leaving out the changes made since. Either way its installations keep their blocks.

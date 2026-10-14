@@ -4,9 +4,9 @@ A logic system automates one job, for example an airlock, a hangar door or a dri
 
 ## What it is made of
 
-- ![](mark:sequence) [Sequences](#sequence) say what happens, step by step.
-- [Triggers](#trigger) say when, for example when a ![](mark:signal) [signal](#signal) arrives, a door finishes closing or a set time passes.
-- ![](mark:installation) [Installations](#installation) say which blocks take part, for example the doors and the vent, and the blocks that send its signals.
+- ![](mark:sequence)&nbsp;[Sequences](#sequence) say what happens, step by step.
+- [Triggers](#trigger) say when, for example when a ![](mark:signal)&nbsp;[signal](#signal) arrives, a door finishes closing or a set time passes.
+- ![](mark:installation)&nbsp;[Installations](#installation) say which blocks take part, for example the doors and the vent, and the blocks that send its signals.
 
 Because the blocks are kept apart from the job, one logic system can run every airlock on your ship.
 
@@ -68,4 +68,4 @@ If a sequence cannot carry on, for example because a block was lost or a slot is
 
 ## Keeping and sharing it
 
-`Make blueprint` saves a copy in the [library](#library) as a ![](mark:blueprint) [blueprint](#blueprint). From then on, the same button reads `Update blueprint`, and brings the library's copy up to date. Putting the blueprint on another construct makes a logic system with one installation, whose slots are filled on the installation panel.
+`Make blueprint` saves a copy in the [library](#library) as a ![](mark:blueprint)&nbsp;[blueprint](#blueprint). From then on, the same button reads `Update blueprint`, and brings the library's copy up to date. Putting the blueprint on another construct makes a logic system with one installation, whose slots are filled on the installation panel.

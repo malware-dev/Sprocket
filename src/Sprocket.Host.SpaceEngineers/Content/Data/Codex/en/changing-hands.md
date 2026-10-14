@@ -14,11 +14,11 @@ The automation uses the blocks its owners may use: the blocks they own, and thos
 
 Where the construct passes to a player it was shared with, its automation keeps running. A ship shared with its owner's faction and handed to another member of that faction carries on as before.
 
-Where it passes outside its sharing, in a capture or a hand-over to a player it was kept from, the automation pauses. Everything it does stops: its buttons go dead, and a ![](mark:sequence) [sequence](#sequence) part way through holds at its step. It stays paused when the world is loaded again, until one of the new owners resumes it. The game asks the new owner of a programmable block to recompile its script in the same way; the automation keeps everything as it was and waits for one press.
+Where it passes outside its sharing, in a capture or a hand-over to a player it was kept from, the automation pauses. Everything it does stops: its buttons go dead, and a ![](mark:sequence)&nbsp;[sequence](#sequence) part way through holds at its step. It stays paused when the world is loaded again, until one of the new owners resumes it. The game asks the new owner of a programmable block to recompile its script in the same way; the automation keeps everything as it was and waits for one press.
 
 ## The Paused screen
 
-While the automation is paused, opening it shows the `Paused` screen first. It says who the construct passed from and to, how many ![](mark:logic-system) [logic systems](#logic-system) it holds, and how many blocks are out of its reach, those the new owners may not use, or back in its reach, those the old owners could not.
+While the automation is paused, opening it shows the `Paused` screen first. It says who the construct passed from and to, how many ![](mark:logic-system)&nbsp;[logic systems](#logic-system) it holds, and how many blocks are out of its reach, those the new owners may not use, or back in its reach, those the old owners could not.
 
 Three buttons lead on:
 

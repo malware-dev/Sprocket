@@ -202,6 +202,45 @@ public class RichTextTests
         Assert.True(Word(easel, "450").Position.X > Wide * 0.6f * easel.Pixels, "the price is not near the right edge");
     }
 
+    /// <summary>Starred columns share the table's width by their stars, whatever their cells hold: one star and three give a quarter and three quarters.</summary>
+    [Fact]
+    public void StarsShareTheWidthWhateverTheCellsHold()
+    {
+        var (shortFirst, shortEasel) = Laid("| | |\n|:--*|:--***|\n| A | Bee |", Wide);
+        var (longFirst, longEasel) = Laid("| | |\n|:--*|:--***|\n| Ack ack ack | Bee |", Wide);
+
+        Assert.Equal(Wide, shortFirst.DesiredSize.X);
+        Assert.Equal(Wide, longFirst.DesiredSize.X);
+
+        var second = Word(shortEasel, "Bee").Position.X;
+        Assert.Equal(second, Word(longEasel, "Bee").Position.X);
+        Assert.True(second > Wide * 0.25f * shortEasel.Pixels && second < Wide * 0.4f * shortEasel.Pixels,
+            "the second column does not start a quarter of the way across");
+    }
+
+    /// <summary>A starred column narrower than its cell wraps the cell to its share.</summary>
+    [Fact]
+    public void AStarredCellWrapsToItsShare()
+    {
+        var (_, easel) = Laid("| | |\n|:--*|:--*******|\n| one two three four five six | x |\n| Below | y |", Wide);
+
+        var lines = easel.Written.Where(c => c.Position.Y < Word(easel, "Below").Position.Y).Select(c => c.Position.Y).Distinct().Count();
+        Assert.True(lines > 1, "the cell kept to one line past its share");
+    }
+
+    /// <summary>Words joined by a no-break space stay on one line wherever the line breaks, drawn with a space between.</summary>
+    [Fact]
+    public void ANoBreakSpaceKeepsItsWordsTogether()
+    {
+        for (var n = 1; n < 40; n++)
+        {
+            var (_, easel) = Laid(string.Join(" ", Enumerable.Repeat("word", n)) + " ten&nbsp;SC end", Wide);
+
+            var holding = Assert.Single(easel.Written, command => command.Text.Contains("SC"));
+            Assert.Contains("ten SC", holding.Text);
+        }
+    }
+
     /// <summary>A table with no star is only as wide as its cells and the gaps between them.</summary>
     [Fact]
     public void ATableWithNoStarHugsItsCells()

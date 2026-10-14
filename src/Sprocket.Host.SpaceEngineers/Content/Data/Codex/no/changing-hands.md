@@ -14,11 +14,11 @@ Automasjonen bruker blokkene eierne kan bruke: blokkene de eier, og dem som er d
 
 Går konstruksjonen over til en spiller den var delt med, fortsetter automasjonen å kjøre. Et skip som er delt med fraksjonen til eieren og gis til et annet medlem av fraksjonen, går videre som før.
 
-Går den over utenfor delingen, ved at den blir tatt eller gitt til en spiller den var holdt unna, settes automasjonen på pause. Alt den gjør, stopper: knappene blir døde, og en ![](mark:sequence) [sekvens](#sequence) som er midt i en kjøring, blir stående på steget sitt. Den forblir på pause når verdenen lastes inn igjen, til en av de nye eierne fortsetter den. Spillet ber på samme måte den nye eieren av en programmerbar blokk om å kompilere skriptet på nytt; automasjonen beholder alt som det var og venter på ett trykk.
+Går den over utenfor delingen, ved at den blir tatt eller gitt til en spiller den var holdt unna, settes automasjonen på pause. Alt den gjør, stopper: knappene blir døde, og en ![](mark:sequence)&nbsp;[sekvens](#sequence) som er midt i en kjøring, blir stående på steget sitt. Den forblir på pause når verdenen lastes inn igjen, til en av de nye eierne fortsetter den. Spillet ber på samme måte den nye eieren av en programmerbar blokk om å kompilere skriptet på nytt; automasjonen beholder alt som det var og venter på ett trykk.
 
 ## Skjermen Satt på pause
 
-Mens automasjonen står på pause, viser den skjermen `Satt på pause` først når den åpnes. Den sier hvem konstruksjonen gikk fra og til, hvor mange ![](mark:logic-system) [logikksystemer](#logic-system) den har, og hvor mange blokker som er utenfor rekkevidde, de nye eierne ikke kan bruke, eller innenfor rekkevidde igjen, de gamle eierne ikke kunne bruke.
+Mens automasjonen står på pause, viser den skjermen `Satt på pause` først når den åpnes. Den sier hvem konstruksjonen gikk fra og til, hvor mange ![](mark:logic-system)&nbsp;[logikksystemer](#logic-system) den har, og hvor mange blokker som er utenfor rekkevidde, de nye eierne ikke kan bruke, eller innenfor rekkevidde igjen, de gamle eierne ikke kunne bruke.
 
 Tre knapper fører videre:
 

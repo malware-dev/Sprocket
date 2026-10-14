@@ -1,10 +1,10 @@
 # Installasjon
 
-En installasjon er ett sted et ![](mark:logic-system) [logikksystem](#logic-system) kjører, som én luftsluse blant flere. Den fyller [plassene](#slot) til logikksystemet med sine egne blokker, for eksempel sine egne dører, sin egen ventil og sin egen knapp.
+En installasjon er ett sted et ![](mark:logic-system)&nbsp;[logikksystem](#logic-system) kjører, som én luftsluse blant flere. Den fyller [plassene](#slot) til logikksystemet med sine egne blokker, for eksempel sine egne dører, sin egen ventil og sin egen knapp.
 
 ## Mange installasjoner, ett logikksystem
 
-Et logikksystem for luftsluser kan ha én installasjon for hver luftsluse på skipet. Alle kjører de samme ![](mark:sequence) [sekvensene](#sequence) og [utløserne](#trigger), hver på sine egne blokker. Sluser du gjennom én luftsluse, blir de andre stående som de er.
+Et logikksystem for luftsluser kan ha én installasjon for hver luftsluse på skipet. Alle kjører de samme ![](mark:sequence)&nbsp;[sekvensene](#sequence) og [utløserne](#trigger), hver på sine egne blokker. Sluser du gjennom én luftsluse, blir de andre stående som de er.
 
 En endring i logikksystemet når alle installasjonene med én gang. Rett et steg, og alle luftslusene får rettelsen.
 

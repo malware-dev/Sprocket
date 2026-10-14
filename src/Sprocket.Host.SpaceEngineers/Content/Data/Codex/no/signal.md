@@ -17,7 +17,7 @@ Hver knapp eller verktøylinjeplass sender sitt eget signal, så én blokk kan s
 
 ### Sette opp et
 
-Signalet når et ![](mark:logic-system) [logikksystem](#logic-system) gjennom en ![](mark:signal) [signalplass](#slot), som holder blokken og verktøylinjeplassen som sender det. Når signalplassen fylles, settes den verktøylinjeplassen opp for deg og viser `Automasjonssignal`. Gjør den allerede noe annet, blir du spurt om du vil ta den over og erstatte det den gjorde, eller la den være. Angrer du overtakelsen, får verktøylinjeplassen tilbake det den gjorde, så lenge ingenting annet er lagt der siden.
+Signalet når et ![](mark:logic-system)&nbsp;[logikksystem](#logic-system) gjennom en ![](mark:signal)&nbsp;[signalplass](#slot), som holder blokken og verktøylinjeplassen som sender det. Når signalplassen fylles, settes den verktøylinjeplassen opp for deg og viser `Automasjonssignal`. Gjør den allerede noe annet, blir du spurt om du vil ta den over og erstatte det den gjorde, eller la den være. Angrer du overtakelsen, får verktøylinjeplassen tilbake det den gjorde, så lenge ingenting annet er lagt der siden.
 
 ### Når verktøylinjeplassen endres
 
@@ -35,6 +35,6 @@ Utløseren leser da for eksempel `When Luftsluse indre dør finishes closing`. B
 
 ## Når et signal kommer
 
-Et signal starter utløseren bare for den ![](mark:installation) [installasjonen](#installation) der plassen holder blokken, så knappen til babord luftsluse sluser bare babord luftsluse.
+Et signal starter utløseren bare for den ![](mark:installation)&nbsp;[installasjonen](#installation) der plassen holder blokken, så knappen til babord luftsluse sluser bare babord luftsluse.
 
-Et signal som kommer mens ![](mark:sequence) [sekvensen](#sequence) det starter allerede kjører, hoppes over, og sekvensen teller det: `hoppet over 1x mens den var opptatt`. Et som kommer mens installasjonen er slått av, hoppes også over, og bare de som kommer fra en verktøylinjeplass, telles: `hoppet over 1x mens den var av`.
+Et signal som kommer mens ![](mark:sequence)&nbsp;[sekvensen](#sequence) det starter allerede kjører, hoppes over, og sekvensen teller det: `hoppet over 1x mens den var opptatt`. Et som kommer mens installasjonen er slått av, hoppes også over, og bare de som kommer fra en verktøylinjeplass, telles: `hoppet over 1x mens den var av`.

@@ -1,6 +1,6 @@
 # Installasjonspanel
 
-Installasjonspanelet er der en ![](mark:installation) [installasjon](#installation) får blokkene og ![](mark:signal) [signalene](#signal) sine. Hver installasjon har sitt eget. Det viser også det den som laget ![](mark:logic-system) [logikksystemet](#logic-system), skrev om det, så noen som aldri har sett det, kan installere det.
+Installasjonspanelet er der en ![](mark:installation)&nbsp;[installasjon](#installation) får blokkene og ![](mark:signal)&nbsp;[signalene](#signal) sine. Hver installasjon har sitt eget. Det viser også det den som laget ![](mark:logic-system)&nbsp;[logikksystemet](#logic-system), skrev om det, så noen som aldri har sett det, kan installere det.
 
 ## Åpne det
 
@@ -15,7 +15,7 @@ Et logikksystem som settes på denne [konstruksjonen](#construct) fra [bibliotek
 
 - **Navnet på installasjonen**, som du kan endre, og logikksystemet den hører til. Trykker du navnet på logikksystemet, åpnes det.
 - **Beskrivelsen** av logikksystemet, skrevet på skjermen til logikksystemet.
-- **Hva som er galt**, om noe, med en knapp som åpner ![](mark:sequence) [sekvensen](#sequence) der det gikk galt.
+- **Hva som er galt**, om noe, med en knapp som åpner ![](mark:sequence)&nbsp;[sekvensen](#sequence) der det gikk galt.
 - **Plassene**, med hvor mange som fortsatt mangler en blokk.
 
 Hver [plass](#slot) viser navnet sitt, hva den er til, og hva som fyller den nå. En signalplass viser også verktøylinjeplassen som sender signalet, for eksempel `button 2 is pressed`. En plass der blokken gikk tapt, sier det og nevner blokken.

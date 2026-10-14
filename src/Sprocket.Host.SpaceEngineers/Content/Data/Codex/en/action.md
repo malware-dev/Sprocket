@@ -12,7 +12,7 @@ For a [step](#step) that does an action, select `task` under `+ step`.
 
 ## Which actions take time
 
-For most actions, the ![](mark:sequence) [sequence](#sequence) tells the block and moves straight on to the next step, without waiting for the block to finish, such as playing a sound. A few take time to finish, such as a door closing, a vent filling or emptying a room, or a piston or rotor moving to where it was sent, and a new step that does one waits for it: the next step begins only once the block is done. The sequence page explains how a step goes straight on while its block is still going.
+For most actions, the ![](mark:sequence)&nbsp;[sequence](#sequence) tells the block and moves straight on to the next step, without waiting for the block to finish, such as playing a sound. A few take time to finish, such as a door closing, a vent filling or emptying a room, or a piston or rotor moving to where it was sent, and a new step that does one waits for it: the next step begins only once the block is done. The sequence page explains how a step goes straight on while its block is still going.
 
 In the picker, each action carries a mark:
 

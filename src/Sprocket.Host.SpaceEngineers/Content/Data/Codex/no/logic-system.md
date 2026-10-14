@@ -4,9 +4,9 @@ Et logikksystem automatiserer én jobb, for eksempel en luftsluse, en hangardør
 
 ## Hva det består av
 
-- ![](mark:sequence) [Sekvenser](#sequence) sier hva som skjer, steg for steg.
-- [Utløsere](#trigger) sier når, for eksempel når et ![](mark:signal) [signal](#signal) kommer, en dør er ferdig med å lukke seg eller en fastsatt tid har gått.
-- ![](mark:installation) [Installasjoner](#installation) sier hvilke blokker som er med, for eksempel dørene og ventilen, og blokkene som sender signalene.
+- ![](mark:sequence)&nbsp;[Sekvenser](#sequence) sier hva som skjer, steg for steg.
+- [Utløsere](#trigger) sier når, for eksempel når et ![](mark:signal)&nbsp;[signal](#signal) kommer, en dør er ferdig med å lukke seg eller en fastsatt tid har gått.
+- ![](mark:installation)&nbsp;[Installasjoner](#installation) sier hvilke blokker som er med, for eksempel dørene og ventilen, og blokkene som sender signalene.
 
 Fordi blokkene holdes atskilt fra jobben, kan ett logikksystem kjøre alle luftslusene på skipet ditt.
 
@@ -68,4 +68,4 @@ Kan en sekvens ikke fortsette, for eksempel fordi en blokk gikk tapt eller en pl
 
 ## Ta vare på og dele det
 
-`Lag plantegning` lagrer en kopi i [biblioteket](#library) som en ![](mark:blueprint) [plantegning](#blueprint). Fra da av står det `Oppdater plantegning` på den samme knappen, og den oppdaterer kopien i biblioteket. Setter du plantegningen på en annen konstruksjon, får du et logikksystem med én installasjon, der plassene fylles på installasjonspanelet.
+`Lag plantegning` lagrer en kopi i [biblioteket](#library) som en ![](mark:blueprint)&nbsp;[plantegning](#blueprint). Fra da av står det `Oppdater plantegning` på den samme knappen, og den oppdaterer kopien i biblioteket. Setter du plantegningen på en annen konstruksjon, får du et logikksystem med én installasjon, der plassene fylles på installasjonspanelet.

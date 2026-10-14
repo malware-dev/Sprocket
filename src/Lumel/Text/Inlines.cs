@@ -14,6 +14,9 @@ namespace Lumel.Text
     /// </remarks>
     public static class Inlines
     {
+        /// <summary>The furthest an entity reference's semicolon can stand from its ampersand: a seven-digit number after <c>&amp;#</c>.</summary>
+        const int Longest = 10;
+
         /// <summary>Adds the runs <paramref name="text" /> holds to <paramref name="runs" />.</summary>
         public static void Parse(string text, IList<Run> runs)
         {
@@ -120,12 +123,85 @@ namespace Lumel.Text
                     continue;
                 }
 
+                if (c == '&')
+                {
+                    int end;
+                    var meant = Entity(text, i, out end);
+                    if (meant != null)
+                    {
+                        words.Append(meant);
+                        i = end;
+                        continue;
+                    }
+                }
+
                 words.Append(c);
                 i++;
             }
 
             Flush(pieces, words);
             return pieces;
+        }
+
+        /// <summary>
+        ///     What the entity reference at <paramref name="at" /> stands for, with <paramref name="end" /> just past it; null where
+        ///     none stands there, and the <c>&amp;</c> is then only a character.
+        /// </summary>
+        /// <remarks>
+        ///     A number in decimal or hexadecimal, as CommonMark reads one, and a short list of names. A number that names no
+        ///     character stands for the replacement character, as CommonMark has it.
+        /// </remarks>
+        static string Entity(string text, int at, out int end)
+        {
+            end = at;
+            var close = text.IndexOf(';', at + 1);
+            if (close < 0 || close - at > Longest)
+                return null;
+
+            var name = text.Substring(at + 1, close - at - 1);
+            var meant = name.Length > 1 && name[0] == '#' ? Numbered(name.Substring(1)) : Named(name);
+            if (meant != null)
+                end = close + 1;
+
+            return meant;
+        }
+
+        /// <summary>The character a numeric reference's digits stand for, or null where they are no number.</summary>
+        static string Numbered(string digits)
+        {
+            var hex = digits.Length > 1 && (digits[0] == 'x' || digits[0] == 'X');
+            var number = hex ? digits.Substring(1) : digits;
+            if (number.Length == 0 || number.Length > (hex ? 6 : 7))
+                return null;
+
+            for (var i = 0; i < number.Length; i++)
+            {
+                var c = number[i];
+                var digit = c >= '0' && c <= '9' || hex && (c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F');
+                if (!digit)
+                    return null;
+            }
+
+            var value = int.Parse(number, hex ? NumberStyles.HexNumber : NumberStyles.None, CultureInfo.InvariantCulture);
+            if (value == 0 || value > 0x10FFFF || value >= 0xD800 && value <= 0xDFFF)
+                return "�";
+
+            return char.ConvertFromUtf32(value);
+        }
+
+        /// <summary>The character a named reference stands for, or null for a name not on the list.</summary>
+        static string Named(string name)
+        {
+            switch (name)
+            {
+                case "nbsp": return " ";
+                case "amp": return "&";
+                case "lt": return "<";
+                case "gt": return ">";
+                case "quot": return "\"";
+                case "apos": return "'";
+                default: return null;
+            }
         }
 
         /// <summary>Pairs closers with openers, and marks where each pair's span starts and ends.</summary>

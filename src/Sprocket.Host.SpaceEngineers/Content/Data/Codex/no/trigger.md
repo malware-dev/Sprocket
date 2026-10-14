@@ -1,12 +1,12 @@
 # Utløser
 
-En utløser sier når en ![](mark:sequence) [sekvens](#sequence) kjører. Den er én linje: når noe skjer, gjør én ting. For eksempel: når knappen til luftslusen trykkes, kjør *Sluse ut*.
+En utløser sier når en ![](mark:sequence)&nbsp;[sekvens](#sequence) kjører. Den er én linje: når noe skjer, gjør én ting. For eksempel: når knappen til luftslusen trykkes, kjør *Sluse ut*.
 
-For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til ![](mark:logic-system) [logikksystemet](#logic-system), og velger `når`, eller `hver` for en som starter på en fast tid. Trykker du en del av en utløser, kan du endre den: tiden åpnes ved siden av den, og enhver annen del åpner [velgeren](#picking) på den delen.
+For å legge til en trykker du `+ utløser` under `Utløsere` på skjermen til ![](mark:logic-system)&nbsp;[logikksystemet](#logic-system), og velger `når`, eller `hver` for en som starter på en fast tid. Trykker du en del av en utløser, kan du endre den: tiden åpnes ved siden av den, og enhver annen del åpner [velgeren](#picking) på den delen.
 
 ## Hva som starter den
 
-- Et ![](mark:signal) [signal](#signal) som kommer, som at en knapp trykkes eller en dør er ferdig med å lukke seg.
+- Et ![](mark:signal)&nbsp;[signal](#signal) som kommer, som at en knapp trykkes eller en dør er ferdig med å lukke seg.
 - Blokker som kommer i en tilstand, som at en dør er lukket. Med flere blokker starter `hvilken som helst` den når den første kommer dit, og `alle sammen` når den siste gjør det.
 - En fastsatt tid som går, om og om igjen, som hvert minutt.
 
@@ -24,4 +24,4 @@ Kopimerket på raden til en utløser legger til en utløser som gjør det samme.
 
 ## Hvilken installasjon den starter
 
-En utløser som startes av et signal, kjører bare for den ![](mark:installation) [installasjonen](#installation) der [plassen](#slot) holder blokken som sendte det. Så knappen til babord luftsluse sluser babord luftsluse, og styrbord luftsluse blir stående som den er.
+En utløser som startes av et signal, kjører bare for den ![](mark:installation)&nbsp;[installasjonen](#installation) der [plassen](#slot) holder blokken som sendte det. Så knappen til babord luftsluse sluser babord luftsluse, og styrbord luftsluse blir stående som den er.

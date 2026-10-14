@@ -1,6 +1,6 @@
 # Step
 
-A step is one line of a ![](mark:sequence) [sequence](#sequence). `+ step`, at the end of a sequence and of each branch of an if, adds one of these kinds:
+A step is one line of a ![](mark:sequence)&nbsp;[sequence](#sequence). `+ step`, at the end of a sequence and of each branch of an if, adds one of these kinds:
 
 - `task` does something to blocks: [an action](#action) such as `open`, or setting one of their values.
 - `wait` [waits](#wait) a set time.
@@ -22,4 +22,4 @@ Pressing a part of a step, such as its blocks or its action, opens the [picker](
 
 A step can be paused with the pause mark on its row: the sequence skips it until it is resumed.
 
-Steps can only be changed while the ![](mark:logic-system) [logic system](#logic-system) is switched off.
+Steps can only be changed while the ![](mark:logic-system)&nbsp;[logic system](#logic-system) is switched off.
