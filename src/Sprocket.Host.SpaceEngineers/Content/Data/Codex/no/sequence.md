@@ -20,8 +20,8 @@ For de fleste handlinger sier sekvensen fra til blokken og går rett videre til 
 
 I [velgeren](#picking) har hver handling et merke:
 
-- ![](mark:action) **Et lyn** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
-- ![](mark:awaited) **En klokke** merker en som tar tid å fullføre. Sekvensen kan vente på den, eller gå rett videre mens den pågår.
+- ![](mark:action) **En pil inn i en blokk** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
+- ![](mark:awaited) **En pil inn i en klokke** merker en som tar tid å fullføre. Sekvensen kan vente på den, eller gå rett videre mens den pågår.
 
 ## Gå rett videre
 

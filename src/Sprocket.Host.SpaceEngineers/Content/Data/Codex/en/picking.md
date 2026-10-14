@@ -18,8 +18,8 @@ When a slot is being filled, only blocks of the right kind are offered.
 
 Each choice carries a mark for its kind:
 
-- ![](mark:action) **An action**, marked with a bolt, is started without waiting for the block to complete it, such as switching a light on.
-- ![](mark:awaited) **An action that takes time**, marked with a clock, such as closing a door, can be waited for before the next step begins, or left running while the sequence goes straight on.
+- ![](mark:action) **An action**, marked with an arrow into a block, is started without waiting for the block to complete it, such as switching a light on.
+- ![](mark:awaited) **An action that takes time**, marked with an arrow into a clock, such as closing a door, can be waited for before the next step begins, or left running while the sequence goes straight on.
 - ![](mark:value) **A value**, marked `=?`, is one of the block's properties, to be set or checked, such as a light's `Radius`.
 - ![](mark:signal) **A signal**, marked with a square pulse, is something a block sends, such as a button being pressed or a door finishing closing. Signals are offered when picking for a trigger.
 

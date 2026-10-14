@@ -559,12 +559,55 @@ def pulse():
 
 def bolt():
     """
-    Action: a lightning bolt, something a block is told to do.
+    Trigger: a lightning bolt, what starts a sequence.
 
-    The mark every interface already uses for a quick action, and one shape: a thing done rather than a thing
-    read. An action that can be waited on shows the clock in its place, so a row carries one mark.
+    The mark automation tools already give whatever sets a flow going, and one shape: a moment rather than a thing.
     """
     return [poly((0.60, 0.10), (0.26, 0.56), (0.47, 0.56), (0.38, 0.90), (0.74, 0.42), (0.53, 0.42), (0.62, 0.10))]
+
+
+# The action pair: an arrow going in from the left, and what it goes into standing to its right.
+INTO_X, INTO_Y = 0.62, 0.5
+
+
+def into(reach=0.40):
+    """The arrow of the action pair, from the left edge to <reach>, at the set's lighter line."""
+    line = 0.094
+    return [stroke((0.04, INTO_Y), (reach - 0.14, INTO_Y), line), head((reach, INTO_Y), (reach - 0.16, INTO_Y), 0.24)]
+
+
+def around(r, steps=6, start=-90):
+    """A ring of points about the pair's centre: a hexagon by default, a circle with enough steps."""
+    return [(INTO_X + r * math.cos(math.radians(start + i * 360.0 / steps)),
+             INTO_Y + r * math.sin(math.radians(start + i * 360.0 / steps))) for i in range(steps)]
+
+
+def act():
+    """
+    Action: an arrow going into a block, something a block is told to do.
+
+    Paired with the block's own cube, drawn lighter so the cube stays open beside the arrow, and with the action that
+    takes time, whose arrow goes into a clock instead: the arrow says action in both.
+    """
+    line = 0.07
+    r = 0.30
+    inner_r = (r * math.cos(math.radians(30)) - line) / math.cos(math.radians(30))
+    inner = around(inner_r)
+    _, right, _, bottom, _, left = inner
+    middle = (INTO_X, INTO_Y)
+    return [poly(*around(r))], [poly(*inner)], [path([left, middle, right], line), stroke(middle, bottom, line)] + into()
+
+
+def lasting():
+    """
+    An action that takes time: the action's arrow going into a clock, its hands at three.
+
+    The clock alone stays the mark of a wait itself; this is an action, and says so with the action's arrow.
+    """
+    line = 0.07
+    r = 0.28
+    hands = [path([(INTO_X, INTO_Y - 0.15), (INTO_X, INTO_Y), (INTO_X + 0.11, INTO_Y)], line)]
+    return [poly(*around(r, 96))], [poly(*around(r - line, 96))], hands + into()
 
 
 def query():
@@ -586,9 +629,9 @@ def query():
 
 def clock():
     """
-    Awaitable: a clock face, its hands at three.
+    Wait: a clock face, its hands at three.
 
-    Something that takes time, which is what a wait on it is for. A ring, with the hands put back inside the
+    The mark of a wait for what is running. A ring, with the hands put back inside the
     hole once it is cut, so they are the same ink as the rim. Drawn at the blueprint's lighter line, with the
     hands short of the rim: at the set's stroke the hands fill the face and it reads as a chart, not a clock.
     """
@@ -713,7 +756,11 @@ GLYPHS = [
     # "s", "g" and "a" are taken; "n" is the next letter of the word.
     ("n", "signal", lambda: solid(pulse())),
     # "a", "c", "t" and "o" are taken; "i" is left.
-    ("i", "action", lambda: solid(bolt())),
+    ("i", "action", lambda: act()),
+    # Every letter of the word is taken in lower case.
+    ("T", "trigger", lambda: solid(bolt())),
+    # Every letter of "lasting" is taken in lower case; "A" for an action, in upper case as "B" and "I" are.
+    ("A", "action that takes time", lambda: lasting()),
     # "v", "a", "u" and "e" are taken; "l" is left.
     ("l", "value", lambda: solid(query())),
     # "c" and "o" are taken; "k" is left.

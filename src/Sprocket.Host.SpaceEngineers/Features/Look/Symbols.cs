@@ -93,10 +93,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A square pulse: a signal a block sends, and the slot it comes in through.</summary>
         public const string Signal = "n";
 
-        /// <summary>A lightning bolt: something a block is told to do.</summary>
+        /// <summary>A lightning bolt: a trigger, what starts a sequence.</summary>
+        public const string Trigger = "T";
+
+        /// <summary>An arrow into a block: something a block is told to do.</summary>
         public const string Action = "i";
 
-        /// <summary>A clock: something a block is told to do that takes time, which a step waits for.</summary>
+        /// <summary>An arrow into a clock: something a block is told to do that takes time, which a step can wait for.</summary>
+        public const string Lasting = "A";
+
+        /// <summary>A clock: a wait for what is running.</summary>
         public const string Awaited = "k";
 
         /// <summary>"=?": something a block is asked about, what one of its values is.</summary>

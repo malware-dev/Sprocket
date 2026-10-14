@@ -16,8 +16,8 @@ For de fleste handlinger sier ![](mark:sequence) [sekvensen](#sequence) fra til 
 
 I velgeren har hver handling et merke:
 
-- ![](mark:action) **Et lyn** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
-- ![](mark:awaited) **En klokke** merker en som tar tid å fullføre. Sekvensen kan vente på den, eller gå rett videre mens den pågår.
+- ![](mark:action) **En pil inn i en blokk** merker en handling sekvensen starter uten å vente på at blokken fullfører den.
+- ![](mark:awaited) **En pil inn i en klokke** merker en som tar tid å fullføre. Sekvensen kan vente på den, eller gå rett videre mens den pågår.
 
 Noen handlinger med klokke har et valg i kolonnen ved siden av: med `wait` venter `Recharge` på et batteri eller en hoppmotor til blokken er ladet, og med `move on` går sekvensen rett videre til neste steg, mens `Stockpile` på en gasstank har det samme valget som `until full` og `without waiting`. De venter til du velger noe annet.
 

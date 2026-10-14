@@ -16,8 +16,8 @@ For most actions, the ![](mark:sequence) [sequence](#sequence) tells the block a
 
 In the picker, each action carries a mark:
 
-- ![](mark:action) **A bolt** marks an action the sequence starts without waiting for the block to complete it.
-- ![](mark:awaited) **A clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
+- ![](mark:action) **An arrow into a block** marks an action the sequence starts without waiting for the block to complete it.
+- ![](mark:awaited) **An arrow into a clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
 
 Some actions with a clock offer a choice in the column beside them: a battery's or jump drive's `Recharge` can `wait` until the block is charged or `move on` to the next step at once, and a gas tank's `Stockpile` can wait `until full` or go straight on `without waiting`. They wait unless you select something else.
 

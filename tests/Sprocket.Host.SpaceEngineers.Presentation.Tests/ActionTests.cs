@@ -209,7 +209,7 @@ public class ActionTests
         screen.Run(2);
 
         var entries = What(screen).Entries();
-        Assert.Equal(Symbols.Awaited, entries.Single(entry => entry.Text == "Open").Mark);
+        Assert.Equal(Symbols.Lasting, entries.Single(entry => entry.Text == "Open").Mark);
         Assert.Equal(Symbols.Action, entries.Single(entry => entry.Text == "Reverse").Mark);
     }
 
@@ -235,7 +235,7 @@ public class ActionTests
         var opens = rows[0].Within().OfType<MemberName>().Single();
         var switches = rows[1].Within().OfType<MemberName>().Single();
 
-        Assert.Equal(Symbols.Awaited, opens.Mark);
+        Assert.Equal(Symbols.Lasting, opens.Mark);
         Assert.Equal(Symbols.Action, switches.Mark);
     }
 

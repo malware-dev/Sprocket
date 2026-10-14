@@ -20,8 +20,8 @@ For most actions, the sequence tells the block and moves straight on to the next
 
 In the [picker](#picking), each action carries a mark:
 
-- ![](mark:action) **A bolt** marks an action the sequence starts without waiting for the block to complete it.
-- ![](mark:awaited) **A clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
+- ![](mark:action) **An arrow into a block** marks an action the sequence starts without waiting for the block to complete it.
+- ![](mark:awaited) **An arrow into a clock** marks one that takes time to finish. The sequence can wait for it, or go straight on while it runs.
 
 ## Going straight on
 

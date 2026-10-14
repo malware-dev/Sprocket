@@ -36,13 +36,15 @@
 <glyph ch="q" code="0071" bm="0" origin="448,128" size="64x64" aw="63" lsb="0" />
 <glyph ch="n" code="006E" bm="0" origin="0,192" size="64x64" aw="63" lsb="0" />
 <glyph ch="i" code="0069" bm="0" origin="64,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="l" code="006C" bm="0" origin="128,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="k" code="006B" bm="0" origin="192,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="B" code="0042" bm="0" origin="256,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="y" code="0079" bm="0" origin="320,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="I" code="0049" bm="0" origin="384,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="h" code="0068" bm="0" origin="448,192" size="64x64" aw="63" lsb="0" />
-<glyph ch="H" code="0048" bm="0" origin="0,256" size="64x64" aw="63" lsb="0" />
+<glyph ch="T" code="0054" bm="0" origin="128,192" size="64x64" aw="63" lsb="0" />
+<glyph ch="A" code="0041" bm="0" origin="192,192" size="64x64" aw="63" lsb="0" />
+<glyph ch="l" code="006C" bm="0" origin="256,192" size="64x64" aw="63" lsb="0" />
+<glyph ch="k" code="006B" bm="0" origin="320,192" size="64x64" aw="63" lsb="0" />
+<glyph ch="B" code="0042" bm="0" origin="384,192" size="64x64" aw="63" lsb="0" />
+<glyph ch="y" code="0079" bm="0" origin="448,192" size="64x64" aw="63" lsb="0" />
+<glyph ch="I" code="0049" bm="0" origin="0,256" size="64x64" aw="63" lsb="0" />
+<glyph ch="h" code="0068" bm="0" origin="64,256" size="64x64" aw="63" lsb="0" />
+<glyph ch="H" code="0048" bm="0" origin="128,256" size="64x64" aw="63" lsb="0" />
 </glyphs>
 <kernpairs>
 </kernpairs>
