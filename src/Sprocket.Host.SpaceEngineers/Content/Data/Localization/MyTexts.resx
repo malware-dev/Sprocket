@@ -1027,20 +1027,20 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Problem on a button trigger whose toolbar slot is not set to start the sequence; {block} is the name of the block whose toolbar holds the button. Shown on the trigger's row on a logic system's screen and on the bar at the top of the sequence's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Problem.MissingSource" xml:space="preserve">
-    <value>A block this trigger watches is gone.</value>
-    <comment>Problem when a block a trigger listens to is gone from the construct. Shown on the trigger's row on a logic system's screen and on the bar at the top of the sequence's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
+    <value>A block this trigger watches was lost.</value>
+    <comment>Problem when a block a trigger listens to was lost from the construct. Shown on the trigger's row on a logic system's screen and on the bar at the top of the sequence's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Problem.MissingTarget" xml:space="preserve">
-    <value>A block this step acts on is gone.</value>
-    <comment>Problem when a block a step acts on is gone from the construct. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <value>A block this step acts on was lost.</value>
+    <comment>Problem when a block a step acts on was lost from the construct. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Problem.NothingStarts" xml:space="preserve">
     <value>This sequence has no trigger, and no sequence runs it.</value>
     <comment>Warning on a sequence that has no trigger and is run by no other sequence. Shown on the bar at the top of the sequence's screen and on the sequence's row on a logic system's screen.</comment>
   </data>
   <data name="Sprocket.Problem.MissingGate" xml:space="preserve">
-    <value>A block this step checks is gone.</value>
-    <comment>Problem when a block that an if step tests is gone from the construct. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+    <value>A block this step checks was lost.</value>
+    <comment>Problem when a block that an if step tests was lost from the construct. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>This step does something its blocks no longer offer. Replace this step.</value>
@@ -1088,11 +1088,11 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Stopped.Plain" xml:space="preserve">
     <value>Stopped: {reason}</value>
-    <comment>Says why Sprocket switched off a logic system (or one of its installations), where no step or named sequence can be pointed at; {reason} is the reason, such as "a block it acts on was gone.", or a block's own words such as "cannot turn - it is locked". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <comment>Says why Sprocket switched off a logic system (or one of its installations), where no step or named sequence can be pointed at; {reason} is the reason, such as "a block it acts on was lost.", or a block's own words such as "cannot turn - it is locked". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.AtStep" xml:space="preserve">
     <value>Stopped at step {step}: {reason}</value>
-    <comment>Says why Sprocket switched off a logic system (or one of its installations), at a step of a sequence that has not been given a name; {step} is the step's number on the sequence's screen and {reason} the reason, such as "a block it acts on was gone.". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <comment>Says why Sprocket switched off a logic system (or one of its installations), at a step of a sequence that has not been given a name; {step} is the step's number on the sequence's screen and {reason} the reason, such as "a block it acts on was lost.". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.In" xml:space="preserve">
     <value>Stopped in {sequence}: {reason}</value>
@@ -1100,7 +1100,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Stopped.AtStepOf" xml:space="preserve">
     <value>Stopped at step {step} of {sequence}: {reason}</value>
-    <comment>Says why Sprocket switched off a logic system (or one of its installations), at a step of a named sequence; {step} is the step's number on the sequence's screen, {sequence} the sequence's name and {reason} the reason, such as "a block it acts on was gone.". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <comment>Says why Sprocket switched off a logic system (or one of its installations), at a step of a named sequence; {step} is the step's number on the sequence's screen, {sequence} the sequence's name and {reason} the reason, such as "a block it acts on was lost.". Shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.EmptySlot" xml:space="preserve">
     <value>the {slot} slot was empty.</value>
@@ -1111,8 +1111,8 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Reason a run stopped: a button trigger's toolbar slot could not start the sequence; {block} is the name of the block whose toolbar holds the button. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.BlockGone" xml:space="preserve">
-    <value>{block} was gone.</value>
-    <comment>Reason a run stopped: a block a step acts on was gone; {block} is the block's name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <value>{block} was lost.</value>
+    <comment>Reason a run stopped: a block a step acts on was lost; {block} is the block's name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.BlockReplaced" xml:space="preserve">
     <value>{block} may have been replaced.</value>
@@ -1123,16 +1123,16 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Reason a run stopped: nothing could start the sequence, used where no block can be named. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.MissingSource" xml:space="preserve">
-    <value>a block its trigger watches was gone.</value>
-    <comment>Reason a run stopped: a block a trigger listens to was gone. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <value>a block its trigger watches was lost.</value>
+    <comment>Reason a run stopped: a block a trigger listens to was lost. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.MissingTarget" xml:space="preserve">
-    <value>a block it acts on was gone.</value>
-    <comment>Reason a run stopped: a block a step acts on was gone, used where the block's name is not known. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <value>a block it acts on was lost.</value>
+    <comment>Reason a run stopped: a block a step acts on was lost, used where the block's name is not known. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.MissingGate" xml:space="preserve">
-    <value>a block it checks was gone.</value>
-    <comment>Reason a run stopped: a block that an if step tests was gone. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+    <value>a block it checks was lost.</value>
+    <comment>Reason a run stopped: a block that an if step tests was lost. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.Unoffered" xml:space="preserve">
     <value>its blocks no longer offered the action.</value>

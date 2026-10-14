@@ -64,7 +64,7 @@ På startskjermen trykker du `+ installasjon` under logikksystemet og fyller pla
 
 På startskjermen lyser en rad grønt mens den kjører, og rødt når den må repareres. Åpne den for å se hvorfor.
 
-Kan en sekvens ikke fortsette, for eksempel fordi en blokk er borte eller en plass er tom, slås den installasjonen av, og raden sier hvorfor: *Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør var borte.* Rett opp det den nevner, for eksempel ved å fylle plassen på installasjonspanelet, og slå på installasjonen igjen.
+Kan en sekvens ikke fortsette, for eksempel fordi en blokk gikk tapt eller en plass er tom, slås den installasjonen av, og raden sier hvorfor: *Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør gikk tapt.* Rett opp det den nevner, for eksempel ved å fylle plassen på installasjonspanelet, og slå på installasjonen igjen.
 
 ## Ta vare på og dele det
 

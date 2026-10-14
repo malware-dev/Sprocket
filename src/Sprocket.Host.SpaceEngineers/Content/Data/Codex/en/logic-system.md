@@ -64,7 +64,7 @@ On the home screen, press `+ installation` under the logic system, and fill its 
 
 On the home screen, a row lights green while it runs and red when it needs mending. Open it to see why.
 
-If a sequence cannot carry on, for example because a block is gone or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.* Put right what it names, for example by filling the slot on the installation panel, and switch the installation on again.
+If a sequence cannot carry on, for example because a block was lost or a slot is empty, that installation is switched off, and its row says why: *Stopped at step 1 of Cycle Out: Airlock Inner Door was lost.* Put right what it names, for example by filling the slot on the installation panel, and switch the installation on again.
 
 ## Keeping and sharing it
 

@@ -36,11 +36,11 @@ Uansett lyser klokka til en venting og klokkene til stegene den venter på når 
 
 ## Når en kjøring mislykkes
 
-En kjøring mislykkes når et av stegene ikke kan gjøres i det hele tatt, for eksempel fordi blokken det virker på, er borte. Installasjonen slås av, de andre installasjonene fortsetter å kjøre, og raden til installasjonen på [startskjermen](#home) nevner steget og hva som gikk galt:
+En kjøring mislykkes når et av stegene ikke kan gjøres i det hele tatt, for eksempel fordi blokken det virker på, gikk tapt. Installasjonen slås av, de andre installasjonene fortsetter å kjøre, og raden til installasjonen på [startskjermen](#home) nevner steget og hva som gikk galt:
 
-`Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør var borte.`
+`Stoppet ved steg 1 i Sluse ut: Luftsluse indre dør gikk tapt.`
 
-Rett det den nevner, og slå på installasjonen igjen. En blokk som er borte, eller en [plass](#slot) som aldri ble fylt, fylles på [installasjonspanelet](#installation-panel) til installasjonen.
+Rett det den nevner, og slå på installasjonen igjen. En blokk som gikk tapt, eller en [plass](#slot) som aldri ble fylt, fylles på [installasjonspanelet](#installation-panel) til installasjonen.
 
 ## Når et steg venter
 

@@ -787,16 +787,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Knappen på {block} er ikke satt opp for denne utløseren ennå.</value>
   </data>
   <data name="Sprocket.Problem.MissingSource" xml:space="preserve">
-    <value>En blokk denne utløseren følger med på, er borte.</value>
+    <value>En blokk denne utløseren fulgte med på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.MissingTarget" xml:space="preserve">
-    <value>En blokk dette steget virker på er borte.</value>
+    <value>En blokk dette steget virker på gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.NothingStarts" xml:space="preserve">
     <value>Denne sekvensen har ingen utløser, og ingen sekvens kjører den.</value>
   </data>
   <data name="Sprocket.Problem.MissingGate" xml:space="preserve">
-    <value>En blokk dette steget sjekker er borte.</value>
+    <value>En blokk dette steget sjekker gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>Dette steget gjør noe blokkene ikke lenger tilbyr. Erstatt dette steget.</value>
@@ -850,7 +850,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>knappen på {block} kunne ikke utløse utløseren.</value>
   </data>
   <data name="Sprocket.Stopped.BlockGone" xml:space="preserve">
-    <value>{block} var borte.</value>
+    <value>{block} gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.BlockReplaced" xml:space="preserve">
     <value>{block} kan ha blitt byttet ut.</value>
@@ -859,13 +859,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>utløseren kunne ikke utløses, av en ukjent grunn.</value>
   </data>
   <data name="Sprocket.Stopped.MissingSource" xml:space="preserve">
-    <value>en blokk utløseren fulgte med på, var borte.</value>
+    <value>en blokk utløseren fulgte med på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.MissingTarget" xml:space="preserve">
-    <value>en blokk den virker på var borte.</value>
+    <value>en blokk den virker på gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.MissingGate" xml:space="preserve">
-    <value>en blokk den sjekker var borte.</value>
+    <value>en blokk den sjekker gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.Unoffered" xml:space="preserve">
     <value>blokkene tilbød ikke lenger handlingen.</value>

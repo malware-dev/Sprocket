@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>What is wrong with one blockset is said on its row and on its installation panel, which leads to where it is mended.</summary>
 public class BlocksetTroubleTests
 {
-    const string Why = "Sequence 1, step 1: A block this step acts on is gone.";
+    const string Why = "Sequence 1, step 1: A block this step acts on was lost.";
 
     /// <summary>The blockset's row says what is wrong in place of what it is doing.</summary>
     [Fact]

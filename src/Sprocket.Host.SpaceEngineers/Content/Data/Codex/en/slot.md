@@ -48,4 +48,4 @@ Write them for someone who has never seen your construct. A slot named *Interior
 
 ## An empty slot
 
-When a sequence reaches a slot that is empty, or whose block is gone, the installation is switched off and its row says why. A trigger whose signal slot is empty can't start, and switches its installation off the same way.
+When a sequence reaches a slot that is empty, or whose block was lost, the installation is switched off and its row says why. A trigger whose signal slot is empty can't start, and switches its installation off the same way.

@@ -6,7 +6,8 @@ the middle of play.
 **Clear, short, and what happened.** Mal rejected "Stopped because it could not work" (it says nothing),
 then "Stopped before the world was last saved, for a reason that was not kept." ("a very wordy way to say
 very little"), then "a block it acts on" ("What block?"). He accepted "Stopped at step 3: Airlock 1 Outer
-Door was gone. Switching the system on releases it." and, where the cause is truly unknown, "Stopped for an
+Door was lost. Switching the system on releases it." ("lost", not "gone": Mal, 2026-10-13, "Projector was
+lost" over "Projector was gone") and, where the cause is truly unknown, "Stopped for an
 unknown reason." Cut to the fewest words that say what happened, why, and what to do; carry the step and
 the block through wherever they are known; keep a short fallback rather than removing a message.
 

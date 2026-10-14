@@ -36,11 +36,11 @@ Either way, resting the pointer on a wait lights its clock and those of the step
 
 ## When a run fails
 
-A run fails when one of its steps can't be done at all, for example because the block it acts on is gone. Its installation is switched off, the other installations keep running, and the installation's row on the [home screen](#home) names the step and what went wrong:
+A run fails when one of its steps can't be done at all, for example because the block it acts on was lost. Its installation is switched off, the other installations keep running, and the installation's row on the [home screen](#home) names the step and what went wrong:
 
-`Stopped at step 1 of Cycle Out: Airlock Inner Door was gone.`
+`Stopped at step 1 of Cycle Out: Airlock Inner Door was lost.`
 
-Put right what it names, and switch the installation on again. A block that is gone, or a [slot](#slot) that was never filled, is filled on the installation's [installation panel](#installation-panel).
+Put right what it names, and switch the installation on again. A block that was lost, or a [slot](#slot) that was never filled, is filled on the installation's [installation panel](#installation-panel).
 
 ## When a step holds
 

@@ -48,4 +48,4 @@ Skriv det for noen som aldri har sett konstruksjonen din. En plass som heter *In
 
 ## En tom plass
 
-Når en sekvens kommer til en plass som er tom, eller der blokken er borte, slås installasjonen av, og raden sier hvorfor. En utløser med tom signalplass kan ikke starte, og slår av installasjonen sin på samme måte.
+Når en sekvens kommer til en plass som er tom, eller der blokken gikk tapt, slås installasjonen av, og raden sier hvorfor. En utløser med tom signalplass kan ikke starte, og slår av installasjonen sin på samme måte.
