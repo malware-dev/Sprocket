@@ -1,6 +1,6 @@
 # Installation panel
 
-The installation panel is where you set up an ![](mark:installation)&nbsp;[installation](#installation). It lists every [slot](#slot) the ![](mark:logic-system)&nbsp;[logic system](#logic-system) needs filled, with any notes on what each is for, and you select the blocks and ![](mark:signal)&nbsp;[signals](#signal) that go in them. Press an installation's row on the [home screen](#home) to open its panel.
+The installation panel is where you set up an ![](mark:installation)&nbsp;[installation](installation). It lists every [slot](slot) the ![](mark:logic-system)&nbsp;[logic system](logic-system) needs filled, with any notes on what each is for, and you select the blocks and ![](mark:signal)&nbsp;[signals](signal) that go in them. Press an installation's row on the [home screen](home) to open its panel.
 
 ## Filling a slot again
 

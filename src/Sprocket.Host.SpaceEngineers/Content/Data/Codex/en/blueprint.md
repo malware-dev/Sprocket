@@ -1,6 +1,6 @@
 # Blueprint
 
-A blueprint is a copy of a ![](mark:logic-system)&nbsp;[logic system](#logic-system) kept in the [library](#library), so you can put it on other constructs, wherever you are. It holds the logic system's ![](mark:sequence)&nbsp;[sequences](#sequence), [triggers](#trigger) and [slots](#slot) and what you wrote about them, but no blocks: each construct brings its own through its ![](mark:installation)&nbsp;[installations](#installation).
+A blueprint is a copy of a ![](mark:logic-system)&nbsp;[logic system](logic-system) kept in the [library](library), so you can put it on other constructs, wherever you are. It holds the logic system's ![](mark:sequence)&nbsp;[sequences](sequence), [triggers](trigger) and [slots](slot) and what you wrote about them, but no blocks: each construct brings its own through its ![](mark:installation)&nbsp;[installations](installation).
 
 The library is where you make and update blueprints, put them on constructs, copy them and share them.
 

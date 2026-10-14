@@ -16,7 +16,7 @@ import sys
 ROOT = os.path.join("src", "Sprocket.Host.SpaceEngineers", "Content", "Data", "Codex")
 LANGUAGES = ("en", "no")
 NAME = re.compile(r"sprocket", re.I)
-LINK = re.compile(r"\]\(#([a-z-]+)\)")
+LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([a-z-]+)\)")
 QUOTED = re.compile(r"`[^`]*`")
 # Pages the name may stand on: the home page names the product by design.
 NAMED = {"home.md", "home.tldr.md"}
@@ -55,7 +55,7 @@ def check(language, name, text, say):
         seen[target] = seen.get(target, 0) + 1
     for target, count in sorted(seen.items()):
         if count > 1:
-            say("links", "%s/%s: #%s linked %d times" % (language, name, target, count))
+            say("links", "%s/%s: %s linked %d times" % (language, name, target, count))
 
     for number, line in enumerate(text.splitlines(), 1):
         if line.startswith("# ") and "mark:" in line:

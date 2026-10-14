@@ -17,10 +17,10 @@ lists the terms in the order the contents show them. Every page and tooltip exis
   out until it is, and the code review's codex step catches the change that builds it.
 - **The codex teaches the editor, never the script.** What is on the screens and what to press; the
   script's syntax and keywords do not appear in a page.
-- **Link a term once per page**, the first time it matters: `[logic systems](#logic-system)`. Mal: the
+- **Link a term once per page**, the first time it matters: `[logic systems](logic-system)`. Mal: the
   wiki rule.
 - **A kind's mark sits beside a link or a bold term**, never beside plain running text:
-  `![](mark:blueprint) [blueprints](#blueprint)`, with empty words. Mal: "[icon] signal slot" makes sense,
+  `![](mark:blueprint) [blueprints](blueprint)`, with empty words. Mal: "[icon] signal slot" makes sense,
   "sends the [icon] signal" does not. A page's title carries no mark, since the contents and the history
   name the page by its title; a heading inside a page may.
 - **What is on screen is quoted as it is on screen**, in backticks: `Make blueprint`.

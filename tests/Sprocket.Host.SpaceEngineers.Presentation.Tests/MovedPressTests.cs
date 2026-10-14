@@ -36,14 +36,14 @@ public class MovedPressTests
     public void ALinkInAMovedRowFollowsWherePressed()
     {
         Link? followed = null;
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex) and more"), FontSize = 20f, Follow = l => followed = l };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = l => followed = l };
         var row = new VStack { RenderTransform = RenderTransform.Moved(new Vector2(0f, 60f)), Children = { text } };
         var root = new VStack { Children = { row } };
         _ = new Easel(root, Wide, High);
 
         Press(new InputRoot(root), text.ToScreen(new Vector2(text.ContentBounds.X + 4f, text.ContentBounds.Y + 10f)));
 
-        Assert.Equal("#codex", followed?.Target);
+        Assert.Equal("codex", followed?.Target);
     }
 
     /// <summary>A link scaled up by a viewbox follows when pressed where it is drawn.</summary>
@@ -51,7 +51,7 @@ public class MovedPressTests
     public void ALinkInAViewboxFollowsWherePressed()
     {
         Link? followed = null;
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex) and more"), FontSize = 20f, Follow = l => followed = l };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = l => followed = l };
         var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, 300f) };
         var root = new VStack { Children = { box } };
         _ = new Easel(root, Wide, High);
@@ -59,7 +59,7 @@ public class MovedPressTests
         Press(new InputRoot(root), text.ToScreen(new Vector2(text.ContentBounds.X + 4f, text.ContentBounds.Y + 10f)));
 
         Assert.True(box.Scale > 1f, $"scaled by {box.Scale}");
-        Assert.Equal("#codex", followed?.Target);
+        Assert.Equal("codex", followed?.Target);
     }
 
     /// <summary>A moved row's command runs when the press ends over where it is drawn, and not over where it was laid out.</summary>

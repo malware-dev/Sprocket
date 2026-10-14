@@ -44,11 +44,29 @@ public class CodexCheckTests
     [Fact]
     public void ALinkToNoPageIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "# C\n\nSee [nothing](#nothing).")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n\nSee [nothing](nothing).")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
 
         var dead = Assert.Single(run.Diagnostics);
         Assert.Equal("LOC009", dead.Id);
         Assert.Equal(2, dead.Location.GetLineSpan().StartLinePosition.Line);
+    }
+
+    /// <summary>An image's locator leads nowhere and is no link, so a mark beside a link is not reported.</summary>
+    [Fact]
+    public void AnImageIsNoLink()
+    {
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n\n![](mark:a)&nbsp;[a](a) and ![C](Banner =20).")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
+
+        Assert.Empty(run.Diagnostics);
+    }
+
+    /// <summary>A link to an anchor, as in <c>#a</c>, names no page and is reported as leading nowhere.</summary>
+    [Fact]
+    public void ALinkToAnAnchorIsReported()
+    {
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n\nSee [a](#a).")).Append((English + "c.tldr.md", "C.")).Append(Listing("a", "b", "c")).ToArray());
+
+        Assert.Equal("LOC009", Assert.Single(run.Diagnostics).Id);
     }
 
     /// <summary>A box never closed is reported on the line that opens it; one that is closed, inside another, is not.</summary>
@@ -66,7 +84,7 @@ public class CodexCheckTests
     [Fact]
     public void ALinkInATooltipIsReported()
     {
-        var run = Run(Whole(English).Append((English + "c.md", "# C\n")).Append((English + "c.tldr.md", "A **C** is shown ![mark](logo).\nSee [a](#a).")).Append(Listing("a", "b", "c")).ToArray());
+        var run = Run(Whole(English).Append((English + "c.md", "# C\n")).Append((English + "c.tldr.md", "A **C** is shown ![mark](logo).\nSee [a](a).")).Append(Listing("a", "b", "c")).ToArray());
 
         var pressless = Assert.Single(run.Diagnostics);
         Assert.Equal("LOC011", pressless.Id);
@@ -149,7 +167,7 @@ public class CodexCheckTests
     [Fact]
     public void OtherMarkdownIsLeftAlone()
     {
-        var run = Run(("docs/Notes.md", "No title, and [a link](#nowhere)."));
+        var run = Run(("docs/Notes.md", "No title, and [a link](nowhere)."));
 
         Assert.Empty(run.Diagnostics);
     }
@@ -157,9 +175,9 @@ public class CodexCheckTests
     /// <summary>Two terms, the first linking to the second, each with its page and tooltip, in the language folder <paramref name="folder" />.</summary>
     static IEnumerable<(string Path, string Text)> Whole(string folder) => new[]
     {
-        (folder + "a.md", "# A\n\nSee [b](#b)."),
+        (folder + "a.md", "# A\n\nSee [b](b)."),
         (folder + "a.tldr.md", "An **a** is a thing."),
-        (folder + "b.md", "# B\n\nBack to [a](#a)."),
+        (folder + "b.md", "# B\n\nBack to [a](a)."),
         (folder + "b.tldr.md", "A **b** is another.")
     };
 

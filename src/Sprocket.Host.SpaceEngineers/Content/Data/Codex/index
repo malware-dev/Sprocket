@@ -6,7 +6,7 @@ installation
 sequence
 installation-panel
 library
-picking
+selector
 trigger
 step
 action
@@ -19,7 +19,7 @@ signal
 blueprint
 construct
 changing-hands
-writing
+rich-text
 > examples
 simple-airlock
 drill-arm

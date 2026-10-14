@@ -111,7 +111,7 @@ A backslash before a mark shows the mark as it is typed.
 
 10&nbsp;SC
 
-`&nbsp;` is a space a line never breaks at, so the words either side of it stay on one line. It keeps a mark with the link after it too: `![](mark:trigger)&nbsp;[triggers](#trigger)`.
+`&nbsp;` is a space a line never breaks at, so the words either side of it stay on one line. It keeps a mark with the link after it too: `![](mark:trigger)&nbsp;[triggers](trigger)`.
 
 ## Writing a character by its name or number
 

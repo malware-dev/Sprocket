@@ -36,11 +36,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The library.</summary>
         public const string Library = "library";
 
-        /// <summary>Picking blocks.</summary>
-        public const string Picking = "picking";
+        /// <summary>The block selector, where blocks are picked.</summary>
+        public const string Picking = "selector";
 
         /// <summary>Rich text, which every description box's guide button opens.</summary>
-        public const string Writing = "writing";
+        public const string Writing = "rich-text";
 
         /// <summary>A construct changing hands, which the resume screen's guide button opens.</summary>
         public const string ChangingHands = "changing-hands";
@@ -92,29 +92,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 _all[i].Reword();
         }
 
-        /// <summary>The term called <paramref name="id" />, or null where the codex has none.</summary>
+        /// <summary>The term called <paramref name="id" />, which is also a link's target, as in <c>installation</c>, or null where the codex has none.</summary>
         public Term Find(string id)
         {
             Ready();
             return Listed(id);
-        }
-
-        /// <summary>The term a link's target names, as in <c>#installation</c>, or null where it names none.</summary>
-        /// <remarks>Compared in place rather than cut out, because a link's note asks this on every frame the pointer rests on it.</remarks>
-        public Term Named(string target)
-        {
-            if (string.IsNullOrEmpty(target) || target[0] != '#')
-                return null;
-
-            Ready();
-            for (var i = 0; i < _all.Count; i++)
-            {
-                var id = _all[i].Id;
-                if (target.Length == id.Length + 1 && string.CompareOrdinal(target, 1, id, 0, id.Length) == 0)
-                    return _all[i];
-            }
-
-            return null;
         }
 
         /// <summary>Reads the index, where the pages have come to be read from somewhere it has not been read from yet.</summary>
@@ -178,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The markdown-lite for <paramref name="words" /> as a link to the term <paramref name="id" />.</summary>
         public static string Link(string words, string id)
         {
-            return "[" + Markdown.Escape(words) + "](#" + id + ")";
+            return "[" + Markdown.Escape(words) + "](" + id + ")";
         }
 
         /// <summary>Makes the links in <paramref name="text" /> lead into the codex: pressing one gives its term to <paramref name="open" />, and resting on one shows the term's preview.</summary>
@@ -186,13 +168,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         {
             text.Follow = delegate(Link link)
             {
-                var term = Named(link.Target);
+                var term = Find(link.Target);
                 if (term != null)
                     open(term);
             };
             text.LinkTip = delegate(Link link)
             {
-                var term = Named(link.Target);
+                var term = Find(link.Target);
                 return term == null ? null : term.Preview;
             };
         }

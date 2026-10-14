@@ -39,7 +39,7 @@ namespace Sprocket.Localization.Generator
             Category, DiagnosticSeverity.Warning, true);
 
         public static readonly DiagnosticDescriptor Dead = new DiagnosticDescriptor(
-            "LOC009", "Codex link leads nowhere", "{0} links to #{1}, which has no page",
+            "LOC009", "Codex link leads nowhere", "{0} links to {1}, which has no page",
             Category, DiagnosticSeverity.Warning, true);
 
         public static readonly DiagnosticDescriptor Unclosed = new DiagnosticDescriptor(

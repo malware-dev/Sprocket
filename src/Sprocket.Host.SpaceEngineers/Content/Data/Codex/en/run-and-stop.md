@@ -1,6 +1,6 @@
 # Run and stop
 
-A [step](#step) can start or stop another ![](mark:sequence)&nbsp;[sequence](#sequence) of the same logic system, with `run` or `stop`. Both act on the ![](mark:installation)&nbsp;[installation](#installation) the step runs on, so the port airlock's sequences never start or stop the starboard airlock's.
+A [step](step) can start or stop another ![](mark:sequence)&nbsp;[sequence](sequence) of the same logic system, with `run` or `stop`. Both act on the ![](mark:installation)&nbsp;[installation](installation) the step runs on, so the port airlock's sequences never start or stop the starboard airlock's.
 
 ## Running a sequence
 

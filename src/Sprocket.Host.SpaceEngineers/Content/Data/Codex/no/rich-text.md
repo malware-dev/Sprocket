@@ -111,7 +111,7 @@ En omvendt skråstrek foran et merke viser merket slik det er skrevet.
 
 10&nbsp;SC
 
-`&nbsp;` er et mellomrom en linje aldri brytes ved, så ordene på hver side av det blir stående på samme linje. Det holder også et merke sammen med lenken etter det: `![](mark:trigger)&nbsp;[utløsere](#trigger)`.
+`&nbsp;` er et mellomrom en linje aldri brytes ved, så ordene på hver side av det blir stående på samme linje. Det holder også et merke sammen med lenken etter det: `![](mark:trigger)&nbsp;[utløsere](trigger)`.
 
 ## Skrive et tegn med navnet eller nummeret
 

@@ -251,7 +251,7 @@ public class CodexTests
         var target = text.LinkAt(at)!.Target;
         screen.Do(((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", "3");
 
-        Assert.Equal(target, "#" + codex.Term!.Id);
+        Assert.Equal(target, codex.Term!.Id);
         Assert.NotEqual(Terms.LogicSystem, codex.Term!.Id);
         Assert.True(codex.CanStepBack);
     }
@@ -285,7 +285,7 @@ public class CodexTests
     public void ALineStartingWithAnAngleBeginsASection()
     {
         var sim = Simulation.Fresh();
-        sim.Texts.Book.Pages = new Pages("index", "home\n> library\npicking\n");
+        sim.Texts.Book.Pages = new Pages("index", "home\n> library\nselector\n");
 
         var terms = new Terms(sim.Texts);
 
@@ -299,15 +299,15 @@ public class CodexTests
     {
         var screen = Screen.Fresh("tick", "3");
         var editor = screen.Scene.Editor;
-        editor.Texts.Book.Pages = new Pages("index", "home\n> library\npicking\n",
-            "home.md", "# Home\n", "library.md", "# Library\n", "picking.md", "# Picking\n");
+        editor.Texts.Book.Pages = new Pages("index", "home\n> library\nselector\n",
+            "home.md", "# Home\n", "library.md", "# Library\n", "selector.md", "# Selector\n");
         editor.OpenCodex(editor.Codex.Find(Terms.Home)!);
         var codex = editor.CodexWindow!;
         codex.List(true);
 
         var entries = codex.Within().OfType<Lumel.Controls.Button>().ToList();
         var heading = Assert.Single(entries, b => b.Text == "Library");
-        var under = Assert.Single(entries, b => b.Text == "Picking");
+        var under = Assert.Single(entries, b => b.Text == "Selector");
         var before = Assert.Single(entries, b => b.Text == "Home");
         Assert.Same(Styles.CodexSection, heading.Style);
         Assert.Same(Styles.CodexEntry, under.Style);
@@ -367,7 +367,7 @@ public class CodexTests
 
         Assert.Equal("Logikksystem", term.Name);
         Assert.StartsWith("Et ![](mark:logic-system)&nbsp;**logikksystem**", term.Summary);
-        Assert.Contains("[konstruksjonen](#construct)", term.Page);
+        Assert.Contains("[konstruksjonen](construct)", term.Page);
     }
 
     /// <summary>Every attribute a codex page's boxes ask for, in every language, is markdown-lite's own or one the codex gives a look.</summary>
@@ -412,33 +412,71 @@ public class CodexTests
         Assert.StartsWith("# Logic system", pages.Find("logic-system.md"));
     }
 
-    /// <summary>Every link in every codex page names a term the codex has, so no page leads nowhere.</summary>
+    /// <summary>Every link in every codex page, in every language, names a term the codex has, so no page leads nowhere.</summary>
     [Fact]
     public void EveryLinkInTheCodexLeadsToATerm()
     {
-        var sim = Simulation.Fresh();
-        foreach (var term in sim.Editor.Codex.All)
+        var codex = Simulation.Fresh().Editor.Codex;
+        var links = 0;
+        foreach (var page in Directory.GetFiles(CodexFiles.Beside, "*.md", SearchOption.AllDirectories))
         {
-            var page = term.Page;
-            for (var at = page.IndexOf("](#", StringComparison.Ordinal); at >= 0;
-                 at = page.IndexOf("](#", at + 1, StringComparison.Ordinal))
+            foreach (var target in Targets(Markdown.Parse(File.ReadAllText(page)).Blocks))
             {
-                var end = page.IndexOf(')', at);
-                var target = page.Substring(at + 2, end - at - 2);
-                Assert.True(sim.Editor.Codex.Named(target) != null, term.Id + " links to " + target + ", which the codex lacks");
+                links++;
+                Assert.True(codex.Find(target) != null, page.Substring(CodexFiles.Beside.Length + 1) + " links to " + target + ", which the codex lacks");
             }
         }
+
+        Assert.True(links > 0, "no link in the codex was read");
     }
 
-    /// <summary>The first point on the screen where a link sits inside <paramref name="inside" />, or anywhere where that is null, and the text it sits in.</summary>
-    static Vector2 FirstLink(Screen screen, out RichText text, Lumel.Element? inside = null)
+    /// <summary>Resting on a link inside a codex page shows the preview of the term it leads to.</summary>
+    [Fact]
+    public void ALinkInAPageShowsItsTermsPreview()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Scene.Editor;
+        editor.OpenCodex(editor.Codex.Find(Terms.LogicSystem)!);
+        screen.Do("tick", "3");
+
+        var at = FirstLink(screen, out var text, editor.CodexWindow!);
+        var term = editor.Codex.Find(text.LinkAt(at)!.Target);
+
+        Assert.NotNull(term);
+        Assert.Same(term.Preview, text.TipAt(at));
+    }
+
+    /// <summary>A logic system's installations heading is a link to the installation's entry: resting on it shows the term's preview, and pressing it opens the codex there.</summary>
+    [Fact]
+    public void TheInstallationsHeadingLeadsIntoTheCodex()
+    {
+        var screen = Screen.Fresh("tick", "3");
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Editor.GoToRoot();
+        screen.Do("tick", "3");
+        var at = FirstLink(screen, out var heading, target: Terms.Installation);
+        var term = screen.Editor.Codex.Find(Terms.Installation)!;
+
+        Assert.Same(term.Preview, heading.TipAt(at));
+
+        screen.Do(((int)at.X).ToString(), ((int)at.Y).ToString(), "tick", "3");
+
+        Assert.Equal(Terms.Installation, screen.Editor.CodexWindow!.Term!.Id);
+    }
+
+    /// <summary>
+    /// The first point on the screen where a link to <paramref name="target" />, or to anything where that is null, sits inside
+    /// <paramref name="inside" />, or anywhere where that is null, and the text it sits in.
+    /// </summary>
+    static Vector2 FirstLink(Screen screen, out RichText text, Lumel.Element? inside = null, string? target = null)
     {
         for (var y = 0; y < 1080; y += 2)
         {
             for (var x = 0; x < 2000; x += 2)
             {
                 var point = new Vector2(x, y);
-                if (screen.Scene.Under(point) is RichText rich && rich.LinkAt(point) != null && (inside == null || Within(rich, inside)))
+                if (screen.Scene.Under(point) is RichText rich && rich.LinkAt(point) is { } link && (inside == null || Within(rich, inside))
+                    && (target == null || link.Target == target))
                 {
                     text = rich;
                     return point;
@@ -480,4 +518,8 @@ public class CodexTests
     /// <summary>Every attribute the boxes in <paramref name="blocks" /> name, inside quotes and other boxes too.</summary>
     static IEnumerable<string> Names(IList<Block> blocks) =>
         blocks.SelectMany(block => block.Names.Concat(Names(block.Blocks)));
+
+    /// <summary>The target of every link in <paramref name="blocks" />, inside tables, quotes and boxes too.</summary>
+    static IEnumerable<string> Targets(IList<Block> blocks) =>
+        blocks.SelectMany(block => block.Runs.OfType<LinkRun>().Select(run => run.Link.Target).Concat(Targets(block.Blocks)));
 }

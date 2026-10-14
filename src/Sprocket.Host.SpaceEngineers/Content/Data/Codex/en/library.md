@@ -1,8 +1,8 @@
 # Library
 
-The library is where you keep your ![](mark:blueprint)&nbsp;[blueprints](#blueprint) and manage the ![](mark:logic-system)&nbsp;[logic systems](#logic-system) made from them. Open it with `Library` on the [home screen](#home). It lists three groups:
+The library is where you keep your ![](mark:blueprint)&nbsp;[blueprints](blueprint) and manage the ![](mark:logic-system)&nbsp;[logic systems](logic-system) made from them. Open it with `Library` on the [home screen](home). It lists three groups:
 
-- `On your constructs`: this [construct](#construct), with every logic system on it.
+- `On your constructs`: this [construct](construct), with every logic system on it.
 - `Backups`: logic systems kept from constructs that lost their automation.
 - `In storage`: your blueprints, which you can use everywhere.
 
@@ -20,7 +20,7 @@ Select a row to see who made it, when it last changed and what it's for.
 
 ## Putting one on a construct
 
-`Add to this construct` puts the blueprint's logic system here, with one ![](mark:installation)&nbsp;[installation](#installation) to fill. It's offered only while no logic system from that blueprint is on the construct, because a second airlock is a second installation of the one logic system, never a second copy of it.
+`Add to this construct` puts the blueprint's logic system here, with one ![](mark:installation)&nbsp;[installation](installation) to fill. It's offered only while no logic system from that blueprint is on the construct, because a second airlock is a second installation of the one logic system, never a second copy of it.
 
 `Make a copy` puts a new logic system on this construct, copied from the row you selected, and opens it so you can change it. The copy has no tie to what it was copied from, and gets a blueprint of its own only when you press `Make blueprint`. It's the way to build something new from something that works, like a hangar door from an airlock.
 

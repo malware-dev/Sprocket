@@ -1,8 +1,8 @@
 # If
 
-Sometimes you need a ![](mark:sequence)&nbsp;[sequence](#sequence) to do one thing or another, depending on the state of its blocks when it runs. An airlock with a single button is the usual case: when the room has air, the button should cycle you out, and when it's empty, cycle you in.
+Sometimes you need a ![](mark:sequence)&nbsp;[sequence](sequence) to do one thing or another, depending on the state of its blocks when it runs. An airlock with a single button is the usual case: when the room has air, the button should cycle you out, and when it's empty, cycle you in.
 
-An if, also known as a "conditional", is the [step](#step) for that. It checks blocks, and runs the steps under it only when its condition passes. Add its `otherwise`, and the steps there run when the condition doesn't pass, so one sequence covers both ways through the airlock.
+An if, also known as a "conditional", is the [step](step) for that. It checks blocks, and runs the steps under it only when its condition passes. Add its `otherwise`, and the steps there run when the condition doesn't pass, so one sequence covers both ways through the airlock.
 
 ## More than two ways
 
@@ -20,6 +20,6 @@ When you need to know about more than one block, like every door on a hangar, se
 
 ## Checking once, not waiting
 
-An if looks at its blocks once, at the moment the sequence reaches it. If the condition doesn't pass then, the if doesn't wait for it to. When you need something to happen as soon as a block reaches a state, whenever that is, use a [trigger](#trigger) instead.
+An if looks at its blocks once, at the moment the sequence reaches it. If the condition doesn't pass then, the if doesn't wait for it to. When you need something to happen as soon as a block reaches a state, whenever that is, use a [trigger](trigger) instead.
 
 Dragging an if's first row moves the whole if, with everything in it.

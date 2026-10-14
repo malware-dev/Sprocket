@@ -27,7 +27,7 @@ namespace Sprocket.Localization.Generator
         const string Title = "# ";
         const string Index = "index";
 
-        static readonly Regex Link = new Regex(@"\]\(#([^)\s]+)\)");
+        static readonly Regex Link = new Regex(@"(?<!!)\[[^\]]*\]\(([^)\s]+)\)");
         static readonly Regex AnyLink = new Regex(@"(?<!!)\[[^\]]*\]\(");
 
         /// <inheritdoc />

@@ -1,6 +1,6 @@
 # Installasjonspanel
 
-Installasjonspanelet er der du setter opp en ![](mark:installation)&nbsp;[installasjon](#installation). Det lister hver [plass](#slot) ![](mark:logic-system)&nbsp;[logikksystemet](#logic-system) trenger fylt, med eventuelle merknader om hva hver er til, og du velger blokkene og ![](mark:signal)&nbsp;[signalene](#signal) som skal i dem. Trykk raden til en installasjon på [startskjermen](#home) for å åpne panelet dens.
+Installasjonspanelet er der du setter opp en ![](mark:installation)&nbsp;[installasjon](installation). Det lister hver [plass](slot) ![](mark:logic-system)&nbsp;[logikksystemet](logic-system) trenger fylt, med eventuelle merknader om hva hver er til, og du velger blokkene og ![](mark:signal)&nbsp;[signalene](signal) som skal i dem. Trykk raden til en installasjon på [startskjermen](home) for å åpne panelet dens.
 
 ## Fylle en plass på nytt
 

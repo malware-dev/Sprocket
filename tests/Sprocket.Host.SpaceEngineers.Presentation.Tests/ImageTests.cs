@@ -217,7 +217,7 @@ public class ImageTests
     {
         for (var n = 1; n < 40; n++)
         {
-            var easel = Laid(string.Join(" ", Enumerable.Repeat("word", n)) + " ![](Banner =20)&nbsp;[triggers](#trigger) end");
+            var easel = Laid(string.Join(" ", Enumerable.Repeat("word", n)) + " ![](Banner =20)&nbsp;[triggers](trigger) end");
 
             var drawn = Assert.Single(easel.Sprites, s => s.Material.String == "Banner").Destination;
             var link = Word(easel, "triggers");

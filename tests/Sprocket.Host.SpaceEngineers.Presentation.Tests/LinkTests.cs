@@ -20,11 +20,11 @@ public class LinkTests
     [Fact]
     public void ALinkIsWordsAndATarget()
     {
-        var runs = Markdown.Parse("Read [the installation](#installation) first").Blocks[0].Runs;
+        var runs = Markdown.Parse("Read [the installation](installation) first").Blocks[0].Runs;
 
         var link = Assert.IsType<LinkRun>(runs[1]);
         Assert.Equal("the installation", link.Text);
-        Assert.Equal("#installation", link.Link.Target);
+        Assert.Equal("installation", link.Link.Target);
         Assert.Equal(new[] { "Read ", "the installation", " first" }, runs.Select(r => r.Text));
     }
 
@@ -56,7 +56,7 @@ public class LinkTests
     [Fact]
     public void ASlotInALinkStaysInIt()
     {
-        var runs = Template.Read("[Open {name}](#system)").Blocks[0].Runs;
+        var runs = Template.Read("[Open {name}](system)").Blocks[0].Runs;
 
         Assert.All(runs, r => Assert.IsType<LinkRun>(r));
         Assert.Same(((LinkRun)runs[0]).Link, ((LinkRun)runs[1]).Link);
@@ -67,7 +67,7 @@ public class LinkTests
     [Fact]
     public void ALinkIsDrawnAsEmphasisUnlessColored()
     {
-        var (text, easel) = Laid("See [the codex](#codex) now");
+        var (text, easel) = Laid("See [the codex](codex) now");
         Assert.Equal(Stressed, Word(easel, "the codex").Color);
         Assert.Equal(Body, Word(easel, "now").Color);
 
@@ -80,7 +80,7 @@ public class LinkTests
     [Fact]
     public void ALinksFillStopsAtItsWords()
     {
-        var (text, easel) = Laid("[codex](#codex) and more words after it");
+        var (text, easel) = Laid("[codex](codex) and more words after it");
         text.LinkFill = Color.Purple;
         easel.Draw(Wide, High);
 
@@ -94,14 +94,14 @@ public class LinkTests
     {
         Link followed = null!;
         var rowPressed = 0;
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex) and more"), FontSize = 20f, Follow = l => followed = l };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = l => followed = l };
         var row = new HStack { Command = new Relay(() => rowPressed++), Children = { text } };
         var input = Input(row);
 
         var onLink = new Vector2(text.ContentBounds.X + 4f, text.ContentBounds.Y + 10f);
         input.PointerDown(onLink, 1, false, false);
         input.PointerUp(onLink);
-        Assert.Equal("#codex", followed.Target);
+        Assert.Equal("codex", followed.Target);
         Assert.Equal(0, rowPressed);
 
         var beside = new Vector2(text.ContentBounds.X + text.ContentBounds.Width - 2f, text.ContentBounds.Y + 10f);
@@ -114,7 +114,7 @@ public class LinkTests
     [Fact]
     public void LinksWithNothingToFollowThemAreWords()
     {
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex)"), FontSize = 20f };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex)"), FontSize = 20f };
         Input(new VStack { Children = { text } });
 
         Assert.NotNull(text.LinkAt(new Vector2(text.ContentBounds.X + 4f, text.ContentBounds.Y + 10f)));
@@ -126,7 +126,7 @@ public class LinkTests
     public void TextWithACommandTakesPressesEverywhere()
     {
         var pressed = 0;
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex) and more"), FontSize = 20f, Command = new Relay(() => pressed++) };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Command = new Relay(() => pressed++) };
         var input = Input(new VStack { Children = { text } });
 
         var beside = new Vector2(text.ContentBounds.X + text.ContentBounds.Width - 2f, text.ContentBounds.Y + 10f);
@@ -142,7 +142,7 @@ public class LinkTests
     {
         var own = new Tip("The text");
         var linked = new Tip("The codex");
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex) and more"), FontSize = 20f, Tip = own, LinkTip = _ => linked };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Tip = own, LinkTip = _ => linked };
         Input(new VStack { Children = { text } });
 
         Assert.Same(linked, text.TipAt(new Vector2(text.ContentBounds.X + 4f, text.ContentBounds.Y + 10f)));

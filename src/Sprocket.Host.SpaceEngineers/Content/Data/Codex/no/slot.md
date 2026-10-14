@@ -1,15 +1,15 @@
 # Plass
 
-For at ett ![](mark:logic-system)&nbsp;[logikksystem](#logic-system) skal kunne kjøre hver luftsluse på et skip, kan ikke [stegene](#step) og [utløserne](#trigger) dets nevne dørene til én luftsluse. De nevner plasser i stedet: navngitte steder som *den indre døra*, som hver ![](mark:installation)&nbsp;[installasjon](#installation) fyller med sine egne blokker.
+For at ett ![](mark:logic-system)&nbsp;[logikksystem](logic-system) skal kunne kjøre hver luftsluse på et skip, kan ikke [stegene](step) og [utløserne](trigger) dets nevne dørene til én luftsluse. De nevner plasser i stedet: navngitte steder som *den indre døra*, som hver ![](mark:installation)&nbsp;[installasjon](installation) fyller med sine egne blokker.
 
 - En ![](mark:block)&nbsp;**blokkplass** holder blokkene et steg virker på eller en utløser følger med på, som en dør, eller alle lysene i luftslusen.
-- En ![](mark:signal)&nbsp;**signalplass** holder en blokk og verktøylinjeplassen på den som sender [signalet](#signal), som et knappepanel og en av knappene.
+- En ![](mark:signal)&nbsp;**signalplass** holder en blokk og verktøylinjeplassen på den som sender [signalet](signal), som et knappepanel og en av knappene.
 
-Blokkene du velger, fyller plassene til installasjonen som er valgt under `Installasjon`. Hver andre installasjon fyller dem på sitt eget [installasjonspanel](#installation-panel).
+Blokkene du velger, fyller plassene til installasjonen som er valgt under `Installasjon`. Hver andre installasjon fyller dem på sitt eget [installasjonspanel](installation-panel).
 
 ## Hvordan plasser lages
 
-Du lager ikke plasser selv. Hver gang du [velger](#picking) blokker for et steg, en utløser eller et [hvis](#if), er blokkene du valgte sammen en gruppe, og logikksystemet lager plassene sine av disse gruppene:
+Du lager ikke plasser selv. Hver gang du [velger](selector) blokker for et steg, en utløser eller et [hvis](if), er blokkene du valgte sammen en gruppe, og logikksystemet lager plassene sine av disse gruppene:
 
 - **Den samme gruppen to ganger er én plass.** Et steg som lukker den indre døra og et som åpner den, bruker begge *Luftsluse indre dør*.
 - **En gruppe av andre plasser bruker dem.** Der den indre og den ytre døra hver har en plass fra før, bruker et steg som lukker begge dørene, de to plassene, og lager ingen ny.

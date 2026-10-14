@@ -1,15 +1,15 @@
 # Slot
 
-For one ![](mark:logic-system)&nbsp;[logic system](#logic-system) to run every airlock on a ship, its [steps](#step) and [triggers](#trigger) can't name one airlock's doors. They name slots instead: named places like *the inner door*, which each ![](mark:installation)&nbsp;[installation](#installation) fills with blocks of its own.
+For one ![](mark:logic-system)&nbsp;[logic system](logic-system) to run every airlock on a ship, its [steps](step) and [triggers](trigger) can't name one airlock's doors. They name slots instead: named places like *the inner door*, which each ![](mark:installation)&nbsp;[installation](installation) fills with blocks of its own.
 
 - A ![](mark:block)&nbsp;**block slot** holds the blocks a step acts on or a trigger watches, like a door, or every light in the airlock.
-- A ![](mark:signal)&nbsp;**signal slot** holds a block and the toolbar slot on it that sends the [signal](#signal), like a button panel and one of its buttons.
+- A ![](mark:signal)&nbsp;**signal slot** holds a block and the toolbar slot on it that sends the [signal](signal), like a button panel and one of its buttons.
 
-The blocks you select fill the slots for the installation selected under `Installation`. Every other installation fills them on its own [installation panel](#installation-panel).
+The blocks you select fill the slots for the installation selected under `Installation`. Every other installation fills them on its own [installation panel](installation-panel).
 
 ## How slots are made
 
-You don't make slots yourself. Each time you [select](#picking) blocks for a step, a trigger or an [if](#if), the blocks you selected together are a group, and the logic system makes its slots from those groups:
+You don't make slots yourself. Each time you [select](selector) blocks for a step, a trigger or an [if](if), the blocks you selected together are a group, and the logic system makes its slots from those groups:
 
 - **The same group twice is one slot.** A step that closes the inner door and another that opens it both use *Airlock Inner Door*.
 - **A group made of other slots uses them.** Where the inner and outer doors each have a slot already, a step that closes both doors uses those two slots, and makes no new one.

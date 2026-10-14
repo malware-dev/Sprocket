@@ -247,7 +247,7 @@ public static class RichTextReport
     {
         var text = new StringBuilder();
         for (var i = 0; i < sentences; i++)
-            text.Append("Each [logic system](#logic-system) holds its [installations](#installation), and runs them in turn.\n");
+            text.Append("Each [logic system](logic-system) holds its [installations](installation), and runs them in turn.\n");
 
         return text.ToString();
     }

@@ -114,7 +114,7 @@ public class ViewboxTests
     [Fact]
     public void APointReachesTheLinkDrawnUnderIt()
     {
-        var text = new RichText { Document = Markdown.Parse("[codex](#codex) and more"), FontSize = 20f, Follow = _ => { } };
+        var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = _ => { } };
         var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, 300f) };
         _ = new Easel(new VStack { Children = { box } }, Wide, High);
 
@@ -124,7 +124,7 @@ public class ViewboxTests
 
         Assert.True(box.Scale > 1f, $"scaled by {box.Scale}");
         Assert.Same(text, box.Under(drawn));
-        Assert.Equal("#codex", text.LinkAt(text.Local(drawn))?.Target);
+        Assert.Equal("codex", text.LinkAt(text.Local(drawn))?.Target);
     }
 
     /// <summary>The scaled text is drawn across the room, its words grown with it.</summary>

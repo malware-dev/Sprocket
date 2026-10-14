@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -260,7 +261,7 @@ public class BlueprintWritingTests
             screen.Run(2);
 
             Assert.True(editor.CodexOpen, "the codex did not open");
-            Assert.Equal("writing", editor.CodexWindow!.Term!.Id);
+            Assert.Equal(Terms.Writing, editor.CodexWindow!.Term!.Id);
         }
     }
 

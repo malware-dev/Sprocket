@@ -64,7 +64,7 @@ public class LayoutBenchmarks
         {
             case "help page": return Mixed(40);
             case "stress": return Mixed(400);
-            case "links in text": return Repeat("Each [logic system](#logic-system) holds its [installations](#installation), and runs them in turn.\n", 400);
+            case "links in text": return Repeat("Each [logic system](logic-system) holds its [installations](installation), and runs them in turn.\n", 400);
             case "code in text": return Repeat("Press `+ installation`, pick `Airlock 1 Outer Door`, then `Open` it and `Close` it again.\n", 400);
             default: return Paragraph(8000);
         }

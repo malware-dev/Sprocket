@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             Opens = opens;
         }
 
-        /// <summary>What a link names the term by, as in <c>[installations](#installation)</c>.</summary>
+        /// <summary>What a link names the term by, as in <c>[installations](installation)</c>.</summary>
         public string Id { get; }
 
         /// <summary>Whether the term begins a section of the contents: its name heads the section, and the terms after it are listed under it.</summary>
