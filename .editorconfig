@@ -82,3 +82,21 @@ resharper_csharp_naming_rule.constant_field = AaBb + _aaBb
 [src/Sprocket.Host.SpaceEngineers.Sim/Fakes/*.cs]
 resharper_check_namespace_highlighting = none
 resharper_inconsistent_naming_highlighting = none
+
+# ---------------------------------------------------------------------------------------------------
+# Lumel is a UI framework other mods import as it is, so its public surface is an API: a member
+# nothing in this solution calls, a setter nobody here sets, or a type nothing here makes is part of
+# what it offers. The inspections that judge a public member by its callers in this solution alone
+# (the .Global ones) are off for it; the .Local ones, about members nothing else can reach, stay on.
+# ---------------------------------------------------------------------------------------------------
+
+[src/Lumel/**.cs]
+resharper_unused_member_global_highlighting = none
+resharper_unused_auto_property_accessor_global_highlighting = none
+resharper_unused_method_return_value_global_highlighting = none
+resharper_unused_member_in_super_global_highlighting = none
+resharper_unused_type_global_highlighting = none
+resharper_unused_parameter_global_highlighting = none
+resharper_member_can_be_private_global_highlighting = none
+resharper_member_can_be_protected_global_highlighting = none
+resharper_class_never_instantiated_global_highlighting = none
