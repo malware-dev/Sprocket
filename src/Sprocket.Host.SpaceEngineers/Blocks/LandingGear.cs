@@ -34,8 +34,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Lock", false, "lock")
                 .Renaming("Unlock", false, "unlock")
                 .Renaming("SwitchLock", false, "toggle lock")
-                .Renaming("Autolock", true, "locking automatically")
-                .Renaming("Autolock", false, "toggle locking automatically")
+                .Renaming("Autolock", true, "lock automatically")
+                .Renaming("Autolock", false, "toggle lock automatically")
                 .Renaming("EnableParking", true, "used for parking")
                 .Renaming("EnableParking", false, "toggle used for parking");
         }

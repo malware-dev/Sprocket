@@ -77,15 +77,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .In(Category.Movement)
                 .Hiding("SetAndMove", "ResetVelocity")
                 .Renaming("Reverse", false, "reverse")
-                .Renaming("Velocity", true, "speed")
-                .Renaming("LowerLimit", true, "lower limit")
-                .Renaming("UpperLimit", true, "upper limit")
-                .Renaming("MaxImpulseAxis", true, "max impulse along the axis")
-                .Renaming("MaxImpulseNonAxis", true, "max impulse across the axis")
-                .Renaming("Add Top Part", false, "add head")
+                .Renaming("Velocity", true, "velocity")
+                .Renaming("LowerLimit", true, "minimum distance")
+                .Renaming("UpperLimit", true, "maximum distance")
+                .Renaming("MaxImpulseAxis", true, "maximum impulse along the axis")
+                .Renaming("MaxImpulseNonAxis", true, "maximum impulse across the axis")
+                .Renaming("Add Top Part", false, "add piston head")
                 .Renaming("SafetyDetach", true, "safety detach distance")
-                .Renaming("ShareInertiaTensor", true, "sharing inertia tensor")
-                .Renaming("ShareInertiaTensor", false, "toggle sharing inertia tensor");
+                .Renaming("ShareInertiaTensor", true, "share inertia tensor")
+                .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
 
             // Where it is, and whether it is going anywhere, change as it moves, which it says nothing of; it says when it
             // reaches either end.

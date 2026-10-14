@@ -1894,7 +1894,7 @@ public class PropertyTests
         var toggle = kind.FindAction("Depressurize", Form.Action)!;
         Assert.True(toggle.Hidden);
         Assert.True(depressurizing.Flips);
-        Assert.Equal("toggle depressurize", toggle.Text);
+        Assert.Equal("toggle depressurizing", toggle.Text);
     }
 
 }

@@ -22,20 +22,20 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         static readonly Being Detecting = Being.Flag(Reading.Of<IMySensorBlock>(sensor => sensor.IsActive));
 
-        // The game's own words for each switch, and Sprocket's for the value and the act that flips it.
+        // The game's own words for each switch, which name its value.
         static readonly string[] Switches =
         {
-            "Detect Players", "people",
-            "Detect Small Ships", "small ships",
-            "Detect Large Ships", "large ships",
-            "Detect Stations", "stations",
-            "Detect Floating Objects", "floating objects",
-            "Detect Asteroids", "asteroids",
-            "Detect Subgrids", "subgrids",
-            "Detect Owner", "its owner",
-            "Detect Friendly", "friends",
-            "Detect Neutral", "neutrals",
-            "Detect Enemy", "enemies"
+            "Detect Players",
+            "Detect Small Ships",
+            "Detect Large Ships",
+            "Detect Stations",
+            "Detect Floating Objects",
+            "Detect Asteroids",
+            "Detect Subgrids",
+            "Detect Owner",
+            "Detect Friendly",
+            "Detect Neutral",
+            "Detect Enemy"
         };
 
         static readonly string[] Extents = { "Left", "Right", "Top", "Bottom", "Front", "Back" };
@@ -66,12 +66,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("detecting", "detecting", Detecting).Announced()
                 .WithValue("things-detected", "things detected", _count)
                 .Looked("A sensor says when it starts and stops detecting, and nothing of how many things it detects.")
-                .Renaming("Audible Proximity Alert", true, "sounding an alert");
+                .Renaming("Audible Proximity Alert", true, "audible proximity alert");
 
-            for (var i = 0; i < Switches.Length; i += 2)
+            for (var i = 0; i < Switches.Length; i++)
             {
-                kind.Renaming(Switches[i], true, "watching for " + Switches[i + 1])
-                    .Renaming(Switches[i], false, "toggle watching for " + Switches[i + 1]);
+                kind.Renaming(Switches[i], true, Switches[i].ToLowerInvariant())
+                    .Renaming(Switches[i], false, "toggle " + Switches[i].ToLowerInvariant());
             }
 
             for (var i = 0; i < Extents.Length; i++)

@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("SafeZoneCreate", true, "zone active")
+            kind.Renaming("SafeZoneCreate", true, "active").Stating("SafeZoneCreate")
                 .Renaming("SafeZoneShapeCombo", true, "shape")
                 .Renaming("SafeZoneSlider", true, "radius")
                 .Renaming("SafeZoneXSlider", true, "size X")
@@ -42,8 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("SafeZoneZSlider", true, "size Z")
                 .Renaming("SafeZoneColor", true, "color")
                 .Renaming("SafeZoneTextureCombo", true, "texture")
-                .Renaming("UseConveyor", true, "using conveyors")
-                .Renaming("UseConveyor", false, "toggle using conveyors");
+                .Renaming("UseConveyor", true, "automatic push and pull")
+                .Renaming("UseConveyor", false, "toggle automatic push and pull");
 
             for (var i = 0; i < Allows.Length; i += 2)
                 kind.Renaming(Allows[i], true, "allowing " + Allows[i + 1]);

@@ -221,7 +221,7 @@ public class MechanicsTests
 
         var add = kind.FindAction("Add Top Part", Form.Action)!;
         Assert.False(add.Hidden);
-        Assert.Equal("add head", add.Text);
+        Assert.Equal("add piston head", add.Text);
     }
 
     /// <summary>

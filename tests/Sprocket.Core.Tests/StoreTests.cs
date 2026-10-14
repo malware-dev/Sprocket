@@ -116,7 +116,7 @@ public class StoreTests
         var toggle = kind.FindAction("Stockpile", Form.Action)!;
         Assert.True(toggle.Hidden);
         Assert.True(stockpiling.Flips);
-        Assert.Equal("toggle stockpile", toggle.Text);
+        Assert.Equal("toggle stockpiling", toggle.Text);
     }
 
     [Fact]

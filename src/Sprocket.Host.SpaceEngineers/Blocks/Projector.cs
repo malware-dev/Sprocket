@@ -39,8 +39,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("projecting", "projecting", Projecting).Looked(Unheard).In(Category.Making)
-                .Renaming("KeepProjection", true, "keeping projection")
-                .Renaming("KeepProjection", false, "toggle keeping projection")
+                .Renaming("KeepProjection", true, "keep projection")
+                .Renaming("KeepProjection", false, "toggle keep projection")
                 .WithAction("remove-the-blueprint", "remove the blueprint", Removes).In(Category.Making)
                 .WithValue("blocks-left", "blocks left", Left).Looked(Unheard).In(Category.Making)
                 .WithChange("finishes-building", "finishes building", "blocks-left", Literal.Of(0L))
@@ -55,9 +55,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("RotY", true, "yaw")
                 .Renaming("RotZ", true, "roll")
                 .Renaming("Scale", true, "scale")
-                .Renaming("ShowOnlyBuildable", true, "showing only buildable")
-                .Renaming("MarkMissingBlocks", true, "marking missing blocks")
-                .Renaming("MarkUnfinishedBlocks", true, "marking unfinished blocks");
+                .Renaming("ShowOnlyBuildable", true, "show only buildable")
+                .Renaming("MarkMissingBlocks", true, "mark missing blocks")
+                .Renaming("MarkUnfinishedBlocks", true, "mark unfinished blocks");
         }
     }
 }

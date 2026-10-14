@@ -49,19 +49,19 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("Range", true, "range")
-                .Renaming("EnableIdleMovement", true, "moves when idle")
-                .Renaming("EnableIdleMovement", false, "toggle moves when idle")
+            kind.Renaming("Range", true, "AI aiming radius")
+                .Renaming("EnableIdleMovement", true, "idle movement")
+                .Renaming("EnableIdleMovement", false, "toggle idle movement")
                 .Renaming(Aims, true, "aims at")
-                .Renaming("EnableTargetLocking", true, "target locking allowed")
-                .Renaming("EnableTargetLocking", false, "toggle target locking allowed")
+                .Renaming("EnableTargetLocking", true, "target locking")
+                .Renaming("EnableTargetLocking", false, "toggle target locking")
                 .Renaming("ViewRotation", true, "view rotation")
                 .Hiding("Control", "FocusLockedTarget");
 
             for (var i = 0; i < Followed.Length; i++)
             {
-                kind.Renaming(Followed[i], true, "targets " + Called[i])
-                    .Renaming(Followed[i], false, "toggle targets " + Called[i]);
+                kind.Renaming(Followed[i], true, "target " + Called[i])
+                    .Renaming(Followed[i], false, "toggle target " + Called[i]);
             }
 
             HideAiming(kind, block);

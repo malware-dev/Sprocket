@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("controlled-by-a-person", "controlled by a person", turret ? TurretControlled : ControllerControlled)
                 .Announced();
 
-            kind.Renaming("Range", true, "range")
+            kind.Renaming("Range", true, "AI aiming radius")
                 .Renaming("EnableIdleMovement", true, "idle movement")
                 .Renaming("EnableIdleMovement", false, "toggle idle movement")
                 .Renaming("EnableTargetLocking", true, "target locking")
@@ -67,8 +67,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             for (var i = 0; i < Switches.Length; i++)
             {
-                kind.Renaming("Target" + Switches[i], true, Targeted[i] + " targeted")
-                    .Renaming("Target" + Switches[i], false, "toggle " + Targeted[i] + " targeted");
+                kind.Renaming("Target" + Switches[i], true, "target " + Targeted[i])
+                    .Renaming("Target" + Switches[i], false, "toggle target " + Targeted[i]);
             }
         }
 

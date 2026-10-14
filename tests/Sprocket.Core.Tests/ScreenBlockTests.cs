@@ -58,7 +58,7 @@ public class ScreenBlockTests
         Assert.True(kind.FindAction("Title", Form.Value)!.Hidden);
         Assert.Equal("text color", kind.FindAction("FontColor", Form.Value)!.Text);
         Assert.Equal("app color", kind.FindAction("ScriptForegroundColor", Form.Value)!.Text);
-        Assert.Equal("keep aspect ratio", kind.FindAction("PreserveAspectRatio", Form.Value)!.Text);
+        Assert.Equal("preserve aspect ratio", kind.FindAction("PreserveAspectRatio", Form.Value)!.Text);
     }
 
     /// <summary>
@@ -205,7 +205,7 @@ public class ScreenBlockTests
         Assert.Equal(Literal.Of(true), Ran.Read(ship, camera, CameraBlock.InUse));
 
         var kind = ship.Entity(camera.Id).Kind;
-        Assert.Equal("panning allowed", kind.FindAction("EnablePanning", Form.Value)!.Text);
-        Assert.Equal("toggle panning allowed", kind.FindAction("EnablePanning", Form.Action)!.Text);
+        Assert.Equal("panning", kind.FindAction("EnablePanning", Form.Value)!.Text);
+        Assert.Equal("toggle panning", kind.FindAction("EnablePanning", Form.Action)!.Text);
     }
 }

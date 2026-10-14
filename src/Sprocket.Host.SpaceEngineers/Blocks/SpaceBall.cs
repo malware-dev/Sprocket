@@ -19,8 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("VirtualMass", true, "mass")
-                .Renaming("EnableBroadCast", true, "broadcasting")
+            kind.Renaming("VirtualMass", true, "virtual mass")
+                .Renaming("EnableBroadCast", true, "broadcasting").Stating("EnableBroadCast")
                 .Renaming("EnableBroadCast", false, "toggle broadcasting")
                 .Hiding("Friction", "Restitution", "IncreaseFriction", "DecreaseFriction", "IncreaseRestitution",
                     "DecreaseRestitution");

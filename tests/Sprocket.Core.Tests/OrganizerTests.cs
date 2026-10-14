@@ -76,7 +76,7 @@ public class OrganizerTests
 
         var value = kind.FindAction("ShowOnHUD", Form.Value)!;
         Assert.False(value.Hidden);
-        Assert.Equal("Shown on HUD", value.Named);
+        Assert.Equal("Show on HUD", value.Named);
         Assert.True(value.Vetted);
 
         var toggle = kind.FindAction("ShowOnHUD", Form.Action)!;

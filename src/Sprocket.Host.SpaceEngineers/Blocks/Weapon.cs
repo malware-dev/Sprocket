@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("firing", "firing", Firing).Looked(Unshot);
+            kind.WithValue("firing", "firing", Firing).Status().Looked(Unshot);
 
             // A modded gun that is not one of the game's gun objects has no count to give.
             if (block is IMyGunObject<MyGunBase>)
@@ -40,14 +40,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.Renaming("Shoot_On", false, "open fire")
                 .Renaming("Shoot_Off", false, "cease fire")
                 .Renaming("Shoot", false, "toggle firing")
-                .Renaming("ShootOnce", false, "fire once")
-                .Renaming("ForceReload", false, "reload")
+                .Renaming("ShootOnce", false, "shoot once")
+                .Renaming("ForceReload", false, "force reload")
                 .Renaming("SelectedAmmoType", true, "ammunition")
-                .Renaming("UseConveyor", true, "using conveyors")
-                .Renaming("UseConveyor", false, "toggle using conveyors")
+                .Renaming("UseConveyor", true, "automatic push and pull")
+                .Renaming("UseConveyor", false, "toggle automatic push and pull")
                 .Renaming("TargetingGroup_Selector", true, "aims at")
-                .Renaming("RequireTargetLock", true, "requiring target lock")
-                .Renaming("RequireTargetLock", false, "toggle requiring target lock")
+                .Renaming("RequireTargetLock", true, "require target lock")
+                .Renaming("RequireTargetLock", false, "toggle require target lock")
                 .Hiding("CycleSelectedAmmoType", "TargetingGroup_CycleSubsystems");
         }
 

@@ -18,8 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.Planning(Plan.SorterList)
                 .Renaming("blacklistWhitelist", true, "filter mode")
-                .Renaming("DrainAll", true, "pulling")
-                .Renaming("DrainAll", false, "toggle pulling");
+                .Renaming("DrainAll", true, "draining all").Stating("DrainAll")
+                .Renaming("DrainAll", false, "toggle draining all");
         }
     }
 }

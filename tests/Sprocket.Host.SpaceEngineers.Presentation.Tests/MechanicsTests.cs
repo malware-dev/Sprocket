@@ -20,7 +20,7 @@ public class MechanicsTests
 
     /// <summary>A task on a piston or a rotor is offered adding a head, and a rotor its lock's toggle, in Sprocket's words.</summary>
     [Theory]
-    [InlineData("Piston", "add head")]
+    [InlineData("Piston", "add piston head")]
     [InlineData("Rotor", "add head")]
     [InlineData("Rotor", "toggle lock")]
     public void ATaskIsOfferedInSprocketsWords(string block, string task)

@@ -15,8 +15,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("HudText", true, "name on HUD")
-                .Renaming("Radius", true, "radius");
+            kind.Renaming("HudText", true, "HUD text")
+                .Renaming("Radius", true, "broadcast radius");
         }
     }
 }

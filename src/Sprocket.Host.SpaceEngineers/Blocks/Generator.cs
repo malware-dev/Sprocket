@@ -36,12 +36,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("producing", "producing", Producing)
                 .Looked("A generator makes gas only while something draws on it, and announces neither.").In(Category.Gas)
                 .Renaming("Refill", false, "refill bottles")
-                .Renaming("Auto-Refill", true, "refilling bottles automatically")
-                .Renaming("Auto-Refill", false, "toggle automatic refill")
-                .Renaming("AutomaticallyPullBottles", true, "pulling bottles automatically")
-                .Renaming("AutomaticallyPullBottles", false, "toggle automatic bottle pulling")
-                .Renaming("UseConveyor", true, "using conveyors")
-                .Renaming("UseConveyor", false, "toggle conveyor use");
+                .Renaming("Auto-Refill", true, "refill bottles automatically")
+                .Renaming("Auto-Refill", false, "toggle refill bottles automatically")
+                .Renaming("AutomaticallyPullBottles", true, "automatically pull bottles")
+                .Renaming("AutomaticallyPullBottles", false, "toggle automatically pull bottles")
+                .Renaming("UseConveyor", true, "automatic push and pull")
+                .Renaming("UseConveyor", false, "toggle automatic push and pull");
         }
 
         /// <summary>Told as the generator runs out of ice and as it gets some back, which its resource source raises.</summary>

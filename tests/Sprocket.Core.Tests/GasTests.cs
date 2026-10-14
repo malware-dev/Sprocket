@@ -166,6 +166,31 @@ public class GasTests
         Assert.Equal("", ProgramText.Load(saved, new Automation(), ship.World.Values));
     }
 
+    /// <summary>A tank's stockpiling is a state of the tank, which a check reads as the tank itself.</summary>
+    [Fact]
+    public void StockpilingIsAStateOfTheTank()
+    {
+        var ship = new Rigged();
+        var tank = ship.Tank(1, "Tank");
+        Assert.True(ship.Entity(tank.Id).Kind.FindAction("Stockpile", Form.Value)!.IsStatus);
+
+        var automation = new Automation();
+        var sequence = automation.AddSequence((Trigger)null!);
+        var test = new Comparison { MemberId = "Stockpile", Quantifier = Quantifier.All, Relation = Relation.Is, Value = Literal.Of(true) };
+        test.Targets.Add(automation.Declare(ship.World, ship.Entity(tank.Id)).Name);
+        var check = new If(test);
+        sequence.Steps.Add(check);
+        sequence.Steps.Add(new EndIf());
+
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+
+        Assert.Equal("if Tank is stockpiling", SequenceText.Step(runner.Bindings, sequence, check, null));
+        test.Relation = Relation.IsNot;
+        Assert.Equal("if Tank is not stockpiling", SequenceText.Step(runner.Bindings, sequence, check, null));
+    }
+
     /// <summary>A tank's own switches are offered in its words: the bottles it refills, and filling them by itself.</summary>
     [Fact]
     public void ATanksBottlesAreSaidInItsWords()
@@ -176,11 +201,11 @@ public class GasTests
         Assert.Equal("refill bottles", kind.FindAction("Refill", Form.Action)!.Text);
 
         var automatic = kind.FindAction("Auto-Refill", Form.Value)!;
-        Assert.Equal("Refilling bottles automatically", automatic.Named);
+        Assert.Equal("Refill bottles automatically", automatic.Named);
         Assert.False(automatic.Hidden);
 
         var toggle = kind.FindAction("Auto-Refill", Form.Action)!;
-        Assert.Equal("toggle automatic refill", toggle.Text);
+        Assert.Equal("toggle refill bottles automatically", toggle.Text);
         Assert.True(toggle.Hidden);
         Assert.True(automatic.Flips);
     }

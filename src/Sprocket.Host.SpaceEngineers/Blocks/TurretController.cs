@@ -20,12 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithSignal(new ToolbarSlot(1, 0, 1), "gets on target")
                 .WithSignal(new ToolbarSlot(1, 0, 2), "loses its aim")
-                .Renaming("AI", true, "aiming automatically")
-                .Renaming("AI", false, "toggle aiming automatically")
-                .Renaming("SunTracking", true, "tracking the sun")
-                .Renaming("SunTracking", false, "toggle tracking the sun")
-                .Renaming("MultiplierAz", true, "azimuth speed")
-                .Renaming("MultiplierEl", true, "elevation speed")
+                .Renaming("AI", true, "AI")
+                .Renaming("AI", false, "toggle AI")
+                .Renaming("SunTracking", true, "always aim at sun")
+                .Renaming("SunTracking", false, "toggle always aim at sun")
+                .Renaming("MultiplierAz", true, "azimuth velocity multiplier")
+                .Renaming("MultiplierEl", true, "elevation velocity multiplier")
                 .Renaming("AngleDeviation", true, "angle deviation");
         }
     }

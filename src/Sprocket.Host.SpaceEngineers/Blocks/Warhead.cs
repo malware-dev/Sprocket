@@ -28,9 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("StartCountdown", false, "start countdown")
                 .Renaming("StopCountdown", false, "stop countdown")
                 .Renaming("Detonate", false, "detonate")
-                .Renaming("Safety", true, "armed")
+                .Renaming("Safety", true, "armed").Stating("Safety")
                 .Renaming("Safety", false, "toggle armed")
-                .Renaming("DetonationTime", true, "countdown");
+                .Renaming("DetonationTime", true, "detonation time");
         }
     }
 }

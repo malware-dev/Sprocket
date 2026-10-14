@@ -38,16 +38,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("autopilot", "autopilot", Flying).Looked(Unswitched)
+            kind.WithValue("autopilot", "flying the route", Flying).Status().Looked(Unswitched)
                 .WithValue("current-waypoint", "current waypoint", Waypoint).Announced()
                 .Vetting(true, Switches)
                 .Vetting(false, Switches)
                 .Renaming("AutoPilot_On", false, "fly the route")
                 .Renaming("AutoPilot_Off", false, "stop the autopilot")
                 .Renaming("AutoPilot", false, "toggle the autopilot")
-                .Renaming("Reset", false, "restart the route")
+                .Renaming("Reset", false, "reset waypoint")
                 .Renaming("FlightMode", true, "flight mode")
-                .Renaming("Direction", true, "direction")
+                .Renaming("Direction", true, "forward direction")
                 .Renaming("MainRemoteControl", true, "main remote control")
                 .Renaming("MainRemoteControl", false, "toggle main remote control")
                 .Hiding("SetFlightMode_BlockPropertyTitle_FlightMode_Patrol", "SetFlightMode_BlockPropertyTitle_FlightMode_Circle",

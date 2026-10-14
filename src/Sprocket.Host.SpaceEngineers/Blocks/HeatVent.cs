@@ -20,8 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("ColorMin", true, "color at low load")
-                .Renaming("ColorMax", true, "color at full load")
+            kind.Renaming("ColorMin", true, "color at minimal load")
+                .Renaming("ColorMax", true, "color at maximal load")
                 .Renaming("PowerDependency", true, "power dependency")
                 .Renaming("Radius", true, "radius")
                 .Renaming("Intensity", true, "intensity")

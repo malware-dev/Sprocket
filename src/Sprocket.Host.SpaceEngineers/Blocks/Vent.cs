@@ -127,8 +127,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("flow-out-of-the-room", "flow out of the room", OutOf).Looked(Unheard).In(Category.Air)
                 .WithValue("in-a-world-with-airtightness", "in a world with airtightness", Airtightness)
                 .Looked("The world's airtightness is set before it starts, and nothing announces it.").In(Category.Air)
-                .Renaming("Depressurize", true, "depressurizing")
-                .Renaming("Depressurize", false, "toggle depressurize")
+                .Renaming("Depressurize", true, "depressurizing").Stating("Depressurize")
+                .Renaming("Depressurize", false, "toggle depressurizing")
                 .WithAction(Pressurize, "pressurize", Fills, "Depressurize_Off").Lasting().Asking(Asked(
                     "**Hold** waits until the room is full. Where there is no more oxygen to give, as when the tanks are "
                     + "empty, that wait never ends.\n\n**Move on** carries on once the room will fill no further, with what "

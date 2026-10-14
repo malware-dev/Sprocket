@@ -34,10 +34,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Reading("is targeting", "is not targeting")
                 .WithChange("loses-its-target", "loses its target", "targeting", Literal.Of(false)).Announced()
                 .Reading("is not targeting", "is targeting")
-                .Renaming("TargetLock", true, "who it attacks")
+                .Renaming("TargetLock", true, block is IMyDefensiveCombatBlock ? "defend against" : "attack target")
                 .Renaming("TargetingGroup", true, "aims at")
-                .Renaming("CanTargetCharacters", true, "characters targeted")
-                .Renaming("CanTargetCharacters", false, "toggle characters targeted")
+                .Renaming("CanTargetCharacters", true, "target characters")
+                .Renaming("CanTargetCharacters", false, "toggle target characters")
                 .Hiding("SetAttackMode_EnemiesOnly", "SetAttackMode_EnemiesAndNeutrals", "SetTargetingGroup_Weapons",
                     "SetTargetingGroup_Propulsion", "SetTargetingGroup_PowerSystems");
         }

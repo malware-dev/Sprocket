@@ -174,13 +174,13 @@ public class CockpitTests
     /// <summary>The seat's own switches are said as states, each with its toggle beside it.</summary>
     [Theory]
     [InlineData("HandBrake", "handbrake")]
-    [InlineData("Park", "parked")]
+    [InlineData("Park", "parking brake")]
     [InlineData("DampenersOverride", "dampeners")]
-    [InlineData("ControlThrusters", "controls thrusters")]
-    [InlineData("ControlGyros", "controls gyroscopes")]
+    [InlineData("ControlThrusters", "control thrusters")]
+    [InlineData("ControlGyros", "control gyros")]
     [InlineData("MainCockpit", "main cockpit")]
-    [InlineData("TargetLocking", "target locking allowed")]
-    [InlineData("HorizonIndicator", "shows horizon")]
+    [InlineData("TargetLocking", "target locking")]
+    [InlineData("HorizonIndicator", "show horizon and altitude")]
     public void ItsSwitchesAreSaidAsStates(string id, string words)
     {
         var ship = new Rigged();

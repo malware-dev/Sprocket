@@ -41,8 +41,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("DampenersOverride", false, "toggle dampeners")
                 .Renaming("HandBrake", true, "handbrake")
                 .Renaming("HandBrake", false, "toggle handbrake")
-                .Renaming("Park", true, "parked")
-                .Renaming("Park", false, "toggle park")
+                .Renaming("Park", true, "parking brake")
+                .Renaming("Park", false, "toggle parking brake")
                 .Renaming("MainCockpit", true, "main cockpit")
                 .Renaming("MainCockpit", false, "toggle main cockpit")
                 .Hiding("ControlThrusters", "ControlWheels", "ControlGyros", "TargetLocking", "HorizonIndicator");

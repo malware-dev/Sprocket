@@ -35,8 +35,8 @@ public class PistonTests
         Assert.True(kind.FindAction("Retract", Form.Action)!.Hidden);
         Assert.True(kind.FindAction("SetAndMove", Form.Action)!.Hidden);
 
-        Assert.Equal("Speed", kind.FindAction("Velocity", Form.Value)!.Named);
-        Assert.Equal("Upper limit", kind.FindAction("UpperLimit", Form.Value)!.Named);
+        Assert.Equal("Velocity", kind.FindAction("Velocity", Form.Value)!.Named);
+        Assert.Equal("Maximum distance", kind.FindAction("UpperLimit", Form.Value)!.Named);
         Assert.Equal("Reverse", kind.FindAction("Reverse", Form.Action)!.Named);
 
         var asked = new List<Field>();

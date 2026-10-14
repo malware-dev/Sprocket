@@ -257,6 +257,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 if (kind.Vets(offer.Id, true))
                     Last(kind).Vouch();
+
+                if (kind.States(offer.Id) && offer.Sets == ValueKind.Flag)
+                    Last(kind).IsStatus = true;
             }
         }
 

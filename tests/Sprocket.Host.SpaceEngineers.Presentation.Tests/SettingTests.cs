@@ -314,7 +314,7 @@ public class SettingTests
         screen.Editor.PressBlock("Warning Beacon");
         screen.Run(2);
 
-        Assert.True(screen.Shows("radius"), "the beacon does not offer its radius");
+        Assert.True(screen.Shows("broadcast radius"), "the beacon does not offer its radius");
         Assert.True(screen.Shows("SIGNALS"), "a beacon's radius is not grouped with what it says");
         Assert.False(screen.Shows("APPEARANCE"), "a beacon's radius is grouped as how it looks");
     }

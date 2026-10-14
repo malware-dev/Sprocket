@@ -51,16 +51,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var gas = Gas(block);
             var level = gas + "-level";
             kind.WithAction(Stockpile, "stockpile", Stockpiles, "Stockpile_On").Lasting().In(Category.Gas).Asking(Asked())
-                .Renaming("Stockpile", true, "stockpiling")
-                .Renaming("Stockpile", false, "toggle stockpile")
+                .Renaming("Stockpile", true, "stockpiling").Stating("Stockpile")
+                .Renaming("Stockpile", false, "toggle stockpiling")
                 .WithValue(level, gas + " level", Level).Looked(Flowing).In(Category.Gas)
                 .WithChange("fills-up", "fills up", level, Literal.Of(100.0)).Reading("is full", "is not full").Looked(Flowing)
                 .WithChange("runs-dry", "runs dry", level, Literal.Of(0.0)).Reading("is empty", "is not empty").Announced()
                 .WithValue("capacity", "capacity", Capacity).Looked("A tank's capacity is its kind's, and never changes.")
                 .In(Category.Gas)
                 .Renaming("Refill", false, "refill bottles")
-                .Renaming("Auto-Refill", true, "refilling bottles automatically")
-                .Renaming("Auto-Refill", false, "toggle automatic refill");
+                .Renaming("Auto-Refill", true, "refill bottles automatically")
+                .Renaming("Auto-Refill", false, "toggle refill bottles automatically");
         }
 
         /// <summary>Told as the tank runs out of gas and as it gets some back, which its resource source raises.</summary>

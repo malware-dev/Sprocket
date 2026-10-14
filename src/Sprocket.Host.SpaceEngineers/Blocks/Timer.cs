@@ -28,11 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithSignal(new ToolbarSlot(1, 0, 0), "goes off")
                 .WithValue("counting-down", "counting down", Counting)
                 .Looked("A timer raises no event of its own.")
-                .Renaming("Start", false, "start the countdown")
-                .Renaming("Stop", false, "stop the countdown")
-                .Renaming("TriggerNow", false, "go off now")
+                .Renaming("Start", false, "start")
+                .Renaming("Stop", false, "stop")
+                .Renaming("TriggerNow", false, "trigger now")
                 .Renaming("TriggerDelay", true, "delay")
-                .Renaming("Silent", true, "silent")
+                .Renaming("Silent", true, "silent").Stating("Silent")
                 .Renaming("Silent", false, "toggle silent");
         }
     }

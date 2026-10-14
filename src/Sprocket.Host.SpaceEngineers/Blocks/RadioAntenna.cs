@@ -15,12 +15,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("EnableBroadCast", true, "broadcasting")
+            kind.Renaming("EnableBroadCast", true, "broadcasting").Stating("EnableBroadCast")
                 .Renaming("EnableBroadCast", false, "toggle broadcasting")
-                .Renaming("Radius", true, "radius")
-                .Renaming("HudText", true, "name on HUD")
-                .Renaming("ShowShipName", true, "showing ship name")
-                .Renaming("ShowShipName", false, "toggle showing ship name");
+                .Renaming("Radius", true, "broadcast radius")
+                .Renaming("HudText", true, "HUD text")
+                .Renaming("ShowShipName", true, "show ship name")
+                .Renaming("ShowShipName", false, "toggle show ship name");
         }
     }
 }

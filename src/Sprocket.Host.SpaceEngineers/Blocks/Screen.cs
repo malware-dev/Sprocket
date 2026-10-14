@@ -48,11 +48,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Font", true, "font")
                 .Renaming("FontSize", true, "font size")
                 .Renaming("alignment", true, "alignment")
-                .Renaming("TextPaddingSlider", true, "padding")
+                .Renaming("TextPaddingSlider", true, "text padding")
                 .Renaming("ScriptForegroundColor", true, "app color")
                 .Renaming("ScriptBackgroundColor", true, "app background color")
-                .Renaming("ChangeIntervalSlider", true, "image interval")
-                .Renaming("PreserveAspectRatio", true, "keep aspect ratio");
+                .Renaming("ChangeIntervalSlider", true, "image change interval")
+                .Renaming("PreserveAspectRatio", true, "preserve aspect ratio");
         }
 
         /// <summary>The text to show.</summary>

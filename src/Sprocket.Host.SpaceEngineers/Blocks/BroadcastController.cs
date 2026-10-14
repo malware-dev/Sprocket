@@ -51,11 +51,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithAction(Say, "say", Says, AskedText()).In(Category.Signals)
                 .WithAction(SendSaved, "send a saved message", Sends, AskedMessage()).In(Category.Signals)
-                .Renaming("TransmitRandomMessage", false, "send a random saved message")
-                .Renaming("SendGps", false, "send its position")
-                .Renaming("BroadcastTarget", true, "who hears it")
-                .Renaming("UseAntenna", true, "using antennas")
-                .Renaming("UseAntenna", false, "toggle using antennas")
+                .Renaming("TransmitRandomMessage", false, "send random message")
+                .Renaming("SendGps", false, "send GPS")
+                .Renaming("BroadcastTarget", true, "broadcast target")
+                .Renaming("UseAntenna", true, "use antenna")
+                .Renaming("UseAntenna", false, "toggle use antenna")
                 .Renaming("CustomName", true, "sender name")
                 .Hiding("BroadcastTargetEveryone", "BroadcastTargetOwner", "BroadcastTargetFaction");
 

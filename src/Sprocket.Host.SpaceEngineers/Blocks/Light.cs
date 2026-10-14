@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         /// <remarks>
         /// Only an interior light has a falloff: a spotlight and a searchlight carry the value and do nothing with it, and their
-        /// own terminal hides it. Only the two rotating warning lights turn; every other spotlight carries a spin speed it
+        /// own terminal hides it. Only the two rotating warning lights turn; every other spotlight carries a rotation speed it
         /// hides as well.
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return;
 
             if (Turns(block))
-                kind.Renaming("RotationSpeed", true, "spin speed");
+                kind.Renaming("RotationSpeed", true, "rotation speed");
             else
                 kind.Hiding("RotationSpeed", "IncreaseRotationSpeed", "DecreaseRotationSpeed");
         }

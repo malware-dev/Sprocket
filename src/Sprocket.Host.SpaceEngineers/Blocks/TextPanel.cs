@@ -55,10 +55,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Font", true, "font")
                 .Renaming("FontSize", true, "font size")
                 .Renaming("alignment", true, "alignment")
-                .Renaming("TextPaddingSlider", true, "padding")
+                .Renaming("TextPaddingSlider", true, "text padding")
                 .Renaming("Rotate", true, "rotation")
-                .Renaming("PreserveAspectRatio", true, "keep aspect ratio")
-                .Renaming("ChangeIntervalSlider", true, "image interval");
+                .Renaming("PreserveAspectRatio", true, "preserve aspect ratio")
+                .Renaming("ChangeIntervalSlider", true, "image change interval");
         }
 
         /// <summary>

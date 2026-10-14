@@ -21,7 +21,7 @@ public class GasPickerTests
         screen.Run(2);
 
         Assert.True(screen.Shows("pressurize"), "the vent's own actions are not listed");
-        Assert.False(screen.Shows("toggle depressurize"), "the toggle is listed beside the switch that flips");
+        Assert.False(screen.Shows("toggle depressurizing"), "the toggle is listed beside the switch that flips");
         Assert.False(screen.Shows("depressurize on/off"), "the game's own words are listed beside Sprocket's");
     }
 

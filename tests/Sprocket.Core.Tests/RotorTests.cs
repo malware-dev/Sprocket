@@ -36,7 +36,7 @@ public class RotorTests
 
         Assert.Equal("reverse", kind.FindAction("Reverse", Form.Action)!.Text);
         Assert.Equal("lock", kind.FindAction("RotorLock_On", Form.Action)!.Text);
-        Assert.Equal("Speed", kind.FindAction("Velocity", Form.Value)!.Named);
+        Assert.Equal("Velocity", kind.FindAction("Velocity", Form.Value)!.Named);
         Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Form.Value)!.Named);
 
         // One member each, under the block's id, offered in the organized view and shown in the

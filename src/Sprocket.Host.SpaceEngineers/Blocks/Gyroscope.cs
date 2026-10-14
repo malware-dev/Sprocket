@@ -26,8 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction("release", "release", Releases, (string)null).In(Category.Flight)
-                .Renaming("Override", true, "overridden")
-                .Renaming("Override", false, "toggle override")
+                .Renaming("Override", true, "overridden").Stating("Override")
+                .Renaming("Override", false, "toggle overridden")
                 .Renaming("Power", true, "strength")
                 .Hiding("Yaw", "Pitch", "Roll", "SetYaw", "SetPitch", "SetRoll", "IncreaseYaw", "DecreaseYaw",
                     "IncreasePitch", "DecreasePitch", "IncreaseRoll", "DecreaseRoll");

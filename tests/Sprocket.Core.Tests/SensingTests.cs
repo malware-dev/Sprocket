@@ -110,15 +110,15 @@ public class SensingTests
         things = 0;
         Assert.Equal(0, Read(entity, "things-detected").Whole);
 
-        Assert.Equal("watching for people", kind.FindAction("Detect Players", Form.Value)!.Text);
+        Assert.Equal("detect players", kind.FindAction("Detect Players", Form.Value)!.Text);
         var toggle = kind.FindAction("Detect Players", Form.Action)!;
-        Assert.Equal("toggle watching for people", toggle.Text);
+        Assert.Equal("toggle detect players", toggle.Text);
         Assert.True(toggle.Hidden);
         Assert.True(kind.FindAction("Detect Players", Form.Value)!.Flips);
         Assert.True(kind.FindAction("Detect Players_On", Form.Action)!.Hidden);
         Assert.Equal("left extent", kind.FindAction("Left", Form.Value)!.Text);
         Assert.True(kind.FindAction("IncreaseLeft", Form.Action)!.Hidden);
-        Assert.Equal("sounding an alert", kind.FindAction("Audible Proximity Alert", Form.Value)!.Text);
+        Assert.Equal("audible proximity alert", kind.FindAction("Audible Proximity Alert", Form.Value)!.Text);
     }
 
     /// <summary>A timer says whether it is counting down, and its countdown and its beeps are said in Sprocket's words.</summary>
@@ -144,9 +144,9 @@ public class SensingTests
         counting = true;
         Assert.True(Read(entity, "counting-down").Flag);
 
-        Assert.Equal("start the countdown", kind.FindAction("Start", Form.Action)!.Text);
-        Assert.Equal("stop the countdown", kind.FindAction("Stop", Form.Action)!.Text);
-        Assert.Equal("go off now", kind.FindAction("TriggerNow", Form.Action)!.Text);
+        Assert.Equal("start", kind.FindAction("Start", Form.Action)!.Text);
+        Assert.Equal("stop", kind.FindAction("Stop", Form.Action)!.Text);
+        Assert.Equal("trigger now", kind.FindAction("TriggerNow", Form.Action)!.Text);
         Assert.Equal("delay", kind.FindAction("TriggerDelay", Form.Value)!.Text);
         Assert.Equal("silent", kind.FindAction("Silent", Form.Value)!.Text);
         Assert.Equal("toggle silent", kind.FindAction("Silent", Form.Action)!.Text);
@@ -162,7 +162,7 @@ public class SensingTests
         timer.Carrying("TriggerDelay", "Delay", ValueKind.Real, "1", "3600");
         var entity = ship.Entity(timer.Id);
 
-        Assert.Equal("start the countdown", entity.Kind.FindAction("Start", Form.Action)!.Text);
+        Assert.Equal("start", entity.Kind.FindAction("Start", Form.Action)!.Text);
         ship.World.Invoke(entity, "Start", null, Form.Action);
         ship.World.Invoke(entity, "TriggerDelay", [Literal.Of(5.0)], Form.Value);
 
@@ -292,19 +292,19 @@ public class SensingTests
             .Offering("BroadcastUsingAntennas", "Broadcast using antennas On/Off");
 
         var beacons = ship.Entity(beacon.Id).Kind;
-        Assert.Equal("name on HUD", beacons.FindAction("HudText", Form.Value)!.Text);
+        Assert.Equal("HUD text", beacons.FindAction("HudText", Form.Value)!.Text);
 
         var antennas = ship.Entity(antenna.Id).Kind;
         Assert.Equal("broadcasting", antennas.FindAction("EnableBroadCast", Form.Value)!.Text);
         Assert.Equal("toggle broadcasting", antennas.FindAction("EnableBroadCast", Form.Action)!.Text);
         Assert.True(antennas.FindAction("EnableBroadCast_Off", Form.Action)!.Hidden);
-        Assert.Equal("showing ship name", antennas.FindAction("ShowShipName", Form.Value)!.Text);
-        Assert.Equal("toggle showing ship name", antennas.FindAction("ShowShipName", Form.Action)!.Text);
-        Assert.Equal("radius", antennas.FindAction("Radius", Form.Value)!.Text);
+        Assert.Equal("show ship name", antennas.FindAction("ShowShipName", Form.Value)!.Text);
+        Assert.Equal("toggle show ship name", antennas.FindAction("ShowShipName", Form.Action)!.Text);
+        Assert.Equal("broadcast radius", antennas.FindAction("Radius", Form.Value)!.Text);
 
         var detectors = ship.Entity(detector.Id).Kind;
-        Assert.Equal("sharing through antennas", detectors.FindAction("BroadcastUsingAntennas", Form.Value)!.Text);
-        Assert.Equal("toggle sharing through antennas",
+        Assert.Equal("broadcast using antennas", detectors.FindAction("BroadcastUsingAntennas", Form.Value)!.Text);
+        Assert.Equal("toggle broadcast using antennas",
             detectors.FindAction("BroadcastUsingAntennas", Form.Action)!.Text);
         Assert.Equal("range", detectors.FindAction("Range", Form.Value)!.Text);
     }
@@ -345,8 +345,8 @@ public class SensingTests
         Assert.False(entity.In(kind.FindEvent("disconnects")!, new Recall()));
 
         Assert.Equal("disconnect", kind.FindAction("Idle", Form.Action)!.Text);
-        Assert.Equal("permanent", kind.FindAction("isPerm", Form.Value)!.Text);
-        Assert.Equal("toggle permanent", kind.FindAction("isPerm", Form.Action)!.Text);
+        Assert.Equal("permanent connection", kind.FindAction("isPerm", Form.Value)!.Text);
+        Assert.Equal("toggle permanent connection", kind.FindAction("isPerm", Form.Action)!.Text);
         Assert.True(kind.FindAction("PasteGpsCoords", Form.Action)!.Hidden);
     }
 
@@ -363,7 +363,7 @@ public class SensingTests
             .Offering("SetFilter_Owner", "Receive from owner");
         var kind = ship.Entity(transponder.Id).Kind;
 
-        Assert.Equal("send a signal", kind.FindAction("SendSignal", Form.Action)!.Text);
+        Assert.Equal("send signal", kind.FindAction("SendSignal", Form.Action)!.Text);
         Assert.Equal("channel", kind.FindAction("Channel", Form.Value)!.Text);
         Assert.Equal("hears from", kind.FindAction("ReceiveFrom", Form.Value)!.Text);
         Assert.True(kind.FindAction("SetChannelValue", Form.Action)!.Hidden);
@@ -389,13 +389,13 @@ public class SensingTests
             .Offering("UseConveyor", "Use conveyor system On/Off");
         var kind = ship.Entity(zone.Id).Kind;
 
-        Assert.Equal("zone active", kind.FindAction("SafeZoneCreate", Form.Value)!.Text);
+        Assert.Equal("active", kind.FindAction("SafeZoneCreate", Form.Value)!.Text);
         Assert.Equal("allowing damage", kind.FindAction("SafeZoneDamageCb", Form.Value)!.Text);
         Assert.Equal("size X", kind.FindAction("SafeZoneXSlider", Form.Value)!.Text);
-        Assert.Equal("using conveyors", kind.FindAction("UseConveyor", Form.Value)!.Text);
+        Assert.Equal("automatic push and pull", kind.FindAction("UseConveyor", Form.Value)!.Text);
 
         var toggle = kind.FindAction("UseConveyor", Form.Action)!;
-        Assert.Equal("toggle using conveyors", toggle.Text);
+        Assert.Equal("toggle automatic push and pull", toggle.Text);
         Assert.True(toggle.Hidden);
         Assert.True(kind.FindAction("UseConveyor", Form.Value)!.Flips);
         Assert.True(ship.Entity(connector.Id).Kind.FindAction("UseConveyor", Form.Action)!.Hidden);

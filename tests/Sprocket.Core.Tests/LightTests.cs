@@ -109,7 +109,7 @@ public class LightTests
 
         var spin = kind.FindAction("RotationSpeed", Form.Value)!;
         Assert.False(spin.Hidden);
-        Assert.Equal("spin speed", spin.Text);
+        Assert.Equal("rotation speed", spin.Text);
         Assert.True(kind.FindAction("Falloff", Form.Value)!.Hidden);
     }
 }

@@ -27,22 +27,22 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("playing", "playing", Playing).Announced()
+            kind.WithValue("playing", "playing", Playing).Status().Announced()
                 .Renaming("ID_PLAY_CHECKBOX_On", false, "play the path")
                 .Renaming("ID_PLAY_CHECKBOX_Off", false, "stop playing")
                 .Renaming("ID_PLAY_CHECKBOX", false, "toggle playing")
-                .Renaming("ReversePath", false, "reverse the path")
-                .Renaming("ID_REPEAT_CHEKBOX", true, "repeating")
+                .Renaming("ReversePath", false, "reverse order")
+                .Renaming("ID_REPEAT_CHEKBOX", true, "repeating").Stating("ID_REPEAT_CHEKBOX")
                 .Renaming("ID_REPEAT_CHEKBOX", false, "toggle repeating")
-                .Renaming("ID_RECORD_CHECKBOX", true, "recording")
+                .Renaming("ID_RECORD_CHECKBOX", true, "recording").Stating("ID_RECORD_CHECKBOX")
                 .Renaming("ID_RECORD_CHECKBOX", false, "toggle recording")
-                .Renaming("ID_ADD_WAYPOINT", false, "add a point here")
+                .Renaming("ID_ADD_WAYPOINT", false, "add waypoint")
                 .Renaming("ID_RECORD_STEPS_SLIDER", true, "record interval")
                 .Renaming("ID_MINIMAL_DISTANCE_SLIDER", true, "minimal distance")
-                .Renaming("ID_SHOW_PATH_CHECKBOX", true, "showing the path")
-                .Renaming("ID_SHOW_PATH_CHECKBOX", false, "toggle showing the path")
-                .Renaming("ID_SHOW_POINTS_CHECKBOX", true, "showing the points")
-                .Renaming("ID_SHOW_POINTS_CHECKBOX", false, "toggle showing the points");
+                .Renaming("ID_SHOW_PATH_CHECKBOX", true, "show path on HUD")
+                .Renaming("ID_SHOW_PATH_CHECKBOX", false, "toggle show path on HUD")
+                .Renaming("ID_SHOW_POINTS_CHECKBOX", true, "show selected points")
+                .Renaming("ID_SHOW_POINTS_CHECKBOX", false, "toggle show selected points");
         }
 
         /// <summary>Told as the recorder starts or stops playing, which its component says.</summary>

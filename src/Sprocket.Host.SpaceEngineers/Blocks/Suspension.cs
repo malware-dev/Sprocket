@@ -30,22 +30,22 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("ResetMaxSteerAngle", "ResetHeight", "ResetSpeed Limit", "ResetPropulsion override",
                     "ResetSteer override")
                 .Renaming("Propulsion override", true, "propulsion override")
-                .Renaming("Steer override", true, "steering override")
+                .Renaming("Steer override", true, "steer override")
                 .Renaming("Speed Limit", true, "speed limit")
                 .Renaming("Power", true, "wheel power")
-                .Renaming("Braking", true, "reacting to braking")
-                .Renaming("Braking", false, "toggle reacting to braking")
+                .Renaming("Braking", true, "brake")
+                .Renaming("Braking", false, "toggle brake")
                 .Renaming("Steering", true, "steering")
                 .Renaming("Steering", false, "toggle steering")
                 .Renaming("Propulsion", true, "propulsion")
                 .Renaming("Propulsion", false, "toggle propulsion")
-                .Renaming("InvertSteering", true, "steering inverted")
-                .Renaming("InvertSteering", false, "toggle steering inverted")
-                .Renaming("InvertPropulsion", true, "propulsion inverted")
-                .Renaming("InvertPropulsion", false, "toggle propulsion inverted")
-                .Renaming("MaxSteerAngle", true, "max steering angle")
-                .Renaming("EnableParking", true, "used for parking")
-                .Renaming("EnableParking", false, "toggle used for parking")
+                .Renaming("InvertSteering", true, "invert steering")
+                .Renaming("InvertSteering", false, "toggle invert steering")
+                .Renaming("InvertPropulsion", true, "invert propulsion")
+                .Renaming("InvertPropulsion", false, "toggle invert propulsion")
+                .Renaming("MaxSteerAngle", true, "maximum steering angle")
+                .Renaming("EnableParking", true, "parking brake")
+                .Renaming("EnableParking", false, "toggle parking brake")
                 .Renaming("Height", true, "height")
                 .Renaming("Strength", true, "strength")
                 .Renaming("Friction", true, "friction")
@@ -53,8 +53,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("AirShock", false, "toggle air shock")
                 .Renaming("Add Top Part", false, "add wheel")
                 .Renaming("SafetyDetach", true, "safety detach distance")
-                .Renaming("ShareInertiaTensor", true, "sharing inertia tensor")
-                .Renaming("ShareInertiaTensor", false, "toggle sharing inertia tensor");
+                .Renaming("ShareInertiaTensor", true, "share inertia tensor")
+                .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
         }
 
         /// <summary>Told as the wheel is attached or comes off, which every suspension raises.</summary>

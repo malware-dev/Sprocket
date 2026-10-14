@@ -28,8 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue(InUse, "in use", Watched).Looked(Unheard)
-                .Renaming("EnablePanning", true, "panning allowed")
-                .Renaming("EnablePanning", false, "toggle panning allowed")
+                .Renaming("EnablePanning", true, "panning")
+                .Renaming("EnablePanning", false, "toggle panning")
                 .Renaming("ViewRotation", true, "view rotation");
         }
     }

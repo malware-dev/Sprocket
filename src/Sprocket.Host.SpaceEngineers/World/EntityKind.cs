@@ -387,6 +387,25 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says the block's own switches <paramref name="gameIds" /> are states of the block, which a check reads as the block itself.</summary>
+        /// <remarks>
+        /// The game's switch for what the block is or is doing, "Tank is stockpiling", rather than a setting of how it behaves,
+        /// "Suspension invert steering is on". Taken up where the block's own members are read, as a rename is.
+        /// </remarks>
+        public EntityKind Stating(params string[] gameIds)
+        {
+            for (var i = 0; i < gameIds.Length; i++)
+                _states.Add(gameIds[i]);
+
+            return this;
+        }
+
+        /// <summary>Whether one of the block's own switches is a state of the block.</summary>
+        public bool States(string gameId)
+        {
+            return _states.Contains(gameId);
+        }
+
         /// <summary>Whether one of the block's own members is vouched for in the game's own words.</summary>
         public bool Vets(string gameId, bool sets)
         {
@@ -433,6 +452,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<Alias> _renamed = new List<Alias>();
 
         readonly List<Alias> _vetted = new List<Alias>();
+
+        readonly List<string> _states = new List<string>();
 
         /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
         public EntityKind WithValue(string id, string named, string propertyId, Field field, ValueKind holds)

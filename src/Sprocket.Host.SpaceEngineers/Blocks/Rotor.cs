@@ -94,15 +94,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming(locks + "_On", false, "lock")
                 .Renaming(locks + "_Off", false, "unlock")
                 .Renaming(locks, false, "toggle lock")
-                .Renaming("Velocity", true, "speed")
+                .Renaming("Velocity", true, "velocity")
                 .Renaming("LowerLimit", true, "lower limit")
                 .Renaming("UpperLimit", true, "upper limit")
                 .Renaming("Torque", true, "torque")
                 .Renaming("BrakingTorque", true, "braking torque")
                 .Renaming("Displacement", true, "displacement")
                 .Renaming("SafetyDetach", true, "safety detach distance")
-                .Renaming("ShareInertiaTensor", true, "sharing inertia tensor")
-                .Renaming("ShareInertiaTensor", false, "toggle sharing inertia tensor");
+                .Renaming("ShareInertiaTensor", true, "share inertia tensor")
+                .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
 
             var heads = Heads(block, hinge);
             var adds = Doing.Of<IMyMotorStator, string>(given => Head(given, heads), Added);

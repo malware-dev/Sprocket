@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithValue("custom-data", "custom data", Data).In(Category.Other).Announced();
 
             kind.Renaming("ShowOnHUD", false, "toggle show on HUD")
-                .Renaming("ShowOnHUD", true, "shown on HUD");
+                .Renaming("ShowOnHUD", true, "show on HUD");
         }
 
         /// <summary>Told as the block starts or stops working and as its Custom Data changes, which every block announces.</summary>

@@ -38,9 +38,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("OffensiveCombatHitAndRun_RetreatDistance", true, "retreat distance")
                 .Renaming("OffensiveCombatHitAndRun_RetreatTimeout", true, "retreat timeout")
                 .Renaming("OffensiveCombatHitAndRun_RetreatAngle", true, "retreat angle")
-                .Renaming("OffensiveCombatIntercept_GuidanceType", true, "guidance")
-                .Renaming("OffensiveCombatIntercept_OverrideCollisionAvoidance", true, "overriding collision avoidance")
-                .Renaming("OffensiveCombatIntercept_OverrideCollisionAvoidance", false, "toggle overriding collision avoidance");
+                .Renaming("OffensiveCombatIntercept_GuidanceType", true, "guidance type")
+                .Renaming("OffensiveCombatIntercept_OverrideCollisionAvoidance", true, "override collision avoidance")
+                .Renaming("OffensiveCombatIntercept_OverrideCollisionAvoidance", false, "toggle override collision avoidance");
 
             for (var i = 0; i < Facings.Length; i++)
             {

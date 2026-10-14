@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("SendSignal", false, "send a signal")
+            kind.Renaming("SendSignal", false, "send signal")
                 .Renaming("Channel", true, "channel")
                 .Renaming("ReceiveFrom", true, "hears from")
                 .Hiding("SetChannelValue", "SetFilter_Owner", "SetFilter_Faction", "SetFilter_Everyone");

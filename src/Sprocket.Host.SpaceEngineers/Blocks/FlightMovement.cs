@@ -24,10 +24,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithValue("current-waypoint", "current waypoint", Waypoint).Looked(Unheard);
             Flying(kind);
             kind.Renaming("MinHeightAboveTerrain", true, "minimum altitude")
-                .Renaming("AlignToGravity", true, "aligning to gravity")
-                .Renaming("AlignToGravity", false, "toggle aligning to gravity")
-                .Renaming("MaxPitchAngle", true, "max pitch")
-                .Renaming("MaxRollAngle", true, "max roll");
+                .Renaming("AlignToGravity", true, "align to gravity")
+                .Renaming("AlignToGravity", false, "toggle align to gravity")
+                .Renaming("MaxPitchAngle", true, "maximum pitch angle")
+                .Renaming("MaxRollAngle", true, "maximum roll angle");
         }
 
         /// <summary>Gives the settings a flight block and a remote control share their words.</summary>

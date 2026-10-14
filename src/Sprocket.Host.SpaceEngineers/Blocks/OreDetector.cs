@@ -16,8 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("BroadcastUsingAntennas", true, "sharing through antennas")
-                .Renaming("BroadcastUsingAntennas", false, "toggle sharing through antennas")
+            kind.Renaming("BroadcastUsingAntennas", true, "broadcast using antennas")
+                .Renaming("BroadcastUsingAntennas", false, "toggle broadcast using antennas")
                 .Renaming("Range", true, "range");
         }
     }

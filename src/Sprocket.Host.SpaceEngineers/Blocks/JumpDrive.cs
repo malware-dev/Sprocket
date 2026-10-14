@@ -69,8 +69,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithAction(Recharge, "recharge", Recharges, (string)null).Lasting().Asking(Recharging.Asked())
                 .In(Category.Power)
-                .Renaming("Recharge", true, "recharging")
-                .Renaming("Recharge", false, "toggle recharge")
+                .Renaming("Recharge", true, "recharging").Stating("Recharge")
+                .Renaming("Recharge", false, "toggle recharging")
                 .WithValue("status", "status", Status).Status().Looked(Unjumped).In(Category.Flight)
                 .WithValue("charge", "charge", Charge).Announced().In(Category.Power)
                 .WithValue("stored-power", "stored power", Stored).Announced().In(Category.Power)

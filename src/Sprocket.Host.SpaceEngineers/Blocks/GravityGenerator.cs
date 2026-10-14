@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction("reverse", "reverse", Reverses, (string)null).In(Category.Behaviour)
-                .Renaming("Gravity", true, "gravity")
+                .Renaming("Gravity", true, "acceleration")
                 .Hiding("SetGravityAcceleration");
 
             if (block is IMyGravityGenerator)

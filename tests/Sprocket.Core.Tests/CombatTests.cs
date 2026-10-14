@@ -75,7 +75,7 @@ public class CombatTests
         Assert.Equal("open fire", Listed(kind, "Shoot_On").Text);
         Assert.Equal("cease fire", Listed(kind, "Shoot_Off").Text);
         Assert.Equal("toggle firing", Listed(kind, "Shoot").Text);
-        Assert.Equal("fire once", Listed(kind, "ShootOnce").Text);
+        Assert.Equal("shoot once", Listed(kind, "ShootOnce").Text);
     }
 
     /// <summary>A target switch reads as a state and is flipped on its own switch, and its toggle and pair are said by the value.</summary>
@@ -87,8 +87,8 @@ public class CombatTests
 
         var value = kind.FindAction("TargetNeutrals", Form.Value)!;
         Assert.False(value.Hidden);
-        Assert.Equal("Neutrals targeted", value.Named);
-        Assert.Equal("toggle neutrals targeted", Flipped(kind, "TargetNeutrals").Text);
+        Assert.Equal("Target neutrals", value.Named);
+        Assert.Equal("toggle target neutrals", Flipped(kind, "TargetNeutrals").Text);
         Assert.True(kind.FindAction("TargetNeutrals_On", Form.Action)!.Hidden);
         Assert.True(kind.FindAction("FocusLockedTarget", Form.Action)!.Hidden);
     }
@@ -100,8 +100,8 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Turret);
 
-        Assert.Equal("toggle using conveyors", Flipped(kind, "UseConveyor").Text);
-        Assert.Equal("Using conveyors", kind.FindAction("UseConveyor", Form.Value)!.Named);
+        Assert.Equal("toggle automatic push and pull", Flipped(kind, "UseConveyor").Text);
+        Assert.Equal("Automatic push and pull", kind.FindAction("UseConveyor", Form.Value)!.Named);
     }
 
     /// <summary>A turret's own values are Sprocket's, and one that is not the game's gun object has no rounds to count.</summary>
@@ -115,6 +115,17 @@ public class CombatTests
             Assert.NotNull(Probe.Value(kind, BlockKinds.Own, id));
 
         Assert.Null(Probe.Value(kind, BlockKinds.Own, "rounds-left"));
+    }
+
+    /// <summary>Whether a gun is firing is a state of the gun, read as the gun itself beside its order to open or cease fire.</summary>
+    [Fact]
+    public void FiringIsAStateOfTheGun()
+    {
+        var ship = new Ship();
+        var firing = Probe.Value(ship.Kind(ship.Turret), BlockKinds.Own, "firing")!;
+
+        Assert.True(firing.IsStatus);
+        Assert.Equal("firing", firing.Text);
     }
 
     /// <summary>An <c>if</c> reads each of a turret's own flags as the turret holds it.</summary>
@@ -191,7 +202,7 @@ public class CombatTests
 
         Assert.Equal("Armed", kind.FindAction("Safety", Form.Value)!.Named);
         Assert.Equal("toggle armed", Flipped(kind, "Safety").Text);
-        Assert.Equal("Countdown", kind.FindAction("DetonationTime", Form.Value)!.Named);
+        Assert.Equal("Detonation time", kind.FindAction("DetonationTime", Form.Value)!.Named);
         Assert.Equal("start countdown", Listed(kind, "StartCountdown").Text);
         Assert.Equal("detonate", Listed(kind, "Detonate").Text);
         Assert.True(kind.FindAction("Safety_On", Form.Action)!.Hidden);
