@@ -1400,7 +1400,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>How <paramref name="quantifier" /> is written.</summary>
         static Keyword Said(Quantifier quantifier)
         {
-            return quantifier == Quantifier.All ? Keyword.All : quantifier == Quantifier.Sum ? Keyword.Sum : Keyword.Any;
+            switch (quantifier)
+            {
+                case Quantifier.All: return Keyword.All;
+                case Quantifier.Sum: return Keyword.Sum;
+                case Quantifier.Average: return Keyword.Average;
+            }
+
+            return Keyword.Any;
         }
 
         /// <summary>How <paramref name="relation" /> is written.</summary>
@@ -1426,9 +1433,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 quantifier = Quantifier.All;
             else if (statement.Says(at, Keyword.Sum))
                 quantifier = Quantifier.Sum;
+            else if (statement.Says(at, Keyword.Average))
+                quantifier = Quantifier.Average;
             else if (!statement.Says(at, Keyword.Any))
             {
-                trouble.Say(statement, "expected any, all or sum after '" + after + "'.");
+                trouble.Say(statement, "expected any, all, sum or average after '" + after + "'.");
                 return false;
             }
 

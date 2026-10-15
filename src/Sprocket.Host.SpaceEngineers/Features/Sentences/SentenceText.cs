@@ -37,6 +37,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>How many blocks a sentence names before it counts the rest.</summary>
         const int Said = 2;
 
+        /// <summary>What a test adding a value up over its blocks says first.</summary>
+        const string SumWords = "the sum of";
+
+        /// <summary>What a test averaging a value over its blocks says first.</summary>
+        const string AverageWords = "the average of";
+
+        /// <summary>Every way a test can read its blocks, in the order they are offered.</summary>
+        public static readonly IReadOnlyList<Quantifier> Readings = new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average };
+
         /// <summary>How many characters of a text a sentence says before cutting it short.</summary>
         const int Quoted = 48;
 
@@ -160,20 +169,47 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Joining(slots, slot, false);
         }
 
-        /// <summary>The same, for a test where <paramref name="tests" /> says so, which reads its value as the program does: a value on some blocks is something.</summary>
+        /// <summary>
+        /// The same, for a test where <paramref name="tests" /> says so, which reads its value as the program does: a value on
+        /// some blocks, then how it is compared, which says its own verb.
+        /// </summary>
         public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
         {
-            var first = slots.Count > 0 ? slots[0] as ActionSlot : null;
-            if (first == null || first.Action == null || !first.Action.Sets)
+            // A test's value can stand after the part saying how its blocks are read; a step's always comes first.
+            var at = tests ? Valued(slots) : 0;
+            var value = at >= 0 && at < slots.Count ? slots[at] as ActionSlot : null;
+            if (value == null || value.Action == null || !(tests || value.Action.Sets))
                 return "";
 
-            if (slot == 1)
+            if (slot == at + 1)
                 return OnWord;
 
-            if (slot != 2)
-                return "";
+            return slot == at + 2 && !tests ? ToWord : "";
+        }
 
-            return tests ? IsWord : ToWord;
+        /// <summary>How a test reads its blocks, as its sentence says it and the list choosing it offers it: any, all, the sum of, the average of.</summary>
+        public static string Quantified(Quantifier quantifier)
+        {
+            switch (quantifier)
+            {
+                case Quantifier.All: return "all";
+                case Quantifier.Sum: return SumWords;
+                case Quantifier.Average: return AverageWords;
+            }
+
+            return "any";
+        }
+
+        /// <summary>Where among <paramref name="slots" /> the value stands, or -1 where none does.</summary>
+        static int Valued(IList<SentenceSlot> slots)
+        {
+            for (var i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] is ActionSlot)
+                    return i;
+            }
+
+            return -1;
         }
 
 
@@ -280,18 +316,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
 
-        /// <summary>A test being picked, as far as it has got: "If Inner Door is open", "If Airlock Light power is …".</summary>
+        /// <summary>A test being picked, as far as it has got: "If Inner Door is open", "If power on Airlock Light is …".</summary>
         /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
         /// <param name="chosen">The state or the value chosen, in the words its list shows it in, or empty.</param>
         /// <param name="state">Whether what is chosen is a state of the blocks' status, which reads as the blocks themselves.</param>
-        public static string Testing(string blocks, string chosen, bool state)
+        /// <param name="reads">How the blocks are read, as <see cref="Quantified" /> says it, or empty where there is one block: "If the sum of radius on the lights is …".</param>
+        public static string Testing(string blocks, string chosen, bool state, string reads)
         {
+            var lead = reads.Length == 0 ? "If " : "If " + reads + " ";
             if (chosen.Length == 0)
-                return "If " + blocks + " " + Empty;
+                return lead + blocks + " " + Empty;
 
             return state
-                ? "If " + blocks + " " + IsWord + " " + chosen
-                : "If " + blocks + " " + chosen + " " + IsWord + " " + Empty;
+                ? lead + blocks + " " + IsWord + " " + chosen
+                : lead + chosen + " " + OnWord + " " + blocks + " " + IsWord + " " + Empty;
         }
 
         /// <summary>

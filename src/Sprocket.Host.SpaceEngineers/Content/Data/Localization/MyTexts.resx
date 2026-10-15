@@ -435,6 +435,14 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Change the value to set.</value>
     <comment>Tooltip on the new value in the sentence of a step or trigger that sets a value of blocks, on a sequence's screen and on a logic system's screen; pressing it opens the picker on that value.</comment>
   </data>
+  <data name="Sprocket.Sequence.ComparedAbout" xml:space="preserve">
+    <value>Choose how it is compared.</value>
+    <comment>Tooltip on the comparison in an if's sentence on a sequence's screen, such as "is" or "is below"; pressing it opens a menu of the comparisons the value can be checked with.</comment>
+  </data>
+  <data name="Sprocket.Sequence.ReadAbout" xml:space="preserve">
+    <value>Choose how the blocks are read.</value>
+    <comment>Tooltip on how an if reads its blocks in its sentence on a sequence's screen, where it names several: "any", "all", "the sum of" or "the average of"; pressing it opens a menu of those.</comment>
+  </data>
   <data name="Sprocket.Sequence.CheckedAbout" xml:space="preserve">
     <value>Change the value to check for.</value>
     <comment>Tooltip on the value an if checks blocks for, in the if's sentence on a sequence's screen; pressing it opens the picker on that value.</comment>
@@ -690,13 +698,13 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>{count} picked</value>
     <comment>Line under the heading of the picker's column of blocks while several blocks are picked. {count} is filled with how many.</comment>
   </data>
-  <data name="Sprocket.Pick.AnyOne" xml:space="preserve">
-    <value>any one</value>
-    <comment>Choice in the picker's column of blocks, while picking what an if checks, meaning that any one of the chosen blocks is enough for the check to hold.</comment>
+  <data name="Sprocket.Pick.AverageNote" xml:space="preserve">
+    <value>Filtered to numbers, for averaging.</value>
+    <comment>Banner at the top of the picker's column of what an if can check, shown while "the average of" is chosen in the column of blocks, saying why nothing but numbers is listed.</comment>
   </data>
-  <data name="Sprocket.Pick.AllOfThem" xml:space="preserve">
-    <value>all of them</value>
-    <comment>Choice in the picker's column of blocks, while picking what an if checks, meaning that all of the chosen blocks are needed together for the check to hold.</comment>
+  <data name="Sprocket.Pick.SumNote" xml:space="preserve">
+    <value>Filtered to numbers, for summing.</value>
+    <comment>Banner at the top of the picker's column of what an if can check, shown while "the sum of" is chosen in the column of blocks, saying why nothing but numbers is listed.</comment>
   </data>
   <data name="Sprocket.Pick.Status" xml:space="preserve">
     <value>Status</value>

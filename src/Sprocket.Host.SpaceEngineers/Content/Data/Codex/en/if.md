@@ -4,7 +4,7 @@ Sometimes you need a ![](mark:sequence)&nbsp;[sequence](sequence) to do one thin
 
 An if, also known as a "conditional", is the [step](step) for that. It checks blocks, and runs the steps under it only when its condition passes. Add its `otherwise`, and the steps there run when the condition doesn't pass, so one sequence covers both ways through the airlock.
 
-The states a block can be in come first in the list, like a door being open or working, and read as the block itself: *if Airlock Door is open*. Any other value is named in the check, *if Airlock Door power is on*, with how it compares chosen beside it.
+The states a block can be in come first in the list, like a door being open or working, and read as the block itself: *if Airlock Door is open*. Any other value is named before its blocks, *if power on Airlock Door is on*. How it compares, here `is`, is a part of its own: press it to choose another, like `is not`, or `is below` for a number.
 
 ## More than two ways
 
@@ -18,7 +18,14 @@ The if tries its branches from the top, and runs the first one whose condition p
 
 ## Several blocks
 
-When you need to know about more than one block, like every door on a hangar, select them all. Then choose: `any one` of them is enough for the condition to pass, or it takes `all of them`.
+When you need to know about more than one block, like every door on a hangar, select them all. A word in front of the value then says how they are read. Press it, or use the drop-down in the blocks column of the [value selector](selector), to choose:
+
+- `any`: one of them is enough for the condition to pass.
+- `all`: it takes every one of them.
+- `the sum of`: the value added up over the blocks, *if the sum of uranium on Reactor 1 and Reactor 2 is below 10*.
+- `the average of`: that sum divided by how many blocks were read.
+
+The sum and the average work on numbers, so choosing either leaves only numbers in the list of what to check. The word appears only with more than one block, where the four differ.
 
 ## Checking once, not waiting
 

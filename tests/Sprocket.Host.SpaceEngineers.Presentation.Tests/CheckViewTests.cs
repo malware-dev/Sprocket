@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -95,10 +96,10 @@ public class CheckViewTests
 
         var opens = sequence.Steps.OfType<If>().Single();
         var through = rig.Editor.StandIn(sequence.System);
-        Assert.Equal("if Airlock Inner Door or Airlock Outer Door is open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
+        Assert.Equal("if any Airlock Inner Door or Airlock Outer Door is open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
 
         opens.Test.Quantifier = Quantifier.All;
-        Assert.Equal("if Airlock Inner Door and Airlock Outer Door are open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
+        Assert.Equal("if all Airlock Inner Door and Airlock Outer Door are open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
     }
 
     /// <summary>Any other value is named in the check, and a number is offered more than sameness.</summary>
@@ -117,7 +118,7 @@ public class CheckViewTests
         rig.Tick();
 
         var opens = sequence.Steps.OfType<If>().Single();
-        Assert.Equal("if Airlock Outer Door power is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, null));
+        Assert.Equal("if power on Airlock Outer Door is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, null));
     }
 
     /// <summary>The signals that start a trigger are one list, with no link to another view.</summary>
@@ -133,6 +134,49 @@ public class CheckViewTests
         rig.Tick();
 
         Assert.All(rig.Editor.Pick().Stages, stage => Assert.Empty(stage.Views));
+    }
+
+    /// <summary>
+    /// How several blocks are read is chosen from a list in the sentence's own words; a sum or an average lists numbers alone and
+    /// says why, lets go of a value that is no number, and reads in the sentence as the list says it.
+    /// </summary>
+    [Fact]
+    public void ATotalListsOnlyNumbers()
+    {
+        var rig = Airlock();
+        var sequence = rig.Editor.Program.Systems[0].Sequences[0];
+        Open(rig);
+        rig.Editor.TickBlock("Airlock Inner Door");
+        rig.Tick();
+        What(rig).Entries().First(entry => entry.Text == "power" && !entry.IsHeading).Pick(Held.Alone, 1);
+        rig.Tick();
+
+        var reads = rig.Editor.Pick().Stages[0].Options.OfType<ListField>().Single();
+        Assert.Equal("any", reads.Text);
+        reads.OnText('t');
+        rig.Tick();
+        Assert.Equal("the sum of", reads.Text);
+
+        var listed = What(rig).Entries().Where(entry => !entry.IsHeading).Select(entry => entry.Text).ToList();
+        Assert.DoesNotContain("power", listed);
+        Assert.NotEmpty(listed);
+        Assert.Equal(rig.Texts.PickSumNote, What(rig).Note);
+        Assert.Empty(((PickPage)rig.Editor.Current).Fields);
+
+        reads.OnText('t');
+        rig.Tick();
+        Assert.Equal("the average of", reads.Text);
+        Assert.Equal(rig.Texts.PickAverageNote, What(rig).Note);
+
+        var number = listed[0];
+        What(rig).Entries().First(entry => entry.Text == number && !entry.IsHeading).Pick(Held.Alone, 1);
+        rig.Tick();
+        rig.Editor.Typed("above 50");
+        rig.Tick();
+
+        var opens = sequence.Steps.OfType<If>().Single();
+        Assert.Equal(Quantifier.Average, opens.Test.Quantifier);
+        Assert.StartsWith("if the average of " + number + " on ", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
     }
 
     /// <summary>Adds an if, and selects the airlock's outer door for it.</summary>

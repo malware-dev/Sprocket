@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Storage;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
@@ -25,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public sealed partial class PickPage : EditorPage
     {
-        const bool AsksAll = false;
         const string FamilyPrefix = "family:";
         const int Actions = 0;
         const int Values = 1;
@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly int _base;
         readonly string _arrivedChosen;
         readonly Nature _arrivedForm;
-        readonly bool _arrivedAll;
+        readonly Quantifier _arrivedQuantifier;
         readonly List<string> _filled = new List<string>();
         readonly List<Field> _nothing = new List<Field>();
         readonly List<Field> _shownFields = new List<Field>();
@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         Nature _chosenForm;
         string _dropped = "";
         Nature _droppedForm;
-        bool _all;
+        Quantifier _quantifier;
         string _kind = "";
         Family _family;
         string _narrowedSearch;
@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _said;
         string _saidChosen = "";
         int _saidOffered;
-        bool _saidAll;
+        Quantifier _saidQuantifier;
         bool _retitled;
         bool _goesOn;
         bool _straight;
@@ -114,8 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         Keyed<long, PickRow> _blockRows;
         Keyed<string, KindRow> _kindRows;
         Keyed<string, PickRow> _whatRows;
-        OptionRow _any;
-        OptionRow _every;
+        ListField _reads;
         ICommand _clearKind;
         ICommand _toggleHidden;
         bool _showsHidden;
@@ -134,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, Nature chosenForm, Action<PickAnswer> done,
-            bool asksAll = false, bool all = false, IList<Literal> arguments = null,
+            bool asksAll = false, Quantifier quantifier = Quantifier.Any, IList<Literal> arguments = null,
             Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
             bool signalsOnly = false, bool forTests = false)
             : base(editor)
@@ -165,9 +164,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _chosenForm = chosenForm;
             _arrivedChosen = _chosen;
             _arrivedForm = chosenForm;
-            _arrivedAll = all;
+            _arrivedQuantifier = quantifier;
             _asksAll = asksAll;
-            _all = all;
+            _quantifier = quantifier;
             _done = done;
 
             _screen = editor.Opener;
@@ -282,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         return true;
                 }
 
-                if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _all != _arrivedAll)
+                if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _quantifier != _arrivedQuantifier)
                     return true;
 
                 if (_aim != null && _aim.Moved)
@@ -380,7 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var arguments = _strip.Arguments;
             if (_forEvents || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
-                _done(new PickAnswer(_selection, _chosen, _all, null, _chosenForm));
+                _done(new PickAnswer(_selection, _chosen, _quantifier, null, _chosenForm));
                 return;
             }
 
@@ -408,11 +407,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 && arguments[0].Text == EntityAction.Toggle)
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _selection, _chosen) ?? _chosen;
-                _done(new PickAnswer(_selection, toggle, _all, new List<Literal>(), Nature.Action));
+                _done(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), Nature.Action));
                 return;
             }
 
-            _done(new PickAnswer(_selection, _chosen, _all, arguments, _chosenForm));
+            _done(new PickAnswer(_selection, _chosen, _quantifier, arguments, _chosenForm));
         }
 
         /// <summary>Gives the argument of each field for one of a list of names as that name.</summary>
@@ -1070,35 +1069,81 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 narrow.Execute();
         }
 
-        /// <summary>Offered wherever the distinction between any one block and all of them means anything: on a test.</summary>
-        /// <remarks>
-        /// A trigger that waits for all of its blocks is built and tested, but the choice would be offered on triggers it means
-        /// nothing for, and nothing on the way in explains it. A trigger already saying "all of them" keeps saying it and
-        /// firing that way.
-        /// </remarks>
+        /// <summary>
+        /// Offered wherever the distinction between the blocks means anything: on a test, and on a trigger watching for a state,
+        /// never on a signal the blocks send. A list in the words the sentence says them in; a test is offered their sum and
+        /// their average as well, which list only what is a number to check.
+        /// </summary>
         void FillOptions()
         {
-            var asks = _asksAll && (AsksAll || _forTests);
+            var asks = _asksAll && (_forTests || Watched());
             if (!asks)
             {
                 _blocks.Options.Clear();
                 return;
             }
 
-            if (_any == null)
+            if (_reads == null)
             {
-                _any = new OptionRow { Text = Editor.Texts.PickAnyOne, Command = Editor.Act(Cmd.RequireAny, delegate { SetAll(false); }) };
-                _every = new OptionRow { Text = Editor.Texts.PickAllOfThem, Command = Editor.Act(Cmd.RequireAll, delegate { SetAll(true); }) };
+                var words = new List<string>();
+                for (var i = 0; i < SentenceText.Readings.Count; i++)
+                {
+                    if (_forTests || i < 2)
+                        words.Add(SentenceText.Quantified(SentenceText.Readings[i]));
+                }
+
+                _reads = new ListField(words);
+                _reads.Edited += delegate
+                {
+                    var reads = Editor.Act(Cmd.ReadBlocks, delegate { Quantify(Read(_reads.Text)); });
+                    if (reads != null)
+                        reads.Execute();
+                };
             }
 
             if (_blocks.Options.Count == 0)
+                _blocks.Options.Add(_reads);
+
+            var said = SentenceText.Quantified(_quantifier);
+            if (_reads.Text != said)
+                _reads.Text = said;
+        }
+
+        /// <summary>The way of reading the blocks <paramref name="said" /> names, as <see cref="SentenceText.Quantified" /> says them.</summary>
+        static Quantifier Read(string said)
+        {
+            for (var i = 0; i < SentenceText.Readings.Count; i++)
             {
-                _blocks.Options.Add(_any);
-                _blocks.Options.Add(_every);
+                if (SentenceText.Quantified(SentenceText.Readings[i]) == said)
+                    return SentenceText.Readings[i];
             }
 
-            _any.IsCurrent = !_all;
-            _every.IsCurrent = _all;
+            return Quantifier.Any;
+        }
+
+        /// <summary>Whether the blocks are read by a total of a number on them, a sum or an average, which lists only numbers.</summary>
+        bool Totals => _quantifier == Quantifier.Sum || _quantifier == Quantifier.Average;
+
+        /// <summary>Whether what is chosen to start something is a state Sprocket watches the blocks for, rather than a signal they send.</summary>
+        bool Watched()
+        {
+            if (!_forEvents || _chosen.Length == 0)
+                return false;
+
+            var events = Vocabulary.EventsOf(Editor.World, _selection);
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].Id == _chosen)
+                    return !events[i].Answered && events[i].Value.Length > 0;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether <paramref name="value" /> is a number, which is what a sum can be taken of.</summary>
+        static bool Number(EntityAction value)
+        {
+            return value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
         }
 
         void FillWhat()
@@ -1138,9 +1183,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var texts = Editor.Texts;
             var note = "";
-            if (_forTests && Editor.ShowsTerminal)
+            if (_forTests)
             {
-                note = texts.PickTerminalNote;
+                note = Editor.ShowsTerminal ? texts.PickTerminalNote : "";
+                var totals = _quantifier == Quantifier.Sum ? texts.PickSumNote : _quantifier == Quantifier.Average ? texts.PickAverageNote : "";
+                if (totals.Length > 0)
+                    note = note.Length == 0 ? totals : note + " " + totals;
             }
             else if (!_forEvents && !_forTests)
             {
@@ -1276,15 +1324,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 actions.Sort(ByDeclared);
                 for (var i = 0; i < actions.Count; i++)
                 {
-                    if (actions[i].Sets && actions[i].Unaltered)
+                    if (actions[i].Sets && actions[i].Unaltered && (!Totals || Number(actions[i])))
                         Read(actions[i], Values);
                 }
 
                 return;
             }
 
+            // A sum or an average is taken of numbers alone, so while one is asked for nothing else is listed.
+            var sums = Totals;
             var events = Vocabulary.EventsOf(Editor.World, _selection);
-            for (var i = 0; i < actions.Count; i++)
+            for (var i = 0; i < actions.Count && !sums; i++)
             {
                 if (actions[i].IsStatus)
                     States(actions[i], events);
@@ -1295,7 +1345,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 for (var i = 0; i < actions.Count; i++)
                 {
                     var one = actions[i];
-                    if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && (int)one.Category == group)
+                    if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && (int)one.Category == group
+                        && (!sums || Number(one)))
                         Read(one, group);
                 }
             }
@@ -1420,7 +1471,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_fits != null)
                 return;
 
-            if (_said != null && _saidChosen == _chosen && _saidOffered == _ids.Count && _saidAll == _all
+            if (_said != null && _saidChosen == _chosen && _saidOffered == _ids.Count && _saidQuantifier == _quantifier
                 && Same(_saidBlocks, _selection))
             {
                 return;
@@ -1428,7 +1479,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _saidChosen = _chosen;
             _saidOffered = _ids.Count;
-            _saidAll = _all;
+            _saidQuantifier = _quantifier;
             _saidBlocks.Clear();
             _saidBlocks.AddRange(_selection);
 
@@ -1437,12 +1488,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             // A step acts on every block it names, so its blocks are always joined with "and". Only what starts something can
             // be any one of them, and then only where it was asked.
-            var blocks = SentenceText.Entities(Editor.World, _selection, !_forEvents && !_forTests || _all);
+            var blocks = SentenceText.Entities(Editor.World, _selection, !_forEvents && !_forTests || _quantifier != Quantifier.Any);
 
             _said = _selection.Count == 0 && chosen.Length == 0
                 ? _title
                 : _forTests
-                    ? SentenceText.Testing(blocks, chosen, IsState(_chosen))
+                    ? SentenceText.Testing(blocks, chosen, IsState(_chosen), _selection.Count > 1 ? SentenceText.Quantified(_quantifier) : "")
                     : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
 
             _retitled = true;
@@ -1699,9 +1750,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Editor.Invalidate();
         }
 
-        void SetAll(bool all)
+        /// <summary>Reads the blocks as <paramref name="quantifier" /> says, letting go of what is chosen where a sum or average cannot be taken of it.</summary>
+        void Quantify(Quantifier quantifier)
         {
-            _all = all;
+            _quantifier = quantifier;
+
+            string value, state;
+            if (Totals && _chosen.Length > 0
+                && (Comparing.Split(_chosen, out value, out state) || !Number(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen))))
+            {
+                _chosen = "";
+            }
+
             Editor.Invalidate();
         }
 

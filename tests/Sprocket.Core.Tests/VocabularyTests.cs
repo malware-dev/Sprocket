@@ -103,6 +103,9 @@ public class VocabularyTests
             + "        else if all Radius on [ light ] <= 2 then {\n"
             + "            call ext.open on [ door1 ]\n"
             + "        }\n"
+            + "        else if average Radius on [ light ] > 3 then {\n"
+            + "            call ext.close on [ door1 ]\n"
+            + "        }\n"
             + "    }\n"
             + "}\n";
 
@@ -211,6 +214,50 @@ public class VocabularyTests
         ship.Tick(5);
 
         Assert.Equal(holds ? 1 : 0, ship.Fired);
+    }
+
+    /// <summary><c>average</c> compares the readings added and divided by how many blocks were read.</summary>
+    [Theory]
+    [InlineData(Relation.Is, 3.5, true)]
+    [InlineData(Relation.Above, 3.5, false)]
+    [InlineData(Relation.Below, 4.0, true)]
+    public void AverageComparesTheMean(Relation relation, double than, bool holds)
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(3.0));
+        ship.Right.Set("Radius", Literal.Of(4.0));
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var test = new Comparison { MemberId = "Radius", Quantifier = Quantifier.Average, Relation = relation, Value = Literal.Of(than) };
+        test.Targets.Add(ship.Name(ship.Left));
+        test.Targets.Add(ship.Name(ship.Right));
+        var off = Given.Power(false);
+        off.Targets.Add(ship.Name(ship.Door));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(off);
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        ship.Runner.Call(cycle);
+        ship.Tick(5);
+
+        Assert.Equal(holds ? 1 : 0, ship.Fired);
+    }
+
+    /// <summary><c>when average</c> fires once, as the average comes to hold.</summary>
+    [Fact]
+    public void AWhenAverageFiresAsTheMeanComesToHold()
+    {
+        var ship = new Ship();
+        ship.Left.Set("Radius", Literal.Of(2.0));
+        ship.Right.Set("Radius", Literal.Of(2.0));
+        ship.When("", "Radius", Quantifier.Average, Relation.AtLeast, Literal.Of(3.0), ship.Left, ship.Right);
+        ship.Start();
+        ship.Tick(30);
+        Assert.Equal(0, ship.Fired);
+
+        ship.Left.Set("Radius", Literal.Of(4.0));
+        ship.Tick(30);
+        Assert.Equal(1, ship.Fired);
     }
 
     /// <summary>A <c>when</c> on one of the block's own values fires as its comparison comes to hold, and once.</summary>

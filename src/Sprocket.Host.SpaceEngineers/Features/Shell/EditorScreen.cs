@@ -282,8 +282,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The words for the question's named slots, or null where it has none and is read as it is.</summary>
         public Arguments QuestionArguments => _questionArguments;
 
-        /// <summary>Whether a question is waiting.</summary>
-        public bool HasQuestion => !string.IsNullOrEmpty(_question);
+        /// <summary>Whether a question is waiting: words asking it, or answers to choose from with no words over them, as a menu hanging under a part is.</summary>
+        public bool HasQuestion => !string.IsNullOrEmpty(_question) || _answers.Count > 0;
 
         /// <summary>Whether the question belongs to whatever was pressed, rather than to the screen.</summary>
         /// <remarks>

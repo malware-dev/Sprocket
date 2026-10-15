@@ -200,11 +200,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Showing blocks of one kind.</summary>
         OneKind,
 
-        /// <summary>Having any one of the chosen blocks start a trigger.</summary>
-        RequireAny,
-
-        /// <summary>Having a trigger wait for all of the chosen blocks.</summary>
-        RequireAll,
+        /// <summary>Choosing how a check or a trigger reads its blocks: any, all, their sum or their average.</summary>
+        ReadBlocks,
 
         /// <summary>Having a trigger run its sequence.</summary>
         TriggerRuns,

@@ -272,7 +272,7 @@ when sum Gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then run 6
 every 600t stop 3
 ```
 
-`when <any|all|sum> <member> on [ <names> ] <comparison> <value> [every <duration>] then <step>` starts
+`when <any|all|sum|average> <member> on [ <names> ] <comparison> <value> [every <duration>] then <step>` starts
 the step when the comparison comes to hold on the blocks named:
 `when all Gearbox.status on [ inner, outer ] == closed then call Gearbox.open on [ hangar ]` opens the
 hangar once both doors are shut. `<member>` is a value or a function, and `<comparison>`, `<value>` and `sum` follow the rules
@@ -284,7 +284,7 @@ enough, and each block it comes to hold on fires on its own, so two doors shutti
 is two firings. With `all`, it must hold on every block, and the `when` fires once, the instant it
 comes to hold on the last of them, and not again until it stops holding on one of them. With `sum`,
 the member is read on every block and the readings are added; the `when` fires once, the instant the
-comparison comes to hold on the total, and not again until it stops holding.
+comparison comes to hold on the total, and not again until it stops holding. With `average`, the same, on the readings' average.
 
 `every` is how often a `when` is tested, and `10t` where it is left out. A host that is told when a
 member changes may test it then, and set the `every` aside.
@@ -316,7 +316,7 @@ run <sequence>
 stop <sequence>
 await
 wait <duration>
-if <any|all|sum> <member> on [ <names> ] <comparison> <value> then {
+if <any|all|sum|average> <member> on [ <names> ] <comparison> <value> then {
     <steps>
 }
 ```
@@ -401,7 +401,7 @@ wait 60t
 call Run("doors open") on [ pb ]
 ```
 
-#### `if <any|all|sum> <member> on [ <names> ] <comparison> <value> then`
+#### `if <any|all|sum|average> <member> on [ <names> ] <comparison> <value> then`
 
 ```
 sequence 1 as Cycle {
@@ -427,7 +427,7 @@ sequence 1 as Cycle {
 }
 ```
 
-`if <any|all|sum> <member> on [ <names> ] <comparison> <value> then` tests the member on the blocks
+`if <any|all|sum|average> <member> on [ <names> ] <comparison> <value> then` tests the member on the blocks
 once, when the step is reached, and runs the statements between its braces where the test holds.
 `<member>` is a value or a function, and `<value>` is written as the kind it gives back.
 
@@ -436,7 +436,7 @@ compare integers and reals, and are an error on any other kind.
 
 With `any`, the test holding on one block is enough; with `all`, it must hold on every block. With
 `sum`, the member is read on every block, the readings are added, and the total is compared once.
-`sum` adds integers and reals, and is an error on anything else.
+`sum` adds integers and reals, and is an error on anything else. With `average`, the readings are added and divided by how many blocks were read, and the result is compared once. `average` takes integers and reals, and is an error on anything else.
 
 ```
 if sum Gearbox.amount("Ingot/Iron") on [ cargo ] >= 1000 then {

@@ -134,6 +134,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (_holds == Given.NewValue)
                 return texts.SequenceNewValueAbout;
 
+            if (_holds == Given.Compared)
+                return texts.SequenceComparedAbout;
+
+            if (_holds == Given.Read)
+                return texts.SequenceReadAbout;
+
             return _holds == Given.Checked ? texts.SequenceCheckedAbout : texts.SequenceOptionsAbout;
         }
     }

@@ -109,10 +109,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             var same = relation == Relation.Is || relation == Relation.IsNot;
             var number = kind == ValueKind.Integer || kind == ValueKind.Real;
-            if ((!same || quantifier == Quantifier.Sum) && !number)
+            var totals = quantifier == Quantifier.Sum || quantifier == Quantifier.Average;
+            if ((!same || totals) && !number)
                 return null;
 
-            if (quantifier == Quantifier.Sum)
+            if (totals)
                 operand = value;
 
             return new Probe(entity, gauge, relation, operand, null, being == null ? null : written, kept, clock);

@@ -131,6 +131,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         Whenever,
 
         /// <summary>The stored blueprint a logic system was made from, and the version of it.</summary>
-        From
+        From,
+
+        /// <summary>A test on the average of a number read on every one of the blocks named.</summary>
+        Average
     }
 }

@@ -5,7 +5,7 @@ A trigger is a line in a ![](mark:logic-system)&nbsp;[logic system](logic-system
 A trigger can fire on any of these:
 
 - A ![](mark:signal)&nbsp;[signal](signal), like a button being pressed or a door finishing closing.
-- Blocks reaching a state, like a door being closed. With several blocks, `any one` starts it when the first gets there, and `all of them` when the last one does.
+- Blocks reaching a state, like a door being closed. With several blocks, `any` starts it when the first gets there, and `all` when the last one does.
 - A set time passing, over and over, like every minute. Add one of these with `every`.
 
 ## Each installation on its own

@@ -328,7 +328,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             _possible = false;
             var when = _trigger as WhenTrigger;
-            if (when != null && when.Quantifier == Quantifier.Sum)
+            if (when != null && (when.Quantifier == Quantifier.Sum || when.Quantifier == Quantifier.Average))
                 return SampleSum(when) ? 1 : 0;
 
             if (when != null)
@@ -475,6 +475,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 Mark(probe, _reads[i].Ruling);
                 total += probe.Number();
             }
+
+            // Every block is read where any of this is readable, so the average is over all of them.
+            if (when.Quantifier == Quantifier.Average && _entities.Length > 0)
+                total /= _entities.Length;
 
             var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, when.Value);
             Live = holds;

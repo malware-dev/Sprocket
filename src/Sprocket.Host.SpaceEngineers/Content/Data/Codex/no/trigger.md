@@ -5,7 +5,7 @@ En utløser er en linje i et ![](mark:logic-system)&nbsp;[logikksystem](logic-sy
 En utløser kan utløses av hvilken som helst av disse:
 
 - Et ![](mark:signal)&nbsp;[signal](signal), som at en knapp trykkes eller en dør blir ferdig med å lukke seg.
-- Blokker som når en tilstand, som at en dør er lukket. Med flere blokker starter `hvilken som helst` den når den første er framme, og `alle sammen` når den siste er det.
+- Blokker som når en tilstand, som at en dør er lukket. Med flere blokker starter `any` den når den første er framme, og `all` når den siste er det.
 - At en fastsatt tid går, om og om igjen, som hvert minutt. Legg til en slik med `hver`.
 
 ## Hver installasjon for seg

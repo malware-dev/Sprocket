@@ -31,7 +31,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     public sealed partial class SequencePage : EditorPage
     {
         const int JustRanTicks = 10;
-
         // How long the ring around what is tied to what is under the pointer takes to brighten and fade again: a second.
         const int PulseTicks = 60;
 
@@ -840,18 +839,85 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var seen = Editor.Seen(_sequence.System, test.Targets);
             var bindings = Editor.Runner.Bindings;
             var value = test.Names(Vocabulary.ActionsFor(bindings, seen));
-            row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
+
+            // How several blocks are read is said first, and chosen from a menu under it as the comparison is; one block is read
+            // the same way whichever it is.
+            if (blocks.Count > 1)
+            {
+                var said = SentenceText.Quantified(test.Quantifier);
+                var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
+                row.Slots.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
+                    Changes(Cmd.StepSlot, delegate { Quantify(step, test, numeric); }), Given.Read));
+            }
+
+            // A value on some blocks, as a set step and the script say it; a status is the blocks themselves.
             if (value == null || !value.IsStatus)
                 row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
+
+            row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
 
             if (value == null)
                 return;
 
+            // The comparison is a part of its own, chosen from a menu hanging under it, and the value another, chosen with the
+            // picker as every other part is.
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
-            row.Slots.Add(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields,
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked,
-                test.Quantifier == Quantifier.All && blocks.Count > 1));
+            var plural = test.Quantifier == Quantifier.All && blocks.Count > 1;
+            row.Slots.Add(new ArgumentsSlot(new[] { Comparing.Of(test.Relation) }, fields.GetRange(0, 1),
+                Changes(Cmd.StepSlot, delegate { Relate(step, test, fields[0], plural); }), Given.Compared, plural));
+            row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields.GetRange(1, fields.Count - 1),
+                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked));
+        }
+
+        /// <summary>Offers the comparisons <paramref name="relation" /> takes in a menu under the part pressed, the one <paramref name="test" /> makes marked, and changes the test to the one chosen as one edit.</summary>
+        void Relate(Step step, Comparison test, Field relation, bool plural)
+        {
+            Editor.AskHere("");
+            for (var i = 0; i < relation.Words.Count; i++)
+            {
+                var related = Comparing.Read(Literal.Name(relation.Means[i]));
+                var said = plural ? SentenceText.Plural(relation.Words[i]) : relation.Words[i];
+                Editor.Answer(said, delegate
+                {
+                    if (related == test.Relation)
+                        return;
+
+                    var now = test.Copy();
+                    now.Relation = related;
+                    Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
+                }, related == test.Relation);
+            }
+        }
+
+        /// <summary>
+        /// Offers the ways <paramref name="test" /> can read its blocks in a menu under the part pressed, in the sentence's own
+        /// words, the one it reads them by marked, and changes it to the one chosen as one edit; a sum and an average only of
+        /// what is <paramref name="numeric" />.
+        /// </summary>
+        void Quantify(Step step, Comparison test, bool numeric)
+        {
+            Editor.AskHere("");
+            for (var i = 0; i < SentenceText.Readings.Count; i++)
+            {
+                var reading = SentenceText.Readings[i];
+                if (numeric || reading == Quantifier.Any || reading == Quantifier.All)
+                    Quantifying(step, test, reading);
+            }
+        }
+
+        /// <summary>One answer of <see cref="Quantify" />: reading the blocks by <paramref name="quantifier" />.</summary>
+        void Quantifying(Step step, Comparison test, Quantifier quantifier)
+        {
+            Editor.Answer(SentenceText.Quantified(quantifier), delegate
+            {
+                if (quantifier == test.Quantifier)
+                    return;
+
+                var now = test.Copy();
+                now.Quantifier = quantifier;
+                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
+            }, quantifier == test.Quantifier);
         }
 
         static StepKind Kind(Step step)
@@ -1018,7 +1084,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 {
                     chosen(Test(answer, test));
                 },
-                true, test != null && test.Quantifier == Quantifier.All,
+                true, test == null ? Quantifier.Any : test.Quantifier,
                 test == null ? null : stated ? new[] { Comparing.Of(test.Relation) } : new[] { Comparing.Of(test.Relation), test.Value },
                 opens, forTests: true);
         }
@@ -1032,7 +1098,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Comparison Test(PickAnswer answer, Comparison was)
         {
             var test = new Comparison();
-            test.Quantifier = answer.All ? Quantifier.All : Quantifier.Any;
+            test.Quantifier = answer.Quantifier;
             var named = Editor.Named(_sequence.System, answer.Targets, was == null ? null : was.Targets);
             for (var i = 0; i < named.Count; i++)
                 test.Targets.Add(named[i]);
@@ -1048,9 +1114,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             test.Value = stated ? Stated(state) : given != null && given.Count > 1 ? given[1] : Literal.Of(true);
             if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
                 return test;
-
-            if (was.Quantifier == Quantifier.Sum)
-                test.Quantifier = Quantifier.Sum;
 
             for (var i = 0; i < was.Arguments.Count; i++)
                 test.Arguments.Add(was.Arguments[i]);

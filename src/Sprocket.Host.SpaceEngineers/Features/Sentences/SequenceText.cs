@@ -438,8 +438,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, targets));
             var given = SentenceText.Given(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields, null,
                 Given.Checked, test.Quantifier == Quantifier.All && targets.Count > 1));
-            var read = value.IsStatus ? blocks : blocks + " " + SentenceText.Value(value);
-            return (test.Quantifier == Quantifier.Sum ? "the sum of " + read : read) + " " + given;
+            var read = value.IsStatus ? blocks : SentenceText.Value(value) + " on " + blocks;
+            return (targets.Count > 1 ? SentenceText.Quantified(test.Quantifier) + " " + read : read) + " " + given;
         }
 
         /// <summary>
@@ -469,7 +469,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var fields = new List<Field>();
             value.Fields(fields);
             var read = SentenceText.Value(value) + " on " + blocks;
-            return (quantifier == Quantifier.Sum ? "the sum of " + read : read) + " " + Compared(relation) + " "
+            return (quantifier == Quantifier.Sum || quantifier == Quantifier.Average ? SentenceText.Quantified(quantifier) + " " + read : read) + " " + Compared(relation) + " "
                    + SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null));
         }
 

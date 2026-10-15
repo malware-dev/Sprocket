@@ -1128,15 +1128,24 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, on all, or on their sum.</summary>
+        /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, on all, or on their sum or average.</summary>
         /// <remarks>Read once, when the run reaches the test; with no block to read, <c>all</c> holds and <c>any</c> does not.</remarks>
         static bool Holds(Tested tested, Comparison test)
         {
-            if (test.Quantifier == Quantifier.Sum)
+            if (test.Quantifier == Quantifier.Sum || test.Quantifier == Quantifier.Average)
             {
                 var total = 0d;
                 for (var i = 0; i < tested.Reads.Count; i++)
                     total += tested.Reads[i].Number();
+
+                // An average of nothing is no number; with no block read, nothing holds.
+                if (test.Quantifier == Quantifier.Average)
+                {
+                    if (tested.Reads.Count == 0)
+                        return false;
+
+                    total /= tested.Reads.Count;
+                }
 
                 return Relations.Holds(Literal.Of(total), test.Relation, test.Value);
             }

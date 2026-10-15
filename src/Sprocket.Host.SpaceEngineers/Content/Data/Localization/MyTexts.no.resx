@@ -331,6 +331,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Sequence.NewValueAbout" xml:space="preserve">
     <value>Endre verdien som skal settes.</value>
   </data>
+  <data name="Sprocket.Sequence.ComparedAbout" xml:space="preserve">
+    <value>Velg hvordan det sammenlignes.</value>
+  </data>
+  <data name="Sprocket.Sequence.ReadAbout" xml:space="preserve">
+    <value>Velg hvordan blokkene leses.</value>
+  </data>
   <data name="Sprocket.Sequence.CheckedAbout" xml:space="preserve">
     <value>Endre verdien det sjekkes etter.</value>
   </data>
@@ -526,11 +532,11 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Pick.SomePicked" xml:space="preserve">
     <value>{count} valgt</value>
   </data>
-  <data name="Sprocket.Pick.AnyOne" xml:space="preserve">
-    <value>hvilken som helst</value>
+  <data name="Sprocket.Pick.AverageNote" xml:space="preserve">
+    <value>Filtrert til tall, for gjennomsnitt.</value>
   </data>
-  <data name="Sprocket.Pick.AllOfThem" xml:space="preserve">
-    <value>alle sammen</value>
+  <data name="Sprocket.Pick.SumNote" xml:space="preserve">
+    <value>Filtrert til tall, for summering.</value>
   </data>
   <data name="Sprocket.Pick.Status" xml:space="preserve">
     <value>Tilstand</value>

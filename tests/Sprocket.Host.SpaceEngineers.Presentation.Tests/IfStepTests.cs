@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -145,6 +146,62 @@ public class IfStepTests
         Assert.Equal(new[] { 0, 1, 1, 0, 1, 1, 0, 0 }, rows.Select(row => row.Depth));
         Assert.Equal(new[] { 1, 2, 0, 3, 4, 0, 0, 5 }, rows.Select(row => row.Number));
         Assert.Equal(6, rows[0].Carries);
+    }
+
+    /// <summary>How an if compares is a part of its own, chosen from a menu under it of the comparisons its value takes, as one edit.</summary>
+    [Fact]
+    public void TheComparisonIsChosenFromAMenuUnderIt()
+    {
+        var rig = Airlock(out var sequence);
+        sequence.Steps.Clear();
+        sequence.Steps.Add(new If(Closed(rig)));
+        sequence.Steps.Add(new EndIf());
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        var relation = rig.Editor.StepRows()[0].Slots.OfType<ArgumentsSlot>().First();
+        Assert.Equal(new[] { "is" }, relation.Filled);
+        relation.Opens!.Execute();
+        rig.Tick();
+        Assert.Equal(new[] { "is", "is not" }, rig.Editor.Screen.Answers.Select(answer => answer.Text).ToArray());
+
+        rig.Editor.PressAnswer("is not");
+        rig.Tick();
+        Assert.Equal(Relation.IsNot, ((If)sequence.Steps[0]).Test.Relation);
+        Assert.Equal("closed", ((If)sequence.Steps[0]).Test.Value.Text);
+
+        rig.Editor.Screen.Undo!.Execute();
+        rig.Tick();
+        Assert.Equal(Relation.Is, ((If)sequence.Steps[0]).Test.Relation);
+    }
+
+    /// <summary>Pressing the comparison hangs its menu under it and keeps it there, though the menu asks nothing in words.</summary>
+    [Fact]
+    public void PressingTheComparisonHangsItsMenu()
+    {
+        var screen = Screen.Holding("sprocket 1 alpha 15\n\n"
+            + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\n"
+            + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+            + "    sequence 1 {\n"
+            + "        if all ext.status on [ door1 ] == closed then {\n"
+            + "        }\n"
+            + "    }\n"
+            + "}\n");
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        system.Enabled = false;
+        editor.Program.Edited();
+        editor.Push(new SequencePage(editor, system.Sequences[0]));
+        screen.Run(5);
+
+        var at = screen.Text("is").At;
+        var point = Screen.Ui(at.X + 4f, at.Y + 8f);
+        screen.Scene.MoveTo(point);
+        screen.Scene.Press(point, 1);
+        screen.Run(1);
+
+        Assert.True(editor.Screen.HasQuestion, "the menu put itself away");
+        Assert.Equal(new[] { "is", "is not" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
     /// <summary>Deleting an if asks first, and can keep the steps in it where they stand.</summary>

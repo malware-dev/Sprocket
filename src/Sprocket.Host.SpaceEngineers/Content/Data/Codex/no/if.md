@@ -4,7 +4,7 @@ Noen ganger trenger du at en ![](mark:sequence)&nbsp;[sekvens](sequence) gjør d
 
 Et hvis, også kalt en "betingelse", er [steget](step) for det. Det sjekker blokker, og kjører stegene under seg bare når betingelsen er oppfylt. Legg til `ellers`, så kjører stegene der når betingelsen ikke er oppfylt, og én sekvens dekker begge veiene gjennom luftslusen.
 
-Tilstandene en blokk kan være i, kommer først i listen, som at en dør er åpen eller virker, og leses som blokken selv: *hvis Luftsluse dør er åpen*. Alle andre verdier nevnes i sjekken, *hvis Luftsluse dør power er på*, med hvordan den sammenlignes valgt ved siden av.
+Tilstandene en blokk kan være i, kommer først i listen, som at en dør er åpen eller virker, og leses som blokken selv: *hvis Luftsluse dør er åpen*. Alle andre verdier nevnes foran blokkene sine, *hvis power på Luftsluse dør er på*. Hvordan den sammenlignes, her `is`, er en egen del: trykk på den for å velge en annen, som `is not`, eller `is below` for et tall.
 
 ## Mer enn to veier
 
@@ -18,7 +18,14 @@ Hvis-steget prøver grenene fra toppen, og kjører den første der betingelsen e
 
 ## Flere blokker
 
-Når du trenger å vite noe om mer enn én blokk, som alle dørene på en hangar, velger du dem alle. Så velger du: `hvilken som helst` av dem er nok til at betingelsen er oppfylt, eller det kreves `alle sammen`.
+Når du trenger å vite noe om mer enn én blokk, som alle dørene på en hangar, velger du dem alle. Et ord foran verdien sier da hvordan de leses. Trykk på det, eller bruk nedtrekkslisten i blokkolonnen i [verdivelgeren](selector), for å velge:
+
+- `any`: én av dem er nok til at betingelsen er oppfylt.
+- `all`: det kreves hver eneste en.
+- `the sum of`: verdien lagt sammen over blokkene, *hvis the sum of uranium på Reaktor 1 og Reaktor 2 er under 10*.
+- `the average of`: den summen delt på hvor mange blokker som ble lest.
+
+Summen og gjennomsnittet virker på tall, så velger du en av dem, står bare tall igjen i listen over hva som kan sjekkes. Ordet vises bare med mer enn én blokk, der de fire skiller seg.
 
 ## Sjekke én gang, ikke vente
 

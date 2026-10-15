@@ -34,6 +34,23 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What the member is compared with.</summary>
         public Literal Value { get; set; }
 
+        /// <summary>The same test, to change one thing of as an edit.</summary>
+        public Comparison Copy()
+        {
+            var copy = new Comparison
+            {
+                MemberId = MemberId,
+                Provider = Provider,
+                Quantifier = Quantifier,
+                Relation = Relation,
+                Value = Value
+            };
+
+            copy._targets.AddRange(_targets);
+            copy._arguments.AddRange(_arguments);
+            return copy;
+        }
+
         /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>ext</c>, the block's own where it is bare; null where it names none.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {

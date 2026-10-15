@@ -643,8 +643,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.NarrowKinds:
                 case Cmd.AnyKind:
                 case Cmd.OneKind:
-                case Cmd.RequireAny:
-                case Cmd.RequireAll:
+                case Cmd.ReadBlocks:
                 case Cmd.TriggerRuns:
                 case Cmd.TriggerStops:
                 case Cmd.TriggerDoes:
@@ -2082,7 +2081,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, SignalTrigger keeping, IList<string> replacing)
         {
             MomentTrigger made = Vocabulary.Starter(
-                Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.All);
+                Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.Quantifier == Quantifier.All);
 
             var signal = made as SignalTrigger;
             if (signal == null || signal.IsWatched)
@@ -2701,7 +2700,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Aimed(system, made, aim, origin, false, taken == null ? edit : TakingOver(edit, taken));
                     }, delegate { UnwindTo(origin); });
                 },
-                true, was != null && was.Quantifier == Quantifier.All, opens: action ? Opening.Nothing : opens, aim: aim);
+                true, was == null ? Quantifier.Any : was.Quantifier, opens: action ? Opening.Nothing : opens, aim: aim);
 
             Push(picker);
             if (action)

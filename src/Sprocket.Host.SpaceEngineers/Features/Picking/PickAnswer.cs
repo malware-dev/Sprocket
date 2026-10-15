@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -15,14 +16,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<long> _targets = new List<long>();
         readonly List<Literal> _arguments = new List<Literal>();
 
-        /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, all together or any one as <paramref name="all" /> says, with no arguments.</summary>
-        public PickAnswer(IList<long> targets, string chosen, bool all)
-            : this(targets, chosen, all, null)
+        /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, read from them as <paramref name="quantifier" /> says, with no arguments.</summary>
+        public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier)
+            : this(targets, chosen, quantifier, null)
         {
         }
 
         /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, given <paramref name="arguments" />, reaching the blocks the way <paramref name="form" /> says.</summary>
-        public PickAnswer(IList<long> targets, string chosen, bool all, IList<Literal> arguments,
+        public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier, IList<Literal> arguments,
             Nature form = Nature.Native)
         {
             for (var i = 0; i < targets.Count; i++)
@@ -35,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             Chosen = chosen;
-            All = all;
+            Quantifier = quantifier;
             Form = form;
         }
 
@@ -58,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Which of the three ways what was chosen reaches the blocks.</summary>
         public Nature Form { get; private set; }
 
-        /// <summary>Whether it takes all of them together, rather than any one.</summary>
-        public bool All { get; private set; }
+        /// <summary>How the blocks are read: any one of them, all of them together, or their sum.</summary>
+        public Quantifier Quantifier { get; private set; }
     }
 }
