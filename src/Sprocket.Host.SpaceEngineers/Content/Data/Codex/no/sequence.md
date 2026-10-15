@@ -16,25 +16,25 @@ En installasjon kjører en sekvens bare én gang om gangen, så sekvensen går g
 
 De fleste handlinger er gjort innen ett tikk, som å slå på et lys. Andre tar lengre tid, som at en dør lukker seg eller en ventil tømmer et rom. De som er merket ![](mark:awaited), er **avventbare**: sekvensen venter på at blokken blir ferdig før neste steg, så ventilen starter når den indre døra er lukket. Et steg som [kjører en annen sekvens](run-and-stop), er også avventbart, og venter til den sekvensen er ferdig.
 
-En sekvens kan bare vente på avventbare handlinger, altså de der blokken kan følges til slutten. En handling merket ![](mark:action)&nbsp;startes, og sekvensen går videre selv om blokken fortsetter: en lyd spilles til den er slutt, og en timerblokk teller ned, mens de neste stegene kjører. For å gi en slik blokk tid legger du til en [venting](wait) på en fastsatt tid etter den, eller lar en utløser starte den neste sekvensen når blokken når tilstanden du trenger.
+En sekvens kan bare vente på avventbare handlinger, altså de der blokken kan følges til slutten. En handling merket ![](mark:action)&nbsp;startes, og sekvensen går videre selv om blokken fortsetter: en lyd spilles til den er slutt, og en timerblokk teller ned, mens de neste stegene kjører. For å gi en slik blokk tid legger du til en [forsinkelse](delay) på en fastsatt tid etter den, eller lar en utløser starte den neste sekvensen når blokken når tilstanden du trenger.
 
 ## Kjøre steg sammen
 
-Et avventbart steg kan la sekvensen gå rett videre, så stegene etter det kjører mens det fortsatt pågår, som når begge dørene i luftslusen lukkes samtidig. En venting lenger ned fanger da hvert avventbare steg siden ventingen før den. Går sekvensen rett videre fra det siste avventbare steget, er kjøringen over der, og blokkene gjør seg ferdige av seg selv.
+Et avventbart steg kan la sekvensen gå rett videre, så stegene etter det kjører mens det fortsatt pågår, som når begge dørene i luftslusen lukkes samtidig. Et `wait for pending tasks` lenger ned fanger da hvert avventbare steg siden det forrige. Går sekvensen rett videre fra det siste avventbare steget, er kjøringen over der, og blokkene gjør seg ferdige av seg selv.
 
 ::: player
-To måter å vise en venting på prøves ut, og verdenen din bruker én av dem. Begge beholdes her til én er valgt.
+To måter å vente på ventende oppgaver prøves ut, og verdenen din bruker én av dem. Begge beholdes her til én er valgt.
 :::
 
-### En venting under hvert steg
+### En ventelinje under hvert steg
 
-Under hvert avventbare steg henger en `Vent til det er ferdig`-linje, som venter på det steget og hvert avventbare steg før det siden forrige venting. Bytt den til `Ikke vent`, så går sekvensen rett videre.
+Under hvert avventbare steg henger en `Vent til det er ferdig`-linje, som venter på det steget og hvert avventbare steg før det siden forrige `wait for pending tasks`. Bytt den til `Ikke vent`, så går sekvensen rett videre.
 
-### En venting som eget steg
+### Venting som eget steg
 
-Å legge til et avventbart steg legger også til et `await all pending tasks`-steg etter det. Flytt avventingen lenger ned, så kjører stegene imellom mens blokken fortsatt holder på; slett den, så går sekvensen rett videre.
+Å legge til et avventbart steg legger også til et `wait for pending tasks`-steg etter det. Flytt det lenger ned, så kjører stegene imellom mens blokken fortsatt holder på; slett den, så går sekvensen rett videre.
 
-Hold pekeren over en venting for å se hvilke steg den venter på, eller over et avventbart steg for å se hvilken venting som fanger det.
+Hold pekeren over et `wait for pending tasks` for å se hvilke steg det venter på, eller over et avventbart steg for å se hvilket som fanger det.
 
 ## Når en kjøring går galt
 

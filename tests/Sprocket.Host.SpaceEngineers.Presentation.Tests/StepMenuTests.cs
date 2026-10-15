@@ -21,7 +21,7 @@ public class StepMenuTests
 
         screen.Do("press", "step");
 
-        foreach (var kind in new[] { "task", "wait", "run", "stop", "if" })
+        foreach (var kind in new[] { "task", "delay", "run", "stop", "if" })
             Assert.True(screen.Shows(kind), "the menu does not offer " + kind);
     }
 
@@ -29,7 +29,7 @@ public class StepMenuTests
     [Fact]
     public void ChoosingAKindAddsIt()
     {
-        var screen = Screen.Fresh((Kinds + " press step press wait").Split(' '));
+        var screen = Screen.Fresh((Kinds + " press step press delay").Split(' '));
         screen.Run(1);
 
         Assert.False(screen.Shows("task"), "the menu was left open");
@@ -75,7 +75,7 @@ public class StepMenuTests
         var rows = screen.Editor.StepRows();
         Assert.Single(rows, row => row.Kind == StepKind.Adds);
 
-        screen.Do("press", "step", "press", "wait");
+        screen.Do("press", "step", "press", "delay");
         screen.Run(1);
 
         var steps = screen.Editor.Program.Systems[0].Sequences[0].Steps;

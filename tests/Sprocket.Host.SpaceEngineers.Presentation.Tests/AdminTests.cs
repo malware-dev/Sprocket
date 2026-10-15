@@ -55,8 +55,8 @@ public class AdminTests
     {
         var screen = Opened(new Settings(new Layer(null, null, Waiting.Step), Layer.Empty));
 
-        Assert.True(screen.Shows("Wait as its own step"));
-        screen.Do("press", "Wait as its own step").Run(1);
+        Assert.True(screen.Shows("As its own step"));
+        screen.Do("press", "As its own step").Run(1);
         Assert.False(screen.Shows("Default (wait as its own step)"));
         Assert.False(screen.Shows("Default (switch on each step)"));
 
@@ -80,7 +80,7 @@ public class AdminTests
         Assert.True(screen.Scene.Ship.Settings.World.DeveloperMode);
         Assert.True(screen.Editor.DeveloperMode);
 
-        Choose(screen, "Switch on each step", "Wait as its own step");
+        Choose(screen, "Switch on each step", "As its own step");
         Assert.Equal(Waiting.Step, screen.Scene.Ship.Settings.Waiting);
         Assert.Equal(100, screen.Scene.Ship.Settings.FastestUpdate);
     }

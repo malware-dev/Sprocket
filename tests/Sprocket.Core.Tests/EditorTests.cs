@@ -1603,7 +1603,7 @@ public class EditorTests
 
         StartOnTheButton(editor);
 
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("2");
 
         editor.PressAdd("task");
@@ -1892,7 +1892,7 @@ public class EditorTests
         var editor = ship.Editor;
         StartOnTheButton(editor);
 
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         Assert.NotNull(editor.Lengths());
 
         editor.GiveLength("5");
@@ -2008,7 +2008,7 @@ public class EditorTests
         ship.Tick();
         editor.PressStart("sequence");
         ship.Tick();
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("2");
         ship.Tick();
 

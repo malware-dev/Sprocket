@@ -44,7 +44,7 @@ public class WaitTests
         var system = screen.Editor.Program.Systems[0];
         var before = screen.Editor.UndoLabel(system, screen.Editor.Program.Sequences[0]);
 
-        screen.Editor.PressAdd("wait");
+        screen.Editor.PressAdd("delay");
         screen.Run(3);
         screen.Editor.Input.Key(MyKeys.Escape, false, false);
         screen.Run(2);
@@ -179,7 +179,7 @@ public class WaitTests
         Panel(screen).Box.Submit!.Execute();
         screen.Run(2);
 
-        screen.Editor.PressAdd("wait");
+        screen.Editor.PressAdd("delay");
         screen.Run(3);
 
         var panel = Panel(screen);
@@ -197,7 +197,7 @@ public class WaitTests
         var screen = Added();
         Panel(screen).Box.Submit!.Execute();
         screen.Run(2);
-        screen.Editor.PressAdd("wait");
+        screen.Editor.PressAdd("delay");
         screen.Run(3);
         Panel(screen).Give("90", true);
         Panel(screen).Box.Submit!.Execute();
@@ -226,7 +226,7 @@ public class WaitTests
         screen.Run(2);
         screen.Editor.PressRow(0);
         screen.Run(2);
-        screen.Editor.PressAdd("wait");
+        screen.Editor.PressAdd("delay");
         screen.Run(3);
 
         Assert.False(Panel(screen).InSeconds);
@@ -275,7 +275,7 @@ public class WaitTests
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
         screen.Run(2);
-        screen.Editor.PressAdd("wait");
+        screen.Editor.PressAdd("delay");
         return screen.Run(3);
     }
 

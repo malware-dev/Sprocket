@@ -9,7 +9,7 @@ rich-text
 > sequence
 step
 action
-wait
+delay
 if
 run-and-stop
 tick

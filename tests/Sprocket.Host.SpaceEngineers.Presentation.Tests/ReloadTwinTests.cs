@@ -213,7 +213,7 @@ public class ReloadTwinTests
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
         Task(editor, "Airlock Vent", "depressurize");
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("1");
         Task(editor, "Airlock Vent", "pressurize");
         editor.SwitchOn();
@@ -233,7 +233,7 @@ public class ReloadTwinTests
         editor.TimerRate().Give("2", false);
         editor.PressPrimary();
         Light(editor, "on");
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("0.5");
         Light(editor, "off");
         editor.SwitchOn();
@@ -263,7 +263,7 @@ public class ReloadTwinTests
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
         Task(editor, "Airlock Inner Door", "close");
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("2");
         Task(editor, "Airlock Outer Door", "open");
         editor.Back();
@@ -300,10 +300,10 @@ public class ReloadTwinTests
         var editor = screen.Editor;
         editor.NewButtonSystem("Airlock");
         Task(editor, "Airlock Inner Door", "close");
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("2");
         Task(editor, "Airlock Outer Door", "open");
-        editor.PressAdd("wait");
+        editor.PressAdd("delay");
         editor.GiveLength("1.5");
         Task(editor, "Airlock Outer Door", "close");
         editor.SwitchOn();

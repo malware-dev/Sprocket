@@ -296,7 +296,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Legg til et steg her.</value>
   </data>
   <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
-    <value>Vent en fastsatt tid før neste steg.</value>
+    <value>Utsett neste steg en fastsatt tid.</value>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
     <value>Kan bare leses mens {holder} redigerer den.</value>
@@ -332,7 +332,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Endre verdien det sjekkes etter.</value>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
-    <value>Endre hvor lenge den skal vente.</value>
+    <value>Endre hvor lang forsinkelsen er.</value>
   </data>
   <data name="Sprocket.Sequence.DragStep" xml:space="preserve">
     <value>Dra for å flytte dette steget.</value>
@@ -1282,7 +1282,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>endring av en plass til påkrevd</value>
   </data>
   <data name="Sprocket.Change.Wait" xml:space="preserve">
-    <value>endring av en venting</value>
+    <value>endring av en forsinkelse</value>
   </data>
   <data name="Sprocket.Change.PauseStep" xml:space="preserve">
     <value>avslåing av et steg</value>
@@ -1297,7 +1297,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>tillegg av et steg</value>
   </data>
   <data name="Sprocket.Change.AddWait" xml:space="preserve">
-    <value>tillegg av en venting</value>
+    <value>tillegg av en forsinkelse</value>
   </data>
   <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
     <value>beskrivelse av en plass</value>
@@ -1965,7 +1965,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>Raskeste oppdatering</value>
   </data>
   <data name="Sprocket.Admin.FastestAbout" xml:space="preserve">
-    <value>Hvor ofte tidtakere og blokksjekker kan gjentas. Knappetrykk, andre hendelser i spillet og tidsbestemte ventinger påvirkes ikke.</value>
+    <value>Hvor ofte tidtakere og blokksjekker kan gjentas. Knappetrykk, andre hendelser i spillet og forsinkelser påvirkes ikke.</value>
   </data>
   <data name="Sprocket.Admin.EveryTick" xml:space="preserve">
     <value>Hvert tikk (mest nøyaktig)</value>
@@ -1989,16 +1989,16 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>Design som fortsatt sammenlignes. En utprøving fjernes når designet er valgt.</value>
   </data>
   <data name="Sprocket.Admin.Waits" xml:space="preserve">
-    <value>Venting i sekvenser</value>
+    <value>Venting på ventende oppgaver</value>
   </data>
   <data name="Sprocket.Admin.WaitsAbout" xml:space="preserve">
-    <value>Endrer bare hvordan ventinger vises og redigeres. Sekvensene kjører likt uansett.</value>
+    <value>Endrer bare hvordan venting på ventende oppgaver vises og redigeres. Sekvensene kjører likt uansett.</value>
   </data>
   <data name="Sprocket.Admin.WaitsSwitch" xml:space="preserve">
     <value>Bryter på hvert steg</value>
   </data>
   <data name="Sprocket.Admin.WaitsStep" xml:space="preserve">
-    <value>Venting som eget steg</value>
+    <value>Som eget steg</value>
   </data>
   <data name="Sprocket.Admin.Close" xml:space="preserve">
     <value>Lukk</value>
@@ -2064,7 +2064,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>Ikke vent</value>
   </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
-    <value>Denne avventingen har ingenting å vente på, fordi ingen steg over den tar tid.</value>
+    <value>Her er det ingen ventende oppgaver å vente på, fordi ingen steg over tar tid.</value>
   </data>
   <data name="Sprocket.Admin.Spine" xml:space="preserve">
     <value>Koble uthevede linjer</value>

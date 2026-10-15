@@ -16,25 +16,25 @@ Stopping a run ends it at the step it has reached, but a block that is already m
 
 Most actions are done within a tick, like switching a light on. Others run longer, like a door closing or a vent emptying a room. Those marked ![](mark:awaited)&nbsp;are **awaitable**: the sequence waits for the block to finish before the next step, so the vent starts once the inner door is shut. A step that [runs another sequence](run-and-stop) is awaitable too, and waits until that sequence has finished.
 
-A sequence can wait only for awaitable actions, which are the ones whose end the block can be watched for. An action marked ![](mark:action)&nbsp;is started, and the sequence moves on even where the block keeps going: a sound plays to its end, and a timer block counts down, while the next steps run. To give a block like that time, add a [wait](wait) of a set time after it, or have a trigger start the next sequence when the block reaches the state you need.
+A sequence can wait only for awaitable actions, which are the ones whose end the block can be watched for. An action marked ![](mark:action)&nbsp;is started, and the sequence moves on even where the block keeps going: a sound plays to its end, and a timer block counts down, while the next steps run. To give a block like that time, add a [delay](delay) of a set time after it, or have a trigger start the next sequence when the block reaches the state you need.
 
 ## Running steps together
 
-An awaitable step can let the sequence go straight on, so the steps after it run while it's still going, like closing both airlock doors together. A wait further down then catches every awaitable step since the wait before it. If the sequence goes straight on from its last awaitable step, the run ends there, and the blocks finish on their own.
+An awaitable step can let the sequence go straight on, so the steps after it run while it's still going, like closing both airlock doors together. A wait for pending tasks further down then catches every awaitable step since the one before it. If the sequence goes straight on from its last awaitable step, the run ends there, and the blocks finish on their own.
 
 ::: player
-Two ways of showing a wait are being tried, and your world uses one of them. Both are kept here until one is chosen.
+Two ways of waiting for pending tasks are being tried, and your world uses one of them. Both are kept here until one is chosen.
 :::
 
-### A wait under each step
+### A waiting line under each step
 
-Under each awaitable step hangs a `Wait for completion` line, which waits for that step and every awaitable step before it since the last wait. Switch it to `Do not wait`, and the sequence goes straight on.
+Under each awaitable step hangs a `Wait for completion` line, which waits for that step and every awaitable step before it since the last wait for pending tasks. Switch it to `Do not wait`, and the sequence goes straight on.
 
-### A wait as a step of its own
+### Waiting as a step of its own
 
-Adding an awaitable step also adds an `await all pending tasks` step after it. Move the await further down, and the steps in between run while the block is still going; delete it, and the sequence goes straight on.
+Adding an awaitable step also adds a `wait for pending tasks` step after it. Move it further down, and the steps in between run while the block is still going; delete it, and the sequence goes straight on.
 
-Rest the pointer on a wait to see which steps it waits for, or on an awaitable step to see which wait catches it.
+Rest the pointer on a wait for pending tasks to see which steps it waits for, or on an awaitable step to see which wait for pending tasks catches it.
 
 ## When a run goes wrong
 

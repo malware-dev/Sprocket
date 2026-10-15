@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public const string EveryWord = "every";
 
         /// <summary>The word a wait for a length of time is said with, on its step and where it is offered.</summary>
-        public const string WaitWord = "wait";
+        public const string WaitWord = "delay";
 
         /// <summary>The word running a sequence is said with, on its step, on a trigger and where either is offered.</summary>
         public const string RunWord = "run";
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public const string OtherwiseWord = "otherwise";
 
         /// <summary>What a wait for everything started above it reads as, on a row of its own and where it is offered.</summary>
-        public const string AwaitWords = "await all pending tasks";
+        public const string AwaitWords = "wait for pending tasks";
 
         const string OnWord = "on";
         const string ToWord = "to";
@@ -148,7 +148,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>
-        /// What comes before a step's slots: "wait", "run", "stop", "set", "if", "otherwise if", "otherwise", the words of a wait for
+        /// What comes before a step's slots: "delay", "run", "stop", "set", "if", "otherwise if", "otherwise", the words of a wait for
         /// what is running, or nothing at all.
         /// </summary>
         /// <remarks>

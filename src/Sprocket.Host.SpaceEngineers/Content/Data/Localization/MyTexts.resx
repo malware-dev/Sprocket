@@ -388,7 +388,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Tooltip on the plus button on a sequence's screen, at the end of the sequence or of a branch of an if, that opens the menu of steps to add.</comment>
   </data>
   <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
-    <value>Wait a set time before the next step.</value>
+    <value>Delay the next step by a set time.</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a wait of a set time.</comment>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
@@ -436,7 +436,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Tooltip on the value an if checks blocks for, in the if's sentence on a sequence's screen; pressing it opens the picker on that value.</comment>
   </data>
   <data name="Sprocket.Sequence.LengthAbout" xml:space="preserve">
-    <value>Change how long it should wait.</value>
+    <value>Change how long the delay is.</value>
     <comment>Tooltip on a wait step's length in its sentence on a sequence's screen; pressing it opens the panel where the length is given.</comment>
   </data>
   <data name="Sprocket.Sequence.DragStep" xml:space="preserve">
@@ -1687,7 +1687,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is making a slot required on its slot's screen, so every installation has to fill it.</comment>
   </data>
   <data name="Sprocket.Change.Wait" xml:space="preserve">
-    <value>changing a wait</value>
+    <value>changing a delay</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to how long a wait step on a sequence's screen waits.</comment>
   </data>
   <data name="Sprocket.Change.PauseStep" xml:space="preserve">
@@ -1707,7 +1707,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a step to a sequence.</comment>
   </data>
   <data name="Sprocket.Change.AddWait" xml:space="preserve">
-    <value>adding a wait</value>
+    <value>adding a delay</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a wait step to a sequence.</comment>
   </data>
   <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
@@ -2597,7 +2597,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>In the admin settings, the name of the setting that caps how often timers and block checks repeat, on both tabs.</comment>
   </data>
   <data name="Sprocket.Admin.FastestAbout" xml:space="preserve">
-    <value>How often timers and block checks may repeat. Button presses, other game events and timed waits are not affected.</value>
+    <value>How often timers and block checks may repeat. Button presses, other game events and delays are not affected.</value>
     <comment>In the admin settings, the line under the name of the setting that caps how often timers and block checks repeat.</comment>
   </data>
   <data name="Sprocket.Admin.EveryTick" xml:space="preserve">
@@ -2629,11 +2629,11 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>In the admin settings, the line under the heading over the trials.</comment>
   </data>
   <data name="Sprocket.Admin.Waits" xml:space="preserve">
-    <value>Waits in sequences</value>
+    <value>Waiting for pending tasks</value>
     <comment>In the admin settings, the name of the trial of how waits in sequences are shown and edited.</comment>
   </data>
   <data name="Sprocket.Admin.WaitsAbout" xml:space="preserve">
-    <value>Changes only how waits are shown and edited. Sequences run the same either way.</value>
+    <value>Changes only how waiting for pending tasks is shown and edited. Sequences run the same either way.</value>
     <comment>In the admin settings, the line under the name of the trial of how waits in sequences are shown and edited.</comment>
   </data>
   <data name="Sprocket.Admin.WaitsSwitch" xml:space="preserve">
@@ -2641,7 +2641,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>In the admin settings, a choice in the list of the trial of how waits in sequences are shown: each step has a switch for whether the sequence waits for it.</comment>
   </data>
   <data name="Sprocket.Admin.WaitsStep" xml:space="preserve">
-    <value>Wait as its own step</value>
+    <value>As its own step</value>
     <comment>In the admin settings, a choice in the list of the trial of how waits in sequences are shown: a wait is a step of its own.</comment>
   </data>
   <data name="Sprocket.Admin.Close" xml:space="preserve">
@@ -2709,7 +2709,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a row waiting for every task started before it, offered when the world's admin settings show waits as steps of their own. ![](mark:awaited) draws the mark a task waited for carries.</comment>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
-    <value>The ![](mark:awaited) tasks started above, back to the last await, run together. The sequence waits here until every task has finished.</value>
+    <value>The ![](mark:awaited) tasks started above, back to the last wait for pending tasks, run together. The sequence waits here until every task has finished.</value>
     <comment>Tooltip on the words of a row waiting for every task started before it, on a sequence's screen, when the world's admin settings show waits as steps of their own. The row reads "await all pending tasks", which stays English; ![](mark:awaited) draws the mark a task waited for carries.</comment>
   </data>
   <data name="Sprocket.Change.WaitHere" xml:space="preserve">
@@ -2729,7 +2729,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>Words beside a clock under a step that takes time, on a sequence's screen, while the sequence goes straight on from the step; pressing them makes the sequence wait for it. Shown when the world's admin settings show waits in sequences as a switch on each step.</comment>
   </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
-    <value>This await has nothing to wait for, because no step above it takes time.</value>
+    <value>There are no pending tasks to wait for here, because no step above it takes time.</value>
     <comment>Warning on an await (a wait for what is running) when no step since the previous await takes time to finish. Shown under the await's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
   </data>
   <data name="Sprocket.Admin.Spine" xml:space="preserve">
