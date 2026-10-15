@@ -20,7 +20,8 @@ namespace Lumel.Controls
 
         Color _offTrack;
         Color _onTrack;
-        Color _thumb;
+        Color _onThumb;
+        Color _offThumb;
 
         /// <summary>A switch that is off, in the neutral look.</summary>
         public Switch()
@@ -30,7 +31,8 @@ namespace Lumel.Controls
             children.Add(_off);
 
             EdgeThickness = 1f;
-            Thumb = Color.White;
+            OnThumb = Color.White;
+            OffThumb = Color.White;
         }
 
         /// <summary>Whether it is on.</summary>
@@ -94,11 +96,18 @@ namespace Lumel.Controls
             set { _offTrack = value; }
         }
 
-        /// <summary>The color of the thumb.</summary>
-        public Color Thumb
+        /// <summary>The color of the thumb while on.</summary>
+        public Color OnThumb
         {
-            get { return _thumb; }
-            set { _thumb = value; }
+            get { return _onThumb; }
+            set { _onThumb = value; }
+        }
+
+        /// <summary>The color of the thumb while off.</summary>
+        public Color OffThumb
+        {
+            get { return _offThumb; }
+            set { _offThumb = value; }
         }
 
         /// <summary>Renames the two states.</summary>
@@ -162,7 +171,7 @@ namespace Lumel.Controls
 
             var thumb = inside.Height;
             var left = IsOn ? inside.X + inside.Width - thumb : inside.X;
-            g.Fill(new RectangleF(left, inside.Y, thumb, thumb), _thumb);
+            g.Fill(new RectangleF(left, inside.Y, thumb, thumb), IsOn ? _onThumb : _offThumb);
 
             (IsOn ? _on : _off).Draw(g);
         }

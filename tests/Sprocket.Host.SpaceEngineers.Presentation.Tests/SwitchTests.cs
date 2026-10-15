@@ -26,7 +26,8 @@ public class SwitchTests
             Color = Ink,
             Background = Body,
             OffTrack = Well,
-            Thumb = Ink,
+            OnThumb = Ink,
+            OffThumb = Ink,
             WordPadding = new Thickness(8f, 4f),
             Padding = new Thickness(4f),
             Edge = Dim
@@ -64,6 +65,22 @@ public class SwitchTests
         var offAt = Thumb(easel).X;
 
         Assert.True(onAt > offAt);
+    }
+
+    /// <summary>The thumb takes the color its style gives the state the switch is in.</summary>
+    [Fact]
+    public void TheThumbTakesTheColorOfItsState()
+    {
+        var amber = new Color(255, 170, 40);
+        var style = new SwitchStyle(Plain) { Base = { OffThumb = amber } };
+        var control = new Switch { Style = style, IsOn = false };
+        var easel = new Easel(new VStack { Children = { control } }, Wide, High);
+        Assert.Single(easel.Sprites, sprite => sprite.Color == amber);
+
+        control.IsOn = true;
+        easel.Draw(Wide, High);
+        Assert.DoesNotContain(easel.Sprites, sprite => sprite.Color == amber);
+        Assert.Equal(Thumb(easel).Width, Thumb(easel).Height);
     }
 
     /// <summary>The room inside is filled with the off track only while off.</summary>

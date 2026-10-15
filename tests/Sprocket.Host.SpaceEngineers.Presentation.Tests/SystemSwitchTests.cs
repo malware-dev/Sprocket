@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -37,6 +38,32 @@ public class SystemSwitchTests
 
         Assert.True(page.Editable);
         Assert.False(sim.Editor.Program.Systems[0].Enabled);
+    }
+
+    /// <summary>A logic system or installation switched off is washed as a warning, an installation as well while its logic system is off.</summary>
+    [Fact]
+    public void ASwitchedOffRowIsWashedAsAWarning()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        var system = sim.Editor.Program.Systems[0];
+        sim.Editor.GoToRoot();
+        sim.Tick();
+
+        var heading = Assert.Single(sim.Editor.RootHeadings());
+        var installation = Assert.Single(sim.Editor.RootRows());
+        Assert.Same(Styles.Parked, heading.Style);
+        Assert.Same(Styles.Parked, installation.Style);
+
+        sim.Editor.SwitchSystem(system, true);
+        sim.Tick();
+        Assert.NotSame(Styles.Parked, heading.Style);
+        Assert.NotSame(Styles.Parked, installation.Style);
+
+        sim.Editor.SwitchInstance(system, system.First, false);
+        sim.Tick();
+        Assert.NotSame(Styles.Parked, heading.Style);
+        Assert.Same(Styles.Parked, installation.Style);
     }
 
     /// <summary>Switched on, every part that cannot be pressed says how to change it, and stops saying so once it can be.</summary>

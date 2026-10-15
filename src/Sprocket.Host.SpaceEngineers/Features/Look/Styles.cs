@@ -448,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Edge = Palette.Accent }
         };
 
-        /// <summary>A row that has stopped where it is waiting to be let on.</summary>
+        /// <summary>A row that has stopped where it is waiting to be let on, or is switched off: a warning, washed amber.</summary>
         public static readonly ElementStyle Parked = new ElementStyle(Row)
         {
             Base = { Background = Palette.NoticeWash }
@@ -505,12 +505,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Color = Palette.Ink,
                 Background = Palette.Line,
                 OffTrack = Palette.Well,
-                Thumb = Palette.Ink,
+                OnThumb = Palette.Ink,
+                OffThumb = Palette.Ink,
                 WordPadding = new Thickness(8f, 4f),
                 Padding = new Thickness(4f)
             },
             Hot = { Edge = Palette.ControlEdgeHot },
-            Disabled = { Color = Palette.Dim, Thumb = Palette.Dim, Background = Palette.Well, OffTrack = Palette.Well }
+            Disabled = { Color = Palette.Dim, OnThumb = Palette.Dim, OffThumb = Palette.Dim, Background = Palette.Well, OffTrack = Palette.Well }
+        };
+
+        /// <summary>A logic system's or an installation's switch, its thumb amber while off, as the row or heading bar holding it is washed.</summary>
+        public static readonly SwitchStyle SystemSwitch = new SwitchStyle(Switch)
+        {
+            Base = { OffThumb = Palette.Notice }
         };
 
         /// <summary>The game's button: a panel with a hairline round it, lifted under the pointer, lit while pressed, and its words dimmed while it cannot be used.</summary>

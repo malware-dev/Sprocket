@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly SprocketEditor _editor;
 
         readonly VStack _root;
+        readonly VStack _head;
         readonly Glyph _back;
         readonly HeadingRow _title;
         readonly Glyph _undo;
@@ -151,14 +152,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                     new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
                                     new Button { Style = Styles.Button, Command = _libraries }.As(out _library),
                                     new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _deletes }.As(out _delete),
-                                    new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
+                                    new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
                                     new Button { Style = Styles.Primary, Command = _dones }.As(out _done),
                                     new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _close)
                                 }
                             },
                             new Label { Style = Styles.Detail }.As(out _subtitle)
                         }
-                    },
+                    }.As(out _head),
                     new Rule(1f, Palette.Line),
                     new Grid
                     {
@@ -694,6 +695,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // The words say the act and its reach, not what it is on - the heading directly above says that.
             _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
+
+            // Switched off is a warning, as it is on a row, and the bar holding the switch says it across the whole page.
+            _head.Background = screen.HasSwitch && !screen.SwitchIsOn ? Palette.NoticeWash : Palette.Chrome;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
             _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);

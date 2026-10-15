@@ -100,7 +100,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
                             new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _copies }.As(out _duplicate),
                             new Button { Style = Styles.Button, Command = _offers }.As(out _button),
-                            new Switch { Style = Styles.Switch, Command = _flips }.As(out _switch),
+                            new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _bins }.As(out _delete)
                         }
                     }
@@ -248,13 +248,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Tip = Tip.For(Tip, About, AboutArguments);
             var wrong = Problems > 0;
 
+            // Switched off is a warning, since a logic system is switched off to be changed. A row is off where its own switch is,
+            // or where the logic system above it is, which holds its switch.
+            var off = Flips != null && (!SwitchIsOn || !string.IsNullOrEmpty(SwitchLocked));
+
             Style = wrong
                 ? Chosen ? Styles.BrokenChosen : Styles.Broken
                 : Chosen
                     ? Styles.Chosen
                     : Running
                         ? Styles.Running
-                        : Parked
+                        : Parked || off
                             ? Styles.Parked
                             : !pressable
                                 ? Styles.Still
