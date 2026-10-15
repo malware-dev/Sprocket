@@ -42,6 +42,10 @@ namespace Lumel.Controls
         /// <summary>What the grip is filled with.</summary>
         public Color GripColor { get; set; }
 
+        /// <summary>How tall the track is drawn, centered down the slider, or zero for its whole height.</summary>
+        /// <remarks>A thin track reads as a line the grip slides along; a whole one shows a picture under the grip, as a hue does.</remarks>
+        public float TrackHeight { get; set; }
+
         /// <inheritdoc />
         protected override bool TakesPointer => true;
 
@@ -67,10 +71,13 @@ namespace Lumel.Controls
         protected override void DrawContent(IGraphics g)
         {
             var room = ContentBounds;
+            var track = TrackHeight > 0f && TrackHeight < room.Height
+                ? new RectangleF(room.X, room.Y + (room.Height - TrackHeight) * 0.5f, room.Width, TrackHeight)
+                : room;
             if (Track == MyStringId.NullOrEmpty)
-                g.Fill(room, TrackTint);
+                g.Fill(track, TrackTint);
             else
-                g.DrawSprite(Track, room, TrackTint, 0f);
+                g.DrawSprite(Track, track, TrackTint, 0f);
 
             var left = room.X + (room.Width - Grip) * _fraction;
             g.Fill(new RectangleF(left, room.Y - Lip, Grip, room.Height + Lip * 2f), GripColor);

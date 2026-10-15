@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     new Swatch { Edge = Palette.Line, Placement = Fixed.Size(96f, 88f) }.As(out _chosen)
                 }
             });
-            Children.Add(new TextBox { Style = Styles.Value, Focusable = true, Placement = Fixed.Wide(148f) }.As(out _written));
+            Children.Add(new TextBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Placement = Fixed.Wide(148f) }.As(out _written));
         }
     }
 }

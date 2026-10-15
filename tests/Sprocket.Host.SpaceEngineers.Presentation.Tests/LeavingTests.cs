@@ -69,7 +69,7 @@ public class LeavingTests
     [Fact]
     public void AndKeepingAsksForValuesTheSameWayDoneDoes()
     {
-        var picker = Screen.Fresh((WantsValues + " " + Back).Split(' '));
+        var picker = Screen.Fresh((WantsValues + " 1348 232 clear " + Back).Split(' '));
 
         Assert.True(picker.Shows("Keep your changes?"), "leaving asked nothing");
 

@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class KeepingTests
 {
     const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press radius 1315 209 type 5 enter";
+        + "press step press task 200 485 press radius 1348 232 type 5 enter";
 
     const string AColourStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
         + "press step press task 200 485 press color 1049 374 type #FF8800 enter";
@@ -28,7 +28,7 @@ public class KeepingTests
     {
         var screen = Screen.Fresh((ARadiusStep + " " + Again).Split(' '));
 
-        Assert.True(screen.Shows("radius (0.1 - 20)"), "the column asks for nothing");
+        Assert.True(screen.Shows("radius"), "the column asks for nothing");
         Assert.True(screen.Shows("5.0"), "the box opened empty");
     }
 
@@ -88,7 +88,7 @@ public class KeepingTests
 
         Assert.Equal("\u2026 Airlock Inner Door", screen.Editor.Screen.Title());
         Assert.False(screen.Editor.Current.CanPrimary, "the picker would finish with nothing chosen");
-        Assert.False(screen.Shows("radius (0.1 - 20)"), "the values column still asks for the radius");
+        Assert.False(screen.Shows("radius"), "the values column still asks for the radius");
     }
 
     /// <summary>Back on blocks that offer the step's action, the action is chosen again and holds its value.</summary>
@@ -127,7 +127,7 @@ public class KeepingTests
         screen.Run(2);
 
         Assert.Equal("Falloff on Cockpit Light", screen.Editor.Screen.Title());
-        Assert.True(screen.Shows("falloff (0 - 2)"), "the values column asks for nothing");
+        Assert.Equal(1, screen.Editor.Pick().Arguments!.Form.Count);
         Assert.False(screen.Shows("5.0"), "the radius's value was given to the falloff");
     }
 

@@ -39,6 +39,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<long> _selection = new List<long>();
         readonly bool _forEvents;
         readonly bool _forTests;
+
+        // Whether the values last opened show what the block holds now rather than what anybody gave.
+        bool _offering;
         readonly bool _asksAll;
         readonly Action<PickAnswer> _done;
         readonly List<GridEntity> _candidates = new List<GridEntity>();
@@ -236,8 +239,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             get
             {
                 _filled.Clear();
+                _offering = false;
                 if (_arrivedValues.Count > 0 && _chosen == _arrivedChosen && _chosenForm == _arrivedForm)
+                {
                     Channels.Shown(_arrivedValues, Wanted(), _filled);
+                    return _filled;
+                }
+
+                // A value being set opens on what the block holds now, as the terminal's own control does.
+                if (_chosenForm == Nature.Value && !_forTests && !_forEvents && _selection.Count > 0)
+                {
+                    var current = Vocabulary.Current(Editor.World, _selection, _chosen);
+                    if (current.HasValue)
+                    {
+                        Channels.Shown(new[] { Opaque(current.Value) }, Wanted(), _filled);
+                        _offering = true;
+                    }
+                }
 
                 return _filled;
             }
@@ -743,6 +761,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var made = _strip.Arguments == null;
             var arguments = _strip.Restate(shown, Chosen(), fields, Filled, colors);
+            if (_offering)
+                arguments.Form.Offer();
             if (made)
             {
                 arguments.Form.Edited += delegate
@@ -1746,6 +1766,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return string.Compare(left == null ? "" : left.Declared, right == null ? "" : right.Declared,
                     StringComparison.OrdinalIgnoreCase);
             }
+        }
+
+        /// <summary><paramref name="value" /> as a step would give it: a color fully opaque, whatever the block reads back.</summary>
+        static Literal Opaque(Literal value)
+        {
+            return value.Kind == ValueKind.Color ? Literal.Colour(value.Red, value.Green, value.Blue, 255) : value;
         }
     }
 }

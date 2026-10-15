@@ -40,6 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly Relay _submit;
 
         bool _judged;
+        bool _offered;
         Texts _language;
 
         /// <summary>A form asking for nothing yet.</summary>
@@ -171,10 +172,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Whether every value holds something it takes, so there is nothing left to give.</summary>
+        /// <remarks>Never while the values only show what the block holds now: those are offered, and nobody has given them yet.</remarks>
         public bool Complete
         {
             get
             {
+                if (_offered)
+                    return false;
+
                 for (var i = 0; i < _fields.Count; i++)
                 {
                     var said = _fields[i].Text;
@@ -220,6 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             _fields.Clear();
             _seen.Clear();
             _judged = false;
+            _offered = false;
 
             for (var i = 0; i < fields.Count; i++)
                 _wanted.Add(fields[i]);
@@ -241,6 +247,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
                 Lay(i, field);
             }
+        }
+
+        /// <summary>Says the values it holds are what the block holds now, offered rather than given, until somebody changes one.</summary>
+        public void Offer()
+        {
+            _offered = true;
         }
 
         /// <summary>Finishes the form on Enter, while it or a part of it that does not take Enter holds the keyboard.</summary>
@@ -312,6 +324,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         void Changed()
         {
+            _offered = false;
             for (var i = 0; i < _fields.Count; i++)
             {
                 // A value is seen once somebody has given it anything.
@@ -326,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 edited();
         }
 
-        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, a box of several lines, a number's box, or a box.</summary>
+        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
         IField Make(Field field, IList<Hsv> colors, Texts texts)
         {
             if (field.Edits == Editor.Colour)
@@ -348,6 +361,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (words != null && words.Count > Few)
                 return new ListField(words);
 
+            if (SliderField.Takes(field))
+                return new SliderField(field, _submit);
+
             return NumberField.Takes(field) ? (IField)new NumberField(field, _submit) : new TypedField(_submit);
         }
 
@@ -362,18 +378,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (!string.IsNullOrEmpty(about))
                 element.Tip = Tip.For(element.Tip, about);
 
+            // A slider shows its range, so its bounds are said in its box's tip rather than its label.
+            if (field is SliderField)
+                ((SliderField)field).Keyboard.Tip = Tip.For(((SliderField)field).Keyboard.Tip, _wanted[at].Takes(_language).Trim('(', ')'));
+
             if (label.Length > 0)
             {
                 var named = new Label { Style = Styles.ValueLabel, Text = label };
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = Tip.For(named.Tip, about);
 
-                Rows.Add(named, element, field is TypedField || field is LinesField ? Lines.Two : Lines.Fit);
+                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? Lines.Two : Lines.Fit);
                 return;
             }
 
             // With no label, a bounded field still keeps to the right-hand edge, so the fields of a form end together.
-            if (!color && !(field is TypedField) && !(field is LinesField) && !(field is WordsField))
+            if (!color && !(field is TypedField) && !(field is LinesField) && !(field is SliderField) && !(field is WordsField))
                 element.Align = Align.Right;
 
             Rows.Add(element);
@@ -383,7 +403,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         string Label(int at)
         {
             var edits = _wanted[at].Edits;
-            if (edits == Editor.Chosen || edits == Editor.Angle)
+            if (edits == Editor.Chosen || edits == Editor.Angle || SliderField.Takes(_wanted[at]))
                 return _wanted[at].Name ?? "";
 
             var said = _wanted[at].Label(_language);

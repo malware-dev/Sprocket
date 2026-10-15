@@ -17,6 +17,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public static class Vocabulary
     {
+        // What a value read with no arguments is given.
+        static readonly Literal[] NoArguments = new Literal[0];
+
         /// <summary>
         /// Events every one of the given entities can raise.
         /// </summary>
@@ -394,6 +397,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             return planned;
+        }
+
+        /// <summary>What the first of the blocks that has the value <paramref name="id" /> holds in it now, or null where none can say.</summary>
+        /// <remarks>
+        /// Read the way a check reads it, so a step setting the value opens on what the block holds. A value that is worked
+        /// out from what was seen before, or that wants arguments to be read, has nothing to say here.
+        /// </remarks>
+        public static Literal? Current(GridWorld world, IList<long> entityIds, string id)
+        {
+            var entities = Blocks(world, entityIds);
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var value = entities[i].Kind.FindAction(id, Nature.Value);
+                if (value == null)
+                    continue;
+
+                var being = value.Being;
+                var gauge = being == null
+                    ? entities[i].Gauge(value)
+                    : !being.Remembers && being.Missing(0) == null ? being.Gauge(entities[i].Block, NoArguments, null) : null;
+                if (gauge != null)
+                    return gauge.Read();
+            }
+
+            return null;
         }
 
         static List<GridEntity> Blocks(GridWorld world, IList<long> entityIds)

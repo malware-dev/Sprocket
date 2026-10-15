@@ -18,7 +18,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly NumberBox _box;
 
         /// <summary>An empty box for what <paramref name="field" /> asks for, whose Enter carries out <paramref name="submit" />.</summary>
-        public NumberField(Field field, ICommand submit)
+        public NumberField(Field field, ICommand submit) : this(field, submit, Numbers)
+        {
+        }
+
+        /// <summary>The same, <paramref name="wide" /> wide.</summary>
+        public NumberField(Field field, ICommand submit, float wide)
         {
             double least;
             var floored = Bound(field.Least, out least);
@@ -29,8 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             {
                 Style = Styles.Value,
                 Focusable = true,
+                SelectsAll = true,
                 Submit = submit,
-                Placement = Fixed.Wide(Numbers),
+                Placement = Fixed.Wide(wide),
                 Whole = field.Entry == Entry.Whole,
                 Negative = !floored || least < 0,
                 Least = floored ? least : (double?)null,
@@ -74,7 +80,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return field.Entry == Entry.Any && Math.Max((field.Least ?? "").Length, (field.Most ?? "").Length) > 0;
         }
 
-        static bool Bound(string written, out double bound)
+        /// <summary>Whether <paramref name="written" /> is a bound, and which, written as a program writes a number.</summary>
+        public static bool Bound(string written, out double bound)
         {
             bound = 0;
             return !string.IsNullOrEmpty(written) && double.TryParse(written, NumberStyles.Float, CultureInfo.InvariantCulture, out bound);

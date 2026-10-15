@@ -636,6 +636,12 @@ namespace Lumel
 
             _focused = true;
             StateChanged();
+            Focused();
+        }
+
+        /// <summary>Told, by <see cref="OnFocus" />, that this has just taken the keyboard.</summary>
+        protected virtual void Focused()
+        {
         }
 
         /// <summary>Told that this no longer holds the keyboard.</summary>

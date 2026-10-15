@@ -17,7 +17,7 @@ public class ArgumentsColumnTests
 
     const string SetRadius = "press radius";
     const string SetColour = "press color";
-    const string RadiusBox = "1315 209";
+    const string RadiusBox = "1348 232";
     const string Done = "1394 72";
 
     /// <summary>Presses twice on the words <paramref name="text" /> where they are drawn.</summary>
@@ -50,7 +50,7 @@ public class ArgumentsColumnTests
         var screen = Open(SetRadius);
 
         Assert.True(screen.Shows("RADIUS"), "the column is not headed by what was chosen");
-        Assert.True(screen.Shows("radius (0.1 - 20)"), "the column asks for nothing");
+        Assert.True(screen.Shows("radius"), "the column asks for nothing");
         Assert.False(screen.Shows("This needs"), "the column says what its fields already show");
         Assert.False(screen.Scene.IsQuestioning, "a dialog was raised over the picker");
         Assert.False(screen.Scene.IsFilling, "a field took the keyboard before it was pressed");
@@ -70,7 +70,7 @@ public class ArgumentsColumnTests
     [Fact]
     public void DoneWithNothingGivenSaysWhat()
     {
-        var screen = Open(SetRadius + " " + Done);
+        var screen = Open(SetRadius + " " + RadiusBox + " clear " + Done);
 
         Assert.Equal("Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Shows("radius must be given."), "nothing said why it did not finish");

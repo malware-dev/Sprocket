@@ -36,6 +36,7 @@ namespace Lumel.Text
         int _caret;
 
         bool _dragging;
+        bool _entering;
 
         bool _edgesStale = true;
         string _font = MyFontEnum.White;
@@ -106,6 +107,9 @@ namespace Lumel.Text
 
         /// <summary>Whether the caret is drawn while the box holds the keyboard; blinking it is the host's.</summary>
         public bool CaretVisible { get; set; }
+
+        /// <summary>Whether it selects all it holds when it takes the keyboard, so what is typed replaces it.</summary>
+        public bool SelectsAll { get; set; }
 
         /// <summary>What Enter carries out while the box holds the keyboard, or null for nothing.</summary>
         public ICommand Submit { get; set; }
@@ -223,8 +227,25 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
+        protected override void Focused()
+        {
+            if (!SelectsAll)
+                return;
+
+            SelectAll();
+            _entering = true;
+        }
+
+        /// <inheritdoc />
         public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
+            // The press that gave it the keyboard keeps what taking it selected.
+            if (_entering)
+            {
+                _entering = false;
+                return;
+            }
+
             var index = IndexAt(point.X);
 
             if (presses >= 3)
@@ -259,6 +280,7 @@ namespace Lumel.Text
         /// <inheritdoc />
         public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
+            _entering = false;
             if (ctrl)
                 return OnShortcut(input, key);
 
@@ -300,6 +322,7 @@ namespace Lumel.Text
         /// <inheritdoc />
         public override void OnText(char c)
         {
+            _entering = false;
             if (c < ' ' || c == (char)127)
                 return;
 
