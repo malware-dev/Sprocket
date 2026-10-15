@@ -624,15 +624,15 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Pick.KeepQuestion" xml:space="preserve">
     <value>Keep your changes?</value>
-    <comment>Question dialog asked on leaving the picker by going back after changing what it opened on.</comment>
+    <comment>Question dialog asked on leaving the picker by going back after changing what it opened on, and on leaving the page where a screen's text or a block's Custom Data is written by going back after changing the text.</comment>
   </data>
   <data name="Sprocket.Pick.KeepThem" xml:space="preserve">
     <value>Keep them</value>
-    <comment>Answer in the question dialog asked on leaving the picker after changing what it opened on; it keeps the changes and finishes the pick, and is the answer the Enter key gives.</comment>
+    <comment>Answer in the question dialog asked on leaving the picker, or the page a screen's text or a block's Custom Data is written on, after changing what it opened on; it keeps the changes and finishes, and is the answer the Enter key gives.</comment>
   </data>
   <data name="Sprocket.Pick.DiscardThem" xml:space="preserve">
     <value>Discard them</value>
-    <comment>Answer in the question dialog asked on leaving the picker after changing what it opened on; it leaves without keeping the changes.</comment>
+    <comment>Answer in the question dialog asked on leaving the picker, or the page a screen's text or a block's Custom Data is written on, after changing what it opened on; it leaves without keeping the changes.</comment>
   </data>
   <data name="Sprocket.Pick.Blocks" xml:space="preserve">
     <value>Blocks</value>
@@ -849,6 +849,18 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Writing.Edit" xml:space="preserve">
     <value>Edit text</value>
     <comment>A button by the description box on a logic system's screen and on a slot's screen, while the text is shown as it reads: goes back to the box it is written in.</comment>
+  </data>
+  <data name="Sprocket.Writing.Open" xml:space="preserve">
+    <value>Edit</value>
+    <comment>Button at the right end of a step's field for text written over several lines, such as a screen's text or a block's Custom Data, which shows only the start of it: opens a page of its own to write the whole text on.</comment>
+  </data>
+  <data name="Sprocket.Writing.OpenAbout" xml:space="preserve">
+    <value>Write the whole text on a page of its own.</value>
+    <comment>Tooltip on the Edit button at the right end of a step's field for text written over several lines.</comment>
+  </data>
+  <data name="Sprocket.Writing.Count" xml:space="preserve">
+    <value>{count} of {most} characters</value>
+    <comment>Above the box on the page where a screen's text or a block's Custom Data is written. {count} is how many characters the text has now, a line break counting as one; {most} is how many the block holds, the most it can be.</comment>
   </data>
   <data name="Sprocket.Writing.Markup" xml:space="preserve">
     <value>Markup</value>

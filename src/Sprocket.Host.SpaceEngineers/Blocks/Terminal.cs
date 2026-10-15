@@ -10,6 +10,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unheard = "The game raises no event as a block stops being hacked.";
 
+        // How long a block's Custom Data may be: the game cuts it there.
+        const int DataLongest = 64000;
+
         static readonly Reading Works = Reading.Of<IMyTerminalBlock>(block => block.IsWorking);
 
         static readonly Being Working = Being.Flag(Works);
@@ -36,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.WithValue("being-hacked", "being hacked", Hacked).Looked(Unheard);
 
-            kind.WithValue("custom-data", "custom data", Data).In(Category.Other).Announced();
+            kind.WithValue("custom-data", "custom data", Data).In(Category.Other).Announced().Lines(DataLongest);
 
             kind.Renaming("ShowOnHUD", false, "toggle show on HUD")
                 .Renaming("ShowOnHUD", true, "show on HUD");

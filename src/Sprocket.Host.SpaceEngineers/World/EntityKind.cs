@@ -160,6 +160,16 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Has a step set the value of Sprocket's own added last as text over several lines, up to <paramref name="longest" /> characters.</summary>
+        public EntityKind Lines(int longest)
+        {
+            if (_value == null)
+                throw new InvalidOperationException("Lines belong to a value of Sprocket's own, and none was added last.");
+
+            _value.Lines(longest);
+            return this;
+        }
+
         /// <summary>
         /// Holds what a step sets the value of Sprocket's own added last to between <paramref name="least" /> and
         /// <paramref name="most" />, each written as a number or empty for none.

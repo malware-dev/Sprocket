@@ -96,6 +96,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// </remarks>
         public Entry Entry;
 
+        /// <summary>How many characters text written over several lines may run to, or zero for no limit: what the block itself holds.</summary>
+        public int Longest;
+
         /// <summary>
         /// How many of the values behind the form this one field stands for.
         /// </summary>

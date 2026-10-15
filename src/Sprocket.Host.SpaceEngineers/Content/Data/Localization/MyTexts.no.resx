@@ -648,6 +648,15 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Writing.Edit" xml:space="preserve">
     <value>Rediger tekst</value>
   </data>
+  <data name="Sprocket.Writing.Open" xml:space="preserve">
+    <value>Rediger</value>
+  </data>
+  <data name="Sprocket.Writing.OpenAbout" xml:space="preserve">
+    <value>Skriv hele teksten på en egen side.</value>
+  </data>
+  <data name="Sprocket.Writing.Count" xml:space="preserve">
+    <value>{count} av {most} tegn</value>
+  </data>
   <data name="Sprocket.Writing.Markup" xml:space="preserve">
     <value>Markering</value>
   </data>

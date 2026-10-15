@@ -35,6 +35,27 @@ public class ScreensTests
         Assert.False(kind.FindAction("FontSize", Nature.Value)!.Vetted);
     }
 
+    /// <summary>Text longer than a sentence has room for is cut short in its step, however long the text is.</summary>
+    [Fact]
+    public void LongTextIsCutShortInItsStep()
+    {
+        var (ship, board) = Built();
+        var automation = new Automation();
+        var sequence = automation.AddSequence((Trigger)null!);
+        var show = new Act(Screen.ShowText) { Form = Nature.Native, Provider = BlockKinds.Own };
+        show.Targets.Add(automation.Declare(ship.World, ship.Entity(board.Id)).Name);
+        show.Arguments.Add(Literal.Of("Back"));
+        show.Arguments.Add(Literal.Of(new string('x', 5000)));
+        sequence.Steps.Add(show);
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+
+        var said = SequenceText.Step(runner.Bindings, sequence, show, null);
+        Assert.EndsWith("…", said);
+        Assert.True(said.Length < 100, "the step says " + said.Length + " characters");
+    }
+
     /// <summary>Text of several lines is shown with its line breaks, and its step reads on one line, a slash for each break.</summary>
     [Fact]
     public void TextOfSeveralLinesIsShownWhole()

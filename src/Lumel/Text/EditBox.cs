@@ -55,6 +55,7 @@ namespace Lumel.Text
         float _gutter;
         float _tall;
         float _widest;
+        int _length;
         int _numbersFrom = int.MaxValue;
         int _numbersTo = int.MinValue;
         int _shownFrom = int.MaxValue;
@@ -103,8 +104,12 @@ namespace Lumel.Text
                 _lines.Clear();
                 _widths.Clear();
                 _lines.AddRange(incoming.Split(Endings, StringSplitOptions.None));
+                _length = _lines.Count - 1;
                 for (var i = 0; i < _lines.Count; i++)
+                {
                     _widths.Add(-1f);
+                    _length += _lines[i].Length;
+                }
 
                 _undo.Clear();
                 _redo.Clear();
@@ -242,6 +247,13 @@ namespace Lumel.Text
 
         /// <summary>How many lines it holds.</summary>
         public int Lines => _lines.Count;
+
+        /// <summary>How many characters it holds, a line break counting as one.</summary>
+        public int Length => _length;
+
+        /// <summary>How many characters typing and pasting may bring it to, or zero for no limit.</summary>
+        /// <remarks>Held to as it is edited; text set whole is taken as it is.</remarks>
+        public int Longest { get; set; }
 
         /// <summary>How tall the whole of it stands, once it has been measured.</summary>
         public float Extent => _down.Extent;
@@ -963,6 +975,13 @@ namespace Lumel.Text
         void Edit(Spot from, Spot to, string words, bool typed)
         {
             var removed = Slice(from, to);
+            if (Longest > 0)
+            {
+                var room = Math.Max(0, Longest - (_length - removed.Length));
+                if (words.Length > room)
+                    words = words.Substring(0, room);
+            }
+
             if (removed.Length == 0 && words.Length == 0)
                 return;
 
@@ -993,6 +1012,13 @@ namespace Lumel.Text
             var head = _lines[from.Line].Substring(0, from.Column);
             var tail = _lines[to.Line].Substring(to.Column);
             var pieces = words.Split('\n');
+
+            // What it held between the two places, without slicing it out: the lines' own lengths and a break after each.
+            var removed = to.Column - from.Column;
+            for (var i = from.Line; i < to.Line; i++)
+                removed += _lines[i].Length + 1;
+
+            _length += words.Length - removed;
 
             _lines.RemoveRange(from.Line, to.Line - from.Line + 1);
             _widths.RemoveRange(from.Line, to.Line - from.Line + 1);

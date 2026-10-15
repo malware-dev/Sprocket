@@ -123,6 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var text = Field.Called("text");
             text.Entry = Entry.Text;
             text.Edits = Editor.Lines;
+            text.Longest = Screen.TextLongest;
             text.Needed = true;
             return text;
         }

@@ -64,6 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Raised when Enter is pressed in a field, which is finishing the form.</summary>
         public event Action Submitted;
 
+        /// <summary>Raised with the field when text written over several lines is to be written on a page of its own.</summary>
+        public event Action<LinesField> Opens;
+
         /// <summary>How many values it asks for.</summary>
         public int Count => _fields.Count;
 
@@ -349,7 +352,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return new AngleField(field.Least, field.Most, _submit);
 
             if (field.Edits == Editor.Lines)
-                return new LinesField();
+            {
+                var lines = new LinesField(field.Longest, texts);
+                lines.Opened += delegate
+                {
+                    var opens = Opens;
+                    if (opens != null)
+                        opens(lines);
+                };
+
+                return lines;
+            }
 
             var words = field.Edits == Editor.Chosen ? field.Words : null;
             if (field.IsOnOff)

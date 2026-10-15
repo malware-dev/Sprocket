@@ -37,6 +37,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>How many blocks a sentence names before it counts the rest.</summary>
         const int Said = 2;
 
+        /// <summary>How many characters of a text a sentence says before cutting it short.</summary>
+        const int Quoted = 48;
+
+        /// <summary>What a text cut short ends with.</summary>
+        const string Cut = "…";
+
 
         /// <summary>A slot nobody has filled in yet.</summary>
         public const string Empty = "…";
@@ -475,9 +481,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>One value as a sentence says it, with the words its field puts around it.</summary>
-        /// <remarks>A line break in text reads as a slash, since a sentence is one line.</remarks>
+        /// <remarks>
+        /// A line break in text reads as a slash, since a sentence is one line, and text longer than a sentence has room for is
+        /// cut short: a screen's text can run to a hundred thousand characters.
+        /// </remarks>
         static string Around(IList<Field> fields, int at, string filled)
         {
+            if (filled != null && filled.Length > Quoted)
+                filled = filled.Substring(0, Quoted).TrimEnd() + Cut;
+
             if (filled != null && filled.IndexOf('\n') >= 0)
                 filled = filled.Replace("\r", "").Replace("\n", " / ");
 

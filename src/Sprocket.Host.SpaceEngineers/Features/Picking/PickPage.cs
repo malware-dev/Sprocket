@@ -10,6 +10,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Features.Writing;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -778,6 +779,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 {
                     if (Editor.Current == this && _finish != null)
                         _finish.Execute();
+                };
+
+                arguments.Form.Opens += delegate(LinesField lines)
+                {
+                    if (Editor.Current == this)
+                        Editor.Push(new TextPage(Editor, Title, lines.Text, lines.Longest, lines.Give));
                 };
             }
 

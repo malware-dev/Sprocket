@@ -286,6 +286,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             _writes.Most = most ?? "";
         }
 
+        /// <summary>Has a step set this value as text written over several lines, up to <paramref name="longest" /> characters.</summary>
+        public void Lines(int longest)
+        {
+            _writes.Edits = Editor.Lines;
+            _writes.Longest = longest;
+        }
+
         /// <summary>Says the block announces when this value may have changed.</summary>
         public void Announce()
         {

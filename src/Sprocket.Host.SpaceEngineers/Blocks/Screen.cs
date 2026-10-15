@@ -16,6 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>The action that writes text on the block's screen.</summary>
         public const string ShowText = "show-text";
 
+        /// <summary>How long the text on a screen may be: the game's own panels hold no more.</summary>
+        public const int TextLongest = 100000;
+
         /// <summary>The game's settings of a screen, which on a block with several act on the one last picked.</summary>
         public static readonly string[] Settings =
         {
@@ -61,6 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var text = Field.Called("text");
             text.Entry = Entry.Text;
             text.Edits = Editor.Lines;
+            text.Longest = Screen.TextLongest;
             text.Needed = true;
             return text;
         }
