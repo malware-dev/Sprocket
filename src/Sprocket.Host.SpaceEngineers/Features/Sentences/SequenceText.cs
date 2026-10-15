@@ -177,10 +177,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>What stopped the last run of <paramref name="sequence" />, and at which step: "stopped at step 4 by Cycle Out".</summary>
-        /// <remarks>Counted with each wait for what is running a row of its own where <paramref name="awaitRows" /> says so.</remarks>
-        public static string CalledOff(Texts texts, Sequence sequence, SequenceRunner state, bool awaitRows)
+        public static string CalledOff(Texts texts, Sequence sequence, SequenceRunner state)
         {
-            var step = Row(sequence, state.StoppedAt, awaitRows).ToString(CultureInfo.InvariantCulture);
+            var step = Row(sequence, state.StoppedAt).ToString(CultureInfo.InvariantCulture);
             if (state.StoppedBy == Stopper.Hand)
                 return Template.Fill(texts.SequenceStoppedByHand, "step", step);
 
@@ -221,15 +220,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
-        /// <remarks>Counted with each wait for what is running a row of its own where <paramref name="awaitRows" /> says so.</remarks>
-        public static string Failing(Texts texts, SequenceFault fault, Sequence sequence, bool awaitRows)
+        public static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
         {
             // A trigger's own act has no steps to count, and no name.
             var problem = Problem(texts, fault, sequence);
             if (sequence.IsAlone)
                 return problem;
 
-            var row = Row(sequence, fault.Step, awaitRows);
+            var row = Row(sequence, fault.Step);
             var step = row.ToString(CultureInfo.InvariantCulture);
             if (sequence.HasName)
             {
@@ -259,14 +257,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it.</summary>
-        /// <remarks>Counted with each wait for what is running a row of its own where <paramref name="awaitRows" /> says so.</remarks>
-        public static string Stopped(Texts texts, Halt halt, AutomationSystem system, bool awaitRows)
+        public static string Stopped(Texts texts, Halt halt, AutomationSystem system)
         {
             if (halt == null || halt.Problem == SequenceProblem.None)
                 return texts.StoppedUnknown;
 
             var sequence = system == null ? null : system.FindSequence(halt.Sequence);
-            var row = Row(sequence, halt.Step, awaitRows);
+            var row = Row(sequence, halt.Step);
             var step = row.ToString(CultureInfo.InvariantCulture);
             var reason = halt.Because.Exists ? TroubleText.Of(texts, halt.Because, halt.Block) : Because(texts, halt.Problem, halt.Block);
 
@@ -331,26 +328,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>The number a step's row shows, or 0 where there is none.</summary>
         /// <remarks>
-        /// Counted as the sequence's screen numbers its rows: a wait for what is running is a row of its own where
-        /// <paramref name="awaitRows" /> says so, and part of the row of the step before it otherwise; the line closing an if has no
-        /// number. Zero where the line has no row of its own to point at.
+        /// Counted as the sequence's screen numbers its rows: a wait for what is running is a row of its own, and the line closing an
+        /// if has no number. Zero where the line has no row of its own to point at.
         /// </remarks>
-        static int Row(Sequence sequence, int step, bool awaitRows)
+        static int Row(Sequence sequence, int step)
         {
             if (sequence == null || step < 0 || step >= sequence.Steps.Count)
                 return 0;
 
-            while (!awaitRows && step >= 0 && sequence.Steps[step] is Await)
-                step--;
-
-            if (step < 0 || sequence.Steps[step] is EndIf)
+            if (sequence.Steps[step] is EndIf)
                 return 0;
 
             var row = 0;
             for (var i = 0; i <= step; i++)
             {
                 var line = sequence.Steps[i];
-                if ((awaitRows || !(line is Await)) && !(line is EndIf))
+                if (!(line is EndIf))
                     row++;
             }
 

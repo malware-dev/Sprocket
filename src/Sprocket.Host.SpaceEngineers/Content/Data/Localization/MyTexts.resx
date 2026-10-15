@@ -2620,30 +2620,6 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Show each automation's script as text you can edit, and add extra tools to screens. Meant for testing and making content.</value>
     <comment>In the admin settings, the line under the name of the developer mode setting.</comment>
   </data>
-  <data name="Sprocket.Admin.Trials" xml:space="preserve">
-    <value>Trials</value>
-    <comment>In the admin settings, the heading over the trials: designs still being compared, which an admin chooses between. On both tabs.</comment>
-  </data>
-  <data name="Sprocket.Admin.TrialsAbout" xml:space="preserve">
-    <value>Designs still being compared. A trial is removed once its design is chosen.</value>
-    <comment>In the admin settings, the line under the heading over the trials.</comment>
-  </data>
-  <data name="Sprocket.Admin.Waits" xml:space="preserve">
-    <value>Waiting for pending tasks</value>
-    <comment>In the admin settings, the name of the trial of how waits in sequences are shown and edited.</comment>
-  </data>
-  <data name="Sprocket.Admin.WaitsAbout" xml:space="preserve">
-    <value>Changes only how waiting for pending tasks is shown and edited. Sequences run the same either way.</value>
-    <comment>In the admin settings, the line under the name of the trial of how waits in sequences are shown and edited.</comment>
-  </data>
-  <data name="Sprocket.Admin.WaitsSwitch" xml:space="preserve">
-    <value>Switch on each step</value>
-    <comment>In the admin settings, a choice in the list of the trial of how waits in sequences are shown: each step has a switch for whether the sequence waits for it.</comment>
-  </data>
-  <data name="Sprocket.Admin.WaitsStep" xml:space="preserve">
-    <value>As its own step</value>
-    <comment>In the admin settings, a choice in the list of the trial of how waits in sequences are shown: a wait is a step of its own.</comment>
-  </data>
   <data name="Sprocket.Admin.Close" xml:space="preserve">
     <value>Close</value>
     <comment>The button at the bottom of the admin settings dialog that closes it. Changes apply as they are made, so closing saves nothing extra.</comment>
@@ -2696,49 +2672,17 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Default (off)</value>
     <comment>In the admin settings, on the tab for this world, the first choice in the list of the developer mode setting: it follows the value on the tab for every world, which has developer mode off.</comment>
   </data>
-  <data name="Sprocket.Sequence.WaitsHere" xml:space="preserve">
-    <value>Steps below wait until this one, and any still running above it, are done. Press to let them run alongside.</value>
-    <comment>Tooltip on the clock and words under a step that takes time, on a sequence's screen, while the sequence waits there for the step to finish; pressing them makes the sequence go straight on. Shown when the world's admin settings show waits in sequences as a switch on each step.</comment>
-  </data>
-  <data name="Sprocket.Sequence.CarriesOn" xml:space="preserve">
-    <value>Steps below run alongside this one. Press to make them wait until it's done.</value>
-    <comment>Tooltip on the clock and words under a step that takes time, on a sequence's screen, while the sequence goes straight on from the step; pressing them makes the sequence wait there. Shown when the world's admin settings show waits in sequences as a switch on each step.</comment>
-  </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
     <value>Wait until every ![](mark:awaited) task started above has finished.</value>
-    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a row waiting for every task started before it, offered when the world's admin settings show waits as steps of their own. ![](mark:awaited) draws the mark a task waited for carries.</comment>
+    <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a row waiting for every task started before it. ![](mark:awaited) draws the mark a task waited for carries.</comment>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
     <value>The ![](mark:awaited) tasks started above, back to the last wait for pending tasks, run together. The sequence waits here until every task has finished.</value>
-    <comment>Tooltip on the words of a row waiting for every task started before it, on a sequence's screen, when the world's admin settings show waits as steps of their own. The row reads "await all pending tasks", which stays English; ![](mark:awaited) draws the mark a task waited for carries.</comment>
-  </data>
-  <data name="Sprocket.Change.WaitHere" xml:space="preserve">
-    <value>waiting for a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is setting a step on a sequence's screen so the sequence waits for it to finish before going on.</comment>
-  </data>
-  <data name="Sprocket.Change.CarryOn" xml:space="preserve">
-    <value>running alongside a step</value>
-    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is setting a step on a sequence's screen so the sequence goes straight on without waiting for it to finish.</comment>
-  </data>
-  <data name="Sprocket.Sequence.WaitForCompletion" xml:space="preserve">
-    <value>Wait for completion</value>
-    <comment>Words beside a clock under a step that takes time, on a sequence's screen, while the sequence waits for the step to finish; pressing them makes the sequence go straight on. Shown when the world's admin settings show waits in sequences as a switch on each step.</comment>
-  </data>
-  <data name="Sprocket.Sequence.DoNotWait" xml:space="preserve">
-    <value>Do not wait</value>
-    <comment>Words beside a clock under a step that takes time, on a sequence's screen, while the sequence goes straight on from the step; pressing them makes the sequence wait for it. Shown when the world's admin settings show waits in sequences as a switch on each step.</comment>
+    <comment>Tooltip on the words of a row waiting for every task started before it, on a sequence's screen. The row reads "wait for pending tasks", which stays English; ![](mark:awaited) draws the mark a task waited for carries.</comment>
   </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
     <value>There are no pending tasks to wait for here, because no step above it takes time.</value>
     <comment>Warning on an await (a wait for what is running) when no step since the previous await takes time to finish. Shown under the await's line on a sequence's screen and on the sequence's row on a logic system's screen.</comment>
-  </data>
-  <data name="Sprocket.Admin.Spine" xml:space="preserve">
-    <value>Join highlighted lines</value>
-    <comment>In the admin settings, the label of a trial's checkbox that draws a pulsing line joining the lines on a sequence's screen lit up by the wait or step under the pointer.</comment>
-  </data>
-  <data name="Sprocket.Admin.SpineAbout" xml:space="preserve">
-    <value>A pulsing line beside the line numbers joins the lines that light up when the pointer rests on a wait or a step, and runs on to lines scrolled out of view.</value>
-    <comment>In the admin settings, the line under the checkbox of the trial that draws a pulsing line joining the lines lit up on a sequence's screen.</comment>
   </data>
   <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
     <value>Advanced door</value>

@@ -58,8 +58,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         bool _structureDirty;
         bool _developerMode;
-        Waiting _waiting;
-        bool _waitSpine = true;
         bool _toldPasting;
         Shelf _shelf;
 
@@ -216,40 +214,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Invalidate();
             }
         }
-
-        /// <summary>Whether a pulsing line joins the lines lit by a wait or step under the pointer, beside the line numbers.</summary>
-        /// <remarks>The world's trial of it, set by the host.</remarks>
-        public bool WaitSpine
-        {
-            get { return _waitSpine; }
-            set
-            {
-                if (_waitSpine == value)
-                    return;
-
-                _waitSpine = value;
-                Invalidate();
-            }
-        }
-
-        /// <summary>Whether each wait for what is running is a row of its own, numbered as a line, rather than hung under the step before it.</summary>
-        public bool AwaitRows => _waiting == Waiting.Step;
-
-        /// <summary>How a sequence's waits are shown and edited: a switch on each step that takes time, or rows of their own.</summary>
-        /// <remarks>The world's trial of the two, set by the host. Rebuilds what is on screen, as <see cref="DeveloperMode" /> does.</remarks>
-        public Waiting Waiting
-        {
-            get { return _waiting; }
-            set
-            {
-                if (_waiting == value)
-                    return;
-
-                _waiting = value;
-                Invalidate();
-            }
-        }
-
 
         /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
         public int CurrentTick => _runner.CurrentTick;

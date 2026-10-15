@@ -12,10 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Grip _grip;
         Label _number;
         Flow _sentence;
-        HStack _hangRoom;
-        HStack _underhang;
-        Glyph _clock;
-        Label _waitWords;
         Label _problem;
         Glyph _leadWaits;
         Label _lead;
@@ -57,26 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                             new Label { Style = Styles.Phrase }.As(out _lead)
                         }
                     }.As(out _sentence),
-
-                    // Where waits are switched on each step: hung under a step that takes time, one in from it, as an if's steps are.
-                    new HStack
-                    {
-                        IsVisible = false,
-                        Children =
-                        {
-                            new HStack
-                            {
-                                Style = Styles.Underhang,
-                                Spacing = 6f,
-                                Children =
-                                {
-                                    new Glyph { Symbol = Symbols.Awaited, Style = Styles.WaitOn, Halo = Symbols.AwaitedOutline, HaloSize = 16f * Sizes.Halo }
-                                        .As(out _clock),
-                                    new Label { Style = Styles.WaitWords }.As(out _waitWords)
-                                }
-                            }.As(out _underhang)
-                        }
-                    }.As(out _hangRoom),
 
                     // Its own line under the step, as on every other line that says what is wrong with it.
                     new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _problem)

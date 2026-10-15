@@ -49,22 +49,6 @@ public class AdminTests
         Assert.True(screen.Shows("Default (off)"));
     }
 
-    /// <summary>A trial has no default: this world shows the design it runs by, and choosing one is this world's.</summary>
-    [Fact]
-    public void ATrialHasNoDefault()
-    {
-        var screen = Opened(new Settings(new Layer(null, null, Waiting.Step), Layer.Empty));
-
-        Assert.True(screen.Shows("As its own step"));
-        screen.Do("press", "As its own step").Run(1);
-        Assert.False(screen.Shows("Default (wait as its own step)"));
-        Assert.False(screen.Shows("Default (switch on each step)"));
-
-        screen.Do("press", "Switch on each step").Run(1);
-        Assert.Equal(Waiting.Switch, screen.Scene.Ship.Settings.World.Waiting);
-        Assert.Equal(Waiting.Step, screen.Scene.Ship.Settings.Global.Waiting);
-    }
-
     /// <summary>A choice under this world is this world's alone, and the world runs by it at once.</summary>
     [Fact]
     public void AChangeAppliesAtOnce()
@@ -79,9 +63,6 @@ public class AdminTests
         Choose(screen, "Default (off)", "On");
         Assert.True(screen.Scene.Ship.Settings.World.DeveloperMode);
         Assert.True(screen.Editor.DeveloperMode);
-
-        Choose(screen, "Switch on each step", "As its own step");
-        Assert.Equal(Waiting.Step, screen.Scene.Ship.Settings.Waiting);
         Assert.Equal(100, screen.Scene.Ship.Settings.FastestUpdate);
     }
 
@@ -89,7 +70,7 @@ public class AdminTests
     [Fact]
     public void TheDefaultLeavesItToEveryWorld()
     {
-        var screen = Opened(new Settings(new Layer(null, 10, null), new Layer(null, 100, null)));
+        var screen = Opened(new Settings(new Layer(null, 10), new Layer(null, 100)));
 
         Choose(screen, "Every 100 ticks (lightest)", "Default (every 10 ticks)");
 
@@ -115,21 +96,6 @@ public class AdminTests
         Assert.True(screen.Shows("Default (every 10 ticks)"));
     }
 
-    /// <summary>The spine joining lit lines is drawn where nothing says otherwise, and the box under the trials takes it away for this world and brings it back.</summary>
-    [Fact]
-    public void TheSpineIsTickedOffAndOn()
-    {
-        var screen = Opened(new Settings(Layer.Empty, Layer.Empty));
-        Assert.True(screen.Editor.WaitSpine);
-
-        screen.Do("press", "Join highlighted lines").Run(1);
-        Assert.False(screen.Scene.Ship.Settings.World.WaitSpine);
-        Assert.False(screen.Editor.WaitSpine);
-
-        screen.Do("press", "Join highlighted lines").Run(1);
-        Assert.True(screen.Scene.Ship.Settings.WaitSpine);
-        Assert.True(screen.Editor.WaitSpine);
-    }
 
     /// <summary>Close and Escape both put it away, keeping what was changed.</summary>
     [Fact]

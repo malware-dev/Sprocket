@@ -8,7 +8,6 @@ using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
@@ -18,8 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
     /// <summary>The world's settings, for an admin to change: a tab for this world and one for every world, each setting a list of its choices.</summary>
     /// <remarks>
     /// Read top to bottom, each setting with what it does under its name and its choices under that. A change applies as it is
-    /// made. Under this world each rule's list starts with the default, which leaves the rule to every world; a trial has no
-    /// default, as it lasts only until its design is chosen.
+    /// made. Under this world each rule's list starts with the default, which leaves the rule to every world.
     /// </remarks>
     public sealed class AdminDialog : Dialog
     {
@@ -28,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
 
         readonly SprocketEditor _editor;
         readonly List<Choice> _choices = new List<Choice>();
-        readonly List<Mark> _spines = new List<Mark>();
 
         Settings _shown;
 
@@ -85,53 +82,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
                         delegate(Layer layer) { return layer.DeveloperMode.HasValue ? Developer(layer.DeveloperMode.Value) : -1; },
                         delegate(Settings settings) { return Developer(settings.DefaultDeveloperMode); },
-                        delegate(Layer layer, int at) { return layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0); })),
-                    new Label { Style = Styles.Heading, Text = texts.AdminTrials },
-                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminTrialsAbout },
-                    Setting(texts.AdminWaits, texts.AdminWaitsAbout, Choose(texts, world,
-                        new[] { texts.AdminWaitsSwitch, texts.AdminWaitsStep },
-                        null,
-                        delegate(Layer layer) { return layer.Waiting.HasValue ? Waits(layer.Waiting.Value) : -1; },
-                        delegate(Settings settings) { return Waits(settings.DefaultWaiting); },
-                        delegate(Layer layer, int at) { return layer.WithWaiting(at < 0 ? (Waiting?)null : at == 0 ? Waiting.Switch : Waiting.Step); })),
-                    Spine(texts, world)
+                        delegate(Layer layer, int at) { return layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0); }))
                 }
             };
-        }
-
-        /// <summary>The trial of the line joining lit lines at one level: a box ticked where it is drawn, and what it does under it.</summary>
-        /// <remarks>A trial has no default, so this world's box shows what the world draws, and ticking it says so for this world.</remarks>
-        Element Spine(Texts texts, bool world)
-        {
-            var mark = new Mark { Many = true };
-            _spines.Add(mark);
-            return new VStack
-            {
-                Spacing = 6f,
-                Children =
-                {
-                    new HStack
-                    {
-                        Style = Styles.Option,
-                        Spacing = 8f,
-                        Align = Align.Left,
-                        Command = new Relay(delegate { Flip(world); }),
-                        Children = { mark, new Label { Style = Styles.Phrase, Text = texts.AdminSpine } }
-                    },
-                    new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminSpineAbout }
-                }
-            };
-        }
-
-        /// <summary>Draws the line joining lit lines at one level where it is not drawn, and stops drawing it where it is.</summary>
-        void Flip(bool world)
-        {
-            var next = world
-                ? _shown.WithWorld(_shown.World.WithWaitSpine(!_shown.WaitSpine))
-                : _shown.WithGlobal(_shown.Global.WithWaitSpine(!_shown.DefaultWaitSpine));
-
-            _editor.ChangeSettings(next);
-            Show(next);
         }
 
         /// <summary>
@@ -173,8 +126,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         void Show(Settings settings)
         {
             _shown = settings;
-            for (var i = 0; i < _spines.Count; i++)
-                _spines[i].IsChecked = i == 0 ? settings.WaitSpine : settings.DefaultWaitSpine;
 
             foreach (var choice in _choices)
             {
@@ -196,13 +147,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         {
             return on ? 0 : 1;
         }
-
-        /// <summary>Where <paramref name="waiting" /> stands among its words: a switch, then a step.</summary>
-        static int Waits(Waiting waiting)
-        {
-            return waiting == Waiting.Switch ? 0 : 1;
-        }
-
         /// <summary>A setting as it reads: its name, what it does, then <paramref name="control" />.</summary>
         static Element Setting(string name, string about, Element control)
         {

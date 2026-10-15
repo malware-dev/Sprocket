@@ -20,21 +20,9 @@ En sekvens kan bare vente på avventbare handlinger, altså de der blokken kan f
 
 ## Kjøre steg sammen
 
-Et avventbart steg kan la sekvensen gå rett videre, så stegene etter det kjører mens det fortsatt pågår, som når begge dørene i luftslusen lukkes samtidig. Et `wait for pending tasks` lenger ned fanger da hvert avventbare steg siden det forrige. Går sekvensen rett videre fra det siste avventbare steget, er kjøringen over der, og blokkene gjør seg ferdige av seg selv.
+Når du legger til et avventbart steg, kommer også et `wait for pending tasks`-steg etter det, som venter på det steget og hvert avventbare steg før det siden forrige. Flytt det lenger ned, så kjører stegene imellom mens blokken fortsatt holder på, som når begge luftslusedørene lukkes samtidig. Slett det, så går sekvensen rett videre. Går sekvensen rett videre fra sitt siste avventbare steg, slutter kjøringen der, og blokkene gjør seg ferdige på egen hånd.
 
-::: player
-To måter å vente på ventende oppgaver prøves ut, og verdenen din bruker én av dem. Begge beholdes her til én er valgt.
-:::
-
-### En ventelinje under hvert steg
-
-Under hvert avventbare steg henger en `Vent til det er ferdig`-linje, som venter på det steget og hvert avventbare steg før det siden forrige `wait for pending tasks`. Bytt den til `Ikke vent`, så går sekvensen rett videre.
-
-### Venting som eget steg
-
-Å legge til et avventbart steg legger også til et `wait for pending tasks`-steg etter det. Flytt det lenger ned, så kjører stegene imellom mens blokken fortsatt holder på; slett den, så går sekvensen rett videre.
-
-Hold pekeren over et `wait for pending tasks` for å se hvilke steg det venter på, eller over et avventbart steg for å se hvilket som fanger det.
+Hold pekeren over et `wait for pending tasks` for å se hvilke steg det venter på, eller over et avventbart steg for å se hvilket som fanger det. En pulserende linje ved siden av linjenumrene binder sammen linjene som lyser opp.
 
 ## Når en kjøring går galt
 

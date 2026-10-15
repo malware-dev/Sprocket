@@ -346,7 +346,7 @@ public class ProblemTests
 
         Assert.False(installation.Enabled);
         Assert.Equal("Stopped in " + ship.Sequence.Name + ": its trigger couldn't fire, for an unknown reason.",
-            SequenceText.Stopped(new Texts(), installation.Halt, system, false));
+            SequenceText.Stopped(new Texts(), installation.Halt, system));
     }
 
     /// <summary>A step's own trouble marks the step, and only the step.</summary>

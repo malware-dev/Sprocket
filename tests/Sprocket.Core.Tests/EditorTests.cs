@@ -868,7 +868,7 @@ public class EditorTests
         editor.PressPrimary();
         ship.Tick();
 
-        Assert.Equal(2, editor.StepRows().Count);
+        Assert.Equal(4, editor.StepRows().Count);
 
         Assert.False(ship.Automation.Systems[0].Enabled);
         toggle!.Execute();
@@ -1861,8 +1861,9 @@ public class EditorTests
         editor.PressChoice("close");
         editor.PressPrimary();
 
-        // One row, even though the sequence has the step and the await after it.
-        Assert.Single(editor.StepRows());
+        // Two rows: the step, and the await after it as a row of its own.
+        Assert.Equal(2, editor.StepRows().Count);
+        Assert.Equal(StepKind.Await, editor.StepRows()[1].Kind);
         Assert.Equal("close", Assert.IsType<ActionSlot>(editor.StepRows()[0].Slots[0]).Action.Text);
 
         var targets = Assert.IsType<EntitiesSlot>(editor.StepRows()[0].Slots[1]);

@@ -1982,24 +1982,6 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Admin.DeveloperAbout" xml:space="preserve">
     <value>Vis skriptet til hver automasjon som tekst du kan redigere, og legg til ekstra verktøy på skjermene. Ment for testing og for å lage innhold.</value>
   </data>
-  <data name="Sprocket.Admin.Trials" xml:space="preserve">
-    <value>Utprøvinger</value>
-  </data>
-  <data name="Sprocket.Admin.TrialsAbout" xml:space="preserve">
-    <value>Design som fortsatt sammenlignes. En utprøving fjernes når designet er valgt.</value>
-  </data>
-  <data name="Sprocket.Admin.Waits" xml:space="preserve">
-    <value>Venting på ventende oppgaver</value>
-  </data>
-  <data name="Sprocket.Admin.WaitsAbout" xml:space="preserve">
-    <value>Endrer bare hvordan venting på ventende oppgaver vises og redigeres. Sekvensene kjører likt uansett.</value>
-  </data>
-  <data name="Sprocket.Admin.WaitsSwitch" xml:space="preserve">
-    <value>Bryter på hvert steg</value>
-  </data>
-  <data name="Sprocket.Admin.WaitsStep" xml:space="preserve">
-    <value>Som eget steg</value>
-  </data>
   <data name="Sprocket.Admin.Close" xml:space="preserve">
     <value>Lukk</value>
   </data>
@@ -2039,38 +2021,14 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Admin.DefaultOff" xml:space="preserve">
     <value>Standard (av)</value>
   </data>
-  <data name="Sprocket.Sequence.WaitsHere" xml:space="preserve">
-    <value>Stegene under venter til dette, og alle over det som fortsatt kjører, er ferdige. Trykk for å la dem kjøre samtidig.</value>
-  </data>
-  <data name="Sprocket.Sequence.CarriesOn" xml:space="preserve">
-    <value>Stegene under kjører samtidig med dette. Trykk for å la dem vente til det er ferdig.</value>
-  </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
     <value>Vent til alle ![](mark:awaited) oppgavene som er startet over, er ferdige.</value>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
     <value>![](mark:awaited)-oppgavene som er startet over, tilbake til forrige slike steg, kjører samtidig. Sekvensen venter her til alle oppgavene er ferdige.</value>
   </data>
-  <data name="Sprocket.Change.WaitHere" xml:space="preserve">
-    <value>venting på et steg</value>
-  </data>
-  <data name="Sprocket.Change.CarryOn" xml:space="preserve">
-    <value>kjøring samtidig med et steg</value>
-  </data>
-  <data name="Sprocket.Sequence.WaitForCompletion" xml:space="preserve">
-    <value>Vent til det er ferdig</value>
-  </data>
-  <data name="Sprocket.Sequence.DoNotWait" xml:space="preserve">
-    <value>Ikke vent</value>
-  </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
     <value>Her er det ingen ventende oppgaver å vente på, fordi ingen steg over tar tid.</value>
-  </data>
-  <data name="Sprocket.Admin.Spine" xml:space="preserve">
-    <value>Koble uthevede linjer</value>
-  </data>
-  <data name="Sprocket.Admin.SpineAbout" xml:space="preserve">
-    <value>En pulserende linje ved linjenumrene kobler sammen linjene som lyser opp når pekeren hviler på en venting eller et steg, og fortsetter til linjer som er rullet ut av syne.</value>
   </data>
   <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
     <value>Avansert dør</value>

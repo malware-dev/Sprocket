@@ -19,7 +19,7 @@ public class SettingsTests
     [Fact]
     public void WrittenSettingsReadBackTheSame()
     {
-        var written = new Settings(new Layer(true, 10, null, true), new Layer(null, 100, Waiting.Step));
+        var written = new Settings(new Layer(true, 10), new Layer(null, 100));
         var read = Settings.Of(written.Written());
 
         Assert.True(read.Global.Same(written.Global));
@@ -27,8 +27,6 @@ public class SettingsTests
         Assert.True(read.DeveloperMode);
         Assert.Equal(100, read.FastestUpdate);
         Assert.Equal(10, read.DefaultFastestUpdate);
-        Assert.Equal(Waiting.Step, read.Waiting);
-        Assert.True(read.WaitSpine);
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 
@@ -113,18 +111,5 @@ public class SettingsTests
     public void TheOldNameIsNotRead()
     {
         Assert.Equal(1, Settings.From(null, "[Sprocket]\nquickestLook=100\n").FastestUpdate);
-    }
-
-    /// <summary>Waits are shown as a switch on each step unless the file says step, and a word it does not know is said in the log.</summary>
-    [Fact]
-    public void WaitsAreSwitchesUnlessSaid()
-    {
-        Assert.Equal(Waiting.Switch, Settings.From(null, null).Waiting);
-        Assert.Equal(Waiting.Step, Settings.From(null, "[Sprocket]\nwaits=step\n").Waiting);
-        Assert.Equal(Waiting.Switch, Settings.From("[Sprocket]\nwaits=step\n", "[Sprocket]\nwaits=switch\n").Waiting);
-
-        var from = Told.Lines.Count;
-        Assert.Equal(Waiting.Switch, Settings.From(null, "[Sprocket]\nwaits=bracket\n").Waiting);
-        Assert.Contains(Told.Lines.Skip(from), line => line.Contains("waits as bracket"));
     }
 }

@@ -96,7 +96,7 @@ public class RunStepTests
 
         var rows = rig.Editor.StepRows();
         Assert.True(Waits(rows[0]), "running another sequence has no waits mark");
-        Assert.False(Waits(rows[1]), "stopping another sequence has the waits mark");
+        Assert.False(Waits(rows[2]), "stopping another sequence has the waits mark");
     }
 
     /// <summary>Pressing the sequence a run step names opens the list that made it, and choosing another is one step back.</summary>

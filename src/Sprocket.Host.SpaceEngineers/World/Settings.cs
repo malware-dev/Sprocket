@@ -50,8 +50,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The harness has no mod storage to read and wants to drive the answers anyway, so it says what it wants rather than going
         /// through <see cref="Read" />.
         /// </remarks>
-        public Settings(bool developerMode, int fastestUpdate = 1, Waiting waiting = Waiting.Switch)
-            : this(new Layer(developerMode, fastestUpdate, waiting), Layer.Empty)
+        public Settings(bool developerMode, int fastestUpdate = 1)
+            : this(new Layer(developerMode, fastestUpdate), Layer.Empty)
         {
         }
 
@@ -68,23 +68,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>One of 1, 10 and 100. What a server that cannot afford something done on every tick sets, and every program on it is held to.</remarks>
         public int FastestUpdate => World.FastestUpdate ?? DefaultFastestUpdate;
 
-        /// <summary>How the editor shows and edits a sequence's waits, the trial's variant this world uses.</summary>
-        public Waiting Waiting => World.Waiting ?? DefaultWaiting;
-
-        /// <summary>Whether a pulsing line joins the lines lit by a wait or step under the pointer, the trial's choice this world uses.</summary>
-        public bool WaitSpine => World.WaitSpine ?? DefaultWaitSpine;
-
         /// <summary>Whether developer mode is on in a world that leaves it: what every world says, or off.</summary>
         public bool DefaultDeveloperMode => Global.DeveloperMode ?? false;
 
         /// <summary>The fastest update of a world that leaves it: what every world says, or every tick.</summary>
         public int DefaultFastestUpdate => Global.FastestUpdate ?? 1;
-
-        /// <summary>Whether the line joining lit lines is drawn in a world that leaves it: as every world says, or drawn.</summary>
-        public bool DefaultWaitSpine => Global.WaitSpine ?? true;
-
-        /// <summary>How waits are shown in a world that leaves it: as every world says, or by a switch on each step.</summary>
-        public Waiting DefaultWaiting => Global.Waiting ?? Waiting.Switch;
 
         /// <summary>These settings with every world saying what <paramref name="global" /> says.</summary>
         public Settings WithGlobal(Layer global)

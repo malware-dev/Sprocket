@@ -422,7 +422,7 @@ public class HandoverTests : IDisposable
         var his = new Heard();
         var annas = Client(anna, hers);
         Client(bert, his);
-        var proposed = new Settings(true, 100, World.Waiting.Step).Written();
+        var proposed = new Settings(true, 100).Written();
 
         Admins(id => id == anna.Id, () =>
         {
@@ -434,7 +434,6 @@ public class HandoverTests : IDisposable
         var told = Settings.Of(his.Settled);
         Assert.True(told.DeveloperMode);
         Assert.Equal(100, told.FastestUpdate);
-        Assert.Equal(World.Waiting.Step, told.Waiting);
         Assert.Equal(his.Settled, hers.Settled);
     }
 

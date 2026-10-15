@@ -308,6 +308,17 @@ public class DragTests
         Step(editor, "Airlock Vent", "depressurize");
         Step(editor, "Airlock Outer Door", "open");
 
+        // Each of the three steps took time and was given a wait row of its own; the drags are of the steps alone.
+        var steps = editor.Program.Sequences[0].Steps;
+        for (var i = steps.Count - 1; i >= 0; i--)
+        {
+            if (steps[i] is Await)
+                steps.RemoveAt(i);
+        }
+
+        editor.Program.Edited();
+        editor.Invalidate();
+
         screen.Run(5);
         return screen;
     }

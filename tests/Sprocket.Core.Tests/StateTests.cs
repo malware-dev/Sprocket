@@ -190,7 +190,7 @@ public class StateTests
         var system = after.Systems[0];
         Assert.False(system.Enabled);
         Assert.Equal(SequenceProblem.None, system.Halt!.Problem);
-        Assert.Equal("Stopped for an unknown reason.", SequenceText.Stopped(new Texts(), system.Halt, system, false));
+        Assert.Equal("Stopped for an unknown reason.", SequenceText.Stopped(new Texts(), system.Halt, system));
     }
 
     [Theory]

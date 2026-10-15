@@ -32,9 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Switches a step off, or back on.</summary>
         SwitchStep,
 
-        /// <summary>Has a step that takes time waited for where it stands, or carried on from at once.</summary>
-        WaitStep,
-
         /// <summary>Puts the program a text says in place of the one there, having read the text first.</summary>
         Mend,
 

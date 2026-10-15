@@ -1,7 +1,7 @@
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>Switches a step off, or back on, with the wait for it to finish that goes with it.</summary>
+    /// <summary>Switches steps off, or back on.</summary>
     public sealed class SwitchStep : SequenceEdit
     {
         readonly int _index;

@@ -41,7 +41,7 @@ public class BlocksetTriggerTests
         Assert.True(system.Instances[0].Enabled);
         Assert.False(system.Instances[1].Enabled);
         Assert.Equal(SequenceProblem.EmptySlot, system.Instances[1].Halt!.Problem);
-        Assert.EndsWith("slot was empty.", SequenceText.Stopped(new Texts(), system.Instances[1].Halt, system, false));
+        Assert.EndsWith("slot was empty.", SequenceText.Stopped(new Texts(), system.Instances[1].Halt, system));
     }
 
     /// <summary>

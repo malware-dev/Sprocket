@@ -178,7 +178,7 @@ public class ReloadTwinTests
     {
         Twins(delegate(Screen screen)
         {
-            screen.Scene.Ship.Settle(new Settings(Layer.Empty, new Layer(true, null, Waiting.Step, false)));
+            screen.Scene.Ship.Settle(new Settings(Layer.Empty, new Layer(true, null)));
             Cycle(screen);
         }, reloadAt, delegate(Screen screen, int tick)
         {

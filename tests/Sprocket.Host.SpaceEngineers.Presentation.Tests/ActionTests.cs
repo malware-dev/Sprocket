@@ -233,7 +233,7 @@ public class ActionTests
 
         var rows = screen.Editor.StepRows();
         var opens = rows[0].Within().OfType<MemberName>().Single();
-        var switches = rows[1].Within().OfType<MemberName>().Single();
+        var switches = rows[2].Within().OfType<MemberName>().Single();
 
         Assert.Equal(Symbols.Lasting, opens.Mark);
         Assert.Equal(Symbols.Action, switches.Mark);

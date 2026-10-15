@@ -77,11 +77,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Why nothing on it can be changed, said over everything that would change it; empty while it can.</summary>
         public string Locked { get; set; } = "";
 
-        /// <summary>Where waits are switched on each step, whether the sequence waits for this one; null for a step that takes no time, or where waits are rows of their own.</summary>
-        public bool? Waits { get; set; }
-
-        /// <summary>What pressing the step's underhang does, or null while it cannot be pressed.</summary>
-        public ICommand Toggles { get; set; }
 
         /// <summary>Whether the clock of its wait is lit, tied to the step under the pointer: its underhang's, or its own where it is a wait row.</summary>
         public bool ClockLit { get; set; }
@@ -101,16 +96,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Whether the spine joining lit lines ends at this row, its last lit line.</summary>
         public bool JoinLast { get; set; }
 
-        /// <summary>Whether the pointer is on the step's underhang.</summary>
-        public bool UnderhangHot => _hangRoom.IsVisible && _underhang.IsHot;
-
-        /// <summary>Whether the pointer is on the step: its underhang, its grip or any part of its sentence.</summary>
+        /// <summary>Whether the pointer is on the step: its grip or any part of its sentence.</summary>
         /// <remarks>Asked every tick, as the pointer gives no word when it moves; a handful of flags on the row, nothing measured.</remarks>
         public bool Hot
         {
             get
             {
-                if (_underhang.IsHot || _grip.IsHot)
+                if (_grip.IsHot)
                     return true;
 
                 for (var i = 0; i < _chips.Count; i++)
@@ -147,8 +139,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>The handle the row is dragged by.</summary>
         public Grip Grip => _grip;
 
-        /// <summary>Where a spine of the ifs it stands in that ends at it turns in: level with its sentence, the underhang below it or not.</summary>
-        public float SpineAt => _hangRoom.IsVisible ? _sentence.Bounds.Y + _sentence.Bounds.Height * 0.5f : Bounds.Y + Bounds.Height * 0.5f;
+        /// <summary>Where a spine of the ifs it stands in that ends at it turns in: level with its sentence.</summary>
+        public float SpineAt => Bounds.Y + Bounds.Height * 0.5f;
 
         /// <summary>Shows what it has been told, naming blocks as <paramref name="world" /> calls them and saying its fixed words in <paramref name="texts" />.</summary>
         public void Show(GridWorld world, Texts texts)
@@ -164,7 +156,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _problem.Text = HasProblem ? Problem : "";
             _problem.IsVisible = HasProblem && Problem.Length != 0;
             _problem.Color = Inks.Of(Level, Palette.Faint);
-            _hangRoom.Padding = new Thickness((Depth + 1) * Indent, 0f, 0f, 0f);
 
             if (_led != Kind)
             {
@@ -182,7 +173,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _chips[i].Glow = MarksLit && !IsOff ? Glow : Palette.None;
 
             _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.MemberWaits : Kind == StepKind.Await ? texts.SequenceAwaitRow : null);
-            Hang(texts);
 
             // The row closing an if and the end of a branch are where things are added, and are nothing that can be moved,
             // paused or deleted; a branch's own line moves, pauses and switches with its if.
@@ -252,22 +242,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <remarks>A wait row has nothing to press, and still lights what it waits for under the pointer.</remarks>
         protected override bool TakesPointer => Kind == StepKind.Await;
 
-        /// <summary>Shows the underhang as the step's wait stands, its clock lit where it is tied to the step under the pointer.</summary>
-        void Hang(Texts texts)
-        {
-            _hangRoom.IsVisible = Waits.HasValue;
-            if (!Waits.HasValue)
-                return;
-
-            var waits = Waits.Value;
-            _waitWords.Text = waits ? texts.SequenceWaitForCompletion : texts.SequenceDoNotWait;
-            _waitWords.Style = waits ? Styles.WaitWords : Styles.WaitWordsOff;
-            _clock.Style = waits ? Styles.WaitOn : Styles.WaitOff;
-            _clock.HaloTint = ClockLit && !IsOff ? Glow : Palette.None;
-            _underhang.Command = Toggles;
-            _underhang.Tip = Tip.For(_underhang.Tip, Toggles == null ? Why() : waits ? texts.SequenceWaitsHere : texts.SequenceCarriesOn);
-        }
-
         /// <summary>Where the spine of the if <paramref name="level" /> ifs out from the sequence runs down its indent.</summary>
         /// <remarks>The ifs' spines are the list's to draw, since they run past rows that move while one is carried; see <see cref="StepList" />.</remarks>
         public float SpineX(int level)
@@ -275,7 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return _sentence.Bounds.X + level * Indent + SpineIn;
         }
 
-        /// <summary>Draws the row, then the spine its underhang hangs from, one in from its own indent.</summary>
+        /// <summary>Draws the row, then its stretch of the spine joining lit lines where it is joined.</summary>
         protected override void DrawContent(IGraphics g)
         {
             base.DrawContent(g);
@@ -283,11 +257,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (Joins)
                 Join(g, Bounds.Y - Reach, Bounds.Y + Bounds.Height + Reach);
 
-            if (_hangRoom.IsVisible)
-            {
-                Spine.Turning(g, SpineX(Depth), _sentence.Bounds.Y + _sentence.Bounds.Height,
-                    _underhang.Bounds.Y + _underhang.Bounds.Height * 0.5f, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
-            }
         }
 
         /// <summary>
@@ -298,17 +267,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var x = _sentence.Bounds.X - JoinOut;
             var line = _sentence.Bounds.Y + _sentence.Bounds.Height * 0.5f;
-            var hung = _underhang.Bounds.Y + _underhang.Bounds.Height * 0.5f;
-            var onLine = MarksLit || ClockLit && !_hangRoom.IsVisible;
-            var onHang = ClockLit && _hangRoom.IsVisible;
-            var first = onLine ? line : onHang ? hung : top;
-            var last = onHang ? hung : onLine ? line : bottom;
+            var onLine = MarksLit || ClockLit;
+            var first = onLine ? line : top;
+            var last = onLine ? line : bottom;
 
             Spine.Down(g, x, JoinFirst ? first : top, JoinLast ? last + Sizes.Spine : bottom, Sizes.Spine, Glow);
             if (onLine)
                 g.Fill(new RectangleF(x, line, JoinOut, Sizes.Spine), Glow);
-            if (onHang)
-                g.Fill(new RectangleF(x, hung, JoinOut, Sizes.Spine), Glow);
         }
 
         /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>

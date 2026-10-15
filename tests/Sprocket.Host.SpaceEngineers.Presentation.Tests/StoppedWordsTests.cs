@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A sequence stopped from outside says so in its status, with the step it was at, in place of "ready".</summary>
 public class StoppedWordsTests
 {
-    /// <summary>Stopped by hand while it waits on its first step, it says it was stopped at step 1 by hand.</summary>
+    /// <summary>Stopped by hand while it waits on its await, the second row, it says it was stopped at step 2 by hand.</summary>
     [Fact]
     public void AStopByHandIsSaidWithItsStep()
     {
@@ -40,11 +40,11 @@ public class StoppedWordsTests
         rig.Editor.Screen.Stops!.Execute();
         rig.Tick();
 
-        Assert.Equal(Template(rig.Texts.SequenceStoppedByHand, "1"), page.Bar.Status);
+        Assert.Equal(Template(rig.Texts.SequenceStoppedByHand, "2"), page.Bar.Status);
 
         rig.Editor.Screen.Runs!.Execute();
         rig.Tick();
-        Assert.NotEqual(Template(rig.Texts.SequenceStoppedByHand, "1"), page.Bar.Status);
+        Assert.NotEqual(Template(rig.Texts.SequenceStoppedByHand, "2"), page.Bar.Status);
     }
 
     /// <summary>Cut short by switching its logic system off, it says so with its step once the system is on again.</summary>
@@ -80,7 +80,7 @@ public class StoppedWordsTests
         system.Enabled = true;
         rig.Tick();
 
-        Assert.Equal(Template(rig.Texts.SequenceStoppedBySwitch, "1"), page.Bar.Status);
+        Assert.Equal(Template(rig.Texts.SequenceStoppedBySwitch, "2"), page.Bar.Status);
     }
 
     static string Template(string text, string step) => text.Replace("{step}", step);

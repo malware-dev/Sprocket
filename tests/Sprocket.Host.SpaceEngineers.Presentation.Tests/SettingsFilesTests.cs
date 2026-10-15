@@ -24,7 +24,7 @@ public class SettingsFilesTests
     public void AChangeToThisWorldWritesTheWorldsFileAlone()
     {
         _files[Global] = "[Sprocket]\nfastestUpdate=10\n";
-        _files[World] = "[Sprocket]\nwaits=step\n";
+        _files[World] = "[Sprocket]\ndeveloperMode=true\n";
 
         Storing(() =>
         {
@@ -35,7 +35,7 @@ public class SettingsFilesTests
         Assert.Equal(new[] { World }, _written);
         var read = Settings.From(_files[Global], _files[World]);
         Assert.Equal(100, read.FastestUpdate);
-        Assert.Equal(Waiting.Step, read.Waiting);
+        Assert.True(read.DeveloperMode);
         Assert.Equal(10, read.DefaultFastestUpdate);
     }
 
@@ -62,7 +62,7 @@ public class SettingsFilesTests
     [Fact]
     public void TheDefaultTakesTheSettingOutOfTheFile()
     {
-        _files[World] = "[Sprocket]\nfastestUpdate=100\nwaits=step\n\n[Other]\nkept=yes\n";
+        _files[World] = "[Sprocket]\nfastestUpdate=100\ndeveloperMode=true\n\n[Other]\nkept=yes\n";
 
         Storing(() =>
         {
@@ -71,7 +71,7 @@ public class SettingsFilesTests
         });
 
         Assert.DoesNotContain("fastestUpdate", _files[World]);
-        Assert.Contains("waits=step", _files[World]);
+        Assert.Contains("developerMode=true", _files[World]);
         Assert.Contains("kept=yes", _files[World]);
     }
 

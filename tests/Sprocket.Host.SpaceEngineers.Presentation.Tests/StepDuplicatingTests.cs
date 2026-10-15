@@ -32,9 +32,9 @@ public class StepDuplicatingTests
         Assert.Equal(new[] { 60, 120 }, Ticks(sequence));
     }
 
-    /// <summary>A step and the wait for it to finish are one row, and are copied together.</summary>
+    /// <summary>A wait is a row of its own, so copying the step before it copies the step alone, right after it.</summary>
     [Fact]
-    public void AStepIsCopiedWithTheWaitForIt()
+    public void AStepIsCopiedWithoutTheWaitAfterIt()
     {
         var rig = Airlock(out var sequence);
         sequence.Steps.Clear();
@@ -48,10 +48,10 @@ public class StepDuplicatingTests
         rig.Tick();
 
         Assert.IsType<Run>(sequence.Steps[0]);
-        Assert.IsType<Await>(sequence.Steps[1]);
-        Assert.IsType<Run>(sequence.Steps[2]);
-        Assert.IsType<Await>(sequence.Steps[3]);
-        Assert.IsType<Wait>(sequence.Steps[4]);
+        Assert.IsType<Run>(sequence.Steps[1]);
+        Assert.IsType<Await>(sequence.Steps[2]);
+        Assert.IsType<Wait>(sequence.Steps[3]);
+        Assert.Equal(4, sequence.Steps.Count);
     }
 
     /// <summary>An if is copied with every branch and step in it, after its end.</summary>

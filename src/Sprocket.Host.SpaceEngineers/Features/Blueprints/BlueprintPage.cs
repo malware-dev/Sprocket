@@ -255,7 +255,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             if (chosen != null && !chosen.Enabled && chosen.Halt != null)
             {
-                said = SequenceText.Stopped(Editor.Texts, chosen.Halt, _system, Editor.AwaitRows);
+                said = SequenceText.Stopped(Editor.Texts, chosen.Halt, _system);
                 sequence = _system.FindSequence(chosen.Halt.Sequence);
                 empty = chosen.Halt.Problem == Runtime.SequenceProblem.EmptySlot;
                 mended = true;
@@ -264,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 Runtime.SequenceFault fault;
                 sequence = SystemSummary.Failing(Editor.Runner, _system, chosen, out fault);
-                said = sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence, Editor.AwaitRows);
+                said = sequence == null ? "" : SequenceText.Failing(Editor.Texts, fault, sequence);
                 empty = fault.Problem == Runtime.SequenceProblem.EmptySlot;
             }
 

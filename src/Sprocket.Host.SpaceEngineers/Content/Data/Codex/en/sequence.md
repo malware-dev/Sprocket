@@ -20,21 +20,9 @@ A sequence can wait only for awaitable actions, which are the ones whose end the
 
 ## Running steps together
 
-An awaitable step can let the sequence go straight on, so the steps after it run while it's still going, like closing both airlock doors together. A wait for pending tasks further down then catches every awaitable step since the one before it. If the sequence goes straight on from its last awaitable step, the run ends there, and the blocks finish on their own.
+Adding an awaitable step also adds a `wait for pending tasks` step after it, which waits for that step and every awaitable step before it since the last one. Move it further down, and the steps in between run while the block is still going, like closing both airlock doors together. Delete it, and the sequence goes straight on. If the sequence goes straight on from its last awaitable step, the run ends there, and the blocks finish on their own.
 
-::: player
-Two ways of waiting for pending tasks are being tried, and your world uses one of them. Both are kept here until one is chosen.
-:::
-
-### A waiting line under each step
-
-Under each awaitable step hangs a `Wait for completion` line, which waits for that step and every awaitable step before it since the last wait for pending tasks. Switch it to `Do not wait`, and the sequence goes straight on.
-
-### Waiting as a step of its own
-
-Adding an awaitable step also adds a `wait for pending tasks` step after it. Move it further down, and the steps in between run while the block is still going; delete it, and the sequence goes straight on.
-
-Rest the pointer on a wait for pending tasks to see which steps it waits for, or on an awaitable step to see which wait for pending tasks catches it.
+Rest the pointer on a wait for pending tasks to see which steps it waits for, or on an awaitable step to see which wait for pending tasks catches it. A pulsing line beside the line numbers joins the lines that light up.
 
 ## When a run goes wrong
 
