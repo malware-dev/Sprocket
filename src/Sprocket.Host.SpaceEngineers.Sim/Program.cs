@@ -251,7 +251,7 @@ namespace Sprocket.Sim
         {
             string bare = word.TrimStart('-');
 
-            if (bare == "at" || bare == "tick" || bare == "drag" || bare == "move" || bare == "scroll"
+            if (bare == "at" || bare == "tick" || bare == "drag" || bare == "carry" || bare == "move" || bare == "scroll"
                 || bare == "type" || bare == "enter" || bare == "escape" || bare == "clear"
                 || bare == "double" || bare == "tab" || bare == "left" || bare == "right" || bare == "up"
                 || bare == "down")

@@ -121,9 +121,9 @@ namespace Sprocket.Sim.Simulation
                     continue;
                 }
 
-                if (word == "drag" && i + 4 < args.Length)
+                if ((word == "drag" || word == "carry") && i + 4 < args.Length)
                 {
-                    Step drag = script.Add(Step.Drag);
+                    Step drag = script.Add(word == "drag" ? Step.Drag : Step.Carry);
                     drag.At = Point(args, i + 1);
                     drag.To = Point(args, i + 3);
                     i += 4;
@@ -340,6 +340,9 @@ namespace Sprocket.Sim.Simulation
 
                 drawn();
             }
+
+            if (step.Kind == Step.Carry)
+                return;
 
             scene.Up();
             drawn();

@@ -56,9 +56,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>How many ifs it stands inside, which is how far its sentence is indented.</summary>
         public int Depth { get; set; }
 
-        /// <summary>How many of its spines go on to the row below it; the rest end at it, as the last step of their branch.</summary>
-        public int Through { get; set; }
-
         /// <summary>How many rows after it are carried with it: the rest of the if, for the row that opens one.</summary>
         public int Carries { get; set; }
 
@@ -149,6 +146,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>The handle the row is dragged by.</summary>
         public Grip Grip => _grip;
+
+        /// <summary>Where a spine of the ifs it stands in that ends at it turns in: level with its sentence, the underhang below it or not.</summary>
+        public float SpineAt => _hangRoom.IsVisible ? _sentence.Bounds.Y + _sentence.Bounds.Height * 0.5f : Bounds.Y + Bounds.Height * 0.5f;
 
         /// <summary>Shows what it has been told, naming blocks as <paramref name="world" /> calls them and saying its fixed words in <paramref name="texts" />.</summary>
         public void Show(GridWorld world, Texts texts)
@@ -268,34 +268,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _underhang.Tip = Tip.For(_underhang.Tip, Toggles == null ? Why() : waits ? texts.SequenceWaitsHere : texts.SequenceCarriesOn);
         }
 
-        /// <summary>Draws the row, then a spine down the indent for each if it stands in, which is what ties a branch's steps to the line opening it.</summary>
-        /// <remarks>
-        /// Drawn through the room either side of the row, so the spines of the rows in one branch are one line; a spine that ends here
-        /// turns in towards the step. An underhang hangs from its step on a spine of its own, one in, drawn the same way.
-        /// </remarks>
+        /// <summary>Where the spine of the if <paramref name="level" /> ifs out from the sequence runs down its indent.</summary>
+        /// <remarks>The ifs' spines are the list's to draw, since they run past rows that move while one is carried; see <see cref="StepList" />.</remarks>
+        public float SpineX(int level)
+        {
+            return _sentence.Bounds.X + level * Indent + SpineIn;
+        }
+
+        /// <summary>Draws the row, then the spine its underhang hangs from, one in from its own indent.</summary>
         protected override void DrawContent(IGraphics g)
         {
             base.DrawContent(g);
 
-            var top = Bounds.Y - Reach;
-            var bottom = Bounds.Y + Bounds.Height + Reach;
             if (Joins)
-                Join(g, top, bottom);
+                Join(g, Bounds.Y - Reach, Bounds.Y + Bounds.Height + Reach);
 
-            // Level with the step's sentence, which is what a spine ends at, the underhang below it or not.
-            var middle = _hangRoom.IsVisible ? _sentence.Bounds.Y + _sentence.Bounds.Height * 0.5f : Bounds.Y + Bounds.Height * 0.5f;
             if (_hangRoom.IsVisible)
             {
-                Spine.Turning(g, _sentence.Bounds.X + Depth * Indent + SpineIn, _sentence.Bounds.Y + _sentence.Bounds.Height,
+                Spine.Turning(g, SpineX(Depth), _sentence.Bounds.Y + _sentence.Bounds.Height,
                     _underhang.Bounds.Y + _underhang.Bounds.Height * 0.5f, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
-            }
-            for (var level = 0; level < Depth; level++)
-            {
-                var x = _sentence.Bounds.X + level * Indent + SpineIn;
-                if (level >= Through)
-                    Spine.Turning(g, x, top, middle, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
-                else
-                    Spine.Down(g, x, top, bottom, Sizes.Spine, Palette.Line);
             }
         }
 

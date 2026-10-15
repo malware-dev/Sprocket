@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Lumel;
+using Lumel.Controls;
+using Lumel.Drawing;
 using Lumel.Layout;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
@@ -14,6 +17,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     /// the place it would take is visibly empty rather than imagined from where the pointer is. They slide rather than
     /// jump, because a row appearing somewhere new reads as the list glitching rather than as the list answering. None
     /// of it moves the layout: carrying only moves how the rows are drawn.
+    /// </para>
+    /// <para>
+    /// The spine down the indent for each if, which ties a branch's steps to the line opening it, is the list's to draw rather
+    /// than each row's, because it has to stay where the if is while the rows it runs past move. A carried row takes along only
+    /// the spines of what it carries, and is drawn over the rest.
     /// </para>
     /// </remarks>
     public class StepList : VStack
@@ -93,6 +101,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             _landed.Clear();
+        }
+
+        /// <summary>Draws the rows standing in the list and their spines, then any carried row over them with its own.</summary>
+        protected override void DrawContent(IGraphics g)
+        {
+            for (var i = 0; i < Children.Count; i++)
+            {
+                if (!Carried(i))
+                    Children[i].Draw(g);
+            }
+
+            Spines(g, false);
+            if (_carrying < 0)
+                return;
+
+            for (var i = _carrying; i <= _carrying + _span; i++)
+                Children[i].Draw(g);
+
+            Spines(g, true);
         }
 
         /// <inheritdoc />
@@ -192,6 +219,61 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var moves = Moves;
             if (moves != null)
                 moves(from, to);
+        }
+
+        /// <summary>
+        /// Draws the spines of the rows standing in the list, or of the rows being carried: one down the indent of each if a row
+        /// stands in, from the row above to its next row where that stands as far in, and turning in at it where it does not.
+        /// </summary>
+        /// <remarks>
+        /// Drawn where each row is drawn, and on across any room between it and the row above, so a spine stays one line while
+        /// the rows slide. The carried rows draw only the spines inside the first of them, which is what they carry.
+        /// </remarks>
+        void Spines(IGraphics g, bool carried)
+        {
+            var reach = Spacing * 0.5f;
+            var floor = carried ? ((StepRow)Children[_carrying]).Depth : 0;
+            StepRow above = null;
+            var aboveBottom = 0f;
+
+            for (var i = 0; i < Children.Count; i++)
+            {
+                if (Carried(i) != carried)
+                    continue;
+
+                var row = (StepRow)Children[i];
+                var next = Next(i, carried);
+                var shift = row.RenderTransform.Translate.Y;
+                var top = row.Bounds.Y + shift - reach;
+                var bottom = row.Bounds.Y + row.Bounds.Height + shift + reach;
+                var through = next == null ? 0 : Math.Min(row.Depth, next.Depth);
+                var joined = above == null ? 0 : Math.Min(above.Depth, row.Depth);
+
+                for (var level = floor; level < row.Depth; level++)
+                {
+                    var x = row.SpineX(level);
+                    var from = level < joined ? Math.Min(top, aboveBottom) : top;
+                    if (level >= through)
+                        Spine.Turning(g, x, from, row.SpineAt + shift, Sizes.Spine, Sizes.SpineTurn, Palette.Line);
+                    else
+                        Spine.Down(g, x, from, bottom, Sizes.Spine, Palette.Line);
+                }
+
+                above = row;
+                aboveBottom = bottom;
+            }
+        }
+
+        /// <summary>The next row after <paramref name="index" /> that is carried, or that is not, as <paramref name="carried" /> says; null for none.</summary>
+        StepRow Next(int index, bool carried)
+        {
+            for (var i = index + 1; i < Children.Count; i++)
+            {
+                if (Carried(i) == carried)
+                    return (StepRow)Children[i];
+            }
+
+            return null;
         }
 
         void MakeRoom(int to)

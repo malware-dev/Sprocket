@@ -3,7 +3,9 @@ using VRageMath;
 using Xunit;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -67,6 +69,32 @@ public class DragTests
         screen.Scene.Up();
         screen.Run(1);
         Assert.NotEqual(Palette.SlotFill, editor.StepRows()[1].Background);
+    }
+
+    /// <summary>A step carried from inside an if leaves the if's spine whole and where it was, rather than taking its stretch of it along.</summary>
+    [Fact]
+    public void ACarriedStepLeavesTheIfsSpineWhole()
+    {
+        var screen = Screen.Holding(WithAnIf);
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        system.Enabled = false;
+        editor.Program.Edited();
+        editor.Push(new SequencePage(editor, system.Sequences[0]));
+        screen.Run(5);
+
+        var resting = Spine(screen, editor.StepRows());
+        Assert.Single(resting);
+
+        // The third grip is the second step inside the if; carried a little way, short of passing the step below it.
+        var grab = Grips(screen)[3];
+        screen.Scene.MoveTo(grab);
+        screen.Scene.Down(grab);
+        screen.Scene.Move(new Vector2(grab.X, grab.Y + 20f));
+        screen.Run(5);
+
+        Assert.True(editor.StepRows()[3].IsCarried);
+        Assert.Equal(resting, Spine(screen, editor.StepRows()));
     }
 
     /// <summary>A step's grip brightens while the pointer rests on it, which is what says it can be taken hold of.</summary>
@@ -222,6 +250,52 @@ public class DragTests
     static string Order(SprocketEditor editor) =>
         string.Join(", ", editor.StepRows()
             .Select(s => ((ActionSlot)s.Slots[0]).Action.Text));
+
+    const string WithAnIf = "sprocket 1 alpha 15\n\n"
+        + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n"
+        + "let door2 = block 'Door/LargeBlockDoor' [ 3 ]\n"
+        + "\n"
+        + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+        + "    sequence 1 {\n"
+        + "        call ext.close on [ door1 ]\n"
+        + "        if all ext.status on [ door1 ] == closed then {\n"
+        + "            call ext.open on [ door2 ]\n"
+        + "            call ext.close on [ door1 ]\n"
+        + "            call ext.open on [ door1 ]\n"
+        + "        }\n"
+        + "        else {\n"
+        + "            call ext.close on [ door2 ]\n"
+        + "        }\n"
+        + "    }\n"
+        + "}\n";
+
+    /// <summary>
+    /// The stretches the spine of the first branch of the first if is drawn in, top and bottom in pixels, run together where
+    /// they touch: one stretch for a whole spine.
+    /// </summary>
+    static List<(int Top, int Bottom)> Spine(Screen screen, List<StepRow> rows)
+    {
+        var opens = rows.FindIndex(row => row.Kind == StepKind.If);
+        var closes = rows.FindIndex(opens + 1, row => row.Depth == 0);
+        var x = rows[opens + 1].SpineX(0) - Screen.Ui(0f, 0f).X;
+        var top = rows[opens].Bounds.Y;
+        var bottom = rows[closes].Bounds.Y;
+
+        var stretches = new List<(int Top, int Bottom)>();
+        foreach (var drawn in screen.Drawings
+                     .Where(d => !d.IsText && d.Ink == Palette.Line && d.Where.Height > d.Where.Width && Math.Abs(d.Where.X - x) < 1.5f
+                                 && d.Where.Y >= top && d.Where.Y < bottom)
+                     .OrderBy(d => d.Where.Y))
+        {
+            var last = stretches.Count - 1;
+            if (last >= 0 && drawn.Where.Y <= stretches[last].Bottom + 1)
+                stretches[last] = (stretches[last].Top, Math.Max(stretches[last].Bottom, drawn.Where.Y + drawn.Where.Height));
+            else
+                stretches.Add((drawn.Where.Y, drawn.Where.Y + drawn.Where.Height));
+        }
+
+        return stretches;
+    }
 
     static Screen Build(out SprocketEditor editor)
     {

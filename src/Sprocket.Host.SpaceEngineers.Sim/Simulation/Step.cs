@@ -51,6 +51,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Hands the whole construct to the player <see cref="Count" /> names, then opens the editor again, as a capture and a look do.</summary>
         public const int Own = 14;
 
+        /// <summary>A drag held where it has got to rather than let go, so the picture is of something being carried.</summary>
+        public const int Carry = 15;
+
         /// <summary>Which of the kinds above it is.</summary>
         public int Kind;
 

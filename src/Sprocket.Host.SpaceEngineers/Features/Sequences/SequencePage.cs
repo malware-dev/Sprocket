@@ -445,13 +445,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     depth++;
             }
 
-            // A spine goes on to the next row where that row stands as far in, and ends here where it does not.
-            for (var i = 0; i < _keys.Count; i++)
-            {
-                var row = _rows[_keys[i]];
-                row.Through = i + 1 < _keys.Count ? Math.Min(row.Depth, _rows[_keys[i + 1]].Depth) : 0;
-            }
-
             Covers();
         }
 
