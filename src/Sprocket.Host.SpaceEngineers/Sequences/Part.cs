@@ -12,13 +12,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class Part
     {
-        readonly List<string> _expects = new List<string>();
-
         /// <summary>A required slot called <paramref name="id" />, expecting any block.</summary>
         public Part(string id)
         {
             Id = id;
             Annotation = "";
+            Expects = "";
         }
 
         /// <summary>The part's name, which is the slot's name wherever it is shown.</summary>
@@ -31,14 +30,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public bool IsSignal { get; set; }
 
         /// <summary>
-        /// The block types that may fill this part, or none for anything.
+        /// The type of block that may fill this part, or empty for any block.
         /// </summary>
         /// <remarks>
-        /// A type id as the game writes it with the <c>MyObjectBuilder_</c> prefix dropped, and a
-        /// <c>Type/Subtype</c> where the author meant one exact block. Several, because a family can
-        /// span type ids: a door is <c>Door</c>, <c>AirtightSlideDoor</c> and <c>AirtightHangarDoor</c>.
+        /// A type id as the game writes it with the <c>MyObjectBuilder_</c> prefix dropped, which takes that type and every type
+        /// the game builds on it, so <c>LightingBlock</c> takes interior lights and spotlights alike; or a <c>Type/Subtype</c>
+        /// where the author meant one exact block.
         /// </remarks>
-        public IList<string> Expects => _expects;
+        public string Expects { get; set; }
 
         /// <summary>
         /// What somebody wrote about this part, in their own words, or empty; never its name.
@@ -49,20 +48,52 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public string Annotation { get; set; }
 
-        /// <summary>Whether a block of the type <paramref name="sort" />, written as <see cref="Expects" /> writes one, may fill this part.</summary>
-        public bool Fits(string sort)
+        /// <summary>Whether a block whose kind stands in <paramref name="lineage" />, nearest first as a kind's lineage has it, may fill this part.</summary>
+        public bool Fits(IList<string> lineage)
         {
-            if (_expects.Count == 0)
+            if (Expects.Length == 0)
                 return true;
 
-            for (var i = 0; i < _expects.Count; i++)
+            for (var i = 0; i < lineage.Count; i++)
             {
-                if (string.Equals(sort, _expects[i], System.StringComparison.Ordinal)
-                    || sort.StartsWith(_expects[i] + "/", System.StringComparison.Ordinal))
+                if (string.Equals(lineage[i], Expects, System.StringComparison.Ordinal))
                     return true;
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// The nearest type every one of <paramref name="lineages" /> stands in, each nearest first as a kind's lineage has it, or
+        /// empty for any block where they share none; one with nothing in it, a block no longer there, says nothing.
+        /// </summary>
+        /// <remarks>A type and never one exact block, so a slot made from blocks takes blocks of another size or style too.</remarks>
+        public static string Nearest(IList<IList<string>> lineages)
+        {
+            IList<string> first = null;
+            for (var i = 0; i < lineages.Count && first == null; i++)
+            {
+                if (lineages[i].Count > 0)
+                    first = lineages[i];
+            }
+
+            if (first == null)
+                return "";
+
+            for (var t = 0; t < first.Count; t++)
+            {
+                if (first[t].IndexOf('/') >= 0)
+                    continue;
+
+                var shared = true;
+                for (var i = 0; i < lineages.Count && shared; i++)
+                    shared = lineages[i].Count == 0 || lineages[i].Contains(first[t]);
+
+                if (shared)
+                    return first[t];
+            }
+
+            return "";
         }
 
         /// <summary>Calls the part <paramref name="id" />, and nothing else: <see cref="AutomationSystem.RenamePart" /> renames what names it.</summary>

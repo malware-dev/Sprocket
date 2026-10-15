@@ -22,7 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly Part _part;
         readonly ICommand _guide;
         readonly List<string> _used = new List<string>();
-        readonly List<string> _kinds = new List<string>();
 
         Element _focused;
 
@@ -199,36 +198,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 : null;
         }
 
-        /// <summary>The kinds of block the slot expects, as the game names those on this construct, or that it takes any block.</summary>
-        /// <remarks>A kind no block on the construct is of is said as the slot writes it, which is the game's own id.</remarks>
+        /// <summary>The type of block the slot expects, in its name, or that it takes any block.</summary>
+        /// <remarks>
+        /// One exact block is named as the game names it on this construct, and a type in a name of Sprocket's own. Either is said
+        /// as the slot writes it where there is no name for it: a block no block on the construct is, or a modded type.
+        /// </remarks>
         string Expected(Localization.Texts texts)
         {
             var expects = _part.Expects;
-            if (expects.Count == 0)
+            if (expects.Length == 0)
                 return texts.SlotAnyBlock;
 
-            _kinds.Clear();
+            if (expects.IndexOf('/') < 0)
+                return TypeText.Of(texts, expects);
+
             var entities = Editor.World.Entities;
-            for (var e = 0; e < expects.Count; e++)
+            for (var i = 0; i < entities.Count; i++)
             {
-                var named = false;
-                for (var i = 0; i < entities.Count; i++)
-                {
-                    var kind = entities[i].Kind;
-                    var sort = BlockKinds.Sort(kind.Id);
-                    if (sort != expects[e] && !sort.StartsWith(expects[e] + "/", System.StringComparison.Ordinal))
-                        continue;
-
-                    named = true;
-                    if (!_kinds.Contains(kind.DisplayName))
-                        _kinds.Add(kind.DisplayName);
-                }
-
-                if (!named && !_kinds.Contains(expects[e]))
-                    _kinds.Add(expects[e]);
+                var kind = entities[i].Kind;
+                if (string.Equals(BlockKinds.Sort(kind.Id), expects, System.StringComparison.Ordinal))
+                    return kind.DisplayName;
             }
 
-            return string.Join(", ", _kinds.ToArray());
+            return expects;
         }
 
         /// <summary>Whether an installation holds blocks in <paramref name="part" />.</summary>

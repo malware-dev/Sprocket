@@ -31,6 +31,7 @@ public static class StorageReport
 
     const int Windows = 7;
 
+    /// <summary>The storage timing of every program shape, saved and loaded, as a table.</summary>
     public static string Render()
     {
         var report = new StringBuilder();
@@ -371,7 +372,7 @@ public static class StorageReport
             {
                 var part = system.PartFor(Entity(f));
                 part.Annotation = _annotation;
-                part.Expects.Add("Door");
+                part.Expects = "Door";
             }
 
             for (var i = 0; i < _instances; i++)

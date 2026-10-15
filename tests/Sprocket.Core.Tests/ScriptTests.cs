@@ -61,7 +61,7 @@ public class ScriptTests
 
         var part = system.PartFor("inner");
         part.Annotation = "The door onto the ship.";
-        part.Expects.Add("Door");
+        part.Expects = "Door";
 
         system.AddInstance().Fill("inner", new[] { "inner" });
 
@@ -333,12 +333,9 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// A part says what may fill it, as one block type or a list of them.
+    /// A part says what may fill it as one block type, a type the game builds others on as readily as any: <c>DoorBase</c>
+    /// takes every door.
     /// </summary>
-    /// <remarks>
-    /// A family spans type ids - a door is <c>Door</c>, <c>AirtightSlideDoor</c> and
-    /// <c>AirtightHangarDoor</c> - so a list is the ordinary case rather than the awkward one.
-    /// </remarks>
     [Fact]
     public void APartSaysWhatMayFillIt()
     {
@@ -347,15 +344,14 @@ public class ScriptTests
 
         var inner = system.PartFor("inner");
         inner.Annotation = "The inner door.";
-        inner.Expects.Add("Door");
-        inner.Expects.Add("AirtightSlideDoor");
+        inner.Expects = "DoorBase";
 
-        system.PartFor("vent").Expects.Add("AirVent");
+        system.PartFor("vent").Expects = "AirVent";
         system.PartFor("anything");
         Closes(program, "inner", "vent", "anything");
 
         var text = Save(program);
-        Assert.Contains("    # The inner door.\n    required slot inner expects [ Door, AirtightSlideDoor ]\n", text);
+        Assert.Contains("    # The inner door.\n    required slot inner expects DoorBase\n", text);
         Assert.Contains("    required slot vent expects AirVent\n", text);
         Assert.Contains("    required slot anything\n", text);
 
@@ -363,10 +359,22 @@ public class ScriptTests
         Assert.Equal("", Load(text, after));
 
         var read = after.Systems[0];
-        Assert.Equal(new[] { "Door", "AirtightSlideDoor" }, read.FindPart("inner")!.Expects);
+        Assert.Equal("DoorBase", read.FindPart("inner")!.Expects);
         Assert.Equal("The inner door.", read.FindPart("inner")!.Annotation);
-        Assert.Equal(new[] { "AirVent" }, read.FindPart("vent")!.Expects);
-        Assert.Empty(read.FindPart("anything")!.Expects);
+        Assert.Equal("AirVent", read.FindPart("vent")!.Expects);
+        Assert.Equal("", read.FindPart("anything")!.Expects);
+    }
+
+    /// <summary>A slot expects one type, so a list after <c>expects</c> is a mistake the reader names.</summary>
+    [Fact]
+    public void ASlotExpectingAListIsAMistake()
+    {
+        var program = BlueprintCalled("", "Airlock");
+        program.Systems[0].PartFor("inner").Expects = "Door";
+        Closes(program, "inner");
+        var text = Save(program).Replace("expects Door\n", "expects [ Door, AirtightSlideDoor ]\n");
+
+        Assert.Contains("expected signal or one block type after 'expects'.", Load(text, new Automation()));
     }
 
     /// <summary>A part a construct may leave unfilled is written optional, and read back as one.</summary>
@@ -375,9 +383,9 @@ public class ScriptTests
     {
         var program = BlueprintCalled("", "Airlock");
         var system = program.Systems[0];
-        system.PartFor("inner").Expects.Add("Door");
+        system.PartFor("inner").Expects = "Door";
         var lamp = system.PartFor("lamp");
-        lamp.Expects.Add("InteriorLight");
+        lamp.Expects = "InteriorLight";
         lamp.Optional = true;
         Closes(program, "inner", "lamp");
 
@@ -438,7 +446,7 @@ public class ScriptTests
     public void AnExactBlockTypeIsQuoted()
     {
         var program = BlueprintCalled("", "Hangar");
-        program.Systems[0].PartFor("door").Expects.Add("AirtightHangarDoor/LargeBlockAirtightHangarDoor");
+        program.Systems[0].PartFor("door").Expects = "AirtightHangarDoor/LargeBlockAirtightHangarDoor";
         Closes(program, "door");
 
         var text = Save(program);
@@ -446,8 +454,7 @@ public class ScriptTests
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
-        Assert.Equal(new[] { "AirtightHangarDoor/LargeBlockAirtightHangarDoor" },
-            after.Systems[0].FindPart("door")!.Expects);
+        Assert.Equal("AirtightHangarDoor/LargeBlockAirtightHangarDoor", after.Systems[0].FindPart("door")!.Expects);
     }
 
     [Theory]

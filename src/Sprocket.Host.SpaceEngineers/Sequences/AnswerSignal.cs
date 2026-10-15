@@ -58,8 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 _part = system.PartFor(_name);
                 _part.IsSignal = true;
-                if (_type.Length > 0)
-                    _part.Expects.Add(_type);
+                _part.Expects = _type;
             }
             else if (_partAt >= 0)
             {

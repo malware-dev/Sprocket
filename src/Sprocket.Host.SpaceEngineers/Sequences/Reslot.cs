@@ -16,8 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Part> _refilled = new List<Part>();
         readonly List<List<string>> _refilledWas = new List<List<string>>();
         readonly List<List<string>> _refilledNow = new List<List<string>>();
-        readonly List<List<string>> _expectedWas = new List<List<string>>();
-        readonly List<List<string>> _expectedNow = new List<List<string>>();
+        readonly List<string> _expectedWas = new List<string>();
+        readonly List<string> _expectedNow = new List<string>();
         readonly List<IList<string>> _renamed = new List<IList<string>>();
         readonly List<List<string>> _renamedWas = new List<List<string>>();
         readonly List<List<string>> _renamedNow = new List<List<string>>();
@@ -46,14 +46,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Gives the slot <paramref name="part" /> the blocks <paramref name="blocks" /> in the installation shown, expecting <paramref name="expects" />.</summary>
-        public void Refill(Part part, IList<string> blocks, IList<string> expects)
+        public void Refill(Part part, IList<string> blocks, string expects)
         {
             var had = _shown.FilledWith(part.Id);
             _refilled.Add(part);
             _refilledWas.Add(had == null ? new List<string>() : new List<string>(had));
             _refilledNow.Add(new List<string>(blocks));
-            _expectedWas.Add(new List<string>(part.Expects));
-            _expectedNow.Add(new List<string>(expects));
+            _expectedWas.Add(part.Expects);
+            _expectedNow.Add(expects);
         }
 
         /// <summary>Has <paramref name="names" />, a step's or a trigger's list, name <paramref name="now" /> in place of what it names.</summary>
@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = 0; i < _refilled.Count; i++)
             {
                 _shown.Fill(_refilled[i].Id, _refilledNow[i]);
-                Put(_refilled[i].Expects, _expectedNow[i]);
+                _refilled[i].Expects = _expectedNow[i];
             }
 
             for (var i = 0; i < _renamed.Count; i++)
@@ -127,7 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 else
                     _shown.Clear(_refilled[i].Id);
 
-                Put(_refilled[i].Expects, _expectedWas[i]);
+                _refilled[i].Expects = _expectedWas[i];
             }
 
             for (var i = _made.Count - 1; i >= 0; i--)

@@ -17,9 +17,13 @@ Du lager ikke plasser selv. Hver gang du [velger](selector) blokker for et steg,
 
 En plass med én blokk får navnet til blokken, og en med flere blir nummerert.
 
+En plass tar én type blokk: den nærmeste typen alle blokkene i den deler, etter spillets egne typer. Ett innelys, eller flere, lager en plass for `Innelys`. Et innelys og en lyskaster lager en plass for `Lys`, som tar begge. Et lys og en dør lager en for `Blokk som slås av og på`, og blokker som ikke deler noe nærmere, lager en plass som tar hvilken som helst blokk. Siden til plassen viser typen under `Forventer`.
+
+Fordi en plass tar en type framfor én bestemt blokk, tar en plass laget av en stor dør også små dører, og en ![](mark:blueprint)&nbsp;[plantegning](blueprint) laget på et stort rutenett kan installeres på et lite.
+
 Logikksystemet regner ut plassene på nytt etter hver endring, så de kan deles og slås sammen mens du bygger. Seks lys som slås av i ett steg, lager *Plass 1*. Legg til et steg som gjør lys 1 til 3 røde og et som gjør lys 4 til 6 blå, så blir de to gruppene plasser. Sammen er de nøyaktig de seks lysene, så det første steget bruker nå begge, og *Plass 1* forsvinner. Slett de røde og blå stegene, så kommer *Plass 1* tilbake.
 
-En plass som blir stående, beholder navnet sitt, hva den er til og blokkene til hver installasjon. Det gjør også en plass som bare ett steg eller én utløser bruker, når du velger andre blokker for den, så lenge de nye er av et slag plassen forventer.
+En plass som blir stående, beholder navnet sitt, hva den er til og blokkene til hver installasjon. Det gjør også en plass som bare ett steg eller én utløser bruker, når du velger andre blokker for den, så lenge de nye er av typen plassen tar.
 
 ## Navnet og hva den er til
 

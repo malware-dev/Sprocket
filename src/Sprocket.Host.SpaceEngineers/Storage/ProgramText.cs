@@ -949,10 +949,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (part.IsSignal)
                 pen.Says(Keyword.Expects).Says(Keyword.Signal);
-            else if (part.Expects.Count == 1)
-                pen.Says(Keyword.Expects).Word(part.Expects[0]);
-            else if (part.Expects.Count > 1)
-                WriteNames(pen.Says(Keyword.Expects), part.Expects);
+            else if (part.Expects.Length > 0)
+                pen.Says(Keyword.Expects).Word(part.Expects);
 
             pen.End();
         }
@@ -992,12 +990,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var one = statement.ValueAt(3);
             if (one.Says(Keyword.Signal))
                 part.IsSignal = true;
-            else if (one.Form == ValueForm.List)
-                Names(statement, 3, part.Expects, trouble, "expected a block type or a list of them after 'expects'.");
             else if (Named(one))
-                part.Expects.Add(one.Word);
+                part.Expects = one.Word;
             else
-                trouble.Say(statement, "expected signal, a block type or a list of them after 'expects'.");
+                trouble.Say(statement, "expected signal or one block type after 'expects'.");
 
             Ends(statement, 4, trouble);
         }

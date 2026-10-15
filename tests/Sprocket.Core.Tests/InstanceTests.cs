@@ -350,7 +350,7 @@ public class InstanceTests
 
         var part = ship.Airlock.PartFor(ship.Ref(4));
         part.Annotation = "The warning light. Whatever you want flashing while the doors move.";
-        part.Expects.Add("InteriorLight");
+        part.Expects = "InteriorLight";
 
         var parts = new List<string>();
         ship.Airlock.Acted(parts);
@@ -365,7 +365,7 @@ public class InstanceTests
 
         Assert.Equal("The warning light. Whatever you want flashing while the doors move.",
             ship.Airlock.FindPart(ship.Ref(4))!.Annotation);
-        Assert.Equal(new[] { "InteriorLight" }, ship.Airlock.FindPart(ship.Ref(4))!.Expects);
+        Assert.Equal("InteriorLight", ship.Airlock.FindPart(ship.Ref(4))!.Expects);
     }
 
     /// <summary>

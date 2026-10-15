@@ -17,9 +17,13 @@ You don't make slots yourself. Each time you [select](selector) blocks for a ste
 
 A slot of one block takes the block's name, and a slot of several is numbered.
 
+A slot takes one type of block: the nearest type its blocks all share, by the game's own types. One interior light, or several, make a slot for `Interior light`. An interior light and a spotlight make a slot for `Light`, which takes either. A light and a door make one for `Block that switches on and off`, and blocks that share nothing nearer make a slot that takes any block. The slot's page shows its type under `Expects`.
+
+Because a slot takes a type rather than one exact block, a slot made from a large door takes small doors too, and a ![](mark:blueprint)&nbsp;[blueprint](blueprint) made on a large grid installs on a small one.
+
 The logic system works its slots out again after every change, so they can split and merge as you build. Six lights switched off by one step make *Slot 1*. Add a step that turns lights 1 to 3 red and one that turns lights 4 to 6 blue, and those two groups become slots. Together they're exactly the six lights, so the first step now uses both, and *Slot 1* goes. Delete the red and blue steps, and *Slot 1* comes back.
 
-A slot that stays keeps its name, what it is for, and every installation's blocks. So does a slot used by only one step or trigger when you select other blocks for it, as long as the new ones are of a kind the slot expects.
+A slot that stays keeps its name, what it is for, and every installation's blocks. So does a slot used by only one step or trigger when you select other blocks for it, as long as the new ones are of the type the slot takes.
 
 ## Its name and what it is for
 

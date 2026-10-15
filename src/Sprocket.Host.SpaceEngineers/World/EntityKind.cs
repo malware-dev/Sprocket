@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<Plan> _planned = new List<Plan>();
         readonly Dictionary<string, string> _flippers = new Dictionary<string, string>();
         readonly List<Capability> _capabilities = new List<Capability>();
+        readonly List<string> _lineage = new List<string>();
 
         EntityAction _value;
 
@@ -56,6 +57,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The node this kind hangs under in the list of kinds, or <see cref="World.Family.None" />.</summary>
         public Family Family { get; private set; }
+
+        /// <summary>
+        /// What a slot may expect of a block of this kind, nearest first: the block itself as <c>Type/Subtype</c>, its type, and
+        /// each type the game builds that one on, up to and short of the terminal block every block is; empty for what is no block.
+        /// </summary>
+        /// <remarks>Each written as <see cref="BlockKinds.Sort" /> writes one, the spelling of a slot's <c>expects</c>.</remarks>
+        public IList<string> Lineage => _lineage;
 
         /// <summary>Moments. These start sequences, and nothing else.</summary>
         public IList<EntityEvent> Events => _events;

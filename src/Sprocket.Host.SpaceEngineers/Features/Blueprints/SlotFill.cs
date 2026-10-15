@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Whether <paramref name="block" /> is of a kind <paramref name="part" /> may be filled with.</summary>
         static bool Fits(Part part, GridEntity block)
         {
-            return part.Fits(BlockKinds.Sort(block.Kind.Id));
+            return part.Fits(block.Kind.Lineage);
         }
     }
 }

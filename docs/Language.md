@@ -216,8 +216,8 @@ required slot inner expects Door
 # The hangar door, and only the large one
 required slot hangar expects 'AirtightHangarDoor/LargeBlockAirtightHangarDoor'
 
-# A light over the door, where there is one
-optional slot lamp expects InteriorLight
+# A light over the door, of whatever kind, where there is one
+optional slot lamp expects LightingBlock
 
 # The call button
 optional slot button expects signal
@@ -225,8 +225,12 @@ optional slot button expects signal
 
 `required slot <name> expects <what>` asks the construct for it. `expects` names what may fill the
 slot: a block's type, or `signal` for a slot answered by a function that gives back a signal. A
-block's type is a game type id with the `MyObjectBuilder_` prefix dropped, a quoted `'Type/Subtype'`
-for one exact block, or a list of either.
+block's type is a game type id with the `MyObjectBuilder_` prefix dropped, which takes every block of
+that type and of every type the game builds on it, so `LightingBlock` takes interior lights and
+spotlights alike; or a quoted `'Type/Subtype'` for one exact block. A slot with no `expects` takes
+any block.
+
+A slot made from blocks expects the nearest type all of them share.
 
 An `optional` slot is one an instance may leave unanswered.
 

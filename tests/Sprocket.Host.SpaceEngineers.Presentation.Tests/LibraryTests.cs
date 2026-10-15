@@ -1106,7 +1106,7 @@ public class LibraryTests
         // The logic system on the construct gains a slot its blueprint in the library lacks: the inner door, which a step
         // closes, answered in every installation.
         var door = rig.Editor.Program.Declare(rig.Editor.World, rig.Editor.World.FindEntity(2)!).Name;
-        system.PartFor("Inner").Expects.Add("Door");
+        system.PartFor("Inner").Expects = "Door";
         foreach (var instance in system.Instances)
             instance.Fill("Inner", new[] { door });
 

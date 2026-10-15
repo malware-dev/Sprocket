@@ -615,6 +615,12 @@ public sealed class Rig
             .Does("GetGridGroup", () => _group)
             .Done();
 
+        // The game's own types, answered as the game answers a mod asking after them.
+        MyAPIGateway.Reflection = Pretend.To<IMyReflection>()
+            .Does("BaseTypeOf", arguments => ((Type)arguments[0]).BaseType)
+            .Does("IsAssignableFrom", arguments => ((Type)arguments[0]).IsAssignableFrom((Type)arguments[1]))
+            .Done();
+
         MyAPIGateway.Multiplayer = Pretend.To<IMyMultiplayer>()
             .Gives("MyName", () => Environment.UserName)
             .Gives("IsServer", () => true)

@@ -409,8 +409,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var name = Free(called);
             var part = PartFor(name);
             part.IsSignal = true;
-            if (type.Length > 0)
-                part.Expects.Add(type);
+            part.Expects = type ?? "";
 
             instance.Fill(name, declared, at);
             return name;

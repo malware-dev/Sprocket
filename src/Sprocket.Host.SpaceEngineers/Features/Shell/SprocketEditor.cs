@@ -2174,7 +2174,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (instance == null)
                 return null;
 
-            return new AnswerSignal(then, system, instance, required.Part, Type(first.Kind), declared, at);
+            return new AnswerSignal(then, system, instance, required.Part, Part.Nearest(new[] { first.Kind.Lineage }), declared, at);
         }
 
         /// <summary>The blocks <paramref name="answer" /> picked, as the construct declares them, each with the toolbar slot its press is answered on; the first of them, or null.</summary>
@@ -2510,7 +2510,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 delegate(string name)
                 {
                     GridEntity entity = Known(name, met);
-                    return entity != null ? Type(entity.Kind) : "";
+                    return entity != null ? entity.Kind.Lineage : new string[0];
                 },
                 delegate(int number) { return Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture)); });
         }
@@ -2597,14 +2597,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var name = Naming.Clean(entity.Name);
             return name.Length > 0 ? name : entity.Kind.DisplayName;
-        }
-
-        /// <summary>The type a part filled by a block of <paramref name="kind" /> expects, with no subtype.</summary>
-        static string Type(EntityKind kind)
-        {
-            var sort = BlockKinds.Sort(kind.Id);
-            var slash = sort.IndexOf('/');
-            return slash < 0 ? sort : sort.Substring(0, slash);
         }
 
         /// <summary>
@@ -3383,7 +3375,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var part = new Part(FreeSlotName(system));
             part.IsSignal = true;
-            Expected(system, signal, part.Expects);
+            part.Expects = Expected(system, signal);
 
             var reslot = new Reslot(system, shown);
             reslot.Make(part, new List<string>());
@@ -3412,21 +3404,47 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>Adds to <paramref name="kinds" /> every kind the slots <paramref name="trigger" /> starts from expect, each once.</summary>
-        static void Expected(AutomationSystem system, MomentTrigger trigger, IList<string> kinds)
+        /// <summary>The nearest type every slot <paramref name="trigger" /> starts from expects, or empty for any block.</summary>
+        string Expected(AutomationSystem system, MomentTrigger trigger)
         {
+            var lineages = new List<IList<string>>();
             for (var i = 0; i < trigger.Sources.Count; i++)
             {
                 var part = system.FindPart(trigger.Sources[i]);
                 if (part == null)
                     continue;
 
-                for (var k = 0; k < part.Expects.Count; k++)
+                if (part.Expects.Length == 0)
+                    return "";
+
+                lineages.Add(Lineage(part.Expects));
+            }
+
+            return Part.Nearest(lineages);
+        }
+
+        /// <summary>
+        /// The type <paramref name="type" /> and each type the game builds it on, nearest first, as a kind on the construct has
+        /// them; the type alone where no block on the construct is of it.
+        /// </summary>
+        IList<string> Lineage(string type)
+        {
+            var entities = _world.Entities;
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var lineage = entities[i].Kind.Lineage;
+                var at = lineage.IndexOf(type);
+                if (at >= 0)
                 {
-                    if (!kinds.Contains(part.Expects[k]))
-                        kinds.Add(part.Expects[k]);
+                    var from = new List<string>();
+                    for (var k = at; k < lineage.Count; k++)
+                        from.Add(lineage[k]);
+
+                    return from;
                 }
             }
+
+            return new List<string> { type };
         }
 
         /// <summary>

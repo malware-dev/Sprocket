@@ -198,7 +198,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Slot.Expects" xml:space="preserve">
     <value>Expects</value>
-    <comment>Heading on a slot's page, in capitals, over the kinds of block the slot takes.</comment>
+    <comment>Heading on a slot's page, in capitals, over the one type of block the slot takes.</comment>
   </data>
   <data name="Sprocket.Slot.AnyBlock" xml:space="preserve">
     <value>Any block</value>
@@ -2739,5 +2739,413 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   <data name="Sprocket.Admin.SpineAbout" xml:space="preserve">
     <value>A pulsing line beside the line numbers joins the lines that light up when the pointer rests on a wait or a step, and runs on to lines scrolled out of view.</value>
     <comment>In the admin settings, the line under the checkbox of the trial that draws a pulsing line joining the lines lit up on a sequence's screen.</comment>
+  </data>
+  <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
+    <value>Advanced door</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's AdvancedDoor blocks, and every type the game builds on it; it covers gates and offset doors.</comment>
+  </data>
+  <data name="Sprocket.Type.AirtightDoorGeneric" xml:space="preserve">
+    <value>Airtight door</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's AirtightDoorGeneric blocks, and every type the game builds on it; it covers hangar doors and sliding doors.</comment>
+  </data>
+  <data name="Sprocket.Type.AirtightHangarDoor" xml:space="preserve">
+    <value>Hangar door</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's AirtightHangarDoor blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.AirtightSlideDoor" xml:space="preserve">
+    <value>Sliding door</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's AirtightSlideDoor blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.AirVent" xml:space="preserve">
+    <value>Air vent</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's AirVent blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Assembler" xml:space="preserve">
+    <value>Assembler</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Assembler blocks, and every type the game builds on it; it covers survival kits, which are assemblers to the game.</comment>
+  </data>
+  <data name="Sprocket.Type.BasicMissionBlock" xml:space="preserve">
+    <value>AI basic task block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's BasicMissionBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.BatteryBlock" xml:space="preserve">
+    <value>Battery</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's BatteryBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Beacon" xml:space="preserve">
+    <value>Beacon</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Beacon blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.BroadcastController" xml:space="preserve">
+    <value>Broadcast controller</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's BroadcastController blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ButtonPanel" xml:space="preserve">
+    <value>Button panel</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ButtonPanel blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.CameraBlock" xml:space="preserve">
+    <value>Camera</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's CameraBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.CargoContainer" xml:space="preserve">
+    <value>Cargo container</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's CargoContainer blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Cockpit" xml:space="preserve">
+    <value>Cockpit or seat</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Cockpit blocks, and every type the game builds on it; it covers cryo chambers and beds, which are cockpits to the game.</comment>
+  </data>
+  <data name="Sprocket.Type.Collector" xml:space="preserve">
+    <value>Collector</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Collector blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ContractBlock" xml:space="preserve">
+    <value>Contracts block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ContractBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ControlPanel" xml:space="preserve">
+    <value>Control panel</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ControlPanel blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ConveyorSorter" xml:space="preserve">
+    <value>Conveyor sorter</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ConveyorSorter blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ConveyorTurretBase" xml:space="preserve">
+    <value>Gatling or missile turret</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ConveyorTurretBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.CryoChamber" xml:space="preserve">
+    <value>Cryo chamber or bed</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's CryoChamber blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Decoy" xml:space="preserve">
+    <value>Decoy</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Decoy blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.DefensiveCombatBlock" xml:space="preserve">
+    <value>AI defensive block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's DefensiveCombatBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Door" xml:space="preserve">
+    <value>Door</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Door blocks, and every type the game builds on it; it covers the plain door alone, not sliding, hangar or advanced doors.</comment>
+  </data>
+  <data name="Sprocket.Type.DoorBase" xml:space="preserve">
+    <value>Door or parachute</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's DoorBase blocks, and every type the game builds on it; it covers every door and the parachute, which is a door to the game.</comment>
+  </data>
+  <data name="Sprocket.Type.Drill" xml:space="preserve">
+    <value>Drill</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Drill blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.EmotionControllerBlock" xml:space="preserve">
+    <value>Emotion controller</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's EmotionControllerBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.EventControllerBlock" xml:space="preserve">
+    <value>Event controller</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's EventControllerBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ExhaustBlock" xml:space="preserve">
+    <value>Exhaust</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ExhaustBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ExtendedPistonBase" xml:space="preserve">
+    <value>Piston</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ExtendedPistonBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.FlightMovementBlock" xml:space="preserve">
+    <value>AI flight block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's FlightMovementBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.FueledPowerProducer" xml:space="preserve">
+    <value>Reactor or hydrogen engine</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's FueledPowerProducer blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.FunctionalBlock" xml:space="preserve">
+    <value>Block that switches on and off</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's FunctionalBlock blocks, and every type the game builds on it; it covers every block with an on/off switch.</comment>
+  </data>
+  <data name="Sprocket.Type.GasTank" xml:space="preserve">
+    <value>Gas tank</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's GasTank blocks, and every type the game builds on it; it covers oxygen and hydrogen tanks.</comment>
+  </data>
+  <data name="Sprocket.Type.GravityGenerator" xml:space="preserve">
+    <value>Gravity generator</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's GravityGenerator blocks, and every type the game builds on it; it covers the box-shaped one alone.</comment>
+  </data>
+  <data name="Sprocket.Type.GravityGeneratorBase" xml:space="preserve">
+    <value>Gravity generator</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's GravityGeneratorBase blocks, and every type the game builds on it; it covers both the box-shaped and the spherical one.</comment>
+  </data>
+  <data name="Sprocket.Type.GravityGeneratorSphere" xml:space="preserve">
+    <value>Spherical gravity generator</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's GravityGeneratorSphere blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Gyro" xml:space="preserve">
+    <value>Gyroscope</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Gyro blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.HeatVentBlock" xml:space="preserve">
+    <value>Heat vent</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's HeatVentBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.HydrogenEngine" xml:space="preserve">
+    <value>Hydrogen engine</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's HydrogenEngine blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.InteriorLight" xml:space="preserve">
+    <value>Interior light</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's InteriorLight blocks, and every type the game builds on it; it covers corner lights too.</comment>
+  </data>
+  <data name="Sprocket.Type.InteriorTurret" xml:space="preserve">
+    <value>Interior turret</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's InteriorTurret blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.JumpDrive" xml:space="preserve">
+    <value>Jump drive</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's JumpDrive blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Jukebox" xml:space="preserve">
+    <value>Jukebox</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Jukebox blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.LandingGear" xml:space="preserve">
+    <value>Landing gear or magnetic plate</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's LandingGear blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.LargeGatlingTurret" xml:space="preserve">
+    <value>Gatling turret</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's LargeGatlingTurret blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.LargeMissileTurret" xml:space="preserve">
+    <value>Missile turret</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's LargeMissileTurret blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.LaserAntenna" xml:space="preserve">
+    <value>Laser antenna</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's LaserAntenna blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.LCDPanelsBlock" xml:space="preserve">
+    <value>Block with screens</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's LCDPanelsBlock blocks, and every type the game builds on it; it covers decorative blocks carrying screens.</comment>
+  </data>
+  <data name="Sprocket.Type.LightingBlock" xml:space="preserve">
+    <value>Light</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's LightingBlock blocks, and every type the game builds on it; it covers interior lights and spotlights, not searchlights.</comment>
+  </data>
+  <data name="Sprocket.Type.MechanicalConnectionBlock" xml:space="preserve">
+    <value>Rotor, hinge, piston or suspension</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MechanicalConnectionBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MedicalRoom" xml:space="preserve">
+    <value>Medical room</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MedicalRoom blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MergeBlock" xml:space="preserve">
+    <value>Merge block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MergeBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MotorAdvancedStator" xml:space="preserve">
+    <value>Advanced rotor or hinge</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MotorAdvancedStator blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MotorBase" xml:space="preserve">
+    <value>Rotor, hinge or suspension</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MotorBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MotorStator" xml:space="preserve">
+    <value>Rotor or hinge</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MotorStator blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MotorSuspension" xml:space="preserve">
+    <value>Wheel suspension</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MotorSuspension blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.MyProgrammableBlock" xml:space="preserve">
+    <value>Programmable block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's MyProgrammableBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.OffensiveCombatBlock" xml:space="preserve">
+    <value>AI offensive block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's OffensiveCombatBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.OreDetector" xml:space="preserve">
+    <value>Ore detector</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's OreDetector blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.OxygenFarm" xml:space="preserve">
+    <value>Oxygen farm</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's OxygenFarm blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.OxygenGenerator" xml:space="preserve">
+    <value>O2/H2 generator</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's OxygenGenerator blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.OxygenTank" xml:space="preserve">
+    <value>Oxygen or hydrogen tank</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's OxygenTank blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Parachute" xml:space="preserve">
+    <value>Parachute</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Parachute blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.PathRecorderBlock" xml:space="preserve">
+    <value>AI recorder block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's PathRecorderBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.PistonBase" xml:space="preserve">
+    <value>Piston</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's PistonBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ProductionBlock" xml:space="preserve">
+    <value>Assembler or refinery</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ProductionBlock blocks, and every type the game builds on it; it covers survival kits too.</comment>
+  </data>
+  <data name="Sprocket.Type.Projector" xml:space="preserve">
+    <value>Projector</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Projector blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ProjectorBase" xml:space="preserve">
+    <value>Projector</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ProjectorBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.RadioAntenna" xml:space="preserve">
+    <value>Antenna</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's RadioAntenna blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Reactor" xml:space="preserve">
+    <value>Reactor</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Reactor blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ReflectorLight" xml:space="preserve">
+    <value>Spotlight</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ReflectorLight blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Refinery" xml:space="preserve">
+    <value>Refinery</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Refinery blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.RemoteControl" xml:space="preserve">
+    <value>Remote control</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's RemoteControl blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SafeZoneBlock" xml:space="preserve">
+    <value>Safe zone</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SafeZoneBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Searchlight" xml:space="preserve">
+    <value>Searchlight</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Searchlight blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SensorBlock" xml:space="preserve">
+    <value>Sensor</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SensorBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ShipConnector" xml:space="preserve">
+    <value>Connector</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ShipConnector blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ShipController" xml:space="preserve">
+    <value>Cockpit, seat or remote control</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ShipController blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ShipGrinder" xml:space="preserve">
+    <value>Grinder</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ShipGrinder blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ShipToolBase" xml:space="preserve">
+    <value>Welder or grinder</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ShipToolBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.ShipWelder" xml:space="preserve">
+    <value>Welder</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's ShipWelder blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SmallGatlingGun" xml:space="preserve">
+    <value>Gatling gun</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SmallGatlingGun blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SmallMissileLauncher" xml:space="preserve">
+    <value>Rocket launcher</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SmallMissileLauncher blocks, and every type the game builds on it; it covers the reloadable one too.</comment>
+  </data>
+  <data name="Sprocket.Type.SmallMissileLauncherReload" xml:space="preserve">
+    <value>Reloadable rocket launcher</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SmallMissileLauncherReload blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SolarPanel" xml:space="preserve">
+    <value>Solar panel</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SolarPanel blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SoundBlock" xml:space="preserve">
+    <value>Sound block or jukebox</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SoundBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SpaceBall" xml:space="preserve">
+    <value>Space ball</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SpaceBall blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.StoreBlock" xml:space="preserve">
+    <value>Store or vending machine</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's StoreBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.SurvivalKit" xml:space="preserve">
+    <value>Survival kit</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's SurvivalKit blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.TargetDummyBlock" xml:space="preserve">
+    <value>Target dummy</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's TargetDummyBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.TextPanel" xml:space="preserve">
+    <value>LCD panel</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's TextPanel blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Thrust" xml:space="preserve">
+    <value>Thruster</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Thrust blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.TimerBlock" xml:space="preserve">
+    <value>Timer block</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's TimerBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.TransponderBlock" xml:space="preserve">
+    <value>Transponder</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's TransponderBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.TurretBase" xml:space="preserve">
+    <value>Turret</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's TurretBase blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.TurretControlBlock" xml:space="preserve">
+    <value>Turret controller</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's TurretControlBlock blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.UpgradeModule" xml:space="preserve">
+    <value>Upgrade module</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's UpgradeModule blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.UserControllableGun" xml:space="preserve">
+    <value>Weapon</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's UserControllableGun blocks, and every type the game builds on it; it covers every gun, launcher and turret.</comment>
+  </data>
+  <data name="Sprocket.Type.VendingMachine" xml:space="preserve">
+    <value>Vending machine</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's VendingMachine blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.VirtualMass" xml:space="preserve">
+    <value>Artificial mass</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's VirtualMass blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.Warhead" xml:space="preserve">
+    <value>Warhead</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's Warhead blocks, and every type the game builds on it.</comment>
+  </data>
+  <data name="Sprocket.Type.WindTurbine" xml:space="preserve">
+    <value>Wind turbine</value>
+    <comment>On a slot's page, the type of block the slot expects: the game's WindTurbine blocks, and every type the game builds on it.</comment>
   </data>
 </root>

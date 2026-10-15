@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly AutomationSystem _system;
         readonly SystemInstance _shown;
         readonly Func<string, string> _called;
-        readonly Func<string, string> _type;
+        readonly Func<string, IList<string>> _lineage;
         readonly Func<int, string> _numbered;
         readonly List<Entry> _entries = new List<Entry>();
         readonly List<Set> _sets = new List<Set>();
@@ -37,16 +37,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>
         /// Slots for <paramref name="system" /> as <paramref name="shown" /> fills them; a new slot of one block is called what
-        /// <paramref name="called" /> says of it and expects what <paramref name="type" /> says, and one of several is called
-        /// <paramref name="numbered" /> of the first number free.
+        /// <paramref name="called" /> says of it, one of several is called <paramref name="numbered" /> of the first number free,
+        /// and either expects the nearest type the lineages <paramref name="lineage" /> gives its blocks share.
         /// </summary>
-        public Slotting(AutomationSystem system, SystemInstance shown, Func<string, string> called, Func<string, string> type,
+        public Slotting(AutomationSystem system, SystemInstance shown, Func<string, string> called, Func<string, IList<string>> lineage,
             Func<int, string> numbered)
         {
             _system = system;
             _shown = shown;
             _called = called;
-            _type = type;
+            _lineage = lineage;
             _numbered = numbered;
         }
 
@@ -215,10 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 }
 
                 var name = set.Blocks.Count == 1 ? Free(_called(set.Blocks[0])) : Numbered();
-                set.Part = new Part(name);
-                var types = Types(set.Blocks);
-                for (var t = 0; t < types.Count; t++)
-                    set.Part.Expects.Add(types[t]);
+                set.Part = new Part(name) { Expects = Nearest(set.Blocks) };
 
                 _taken.Add(name);
                 _made++;
@@ -251,7 +248,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             for (var i = 0; i < blocks.Count; i++)
             {
-                if (!only.Fits(_type(blocks[i])))
+                if (!only.Fits(_lineage(blocks[i])))
                     return null;
             }
 
@@ -360,17 +357,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
-        List<string> Types(IList<string> blocks)
+        /// <summary>The nearest type every one of <paramref name="blocks" /> is, or empty for any block.</summary>
+        string Nearest(IList<string> blocks)
         {
-            var types = new List<string>();
+            var lineages = new List<IList<string>>();
             for (var i = 0; i < blocks.Count; i++)
-            {
-                var type = _type(blocks[i]);
-                if (type.Length > 0)
-                    Add(types, type);
-            }
+                lineages.Add(_lineage(blocks[i]));
 
-            return types;
+            return Part.Nearest(lineages);
         }
 
         Set Find(List<string> blocks)

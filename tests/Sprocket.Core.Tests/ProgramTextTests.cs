@@ -101,8 +101,7 @@ public class ProgramTextTests
         // parts with its own doors.
         var inner = airlock.PartFor("inner");
         inner.Annotation = "The door onto the ship.\n\nThe one you walk through to get inside.";
-        inner.Expects.Add("Door");
-        inner.Expects.Add("AirtightSlideDoor");
+        inner.Expects = "DoorBase";
 
         var spare = airlock.PartFor("vent");
         spare.Annotation = "The vent.";
@@ -212,9 +211,9 @@ public class ProgramTextTests
         // The parts, what they expect, and what the author wrote about them.
         Assert.Equal("The door onto the ship.\n\nThe one you walk through to get inside.",
             airlock.FindPart("inner")!.Annotation);
-        Assert.Equal(new[] { "Door", "AirtightSlideDoor" }, airlock.FindPart("inner")!.Expects);
+        Assert.Equal("DoorBase", airlock.FindPart("inner")!.Expects);
         Assert.Equal("The vent.", airlock.FindPart("vent")!.Annotation);
-        Assert.Empty(airlock.FindPart("vent")!.Expects);
+        Assert.Equal("", airlock.FindPart("vent")!.Expects);
 
         // And which of its own things the second one uses for them, including a part filled
         // with more than one.

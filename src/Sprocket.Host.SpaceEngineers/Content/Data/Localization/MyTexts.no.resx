@@ -2072,4 +2072,310 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Admin.SpineAbout" xml:space="preserve">
     <value>En pulserende linje ved linjenumrene kobler sammen linjene som lyser opp når pekeren hviler på en venting eller et steg, og fortsetter til linjer som er rullet ut av syne.</value>
   </data>
+  <data name="Sprocket.Type.AdvancedDoor" xml:space="preserve">
+    <value>Avansert dør</value>
+  </data>
+  <data name="Sprocket.Type.AirtightDoorGeneric" xml:space="preserve">
+    <value>Lufttett dør</value>
+  </data>
+  <data name="Sprocket.Type.AirtightHangarDoor" xml:space="preserve">
+    <value>Hangardør</value>
+  </data>
+  <data name="Sprocket.Type.AirtightSlideDoor" xml:space="preserve">
+    <value>Skyvedør</value>
+  </data>
+  <data name="Sprocket.Type.AirVent" xml:space="preserve">
+    <value>Luftventil</value>
+  </data>
+  <data name="Sprocket.Type.Assembler" xml:space="preserve">
+    <value>Montør</value>
+  </data>
+  <data name="Sprocket.Type.BasicMissionBlock" xml:space="preserve">
+    <value>AI-blokk for enkle oppdrag</value>
+  </data>
+  <data name="Sprocket.Type.BatteryBlock" xml:space="preserve">
+    <value>Batteri</value>
+  </data>
+  <data name="Sprocket.Type.Beacon" xml:space="preserve">
+    <value>Fyr</value>
+  </data>
+  <data name="Sprocket.Type.BroadcastController" xml:space="preserve">
+    <value>Kringkastingskontroller</value>
+  </data>
+  <data name="Sprocket.Type.ButtonPanel" xml:space="preserve">
+    <value>Knappepanel</value>
+  </data>
+  <data name="Sprocket.Type.CameraBlock" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="Sprocket.Type.CargoContainer" xml:space="preserve">
+    <value>Lastecontainer</value>
+  </data>
+  <data name="Sprocket.Type.Cockpit" xml:space="preserve">
+    <value>Cockpit eller sete</value>
+  </data>
+  <data name="Sprocket.Type.Collector" xml:space="preserve">
+    <value>Samler</value>
+  </data>
+  <data name="Sprocket.Type.ContractBlock" xml:space="preserve">
+    <value>Kontraktblokk</value>
+  </data>
+  <data name="Sprocket.Type.ControlPanel" xml:space="preserve">
+    <value>Kontrollpanel</value>
+  </data>
+  <data name="Sprocket.Type.ConveyorSorter" xml:space="preserve">
+    <value>Transportørsorterer</value>
+  </data>
+  <data name="Sprocket.Type.ConveyorTurretBase" xml:space="preserve">
+    <value>Gatling- eller missiltårn</value>
+  </data>
+  <data name="Sprocket.Type.CryoChamber" xml:space="preserve">
+    <value>Kryokammer eller seng</value>
+  </data>
+  <data name="Sprocket.Type.Decoy" xml:space="preserve">
+    <value>Lokkedue</value>
+  </data>
+  <data name="Sprocket.Type.DefensiveCombatBlock" xml:space="preserve">
+    <value>Defensiv AI-blokk</value>
+  </data>
+  <data name="Sprocket.Type.Door" xml:space="preserve">
+    <value>Dør</value>
+  </data>
+  <data name="Sprocket.Type.DoorBase" xml:space="preserve">
+    <value>Dør eller fallskjerm</value>
+  </data>
+  <data name="Sprocket.Type.Drill" xml:space="preserve">
+    <value>Bor</value>
+  </data>
+  <data name="Sprocket.Type.EmotionControllerBlock" xml:space="preserve">
+    <value>Følelseskontroller</value>
+  </data>
+  <data name="Sprocket.Type.EventControllerBlock" xml:space="preserve">
+    <value>Hendelseskontroller</value>
+  </data>
+  <data name="Sprocket.Type.ExhaustBlock" xml:space="preserve">
+    <value>Eksos</value>
+  </data>
+  <data name="Sprocket.Type.ExtendedPistonBase" xml:space="preserve">
+    <value>Stempel</value>
+  </data>
+  <data name="Sprocket.Type.FlightMovementBlock" xml:space="preserve">
+    <value>AI-flyblokk</value>
+  </data>
+  <data name="Sprocket.Type.FueledPowerProducer" xml:space="preserve">
+    <value>Reaktor eller hydrogenmotor</value>
+  </data>
+  <data name="Sprocket.Type.FunctionalBlock" xml:space="preserve">
+    <value>Blokk som slås av og på</value>
+  </data>
+  <data name="Sprocket.Type.GasTank" xml:space="preserve">
+    <value>Gasstank</value>
+  </data>
+  <data name="Sprocket.Type.GravityGenerator" xml:space="preserve">
+    <value>Gravitasjonsgenerator</value>
+  </data>
+  <data name="Sprocket.Type.GravityGeneratorBase" xml:space="preserve">
+    <value>Gravitasjonsgenerator</value>
+  </data>
+  <data name="Sprocket.Type.GravityGeneratorSphere" xml:space="preserve">
+    <value>Sfærisk gravitasjonsgenerator</value>
+  </data>
+  <data name="Sprocket.Type.Gyro" xml:space="preserve">
+    <value>Gyroskop</value>
+  </data>
+  <data name="Sprocket.Type.HeatVentBlock" xml:space="preserve">
+    <value>Varmeventil</value>
+  </data>
+  <data name="Sprocket.Type.HydrogenEngine" xml:space="preserve">
+    <value>Hydrogenmotor</value>
+  </data>
+  <data name="Sprocket.Type.InteriorLight" xml:space="preserve">
+    <value>Innelys</value>
+  </data>
+  <data name="Sprocket.Type.InteriorTurret" xml:space="preserve">
+    <value>Innendørstårn</value>
+  </data>
+  <data name="Sprocket.Type.JumpDrive" xml:space="preserve">
+    <value>Hoppmotor</value>
+  </data>
+  <data name="Sprocket.Type.Jukebox" xml:space="preserve">
+    <value>Jukeboks</value>
+  </data>
+  <data name="Sprocket.Type.LandingGear" xml:space="preserve">
+    <value>Landingsstell eller magnetplate</value>
+  </data>
+  <data name="Sprocket.Type.LargeGatlingTurret" xml:space="preserve">
+    <value>Gatlingtårn</value>
+  </data>
+  <data name="Sprocket.Type.LargeMissileTurret" xml:space="preserve">
+    <value>Missiltårn</value>
+  </data>
+  <data name="Sprocket.Type.LaserAntenna" xml:space="preserve">
+    <value>Laserantenne</value>
+  </data>
+  <data name="Sprocket.Type.LCDPanelsBlock" xml:space="preserve">
+    <value>Blokk med skjermer</value>
+  </data>
+  <data name="Sprocket.Type.LightingBlock" xml:space="preserve">
+    <value>Lys</value>
+  </data>
+  <data name="Sprocket.Type.MechanicalConnectionBlock" xml:space="preserve">
+    <value>Rotor, hengsel, stempel eller hjuloppheng</value>
+  </data>
+  <data name="Sprocket.Type.MedicalRoom" xml:space="preserve">
+    <value>Sykestue</value>
+  </data>
+  <data name="Sprocket.Type.MergeBlock" xml:space="preserve">
+    <value>Sammenføyningsblokk</value>
+  </data>
+  <data name="Sprocket.Type.MotorAdvancedStator" xml:space="preserve">
+    <value>Avansert rotor eller hengsel</value>
+  </data>
+  <data name="Sprocket.Type.MotorBase" xml:space="preserve">
+    <value>Rotor, hengsel eller hjuloppheng</value>
+  </data>
+  <data name="Sprocket.Type.MotorStator" xml:space="preserve">
+    <value>Rotor eller hengsel</value>
+  </data>
+  <data name="Sprocket.Type.MotorSuspension" xml:space="preserve">
+    <value>Hjuloppheng</value>
+  </data>
+  <data name="Sprocket.Type.MyProgrammableBlock" xml:space="preserve">
+    <value>Programmerbar blokk</value>
+  </data>
+  <data name="Sprocket.Type.OffensiveCombatBlock" xml:space="preserve">
+    <value>Offensiv AI-blokk</value>
+  </data>
+  <data name="Sprocket.Type.OreDetector" xml:space="preserve">
+    <value>Malmdetektor</value>
+  </data>
+  <data name="Sprocket.Type.OxygenFarm" xml:space="preserve">
+    <value>Oksygenfarm</value>
+  </data>
+  <data name="Sprocket.Type.OxygenGenerator" xml:space="preserve">
+    <value>O2/H2-generator</value>
+  </data>
+  <data name="Sprocket.Type.OxygenTank" xml:space="preserve">
+    <value>Oksygen- eller hydrogentank</value>
+  </data>
+  <data name="Sprocket.Type.Parachute" xml:space="preserve">
+    <value>Fallskjerm</value>
+  </data>
+  <data name="Sprocket.Type.PathRecorderBlock" xml:space="preserve">
+    <value>AI-opptaksblokk</value>
+  </data>
+  <data name="Sprocket.Type.PistonBase" xml:space="preserve">
+    <value>Stempel</value>
+  </data>
+  <data name="Sprocket.Type.ProductionBlock" xml:space="preserve">
+    <value>Montør eller raffineri</value>
+  </data>
+  <data name="Sprocket.Type.Projector" xml:space="preserve">
+    <value>Projektor</value>
+  </data>
+  <data name="Sprocket.Type.ProjectorBase" xml:space="preserve">
+    <value>Projektor</value>
+  </data>
+  <data name="Sprocket.Type.RadioAntenna" xml:space="preserve">
+    <value>Antenne</value>
+  </data>
+  <data name="Sprocket.Type.Reactor" xml:space="preserve">
+    <value>Reaktor</value>
+  </data>
+  <data name="Sprocket.Type.ReflectorLight" xml:space="preserve">
+    <value>Lyskaster</value>
+  </data>
+  <data name="Sprocket.Type.Refinery" xml:space="preserve">
+    <value>Raffineri</value>
+  </data>
+  <data name="Sprocket.Type.RemoteControl" xml:space="preserve">
+    <value>Fjernkontroll</value>
+  </data>
+  <data name="Sprocket.Type.SafeZoneBlock" xml:space="preserve">
+    <value>Sikker sone</value>
+  </data>
+  <data name="Sprocket.Type.Searchlight" xml:space="preserve">
+    <value>Søkelys</value>
+  </data>
+  <data name="Sprocket.Type.SensorBlock" xml:space="preserve">
+    <value>Sensor</value>
+  </data>
+  <data name="Sprocket.Type.ShipConnector" xml:space="preserve">
+    <value>Kobling</value>
+  </data>
+  <data name="Sprocket.Type.ShipController" xml:space="preserve">
+    <value>Cockpit, sete eller fjernkontroll</value>
+  </data>
+  <data name="Sprocket.Type.ShipGrinder" xml:space="preserve">
+    <value>Kutter</value>
+  </data>
+  <data name="Sprocket.Type.ShipToolBase" xml:space="preserve">
+    <value>Sveiser eller kutter</value>
+  </data>
+  <data name="Sprocket.Type.ShipWelder" xml:space="preserve">
+    <value>Sveiser</value>
+  </data>
+  <data name="Sprocket.Type.SmallGatlingGun" xml:space="preserve">
+    <value>Gatlingkanon</value>
+  </data>
+  <data name="Sprocket.Type.SmallMissileLauncher" xml:space="preserve">
+    <value>Rakettkaster</value>
+  </data>
+  <data name="Sprocket.Type.SmallMissileLauncherReload" xml:space="preserve">
+    <value>Omladbar rakettkaster</value>
+  </data>
+  <data name="Sprocket.Type.SolarPanel" xml:space="preserve">
+    <value>Solcellepanel</value>
+  </data>
+  <data name="Sprocket.Type.SoundBlock" xml:space="preserve">
+    <value>Lydblokk eller jukeboks</value>
+  </data>
+  <data name="Sprocket.Type.SpaceBall" xml:space="preserve">
+    <value>Romball</value>
+  </data>
+  <data name="Sprocket.Type.StoreBlock" xml:space="preserve">
+    <value>Butikk eller salgsautomat</value>
+  </data>
+  <data name="Sprocket.Type.SurvivalKit" xml:space="preserve">
+    <value>Overlevelsessett</value>
+  </data>
+  <data name="Sprocket.Type.TargetDummyBlock" xml:space="preserve">
+    <value>Måldukke</value>
+  </data>
+  <data name="Sprocket.Type.TextPanel" xml:space="preserve">
+    <value>LCD-panel</value>
+  </data>
+  <data name="Sprocket.Type.Thrust" xml:space="preserve">
+    <value>Thruster</value>
+  </data>
+  <data name="Sprocket.Type.TimerBlock" xml:space="preserve">
+    <value>Tidsurblokk</value>
+  </data>
+  <data name="Sprocket.Type.TransponderBlock" xml:space="preserve">
+    <value>Transponder</value>
+  </data>
+  <data name="Sprocket.Type.TurretBase" xml:space="preserve">
+    <value>Tårn</value>
+  </data>
+  <data name="Sprocket.Type.TurretControlBlock" xml:space="preserve">
+    <value>Tårnkontroller</value>
+  </data>
+  <data name="Sprocket.Type.UpgradeModule" xml:space="preserve">
+    <value>Oppgraderingsmodul</value>
+  </data>
+  <data name="Sprocket.Type.UserControllableGun" xml:space="preserve">
+    <value>Våpen</value>
+  </data>
+  <data name="Sprocket.Type.VendingMachine" xml:space="preserve">
+    <value>Salgsautomat</value>
+  </data>
+  <data name="Sprocket.Type.VirtualMass" xml:space="preserve">
+    <value>Kunstig masse</value>
+  </data>
+  <data name="Sprocket.Type.Warhead" xml:space="preserve">
+    <value>Stridshode</value>
+  </data>
+  <data name="Sprocket.Type.WindTurbine" xml:space="preserve">
+    <value>Vindturbin</value>
+  </data>
 </root>

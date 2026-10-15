@@ -5,6 +5,8 @@ using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI;
+using VRage.ObjectBuilders;
+using VRage.Game;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -54,6 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // It is the same string as the kind id, which is not a coincidence - both are "which block
             // type is this".
             kind = new EntityKind(id, name).WithIcon(id).WithFamily(Families.Of(block.BlockDefinition.TypeIdString));
+            Lineage(block.BlockDefinition.TypeId, Sort(id), kind.Lineage);
 
             // What this block is, before what every block is, so a door offers "open" above "power".
             Describe(kind, block, _capabilities.Blocks);
@@ -547,6 +550,25 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return sort ?? "";
 
             return sort.StartsWith(GamePrefix, StringComparison.Ordinal) ? sort : GamePrefix + sort;
+        }
+
+        /// <summary>
+        /// Adds to <paramref name="into" /> the block <paramref name="exact" />, written as a slot writes it, then its type
+        /// <paramref name="type" /> and each type the game builds that one on, nearest first, short of the terminal block.
+        /// </summary>
+        /// <remarks>
+        /// Read from the game's own types, so a modded block built on one of the game's stands under it as the game's do. Once
+        /// for each kind, when it is first described.
+        /// </remarks>
+        static void Lineage(MyObjectBuilderType type, string exact, IList<string> into)
+        {
+            into.Add(exact);
+            Type at = type;
+            while (at != null && at != typeof(MyObjectBuilder_TerminalBlock))
+            {
+                into.Add(Sort(at.Name));
+                at = MyAPIGateway.Reflection.BaseTypeOf(at);
+            }
         }
     }
 }
