@@ -27,8 +27,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The word a set is said with, on its step and wherever else it is said.</summary>
         public const string SetWord = "set";
 
-        /// <summary>What a wait for everything started above it reads as, on a row of its own.</summary>
-        const string AwaitWords = "await all pending tasks";
+        /// <summary>The word a trigger watching for something is offered with, as the language says it.</summary>
+        public const string WhenWord = "when";
+
+        /// <summary>The word a trigger on a clock is offered with, as the language says it.</summary>
+        public const string EveryWord = "every";
+
+        /// <summary>The word a wait for a length of time is said with, on its step and where it is offered.</summary>
+        public const string WaitWord = "wait";
+
+        /// <summary>The word running a sequence is said with, on its step, on a trigger and where either is offered.</summary>
+        public const string RunWord = "run";
+
+        /// <summary>The word stopping a sequence is said with, on its step, on a trigger and where either is offered.</summary>
+        public const string StopWord = "stop";
+
+        /// <summary>The word a check is said with, on its step and where it is offered.</summary>
+        public const string IfWord = "if";
+
+        /// <summary>The words a further check of an if is said with, on its row and where it is offered.</summary>
+        public const string OtherwiseIfWords = "otherwise if";
+
+        /// <summary>The word the branch of an if taken when no check holds is said with, on its row and where it is offered.</summary>
+        public const string OtherwiseWord = "otherwise";
+
+        /// <summary>What a wait for everything started above it reads as, on a row of its own and where it is offered.</summary>
+        public const string AwaitWords = "await all pending tasks";
 
         const string OnWord = "on";
         const string ToWord = "to";
@@ -134,27 +158,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string Lead(StepKind kind)
         {
             if (kind == StepKind.Run)
-                return "run";
+                return RunWord;
 
             if (kind == StepKind.Stop)
-                return "stop";
+                return StopWord;
 
             if (kind == StepKind.Set)
                 return SetWord;
 
             if (kind == StepKind.If)
-                return "if";
+                return IfWord;
 
             if (kind == StepKind.OtherwiseIf)
-                return "otherwise if";
+                return OtherwiseIfWords;
 
             if (kind == StepKind.Otherwise)
-                return "otherwise";
+                return OtherwiseWord;
 
             if (kind == StepKind.Await)
                 return AwaitWords;
 
-            return kind == StepKind.Wait ? "wait" : "";
+            return kind == StepKind.Wait ? WaitWord : "";
         }
 
 

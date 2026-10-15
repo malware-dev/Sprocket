@@ -6,6 +6,7 @@ using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
@@ -132,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (asks && _runs == null)
             {
                 _runs = new Switch { Style = Styles.Switch, Command = _editor.Act(Cmd.TriggerStops, delegate { Stopping(!Stops); }) };
-                _runs.Says(texts.PickRun, texts.PickStop);
+                _runs.Says(SentenceText.RunWord, SentenceText.StopWord);
                 stage.Options.Add(_runs);
             }
 

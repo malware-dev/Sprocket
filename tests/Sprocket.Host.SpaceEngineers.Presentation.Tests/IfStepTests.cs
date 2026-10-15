@@ -52,17 +52,17 @@ public class IfStepTests
 
         var end = rig.Editor.StepRows().Single(row => row.Kind == StepKind.End);
         var branches = Assert.Single(end.Adds).Choices!;
-        Assert.Equal(new[] { rig.Texts.SequenceOtherwiseIf, rig.Texts.SequenceOtherwise }, Offered(branches));
+        Assert.Equal(new[] { SentenceText.OtherwiseIfWords, SentenceText.OtherwiseWord }, Offered(branches));
         branches[1].Adds!.Execute();
         rig.Tick();
 
         Assert.Null(Assert.IsType<Else>(sequence.Steps[sequence.Steps.Count - 2]).Test);
-        Assert.Equal(new[] { rig.Texts.SequenceOtherwiseIf },
+        Assert.Equal(new[] { SentenceText.OtherwiseIfWords },
             Offered(Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds).Choices!));
 
         var otherwise = rig.Editor.StepRows().Single(row => row.Kind == StepKind.Otherwise);
         var test = Assert.Single(Assert.Single(otherwise.Adds).Choices!);
-        Assert.Equal(rig.Texts.SequenceIf, test.Text);
+        Assert.Equal(SentenceText.IfWord, test.Text);
         test.Adds!.Execute();
         rig.Tick();
         rig.Editor.PressBlock("Airlock Inner Door");
@@ -113,7 +113,7 @@ public class IfStepTests
         rig.Tick();
 
         var end = rig.Editor.StepRows().Single(row => row.Kind == StepKind.Adds);
-        end.Adds.Single().Choices!.Single(adder => adder.Text == rig.Texts.SequenceWait).Adds!.Execute();
+        end.Adds.Single().Choices!.Single(adder => adder.Text == SentenceText.WaitWord).Adds!.Execute();
         rig.Tick();
 
         Assert.IsType<If>(sequence.Steps[0]);
@@ -432,7 +432,7 @@ public class IfStepTests
 
     static void AddIf(Simulation rig, string block, string state)
     {
-        rig.Editor.PressAdd(rig.Texts.SequenceIf);
+        rig.Editor.PressAdd(SentenceText.IfWord);
         rig.Tick();
         rig.Editor.PressBlock(block);
         rig.Tick();

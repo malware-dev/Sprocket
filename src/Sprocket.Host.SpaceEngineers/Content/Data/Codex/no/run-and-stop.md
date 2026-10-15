@@ -1,6 +1,6 @@
 # Kjøre og stoppe
 
-Et [steg](step) kan starte eller stoppe en annen ![](mark:sequence)&nbsp;[sekvens](sequence) i det samme logikksystemet, med `kjør` eller `stopp`. Begge virker på den ![](mark:installation)&nbsp;[installasjonen](installation) steget kjører på, så sekvensene til babord luftsluse starter eller stopper aldri styrbord luftsluse.
+Et [steg](step) kan starte eller stoppe en annen ![](mark:sequence)&nbsp;[sekvens](sequence) i det samme logikksystemet, med `run` eller `stop`. Begge virker på den ![](mark:installation)&nbsp;[installasjonen](installation) steget kjører på, så sekvensene til babord luftsluse starter eller stopper aldri styrbord luftsluse.
 
 ## Kjøre en sekvens
 

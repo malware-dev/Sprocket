@@ -218,12 +218,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.System.Triggers" xml:space="preserve">
     <value>Utløsere</value>
   </data>
-  <data name="Sprocket.System.When" xml:space="preserve">
-    <value>når</value>
-  </data>
-  <data name="Sprocket.System.Every" xml:space="preserve">
-    <value>hver</value>
-  </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
     <value>Utfør en oppgave når en blokk sender et signal eller når en ønsket tilstand.</value>
   </data>
@@ -291,9 +285,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
     <value>oppgave</value>
-  </data>
-  <data name="Sprocket.Sequence.Wait" xml:space="preserve">
-    <value>vent</value>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
     <value>Utfør en handling på blokker eller sett en av verdiene deres.</value>
@@ -573,12 +564,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette tar tid å fullføre. Sekvensen kan vente på det, eller gå rett videre mens det pågår.</value>
-  </data>
-  <data name="Sprocket.Pick.Run" xml:space="preserve">
-    <value>kjør</value>
-  </data>
-  <data name="Sprocket.Pick.Stop" xml:space="preserve">
-    <value>stopp</value>
   </data>
   <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
     <value>Start sekvensen valgt under</value>
@@ -1673,9 +1658,6 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Library.KeepBackupLeave" xml:space="preserve">
     <value>La den være</value>
   </data>
-  <data name="Sprocket.Sequence.Run" xml:space="preserve">
-    <value>kjør</value>
-  </data>
   <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
     <value>Start en annen sekvens.</value>
   </data>
@@ -1685,26 +1667,14 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Sequence.RunNone" xml:space="preserve">
     <value>Dette systemet har ingen annen sekvens å kjøre.</value>
   </data>
-  <data name="Sprocket.Sequence.Stop" xml:space="preserve">
-    <value>stopp</value>
-  </data>
   <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
     <value>Stopp en annen sekvens der den er.</value>
-  </data>
-  <data name="Sprocket.Sequence.If" xml:space="preserve">
-    <value>hvis</value>
   </data>
   <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
     <value>Kjør stegene under bare hvis en betingelse er oppfylt.</value>
   </data>
-  <data name="Sprocket.Sequence.OtherwiseIf" xml:space="preserve">
-    <value>ellers hvis</value>
-  </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
     <value>Sjekk en annen betingelse når ingen over var oppfylt.</value>
-  </data>
-  <data name="Sprocket.Sequence.Otherwise" xml:space="preserve">
-    <value>ellers</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
     <value>Kjør dette når ingen av betingelsene over er oppfylt.</value>
@@ -2074,9 +2044,6 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   </data>
   <data name="Sprocket.Sequence.CarriesOn" xml:space="preserve">
     <value>Stegene under kjører samtidig med dette. Trykk for å la dem vente til det er ferdig.</value>
-  </data>
-  <data name="Sprocket.Sequence.Await" xml:space="preserve">
-    <value>avvent alle ventende oppgaver</value>
   </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
     <value>Vent til alle ![](mark:awaited) oppgavene som er startet over, er ferdige.</value>

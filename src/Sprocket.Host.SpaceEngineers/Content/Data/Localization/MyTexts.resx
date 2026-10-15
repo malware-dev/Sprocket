@@ -286,14 +286,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Triggers</value>
     <comment>Heading on a logic system's screen over its triggers, the things that start its sequences. Shown in capitals.</comment>
   </data>
-  <data name="Sprocket.System.When" xml:space="preserve">
-    <value>when</value>
-    <comment>Choice in the add-trigger menu on a logic system's screen, which opens from the plus button under the triggers; it adds a trigger started by something happening to a block.</comment>
-  </data>
-  <data name="Sprocket.System.Every" xml:space="preserve">
-    <value>every</value>
-    <comment>Choice in the add-trigger menu on a logic system's screen, which opens from the plus button under the triggers; it adds a trigger started on a timer.</comment>
-  </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
     <value>Perform a task when a block sends a signal or reaches a requested state.</value>
     <comment>Tooltip on the choice in the add-trigger menu on a logic system's screen that adds a trigger started by a block's signal or state.</comment>
@@ -382,10 +374,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Sequence.DoSomething" xml:space="preserve">
     <value>task</value>
     <comment>Choice in the add-step menu on a sequence's screen, which opens from the plus button at the end of the sequence or of a branch of an if; it adds a task, a step acting on blocks, and asks which blocks and what to do before it adds.</comment>
-  </data>
-  <data name="Sprocket.Sequence.Wait" xml:space="preserve">
-    <value>wait</value>
-    <comment>Choice in the add-step menu on a sequence's screen, which opens from the plus button at the end of the sequence or of a branch of an if; it adds a step waiting a length of time, and asks how long before it adds.</comment>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
     <value>Perform an action on blocks or set one of their values.</value>
@@ -753,14 +741,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>This takes time to finish. The sequence can wait for it, or go straight on while it runs.</value>
     <comment>Tooltip on an action marked with the clock, one that takes time to finish: on its row in the picker and on its part of a sentence. Also the tooltip on a step's sentence on a sequence's screen when the step starts such an action and goes straight on.</comment>
-  </data>
-  <data name="Sprocket.Pick.Run" xml:space="preserve">
-    <value>run</value>
-    <comment>Choice at the top of the picker's column choosing what a trigger does, shown when the logic system has sequences to offer; it makes the trigger start the sequence chosen in that column.</comment>
-  </data>
-  <data name="Sprocket.Pick.Stop" xml:space="preserve">
-    <value>stop</value>
-    <comment>Choice at the top of the picker's column choosing what a trigger does, shown when the logic system has sequences to offer; it makes the trigger stop the sequence chosen in that column.</comment>
   </data>
   <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
     <value>Start the sequence selected below</value>
@@ -2208,10 +2188,6 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Leave it</value>
     <comment>An answer in the dialog that opens when a backup chosen in the library is to be kept in the library, where the blueprint it was made from is there already: closes the dialog and keeps nothing. It is the answer Enter takes.</comment>
   </data>
-  <data name="Sprocket.Sequence.Run" xml:space="preserve">
-    <value>run</value>
-    <comment>Choice in the add-step menu on a sequence's screen, which opens from the plus button at the end of the sequence or of a branch of an if; it adds a step starting another sequence in the sequence's logic system, and asks which before it adds.</comment>
-  </data>
   <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
     <value>Start another sequence.</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a step starting another sequence.</comment>
@@ -2224,33 +2200,17 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>This system has no other sequence to run.</value>
     <comment>Shown on the screen for choosing which sequence a step starts, in place of the list, when the logic system has no other sequence.</comment>
   </data>
-  <data name="Sprocket.Sequence.Stop" xml:space="preserve">
-    <value>stop</value>
-    <comment>Choice in the add-step menu on a sequence's screen, which opens from the plus button at the end of the sequence or of a branch of an if; it adds a step stopping another sequence in the sequence's logic system, and asks which before it adds.</comment>
-  </data>
   <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
     <value>Stop another sequence where it is.</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds a step stopping another sequence where it is.</comment>
-  </data>
-  <data name="Sprocket.Sequence.If" xml:space="preserve">
-    <value>if</value>
-    <comment>Choice in the add-step menu on a sequence's screen, which opens from the plus button at the end of the sequence or of a branch of an if; it adds an if, whose steps run only where what it checks holds. Also the button, after a plus sign, on the line of an if's otherwise branch that gives the branch something to check.</comment>
   </data>
   <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
     <value>Run the steps below only if a condition passes.</value>
     <comment>Tooltip on the choice in the add-step menu on a sequence's screen that adds an if.</comment>
   </data>
-  <data name="Sprocket.Sequence.OtherwiseIf" xml:space="preserve">
-    <value>otherwise if</value>
-    <comment>Choice in the add-branch menu on the row closing an if on a sequence's screen; it adds a branch checking something else, tried where none of the if's earlier checks held.</comment>
-  </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
     <value>Check another condition when none above passed.</value>
     <comment>Tooltip on the choice in the add-branch menu on the row closing an if, on a sequence's screen, that adds an otherwise if branch.</comment>
-  </data>
-  <data name="Sprocket.Sequence.Otherwise" xml:space="preserve">
-    <value>otherwise</value>
-    <comment>Choice in the add-branch menu on the row closing an if on a sequence's screen; it adds the if's last branch, run where none of its checks held, and can be pressed only while the if has no such branch.</comment>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
     <value>Run this when none of the conditions above pass.</value>
@@ -2743,10 +2703,6 @@ For half a minute, a red box shows what it has to cover, and a white box how far
   <data name="Sprocket.Sequence.CarriesOn" xml:space="preserve">
     <value>Steps below run alongside this one. Press to make them wait until it's done.</value>
     <comment>Tooltip on the clock and words under a step that takes time, on a sequence's screen, while the sequence goes straight on from the step; pressing them makes the sequence wait there. Shown when the world's admin settings show waits in sequences as a switch on each step.</comment>
-  </data>
-  <data name="Sprocket.Sequence.Await" xml:space="preserve">
-    <value>await all pending tasks</value>
-    <comment>Choice in the add-step menu on a sequence's screen; it adds a row waiting for every task started before it. Offered only when the world's admin settings show waits in sequences as steps of their own.</comment>
   </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
     <value>Wait until every ![](mark:awaited) task started above has finished.</value>

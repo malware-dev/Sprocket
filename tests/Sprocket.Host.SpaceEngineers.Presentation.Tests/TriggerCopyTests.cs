@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -168,7 +169,7 @@ public class TriggerCopyTests
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewSystem("Airlock");
-        sim.Editor.PressStart(sim.Texts.SystemWhen);
+        sim.Editor.PressStart(SentenceText.WhenWord);
         sim.Editor.PressBlock("Airlock Inner Door");
         sim.Editor.PressChoice("finishes closing");
         sim.Editor.PressPrimary();

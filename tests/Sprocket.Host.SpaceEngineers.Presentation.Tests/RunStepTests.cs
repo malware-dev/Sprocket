@@ -4,6 +4,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Sim.Machine;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -16,7 +17,7 @@ public class RunStepTests
     {
         var rig = Two(out var first, out _);
 
-        rig.Editor.PressAdd(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(SentenceText.RunWord);
         rig.Tick();
 
         Assert.IsType<ChoicePage>(rig.Editor.Current);
@@ -31,7 +32,7 @@ public class RunStepTests
     {
         var rig = Two(out _, out _);
 
-        rig.Editor.PressAdd(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(SentenceText.RunWord);
         rig.Tick();
 
         Assert.All(rig.Editor.Choices(), row => Assert.Equal(Symbols.Sequence, row.Mark));
@@ -43,7 +44,7 @@ public class RunStepTests
     {
         var rig = Two(out var first, out var second);
 
-        rig.Editor.PressAdd(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(SentenceText.RunWord);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
@@ -67,7 +68,7 @@ public class RunStepTests
         var rig = Two(out var first, out var second);
         var before = first.Steps.Count;
 
-        rig.Editor.PressAdd(rig.Texts.SequenceStop);
+        rig.Editor.PressAdd(SentenceText.StopWord);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
@@ -84,11 +85,11 @@ public class RunStepTests
     {
         var rig = Two(out _, out _);
 
-        rig.Editor.PressAdd(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(SentenceText.RunWord);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
-        rig.Editor.PressAdd(rig.Texts.SequenceStop);
+        rig.Editor.PressAdd(SentenceText.StopWord);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();
@@ -106,7 +107,7 @@ public class RunStepTests
         var third = rig.Editor.Program.AddSequence(first.System!);
         third.Name = "Purge";
 
-        rig.Editor.PressAdd(rig.Texts.SequenceRun);
+        rig.Editor.PressAdd(SentenceText.RunWord);
         rig.Tick();
         rig.Editor.PressChoice("Cycle Out");
         rig.Tick();

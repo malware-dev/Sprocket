@@ -304,13 +304,13 @@ public class WaitingTrialTests
     {
         var rig = Airlock(out var sequence, Waiting.Switch);
         Steps(rig, sequence, new If(Closed(rig)), new EndIf());
-        Assert.DoesNotContain(rig.Texts.SequenceAwait, Offered(rig));
+        Assert.DoesNotContain(SentenceText.AwaitWords, Offered(rig));
 
         rig.Settle(rig.Settings.WithWorld(rig.Settings.World.WithWaiting(Waiting.Step)));
         rig.Tick();
-        Assert.Contains(rig.Texts.SequenceAwait, Offered(rig));
+        Assert.Contains(SentenceText.AwaitWords, Offered(rig));
 
-        Menu(rig).Single(choice => choice.Text == rig.Texts.SequenceAwait).Adds!.Execute();
+        Menu(rig).Single(choice => choice.Text == SentenceText.AwaitWords).Adds!.Execute();
         rig.Tick();
         Assert.IsType<Await>(sequence.Steps[1]);
         Assert.Equal(3, sequence.Steps.Count);

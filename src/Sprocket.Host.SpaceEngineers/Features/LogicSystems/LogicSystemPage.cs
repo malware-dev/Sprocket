@@ -407,9 +407,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _triggersHeading.Style = _system.IsBlueprint ? Styles.NextHeading : Styles.Heading;
             _addTrigger.Show(new Adder(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
             {
-                new Adder(texts.SystemWhen, texts.SystemWhenAbout,
+                new Adder(SentenceText.WhenWord, texts.SystemWhenAbout,
                     Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); })),
-                new Adder(texts.SystemEvery, texts.SystemEveryAbout,
+                new Adder(SentenceText.EveryWord, texts.SystemEveryAbout,
                     Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Editor.NewLength)); }))
             }));
 

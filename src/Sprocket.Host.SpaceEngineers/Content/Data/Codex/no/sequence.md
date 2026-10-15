@@ -32,7 +32,7 @@ Under hvert avventbare steg henger en `Vent til det er ferdig`-linje, som venter
 
 ### En venting som eget steg
 
-Å legge til et avventbart steg legger også til et `avvent alle ventende oppgaver`-steg etter det. Flytt avventingen lenger ned, så kjører stegene imellom mens blokken fortsatt holder på; slett den, så går sekvensen rett videre.
+Å legge til et avventbart steg legger også til et `await all pending tasks`-steg etter det. Flytt avventingen lenger ned, så kjører stegene imellom mens blokken fortsatt holder på; slett den, så går sekvensen rett videre.
 
 Hold pekeren over en venting for å se hvilke steg den venter på, eller over et avventbart steg for å se hvilken venting som fanger det.
 

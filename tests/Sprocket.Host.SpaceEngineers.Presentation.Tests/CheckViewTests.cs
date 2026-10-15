@@ -20,7 +20,7 @@ public class CheckViewTests
     public void ACheckHasAnOrganizedAndATerminalView()
     {
         var rig = Airlock();
-        rig.Editor.PressAdd(rig.Texts.SequenceIf);
+        rig.Editor.PressAdd(SentenceText.IfWord);
         rig.Tick();
         rig.Editor.PressBlock("Airlock Outer Door");
         rig.Tick();
@@ -82,7 +82,7 @@ public class CheckViewTests
     {
         var rig = Airlock();
         var sequence = rig.Editor.Program.Systems[0].Sequences[0];
-        rig.Editor.PressAdd(rig.Texts.SequenceIf);
+        rig.Editor.PressAdd(SentenceText.IfWord);
         rig.Tick();
         rig.Editor.TickBlock("Airlock Inner Door");
         rig.Editor.TickBlock("Airlock Outer Door");
@@ -128,7 +128,7 @@ public class CheckViewTests
         var rig = Airlock();
         rig.Editor.Push(new LogicSystemPage(rig.Editor, rig.Editor.Program.Systems[0]));
         rig.Tick();
-        rig.Editor.PressStart(rig.Editor.Texts.SystemWhen);
+        rig.Editor.PressStart(SentenceText.WhenWord);
         rig.Tick();
         rig.Editor.PressBlock("Airlock Outer Door");
         rig.Tick();
@@ -182,7 +182,7 @@ public class CheckViewTests
     /// <summary>Adds an if, and selects the airlock's outer door for it.</summary>
     static void Open(Simulation rig)
     {
-        rig.Editor.PressAdd(rig.Texts.SequenceIf);
+        rig.Editor.PressAdd(SentenceText.IfWord);
         rig.Tick();
         rig.Editor.PressBlock("Airlock Outer Door");
         rig.Tick();

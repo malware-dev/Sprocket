@@ -3,6 +3,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -266,7 +267,7 @@ public class ReloadTwinTests
         editor.GiveLength("2");
         Task(editor, "Airlock Outer Door", "open");
         editor.Back();
-        editor.PressStart(editor.Texts.SystemWhen);
+        editor.PressStart(SentenceText.WhenWord);
         editor.PressBlock("Stop Button");
         editor.PressChoice("button 1 is pressed");
         editor.PressChoice("stop");

@@ -78,7 +78,7 @@ public class MarkTests
     {
         var screen = OnTheSequence();
 
-        screen.Editor.PressAdd(screen.Editor.Texts.SequenceIf);
+        screen.Editor.PressAdd(SentenceText.IfWord);
         screen.Editor.PressBlock("Airlock Outer Door");
         screen.Run(2);
 

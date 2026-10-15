@@ -204,7 +204,7 @@ namespace Sprocket.Sim.Driving
         public static void NewButtonSystem(this SprocketEditor editor, string name)
         {
             editor.NewSystem(name);
-            editor.PressStart(editor.Texts.SystemWhen);
+            editor.PressStart(SentenceText.WhenWord);
             editor.PressBlock("Airlock Button");
             editor.PressChoice("button 1 is pressed");
             editor.PressPrimary();

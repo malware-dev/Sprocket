@@ -629,19 +629,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var kinds = new List<Adder>
             {
                 new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, delegate { AddAction(at); })),
-                new Adder(texts.SequenceWait, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); }))
+                new Adder(SentenceText.WaitWord, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); }))
             };
 
             // Beside the wait for a length of time, where waits for what is running are rows of their own.
             if (AwaitRows)
             {
-                kinds.Add(new Adder(texts.SequenceAwait, texts.SequenceAwaitAbout,
+                kinds.Add(new Adder(SentenceText.AwaitWords, texts.SequenceAwaitAbout,
                     Changes(Cmd.AddAwait, delegate { Editor.Do(_sequence, new AddStep(Change.AddStep, at, new Await())); })));
             }
 
-            kinds.Add(new Adder(texts.SequenceRun, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })));
-            kinds.Add(new Adder(texts.SequenceStop, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })));
-            kinds.Add(new Adder(texts.SequenceIf, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); })));
+            kinds.Add(new Adder(SentenceText.RunWord, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })));
+            kinds.Add(new Adder(SentenceText.StopWord, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })));
+            kinds.Add(new Adder(SentenceText.IfWord, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); })));
             return kinds;
         }
 
@@ -657,16 +657,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var ends = _sequence.Otherwise(_sequence.OpenOf(index)) < 0;
                 row.Adds.Add(new Adder(texts.SequenceBranch, texts.SequenceBranchAbout, new[]
                 {
-                    new Adder(texts.SequenceOtherwiseIf, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, delegate { AddBranch(index); })),
-                    new Adder(texts.SequenceOtherwise, texts.SequenceOtherwiseAbout,
+                    new Adder(SentenceText.OtherwiseIfWords, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, delegate { AddBranch(index); })),
+                    new Adder(SentenceText.OtherwiseWord, texts.SequenceOtherwiseAbout,
                         ends ? Changes(Cmd.AddBranch, delegate { AddLast(index); }) : null)
                 }));
             }
             else if (Kind(step) == StepKind.Otherwise)
             {
-                row.Adds.Add(new Adder(texts.SequenceIf, texts.SequenceOtherwiseTestAbout, new[]
+                row.Adds.Add(new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, new[]
                 {
-                    new Adder(texts.SequenceIf, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, delegate { GiveTest(step); }))
+                    new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, delegate { GiveTest(step); }))
                 }));
             }
         }

@@ -106,7 +106,7 @@ public class WatchedNumberTests
     {
         var rig = Simulation.Fresh();
         rig.Editor.NewSystem("Airlock");
-        rig.Editor.PressStart(rig.Texts.SystemWhen);
+        rig.Editor.PressStart(SentenceText.WhenWord);
         rig.Editor.PressBlock("Airlock Light");
         rig.Tick();
         rig.Editor.TickBlock("Cockpit Light");
