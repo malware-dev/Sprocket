@@ -740,16 +740,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
-        /// <summary>A question asked in a box hanging under what raised it.</summary>
-        public static readonly WindowStyle Prompt = new WindowStyle
-        {
-            Base = { Background = Palette.PanelHot, Edge = Palette.Line, Padding = new Thickness(16f, 8f) }
-        };
-
         /// <summary>A list hanging open under what opened it.</summary>
         public static readonly WindowStyle List = new WindowStyle
         {
             Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(4f), Shadow = ShortShadow }
+        };
+
+        /// <summary>Controls hanging from what opened them, on the ground a form's controls stand on, so they look as they do in a form.</summary>
+        public static readonly WindowStyle Panel = new WindowStyle
+        {
+            Base = { Background = Palette.Panel, Edge = Palette.Line, Padding = new Thickness(12f), Shadow = ShortShadow }
         };
 
         /// <summary>A menu hanging open from what opened it, on the highlight tone.</summary>

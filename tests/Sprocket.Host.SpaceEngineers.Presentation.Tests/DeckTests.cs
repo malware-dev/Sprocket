@@ -23,6 +23,22 @@ public class DeckTests
         Assert.Equal(new VRageMath.Vector2(100f, 40f), deck.DesiredSize);
     }
 
+    /// <summary>Layers are a deck with every card face up: as large as the largest, each placed by its own alignment, all drawn, the uppermost pressed.</summary>
+    [Fact]
+    public void LayersShowEveryCardEachWhereItIsAligned()
+    {
+        var under = new Label { Text = "under", Placement = Fixed.Size(200f, 80f) };
+        var over = new Label { Text = "over", Placement = Fixed.Size(50f, 20f), Align = Lumel.Align.Right | Lumel.Align.Bottom };
+        var layers = new Layers { Children = { under, over } };
+        var easel = new Easel(new HStack { Children = { layers } }, 400f, 200f);
+
+        Assert.Equal(new VRageMath.Vector2(200f, 80f), layers.DesiredSize);
+        Assert.Equal(layers.Bounds.Right - 50f, over.Bounds.X, 3);
+        Assert.Equal(layers.Bounds.Bottom - 20f, over.Bounds.Y, 3);
+        Assert.Equal(new[] { "under", "over" }, easel.Written.Select(run => run.Text).ToArray());
+        Assert.Equal(2, layers.VisualChildCount);
+    }
+
     /// <summary>Only the card on top is drawn, answers a press and counts as a child to walk.</summary>
     [Fact]
     public void OnlyTheTopCardIsDrawnPressedAndWalked()

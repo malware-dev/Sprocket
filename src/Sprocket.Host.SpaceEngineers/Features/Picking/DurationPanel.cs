@@ -25,14 +25,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         const string SecondsFormat = "0.##";
         const int CostlyTicks = 10;
 
+        // How wide each length to pick is, the same in both units, so the two rows of seven line up: room for "0.5 s".
+        const float PickWidth = 68f;
+
         static readonly double[] SecondsPicks = { 0.5, 1, 2, 5, 10, 30, 60 };
-        static readonly int[] TicksPicks = { 1, 10, 30, 60, 100, 300 };
+        static readonly int[] TicksPicks = { 1, 10, 30, 60, 100, 300, 600 };
 
         readonly Texts _texts;
         readonly InputRoot _input;
         readonly NumberBox _box;
-        readonly OptionRow _seconds;
-        readonly OptionRow _ticks;
+        readonly Switch _unit;
         readonly Label _other;
         readonly Label _caution;
         readonly Deck _picks;
@@ -75,11 +77,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Command = new Relay(delegate { Step(1); }),
                 Tip = Tip.For(null, texts.WaitLonger)
             });
-            number.Children.Add(new OptionRow { Text = texts.WaitInSeconds, Command = new Relay(delegate { Unit(true); }) }.As(out _seconds));
-            number.Children.Add(new OptionRow { Text = texts.WaitInTicks, Tip = Tip.For(null, texts.WaitTickAbout), Command = new Relay(delegate { Unit(false); }) }.As(out _ticks));
+            // At the right end, across from the number it is the unit of.
+            number.Children.Add(new HStack { Placement = Flex.Spare });
+            number.Children.Add(new Switch
+            {
+                Style = Styles.Switch,
+                Tip = Tip.For(null, texts.WaitTickAbout),
+                Command = new Relay(delegate { Unit(!_inSeconds); })
+            }.As(out _unit));
+            _unit.Says(texts.WaitInSeconds, texts.WaitInTicks);
             Children.Add(number);
 
-            Children.Add(new Label { Style = Styles.Aside }.As(out _other));
             Children.Add(new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution));
 
             _secondsPicks = new HStack { Spacing = 6f };
@@ -89,6 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _secondsPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
+                    Placement = Fixed.Wide(PickWidth),
                     Text = seconds == 60 ? texts.WaitPickMinute : Template.Fill(texts.WaitPickSeconds, "count", Said(seconds)),
                     Command = new Relay(delegate { Give(Said(seconds)); })
                 });
@@ -101,6 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ticksPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
+                    Placement = Fixed.Wide(PickWidth),
                     Text = Template.Fill(texts.WaitPickTicks, "count", Said(ticks)),
                     Command = new Relay(delegate { Give(Said(ticks)); })
                 });
@@ -108,6 +118,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             // One over the other, so the panel is as wide as the wider of the two rows whichever unit shows.
             Children.Add(new Deck { Children = { _secondsPicks, _ticksPicks } }.As(out _picks));
+
+            // Last, and as tall as a button, its words in the middle, so a Done the holder lays over its right end sits on its line:
+            // six above and below the twenty its words take make a button's thirty-two.
+            Children.Add(new Label { Style = Styles.Aside, Padding = new Thickness(0f, 6f) }.As(out _other));
 
             _box.Edited += Show;
 
@@ -214,8 +228,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _box.Whole = !seconds;
             _box.Step = seconds ? SecondsStep : TicksStep;
             _box.Format = seconds ? SecondsFormat : "0";
-            _seconds.IsCurrent = seconds;
-            _ticks.IsCurrent = !seconds;
+            _unit.IsOn = seconds;
             _picks.Top = seconds ? _secondsPicks : _ticksPicks;
         }
 

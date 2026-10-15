@@ -44,11 +44,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _window = new Popup
             {
-                Style = Styles.List,
-                Flush = true,
-                Content = new VStack
+                Style = Styles.Panel,
+                // Done laid over the panel's bottom right corner, on the line saying the length in the other unit.
+                Content = new Layers
                 {
-                    Spacing = 12f,
                     Children =
                     {
                         _panel,
@@ -56,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         {
                             Style = Styles.Primary,
                             Text = editor.Texts.ChromeDone,
-                            Align = Align.Right,
+                            Align = Align.Right | Align.Bottom,
                             Command = new Relay(delegate { Finish(false); })
                         }
                     }

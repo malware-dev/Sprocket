@@ -33,6 +33,36 @@ public class StackTests
         Assert.Equal(130f, three.Bounds.X, 3);
     }
 
+    /// <summary>A child taking only spare room asks for none, so its stack keeps its children's size, and pushes what follows to the far end of a wider one.</summary>
+    [Fact]
+    public void ASpareChildTakesOnlyTheRoomLeftWhenArranged()
+    {
+        HStack row;
+        Label last;
+        var column = new VStack
+        {
+            Children =
+            {
+                new HStack { Placement = Fixed.Wide(300f) },
+                new HStack
+                {
+                    Children =
+                    {
+                        new Label { Placement = Fixed.Wide(40f) },
+                        new HStack { Placement = Flex.Spare },
+                        new Label { Placement = Fixed.Wide(60f) }.As(out last)
+                    }
+                }.As(out row)
+            }
+        };
+
+        _ = new Easel(new HStack { Children = { column } }, Wide, High);
+
+        Assert.Equal(100f, row.DesiredSize.X, 3);
+        Assert.Equal(300f, column.DesiredSize.X, 3);
+        Assert.Equal(240f, last.Bounds.X - column.Bounds.X, 3);
+    }
+
     /// <summary>A fixed width holds a child to it, whatever the child asks for.</summary>
     [Fact]
     public void AFixedWidthHoldsAChildToIt()

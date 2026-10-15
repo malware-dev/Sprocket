@@ -52,7 +52,7 @@ namespace Lumel.Layout
             {
                 var child = Children[i];
                 var entry = _entries[i];
-                var grows = bounded && entry.Grow > 0f;
+                var grows = bounded && entry.Grow > 0f && entry.Claims;
 
                 if (!grows)
                 {
@@ -78,9 +78,9 @@ namespace Lumel.Layout
                 across = Wider(across, Given(entry.Across, Across(child.DesiredSize)));
             }
 
-            _sharing = weight > 0f;
+            _sharing = weight > 0f || Spares();
 
-            if (!_sharing)
+            if (!(weight > 0f))
                 return Make(used, across);
 
             var spare = room - used;
@@ -231,7 +231,10 @@ namespace Lumel.Layout
 
             var stacked = placement as IStacked;
             if (stacked != null)
+            {
                 entry.Grow = stacked.Grow;
+                entry.Claims = stacked.Claims;
+            }
 
             return entry;
         }
@@ -268,6 +271,19 @@ namespace Lumel.Layout
             public float Along;
             public float Across;
             public float Grow;
+            public bool Claims;
+        }
+
+        /// <summary>Whether a visible child takes only the room left over as the stack is arranged.</summary>
+        bool Spares()
+        {
+            for (var i = 0; i < Children.Count; i++)
+            {
+                if (Children[i].IsVisible && _entries[i].Grow > 0f && !_entries[i].Claims)
+                    return true;
+            }
+
+            return false;
         }
     }
 }

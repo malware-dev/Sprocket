@@ -340,14 +340,11 @@ namespace Sprocket.Sim.Driving
         public static DurationPanel RateLengths(this SprocketEditor editor) =>
             (editor.Current as LogicSystemPage)?.Rate ?? throw new InvalidOperationException($"no timer's rate is being given on '{editor.Screen.Title()}'.");
 
-        /// <summary>Types <paramref name="said" /> over the panel's number, pressing ticks or seconds first where the panel is in the other.</summary>
+        /// <summary>Types <paramref name="said" /> over the panel's number, flipping its unit first where the panel is in the other.</summary>
         public static void Give(this DurationPanel panel, string said, bool ticks)
         {
             if (panel.InSeconds == ticks)
-            {
-                var unit = Within(panel).OfType<OptionRow>().Single(row => row.Text == (ticks ? "ticks" : "seconds"));
-                unit.Command!.Execute();
-            }
+                Within(panel).OfType<Switch>().Single().Command!.Execute();
 
             panel.Box.SelectAll();
             panel.Box.Insert(said);
