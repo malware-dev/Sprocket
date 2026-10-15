@@ -247,6 +247,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _empty.Text = EmptyText ?? "";
         }
 
+        /// <summary>Asks what the chosen thing is given in <paramref name="given" />, over the choices and the rows, or nothing there where it is null.</summary>
+        public void Ask(Element given)
+        {
+            if (given != null && given.Parent == _given)
+                return;
+
+            _given.Children.Clear();
+            if (given != null)
+                _given.Children.Add(given);
+
+            _given.IsVisible = given != null;
+        }
+
         /// <summary>Closes the list of kinds, where it hangs open.</summary>
         public void CloseKinds()
         {

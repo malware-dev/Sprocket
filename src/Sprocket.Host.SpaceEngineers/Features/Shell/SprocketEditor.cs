@@ -644,7 +644,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Cmd.AnyKind:
                 case Cmd.OneKind:
                 case Cmd.ReadBlocks:
-                case Cmd.TriggerRuns:
                 case Cmd.TriggerStops:
                 case Cmd.TriggerDoes:
                 case Cmd.PageOn:
@@ -2080,6 +2079,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, SignalTrigger keeping, IList<string> replacing)
         {
+            // A number on the blocks starts it as it comes to compare as asked.
+            if (answer.Form == Nature.Value)
+            {
+                var given = answer.Arguments;
+                var when = new WhenTrigger(answer.Chosen)
+                {
+                    Provider = Vocabulary.Provider(_world, answer.Targets, answer.Chosen, Nature.Value),
+                    Quantifier = answer.Quantifier,
+                    Relation = given.Count > 0 ? Comparing.Read(given[0]) : Relation.Is,
+                    Value = given.Count > 1 ? given[1] : Literal.Of(0)
+                };
+
+                var sources = Named(system, answer.Targets, replacing);
+                for (var i = 0; i < sources.Count; i++)
+                    when.Sources.Add(sources[i]);
+
+                return when;
+            }
+
             MomentTrigger made = Vocabulary.Starter(
                 Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.Quantifier == Quantifier.All);
 
@@ -2650,8 +2668,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var was = moment as WhenTrigger;
 
+            // A when comparing a number opens on that number and how it compares; anything else on its moment.
+            var compares = was != null && Vocabulary.Compares(_runner.Bindings, was, SystemInstance.Through(StandIn(system), was.Sources));
             var picker = new PickPage(this, "When something happens", true,
-                Blocks(system, moment.Sources), Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)), Nature.Native,
+                Blocks(system, moment.Sources), compares ? was.EventId : Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)),
+                compares ? Nature.Value : Nature.Native,
                 delegate(PickAnswer answer)
                 {
                     // The first pick on a copy is the answer its line was asking for.
@@ -2700,7 +2721,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Aimed(system, made, aim, origin, false, taken == null ? edit : TakingOver(edit, taken));
                     }, delegate { UnwindTo(origin); });
                 },
-                true, was == null ? Quantifier.Any : was.Quantifier, opens: action ? Opening.Nothing : opens, aim: aim);
+                true, was == null ? Quantifier.Any : was.Quantifier, compares ? new[] { Comparing.Of(was.Relation), was.Value } : null,
+                opens: action ? Opening.Nothing : opens, aim: aim);
 
             Push(picker);
             if (action)

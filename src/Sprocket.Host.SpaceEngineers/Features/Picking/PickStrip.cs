@@ -42,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Cut _reveal = new Cut();
 
         ArgumentsColumn _arguments;
+        StageColumn _holder;
         string _chosen;
         int _shownPage = -1;
         bool _onward;
@@ -91,6 +92,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Whether the column of what is given stands after the stages of the page showing.</summary>
         public bool ShowsArguments { get; set; }
+
+        /// <summary>
+        /// The stage what is given is asked in, over its rows and beside what was chosen there, or null for a column of its own
+        /// after the stages.
+        /// </summary>
+        public StageColumn ArgumentsIn { get; set; }
 
         /// <summary>How wide a column is on the page showing now.</summary>
         public float Width => Page > 0 ? PagedWidth : ColumnWidth;
@@ -254,31 +261,55 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Children.Add(_fold);
             }
 
-            Columns(_stages.Count);
-            After();
+            Laid();
         }
 
-        /// <summary>The page's own columns up to the one at <paramref name="end" />, each as wide as the page has them.</summary>
-        void Columns(int end)
+        /// <summary>The page's columns, what is given where it is showing, and the way on where there is one.</summary>
+        void Laid()
+        {
+            Columns();
+            Given();
+            WayOn();
+        }
+
+        /// <summary>The page's own columns, each as wide as the page has them.</summary>
+        void Columns()
         {
             var width = Width;
             var last = _stages.Count - 1;
-            for (var i = Page; i < end && i <= last; i++)
+            for (var i = Page; i <= last; i++)
             {
                 _stages[i].Width = _onward && i == last && _squeeze < 0 ? width - FoldWidth - Gap : width;
                 Children.Add(_stages[i]);
             }
         }
 
-        /// <summary>The arguments after the columns where they are showing, and the way on where there is one.</summary>
-        void After()
+        /// <summary>What is given, where it is showing: in the stage it is asked in, or as a column after the stages.</summary>
+        void Given()
         {
-            if (ShowsArguments && _arguments != null)
+            var shown = ShowsArguments && _arguments != null;
+            var holder = shown ? ArgumentsIn : null;
+            if (_holder != null && _holder != holder)
+                _holder.Ask(null);
+
+            _holder = holder;
+            if (!shown)
+                return;
+
+            _arguments.Nested = holder != null;
+            if (holder != null)
             {
-                _arguments.Width = Width;
-                Children.Add(_arguments);
+                holder.Ask(_arguments);
+                return;
             }
 
+            _arguments.Width = Width;
+            Children.Add(_arguments);
+        }
+
+        /// <summary>The way on, where there is one.</summary>
+        void WayOn()
+        {
             if (_onward)
                 Children.Add(_next);
         }
@@ -310,8 +341,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     across += Across(_old[i]) + Gap;
             }
 
-            Columns(_stages.Count);
-            After();
+            Laid();
             Slide(0f, -across, _fold, from, FoldWidth);
         }
 
@@ -341,7 +371,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     across += column.Width + Gap;
             }
 
-            After();
+            Given();
+            WayOn();
 
             for (var i = 0; i < _old.Count; i++)
             {

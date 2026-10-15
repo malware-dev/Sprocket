@@ -23,6 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     {
         readonly List<Slot> _starts = new List<Slot>();
         readonly List<Label> _joins = new List<Label>();
+        readonly List<Label> _startJoins = new List<Label>();
         readonly List<Slot> _does = new List<Slot>();
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
         readonly List<Mention> _pieces = new List<Mention>();
@@ -98,6 +99,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             for (var i = 0; i < Starts.Count; i++)
             {
                 _starts[i].Tip = Tip.For(_starts[i].Tip, Starts[i].Opens == null ? Why() : Starting(texts, Starts[i]));
+
+                // A number watched reads as a check does: a value on some blocks, then how it compares.
+                if (!ReferenceEquals(_shown[i], Starts[i]))
+                {
+                    var join = SentenceText.Joining(Starts, i, true);
+                    _startJoins[i].Text = join;
+                    _startJoins[i].IsVisible = join.Length != 0;
+                }
+
                 Part(_starts[i], i, Starts[i], world);
             }
 
@@ -197,7 +207,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         void Reshape()
         {
             while (_starts.Count < Starts.Count)
+            {
+                _startJoins.Add(new Label { Style = Styles.Phrase, IsVisible = false });
                 _starts.Add(new Slot());
+            }
 
             while (_does.Count < Does.Count)
             {
@@ -210,7 +223,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             sentence.Add(_lead);
 
             for (var i = 0; i < Starts.Count; i++)
+            {
+                sentence.Add(_startJoins[i]);
                 sentence.Add(_starts[i]);
+            }
 
             sentence.Add(_between);
 
@@ -223,6 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             sentence.Add(_live);
 
             _starts.RemoveRange(Starts.Count, _starts.Count - Starts.Count);
+            _startJoins.RemoveRange(Starts.Count, _startJoins.Count - Starts.Count);
             _joins.RemoveRange(Does.Count, _joins.Count - Does.Count);
             _does.RemoveRange(Does.Count, _does.Count - Does.Count);
 

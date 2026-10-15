@@ -57,6 +57,25 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <remarks>Kept as the program says it, so a member added by something this host does not have is never taken for one it does.</remarks>
         public string Provider { get; set; } = BlockKinds.Own;
 
+        /// <summary>The same trigger, to change one thing of as an edit; what it starts is the edit's to carry over.</summary>
+        public WhenTrigger Copy()
+        {
+            var copy = new WhenTrigger(EventId)
+            {
+                Quantifier = Quantifier,
+                Relation = Relation,
+                Value = Value,
+                Interval = Interval,
+                Provider = Provider
+            };
+
+            for (var i = 0; i < Sources.Count; i++)
+                copy.Sources.Add(Sources[i]);
+
+            copy._arguments.AddRange(_arguments);
+            return copy;
+        }
+
         /// <summary>The value among <paramref name="actions" /> that the member names: Sprocket's own where it is qualified by <c>ext</c>, the block's own where it is bare; null where it names none.</summary>
         public EntityAction Names(IList<EntityAction> actions)
         {

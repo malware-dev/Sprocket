@@ -321,9 +321,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <param name="chosen">The state or the value chosen, in the words its list shows it in, or empty.</param>
         /// <param name="state">Whether what is chosen is a state of the blocks' status, which reads as the blocks themselves.</param>
         /// <param name="reads">How the blocks are read, as <see cref="Quantified" /> says it, or empty where there is one block: "If the sum of radius on the lights is …".</param>
-        public static string Testing(string blocks, string chosen, bool state, string reads)
+        /// <param name="opens">What the line opens with: "If" for a check, "When" for what starts something.</param>
+        public static string Testing(string blocks, string chosen, bool state, string reads, string opens = "If")
         {
-            var lead = reads.Length == 0 ? "If " : "If " + reads + " ";
+            var lead = reads.Length == 0 ? opens + " " : opens + " " + reads + " ";
             if (chosen.Length == 0)
                 return lead + blocks + " " + Empty;
 

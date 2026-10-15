@@ -30,6 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         const int Actions = 0;
         const int Values = 1;
 
+        // The group a moment stands in, in a list of what starts something: under no heading, before the values.
+        const int Moments = -1;
+
         // The group a check's status values stand in, first, past every category's.
         const int Statuses = (int)Category.Other + 1;
 
@@ -377,7 +380,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override void Primary()
         {
             var arguments = _strip.Arguments;
-            if (_forEvents || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
+            if (_forEvents && _chosenForm != Nature.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
                 _done(new PickAnswer(_selection, _chosen, _quantifier, null, _chosenForm));
                 return;
@@ -712,6 +715,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (!IsComplete)
                 return _nothing;
 
+            // A number watched to start something is compared as a check compares it.
+            if (_forEvents && _chosenForm == Nature.Value)
+                return Comparing.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
+
             if (!_forTests)
                 return Editor.Fields(_selection, _chosen, _chosenForm);
 
@@ -731,11 +738,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         void FillGiven()
         {
-            if (_forEvents)
+            // A moment takes nothing; a number watched asks how it compares, and with what, over what the trigger does, which
+            // is the order the sentence says them in and keeps every column on the one page.
+            if (_forEvents && _chosenForm != Nature.Value)
             {
                 _strip.ShowsArguments = false;
                 return;
             }
+
+            _strip.ArgumentsIn = _forEvents ? _does ?? _what : null;
 
             var shown = IsComplete ? _chosenForm + " " + _chosen : "";
             _strip.ShowsArguments = _what != null && shown.Length != 0;
@@ -1076,7 +1087,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         void FillOptions()
         {
-            var asks = _asksAll && (_forTests || Watched());
+            var asks = _asksAll && (_forTests || _forEvents && !_signalsOnly && (_chosen.Length == 0 || Watched() || _chosenForm == Nature.Value || Totals));
             if (!asks)
             {
                 _blocks.Options.Clear();
@@ -1087,10 +1098,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var words = new List<string>();
                 for (var i = 0; i < SentenceText.Readings.Count; i++)
-                {
-                    if (_forTests || i < 2)
-                        words.Add(SentenceText.Quantified(SentenceText.Readings[i]));
-                }
+                    words.Add(SentenceText.Quantified(SentenceText.Readings[i]));
 
                 _reads = new ListField(words);
                 _reads.Edited += delegate
@@ -1163,7 +1171,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
             else if (_forEvents)
             {
-                var events = Vocabulary.EventsOf(Editor.World, _selection);
+                // A total is taken of numbers alone, so while one is asked for no moment is listed.
+                var events = Totals ? new List<EntityEvent>() : Vocabulary.EventsOf(Editor.World, _selection);
                 for (var i = 0; i < events.Count; i++)
                 {
                     if (_signalsOnly && !events[i].Answered)
@@ -1174,6 +1183,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                     _ids.Add(events[i].Id);
                     _sets.Add(false);
+                    _forms.Add(Nature.Native);
+                    _groups.Add(Moments);
+                    _ready.Add(Readiness.Ready);
+                    _why.Add(null);
+                }
+
+                // A number on the blocks can start something as it comes to compare as asked: the states already come as
+                // moments, so numbers alone are listed.
+                if (!_signalsOnly)
+                {
+                    var actions = Vocabulary.ActionsOf(Editor.World, _selection);
+                    for (var i = 0; i < actions.Count; i++)
+                    {
+                        var one = actions[i];
+                        if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && Number(one))
+                            Read(one, Values);
+                    }
                 }
             }
             else
@@ -1183,9 +1209,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var texts = Editor.Texts;
             var note = "";
-            if (_forTests)
+            if (_forTests || _forEvents)
             {
-                note = Editor.ShowsTerminal ? texts.PickTerminalNote : "";
+                note = _forTests && Editor.ShowsTerminal ? texts.PickTerminalNote : "";
                 var totals = _quantifier == Quantifier.Sum ? texts.PickSumNote : _quantifier == Quantifier.Average ? texts.PickAverageNote : "";
                 if (totals.Length > 0)
                     note = note.Length == 0 ? totals : note + " " + totals;
@@ -1238,7 +1264,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var i = 0; i < _matched.Count; i++)
             {
                 var at = _matched[i];
-                var mine = _forEvents ? group : _groups.Count > at ? _groups[at] : group;
+                var mine = _groups.Count > at ? _groups[at] : group;
                 if (mine != group)
                 {
                     group = mine;
@@ -1494,7 +1520,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 ? _title
                 : _forTests
                     ? SentenceText.Testing(blocks, chosen, IsState(_chosen), _selection.Count > 1 ? SentenceText.Quantified(_quantifier) : "")
-                    : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
+                    : _forEvents && (_chosenForm == Nature.Value || Totals)
+                        ? SentenceText.Testing(blocks, chosen, false, _selection.Count > 1 ? SentenceText.Quantified(_quantifier) : "", "When")
+                        : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
 
             _retitled = true;
         }
@@ -1562,6 +1590,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>What a group is headed.</summary>
         string Heading(int group)
         {
+            // What starts something lists its moments under no heading, and its numbers under one.
+            if (_forEvents)
+                return Editor.Texts.PickValues;
+
             if (Editor.ShowsTerminal)
                 return group == Values ? Editor.Texts.PickValues : Editor.Texts.PickToolbarActions;
 

@@ -163,6 +163,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
+        /// Whether <paramref name="when" /> compares a value on the blocks <paramref name="sources" /> stand for, rather than
+        /// watching for one of the moments they say: anything but Sprocket's own state coming to be.
+        /// </summary>
+        public static bool Compares(Bindings bindings, WhenTrigger when, IList<string> sources)
+        {
+            if (when.Provider != BlockKinds.Own || bindings == null)
+                return true;
+
+            bool inState;
+            return Change(EventsFor(bindings, sources), when.EventId, when.Relation, when.Value, out inState) == null || !inState;
+        }
+
+        /// <summary>
         /// The namespace a step doing <paramref name="id" /> as <paramref name="form" /> on these blocks is qualified by:
         /// Sprocket's own for its own actions and values, empty for the game's.
         /// </summary>

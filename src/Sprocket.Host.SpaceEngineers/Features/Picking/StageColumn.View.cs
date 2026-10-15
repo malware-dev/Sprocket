@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         Glyph _hidden;
         Label _showing;
         HStack _options;
+        VStack _given;
         Label _note;
         VStack _rows;
         Label _empty;
@@ -97,6 +98,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }.As(out _kindHead));
 
             Children.Add(new Label { Style = Styles.ColumnNote, IsVisible = false }.As(out _showing));
+
+            // Over the choices and the rows, in the order the sentence says them, so a column further on stays free.
+            Children.Add(new VStack { IsVisible = false }.As(out _given));
 
             // Across rather than stacked: there are two of them, three words each, and every line of height comes out of
             // the list.

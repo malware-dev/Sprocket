@@ -298,6 +298,16 @@ namespace Sprocket.Sim.Driving
                     return;
                 }
 
+                // A switch is pressed only where it does not already say it: its first word is its on side.
+                var flip = pane.Options.OfType<Switch>().FirstOrDefault(s => s.Within().OfType<Label>().Any(word => word.Text == text));
+                if (flip != null)
+                {
+                    if ((flip.Within().OfType<Label>().First().Text == text) != flip.IsOn)
+                        flip.Command!.Execute();
+
+                    return;
+                }
+
                 var entry = pane.Entries().FirstOrDefault(e => e.Text == text && !e.IsHeading);
                 if (entry != null)
                 {

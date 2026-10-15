@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
@@ -33,8 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         StageColumn _filled;
         Keyed<string, PickRow> _rows;
-        OptionRow _run;
-        OptionRow _stop;
+        Switch _runs;
 
         /// <summary>Opens on what <paramref name="trigger" /> does now, or on a new sequence where it is null or does nothing.</summary>
         public Aim(SprocketEditor editor, AutomationSystem system, Trigger trigger)
@@ -112,8 +111,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Says what the trigger may do in <paramref name="stage" />.</summary>
         /// <remarks>
-        /// Running and stopping are a choice about the rest, as any and all are about the blocks, so stopping is one choice and
-        /// one row rather than a second list. There is nothing new to stop, and a single action is done rather than stopped, so
+        /// Running and stopping are a choice about the rest, as any and all are about the blocks, so they are one switch over
+        /// the list rather than a second list. There is nothing new to stop, and a single action is done rather than stopped, so
         /// stopping lists the sequences alone; and a system with none has nothing to stop. The two that make something come
         /// first, and then under their own heading the sequences, which are as many as the system has and so go last, where
         /// their number cannot push anything else out of sight.
@@ -125,33 +124,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 _filled = stage;
                 _rows = new Keyed<string, PickRow>(stage.Rows, Row);
-                _run = null;
+                _runs = null;
             }
 
 
             var asks = _offered.Count > 0;
-            if (asks && _run == null)
+            if (asks && _runs == null)
             {
-                _run = new OptionRow
-                {
-                    Text = texts.PickRun,
-                    Tip = Tip.For(null, texts.PickRunAbout),
-                    Command = _editor.Act(Cmd.TriggerRuns, delegate { Stopping(false); })
-                };
-                _stop = new OptionRow
-                {
-                    Text = texts.PickStop,
-                    Tip = Tip.For(null, texts.PickStopAbout),
-                    Command = _editor.Act(Cmd.TriggerStops, delegate { Stopping(true); })
-                };
-                stage.Options.Add(_run);
-                stage.Options.Add(_stop);
+                _runs = new Switch { Style = Styles.Switch, Command = _editor.Act(Cmd.TriggerStops, delegate { Stopping(!Stops); }) };
+                _runs.Says(texts.PickRun, texts.PickStop);
+                stage.Options.Add(_runs);
             }
 
             if (asks)
             {
-                _run.IsCurrent = !Stops;
-                _stop.IsCurrent = Stops;
+                _runs.IsOn = !Stops;
+                _runs.Tip = Tip.For(null, Stops ? texts.PickStopAbout : texts.PickRunAbout);
             }
 
             // A single action is offered only in developer mode, or where the trigger does one already: whether a trigger needs

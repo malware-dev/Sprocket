@@ -757,10 +757,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Does.Clear();
 
             var moment = trigger as MomentTrigger;
-            if (moment != null)
+            var watching = moment as WhenTrigger;
+            var seen = moment == null ? null : Editor.Seen(_system, moment.Sources);
+            if (watching != null && Vocabulary.Compares(Editor.Runner.Bindings, watching, seen))
             {
-                var when = moment as WhenTrigger;
-                var all = when != null && when.Quantifier != Quantifier.Any;
+                Compared(row, watching, seen);
+            }
+            else if (moment != null)
+            {
+                var all = watching != null && watching.Quantifier != Quantifier.Any;
                 var blocks = Editor.Blocks(_system, moment.Sources);
                 row.Starts.Add(new EntitiesSlot(blocks, all, Starts(trigger, Opening.Blocks)));
                 row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, Opening.What), all && blocks.Count > 1));
@@ -783,6 +788,73 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return TriggerKind.Every;
 
             return trigger is WhenTrigger ? TriggerKind.When : TriggerKind.Signal;
+        }
+
+        /// <summary>
+        /// Gives <paramref name="row" /> the parts of a when on a number, read as a check reads one: how several blocks are
+        /// read, the value on its blocks, how it compares and with what, the first and third each chosen from a menu under it.
+        /// </summary>
+        void Compared(TriggerRow row, WhenTrigger when, IList<string> seen)
+        {
+            var bindings = Editor.Runner.Bindings;
+            var blocks = Editor.Blocks(_system, when.Sources);
+            var value = when.Names(Vocabulary.ActionsFor(bindings, seen));
+            if (blocks.Count > 1)
+            {
+                var said = SentenceText.Quantified(when.Quantifier);
+                row.Starts.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
+                    Changes(Cmd.OpenTrigger, delegate { Quantify(when); }), Given.Read));
+            }
+
+            row.Starts.Add(new ActionSlot(value, Starts(when, Opening.What)));
+            row.Starts.Add(new EntitiesSlot(blocks, when.Quantifier != Quantifier.Any, Starts(when, Opening.Blocks)));
+            if (value == null)
+                return;
+
+            var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
+            var plural = when.Quantifier == Quantifier.All && blocks.Count > 1;
+            row.Starts.Add(new ArgumentsSlot(new[] { Comparing.Of(when.Relation) }, fields.GetRange(0, 1),
+                Changes(Cmd.OpenTrigger, delegate { Relate(when, fields[0], plural); }), Given.Compared, plural));
+            row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, Opening.Arguments), Given.Checked));
+        }
+
+        /// <summary>Offers the comparisons <paramref name="relation" /> takes in a menu under the part pressed, the one <paramref name="when" /> makes marked, and changes it to the one chosen as one edit.</summary>
+        void Relate(WhenTrigger when, Field relation, bool plural)
+        {
+            Editor.AskHere("");
+            for (var i = 0; i < relation.Words.Count; i++)
+            {
+                var related = Comparing.Read(Literal.Name(relation.Means[i]));
+                var said = plural ? SentenceText.Plural(relation.Words[i]) : relation.Words[i];
+                Editor.Answer(said, delegate
+                {
+                    if (related == when.Relation)
+                        return;
+
+                    var now = when.Copy();
+                    now.Relation = related;
+                    Editor.Do(_system, new ChangeTrigger(when, now));
+                }, related == when.Relation);
+            }
+        }
+
+        /// <summary>Offers the ways <paramref name="when" /> can read its blocks in a menu under the part pressed, in the sentence's own words, and changes it to the one chosen as one edit.</summary>
+        void Quantify(WhenTrigger when)
+        {
+            Editor.AskHere("");
+            for (var i = 0; i < SentenceText.Readings.Count; i++)
+            {
+                var reading = SentenceText.Readings[i];
+                Editor.Answer(SentenceText.Quantified(reading), delegate
+                {
+                    if (reading == when.Quantifier)
+                        return;
+
+                    var now = when.Copy();
+                    now.Quantifier = reading;
+                    Editor.Do(_system, new ChangeTrigger(when, now));
+                }, reading == when.Quantifier);
+            }
         }
 
         EntityEvent Happening(MomentTrigger moment)

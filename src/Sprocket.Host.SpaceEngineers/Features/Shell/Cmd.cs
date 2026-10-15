@@ -203,10 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Choosing how a check or a trigger reads its blocks: any, all, their sum or their average.</summary>
         ReadBlocks,
 
-        /// <summary>Having a trigger run its sequence.</summary>
-        TriggerRuns,
-
-        /// <summary>Having a trigger stop its sequence.</summary>
+        /// <summary>Switching a trigger between running its sequence and stopping it.</summary>
         TriggerStops,
 
         /// <summary>Having a trigger have a block do one thing.</summary>

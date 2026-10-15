@@ -6,6 +6,7 @@ A trigger can fire on any of these:
 
 - A ![](mark:signal)&nbsp;[signal](signal), like a button being pressed or a door finishing closing.
 - Blocks reaching a state, like a door being closed. With several blocks, `any` starts it when the first gets there, and `all` when the last one does.
+- A number on blocks reaching a comparison, like *When stored power on Base Battery is below 1*. The comparison is `is`, `is not`, `is above`, `is at least`, `is below` or `is at most`, and the trigger fires once as it comes to hold, then again only after it has stopped holding. With several blocks, `any` and `all` read them as for a state, while `the sum of` and `the average of` make them one number, as on an [if](if), so choosing either lists numbers alone.
 - A set time passing, over and over, like every minute. Add one of these with `every`.
 
 ## Each installation on its own
