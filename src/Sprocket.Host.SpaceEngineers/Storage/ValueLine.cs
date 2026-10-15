@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.World;
+using VRage.Game.ModAPI.Ingame.Utilities;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
@@ -37,7 +38,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 if (said[at] == '"')
                 {
-                    into.Add(Literal.Of(Quoted(said, ref at)));
+                    // Quoted as a program quotes text, so its entities are read back as what they stand for: a line break
+                    // written as one comes back a break.
+                    var text = Quoted(said, ref at);
+                    into.Add(Literal.Of(text.IndexOf('&') < 0 ? text : Entities.Read(new StringSegment(text))));
                     continue;
                 }
 
