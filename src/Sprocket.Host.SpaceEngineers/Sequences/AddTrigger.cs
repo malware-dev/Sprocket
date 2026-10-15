@@ -47,6 +47,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override Change Change => _change;
 
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, system);
+            Touch(screens, _made);
+            for (var i = 0; i < _before.Count; i++)
+                _before[i].Touches(system, screens);
+        }
+
         /// <summary>Waits for the logic system's switch, and for whatever taking a button waits for.</summary>
         public override bool Held(AutomationSystem system, bool back)
         {

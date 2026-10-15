@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
@@ -26,6 +27,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override Change Change => Change.TakeOver;
+
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, system);
+            Touch(screens, _from);
+            if (_made != null)
+                _made.Touches(system, screens);
+        }
 
         /// <inheritdoc />
         public override bool Changes => true;

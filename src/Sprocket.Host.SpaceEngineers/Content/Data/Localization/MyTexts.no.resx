@@ -2378,4 +2378,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Type.WindTurbine" xml:space="preserve">
     <value>Vindturbin</value>
   </data>
+  <data name="Sprocket.Undo.Also" xml:space="preserve">
+    <value>Tar også tilbake det som er endret siden på {screens}.</value>
+  </data>
 </root>

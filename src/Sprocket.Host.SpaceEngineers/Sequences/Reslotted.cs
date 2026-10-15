@@ -40,6 +40,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override bool ChangesShape => _edit.ChangesShape || Reslots;
 
+        /// <inheritdoc />
+        public override void Touches(T subject, IList<object> screens)
+        {
+            _edit.Touches(subject, screens);
+            for (var i = 0; i < _reslots.Count; i++)
+                _reslots[i].Touches(screens);
+        }
+
+        /// <inheritdoc />
+        public override void Reassert(T subject)
+        {
+            _edit.Reassert(subject);
+        }
+
         /// <summary>Whether it changes any slot.</summary>
         bool Reslots
         {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A sequence made in a logic system, new or as a copy of another, as a step its undo takes back.</summary>
@@ -22,6 +23,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override Change Change => _change;
+
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, system);
+            Touch(screens, Sequence);
+        }
 
         /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)

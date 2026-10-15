@@ -124,16 +124,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public override bool HasHistory => true;
 
         /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
-        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_sequence.System);
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_sequence.System, _sequence);
 
         /// <inheritdoc />
-        public override string UndoText => Editor.UndoLabel(_sequence.System);
+        public override string UndoText => Editor.UndoLabel(_sequence.System, _sequence);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_sequence.System);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_sequence.System, _sequence);
 
         /// <inheritdoc />
-        public override string RedoText => Editor.RedoLabel(_sequence.System);
+        public override string RedoText => Editor.RedoLabel(_sequence.System, _sequence);
 
         /// <summary>The sequence just made is as it was made: its name, and nothing done in the program since.</summary>
         public override bool Untouched => _sequence.Name == _madeName && Editor.Program.Edits == _madeEdits;
@@ -210,13 +210,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override void Undo()
         {
-            Editor.Undo(_sequence.System);
+            Editor.Undo(_sequence.System, _sequence);
         }
 
         /// <inheritdoc />
         public override void Redo()
         {
-            Editor.Redo(_sequence.System);
+            Editor.Redo(_sequence.System, _sequence);
         }
 
         /// <summary>One part: what this sequence is called, the name where there is one and what it does where there is not.</summary>

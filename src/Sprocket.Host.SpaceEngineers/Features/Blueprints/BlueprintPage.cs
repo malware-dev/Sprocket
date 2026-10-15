@@ -89,16 +89,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool HasHistory => true;
 
         /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
-        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system);
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system, Blockset);
 
         /// <inheritdoc />
-        public override string UndoText => Editor.UndoLabel(_system);
+        public override string UndoText => Editor.UndoLabel(_system, Blockset);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system, Blockset);
 
         /// <inheritdoc />
-        public override string RedoText => Editor.RedoLabel(_system);
+        public override string RedoText => Editor.RedoLabel(_system, Blockset);
 
         /// <summary>The blueprint's parts, one row each, with the chosen logic system's blocks for each.</summary>
         public Element.Collection Parts => _partList.Children;
@@ -154,13 +154,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         public override void Undo()
         {
-            Editor.Undo(_system);
+            Editor.Undo(_system, Blockset);
         }
 
         /// <inheritdoc />
         public override void Redo()
         {
-            Editor.Redo(_system);
+            Editor.Redo(_system, Blockset);
         }
 
         /// <inheritdoc />

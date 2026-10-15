@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What a part says about itself.</summary>
@@ -8,6 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _now;
         readonly Change _change;
 
+        /// <summary>Writes <paramref name="now" /> about <paramref name="part" />, a change of the kind <paramref name="change" />.</summary>
         public AnnotatePart(Part part, string now, Change change)
         {
             _part = part;
@@ -18,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override Change Change => _change;
+
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, _part);
+        }
 
         /// <summary>Only what the slot says changes, and its box already says it.</summary>
         public override bool ChangesShape => false;

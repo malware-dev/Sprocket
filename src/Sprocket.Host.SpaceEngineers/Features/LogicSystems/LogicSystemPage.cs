@@ -129,16 +129,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override bool HasHistory => true;
 
         /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
-        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system);
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system, _system);
 
         /// <inheritdoc />
-        public override string UndoText => Editor.UndoLabel(_system);
+        public override string UndoText => Editor.UndoLabel(_system, _system);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system, _system);
 
         /// <inheritdoc />
-        public override string RedoText => Editor.RedoLabel(_system);
+        public override string RedoText => Editor.RedoLabel(_system, _system);
 
         /// <summary>Whether what the system does may be changed now: not while it may run, and not while somebody else holds the editor.</summary>
         public bool Editable => !_system.Enabled && Editor.Holder == null;
@@ -244,14 +244,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override void Undo()
         {
             Settle();
-            Editor.Undo(_system);
+            Editor.Undo(_system, _system);
         }
 
         /// <inheritdoc />
         public override void Redo()
         {
             Settle();
-            Editor.Redo(_system);
+            Editor.Redo(_system, _system);
         }
 
         /// <summary>Brings the view up to date, words and all.</summary>

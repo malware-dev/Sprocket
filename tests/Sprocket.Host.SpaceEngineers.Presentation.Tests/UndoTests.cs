@@ -1,3 +1,6 @@
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Xunit;
@@ -5,14 +8,34 @@ using Xunit;
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
 /// <summary>
-/// One way back for each logic system, whichever of its screens a change was made on, taken in the order the changes were
-/// made, under the switch they were made under, and showing where each one was.
+/// Each screen of a logic system takes back what was changed on it, with whatever later change on another screen leaned on
+/// that, under the switch it was made under.
 /// </summary>
 public class UndoTests
 {
-    /// <summary>A step added on a sequence is taken back from its logic system's screen, which goes to the sequence to show it.</summary>
+    /// <summary>A step added on a sequence is taken back on the sequence, and the logic system's screen leaves it standing.</summary>
     [Fact]
-    public void AStepIsTakenBackFromTheLogicSystemsScreen()
+    public void AStepIsTakenBackOnItsSequence()
+    {
+        var screen = Built();
+        var editor = screen.Editor;
+        Light(screen);
+
+        Assert.Equal("adding a step", editor.Screen.UndoText);
+        editor.Screen.Undo!.Execute();
+        screen.Run(2);
+
+        Assert.Empty(editor.Program.Sequences[0].Steps);
+        Assert.Single(editor.Program.Systems[0].Triggers);
+        Assert.IsType<SequencePage>(editor.Current);
+    }
+
+    /// <summary>
+    /// Undo on the logic system's screen takes back the trigger that made the sequence, and the step added on the sequence
+    /// since with it, saying so; redo there brings both back.
+    /// </summary>
+    [Fact]
+    public void TheTriggerTakesTheStepAlong()
     {
         var screen = Built();
         var editor = screen.Editor;
@@ -21,15 +44,47 @@ public class UndoTests
         screen.Run(2);
         Assert.IsType<LogicSystemPage>(editor.Current);
 
-        Assert.Equal("adding a step", editor.Screen.UndoText);
+        var also = Template.Fill(editor.Texts.UndoAlso, "screens", SequenceText.Called(editor.Texts, editor.Program.Sequences[0]));
+        Assert.StartsWith("adding a trigger " + also.Substring(0, also.IndexOf('{') < 0 ? also.Length - 1 : also.IndexOf('{')),
+            editor.Screen.UndoText);
+        Assert.Contains(SequenceText.Called(editor.Texts, editor.Program.Sequences[0]), editor.Screen.UndoText);
         editor.Screen.Undo!.Execute();
         screen.Run(2);
 
-        Assert.Empty(editor.Program.Sequences[0].Steps);
-        Assert.IsType<SequencePage>(editor.Current);
+        Assert.Empty(editor.Program.Systems[0].Triggers);
+        Assert.Empty(editor.Program.Sequences);
+
+        editor.Screen.Redo!.Execute();
+        screen.Run(2);
+        Assert.Single(editor.Program.Systems[0].Triggers);
+        Assert.Single(editor.Program.Sequences[0].Steps);
     }
 
-    /// <summary>A change to a trigger, taken back from a sequence's screen, goes to the logic system's screen where triggers are.</summary>
+    /// <summary>A slot's page takes back what was written on it, and leaves the step on the sequence standing.</summary>
+    [Fact]
+    public void ASlotsPageTakesBackItsOwn()
+    {
+        var screen = Built();
+        var editor = screen.Editor;
+        var system = editor.Program.Systems[0];
+        Light(screen);
+        editor.Back();
+        screen.Run(2);
+        system.Enabled = false;
+        editor.OpenSlot("Airlock Light");
+        screen.Run(2);
+        var part = system.FindPart("Airlock Light")!;
+        editor.Do(system, new AnnotatePart(part, "Over the inner door.", Change.DescribeSlot));
+        screen.Run(2);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(2);
+
+        Assert.Equal("", part.Annotation);
+        Assert.Single(editor.Program.Sequences[0].Steps);
+    }
+
+    /// <summary>A trigger that made a sequence is taken back on that sequence's screen too, which goes to the logic system's screen.</summary>
     [Fact]
     public void ATriggerIsTakenBackFromASequencesScreen()
     {
@@ -200,7 +255,7 @@ public class UndoTests
         Assert.False(system.Enabled);
         editor.OpenBlueprintSystem(0);
         screen.Run(2);
-        Assert.Equal("adding a step", editor.Screen.UndoText);
+        Assert.StartsWith("adding a trigger", editor.Screen.UndoText);
     }
 
     /// <summary>Another program read in place of the one there starts every way back again.</summary>

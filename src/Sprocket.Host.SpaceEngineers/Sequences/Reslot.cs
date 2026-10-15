@@ -56,6 +56,52 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _expectedNow.Add(expects);
         }
 
+        /// <summary>
+        /// Adds to <paramref name="screens" /> the slots this makes, fills and drops, the installation shown where it fills any,
+        /// and the sequence or logic system a list it renames is on. The logic system's screen lists the slots, and a slot coming
+        /// or going there is the slot's change, not one made on that screen.
+        /// </summary>
+        public void Touches(IList<object> screens)
+        {
+            for (var i = 0; i < _made.Count; i++)
+                Touch(screens, _made[i]);
+
+            for (var i = 0; i < _refilled.Count; i++)
+                Touch(screens, _refilled[i]);
+
+            for (var i = 0; i < _dropped.Count; i++)
+                Touch(screens, _dropped[i]);
+
+            if (_made.Count + _refilled.Count + _dropped.Count > 0)
+                Touch(screens, _shown);
+
+            for (var i = 0; i < _renamed.Count; i++)
+                Touch(screens, Owner(_renamed[i]));
+        }
+
+        /// <summary>The sequence whose step holds <paramref name="names" />, or the logic system where a trigger does.</summary>
+        object Owner(IList<string> names)
+        {
+            var sequences = System.Sequences;
+            for (var s = 0; s < sequences.Count; s++)
+            {
+                var steps = sequences[s].Steps;
+                for (var i = 0; i < steps.Count; i++)
+                {
+                    if (ReferenceEquals(steps[i].Targets, names))
+                        return sequences[s];
+                }
+            }
+
+            return System;
+        }
+
+        static void Touch(IList<object> screens, object screen)
+        {
+            if (!screens.Contains(screen))
+                screens.Add(screen);
+        }
+
         /// <summary>Has <paramref name="names" />, a step's or a trigger's list, name <paramref name="now" /> in place of what it names.</summary>
         public void Rename(IList<string> names, IList<string> now)
         {

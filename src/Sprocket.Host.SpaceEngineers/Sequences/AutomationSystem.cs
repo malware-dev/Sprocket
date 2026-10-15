@@ -314,8 +314,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Renames <paramref name="part" /> to <paramref name="name" />, everywhere the system names it.</summary>
         public void RenamePart(Part part, string name)
         {
-            var was = part.Id;
+            RenameMentions(part.Id, name);
+            part.Rename(name);
+        }
 
+        /// <summary>Has everything that names the slot <paramref name="was" /> - triggers, steps, installations - name <paramref name="name" /> instead.</summary>
+        public void RenameMentions(string was, string name)
+        {
             for (var i = 0; i < _triggers.Count; i++)
             {
                 var moment = _triggers[i] as MomentTrigger;
@@ -336,8 +341,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             for (var i = 0; i < _instances.Count; i++)
                 _instances[i].RenameSlot(was, name);
-
-            part.Rename(name);
         }
 
         static void Rename(IList<string> names, string was, string now)

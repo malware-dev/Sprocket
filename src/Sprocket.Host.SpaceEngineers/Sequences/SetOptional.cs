@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Whether a construct may leave a part unfilled.</summary>
@@ -6,6 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Part _part;
         readonly bool _now;
 
+        /// <summary>Makes <paramref name="part" /> one a construct may leave unfilled where <paramref name="now" />, and required otherwise.</summary>
         public SetOptional(Part part, bool now)
         {
             _part = part;
@@ -14,6 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override Change Change => _now ? Change.Optional : Change.Required;
+
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, _part);
+        }
 
         /// <inheritdoc />
         public override bool Changes => _part.Optional != _now;

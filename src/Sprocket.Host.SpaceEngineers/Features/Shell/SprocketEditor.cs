@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
-using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Home;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
@@ -1028,6 +1027,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly History<Automation> _constructHistory = new History<Automation>();
 
+        readonly List<object> _also = new List<object>();
+
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
         /// <remarks>The only way anything changes a sequence.</remarks>
         public void Do(Sequence sequence, SequenceEdit edit)
@@ -1094,85 +1095,102 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Invalidate();
         }
 
-        /// <summary>Whether there is a change to <paramref name="system" /> to take back now: on any of its screens, and not waiting for a switch.</summary>
-        public bool CanUndo(AutomationSystem system)
+        /// <summary>
+        /// Whether there is a change to <paramref name="system" /> on its screen <paramref name="screen" /> to take back now - a
+        /// sequence, a slot, an installation or the logic system itself - and not waiting for a switch.
+        /// </summary>
+        public bool CanUndo(AutomationSystem system, object screen)
         {
-            return _systemHistory.CanUndo(system);
+            return _systemHistory.CanUndo(system, screen);
         }
 
-        /// <summary>What taking back the last change to <paramref name="system" /> would undo, in words.</summary>
-        public string UndoLabel(AutomationSystem system)
+        /// <summary>What taking back the last change on <paramref name="screen" /> would undo, in words, with the other screens it takes back changes on.</summary>
+        public string UndoLabel(AutomationSystem system, object screen)
         {
-            return ChangeText.Of(Texts, _systemHistory.Undoes(system));
+            return Label(_systemHistory.Undoes(system, screen), system, screen, true);
         }
 
-        /// <summary>Takes the last change to <paramref name="system" /> back, and shows where it was.</summary>
-        public void Undo(AutomationSystem system)
+        /// <summary>Takes back the last change on <paramref name="screen" />, with every later change it takes along.</summary>
+        public void Undo(AutomationSystem system, object screen)
         {
-            var edit = _systemHistory.Undo(system);
-            Walked(edit);
-            Show(system, edit);
+            Walked(_systemHistory.Undo(system, screen));
+            Stand(system);
         }
 
-        /// <summary>Whether there is a change to <paramref name="system" /> taken back to make again.</summary>
-        public bool CanRedo(AutomationSystem system)
+        /// <summary>Whether there is a change on <paramref name="screen" /> taken back to make again.</summary>
+        public bool CanRedo(AutomationSystem system, object screen)
         {
-            return _systemHistory.CanRedo(system);
+            return _systemHistory.CanRedo(system, screen);
         }
 
-        /// <summary>What making the last change to <paramref name="system" /> again would redo, in words.</summary>
-        public string RedoLabel(AutomationSystem system)
+        /// <summary>What making the last change taken back on <paramref name="screen" /> again would redo, in words, with the other screens it makes changes on.</summary>
+        public string RedoLabel(AutomationSystem system, object screen)
         {
-            return ChangeText.Of(Texts, _systemHistory.Redoes(system));
+            return Label(_systemHistory.Redoes(system, screen), system, screen, false);
         }
 
-        /// <summary>Makes the last change to <paramref name="system" /> taken back again, and shows where it was.</summary>
-        public void Redo(AutomationSystem system)
+        /// <summary>Makes the last change taken back on <paramref name="screen" /> again, with whatever taken back it leans on.</summary>
+        public void Redo(AutomationSystem system, object screen)
         {
-            var edit = _systemHistory.Redo(system);
-            Walked(edit);
-            Show(system, edit);
+            Walked(_systemHistory.Redo(system, screen));
+            Stand(system);
         }
 
         /// <summary>
-        /// Shows where <paramref name="edit" />, just walked, was made: the sequence for a step, the installation's panel for its
-        /// blocks or its name, and otherwise the logic system's own screen; where the screen showing it is open already, nothing
-        /// moves.
+        /// <paramref name="change" /> in words, and where walking it takes changes on other screens along, back where
+        /// <paramref name="back" /> or forward, what those screens are called.
         /// </summary>
-        /// <remarks>A screen further down the way back is gone back to rather than opened again, so Back still leads where it did.</remarks>
-        void Show(AutomationSystem system, Edit<AutomationSystem> edit)
+        string Label(Change change, AutomationSystem system, object screen, bool back)
         {
-            if (edit == null || _program.FindSystem(system.Identity) != system)
-                return;
+            var label = ChangeText.Of(Texts, change);
+            _also.Clear();
+            _systemHistory.Also(system, screen, back, _also);
+            if (_also.Count == 0)
+                return label;
 
-            var slotted = edit as Reslotted<AutomationSystem>;
-            var made = slotted != null ? slotted.Edit : edit;
-
-            var step = made as OnSequence;
-            var copy = made as MakeSequence;
-            var sequence = step != null ? step.Sequence : copy != null ? copy.Sequence : null;
-            if (sequence != null && system.FindSequence(sequence.Number) == sequence)
+            var names = new List<string>();
+            for (var i = 0; i < _also.Count; i++)
             {
-                Reach(delegate(EditorPage page)
-                {
-                    var open = page as SequencePage;
-                    return open != null && open.SequenceId == sequence.Id;
-                }, system, delegate { return new SequencePage(this, sequence); });
-                return;
+                var name = ScreenName(_also[i]);
+                if (name.Length > 0 && !names.Contains(name))
+                    names.Add(name);
             }
 
-            var installation = made as IInstallationEdit;
-            if (installation != null && system.FindInstance(installation.Instance.Number) == installation.Instance)
-            {
-                Choose(system, installation.Instance);
-                Reach(delegate(EditorPage page) { return page is BlueprintPage && page.IsAbout(system); },
-                    system, delegate { return new BlueprintPage(this, system); });
-                return;
-            }
+            return names.Count == 0 ? label : label + " " + Template.Fill(Texts.UndoAlso, "screens", string.Join(", ", names.ToArray()));
+        }
 
-            // A slot's own page shows what is written about it; anything else of the logic system is on its screen.
-            if (Current is SlotPage && Current.IsAbout(system))
+        /// <summary>What the screen of <paramref name="screen" /> is called: the sequence's, slot's, installation's or logic system's name.</summary>
+        string ScreenName(object screen)
+        {
+            var sequence = screen as Sequence;
+            if (sequence != null)
+                return SequenceText.Called(Texts, sequence);
+
+            var part = screen as Part;
+            if (part != null)
+                return part.Id;
+
+            var instance = screen as SystemInstance;
+            if (instance != null)
+                return instance.Name ?? "";
+
+            var system = screen as AutomationSystem;
+            return system != null ? system.Name ?? "" : "";
+        }
+
+        /// <summary>Goes back to the logic system's screen where an undo or redo on a sequence's screen took that sequence away.</summary>
+        void Stand(AutomationSystem system)
+        {
+            var open = Current as SequencePage;
+            if (open == null || !open.IsAbout(system))
                 return;
+
+            var sequences = system.Sequences;
+            for (var i = 0; i < sequences.Count; i++)
+            {
+                if (sequences[i].Id == open.SequenceId)
+                    return;
+            }
 
             Reach(delegate(EditorPage page) { return page is LogicSystemPage && page.IsAbout(system); }, system, null);
         }
@@ -1218,37 +1236,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether there is a change to the program as a whole to walk back.</summary>
         public bool CanUndoConstruct()
         {
-            return _constructHistory.CanUndo(_program);
+            return _constructHistory.CanUndo(_program, null);
         }
 
         /// <summary>What walking back the last change to the program as a whole undoes, as the undo arrow names it.</summary>
         public string UndoLabelConstruct()
         {
-            return ChangeText.Of(Texts, _constructHistory.Undoes(_program));
+            return ChangeText.Of(Texts, _constructHistory.Undoes(_program, null));
         }
 
         /// <summary>Walks back the last change to the program as a whole.</summary>
         public void UndoConstruct()
         {
-            Walked(_constructHistory.Undo(_program));
+            Walked(_constructHistory.Undo(_program, null));
         }
 
         /// <summary>Whether there is a change to the program as a whole to walk forward again.</summary>
         public bool CanRedoConstruct()
         {
-            return _constructHistory.CanRedo(_program);
+            return _constructHistory.CanRedo(_program, null);
         }
 
         /// <summary>What walking forward again does, as the redo arrow names it.</summary>
         public string RedoLabelConstruct()
         {
-            return ChangeText.Of(Texts, _constructHistory.Redoes(_program));
+            return ChangeText.Of(Texts, _constructHistory.Redoes(_program, null));
         }
 
         /// <summary>Walks forward again the last change to the program as a whole that was walked back.</summary>
         public void RedoConstruct()
         {
-            Walked(_constructHistory.Redo(_program));
+            Walked(_constructHistory.Redo(_program, null));
         }
 
         /// <summary>Whatever a step back or forward changed, once it has changed it.</summary>

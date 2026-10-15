@@ -42,7 +42,7 @@ public class WaitTests
         screen.Editor.NewButtonSystem("Airlock");
         screen.Run(2);
         var system = screen.Editor.Program.Systems[0];
-        var before = screen.Editor.UndoLabel(system);
+        var before = screen.Editor.UndoLabel(system, screen.Editor.Program.Sequences[0]);
 
         screen.Editor.PressAdd("wait");
         screen.Run(3);
@@ -51,7 +51,7 @@ public class WaitTests
 
         Assert.Null(Page(screen).Lengths);
         Assert.Empty(screen.Editor.Program.Sequences[0].Steps);
-        Assert.Equal(before, screen.Editor.UndoLabel(system));
+        Assert.Equal(before, screen.Editor.UndoLabel(system, screen.Editor.Program.Sequences[0]));
     }
 
     /// <summary>A length typed into a wait just added is kept on Enter, and adding it and giving it its length are one change.</summary>
@@ -68,7 +68,7 @@ public class WaitTests
         Assert.Equal(150, wait.Ticks);
         Assert.True(wait.Length.InSeconds);
 
-        screen.Editor.Undo(screen.Editor.Program.Systems[0]);
+        screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
         screen.Run(2);
         Assert.Empty(screen.Editor.Program.Sequences[0].Steps);
     }
@@ -130,7 +130,7 @@ public class WaitTests
         Assert.Equal(Duration.OfTicks(90), wait.Length);
         Assert.True(screen.Shows("90 ticks"));
 
-        screen.Editor.Undo(screen.Editor.Program.Systems[0]);
+        screen.Editor.Undo(screen.Editor.Program.Systems[0], screen.Editor.Program.Sequences[0]);
         Assert.Equal(Duration.OfSeconds(1), wait.Length);
     }
 

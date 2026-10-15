@@ -3148,4 +3148,8 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Wind turbine</value>
     <comment>On a slot's page, the type of block the slot expects: the game's WindTurbine blocks, and every type the game builds on it.</comment>
   </data>
+  <data name="Sprocket.Undo.Also" xml:space="preserve">
+    <value>Also takes back what changed since on {screens}.</value>
+    <comment>After what an undo or redo arrow takes back, where it takes changes on other screens along with it; {screens} is their names, joined by commas: sequences, slots, installations or the logic system.</comment>
+  </data>
 </root>

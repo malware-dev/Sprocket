@@ -90,6 +90,36 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return false;
         }
 
+        /// <summary>
+        /// Adds to <paramref name="screens" /> each thing with a screen of its own that this changes what is shown on: a
+        /// sequence, a slot, an installation, a logic system; the thing it is made to, <paramref name="subject" />, where it
+        /// says nothing else.
+        /// </summary>
+        /// <remarks>
+        /// What undo on a screen walks: the changes that touched it, and with each of those every later change that touched a
+        /// screen it touched too, so what is taken back is always what was there.
+        /// </remarks>
+        public virtual void Touches(T subject, IList<object> screens)
+        {
+            Touch(screens, subject);
+        }
+
+        /// <summary>
+        /// Says again what this made true of names that later changes may have brought back otherwise, while it stands and
+        /// something made before it was walked back.
+        /// </summary>
+        /// <remarks>A name given a slot is the logic system's, so a step brought back by undo names the slot as it is called now.</remarks>
+        public virtual void Reassert(T subject)
+        {
+        }
+
+        /// <summary>Adds <paramref name="screen" /> to <paramref name="screens" />, once.</summary>
+        protected static void Touch(IList<object> screens, object screen)
+        {
+            if (screen != null && !screens.Contains(screen))
+                screens.Add(screen);
+        }
+
         /// <summary>A list of its own holding the same ids as <paramref name="ids" />.</summary>
         protected static List<string> CopyOf(IList<string> ids)
         {

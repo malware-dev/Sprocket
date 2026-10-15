@@ -37,6 +37,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override Change Change => Change.FillSlot;
 
         /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, Instance);
+            for (var i = 0; i < _was.Count; i++)
+                Touch(screens, _was[i].Instance);
+        }
+
+        /// <inheritdoc />
         public override bool ChangesShape => true;
 
         /// <summary>Waits only while the installation may run: switched on, in a logic system switched on.</summary>

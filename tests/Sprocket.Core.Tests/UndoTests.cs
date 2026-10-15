@@ -392,6 +392,28 @@ public class UndoTests
         Assert.Equal("The door to the inside of the ship.", part.Annotation);
     }
 
+    /// <summary>
+    /// A rename standing says itself again over a step brought back naming the slot as it was called, and never over a name
+    /// another slot has taken since.
+    /// </summary>
+    [Fact]
+    public void ARenameStandingNamesAStepBroughtBack()
+    {
+        var part = Slot(out var system);
+        var close = (Act)system.Sequences[0].Steps[0];
+        var edit = new RenamePart(part, "Hatch");
+        edit.Apply(system);
+
+        close.Targets[0] = "inner";
+        edit.Reassert(system);
+        Assert.Equal("Hatch", close.Targets[0]);
+
+        close.Targets[0] = "inner";
+        system.PartFor("inner");
+        edit.Reassert(system);
+        Assert.Equal("inner", close.Targets[0]);
+    }
+
     [Fact]
     public void DescribingASlotReversesExactly()
     {

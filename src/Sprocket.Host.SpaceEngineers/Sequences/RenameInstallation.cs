@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Gives an installation another name.</summary>
@@ -19,6 +20,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <inheritdoc />
         public override Change Change => Change.RenameInstallation;
+
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, Instance);
+        }
 
         /// <inheritdoc />
         public override bool Changes => _was != _now;

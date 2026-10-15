@@ -69,7 +69,7 @@ public class RateTests
         Assert.Equal(Duration.OfSeconds(2.5), every.Interval);
         Assert.Equal("Every 2.5 seconds", screen.Editor.Says(0));
 
-        screen.Editor.Undo(System(screen));
+        screen.Editor.Undo(System(screen), System(screen));
         Assert.Equal(Duration.OfSeconds(1), every.Interval);
     }
 

@@ -40,6 +40,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override Change Change => Change.ForgetTrigger;
 
         /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            Touch(screens, system);
+            Touch(screens, _part);
+            for (var i = 0; i < _answers.Count; i++)
+                Touch(screens, _answers[i].Instance);
+        }
+
+        /// <inheritdoc />
         public override bool Undoable(AutomationSystem system)
         {
             return Gone(system, _going) && (_part == null || system.FindPart(_part.Id) == null);

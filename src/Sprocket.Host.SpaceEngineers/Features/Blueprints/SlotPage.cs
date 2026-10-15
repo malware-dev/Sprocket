@@ -63,16 +63,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool HasHistory => true;
 
         /// <inheritdoc />
-        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system);
+        public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_system, _part);
 
         /// <inheritdoc />
-        public override string UndoText => Editor.UndoLabel(_system);
+        public override string UndoText => Editor.UndoLabel(_system, _part);
 
         /// <inheritdoc />
-        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system);
+        public override bool CanRedo => Editor.Holder == null && Editor.CanRedo(_system, _part);
 
         /// <inheritdoc />
-        public override string RedoText => Editor.RedoLabel(_system);
+        public override string RedoText => Editor.RedoLabel(_system, _part);
 
         /// <summary>The box what the slot is for is written in.</summary>
         public Composer About => _composer;
@@ -127,14 +127,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override void Undo()
         {
             Settle();
-            Editor.Undo(_system);
+            Editor.Undo(_system, _part);
         }
 
         /// <inheritdoc />
         public override void Redo()
         {
             Settle();
-            Editor.Redo(_system);
+            Editor.Redo(_system, _part);
         }
 
         /// <summary>Brings the view up to date, or goes back where a step back has taken the slot away.</summary>

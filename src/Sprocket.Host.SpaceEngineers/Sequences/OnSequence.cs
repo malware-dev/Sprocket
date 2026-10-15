@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A change to one of a logic system's sequences, carried on the logic system's own history.</summary>
@@ -19,6 +20,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>The sequence the change was made to.</summary>
         public Sequence Sequence { get; }
+
+        /// <inheritdoc />
+        public override void Touches(AutomationSystem system, IList<object> screens)
+        {
+            _edit.Touches(Sequence, screens);
+        }
+
+        /// <inheritdoc />
+        public override void Reassert(AutomationSystem system)
+        {
+            _edit.Reassert(Sequence);
+        }
 
         /// <inheritdoc />
         public override Change Change => _edit.Change;
