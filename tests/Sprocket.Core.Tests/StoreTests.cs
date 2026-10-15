@@ -24,14 +24,14 @@ public class StoreTests
         var battery = ship.Battery(1, "Battery");
         var kind = ship.Entity(battery.Id).Kind;
 
-        var recharge = kind.FindAction(Blocks.Battery.Recharge, Form.Native)!;
+        var recharge = kind.FindAction(Blocks.Battery.Recharge, Nature.Native)!;
         Assert.True(recharge.Lasts);
         Assert.False(recharge.Hidden);
 
         // Recharging stands in for the game's own act, and charge mode says the rest.
-        Assert.True(kind.FindAction("Recharge_On", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("Discharge_On", Form.Action)!.Hidden);
-        Assert.False(kind.FindAction("ChargeMode", Form.Value)!.Hidden);
+        Assert.True(kind.FindAction("Recharge_On", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("Discharge_On", Nature.Action)!.Hidden);
+        Assert.False(kind.FindAction("ChargeMode", Nature.Value)!.Hidden);
     }
 
     [Fact]
@@ -100,20 +100,20 @@ public class StoreTests
         var tank = ship.Tank(1, "Tank");
         var kind = ship.Entity(tank.Id).Kind;
 
-        var stockpile = kind.FindAction(Blocks.Tank.Stockpile, Form.Native)!;
+        var stockpile = kind.FindAction(Blocks.Tank.Stockpile, Nature.Native)!;
         Assert.True(stockpile.Lasts);
         Assert.False(stockpile.Hidden);
 
         // Stockpiling stands in for the game's own act. The switch is offered as stockpiling, which says the game's pair
         // between them and flips it on its own switch, so toggle stockpile is kept to the terminal view.
-        Assert.True(kind.FindAction("Stockpile_On", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("Stockpile_Off", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("Stockpile_On", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("Stockpile_Off", Nature.Action)!.Hidden);
 
-        var stockpiling = kind.FindAction("Stockpile", Form.Value)!;
+        var stockpiling = kind.FindAction("Stockpile", Nature.Value)!;
         Assert.False(stockpiling.Hidden);
         Assert.Equal("Stockpiling", stockpiling.Named);
 
-        var toggle = kind.FindAction("Stockpile", Form.Action)!;
+        var toggle = kind.FindAction("Stockpile", Nature.Action)!;
         Assert.True(toggle.Hidden);
         Assert.True(stockpiling.Flips);
         Assert.Equal("toggle stockpiling", toggle.Text);

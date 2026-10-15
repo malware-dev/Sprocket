@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
@@ -15,9 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// <summary>The values something takes, one line each: what the value is, and where it is given.</summary>
     /// <remarks>
     /// A line each rather than side by side. Side by side reads as parts of one thing, and that is a claim about what the
-    /// values are for, which the game never says: an action declares how many it takes and nothing else. The labels share a
-    /// column, so the fields start together after the widest of them, and a field for text takes whatever width is left
-    /// where a bounded one keeps to the right-hand edge.
+    /// values are for, which the game never says: an action declares how many it takes and nothing else. Each value's field
+    /// sits beside its label against the right-hand edge where both fit, and under the label where they do not, so nothing
+    /// runs past the form's edge; text always takes the whole width under its label, and a color stands alone.
     /// <para>
     /// Nothing is held against what is filled in until finishing is tried: <see cref="Judge" /> starts holding every field to
     /// what it takes, until the form is given something else to ask.
@@ -27,13 +28,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// finishes it from anywhere in it that does not take Enter for itself, as it does in a box.
     /// </para>
     /// </remarks>
-    public class FieldSet : Grid
+    public class FieldSet : Form
     {
         const int Few = 3;
 
         readonly List<Field> _wanted = new List<Field>();
         readonly List<IField> _fields = new List<IField>();
-        readonly List<Spot> _placed = new List<Spot>();
         readonly List<bool> _seen = new List<bool>();
         readonly List<string> _parts = new List<string>();
         readonly List<bool> _texts = new List<bool>();
@@ -48,9 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Focusable = true;
             ColumnSpacing = 8f;
             RowSpacing = 8f;
-            Columns.Add(Length.Auto);
-            Columns.Add(Length.Flex(1));
-            Columns.Add(Length.Auto);
 
             _submit = new Relay(delegate
             {
@@ -218,10 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colors, Texts texts)
         {
             _language = texts;
-            for (var i = 0; i < _placed.Count; i++)
-                Cells[_placed[i].Row, _placed[i].Column, 1, _placed[i].Columns] = null;
-
-            _placed.Clear();
+            Rows.Clear();
             _wanted.Clear();
             _fields.Clear();
             _seen.Clear();
@@ -332,7 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 edited();
         }
 
-        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, a number's box, or a box.</summary>
+        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, a box of several lines, a number's box, or a box.</summary>
         IField Make(Field field, IList<Hsv> colors, Texts texts)
         {
             if (field.Edits == Editor.Colour)
@@ -340,6 +334,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             if (field.Edits == Editor.Angle)
                 return new AngleField(field.Least, field.Most, _submit);
+
+            if (field.Edits == Editor.Lines)
+                return new LinesField();
 
             var words = field.Edits == Editor.Chosen ? field.Words : null;
             if (words != null && words.Count == 2)
@@ -354,7 +351,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return NumberField.Takes(field) ? (IField)new NumberField(field, _submit) : new TypedField(_submit);
         }
 
-        /// <summary>Puts a value's label and field on their line: a color across the whole of it, text and a few words across all the label leaves, anything else against the right.</summary>
+        /// <summary>Puts a value's label and field in a row: a color alone across the whole width, text under its label, anything else beside it where it fits.</summary>
         void Lay(int at, IField field)
         {
             var element = (Element)field;
@@ -362,34 +359,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             var label = color ? "" : Label(at);
             var about = _wanted[at].About;
+            if (!string.IsNullOrEmpty(about))
+                element.Tip = Tip.For(element.Tip, about);
+
             if (label.Length > 0)
             {
                 var named = new Label { Style = Styles.ValueLabel, Text = label };
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = Tip.For(named.Tip, about);
 
-                Place(named, at, 0, 1);
+                Rows.Add(named, element, field is TypedField || field is LinesField ? Lines.Two : Lines.Fit);
+                return;
             }
 
-            if (!string.IsNullOrEmpty(about))
-                element.Tip = Tip.For(element.Tip, about);
-
-            if (color)
-                Place(element, at, 0, 3);
-            else if (field is TypedField || field is WordsField)
-                Place(element, at, 1, 2);
-            else
-            {
-                // Against the right edge whatever its width, so the fields of a form end together.
+            // With no label, a bounded field still keeps to the right-hand edge, so the fields of a form end together.
+            if (!color && !(field is TypedField) && !(field is LinesField) && !(field is WordsField))
                 element.Align = Align.Right;
-                Place(element, at, 2, 1);
-            }
-        }
 
-        void Place(Element element, int row, int column, int columns)
-        {
-            Cells[row, column, 1, columns] = element;
-            _placed.Add(new Spot { Row = row, Column = column, Columns = columns });
+            Rows.Add(element);
         }
 
         /// <summary>What a value is called beside its field: its name where the field already shows what it takes, its label, or its place where there are several.</summary>
@@ -438,18 +425,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (said == null)
                 return "\"\"";
 
-            if (!always && said.IndexOf(' ') < 0 && said.IndexOf('"') < 0)
+            if (!always && said.IndexOf(' ') < 0 && said.IndexOf('"') < 0 && said.IndexOf('\n') < 0)
                 return said;
 
-            return "\"" + said.Replace("\"", "\"\"") + "\"";
-        }
+            // Spelled as a program writes text, so a line break goes as an entity and the answer reads back whole.
+            var quoted = new StringBuilder("\"");
+            for (var i = 0; i < said.Length; i++)
+            {
+                if (said[i] == '"')
+                    quoted.Append('"');
 
-        /// <summary>Where a label or a field was put, so it can be emptied again.</summary>
-        struct Spot
-        {
-            public int Row;
-            public int Column;
-            public int Columns;
+                Storage.Entities.Write(quoted, said, i);
+            }
+
+            return quoted.Append('"').ToString();
         }
     }
 }

@@ -45,13 +45,13 @@ public class SensingTests
         }
     }
 
-    static void Vetted(EntityKind kind, Form form, params string[] ids)
+    static void Vetted(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
             Assert.True(kind.FindAction(id, form)!.Vetted, id + " (" + form + ") is to be vetted");
     }
 
-    static void NotVetted(EntityKind kind, Form form, params string[] ids)
+    static void NotVetted(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
             Assert.False(kind.FindAction(id, form)!.Vetted, id + " (" + form + ") is not to be vetted");
@@ -65,7 +65,7 @@ public class SensingTests
 
     static Literal Read(GridEntity entity, string id)
     {
-        var value = entity.Kind.FindAction(id, Form.Value)!;
+        var value = entity.Kind.FindAction(id, Nature.Value)!;
         return value.Being.Gauge(entity.Block, new Literal[0], new Recall()).Read();
     }
 
@@ -100,25 +100,25 @@ public class SensingTests
         Assert.Equal("starts detecting", kind.FindEvent("toolbar-1-0-1")!.Text);
         Assert.Equal("stops detecting", kind.FindEvent("toolbar-1-0-2")!.Text);
 
-        Assert.True(kind.FindAction("detecting", Form.Value)!.Announced);
+        Assert.True(kind.FindAction("detecting", Nature.Value)!.Announced);
         Assert.True(Read(entity, "detecting").Flag);
         detecting = false;
         Assert.False(Read(entity, "detecting").Flag);
 
-        Assert.True(kind.FindAction("things-detected", Form.Value)!.LookedBecause.Length > 0);
+        Assert.True(kind.FindAction("things-detected", Nature.Value)!.LookedBecause.Length > 0);
         Assert.Equal(2, Read(entity, "things-detected").Whole);
         things = 0;
         Assert.Equal(0, Read(entity, "things-detected").Whole);
 
-        Assert.Equal("detect players", kind.FindAction("Detect Players", Form.Value)!.Text);
-        var toggle = kind.FindAction("Detect Players", Form.Action)!;
+        Assert.Equal("detect players", kind.FindAction("Detect Players", Nature.Value)!.Text);
+        var toggle = kind.FindAction("Detect Players", Nature.Action)!;
         Assert.Equal("toggle detect players", toggle.Text);
         Assert.True(toggle.Hidden);
-        Assert.True(kind.FindAction("Detect Players", Form.Value)!.Flips);
-        Assert.True(kind.FindAction("Detect Players_On", Form.Action)!.Hidden);
-        Assert.Equal("left extent", kind.FindAction("Left", Form.Value)!.Text);
-        Assert.True(kind.FindAction("IncreaseLeft", Form.Action)!.Hidden);
-        Assert.Equal("audible proximity alert", kind.FindAction("Audible Proximity Alert", Form.Value)!.Text);
+        Assert.True(kind.FindAction("Detect Players", Nature.Value)!.Flips);
+        Assert.True(kind.FindAction("Detect Players_On", Nature.Action)!.Hidden);
+        Assert.Equal("left extent", kind.FindAction("Left", Nature.Value)!.Text);
+        Assert.True(kind.FindAction("IncreaseLeft", Nature.Action)!.Hidden);
+        Assert.Equal("audible proximity alert", kind.FindAction("Audible Proximity Alert", Nature.Value)!.Text);
     }
 
     /// <summary>A timer says whether it is counting down, and its countdown and its beeps are said in Sprocket's words.</summary>
@@ -139,17 +139,17 @@ public class SensingTests
         var kind = entity.Kind;
 
         Assert.Equal("goes off", kind.FindEvent("toolbar-1-0-0")!.Text);
-        Assert.True(kind.FindAction("counting-down", Form.Value)!.LookedBecause.Length > 0);
+        Assert.True(kind.FindAction("counting-down", Nature.Value)!.LookedBecause.Length > 0);
         Assert.False(Read(entity, "counting-down").Flag);
         counting = true;
         Assert.True(Read(entity, "counting-down").Flag);
 
-        Assert.Equal("start", kind.FindAction("Start", Form.Action)!.Text);
-        Assert.Equal("stop", kind.FindAction("Stop", Form.Action)!.Text);
-        Assert.Equal("trigger now", kind.FindAction("TriggerNow", Form.Action)!.Text);
-        Assert.Equal("delay", kind.FindAction("TriggerDelay", Form.Value)!.Text);
-        Assert.Equal("silent", kind.FindAction("Silent", Form.Value)!.Text);
-        Assert.Equal("toggle silent", kind.FindAction("Silent", Form.Action)!.Text);
+        Assert.Equal("start", kind.FindAction("Start", Nature.Action)!.Text);
+        Assert.Equal("stop", kind.FindAction("Stop", Nature.Action)!.Text);
+        Assert.Equal("trigger now", kind.FindAction("TriggerNow", Nature.Action)!.Text);
+        Assert.Equal("delay", kind.FindAction("TriggerDelay", Nature.Value)!.Text);
+        Assert.Equal("silent", kind.FindAction("Silent", Nature.Value)!.Text);
+        Assert.Equal("toggle silent", kind.FindAction("Silent", Nature.Action)!.Text);
     }
 
     /// <summary>A renamed timer member is the game's own, and the game does it.</summary>
@@ -162,9 +162,9 @@ public class SensingTests
         timer.Carrying("TriggerDelay", "Delay", ValueKind.Real, "1", "3600");
         var entity = ship.Entity(timer.Id);
 
-        Assert.Equal("start", entity.Kind.FindAction("Start", Form.Action)!.Text);
-        ship.World.Invoke(entity, "Start", null, Form.Action);
-        ship.World.Invoke(entity, "TriggerDelay", [Literal.Of(5.0)], Form.Value);
+        Assert.Equal("start", entity.Kind.FindAction("Start", Nature.Action)!.Text);
+        ship.World.Invoke(entity, "Start", null, Nature.Action);
+        ship.World.Invoke(entity, "TriggerDelay", [Literal.Of(5.0)], Nature.Value);
 
         Assert.Contains("Timer:Start", ship.Rig.Log);
         Assert.Contains("Timer:TriggerDelay 5", ship.Rig.Log);
@@ -196,8 +196,8 @@ public class SensingTests
         Assert.Equal("toolbar slot 2 runs", kind.FindEvent("toolbar-1-1-2")!.Text);
         Assert.DoesNotContain(kind.Events, signal => signal.Id == "toolbar-1-0-1" || signal.Id == "toolbar-1-0-2");
 
-        NotVetted(kind, Form.Value, "ANDCheckbox", "Threshold");
-        NotVetted(kind, Form.Action, "ANDCheckbox", "ANDCheckbox_On", "IncreaseThreshold");
+        NotVetted(kind, Nature.Value, "ANDCheckbox", "Threshold");
+        NotVetted(kind, Nature.Action, "ANDCheckbox", "ANDCheckbox_On", "IncreaseThreshold");
     }
 
     /// <summary>
@@ -215,12 +215,12 @@ public class SensingTests
         var entity = ship.Entity(block.Id);
         var kind = entity.Kind;
 
-        Assert.True(kind.FindAction("has-compile-errors", Form.Value)!.LookedBecause.Length > 0);
+        Assert.True(kind.FindAction("has-compile-errors", Nature.Value)!.LookedBecause.Length > 0);
         Assert.True(Read(entity, "has-compile-errors").Flag);
         broken = false;
         Assert.False(Read(entity, "has-compile-errors").Flag);
 
-        Assert.False(kind.FindAction("ConsoleCommand", Form.Value)!.Vetted);
+        Assert.False(kind.FindAction("ConsoleCommand", Nature.Value)!.Vetted);
     }
 
     /// <summary>A step runs a programmable block's script with the argument it gives, an empty one included.</summary>
@@ -236,7 +236,7 @@ public class SensingTests
                     return true;
                 }));
 
-        Assert.True(ship.Entity(block.Id).Kind.FindAction(ProgrammableBlock.Run, Form.Native)!.Vetted);
+        Assert.True(ship.Entity(block.Id).Kind.FindAction(ProgrammableBlock.Run, Nature.Native)!.Vetted);
 
         Ran.Step(ship, block, ProgrammableBlock.Run, Literal.Of("dock"));
         Ran.Step(ship, block, ProgrammableBlock.Run, Literal.Of(""));
@@ -292,21 +292,21 @@ public class SensingTests
             .Offering("BroadcastUsingAntennas", "Broadcast using antennas On/Off");
 
         var beacons = ship.Entity(beacon.Id).Kind;
-        Assert.Equal("HUD text", beacons.FindAction("HudText", Form.Value)!.Text);
+        Assert.Equal("HUD text", beacons.FindAction("HudText", Nature.Value)!.Text);
 
         var antennas = ship.Entity(antenna.Id).Kind;
-        Assert.Equal("broadcasting", antennas.FindAction("EnableBroadCast", Form.Value)!.Text);
-        Assert.Equal("toggle broadcasting", antennas.FindAction("EnableBroadCast", Form.Action)!.Text);
-        Assert.True(antennas.FindAction("EnableBroadCast_Off", Form.Action)!.Hidden);
-        Assert.Equal("show ship name", antennas.FindAction("ShowShipName", Form.Value)!.Text);
-        Assert.Equal("toggle show ship name", antennas.FindAction("ShowShipName", Form.Action)!.Text);
-        Assert.Equal("broadcast radius", antennas.FindAction("Radius", Form.Value)!.Text);
+        Assert.Equal("broadcasting", antennas.FindAction("EnableBroadCast", Nature.Value)!.Text);
+        Assert.Equal("toggle broadcasting", antennas.FindAction("EnableBroadCast", Nature.Action)!.Text);
+        Assert.True(antennas.FindAction("EnableBroadCast_Off", Nature.Action)!.Hidden);
+        Assert.Equal("show ship name", antennas.FindAction("ShowShipName", Nature.Value)!.Text);
+        Assert.Equal("toggle show ship name", antennas.FindAction("ShowShipName", Nature.Action)!.Text);
+        Assert.Equal("broadcast radius", antennas.FindAction("Radius", Nature.Value)!.Text);
 
         var detectors = ship.Entity(detector.Id).Kind;
-        Assert.Equal("broadcast using antennas", detectors.FindAction("BroadcastUsingAntennas", Form.Value)!.Text);
+        Assert.Equal("broadcast using antennas", detectors.FindAction("BroadcastUsingAntennas", Nature.Value)!.Text);
         Assert.Equal("toggle broadcast using antennas",
-            detectors.FindAction("BroadcastUsingAntennas", Form.Action)!.Text);
-        Assert.Equal("range", detectors.FindAction("Range", Form.Value)!.Text);
+            detectors.FindAction("BroadcastUsingAntennas", Nature.Action)!.Text);
+        Assert.Equal("range", detectors.FindAction("Range", Nature.Value)!.Text);
     }
 
     /// <summary>
@@ -333,7 +333,7 @@ public class SensingTests
         status = MyLaserAntennaStatus.OutOfRange;
         Assert.Equal("out-of-range", Said(entity, "link"));
 
-        Assert.NotNull(kind.FindAction("link", Form.Value)!.RuledOutBy);
+        Assert.NotNull(kind.FindAction("link", Nature.Value)!.RuledOutBy);
         foreach (var id in new[] { "starts-connecting", "connects", "disconnects" })
             Assert.NotNull(kind.FindEvent(id)!.RuledOutBy);
 
@@ -344,10 +344,10 @@ public class SensingTests
         Assert.True(entity.In(kind.FindEvent("connects")!, new Recall()));
         Assert.False(entity.In(kind.FindEvent("disconnects")!, new Recall()));
 
-        Assert.Equal("disconnect", kind.FindAction("Idle", Form.Action)!.Text);
-        Assert.Equal("permanent connection", kind.FindAction("isPerm", Form.Value)!.Text);
-        Assert.Equal("toggle permanent connection", kind.FindAction("isPerm", Form.Action)!.Text);
-        Assert.True(kind.FindAction("PasteGpsCoords", Form.Action)!.Hidden);
+        Assert.Equal("disconnect", kind.FindAction("Idle", Nature.Action)!.Text);
+        Assert.Equal("permanent connection", kind.FindAction("isPerm", Nature.Value)!.Text);
+        Assert.Equal("toggle permanent connection", kind.FindAction("isPerm", Nature.Action)!.Text);
+        Assert.True(kind.FindAction("PasteGpsCoords", Nature.Action)!.Hidden);
     }
 
     /// <summary>A transponder sends on its channel and hears from whom its value says; the buttons that set it are left to the terminal.</summary>
@@ -363,11 +363,11 @@ public class SensingTests
             .Offering("SetFilter_Owner", "Receive from owner");
         var kind = ship.Entity(transponder.Id).Kind;
 
-        Assert.Equal("send signal", kind.FindAction("SendSignal", Form.Action)!.Text);
-        Assert.Equal("channel", kind.FindAction("Channel", Form.Value)!.Text);
-        Assert.Equal("hears from", kind.FindAction("ReceiveFrom", Form.Value)!.Text);
-        Assert.True(kind.FindAction("SetChannelValue", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("SetFilter_Owner", Form.Action)!.Hidden);
+        Assert.Equal("send signal", kind.FindAction("SendSignal", Nature.Action)!.Text);
+        Assert.Equal("channel", kind.FindAction("Channel", Nature.Value)!.Text);
+        Assert.Equal("hears from", kind.FindAction("ReceiveFrom", Nature.Value)!.Text);
+        Assert.True(kind.FindAction("SetChannelValue", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("SetFilter_Owner", Nature.Action)!.Hidden);
     }
 
     /// <summary>
@@ -389,16 +389,16 @@ public class SensingTests
             .Offering("UseConveyor", "Use conveyor system On/Off");
         var kind = ship.Entity(zone.Id).Kind;
 
-        Assert.Equal("active", kind.FindAction("SafeZoneCreate", Form.Value)!.Text);
-        Assert.Equal("allowing damage", kind.FindAction("SafeZoneDamageCb", Form.Value)!.Text);
-        Assert.Equal("size X", kind.FindAction("SafeZoneXSlider", Form.Value)!.Text);
-        Assert.Equal("automatic push and pull", kind.FindAction("UseConveyor", Form.Value)!.Text);
+        Assert.Equal("active", kind.FindAction("SafeZoneCreate", Nature.Value)!.Text);
+        Assert.Equal("allowing damage", kind.FindAction("SafeZoneDamageCb", Nature.Value)!.Text);
+        Assert.Equal("size X", kind.FindAction("SafeZoneXSlider", Nature.Value)!.Text);
+        Assert.Equal("automatic push and pull", kind.FindAction("UseConveyor", Nature.Value)!.Text);
 
-        var toggle = kind.FindAction("UseConveyor", Form.Action)!;
+        var toggle = kind.FindAction("UseConveyor", Nature.Action)!;
         Assert.Equal("toggle automatic push and pull", toggle.Text);
         Assert.True(toggle.Hidden);
-        Assert.True(kind.FindAction("UseConveyor", Form.Value)!.Flips);
-        Assert.True(ship.Entity(connector.Id).Kind.FindAction("UseConveyor", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("UseConveyor", Nature.Value)!.Flips);
+        Assert.True(ship.Entity(connector.Id).Kind.FindAction("UseConveyor", Nature.Action)!.Hidden);
     }
 
     /// <summary>
@@ -413,8 +413,8 @@ public class SensingTests
             typeof(MyObjectBuilder_BroadcastController));
         var beacon = ship.Rig.Beacon(2, "Beacon");
 
-        Assert.False(ship.Entity(controller.Id).Kind.FindAction("CustomName", Form.Value)!.Hidden);
-        Assert.True(ship.Entity(beacon.Id).Kind.FindAction("CustomName", Form.Value)!.Hidden);
+        Assert.False(ship.Entity(controller.Id).Kind.FindAction("CustomName", Nature.Value)!.Hidden);
+        Assert.True(ship.Entity(beacon.Id).Kind.FindAction("CustomName", Nature.Value)!.Hidden);
     }
 
     /// <summary>
@@ -452,16 +452,16 @@ public class SensingTests
 
         var kind = ship.Entity(sensor.Id).Kind;
 
-        Vetted(kind, Form.Value, "detecting", "things-detected", "Audible Proximity Alert");
-        Vetted(kind, Form.Value, switches);
-        Vetted(kind, Form.Action, switches);
-        Vetted(kind, Form.Value, extents);
+        Vetted(kind, Nature.Value, "detecting", "things-detected", "Audible Proximity Alert");
+        Vetted(kind, Nature.Value, switches);
+        Vetted(kind, Nature.Action, switches);
+        Vetted(kind, Nature.Value, extents);
 
-        NotVetted(kind, Form.Action, switches.Select(one => one + "_On").ToArray());
-        NotVetted(kind, Form.Action, switches.Select(one => one + "_Off").ToArray());
-        NotVetted(kind, Form.Action, extents.Select(one => "Increase" + one).ToArray());
-        NotVetted(kind, Form.Action, extents.Select(one => "Decrease" + one).ToArray());
-        NotVetted(kind, Form.Action, extents.Select(one => "Set" + one).ToArray());
+        NotVetted(kind, Nature.Action, switches.Select(one => one + "_On").ToArray());
+        NotVetted(kind, Nature.Action, switches.Select(one => one + "_Off").ToArray());
+        NotVetted(kind, Nature.Action, extents.Select(one => "Increase" + one).ToArray());
+        NotVetted(kind, Nature.Action, extents.Select(one => "Decrease" + one).ToArray());
+        NotVetted(kind, Nature.Action, extents.Select(one => "Set" + one).ToArray());
     }
 
     /// <summary>An ore detector vouches for its reach and its sharing through antennas, with the toggle of that.</summary>
@@ -475,8 +475,8 @@ public class SensingTests
             .Offering("BroadcastUsingAntennas", "Broadcast using antennas On/Off");
         var kind = ship.Entity(detector.Id).Kind;
 
-        Vetted(kind, Form.Value, "BroadcastUsingAntennas", "Range");
-        Vetted(kind, Form.Action, "BroadcastUsingAntennas");
+        Vetted(kind, Nature.Value, "BroadcastUsingAntennas", "Range");
+        Vetted(kind, Nature.Action, "BroadcastUsingAntennas");
     }
 
     /// <summary>A timer vouches for its countdown, its delay, its beeps and whether it is counting down; the delay's steps are left to the terminal.</summary>
@@ -495,9 +495,9 @@ public class SensingTests
             .Offering("DecreaseTriggerDelay", "Decrease Delay");
         var kind = ship.Entity(timer.Id).Kind;
 
-        Vetted(kind, Form.Value, "counting-down", "TriggerDelay", "Silent");
-        Vetted(kind, Form.Action, "Start", "Stop", "TriggerNow", "Silent");
-        NotVetted(kind, Form.Action, "IncreaseTriggerDelay", "DecreaseTriggerDelay");
+        Vetted(kind, Nature.Value, "counting-down", "TriggerDelay", "Silent");
+        Vetted(kind, Nature.Action, "Start", "Stop", "TriggerNow", "Silent");
+        NotVetted(kind, Nature.Action, "IncreaseTriggerDelay", "DecreaseTriggerDelay");
     }
 
     /// <summary>
@@ -514,9 +514,9 @@ public class SensingTests
             .Offering("RunWithDefaultArgument", "Run with default argument");
         var kind = ship.Entity(block.Id).Kind;
 
-        Vetted(kind, Form.Value, "has-compile-errors");
-        NotVetted(kind, Form.Value, "ConsoleCommand");
-        NotVetted(kind, Form.Action, "Run", "RunWithDefaultArgument");
+        Vetted(kind, Nature.Value, "has-compile-errors");
+        NotVetted(kind, Nature.Value, "ConsoleCommand");
+        NotVetted(kind, Nature.Action, "Run", "RunWithDefaultArgument");
     }
 
     /// <summary>A beacon vouches for its name on the HUD and its radius; the setters written beside them and the radius's steps are left to the terminal.</summary>
@@ -533,8 +533,8 @@ public class SensingTests
             .Offering("DecreaseRadius", "Decrease Radius");
         var kind = ship.Entity(beacon.Id).Kind;
 
-        Vetted(kind, Form.Value, "HudText", "Radius");
-        NotVetted(kind, Form.Action, "SetHudText", "SetRadius", "IncreaseRadius", "DecreaseRadius");
+        Vetted(kind, Nature.Value, "HudText", "Radius");
+        NotVetted(kind, Nature.Action, "SetHudText", "SetRadius", "IncreaseRadius", "DecreaseRadius");
     }
 
     /// <summary>
@@ -559,9 +559,9 @@ public class SensingTests
             .Offering("IncreaseRadius", "Increase Radius");
         var kind = ship.Entity(antenna.Id).Kind;
 
-        Vetted(kind, Form.Value, "EnableBroadCast", "ShowShipName", "Radius", "HudText");
-        Vetted(kind, Form.Action, "EnableBroadCast", "ShowShipName");
-        NotVetted(kind, Form.Action, "EnableBroadCast_On", "EnableBroadCast_Off", "SetHudText", "SetRadius",
+        Vetted(kind, Nature.Value, "EnableBroadCast", "ShowShipName", "Radius", "HudText");
+        Vetted(kind, Nature.Action, "EnableBroadCast", "ShowShipName");
+        NotVetted(kind, Nature.Action, "EnableBroadCast_On", "EnableBroadCast_Off", "SetHudText", "SetRadius",
             "IncreaseRadius");
     }
 
@@ -583,9 +583,9 @@ public class SensingTests
             .Offering("IncreaseRange", "Increase Range");
         var kind = ship.Entity(antenna.Id).Kind;
 
-        Vetted(kind, Form.Value, "link", "isPerm", "Range");
-        Vetted(kind, Form.Action, "Idle", "isPerm");
-        NotVetted(kind, Form.Action, "ConnectGPS", "PasteGpsCoords", "IncreaseRange");
+        Vetted(kind, Nature.Value, "link", "isPerm", "Range");
+        Vetted(kind, Nature.Action, "Idle", "isPerm");
+        NotVetted(kind, Nature.Action, "ConnectGPS", "PasteGpsCoords", "IncreaseRange");
     }
 
     /// <summary>
@@ -611,11 +611,11 @@ public class SensingTests
             .Offering("Transmit Message 1", "Transmit message 1");
         var kind = ship.Entity(controller.Id).Kind;
 
-        Vetted(kind, Form.Native, BroadcastController.Say, BroadcastController.SendSaved);
-        Vetted(kind, Form.Action, "TransmitRandomMessage", "SendGps", "UseAntenna");
-        Vetted(kind, Form.Value, "BroadcastTarget", "UseAntenna", "CustomName");
-        NotVetted(kind, Form.Action, "BroadcastTargetEveryone", "Transmit Message 1");
-        NotVetted(kind, Form.Value, "Message0");
+        Vetted(kind, Nature.Native, BroadcastController.Say, BroadcastController.SendSaved);
+        Vetted(kind, Nature.Action, "TransmitRandomMessage", "SendGps", "UseAntenna");
+        Vetted(kind, Nature.Value, "BroadcastTarget", "UseAntenna", "CustomName");
+        NotVetted(kind, Nature.Action, "BroadcastTargetEveryone", "Transmit Message 1");
+        NotVetted(kind, Nature.Value, "Message0");
     }
 
     /// <summary>
@@ -636,9 +636,9 @@ public class SensingTests
             .Offering("IncreaseChannel", "Increase Channel");
         var kind = ship.Entity(transponder.Id).Kind;
 
-        Vetted(kind, Form.Value, "Channel", "ReceiveFrom");
-        Vetted(kind, Form.Action, "SendSignal");
-        NotVetted(kind, Form.Action, "SetChannelValue", "SetChannelValue_SendSignal", "SetFilter_Owner",
+        Vetted(kind, Nature.Value, "Channel", "ReceiveFrom");
+        Vetted(kind, Nature.Action, "SendSignal");
+        NotVetted(kind, Nature.Action, "SetChannelValue", "SetChannelValue_SendSignal", "SetFilter_Owner",
             "IncreaseChannel");
     }
 
@@ -672,16 +672,16 @@ public class SensingTests
             zone.Carrying(one, one, ValueKind.Real, "10", "1000");
         var kind = ship.Entity(zone.Id).Kind;
 
-        Vetted(kind, Form.Value, "SafeZoneCreate", "SafeZoneShapeCombo", "SafeZoneColor", "SafeZoneTextureCombo",
+        Vetted(kind, Nature.Value, "SafeZoneCreate", "SafeZoneShapeCombo", "SafeZoneColor", "SafeZoneTextureCombo",
             "UseConveyor");
-        Vetted(kind, Form.Value, allows);
-        Vetted(kind, Form.Value, sizes);
-        Vetted(kind, Form.Action, "UseConveyor");
+        Vetted(kind, Nature.Value, allows);
+        Vetted(kind, Nature.Value, sizes);
+        Vetted(kind, Nature.Action, "UseConveyor");
     }
 
     static string Said(GridEntity entity, string id)
     {
-        var value = entity.Kind.FindAction(id, Form.Value)!;
+        var value = entity.Kind.FindAction(id, Nature.Value)!;
         return value.Being.Names[(int)Read(entity, id).Whole];
     }
 }

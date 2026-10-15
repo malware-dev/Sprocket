@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<string> _names = new List<string>();
         readonly List<string> _ids = new List<string>();
         readonly List<int> _matched = new List<int>();
-        readonly List<Form> _forms = new List<Form>();
+        readonly List<Nature> _forms = new List<Nature>();
         readonly List<int> _groups = new List<int>();
         readonly List<string> _marks = new List<string>();
         readonly List<bool> _sets = new List<bool>();
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Aim _aim;
         readonly int _base;
         readonly string _arrivedChosen;
-        readonly Form _arrivedForm;
+        readonly Nature _arrivedForm;
         readonly bool _arrivedAll;
         readonly List<string> _filled = new List<string>();
         readonly List<Field> _nothing = new List<Field>();
@@ -81,9 +81,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Dictionary<long, string> _ahead = new Dictionary<long, string>();
 
         string _chosen;
-        Form _chosenForm;
+        Nature _chosenForm;
         string _dropped = "";
-        Form _droppedForm;
+        Nature _droppedForm;
         bool _all;
         string _kind = "";
         Family _family;
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// not have is dropped later, where it is.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
-            IList<long> targets, string chosen, Form chosenForm, Action<PickAnswer> done,
+            IList<long> targets, string chosen, Nature chosenForm, Action<PickAnswer> done,
             bool asksAll = false, bool all = false, IList<Literal> arguments = null,
             Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
             bool signalsOnly = false, bool forTests = false)
@@ -175,15 +175,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             // A step that flips a switch was made by choosing toggle on the switch's value, so that is what it opens on.
-            var flipped = !forEvents && !forTests && chosenForm == Form.Action
+            var flipped = !forEvents && !forTests && chosenForm == Nature.Action
                 ? Vocabulary.Flipped(editor.World, _selection, _chosen)
                 : null;
             if (flipped != null)
             {
                 _chosen = flipped;
                 _arrivedChosen = flipped;
-                _chosenForm = Form.Value;
-                _arrivedForm = Form.Value;
+                _chosenForm = Nature.Value;
+                _arrivedForm = Nature.Value;
                 _arrivedValues.Clear();
                 _arrivedValues.Add(Literal.Of(EntityAction.Toggle));
             }
@@ -192,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>
         public PickPage(SprocketEditor editor, string title, IList<long> targets, Func<GridEntity, bool> fits,
             Action<PickAnswer> done)
-            : this(editor, title, false, targets, "", Form.Native, done)
+            : this(editor, title, false, targets, "", Nature.Native, done)
         {
             _fits = fits;
         }
@@ -385,11 +385,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Named(arguments);
 
             // Toggle on a switch is the game's toggle for it, which takes nothing.
-            if (_chosenForm == Form.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text
+            if (_chosenForm == Nature.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text
                 && arguments[0].Text == EntityAction.Toggle)
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _selection, _chosen) ?? _chosen;
-                _done(new PickAnswer(_selection, toggle, _all, new List<Literal>(), Form.Action));
+                _done(new PickAnswer(_selection, toggle, _all, new List<Literal>(), Nature.Action));
                 return;
             }
 
@@ -632,7 +632,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
 
             var id = _ids[at];
-            var form = _forms.Count > at ? _forms[at] : Form.Native;
+            var form = _forms.Count > at ? _forms[at] : Nature.Native;
             var choose = Editor.Act(Cmd.PickChoice, delegate { Choose(id, form); });
             if (choose == null)
                 return;
@@ -1132,7 +1132,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _dropped = _chosen;
                 _droppedForm = _chosenForm;
                 _chosen = "";
-                _chosenForm = Form.Native;
+                _chosenForm = Nature.Native;
             }
             else if (_chosen.Length == 0 && _dropped.Length > 0 && At(_dropped, _droppedForm) >= 0)
             {
@@ -1180,7 +1180,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var at = _rows[i];
                 var key = at < 0
                     ? "#" + (-1 - at).ToString(CultureInfo.InvariantCulture)
-                    : (_forms.Count > at ? _forms[at] : Form.Native) + " " + _ids[at];
+                    : (_forms.Count > at ? _forms[at] : Nature.Native) + " " + _ids[at];
 
                 _whatKeys.Add(key);
                 _whatAt[key] = at;
@@ -1211,7 +1211,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 // Something that cannot be made into a step is listed to be read about and not chosen.
                 var ready = _ready.Count > at ? _ready[at] : Readiness.Ready;
-                var form = _forms.Count > at ? _forms[at] : Form.Native;
+                var form = _forms.Count > at ? _forms[at] : Nature.Native;
 
                 row.Text = _names[at];
                 row.IsHeading = false;
@@ -1287,7 +1287,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var word = states.Words[i];
                 _names.Add(word);
                 _ids.Add(Comparing.Id(status.Id, states.Means == null ? word : states.Means[i]));
-                _forms.Add(Form.Native);
+                _forms.Add(Nature.Native);
                 _groups.Add(Statuses);
                 _marks.Add(Symbols.Value);
                 _sets.Add(false);
@@ -1301,7 +1301,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _names.Add(Said(one));
             _ids.Add(one.Id);
-            _forms.Add(Form.Value);
+            _forms.Add(Nature.Value);
             _groups.Add(group);
             _marks.Add(Symbols.Value);
             _sets.Add(true);
@@ -1379,7 +1379,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether what is on offer under that id can be made into a step.</summary>
-        Readiness ReadinessOf(string id, Form form)
+        Readiness ReadinessOf(string id, Nature form)
         {
             var at = At(id, form);
             return at >= 0 && at < _ready.Count ? _ready[at] : Readiness.Ready;
@@ -1444,11 +1444,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Where the thing on offer under that id is in the list, or -1 where it is not listed.</summary>
         /// <remarks>By the id and by which of the three ways it reaches the block, because a switch's value and the act that flips it share one id.</remarks>
-        int At(string id, Form form)
+        int At(string id, Nature form)
         {
             for (var i = 0; i < _ids.Count; i++)
             {
-                if (_ids[i] == id && (_forms.Count > i ? _forms[i] : Form.Native) == form)
+                if (_ids[i] == id && (_forms.Count > i ? _forms[i] : Nature.Native) == form)
                     return i;
             }
 
@@ -1664,7 +1664,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return -1;
         }
 
-        void Choose(string id, Form form)
+        void Choose(string id, Nature form)
         {
             _chosen = id;
             _chosenForm = form;

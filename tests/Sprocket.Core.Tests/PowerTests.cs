@@ -22,20 +22,20 @@ public class PowerTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Battery(1, "Battery").Id).Kind;
 
-        var recharge = kind.FindAction("Recharge", Form.Action)!;
+        var recharge = kind.FindAction("Recharge", Nature.Action)!;
         Assert.False(recharge.Hidden);
         Assert.Equal("Toggle recharge", recharge.Named);
 
-        var discharge = kind.FindAction("Discharge", Form.Action)!;
+        var discharge = kind.FindAction("Discharge", Nature.Action)!;
         Assert.False(discharge.Hidden);
         Assert.Equal("Toggle discharge", discharge.Named);
 
-        var mode = kind.FindAction("ChargeMode", Form.Value)!;
+        var mode = kind.FindAction("ChargeMode", Nature.Value)!;
         Assert.False(mode.Hidden);
         Assert.Equal("Charge mode", mode.Named);
 
         foreach (var id in new[] { "Recharge_On", "Recharge_Off", "Discharge_On", "Discharge_Off", "Auto" })
-            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is listed");
+            Assert.True(kind.FindAction(id, Nature.Action)!.Hidden, id + " is listed");
     }
 
     /// <summary>A battery's readings are Sprocket's own values, under power, each read and none set.</summary>
@@ -52,7 +52,7 @@ public class PowerTests
                      "charge", "stored-power", "capacity", "charging", "input", "maximum-input", "output", "maximum-output"
                  })
         {
-            var value = kind.FindAction(id, Form.Value)!;
+            var value = kind.FindAction(id, Nature.Value)!;
             Assert.NotNull(value.Being);
             Assert.False(value.Sets);
             Assert.Equal(Category.Power, value.Category);
@@ -68,7 +68,7 @@ public class PowerTests
     public void RechargeAsksWhetherItWaits()
     {
         var ship = new Rigged();
-        var recharge = ship.Entity(ship.Battery(1, "Battery").Id).Kind.FindAction(Blocks.Battery.Recharge, Form.Native)!;
+        var recharge = ship.Entity(ship.Battery(1, "Battery").Id).Kind.FindAction(Blocks.Battery.Recharge, Nature.Native)!;
 
         var fields = new List<Field>();
         recharge.Fields(fields);
@@ -161,11 +161,11 @@ public class PowerTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Battery(1, "Battery").Id).Kind;
 
-        Vetted(kind, Form.Native, Blocks.Battery.Recharge);
-        Vetted(kind, Form.Action, "Recharge", "Discharge");
-        Vetted(kind, Form.Value, "ChargeMode", "charge", "stored-power", "capacity", "charging", "input", "maximum-input",
+        Vetted(kind, Nature.Native, Blocks.Battery.Recharge);
+        Vetted(kind, Nature.Action, "Recharge", "Discharge");
+        Vetted(kind, Nature.Value, "ChargeMode", "charge", "stored-power", "capacity", "charging", "input", "maximum-input",
             "output", "maximum-output");
-        Unvetted(kind, Form.Action, "Recharge_On", "Recharge_Off", "Discharge_On", "Discharge_Off", "Auto");
+        Unvetted(kind, Nature.Action, "Recharge_On", "Recharge_Off", "Discharge_On", "Discharge_Off", "Auto");
     }
 
     /// <summary>
@@ -178,13 +178,13 @@ public class PowerTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Thruster(1, "Thruster").Id).Kind;
 
-        Vetted(kind, Form.Value, "override", "thrust", "maximum-thrust");
-        Unvetted(kind, Form.Value, "Override");
-        Unvetted(kind, Form.Action, "SetOverride", "IncreaseOverride", "DecreaseOverride");
+        Vetted(kind, Nature.Value, "override", "thrust", "maximum-thrust");
+        Unvetted(kind, Nature.Value, "Override");
+        Unvetted(kind, Nature.Action, "SetOverride", "IncreaseOverride", "DecreaseOverride");
 
-        Assert.True(kind.FindAction("Override", Form.Value)!.Hidden);
+        Assert.True(kind.FindAction("Override", Nature.Value)!.Hidden);
         foreach (var id in new[] { "SetOverride", "IncreaseOverride", "DecreaseOverride" })
-            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is listed");
+            Assert.True(kind.FindAction(id, Nature.Action)!.Hidden, id + " is listed");
     }
 
     /// <summary>
@@ -197,17 +197,17 @@ public class PowerTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.JumpDrive(1, "Drive").Id).Kind;
 
-        Vetted(kind, Form.Native, Blocks.JumpDrive.Recharge);
-        Vetted(kind, Form.Action, "Recharge");
-        Vetted(kind, Form.Value, "Recharge", "status", "charge", "stored-power", "capacity",
+        Vetted(kind, Nature.Native, Blocks.JumpDrive.Recharge);
+        Vetted(kind, Nature.Action, "Recharge");
+        Vetted(kind, Nature.Value, "Recharge", "status", "charge", "stored-power", "capacity",
             "minimum-jump-distance", "maximum-jump-distance");
-        Unvetted(kind, Form.Value, "JumpDistance");
-        Unvetted(kind, Form.Action, "Recharge_On", "Recharge_Off", "Jump", "IncreaseJumpDistance", "DecreaseJumpDistance",
+        Unvetted(kind, Nature.Value, "JumpDistance");
+        Unvetted(kind, Nature.Action, "Recharge_On", "Recharge_Off", "Jump", "IncreaseJumpDistance", "DecreaseJumpDistance",
             "SetGravityAcceleration");
 
-        Assert.True(kind.FindAction("JumpDistance", Form.Value)!.Hidden);
+        Assert.True(kind.FindAction("JumpDistance", Nature.Value)!.Hidden);
         foreach (var id in new[] { "SetGravityAcceleration", "IncreaseJumpDistance", "DecreaseJumpDistance" })
-            Assert.True(kind.FindAction(id, Form.Action)!.Hidden, id + " is listed");
+            Assert.True(kind.FindAction(id, Nature.Action)!.Hidden, id + " is listed");
     }
 
     /// <summary>A step sets a thruster's override in percent, and it reads back so.</summary>
@@ -278,7 +278,7 @@ public class PowerTests
         Assert.Equal(changed + 1, frame);
     }
 
-    static void Vetted(EntityKind kind, Form form, params string[] ids)
+    static void Vetted(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -288,7 +288,7 @@ public class PowerTests
         }
     }
 
-    static void Unvetted(EntityKind kind, Form form, params string[] ids)
+    static void Unvetted(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -328,7 +328,7 @@ public class PowerTests
 
     static Act Setting(Automation automation, Rigged ship, Fitting fitting, string id, Literal value)
     {
-        var set = new Act(id) { Form = Form.Value, Provider = BlockKinds.Own };
+        var set = new Act(id) { Form = Nature.Value, Provider = BlockKinds.Own };
         set.Targets.Add(automation.Declare(ship.World, ship.Entity(fitting.Id)).Name);
         set.Arguments.Add(value);
         return set;
@@ -336,7 +336,7 @@ public class PowerTests
 
     static double Read(Rigged ship, Fitting fitting, string id)
     {
-        var value = ship.Entity(fitting.Id).Kind.FindAction(id, Form.Value)!;
+        var value = ship.Entity(fitting.Id).Kind.FindAction(id, Nature.Value)!;
         return value.Being!.Gauge(fitting.Block, new Literal[0], new Recall()).Read().Number;
     }
 

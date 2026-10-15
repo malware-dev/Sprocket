@@ -80,7 +80,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light").CarryingUnread("Pattern", "Pattern");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
-        ship.Rig.Entity(4).Kind.FindAction("Pattern", Form.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("Pattern", Nature.Value)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -122,8 +122,8 @@ public class EditorTests
             .Offering("AIBehavior", "AI Behavior On/Off");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
-        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Form.Value)!.Vouch();
-        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Form.Action)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Nature.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Nature.Action)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -160,7 +160,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light").Carrying("Mode", "Mode:", ValueKind.Flag);
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
-        ship.Rig.Entity(4).Kind.FindAction("Mode", Form.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("Mode", Nature.Value)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);

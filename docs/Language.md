@@ -40,7 +40,7 @@ An annotation describes the statement below it. An annotation with nothing under
 |---|---|---|
 | Name | `inner`, `'Airlock System'` | A letter, then letters, digits and `_`. Quoted where it holds anything else. Write `''` for a quote within one: `'Mal''s airlock'` |
 | Qualified name | `MalTek.Airlock`, `'MalTek Inc.'.'Airlock System'` | Names joined by the `.` operator, kept as parts: `'a.b'.c` and `a.'b.c'` differ. Spaces around the dot are nothing |
-| Text | `"Airlock Inner Door"` | Write `""` for a quote within one: `"the ""inner"" door"` |
+| Text | `"Airlock Inner Door"` | Write `""` for a quote within one: `"the ""inner"" door"`. Write `&br;` for a line break and `&amp;` for `&`: `"Cycling&br;Stand clear"` |
 | Integer | `60`, `74857693847562934` | Whole, 64-bit |
 | Real | `0.25`, `1E-05` | A dot or an exponent makes a real |
 | Duration | `600t`, `2s`, `1.5s` | A number and its unit as one token. `t` is ticks, `s` is seconds of sixty ticks each. Seconds may have a fraction, and count as the nearest whole tick: `0.25s` is 15 ticks, `0.01s` is 1 |

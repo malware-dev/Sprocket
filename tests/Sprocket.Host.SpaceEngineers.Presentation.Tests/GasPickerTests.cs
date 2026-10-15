@@ -48,7 +48,7 @@ public class GasPickerTests
         screen.Run(2);
 
         var step = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
-        Assert.Equal(Form.Action, step.Form);
+        Assert.Equal(Nature.Action, step.Form);
         Assert.Equal("Depressurize", step.ActionId);
         Assert.Empty(step.Arguments);
 

@@ -737,7 +737,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
-        public List<Field> Fields(IList<long> entityIds, string actionId, Form form)
+        public List<Field> Fields(IList<long> entityIds, string actionId, Nature form)
         {
             return Vocabulary.Fields(_world, entityIds, actionId, form);
         }
@@ -1647,7 +1647,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
                 var picker = new PickPage(this, "When something happens", true,
-                    new List<long>(), moment.EventId, Form.Native,
+                    new List<long>(), moment.EventId, Nature.Native,
                     delegate(PickAnswer answer)
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
@@ -2324,7 +2324,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (aim.Following == null)
             {
-                aim.Following = new PickPage(this, Texts.PickSingleTask, false, new List<long>(), "", Form.Native,
+                aim.Following = new PickPage(this, Texts.PickSingleTask, false, new List<long>(), "", Nature.Native,
                     delegate(PickAnswer answer) { aim.Finish(answer); }, opens: aim.Opens, after: aim.Pick);
             }
 
@@ -2652,7 +2652,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var was = moment as WhenTrigger;
 
             var picker = new PickPage(this, "When something happens", true,
-                Blocks(system, moment.Sources), Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)), Form.Native,
+                Blocks(system, moment.Sources), Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)), Nature.Native,
                 delegate(PickAnswer answer)
                 {
                     // The first pick on a copy is the answer its line was asking for.

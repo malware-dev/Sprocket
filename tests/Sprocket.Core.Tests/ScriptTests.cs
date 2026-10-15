@@ -810,7 +810,7 @@ public class ScriptTests
         var triggers = after.Systems[0].Triggers;
         var open = Assert.IsType<Act>(triggers[0].Does);
         Assert.Equal("open", open.ActionId);
-        Assert.Equal(Form.Native, open.Form);
+        Assert.Equal(Nature.Native, open.Form);
         Assert.Equal(new[] { "outer" }, open.Targets);
 
         var dim = Assert.IsType<Act>(triggers[1].Does);
@@ -821,7 +821,7 @@ public class ScriptTests
         Assert.True(triggers[2].Stops);
 
         var reverse = Assert.IsType<Act>(Assert.IsType<WhenTrigger>(triggers[3]).Does);
-        Assert.Equal(Form.Action, reverse.Form);
+        Assert.Equal(Nature.Action, reverse.Form);
         Assert.Equal(2, reverse.Arguments[0].Whole);
 
         Assert.True(Assert.IsType<EveryTrigger>(triggers[4]).Stops);
@@ -1293,7 +1293,7 @@ public class ScriptTests
         program.Systems[0].PartFor("thing");
 
         var odd = new Act("every");
-        odd.Form = Form.Action;
+        odd.Form = Nature.Action;
         odd.Targets.Add("thing");
         sequence.Steps.Add(odd);
 
@@ -1309,10 +1309,10 @@ public class ScriptTests
         Assert.Equal("", Load(text, after));
         var game = Assert.IsType<Act>(after.Sequences[0].Steps[0]);
         Assert.Equal("every", game.ActionId);
-        Assert.Equal(Form.Action, game.Form);
+        Assert.Equal(Nature.Action, game.Form);
         var native = Assert.IsType<Act>(after.Sequences[0].Steps[1]);
         Assert.Equal("every", native.ActionId);
-        Assert.Equal(Form.Native, native.Form);
+        Assert.Equal(Nature.Native, native.Form);
     }
 
     /// <summary>

@@ -23,7 +23,7 @@ public class SoundTests
         var speaker = ship.Speaker(1, "Speaker");
         var kind = ship.Entity(speaker.Id).Kind;
 
-        var play = kind.FindAction(Blocks.Speaker.Play, Form.Native)!;
+        var play = kind.FindAction(Blocks.Speaker.Play, Nature.Native)!;
         Assert.False(play.Lasts);
 
         var fields = new List<Field>();
@@ -34,8 +34,8 @@ public class SoundTests
         Assert.Equal(new[] { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" }, fields[0].Means);
 
         // The game's own play plays whichever sound was left selected.
-        Assert.True(kind.FindAction("PlaySound", Form.Action)!.Hidden);
-        Assert.False(kind.FindAction("StopSound", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("PlaySound", Nature.Action)!.Hidden);
+        Assert.False(kind.FindAction("StopSound", Nature.Action)!.Hidden);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class SoundTests
     {
         var ship = new Rigged();
         var speaker = ship.Speaker(1, "Speaker");
-        var selected = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Selected, Form.Value)!;
+        var selected = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Selected, Nature.Value)!;
 
         Assert.Equal(new[] { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" }, selected.Being!.Names);
         Assert.False(selected.Being.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
@@ -89,10 +89,10 @@ public class SoundTests
             .Carrying("LoopableSlider", "Loop time", ValueKind.Real);
         var kind = ship.Entity(speaker.Id).Kind;
 
-        Assert.Equal("stop", kind.FindAction("StopSound", Form.Action)!.Text);
-        Assert.Equal("volume", kind.FindAction("VolumeSlider", Form.Value)!.Text);
-        Assert.Equal("range", kind.FindAction("RangeSlider", Form.Value)!.Text);
-        Assert.Equal("loop time", kind.FindAction("LoopableSlider", Form.Value)!.Text);
+        Assert.Equal("stop", kind.FindAction("StopSound", Nature.Action)!.Text);
+        Assert.Equal("volume", kind.FindAction("VolumeSlider", Nature.Value)!.Text);
+        Assert.Equal("range", kind.FindAction("RangeSlider", Nature.Value)!.Text);
+        Assert.Equal("loop time", kind.FindAction("LoopableSlider", Nature.Value)!.Text);
     }
 
     /// <summary>
@@ -108,12 +108,12 @@ public class SoundTests
             .Carrying("LoopableSlider", "Loop time", ValueKind.Real);
         var kind = ship.Entity(jukebox.Id).Kind;
 
-        Assert.Null(kind.FindAction(Blocks.Speaker.Play, Form.Native));
-        Assert.Null(kind.FindAction(Blocks.Speaker.Selected, Form.Value));
-        Assert.True(kind.FindAction("PlaySound", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("StopSound", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("LoopableSlider", Form.Value)!.Hidden);
-        Assert.Equal("volume", kind.FindAction("VolumeSlider", Form.Value)!.Text);
+        Assert.Null(kind.FindAction(Blocks.Speaker.Play, Nature.Native));
+        Assert.Null(kind.FindAction(Blocks.Speaker.Selected, Nature.Value));
+        Assert.True(kind.FindAction("PlaySound", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("StopSound", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("LoopableSlider", Nature.Value)!.Hidden);
+        Assert.Equal("volume", kind.FindAction("VolumeSlider", Nature.Value)!.Text);
     }
 
     /// <summary>
@@ -133,17 +133,17 @@ public class SoundTests
             .Offering("IncreaseLoopableSlider", "Increase Loop time");
         var kind = ship.Entity(speaker.Id).Kind;
 
-        Assert.True(kind.FindAction(Blocks.Speaker.Play, Form.Native)!.Vetted);
-        Assert.True(kind.FindAction(Blocks.Speaker.Selected, Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("StopSound", Form.Action)!.Vetted);
-        Assert.True(kind.FindAction("VolumeSlider", Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("RangeSlider", Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("LoopableSlider", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction(Blocks.Speaker.Play, Nature.Native)!.Vetted);
+        Assert.True(kind.FindAction(Blocks.Speaker.Selected, Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("StopSound", Nature.Action)!.Vetted);
+        Assert.True(kind.FindAction("VolumeSlider", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("RangeSlider", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("LoopableSlider", Nature.Value)!.Vetted);
 
-        Assert.False(kind.FindAction("PlaySound", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("IncreaseVolumeSlider", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("DecreaseRangeSlider", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("IncreaseLoopableSlider", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("PlaySound", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseVolumeSlider", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("DecreaseRangeSlider", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseLoopableSlider", Nature.Action)!.Vetted);
     }
 
     /// <summary>A jukebox vouches for its volume and range, and for nothing its own terminal hides or steps.</summary>
@@ -158,13 +158,13 @@ public class SoundTests
             .Offering("IncreaseVolumeSlider", "Increase Volume");
         var kind = ship.Entity(jukebox.Id).Kind;
 
-        Assert.True(kind.FindAction("VolumeSlider", Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("RangeSlider", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("VolumeSlider", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("RangeSlider", Nature.Value)!.Vetted);
 
-        Assert.False(kind.FindAction("PlaySound", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("StopSound", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("LoopableSlider", Form.Value)!.Vetted);
-        Assert.False(kind.FindAction("IncreaseVolumeSlider", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("PlaySound", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("StopSound", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("LoopableSlider", Nature.Value)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseVolumeSlider", Nature.Action)!.Vetted);
     }
 
     /// <summary>A step sets the sound the block holds ready, by its id, without playing it.</summary>
@@ -199,7 +199,7 @@ public class SoundTests
     {
         var ship = new Rigged();
         var speaker = ship.Speaker(1, "Speaker");
-        var play = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Play, Form.Native)!;
+        var play = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Play, Nature.Native)!;
         var fields = new List<Field>();
         play.Fields(fields);
 

@@ -71,7 +71,7 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Turret);
 
-        Assert.True(kind.FindAction("Shoot", Form.Value)!.Hidden);
+        Assert.True(kind.FindAction("Shoot", Nature.Value)!.Hidden);
         Assert.Equal("open fire", Listed(kind, "Shoot_On").Text);
         Assert.Equal("cease fire", Listed(kind, "Shoot_Off").Text);
         Assert.Equal("toggle firing", Listed(kind, "Shoot").Text);
@@ -85,12 +85,12 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Turret);
 
-        var value = kind.FindAction("TargetNeutrals", Form.Value)!;
+        var value = kind.FindAction("TargetNeutrals", Nature.Value)!;
         Assert.False(value.Hidden);
         Assert.Equal("Target neutrals", value.Named);
         Assert.Equal("toggle target neutrals", Flipped(kind, "TargetNeutrals").Text);
-        Assert.True(kind.FindAction("TargetNeutrals_On", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("FocusLockedTarget", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("TargetNeutrals_On", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("FocusLockedTarget", Nature.Action)!.Hidden);
     }
 
     /// <summary>A gun's switch for what it feeds from is flipped on its own switch, in the gun's words.</summary>
@@ -101,7 +101,7 @@ public class CombatTests
         var kind = ship.Kind(ship.Turret);
 
         Assert.Equal("toggle automatic push and pull", Flipped(kind, "UseConveyor").Text);
-        Assert.Equal("Automatic push and pull", kind.FindAction("UseConveyor", Form.Value)!.Named);
+        Assert.Equal("Automatic push and pull", kind.FindAction("UseConveyor", Nature.Value)!.Named);
     }
 
     /// <summary>A turret's own values are Sprocket's, and one that is not the game's gun object has no rounds to count.</summary>
@@ -182,7 +182,7 @@ public class CombatTests
     {
         var ship = new Ship();
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var reset = new Act("reset-targeting") { Form = Form.Native };
+        var reset = new Act("reset-targeting") { Form = Nature.Native };
         reset.Targets.Add(ship.Name(ship.Turret));
         cycle.Steps.Add(reset);
 
@@ -200,13 +200,13 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Warhead);
 
-        Assert.Equal("Armed", kind.FindAction("Safety", Form.Value)!.Named);
+        Assert.Equal("Armed", kind.FindAction("Safety", Nature.Value)!.Named);
         Assert.Equal("toggle armed", Flipped(kind, "Safety").Text);
-        Assert.Equal("Detonation time", kind.FindAction("DetonationTime", Form.Value)!.Named);
+        Assert.Equal("Detonation time", kind.FindAction("DetonationTime", Nature.Value)!.Named);
         Assert.Equal("start countdown", Listed(kind, "StartCountdown").Text);
         Assert.Equal("detonate", Listed(kind, "Detonate").Text);
-        Assert.True(kind.FindAction("Safety_On", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("IncreaseDetonationTime", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("Safety_On", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("IncreaseDetonationTime", Nature.Action)!.Hidden);
     }
 
     /// <summary>An <c>if</c> on a warhead counting down holds while it is.</summary>
@@ -238,13 +238,13 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Turret);
 
-        Vouched(kind, Form.Action, "Shoot_On", "Shoot_Off", "Shoot", "ShootOnce", "UseConveyor", "TargetNeutrals");
-        Vouched(kind, Form.Value, "UseConveyor", "TargetNeutrals", "Range", "firing", "targeting", "on-target",
+        Vouched(kind, Nature.Action, "Shoot_On", "Shoot_Off", "Shoot", "ShootOnce", "UseConveyor", "TargetNeutrals");
+        Vouched(kind, Nature.Value, "UseConveyor", "TargetNeutrals", "Range", "firing", "targeting", "on-target",
             "controlled-by-a-person");
-        Vouched(kind, Form.Native, "reset-targeting");
+        Vouched(kind, Nature.Native, "reset-targeting");
 
-        Unvouched(kind, Form.Action, "TargetNeutrals_On", "TargetNeutrals_Off", "FocusLockedTarget");
-        Unvouched(kind, Form.Value, "Shoot");
+        Unvouched(kind, Nature.Action, "TargetNeutrals_On", "TargetNeutrals_Off", "FocusLockedTarget");
+        Unvouched(kind, Nature.Value, "Shoot");
     }
 
     /// <summary>A warhead vouches for what it keeps, and not for the pair its armed value says, nor the steps of its countdown.</summary>
@@ -254,10 +254,10 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Warhead);
 
-        Vouched(kind, Form.Action, "StartCountdown", "StopCountdown", "Detonate", "Safety");
-        Vouched(kind, Form.Value, "Safety", "DetonationTime", "counting-down");
+        Vouched(kind, Nature.Action, "StartCountdown", "StopCountdown", "Detonate", "Safety");
+        Vouched(kind, Nature.Value, "Safety", "DetonationTime", "counting-down");
 
-        Unvouched(kind, Form.Action, "Safety_On", "Safety_Off", "IncreaseDetonationTime", "DecreaseDetonationTime");
+        Unvouched(kind, Nature.Action, "Safety_On", "Safety_Off", "IncreaseDetonationTime", "DecreaseDetonationTime");
     }
 
     /// <summary>
@@ -276,25 +276,25 @@ public class CombatTests
             "MainRemoteControl", "HorizonIndicator"
         };
 
-        Vouched(kind, Form.Action, "AutoPilot_On", "AutoPilot_Off", "AutoPilot", "Reset");
-        Vouched(kind, Form.Action, switches);
-        Vouched(kind, Form.Value, switches);
-        Vouched(kind, Form.Value, "SpeedLimit", "FlightMode", "autopilot", "current-waypoint", "speed");
+        Vouched(kind, Nature.Action, "AutoPilot_On", "AutoPilot_Off", "AutoPilot", "Reset");
+        Vouched(kind, Nature.Action, switches);
+        Vouched(kind, Nature.Value, switches);
+        Vouched(kind, Nature.Value, "SpeedLimit", "FlightMode", "autopilot", "current-waypoint", "speed");
 
-        Unvouched(kind, Form.Action, "CollisionAvoidance_On", "CollisionAvoidance_Off", "HandBrake_On", "HandBrake_Off", "Park_On",
+        Unvouched(kind, Nature.Action, "CollisionAvoidance_On", "CollisionAvoidance_Off", "HandBrake_On", "HandBrake_Off", "Park_On",
             "Park_Off", "DampenersOverride_On", "DampenersOverride_Off", "IncreaseSpeedLimit", "DecreaseSpeedLimit",
             "SetFlightMode_BlockPropertyTitle_FlightMode_Patrol", "Forward");
-        Unvouched(kind, Form.Value, "AutoPilot");
+        Unvouched(kind, Nature.Value, "AutoPilot");
 
         foreach (var id in new[] { "MainCockpit", "TargetLocking" })
         {
-            Assert.Null(kind.FindAction(id, Form.Value));
-            Assert.Null(kind.FindAction(id, Form.Action));
+            Assert.Null(kind.FindAction(id, Nature.Value));
+            Assert.Null(kind.FindAction(id, Nature.Action));
         }
     }
 
     /// <summary>Asserts that each of <paramref name="ids" /> is on the kind in that form and is vouched for.</summary>
-    static void Vouched(EntityKind kind, Form form, params string[] ids)
+    static void Vouched(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -305,7 +305,7 @@ public class CombatTests
     }
 
     /// <summary>Asserts that each of <paramref name="ids" /> is on the kind in that form and is not vouched for.</summary>
-    static void Unvouched(EntityKind kind, Form form, params string[] ids)
+    static void Unvouched(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -318,8 +318,8 @@ public class CombatTests
     /// <summary>The toggle of the switch <paramref name="id" />, kept to the terminal view, since the switch's value flips it.</summary>
     static EntityAction Flipped(EntityKind kind, string id)
     {
-        Assert.True(kind.FindAction(id, Form.Value)!.Flips, id + " is not flipped on its own switch");
-        var toggle = kind.FindAction(id, Form.Action)!;
+        Assert.True(kind.FindAction(id, Nature.Value)!.Flips, id + " is not flipped on its own switch");
+        var toggle = kind.FindAction(id, Nature.Action)!;
         Assert.True(toggle.Hidden, id + "'s toggle is still listed");
         return toggle;
     }
@@ -327,7 +327,7 @@ public class CombatTests
     /// <summary>One of the block's own actions, listed where somebody chooses.</summary>
     static EntityAction Listed(EntityKind kind, string id)
     {
-        var action = kind.FindAction(id, Form.Action)!;
+        var action = kind.FindAction(id, Nature.Action)!;
         Assert.False(action.Hidden, id + " is left out of the list");
         return action;
     }

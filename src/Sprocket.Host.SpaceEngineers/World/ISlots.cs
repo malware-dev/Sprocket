@@ -76,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Asked once, when a program is bound; each value is built as the type in
         /// <paramref name="types" /> where there is one, so giving the order does nothing else.
         /// </remarks>
-        Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
+        Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
             IList<Primitive> types);
 
         /// <summary>

@@ -19,11 +19,11 @@ public class LightTests
             .Carrying("Color", "Color", ValueKind.Color);
         var kind = ship.Entity(lamp.Id).Kind;
 
-        Assert.Equal("radius", kind.FindAction("Radius", Form.Value)!.Text);
-        Assert.Equal("blink interval", kind.FindAction("Blink Interval", Form.Value)!.Text);
-        Assert.Equal("blink length", kind.FindAction("Blink Lenght", Form.Value)!.Text);
-        Assert.Equal("color", kind.FindAction("Color", Form.Value)!.Text);
-        Assert.False(kind.FindAction("Falloff", Form.Value)!.Hidden);
+        Assert.Equal("radius", kind.FindAction("Radius", Nature.Value)!.Text);
+        Assert.Equal("blink interval", kind.FindAction("Blink Interval", Nature.Value)!.Text);
+        Assert.Equal("blink length", kind.FindAction("Blink Lenght", Nature.Value)!.Text);
+        Assert.Equal("color", kind.FindAction("Color", Nature.Value)!.Text);
+        Assert.False(kind.FindAction("Falloff", Nature.Value)!.Hidden);
     }
 
     /// <summary>A spotlight carries a falloff and a spin it does nothing with, so neither is offered, nor the steps made of them.</summary>
@@ -38,10 +38,10 @@ public class LightTests
             .Offering("IncreaseRotationSpeed", "Increase Rotation speed");
         var kind = ship.Entity(spot.Id).Kind;
 
-        Assert.True(kind.FindAction("Falloff", Form.Value)!.Hidden);
-        Assert.True(kind.FindAction("IncreaseFalloff", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("RotationSpeed", Form.Value)!.Hidden);
-        Assert.True(kind.FindAction("IncreaseRotationSpeed", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction("Falloff", Nature.Value)!.Hidden);
+        Assert.True(kind.FindAction("IncreaseFalloff", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("RotationSpeed", Nature.Value)!.Hidden);
+        Assert.True(kind.FindAction("IncreaseRotationSpeed", Nature.Action)!.Hidden);
     }
 
     /// <summary>
@@ -68,10 +68,10 @@ public class LightTests
         var kind = ship.Entity(lamp.Id).Kind;
 
         foreach (var id in values)
-            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in steps)
-            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
     }
 
     /// <summary>
@@ -91,10 +91,10 @@ public class LightTests
             .Offering("IncreaseRotationSpeed", "Increase Rotation speed");
         var kind = ship.Entity(spot.Id).Kind;
 
-        Assert.True(kind.FindAction("Radius", Form.Value)!.Vetted);
-        Assert.False(kind.FindAction("Falloff", Form.Value)!.Vetted);
-        Assert.Equal(turns, kind.FindAction("RotationSpeed", Form.Value)!.Vetted);
-        Assert.False(kind.FindAction("IncreaseRotationSpeed", Form.Action)!.Vetted);
+        Assert.True(kind.FindAction("Radius", Nature.Value)!.Vetted);
+        Assert.False(kind.FindAction("Falloff", Nature.Value)!.Vetted);
+        Assert.Equal(turns, kind.FindAction("RotationSpeed", Nature.Value)!.Vetted);
+        Assert.False(kind.FindAction("IncreaseRotationSpeed", Nature.Action)!.Vetted);
     }
 
     /// <summary>A rotating warning light offers its spin speed, and still no falloff.</summary>
@@ -107,9 +107,9 @@ public class LightTests
             .Carrying("RotationSpeed", "Rotation speed", ValueKind.Real);
         var kind = ship.Entity(spot.Id).Kind;
 
-        var spin = kind.FindAction("RotationSpeed", Form.Value)!;
+        var spin = kind.FindAction("RotationSpeed", Nature.Value)!;
         Assert.False(spin.Hidden);
         Assert.Equal("rotation speed", spin.Text);
-        Assert.True(kind.FindAction("Falloff", Form.Value)!.Hidden);
+        Assert.True(kind.FindAction("Falloff", Nature.Value)!.Hidden);
     }
 }

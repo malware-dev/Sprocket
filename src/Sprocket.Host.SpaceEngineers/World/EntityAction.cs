@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A value, the block's own or Sprocket's, is a value; anything the block itself declared is the game's action,
         /// whatever Sprocket calls it; and what is left is Sprocket's own.
         /// </remarks>
-        public Form Form => Sets || Being != null ? Form.Value : Unaltered ? Form.Action : Form.Native;
+        public Nature Form => Sets || Being != null ? Nature.Value : Unaltered ? Nature.Action : Nature.Native;
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         /// <remarks>
@@ -435,7 +435,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public bool Compares(Literal value, out Literal became)
         {
             became = value;
-            return Form == Form.Value && value.Becomes(_holds, out became);
+            return Form == Nature.Value && value.Becomes(_holds, out became);
         }
 
         /// <summary>Whether every value a test compares this with is one it can be: its kind, and one of its words where it lists some.</summary>
@@ -568,7 +568,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 var action = actions[i];
-                if (action.Id == id && action.Form == Form.Value && (action.Being != null) == own)
+                if (action.Id == id && action.Form == Nature.Value && (action.Being != null) == own)
                     return action;
             }
 

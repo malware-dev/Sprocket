@@ -163,12 +163,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// The namespace a step doing <paramref name="id" /> as <paramref name="form" /> on these blocks is qualified by:
         /// Sprocket's own for its own actions and values, empty for the game's.
         /// </summary>
-        public static string Provider(GridWorld world, IList<long> entityIds, string id, Form form)
+        public static string Provider(GridWorld world, IList<long> entityIds, string id, Nature form)
         {
-            if (form == Form.Native)
+            if (form == Nature.Native)
                 return BlockKinds.Own;
 
-            if (form != Form.Value)
+            if (form != Nature.Value)
                 return "";
 
             return EntityAction.Value(ActionsOf(world, entityIds), BlockKinds.Own, id) != null ? BlockKinds.Own : "";
@@ -198,7 +198,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// name more than one: a switch's value and the act that flips it share one.
         /// </para>
         /// </remarks>
-        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, Form form)
+        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, Nature form)
         {
             var said = new List<Field>();
 
@@ -214,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Whether the action these blocks share by that id and form takes time to finish.</summary>
         /// <remarks>Which is whether a step doing it is followed by a wait for it.</remarks>
-        public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, Form form)
+        public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, Nature form)
         {
             var actions = ActionsOf(world, entityIds);
             for (var i = 0; i < actions.Count; i++)
@@ -304,7 +304,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             for (var i = 0; i < kind.Actions.Count; i++)
             {
-                if (kind.Actions[i].Form == Form.Value)
+                if (kind.Actions[i].Form == Nature.Value)
                     return true;
             }
 
@@ -353,7 +353,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var entities = Blocks(world, entityIds);
             for (var i = 0; i < entities.Count; i++)
             {
-                var one = entities[i].Kind.FindAction(value, Form.Value);
+                var one = entities[i].Kind.FindAction(value, Nature.Value);
                 if (one != null && one.Flips)
                     return one.FlippedBy;
             }
@@ -370,7 +370,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var actions = entities[i].Kind.Actions;
                 for (var a = 0; a < actions.Count; a++)
                 {
-                    if (actions[a].Form == Form.Value && actions[a].FlippedBy == toggle)
+                    if (actions[a].Form == Nature.Value && actions[a].FlippedBy == toggle)
                         return actions[a].Id;
                 }
             }

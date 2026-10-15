@@ -401,7 +401,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Form == Form.Action && !one.Renamed && one.GameActionId == id)
+                if (one.Form == Nature.Action && !one.Renamed && one.GameActionId == id)
                     one.Hide();
             }
         }

@@ -193,13 +193,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (action.Being != null)
                 return arguments == null || arguments.Count == 0 ? null : action.Being.Order(_block, arguments[0]);
 
-            if (action.Form != Form.Native)
+            if (action.Form != Nature.Native)
                 return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
 
             if (bound != null && bound.Acts || action.GameActionId == null)
                 return null;
 
-            return Toolbars.Prepare(_block, action.GameActionId, Form.Action, arguments, action.Primitives);
+            return Toolbars.Prepare(_block, action.GameActionId, Nature.Action, arguments, action.Primitives);
         }
 
         /// <summary>Tells the block to do <paramref name="actionId" />.</summary>
@@ -211,7 +211,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />.</summary>
         public void Invoke(string actionId, IList<Literal> arguments)
         {
-            Invoke(actionId, arguments, Form.Native);
+            Invoke(actionId, arguments, Nature.Native);
         }
 
         /// <summary>The same, told which of the three ways the step reaches the block.</summary>
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// that went looking for whatever answered to its id could find the wrong one.
         /// </para>
         /// </remarks>
-        public void Invoke(string actionId, IList<Literal> arguments, Form form)
+        public void Invoke(string actionId, IList<Literal> arguments, Nature form)
         {
             Perform(actionId, arguments, form);
             Asked();
@@ -249,14 +249,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>One of Sprocket's own actions as told <paramref name="arguments" />, or null where the block has no such action.</summary>
         Bound Bind(string actionId, IList<Literal> arguments)
         {
-            var action = _kind.FindAction(actionId, Form.Native);
+            var action = _kind.FindAction(actionId, Nature.Native);
             return action == null || action.Doing == null ? null : action.Doing.Bind(arguments ?? new Literal[0]);
         }
 
-        void Perform(string actionId, IList<Literal> arguments, Form form)
+        void Perform(string actionId, IList<Literal> arguments, Nature form)
         {
             // The block's own members are named by the block's ids, so those go straight to the game.
-            if (form == Form.Value)
+            if (form == Nature.Value)
             {
                 if (arguments != null && arguments.Count > 0)
                     Toolbars.Set(_block, actionId, arguments[0]);
@@ -264,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            if (form == Form.Action)
+            if (form == Nature.Action)
             {
                 Toolbars.Perform(_block, actionId, arguments);
                 return;
@@ -272,7 +272,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // An id this block does not have is a sequence written against a vocabulary it no longer offers, and it does
             // nothing rather than throwing - the same answer a reading gives.
-            var entry = _kind.FindAction(actionId, Form.Native);
+            var entry = _kind.FindAction(actionId, Nature.Native);
             if (entry == null)
                 return;
 

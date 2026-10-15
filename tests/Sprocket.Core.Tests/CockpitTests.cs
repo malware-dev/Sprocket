@@ -78,7 +78,7 @@ public class CockpitTests
         enclosed.Air = 0.25f;
 
         Assert.Equal(25.0, Ran.Read(ship, enclosed, "oxygen-level").Real, 3);
-        Assert.Null(ship.Entity(open.Id).Kind.FindAction("oxygen-level", Form.Value));
+        Assert.Null(ship.Entity(open.Id).Kind.FindAction("oxygen-level", Nature.Value));
     }
 
     /// <summary>The ship's speed is in metres a second, its gravity in g, and its mass in kilograms.</summary>
@@ -122,18 +122,18 @@ public class CockpitTests
         var kind = ship.Entity(seat.Id).Kind;
 
         foreach (var id in new[] { "occupied", "occupant-name", "under-control", "oxygen-level", "gravity", "ship-mass", "speed" })
-            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in switches)
         {
-            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
-            Assert.True(kind.FindAction(id, Form.Action)!.Vetted, "toggle " + id + " is not vetted");
-            Assert.False(kind.FindAction(id + "_On", Form.Action)!.Vetted, id + "_On is vetted");
-            Assert.False(kind.FindAction(id + "_Off", Form.Action)!.Vetted, id + "_Off is vetted");
+            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Action)!.Vetted, "toggle " + id + " is not vetted");
+            Assert.False(kind.FindAction(id + "_On", Nature.Action)!.Vetted, id + "_On is vetted");
+            Assert.False(kind.FindAction(id + "_Off", Nature.Action)!.Vetted, id + "_Off is vetted");
         }
 
-        Assert.False(kind.FindAction("Control", Form.Action)!.Vetted);
-        Assert.Null(kind.FindAction("eject-occupant", Form.Native));
+        Assert.False(kind.FindAction("Control", Nature.Action)!.Vetted);
+        Assert.Null(kind.FindAction("eject-occupant", Nature.Native));
     }
 
     /// <summary>
@@ -162,13 +162,13 @@ public class CockpitTests
 
         foreach (var id in switches)
         {
-            Assert.Null(kind.FindAction(id, Form.Value));
-            Assert.Null(kind.FindAction(id, Form.Action));
-            Assert.Null(kind.FindAction(id + "_On", Form.Action));
-            Assert.Null(kind.FindAction(id + "_Off", Form.Action));
+            Assert.Null(kind.FindAction(id, Nature.Value));
+            Assert.Null(kind.FindAction(id, Nature.Action));
+            Assert.Null(kind.FindAction(id + "_On", Nature.Action));
+            Assert.Null(kind.FindAction(id + "_Off", Nature.Action));
         }
 
-        Assert.True(kind.FindAction("occupied", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("occupied", Nature.Value)!.Vetted);
     }
 
     /// <summary>The seat's own switches are said as states, each with its toggle beside it.</summary>
@@ -188,7 +188,7 @@ public class CockpitTests
         seat.Carrying(id, id, ValueKind.Flag).Offering(id, id);
         var kind = ship.Entity(seat.Id).Kind;
 
-        Assert.Equal(words, kind.FindAction(id, Form.Value)!.Text);
-        Assert.Equal("toggle " + words, kind.FindAction(id, Form.Action)!.Text);
+        Assert.Equal(words, kind.FindAction(id, Nature.Value)!.Text);
+        Assert.Equal("toggle " + words, kind.FindAction(id, Nature.Action)!.Text);
     }
 }

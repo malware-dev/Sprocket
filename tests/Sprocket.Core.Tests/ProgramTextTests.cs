@@ -282,17 +282,17 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(arm, null);
 
-        var reverse = new Act("Reverse") { Form = Form.Action };
+        var reverse = new Act("Reverse") { Form = Nature.Action };
         reverse.Targets.Add("rotor");
         sequence.Steps.Add(reverse);
 
-        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = Form.Native };
+        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = Nature.Native };
         rotate.Targets.Add("rotor");
         rotate.Arguments.Add(Literal.Of(90L));
         rotate.Arguments.Add(Literal.Of(2.5));
         sequence.Steps.Add(rotate);
 
-        var speed = new Act("Velocity") { Form = Form.Value };
+        var speed = new Act("Velocity") { Form = Nature.Value };
         speed.Targets.Add("rotor");
         speed.Arguments.Add(Literal.Of(5.0));
         sequence.Steps.Add(speed);
@@ -307,19 +307,19 @@ public class ProgramTextTests
         var steps = after.Sequences[0].Steps;
 
         var game = Assert.IsType<Act>(steps[0]);
-        Assert.Equal(Form.Action, game.Form);
+        Assert.Equal(Nature.Action, game.Form);
         Assert.Equal("Reverse", game.ActionId);
         Assert.Empty(game.Arguments);
 
         var own = Assert.IsType<Act>(steps[1]);
-        Assert.Equal(Form.Native, own.Form);
+        Assert.Equal(Nature.Native, own.Form);
         Assert.Equal(Blocks.Rotor.RotateTo, own.ActionId);
         Assert.Equal(2, own.Arguments.Count);
         Assert.Equal(90, own.Arguments[0].Whole);
         Assert.Equal(2.5, own.Arguments[1].Real);
 
         var value = Assert.IsType<Act>(steps[2]);
-        Assert.Equal(Form.Value, value.Form);
+        Assert.Equal(Nature.Value, value.Form);
         Assert.Equal("Velocity", value.ActionId);
     }
 
@@ -335,14 +335,14 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
 
-        var colour = new Act("SetColor") { Form = Form.Action };
+        var colour = new Act("SetColor") { Form = Nature.Action };
         colour.Targets.Add("light");
         colour.Arguments.Add(Literal.Of(255));
         colour.Arguments.Add(Literal.Of(136));
         colour.Arguments.Add(Literal.Of(0));
         sequence.Steps.Add(colour);
 
-        var each = new Act("SetEverything") { Form = Form.Action };
+        var each = new Act("SetEverything") { Form = Nature.Action };
         each.Targets.Add("light");
         each.Arguments.Add(Literal.Of("four and a half"));
         each.Arguments.Add(Literal.Of(4.5));
@@ -383,6 +383,38 @@ public class ProgramTextTests
         Assert.Equal(0, kinds.Arguments[3].Blue);
     }
 
+    /// <summary>
+    /// Text holding a line break is written on one line with <c>&amp;br;</c> for the break, an ampersand that would begin
+    /// one of the two entities as <c>&amp;amp;</c>, and any other ampersand as it is; all of it reads back as it was.
+    /// </summary>
+    [Theory]
+    [InlineData("Cycling\nStand clear", "\"Cycling&br;Stand clear\"", "Cycling\nStand clear")]
+    [InlineData("Line\r\nbreak", "\"Line&br;break\"", "Line\nbreak")]
+    [InlineData("Rock & roll", "\"Rock & roll\"", "Rock & roll")]
+    [InlineData("say &br; out loud", "\"say &amp;br; out loud\"", "say &br; out loud")]
+    [InlineData("a &amp; b", "\"a &amp;amp; b\"", "a &amp; b")]
+    [InlineData("the \"inner\"\ndoor", "\"the \"\"inner\"\"&br;door\"", "the \"inner\"\ndoor")]
+    public void TextKeepsItsLineBreaksOnOneLine(string text, string written, string read)
+    {
+        var program = new Automation();
+        var values = new Values();
+        program.Restore(Declared("lcd", "lcd", values, 1, "Airlock Screen"));
+
+        var sequence = program.AddSequence(program.AddSystem(), null);
+        var show = new Act("Show") { Form = Nature.Action };
+        show.Targets.Add("lcd");
+        show.Arguments.Add(Literal.Of(text));
+        sequence.Steps.Add(show);
+
+        var saved = Save(program);
+        Assert.Contains("call Show(" + written + ") on [ lcd ]", saved);
+
+        var after = new Automation();
+        LoadAll(program, after);
+
+        Assert.Equal(read, Assert.IsType<Act>(after.Sequences[0].Steps[0]).Arguments[0].Text);
+    }
+
     /// <summary>An action that asked for nothing is written as the action and its parts, with no <c>with</c>.</summary>
     [Fact]
     public void AStepWithNoValuesHasNoWith()
@@ -417,7 +449,7 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
         var radius = new Act("Radius");
-        radius.Form = Form.Value;
+        radius.Form = Nature.Value;
         radius.Targets.Add("light");
         radius.Arguments.Add(Literal.Of(4.5));
         sequence.Steps.Add(radius);

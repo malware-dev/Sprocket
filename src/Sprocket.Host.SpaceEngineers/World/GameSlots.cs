@@ -459,13 +459,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
+        public Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
             IList<Primitive> types)
         {
             if (block == null)
                 return null;
 
-            if (form == Form.Value)
+            if (form == Nature.Value)
                 return arguments == null || arguments.Count == 0 ? null : Written(block, id, arguments[0]);
 
             ITerminalAction action = block.GetActionWithName(id);

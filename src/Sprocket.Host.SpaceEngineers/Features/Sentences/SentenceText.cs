@@ -475,8 +475,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>One value as a sentence says it, with the words its field puts around it.</summary>
+        /// <remarks>A line break in text reads as a slash, since a sentence is one line.</remarks>
         static string Around(IList<Field> fields, int at, string filled)
         {
+            if (filled != null && filled.IndexOf('\n') >= 0)
+                filled = filled.Replace("\r", "").Replace("\n", " / ");
+
             if (at >= fields.Count)
                 return filled;
 

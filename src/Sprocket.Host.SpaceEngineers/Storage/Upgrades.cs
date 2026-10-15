@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var on = act.ActionId == SwitchOn;
             act.ActionId = Power;
-            act.Form = Form.Value;
+            act.Form = Nature.Value;
             act.Provider = BlockKinds.Own;
             act.Arguments.Clear();
             act.Arguments.Add(Literal.Of(on));

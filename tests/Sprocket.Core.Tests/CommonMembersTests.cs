@@ -91,21 +91,21 @@ public class CommonMembersTests
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
         foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level" })
-            Assert.NotNull(kind.FindAction(id, Form.Value));
+            Assert.NotNull(kind.FindAction(id, Nature.Value));
 
         foreach (var id in new[] { "starts-working", "stops-working" })
             Assert.NotNull(kind.FindEvent(id));
 
         foreach (var id in new[] { "powered", "broken" })
-            Assert.Null(kind.FindAction(id, Form.Value));
+            Assert.Null(kind.FindAction(id, Nature.Value));
 
         foreach (var id in new[] { "loses-power", "gets-power", "breaks", "gets-repaired" })
             Assert.Null(kind.FindEvent(id));
 
-        Assert.True(kind.FindAction("working", Form.Value)!.Announced);
-        Assert.True(kind.FindAction("custom-data", Form.Value)!.Announced);
-        Assert.True(kind.FindAction("integrity", Form.Value)!.Announced);
-        Assert.NotEqual("", kind.FindAction("being-hacked", Form.Value)!.LookedBecause);
+        Assert.True(kind.FindAction("working", Nature.Value)!.Announced);
+        Assert.True(kind.FindAction("custom-data", Nature.Value)!.Announced);
+        Assert.True(kind.FindAction("integrity", Nature.Value)!.Announced);
+        Assert.NotEqual("", kind.FindAction("being-hacked", Nature.Value)!.LookedBecause);
     }
 
     /// <summary>A block the harness gives no inventory, power or screen offers none of what those bring.</summary>
@@ -116,9 +116,9 @@ public class CommonMembersTests
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
         foreach (var id in new[] { "inventory-fill", "inventory-mass", "power-use" })
-            Assert.Null(kind.FindAction(id, Form.Value));
+            Assert.Null(kind.FindAction(id, Nature.Value));
 
-        Assert.Null(kind.FindAction("show-text", Form.Native));
+        Assert.Null(kind.FindAction("show-text", Nature.Native));
     }
 
     /// <summary>
@@ -202,20 +202,20 @@ public class CommonMembersTests
     {
         var ship = new Ship();
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
-        var toggle = kind.FindAction("OnOff", Form.Action)!;
+        var toggle = kind.FindAction("OnOff", Nature.Action)!;
 
         Assert.Equal("Toggle on/off", toggle.Named);
         Assert.Equal("toggle on/off", toggle.Text);
 
         // The switch is one value, set off, on or flipped; the game's acts beside it are kept to the terminal view.
-        var switched = kind.FindAction("power", Form.Value)!;
+        var switched = kind.FindAction("power", Nature.Value)!;
         Assert.True(switched.Sets);
         Assert.Equal("OnOff", switched.FlippedBy);
         Assert.True(toggle.Hidden);
-        Assert.True(kind.FindAction("OnOff_On", Form.Action)!.Hidden);
-        Assert.True(kind.FindAction("OnOff_Off", Form.Action)!.Hidden);
-        Assert.Null(kind.FindAction("on", Form.Native));
-        Assert.Null(kind.FindAction("off", Form.Native));
+        Assert.True(kind.FindAction("OnOff_On", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("OnOff_Off", Nature.Action)!.Hidden);
+        Assert.Null(kind.FindAction("on", Nature.Native));
+        Assert.Null(kind.FindAction("off", Nature.Native));
     }
 
     /// <summary>
@@ -234,16 +234,16 @@ public class CommonMembersTests
         var kind = ship.Rig.Entity(ship.Lamp.Id).Kind;
 
         foreach (var id in new[] { "working", "being-hacked", "custom-data", "integrity", "damaged", "build-level", "power", "ShowOnHUD" })
-            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in new[] { "OnOff", "ShowOnHUD" })
-            Assert.True(kind.FindAction(id, Form.Action)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Action)!.Vetted, id + " is not vetted");
 
         foreach (var id in new[] { "OnOff_On", "OnOff_Off", "ShowOnHUD_On", "ShowOnHUD_Off" })
-            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
 
         foreach (var id in new[] { "OnOff", "CustomName" })
-            Assert.False(kind.FindAction(id, Form.Value)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Value)!.Vetted, id + " is vetted");
     }
 
     /// <summary>A separation charge's detach is vetted in the game's words.</summary>
@@ -256,10 +256,10 @@ public class CommonMembersTests
             .Offering("Detach", "Detach");
         var kind = ship.Rig.Entity(charge.Id).Kind;
 
-        var detach = kind.FindAction("Detach", Form.Action)!;
+        var detach = kind.FindAction("Detach", Nature.Action)!;
         Assert.True(detach.Vetted);
         Assert.False(detach.Renamed);
-        Assert.False(kind.FindAction("OnOff_On", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("OnOff_On", Nature.Action)!.Vetted);
     }
 
     /// <summary>A micro emitter's discharge, its countdown's start and stop, and the countdown are vetted, and the countdown's steps are not.</summary>
@@ -278,12 +278,12 @@ public class CommonMembersTests
         var kind = ship.Rig.Entity(emitter.Id).Kind;
 
         foreach (var id in new[] { "Discharge", "StartCountdown", "StopCountdown" })
-            Assert.True(kind.FindAction(id, Form.Action)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Action)!.Vetted, id + " is not vetted");
 
-        Assert.True(kind.FindAction("Countdown", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction("Countdown", Nature.Value)!.Vetted);
 
         foreach (var id in new[] { "IncreaseCountdown", "DecreaseCountdown" })
-            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
     }
 
     /// <summary>
@@ -304,14 +304,14 @@ public class CommonMembersTests
             .Offering("AnyoneCanUse_Off", "Anyone can use Off");
         var kind = ship.Rig.Entity(terminal.Id).Kind;
 
-        Assert.True(kind.FindAction("AnyoneCanUse", Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("AnyoneCanUse", Form.Action)!.Vetted);
+        Assert.True(kind.FindAction("AnyoneCanUse", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("AnyoneCanUse", Nature.Action)!.Vetted);
 
         foreach (var id in new[] { "RepairServiceRange", "SalvageServiceRange" })
-            Assert.False(kind.FindAction(id, Form.Value)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Value)!.Vetted, id + " is vetted");
 
         foreach (var id in new[] { "AnyoneCanUse_On", "AnyoneCanUse_Off" })
-            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
     }
 
     /// <summary>A functional block with none of their components is none of those blocks, whatever members it declares.</summary>
@@ -327,10 +327,10 @@ public class CommonMembersTests
         var kind = ship.Rig.Entity(block.Id).Kind;
 
         foreach (var id in new[] { "Detach", "Discharge" })
-            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
 
         foreach (var id in new[] { "Countdown", "AnyoneCanUse" })
-            Assert.False(kind.FindAction(id, Form.Value)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Value)!.Vetted, id + " is vetted");
     }
 
     /// <summary>A step sets a block's Custom Data to the text it is given, replacing what was there.</summary>
@@ -368,7 +368,7 @@ public class CommonMembersTests
     public void TheAutomationsOwnBlockOffersCustomDataToSet()
     {
         var ship = new Ship();
-        var data = ship.Rig.Entity(ship.Rig.Rig.Sprocket.Id).Kind.FindAction("custom-data", Form.Value)!;
+        var data = ship.Rig.Entity(ship.Rig.Rig.Sprocket.Id).Kind.FindAction("custom-data", Nature.Value)!;
 
         Assert.True(data.Sets);
         Assert.True(data.Vetted);
@@ -383,7 +383,7 @@ public class CommonMembersTests
     /// <summary>A step setting the lamp's Custom Data to <paramref name="value" />.</summary>
     static Act SetCustomData(Ship ship, Literal value)
     {
-        var set = new Act("custom-data") { Form = Form.Value, Provider = BlockKinds.Own };
+        var set = new Act("custom-data") { Form = Nature.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Lamp));
         set.Arguments.Add(value);
         return set;

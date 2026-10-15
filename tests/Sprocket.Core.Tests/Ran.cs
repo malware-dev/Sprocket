@@ -37,7 +37,7 @@ static class Ran
     {
         var automation = new Automation();
         var sequence = automation.AddSequence(new EveryTrigger(600));
-        var set = new Act(id) { Form = Form.Value, Provider = BlockKinds.Own };
+        var set = new Act(id) { Form = Nature.Value, Provider = BlockKinds.Own };
         set.Targets.Add(automation.Declare(ship.World, ship.Entity(fitting.Id)).Name);
         set.Arguments.Add(value);
         sequence.Steps.Add(set);
@@ -55,7 +55,7 @@ static class Ran
     /// <summary>What Sprocket's own value <paramref name="id" /> of <paramref name="fitting" /> reads now, given <paramref name="arguments" />.</summary>
     public static Literal Read(Rigged ship, Fitting fitting, string id, params Literal[] arguments)
     {
-        var value = ship.Entity(fitting.Id).Kind.FindAction(id, Form.Value)!;
+        var value = ship.Entity(fitting.Id).Kind.FindAction(id, Nature.Value)!;
         return value.Being!.Gauge(fitting.Block, arguments, new Recall()).Read();
     }
 }

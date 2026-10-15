@@ -384,10 +384,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Something in quotes, escaping only its own quote, by doubling it.
         /// </summary>
         /// <remarks>
-        /// A line break folds to a space, because a statement ends at the end of its line and a value holding
-        /// one would write a file that cannot be read back. <see cref="Sequences.Naming" /> is where that rule
-        /// belongs and it keeps names to one line, so this is the guard rather than the rule: the writer must
-        /// not be able to produce a broken save whatever reaches it.
+        /// A statement ends at the end of its line, so a line break is never written as one. In text it is written as
+        /// <c>&amp;br;</c>, which reads back as the break (see <see cref="Entities" />). In a name it folds to a space:
+        /// <see cref="Sequences.Naming" /> is where that rule belongs and it keeps names to one line, so this is the guard
+        /// rather than the rule: the writer must not be able to produce a broken save whatever reaches it.
         /// </remarks>
         static void Quote(StringBuilder into, string value, char quote)
         {
@@ -397,6 +397,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 for (var i = 0; i < value.Length; i++)
                 {
                     var c = value[i];
+                    if (quote == '"')
+                    {
+                        if (c == quote)
+                            into.Append(quote);
+
+                        Entities.Write(into, value, i);
+                        continue;
+                    }
+
                     if (c == '\n' || c == '\r')
                     {
                         into.Append(' ');

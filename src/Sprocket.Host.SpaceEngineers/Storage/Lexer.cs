@@ -252,7 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _ptr = close;
             var text = Since(from);
             _ptr++;
-            return new Token(kind, start.Index, text);
+            return new Token(kind, start.Index, Read(kind, text));
         }
 
         /// <summary>The rare value holding a doubled quote, built up a run at a time between them.</summary>
@@ -274,12 +274,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if ((close + 1).Char != quote)
                 {
                     _ptr = close + 1;
-                    return new Token(kind, start.Index, new StringSegment(built.ToString()));
+                    return new Token(kind, start.Index, Read(kind, new StringSegment(built.ToString())));
                 }
 
                 built.Append(quote);
                 _ptr = close + 2;
             }
+        }
+
+        /// <summary>Text with its entities read as what they stand for; a name, or text holding none, as it lies.</summary>
+        static StringSegment Read(TokenKind kind, StringSegment text)
+        {
+            return kind == TokenKind.Text && Entities.Holds(text) ? new StringSegment(Entities.Read(text)) : text;
         }
 
         static string Unclosed(TokenKind kind)

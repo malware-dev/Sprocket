@@ -137,7 +137,7 @@ public sealed class RigSlots : ISlots
     /// A made-up block's action or value, made ready the way the game's are: each value built as the
     /// type it is taken as, which the fitting keeps for a test to look at when it is given.
     /// </summary>
-    public Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
+    public Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
         IList<Primitive> types)
     {
         foreach (Fitting fitting in _rig.Fitted)
@@ -145,7 +145,7 @@ public sealed class RigSlots : ISlots
             if (fitting.Block != block)
                 continue;
 
-            if (form == Form.Value)
+            if (form == Nature.Value)
                 return arguments == null || arguments.Count == 0 ? null : new Told(fitting, id, arguments, null, true);
 
             if (!fitting.Offers(id))

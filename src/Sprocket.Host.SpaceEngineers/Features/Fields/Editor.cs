@@ -32,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         Chosen,
 
         /// <summary>An angle in degrees, typed until it has a control of its own.</summary>
-        Angle
+        Angle,
+
+        /// <summary>Text over several lines, in a box where Enter starts a new one.</summary>
+        Lines
     }
 }

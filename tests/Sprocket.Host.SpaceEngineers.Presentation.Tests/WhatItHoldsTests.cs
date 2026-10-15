@@ -100,7 +100,7 @@ public class WhatItHoldsTests
         var system = program.AddSystem();
         program.AddSequence(system, Pressed.On(program, system, Named(sim, button)));
 
-        var set = new Act("Falloff") { Form = Form.Value };
+        var set = new Act("Falloff") { Form = Nature.Value };
         set.Targets.Add(Named(sim, light));
         set.Arguments.Add(Literal.Of(2L));
         system.Triggers[0].Does = set;

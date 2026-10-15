@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, given <paramref name="arguments" />, reaching the blocks the way <paramref name="form" /> says.</summary>
         public PickAnswer(IList<long> targets, string chosen, bool all, IList<Literal> arguments,
-            Form form = Form.Native)
+            Nature form = Nature.Native)
         {
             for (var i = 0; i < targets.Count; i++)
                 _targets.Add(targets[i]);
@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public string Chosen { get; private set; }
 
         /// <summary>Which of the three ways what was chosen reaches the blocks.</summary>
-        public Form Form { get; private set; }
+        public Nature Form { get; private set; }
 
         /// <summary>Whether it takes all of them together, rather than any one.</summary>
         public bool All { get; private set; }

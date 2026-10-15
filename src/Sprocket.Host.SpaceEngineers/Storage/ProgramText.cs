@@ -2035,7 +2035,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             // A value is a set; an action is a call, bare or qualified by its namespace.
             var act = step as Act;
             if (act != null)
-                return act.Form == Form.Value ? Keyword.Set : Keyword.Call;
+                return act.Form == Nature.Value ? Keyword.Set : Keyword.Call;
 
             if (step is Wait)
                 return Keyword.Wait;
@@ -2053,7 +2053,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var act = step as Act;
             if (act != null)
             {
-                if (act.Form == Form.Value)
+                if (act.Form == Nature.Value)
                 {
                     WriteMember(pen, act.Provider, act.ActionId, NoArguments, act.Targets);
                     if (act.Arguments.Count > 0)
@@ -2064,7 +2064,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
                 else
                 {
-                    WriteMember(pen, act.Form == Form.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
+                    WriteMember(pen, act.Form == Nature.Native ? act.Provider : "", act.ActionId, act.Arguments, act.Targets);
                 }
 
                 return;
@@ -2127,7 +2127,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return null;
 
             act.ActionId = id;
-            act.Form = provider.Length == 0 ? Form.Action : Form.Native;
+            act.Form = provider.Length == 0 ? Nature.Action : Nature.Native;
             if (provider.Length > 0)
                 act.Provider = provider;
 
@@ -2169,7 +2169,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return null;
 
             act.ActionId = id;
-            act.Form = Form.Value;
+            act.Form = Nature.Value;
             act.Provider = provider;
             act.Arguments.Add(Given(statement.ValueAt(2)));
             return Noted(act, statement);

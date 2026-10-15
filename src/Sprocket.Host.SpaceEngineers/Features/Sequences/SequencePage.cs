@@ -931,7 +931,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var origin = Editor.Depth;
 
             Editor.Push(new PickPage(Editor, "Do something", false,
-                new List<long>(), "", Form.Native,
+                new List<long>(), "", Nature.Native,
                 delegate(PickAnswer answer)
                 {
                     var step = new Act(answer.Chosen);
@@ -1012,7 +1012,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return new PickPage(Editor, "Check something", false,
                 test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets),
                 test == null ? "" : stated ? Comparing.Id(test.MemberId, test.Value.Said) : test.MemberId,
-                stated ? Form.Native : Form.Value,
+                stated ? Nature.Native : Nature.Value,
                 delegate(PickAnswer answer)
                 {
                     chosen(Test(answer, test));
@@ -1071,7 +1071,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             for (var i = 0; i < actions.Count; i++)
             {
-                if (actions[i].Id == id && actions[i].Form == Form.Value)
+                if (actions[i].Id == id && actions[i].Form == Nature.Value)
                     return actions[i];
             }
 

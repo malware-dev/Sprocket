@@ -1,74 +1,18 @@
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Blocks;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Sim.Fakes;
 using Sprocket.Sim.Machine;
 using VRage.Game.GUI.TextPanel;
 using VRageMath;
 using Xunit;
-using IMyTextSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
-using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 
 namespace Sprocket.Tests;
 
 /// <summary>A block with several screens: each member names the screen it means.</summary>
 public class ScreensTests
 {
-    /// <summary>A block with two screens, front and back, as a billboard has.</summary>
-    sealed class Billboard : Fitting
-    {
-        public Billboard(long id, string name)
-            : base(id, name, typeof(MyObjectBuilder_LCDPanelsBlock), "LargeBlockBillboard", "Billboard")
-        {
-            Fit(Pretend.To<IMyFunctionalBlock>()
-                .Also<IMyTextSurfaceProvider>()
-                .Gives("UseGenericLcd", () => true)
-                .Gives("SurfaceCount", () => 2)
-                .Does("GetSurface", arguments => Faces[(int)arguments[0]].Surface));
-        }
-
-        /// <summary>Its two screens.</summary>
-        public Face[] Faces { get; } = [new Face("Front"), new Face("Back")];
-    }
-
-    /// <summary>One screen, holding what it is set to.</summary>
-    sealed class Face
-    {
-        public Face(string name)
-        {
-            Surface = Pretend.To<IMyTextSurface>()
-                .Gives("DisplayName", () => name)
-                .Does("GetFonts", _ => null!)
-                .Does("WriteText", arguments =>
-                {
-                    Text = (string)arguments[0];
-                    return true;
-                })
-                .Gives("ContentType", () => Content)
-                .Takes("ContentType", value => Content = (ContentType)value)
-                .Gives("FontSize", () => FontSize)
-                .Takes("FontSize", value => FontSize = (float)value)
-                .Gives("FontColor", () => FontColor)
-                .Takes("FontColor", value => FontColor = (Color)value)
-                .Gives("Alignment", () => Alignment)
-                .Takes("Alignment", value => Alignment = (TextAlignment)value)
-                .Done();
-        }
-
-        public IMyTextSurface Surface { get; }
-
-        public string Text { get; private set; } = "";
-
-        public ContentType Content { get; set; }
-
-        public float FontSize { get; set; } = 1f;
-
-        public Color FontColor { get; set; } = Color.White;
-
-        public TextAlignment Alignment { get; set; }
-    }
-
     static (Rigged Ship, Billboard Board) Built()
     {
         var ship = new Rigged();
@@ -83,12 +27,40 @@ public class ScreensTests
         board.Carrying("FontSize", "Font size", ValueKind.Real, "0.1", "10");
         var kind = ship.Entity(board.Id).Kind;
 
-        Assert.True(kind.FindAction(Screen.ShowText, Form.Native)!.Vetted);
-        Assert.True(kind.FindAction(Screens.SetUp, Form.Native)!.Vetted);
+        Assert.True(kind.FindAction(Screen.ShowText, Nature.Native)!.Vetted);
+        Assert.True(kind.FindAction(Screens.SetUp, Nature.Native)!.Vetted);
         foreach (var id in new[] { "content", "text-color", "font-size", "alignment", "keep-aspect-ratio" })
-            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
 
-        Assert.False(kind.FindAction("FontSize", Form.Value)!.Vetted);
+        Assert.False(kind.FindAction("FontSize", Nature.Value)!.Vetted);
+    }
+
+    /// <summary>Text of several lines is shown with its line breaks, and its step reads on one line, a slash for each break.</summary>
+    [Fact]
+    public void TextOfSeveralLinesIsShownWhole()
+    {
+        var (ship, board) = Built();
+        var automation = new Automation();
+        var sequence = automation.AddSequence((Trigger)null!);
+        var show = new Act(Screen.ShowText) { Form = Nature.Native, Provider = BlockKinds.Own };
+        show.Targets.Add(automation.Declare(ship.World, ship.Entity(board.Id)).Name);
+        show.Arguments.Add(Literal.Of("Back"));
+        show.Arguments.Add(Literal.Of("Cycling\nStand clear"));
+        sequence.Steps.Add(show);
+        var runner = new AutomationRunner(automation, ship.World);
+        ship.Tick();
+        runner.Tick(1);
+
+        Assert.Equal("show text Billboard Back Cycling / Stand clear", SequenceText.Step(runner.Bindings, sequence, show, null));
+
+        runner.Call(sequence);
+        for (var frame = 2; frame < 6; frame++)
+        {
+            ship.Tick();
+            runner.Tick(frame);
+        }
+
+        Assert.Equal("Cycling\nStand clear", board.Faces[1].Text);
     }
 
     /// <summary>Text is shown on the screen a step names, and that screen is set to show text.</summary>

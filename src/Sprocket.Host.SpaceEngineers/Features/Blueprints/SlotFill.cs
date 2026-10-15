@@ -43,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 // A signal slot is a block and one of its toolbar slots, picked as a trigger's signal is.
                 var positions = chosen.Positions(part.Id);
                 var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
-                _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, Form.Native,
+                _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, Nature.Native,
                     delegate(PickAnswer answer) { Answered(part, chosen, answer); },
                     admits: Signaling, signalsOnly: true));
                 return;

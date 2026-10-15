@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One of a block's own actions or values made ready to be given, or null.</summary>
-        public static Order Prepare(IMyTerminalBlock block, string id, Form form, IList<Literal> arguments,
+        public static Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
             IList<Primitive> types)
         {
             return block == null || string.IsNullOrEmpty(id) ? null : _slots.Prepare(block, id, form, arguments, types);

@@ -278,7 +278,7 @@ public class ProductionTests
         /// <remarks>That nothing starts the sequence is about the sequence, which is called here, and not about the step.</remarks>
         public SequenceProblem Set(Fitting fitting, string id, Literal value)
         {
-            var set = new Act(id) { Form = Form.Value, Provider = BlockKinds.Own };
+            var set = new Act(id) { Form = Nature.Value, Provider = BlockKinds.Own };
             set.Targets.Add(Name(fitting));
             set.Arguments.Add(value);
             var sequence = Program.AddSequence((Trigger)null!);
@@ -302,22 +302,22 @@ public class ProductionTests
         var ship = new Ship();
         var kind = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
 
-        Assert.NotNull(kind.FindAction("make", Form.Native));
-        Assert.NotNull(kind.FindAction("clear-the-queue", Form.Native));
+        Assert.NotNull(kind.FindAction("make", Nature.Native));
+        Assert.NotNull(kind.FindAction("clear-the-queue", Nature.Native));
         foreach (var value in new[]
                  {
                      "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating", "input-fill",
                      "output-fill", "amount-in-input", "amount-in-output"
                  })
         {
-            var own = kind.FindAction(value, Form.Value);
+            var own = kind.FindAction(value, Nature.Value);
             Assert.True(own?.Being != null, value);
             Assert.True(own.Announced || own.LookedBecause.Length > 0, value);
         }
 
         Assert.True(kind.FindEvent("starts-producing")!.Announced);
         Assert.True(kind.FindEvent("stops-producing")!.Announced);
-        Assert.Null(kind.FindAction("refining", Form.Value));
+        Assert.Null(kind.FindAction("refining", Nature.Value));
     }
 
     /// <summary>Every signal and value of Sprocket's own on this family's blocks says how it is heard: announced or looked for, with why.</summary>
@@ -358,13 +358,13 @@ public class ProductionTests
         var ship = new Ship();
         var kind = ship.Rig.Entity(ship.Weld(new Factory(1, "Refinery", true)).Id).Kind;
 
-        Assert.NotNull(kind.FindAction("refining", Form.Value));
+        Assert.NotNull(kind.FindAction("refining", Nature.Value));
         Assert.NotNull(kind.FindEvent("starts-refining"));
         Assert.NotNull(kind.FindEvent("stops-refining"));
-        Assert.Null(kind.FindAction("producing", Form.Value));
-        Assert.Null(kind.FindAction("make", Form.Native));
-        Assert.Null(kind.FindAction("items-queued", Form.Value));
-        Assert.NotNull(kind.FindAction("input-fill", Form.Value));
+        Assert.Null(kind.FindAction("producing", Nature.Value));
+        Assert.Null(kind.FindAction("make", Nature.Native));
+        Assert.Null(kind.FindAction("items-queued", Nature.Value));
+        Assert.NotNull(kind.FindAction("input-fill", Nature.Value));
     }
 
     /// <summary>
@@ -376,17 +376,17 @@ public class ProductionTests
     {
         var ship = new Ship();
         var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
-        var toggle = assembler.FindAction("UseConveyor", Form.Action)!;
+        var toggle = assembler.FindAction("UseConveyor", Nature.Action)!;
         Assert.True(toggle.Hidden);
-        Assert.True(assembler.FindAction("UseConveyor", Form.Value)!.Flips);
+        Assert.True(assembler.FindAction("UseConveyor", Nature.Value)!.Flips);
         Assert.Equal("toggle automatic push and pull", toggle.Text);
-        Assert.Equal("Automatic push and pull", assembler.FindAction("UseConveyor", Form.Value)!.Named);
+        Assert.Equal("Automatic push and pull", assembler.FindAction("UseConveyor", Nature.Value)!.Named);
 
         var generator = new Plain(2, "Generator", new MyObjectBuilderType(typeof(MyObjectBuilder_OxygenGenerator)),
             "OxygenGenerator", "O2/H2 Generator");
         generator.Offering("UseConveyor", "Use Conveyor System On/Off");
         ship.Weld(generator);
-        Assert.True(ship.Rig.Entity(generator.Id).Kind.FindAction("UseConveyor", Form.Action)!.Hidden);
+        Assert.True(ship.Rig.Entity(generator.Id).Kind.FindAction("UseConveyor", Nature.Action)!.Hidden);
     }
 
     /// <summary>
@@ -433,7 +433,7 @@ public class ProductionTests
         assembler.Producing = producing;
         assembler.Enabled = on;
 
-        var value = ship.Rig.Entity(assembler.Id).Kind.FindAction("stuck", Form.Value)!;
+        var value = ship.Rig.Entity(assembler.Id).Kind.FindAction("stuck", Nature.Value)!;
         Assert.Equal(Literal.Of(stuck), value.Being.Gauge(assembler.Block, new Literal[0], null).Read());
     }
 
@@ -445,7 +445,7 @@ public class ProductionTests
         var assembler = ship.Weld(new Factory(1, "Assembler", false));
         assembler.InputFill = 0.4f;
 
-        var fill = ship.Rig.Entity(assembler.Id).Kind.FindAction("input-fill", Form.Value)!;
+        var fill = ship.Rig.Entity(assembler.Id).Kind.FindAction("input-fill", Nature.Value)!;
         Assert.Equal(40.0, fill.Being.Gauge(assembler.Block, new Literal[0], null).Read().Real, 3);
     }
 
@@ -492,7 +492,7 @@ public class ProductionTests
     {
         var ship = new Ship();
         var drill = ship.Weld(new Bore(1, "Drill"));
-        var mode = ship.Rig.Entity(drill.Id).Kind.FindAction("mode", Form.Value)!;
+        var mode = ship.Rig.Entity(drill.Id).Kind.FindAction("mode", Nature.Value)!;
 
         Assert.Equal(new[] { "mining", "clearing-terrain" }, mode.Being.Names);
         Assert.Equal(Literal.Of(0L), mode.Being.Gauge(drill.Block, new Literal[0], null).Read());
@@ -506,16 +506,16 @@ public class ProductionTests
     {
         var ship = new Ship();
         var store = ship.Rig.Entity(ship.Weld(new Shop(1, "Store")).Id).Kind;
-        var toggle = store.FindAction("AnyoneCanUse", Form.Action)!;
+        var toggle = store.FindAction("AnyoneCanUse", Nature.Action)!;
         Assert.True(toggle.Hidden);
-        Assert.True(store.FindAction("AnyoneCanUse", Form.Value)!.Flips);
+        Assert.True(store.FindAction("AnyoneCanUse", Nature.Value)!.Flips);
         Assert.Equal("toggle anyone can use", toggle.Text);
 
         var panel = new Plain(2, "Panel", new MyObjectBuilderType(typeof(MyObjectBuilder_ButtonPanel)), "ButtonPanelLarge",
             "Button Panel");
         panel.Offering("AnyoneCanUse", "Anyone Can Use On/Off");
         ship.Weld(panel);
-        Assert.True(ship.Rig.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Form.Action)!.Hidden);
+        Assert.True(ship.Rig.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Nature.Action)!.Hidden);
     }
 
     /// <summary>A projector finishes building as its blocks left come to nothing, looked for on its cadence.</summary>
@@ -570,15 +570,15 @@ public class ProductionTests
     {
         var ship = new Ship();
         var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
-        Vetted(assembler, Form.Native, "make", "clear-the-queue");
-        Vetted(assembler, Form.Value, "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
+        Vetted(assembler, Nature.Native, "make", "clear-the-queue");
+        Vetted(assembler, Nature.Value, "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
             "input-fill", "output-fill", "amount-in-input", "amount-in-output", "slaveMode", "UseConveyor");
-        Vetted(assembler, Form.Action, "slaveMode", "UseConveyor");
+        Vetted(assembler, Nature.Action, "slaveMode", "UseConveyor");
 
         var refinery = ship.Rig.Entity(ship.Weld(new Factory(2, "Refinery", true)).Id).Kind;
-        Vetted(refinery, Form.Value, "refining", "stuck", "input-fill", "output-fill", "amount-in-input", "amount-in-output",
+        Vetted(refinery, Nature.Value, "refining", "stuck", "input-fill", "output-fill", "amount-in-input", "amount-in-output",
             "UseConveyor");
-        Vetted(refinery, Form.Action, "UseConveyor");
+        Vetted(refinery, Nature.Action, "UseConveyor");
     }
 
     /// <summary>
@@ -592,9 +592,9 @@ public class ProductionTests
         var sorter = ship.Rig.Entity(ship.Weld(new Gate(1, "Sorter")).Id).Kind;
 
         Assert.Equal(new[] { Plan.SorterList }, sorter.Planned);
-        Vetted(sorter, Form.Value, "blacklistWhitelist", "DrainAll");
-        Vetted(sorter, Form.Action, "DrainAll");
-        Unvetted(sorter, Form.Action, "DrainAll_On", "DrainAll_Off");
+        Vetted(sorter, Nature.Value, "blacklistWhitelist", "DrainAll");
+        Vetted(sorter, Nature.Action, "DrainAll");
+        Unvetted(sorter, Nature.Action, "DrainAll_On", "DrainAll_Off");
     }
 
     /// <summary>
@@ -607,10 +607,10 @@ public class ProductionTests
         var ship = new Ship();
         var drill = ship.Rig.Entity(ship.Weld(new Bore(1, "Drill")).Id).Kind;
 
-        Vetted(drill, Form.Value, "drilling", "mode");
-        Vetted(drill, Form.Action, "TerrainClearingMode");
-        Unvetted(drill, Form.Value, "TerrainClearingMode");
-        Unvetted(drill, Form.Action, "TerrainClearingMode_On", "TerrainClearingMode_Off");
+        Vetted(drill, Nature.Value, "drilling", "mode");
+        Vetted(drill, Nature.Action, "TerrainClearingMode");
+        Unvetted(drill, Nature.Value, "TerrainClearingMode");
+        Unvetted(drill, Nature.Action, "TerrainClearingMode_On", "TerrainClearingMode_Off");
     }
 
     /// <summary>A projector's members are vetted, and the game's increase and decrease steps beside its placement are not.</summary>
@@ -620,13 +620,13 @@ public class ProductionTests
         var ship = new Ship();
         var projector = ship.Rig.Entity(ship.Weld(new Printer(1, "Printer")).Id).Kind;
 
-        Vetted(projector, Form.Native, "remove-the-blueprint");
-        Vetted(projector, Form.Value, "projecting", "blocks-left", "armor-blocks-left", "total-blocks", "blocks-ready-to-weld",
+        Vetted(projector, Nature.Native, "remove-the-blueprint");
+        Vetted(projector, Nature.Value, "projecting", "blocks-left", "armor-blocks-left", "total-blocks", "blocks-ready-to-weld",
             "KeepProjection", "X", "Y", "Z", "RotX", "RotY", "RotZ", "Scale", "ShowOnlyBuildable", "MarkMissingBlocks",
             "MarkUnfinishedBlocks");
-        Vetted(projector, Form.Action, "KeepProjection");
+        Vetted(projector, Nature.Action, "KeepProjection");
         foreach (var placed in new[] { "X", "Y", "Z", "RotX", "RotY", "RotZ", "Scale" })
-            Unvetted(projector, Form.Action, "Increase" + placed, "Decrease" + placed);
+            Unvetted(projector, Nature.Action, "Increase" + placed, "Decrease" + placed);
     }
 
     /// <summary>
@@ -638,24 +638,24 @@ public class ProductionTests
     {
         var ship = new Ship();
         var store = ship.Rig.Entity(ship.Weld(new Shop(1, "Store")).Id).Kind;
-        Vetted(store, Form.Value, "AnyoneCanUse", "Searchable");
-        Vetted(store, Form.Action, "AnyoneCanUse", "Searchable");
+        Vetted(store, Nature.Value, "AnyoneCanUse", "Searchable");
+        Vetted(store, Nature.Action, "AnyoneCanUse", "Searchable");
 
         var machine = new Stood<IMyVendingMachine>(2, "Machine", typeof(MyObjectBuilder_VendingMachine), "VendingMachine",
             "Vending Machine");
         machine.Offering("AnyoneCanUse", "Anyone Can Use On/Off").Offering("Searchable", "Searchable On/Off");
         machine.Carrying("AnyoneCanUse", "Anyone Can Use", ValueKind.Flag).Carrying("Searchable", "Searchable", ValueKind.Flag);
         var vending = ship.Rig.Entity(ship.Weld(machine).Id).Kind;
-        Vetted(vending, Form.Native, "show-next-item", "show-previous-item");
-        Vetted(vending, Form.Value, "AnyoneCanUse", "Searchable");
-        Vetted(vending, Form.Action, "AnyoneCanUse", "Searchable");
+        Vetted(vending, Nature.Native, "show-next-item", "show-previous-item");
+        Vetted(vending, Nature.Value, "AnyoneCanUse", "Searchable");
+        Vetted(vending, Nature.Action, "AnyoneCanUse", "Searchable");
 
         var desk = new Plain(3, "Contracts", new MyObjectBuilderType(typeof(MyObjectBuilder_ContractBlock)), "ContractBlock",
             "Contracts");
         desk.Offering("AnyoneCanUse", "Anyone Can Use On/Off").Carrying("AnyoneCanUse", "Anyone Can Use", ValueKind.Flag);
         var contracts = ship.Rig.Entity(ship.Weld(desk).Id).Kind;
-        Vetted(contracts, Form.Value, "AnyoneCanUse");
-        Vetted(contracts, Form.Action, "AnyoneCanUse");
+        Vetted(contracts, Nature.Value, "AnyoneCanUse");
+        Vetted(contracts, Nature.Action, "AnyoneCanUse");
     }
 
     /// <summary>
@@ -677,15 +677,15 @@ public class ProductionTests
         {
             tool.Offering("UseConveyor", "Use Conveyor System On/Off").Carrying("UseConveyor", "Use Conveyor System", ValueKind.Flag);
             var kind = ship.Rig.Entity(ship.Weld(tool).Id).Kind;
-            Vetted(kind, Form.Value, "UseConveyor");
-            Vetted(kind, Form.Action, "UseConveyor");
+            Vetted(kind, Nature.Value, "UseConveyor");
+            Vetted(kind, Nature.Action, "UseConveyor");
             if (!(tool.Block is IMyCollector))
-                Vetted(kind, Form.Value, "run-by-a-pilot");
+                Vetted(kind, Nature.Value, "run-by-a-pilot");
         }
 
         var module = ship.Weld(new Stood<IMyUpgradeModule>(4, "Module", typeof(MyObjectBuilder_UpgradeModule), "LargeProductivityModule",
             "Productivity Module"));
-        Vetted(ship.Rig.Entity(module.Id).Kind, Form.Value, "connections", "upgrade-count");
+        Vetted(ship.Rig.Entity(module.Id).Kind, Nature.Value, "connections", "upgrade-count");
     }
 
     /// <summary>An assembler's mode is set by a step, to making or taking apart, and to nothing else.</summary>
@@ -748,7 +748,7 @@ public class ProductionTests
     }
 
     /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" />, and vetted.</summary>
-    static void Vetted(EntityKind kind, Form form, params string[] ids)
+    static void Vetted(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -759,7 +759,7 @@ public class ProductionTests
     }
 
     /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" />, and not vetted.</summary>
-    static void Unvetted(EntityKind kind, Form form, params string[] ids)
+    static void Unvetted(EntityKind kind, Nature form, params string[] ids)
     {
         foreach (var id in ids)
         {

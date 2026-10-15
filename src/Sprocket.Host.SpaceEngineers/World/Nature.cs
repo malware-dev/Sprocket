@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// switch's value and the game's act that flips it share one, and nothing stops one of Sprocket's
     /// own words from being spelled like one of the game's.
     /// </remarks>
-    public enum Form
+    public enum Nature
     {
         /// <summary>One of Sprocket's own actions, written qualified by what adds it: <c>ext.close</c>.</summary>
         Native,

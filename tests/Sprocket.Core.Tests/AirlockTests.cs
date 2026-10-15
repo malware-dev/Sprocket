@@ -136,7 +136,7 @@ public class AirlockTests
     {
         var ship = new Rigged();
         var vent = ship.Vent(1, "Vent");
-        var action = ship.Entity(vent.Id).Kind.FindAction(Blocks.Vent.Depressurize, Form.Native)!;
+        var action = ship.Entity(vent.Id).Kind.FindAction(Blocks.Vent.Depressurize, Nature.Native)!;
 
         var fields = new List<Field>();
         action.Fields(fields);
@@ -1005,7 +1005,7 @@ public class AirlockTests
         var system = a.Automation.Systems[0];
 
         var cycle = a.Automation.AddSequence(system);
-        var empty = new Act("Depressurize") { Form = Form.Value };
+        var empty = new Act("Depressurize") { Form = Nature.Value };
         empty.Targets.Add(a.Ref(a.Seen(a.Vent)));
         empty.Arguments.Add(Literal.Of(true));
         cycle.Steps.Add(empty);
@@ -1029,7 +1029,7 @@ public class AirlockTests
         var system = a.Automation.Systems[0];
 
         var cycle = a.Automation.AddSequence(system);
-        var radius = new Act("Radius") { Form = Form.Value };
+        var radius = new Act("Radius") { Form = Nature.Value };
         radius.Targets.Add(a.Ref(a.Seen(lamp)));
         radius.Arguments.Add(Literal.Of(4.5));
         cycle.Steps.Add(radius);
@@ -1883,15 +1883,15 @@ public class PropertyTests
         var ship = new Rigged();
         var door = ship.Door(1, "Door");
         door.Carrying("Open", "Open", ValueKind.Flag);
-        Assert.True(ship.Entity(door.Id).Kind.FindAction("Open", Form.Value)!.Hidden);
+        Assert.True(ship.Entity(door.Id).Kind.FindAction("Open", Nature.Value)!.Hidden);
 
         var kind = ship.Entity(ship.Vent(2, "Vent").Id).Kind;
-        var depressurizing = kind.FindAction("Depressurize", Form.Value)!;
+        var depressurizing = kind.FindAction("Depressurize", Nature.Value)!;
         Assert.False(depressurizing.Hidden);
         Assert.Equal("Depressurizing", depressurizing.Named);
 
         // Flipping it is the third choice on its own switch, so the act that flips it is kept to the terminal view.
-        var toggle = kind.FindAction("Depressurize", Form.Action)!;
+        var toggle = kind.FindAction("Depressurize", Nature.Action)!;
         Assert.True(toggle.Hidden);
         Assert.True(depressurizing.Flips);
         Assert.Equal("toggle depressurizing", toggle.Text);

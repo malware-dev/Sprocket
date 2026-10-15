@@ -167,7 +167,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < _offered.Count; i++)
             {
                 Offer offer = _offered[i];
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Action) != null || kind.Lacks(offer.Id))
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Nature.Action) != null || kind.Lacks(offer.Id))
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -240,7 +240,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Offer offer = _offered[i];
 
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Form.Value) != null || kind.Lacks(offer.Id))
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Nature.Value) != null || kind.Lacks(offer.Id))
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -390,7 +390,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Form != Form.Value || !one.Sets || !one.Vetted || one.Hidden)
+                if (one.Form != Nature.Value || !one.Sets || !one.Vetted || one.Hidden)
                     continue;
 
                 var toggleId = one.GamePropertyId ?? kind.Flipper(one.Id);
@@ -402,7 +402,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (fields.Count != 1 || !Switch(fields[0]))
                     continue;
 
-                var toggle = kind.FindAction(toggleId, Form.Action);
+                var toggle = kind.FindAction(toggleId, Nature.Action);
                 if (toggle == null || toggle.Hidden || !toggle.Vetted)
                     continue;
 

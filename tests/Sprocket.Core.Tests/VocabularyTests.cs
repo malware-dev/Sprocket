@@ -322,7 +322,7 @@ public class VocabularyTests
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var set = new Act("level") { Form = Form.Value, Provider = BlockKinds.Own };
+        var set = new Act("level") { Form = Nature.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Left));
         set.Arguments.Add(Literal.Of(3.0));
         cycle.Steps.Add(set);
@@ -352,7 +352,7 @@ public class VocabularyTests
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
-        var set = new Act(value) { Form = Form.Value, Provider = BlockKinds.Own };
+        var set = new Act(value) { Form = Nature.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Door));
         set.Arguments.Add(Literal.Name(name));
         cycle.Steps.Add(set);
@@ -376,7 +376,7 @@ public class VocabularyTests
             .Looked("A test value.").Between("0", "10");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
-        var set = new Act("level") { Form = Form.Value, Provider = BlockKinds.Own };
+        var set = new Act("level") { Form = Nature.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Left));
         set.Arguments.Add(Literal.Of(given));
         cycle.Steps.Add(set);
@@ -414,7 +414,7 @@ public class VocabularyTests
         Assert.Equal(written, ProgramText.Save(program, new Values()));
         var set = Assert.IsType<Act>(program.Systems[0].Sequences[0].Steps[0]);
         Assert.Equal(BlockKinds.Own, set.Provider);
-        Assert.Equal(Form.Value, set.Form);
+        Assert.Equal(Nature.Value, set.Form);
     }
 
     /// <summary>
@@ -434,7 +434,7 @@ public class VocabularyTests
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
         var vents = member == "depressurize";
-        var step = new Act(member) { Form = vents ? Form.Native : Form.Value };
+        var step = new Act(member) { Form = vents ? Nature.Native : Nature.Value };
         step.Targets.Add(vents ? ship.Name(vent) : ship.Name(ship.Left));
         step.Arguments.Add(Literal.Of(given));
         cycle.Steps.Add(step);
@@ -654,7 +654,7 @@ public class VocabularyTests
         var ship = new Ship();
         var vent = ship.Rig.Vent(6, "Vent");
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var act = new Act(Blocks.Vent.Depressurize) { Form = Form.Native };
+        var act = new Act(Blocks.Vent.Depressurize) { Form = Nature.Native };
         act.Targets.Add(ship.Name(vent));
         for (var i = 0; i < given; i++)
             act.Arguments.Add(Literal.Of(Blocks.Vent.Hold));
@@ -673,7 +673,7 @@ public class VocabularyTests
     {
         var ship = new Ship();
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var act = new Act("close") { Form = Form.Native };
+        var act = new Act("close") { Form = Nature.Native };
         act.Targets.Add(ship.Name(ship.Door));
         act.Arguments.Add(Literal.Of(1L));
         cycle.Steps.Add(act);

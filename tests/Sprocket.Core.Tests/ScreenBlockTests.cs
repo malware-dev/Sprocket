@@ -37,7 +37,7 @@ public class ScreenBlockTests
         panel.App = "TSS_Weather";
 
         Assert.Equal("DOCKED", Ran.Read(ship, panel, TextPanel.Shown).Text);
-        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, Form.Value)!.Being!;
+        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, Nature.Value)!.Being!;
         Assert.Equal(new[] { "TSS_ClockAnalog", "TSS_Weather" }, app.Names);
         Assert.True(app.Is(Literal.Name("TSS_Weather")).Holds(panel.Block, null!));
     }
@@ -55,10 +55,10 @@ public class ScreenBlockTests
             .Offering("PreserveAspectRatio", "Preserve aspect ratio On/Off");
         var kind = ship.Entity(panel.Id).Kind;
 
-        Assert.True(kind.FindAction("Title", Form.Value)!.Hidden);
-        Assert.Equal("text color", kind.FindAction("FontColor", Form.Value)!.Text);
-        Assert.Equal("app color", kind.FindAction("ScriptForegroundColor", Form.Value)!.Text);
-        Assert.Equal("preserve aspect ratio", kind.FindAction("PreserveAspectRatio", Form.Value)!.Text);
+        Assert.True(kind.FindAction("Title", Nature.Value)!.Hidden);
+        Assert.Equal("text color", kind.FindAction("FontColor", Nature.Value)!.Text);
+        Assert.Equal("app color", kind.FindAction("ScriptForegroundColor", Nature.Value)!.Text);
+        Assert.Equal("preserve aspect ratio", kind.FindAction("PreserveAspectRatio", Nature.Value)!.Text);
     }
 
     /// <summary>
@@ -88,21 +88,21 @@ public class ScreenBlockTests
             .Offering("IncreaseChangeIntervalSlider", "Increase Image change interval");
         var kind = ship.Entity(panel.Id).Kind;
 
-        Assert.True(kind.FindAction(TextPanel.ShowImage, Form.Native)!.Vetted);
-        Assert.True(kind.FindAction(TextPanel.Shown, Form.Value)!.Vetted);
-        Assert.True(kind.FindAction(TextPanel.App, Form.Value)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.ShowImage, Nature.Native)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.Shown, Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.App, Nature.Value)!.Vetted);
         foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio"))
-            Assert.True(kind.FindAction(id, Form.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
 
-        Assert.False(kind.FindAction("PreserveAspectRatio", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("PreserveAspectRatio", Nature.Action)!.Vetted);
 
-        Assert.False(kind.FindAction("Title", Form.Value)!.Vetted);
+        Assert.False(kind.FindAction("Title", Nature.Value)!.Vetted);
         foreach (var id in new[]
                  {
                      "PreserveAspectRatio_On", "PreserveAspectRatio_Off", "IncreaseFontSize", "DecreaseTextPaddingSlider",
                      "IncreaseChangeIntervalSlider"
                  })
-            Assert.False(kind.FindAction(id, Form.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
     }
 
     /// <summary>A step chooses the app a panel runs, and leaves what the panel shows as it was.</summary>
@@ -140,9 +140,9 @@ public class ScreenBlockTests
         var faces = ship.Rig.EmotionController(1, "Face");
         var kind = ship.Entity(faces.Id).Kind;
 
-        Assert.True(kind.FindAction(EmotionController.ShowFace, Form.Native)!.Vetted);
-        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Happy.dds", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Form.Action)!.Vetted);
+        Assert.True(kind.FindAction(EmotionController.ShowFace, Nature.Native)!.Vetted);
+        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Happy.dds", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Nature.Action)!.Vetted);
     }
 
     /// <summary>
@@ -162,14 +162,14 @@ public class ScreenBlockTests
             .Offering("View", "View");
         var kind = ship.Entity(camera.Id).Kind;
 
-        Assert.True(kind.FindAction(CameraBlock.InUse, Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("EnablePanning", Form.Value)!.Vetted);
-        Assert.True(kind.FindAction("EnablePanning", Form.Action)!.Vetted);
-        Assert.True(kind.FindAction("ViewRotation", Form.Value)!.Vetted);
+        Assert.True(kind.FindAction(CameraBlock.InUse, Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("EnablePanning", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("EnablePanning", Nature.Action)!.Vetted);
+        Assert.True(kind.FindAction("ViewRotation", Nature.Value)!.Vetted);
 
-        Assert.False(kind.FindAction("EnablePanning_On", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("EnablePanning_Off", Form.Action)!.Vetted);
-        Assert.False(kind.FindAction("View", Form.Action)!.Vetted);
+        Assert.False(kind.FindAction("EnablePanning_On", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("EnablePanning_Off", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("View", Nature.Action)!.Vetted);
     }
 
     /// <summary>Showing a face offers every face the block has by its own name, and runs the game's action for the one chosen.</summary>
@@ -181,11 +181,11 @@ public class ScreenBlockTests
         var kind = ship.Entity(faces.Id).Kind;
 
         var fields = new List<Field>();
-        kind.FindAction(EmotionController.ShowFace, Form.Native)!.Fields(fields);
+        kind.FindAction(EmotionController.ShowFace, Nature.Native)!.Fields(fields);
         var face = Assert.Single(fields);
         Assert.Equal(new[] { "Happy", "Sad" }, face.Words);
-        Assert.True(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Form.Action)!.Hidden);
-        Assert.False(kind.FindAction("Blink", Form.Action)!.Hidden);
+        Assert.True(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Nature.Action)!.Hidden);
+        Assert.False(kind.FindAction("Blink", Nature.Action)!.Hidden);
 
         Ran.Step(ship, faces, EmotionController.ShowFace, Literal.Of(@"Textures\Models\Emotes\Sad.dds"));
 
@@ -205,7 +205,7 @@ public class ScreenBlockTests
         Assert.Equal(Literal.Of(true), Ran.Read(ship, camera, CameraBlock.InUse));
 
         var kind = ship.Entity(camera.Id).Kind;
-        Assert.Equal("panning", kind.FindAction("EnablePanning", Form.Value)!.Text);
-        Assert.Equal("toggle panning", kind.FindAction("EnablePanning", Form.Action)!.Text);
+        Assert.Equal("panning", kind.FindAction("EnablePanning", Nature.Value)!.Text);
+        Assert.Equal("toggle panning", kind.FindAction("EnablePanning", Nature.Action)!.Text);
     }
 }

@@ -1299,7 +1299,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var acted = compiled.Acts[i];
                 acted.Done = false;
 
-                if (act.Form != Form.Native)
+                if (act.Form != Nature.Native)
                 {
                     if (acted.Order != null)
                         acted.Order.Give();
@@ -1321,7 +1321,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         SequenceFault Refused(int step)
         {
             var act = (Act)_sequence.Steps[step];
-            if (!act.HasAction || act.Form != Form.Native)
+            if (!act.HasAction || act.Form != Nature.Native)
                 return SequenceFault.None;
 
             var compiled = Compile(step);

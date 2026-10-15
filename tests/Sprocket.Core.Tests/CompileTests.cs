@@ -150,7 +150,7 @@ public class CompileTests
         var ship = new Rigged();
         var block = ship.Rig.Panel(1, "Mover").Offering("SetAndMove", "Set and move",
             Primitive.String, Primitive.String);
-        var action = ship.Entity(block.Id).Kind.FindAction("SetAndMove", Form.Action)!;
+        var action = ship.Entity(block.Id).Kind.FindAction("SetAndMove", Nature.Action)!;
 
         var converted = new List<Literal>();
         Assert.True(action.Converts([Literal.Of(4L), Literal.Of(0.5)], converted));
@@ -167,7 +167,7 @@ public class CompileTests
     {
         var ship = new Rigged();
         var block = ship.Rig.Panel(1, "Brain").Offering("Run", "Run", Primitive.String);
-        var action = ship.Entity(block.Id).Kind.FindAction("Run", Form.Action)!;
+        var action = ship.Entity(block.Id).Kind.FindAction("Run", Nature.Action)!;
 
         Assert.True(action.Takes([Literal.Of("doors open")]));
         Assert.False(action.Takes([Literal.Of(5L)]));
@@ -179,7 +179,7 @@ public class CompileTests
     {
         var ship = new Rigged();
         var block = ship.Rig.Panel(1, "Oddment").Offering("Twiddle", "Twiddle", 1);
-        var action = ship.Entity(block.Id).Kind.FindAction("Twiddle", Form.Action)!;
+        var action = ship.Entity(block.Id).Kind.FindAction("Twiddle", Nature.Action)!;
 
         var converted = new List<Literal>();
         Assert.True(action.Converts([Literal.Of(5L)], converted));
@@ -215,7 +215,7 @@ public class CompileTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var steer = new Act("Steer") { Form = Form.Action };
+        var steer = new Act("Steer") { Form = Nature.Action };
         steer.Targets.Add(automation.Declare(ship.World, ship.Entity(remote.Id)).Name);
         steer.Arguments.Add(Literal.Of(3L));
         steer.Arguments.Add(Literal.Of(2L));
@@ -242,7 +242,7 @@ public class CompileTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var steer = new Act("Steer") { Form = Form.Action };
+        var steer = new Act("Steer") { Form = Nature.Action };
         steer.Targets.Add(automation.Declare(ship.World, ship.Entity(remote.Id)).Name);
         steer.Arguments.Add(Literal.Of(300L));
         sequence.Steps.Add(steer);
@@ -265,7 +265,7 @@ public class CompileTests
         var ship = new Rigged();
         var remote = ship.Rig.Panel(1, "Remote").Offering("Steer", "Steer", Primitive.Byte);
         var fields = new List<Field>();
-        ship.Entity(remote.Id).Kind.FindAction("Steer", Form.Action)!.Fields(fields);
+        ship.Entity(remote.Id).Kind.FindAction("Steer", Nature.Action)!.Fields(fields);
 
         var field = Assert.Single(fields);
         Assert.Equal(Entry.Whole, field.Entry);

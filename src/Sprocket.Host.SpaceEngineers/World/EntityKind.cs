@@ -127,7 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public EntityKind WithChange(string id, string text, string value, Literal becomes)
         {
-            var changed = FindAction(value, Form.Value);
+            var changed = FindAction(value, Nature.Value);
             if (changed == null || changed.Being == null)
                 throw new ArgumentException("The signal " + id + " is a change in " + value + ", which is no value of Sprocket's own declared before it.");
 
@@ -497,7 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// it are both called <c>OnOff</c>, and a program tells them apart by writing one as a
         /// <c>set</c>.
         /// </remarks>
-        public EntityAction FindAction(string actionId, Form form)
+        public EntityAction FindAction(string actionId, Nature form)
         {
             for (var i = 0; i < _actions.Count; i++)
             {
