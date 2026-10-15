@@ -63,7 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var named = new Label { Style = Styles.ListWord, Text = word };
                 var row = new HStack
                 {
-                    Style = Styles.ListRow,
+                    Style = Styles.MenuRow,
                     Command = new Relay(delegate { Choose(_words[at]); }),
                     Children = { named }
                 };
@@ -74,7 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             }
 
             var scroll = new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = rows };
-            var list = new Popup { Style = Styles.List, Anchor = this, Flush = true, Content = scroll };
+            // Hung as every menu is, and never narrower than the line it drops from.
+            var list = new Popup { Style = Styles.Menu, Anchor = this, Flush = true, Content = scroll };
 
             Command = new Relay(delegate
             {
@@ -84,9 +85,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     return;
                 }
 
+                // The word it holds is marked as a menu marks the answer Enter takes.
+                var given = _words.IndexOf(_text);
+                for (var i = 0; i < _rows.Count; i++)
+                {
+                    _rows[i].Style = i == given ? Styles.MenuRowTaken : Styles.MenuRow;
+                    _named[i].Style = i == given ? Styles.ListWordTaken : Styles.ListWord;
+                }
+
                 list.Open();
 
-                var given = _words.IndexOf(_text);
                 if (given >= 0)
                     scroll.BringIntoView(_rows[given]);
             });

@@ -740,22 +740,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
-        /// <summary>A list hanging open under what opened it.</summary>
-        public static readonly WindowStyle List = new WindowStyle
-        {
-            Base = { Background = Palette.Well, Edge = Palette.Line, Padding = new Thickness(4f), Shadow = ShortShadow }
-        };
-
         /// <summary>Controls hanging from what opened them, on the ground a form's controls stand on, so they look as they do in a form.</summary>
         public static readonly WindowStyle Panel = new WindowStyle
         {
             Base = { Background = Palette.Panel, Edge = Palette.Line, Padding = new Thickness(12f), Shadow = ShortShadow }
         };
 
-        /// <summary>A menu hanging open from what opened it, on the highlight tone.</summary>
+        /// <summary>A menu or a list hanging open from what opened it, on the tone every hanging thing shares: the one a form's controls stand on.</summary>
         public static readonly WindowStyle Menu = new WindowStyle
         {
-            Base = { Background = Palette.PanelHot, Edge = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
+            Base = { Background = Palette.Panel, Edge = Palette.Line, Padding = new Thickness(8f), Shadow = ShortShadow }
         };
 
         /// <summary>One entry of a menu, lit a step past the menu's own tone under the pointer.</summary>
@@ -777,13 +771,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base = { Background = Palette.Accent },
             Hot = { Background = Palette.Ink }
-        };
-
-        /// <summary>One entry of a list hanging open, lit under the pointer.</summary>
-        public static readonly ElementStyle ListRow = new ElementStyle
-        {
-            Base = { Padding = new Thickness(12f, 8f) },
-            Hot = { Background = Palette.Panel }
         };
 
         /// <summary>The words of an entry in a list hanging open.</summary>
