@@ -175,9 +175,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _leadWaits.IsVisible = Kind == StepKind.Run || Kind == StepKind.Await;
             }
 
-            _leadWaits.HaloTint = MarksLit || Kind == StepKind.Await && ClockLit ? Glow : Palette.None;
+            // A paused step waits for nothing, so its mark is quieter and is never lit.
+            _leadWaits.Style = IsOff ? Styles.WaitsPaused : Styles.Waits;
+            _leadWaits.HaloTint = !IsOff && (MarksLit || Kind == StepKind.Await && ClockLit) ? Glow : Palette.None;
             for (var i = 0; i < _chips.Count; i++)
-                _chips[i].Glow = MarksLit ? Glow : Palette.None;
+                _chips[i].Glow = MarksLit && !IsOff ? Glow : Palette.None;
 
             _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.MemberWaits : Kind == StepKind.Await ? texts.SequenceAwaitRow : null);
             Hang(texts);
@@ -213,6 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             {
                 _joins[i].Style = words;
                 _chips[i].Style = parts;
+                _chips[i].Paused = IsOff;
             }
 
             // Quiet rather than gone, so a locked row is the same row with nothing on it to press. An otherwise if is carried to
@@ -260,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _waitWords.Text = waits ? texts.SequenceWaitForCompletion : texts.SequenceDoNotWait;
             _waitWords.Style = waits ? Styles.WaitWords : Styles.WaitWordsOff;
             _clock.Style = waits ? Styles.WaitOn : Styles.WaitOff;
-            _clock.HaloTint = ClockLit ? Glow : Palette.None;
+            _clock.HaloTint = ClockLit && !IsOff ? Glow : Palette.None;
             _underhang.Command = Toggles;
             _underhang.Tip = Tip.For(_underhang.Tip, Toggles == null ? Why() : waits ? texts.SequenceWaitsHere : texts.SequenceCarriesOn);
         }

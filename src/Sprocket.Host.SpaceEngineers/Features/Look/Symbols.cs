@@ -105,6 +105,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A clock: a wait for what is running.</summary>
         public const string Awaited = "k";
 
+        /// <summary>The outline round <see cref="Lasting" />, lit round it while it is tied to what is under the pointer.</summary>
+        public const string LastingOutline = "W";
+
+        /// <summary>The outline round <see cref="Awaited" />, lit round it while it is tied to what is under the pointer.</summary>
+        public const string AwaitedOutline = "K";
+
         /// <summary>"=?": something a block is asked about, what one of its values is.</summary>
         public const string Value = "l";
 
@@ -124,5 +130,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         ///     declared over it in <c>Content/Data/TransparentMaterials.sbc</c>.
         /// </remarks>
         public static readonly MyStringId Hue = MyStringId.GetOrCompute("Sprocket_Hue");
+
+        /// <summary>The outline lit round <paramref name="mark" />, or null for a mark that is never lit.</summary>
+        public static string OutlineOf(string mark)
+        {
+            return mark == Lasting ? LastingOutline : mark == Awaited ? AwaitedOutline : null;
+        }
     }
 }

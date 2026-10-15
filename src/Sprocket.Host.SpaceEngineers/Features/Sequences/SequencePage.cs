@@ -459,7 +459,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// Works out which row waits for each step that takes time, and from which row each wait covers: every step that takes time
         /// since the wait before, down to the wait. A wait is a row of its own, or the underhang of the step it follows.
         /// </summary>
-        /// <remarks>A step that takes time with no wait below it is covered by none, which is how the sequence leaves it to finish on its own.</remarks>
+        /// <remarks>
+        /// A step that takes time with no wait below it is covered by none, which is how the sequence leaves it to finish on its own.
+        /// A paused step is read as the run reads it, as though it were not there: a paused wait covers nothing and leaves its steps
+        /// to the next wait, and a paused step that takes time is not waited for.
+        /// </remarks>
         void Covers()
         {
             _waiter.Clear();
@@ -470,7 +474,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _waiter.Add(-1);
                 _covered.Add(-1);
                 var step = _keys[i] as Step;
-                _lasting.Add(step != null && Lasting(step));
+                _lasting.Add(step != null && Lasting(step) && !_rows[_keys[i]].IsOff);
             }
 
             _hot = -1;
@@ -485,7 +489,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
                 // Where waits are rows, the wait is the row; otherwise it is the step's own, after it.
                 var index = _shown[i];
-                var waits = AwaitRows ? _keys[i] is Await : index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await;
+                var waits = AwaitRows
+                    ? _keys[i] is Await && !_rows[_keys[i]].IsOff
+                    : index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await && !_sequence.Steps[index + 1].IsOff;
                 if (!waits || open < 0)
                     continue;
 
@@ -509,7 +515,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var hot = -1;
             var onWait = false;
-            for (var i = 0; i < _keys.Count && i < _waiter.Count; i++)
+
+            // Nothing is lit while a step is carried: the pointer passing over rows on its way is not pointing at them.
+            for (var i = 0; !_steps.IsCarrying && i < _keys.Count && i < _waiter.Count; i++)
             {
                 var row = _rows[_keys[i]];
                 if (row.UnderhangHot || row.Kind == StepKind.Await && row.IsHot)

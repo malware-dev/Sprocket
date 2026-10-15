@@ -1,10 +1,14 @@
 using Lumel;
+using Lumel.Images;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
+using VRageMath;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -113,6 +117,67 @@ public class WaitingTrialTests
         rig.Tick();
         Assert.Equal(new[] { false, false, false, false, true }, rows.Select(row => row.ClockLit).ToArray());
         Assert.Equal(new[] { false, false, false, true, false }, rows.Select(row => row.MarksLit).ToArray());
+    }
+
+    /// <summary>A paused wait is read as though it were not there: its steps go to the next wait, and it lights nothing itself.</summary>
+    [Fact]
+    public void APausedWaitLeavesItsStepsToTheNext()
+    {
+        var rig = Airlock(out var sequence, Waiting.Step);
+        Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await(),
+            Open(rig, "Airlock Outer Door"), new Await());
+        sequence.Steps[2].IsOff = true;
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        var rows = rig.Editor.StepRows();
+        rows[4].IsHot = true;
+        rig.Tick();
+        Assert.Equal(new[] { true, true, false, true, false }, rows.Select(row => row.MarksLit).ToArray());
+
+        rows[4].IsHot = false;
+        rows[2].IsHot = true;
+        rig.Tick();
+        Assert.All(rows, row => Assert.False(row.MarksLit || row.ClockLit));
+    }
+
+    /// <summary>A paused step that takes time is not waited for, so the wait below it lights only the others.</summary>
+    [Fact]
+    public void APausedStepIsNotWaitedFor()
+    {
+        var rig = Airlock(out var sequence, Waiting.Step);
+        Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
+        sequence.Steps[1].IsOff = true;
+        rig.Editor.Program.Edited();
+        rig.Tick();
+
+        var rows = rig.Editor.StepRows();
+        rows[2].IsHot = true;
+        rig.Tick();
+        Assert.Equal(new[] { true, false, false }, rows.Select(row => row.MarksLit).ToArray());
+    }
+
+    /// <summary>Nothing is lit while a step is carried, whatever the pointer passes over.</summary>
+    [Fact]
+    public void NothingLightsWhileAStepIsCarried()
+    {
+        var rig = Airlock(out var sequence, Waiting.Step);
+        Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
+
+        var rows = rig.Editor.StepRows();
+        rows[0].Grip.OnPointerDown(Vector2.Zero, 1, false, false);
+        rows[2].IsHot = true;
+        rig.Tick();
+        Assert.All(rows, row => Assert.False(row.ClockLit || row.MarksLit));
+    }
+
+    /// <summary>A mark that can be waited for is lit by the outline of its own shape, and any other mark has none.</summary>
+    [Fact]
+    public void AMarkIsLitByItsOwnOutline()
+    {
+        Assert.Equal(Symbols.LastingOutline, Outline(Symbols.Lasting));
+        Assert.Equal(Symbols.AwaitedOutline, Outline(Symbols.Awaited));
+        Assert.Null(Outline(Symbols.Action));
     }
 
     /// <summary>A step that goes straight on still goes straight on once changed to another action that takes time.</summary>
@@ -303,6 +368,8 @@ public class WaitingTrialTests
         rig.Editor.Program.Edited();
         rig.Tick();
     }
+
+    static string? Outline(string mark) => ((Glyph)new MemberName { Mark = mark }.Children[0]).Halo;
 
     static Simulation Airlock(out Sequence sequence, Waiting waiting)
     {

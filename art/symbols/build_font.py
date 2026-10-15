@@ -774,7 +774,24 @@ GLYPHS = [
     # Hidden: "h" with the eye open, showing what is hidden, and "H" with it shut.
     ("h", "hidden shown", lambda: toolbar_eye()),
     ("H", "hidden hidden", lambda: toolbar_eye_shut()),
+    # The outlines lit round a mark, each the upper case of its mark's code where that is free.
+    ("K", "clock outline", lambda: clock()),
+    # "A" is the mark's own; "W" for what lights round something the sequence waits for.
+    ("W", "action that takes time outline", lambda: lasting()),
 ]
+
+
+# A glyph drawn as the outline round another's silhouette rather than as the shape itself, so a mark can be lit round its
+# own shape: drawn under the mark, at the mark's size divided by OUTLINE_SHRINK, it lies round it.
+OUTLINED = {"K", "W"}
+
+# How far an outline stands off its mark, and how thick its line is, in texels of the mark's own cell: a hair of dark
+# between them, and a line as heavy as the mark's own strokes.
+OUTLINE_GAP = 3
+OUTLINE_LINE = 5
+
+# How much smaller the mark is drawn in an outline's cell than in its own, leaving room round it for the outline.
+OUTLINE_SHRINK = 0.75
 
 
 # A glyph drawn on another's scale and frame rather than its own, by code, so the two replace each other in place.
@@ -882,7 +899,40 @@ def frame(make):
     return scale, box
 
 
-def render(glyph, framed=None):
+def silhouette(cover):
+    """The outline round a shape at the oversampled size: everything OUTLINE_GAP to OUTLINE_GAP + OUTLINE_LINE outside it, holes and all filled first."""
+    import numpy
+    from PIL import Image, ImageDraw
+
+    size = cover.width
+    whole = cover.point(lambda v: 255 if v >= 128 else 0)
+
+    # Its holes filled, so only the outside of the shape is outlined: whatever the outside cannot reach is inside it.
+    outside = whole.copy()
+    ImageDraw.floodfill(outside, (0, 0), 128)
+    filled = outside.point(lambda v: 0 if v == 128 else 255)
+
+    # A texel of the mark's own cell, at the oversampled size.
+    texel = OVER * EXTENT / FILL
+
+    mask = numpy.array(filled) > 0
+    inner = mask[1:-1, 1:-1] & mask[:-2, 1:-1] & mask[2:, 1:-1] & mask[1:-1, :-2] & mask[1:-1, 2:]
+    rim = mask.copy()
+    rim[1:-1, 1:-1] &= ~inner
+    ys, xs = numpy.nonzero(rim)
+
+    def grown(by):
+        page = filled.copy()
+        draw = ImageDraw.Draw(page)
+        for x, y in zip(xs, ys):
+            draw.ellipse((x - by, y - by, x + by, y + by), fill=255)
+        return numpy.array(page) > 0
+
+    ring = grown((OUTLINE_GAP + OUTLINE_LINE) * texel) & ~grown(OUTLINE_GAP * texel)
+    return Image.fromarray((ring * 255).astype(numpy.uint8), "L")
+
+
+def render(glyph, framed=None, outlined=False):
     """
     One glyph, drawn oversized, centred on its own ink, and averaged down: how much of each pixel it covers, and how
     bright that ink is, which is full for every shape but those drawn behind.
@@ -929,16 +979,20 @@ def render(glyph, framed=None):
         for shape in over:
             draw.polygon([(x * size, y * size) for (x, y) in shape], fill=255)
 
-    # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL: of its own ink, or its partner's.
+    # The middle of the page, sized so the mark drawn at EXTENT comes out at FILL: of its own ink, or its partner's. An
+    # outline is centred on its mark's ink and takes in more of the page, so the mark comes out OUTLINE_SHRINK as large.
     ink = box or cover.getbbox()
-    side = size * EXTENT / FILL
+    if outlined:
+        cover = silhouette(cover)
+        bright = cover
+    side = size * EXTENT / FILL / (OUTLINE_SHRINK if outlined else 1.0)
     edge = (size - side) / 2.0
     done = []
     for page in (cover, bright):
         if ink is not None:
             left, top, right, bottom = ink
             middled = Image.new("L", (size, size), 0)
-            middled.paste(page.crop(ink), ((size - (right - left)) // 2, (size - (bottom - top)) // 2))
+            middled.paste(page, ((size - (right - left)) // 2 - left, (size - (bottom - top)) // 2 - top))
             page = middled
         done.append(page.resize((CELL, CELL), Image.BOX, box=(edge, edge, edge + side, edge + side)))
 
@@ -963,7 +1017,7 @@ def main():
     makers = dict((ch, glyph) for (ch, _, glyph) in GLYPHS)
     for i, (ch, label, glyph) in enumerate(GLYPHS):
         x, y = (i % across) * CELL, (i // across) * CELL
-        alpha, bright = render(glyph, makers.get(FRAMED.get(ch)))
+        alpha, bright = render(glyph, makers.get(FRAMED.get(ch)), ch in OUTLINED)
 
         # The page is straight alpha, so the color is the brightness without the coverage folded into it: white for
         # every shape but those drawn behind.

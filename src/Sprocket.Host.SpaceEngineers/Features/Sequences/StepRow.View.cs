@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         Children =
                         {
                             // Before its word, as it stands before a member's name: running another sequence lasts until it finishes.
-                            new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.Ring, HaloSize = 20f * Sizes.Halo }
+                            new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, HaloSize = 20f * Sizes.Halo }
                                 .As(out _leadWaits),
                             new Label { Style = Styles.Phrase }.As(out _lead)
                         }
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                                 Spacing = 6f,
                                 Children =
                                 {
-                                    new Glyph { Symbol = Symbols.Awaited, Style = Styles.WaitOn, Halo = Symbols.Ring, HaloSize = 16f * Sizes.Halo }
+                                    new Glyph { Symbol = Symbols.Awaited, Style = Styles.WaitOn, Halo = Symbols.AwaitedOutline, HaloSize = 16f * Sizes.Halo }
                                         .As(out _clock),
                                     new Label { Style = Styles.WaitWords }.As(out _waitWords)
                                 }

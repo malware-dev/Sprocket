@@ -41,6 +41,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <remarks>The list opens only at those places, the nearest to where the row is carried, and the first and last of them hold beyond either end.</remarks>
         public Func<int, IList<int>> Landings { get; set; }
 
+        /// <summary>Whether a row is being carried.</summary>
+        public bool IsCarrying => _carrying >= 0;
+
         /// <summary>Told, when a row is dropped somewhere new, where it came from as a row, and how many of the rows it was not carrying are above it now.</summary>
         public Action<int, int> Moves { get; set; }
 

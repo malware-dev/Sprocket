@@ -58,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
         }
 
-        /// <summary>The color of the ring around the marks of the members it says, transparent for none: tied to the wait or step under the pointer.</summary>
+        /// <summary>The color of the outline around the marks of the members it says, transparent for none: tied to the wait or step under the pointer.</summary>
         public Color Glow
         {
             get { return _glow; }
@@ -73,6 +73,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     var member = Children[i] as MemberName;
                     if (member != null)
                         member.Glow = value;
+                }
+            }
+        }
+
+        /// <summary>Whether the marks of the members it says are as quiet as the words of a paused step.</summary>
+        public bool Paused
+        {
+            set
+            {
+                for (var i = 0; i < Children.Count; i++)
+                {
+                    var member = Children[i] as MemberName;
+                    if (member != null)
+                        member.Paused = value;
                 }
             }
         }

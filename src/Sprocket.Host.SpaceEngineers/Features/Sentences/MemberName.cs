@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public MemberName()
         {
             Spacing = 8f;
-            Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false, Halo = Symbols.Ring, HaloSize = 20f * Sizes.Halo }.As(out _mark));
+            Children.Add(new Glyph { Style = Styles.Waits, IsVisible = false, HaloSize = 20f * Sizes.Halo }.As(out _mark));
             Children.Add(new Label().As(out _name));
         }
 
@@ -35,15 +35,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             set
             {
                 _mark.IsVisible = !string.IsNullOrEmpty(value);
-                if (_mark.IsVisible)
-                    _mark.Symbol = value;
+                if (!_mark.IsVisible)
+                    return;
+
+                _mark.Symbol = value;
+                _mark.Halo = Symbols.OutlineOf(value);
             }
         }
 
-        /// <summary>The color of the ring around its mark, transparent for none: tied to the wait or step under the pointer.</summary>
+        /// <summary>The color of the outline around its mark, transparent for none: tied to the wait or step under the pointer.</summary>
         public Color Glow
         {
             set { _mark.HaloTint = value; }
+        }
+
+        /// <summary>Whether its mark is as quiet as the words of a paused step.</summary>
+        public bool Paused
+        {
+            set { _mark.Style = value ? Styles.WaitsPaused : Styles.Waits; }
         }
 
         /// <summary>What the member says while the pointer rests on it, words and mark alike, or null for nothing.</summary>

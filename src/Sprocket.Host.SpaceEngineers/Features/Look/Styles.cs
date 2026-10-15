@@ -927,6 +927,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted }
         };
 
+        /// <summary>The same mark on a paused step, as quiet as its words.</summary>
+        public static readonly GlyphStyle WaitsPaused = new GlyphStyle(Waits)
+        {
+            Base = { Tint = Palette.Dim }
+        };
+
         /// <summary>The line hanging under a step that takes time, saying whether the sequence waits for it, lit under the pointer.</summary>
         public static readonly ElementStyle Underhang = new ElementStyle
         {
