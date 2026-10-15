@@ -82,11 +82,12 @@ namespace RichTextPanels
 
         /// <inheritdoc />
         /// <remarks>
-        ///     The game raises nothing a script can hear when a panel's text changes, so the text is looked at on this,
-        ///     the slowest cadence that still answers an edit within two seconds. Looking costs a copy into a builder kept
-        ///     for it and a comparison, and allocates nothing; only a change lays anything out.
+        ///     The game raises nothing a script can hear when a panel's text changes, so the text is looked at every ten
+        ///     ticks, which answers whoever wrote it, a player, a program or a mod, within a sixth of a second, the same in
+        ///     multiplayer. Looking costs a copy into a builder kept for it and a comparison, and allocates nothing; only a
+        ///     change lays anything out.
         /// </remarks>
-        public override ScriptUpdate NeedsUpdate => ScriptUpdate.Update100;
+        public override ScriptUpdate NeedsUpdate => ScriptUpdate.Update10;
 
         /// <inheritdoc />
         /// <remarks>
