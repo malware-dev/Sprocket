@@ -84,7 +84,7 @@ public class ScreensTests
         Assert.Equal("Cycling\nStand clear", board.Faces[1].Text);
     }
 
-    /// <summary>Text is shown on the screen a step names, and that screen is set to show text.</summary>
+    /// <summary>Text is written on the screen a step names, which keeps what it is set to show, so a mod drawing it still can.</summary>
     [Fact]
     public void TextIsShownOnTheScreenNamed()
     {
@@ -95,7 +95,7 @@ public class ScreensTests
 
         Assert.Equal("", board.Faces[0].Text);
         Assert.Equal("Closed", board.Faces[1].Text);
-        Assert.Equal(ContentType.TEXT_AND_IMAGE, board.Faces[1].Content);
+        Assert.Equal(ContentType.SCRIPT, board.Faces[1].Content);
     }
 
     /// <summary>Setting up a screen sets what was given on the screen named and leaves everything left empty.</summary>

@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.Hiding(Screen.Settings)
                 .WithAction(Screen.ShowText, "show text", Doing.Of<IMyTextSurfaceProvider, Shown>(
-                        arguments => Shown.Read(arguments, names), Show), Which(names), Text())
+                        arguments => Shown.Read(arguments, names), Show), Faces(names), Lines())
                 .In(Category.Screen)
                 .WithAction(SetUp, "set up screen", Doing.Of<IMyTextSurfaceProvider, Look>(
                         arguments => Look.Read(arguments, names), Apply), Asked(names, Fonts(screens)))
@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>Adds a reading of one screen's setting, called <paramref name="said" />, taking which screen.</summary>
         static void Value(EntityKind kind, string said, Being being, IList<string> names)
         {
-            kind.WithValue(said.Replace(' ', '-'), said, being.Taking(Which(names))).Looked(Unheard).In(Category.Screen);
+            kind.WithValue(said.Replace(' ', '-'), said, being.Taking(Faces(names))).Looked(Unheard).In(Category.Screen);
         }
 
         /// <summary>The names of the block's screens, as the game gives them, or numbered where it gives none.</summary>
@@ -109,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>The screen a member means, among <paramref name="names" />.</summary>
-        static Field Which(IList<string> names)
+        static Field Faces(IList<string> names)
         {
             var screen = Field.Among("screen", names, names);
             screen.Entry = Entry.Text;
@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>The text to show.</summary>
-        static Field Text()
+        static Field Lines()
         {
             var text = Field.Called("text");
             text.Entry = Entry.Text;
@@ -136,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             return new[]
             {
-                Which(names), Field.Among("content", Contents, Contents), Field.Holding("text color", Editor.Colour, 1),
+                Faces(names), Field.Among("content", Contents, Contents), Field.Holding("text color", Editor.Colour, 1),
                 Field.Holding("background color", Editor.Colour, 1), font, Decimal("font size", "0.1", "10"),
                 Field.Among("alignment", Alignments, Alignments), Decimal("padding", "0", "50"),
                 Field.Holding("app color", Editor.Colour, 1), Field.Holding("app background color", Editor.Colour, 1),
@@ -174,12 +174,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return at < 0 ? 1 : at;
         }
 
-        /// <summary>Writes <paramref name="shown" />'s text on its screen, set to show text, since text on a screen showing an app is never seen.</summary>
+        /// <summary>Writes <paramref name="shown" />'s text on its screen, whatever the screen is set to show.</summary>
+        /// <remarks>
+        /// The text alone: a screen set to show nothing or an app keeps that, so a mod drawing the text itself, rich text from
+        /// a screen's own text, is left to do so. Setting it to show text is "set up screen"'s to do.
+        /// </remarks>
         static void Show(IMyTextSurfaceProvider provider, Shown shown, Recall seen)
         {
-            var surface = Surface(provider, shown.Which);
-            surface.ContentType = ContentType.TEXT_AND_IMAGE;
-            surface.WriteText(shown.Text);
+            Surface(provider, shown.Which).WriteText(shown.Text);
         }
 
         /// <summary>Sets each setting <paramref name="look" /> was given on its screen, and leaves the rest.</summary>

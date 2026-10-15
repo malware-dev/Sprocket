@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.Game.GUI.TextPanel;
 
 // The mod-side provider adds nothing to the one in the Ingame namespace, and some blocks are given only that one.
 using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
@@ -77,12 +76,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return arguments != null && arguments.Count > 0 ? arguments[0].Text ?? "" : "";
         }
 
-        /// <summary>Writes <paramref name="text" /> on the screen, set to show text, since text on a screen showing an app is never seen.</summary>
+        /// <summary>Writes <paramref name="text" /> on the screen, whatever it is set to show.</summary>
+        /// <remarks>
+        /// The text alone: a screen set to show nothing or an app keeps that, so a mod drawing the text itself, rich text from
+        /// a screen's own text, is left to do so. Setting it to show text is "set up screen"'s to do.
+        /// </remarks>
         static void Show(IMyTextSurfaceProvider screens, string text, Recall seen)
         {
-            var screen = screens.GetSurface(0);
-            screen.ContentType = ContentType.TEXT_AND_IMAGE;
-            screen.WriteText(text);
+            screens.GetSurface(0).WriteText(text);
         }
     }
 }
