@@ -9,10 +9,10 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A value that is one of exactly two words, given with a switch saying them.</summary>
+    /// <summary>A value that is on or off, given with a switch saying them.</summary>
     /// <remarks>
-    /// Two words are a switch because a switch is what two words that exclude each other look like everywhere in this game.
-    /// Inside a row of its own, so it is as wide as its words rather than as wide as the form.
+    /// A switch because that is what on and off look like everywhere in this game; any other choice is a line of its words,
+    /// which has room for longer ones. Inside a row of its own, so it is as wide as its words rather than as wide as the form.
     /// </remarks>
     public class SwitchField : HStack, IField
     {

@@ -399,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 fields.Clear();
                 one.Fields(fields);
-                if (fields.Count != 1 || !Switch(fields[0]))
+                if (fields.Count != 1 || !fields[0].IsOnOff)
                     continue;
 
                 var toggle = kind.FindAction(toggleId, Nature.Action);
@@ -409,14 +409,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 one.Flipped(toggleId);
                 toggle.Hide();
             }
-        }
-
-        /// <summary>Whether <paramref name="field" /> is a switch's: on or off, chosen.</summary>
-        static bool Switch(Field field)
-        {
-            var words = field.Words;
-            return field.Edits == Editor.Chosen && words != null && words.Count == 2
-                && words.Contains(Literal.Of(true).Said) && words.Contains(Literal.Of(false).Said);
         }
 
         static EntityAction Last(EntityKind kind)

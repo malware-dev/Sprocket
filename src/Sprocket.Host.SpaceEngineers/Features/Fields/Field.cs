@@ -113,6 +113,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             get { return Spans < 1 ? 1 : Spans; }
         }
 
+        /// <summary>Whether it is a choice between on and off and nothing else.</summary>
+        public bool IsOnOff
+        {
+            get
+            {
+                return Edits == Editor.Chosen && Words != null && Words.Count == 2
+                       && Words.Contains(Literal.Of(true).Said) && Words.Contains(Literal.Of(false).Said);
+            }
+        }
+
         /// <summary>One field standing over several values, filled in by a control of its own.</summary>
         public static Field Holding(string name, Editor edits, int spans)
         {

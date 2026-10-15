@@ -339,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 edited();
         }
 
-        /// <summary>The field a value is given in: a switch for two words, a line of them for three, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
+        /// <summary>The field a value is given in: a switch for on or off, a line of words for a few others, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
         IField Make(Field field, IList<Hsv> colors, Texts texts)
         {
             if (field.Edits == Editor.Colour)
@@ -352,8 +352,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return new LinesField();
 
             var words = field.Edits == Editor.Chosen ? field.Words : null;
-            if (words != null && words.Count == 2)
-                return new SwitchField(words[0], words[1]);
+            if (field.IsOnOff)
+                return new SwitchField(field.Words[0], field.Words[1]);
 
             if (words != null && words.Count > 0 && words.Count <= Few)
                 return new WordsField(words);

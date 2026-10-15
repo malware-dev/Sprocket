@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -157,6 +158,20 @@ public class FieldTests
         Assert.NotNull(((Element)form.Fields[0]).Tip);
         Assert.Null(((Element)form.Fields[1]).Tip);
         Assert.NotNull(Assert.Single(form.Within().OfType<Label>(), l => l.Text == "when stuck").Tip);
+    }
+
+    /// <summary>On or off is a switch; any other two words are a line of them, which has room for long ones.</summary>
+    [Fact]
+    public void OnlyOnOrOffIsASwitch()
+    {
+        var flag = Field.OneOf("keep aspect ratio", Literal.Of(true).Said, Literal.Of(false).Said);
+        flag.Edits = Editor.Chosen;
+        var named = Field.Among("mode", new[] { "Keep the current direction", "Turn round at the end" }, new[] { "0", "1" });
+        var form = new FieldSet();
+        form.Show(new[] { flag, named }, new string[0], new Hsv[0], new Texts());
+
+        Assert.IsType<SwitchField>(form.Fields[0]);
+        Assert.IsType<WordsField>(form.Fields[1]);
     }
 
     /// <summary>Nothing is held against what is typed until finishing is tried.</summary>
