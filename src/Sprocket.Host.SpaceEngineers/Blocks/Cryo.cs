@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithChange("becomes-empty", "becomes empty", "occupied", Literal.Of(false))
                 .Reading("is empty", "is occupied").Announced()
                 .WithValue("occupant-name", "occupant name", Sleeper).Announced()
-                .WithValue("oxygen-level", "oxygen level", Air)
+                .WithValue("oxygen-level", "oxygen level", Air).Percent()
                 .Looked("A chamber announces nothing as its air rises or falls.").In(Category.Air)
                 .Renaming("DampenersOverride", true, "dampeners")
                 .Renaming("DampenersOverride", false, "toggle dampeners")

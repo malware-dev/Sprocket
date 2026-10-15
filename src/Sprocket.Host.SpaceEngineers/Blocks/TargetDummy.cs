@@ -23,7 +23,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithSignal(new ToolbarSlot(1, 0, 1), "gets hit")
                 .WithSignal(new ToolbarSlot(1, 0, 2), "gets knocked down")
                 .Renaming("Enable Restoration", true, "restoration")
-                .Renaming("Delay", true, "regeneration delay");
+                .Renaming("Delay", true, "regeneration delay")
+                .Measuring("Delay", " s");
         }
     }
 }

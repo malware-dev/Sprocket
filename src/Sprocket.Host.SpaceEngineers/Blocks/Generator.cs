@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("ice", "ice", Held)
+            kind.WithValue("ice", "ice", Held).Measured(" kg")
                 .Looked("A generator announces what it holds every time it burns ice, which saves no look while it works.")
                 .In(Category.Gas)
                 .WithChange("runs-out-of-ice", "runs out of ice", "ice", Literal.Of(0.0)).Reading("has no ice", "has ice").Announced()

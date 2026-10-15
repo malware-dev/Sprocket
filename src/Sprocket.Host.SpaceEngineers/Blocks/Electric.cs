@@ -37,10 +37,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("power-use", "power use", Use).In(Category.Power).Looked(Busy)
-                .WithValue("power-required", "power required", Required).In(Category.Power).Looked(Busy)
-                .WithValue("maximum-power-use", "maximum power use", Most).In(Category.Power).Looked(Unheard)
-                .WithValue("power-supplied", "power supplied", Supplied).In(Category.Power).Looked(Busy);
+            kind.WithValue("power-use", "power use", Use).Measured(" MW").In(Category.Power).Looked(Busy)
+                .WithValue("power-required", "power required", Required).Measured(" MW").In(Category.Power).Looked(Busy)
+                .WithValue("maximum-power-use", "maximum power use", Most).Measured(" MW").In(Category.Power).Looked(Unheard)
+                .WithValue("power-supplied", "power supplied", Supplied).Percent().In(Category.Power).Looked(Busy);
         }
 
         /// <summary>Whether <paramref name="sink" /> takes electricity.</summary>

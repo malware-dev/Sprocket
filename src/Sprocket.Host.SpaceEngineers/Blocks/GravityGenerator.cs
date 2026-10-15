@@ -28,18 +28,23 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithAction("reverse", "reverse", Reverses, (string)null).In(Category.Behaviour)
                 .Renaming("Gravity", true, "acceleration")
+                .Measuring("Gravity", " m/s2")
                 .Hiding("SetGravityAcceleration");
 
             if (block is IMyGravityGenerator)
             {
                 kind.WithAction("fit-to-the-grid", "fit to the grid", Fits, (string)null).In(Category.Behaviour)
                     .Renaming("Width", true, "width")
+                    .Measuring("Width", " m")
                     .Renaming("Height", true, "height")
-                    .Renaming("Depth", true, "depth");
+                    .Measuring("Height", " m")
+                    .Renaming("Depth", true, "depth")
+                    .Measuring("Depth", " m");
             }
 
             if (block is IMyGravityGeneratorSphere)
-                kind.Renaming("Radius", true, "radius");
+                kind.Renaming("Radius", true, "radius")
+                    .Measuring("Radius", " m");
         }
 
         /// <summary>Sizes <paramref name="generator" />'s field to every block of its grid, as far as the generator reaches.</summary>

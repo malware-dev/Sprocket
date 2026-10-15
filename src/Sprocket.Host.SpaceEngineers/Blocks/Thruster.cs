@@ -41,13 +41,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("override", "override", Override).Announced().Between("0", "100").In(Category.Flight)
-                .WithValue("thrust", "thrust", Thrust).Looked(Unheard).In(Category.Flight);
+            kind.WithValue("override", "override", Override).Measured(" %").Announced().Between("0", "100").In(Category.Flight)
+                .WithValue("thrust", "thrust", Thrust).Percent().Looked(Unheard).In(Category.Flight);
 
             if (Aired(block))
-                kind.WithValue("effectiveness", "effectiveness", Effectiveness).Looked(Unaired).In(Category.Flight);
+                kind.WithValue("effectiveness", "effectiveness", Effectiveness).Percent().Looked(Unaired).In(Category.Flight);
 
-            kind.WithValue("maximum-thrust", "maximum thrust", MostThrust).Announced().In(Category.Flight)
+            kind.WithValue("maximum-thrust", "maximum thrust", MostThrust).Measured(" N").Announced().In(Category.Flight)
                 .Hiding("Override", "SetOverride", "IncreaseOverride", "DecreaseOverride");
         }
 

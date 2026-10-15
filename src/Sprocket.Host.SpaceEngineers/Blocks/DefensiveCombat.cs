@@ -37,13 +37,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Flee", true, "flees when")
                 .Renaming("FleeMode", true, "flee destination")
                 .Renaming("FleeDistance", true, "flee distance")
+                .Measuring("FleeDistance", " m")
                 .Renaming("WaypointZoneSize", true, "flee waypoint size")
+                .Measuring("WaypointZoneSize", " m")
                 .Renaming("LockTarget", true, "lock target")
                 .Renaming("LockTarget", false, "toggle lock target")
                 .Renaming("EvasiveManeuvers", true, "evasive maneuvers")
                 .Renaming("EvasiveManeuvers", false, "toggle evasive maneuvers")
                 .Renaming("EvasiveManeuverAngle", true, "evasive angle")
-                .Renaming("EvasiveManeuverIntervalRange", true, "evasive interval");
+                .Measuring("EvasiveManeuverAngle", "°")
+                .Renaming("EvasiveManeuverIntervalRange", true, "evasive interval")
+                .Measuring("EvasiveManeuverIntervalRange", " s");
         }
 
         /// <summary>Told as the block starts or stops fleeing, which it says itself.</summary>

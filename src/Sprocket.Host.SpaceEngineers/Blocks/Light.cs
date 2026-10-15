@@ -31,10 +31,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.Renaming("Color", true, "color")
                 .Renaming("Intensity", true, "intensity")
                 .Renaming("Radius", true, "radius")
+                .Measuring("Radius", " m")
                 .Renaming("Offset", true, "offset")
+                .Measuring("Offset", " m")
                 .Renaming("Blink Interval", true, "blink interval")
+                .Measuring("Blink Interval", " s")
                 .Renaming("Blink Lenght", true, "blink length")
-                .Renaming("Blink Offset", true, "blink offset");
+                .Measuring("Blink Lenght", " %")
+                .Renaming("Blink Offset", true, "blink offset")
+                .Measuring("Blink Offset", " %");
 
             if (block is IMyInteriorLight)
                 kind.Renaming("Falloff", true, "falloff");
@@ -45,7 +50,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return;
 
             if (Turns(block))
-                kind.Renaming("RotationSpeed", true, "rotation speed");
+                kind.Renaming("RotationSpeed", true, "rotation speed")
+                    .Measuring("RotationSpeed", " rpm");
             else
                 kind.Hiding("RotationSpeed", "IncreaseRotationSpeed", "DecreaseRotationSpeed");
         }

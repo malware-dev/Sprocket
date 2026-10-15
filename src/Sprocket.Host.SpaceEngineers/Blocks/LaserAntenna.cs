@@ -45,6 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithEvent("disconnects", Connected, Edge.Falling, "disconnects").RuledOutBy(Idle)
                 .Renaming("Idle", false, "disconnect")
                 .Renaming("Range", true, "range")
+                .Measuring("Range", " m")
                 .Renaming("isPerm", true, "permanent connection")
                 .Renaming("isPerm", false, "toggle permanent connection")
                 .Hiding("PasteGpsCoords");

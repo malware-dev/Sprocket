@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             // How far open changes only while the door moves, which it can only between starting to open and having
             // closed; nothing is raised as it moves, so it is looked at on the when's cadence in between.
-            kind.WithValue("how-far-open", "how far open", Ratio).RuledOutBy(Shut);
+            kind.WithValue("how-far-open", "how far open", Ratio).Percent().RuledOutBy(Shut);
 
             kind.WithAction("open", "open", Opens, "Open_On").Lasting()
                 .WithAction("close", "close", Closes, "Open_Off").Lasting()

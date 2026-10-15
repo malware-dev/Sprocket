@@ -192,6 +192,26 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>
+        /// Says the value of Sprocket's own added last is in <paramref name="unit" />, said after its number, and shown
+        /// <paramref name="scale" /> times what it holds.
+        /// </summary>
+        /// <remarks>A unit as a sentence says it, with its space before it where it takes one: " kg", "°".</remarks>
+        public EntityKind Measured(string unit, double scale = 1)
+        {
+            if (_value == null)
+                throw new InvalidOperationException("A unit belongs to a value of Sprocket's own, and none was added last.");
+
+            _value.Measured(unit, scale, 0);
+            return this;
+        }
+
+        /// <summary>Says the value of Sprocket's own added last is a percent, 0 to 100, which a slider sets and checks.</summary>
+        public EntityKind Percent()
+        {
+            return Between("0", "100").Measured(" %");
+        }
+
         /// <summary>Says how a test reads the moment added last: the block in it, and not.</summary>
         public EntityKind Reading(string state, string unstate)
         {
@@ -392,6 +412,45 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>
+        /// Says the block's own value <paramref name="gameId" /> is in <paramref name="unit" />, said after its number, and shown
+        /// <paramref name="scale" /> times what the game holds, moving in <paramref name="step" /> as shown where that is more
+        /// than 0, and shown no higher than <paramref name="most" /> where that is given.
+        /// </summary>
+        /// <remarks>
+        /// The game gives a value's bounds and never its unit, so the unit is Sprocket's to say. The script keeps the game's
+        /// number; the scale is how a person reads it, a strength the game holds as 0 to 1 typed as a percent, and the step what
+        /// the game snaps it to, a screen's rotation to quarter turns. Taken up where the block's own members are read, as a
+        /// rename is.
+        /// </remarks>
+        public EntityKind Measuring(string gameId, string unit, double scale = 1, double step = 0, string most = null)
+        {
+            _measured.Add(new Measure(gameId, unit, scale, step, most));
+            return this;
+        }
+
+        /// <summary>The unit and scale one of the block's own values is said in, where Sprocket says one.</summary>
+        public bool Measures(string gameId, out string unit, out double scale, out double step, out string most)
+        {
+            for (var i = 0; i < _measured.Count; i++)
+            {
+                if (_measured[i].GameId == gameId)
+                {
+                    unit = _measured[i].Unit;
+                    scale = _measured[i].Scale;
+                    step = _measured[i].Step;
+                    most = _measured[i].Most;
+                    return true;
+                }
+            }
+
+            unit = null;
+            scale = 1;
+            step = 0;
+            most = null;
+            return false;
+        }
+
         /// <summary>Vouches for the block's own members <paramref name="gameIds" /> in the game's own words: values where <paramref name="sets" /> says so, actions otherwise.</summary>
         /// <remarks>
         /// What puts one of the block's own members in the organized view without a word of Sprocket's for it. Taken up where
@@ -468,6 +527,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         readonly List<Alias> _renamed = new List<Alias>();
+
+        readonly List<Measure> _measured = new List<Measure>();
 
         readonly List<Alias> _vetted = new List<Alias>();
 
@@ -553,6 +614,29 @@ namespace Sprocket.Host.SpaceEngineers.World
             var box = Field.Called(named);
             box.Entry = EntityAction.Entered(being.Kind);
             return box;
+        }
+
+        /// <summary>The unit and scale one of the block's own values is said in.</summary>
+        sealed class Measure
+        {
+            public Measure(string gameId, string unit, double scale, double step, string most)
+            {
+                GameId = gameId;
+                Unit = unit;
+                Scale = scale;
+                Step = step;
+                Most = most;
+            }
+
+            public string GameId { get; }
+
+            public string Unit { get; }
+
+            public double Scale { get; }
+
+            public double Step { get; }
+
+            public string Most { get; }
         }
     }
 }

@@ -21,7 +21,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.Vetting(false, "Discharge", "StartCountdown", "StopCountdown")
-                .Vetting(true, "Countdown");
+                .Vetting(true, "Countdown")
+                .Measuring("Countdown", " s");
         }
     }
 }

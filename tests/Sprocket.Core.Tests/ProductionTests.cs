@@ -307,7 +307,7 @@ public class ProductionTests
         foreach (var value in new[]
                  {
                      "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating", "input-fill",
-                     "output-fill", "amount-in-input", "amount-in-output"
+                     "output-fill"
                  })
         {
             var own = kind.FindAction(value, Nature.Value);
@@ -449,30 +449,31 @@ public class ProductionTests
         Assert.Equal(40.0, fill.Being.Gauge(assembler.Block, new Literal[0], null).Read().Real, 3);
     }
 
-    /// <summary>How much of an item an inventory holds is a function of the item, heard as the inventory changes.</summary>
-    [Fact]
-    public void TheAmountOfAnItemIsHeardAsTheInventoryChanges()
-    {
-        var ship = new Ship();
-        var assembler = ship.Weld(new Factory(1, "Assembler", false));
-
-        var when = new WhenTrigger("amount-in-input")
-        {
-            Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(100L)
-        };
-        when.Arguments.Add(Literal.Of("Ingot/Iron"));
-        when.Sources.Add(ship.Name(assembler));
-        ship.Switching(when);
-        ship.Start();
-        ship.Tick(20);
-        Assert.Equal(0, ship.Fired);
-
-        assembler.Iron = 250;
-        assembler.Changed();
-        ship.Tick();
-
-        Assert.Equal(1, ship.Fired);
-    }
+    // The amount of one item in a production block's inventory waits for after the beta, with the value it tests.
+    // /// <summary>How much of an item an inventory holds is a function of the item, heard as the inventory changes.</summary>
+    // [Fact]
+    // public void TheAmountOfAnItemIsHeardAsTheInventoryChanges()
+    // {
+    //     var ship = new Ship();
+    //     var assembler = ship.Weld(new Factory(1, "Assembler", false));
+    //
+    //     var when = new WhenTrigger("amount-in-input")
+    //     {
+    //         Provider = BlockKinds.Own, Quantifier = Quantifier.Any, Relation = Relation.AtLeast, Value = Literal.Of(100L)
+    //     };
+    //     when.Arguments.Add(Literal.Of("Ingot/Iron"));
+    //     when.Sources.Add(ship.Name(assembler));
+    //     ship.Switching(when);
+    //     ship.Start();
+    //     ship.Tick(20);
+    //     Assert.Equal(0, ship.Fired);
+    //
+    //     assembler.Iron = 250;
+    //     assembler.Changed();
+    //     ship.Tick();
+    //
+    //     Assert.Equal(1, ship.Fired);
+    // }
 
     /// <summary>An item is written as its type and subtype, and one the game has no type for names nothing.</summary>
     [Theory]
@@ -572,12 +573,11 @@ public class ProductionTests
         var assembler = ship.Rig.Entity(ship.Weld(new Factory(1, "Assembler", false)).Id).Kind;
         Vetted(assembler, Nature.Native, "make", "clear-the-queue");
         Vetted(assembler, Nature.Value, "items-queued", "progress", "producing", "stuck", "mode", "able-to-take-apart", "repeating",
-            "input-fill", "output-fill", "amount-in-input", "amount-in-output", "slaveMode", "UseConveyor");
+            "input-fill", "output-fill", "slaveMode", "UseConveyor");
         Vetted(assembler, Nature.Action, "slaveMode", "UseConveyor");
 
         var refinery = ship.Rig.Entity(ship.Weld(new Factory(2, "Refinery", true)).Id).Kind;
-        Vetted(refinery, Nature.Value, "refining", "stuck", "input-fill", "output-fill", "amount-in-input", "amount-in-output",
-            "UseConveyor");
+        Vetted(refinery, Nature.Value, "refining", "stuck", "input-fill", "output-fill", "UseConveyor");
         Vetted(refinery, Nature.Action, "UseConveyor");
     }
 

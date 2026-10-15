@@ -30,7 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Detonate", false, "detonate")
                 .Renaming("Safety", true, "armed").Stating("Safety")
                 .Renaming("Safety", false, "toggle armed")
-                .Renaming("DetonationTime", true, "detonation time");
+                .Renaming("DetonationTime", true, "detonation time")
+                .Measuring("DetonationTime", " s");
         }
     }
 }

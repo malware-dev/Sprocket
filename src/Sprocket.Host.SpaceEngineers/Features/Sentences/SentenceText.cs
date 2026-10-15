@@ -560,7 +560,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return filled;
 
             var field = fields[at];
-            var said = filled + (field.Unit ?? "");
+            var said = field.Scaled(filled) + (field.Unit ?? "");
             return string.IsNullOrEmpty(field.Lead) ? said : field.Lead + " " + said;
         }
 

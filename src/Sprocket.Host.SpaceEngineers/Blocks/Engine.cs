@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var definition = Definition(block);
             var fuel = definition.Fuel.FuelId.SubtypeName.ToLowerInvariant();
             var level = fuel + "-level";
-            kind.WithValue(level, fuel + " level", Level(definition.FuelCapacity))
+            kind.WithValue(level, fuel + " level", Level(definition.FuelCapacity)).Percent()
                 .Looked("An engine announces its fuel every tick it burns, which saves no look while it runs.").In(Category.Fuel)
                 .WithChange("runs-out-of-" + fuel, "runs out of " + fuel, level, Literal.Of(0.0))
                 .Reading("has no " + fuel, "has " + fuel).Announced();

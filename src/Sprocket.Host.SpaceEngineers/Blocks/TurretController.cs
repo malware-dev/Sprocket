@@ -26,7 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("SunTracking", false, "toggle always aim at sun")
                 .Renaming("MultiplierAz", true, "azimuth velocity multiplier")
                 .Renaming("MultiplierEl", true, "elevation velocity multiplier")
-                .Renaming("AngleDeviation", true, "angle deviation");
+                .Renaming("AngleDeviation", true, "angle deviation")
+                .Measuring("AngleDeviation", "°");
         }
     }
 }

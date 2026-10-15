@@ -57,8 +57,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("PlaySound")
                 .Renaming("StopSound", false, "stop")
                 .Renaming("VolumeSlider", true, "volume")
+                .Measuring("VolumeSlider", " %", 100)
                 .Renaming("RangeSlider", true, "range")
-                .Renaming("LoopableSlider", true, "loop time");
+                .Measuring("RangeSlider", " m")
+                .Renaming("LoopableSlider", true, "loop time")
+                .Measuring("LoopableSlider", " s");
         }
 
         /// <summary>

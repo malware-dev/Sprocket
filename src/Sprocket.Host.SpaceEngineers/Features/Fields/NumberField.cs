@@ -16,6 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public const float Numbers = 176f;
 
         readonly NumberBox _box;
+        Field _field;
 
         /// <summary>An empty box for what <paramref name="field" /> asks for, whose Enter carries out <paramref name="submit" />.</summary>
         public NumberField(Field field, ICommand submit) : this(field, submit, Numbers)
@@ -23,12 +24,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>The same, <paramref name="wide" /> wide.</summary>
+        /// <remarks>
+        /// It shows what a person reads and is read as what is stored: a value the game holds as 0 to 1 is typed as a percent.
+        /// Its unit stands after it.
+        /// </remarks>
         public NumberField(Field field, ICommand submit, float wide)
         {
+            _field = field;
+            Spacing = 8f;
             double least;
-            var floored = Bound(field.Least, out least);
+            var floored = Bound(field.Scaled(field.Least), out least);
             double most;
-            var ceilinged = Bound(field.Most, out most);
+            var ceilinged = Bound(field.Scaled(field.Most), out most);
 
             Children.Add(new NumberBox
             {
@@ -44,6 +51,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 Format = field.Entry == Entry.Whole ? "0" : field.Entry == Entry.Decimal ? "0.0#" : "0.##"
             }.As(out _box));
 
+            var unit = (field.Unit ?? "").Trim();
+            if (unit.Length > 0)
+                Children.Add(new Label { Style = Styles.ValueLabel, Text = unit });
+
             _box.Edited += delegate
             {
                 var edited = Edited;
@@ -58,8 +69,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public string Text
         {
-            get { return _box.Text; }
-            set { _box.Text = value ?? ""; }
+            get { return _field.Unscaled(_box.Text); }
+            set { _box.Text = _field.Scaled(value ?? ""); }
         }
 
         /// <inheritdoc />

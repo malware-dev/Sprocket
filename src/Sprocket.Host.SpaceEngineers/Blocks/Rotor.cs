@@ -95,12 +95,19 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming(locks + "_Off", false, "unlock")
                 .Renaming(locks, false, "toggle lock")
                 .Renaming("Velocity", true, "velocity")
+                .Measuring("Velocity", " rpm")
                 .Renaming("LowerLimit", true, "lower limit")
+                .Measuring("LowerLimit", "°")
                 .Renaming("UpperLimit", true, "upper limit")
+                .Measuring("UpperLimit", "°")
                 .Renaming("Torque", true, "torque")
+                .Measuring("Torque", " N*m")
                 .Renaming("BrakingTorque", true, "braking torque")
+                .Measuring("BrakingTorque", " N*m")
                 .Renaming("Displacement", true, "displacement")
+                .Measuring("Displacement", " m")
                 .Renaming("SafetyDetach", true, "safety detach distance")
+                .Measuring("SafetyDetach", " m")
                 .Renaming("ShareInertiaTensor", true, "share inertia tensor")
                 .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
 
@@ -111,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             else
                 kind.WithAction(AddHead, "add head", adds);
 
-            kind.WithValue("angle", "angle", hinge ? HingeAngle : RotorAngle).Looked(Turning).In(Category.Movement)
+            kind.WithValue("angle", "angle", hinge ? HingeAngle : RotorAngle).Measured("°").Looked(Turning).In(Category.Movement)
                 .WithValue("locked", "locked", Locked).Looked(Unheard).In(Category.Locking)
                 .WithValue("attached", "attached", Attached).Status().Announced()
                 .WithChange("attaches", "attaches", "attached", Literal.Of(true)).Announced()

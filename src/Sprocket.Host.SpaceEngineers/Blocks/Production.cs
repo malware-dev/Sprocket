@@ -100,10 +100,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (assembler != null)
                 Setup(kind, block);
 
-            kind.WithValue("input-fill", "input fill", InputFill).Announced().In(Category.Stock)
-                .WithValue("output-fill", "output fill", OutputFill).Announced().In(Category.Stock)
-                .WithValue("amount-in-input", "amount in input", Holding(true)).Announced().In(Category.Stock)
-                .WithValue("amount-in-output", "amount in output", Holding(false)).Announced().In(Category.Stock);
+            kind.WithValue("input-fill", "input fill", InputFill).Percent().Announced().In(Category.Stock)
+                .WithValue("output-fill", "output fill", OutputFill).Percent().Announced().In(Category.Stock);
+
+            // The amount of one item in either inventory waits for after the beta: no form asks which item, so neither could be
+            // filled in. Kept for the form that asks.
+            // kind.WithValue("amount-in-input", "amount in input", Holding(true)).Announced().In(Category.Stock)
+            //     .WithValue("amount-in-output", "amount in output", Holding(false)).Announced().In(Category.Stock);
         }
 
         /// <summary>Told as the block starts or stops producing, gets stuck or works again, or its inventories change; on an assembler also as its progress, state or mode changes.</summary>
@@ -147,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithAction("make", "make", makes, Items.Choosing("item", words, means), amount).In(Category.Making)
                 .WithAction("clear-the-queue", "clear the queue", Clears).In(Category.Making)
                 .WithValue("items-queued", "items queued", _queued).Looked(Queue).In(Category.Making)
-                .WithValue("progress", "progress", Progress).Announced().In(Category.Making);
+                .WithValue("progress", "progress", Progress).Percent().Announced().In(Category.Making);
         }
 
         /// <summary>How an assembler is set to work: making or taking apart, and over again.</summary>
@@ -210,13 +213,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return assembler.Mode == MyAssemblerMode.Disassembly ? 1 : 0;
         }
 
-        /// <summary>How much of an item one of the block's two inventories holds: in kilograms for ore and ingots, and in pieces for anything else.</summary>
-        static Being Holding(bool input)
-        {
-            return Being.Number<IMyProductionBlock, Item>(Item.First, (block, item, seen) =>
-                    item.Known ? (double)(input ? block.InputInventory : block.OutputInventory).GetItemAmount(item.Id) : 0.0)
-                .Taking(Items.Asked("item"));
-        }
+        // Read by the amounts above, which wait for after the beta.
+        // /// <summary>How much of an item one of the block's two inventories holds: in kilograms for ore and ingots, and in pieces for anything else.</summary>
+        // static Being Holding(bool input)
+        // {
+        //     return Being.Number<IMyProductionBlock, Item>(Item.First, (block, item, seen) =>
+        //             item.Known ? (double)(input ? block.InputInventory : block.OutputInventory).GetItemAmount(item.Id) : 0.0)
+        //         .Taking(Items.Asked("item"));
+        // }
 
         /// <summary>How many items an assembler has queued, all orders together.</summary>
         long Queued(IMyAssembler assembler)

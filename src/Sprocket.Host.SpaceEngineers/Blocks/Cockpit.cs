@@ -60,10 +60,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var cockpit = block as IMyCockpit;
             if (cockpit != null && cockpit.OxygenCapacity > 0f)
-                kind.WithValue("oxygen-level", "oxygen level", Air).Looked(Unheard);
+                kind.WithValue("oxygen-level", "oxygen level", Air).Percent().Looked(Unheard);
 
-            kind.WithValue("gravity", "gravity", Gravity).Looked(Unheard)
-                .WithValue("ship-mass", "ship mass", Mass).Looked(Unheard)
+            kind.WithValue("gravity", "gravity", Gravity).Measured(" g").Looked(Unheard)
+                .WithValue("ship-mass", "ship mass", Mass).Measured(" kg").Looked(Unheard)
                 .Renaming("HandBrake", true, "handbrake")
                 .Renaming("HandBrake", false, "toggle handbrake")
                 .Renaming("Park", true, "parking brake")

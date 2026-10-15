@@ -16,7 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.Renaming("HudText", true, "HUD text")
-                .Renaming("Radius", true, "broadcast radius");
+                .Renaming("Radius", true, "broadcast radius")
+                .Measuring("Radius", " m");
         }
     }
 }

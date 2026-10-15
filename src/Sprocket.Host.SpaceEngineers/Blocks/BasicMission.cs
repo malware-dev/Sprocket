@@ -20,11 +20,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ID_MODE_SELECTOR_COMBOBOX", true, "route mode")
                 .Renaming("SetCurrentGridPositionHome", false, "set home position")
                 .Renaming("FollowHomeMinRange", true, "minimum range from home")
+                .Measuring("FollowHomeMinRange", " m")
                 .Renaming("FollowHomeMaxRange", true, "maximum range from home")
+                .Measuring("FollowHomeMaxRange", " m")
                 .Renaming("Wander", true, "wandering").Stating("Wander")
                 .Renaming("Wander", false, "toggle wandering")
                 .Renaming("StopFollowing", false, "stop following")
                 .Renaming("FollowDistance", true, "follow distance")
+                .Measuring("FollowDistance", " m")
                 .Hiding("FollowMe", "SetCurrentPositionHome");
         }
     }

@@ -28,12 +28,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly double _most;
         readonly bool _logarithmic;
         readonly string _format;
+        Field _field;
 
         /// <summary>A slider and box for what <paramref name="field" /> asks for, whose Enter carries out <paramref name="submit" />.</summary>
         public SliderField(Field field, ICommand submit)
         {
-            NumberField.Bound(field.Least, out _least);
-            NumberField.Bound(field.Most, out _most);
+            NumberField.Bound(field.Scaled(field.Least), out _least);
+            NumberField.Bound(field.Scaled(field.Most), out _most);
+            _field = field;
             _logarithmic = _least > 0 && _most / _least >= Wide;
             _format = field.Entry == Entry.Whole ? "0" : field.Entry == Entry.Decimal ? "0.0#" : "0.##";
 
@@ -43,13 +45,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             _slider.Moved += delegate
             {
-                _number.Text = Spelled(Valued(_slider.Fraction));
+                _number.Text = _field.Unscaled(Spelled(Valued(_slider.Fraction)));
                 Raise();
             };
 
             _number.Edited += delegate
             {
-                Place(_number.Text);
+                Place(_field.Scaled(_number.Text));
                 Raise();
             };
         }
@@ -64,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             set
             {
                 _number.Text = value;
-                Place(value);
+                Place(_field.Scaled(value));
             }
         }
 
@@ -85,10 +87,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                    && most > least;
         }
 
-        /// <summary>The value at <paramref name="fraction" /> of the way along the slider.</summary>
+        /// <summary>The value at <paramref name="fraction" /> of the way along the slider, at the nearest step where it moves in steps.</summary>
         double Valued(float fraction)
         {
-            return _logarithmic ? _least * Math.Pow(_most / _least, fraction) : _least + (_most - _least) * fraction;
+            var value = _logarithmic ? _least * Math.Pow(_most / _least, fraction) : _least + (_most - _least) * fraction;
+            return _field.Step > 0 ? Math.Round(value / _field.Step) * _field.Step : value;
         }
 
         /// <summary>Puts the grip where <paramref name="said" /> lies between the bounds, and leaves it where it is for anything that is not a number.</summary>

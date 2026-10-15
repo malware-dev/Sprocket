@@ -18,7 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.Renaming("BroadcastUsingAntennas", true, "broadcast using antennas")
                 .Renaming("BroadcastUsingAntennas", false, "toggle broadcast using antennas")
-                .Renaming("Range", true, "range");
+                .Renaming("Range", true, "range")
+                .Measuring("Range", " m");
         }
     }
 }

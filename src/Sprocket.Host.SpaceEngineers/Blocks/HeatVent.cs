@@ -24,9 +24,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ColorMax", true, "color at maximal load")
                 .Renaming("PowerDependency", true, "power dependency")
                 .Renaming("Radius", true, "radius")
+                .Measuring("Radius", " m")
                 .Renaming("Intensity", true, "intensity")
                 .Renaming("Falloff", true, "falloff")
-                .Renaming("Offset", true, "offset");
+                .Renaming("Offset", true, "offset")
+                .Measuring("Offset", " m");
         }
     }
 }

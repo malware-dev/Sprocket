@@ -25,9 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("integrity", "integrity", Integrity).Announced()
+            kind.WithValue("integrity", "integrity", Integrity).Percent().Announced()
                 .WithValue("damaged", "damaged", Damaged).Announced()
-                .WithValue("build-level", "build level", Built).Announced();
+                .WithValue("build-level", "build level", Built).Percent().Announced();
         }
 
         /// <summary>Told as the block is hit, welded or ground, which its grid announces for every block on it.</summary>

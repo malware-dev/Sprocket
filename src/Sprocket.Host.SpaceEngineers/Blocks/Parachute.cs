@@ -24,12 +24,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("air-density", "air density", Air).Looked(Unheard)
+            kind.WithValue("air-density", "air density", Air).Between("0", "1").Measured(" %", 100).Looked(Unheard)
                 .Renaming("Open_Off", false, "close the hatch")
                 .Renaming("Open", false, "toggle deploy")
                 .Renaming("AutoDeploy", true, "deploy automatically")
                 .Renaming("AutoDeploy", false, "toggle deploy automatically")
                 .Renaming("AutoDeployHeight", true, "deploy altitude")
+                .Measuring("AutoDeployHeight", " m")
                 .Renaming("AnyoneCanUse", true, "anyone can use")
                 .Renaming("AnyoneCanUse", false, "toggle anyone can use");
         }

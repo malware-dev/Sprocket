@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>Its mass is fixed by the block, so nothing need announce it.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("mass", "mass", Mass).Announced().In(Category.Behaviour);
+            kind.WithValue("mass", "mass", Mass).Measured(" kg").Announced().In(Category.Behaviour);
         }
     }
 }

@@ -55,6 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Announced();
 
             kind.Renaming("Range", true, "AI aiming radius")
+                .Measuring("Range", " m")
                 .Renaming("EnableIdleMovement", true, "idle movement")
                 .Renaming("EnableIdleMovement", false, "toggle idle movement")
                 .Renaming("EnableTargetLocking", true, "target locking")

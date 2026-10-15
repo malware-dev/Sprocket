@@ -29,8 +29,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (block.InventoryCount != 1)
                 return;
 
-            kind.WithValue("inventory-fill", "inventory fill", Fill).In(Category.Stock).Announced()
-                .WithValue("inventory-mass", "inventory mass", Mass).In(Category.Stock).Announced();
+            kind.WithValue("inventory-fill", "inventory fill", Fill).Percent().In(Category.Stock).Announced()
+                .WithValue("inventory-mass", "inventory mass", Mass).Measured(" kg").In(Category.Stock).Announced();
         }
 
         /// <summary>Told as anything goes into or out of the inventory, which every inventory announces.</summary>

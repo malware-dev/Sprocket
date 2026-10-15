@@ -29,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Override", true, "overridden").Stating("Override")
                 .Renaming("Override", false, "toggle overridden")
                 .Renaming("Power", true, "strength")
+                .Measuring("Power", " %", 100)
                 .Hiding("Yaw", "Pitch", "Roll", "SetYaw", "SetPitch", "SetRoll", "IncreaseYaw", "DecreaseYaw",
                     "IncreasePitch", "DecreasePitch", "IncreaseRoll", "DecreaseRoll");
         }

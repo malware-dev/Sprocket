@@ -258,6 +258,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (renamed)
                     Last(kind).Rename(word);
 
+                string unit, most;
+                double scale, step;
+                if (kind.Measures(offer.Id, out unit, out scale, out step, out most))
+                {
+                    Last(kind).Measured(unit, scale, step);
+                    if (most != null)
+                        Last(kind).Capped(most);
+                }
+
                 if (kind.Vets(offer.Id, true))
                     Last(kind).Vouch();
 

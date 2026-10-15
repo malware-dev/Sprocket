@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.Renaming("Range", true, "AI aiming radius")
+                .Measuring("Range", " m")
                 .Renaming("EnableIdleMovement", true, "idle movement")
                 .Renaming("EnableIdleMovement", false, "toggle idle movement")
                 .Renaming(Aims, true, "aims at")

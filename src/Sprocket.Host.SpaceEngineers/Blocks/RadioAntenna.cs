@@ -18,6 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.Renaming("EnableBroadCast", true, "broadcasting").Stating("EnableBroadCast")
                 .Renaming("EnableBroadCast", false, "toggle broadcasting")
                 .Renaming("Radius", true, "broadcast radius")
+                .Measuring("Radius", " m")
                 .Renaming("HudText", true, "HUD text")
                 .Renaming("ShowShipName", true, "show ship name")
                 .Renaming("ShowShipName", false, "toggle show ship name");

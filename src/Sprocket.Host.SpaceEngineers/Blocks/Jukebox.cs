@@ -36,7 +36,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.Hiding("PlaySound", "StopSound", "LoopableSlider", "IncreaseLoopableSlider", "DecreaseLoopableSlider")
                 .Renaming("VolumeSlider", true, "volume")
-                .Renaming("RangeSlider", true, "range");
+                .Measuring("VolumeSlider", " %", 100)
+                .Renaming("RangeSlider", true, "range")
+                .Measuring("RangeSlider", " m");
         }
     }
 }

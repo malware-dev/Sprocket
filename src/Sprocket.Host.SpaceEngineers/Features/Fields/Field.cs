@@ -73,8 +73,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>What a sentence says before this value, or null for nothing: "to" in "to 90°".</summary>
         public string Lead;
 
-        /// <summary>What a sentence says straight after this value, or null for nothing: the "°" in "90°".</summary>
+        /// <summary>What a sentence says straight after this value, or null for nothing: the "°" in "90°", and what stands after its box.</summary>
         public string Unit;
+
+        /// <summary>
+        /// How many of what is shown make one of what is stored: 100 for a value the game holds as 0 to 1 and a person reads
+        /// as a percent, and 0 or 1 where the two are the same.
+        /// </summary>
+        /// <remarks>
+        /// The script keeps the game's own value, and the editor shows the one a person reads, so the form and the sentence
+        /// say what the terminal says. Bounds are stored as the game has them too.
+        /// </remarks>
+        public double Scale;
+
+        /// <summary>
+        /// What a shown value moves in, or 0 for any amount: 90 for a rotation the game snaps to quarter turns, so the slider
+        /// stops at each and a number typed between them goes to the nearest.
+        /// </summary>
+        public double Step;
 
         /// <summary>
         /// The word a sentence leaves out, or null where it says every one.
@@ -232,6 +248,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             field.Words = words;
             field.Means = means;
             return field;
+        }
+
+        /// <summary>The stored number <paramref name="stored" /> on the scale it is shown at, or what it says as it is where it is no number.</summary>
+        public string Scaled(string stored)
+        {
+            double value;
+            if (Scale == 0 || Scale == 1 || !double.TryParse(stored, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+                return stored;
+
+            return (value * Scale).ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>
+        /// The number <paramref name="shown" /> on the scale it is stored at, moved to the nearest step where it moves in steps,
+        /// or what it says as it is where it is no number.
+        /// </summary>
+        public string Unscaled(string shown)
+        {
+            double value;
+            if (Scale == 0 && Step == 0 || Scale == 1 && Step == 0
+                || !double.TryParse(shown, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
+                return shown;
+
+            if (Step > 0)
+                value = System.Math.Round(value / Step) * Step;
+
+            return (value / (Scale == 0 ? 1 : Scale)).ToString("0.######", CultureInfo.InvariantCulture);
         }
 
         /// <summary>A field nobody has described, which is a box that takes anything.</summary>

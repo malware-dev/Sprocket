@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("effectiveness", "effectiveness", Effectiveness).Announced().In(Category.Gas)
+            kind.WithValue("effectiveness", "effectiveness", Effectiveness).Percent().Announced().In(Category.Gas)
                 .WithValue("able-to-produce", "able to produce", Able)
                 .Looked("A farm announces nothing as its power or the world's oxygen comes and goes.").In(Category.Gas)
                 .WithValue("in-shadow", "in shadow", Shadowed)

@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("speed", "speed", Speed).Looked(Unheard);
+            kind.WithValue("speed", "speed", Speed).Measured(" m/s").Looked(Unheard);
 
             var flies = ((IMyShipController)block).CanControlShip;
             if (!flies)

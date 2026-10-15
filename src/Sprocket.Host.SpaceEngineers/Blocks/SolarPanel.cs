@@ -28,9 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("sunlight", "sunlight", Sunlight).Announced().In(Category.Power)
-                .WithValue("output", "output", Output).Announced().In(Category.Power)
-                .WithValue("maximum-output", "maximum output", MostOut).Announced().In(Category.Power);
+            kind.WithValue("sunlight", "sunlight", Sunlight).Percent().Announced().In(Category.Power)
+                .WithValue("output", "output", Output).Measured(" MW").Announced().In(Category.Power)
+                .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power);
         }
 
         /// <summary>Told as the panel's output changes, which it announces as the light it catches moves what it can make.</summary>

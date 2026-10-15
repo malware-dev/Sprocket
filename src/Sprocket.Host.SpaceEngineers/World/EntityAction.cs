@@ -286,6 +286,23 @@ namespace Sprocket.Host.SpaceEngineers.World
             _writes.Most = most ?? "";
         }
 
+        /// <summary>Holds what a step sets this value to no higher than <paramref name="most" />, the bottom bound as it was.</summary>
+        public void Capped(string most)
+        {
+            _writes.Most = most ?? "";
+        }
+
+        /// <summary>
+        /// Says this value is in <paramref name="unit" />, said after its number, shown <paramref name="scale" /> times what it
+        /// holds, and moving in <paramref name="step" /> as shown where that is more than 0.
+        /// </summary>
+        public void Measured(string unit, double scale, double step)
+        {
+            _writes.Unit = unit;
+            _writes.Scale = scale;
+            _writes.Step = step;
+        }
+
         /// <summary>Has a step set this value as text written over several lines, up to <paramref name="longest" /> characters.</summary>
         public void Lines(int longest)
         {

@@ -31,11 +31,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("wind", "wind", Wind).Announced().In(Category.Power)
-                .WithValue("wind-strength", "wind strength", Strength).Announced().In(Category.Power)
-                .WithValue("clearance", "clearance", Clearance).Announced().In(Category.Power)
-                .WithValue("output", "output", Output).Announced().In(Category.Power)
-                .WithValue("maximum-output", "maximum output", MostOut).Announced().In(Category.Power);
+            kind.WithValue("wind", "wind", Wind).Percent().Announced().In(Category.Power)
+                .WithValue("wind-strength", "wind strength", Strength).Percent().Announced().In(Category.Power)
+                .WithValue("clearance", "clearance", Clearance).Percent().Announced().In(Category.Power)
+                .WithValue("output", "output", Output).Measured(" MW").Announced().In(Category.Power)
+                .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power);
         }
 
         /// <summary>Told as the turbine's output changes, which it announces as the wind or its clearance moves what it can make.</summary>

@@ -69,8 +69,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("charge", "charge", _charge).Looked(Uncounted)
-                .WithValue("time-until-charged", "time until charged", _remaining).Looked(Uncounted)
+            kind.WithValue("charge", "charge", _charge).Percent().Looked(Uncounted)
+                .WithValue("time-until-charged", "time until charged", _remaining).Measured(" s").Looked(Uncounted)
                 .WithValue("charging", "charging", _charging).Status().Looked(Uncounted)
                 .WithValue("charged", "charged", _charged).Status().Announced()
                 .WithChange("finishes-charging", "finishes charging", "charged", Literal.Of(true)).Announced()
