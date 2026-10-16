@@ -53,11 +53,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 kind.Lacking("TargetLocking");
 
             IMyToolbar hotbar = Toolbars.Of(block, 1);
-            for (var page = 1; hotbar != null && page <= hotbar.PageCount; page++)
-            {
-                for (var slot = 1; slot <= hotbar.SlotCount; slot++)
-                    kind.WithSignal(new ToolbarSlot(1, page, slot), "hotbar page " + page + ", slot " + slot + " is pressed");
-            }
+            if (hotbar != null && hotbar.PageCount > 0 && hotbar.SlotCount > 0)
+                kind.WithPressed(1, "hotbar slot is pressed", hotbar.PageCount, hotbar.SlotCount,
+                    at => "hotbar page " + at.Page + ", slot " + at.Slot + " is pressed");
 
             if (Toolbars.Of(block, 3) == null)
                 return;

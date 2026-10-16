@@ -133,6 +133,10 @@ namespace Sprocket.Sim.Driving
         /// <summary>The things a column offers, in the order they stand.</summary>
         public static List<PickRow> Entries(this StageColumn column) => column.Rows.OfType<PickRow>().ToList();
 
+        /// <summary>The slots open under the chosen toolbar of a pick, or null where none are.</summary>
+        public static SlotStrip? Slots(this SprocketEditor editor) =>
+            editor.Stages().SelectMany(column => column.Rows.OfType<SlotStrip>()).SingleOrDefault();
+
         /// <summary>The choices about the picking a column offers, in the order they stand.</summary>
         public static List<OptionRow> Choices(this StageColumn column) => column.Options.OfType<OptionRow>().ToList();
 
@@ -315,6 +319,11 @@ namespace Sprocket.Sim.Driving
                     return;
                 }
             }
+
+            // One slot of a toolbar a person presses is its toolbar's line and then the slot under it.
+            var picker = editor.Current as PickPage;
+            if (picker != null && picker.ChooseSlot(text))
+                return;
 
             throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
         }

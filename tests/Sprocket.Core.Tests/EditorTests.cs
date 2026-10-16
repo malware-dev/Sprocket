@@ -536,7 +536,7 @@ public class EditorTests
         Assert.NotEmpty(editor.Offered());
         Assert.All(editor.Offered(), row => Assert.Contains("Button", row.Secondary));
         editor.PressBlock("Airlock Button");
-        Assert.True(editor.HasChoice("button 1 is pressed"));
+        Assert.True(editor.HasChoice("button is pressed"));
         editor.PressChoice("button 1 is pressed");
 
         ship.Tick();

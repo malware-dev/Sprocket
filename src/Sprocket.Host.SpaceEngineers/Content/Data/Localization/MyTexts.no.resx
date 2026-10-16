@@ -2339,4 +2339,28 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
   <data name="Sprocket.Undo.Also" xml:space="preserve">
     <value>Tar også tilbake det som er endret siden på {screens}.</value>
   </data>
+  <data name="Sprocket.Slot.Page" xml:space="preserve">
+    <value>side</value>
+  </data>
+  <data name="Sprocket.Slot.Free" xml:space="preserve">
+    <value>ledig</value>
+  </data>
+  <data name="Sprocket.Slot.OnPage" xml:space="preserve">
+    <value>Side {page}, plass {slot}: {held}</value>
+  </data>
+  <data name="Sprocket.Slot.Alone" xml:space="preserve">
+    <value>Plass {slot}: {held}</value>
+  </data>
+  <data name="Sprocket.Slot.Answers" xml:space="preserve">
+    <value>Brukt av {system}: {sequence}</value>
+  </data>
+  <data name="Sprocket.Slot.Elsewhere" xml:space="preserve">
+    <value>Brukt av en annen automasjonsblokk</value>
+  </data>
+  <data name="Sprocket.Slot.Label" xml:space="preserve">
+    <value>Etikett: {label}</value>
+  </data>
+  <data name="Sprocket.Slot.More" xml:space="preserve">
+    <value>og {count} til</value>
+  </data>
 </root>

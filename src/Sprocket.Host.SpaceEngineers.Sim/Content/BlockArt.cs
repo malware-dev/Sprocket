@@ -32,6 +32,7 @@ namespace Sprocket.Sim.Content
             { "MyObjectBuilder_Beacon", Cubes + "beacon.dds" },
             { "MyObjectBuilder_SensorBlock", Cubes + "Sensor.dds" },
             { "MyObjectBuilder_ButtonPanel", Cubes + "ButtonPanel.dds" },
+            { "MyObjectBuilder_Cockpit", Cubes + "CockpitLarge.dds" },
             { "MyObjectBuilder_OxygenTank", Cubes + "OxygenTank.dds" },
             { "MyObjectBuilder_AirVent", Cubes + "AirVent.dds" },
             { "MyObjectBuilder_MyProgrammableBlock", Cubes + "ProgrammableBlock.dds" }

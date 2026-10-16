@@ -30,6 +30,9 @@ public sealed class Seat : Fitting
         bool flies = true)
         : base(id, name, type, subtype, display)
     {
+        // The hotbar, nine pages of nine, as every seat in the game has.
+        Toolbar = new Toolbar(9, 9);
+
         var stand = Pretend.To<IMyCockpit>();
         if (cryo)
             stand.Also<Sandbox.ModAPI.IMyCryoChamber>();

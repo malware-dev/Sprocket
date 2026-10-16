@@ -27,7 +27,7 @@ public class MarkTests
 
         screen.Editor.PressBlock("Airlock Button");
         screen.Run(2);
-        Assert.Equal(Symbols.Signal, Entry(screen, "button 1 is pressed").Mark);
+        Assert.Equal(Symbols.Signal, Entry(screen, "button is pressed").Mark);
     }
 
     /// <summary>What a trigger may do is marked as what it is: a single action by the bolt, a new sequence and each sequence by the sequence's mark.</summary>

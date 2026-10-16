@@ -16,7 +16,7 @@ public class PageTurnTests
     static readonly string[] Chosen =
     {
         "press", "+ logic system", "type", "Airlock", "enter", "press", "trigger", "press", "when",
-        "press", "Airlock Button", "press", "button 1 is pressed", "press", "A task on blocks…"
+        "press", "Airlock Button", "press", "button is pressed", "press", "A task on blocks…"
     };
 
     /// <summary>The fold at the page's left edge, pressed to go back a page.</summary>

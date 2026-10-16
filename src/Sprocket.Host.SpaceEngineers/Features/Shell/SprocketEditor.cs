@@ -1942,6 +1942,39 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return null;
         }
 
+        /// <summary>
+        /// Which trigger of this automation the toolbar slot <paramref name="at" /> of <paramref name="panel" /> answers, in
+        /// words: its logic system or installation and the sequence it runs; another automation block's where none of this one's does.
+        /// </summary>
+        public string Answering(GridEntity panel, ToolbarSlot at)
+        {
+            foreach (var system in _program.Systems)
+            {
+                foreach (var trigger in system.Triggers)
+                {
+                    var answered = trigger as SignalTrigger;
+                    if (answered == null)
+                        continue;
+
+                    foreach (var through in system.Uses)
+                    {
+                        if (!Answers(system, through, answered, panel.Id, at))
+                            continue;
+
+                        var sequence = system.FindSequence(answered.Runs);
+                        var named = system.IsBlueprint && through != null
+                            ? SystemSummary.DescribeInstanceOf(Texts, _runner.Bindings, system, through)
+                            : system.Name;
+                        var said = Template.Fill(Texts.SlotAnswers, "system", named);
+                        return Template.Fill(said, "sequence",
+                            sequence == null ? "" : sequence.HasName ? sequence.Name : SequenceText.DefaultName(Texts, sequence.Number));
+                    }
+                }
+            }
+
+            return Texts.SlotElsewhere;
+        }
+
         static bool Taken(List<Occupant> taking, Occupant holder)
         {
             for (var i = 0; taking != null && i < taking.Count; i++)

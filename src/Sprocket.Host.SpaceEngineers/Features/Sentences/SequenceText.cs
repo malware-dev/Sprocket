@@ -93,14 +93,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The words for the moment <paramref name="eventId" /> on <paramref name="sources" />, or an unfilled gap.</summary>
         static string Happening(Bindings bindings, string eventId, IList<string> sources)
         {
-            var events = Vocabulary.EventsFor(bindings, sources);
-            foreach (var entityEvent in events)
-            {
-                if (entityEvent.Id == eventId)
-                    return entityEvent.Text;
-            }
-
-            return SentenceText.Empty;
+            var happening = Vocabulary.Find(Vocabulary.EventsFor(bindings, sources), eventId);
+            return happening == null ? SentenceText.Empty : happening.Text;
         }
 
 

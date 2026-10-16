@@ -81,6 +81,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             return _slots.Clear(toolbar, slot);
         }
 
+        /// <summary>What a slot's item does, in the game's words, and the picture the game draws for it.</summary>
+        public static string Described(MyToolbarItemInfo item, out string picture)
+        {
+            return _slots.Described(item, out picture);
+        }
+
         /// <summary>
         /// Whether a block has an action of the game's own by that name.
         /// </summary>

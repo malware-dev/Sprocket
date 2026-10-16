@@ -267,6 +267,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>
+        /// Adds the toolbar <paramref name="toolbar" /> a person presses as one signal, read as <paramref name="text" />:
+        /// <paramref name="pages" /> pages of <paramref name="slots" /> slots, the one chosen worded by <paramref name="says" />.
+        /// </summary>
+        /// <remarks>See <see cref="EntityEvent.IsPressed" />.</remarks>
+        public EntityKind WithPressed(int toolbar, string text, int pages, int slots, Func<Sequences.ToolbarSlot, string> says)
+        {
+            _events.Add(new EntityEvent(new Sequences.ToolbarSlot(toolbar, 0, 0), text, pages, slots, says));
+            _value = null;
+            return this;
+        }
+
         /// <summary>Adds one of the block's own actions, <paramref name="gameActionId" />, as <paramref name="id" /> said as <paramref name="text" />.</summary>
         public EntityKind WithAction(string id, string text, string gameActionId)
         {
@@ -563,7 +575,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 var stands = Sequences.ToolbarSlot.Of(entityEvent.Id);
                 if (stands != null && stands.Covers(at))
-                    return entityEvent;
+                    return entityEvent.At(at);
             }
 
             return null;

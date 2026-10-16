@@ -3096,4 +3096,36 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <value>Also takes back what changed since on {screens}.</value>
     <comment>After what an undo or redo arrow takes back, where it takes changes on other screens along with it; {screens} is their names, joined by commas: sequences, slots, installations or the logic system.</comment>
   </data>
+  <data name="Sprocket.Slot.Page" xml:space="preserve">
+    <value>page</value>
+    <comment>Label before the page numbers of a toolbar a person presses, such as a cockpit's hotbar, shown under that toolbar in the picker so a page of its slots can be chosen.</comment>
+  </data>
+  <data name="Sprocket.Slot.Free" xml:space="preserve">
+    <value>free</value>
+    <comment>What an empty toolbar slot holds, in the line under a toolbar's slots in the picker and in the slot's tip; fills {held} in Sprocket.Slot.OnPage and Sprocket.Slot.Alone.</comment>
+  </data>
+  <data name="Sprocket.Slot.OnPage" xml:space="preserve">
+    <value>Page {page}, slot {slot}: {held}</value>
+    <comment>Line under a toolbar's slots in the picker, saying which slot is chosen and what it holds now, on a toolbar with several pages; {page} and {slot} count from 1, {held} is Sprocket.Slot.Free or what the slot holds, such as "Hangar Door: Open".</comment>
+  </data>
+  <data name="Sprocket.Slot.Alone" xml:space="preserve">
+    <value>Slot {slot}: {held}</value>
+    <comment>The same line on a toolbar with one page, such as a button panel's; {slot} counts from 1, {held} is Sprocket.Slot.Free or what the slot holds.</comment>
+  </data>
+  <data name="Sprocket.Slot.Answers" xml:space="preserve">
+    <value>Used by {system}: {sequence}</value>
+    <comment>What a toolbar slot holds where it already answers a trigger of this automation, in the slot's tip and the line under the slots; {system} is the logic system or installation, {sequence} the sequence the trigger runs or stops.</comment>
+  </data>
+  <data name="Sprocket.Slot.Elsewhere" xml:space="preserve">
+    <value>Used by another automation block</value>
+    <comment>What a toolbar slot holds where an automation block other than this one answers it, in the slot's tip and the line under the slots.</comment>
+  </data>
+  <data name="Sprocket.Slot.Label" xml:space="preserve">
+    <value>Label: {label}</value>
+    <comment>First line of a toolbar slot's tip in the picker, where the player gave the slot or the button a label of their own; {label} is that label.</comment>
+  </data>
+  <data name="Sprocket.Slot.More" xml:space="preserve">
+    <value>and {count} more</value>
+    <comment>After what a toolbar slot holds on the first of several blocks picked, in the line under a toolbar's slots in the picker, where it holds something on others too; {count} is how many others, from 1.</comment>
+  </data>
 </root>

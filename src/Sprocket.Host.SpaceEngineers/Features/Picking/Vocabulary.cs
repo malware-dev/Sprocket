@@ -83,12 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         public static MomentTrigger Starter(List<EntityEvent> events, string eventId, bool all)
         {
-            EntityEvent picked = null;
-            for (var i = 0; i < events.Count && picked == null; i++)
-            {
-                if (events[i].Id == eventId)
-                    picked = events[i];
-            }
+            var picked = Find(events, eventId);
 
             if (picked != null && picked.Answered)
                 return new SignalTrigger(eventId);
@@ -101,6 +96,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             when.Quantifier = Quantifier.All;
             when.Value = picked.Becomes;
             return when;
+        }
+
+        /// <summary>The moment among <paramref name="events" /> that <paramref name="eventId" /> names, worded for the one slot it names on a toolbar a person presses; null where none is.</summary>
+        public static EntityEvent Find(IList<EntityEvent> events, string eventId)
+        {
+            for (var i = 0; i < events.Count; i++)
+            {
+                if (events[i].Names(eventId))
+                    return events[i].At(ToolbarSlot.Of(eventId));
+            }
+
+            return null;
         }
 
         /// <summary>

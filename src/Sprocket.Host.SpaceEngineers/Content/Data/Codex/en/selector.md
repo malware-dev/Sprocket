@@ -12,6 +12,10 @@ Blocks with `Show block in toolbar config` switched off in the terminal are left
 
 The block selector and the value selector list only what is known to work with the automation. `Terminal ›` switches either one to everything the blocks offer in the terminal, under the terminal's own names, without that promise.
 
+In the signal selector, a toolbar somebody presses is one line: `hotbar slot is pressed` for a cockpit or any other seat, `button is pressed` for a button panel. Selecting it opens the toolbar's slots under it as numbered squares, with page numbers where the toolbar has more than one page, as a hotbar has nine. A square is plain where the slot is free, filled with the picture of the block where it holds one of the game's own actions, and green where it already answers a trigger of the automation. Its tip says what it holds, and any label the slot or button was given. The first free slot is chosen for you, and the line under the squares names it, like `Page 1, slot 3: free`. Press another square to choose that one, turning the page first if it's on another. The trigger then names the slot: *When Cockpit hotbar page 1, slot 3 is pressed*.
+
+A toolbar whose slots stand for things that happen keeps a line for each, like a sensor's `starts detecting` and `stops detecting`, or a timer's `goes off`.
+
 Each thing the blocks can do carries a mark for its kind:
 
 - ![](mark:action)&nbsp;An [action](action) the sequence starts and moves on from, regardless of how long the block takes to finish it.

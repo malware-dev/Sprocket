@@ -122,6 +122,7 @@ public sealed class Rig
         Light(rig, 10, "Landing Lights");
         Light(rig, 11, "Airlock Light");
         Light(rig, 12, "Cockpit Light");
+        rig.Cockpit(23, "Cockpit");
         // A beacon, answering the game's own beacon interface and carrying the value that makes it
         // one: how far it is heard. A light carries a Radius too, and the two mean different things
         // by the word - which is the whole reason a block gets to say what it meant.

@@ -23,25 +23,40 @@ public sealed class Toolbar : IMyToolbar
     readonly bool[] _filled;
     readonly List<TerminalActionParameter>[] _parameters;
 
-    public Toolbar(int slots)
+    readonly int _slots;
+    readonly int _pages;
+
+    /// <summary>A toolbar of one page of <paramref name="slots" /> slots, all of them empty, as a button panel's is.</summary>
+    public Toolbar(int slots) : this(slots, 1)
     {
-        _items = new MyToolbarItemInfo[slots];
-        _filled = new bool[slots];
-        _parameters = new List<TerminalActionParameter>[slots];
     }
 
-    public int SlotCount => _items.Length;
+    /// <summary>A toolbar of <paramref name="pages" /> pages of <paramref name="slots" /> slots each, all of them empty, as a cockpit's hotbar is nine of nine.</summary>
+    public Toolbar(int slots, int pages)
+    {
+        _slots = slots;
+        _pages = pages;
+        _items = new MyToolbarItemInfo[slots * pages];
+        _filled = new bool[slots * pages];
+        _parameters = new List<TerminalActionParameter>[slots * pages];
+    }
 
-    public int PageCount => 1;
+    /// <inheritdoc />
+    public int SlotCount => _slots;
+
+    /// <inheritdoc />
+    public int PageCount => _pages;
 
     /// <summary>How many slots it has across its pages, filled or not, as the game counts them.</summary>
     public int ItemCount => SlotCount * PageCount;
 
+    /// <inheritdoc />
     public MyToolbarType Type => MyToolbarType.ButtonPanel;
 
     /// <summary>The same slots. A gamepad is not something the harness has.</summary>
     public IMyToolbarSlots GamepadSlots => this;
 
+    /// <inheritdoc />
     public bool TryGetItem(int index, out MyToolbarItemInfo info)
     {
         if (index < 0 || index >= _items.Length || !_filled[index])
@@ -54,6 +69,7 @@ public sealed class Toolbar : IMyToolbar
         return true;
     }
 
+    /// <inheritdoc />
     public void GetItems(List<MyToolbarItemInfo> output)
     {
         for (var i = 0; i < _items.Length; i++)
@@ -69,11 +85,13 @@ public sealed class Toolbar : IMyToolbar
         return index >= 0 && index < _filled.Length && _filled[index];
     }
 
+    /// <inheritdoc />
     public bool Trigger(int index)
     {
         return Holds(index);
     }
 
+    /// <inheritdoc />
     public IMyToolbarChangeBuilder BeginChanges()
     {
         return Changing();
@@ -85,11 +103,13 @@ public sealed class Toolbar : IMyToolbar
         return new Changes(this);
     }
 
+    /// <inheritdoc />
     public MyObjectBuilder_Toolbar GetObjectBuilder()
     {
         return null;
     }
 
+    /// <summary>What the item in slot <paramref name="index" /> was given to run with, appended to <paramref name="output" />.</summary>
     public void Parameters(int index, List<TerminalActionParameter> output)
     {
         if (index < 0 || index >= _parameters.Length || _parameters[index] == null)
@@ -115,16 +135,19 @@ public sealed class Toolbar : IMyToolbar
         readonly List<List<TerminalActionParameter>> _parameters =
             new List<List<TerminalActionParameter>>();
 
+        /// <summary>No changes yet to <paramref name="toolbar" />.</summary>
         public Changes(Toolbar toolbar)
         {
             _toolbar = toolbar;
         }
 
+        /// <inheritdoc />
         public IMyToolbarChangeBuilder Set(int index, MyToolbarItemInfo item)
         {
             return Set(index, item, null);
         }
 
+        /// <summary>Puts <paramref name="item" /> in slot <paramref name="index" /> with what it is to run with, <paramref name="parameters" />, once applied.</summary>
         public IMyToolbarChangeBuilder Set(int index, MyToolbarItemInfo item,
             List<TerminalActionParameter>? parameters)
         {
@@ -135,6 +158,7 @@ public sealed class Toolbar : IMyToolbar
             return this;
         }
 
+        /// <inheritdoc />
         public IMyToolbarChangeBuilder Clear(int index)
         {
             _slots.Add(index);
@@ -144,12 +168,13 @@ public sealed class Toolbar : IMyToolbar
             return this;
         }
 
+        /// <inheritdoc />
         public bool Apply()
         {
             for (var i = 0; i < _slots.Count; i++)
             {
                 var slot = _slots[i];
-                if (slot < 0 || slot >= _toolbar.SlotCount)
+                if (slot < 0 || slot >= _toolbar.ItemCount)
                     return false;
 
                 _toolbar._filled[slot] = _keeps[i];

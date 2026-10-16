@@ -860,13 +860,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var events = Vocabulary.EventsFor(Editor.Runner.Bindings, Editor.Seen(_system, moment.Sources));
             var eventId = Vocabulary.EventOf(Editor.Program, Editor.Runner.Bindings, _system, moment, Editor.StandIn(_system));
-            foreach (var entityEvent in events)
-            {
-                if (entityEvent.Id == eventId)
-                    return entityEvent;
-            }
-
-            return null;
+            return Vocabulary.Find(events, eventId);
         }
 
         void Doing(TriggerRow row, Trigger trigger)

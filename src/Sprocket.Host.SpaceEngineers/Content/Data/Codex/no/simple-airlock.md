@@ -6,7 +6,7 @@ Dette bygger en luftsluse som sluser ut når knappen trykkes: den indre døra lu
 2. Under `Sekvenser` trykker du `+ sekvens` og gir den navnet *Sluse ut*.
 3. Trykk `+ steg` og så `oppgave`, [velg](selector) den indre døra, og så `close`. `close` er avventbar, fordi døra bruker tid på å lukke seg, så neste steg venter på den.
 4. Legg til `depressurize` for ventilen og `open` for den ytre døra på samme måte.
-5. Gå tilbake. Under `Utløsere` trykker du `+ utløser` og så `when`, velger knappen og lar den kjøre *Sluse ut*.
+5. Gå tilbake. Under `Utløsere` trykker du `+ utløser` og så `when`, velger knappepanelet og så `button is pressed`, som velger den første knappen, og lar den kjøre *Sluse ut*.
 6. Forlat skjermen, og slå på logikksystemet når du blir spurt.
 
 Trykk knappen for å prøve. Mens den kjører, lyser raden til sekvensen grønt, og steget som kjøres, lyser på skjermen til sekvensen.

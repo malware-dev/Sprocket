@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Storage;
+using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -69,6 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<string> _why = new List<string>();
         readonly List<int> _rows = new List<int>();
         readonly List<string> _whatKeys = new List<string>();
+        readonly List<string> _whatShown = new List<string>();
+        readonly List<SlotHeld> _held = new List<SlotHeld>();
         readonly Dictionary<string, int> _whatAt = new Dictionary<string, int>();
         readonly List<long> _arrived = new List<long>();
         readonly List<long> _saidBlocks = new List<long>();
@@ -77,6 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Aim _aim;
         readonly int _base;
         readonly string _arrivedChosen;
+        readonly ToolbarSlot _arrivedSlot;
         readonly Nature _arrivedForm;
         readonly Quantifier _arrivedQuantifier;
         readonly List<string> _filled = new List<string>();
@@ -88,6 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Dictionary<long, string> _ahead = new Dictionary<long, string>();
 
         string _chosen;
+        ToolbarSlot _slot;
         Nature _chosenForm;
         string _dropped = "";
         Nature _droppedForm;
@@ -100,6 +105,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _whatSearch = "";
         string _said;
         string _saidChosen = "";
+        ToolbarSlot _saidSlot;
+        string _heldFor;
         int _saidOffered;
         Quantifier _saidQuantifier;
         bool _retitled;
@@ -116,7 +123,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         StageColumn _does;
         Keyed<long, PickRow> _blockRows;
         Keyed<string, KindRow> _kindRows;
-        Keyed<string, PickRow> _whatRows;
+        Keyed<string, Element> _whatRows;
+        SlotStrip _slots;
         ListField _reads;
         ICommand _clearKind;
         ICommand _toggleHidden;
@@ -173,6 +181,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _done = done;
 
             _screen = editor.Opener;
+
+            var pressed = forEvents ? Pressing(editor.World, targets, _chosen) : null;
+            if (pressed != null)
+            {
+                _slot = ToolbarSlot.Of(_chosen);
+                _chosen = pressed.Id;
+                _arrivedChosen = _chosen;
+                _arrivedSlot = _slot;
+            }
 
             for (var i = 0; i < targets.Count; i++)
             {
@@ -284,7 +301,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         return true;
                 }
 
-                if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _quantifier != _arrivedQuantifier)
+                if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _quantifier != _arrivedQuantifier
+                    || !Same(_slot, _arrivedSlot))
                     return true;
 
                 if (_aim != null && _aim.Moved)
@@ -382,7 +400,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var arguments = _strip.Arguments;
             if (_forEvents && _chosenForm != Nature.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
-                _done(new PickAnswer(_selection, _chosen, _quantifier, null, _chosenForm));
+                _done(new PickAnswer(_selection, Answered, _quantifier, null, _chosenForm));
                 return;
             }
 
@@ -520,6 +538,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override void Refresh()
         {
             _strip.Tick();
+            if (_slots != null)
+                _slots.Slide();
         }
 
         /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>
@@ -586,7 +606,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 ? Editor.Texts.PickNothingChecked
                 : _forEvents ? Editor.Texts.PickNothingHappens : Editor.Texts.PickNothingDone;
             _what.Narrowed += OnWhatSearch;
-            _whatRows = new Keyed<string, PickRow>(_what.Rows, WhatRow);
+            _whatRows = new Keyed<string, Element>(_what.Rows, WhatRow);
 
             _organized = Editor.Act(Cmd.ShowOrganized, () => Show(false));
             _terminal = Editor.Act(Cmd.ShowTerminal, () => Show(true));
@@ -621,8 +641,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             };
         }
 
-        PickRow WhatRow(string key)
+        Element WhatRow(string key)
         {
+            if (key == SlotsKey)
+            {
+                _slots = new SlotStrip(Editor.Texts);
+                _slots.Picked += PickSlot;
+                return _slots;
+            }
+
             var row = new PickRow();
             row.Picked += delegate(Held held, int presses) { Chosen(key, presses); };
             return row;
@@ -1283,12 +1310,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _whatAt[key] = at;
             }
 
-            _whatRows.Show(_whatKeys);
+            // The slots of a toolbar a person presses open under its line once it is chosen.
+            _whatShown.Clear();
+            _whatShown.AddRange(_whatKeys);
+            var pressed = Pressing(Editor.World, _selection, _chosen);
+            var under = pressed == null ? -1 : _whatKeys.IndexOf(Nature.Native + " " + pressed.Id);
+            if (under >= 0)
+                _whatShown.Insert(under + 1, SlotsKey);
+
+            _whatRows.Show(_whatShown);
+            if (under >= 0)
+                ShowSlots(pressed);
+            else
+                _slots = null;
 
             for (var i = 0; i < _rows.Count; i++)
             {
                 var at = _rows[i];
-                var row = _whatRows[_whatKeys[i]];
+                var row = (PickRow)_whatRows[_whatKeys[i]];
                 row.Many = false;
                 row.HasPicture = false;
                 row.Secondary = "";
@@ -1491,20 +1530,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_fits != null)
                 return;
 
-            if (_said != null && _saidChosen == _chosen && _saidOffered == _ids.Count && _saidQuantifier == _quantifier
-                && Same(_saidBlocks, _selection))
+            if (_said != null && _saidChosen == _chosen && Same(_saidSlot, _slot) && _saidOffered == _ids.Count
+                && _saidQuantifier == _quantifier && Same(_saidBlocks, _selection))
             {
                 return;
             }
 
             _saidChosen = _chosen;
+            _saidSlot = _slot;
             _saidOffered = _ids.Count;
             _saidQuantifier = _quantifier;
             _saidBlocks.Clear();
             _saidBlocks.AddRange(_selection);
 
             var at = _chosen.Length == 0 ? -1 : At(_chosen, _chosenForm);
-            var chosen = at < 0 ? "" : _names[at];
+            var pressed = _slot == null ? null : Pressing(Editor.World, _selection, _chosen);
+            var chosen = at < 0 ? "" : pressed != null ? pressed.At(_slot).Text : _names[at];
 
             // A step acts on every block it names, so its blocks are always joined with "and". Only what starts something can
             // be any one of them, and then only where it was asked.
@@ -1767,8 +1808,130 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return -1;
         }
 
+        /// <summary>The key the slots of a chosen toolbar are kept under among the rows, which no row's key can be.</summary>
+        const string SlotsKey = "slots";
+
+        /// <summary>What is chosen as the program names it: the one slot, where a toolbar a person presses is chosen.</summary>
+        string Answered => _slot == null ? _chosen : _slot.EventId;
+
+        /// <summary>
+        /// The toolbar a person presses among what <paramref name="targets" /> share that <paramref name="eventId" /> names,
+        /// the toolbar itself or one of its slots; null where it names none.
+        /// </summary>
+        static EntityEvent Pressing(GridWorld world, IList<long> targets, string eventId)
+        {
+            if (string.IsNullOrEmpty(eventId) || ToolbarSlot.Of(eventId) == null)
+                return null;
+
+            foreach (var entityEvent in Vocabulary.EventsOf(world, targets))
+            {
+                if (entityEvent.IsPressed && entityEvent.Names(eventId))
+                    return entityEvent;
+            }
+
+            return null;
+        }
+
+        /// <summary>The first slot of <paramref name="pressed" /> that holds nothing on any of the blocks, or its first slot where every one holds something.</summary>
+        ToolbarSlot Free(EntityEvent pressed)
+        {
+            Occupy(pressed);
+            var toolbar = ToolbarSlot.Of(pressed.Id).Toolbar;
+            for (var i = 0; i < _held.Count; i++)
+            {
+                if (!_held[i].Holds)
+                    return new ToolbarSlot(toolbar, i / pressed.Slots + 1, i % pressed.Slots + 1);
+            }
+
+            return new ToolbarSlot(toolbar, 1, 1);
+        }
+
+        /// <summary>Reads what the slots of <paramref name="pressed" /> hold, where the toolbar or the blocks have changed since they were read.</summary>
+        void Occupy(EntityEvent pressed)
+        {
+            var reading = pressed.Id + Joined(_selection);
+            if (reading == _heldFor)
+                return;
+
+            _heldFor = reading;
+            Occupancy.Read(Editor, _selection, pressed, _held);
+        }
+
+        static string Joined(List<long> blocks)
+        {
+            var joined = "";
+            foreach (var block in blocks)
+                joined += " " + block.ToString(CultureInfo.InvariantCulture);
+            return joined;
+        }
+
+        void ShowSlots(EntityEvent pressed)
+        {
+            Occupy(pressed);
+            if (_slot == null)
+                _slot = Free(pressed);
+
+            _slots.Show(pressed.Pages, pressed.Slots, _held, _slot.Page, _slot.Slot);
+        }
+
+        /// <summary>
+        /// Chooses the toolbar a person presses that has a slot read as <paramref name="words" />, "button 2 is pressed", and
+        /// then that slot, as pressing the toolbar's line and then the slot under it does; false where no slot reads so.
+        /// </summary>
+        public bool ChooseSlot(string words)
+        {
+            if (!_forEvents)
+                return false;
+
+            foreach (var pressed in Vocabulary.EventsOf(Editor.World, _selection))
+            {
+                if (!pressed.IsPressed)
+                    continue;
+
+                var toolbar = ToolbarSlot.Of(pressed.Id).Toolbar;
+                for (var i = 0; i < pressed.Pages * pressed.Slots; i++)
+                {
+                    var at = new ToolbarSlot(toolbar, i / pressed.Slots + 1, i % pressed.Slots + 1);
+                    if (pressed.At(at).Text != words)
+                        continue;
+
+                    Chosen(Nature.Native + " " + pressed.Id, 1);
+                    PickSlot(at.Page, at.Slot);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void PickSlot(int page, int slot)
+        {
+            var whole = ToolbarSlot.Of(_chosen);
+            if (whole == null)
+                return;
+
+            var pick = Editor.Act(Cmd.PickChoice, delegate
+            {
+                _slot = new ToolbarSlot(whole.Toolbar, page, slot);
+                Editor.Invalidate();
+            });
+            if (pick != null)
+                pick.Execute();
+        }
+
+        static bool Same(ToolbarSlot one, ToolbarSlot other)
+        {
+            return one == null ? other == null : one.Same(other);
+        }
+
         void Choose(string id, Nature form)
         {
+            var pressed = form == Nature.Native ? Pressing(Editor.World, _selection, id) : null;
+            if (pressed == null)
+                _slot = null;
+            else if (id != _chosen || _slot == null)
+                _slot = Free(pressed);
+
             _chosen = id;
             _chosenForm = form;
             _dropped = "";

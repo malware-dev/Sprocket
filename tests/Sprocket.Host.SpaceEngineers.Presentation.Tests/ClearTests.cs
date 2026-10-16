@@ -35,11 +35,11 @@ public class ClearTests
     {
         var picker = Screen.Fresh(SearchTheBlocks.Split(' '));
 
-        Assert.True(picker.Shows("3 of 14"), "the blocks were not narrowed to begin with");
+        Assert.True(picker.Shows("3 of 15"), "the blocks were not narrowed to begin with");
 
         picker.Do("452", "206");
 
-        Assert.True(picker.Shows("14 blocks"), "the cross did not empty the box");
+        Assert.True(picker.Shows("15 blocks"), "the cross did not empty the box");
     }
 
     /// <summary>And there is nothing to press while there is nothing written.</summary>

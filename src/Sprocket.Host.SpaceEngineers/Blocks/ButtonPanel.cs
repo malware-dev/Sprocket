@@ -3,7 +3,6 @@ using System.Globalization;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.ModAPI;
 
@@ -43,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return block is IMyButtonPanel;
         }
 
-        /// <summary>"button 2 is pressed": every button by its number, on a panel with one button as on a panel with several.</summary>
+        /// <summary>"button 2 is pressed": the panel's buttons as one signal, the button chosen beside it, said by its number on a panel with one button as on a panel with several.</summary>
         /// <remarks>
         /// The same signal reads the same whatever panel it is on, so installations filled from different panels agree. The
         /// terminal's own label box edits whichever button is picked in its list, so it is left to the terminal view, and a
@@ -60,12 +59,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return;
 
             // The game gives a panel one page more than its buttons fill, so every page but the last is buttons.
-            var buttons = toolbar.PageCount <= 1 ? toolbar.SlotCount : toolbar.SlotCount * (toolbar.PageCount - 1);
-            for (var button = 0; button < buttons; button++)
-            {
-                var at = new ToolbarSlot(1, button / toolbar.SlotCount + 1, button % toolbar.SlotCount + 1);
-                kind.WithSignal(at, "button " + (button + 1) + " is pressed");
-            }
+            var pages = toolbar.PageCount <= 1 ? 1 : toolbar.PageCount - 1;
+            var buttons = toolbar.SlotCount * pages;
+            var slots = toolbar.SlotCount;
+            kind.WithPressed(1, "button is pressed", pages, slots, at => "button " + ((at.Page - 1) * slots + at.Slot) + " is pressed");
 
             var labels = Doing.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
             {

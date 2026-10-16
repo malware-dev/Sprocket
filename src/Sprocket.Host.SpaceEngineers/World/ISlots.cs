@@ -45,6 +45,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Empties a slot, and answers whether that took.</summary>
         bool Clear(IMyToolbar toolbar, int slot);
 
+        /// <summary>
+        /// What a slot's item does, in the game's words: the block or group and its action, or the thing it holds; with the
+        /// picture the game draws for it in <paramref name="picture" />, empty where there is none.
+        /// </summary>
+        string Described(MyToolbarItemInfo item, out string picture);
+
         /// <summary>Whether a block has an action of the game's own by that name.</summary>
         bool Offers(IMyTerminalBlock block, string actionId);
 

@@ -891,6 +891,57 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.SlotFill }
         };
 
+        /// <summary>A toolbar slot that holds nothing, offered under a toolbar a person presses.</summary>
+        public static readonly ElementStyle SlotFree = new ElementStyle
+        {
+            Base = { Background = Palette.Well, Edge = Palette.Line },
+            Hot = { Background = Palette.Panel, Edge = Palette.Muted }
+        };
+
+        /// <summary>A toolbar slot holding something of the game's: an action, a group's action or a thing.</summary>
+        public static readonly ElementStyle SlotTaken = new ElementStyle
+        {
+            Base = { Background = Palette.SlotFill, Edge = Palette.SlotEdge },
+            Hot = { Background = Palette.PanelHot, Edge = Palette.Ink }
+        };
+
+        /// <summary>A toolbar slot already answering a signal of the automation.</summary>
+        public static readonly ElementStyle SlotAnswering = new ElementStyle
+        {
+            Base = { Background = Palette.LiveWash, Edge = Palette.Live },
+            Hot = { Background = Palette.PanelHot, Edge = Palette.Live }
+        };
+
+        /// <summary>The ring around the toolbar slot chosen, over whatever the slot holds.</summary>
+        public static readonly ElementStyle SlotChosen = new ElementStyle
+        {
+            Base = { Edge = Palette.Ink }
+        };
+
+        /// <summary>A toolbar slot's number, in its corner.</summary>
+        public static readonly TextStyle SlotNumber = new TextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 16f, Color = Palette.Ink, Padding = new Thickness(4f, 0f) }
+        };
+
+        /// <summary>A page of a toolbar, offered beside its other pages.</summary>
+        public static readonly ButtonStyle SlotPage = new ButtonStyle(Word)
+        {
+            Base = { FontSize = 16f, Padding = new Thickness(8f, 2f) }
+        };
+
+        /// <summary>A page of a toolbar where something already sits in one of its slots.</summary>
+        public static readonly ButtonStyle SlotPageTaken = new ButtonStyle(SlotPage)
+        {
+            Base = { Color = Palette.Ink }
+        };
+
+        /// <summary>The page of a toolbar being shown.</summary>
+        public static readonly ButtonStyle SlotPageChosen = new ButtonStyle(SlotPage)
+        {
+            Base = { Color = Palette.Ink, Background = Palette.Line }
+        };
+
         /// <summary>A mark saying something has not been chosen: a ring for one of several, a box for any of them.</summary>
         public static readonly GlyphStyle Mark = new GlyphStyle
         {

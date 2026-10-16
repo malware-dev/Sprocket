@@ -72,6 +72,37 @@ public sealed class RigSlots : ISlots
     }
 
     /// <inheritdoc />
+    /// <remarks>A block's action as the rig offers it; the rig holds no groups or definitions, so those say their names.</remarks>
+    public string Described(MyToolbarItemInfo item, out string picture)
+    {
+        picture = "";
+        if (item.Kind == MyToolbarItemKind.GroupAction)
+            return item.GroupName + ": " + item.ActionId;
+
+        if (item.Kind != MyToolbarItemKind.BlockAction)
+            return item.Kind == MyToolbarItemKind.Definition ? item.DefinitionId.SubtypeName : "";
+
+        foreach (Fitting fitting in _rig.Fitted)
+        {
+            if (fitting.Block.EntityId != item.BlockEntityId)
+                continue;
+
+            picture = fitting.Block.BlockDefinition.TypeIdString + "/" + fitting.Block.BlockDefinition.SubtypeName;
+            var offers = new List<Offer>();
+            fitting.Offered(offers);
+            foreach (var offer in offers)
+            {
+                if (offer.Id == item.ActionId)
+                    return fitting.Name + ": " + offer.Text;
+            }
+
+            return fitting.Name + ": " + item.ActionId;
+        }
+
+        return item.ActionId ?? "";
+    }
+
+    /// <inheritdoc />
     public bool Offers(IMyTerminalBlock block, string actionId)
     {
         foreach (Fitting fitting in _rig.Fitted)

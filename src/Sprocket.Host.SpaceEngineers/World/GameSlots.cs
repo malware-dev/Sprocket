@@ -79,6 +79,40 @@ namespace Sprocket.Host.SpaceEngineers.World
             return toolbar != null && toolbar.BeginChanges().Clear(slot).Apply();
         }
 
+        /// <inheritdoc />
+        /// <remarks>A block that is not loaded here is said by its action alone, with no picture.</remarks>
+        public string Described(MyToolbarItemInfo item, out string picture)
+        {
+            picture = "";
+            switch (item.Kind)
+            {
+                case MyToolbarItemKind.BlockAction:
+                {
+                    var block = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(item.BlockEntityId) as IMyTerminalBlock;
+                    if (block == null)
+                        return item.ActionId ?? "";
+
+                    picture = block.BlockDefinition.TypeIdString + "/" + block.BlockDefinition.SubtypeName;
+                    var action = block.GetActionWithName(item.ActionId);
+                    return block.CustomName + ": " + (action == null ? item.ActionId : action.Name.ToString());
+                }
+
+                case MyToolbarItemKind.GroupAction:
+                    return item.GroupName + ": " + item.ActionId;
+
+                case MyToolbarItemKind.Definition:
+                {
+                    var definitions = Sandbox.Definitions.MyDefinitionManager.Static;
+                    var definition = definitions?.GetDefinition(item.DefinitionId);
+                    picture = item.DefinitionId.ToString();
+                    return definition == null ? item.DefinitionId.SubtypeName : definition.DisplayNameText;
+                }
+
+                default:
+                    return "";
+            }
+        }
+
         /// <summary>
         /// Whether a block has an action of the game's own by that name.
         /// </summary>
