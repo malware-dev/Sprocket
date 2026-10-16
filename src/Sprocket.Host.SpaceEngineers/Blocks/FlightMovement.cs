@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("current-waypoint", "current waypoint", Waypoint).Looked(Unheard);
+            kind.WithValue("current-waypoint", "current waypoint", Waypoint).Looked(Unheard).In(Category.Flight);
             Flying(kind);
             kind.Renaming("MinHeightAboveTerrain", true, "minimum altitude")
                 .Measuring("MinHeightAboveTerrain", " m")

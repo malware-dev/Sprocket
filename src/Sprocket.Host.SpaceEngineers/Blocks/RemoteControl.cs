@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("autopilot", "flying the route", Flying).Status().Looked(Unswitched)
-                .WithValue("current-waypoint", "current waypoint", Waypoint).Announced()
+                .WithValue("current-waypoint", "current waypoint", Waypoint).Announced().In(Category.Flight)
                 .Vetting(true, Switches)
                 .Vetting(false, Switches)
                 .Renaming("AutoPilot_On", false, "fly the route")

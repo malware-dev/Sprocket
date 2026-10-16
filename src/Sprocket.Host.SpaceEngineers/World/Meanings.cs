@@ -43,7 +43,81 @@ namespace Sprocket.Host.SpaceEngineers.World
             // An order whose two actions and toggle are offered, beside a value of Sprocket's own saying how it stands.
             if (block is IMyOffensiveCombatBlock || block is IMyDefensiveCombatBlock || block is IMyFlightMovementBlock
                 || block is IMyPathRecorderBlock || block is IMyBasicMissionBlock)
+            {
                 HideValue(kind, "ActivateBehavior");
+                In(kind, "ActivateBehavior", Category.Automation);
+            }
+
+            // How it attacks, beside every other member of the block, which is about shooting.
+            if (block is IMyOffensiveCombatBlock)
+            {
+                In(kind, "AttackPattern", Category.Weapons);
+                In(kind, "TargetPriority", Category.Weapons);
+            }
+
+            // How far it flees, beside where it flees to.
+            if (block is IMyDefensiveCombatBlock)
+                In(kind, "WaypointZoneSize", Category.Behaviour);
+
+            // A dummy is shot at and shoots nothing: how it recovers is how it is set up.
+            if (block is IMyTargetDummyBlock)
+            {
+                In(kind, "Enable Restoration", Category.Behaviour);
+                In(kind, "Delay", Category.Behaviour);
+            }
+
+            // Who hears its messages, and how they go out.
+            if (block is IMyBroadcastController)
+            {
+                In(kind, "BroadcastTarget", Category.Signals);
+                In(kind, "UseAntenna", Category.Signals);
+            }
+
+            // Its pulse is fired by discharging it.
+            if (Claimed<MicroEmitter>(kind))
+                In(kind, "Discharge", Category.Weapons);
+
+            // Arming is what a sequence does to a warhead beside detonating it, and its countdown is how long that takes.
+            if (block is IMyWarhead)
+            {
+                In(kind, "Safety", Category.Weapons);
+                In(kind, "DetonationTime", Category.Weapons);
+            }
+
+            // Whether the zone is up is whether it runs.
+            if (block is IMySafeZoneBlock)
+                In(kind, "SafeZoneCreate", Category.Power);
+
+            // A charge lets go of the grid it holds.
+            if (Claimed<SeparationCharge>(kind))
+                In(kind, "Detach", Category.Locking);
+
+            // How strongly it turns the ship.
+            if (block is IMyGyro)
+                In(kind, "Power", Category.Flight);
+
+            // What a sensor looks for, and the noise it makes about it.
+            if (block is IMySensorBlock)
+            {
+                In(kind, "Detect", Category.Detection);
+                In(kind, "Audible Proximity Alert", Category.Sound);
+            }
+
+            // A drill's mode, beside the mode value it toggles.
+            if (block is IMyShipDrill)
+                In(kind, "TerrainClearingMode", Category.Production);
+
+            // Helping another assembler make what it makes.
+            if (block is IMyAssembler)
+                In(kind, "slaveMode", Category.Production);
+
+            // Filling bottles is something a sequence does; refilling them by itself is how it is set up.
+            if (block is IMyGasTank || block is IMyGasGenerator)
+                In(kind, "Refill", Category.Gas);
+
+            // Whether a gun takes its ammunition from the conveyors is what it does with what it holds.
+            if (block is IMyUserControllableGun)
+                In(kind, "UseConveyor", Category.Stock);
 
             if (block is IMyPathRecorderBlock)
                 HideValue(kind, "ID_PLAY_CHECKBOX");
@@ -67,7 +141,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             if (block is IMyMechanicalConnectionBlock)
+            {
                 Building(kind);
+
+                // Set once when the machine is built, however it moves after.
+                In(kind, "ShareInertiaTensor", Category.Behaviour);
+            }
 
             // Lock, unlock and toggle lock set it, and the rotor's own locked reads it.
             if (block is IMyMotorStator)
@@ -80,16 +159,32 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block is IMyParachute)
                 HideValue(kind, "Open");
 
+            // A sequence brakes and drives a wheel while it runs.
             if (block is IMyMotorSuspension)
-                In(kind, "Speed Limit", Category.Behaviour);
+            {
+                In(kind, "Speed Limit", Category.Movement);
+                In(kind, "Braking", Category.Movement);
+                In(kind, "Power", Category.Movement);
+            }
 
+            // The pull a block exerts belongs under no heading there is.
             if (block is IMyGravityGenerator || block is IMyGravityGeneratorSphere)
             {
-                In(kind, "Height", Category.Behaviour);
-                In(kind, "Radius", Category.Behaviour);
+                In(kind, "Width", Category.Other);
+                In(kind, "Height", Category.Other);
+                In(kind, "Depth", Category.Other);
+                In(kind, "Radius", Category.Other);
+                In(kind, "Gravity", Category.Other);
 
                 // The game sets a jump drive's distance by this id too, where it means flight.
-                In(kind, "SetGravityAcceleration", Category.Behaviour);
+                In(kind, "SetGravityAcceleration", Category.Other);
+            }
+
+            // A searchlight is no gun: what it aims at and how it looks are how it is set up.
+            if (block is IMySearchlight)
+            {
+                In(kind, "TargetingGroup_Selector", Category.Behaviour);
+                In(kind, "ViewRotation", Category.Behaviour);
             }
 
             if (block is IMyCameraBlock)
@@ -100,15 +195,19 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Hide(kind, "View");
             }
 
+            // How far it sees, and whether it shares what it finds.
             if (block is IMyOreDetector)
             {
-                In(kind, "Range", Category.Behaviour);
-                In(kind, "BroadcastUsingAntennas", Category.Behaviour);
+                In(kind, "Range", Category.Detection);
+                In(kind, "BroadcastUsingAntennas", Category.Signals);
             }
+
+            // A survival kit's respawn name is the name a medical room's is.
+            if (Claimed<Respawn>(kind))
+                In(kind, "SpawnName", Category.Identity);
 
             if (block is IMyMedicalRoom)
             {
-                In(kind, "SpawnName", Category.Identity);
 
                 // Ownership moved to the faction system years ago; these two are what is left.
                 Hide(kind, "TakeOwnership");
@@ -118,23 +217,22 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block is IMyTextPanel)
                 Screens(kind);
 
+            // How far a sound carries, beside how loud it is.
             if (block is IMySoundBlock)
-                In(kind, "RangeSlider", Category.Behaviour);
+                In(kind, "RangeSlider", Category.Sound);
 
+            // A sequence sets a timer's delay before starting it.
             if (block is IMyTimerBlock)
-                In(kind, "TriggerDelay", Category.Behaviour);
+                In(kind, "TriggerDelay", Category.Automation);
 
             if (block is IMyProjector)
                 Projectors(kind);
 
             if (block is IMyConveyorSorter)
             {
-                In(kind, "blacklistWhitelist", Category.Behaviour);
+                In(kind, "blacklistWhitelist", Category.Stock);
                 Hide(kind, "SearchField");
             }
-
-            if (block is IMyWarhead)
-                In(kind, "DetonationTime", Category.Behaviour);
 
             if (block is IMyStoreBlock)
                 In(kind, "Searchable", Category.Behaviour);
@@ -206,8 +304,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What every block means by a word, where the table's answer is the wrong one.</summary>
         /// <remarks>
-        /// An event controller is nothing but the setting up of a watcher, and a transponder's filter
-        /// is who it listens to rather than what it says.
+        /// An event controller is nothing but the setting up of a watcher, and a transponder's filter is who it
+        /// listens to, which is talking to other constructs.
         /// </remarks>
         static void Everywhere(EntityKind kind, IMyTerminalBlock block)
         {
@@ -215,7 +313,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             In(kind, "Condition", Category.Behaviour);
             In(kind, "AvailableEvents", Category.Behaviour);
             In(kind, "ANDCheckbox", Category.Behaviour);
-            In(kind, "ReceiveFrom", Category.Behaviour);
+            In(kind, "ReceiveFrom", Category.Signals);
             Hide(kind, "SearchBox");
 
             // Set once when the machine is built, so flipping it is nothing a sequence does. The value
@@ -263,6 +361,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             Withhold(kind, "CameraList", Readiness.Pending, Holdback.Camera);
             In(kind, "SpeedLimit", Category.Behaviour);
 
+            // How the autopilot flies its route, and the start of the route again.
+            In(kind, "FlightMode", Category.Flight);
+            In(kind, "Reset", Category.Flight);
+
             // Which way a remote calls forward, spelled once as a value and six times as actions.
             In(kind, "Left", Category.Behaviour);
             In(kind, "Right", Category.Behaviour);
@@ -280,6 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             In(kind, "Range", Category.Behaviour);
             In(kind, "TargetingGroup_Selector", Category.Behaviour);
+            In(kind, "ViewRotation", Category.Behaviour);
             Hide(kind, "Control");
 
             if (!(block is IMyTurretControlBlock))
@@ -354,6 +457,18 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (Categories.Names(one.Sets ? one.GamePropertyId : one.GameActionId, stem))
                     one.Withhold(readiness, why);
             }
+        }
+
+        /// <summary>Whether a capability of the kind <typeparamref name="T" /> claimed <paramref name="kind" />, for a block known by a component rather than an interface.</summary>
+        static bool Claimed<T>(EntityKind kind) where T : Capability
+        {
+            foreach (var capability in kind.Capabilities)
+            {
+                if (capability is T)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>Puts every member the game named <paramref name="stem" /> in its true category.</summary>

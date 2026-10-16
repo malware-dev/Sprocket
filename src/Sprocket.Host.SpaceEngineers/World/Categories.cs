@@ -384,7 +384,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case "offsetx":
                 case "offsety":
                 case "offsetz":
-                    return Category.Making;
+                    return Category.Production;
 
                 // Shooting.
                 case "shoot":

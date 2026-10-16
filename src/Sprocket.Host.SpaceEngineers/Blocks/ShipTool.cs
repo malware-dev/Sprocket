@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("run-by-a-pilot", "run by a pilot", Piloted).Looked(Unheard).In(Category.Making);
+            kind.WithValue("run-by-a-pilot", "run by a pilot", Piloted).Looked(Unheard).In(Category.Production);
         }
     }
 }

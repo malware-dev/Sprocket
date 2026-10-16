@@ -105,10 +105,10 @@ public class SensingTests
         detecting = false;
         Assert.False(Read(entity, "detecting").Flag);
 
-        Assert.True(kind.FindAction("things-detected", Nature.Value)!.LookedBecause.Length > 0);
-        Assert.Equal(2, Read(entity, "things-detected").Whole);
+        Assert.True(kind.FindAction("detections", Nature.Value)!.LookedBecause.Length > 0);
+        Assert.Equal(2, Read(entity, "detections").Whole);
         things = 0;
-        Assert.Equal(0, Read(entity, "things-detected").Whole);
+        Assert.Equal(0, Read(entity, "detections").Whole);
 
         Assert.Equal("detect players", kind.FindAction("Detect Players", Nature.Value)!.Text);
         var toggle = kind.FindAction("Detect Players", Nature.Action)!;
@@ -350,7 +350,7 @@ public class SensingTests
         Assert.True(kind.FindAction("PasteGpsCoords", Nature.Action)!.Hidden);
     }
 
-    /// <summary>A transponder sends on its channel and hears from whom its value says; the buttons that set it are left to the terminal.</summary>
+    /// <summary>A transponder sends on its channel and receives from whom its value says; the buttons that set it are left to the terminal.</summary>
     [Fact]
     public void ATransponderSendsAndHearsInSprocketsWords()
     {
@@ -365,7 +365,7 @@ public class SensingTests
 
         Assert.Equal("send signal", kind.FindAction("SendSignal", Nature.Action)!.Text);
         Assert.Equal("channel", kind.FindAction("Channel", Nature.Value)!.Text);
-        Assert.Equal("hears from", kind.FindAction("ReceiveFrom", Nature.Value)!.Text);
+        Assert.Equal("receives from", kind.FindAction("ReceiveFrom", Nature.Value)!.Text);
         Assert.True(kind.FindAction("SetChannelValue", Nature.Action)!.Hidden);
         Assert.True(kind.FindAction("SetFilter_Owner", Nature.Action)!.Hidden);
     }
@@ -457,7 +457,7 @@ public class SensingTests
 
         var kind = ship.Entity(sensor.Id).Kind;
 
-        Vetted(kind, Nature.Value, "detecting", "things-detected", "Audible Proximity Alert");
+        Vetted(kind, Nature.Value, "detecting", "detections", "Audible Proximity Alert");
         Vetted(kind, Nature.Value, switches);
         Vetted(kind, Nature.Action, switches);
         Vetted(kind, Nature.Value, extents);
@@ -624,8 +624,8 @@ public class SensingTests
     }
 
     /// <summary>
-    /// A transponder vouches for sending a signal, its channel and whom it hears from; the channel's setter and steps, the
-    /// buttons that pick whom it hears from and the setter that sends on another channel are left to the terminal.
+    /// A transponder vouches for sending a signal, its channel and whom it receives from; the channel's setter and steps, the
+    /// buttons that pick whom it receives from and the setter that sends on another channel are left to the terminal.
     /// </summary>
     [Fact]
     public void ATransponderVetsWhatItSendsAndHears()

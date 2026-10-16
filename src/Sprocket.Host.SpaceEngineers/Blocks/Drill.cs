@@ -28,8 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithValue("drilling", "drilling", Drilling).Looked(Unheard).In(Category.Making)
-                .WithValue("mode", "mode", Mode).Looked(Unheard).In(Category.Making)
+            kind.WithValue("drilling", "drilling", Drilling).Looked(Unheard).In(Category.Production)
+                .WithValue("mode", "mode", Mode).Looked(Unheard).In(Category.Production)
                 .Renaming("TerrainClearingMode", false, "toggle mode");
         }
     }

@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             // How many kinds of boost a module gives is fixed by its definition, so it never changes and there is nothing to announce.
-            kind.WithValue("connections", "connections", Connections).Looked(Unheard).In(Category.Behaviour)
-                .WithValue("upgrade-count", "upgrade count", Upgrades).Announced().In(Category.Behaviour);
+            kind.WithValue("connections", "connections", Connections).Looked(Unheard).In(Category.State)
+                .WithValue("upgrade-count", "upgrade count", Upgrades).Announced().In(Category.State);
         }
     }
 }

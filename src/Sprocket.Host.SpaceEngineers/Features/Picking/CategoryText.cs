@@ -22,9 +22,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 case Category.Flight: return texts.CategoryFlight;
                 case Category.Stock: return texts.CategoryCargo;
                 case Category.Air: return texts.CategoryAir;
+                case Category.LifeSupport: return texts.CategoryLifeSupport;
                 case Category.Gas: return texts.CategoryGas;
                 case Category.Fuel: return texts.CategoryFuel;
-                case Category.Making: return texts.CategoryProduction;
+                case Category.Production: return texts.CategoryProduction;
+                case Category.Repair: return texts.CategoryRepair;
                 case Category.Weapons: return texts.CategoryWeapons;
                 case Category.Detection: return texts.CategoryDetection;
                 case Category.Automation: return texts.CategoryAutomation;
@@ -34,6 +36,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 case Category.Screen: return texts.CategoryScreens;
                 case Category.Sound: return texts.CategorySound;
                 case Category.Identity: return texts.CategoryIdentity;
+                case Category.State: return texts.CategoryState;
+                case Category.Usage: return texts.CategoryUsage;
                 case Category.Access: return texts.CategoryAccess;
                 default: return texts.CategoryOther;
             }

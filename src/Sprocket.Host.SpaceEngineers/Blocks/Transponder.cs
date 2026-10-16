@@ -4,8 +4,8 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A transponder: sending a signal on its channel, the channel, and whom it hears from, said in Sprocket's words.</summary>
-    /// <remarks>Its three buttons that pick whom it hears from are the value they set, and so is the setter written beside its channel.</remarks>
+    /// <summary>A transponder: sending a signal on its channel, the channel, and whom it receives from, said in Sprocket's words.</summary>
+    /// <remarks>Its three buttons that pick whom it receives from are the value they set, and so is the setter written beside its channel.</remarks>
     public sealed class Transponder : Capability
     {
         /// <inheritdoc />
@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.Renaming("SendSignal", false, "send signal")
                 .Renaming("Channel", true, "channel")
-                .Renaming("ReceiveFrom", true, "hears from")
+                .Renaming("ReceiveFrom", true, "receives from")
                 .Hiding("SetChannelValue", "SetFilter_Owner", "SetFilter_Faction", "SetFilter_Everyone");
         }
     }

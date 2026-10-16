@@ -44,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(ShowImage, "show image", Shows, AskedImage()).In(Category.Screen)
-                .WithValue(Shown, "text shown", Written).Looked(Unheard)
-                .WithValue(App, "app", Running(Apps(block))).Looked(Unheard)
+                .WithValue(Shown, "text", Written).Looked(Unheard).In(Category.Screen)
+                .WithValue(App, "app", Running(Apps(block))).Looked(Unheard).In(Category.Screen)
                 .Hiding("Title")
                 .Renaming("Rotate", true, "rotation")
                 .Measuring("Rotate", "°", 1, 90, "270");

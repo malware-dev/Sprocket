@@ -1462,6 +1462,22 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Fuel</value>
     <comment>A heading in the picker's organized list of what the chosen blocks offer, over the actions and values about what an engine burns, such as a hydrogen engine's hydrogen level and its running out of hydrogen.</comment>
   </data>
+  <data name="Sprocket.Category.LifeSupport" xml:space="preserve">
+    <value>Life support</value>
+    <comment>A heading in the picker's organized list of what the chosen blocks offer, over the actions and values about the air kept for whoever sits or sleeps in a block, such as a cockpit's or a cryo chamber's oxygen level.</comment>
+  </data>
+  <data name="Sprocket.Category.Repair" xml:space="preserve">
+    <value>Repair</value>
+    <comment>A heading in the picker's organized list of what the chosen blocks offer, over the actions and values about how whole a block is and the parts it is built from, such as integrity, damaged, build level, a rotor's add head and a suspension's wheel attached.</comment>
+  </data>
+  <data name="Sprocket.Category.State" xml:space="preserve">
+    <value>State</value>
+    <comment>A heading in the picker's organized list of what the chosen blocks offer, over the actions and values about how a block and its construct stand, counted and weighed, such as an upgrade module's connections and upgrade count and a cockpit's ship mass.</comment>
+  </data>
+  <data name="Sprocket.Category.Usage" xml:space="preserve">
+    <value>Usage</value>
+    <comment>A heading in the picker's organized list of what the chosen blocks offer, over the actions and values about who is using a block now, such as a cockpit's occupant name and under control, a turret controlled by a person and a camera in use.</comment>
+  </data>
   <data name="Sprocket.Category.Production" xml:space="preserve">
     <value>Production</value>
     <comment>A heading in the picker's organized list of what the chosen blocks offer, over the actions and values about making things, such as an assembler's or refinery's queue, progress and repeat mode, a projector's projecting and blocks left, and a drill's mode.</comment>

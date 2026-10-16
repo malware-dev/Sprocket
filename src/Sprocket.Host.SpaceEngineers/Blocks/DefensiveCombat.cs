@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction("flee", "flee", Flees).In(Category.Behaviour)
+            kind.WithAction("flee", "flee", Flees).In(Category.Automation)
                 .WithValue("fleeing", "fleeing", Fleeing).Status().Announced()
                 .WithChange("starts-fleeing", "starts fleeing", "fleeing", Literal.Of(true)).Announced()
                 .Reading("is fleeing", "is not fleeing")

@@ -90,12 +90,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 Orders(kind, assembler);
 
             var doing = assembler == null ? "refining" : "producing";
-            kind.WithValue(doing, doing, Producing).Announced().In(Category.Making)
+            kind.WithValue(doing, doing, Producing).Announced().In(Category.Production)
                 .WithChange("starts-" + doing, "starts " + doing, doing, Literal.Of(true))
                 .Reading("is " + doing, "is not " + doing).Announced()
                 .WithChange("stops-" + doing, "stops " + doing, doing, Literal.Of(false))
                 .Reading("is not " + doing, "is " + doing).Announced()
-                .WithValue("stuck", "stuck", Stuck).Announced().In(Category.Making);
+                .WithValue("stuck", "stuck", Stuck).Announced().In(Category.Production);
 
             if (assembler != null)
                 Setup(kind, block);
@@ -147,10 +147,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                         made.AddQueueItem(order.Blueprint, (double)order.Amount);
                 });
 
-            kind.WithAction("make", "make", makes, Items.Choosing("item", words, means), amount).In(Category.Making)
-                .WithAction("clear-the-queue", "clear the queue", Clears).In(Category.Making)
-                .WithValue("items-queued", "items queued", _queued).Looked(Queue).In(Category.Making)
-                .WithValue("progress", "progress", Progress).Percent().Announced().In(Category.Making);
+            kind.WithAction("make", "make", makes, Items.Choosing("item", words, means), amount).In(Category.Production)
+                .WithAction("clear-the-queue", "clear the queue", Clears).In(Category.Production)
+                .WithValue("items-queued", "items queued", _queued).Looked(Queue).In(Category.Production)
+                .WithValue("progress", "progress", Progress).Percent().Announced().In(Category.Production);
         }
 
         /// <summary>How an assembler is set to work: making or taking apart, and over again.</summary>
@@ -158,10 +158,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             // Whether an assembler can take apart is fixed by its definition, so it never changes and there is nothing to announce.
             var able = TakesApart(block);
-            kind.WithValue("mode", "mode", able ? Mode : Locked).Announced().In(Category.Making)
+            kind.WithValue("mode", "mode", able ? Mode : Locked).Announced().In(Category.Production)
                 .WithValue("able-to-take-apart", "able to take apart", Being.Flag(Reading.Of<IMyAssembler>(assembler => able)))
-                .Announced().In(Category.Making)
-                .WithValue("repeating", "repeating", Repeating).Looked(Repeat).In(Category.Making);
+                .Announced().In(Category.Production)
+                .WithValue("repeating", "repeating", Repeating).Looked(Repeat).In(Category.Production);
         }
 
         /// <summary>

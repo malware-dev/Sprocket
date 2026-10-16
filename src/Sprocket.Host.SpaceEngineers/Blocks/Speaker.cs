@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             sound.Needed = true;
 
             kind.WithAction(Play, "play", Plays, sound).In(Category.Sound)
-                .WithValue(Selected, "selected sound", Holding(means.ToArray())).Looked(Unheard)
+                .WithValue(Selected, "selected sound", Holding(means.ToArray())).Looked(Unheard).In(Category.Sound)
                 .Hiding("PlaySound")
                 .Renaming("StopSound", false, "stop")
                 .Renaming("VolumeSlider", true, "volume")

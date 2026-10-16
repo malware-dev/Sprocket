@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithChange("stops-working", "stops working", "working", Literal.Of(false))
                 .Reading("is not working", "is working").Announced();
 
-            kind.WithValue("being-hacked", "being hacked", Hacked).Looked(Unheard);
+            kind.WithValue("being-hacked", "being hacked", Hacked).Looked(Unheard).In(Category.Access);
 
             kind.WithValue("custom-data", "custom data", Data).In(Category.Other).Announced().Lines(DataLongest);
 

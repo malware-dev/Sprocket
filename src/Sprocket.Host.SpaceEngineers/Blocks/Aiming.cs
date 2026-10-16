@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithValue("targeting", "targeting", turret ? TurretTargeting : ControllerTargeting).Status().Looked(Unaimed)
                 .WithValue("on-target", "on target", turret ? TurretOnTarget : ControllerOnTarget).Looked(Unaimed)
                 .WithValue("controlled-by-a-person", "controlled by a person", turret ? TurretControlled : ControllerControlled)
-                .Announced();
+                .Announced().In(Category.Usage);
 
             kind.Renaming("Range", true, "AI aiming radius")
                 .Measuring("Range", " m")

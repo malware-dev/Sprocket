@@ -1113,6 +1113,18 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Category.Fuel" xml:space="preserve">
     <value>Drivstoff</value>
   </data>
+  <data name="Sprocket.Category.LifeSupport" xml:space="preserve">
+    <value>Livsstøtte</value>
+  </data>
+  <data name="Sprocket.Category.Repair" xml:space="preserve">
+    <value>Reparasjon</value>
+  </data>
+  <data name="Sprocket.Category.State" xml:space="preserve">
+    <value>Tilstand</value>
+  </data>
+  <data name="Sprocket.Category.Usage" xml:space="preserve">
+    <value>Bruk</value>
+  </data>
   <data name="Sprocket.Category.Production" xml:space="preserve">
     <value>Produksjon</value>
   </data>

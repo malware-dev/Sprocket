@@ -35,6 +35,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The air in a room: filling it, emptying it, and how much there is.</summary>
         Air,
 
+        /// <summary>The air kept for whoever sits or sleeps in it.</summary>
+        LifeSupport,
+
         /// <summary>Gas held or made: a tank's store, a generator's ice, a farm's output.</summary>
         Gas,
 
@@ -42,7 +45,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         Fuel,
 
         /// <summary>Making things.</summary>
-        Making,
+        Production,
+
+        /// <summary>How whole it is, and the parts it is built from.</summary>
+        Repair,
 
         /// <summary>Shooting.</summary>
         Weapons,
@@ -68,6 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What it is called.</summary>
         Identity,
 
+        /// <summary>How it and its construct stand, counted and weighed: what is fitted to it, how heavy the construct is.</summary>
+        State,
+
         /// <summary>
         /// How the machine is set up to behave: what it does when nobody tells it, and what it was
         /// tuned to when it was built.
@@ -78,6 +87,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// turns with the torque it was built with. Neither is something an automation revisits.
         /// </remarks>
         Behaviour,
+
+        /// <summary>Who is using it now.</summary>
+        Usage,
 
         /// <summary>Who may use it.</summary>
         Access,

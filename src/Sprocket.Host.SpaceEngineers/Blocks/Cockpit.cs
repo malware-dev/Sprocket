@@ -55,15 +55,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Reading("is occupied", "is empty").Announced()
                 .WithChange("becomes-empty", "becomes empty", Occupied, Literal.Of(false))
                 .Reading("is empty", "is occupied").Announced()
-                .WithValue("occupant-name", "occupant name", Occupant).Announced()
-                .WithValue("under-control", "under control", Controlled).Looked(Unheard);
+                .WithValue("occupant-name", "occupant name", Occupant).Announced().In(Category.Usage)
+                .WithValue("under-control", "under control", Controlled).Looked(Unheard).In(Category.Usage);
 
             var cockpit = block as IMyCockpit;
             if (cockpit != null && cockpit.OxygenCapacity > 0f)
-                kind.WithValue("oxygen-level", "oxygen level", Air).Percent().Looked(Unheard);
+                kind.WithValue("oxygen-level", "oxygen level", Air).Percent().Looked(Unheard).In(Category.LifeSupport);
 
-            kind.WithValue("gravity", "gravity", Gravity).Measured(" g").Looked(Unheard)
-                .WithValue("ship-mass", "ship mass", Mass).Measured(" kg").Looked(Unheard)
+            kind.WithValue("gravity", "gravity", Gravity).Measured(" g").Looked(Unheard).In(Category.Detection)
+                .WithValue("ship-mass", "ship mass", Mass).Measured(" kg").Looked(Unheard).In(Category.State)
                 .Renaming("HandBrake", true, "handbrake")
                 .Renaming("HandBrake", false, "toggle handbrake")
                 .Renaming("Park", true, "parking brake")

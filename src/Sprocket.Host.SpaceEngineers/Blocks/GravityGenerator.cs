@@ -26,14 +26,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction("reverse", "reverse", Reverses, (string)null).In(Category.Behaviour)
+            kind.WithAction("reverse", "reverse", Reverses, (string)null).In(Category.Other)
                 .Renaming("Gravity", true, "acceleration")
                 .Measuring("Gravity", " m/s2")
                 .Hiding("SetGravityAcceleration");
 
             if (block is IMyGravityGenerator)
             {
-                kind.WithAction("fit-to-the-grid", "fit to the grid", Fits, (string)null).In(Category.Behaviour)
+                kind.WithAction("fit-to-the-grid", "fit to the grid", Fits, (string)null).In(Category.Other)
                     .Renaming("Width", true, "width")
                     .Measuring("Width", " m")
                     .Renaming("Height", true, "height")

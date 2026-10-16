@@ -114,12 +114,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var heads = Heads(block, hinge);
             var adds = Doing.Of<IMyMotorStator, string>(given => Head(given, heads), Added);
             if (heads[1] != null || heads[2] != null)
-                kind.WithAction(AddHead, "add head", adds, AskedSize(heads));
+                kind.WithAction(AddHead, "add head", adds, AskedSize(heads)).In(Category.Repair);
             else
-                kind.WithAction(AddHead, "add head", adds);
+                kind.WithAction(AddHead, "add head", adds).In(Category.Repair);
 
             kind.WithValue("angle", "angle", hinge ? HingeAngle : RotorAngle).Measured("°").Looked(Turning).In(Category.Movement)
-                .WithValue("locked", "locked", Locked).Looked(Unheard).In(Category.Locking)
+                .WithValue("locked", "locked", Locked).Looked(Unheard).In(Category.Movement)
                 .WithValue("attached", "attached", Attached).Status().Announced()
                 .WithChange("attaches", "attaches", "attached", Literal.Of(true)).Announced()
                 .Reading("is attached", "is not attached")

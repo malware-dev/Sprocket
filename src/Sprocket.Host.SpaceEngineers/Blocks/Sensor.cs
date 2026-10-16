@@ -64,8 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithSignal(new ToolbarSlot(1, 0, 1), "starts detecting")
                 .WithSignal(new ToolbarSlot(1, 0, 2), "stops detecting")
                 .WithValue("detecting", "detecting", Detecting).Announced()
-                .WithValue("things-detected", "things detected", _count)
+                .WithValue("detections", "detections", _count)
                 .Looked("A sensor says when it starts and stops detecting, and nothing of how many things it detects.")
+                .In(Category.Detection)
                 .Renaming("Audible Proximity Alert", true, "audible proximity alert");
 
             foreach (var switchName in Switches)

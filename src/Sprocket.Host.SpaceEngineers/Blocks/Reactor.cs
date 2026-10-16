@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 _fuel = Being.Number<IMyReactor>(reactor => Held(reactor, uranium));
             }
 
-            kind.WithValue("uranium", "uranium", _fuel).Measured(" kg").Announced().In(Category.Power)
+            kind.WithValue("uranium", "uranium", _fuel).Measured(" kg").Announced().In(Category.Fuel)
                 .WithChange("runs-out-of-uranium", "runs out of uranium", "uranium", Literal.Of(0.0)).Announced()
                 .Reading("has no uranium", "has uranium")
                 .WithValue("output", "output", Output).Measured(" MW").Announced().In(Category.Power)

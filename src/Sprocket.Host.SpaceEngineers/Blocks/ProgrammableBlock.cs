@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             kind.WithAction(Run, "run", Runs, Asked()).In(Category.Automation)
                 .WithValue("has-compile-errors", "has compile errors", Broken)
-                .Looked("A programmable block raises no event when its script is compiled.");
+                .Looked("A programmable block raises no event when its script is compiled.").In(Category.Automation);
         }
 
         /// <summary>Runs the script with <paramref name="argument" />, keeping in <paramref name="seen" /> whether it ran.</summary>

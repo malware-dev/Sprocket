@@ -83,10 +83,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
                 .WithValue(LabelOf, "label of button", Being.Text<IMyButtonPanel, Labelled>(Labelled.Read,
                     (panel, labelled, seen) => panel.GetButtonName(labelled.Button))
-                    .Taking(Asked(buttons))).Looked(Unheard)
+                    .Taking(Asked(buttons))).Looked(Unheard).In(Category.Screen)
                 .WithValue(Assigned, "button has an action", Being.Flag<IMyButtonPanel, Labelled>(Labelled.Read,
                     (panel, labelled, seen) => panel.IsButtonAssigned(labelled.Button))
-                    .Taking(Asked(buttons))).Looked(Unheard);
+                    .Taking(Asked(buttons))).Looked(Unheard).In(Category.Automation);
         }
 
         /// <summary>Not wired where none of its buttons is, because an unwired button cannot report a press.</summary>
