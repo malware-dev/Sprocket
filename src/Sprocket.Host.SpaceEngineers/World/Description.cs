@@ -52,8 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             get
             {
                 var covered = 0;
-                for (var i = 0; i < Pieces.Count; i++)
-                    covered += Pieces[i].Span;
+                foreach (var piece in Pieces)
+                    covered += piece.Span;
 
                 return covered;
             }
@@ -69,16 +69,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public void Fields(IList<Field> into)
         {
-            for (var i = 0; i < Pieces.Count; i++)
+            foreach (var piece in Pieces)
             {
-                var one = Pieces[i] as Parameter;
+                var one = piece as Parameter;
                 if (one != null)
                 {
                     into.Add(Asks(one));
                     continue;
                 }
 
-                var group = Pieces[i] as Group;
+                var group = piece as Group;
                 if (group == null)
                     continue;
 
@@ -92,8 +92,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                for (var p = 0; p < group.Parameters.Count; p++)
-                    into.Add(Asks(group.Parameters[p]));
+                foreach (var parameter in group.Parameters)
+                    into.Add(Asks(parameter));
             }
         }
 
@@ -103,21 +103,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Correct(IList<Primitive> types)
         {
             var at = 0;
-            for (var i = 0; i < Pieces.Count; i++)
+            foreach (var piece in Pieces)
             {
-                var one = Pieces[i] as Parameter;
+                var one = piece as Parameter;
                 if (one != null)
                 {
                     Correct(types, at++, one);
                     continue;
                 }
 
-                var group = Pieces[i] as Group;
+                var group = piece as Group;
                 if (group == null)
                     continue;
 
-                for (var p = 0; p < group.Parameters.Count; p++)
-                    Correct(types, at++, group.Parameters[p]);
+                foreach (var parameter in group.Parameters)
+                    Correct(types, at++, parameter);
             }
         }
 

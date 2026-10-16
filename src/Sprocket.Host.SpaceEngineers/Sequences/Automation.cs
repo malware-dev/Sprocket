@@ -252,12 +252,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public EntityRef Declare(GridWorld world, GridEntity entity)
         {
-            for (var i = 0; i < _refs.Count; i++)
+            foreach (var entityRef in _refs)
             {
                 int matched;
-                var found = world.Match(_refs[i].Keys, out matched);
-                if (found != null && found.Id == entity.Id && _refs[i].KindId == entity.Kind.Id)
-                    return _refs[i];
+                var found = world.Match(entityRef.Keys, out matched);
+                if (found != null && found.Id == entity.Id && entityRef.KindId == entity.Kind.Id)
+                    return entityRef;
             }
 
             var called = Naming.Clean(entity.Name);
@@ -314,10 +314,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The signal variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names, or null.</summary>
         public SignalRef FindSignalRef(string block, ToolbarSlot at)
         {
-            for (var i = 0; i < _signalRefs.Count; i++)
+            foreach (var signalRef in _signalRefs)
             {
-                if (_signalRefs[i].Holds(block, at))
-                    return _signalRefs[i];
+                if (signalRef.Holds(block, at))
+                    return signalRef;
             }
 
             return null;
@@ -326,10 +326,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The signal variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names and no other, or null.</summary>
         public SignalRef FindSignalRefOnly(string block, ToolbarSlot at)
         {
-            for (var i = 0; i < _signalRefs.Count; i++)
+            foreach (var signalRef in _signalRefs)
             {
-                if (_signalRefs[i].HoldsOnly(block, at))
-                    return _signalRefs[i];
+                if (signalRef.HoldsOnly(block, at))
+                    return signalRef;
             }
 
             return null;
@@ -375,9 +375,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 return;
 
             var sources = SystemInstance.Through(instance, trigger.Sources);
-            for (var i = 0; i < sources.Count; i++)
+            foreach (var source in sources)
             {
-                blocks.Add(sources[i]);
+                blocks.Add(source);
                 at.Add(trigger.At);
             }
         }
@@ -398,8 +398,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             if (system.IsBlueprint)
             {
-                var filled = instance == null ? null : instance.FilledWith(trigger);
-                var positions = instance == null ? null : instance.Positions(trigger);
+                var filled = instance?.FilledWith(trigger);
+                var positions = instance?.Positions(trigger);
                 for (var i = 0; filled != null && positions != null && i < filled.Count && i < positions.Count; i++)
                 {
                     blocks.Add(filled[i]);
@@ -427,10 +427,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (found == null)
                 return reference;
 
-            for (var i = 0; i < found.Keys.Count; i++)
+            foreach (var key in found.Keys)
             {
                 string text;
-                if (found.Keys[i].Cells == null && values.TryText(found.Keys[i].Kind, found.Keys[i].Value, out text))
+                if (key.Cells == null && values.TryText(key.Kind, key.Value, out text))
                     return text;
             }
 
@@ -525,10 +525,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The logic system numbered <paramref name="id" />, or null where there is none.</summary>
         public AutomationSystem FindSystem(int id)
         {
-            for (var i = 0; i < _systems.Count; i++)
+            foreach (var system in _systems)
             {
-                if (_systems[i].Id == id)
-                    return _systems[i];
+                if (system.Id == id)
+                    return system;
             }
             return null;
         }
@@ -536,10 +536,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The system with that identity, or null.</summary>
         public AutomationSystem FindSystem(Guid identity)
         {
-            for (var i = 0; i < _systems.Count; i++)
+            foreach (var system in _systems)
             {
-                if (_systems[i].Identity == identity)
-                    return _systems[i];
+                if (system.Identity == identity)
+                    return system;
             }
             return null;
         }
@@ -547,10 +547,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The logic system made from the stored blueprint <paramref name="origin" />, or null.</summary>
         public AutomationSystem MadeFrom(Guid origin)
         {
-            for (var i = 0; i < _systems.Count; i++)
+            foreach (var system in _systems)
             {
-                if (_systems[i].Origin == origin)
-                    return _systems[i];
+                if (system.Origin == origin)
+                    return system;
             }
             return null;
         }
@@ -558,10 +558,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The system called this, by this namespace, or null.</summary>
         public AutomationSystem FindSystem(string space, string name)
         {
-            for (var i = 0; i < _systems.Count; i++)
+            foreach (var system in _systems)
             {
-                if (_systems[i].Is(space, name))
-                    return _systems[i];
+                if (system.Is(space, name))
+                    return system;
             }
             return null;
         }
@@ -758,10 +758,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void RemoveSequence(Sequence sequence)
         {
             _sequences.Remove(sequence);
-            for (var i = 0; i < _systems.Count; i++)
+            foreach (var system in _systems)
             {
-                if (_systems[i].Remove(sequence))
-                    _systems[i].DropTriggersFor(sequence.Number);
+                if (system.Remove(sequence))
+                    system.DropTriggersFor(sequence.Number);
             }
 
             Wiring++;
@@ -839,10 +839,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The sequence numbered <paramref name="id" />, or null where there is none.</summary>
         public Sequence FindSequence(int id)
         {
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
-                if (_sequences[i].Id == id)
-                    return _sequences[i];
+                if (sequence.Id == id)
+                    return sequence;
             }
             return null;
         }

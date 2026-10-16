@@ -85,8 +85,8 @@ namespace Lumel.Styling
         /// <summary>Gathers into <paramref name="declared" /> everything any layer of this style, or of its base, sets.</summary>
         void Declare(TState declared)
         {
-            for (var i = 0; i < _layers.Count; i++)
-                declared.Gather(_layers[i]);
+            foreach (var layer in _layers)
+                declared.Gather(layer);
 
             if (_basedOn != null)
                 _basedOn.Declare(declared);

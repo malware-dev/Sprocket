@@ -45,8 +45,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var compared = new List<Field>();
             value.Fields(compared);
-            for (var i = 0; i < compared.Count; i++)
-                fields.Add(value.Holds == ValueKind.Flag ? Stated(compared[i], value, events) : compared[i]);
+            foreach (var field in compared)
+                fields.Add(value.Holds == ValueKind.Flag ? Stated(field, value, events) : field);
 
             return fields;
         }

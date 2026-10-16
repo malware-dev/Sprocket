@@ -58,8 +58,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             said.Actions.Add(Action("SetChannelValue", Parameter("", Integer)));
             said.Actions.Add(Action("SetChannelValue_SendSignal", Parameter("", Integer)));
 
-            for (var i = 0; i < Reals.Length; i++)
-                said.Actions.Add(Action(Reals[i], Parameter("", Real)));
+            foreach (var name in Reals)
+                said.Actions.Add(Action(name, Parameter("", Real)));
 
             return said;
         }
@@ -74,8 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             var description = new Description();
             description.Id = id;
 
-            for (var i = 0; i < pieces.Length; i++)
-                description.Pieces.Add(pieces[i]);
+            foreach (var piece in pieces)
+                description.Pieces.Add(piece);
 
             return description;
         }
@@ -93,8 +93,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             var group = new Group();
             group.Sort = kind;
 
-            for (var i = 0; i < parameters.Length; i++)
-                group.Parameters.Add(parameters[i]);
+            foreach (var parameter in parameters)
+                group.Parameters.Add(parameter);
 
             return group;
         }

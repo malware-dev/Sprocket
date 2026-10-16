@@ -20,14 +20,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public float In(IMyAirVent vent)
         {
             var sink = vent.Components.Get<MyResourceSinkComponent>();
-            return sink == null ? -1f : sink.CurrentInputByType(Oxygen);
+            return sink?.CurrentInputByType(Oxygen) ?? -1f;
         }
 
         /// <inheritdoc />
         public float Out(IMyAirVent vent)
         {
             var source = vent.Components.Get<MyResourceSourceComponent>();
-            return source == null ? -1f : source.CurrentOutputByType(Oxygen);
+            return source?.CurrentOutputByType(Oxygen) ?? -1f;
         }
     }
 }

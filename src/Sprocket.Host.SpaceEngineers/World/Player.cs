@@ -62,8 +62,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (kept == null)
                 return;
 
-            for (var i = 0; i < kept.Count; i++)
-                into.Add(Hsv.Painted(kept[i]));
+            foreach (var color in kept)
+                into.Add(Hsv.Painted(color));
         }
     }
 }

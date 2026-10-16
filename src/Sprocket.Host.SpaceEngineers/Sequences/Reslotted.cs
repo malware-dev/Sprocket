@@ -44,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Touches(T subject, IList<object> screens)
         {
             _edit.Touches(subject, screens);
-            for (var i = 0; i < _reslots.Count; i++)
-                _reslots[i].Touches(screens);
+            foreach (var reslot in _reslots)
+                reslot.Touches(screens);
         }
 
         /// <inheritdoc />
@@ -59,9 +59,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             get
             {
-                for (var i = 0; i < _reslots.Count; i++)
+                foreach (var reslot in _reslots)
                 {
-                    if (!_reslots[i].IsEmpty)
+                    if (!reslot.IsEmpty)
                         return true;
                 }
 
@@ -77,8 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _reslots.Add(_settle());
 
             _made = true;
-            for (var i = 0; i < _reslots.Count; i++)
-                _reslots[i].Apply();
+            foreach (var reslot in _reslots)
+                reslot.Apply();
         }
 
         /// <inheritdoc />
@@ -105,9 +105,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether every slot change it carries stands as it was made, where <paramref name="made" />, or as before it.</summary>
         bool Holds(bool made)
         {
-            for (var i = 0; i < _reslots.Count; i++)
+            foreach (var reslot in _reslots)
             {
-                if (!_reslots[i].Holds(made))
+                if (!reslot.Holds(made))
                     return false;
             }
 

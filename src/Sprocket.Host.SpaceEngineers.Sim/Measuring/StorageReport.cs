@@ -169,8 +169,8 @@ public static class StorageReport
     static int Statements(string text)
     {
         var lines = 0;
-        for (var i = 0; i < text.Length; i++)
-            if (text[i] == '\n')
+        foreach (var character in text)
+            if (character == '\n')
                 lines++;
 
         return lines;

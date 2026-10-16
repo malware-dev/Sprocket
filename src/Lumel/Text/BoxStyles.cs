@@ -12,12 +12,12 @@ namespace Lumel.Text
         /// <summary>The attributes <paramref name="styles" /> give, no two of them under one name.</summary>
         public BoxStyles(params BoxStyle[] styles)
         {
-            for (var i = 0; i < styles.Length; i++)
+            foreach (var style in styles)
             {
-                if (_byName.ContainsKey(styles[i].Name))
-                    throw new ArgumentException("Two box styles are given for the attribute " + styles[i].Name + ".", nameof(styles));
+                if (_byName.ContainsKey(style.Name))
+                    throw new ArgumentException("Two box styles are given for the attribute " + style.Name + ".", nameof(styles));
 
-                _byName.Add(styles[i].Name, styles[i]);
+                _byName.Add(style.Name, style);
             }
         }
 

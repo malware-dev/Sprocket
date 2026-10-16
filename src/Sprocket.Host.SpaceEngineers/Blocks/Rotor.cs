@@ -221,9 +221,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static MyMotorStatorDefinition Definition(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;
-            return definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyMotorStatorDefinition;
+            return definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyMotorStatorDefinition;
         }
 
         /// <summary>

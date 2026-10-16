@@ -194,7 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _required.IsOn = !_part.Optional;
             _required.Tip = Tip.For(_required.Tip, texts.BlueprintRequiredAbout);
             _required.Command = editable
-                ? Editor.Act(Cmd.MakeOptional, delegate { Editor.Do(_system, new SetOptional(_part, !_part.Optional)); })
+                ? Editor.Act(Cmd.MakeOptional, () => Editor.Do(_system, new SetOptional(_part, !_part.Optional)))
                 : null;
         }
 
@@ -240,7 +240,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Writes the box into the slot once the keyboard has left it, read every tick because it is one comparison.</summary>
         void Refocused()
         {
-            var now = Editor.Input == null ? null : Editor.Input.Focused;
+            var now = Editor.Input?.Focused;
             if (ReferenceEquals(now, _focused))
                 return;
 

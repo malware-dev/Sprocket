@@ -226,8 +226,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     continue;
                 }
 
-                for (var n = 0; n < chosen.Count; n++)
-                    into.Add(chosen[n]);
+                foreach (var choice in chosen)
+                    into.Add(choice);
             }
         }
     }

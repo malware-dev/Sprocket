@@ -66,14 +66,14 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             }
 
             _offset = memory.Clock - frame;
-            for (var i = 0; i < memory.Constructs.Count; i++)
-                _unclaimed[memory.Constructs[i].Keeper] = memory.Constructs[i];
+            foreach (var construct in memory.Constructs)
+                _unclaimed[construct.Keeper] = construct;
 
-            for (var i = 0; i < memory.Players.Count; i++)
-                _players[memory.Players[i].Player] = memory.Players[i];
+            foreach (var player in memory.Players)
+                _players[player.Player] = player;
 
-            for (var i = 0; i < memory.Doors.Count; i++)
-                _closing[memory.Doors[i].Door] = memory.Doors[i].Due;
+            foreach (var door in memory.Doors)
+                _closing[door.Door] = door.Due;
         }
 
         /// <summary>The tick <paramref name="door" /> was to close on when the world was saved, given up to whoever claims it; -1 where none was coming.</summary>

@@ -38,8 +38,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _answered = answered;
 
             _panel = new DurationPanel(editor.Texts, editor.Input, start) { Cautions = rate };
-            _panel.Submitted += delegate { Finish(false); };
-            _panel.Cancelled += delegate { Finish(true); };
+            _panel.Submitted += () => Finish(false);
+            _panel.Cancelled += () => Finish(true);
             _panel.Switched += editor.Prefer;
 
             _window = new Popup
@@ -56,12 +56,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                             Style = Styles.Primary,
                             Text = editor.Texts.ChromeDone,
                             Align = Align.Right | Align.Bottom,
-                            Command = new Relay(delegate { Finish(false); })
+                            Command = new Relay(() => Finish(false))
                         }
                     }
                 }
             };
-            _window.Closed += delegate { Finish(true); };
+            _window.Closed += () => Finish(true);
         }
 
         /// <summary>The panel the length is given in.</summary>

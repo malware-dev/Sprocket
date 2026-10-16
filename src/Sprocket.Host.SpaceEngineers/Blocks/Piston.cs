@@ -158,8 +158,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field AskedPosition(IMyTerminalBlock block)
         {
             var piston = block as IMyPistonBase;
-            var least = piston == null ? 0f : piston.LowestPosition;
-            var most = piston == null ? 10f : piston.HighestPosition;
+            var least = piston?.LowestPosition ?? 0f;
+            var most = piston?.HighestPosition ?? 10f;
 
             var position = Field.Between("position", Said(least), Said(most));
             position.Needed = true;
@@ -174,7 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // A move at no speed sets out for a position it can never reach, so there is no reading of an
             // empty speed that means anything.
             var piston = block as IMyPistonBase;
-            var speed = Field.Between("speed", "0", Said(piston == null ? 5f : piston.MaxVelocity));
+            var speed = Field.Between("speed", "0", Said(piston?.MaxVelocity ?? 5f));
             speed.Needed = true;
             speed.Above = true;
             speed.Entry = Entry.Decimal;

@@ -47,13 +47,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("OffensiveCombatIntercept_OverrideCollisionAvoidance", true, "override collision avoidance")
                 .Renaming("OffensiveCombatIntercept_OverrideCollisionAvoidance", false, "toggle override collision avoidance");
 
-            for (var i = 0; i < Facings.Length; i++)
+            foreach (var direction in Facings)
             {
-                var facing = Facings[i].ToLowerInvariant();
-                kind.Renaming(Circle + "Facing" + Facings[i], true, "circle facing " + facing)
-                    .Renaming(Circle + "Facing" + Facings[i], false, "toggle circle facing " + facing)
-                    .Renaming(Range + "Facing" + Facings[i], true, "stay at range facing " + facing)
-                    .Renaming(Range + "Facing" + Facings[i], false, "toggle stay at range facing " + facing);
+                var facing = direction.ToLowerInvariant();
+                kind.Renaming(Circle + "Facing" + direction, true, "circle facing " + facing)
+                    .Renaming(Circle + "Facing" + direction, false, "toggle circle facing " + facing)
+                    .Renaming(Range + "Facing" + direction, true, "stay at range facing " + facing)
+                    .Renaming(Range + "Facing" + direction, false, "toggle stay at range facing " + facing);
             }
         }
     }

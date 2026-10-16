@@ -94,9 +94,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (required.IsWatched)
                     {
                         var sending = SystemInstance.Through(through, required.Sources);
-                        for (var s = 0; s < sending.Count; s++)
+                        foreach (var source in sending)
                         {
-                            GridEntity block = bindings.Entity(sending[s]);
+                            GridEntity block = bindings.Entity(source);
                             if (block != null && Probe.Watching(block, required.Provider, required.EventId) == null)
                                 return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
                         }
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     var named = SystemInstance.Through(through, moment.Sources);
                     var entity = named.Count == 0 ? null : bindings.Entity(named[0]);
-                    return SequenceFault.Unstarted(Unwired.NoMoment, entity == null ? null : entity.Name);
+                    return SequenceFault.Unstarted(Unwired.NoMoment, entity?.Name);
                 }
 
                 // A block whose member can never be read as the when compares it can never start it, which is said rather
@@ -139,9 +139,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 var watched = SystemInstance.Through(through, when.Sources);
-                for (var s = 0; s < watched.Count; s++)
+                foreach (var source in watched)
                 {
-                    GridEntity block = bindings.Entity(watched[s]);
+                    GridEntity block = bindings.Entity(source);
                     if (block != null && Probe.Of(block, when.Provider, when.EventId, when.Arguments, when.Quantifier,
                             when.Relation, when.Value) == null)
                         return SequenceFault.Unstarted(Unwired.NoMoment, block.Name);
@@ -197,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>A lookup: the faults are found where they happen, and nothing is worked out here.</remarks>
         public static SequenceFault Fault(SequenceRunner state)
         {
-            return state == null ? SequenceFault.None : state.Fault;
+            return state?.Fault ?? SequenceFault.None;
         }
 
         /// <summary>What the program says is wrong with a sequence on <paramref name="through" />, or none.</summary>
@@ -306,9 +306,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         static bool Lasts(Bindings bindings, Act act, SystemInstance through)
         {
             var targets = SystemInstance.Through(through, act.Targets);
-            for (var t = 0; t < targets.Count; t++)
+            foreach (var target in targets)
             {
-                GridEntity entity = bindings.Entity(targets[t]);
+                GridEntity entity = bindings.Entity(target);
                 if (entity == null)
                     continue;
 
@@ -337,12 +337,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 for (var s = 0; s < step.Targets.Count; s++)
                 {
                     var slot = step.Targets[s];
-                    var part = system == null ? null : system.FindPart(slot);
-                    var filled = through == null ? null : through.FilledWith(slot);
+                    var part = system?.FindPart(slot);
+                    var filled = through?.FilledWith(slot);
                     if (part != null && through != null && (filled == null || filled.Count == 0))
                         continue;
 
-                    var count = filled == null ? 1 : filled.Count;
+                    var count = filled?.Count ?? 1;
                     for (var n = 0; n < count; n++)
                     {
                         var name = filled == null ? slot : filled[n];
@@ -408,7 +408,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         static Comparison TestOf(Step step)
         {
             var branch = step as Branch;
-            return branch == null ? null : branch.Test;
+            return branch?.Test;
         }
 
         /// <summary>The first step that runs a sequence which, directly or through the sequences it runs, starts this one again, or none.</summary>
@@ -441,7 +441,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             seen.Add(from);
             var called = system.FindSequence(from);
-            var steps = called == null ? null : called.Steps;
+            var steps = called?.Steps;
             for (var i = 0; steps != null && i < steps.Count; i++)
             {
                 var run = steps[i] as Run;
@@ -465,9 +465,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (test != null)
                 {
                     var read = SystemInstance.Through(through, test.Targets);
-                    for (var t = 0; t < read.Count; t++)
+                    foreach (var source in read)
                     {
-                        GridEntity entity = bindings.Entity(read[t]);
+                        GridEntity entity = bindings.Entity(source);
                         var value = entity == null ? null : test.Names(entity.Kind.Actions);
                         var left = value == null || value.Being == null ? null : value.Being.Missing(test.Arguments.Count);
                         if (left != null)
@@ -482,9 +482,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 var targets = SystemInstance.Through(through, act.Targets);
-                for (var t = 0; t < targets.Count; t++)
+                foreach (var target in targets)
                 {
-                    GridEntity entity = bindings.Entity(targets[t]);
+                    GridEntity entity = bindings.Entity(target);
                     if (entity == null)
                         continue;
 
@@ -527,14 +527,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 var targets = SystemInstance.Through(through, act.Targets);
-                for (var t = 0; t < targets.Count; t++)
+                foreach (var target in targets)
                 {
-                    GridEntity entity = bindings.Entity(targets[t]);
+                    GridEntity entity = bindings.Entity(target);
                     if (entity == null)
                         continue;
 
                     EntityAction doing = act.Names(entity.Kind.Actions);
-                    var refused = doing == null ? null : doing.Refused(act.Arguments);
+                    var refused = doing?.Refused(act.Arguments);
                     if (refused != null)
                         return new SequenceFault(SequenceProblem.Mistyped, i, Trouble.None, refused);
                 }
@@ -550,9 +550,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         static bool TestTakes(Bindings bindings, Comparison test, SystemInstance through, IList<Literal> compared)
         {
             var targets = SystemInstance.Through(through, test.Targets);
-            for (var t = 0; t < targets.Count; t++)
+            foreach (var target in targets)
             {
-                GridEntity entity = bindings.Entity(targets[t]);
+                GridEntity entity = bindings.Entity(target);
                 if (entity == null)
                     continue;
 
@@ -586,9 +586,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (test != null)
                 {
                     var read = SystemInstance.Through(through, test.Targets);
-                    for (var t = 0; t < read.Count; t++)
+                    foreach (var source in read)
                     {
-                        GridEntity entity = bindings.Entity(read[t]);
+                        GridEntity entity = bindings.Entity(source);
                         if (entity != null && test.Names(entity.Kind.Actions) == null)
                             return new SequenceFault(SequenceProblem.Unoffered, i);
                     }
@@ -601,9 +601,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 var targets = SystemInstance.Through(through, act.Targets);
-                for (var t = 0; t < targets.Count; t++)
+                foreach (var target in targets)
                 {
-                    GridEntity entity = bindings.Entity(targets[t]);
+                    GridEntity entity = bindings.Entity(target);
                     if (entity != null && act.Names(entity.Kind.Actions) == null)
                         return new SequenceFault(SequenceProblem.Unoffered, i);
                 }

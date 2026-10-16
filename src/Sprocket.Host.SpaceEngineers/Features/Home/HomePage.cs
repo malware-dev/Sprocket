@@ -194,7 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public void Live(StatusRow row, AutomationSystem system, SystemInstance instance, bool recount, bool shown,
             Texts texts)
         {
-            Live(row, system, instance, instance != null && system.Enabled && instance.Enabled, instance == null ? null : instance.Halt,
+            Live(row, system, instance, instance != null && system.Enabled && instance.Enabled, instance?.Halt,
                 recount, shown, texts);
         }
 
@@ -297,8 +297,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             if (reshaped)
                 Arrange(texts);
 
-            for (var i = 0; i < _systems.Count; i++)
-                _groups[_systems[i]].Live(recount, reshaped, texts);
+            foreach (var system in _systems)
+                _groups[system].Live(recount, reshaped, texts);
         }
 
         /// <summary>Puts a group in place for each logic system, and gives everything its words.</summary>
@@ -314,8 +314,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
 
-            for (var i = 0; i < _systems.Count; i++)
-                _groups[_systems[i]].Arrange(texts);
+            foreach (var system in _systems)
+                _groups[system].Arrange(texts);
         }
 
         /// <summary>Makes a logic system, numbered, with its first installation, and opens it with its name in hand to be given.</summary>
@@ -352,9 +352,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         int Shape()
         {
             var shape = _systems.Count;
-            for (var i = 0; i < _systems.Count; i++)
+            foreach (AutomationSystem system in _systems)
             {
-                AutomationSystem system = _systems[i];
                 shape = shape * 31 + system.Id;
                 shape = shape * 31 + system.Instances.Count * 2 + (system.IsBlueprint ? 1 : 0);
             }

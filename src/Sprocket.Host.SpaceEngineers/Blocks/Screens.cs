@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             for (var i = 0; i < names.Length; i++)
             {
                 var surface = screens.GetSurface(i);
-                var name = surface == null ? null : surface.DisplayName;
+                var name = surface?.DisplayName;
                 names[i] = string.IsNullOrEmpty(name) ? "screen " + (i + 1) : name;
             }
 

@@ -185,10 +185,10 @@ public sealed class Rig
                 _joined(_group, head.Block, null);
         }
 
-        for (var i = 0; i < _grids.Count; i++)
+        foreach (var grid in _grids)
         {
-            if (_grids[i].Block == rotor.TopGrid)
-                _welding = _grids[i];
+            if (grid.Block == rotor.TopGrid)
+                _welding = grid;
         }
     }
 
@@ -218,9 +218,9 @@ public sealed class Rig
     /// <summary>Whether one of the rig's grids has the entity id <paramref name="entityId" />.</summary>
     public bool HasGrid(long entityId)
     {
-        for (var i = 0; i < _grids.Count; i++)
+        foreach (var grid in _grids)
         {
-            if (_grids[i].Block.EntityId == entityId)
+            if (grid.Block.EntityId == entityId)
                 return true;
         }
 
@@ -568,8 +568,8 @@ public sealed class Rig
                 return _grids[0].Fitted;
 
             var all = new List<Fitting>();
-            for (var i = 0; i < _grids.Count; i++)
-                all.AddRange(_grids[i].Fitted);
+            foreach (var grid in _grids)
+                all.AddRange(grid.Fitted);
 
             return all;
         }
@@ -606,8 +606,8 @@ public sealed class Rig
                 var into = arguments[2] as List<IMyCubeGrid>;
                 if (into != null)
                 {
-                    for (var i = 0; i < _grids.Count; i++)
-                        into.Add(_grids[i].Block);
+                    foreach (var grid in _grids)
+                        into.Add(grid.Block);
                 }
 
                 return null;

@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _entries.Children.Add(new HStack
                 {
                     Style = Styles.MenuRow,
-                    Command = new Relay(delegate { Choose(choice); }),
+                    Command = new Relay(() => Choose(choice)),
                     Tip = Tip.For(null, choice.About),
                     Children = { new Label { Style = Styles.ListWord, Text = choice.Text } }
                 });

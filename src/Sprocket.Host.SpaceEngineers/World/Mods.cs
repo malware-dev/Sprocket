@@ -35,10 +35,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (mods == null)
                 return;
 
-            for (var i = 0; i < mods.Count; i++)
+            foreach (var mod in mods)
             {
-                var named = Named(mods[i]);
-                Descriptions said = Said(mods[i], named);
+                var named = Named(mod);
+                Descriptions said = Said(mod, named);
                 if (said == null)
                     continue;
 

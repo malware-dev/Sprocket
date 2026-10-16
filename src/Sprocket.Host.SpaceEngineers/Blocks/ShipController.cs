@@ -70,9 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static bool Locks(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;
-            var definition = definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyShipControllerDefinition;
+            var definition = definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyShipControllerDefinition;
 
             return definition == null || definition.TargetLockingEnabled;
         }

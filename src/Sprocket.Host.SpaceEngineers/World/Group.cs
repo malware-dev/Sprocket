@@ -23,15 +23,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         public List<Parameter> Parameters = new List<Parameter>();
 
         /// <inheritdoc />
-        public override int Span
-        {
-            get { return Parameters.Count; }
-        }
+        public override int Span => Parameters.Count;
 
         /// <inheritdoc />
-        public override string Kind
-        {
-            get { return Sort ?? ""; }
-        }
+        public override string Kind => Sort ?? "";
     }
 }

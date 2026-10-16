@@ -303,9 +303,8 @@ namespace Lumel.Text
             var strong = 0;
             var emphasis = 0;
 
-            for (var i = 0; i < pieces.Count; i++)
+            foreach (var piece in pieces)
             {
-                var piece = pieces[i];
                 strong += piece.StrongDelta;
                 emphasis += piece.EmphasisDelta;
 
@@ -446,9 +445,9 @@ namespace Lumel.Text
             if (target.Length == 0)
                 return null;
 
-            for (var i = 0; i < target.Length; i++)
+            foreach (var character in target)
             {
-                if (IsSpace(target[i]))
+                if (IsSpace(character))
                     return null;
             }
 

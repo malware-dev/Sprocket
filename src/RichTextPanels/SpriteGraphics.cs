@@ -188,8 +188,8 @@ namespace RichTextPanels
         float Grown()
         {
             var scale = 1f;
-            for (var i = 0; i < _transforms.Count; i++)
-                scale *= _transforms[i].Scale;
+            foreach (var transform in _transforms)
+                scale *= transform.Scale;
 
             return scale;
         }

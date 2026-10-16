@@ -292,13 +292,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         SequenceFault Troubled()
         {
             var stuck = SequenceFault.None;
-            for (var i = 0; i < _memory.Outstanding.Count; i++)
+            foreach (var step in _memory.Outstanding)
             {
-                var step = _memory.Outstanding[i];
                 var compiled = Compile(step);
-                for (var t = 0; t < compiled.Acts.Count; t++)
+                foreach (var acted in compiled.Acts)
                 {
-                    var acted = compiled.Acts[t];
                     var until = acted.Action.Until;
                     if (until == null)
                         continue;
@@ -755,16 +753,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (_bindings == null)
                 return;
 
-            for (var i = 0; i < _memory.Outstanding.Count; i++)
+            foreach (var step in _memory.Outstanding)
             {
-                var act = (Act)_sequence.Steps[_memory.Outstanding[i]];
+                var act = (Act)_sequence.Steps[step];
                 if (!act.HasAction || act.Sets)
                     continue;
 
-                var compiled = Compile(_memory.Outstanding[i]);
-                for (var t = 0; t < compiled.Acts.Count; t++)
+                var compiled = Compile(step);
+                foreach (var acted in compiled.Acts)
                 {
-                    var acted = compiled.Acts[t];
                     if (acted.Bound != null)
                         acted.Bound.Stop(acted.Entity.Block);
                 }
@@ -796,9 +793,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return true;
 
             var compiled = Compile(step);
-            for (var i = 0; i < compiled.Acts.Count; i++)
+            foreach (var acted in compiled.Acts)
             {
-                var acted = compiled.Acts[i];
                 var until = acted.Action.Until;
                 if (until != null && !acted.Done && !until.Holds(acted.Entity.Block, acted.Seen))
                     return false;
@@ -810,9 +806,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Lets go of everything being waited on, forgetting what any block said it was done with.</summary>
         void Release()
         {
-            for (var i = 0; i < _memory.Outstanding.Count; i++)
+            foreach (var step in _memory.Outstanding)
             {
-                var compiled = _memory.Outstanding[i] < _steps.Length ? _steps[_memory.Outstanding[i]] : null;
+                var compiled = step < _steps.Length ? _steps[step] : null;
                 for (var t = 0; compiled != null && t < compiled.Acts.Count; t++)
                     compiled.Acts[t].Done = false;
             }
@@ -831,10 +827,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Keeps what is remembered of each block of <paramref name="compiled" /> in what the world saves, where it is not kept already.</summary>
         void Listed(Compiled compiled)
         {
-            for (var i = 0; i < compiled.Acts.Count; i++)
+            foreach (var acted in compiled.Acts)
             {
-                if (!_memory.Acts.Contains(compiled.Acts[i].Kept))
-                    _memory.Acts.Add(compiled.Acts[i].Kept);
+                if (!_memory.Acts.Contains(acted.Kept))
+                    _memory.Acts.Add(acted.Kept);
             }
         }
 
@@ -1135,8 +1131,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (test.Quantifier == Quantifier.Sum || test.Quantifier == Quantifier.Average)
             {
                 var total = 0d;
-                for (var i = 0; i < tested.Reads.Count; i++)
-                    total += tested.Reads[i].Number();
+                foreach (var read in tested.Reads)
+                    total += read.Number();
 
                 // An average of nothing is no number; with no block read, nothing holds.
                 if (test.Quantifier == Quantifier.Average)
@@ -1151,9 +1147,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             var all = test.Quantifier == Quantifier.All;
-            for (var i = 0; i < tested.Reads.Count; i++)
+            foreach (var read in tested.Reads)
             {
-                var holds = tested.Reads[i].Holds();
+                var holds = read.Holds();
                 if (holds != all)
                     return holds;
             }
@@ -1164,10 +1160,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The first block of an act that is switched off, and so cannot do what it is asked; none where all can.</summary>
         SequenceFault Unable(Compiled compiled)
         {
-            for (var i = 0; i < compiled.Acts.Count; i++)
+            foreach (var acted in compiled.Acts)
             {
                 // A block already where the step would take it has nothing to do, switched on or not.
-                var acted = compiled.Acts[i];
                 var until = acted.Action.Until;
                 if (until != null && until.Holds(acted.Entity.Block, acted.Seen))
                     continue;
@@ -1186,14 +1181,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         SequenceFault Gone()
         {
-            for (var i = 0; i < _memory.Outstanding.Count; i++)
+            foreach (var step in _memory.Outstanding)
             {
-                if (!((Act)_sequence.Steps[_memory.Outstanding[i]]).HasAction)
+                if (!((Act)_sequence.Steps[step]).HasAction)
                     continue;
 
-                var compiled = Compile(_memory.Outstanding[i]);
+                var compiled = Compile(step);
                 if (compiled.Problem != SequenceProblem.None)
-                    return new SequenceFault(compiled.Problem, _memory.Outstanding[i], Trouble.None, compiled.Which);
+                    return new SequenceFault(compiled.Problem, step, Trouble.None, compiled.Which);
             }
 
             return SequenceFault.None;
@@ -1252,16 +1247,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return GridEntity.Unestimated;
 
             var longest = 0;
-            for (var i = 0; i < _memory.Outstanding.Count; i++)
+            foreach (var step in _memory.Outstanding)
             {
-                if (!((Act)_sequence.Steps[_memory.Outstanding[i]]).HasAction)
+                if (!((Act)_sequence.Steps[step]).HasAction)
                     continue;
 
-                var compiled = Compile(_memory.Outstanding[i]);
-                for (var q = 0; q < compiled.Acts.Count; q++)
+                var compiled = Compile(step);
+                foreach (var acted in compiled.Acts)
                 {
-                    var acted = compiled.Acts[q];
-                    var expected = acted.Bound == null ? GridEntity.Unestimated : acted.Bound.Expected(acted.Entity.Block);
+                    var expected = acted.Bound?.Expected(acted.Entity.Block) ?? GridEntity.Unestimated;
                     if (expected < 0)
                         return GridEntity.Unestimated;
 
@@ -1276,9 +1270,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Whether everything started since the last await has got where it was going, and every sequence started since has finished.</summary>
         bool Finished()
         {
-            for (var i = 0; i < _memory.Outstanding.Count; i++)
+            foreach (var step in _memory.Outstanding)
             {
-                if (!Settled(_memory.Outstanding[i]))
+                if (!Settled(step))
                     return false;
             }
 
@@ -1302,10 +1296,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
 
             var compiled = Compile(step);
-            for (var i = 0; i < compiled.Acts.Count; i++)
+            foreach (var acted in compiled.Acts)
             {
                 // Done again, so what its blocks said of the last time is no answer for this one.
-                var acted = compiled.Acts[i];
                 acted.Done = false;
 
                 if (act.Form != Nature.Native)
@@ -1334,9 +1327,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return SequenceFault.None;
 
             var compiled = Compile(step);
-            for (var i = 0; i < compiled.Acts.Count; i++)
+            foreach (var acted in compiled.Acts)
             {
-                var acted = compiled.Acts[i];
                 if (acted.Bound == null || acted.Action.Until != null)
                     continue;
 
@@ -1438,9 +1430,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             compiled = new Compiled();
             compiled.Problem = Needed(act.Targets, SequenceProblem.MissingTarget, out compiled.Which);
             var acting = ActedOn(act.Targets);
-            for (var i = 0; i < acting.Count; i++)
+            foreach (var name in acting)
             {
-                var entity = _bindings.Entity(acting[i]);
+                var entity = _bindings.Entity(name);
                 if (entity == null)
                     continue;
 
@@ -1484,9 +1476,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             tested.Problem = Needed(test.Targets, SequenceProblem.MissingGate, out tested.Which);
 
             var reading = ActedOn(test.Targets);
-            for (var i = 0; i < reading.Count; i++)
+            foreach (var name in reading)
             {
-                var probe = Probe.Of(_bindings.Entity(reading[i]), test.Provider, test.MemberId, test.Arguments,
+                var probe = Probe.Of(_bindings.Entity(name), test.Provider, test.MemberId, test.Arguments,
                     test.Quantifier, test.Relation, test.Value, null, _owner.Clock);
 
                 if (probe != null)
@@ -1529,8 +1521,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             for (var s = 0; s < targets.Count; s++)
             {
                 var slot = targets[s];
-                var part = system == null ? null : system.FindPart(slot);
-                var filled = _instance == null ? null : _instance.FilledWith(slot);
+                var part = system?.FindPart(slot);
+                var filled = _instance?.FilledWith(slot);
                 if (part != null && _instance != null && (filled == null || filled.Count == 0))
                 {
                     if (part.Optional)
@@ -1540,7 +1532,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     return SequenceProblem.EmptySlot;
                 }
 
-                var count = filled == null ? 1 : filled.Count;
+                var count = filled?.Count ?? 1;
                 for (var n = 0; n < count; n++)
                 {
                     var name = filled == null ? slot : filled[n];
@@ -1566,10 +1558,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         static Acted Shared(Compiled compiled, EntityAction action, IList<Literal> given)
         {
-            for (var i = 0; i < compiled.Acts.Count; i++)
+            foreach (var acted in compiled.Acts)
             {
-                if (compiled.Acts[i].Action == action)
-                    return compiled.Acts[i];
+                if (acted.Action == action)
+                    return acted;
             }
 
             var converted = new List<Literal>(given.Count);
@@ -1579,7 +1571,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return new Acted
             {
                 Arguments = converted,
-                Bound = action.Doing == null ? null : action.Doing.Bind(converted)
+                Bound = action.Doing?.Bind(converted)
             };
         }
     }

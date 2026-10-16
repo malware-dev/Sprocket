@@ -48,7 +48,7 @@ namespace Lumel.Windows
         Vector2 Placed(Vector2 point)
         {
             var screen = ToScreen(point);
-            return Window.Parent == null ? screen : Window.Parent.FromScreen(screen);
+            return Window.Parent?.FromScreen(screen) ?? screen;
         }
     }
 }

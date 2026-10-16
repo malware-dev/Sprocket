@@ -573,10 +573,8 @@ namespace Sprocket.Sim.Driving
         public static string Title(this EditorScreen screen)
         {
             var joined = "";
-            for (var i = 0; i < screen.Heading.Count; i++)
+            foreach (var part in screen.Heading)
             {
-                var part = screen.Heading[i];
-
                 if (joined.Length > 0)
                     joined += part.Lead.Length > 0 ? " " : " » ";
 
@@ -592,10 +590,10 @@ namespace Sprocket.Sim.Driving
         /// <summary>The first part of the heading anybody can rename, or null when none can be.</summary>
         public static HeadingPart? Nameable(this EditorScreen screen)
         {
-            for (var i = 0; i < screen.Heading.Count; i++)
+            foreach (var part in screen.Heading)
             {
-                if (screen.Heading[i].CanRename)
-                    return screen.Heading[i];
+                if (part.CanRename)
+                    return part;
             }
 
             return null;

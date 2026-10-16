@@ -64,9 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         static bool Contains(List<EntityKind> kinds, EntityKind kind)
         {
-            for (var i = 0; i < kinds.Count; i++)
+            foreach (var known in kinds)
             {
-                if (kinds[i].Id == kind.Id)
+                if (known.Id == kind.Id)
                     return true;
             }
             return false;

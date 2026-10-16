@@ -41,19 +41,19 @@ namespace Sprocket.Standards
             var declared = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
             var named = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
 
-            context.RegisterSymbolAction(delegate(SymbolAnalysisContext symbol)
+            context.RegisterSymbolAction(symbol =>
             {
                 if (Judged(symbol.Symbol))
                     declared.TryAdd(symbol.Symbol, true);
             }, SymbolKind.NamedType, SymbolKind.Method, SymbolKind.Property, SymbolKind.Field, SymbolKind.Event);
 
-            context.RegisterSyntaxNodeAction(delegate(SyntaxNodeAnalysisContext node)
+            context.RegisterSyntaxNodeAction(node =>
             {
                 Name(node.SemanticModel, node.Node, named, node.CancellationToken);
             }, SyntaxKind.IdentifierName, SyntaxKind.GenericName, SyntaxKind.ObjectInitializerExpression,
                 SyntaxKind.CollectionInitializerExpression, SyntaxKind.ForEachStatement);
 
-            context.RegisterCompilationEndAction(delegate(CompilationAnalysisContext end)
+            context.RegisterCompilationEndAction(end =>
             {
                 foreach (var symbol in declared.Keys)
                 {

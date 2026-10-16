@@ -48,6 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public string Annotation { get; set; } = "";
 
         /// <summary>In priority order, strongest first. The host minted these and only it reads them.</summary>
-        public List<EntityKey> Keys { get { return _keys; } }
+        public List<EntityKey> Keys => _keys;
     }
 }

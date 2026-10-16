@@ -52,8 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             Touch(screens, system);
             Touch(screens, _made);
-            for (var i = 0; i < _before.Count; i++)
-                _before[i].Touches(system, screens);
+            foreach (var edit in _before)
+                edit.Touches(system, screens);
         }
 
         /// <summary>Waits for the logic system's switch, and for whatever taking a button waits for.</summary>
@@ -62,9 +62,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             if (system.Enabled)
                 return true;
 
-            for (var i = 0; i < _before.Count; i++)
+            foreach (var edit in _before)
             {
-                if (_before[i].Held(system, back))
+                if (edit.Held(system, back))
                     return true;
             }
 
@@ -88,8 +88,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             if (_again)
             {
-                for (var i = 0; i < _before.Count; i++)
-                    _before[i].Apply(system);
+                foreach (var edit in _before)
+                    edit.Apply(system);
 
                 if (_replaced != null)
                     system.ReplaceTrigger(_replaced, null);

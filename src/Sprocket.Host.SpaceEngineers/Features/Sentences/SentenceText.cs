@@ -316,12 +316,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         static bool Acronym(string word)
         {
             var letters = 0;
-            for (var i = 0; i < word.Length; i++)
+            foreach (var letter in word)
             {
-                if (!char.IsLetter(word[i]))
+                if (!char.IsLetter(letter))
                     continue;
 
-                if (!char.IsUpper(word[i]))
+                if (!char.IsUpper(letter))
                     return false;
 
                 letters++;

@@ -78,9 +78,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _empty.Text = EmptyText;
             _empty.IsVisible = _options.Count == 0 && !string.IsNullOrEmpty(EmptyText);
 
-            for (var i = 0; i < _options.Count; i++)
+            foreach (var option in _options)
             {
-                var option = _options[i];
                 var row = new ChoiceRow
                 {
                     Mark = option.Mark,

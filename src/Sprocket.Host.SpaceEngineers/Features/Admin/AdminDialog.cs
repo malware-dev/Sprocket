@@ -74,15 +74,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                     Setting(texts.AdminFastest, texts.AdminFastestAbout, Choose(texts, world,
                         new[] { texts.AdminEveryTick, texts.AdminEveryTen, texts.AdminEveryHundred },
                         new[] { texts.AdminDefaultEveryTick, texts.AdminDefaultEveryTen, texts.AdminDefaultEveryHundred },
-                        delegate(Layer layer) { return layer.FastestUpdate.HasValue ? Array.IndexOf(World.Layer.Updates, layer.FastestUpdate.Value) : -1; },
-                        delegate(Settings settings) { return Array.IndexOf(World.Layer.Updates, settings.DefaultFastestUpdate); },
-                        delegate(Layer layer, int at) { return layer.WithFastestUpdate(at < 0 ? (int?)null : World.Layer.Updates[at]); })),
+                        layer => layer.FastestUpdate.HasValue ? Array.IndexOf(World.Layer.Updates, layer.FastestUpdate.Value) : -1,
+                        settings => Array.IndexOf(World.Layer.Updates, settings.DefaultFastestUpdate),
+                        (layer, at) => layer.WithFastestUpdate(at < 0 ? (int?)null : World.Layer.Updates[at]))),
                     Setting(texts.AdminDeveloper, texts.AdminDeveloperAbout, Choose(texts, world,
                         new[] { texts.AdminOn, texts.AdminOff },
                         new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
-                        delegate(Layer layer) { return layer.DeveloperMode.HasValue ? Developer(layer.DeveloperMode.Value) : -1; },
-                        delegate(Settings settings) { return Developer(settings.DefaultDeveloperMode); },
-                        delegate(Layer layer, int at) { return layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0); }))
+                        layer => layer.DeveloperMode.HasValue ? Developer(layer.DeveloperMode.Value) : -1,
+                        settings => Developer(settings.DefaultDeveloperMode),
+                        (layer, at) => layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0)))
                 }
             };
         }
@@ -105,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 field.Explain(0, Tip.For(null, texts.AdminDefaultAbout));
 
             var choice = new Choice(world, field, words, defaulted ? defaults : null, given, standing, giving);
-            field.Edited += delegate { Change(choice); };
+            field.Edited += () => Change(choice);
             _choices.Add(choice);
             return field;
         }

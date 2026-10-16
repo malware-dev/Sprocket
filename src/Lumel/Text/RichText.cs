@@ -491,9 +491,8 @@ namespace Lumel.Text
             }
 
             var inset = _codeInset;
-            for (var i = 0; i < _pieces.Count; i++)
+            foreach (var piece in _pieces)
             {
-                var piece = _pieces[i];
                 if (piece.Code && CodeFill.HasValue)
                     g.Fill(new RectangleF(room.X + piece.At.X - inset, room.Y + piece.At.Y + 1f, piece.Box.X + inset * 2f, piece.Box.Y - 2f), CodeFill.Value);
 
@@ -564,9 +563,8 @@ namespace Lumel.Text
 
             _laidOut = new Vector2(widest, y);
 
-            for (var i = 0; i < _pieces.Count; i++)
+            foreach (var piece in _pieces)
             {
-                var piece = _pieces[i];
                 if (piece.Link != null)
                     _spots.Add(new Spot { Where = new RectangleF(piece.At.X, piece.At.Y, piece.Box.X, piece.Box.Y), Link = piece.Link });
             }
@@ -671,7 +669,7 @@ namespace Lumel.Text
                 else if (string.Equals(name, "right", StringComparison.OrdinalIgnoreCase))
                     inner = Alignment.Right;
 
-                var style = _boxes == null ? null : _boxes.Find(name);
+                var style = _boxes?.Find(name);
                 if (style == null)
                     continue;
 
@@ -908,7 +906,7 @@ namespace Lumel.Text
                 }
 
                 var linked = run as LinkRun;
-                var link = linked == null ? null : linked.Link;
+                var link = linked?.Link;
                 var tone = link != null ? Tone.Link
                     : heading ? Tone.Heading
                     : (run.Kind & RunKind.Strong) != 0 ? Tone.Strong

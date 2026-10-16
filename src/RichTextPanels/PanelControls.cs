@@ -97,9 +97,8 @@ namespace RichTextPanels
 
             // The last of each name, which on a plain text panel listing them twice is the set it shows.
             game = new Game();
-            for (var i = 0; i < controls.Count; i++)
+            foreach (var control in controls)
             {
-                var control = controls[i];
                 switch (control.Id)
                 {
                     case "Content":

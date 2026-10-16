@@ -106,8 +106,8 @@ namespace RichTextPanels
 
             using (var frame = Surface.DrawFrame())
             {
-                for (var i = 0; i < _sprites.Count; i++)
-                    frame.Add(_sprites[i]);
+                foreach (var sprite in _sprites)
+                    frame.Add(sprite);
             }
         }
 
@@ -187,9 +187,9 @@ namespace RichTextPanels
 
         static bool IsBlank(string text)
         {
-            for (var i = 0; i < text.Length; i++)
+            foreach (var character in text)
             {
-                if (!char.IsWhiteSpace(text[i]))
+                if (!char.IsWhiteSpace(character))
                     return false;
             }
 

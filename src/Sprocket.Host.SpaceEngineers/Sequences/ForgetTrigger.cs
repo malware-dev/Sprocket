@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             var moment = going as MomentTrigger;
             _sources = moment == null ? null : CopyOf(moment.Sources);
-            _eventId = moment == null ? null : moment.EventId;
+            _eventId = moment?.EventId;
         }
 
         /// <inheritdoc />
@@ -44,8 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             Touch(screens, system);
             Touch(screens, _part);
-            for (var i = 0; i < _answers.Count; i++)
-                Touch(screens, _answers[i].Instance);
+            foreach (var answer in _answers)
+                Touch(screens, answer.Instance);
         }
 
         /// <inheritdoc />
@@ -97,9 +97,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 system.PutPartBack(_partAt, _part);
 
-                for (var i = 0; i < _answers.Count; i++)
+                foreach (var answer in _answers)
                 {
-                    var answer = _answers[i];
                     if (answer.At == null)
                         answer.Instance.Fill(_part.Id, answer.Blocks);
                     else

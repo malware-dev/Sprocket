@@ -177,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             Line(frame, "SPROCKET", left, y, scale * 0.9f, _ink);
 
-            IMyCubeGrid grid = block == null ? null : block.CubeGrid;
+            IMyCubeGrid grid = block?.CubeGrid;
             if (grid != null)
                 Line(frame, grid.CustomName, right, y, scale * 0.9f, _quiet, TextAlignment.RIGHT);
 
@@ -202,9 +202,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             // Every Sprocket on the construct into one picture, before any of it is drawn, so the line
             // that says how many did not fit can count them.
             _overview.Clear();
-            for (var u = 0; u < _found.Count; u++)
+            foreach (SprocketUnit unit in _found)
             {
-                SprocketUnit unit = _found[u];
                 _overview.Include(unit.World, unit.Editor.Program, unit.Runner);
             }
 

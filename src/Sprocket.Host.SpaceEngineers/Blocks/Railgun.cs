@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             _remaining = Being.Number<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
-                return capacitor == null ? 0d : capacitor.TimeRemaining;
+                return capacitor?.TimeRemaining ?? 0d;
             });
 
             _charged = Being.Flag(Reading.Of<IMyTerminalBlock>(block =>

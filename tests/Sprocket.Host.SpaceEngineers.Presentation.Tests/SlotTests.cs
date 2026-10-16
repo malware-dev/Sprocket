@@ -58,7 +58,7 @@ public class SlotTests
 
     static Slot Pressable()
     {
-        var chip = new Slot { Command = new Relay(delegate { }) };
+        var chip = new Slot { Command = new Relay(() => { }) };
         chip.Say("Airlock");
         return chip;
     }

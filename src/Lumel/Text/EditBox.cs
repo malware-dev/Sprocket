@@ -105,10 +105,10 @@ namespace Lumel.Text
                 _widths.Clear();
                 _lines.AddRange(incoming.Split(Endings, StringSplitOptions.None));
                 _length = _lines.Count - 1;
-                for (var i = 0; i < _lines.Count; i++)
+                foreach (var line in _lines)
                 {
                     _widths.Add(-1f);
-                    _length += _lines[i].Length;
+                    _length += line.Length;
                 }
 
                 _undo.Clear();
@@ -900,10 +900,10 @@ namespace Lumel.Text
                     _dropped.Add(line);
             }
 
-            for (var i = 0; i < _dropped.Count; i++)
+            foreach (var line in _dropped)
             {
-                _spareEdges.Add(_edges[_dropped[i]]);
-                _edges.Remove(_dropped[i]);
+                _spareEdges.Add(_edges[line]);
+                _edges.Remove(line);
             }
         }
 
@@ -928,9 +928,9 @@ namespace Lumel.Text
             var said = _lines[line];
             edges.Add(0f);
             _scratch.Length = 0;
-            for (var i = 0; i < said.Length; i++)
+            foreach (var character in said)
             {
-                _scratch.Append(said[i]);
+                _scratch.Append(character);
                 edges.Add(g.MeasureText(_font, _scratch, _fontSize).X);
             }
 
@@ -1152,9 +1152,9 @@ namespace Lumel.Text
             var y = top;
 
             g.PushClip(new RectangleF(view.X, view.Y, _gutter, view.Height));
-            for (var i = 0; i < _numbers.Count; i++)
+            foreach (var number in _numbers)
             {
-                g.DrawText(_font, _numbers[i], new Vector2(edge, y), _fontSize, NumberColor, TextAlign.Right);
+                g.DrawText(_font, number, new Vector2(edge, y), _fontSize, NumberColor, TextAlign.Right);
                 y += _fontSize;
             }
 

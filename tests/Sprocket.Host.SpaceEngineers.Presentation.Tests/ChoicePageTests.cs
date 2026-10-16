@@ -14,8 +14,8 @@ public class ChoicePageTests
     {
         var sim = Asking(page =>
         {
-            page.Add("Keep it", false, delegate { });
-            page.Add("Delete it", false, delegate { });
+            page.Add("Keep it", false, () => { });
+            page.Add("Delete it", false, () => { });
             page.WarnOnLast("This cannot be undone.");
         });
 
@@ -32,8 +32,8 @@ public class ChoicePageTests
         var given = "";
         var sim = Asking(page =>
         {
-            page.Add("Port", true, delegate { given = "Port"; });
-            page.Add("Starboard", false, delegate { given = "Starboard"; });
+            page.Add("Port", true, () => given = "Port");
+            page.Add("Starboard", false, () => given = "Starboard");
         });
 
         var answers = sim.Editor.Choices();

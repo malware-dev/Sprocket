@@ -143,10 +143,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             get
             {
                 var reads = _memory.Readings;
-                for (var i = 0; i < reads.Count; i++)
+                foreach (var reading in reads)
                 {
-                    if (reads[i].Known)
-                        yield return new KeyValuePair<string, bool>(reads[i].Block, reads[i].Held);
+                    if (reading.Known)
+                        yield return new KeyValuePair<string, bool>(reading.Block, reading.Held);
                 }
             }
         }
@@ -178,10 +178,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         ReadingMemory Reading(string block)
         {
             var reads = _memory.Readings;
-            for (var i = 0; i < reads.Count; i++)
+            foreach (var reading in reads)
             {
-                if (reads[i].Block == block)
-                    return reads[i];
+                if (reading.Block == block)
+                    return reading;
             }
 
             return new ReadingMemory { Block = block };
@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         _owner.Clock)
                     : Probe.Watching(entity, signal.Provider, signal.EventId, read, _owner.Clock);
 
-                var ruling = probe == null ? null : probe.RuledOutBy;
+                var ruling = probe?.RuledOutBy;
                 _entities[i] = entity;
                 _probes[i] = probe;
                 if (ruling == null || !ruling.Remembers)
@@ -316,8 +316,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Stops listening to every block.</summary>
         void Deafen()
         {
-            for (var i = 0; i < _listening.Count; i++)
-                _listening[i].Dispose();
+            foreach (var listener in _listening)
+                listener.Dispose();
 
             _listening.Clear();
             _announced = false;

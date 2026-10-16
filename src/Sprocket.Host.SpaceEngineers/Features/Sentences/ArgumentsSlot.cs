@@ -66,10 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// Worked out when the slot is made, like everything else here, because a sentence is dressed
         /// on every tick and reading a colour out of three arguments is not a per-tick job.
         /// </remarks>
-        public override Color? Sample
-        {
-            get { return _sample; }
-        }
+        public override Color? Sample => _sample;
 
         /// <summary>What the action was given, in order.</summary>
         public IList<Literal> Arguments => _arguments;
@@ -94,9 +91,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             get
             {
-                for (var i = 0; i < _filled.Count; i++)
+                foreach (var text in _filled)
                 {
-                    if (_filled[i].Length > 0)
+                    if (text.Length > 0)
                         return false;
                 }
 

@@ -183,16 +183,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static float In(IMyGasTank tank, MyDefinitionId gas)
         {
             var sink = tank.Components.Get<MyResourceSinkComponent>();
-            return sink == null ? -1f : sink.CurrentInputByType(gas);
+            return sink?.CurrentInputByType(gas) ?? -1f;
         }
 
         /// <summary>What the game says this tank is, or null where nothing has been loaded to say.</summary>
         static MyGasTankDefinition Definition(IMyTerminalBlock tank)
         {
             var definitions = MyDefinitionManager.Static;
-            return definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(tank.BlockDefinition) as MyGasTankDefinition;
+            return definitions?.GetCubeBlockDefinition(tank.BlockDefinition) as MyGasTankDefinition;
         }
 
         /// <summary>What a step told a tank to stockpile with.</summary>

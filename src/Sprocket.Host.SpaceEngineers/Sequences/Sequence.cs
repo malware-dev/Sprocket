@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// ordinary rather than broken: somebody is halfway through building it, or it is only ever
         /// reached from another sequence.
         /// </remarks>
-        public Trigger Trigger => System == null ? null : System.TriggerFor(Number);
+        public Trigger Trigger => System?.TriggerFor(Number);
 
         public IList<Step> Steps => _steps;
 

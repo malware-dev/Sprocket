@@ -74,9 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             _offered.Clear();
             Toolbars.Offered(block, _offered);
-            for (var i = 0; i < _offered.Count; i++)
+            foreach (var offer in _offered)
             {
-                var id = _offered[i].Id;
+                var id = offer.Id;
                 if (id != null && id != Aims && id.StartsWith(Aiming, StringComparison.Ordinal))
                     kind.Hiding(id);
             }

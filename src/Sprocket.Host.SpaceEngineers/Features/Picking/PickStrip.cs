@@ -182,9 +182,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var turned = was >= 0 && was != Page;
 
             _old.Clear();
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
-                var child = Children[i];
                 if (child != _next && child != _arguments)
                     _old.Add(child == _reveal ? _reveal.Content : child);
             }
@@ -324,9 +323,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var across = 0f;
             var before = true;
             var from = FoldWidth;
-            for (var i = 0; i < _old.Count; i++)
+            foreach (var previous in _old)
             {
-                if (_old[i] == folding)
+                if (previous == folding)
                 {
                     from = Across(folding);
                     _fold.Placement = Fixed.Wide(from);
@@ -335,10 +334,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     continue;
                 }
 
-                Children.Add(_old[i]);
-                _leaving.Add(_old[i]);
+                Children.Add(previous);
+                _leaving.Add(previous);
                 if (before)
-                    across += Across(_old[i]) + Gap;
+                    across += Across(previous) + Gap;
             }
 
             Laid();
@@ -374,13 +373,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Given();
             WayOn();
 
-            for (var i = 0; i < _old.Count; i++)
+            foreach (var previous in _old)
             {
-                if (_old[i] == _fold || _stages.Contains(_old[i] as StageColumn))
+                if (previous == _fold || _stages.Contains(previous as StageColumn))
                     continue;
 
-                Children.Add(_old[i]);
-                _leaving.Add(_old[i]);
+                Children.Add(previous);
+                _leaving.Add(previous);
             }
 
             Slide(-across, 0f, _reveal, FoldWidth, Across(unfolding));
@@ -405,8 +404,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
 
             _slide = -1;
-            for (var i = 0; i < _leaving.Count; i++)
-                Children.Remove(_leaving[i]);
+            foreach (var leaving in _leaving)
+                Children.Remove(leaving);
 
             _leaving.Clear();
             _resized.Placement = Fixed.Wide(_resizedTo);
@@ -434,7 +433,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return stage.Width;
 
             var values = column as ArgumentsColumn;
-            return values != null ? values.Width : column.DesiredSize.X;
+            return values?.Width ?? column.DesiredSize.X;
         }
 
         /// <summary>Quick to leave and slow to arrive, so the eye has where it is going before it stops.</summary>
@@ -447,8 +446,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void Slid(float by)
         {
             var moved = by == 0f ? RenderTransform.Identity : RenderTransform.Moved(new Vector2(by, 0f));
-            for (var i = 0; i < Children.Count; i++)
-                Children[i].RenderTransform = moved;
+            foreach (var child in Children)
+                child.RenderTransform = moved;
         }
 
         /// <summary>Starts making room for the way on at the right of the last column, or taking it away.</summary>

@@ -85,9 +85,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get
             {
-                for (var i = 0; i < Heading.Count; i++)
+                foreach (var part in Heading)
                 {
-                    if (Heading[i].CanRename)
+                    if (part.CanRename)
                         return true;
                 }
 
@@ -313,8 +313,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Says <see cref="Heading" /> has been filled again, so that what its parts say from now on counts as a change here.</summary>
         public void Reheaded()
         {
-            for (var i = 0; i < Heading.Count; i++)
-                Heading[i].Show(this);
+            foreach (var part in Heading)
+                part.Show(this);
 
             _revision++;
         }

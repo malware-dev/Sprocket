@@ -77,13 +77,13 @@ namespace Sprocket.Localization.Generator
                 return;
 
             var read = new ConcurrentDictionary<ISymbol, bool>(SymbolEqualityComparer.Default);
-            context.RegisterOperationAction(delegate(OperationAnalysisContext operation)
+            context.RegisterOperationAction(operation =>
             {
                 var property = ((IPropertyReferenceOperation)operation.Operation).Property.OriginalDefinition;
                 read.TryAdd(property, true);
             }, OperationKind.PropertyReference);
 
-            context.RegisterCompilationEndAction(delegate(CompilationAnalysisContext end)
+            context.RegisterCompilationEndAction(end =>
             {
                 foreach (var pair in files)
                     Report(end, pair.Key, pair.Value, prefix, named, read);

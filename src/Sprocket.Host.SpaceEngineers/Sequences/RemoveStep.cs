@@ -24,8 +24,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             _change = change;
             _index = index;
-            for (var i = 0; i < steps.Length; i++)
-                _steps.Add(steps[i]);
+            foreach (var step in steps)
+                _steps.Add(step);
         }
 
         /// <inheritdoc />

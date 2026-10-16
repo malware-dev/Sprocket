@@ -193,8 +193,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     Padding = new Thickness(16f, 8f, 0f, 4f)
                 });
 
-                for (var g = 0; g < _group.Count; g++)
-                    ListBackup(texts, _group[g]);
+                foreach (var backup in _group)
+                    ListBackup(texts, backup);
             }
         }
 
@@ -207,7 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Summary = backup.Name,
                 Depth = 1,
                 Status = Template.Fill(texts.LibraryLost, "time", Time(backup.Lost)),
-                Deletes = Editor.Act(Cmd.ForgetBackup, delegate { Editor.ForgetBackup(backup); }),
+                Deletes = Editor.Act(Cmd.ForgetBackup, () => Editor.ForgetBackup(backup)),
                 DeleteText = texts.LibraryForgetBackup
             });
         }
@@ -223,11 +223,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             _volumes.Clear();
             _volumes.AddRange(shelf.All);
-            _volumes.Sort(delegate(Volume a, Volume b) { return string.Compare(Called(a), Called(b), StringComparison.CurrentCultureIgnoreCase); });
+            _volumes.Sort((a, b) => string.Compare(Called(a), Called(b), StringComparison.CurrentCultureIgnoreCase));
 
-            for (var i = 0; i < _volumes.Count; i++)
+            foreach (var volume in _volumes)
             {
-                var volume = _volumes[i];
                 var entry = new Entry { Section = Kept, Identity = volume.Identity };
                 if (volume.State == VolumeState.Read)
                 {
@@ -247,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     Summary = Called(volume),
                     Depth = 1,
                     Status = Made(volume, texts),
-                    Deletes = Editor.Act(Cmd.Unshelve, delegate { Editor.Unshelve(volume); }),
+                    Deletes = Editor.Act(Cmd.Unshelve, () => Editor.Unshelve(volume)),
                     DeleteText = texts.LibraryForget
                 };
 
@@ -268,7 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         void Add(Entry entry, StatusRow row)
         {
             entry.Row = row;
-            row.Opens = Editor.Act(Cmd.Expand, delegate { Choose(entry); });
+            row.Opens = Editor.Act(Cmd.Expand, () => Choose(entry));
             row.Show(Editor.Texts);
             _entries.Add(entry);
             _list.Children.Add(row);
@@ -287,9 +286,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// <summary>Shows only the rows whose name holds the words typed in the search box, as every search box matches them.</summary>
         void Narrow()
         {
-            for (var i = 0; i < _entries.Count; i++)
+            foreach (var entry in _entries)
             {
-                var row = _entries[i].Row;
+                var row = entry.Row;
                 row.IsVisible = EntityQuery.MatchesText(row.Summary, _search.Text);
             }
         }
@@ -441,13 +440,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             if (entry.Backup != null)
             {
-                Run(Cmd.PutOn, delegate { _refused = Editor.PutOn(entry.Read); });
+                Run(Cmd.PutOn, () => _refused = Editor.PutOn(entry.Read));
             }
             else
             {
-                var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
+                var volume = Editor.Shelf?.Find(entry.Identity);
                 if (volume != null)
-                    Run(Cmd.PutOn, delegate { _refused = Editor.PutOn(volume); });
+                    Run(Cmd.PutOn, () => _refused = Editor.PutOn(volume));
             }
 
             Describe();
@@ -464,7 +463,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             {
                 var backed = entry.Read;
                 if (backed != null)
-                    Run(Cmd.Shelve, delegate { Editor.ShelveBackup(backed); });
+                    Run(Cmd.Shelve, () => Editor.ShelveBackup(backed));
 
                 return;
             }
@@ -476,11 +475,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             // Either update replaces something, so it asks first: the blueprint where the logic system is the newer, and the
             // logic system where the blueprint is.
             if (!Editor.Stored(live))
-                Run(Cmd.Shelve, delegate { Editor.Shelve(live); });
+                Run(Cmd.Shelve, () => Editor.Shelve(live));
             else if (Editor.ChangedSince(live))
-                Run(Cmd.Shelve, delegate { Editor.AskUpdate(live); });
+                Run(Cmd.Shelve, () => Editor.AskUpdate(live));
             else
-                Run(Cmd.Renew, delegate { Editor.AskRenew(live); });
+                Run(Cmd.Renew, () => Editor.AskRenew(live));
         }
 
         /// <summary>Puts the chosen blueprint in the library back in the place of the logic system on this construct, after asking.</summary>
@@ -488,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             var live = _chosen == null || _chosen.Section != OnConstruct ? null : Live(_chosen);
             if (live != null)
-                Run(Cmd.Renew, delegate { Editor.AskReset(live); });
+                Run(Cmd.Renew, () => Editor.AskReset(live));
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
@@ -550,8 +549,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             if (entry.Section == Kept)
             {
-                var volume = Editor.Shelf == null ? null : Editor.Shelf.Find(entry.Identity);
-                return volume == null ? null : volume.Text;
+                var volume = Editor.Shelf?.Find(entry.Identity);
+                return volume?.Text;
             }
 
             var system = entry.Section == BackedUp ? entry.Read : Live(entry);

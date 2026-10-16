@@ -53,7 +53,7 @@ public class RenderTransformTests
     public void APressLandsWhereItIsDrawn()
     {
         var box = Box();
-        box.Command = new Relay(delegate { });
+        box.Command = new Relay(() => { });
         var root = new VStack { Children = { box } };
         var easel = new Easel(root, Wide, High);
 

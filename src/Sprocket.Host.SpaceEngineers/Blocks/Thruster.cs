@@ -63,9 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static bool Aired(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;
-            var definition = definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyThrustDefinition;
+            var definition = definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyThrustDefinition;
 
             return definition != null && definition.EffectivenessAtMinInfluence != definition.EffectivenessAtMaxInfluence;
         }

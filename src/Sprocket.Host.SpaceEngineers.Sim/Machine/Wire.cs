@@ -108,7 +108,7 @@ public sealed class Wire : INetworkProxy
             .Gives("MyId", () => Running.Id)
             .Gives("IsServer", () => Running.IsServer)
             .Gives("MultiplayerActive", () => true)
-            .Gives("ServerId", () => Host == null ? 0UL : Host.Id)
+            .Gives("ServerId", () => Host?.Id ?? 0UL)
             .Done();
     }
 

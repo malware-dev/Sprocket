@@ -46,6 +46,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Func<int> Clock { get; set; }
 
         /// <summary>The tick a reader is reading on, or -1 where the recall has no clock.</summary>
-        public int Now => Clock == null ? -1 : Clock();
+        public int Now => Clock?.Invoke() ?? -1;
     }
 }

@@ -128,7 +128,7 @@ namespace Lumel.Text
             }
 
             var linked = run as LinkRun;
-            var link = linked == null ? null : linked.Link;
+            var link = linked?.Link;
 
             var i = 0;
             while (i < text.Length)

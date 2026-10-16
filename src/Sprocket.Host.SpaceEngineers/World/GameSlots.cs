@@ -118,9 +118,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             _actions.Clear();
             block.GetActions(_actions);
 
-            for (var i = 0; i < _actions.Count; i++)
+            foreach (ITerminalAction action in _actions)
             {
-                ITerminalAction action = _actions[i];
                 if (!action.IsEnabled(block))
                     continue;
 
@@ -147,10 +146,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             _properties.Clear();
             block.GetProperties(_properties);
 
-            for (var i = 0; i < _properties.Count; i++)
+            foreach (ITerminalProperty property in _properties)
             {
-                ITerminalProperty property = _properties[i];
-
                 ValueKind kind;
                 if (!Holds(property, out kind) || !Has(property, block))
                     continue;
@@ -317,7 +314,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             kind = ValueKind.Text;
 
-            string type = property == null ? null : property.TypeName;
+            string type = property?.TypeName;
             if (string.IsNullOrEmpty(type))
                 return false;
 
@@ -378,14 +375,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return 0;
 
             List<TerminalActionParameter> wanted = declared.ParameterDefinitions;
-            return wanted == null ? 0 : wanted.Count;
+            return wanted?.Count ?? 0;
         }
 
         /// <summary>What type each of an action's values is declared as, or null where it takes none.</summary>
         static IList<Primitive> Declared(ITerminalAction action)
         {
             var declared = action as IMyTerminalAction;
-            List<TerminalActionParameter> wanted = declared == null ? null : declared.ParameterDefinitions;
+            List<TerminalActionParameter> wanted = declared?.ParameterDefinitions;
             if (wanted == null || wanted.Count == 0)
                 return null;
 
@@ -453,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <inheritdoc />
         public Gauge Gauge(IMyTerminalBlock block, string propertyId)
         {
-            ITerminalProperty property = block == null ? null : block.GetProperty(propertyId);
+            ITerminalProperty property = block?.GetProperty(propertyId);
             ValueKind kind;
             return property != null && Holds(property, out kind) ? new Property(block, property, kind) : null;
         }
@@ -750,9 +747,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var declared = action as IMyTerminalAction;
             List<TerminalActionParameter> wanted =
-                declared == null ? null : declared.ParameterDefinitions;
+                declared?.ParameterDefinitions;
 
-            var count = wanted == null ? arguments.Count : wanted.Count;
+            var count = wanted?.Count ?? arguments.Count;
             for (var i = 0; i < count; i++)
             {
                 if (i < arguments.Count)

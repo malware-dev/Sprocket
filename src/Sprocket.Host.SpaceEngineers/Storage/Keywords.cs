@@ -51,9 +51,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return Keyword.None;
 
             var candidates = ByLength[word.Length];
-            for (var i = 0; i < candidates.Length; i++)
-                if (word.Equals(Names[(int)candidates[i]]))
-                    return candidates[i];
+            foreach (var candidate in candidates)
+                if (word.Equals(Names[(int)candidate]))
+                    return candidate;
 
             return Keyword.None;
         }

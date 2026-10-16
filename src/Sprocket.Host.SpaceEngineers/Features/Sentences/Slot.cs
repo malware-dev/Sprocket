@@ -68,9 +68,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     return;
 
                 _glow = value;
-                for (var i = 0; i < Children.Count; i++)
+                foreach (var child in Children)
                 {
-                    var member = Children[i] as MemberName;
+                    var member = child as MemberName;
                     if (member != null)
                         member.Glow = value;
                 }
@@ -82,9 +82,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             set
             {
-                for (var i = 0; i < Children.Count; i++)
+                foreach (var child in Children)
                 {
-                    var member = Children[i] as MemberName;
+                    var member = child as MemberName;
                     if (member != null)
                         member.Paused = value;
                 }
@@ -111,8 +111,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             get
             {
                 var said = "";
-                for (var i = 0; i < _said.Count; i++)
-                    said += _said[i].Text;
+                foreach (var mention in _said)
+                    said += mention.Text;
 
                 return said;
             }
@@ -250,9 +250,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         void Dress()
         {
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
-                var text = (ITextual)Children[i];
+                var text = (ITextual)child;
                 text.Font = _font;
                 text.FontSize = _fontSize;
                 text.Color = _color;

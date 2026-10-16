@@ -79,8 +79,8 @@ namespace Lumel.Layout
                     _gone.Add(pair.Key);
             }
 
-            for (var i = 0; i < _gone.Count; i++)
-                _kept.Remove(_gone[i]);
+            foreach (var key in _gone)
+                _kept.Remove(key);
         }
 
         sealed class Entry

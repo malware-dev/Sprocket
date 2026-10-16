@@ -173,7 +173,7 @@ namespace Sprocket.Sim.Shell
             if (status != _lastStatus)
             {
                 _lastStatus = status;
-                Dispatcher.BeginInvoke(new Action(delegate { _status.Text = status; }));
+                Dispatcher.BeginInvoke(new Action(() => _status.Text = status));
             }
         }
 
@@ -215,7 +215,7 @@ namespace Sprocket.Sim.Shell
                         ? "press " + panel.Name
                         : "press " + panel.Name + " " + (which + 1);
 
-                    row.Children.Add(Poke(name, delegate { panel.Press(which); }));
+                    row.Children.Add(Poke(name, () => panel.Press(which)));
                 }
             }
 

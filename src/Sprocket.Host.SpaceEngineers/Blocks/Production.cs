@@ -200,9 +200,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static bool TakesApart(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;
-            var definition = definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyAssemblerDefinition;
+            var definition = definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyAssemblerDefinition;
 
             return definition == null || definition.EnableDisassembly;
         }

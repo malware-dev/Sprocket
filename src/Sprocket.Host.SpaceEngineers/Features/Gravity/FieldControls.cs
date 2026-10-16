@@ -122,12 +122,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
             var max = new Vector3I(int.MinValue);
             var any = false;
             var size = generator.CubeGrid.GridSize;
-            for (var i = 0; i < rooms.Count; i++)
+            foreach (var room in rooms)
             {
-                if (!Pressurized(rooms[i], size))
+                if (!Pressurized(room, size))
                     continue;
 
-                foreach (var cell in rooms[i].Blocks)
+                foreach (var cell in room.Blocks)
                 {
                     min = Vector3I.Min(min, cell);
                     max = Vector3I.Max(max, cell);

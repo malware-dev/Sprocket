@@ -208,7 +208,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
+                IMyCubeGrid grid = _anchor?.CubeGrid;
                 return grid == null ? "" : grid.CustomName;
             }
         }
@@ -219,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Calls the grid the program runs on <paramref name="name" />.</summary>
         public void Rename(string name)
         {
-            IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
+            IMyCubeGrid grid = _anchor?.CubeGrid;
             if (grid != null)
                 grid.CustomName = name;
         }
@@ -258,8 +258,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Unstarted++;
             _unstartable.Clear();
-            for (var i = 0; i < starts.Count; i++)
-                _unstartable.Add(starts[i]);
+            foreach (var start in starts)
+                _unstartable.Add(start);
 
             _why.Clear();
             foreach (var pair in why)
@@ -287,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public static long Start(int sequenceId, SystemInstance instance)
         {
-            return ((long)sequenceId << 32) | (uint)(instance == null ? 0 : instance.Number);
+            return ((long)sequenceId << 32) | (uint)(instance?.Number ?? 0);
         }
 
         bool _asked;
@@ -364,7 +364,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         Vector3I[] Path(GridEntity entity)
         {
-            IMyCubeGrid home = _anchor == null ? null : _anchor.CubeGrid;
+            IMyCubeGrid home = _anchor?.CubeGrid;
             IMyCubeGrid target = entity.Block.CubeGrid;
             if (home == null || target == null)
                 return null;
@@ -384,14 +384,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 blocks.Clear();
                 grid.GetBlocks(blocks);
 
-                for (var i = 0; i < blocks.Count; i++)
+                foreach (var slim in blocks)
                 {
-                    IMyCubeGrid next = Across(blocks[i].FatBlock);
+                    IMyCubeGrid next = Across(slim.FatBlock);
                     if (next == null || from.ContainsKey(next))
                         continue;
 
                     from[next] = grid;
-                    through[next] = blocks[i].FatBlock.Position;
+                    through[next] = slim.FatBlock.Position;
                     waiting.Enqueue(next);
                 }
             }
@@ -412,15 +412,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         GridEntity Walk(Vector3I[] cells)
         {
-            IMyCubeGrid grid = _anchor == null ? null : _anchor.CubeGrid;
+            IMyCubeGrid grid = _anchor?.CubeGrid;
             for (var i = 0; grid != null && i < cells.Length - 1; i++)
             {
                 IMySlimBlock joint = grid.GetCubeBlock(cells[i]);
                 grid = joint == null ? null : Across(joint.FatBlock);
             }
 
-            IMySlimBlock found = grid == null ? null : grid.GetCubeBlock(cells[cells.Length - 1]);
-            var block = found == null ? null : found.FatBlock as IMyTerminalBlock;
+            IMySlimBlock found = grid?.GetCubeBlock(cells[cells.Length - 1]);
+            var block = found?.FatBlock as IMyTerminalBlock;
             return block == null ? null : FindEntity(block.EntityId);
         }
 
@@ -492,10 +492,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Deliberately the first of several. Two blocks may share a name, and picking one is
             // still better than losing the reference - it is a proposal either way, because a name
             // is never the strongest key.
-            for (var i = 0; i < _entities.Count; i++)
+            foreach (var entity in _entities)
             {
-                if (_entities[i].Name == name)
-                    return _entities[i];
+                if (entity.Name == name)
+                    return entity;
             }
 
             return null;
@@ -558,14 +558,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             _found.Clear();
             _seen.Clear();
             _counted.Clear();
-            for (int i = 0; i < _grids.Count; i++)
+            foreach (var grid in _grids)
             {
                 _slim.Clear();
-                _grids[i].GetBlocks(_slim);
+                grid.GetBlocks(_slim);
 
-                for (int b = 0; b < _slim.Count; b++)
+                foreach (var slim in _slim)
                 {
-                    IMyTerminalBlock block = _slim[b].FatBlock as IMyTerminalBlock;
+                    IMyTerminalBlock block = slim.FatBlock as IMyTerminalBlock;
                     if (block == null || !_seen.Add(block.EntityId))
                         continue;
 
@@ -589,9 +589,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // A block none of the big owners may use is no part of their automation, and reads as gone; the next read after
             // its sharing changes finds it again.
-            for (int i = 0; i < _found.Count; i++)
+            foreach (var block in _found)
             {
-                IMyTerminalBlock block = _found[i];
                 if (_byId.ContainsKey(block.EntityId))
                     continue;
 
@@ -615,14 +614,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Listens for <paramref name="blocks" /> being renamed, and for no others.</summary>
         void Hear(List<IMyTerminalBlock> blocks)
         {
-            for (int i = 0; i < _named.Count; i++)
-                _named[i].CustomNameChanged -= OnRenamed;
+            foreach (var block in _named)
+                block.CustomNameChanged -= OnRenamed;
 
             _named.Clear();
-            for (int i = 0; i < blocks.Count; i++)
+            foreach (var block in blocks)
             {
-                blocks[i].CustomNameChanged += OnRenamed;
-                _named.Add(blocks[i]);
+                block.CustomNameChanged += OnRenamed;
+                _named.Add(block);
             }
         }
 
@@ -660,9 +659,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_bigOwners.Count == 0)
                 return true;
 
-            for (var i = 0; i < _bigOwners.Count; i++)
+            foreach (var owner in _bigOwners)
             {
-                if (block.HasPlayerAccess(_bigOwners[i]))
+                if (block.HasPlayerAccess(owner))
                     return true;
             }
 
@@ -680,10 +679,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_anchor != null && !Closing(_anchor) && _anchor.CubeGrid != null && !Closing(_anchor.CubeGrid))
                 return _anchor.CubeGrid;
 
-            for (var i = 0; i < _watched.Count; i++)
+            foreach (var grid in _watched)
             {
-                if (!Closing(_watched[i]))
-                    return _watched[i];
+                if (!Closing(grid))
+                    return grid;
             }
 
             return null;
@@ -720,25 +719,25 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Listens to whatever grids are currently part of this construct, and nothing else.</summary>
         void Watch(List<IMyCubeGrid> grids)
         {
-            for (int i = 0; i < _watched.Count; i++)
+            foreach (var grid in _watched)
             {
-                _watched[i].OnBlockAdded -= OnBlocksChanged;
-                _watched[i].OnBlockRemoved -= OnBlockRemoved;
-                _watched[i].OnBlockOwnershipChanged -= OnOwnership;
-                _watched[i].OnGridSplit -= OnGridsChanged;
-                _watched[i].OnGridMerge -= OnGridsChanged;
+                grid.OnBlockAdded -= OnBlocksChanged;
+                grid.OnBlockRemoved -= OnBlockRemoved;
+                grid.OnBlockOwnershipChanged -= OnOwnership;
+                grid.OnGridSplit -= OnGridsChanged;
+                grid.OnGridMerge -= OnGridsChanged;
             }
 
             _watched.Clear();
 
-            for (int i = 0; i < grids.Count; i++)
+            foreach (var grid in grids)
             {
-                grids[i].OnBlockAdded += OnBlocksChanged;
-                grids[i].OnBlockRemoved += OnBlockRemoved;
-                grids[i].OnBlockOwnershipChanged += OnOwnership;
-                grids[i].OnGridSplit += OnGridsChanged;
-                grids[i].OnGridMerge += OnGridsChanged;
-                _watched.Add(grids[i]);
+                grid.OnBlockAdded += OnBlocksChanged;
+                grid.OnBlockRemoved += OnBlockRemoved;
+                grid.OnBlockOwnershipChanged += OnOwnership;
+                grid.OnGridSplit += OnGridsChanged;
+                grid.OnGridMerge += OnGridsChanged;
+                _watched.Add(grid);
             }
         }
 

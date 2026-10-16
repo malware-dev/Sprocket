@@ -64,10 +64,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>The copy of the blueprint <paramref name="identity" />, or null where the library has none.</summary>
         public Volume Find(Guid identity)
         {
-            for (var i = 0; i < _all.Count; i++)
+            foreach (var volume in _all)
             {
-                if (_all[i].State == VolumeState.Read && _all[i].Identity == identity)
-                    return _all[i];
+                if (volume.State == VolumeState.Read && volume.Identity == identity)
+                    return volume;
             }
 
             return null;
@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public Volume Keep(AutomationSystem blueprint)
         {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
-            var identity = had != null ? had.Identity : Guid.NewGuid();
+            var identity = had?.Identity ?? Guid.NewGuid();
             var text = ProgramText.Blueprint(blueprint, identity);
             if (had == null)
             {
@@ -281,10 +281,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static string Clean(string name)
         {
             var clean = new StringBuilder(name.Length);
-            for (var i = 0; i < name.Length; i++)
+            foreach (var character in name)
             {
-                var c = name[i];
-                clean.Append(c < ' ' || Array.IndexOf(Refused, c) >= 0 ? '_' : c);
+                clean.Append(character < ' ' || Array.IndexOf(Refused, character) >= 0 ? '_' : character);
             }
 
             return clean.ToString().Trim().TrimEnd('.');
@@ -293,8 +292,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         void WriteIndex()
         {
             var text = new StringBuilder();
-            for (var i = 0; i < _lines.Count; i++)
-                text.Append(_lines[i]).Append('\n');
+            foreach (var line in _lines)
+                text.Append(line).Append('\n');
 
             Write(Index, text.ToString());
         }

@@ -118,9 +118,9 @@ namespace Sprocket.Sim.Shell
             Process[] running = Process.GetProcessesByName(
                 Process.GetCurrentProcess().ProcessName);
 
-            for (int i = 0; i < running.Length; i++)
+            foreach (var process in running)
             {
-                if (running[i].MainWindowHandle == window)
+                if (process.MainWindowHandle == window)
                     return true;
             }
 
@@ -163,9 +163,9 @@ namespace Sprocket.Sim.Shell
 
             int touched = 0;
 
-            for (int i = 0; i < running.Length; i++)
+            foreach (var process in running)
             {
-                IntPtr window = running[i].MainWindowHandle;
+                IntPtr window = process.MainWindowHandle;
                 if (window == IntPtr.Zero)
                     continue;
 

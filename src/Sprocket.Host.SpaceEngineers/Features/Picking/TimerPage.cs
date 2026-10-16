@@ -69,8 +69,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override void Primary()
         {
-            var rate = _rate == null ? null : _rate.Length;
-            _done(rate.HasValue ? rate.Value : _start);
+            var rate = _rate?.Length;
+            _done(rate ?? _start);
         }
 
         /// <inheritdoc />

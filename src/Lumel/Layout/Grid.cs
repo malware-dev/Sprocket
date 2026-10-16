@@ -83,9 +83,8 @@ namespace Lumel.Layout
             for (var c = 0; c < _columnCount; c++)
                 _widths[c] = Columns[c].IsFixed ? Columns[c].Size : 0f;
 
-            for (var i = 0; i < _cells.Count; i++)
+            foreach (var cell in _cells)
             {
-                var cell = _cells[i];
                 var track = Columns[cell.Column];
 
                 if (cell.Columns == 1 && (track.IsFixed || (track.IsFlex && boundedAcross)))
@@ -114,9 +113,8 @@ namespace Lumel.Layout
             for (var r = 0; r < _rowCount; r++)
                 _heights[r] = Rows[r].IsFixed ? Rows[r].Size : 0f;
 
-            for (var i = 0; i < _cells.Count; i++)
+            foreach (var cell in _cells)
             {
-                var cell = _cells[i];
                 var room = Span(_widths, cell.Column, cell.Columns, _columnSpacing);
 
                 cell.Element.Measure(g, new Vector2(Given(cell.Width, room), Given(cell.Height, available.Y)));
@@ -160,9 +158,8 @@ namespace Lumel.Layout
             Offsets(_xs, _widths, _columnCount, bounds.X, _columnSpacing);
             Offsets(_ys, _heights, _rowCount, bounds.Y, _rowSpacing);
 
-            for (var i = 0; i < _cells.Count; i++)
+            foreach (var cell in _cells)
             {
-                var cell = _cells[i];
                 if (!cell.Element.IsVisible)
                     continue;
 
@@ -182,8 +179,8 @@ namespace Lumel.Layout
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            for (var i = 0; i < _cells.Count; i++)
-                _cells[i].Element.Draw(g);
+            foreach (var cell in _cells)
+                cell.Element.Draw(g);
         }
 
         /// <inheritdoc />
@@ -223,16 +220,16 @@ namespace Lumel.Layout
         /// <inheritdoc />
         protected override void Replaced(Element child)
         {
-            for (var i = 0; i < _cells.Count; i++)
-                if (_cells[i].Element == child)
-                    _cells[i].Resolve(child.Placement);
+            foreach (var cell in _cells)
+                if (cell.Element == child)
+                    cell.Resolve(child.Placement);
         }
 
         Element At(int row, int column)
         {
-            for (var i = 0; i < _cells.Count; i++)
-                if (_cells[i].Covers(row, column))
-                    return _cells[i].Element;
+            foreach (var cell in _cells)
+                if (cell.Covers(row, column))
+                    return cell.Element;
 
             return null;
         }
@@ -245,9 +242,8 @@ namespace Lumel.Layout
             var placing = new Cell(child, row, column, rows, columns);
             Cell same = null;
 
-            for (var i = 0; i < _cells.Count; i++)
+            foreach (var cell in _cells)
             {
-                var cell = _cells[i];
                 if (cell.Element == child)
                     continue;
 
@@ -278,10 +274,8 @@ namespace Lumel.Layout
             _columnCount = Columns.Count;
             _rowCount = Rows.Count;
 
-            for (var i = 0; i < _cells.Count; i++)
+            foreach (var cell in _cells)
             {
-                var cell = _cells[i];
-
                 if (cell.Column + cell.Columns > _columnCount)
                     _columnCount = cell.Column + cell.Columns;
 
@@ -408,8 +402,8 @@ namespace Lumel.Layout
             public void Resolve(IPlacement placement)
             {
                 var sized = placement as ISized;
-                Width = sized == null ? float.NaN : sized.Width;
-                Height = sized == null ? float.NaN : sized.Height;
+                Width = sized?.Width ?? float.NaN;
+                Height = sized?.Height ?? float.NaN;
             }
         }
     }

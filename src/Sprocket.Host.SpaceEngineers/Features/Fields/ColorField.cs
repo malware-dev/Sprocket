@@ -43,16 +43,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     Edge = Palette.Chrome,
                     HighlightEdge = Palette.Ink,
                     Placement = Fixed.Size(32f, 28f),
-                    Command = new Relay(delegate { Give(color); })
+                    Command = new Relay(() => Give(color))
                 });
             }
 
             _palette.IsVisible = colors.Count != 0;
 
-            _hue.Moved += delegate { Give(_color.Hued(_hue.Fraction)); };
-            _saturation.Moved += delegate { Give(_color.Saturated(_saturation.Fraction)); };
-            _value.Moved += delegate { Give(_color.Valued(_value.Fraction)); };
-            _written.Edited += delegate
+            _hue.Moved += () => Give(_color.Hued(_hue.Fraction));
+            _saturation.Moved += () => Give(_color.Saturated(_saturation.Fraction));
+            _value.Moved += () => Give(_color.Valued(_value.Fraction));
+            _written.Edited += () =>
             {
                 Reread();
                 Raise();

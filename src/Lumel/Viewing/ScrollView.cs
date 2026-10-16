@@ -244,7 +244,7 @@ namespace Lumel.Viewing
         /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
-            return Content != null ? Content.Under(point) : null;
+            return Content?.Under(point);
         }
 
         static bool Inside(RectangleF bounds, Vector2 point)

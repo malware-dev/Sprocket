@@ -116,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             && _system.Enabled == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
 
         /// <summary>Deletes the system, asking first; a blueprint only once its name is typed, since every logic system made from it goes too.</summary>
-        public override ICommand Deletes => Editor.Act(Cmd.DeleteSystem, delegate { Editor.DeleteSystem(_system); });
+        public override ICommand Deletes => Editor.Act(Cmd.DeleteSystem, () => Editor.DeleteSystem(_system));
 
         /// <inheritdoc />
         public override string DeleteAbout => Editor.Texts.SystemDelete;
@@ -343,9 +343,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Show(Editor.World, texts);
             }
 
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
-                var sequence = _sequences[i];
                 var row = _sequenceRows[sequence];
 
                 Live(row, sequence, tick);
@@ -369,8 +368,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (_rate != null)
                 _rate.Finish(false);
 
-            _rate = new LengthQuestion(Editor, every.Interval, true, delegate { return RateChip(every); },
-                delegate(Duration? interval, bool cancelled)
+            _rate = new LengthQuestion(Editor, every.Interval, true, () => RateChip(every),
+                (interval, cancelled) =>
                 {
                     if (!cancelled && interval.HasValue && interval.Value != every.Interval && _system.IndexOfTrigger(every) >= 0)
                         Editor.Do(_system, new SetCadence(every, every.Interval, interval.Value));
@@ -381,14 +380,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The chip of <paramref name="every" />'s rate, or null where its row does not show one.</summary>
         Element RateChip(EveryTrigger every)
         {
-            var row = _triggerRows == null ? null : _triggerRows[every];
+            var row = _triggerRows?[every];
             if (row == null)
                 return null;
 
-            for (var i = 0; i < row.Starts.Count; i++)
+            foreach (var start in row.Starts)
             {
-                if (row.Starts[i] is DurationSlot)
-                    return row.ChipOf(row.Starts[i]);
+                if (start is DurationSlot)
+                    return row.ChipOf(start);
             }
 
             return null;
@@ -408,21 +407,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _addTrigger.Show(new Adder(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
             {
                 new Adder(SentenceText.WhenWord, texts.SystemWhenAbout,
-                    Changes(Cmd.StartWhen, delegate { Editor.StartSequence(_system, new WhenTrigger("")); })),
+                    Changes(Cmd.StartWhen, () => Editor.StartSequence(_system, new WhenTrigger("")))),
                 new Adder(SentenceText.EveryWord, texts.SystemEveryAbout,
-                    Changes(Cmd.StartEvery, delegate { Editor.StartSequence(_system, new EveryTrigger(Editor.NewLength)); }))
+                    Changes(Cmd.StartEvery, () => Editor.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
             }));
 
             _runs.Clear();
-            for (var i = 0; i < _triggers.Count; i++)
+            foreach (var trigger in _triggers)
             {
-                var trigger = _triggers[i];
                 _runs.Add(trigger.Acts != null ? Editor.Runner.Alone(_system, trigger) : _system.FindSequence(trigger.Runs));
             }
 
             _triggerRows.Show(_triggers);
-            for (var i = 0; i < _triggers.Count; i++)
-                Word(_triggerRows[_triggers[i]], _triggers[i]);
+            foreach (var trigger in _triggers)
+                Word(_triggerRows[trigger], trigger);
 
             _sequencesHeading.Text = texts.SystemSequences.ToUpperInvariant();
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
@@ -430,25 +428,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // The way to make a sequence without starting from what would start it. Somebody who knows what the
             // machine should do can write that first and give it a trigger afterwards.
-            _newSequence.Command = Changes(Cmd.NewSequence, delegate { Editor.NewSequence(_system); });
+            _newSequence.Command = Changes(Cmd.NewSequence, () => Editor.NewSequence(_system));
 
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0;
             _noSequences.Text = texts.SystemNoSequences;
 
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
                 // Said before it is done rather than discovered after: the copy having no trigger is the part
                 // somebody would otherwise read as a fault.
-                var sequence = _sequences[i];
                 var row = _sequenceRows[sequence];
                 row.DuplicateText = sequence.Trigger != null ? texts.SystemCopy : texts.SystemCopyUnstarted;
                 row.About = texts.SystemOpenSequence;
                 row.AboutArguments.Set("name", SequenceText.Called(texts, sequence));
 
                 // Copying one or deleting it is changing the system, so it waits for the switch like any other change.
-                row.Copies = Changes(Cmd.DuplicateSequence, delegate { Editor.Duplicate(sequence); });
-                row.Deletes = Changes(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(sequence); });
+                row.Copies = Changes(Cmd.DuplicateSequence, () => Editor.Duplicate(sequence));
+                row.Deletes = Changes(Cmd.DeleteSequence, () => Editor.DeleteSequence(sequence));
                 row.DeleteText = texts.SequenceDelete;
                 row.Locked = Locked();
             }
@@ -509,18 +506,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (shown == null)
                 return;
 
-            for (var i = 0; i < _parts.Count; i++)
+            foreach (var part in _parts)
             {
-                var part = _parts[i];
                 var row = _slotRows[part];
 
                 row.Name = part.Id;
                 row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
                 row.Described = part.Annotation;
                 // Like everything else on this screen, waiting for the switch, and saying why.
-                row.Opens = Changes(Cmd.OpenSlot, delegate { Editor.Push(new SlotPage(Editor, _system, part)); });
+                row.Opens = Changes(Cmd.OpenSlot, () => Editor.Push(new SlotPage(Editor, _system, part)));
                 row.OpensAbout = Editable ? texts.SlotOpenAbout : Locked();
-                row.Fills = Changes(Cmd.FillPart, delegate { _fill.Ask(part, shown); });
+                row.Fills = Changes(Cmd.FillPart, () => _fill.Ask(part, shown));
                 row.Marks = Marked(texts, part, shown);
                 row.Take(Editor.Runner.Bindings, shown.FilledWith(part.Id), part.IsSignal ? shown.Positions(part.Id) : null);
 
@@ -555,7 +551,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Writes the description box into the blueprint once the keyboard has left it, read every tick because it is one comparison.</summary>
         void Refocused()
         {
-            var now = Editor.Input == null ? null : Editor.Input.Focused;
+            var now = Editor.Input?.Focused;
             if (ReferenceEquals(now, _focused))
                 return;
 
@@ -682,7 +678,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return;
 
             var instance = _system.Instances[at];
-            var choose = Editor.Act(Cmd.ChooseInstance, delegate { Editor.Choose(_system, instance); });
+            var choose = Editor.Act(Cmd.ChooseInstance, () => Editor.Choose(_system, instance));
             if (choose != null)
                 choose.Execute();
         }
@@ -695,9 +691,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return new StatusRow
             {
                 Mark = Symbols.Sequence,
-                Opens = Editor.Act(Cmd.OpenSequence, delegate { Editor.Push(new SequencePage(Editor, sequence)); }),
-                Runs = Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(sequence); }),
-                Stops = Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(sequence); }),
+                Opens = Editor.Act(Cmd.OpenSequence, () => Editor.Push(new SequencePage(Editor, sequence))),
+                Runs = Editor.Act(Cmd.RunNow, () => Editor.RunNow(sequence)),
+                Stops = Editor.Act(Cmd.StopNow, () => Editor.StopNow(sequence)),
                 AboutArguments = new Arguments()
             };
         }
@@ -773,12 +769,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.Interval, Changes(Cmd.OpenTrigger, delegate { OpenRate(every); })));
+                row.Starts.Add(new DurationSlot(every.Interval, Changes(Cmd.OpenTrigger, () => OpenRate(every))));
 
             Doing(row, trigger);
 
-            row.Deletes = Changes(Cmd.DeleteTrigger, delegate { Editor.Forget(_system, trigger); });
-            row.Copies = Changes(Cmd.DuplicateTrigger, delegate { Editor.CopyTrigger(_system, trigger); });
+            row.Deletes = Changes(Cmd.DeleteTrigger, () => Editor.Forget(_system, trigger));
+            row.Copies = Changes(Cmd.DuplicateTrigger, () => Editor.CopyTrigger(_system, trigger));
             row.Locked = Locked();
         }
 
@@ -803,7 +799,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 var said = SentenceText.Quantified(when.Quantifier);
                 row.Starts.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(Cmd.OpenTrigger, delegate { Quantify(when); }), Given.Read));
+                    Changes(Cmd.OpenTrigger, () => Quantify(when)), Given.Read));
             }
 
             row.Starts.Add(new ActionSlot(value, Starts(when, Opening.What)));
@@ -814,7 +810,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
             var plural = when.Quantifier == Quantifier.All && blocks.Count > 1;
             row.Starts.Add(new ArgumentsSlot(new[] { Comparing.Of(when.Relation) }, fields.GetRange(0, 1),
-                Changes(Cmd.OpenTrigger, delegate { Relate(when, fields[0], plural); }), Given.Compared, plural));
+                Changes(Cmd.OpenTrigger, () => Relate(when, fields[0], plural)), Given.Compared, plural));
             row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, Opening.Arguments), Given.Checked));
         }
 
@@ -864,10 +860,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var events = Vocabulary.EventsFor(Editor.Runner.Bindings, Editor.Seen(_system, moment.Sources));
             var eventId = Vocabulary.EventOf(Editor.Program, Editor.Runner.Bindings, _system, moment, Editor.StandIn(_system));
-            for (var i = 0; i < events.Count; i++)
+            foreach (var entityEvent in events)
             {
-                if (events[i].Id == eventId)
-                    return events[i];
+                if (entityEvent.Id == eventId)
+                    return entityEvent;
             }
 
             return null;
@@ -885,7 +881,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var sequence = _system.FindSequence(trigger.Runs);
                 row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, true, false);
                 row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
-                    Changes(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, Opening.Nothing, false); })));
+                    Changes(Cmd.TriggerTarget, () => Editor.ChangeTrigger(_system, trigger, Opening.Nothing, false))));
 
                 return;
             }
@@ -909,12 +905,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         ICommand Does(Trigger trigger, Opening opens)
         {
-            return Changes(Cmd.TriggerTarget, delegate { Editor.ChangeTrigger(_system, trigger, opens, true); });
+            return Changes(Cmd.TriggerTarget, () => Editor.ChangeTrigger(_system, trigger, opens, true));
         }
 
         ICommand Starts(Trigger trigger, Opening opens)
         {
-            return Changes(Cmd.OpenTrigger, delegate { Editor.ChangeTrigger(_system, trigger, opens, false); });
+            return Changes(Cmd.OpenTrigger, () => Editor.ChangeTrigger(_system, trigger, opens, false));
         }
 
         void Collect()

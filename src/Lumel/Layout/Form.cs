@@ -195,8 +195,8 @@ namespace Lumel.Layout
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            for (var i = 0; i < _children.Count; i++)
-                _children[i].Draw(g);
+            foreach (var child in _children)
+                child.Draw(g);
         }
 
         /// <inheritdoc />
@@ -239,7 +239,7 @@ namespace Lumel.Layout
         static float FixedWidth(Element child)
         {
             var sized = child.Placement as ISized;
-            return sized != null ? sized.Width : float.NaN;
+            return sized?.Width ?? float.NaN;
         }
 
         /// <summary>A child's width: the one its placement fixes, else <paramref name="desired" />.</summary>

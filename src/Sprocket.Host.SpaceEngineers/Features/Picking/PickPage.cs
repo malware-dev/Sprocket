@@ -278,9 +278,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (_selection.Count != _arrived.Count)
                     return true;
 
-                for (var i = 0; i < _selection.Count; i++)
+                foreach (var id in _selection)
                 {
-                    if (!Contains(_arrived, _selection[i]))
+                    if (!Contains(_arrived, id))
                         return true;
                 }
 
@@ -322,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <remarks>The player's own, the same in every picker, where the machine keeps preferences; this picker's alone where it does not.</remarks>
         bool ShowsHidden
         {
-            get { return Editor.Preferences != null ? Editor.Preferences.ShowsHidden : _showsHidden; }
+            get { return Editor.Preferences?.ShowsHidden ?? _showsHidden; }
             set
             {
                 if (Editor.Preferences != null)
@@ -364,13 +364,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_base > 0)
                 return _straight ? LeavingStraight() : true;
 
-            var after = _aim == null ? null : _aim.Following;
+            var after = _aim?.Following;
             if (!IsComplete || !Moved && (after == null || !after.Moved))
                 return true;
 
             Editor.Ask(Editor.Texts.PickKeepQuestion);
             Editor.AnswerPrimary(Editor.Texts.PickKeepThem, true);
-            Editor.Answer(Editor.Texts.PickDiscardThem, delegate { Editor.Pop(); });
+            Editor.Answer(Editor.Texts.PickDiscardThem, () => Editor.Pop());
 
             return false;
         }
@@ -562,7 +562,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (Editor.Input != null)
                     Editor.Input.Focus(_blocks.KindNarrow);
             };
-            _clearKind = Editor.Act(Cmd.AnyKind, delegate { SetKind(""); });
+            _clearKind = Editor.Act(Cmd.AnyKind, () => SetKind(""));
             _toggleHidden = Editor.Act(Cmd.HiddenBlocks, delegate
             {
                 ShowsHidden = !ShowsHidden;
@@ -588,8 +588,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _what.Narrowed += OnWhatSearch;
             _whatRows = new Keyed<string, PickRow>(_what.Rows, WhatRow);
 
-            _organized = Editor.Act(Cmd.ShowOrganized, delegate { Show(false); });
-            _terminal = Editor.Act(Cmd.ShowTerminal, delegate { Show(true); });
+            _organized = Editor.Act(Cmd.ShowOrganized, () => Show(false));
+            _terminal = Editor.Act(Cmd.ShowTerminal, () => Show(true));
 
             _strip.Add(_what);
         }
@@ -597,8 +597,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         PickRow BlockRow(long id)
         {
             var row = new PickRow();
-            row.Picked += delegate(Held held, int presses) { Picked(id, held, presses); };
-            row.Ticks = Editor.Act(Cmd.PickEntity, delegate { Pick(id, Held.Also); });
+            row.Picked += (held, presses) => Picked(id, held, presses);
+            row.Ticks = Editor.Act(Cmd.PickEntity, () => Pick(id, Held.Also));
             return row;
         }
 
@@ -636,7 +636,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </remarks>
         void Picked(long id, Held held, int presses)
         {
-            var pick = Editor.Act(Cmd.PickEntity, delegate { Pick(id, held); });
+            var pick = Editor.Act(Cmd.PickEntity, () => Pick(id, held));
             if (pick == null)
                 return;
 
@@ -654,7 +654,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var id = _ids[at];
             var form = _forms.Count > at ? _forms[at] : Nature.Native;
-            var choose = Editor.Act(Cmd.PickChoice, delegate { Choose(id, form); });
+            var choose = Editor.Act(Cmd.PickChoice, () => Choose(id, form));
             if (choose == null)
                 return;
 
@@ -791,7 +791,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         _finish.Execute();
                 };
 
-                arguments.Form.Opens += delegate(LinesField lines)
+                arguments.Form.Opens += lines =>
                 {
                     if (Editor.Current == this)
                         Editor.Push(new TextPage(Editor, Title, lines.Text, lines.Longest, lines.Give));
@@ -811,10 +811,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>The value <paramref name="id" /> among <paramref name="actions" />, or null where none of them is.</summary>
         static EntityAction Valued(List<EntityAction> actions, string id)
         {
-            for (var i = 0; i < actions.Count; i++)
+            foreach (var action in actions)
             {
-                if (actions[i].Id == id && (actions[i].Sets || actions[i].Being != null))
-                    return actions[i];
+                if (action.Id == id && (action.Sets || action.Being != null))
+                    return action;
             }
 
             return null;
@@ -880,9 +880,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     "count", _candidates.Count.ToString(CultureInfo.InvariantCulture));
 
             _blockRows.Show(_filteredIds);
-            for (var i = 0; i < _filtered.Count; i++)
+            foreach (var entity in _filtered)
             {
-                var entity = _filtered[i];
                 var row = _blockRows[entity.Id];
 
                 string note;
@@ -976,9 +975,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         bool HasKind(string kindId)
         {
-            for (var i = 0; i < _kinds.Count; i++)
+            foreach (var kind in _kinds)
             {
-                if (_kinds[i].Id == kindId || (_family != Family.None && _kinds[i].Family == _family))
+                if (kind.Id == kindId || (_family != Family.None && kind.Family == _family))
                     return true;
             }
 
@@ -1014,9 +1013,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         int KindsOf(Family family)
         {
             var count = 0;
-            for (var i = 0; i < _kinds.Count; i++)
+            foreach (var kind in _kinds)
             {
-                if (_kinds[i].Family == family)
+                if (kind.Family == family)
                     count++;
             }
 
@@ -1025,10 +1024,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         EntityKind OnlyKindOf(Family family)
         {
-            for (var i = 0; i < _kinds.Count; i++)
+            foreach (var kind in _kinds)
             {
-                if (_kinds[i].Family == family)
-                    return _kinds[i];
+                if (kind.Family == family)
+                    return kind;
             }
 
             return null;
@@ -1037,9 +1036,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         int CountOfFamily(Family family)
         {
             var count = 0;
-            for (var i = 0; i < _candidates.Count; i++)
+            foreach (var candidate in _candidates)
             {
-                if (_candidates[i].Kind.Family == family)
+                if (candidate.Kind.Family == family)
                     count++;
             }
 
@@ -1103,7 +1102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _reads = new ListField(words);
                 _reads.Edited += delegate
                 {
-                    var reads = Editor.Act(Cmd.ReadBlocks, delegate { Quantify(Read(_reads.Text)); });
+                    var reads = Editor.Act(Cmd.ReadBlocks, () => Quantify(Read(_reads.Text)));
                     if (reads != null)
                         reads.Execute();
                 };
@@ -1139,10 +1138,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return false;
 
             var events = Vocabulary.EventsOf(Editor.World, _selection);
-            for (var i = 0; i < events.Count; i++)
+            foreach (var entityEvent in events)
             {
-                if (events[i].Id == _chosen)
-                    return !events[i].Answered && events[i].Value.Length > 0;
+                if (entityEvent.Id == _chosen)
+                    return !entityEvent.Answered && entityEvent.Value.Length > 0;
             }
 
             return false;
@@ -1173,15 +1172,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 // A total is taken of numbers alone, so while one is asked for no moment is listed.
                 var events = Totals ? new List<EntityEvent>() : Vocabulary.EventsOf(Editor.World, _selection);
-                for (var i = 0; i < events.Count; i++)
+                foreach (var entityEvent in events)
                 {
-                    if (_signalsOnly && !events[i].Answered)
+                    if (_signalsOnly && !entityEvent.Answered)
                         continue;
 
-                    _names.Add(events[i].Text);
-                    _marks.Add(MarkText.Of(events[i]));
+                    _names.Add(entityEvent.Text);
+                    _marks.Add(MarkText.Of(entityEvent));
 
-                    _ids.Add(events[i].Id);
+                    _ids.Add(entityEvent.Id);
                     _sets.Add(false);
                     _forms.Add(Nature.Native);
                     _groups.Add(Moments);
@@ -1194,11 +1193,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (!_signalsOnly)
                 {
                     var actions = Vocabulary.ActionsOf(Editor.World, _selection);
-                    for (var i = 0; i < actions.Count; i++)
+                    foreach (var action in actions)
                     {
-                        var one = actions[i];
-                        if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && Number(one))
-                            Read(one, Values);
+                        if (!action.IsStatus && (action.Being != null || (action.Sets && Lists(action))) && Number(action))
+                            Read(action, Values);
                     }
                 }
             }
@@ -1261,9 +1259,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // anything left in them is decided by what somebody has just typed. An event list has no groups.
             _rows.Clear();
             var group = -1;
-            for (var i = 0; i < _matched.Count; i++)
+            foreach (var at in _matched)
             {
-                var at = _matched[i];
                 var mine = _groups.Count > at ? _groups[at] : group;
                 if (mine != group)
                 {
@@ -1276,9 +1273,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _whatKeys.Clear();
             _whatAt.Clear();
-            for (var i = 0; i < _rows.Count; i++)
+            foreach (var at in _rows)
             {
-                var at = _rows[i];
                 var key = at < 0
                     ? "#" + (-1 - at).ToString(CultureInfo.InvariantCulture)
                     : (_forms.Count > at ? _forms[at] : Nature.Native) + " " + _ids[at];
@@ -1348,10 +1344,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (Editor.ShowsTerminal)
             {
                 actions.Sort(ByDeclared);
-                for (var i = 0; i < actions.Count; i++)
+                foreach (var action in actions)
                 {
-                    if (actions[i].Sets && actions[i].Unaltered && (!Totals || Number(actions[i])))
-                        Read(actions[i], Values);
+                    if (action.Sets && action.Unaltered && (!Totals || Number(action)))
+                        Read(action, Values);
                 }
 
                 return;
@@ -1368,9 +1364,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             for (var group = 0; group <= (int)Category.Other; group++)
             {
-                for (var i = 0; i < actions.Count; i++)
+                foreach (var one in actions)
                 {
-                    var one = actions[i];
                     if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && (int)one.Category == group
                         && (!sums || Number(one)))
                         Read(one, group);
@@ -1438,9 +1433,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void Listed(List<EntityAction> actions, int group)
         {
-            for (var i = 0; i < actions.Count; i++)
+            foreach (var one in actions)
             {
-                var one = actions[i];
                 if (!Lists(one) || Group(one) != group)
                     continue;
 
@@ -1603,9 +1597,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         int CountOfKind(string kindId)
         {
             var count = 0;
-            for (var i = 0; i < _candidates.Count; i++)
+            foreach (var candidate in _candidates)
             {
-                if (_candidates[i].Kind.Id == kindId)
+                if (candidate.Kind.Id == kindId)
                     count++;
             }
 
@@ -1640,10 +1634,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             else
             {
                 var capable = _forTests ? Vocabulary.Testable(Editor.World) : Vocabulary.Capable(Editor.World, _forEvents);
-                for (var i = 0; i < capable.Count; i++)
+                foreach (var entity in capable)
                 {
-                    if ((_admits == null || _admits(capable[i])) && Listed(capable[i]))
-                        _candidates.Add(capable[i]);
+                    if ((_admits == null || _admits(entity)) && Listed(entity))
+                        _candidates.Add(entity);
                 }
             }
 
@@ -1656,8 +1650,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _wasShown.Clear();
             if (_screen.Search == _narrowedSearch && _kind == _narrowedKind)
             {
-                for (var i = 0; i < _filteredIds.Count; i++)
-                    _wasShown.Add(_filteredIds[i]);
+                foreach (var id in _filteredIds)
+                    _wasShown.Add(id);
             }
 
             _narrowedSearch = _screen.Search;
@@ -1665,9 +1659,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _filtered.Clear();
             _filteredIds.Clear();
-            for (var i = 0; i < _candidates.Count; i++)
+            foreach (var entity in _candidates)
             {
-                var entity = _candidates[i];
                 if (!_wasShown.Contains(entity.Id) && !Contains(_selection, entity.Id)
                     && !EntityQuery.Matches(entity, _screen.Search, _kind, _family))
                     continue;

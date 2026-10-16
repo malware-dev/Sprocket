@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
 
             Editor.Ask(Editor.Texts.PickKeepQuestion);
             Editor.AnswerPrimary(Editor.Texts.PickKeepThem, true);
-            Editor.Answer(Editor.Texts.PickDiscardThem, delegate { Editor.Pop(); });
+            Editor.Answer(Editor.Texts.PickDiscardThem, () => Editor.Pop());
             return false;
         }
 

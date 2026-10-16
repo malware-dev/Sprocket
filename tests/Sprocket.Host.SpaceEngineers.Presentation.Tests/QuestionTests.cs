@@ -17,7 +17,7 @@ public class QuestionTests
         button.Command = new Relay(delegate
         {
             screen.Editor.AskHere("Which one?");
-            screen.Editor.Answer("This one", delegate { });
+            screen.Editor.Answer("This one", () => { });
         });
 
         var bounds = button.Bounds;

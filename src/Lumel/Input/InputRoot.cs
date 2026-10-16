@@ -175,7 +175,7 @@ namespace Lumel.Input
                 return element.Parent;
 
             var popup = element as Popup;
-            return popup == null ? null : popup.Anchor;
+            return popup?.Anchor;
         }
 
         static Element FocusableFrom(Element element)

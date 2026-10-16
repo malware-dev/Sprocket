@@ -37,10 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// numbers is a worse answer in all of them. Nothing else here has a rendering that is not
         /// text, which is why this is one property rather than a way of saying anything at all.
         /// </remarks>
-        public virtual Color? Sample
-        {
-            get { return null; }
-        }
+        public virtual Color? Sample => null;
 
         /// <summary>What pressing this part does, or null where it cannot be pressed.</summary>
         public ICommand Opens { get; }

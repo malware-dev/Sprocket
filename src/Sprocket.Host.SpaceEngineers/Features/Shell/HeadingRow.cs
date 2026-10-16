@@ -35,10 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>How many parts are on show.</summary>
-        public int Count
-        {
-            get { return _shown; }
-        }
+        public int Count => _shown;
 
         /// <summary>Shows <paramref name="heading" />, leaving the words of the part at <paramref name="renaming" /> to its box.</summary>
         public void Update(List<HeadingPart> heading, int renaming)
@@ -119,11 +116,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var shape = heading.Count;
 
-            for (var i = 0; i < heading.Count; i++)
+            foreach (var part in heading)
             {
-                shape = shape * 2 + (string.IsNullOrEmpty(heading[i].Lead) ? 0 : 1);
-                shape = shape * 2 + (string.IsNullOrEmpty(heading[i].After) ? 0 : 1);
-                shape = shape * 2 + (string.IsNullOrEmpty(heading[i].Mark) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(part.Lead) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(part.After) ? 0 : 1);
+                shape = shape * 2 + (string.IsNullOrEmpty(part.Mark) ? 0 : 1);
             }
 
             return shape;

@@ -60,11 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static double Best(IMySolarPanel panel)
         {
             var definitions = MyDefinitionManager.Static;
-            var definition = definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(panel.BlockDefinition) as MyPowerProducerDefinition;
+            var definition = definitions?.GetCubeBlockDefinition(panel.BlockDefinition) as MyPowerProducerDefinition;
 
-            return definition == null ? 0.0 : definition.MaxPowerOutput;
+            return definition?.MaxPowerOutput ?? 0.0;
         }
     }
 }

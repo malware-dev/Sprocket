@@ -68,14 +68,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Looked("A sensor says when it starts and stops detecting, and nothing of how many things it detects.")
                 .Renaming("Audible Proximity Alert", true, "audible proximity alert");
 
-            for (var i = 0; i < Switches.Length; i++)
+            foreach (var switchName in Switches)
             {
-                kind.Renaming(Switches[i], true, Switches[i].ToLowerInvariant())
-                    .Renaming(Switches[i], false, "toggle " + Switches[i].ToLowerInvariant());
+                kind.Renaming(switchName, true, switchName.ToLowerInvariant())
+                    .Renaming(switchName, false, "toggle " + switchName.ToLowerInvariant());
             }
 
-            for (var i = 0; i < Extents.Length; i++)
-                kind.Renaming(Extents[i], true, Extents[i].ToLowerInvariant() + " extent");
+            foreach (var extent in Extents)
+                kind.Renaming(extent, true, extent.ToLowerInvariant() + " extent");
         }
 
         /// <summary>Told as the sensor starts or stops detecting, which it raises on the server and on every client.</summary>

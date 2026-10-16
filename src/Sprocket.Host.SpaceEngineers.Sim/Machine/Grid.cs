@@ -161,11 +161,11 @@ public sealed class Grid
     object Blocks(object[] arguments)
     {
         var into = (List<IMySlimBlock>)arguments[0];
-        for (var i = 0; i < _fitted.Count; i++)
-            into.Add(_slim[_fitted[i]]);
+        foreach (var fitting in _fitted)
+            into.Add(_slim[fitting]);
 
-        for (var i = 0; i < _tops.Count; i++)
-            into.Add(_tops[i]);
+        foreach (var block in _tops)
+            into.Add(block);
 
         return null;
     }
@@ -173,16 +173,16 @@ public sealed class Grid
     /// <summary>The block standing at <paramref name="cell" />, or null.</summary>
     IMySlimBlock At(Vector3I cell)
     {
-        for (var i = 0; i < _fitted.Count; i++)
+        foreach (var fitting in _fitted)
         {
-            if (_fitted[i].Cell == cell)
-                return _slim[_fitted[i]];
+            if (fitting.Cell == cell)
+                return _slim[fitting];
         }
 
-        for (var i = 0; i < _tops.Count; i++)
+        foreach (var block in _tops)
         {
-            if (_tops[i].FatBlock.Position == cell)
-                return _tops[i];
+            if (block.FatBlock.Position == cell)
+                return block;
         }
 
         return null;

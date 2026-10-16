@@ -235,7 +235,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public int Expected(string actionId, IList<Literal> arguments)
         {
             var bound = Bind(actionId, arguments);
-            return bound == null ? Unestimated : bound.Expected(_block);
+            return bound?.Expected(_block) ?? Unestimated;
         }
 
         /// <summary>Why this block cannot finish <paramref name="actionId" /> as told with <paramref name="arguments" />, or none while it might.</summary>
@@ -243,7 +243,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Trouble Trouble(string actionId, IList<Literal> arguments)
         {
             var bound = Bind(actionId, arguments);
-            return bound == null ? World.Trouble.None : bound.Trouble(_block, new Recall());
+            return bound?.Trouble(_block, new Recall()) ?? World.Trouble.None;
         }
 
         /// <summary>One of Sprocket's own actions as told <paramref name="arguments" />, or null where the block has no such action.</summary>
@@ -276,7 +276,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (entry == null)
                 return;
 
-            var bound = entry.Doing == null ? null : entry.Doing.Bind(arguments ?? new Literal[0]);
+            var bound = entry.Doing?.Bind(arguments ?? new Literal[0]);
             if (bound != null && bound.Acts)
                 bound.Do(_block, new Recall());
             else if (entry.GameActionId != null)
@@ -302,8 +302,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             public void Dispose()
             {
                 _entity._hearing.Remove(_told);
-                for (var i = 0; i < _listening.Count; i++)
-                    _listening[i].Dispose();
+                foreach (var listener in _listening)
+                    listener.Dispose();
             }
         }
     }

@@ -132,7 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var asks = _offered.Count > 0;
             if (asks && _runs == null)
             {
-                _runs = new Switch { Style = Styles.Switch, Command = _editor.Act(Cmd.TriggerStops, delegate { Stopping(!Stops); }) };
+                _runs = new Switch { Style = Styles.Switch, Command = _editor.Act(Cmd.TriggerStops, () => Stopping(!Stops)) };
                 _runs.Says(SentenceText.RunWord, SentenceText.StopWord);
                 stage.Options.Add(_runs);
             }
@@ -157,8 +157,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (!Stops && _offered.Count > 0)
                 _keys.Add(Heading);
 
-            for (var i = 0; i < _offered.Count; i++)
-                _keys.Add(Key(_offered[i].Number));
+            foreach (var sequence in _offered)
+                _keys.Add(Key(sequence.Number));
 
             _rows.Show(_keys);
 
@@ -177,11 +177,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (!Stops && _offered.Count > 0)
                 Show(_rows[Heading], texts.PickSequences, null, false, true);
 
-            for (var i = 0; i < _offered.Count; i++)
+            foreach (var sequence in _offered)
             {
-                var number = _offered[i].Number;
+                var number = sequence.Number;
                 _rows[Key(number)].Mark = Symbols.Sequence;
-                Show(_rows[Key(number)], _offered[i].Name, null, Outcome == Outcome.Existing && Sequence == number, false);
+                Show(_rows[Key(number)], sequence.Name, null, Outcome == Outcome.Existing && Sequence == number, false);
             }
 
             stage.ShowEmpty();
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
             else if (key == New)
             {
-                does = delegate { Does(Outcome.New, 0); };
+                does = () => Does(Outcome.New, 0);
             }
             else
             {
@@ -232,7 +232,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (!int.TryParse(key, NumberStyles.Integer, CultureInfo.InvariantCulture, out number))
                     return;
 
-                does = delegate { Does(Outcome.Existing, number); };
+                does = () => Does(Outcome.Existing, number);
             }
 
             var act = _editor.Act(Cmd.TriggerDoes, does);

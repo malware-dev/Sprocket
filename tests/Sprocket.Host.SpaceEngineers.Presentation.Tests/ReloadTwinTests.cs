@@ -25,7 +25,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 5, 300, 7)]
     public void AnAirlockCycleCarriesOn(int reloadAt)
     {
-        Twins(Cycle, reloadAt, delegate(Screen screen, int tick)
+        Twins(Cycle, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -45,7 +45,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 120, 5)]
     public void AWatcherRemembersWhatItSaw(int reloadAt)
     {
-        Twins(Watched, reloadAt, delegate(Screen screen, int tick)
+        Twins(Watched, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -57,7 +57,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 250, 9)]
     public void AStopFromOutsideIsRemembered(int reloadAt)
     {
-        Twins(Stoppable, reloadAt, delegate(Screen screen, int tick)
+        Twins(Stoppable, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -71,7 +71,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 250, 9)]
     public void ASwitchOffPartWayIsRemembered(int reloadAt)
     {
-        Twins(Cycle, reloadAt, delegate(Screen screen, int tick)
+        Twins(Cycle, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -87,7 +87,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 250, 9)]
     public void AVentSentTheOtherWayIsRemembered(int reloadAt)
     {
-        Twins(Vented, reloadAt, delegate(Screen screen, int tick)
+        Twins(Vented, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -133,7 +133,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 120, 7)]
     public void APauseIsRemembered(int reloadAt)
     {
-        Twins(Owned, reloadAt, delegate(Screen screen, int tick)
+        Twins(Owned, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -147,7 +147,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 400, 11)]
     public void AVentCycleCarriesOn(int reloadAt)
     {
-        Twins(Vented, reloadAt, delegate(Screen screen, int tick)
+        Twins(Vented, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -159,7 +159,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 300, 9)]
     public void WhatARunMetIsRemembered(int reloadAt)
     {
-        Twins(Cycle, reloadAt, delegate(Screen screen, int tick)
+        Twins(Cycle, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -176,11 +176,11 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 3, 300, 9)]
     public void WhatARunMetIsRememberedInAWorldWithItsOwnSettings(int reloadAt)
     {
-        Twins(delegate(Screen screen)
+        Twins(screen =>
         {
             screen.Scene.Ship.Settle(new Settings(Layer.Empty, new Layer(true, null)));
             Cycle(screen);
-        }, reloadAt, delegate(Screen screen, int tick)
+        }, reloadAt, (screen, tick) =>
         {
             if (tick == 12)
                 screen.Scene.Ship.Press("Airlock Button");
@@ -194,7 +194,7 @@ public class ReloadTwinTests
     [MemberData(nameof(Every), 15, 120, 6)]
     public void ASkippedPressIsCounted(int reloadAt)
     {
-        Twins(Cycle, reloadAt, delegate(Screen screen, int tick)
+        Twins(Cycle, reloadAt, (screen, tick) =>
         {
             if (tick == 12 || tick == 20 || tick == 45)
                 screen.Scene.Ship.Press("Airlock Button");

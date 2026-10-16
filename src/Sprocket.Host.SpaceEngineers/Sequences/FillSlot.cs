@@ -40,8 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public override void Touches(AutomationSystem system, IList<object> screens)
         {
             Touch(screens, Instance);
-            for (var i = 0; i < _was.Count; i++)
-                Touch(screens, _was[i].Instance);
+            foreach (var kept in _was)
+                Touch(screens, kept.Instance);
         }
 
         /// <inheritdoc />
@@ -100,16 +100,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 foreach (var slot in instances[i].Filled)
                     slots.Add(slot);
 
-                for (var s = 0; s < slots.Count; s++)
+                foreach (var slotName in slots)
                 {
-                    if (!Had(instances[i], slots[s]))
-                        instances[i].Clear(slots[s]);
+                    if (!Had(instances[i], slotName))
+                        instances[i].Clear(slotName);
                 }
             }
 
-            for (var i = 0; i < _was.Count; i++)
+            foreach (var kept in _was)
             {
-                var kept = _was[i];
                 if (kept.At == null)
                     kept.Instance.Fill(kept.Slot, kept.Blocks);
                 else
@@ -120,9 +119,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether <paramref name="instance" /> filled <paramref name="slot" /> before this was made.</summary>
         bool Had(SystemInstance instance, string slot)
         {
-            for (var i = 0; i < _was.Count; i++)
+            foreach (var kept in _was)
             {
-                if (_was[i].Instance == instance && _was[i].Slot == slot)
+                if (kept.Instance == instance && kept.Slot == slot)
                     return true;
             }
 

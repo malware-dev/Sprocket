@@ -69,15 +69,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override bool SwitchLocked => !_system.Enabled;
 
         /// <summary>The blockset just made is as it was made: its name, its switch, and not one slot filled.</summary>
-        public override bool Untouched
-        {
-            get
-            {
-                // Switched off by Sprocket for its empty slots is not somebody touching it.
-                return _made != null && _made.Name == _madeName && (_made.Enabled == _madeOn || _made.Halt != null)
-                    && _made.IsEmpty;
-            }
-        }
+        public override bool Untouched =>
+            // Switched off by Sprocket for its empty slots is not somebody touching it.
+            _made != null && _made.Name == _madeName && (_made.Enabled == _madeOn || _made.Halt != null)
+            && _made.IsEmpty;
 
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.BlueprintNameAbout;
@@ -147,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             from.Lead = Editor.Texts.BlueprintFromLead;
             from.After = Editor.Texts.BlueprintFromAfter;
             from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);
-            from.Opens = Editor.Act(Cmd.OpenSystem, delegate { Editor.Push(new LogicSystemPage(Editor, _system)); });
+            from.Opens = Editor.Act(Cmd.OpenSystem, () => Editor.Push(new LogicSystemPage(Editor, _system)));
             parts.Add(from);
         }
 
@@ -229,9 +224,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             SetAside(chosen);
 
             var unfilled = 0;
-            for (var i = 0; i < _parts.Count; i++)
+            foreach (var part in _parts)
             {
-                if (!Part(_partRows[_parts[i]], _parts[i], chosen) && !_parts[i].Optional)
+                if (!Part(_partRows[part], part, chosen) && !part.Optional)
                     unfilled++;
             }
 
@@ -323,10 +318,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 return;
 
             Marks.SetAside(_system, chosen, _used, _aside);
-            for (var i = 0; i < _aside.Count; i++)
+            foreach (var reference in _aside)
             {
-                var block = Editor.Runner.Bindings.Entity(_aside[i]);
-                _asideNames.Add(block != null ? block.Name : Called(_aside[i]));
+                var block = Editor.Runner.Bindings.Entity(reference);
+                _asideNames.Add(block != null ? block.Name : Called(reference));
             }
         }
 
@@ -339,10 +334,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
             row.Described = part.Annotation;
 
-            var gone = row.Take(Editor.Runner.Bindings, chosen == null ? null : chosen.FilledWith(part.Id),
+            var gone = row.Take(Editor.Runner.Bindings, chosen?.FilledWith(part.Id),
                 chosen == null || !part.IsSignal ? null : chosen.Positions(part.Id));
 
-            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(Cmd.FillPart, delegate { _fill.Ask(part, chosen); });
+            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(Cmd.FillPart, () => _fill.Ask(part, chosen));
 
             row.Problem = row.Blocks.Count == 0 && gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
 
@@ -383,7 +378,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>What the page is built from that can change under it, as one number: how many of it, which is chosen, and whether that one may run.</summary>
         int Shape(SystemInstance chosen)
         {
-            var shape = _system.Instances.Count * 31 + (chosen == null ? 0 : chosen.Number);
+            var shape = _system.Instances.Count * 31 + (chosen?.Number ?? 0);
             return shape * 2 + (chosen != null && Live(chosen) ? 1 : 0);
         }
     }

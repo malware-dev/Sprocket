@@ -22,14 +22,14 @@ public sealed class RigGas : IGasMeter
     public float In(IMyAirVent vent)
     {
         var found = Find(vent);
-        return found == null ? -1f : found.In;
+        return found?.In ?? -1f;
     }
 
     /// <inheritdoc />
     public float Out(IMyAirVent vent)
     {
         var found = Find(vent);
-        return found == null ? -1f : found.Out;
+        return found?.Out ?? -1f;
     }
 
     Vent? Find(IMyAirVent vent)

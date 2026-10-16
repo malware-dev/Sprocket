@@ -290,9 +290,8 @@ namespace Lumel.Text
                 at++;
 
             var words = line.Substring(at).Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-            for (var w = 0; w < words.Length; w++)
+            foreach (var word in words)
             {
-                var word = words[w];
                 for (var i = 0; i < word.Length; i++)
                 {
                     if (!char.IsLetterOrDigit(word[i]) && word[i] != '-' && word[i] != '_')
@@ -340,15 +339,15 @@ namespace Lumel.Text
             }
 
             var table = new Block(BlockKind.Table);
-            for (var i = 0; i < columns.Count; i++)
-                table.Columns.Add(columns[i]);
+            foreach (var column in columns)
+                table.Columns.Add(column);
 
             blocks.Add(table);
 
             var cells = Cells(heading);
-            for (var i = 0; i < cells.Count; i++)
+            foreach (var cell in cells)
             {
-                if (cells[i].Trim().Length > 0)
+                if (cell.Trim().Length > 0)
                 {
                     Row(table, heading, 1);
                     break;
@@ -421,9 +420,9 @@ namespace Lumel.Text
             var cells = Cells(line);
             var found = new List<Column>(cells.Count);
 
-            for (var i = 0; i < cells.Count; i++)
+            foreach (var raw in cells)
             {
-                var cell = cells[i].Trim();
+                var cell = raw.Trim();
                 var shares = 0;
                 var marks = new StringBuilder(cell.Length);
                 for (var j = 0; j < cell.Length; j++)

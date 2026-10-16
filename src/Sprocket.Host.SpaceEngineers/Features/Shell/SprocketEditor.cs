@@ -77,7 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _said[systems[i].Identity] = ProgramText.Said(systems[i]);
 
             _saidEdits = _program.Edits;
-            _program.Reshaped += delegate { _reshaped = true; };
+            _program.Reshaped += () => _reshaped = true;
 
             _stack.Add(new HomePage(this));
             Rebuild();
@@ -348,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>An answer that finishes the page on top, the way its own way on does.</summary>
         public void AnswerPrimary(string text, bool byDefault)
         {
-            Answer(text, delegate { Current.Primary(); }, byDefault);
+            Answer(text, () => Current.Primary(), byDefault);
         }
 
         /// <summary>
@@ -360,7 +360,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void Answer(string text, Action chosen, bool byDefault)
         {
-            var command = Refuses(Cmd.Answer) ? null : new Relay(delegate { Reply(chosen); });
+            var command = Refuses(Cmd.Answer) ? null : new Relay(() => Reply(chosen));
             _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
         }
 
@@ -535,7 +535,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 _notice.Expanded = _open;
         }));
 
-        ICommand Resolves => _resolves ?? (_resolves = Act(Cmd.Resolve, delegate { AskBeforeReplacing(delegate { }); }));
+        ICommand Resolves => _resolves ?? (_resolves = Act(Cmd.Resolve, () => AskBeforeReplacing(() => { })));
 
         ICommand Mends => _mends ?? (_mends = Act(Cmd.ShowScript, ShowScript));
 
@@ -666,7 +666,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             });
 
             // The one Enter takes: a key pressed without reading must not throw a program away.
-            Answer(Texts.SalvageKeep, delegate { }, true);
+            Answer(Texts.SalvageKeep, () => { }, true);
         }
 
         /// <summary>A command that carries <paramref name="action" /> out as a press of <paramref name="kind" />, or null where the editor refuses that kind of press.</summary>
@@ -676,14 +676,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public ICommand Act(Cmd kind, Action action)
         {
-            return Refuses(kind) ? null : new Relay(delegate { Carry(kind, action); });
+            return Refuses(kind) ? null : new Relay(() => Carry(kind, action));
         }
 
         void Carry(Cmd kind, Action action)
         {
             if (Replacing(kind))
             {
-                AskBeforeReplacing(delegate { Carry(kind, action); });
+                AskBeforeReplacing(() => Carry(kind, action));
                 return;
             }
 
@@ -718,7 +718,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return null;
 
             Action<string> gives = null;
-            gives = delegate(string name)
+            gives = name =>
             {
                 name = name ?? "";
                 if (accepts != null && !accepts(name))
@@ -726,7 +726,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
                 if (Replacing(Cmd.Rename))
                 {
-                    AskBeforeReplacing(delegate { gives(name); });
+                    AskBeforeReplacing(() => gives(name));
                     return;
                 }
 
@@ -983,8 +983,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     _gone.Add(identity);
             }
 
-            for (var i = 0; i < _gone.Count; i++)
-                _said.Remove(_gone[i]);
+            foreach (var gone in _gone)
+                _said.Remove(gone);
         }
 
         readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
@@ -1028,7 +1028,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (shown == null)
                 return edit;
 
-            return new Reslotted<T>(edit, picked, delegate { return Slots(system, shown, null).Settle(); });
+            return new Reslotted<T>(edit, picked, () => Slots(system, shown, null).Settle());
         }
 
         /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
@@ -1156,7 +1156,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     return;
             }
 
-            Reach(delegate(EditorPage page) { return page is LogicSystemPage && page.IsAbout(system); }, system, null);
+            Reach(page => page is LogicSystemPage && page.IsAbout(system), system, null);
         }
 
         /// <summary>
@@ -1267,7 +1267,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("named", named ?? "");
 
             Ask(question + "\n\n**{named}**" + (string.IsNullOrEmpty(warning) ? "" : "\n\n" + warning), arguments);
-            Answer(Texts.DeleteKeep, delegate { }, true);
+            Answer(Texts.DeleteKeep, () => { }, true);
             Answer(Texts.DeleteConfirm, delete);
         }
 
@@ -1418,8 +1418,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.CanGoBack = _stack.Count > 1;
             _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
             _screen.Library = page.Library;
-            _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, delegate { Helped(page); }) : null;
-            _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, delegate { page.Switch(!page.SwitchIsOn); }) : null;
+            _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, () => Helped(page)) : null;
+            _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, () => page.Switch(!page.SwitchIsOn)) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 
             // Asked as the screen is built: what locks a switch is another page's switch, so it cannot change while this page shows.
@@ -1628,14 +1628,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
                 var picker = new PickPage(this, "When something happens", true,
                     new List<long>(), moment.EventId, Nature.Native,
-                    delegate(PickAnswer answer)
+                    answer =>
                     {
                         // Nothing to record: the sequence does not exist yet, so there is no
                         // history for it and nothing to take back to - which is why the trigger
                         // losing the button here loses it outright, the way the bin on its row is
                         // the way back from making one at all.
                         MomentTrigger made = Starter(system, answer, null, null);
-                        Unless(system, made, answer, null, delegate(Occupant taken)
+                        Unless(system, made, answer, null, taken =>
                         {
                             // Settled now, so the questions that follow see it, and recorded, so adding the trigger takes it
                             // all back as one step.
@@ -1659,7 +1659,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             _program.Rewire();
 
                             Aimed(system, made, aim, origin, true, null);
-                        }, delegate { });
+                        }, () => { });
                     },
                     true, aim: aim);
 
@@ -1671,7 +1671,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (every == null)
                 return;
 
-            var timer = new TimerPage(this, every.Interval, aim, delegate(Duration interval)
+            var timer = new TimerPage(this, every.Interval, aim, interval =>
             {
                 every.Interval = interval;
                 Aimed(system, every, aim, origin, true, null);
@@ -1839,16 +1839,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     taking.Add(holder);
                     Filling(system, part, chosen, blocks, at, fill, done, taking);
                 });
-                Answer(Texts.ButtonLeaveAlone, delegate { }, true);
+                Answer(Texts.ButtonLeaveAlone, () => { }, true);
                 return;
             }
 
             // One step: the fill, and every button it takes from somewhere else.
             var edit = fill();
-            for (var i = 0; i < taking.Count; i++)
+            foreach (var occupant in taking)
             {
-                if (taking[i].Trigger != null)
-                    edit = TakingOver(edit, taking[i]);
+                if (occupant.Trigger != null)
+                    edit = TakingOver(edit, occupant);
             }
 
             Do(system, edit);
@@ -2074,8 +2074,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 };
 
                 var sources = Named(system, answer.Targets, replacing);
-                for (var i = 0; i < sources.Count; i++)
-                    when.Sources.Add(sources[i]);
+                foreach (var source in sources)
+                    when.Sources.Add(source);
 
                 return when;
             }
@@ -2087,8 +2087,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (signal == null || signal.IsWatched)
             {
                 var named = Named(system, answer.Targets, replacing);
-                for (var i = 0; i < named.Count; i++)
-                    made.Sources.Add(named[i]);
+                foreach (var name in named)
+                    made.Sources.Add(name);
 
                 return made;
             }
@@ -2289,14 +2289,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh,
             SystemEdit start, Aim aim)
         {
-            aim.Finish = delegate(PickAnswer answer)
+            aim.Finish = answer =>
             {
                 var act = new Act(answer.Chosen);
                 act.Form = answer.Form;
                 act.Provider = Vocabulary.Provider(_world, answer.Targets, answer.Chosen, answer.Form);
                 var named = Named(system, answer.Targets, fresh || trigger.Acts == null ? null : trigger.Acts.Targets);
-                for (var i = 0; i < named.Count; i++)
-                    act.Targets.Add(named[i]);
+                foreach (var name in named)
+                    act.Targets.Add(name);
 
                 for (var i = 0; i < answer.Arguments.Count; i++)
                     act.Arguments.Add(answer.Arguments[i]);
@@ -2311,7 +2311,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (aim.Following == null)
                 {
                     aim.Following = new PickPage(this, Texts.PickSingleTask, false, Blocks(system, only.Targets),
-                        only.ActionId, only.Form, delegate(PickAnswer answer) { aim.Finish(answer); },
+                        only.ActionId, only.Form, answer => aim.Finish(answer),
                         arguments: only.Arguments, opens: aim.Opens, after: aim.Pick);
                 }
 
@@ -2324,7 +2324,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (aim.Following == null)
             {
                 aim.Following = new PickPage(this, Texts.PickSingleTask, false, new List<long>(), "", Nature.Native,
-                    delegate(PickAnswer answer) { aim.Finish(answer); }, opens: aim.Opens, after: aim.Pick);
+                    answer => aim.Finish(answer), opens: aim.Opens, after: aim.Pick);
             }
 
             aim.Following.Arrived(aim.Straight);
@@ -2442,8 +2442,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_picked.Count > 0 && _picked[0].System != system)
                 Unpicked(null);
 
-            for (var i = 0; i < _picked.Count; i++)
-                _picked[i].Apply();
+            foreach (var pick in _picked)
+                pick.Apply();
 
             Reslot reslot;
             var named = Slots(system, shown, met).Pick(declared, replacing, _pickedNames, out reslot);
@@ -2459,9 +2459,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether the picks since the last edit change any slot of <paramref name="system" />.</summary>
         bool Reslots(AutomationSystem system)
         {
-            for (var i = 0; i < _picked.Count; i++)
+            foreach (var pick in _picked)
             {
-                if (_picked[i].System == system && !_picked[i].IsEmpty)
+                if (pick.System == system && !pick.IsEmpty)
                     return true;
             }
 
@@ -2484,17 +2484,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Slotting Slots(AutomationSystem system, SystemInstance shown, Dictionary<string, GridEntity> met)
         {
             return new Slotting(system, shown,
-                delegate(string name)
+                name =>
                 {
                     GridEntity entity = Known(name, met);
                     return entity != null ? Called(entity) : _program.Called(name, _world.Values);
                 },
-                delegate(string name)
+                name =>
                 {
                     GridEntity entity = Known(name, met);
                     return entity != null ? entity.Kind.Lineage : new string[0];
                 },
-                delegate(int number) { return Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture)); });
+                number => Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture)));
         }
 
         /// <summary>The block the variable <paramref name="name" /> holds: one just picked, or one the construct has bound.</summary>
@@ -2624,10 +2624,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (every != null)
             {
                 var rate = every.Interval;
-                var timer = new TimerPage(this, rate, aim, delegate(Duration interval)
-                {
-                    Aimed(system, every, aim, origin, false, interval == rate ? null : new SetCadence(every, rate, interval));
-                });
+                var timer = new TimerPage(this, rate, aim, interval =>
+                    Aimed(system, every, aim, origin, false, interval == rate ? null : new SetCadence(every, rate, interval)));
 
                 Push(timer);
                 if (action)
@@ -2647,7 +2645,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var picker = new PickPage(this, "When something happens", true,
                 Blocks(system, moment.Sources), compares ? was.EventId : Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)),
                 compares ? Nature.Value : Nature.Native,
-                delegate(PickAnswer answer)
+                answer =>
                 {
                     // The first pick on a copy is the answer its line was asking for.
                     _copies.Remove(moment);
@@ -2657,7 +2655,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         keeping = null;
 
                     MomentTrigger made = Starter(system, answer, keeping, moment.Sources);
-                    Unless(system, made, answer, moment, delegate(Occupant taken)
+                    Unless(system, made, answer, moment, taken =>
                     {
                         if (Shares(taken, system))
                         {
@@ -2693,9 +2691,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         // One edit either way, because it is one answer to one question.
                         var edit = Answering(system, made, answer, change) ?? change;
                         Aimed(system, made, aim, origin, false, taken == null ? edit : TakingOver(edit, taken));
-                    }, delegate { UnwindTo(origin); });
+                    }, () => UnwindTo(origin));
                 },
-                true, was == null ? Quantifier.Any : was.Quantifier, compares ? new[] { Comparing.Of(was.Relation), was.Value } : null,
+                true, was?.Quantifier ?? Quantifier.Any, compares ? new[] { Comparing.Of(was.Relation), was.Value } : null,
                 opens: action ? Opening.Nothing : opens, aim: aim);
 
             Push(picker);
@@ -2717,9 +2715,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var seen = Seen(system, names);
             var found = new List<long>();
-            for (var i = 0; i < seen.Count; i++)
+            foreach (var blockName in seen)
             {
-                GridEntity entity = _runner.Bindings.Entity(seen[i]);
+                GridEntity entity = _runner.Bindings.Entity(blockName);
                 if (entity != null)
                     found.Add(entity.Id);
             }
@@ -2844,13 +2842,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Ask(Template.Fill(question, "count", systems.Count.ToString(System.Globalization.CultureInfo.InvariantCulture)));
             Answer(Texts.PausedRemoveAll, delegate
             {
-                for (var i = 0; i < systems.Count; i++)
-                    DeleteSystem(systems[i]);
+                foreach (var doomed in systems)
+                    DeleteSystem(doomed);
 
                 _program.PausedFrom.Clear();
                 UnwindTo(1);
             });
-            Answer(Texts.ButtonLeaveAlone, delegate { }, true);
+            Answer(Texts.ButtonLeaveAlone, () => { }, true);
         }
 
         /// <summary>Takes <paramref name="system" /> out of the program, with its sequences, its triggers and its installations, as a step home's undo takes back.</summary>
@@ -3018,14 +3016,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (!ChangedSince(system))
             {
                 Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffKept, arguments);
-                Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
-                Answer(Texts.LibraryTakeOffConfirm, delegate { TakeOff(system, false); });
+                Answer(Texts.LibraryTakeOffKeep, () => { }, true);
+                Answer(Texts.LibraryTakeOffConfirm, () => TakeOff(system, false));
                 return;
             }
 
             Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffGoes, arguments);
-            Answer(Texts.LibraryTakeOffKeep, delegate { }, true);
-            Answer(Texts.LibraryTakeOffConfirm, delegate { AskTakeOffBlueprint(system); });
+            Answer(Texts.LibraryTakeOffKeep, () => { }, true);
+            Answer(Texts.LibraryTakeOffConfirm, () => AskTakeOffBlueprint(system));
         }
 
         /// <summary>
@@ -3038,8 +3036,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("named", system.Name);
 
             Ask(Texts.LibraryTakeOffChanged, arguments);
-            Answer(Texts.LibraryTakeOffUpdate, delegate { TakeOff(system, true); });
-            Answer(Texts.LibraryTakeOffLeave, delegate { TakeOff(system, false); }, true);
+            Answer(Texts.LibraryTakeOffUpdate, () => TakeOff(system, true));
+            Answer(Texts.LibraryTakeOffLeave, () => TakeOff(system, false), true);
         }
 
         /// <summary>Asks before putting the logic system <paramref name="system" /> in place of its blueprint in the library; keeping the blueprint is the answer Enter takes.</summary>
@@ -3051,8 +3049,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("named", system.Name);
 
             Ask(Texts.LibraryUpdateQuestion + "\n\n**{named}**\n\n" + Texts.LibraryUpdateReplaced, arguments);
-            Answer(Texts.LibraryUpdateKeep, delegate { }, true);
-            Answer(Texts.LibraryUpdateConfirm, delegate { Shelve(system); });
+            Answer(Texts.LibraryUpdateKeep, () => { }, true);
+            Answer(Texts.LibraryUpdateConfirm, () => Shelve(system));
         }
 
         /// <summary>
@@ -3074,8 +3072,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("named", backed.Name);
 
             Ask(Texts.LibraryKeepBackupQuestion + "\n\n**{named}**\n\n" + Texts.LibraryKeepBackupLinked, arguments);
-            Answer(Texts.LibraryKeepBackupLeave, delegate { }, true);
-            Answer(Texts.LibraryKeepBackupUpdate, delegate { Shelve(backed); });
+            Answer(Texts.LibraryKeepBackupLeave, () => { }, true);
+            Answer(Texts.LibraryKeepBackupUpdate, () => Shelve(backed));
             Answer(Texts.LibraryKeepBackupNew, delegate
             {
                 backed.Origin = Guid.Empty;
@@ -3093,8 +3091,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("named", system.Name);
 
             Ask(Texts.LibraryRenewQuestion + "\n\n**{named}**\n\n" + Texts.LibraryRenewReplaced, arguments);
-            Answer(Texts.LibraryRenewKeep, delegate { }, true);
-            Answer(Texts.LibraryRenewConfirm, delegate { Renew(system, Change.UpdateFromLibrary); });
+            Answer(Texts.LibraryRenewKeep, () => { }, true);
+            Answer(Texts.LibraryRenewConfirm, () => Renew(system, Change.UpdateFromLibrary));
         }
 
         /// <summary>Asks before putting the blueprint of <paramref name="system" /> in the library back in its place, losing what changed since; keeping it is the answer Enter takes.</summary>
@@ -3106,8 +3104,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("named", system.Name);
 
             Ask(Texts.LibraryResetQuestion + "\n\n**{named}**\n\n" + Texts.LibraryResetReplaced, arguments);
-            Answer(Texts.LibraryRenewKeep, delegate { }, true);
-            Answer(Texts.LibraryResetConfirm, delegate { Renew(system, Change.ResetToBlueprint); });
+            Answer(Texts.LibraryRenewKeep, () => { }, true);
+            Answer(Texts.LibraryResetConfirm, () => Renew(system, Change.ResetToBlueprint));
         }
 
         /// <summary>
@@ -3227,13 +3225,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments.Set("name", system.Name);
 
             var listed = Bullets(instances.Count,
-                delegate(int i) { return SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instances[i]); }, arguments);
+                i => SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instances[i]), arguments);
             var running = SystemSummary.IsRunning(system, _runner, null);
             Ask(Texts.BlueprintSwitchOffQuestion + "\n\n" + Texts.BlueprintSwitchOffStops + listed
                 + (running ? "\n\n" + Texts.BlueprintSwitchOffRunning : ""), arguments);
 
             // Keeping them running is the one Enter takes.
-            Answer(Texts.BlueprintKeepRunning, delegate { }, true);
+            Answer(Texts.BlueprintKeepRunning, () => { }, true);
             Answer(Texts.BlueprintSwitchThemOff, delegate
             {
                 system.Enabled = false;

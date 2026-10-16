@@ -199,9 +199,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             get
             {
-                for (var i = 0; i < _fields.Count; i++)
+                foreach (var field in _fields)
                 {
-                    if (!string.IsNullOrEmpty(_fields[i].Text))
+                    if (!string.IsNullOrEmpty(field.Text))
                         return true;
                 }
 

@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <remarks>Read each time the terminal shows the slider, and each time a door with a delay opens.</remarks>
         public static int Stored(IMyTerminalBlock block)
         {
-            MyModStorageComponentBase storage = block == null ? null : block.Storage;
+            MyModStorageComponentBase storage = block?.Storage;
             string text;
             int seconds;
             if (storage == null || !storage.TryGetValue(Key, out text)

@@ -106,13 +106,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// Somebody working on a system switches it off so its triggers leave it alone, which is exactly when they want to
         /// see a sequence work.
         /// </remarks>
-        public override ICommand Runs => Editor.Act(Cmd.RunNow, delegate { Editor.RunNow(_sequence); });
+        public override ICommand Runs => Editor.Act(Cmd.RunNow, () => Editor.RunNow(_sequence));
 
         /// <inheritdoc />
-        public override ICommand Stops => Editor.Act(Cmd.StopNow, delegate { Editor.StopNow(_sequence); });
+        public override ICommand Stops => Editor.Act(Cmd.StopNow, () => Editor.StopNow(_sequence));
 
         /// <summary>Deletes the sequence, as a step its logic system's undo takes back; like every edit, while it cannot run.</summary>
-        public override ICommand Deletes => Editable ? Editor.Act(Cmd.DeleteSequence, delegate { Editor.DeleteSequence(_sequence); }) : null;
+        public override ICommand Deletes => Editable ? Editor.Act(Cmd.DeleteSequence, () => Editor.DeleteSequence(_sequence)) : null;
 
         /// <inheritdoc />
         public override string DeleteLocked => Editable ? null : LockedText;
@@ -264,9 +264,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             _rows = new Keyed<object, StepRow>(_steps.Children, delegate { return new StepRow(); });
             _steps.Landings = Landings;
-            _steps.Moves = delegate(int from, int to)
+            _steps.Moves = (from, to) =>
             {
-                var move = Editor.Act(Cmd.MoveStep, delegate { Move(from, to); });
+                var move = Editor.Act(Cmd.MoveStep, () => Move(from, to));
                 if (move != null)
                     move.Execute();
             };
@@ -294,7 +294,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _bar.Status = status == SequenceStatus.Stopped ? CalledOff(texts, state) : SequenceText.Status(texts, status);
             _bar.JustRan = state != null && state.LastFiredTick >= 0 && tick - state.LastFiredTick < JustRanTicks;
             _bar.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(state, tick));
-            _bar.Skipped = Skips(texts, state == null ? 0 : state.SkippedCount, state == null ? 0 : state.RefusedCount);
+            _bar.Skipped = Skips(texts, state?.SkippedCount ?? 0, state?.RefusedCount ?? 0);
 
             if (recount)
                 Mark();
@@ -330,10 +330,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (row == null)
                 return null;
 
-            for (var i = 0; i < row.Slots.Count; i++)
+            foreach (var slot in row.Slots)
             {
-                if (row.Slots[i] is DurationSlot)
-                    return row.ChipOf(row.Slots[i]);
+                if (slot is DurationSlot)
+                    return row.ChipOf(slot);
             }
 
             return null;
@@ -422,12 +422,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Carries = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
                 row.Slots.Clear();
                 Word(row, step);
-                row.Deletes = closes ? null : Changes(Cmd.DeleteStep, delegate { Remove(index); });
+                row.Deletes = closes ? null : Changes(Cmd.DeleteStep, () => Remove(index));
                 row.Copies = closes || branch && Kind(step) != StepKind.OtherwiseIf
                     ? null
-                    : Changes(Cmd.DuplicateStep, delegate { Duplicate(index); });
+                    : Changes(Cmd.DuplicateStep, () => Duplicate(index));
                 row.IsOff = step.IsOff || index <= offTo;
-                row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, delegate { SwitchStep(index); });
+                row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, () => SwitchStep(index));
                 row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
                 Branches(row, texts, step, index);
                 row.Locked = locked;
@@ -607,17 +607,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var kinds = new List<Adder>
             {
-                new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, delegate { AddAction(at); })),
-                new Adder(SentenceText.WaitWord, texts.SequenceWaitAbout, Changes(Cmd.AddWait, delegate { AddWait(at); }))
+                new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, () => AddAction(at))),
+                new Adder(SentenceText.WaitWord, texts.SequenceWaitAbout, Changes(Cmd.AddWait, () => AddWait(at)))
             };
 
             // Beside the delay.
             kinds.Add(new Adder(SentenceText.AwaitWords, texts.SequenceAwaitAbout,
-                Changes(Cmd.AddAwait, delegate { Editor.Do(_sequence, new AddStep(Change.AddStep, at, new Await())); })));
+                Changes(Cmd.AddAwait, () => Editor.Do(_sequence, new AddStep(Change.AddStep, at, new Await())))));
 
-            kinds.Add(new Adder(SentenceText.RunWord, texts.SequenceRunAbout, Changes(Cmd.AddRun, delegate { AddRun(false, at); })));
-            kinds.Add(new Adder(SentenceText.StopWord, texts.SequenceStopAbout, Changes(Cmd.AddStop, delegate { AddRun(true, at); })));
-            kinds.Add(new Adder(SentenceText.IfWord, texts.SequenceIfAbout, Changes(Cmd.AddIf, delegate { AddIf(at); })));
+            kinds.Add(new Adder(SentenceText.RunWord, texts.SequenceRunAbout, Changes(Cmd.AddRun, () => AddRun(false, at))));
+            kinds.Add(new Adder(SentenceText.StopWord, texts.SequenceStopAbout, Changes(Cmd.AddStop, () => AddRun(true, at))));
+            kinds.Add(new Adder(SentenceText.IfWord, texts.SequenceIfAbout, Changes(Cmd.AddIf, () => AddIf(at))));
             return kinds;
         }
 
@@ -633,16 +633,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var ends = _sequence.Otherwise(_sequence.OpenOf(index)) < 0;
                 row.Adds.Add(new Adder(texts.SequenceBranch, texts.SequenceBranchAbout, new[]
                 {
-                    new Adder(SentenceText.OtherwiseIfWords, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, delegate { AddBranch(index); })),
+                    new Adder(SentenceText.OtherwiseIfWords, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, () => AddBranch(index))),
                     new Adder(SentenceText.OtherwiseWord, texts.SequenceOtherwiseAbout,
-                        ends ? Changes(Cmd.AddBranch, delegate { AddLast(index); }) : null)
+                        ends ? Changes(Cmd.AddBranch, () => AddLast(index)) : null)
                 }));
             }
             else if (Kind(step) == StepKind.Otherwise)
             {
                 row.Adds.Add(new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, new[]
                 {
-                    new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, delegate { GiveTest(step); }))
+                    new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, () => GiveTest(step)))
                 }));
             }
         }
@@ -766,7 +766,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var wait = step as Wait;
             if (wait != null)
             {
-                row.Slots.Add(new DurationSlot(wait.Length, Changes(Cmd.StepSlot, delegate { Open(wait, false); })));
+                row.Slots.Add(new DurationSlot(wait.Length, Changes(Cmd.StepSlot, () => Open(wait, false))));
                 return;
             }
 
@@ -774,9 +774,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (run != null)
             {
                 // Opened on the list that made it, to run or stop another.
-                var called = _sequence.System == null ? null : _sequence.System.FindSequence(run.Number);
+                var called = _sequence.System?.FindSequence(run.Number);
                 row.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name,
-                    Changes(Cmd.StepSlot, delegate { ChangeRun(run); })));
+                    Changes(Cmd.StepSlot, () => ChangeRun(run))));
                 return;
             }
 
@@ -788,9 +788,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // gap in its sentence is where it is picked again.
             var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
 
-            row.Slots.Add(new ActionSlot(chosen, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.What); })));
+            row.Slots.Add(new ActionSlot(chosen, Changes(Cmd.StepSlot, () => EditStep(act, Opening.What))));
             row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), true,
-                Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Blocks); })));
+                Changes(Cmd.StepSlot, () => EditStep(act, Opening.Blocks))));
 
             // Last, because the blocks are what somebody scanning a list of steps is looking for and the values are the
             // detail. Pressing it opens the step where its values are given, with the caret already in them.
@@ -799,7 +799,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, delegate { EditStep(act, Opening.Arguments); }),
+            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, () => EditStep(act, Opening.Arguments)),
                 act.Sets ? Given.NewValue : Given.Options);
             if (!given.Quiet)
                 row.Slots.Add(given);
@@ -823,15 +823,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var said = SentenceText.Quantified(test.Quantifier);
                 var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
                 row.Slots.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(Cmd.StepSlot, delegate { Quantify(step, test, numeric); }), Given.Read));
+                    Changes(Cmd.StepSlot, () => Quantify(step, test, numeric)), Given.Read));
             }
 
             // A value on some blocks, as a set step and the script say it; a status is the blocks themselves.
             if (value == null || !value.IsStatus)
-                row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.What); })));
+                row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, () => EditTest(step, test, Opening.What))));
 
             row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Blocks); })));
+                Changes(Cmd.StepSlot, () => EditTest(step, test, Opening.Blocks))));
 
             if (value == null)
                 return;
@@ -841,9 +841,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
             var plural = test.Quantifier == Quantifier.All && blocks.Count > 1;
             row.Slots.Add(new ArgumentsSlot(new[] { Comparing.Of(test.Relation) }, fields.GetRange(0, 1),
-                Changes(Cmd.StepSlot, delegate { Relate(step, test, fields[0], plural); }), Given.Compared, plural));
+                Changes(Cmd.StepSlot, () => Relate(step, test, fields[0], plural)), Given.Compared, plural));
             row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields.GetRange(1, fields.Count - 1),
-                Changes(Cmd.StepSlot, delegate { EditTest(step, test, Opening.Arguments); }), Given.Checked));
+                Changes(Cmd.StepSlot, () => EditTest(step, test, Opening.Arguments)), Given.Checked));
         }
 
         /// <summary>Offers the comparisons <paramref name="relation" /> takes in a menu under the part pressed, the one <paramref name="test" /> makes marked, and changes the test to the one chosen as one edit.</summary>
@@ -885,7 +885,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>One answer of <see cref="Quantify" />: reading the blocks by <paramref name="quantifier" />.</summary>
         void Quantifying(Step step, Comparison test, Quantifier quantifier)
         {
-            Editor.Answer(SentenceText.Quantified(quantifier), delegate
+            Editor.Answer(SentenceText.Quantified(quantifier), () =>
             {
                 if (quantifier == test.Quantifier)
                     return;
@@ -931,7 +931,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // empty: changing which blocks a step acts on is not a reason to type its values again.
             Editor.Push(new PickPage(Editor, "Do something", false,
                 Editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
-                delegate(PickAnswer answer)
+                answer =>
                 {
                     var named = Editor.Named(_sequence.System, answer.Targets, step.Targets);
                     var lasts = Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form);
@@ -963,14 +963,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             Editor.Push(new PickPage(Editor, "Do something", false,
                 new List<long>(), "", Nature.Native,
-                delegate(PickAnswer answer)
+                answer =>
                 {
                     var step = new Act(answer.Chosen);
                     step.Form = answer.Form;
                     step.Provider = Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form);
                     var named = Editor.Named(_sequence.System, answer.Targets);
-                    for (var i = 0; i < named.Count; i++)
-                        step.Targets.Add(named[i]);
+                    foreach (var target in named)
+                        step.Targets.Add(target);
 
                     for (var i = 0; i < answer.Arguments.Count; i++)
                         step.Arguments.Add(answer.Arguments[i]);
@@ -988,7 +988,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddIf(int at)
         {
             var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
+            Editor.Push(TestPage(null, Opening.Blocks, test =>
             {
                 Editor.Do(_sequence, new AddStep(Change.AddIf, at, new If(test), new EndIf()));
                 Editor.UnwindTo(origin);
@@ -999,7 +999,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddBranch(int end)
         {
             var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
+            Editor.Push(TestPage(null, Opening.Blocks, test =>
             {
                 var last = _sequence.Otherwise(_sequence.OpenOf(end));
                 Editor.Do(_sequence, new AddStep(Change.AddBranch, last < 0 ? end : last, new Else(test)));
@@ -1011,7 +1011,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void GiveTest(Step step)
         {
             var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, delegate(Comparison test)
+            Editor.Push(TestPage(null, Opening.Blocks, test =>
             {
                 Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), null, test));
                 Editor.UnwindTo(origin);
@@ -1027,7 +1027,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed.</summary>
         void EditTest(Step step, Comparison test, Opening opens)
         {
-            Editor.Push(TestPage(test, opens, delegate(Comparison now)
+            Editor.Push(TestPage(test, opens, now =>
             {
                 Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
                 Editor.Pop();
@@ -1038,17 +1038,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         PickPage TestPage(Comparison test, Opening opens, Action<Comparison> chosen)
         {
             // A sameness on a status opens on its state, chosen as it is listed; anything else on its value.
-            var value = test == null ? null : test.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, test.Targets)));
+            var value = test?.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, test.Targets)));
             var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
             return new PickPage(Editor, "Check something", false,
                 test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets),
                 test == null ? "" : stated ? Comparing.Id(test.MemberId, test.Value.Said) : test.MemberId,
                 stated ? Nature.Native : Nature.Value,
-                delegate(PickAnswer answer)
-                {
-                    chosen(Test(answer, test));
-                },
-                true, test == null ? Quantifier.Any : test.Quantifier,
+                answer => chosen(Test(answer, test)),
+                true, test?.Quantifier ?? Quantifier.Any,
                 test == null ? null : stated ? new[] { Comparing.Of(test.Relation) } : new[] { Comparing.Of(test.Relation), test.Value },
                 opens, forTests: true);
         }
@@ -1063,9 +1060,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var test = new Comparison();
             test.Quantifier = answer.Quantifier;
-            var named = Editor.Named(_sequence.System, answer.Targets, was == null ? null : was.Targets);
-            for (var i = 0; i < named.Count; i++)
-                test.Targets.Add(named[i]);
+            var named = Editor.Named(_sequence.System, answer.Targets, was?.Targets);
+            foreach (var target in named)
+                test.Targets.Add(target);
 
             // Read off the blocks picked, since a slot made for them is not filled until the edit is done.
             string id, state;
@@ -1122,7 +1119,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void AddRun(bool stops, int at)
         {
             var origin = Editor.Depth;
-            Editor.Push(RunPage(stops, 0, delegate(int number)
+            Editor.Push(RunPage(stops, 0, number =>
             {
                 Editor.Do(_sequence, stops
                     ? new AddStep(Change.AddStep, at, new Run(number, true))
@@ -1135,7 +1132,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         void ChangeRun(Run step)
         {
             var origin = Editor.Depth;
-            Editor.Push(RunPage(step.Stops, step.Number, delegate(int number)
+            Editor.Push(RunPage(step.Stops, step.Number, number =>
             {
                 Editor.Do(_sequence, new SetRun(_sequence.Steps.IndexOf(step), step.Number, number));
                 Editor.UnwindTo(origin);
@@ -1158,7 +1155,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (other == _sequence)
                     continue;
 
-                page.Add(SequenceText.Called(texts, other), other.Number == current, delegate { chosen(other.Number); });
+                page.Add(SequenceText.Called(texts, other), other.Number == current, () => chosen(other.Number));
                 page.MarkLast(Symbols.Sequence);
             }
 
@@ -1176,8 +1173,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_length != null)
                 _length.Finish(false);
 
-            _length = new LengthQuestion(Editor, wait.Length, false, delegate { return LengthChip(wait); },
-                delegate(Duration? length, bool cancelled) { Closed(wait, length, added, cancelled); });
+            _length = new LengthQuestion(Editor, wait.Length, false, () => LengthChip(wait),
+                (length, cancelled) => Closed(wait, length, added, cancelled));
             _length.Hang();
         }
 
@@ -1216,9 +1213,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var whole = step is If;
             var texts = Editor.Texts;
             Editor.AskHere(whole ? texts.SequenceRemoveIf : texts.SequenceRemoveBranch);
-            Editor.Answer(texts.SequenceKeepSteps, delegate { Unwrap(index, whole); });
-            Editor.Answer(texts.SequenceDeleteSteps, delegate { Cut(index, whole); });
-            Editor.Answer(texts.ButtonLeaveAlone, delegate { }, true);
+            Editor.Answer(texts.SequenceKeepSteps, () => Unwrap(index, whole));
+            Editor.Answer(texts.SequenceDeleteSteps, () => Cut(index, whole));
+            Editor.Answer(texts.ButtonLeaveAlone, () => { }, true);
         }
 
         /// <summary>Puts a copy of the row's step right after it: whatever a drag would carry, an if with every step in it, a branch with its own.</summary>
@@ -1257,8 +1254,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 lines.Add(_sequence.EndOf(index));
 
             var steps = new List<Step>();
-            for (var i = 0; i < lines.Count; i++)
-                steps.Add(_sequence.Steps[lines[i]]);
+            foreach (var line in lines)
+                steps.Add(_sequence.Steps[line]);
 
             Editor.Do(_sequence, new Unwrap(whole ? Change.Unwrap : Change.RemoveBranch, lines, steps));
         }

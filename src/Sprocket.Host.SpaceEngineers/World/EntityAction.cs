@@ -137,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Doing Doing { get; private set; }
 
         /// <summary>What it waits for, or null where it is done the moment it is told.</summary>
-        public Reading Until => Doing == null ? null : Doing.Until;
+        public Reading Until => Doing?.Until;
 
         /// <summary>Gives it what it does as one of Sprocket's own.</summary>
         public EntityAction Performing(Doing doing)
@@ -366,10 +366,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What type each value of one of the game's actions is taken as, or null for anything else.</summary>
-        public IList<Primitive> Primitives
-        {
-            get { return _takes; }
-        }
+        public IList<Primitive> Primitives => _takes;
 
         /// <summary>Gives it the values it asks for, one field per value, in the order they are written.</summary>
         /// <remarks>For an action of Sprocket's own, which describes itself rather than being described.</remarks>
@@ -482,7 +479,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>Each value is also held to its field: one of its words where it lists some, and within its bounds.</remarks>
         public bool Converts(IList<Literal> given, List<Literal> into)
         {
-            var from = into == null ? 0 : into.Count;
+            var from = into?.Count ?? 0;
             if (into == null)
             {
                 _converted.Clear();

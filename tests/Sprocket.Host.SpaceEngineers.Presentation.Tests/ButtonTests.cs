@@ -92,7 +92,7 @@ public class ButtonTests
     [Fact]
     public void APressOnItsWordsReachesTheButton()
     {
-        var button = new Button { Text = "Done", Style = Go, Command = new Relay(delegate { }) };
+        var button = new Button { Text = "Done", Style = Go, Command = new Relay(() => { }) };
         _ = new Easel(new VStack { Children = { button } }, Wide, High);
 
         var middle = new Vector2(button.Bounds.X + button.Bounds.Width / 2f, button.Bounds.Y + button.Bounds.Height / 2f);

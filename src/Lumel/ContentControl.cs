@@ -73,7 +73,7 @@ namespace Lumel
         /// <inheritdoc />
         protected override Element UnderContent(Vector2 point)
         {
-            return _content != null ? _content.Under(point) : null;
+            return _content?.Under(point);
         }
     }
 }

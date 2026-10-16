@@ -22,9 +22,9 @@ namespace Lumel.Windows
         {
             get
             {
-                for (var i = 0; i < _open.Count; i++)
+                foreach (var window in _open)
                 {
-                    if (!(_open[i] is FloatingWindow))
+                    if (!(window is FloatingWindow))
                         return false;
                 }
 
@@ -86,10 +86,8 @@ namespace Lumel.Windows
         /// <remarks>A window is as wide and as tall as its placement says where it says, and otherwise as it asks, up to the area.</remarks>
         public void Draw(IGraphics g, RectangleF area)
         {
-            for (var i = 0; i < _open.Count; i++)
+            foreach (var window in _open)
             {
-                var window = _open[i];
-
                 if (window.IsModal && window.Backdrop.A > 0)
                     g.Fill(area, window.Backdrop);
 

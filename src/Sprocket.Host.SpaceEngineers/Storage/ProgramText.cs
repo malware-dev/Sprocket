@@ -144,16 +144,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var read = new Trouble(text, parser.Trouble);
             var id = identity.ToString("D");
 
-            for (var i = 0; i < constructs.Count; i++)
+            foreach (var construct in constructs)
             {
-                var construct = constructs[i];
                 if (construct.Key == Keyword.System && construct.Text(construct.Says(0, Keyword.Blueprint) ? 1 : 0) == id)
                     ReadSystem(construct, program, read);
             }
 
-            for (var i = 0; i < constructs.Count; i++)
+            foreach (var construct in constructs)
             {
-                var construct = constructs[i];
                 if (construct.Key == Keyword.Instance && construct.Text(2) == id)
                     ReadInstance(construct, program, read);
             }
@@ -233,10 +231,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var parser = new Parser(text);
             var constructs = parser.Read();
             var read = new Trouble(text, parser.Trouble);
-            for (var i = 0; i < constructs.Count; i++)
+            foreach (var construct in constructs)
             {
-                if (constructs[i].Key == Keyword.System)
-                    ReadSystem(constructs[i], program, read);
+                if (construct.Key == Keyword.System)
+                    ReadSystem(construct, program, read);
             }
 
             read.Settle();
@@ -282,12 +280,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!system.IsBlueprint)
                 {
                     system.Acted(named);
-                    for (var n = 0; n < named.Count; n++)
+                    foreach (var name in named)
                     {
-                        if (program.FindSignalRef(named[n]) != null)
-                            triggers.Add(named[n]);
+                        if (program.FindSignalRef(name) != null)
+                            triggers.Add(name);
                         else
-                            blocks.Add(named[n]);
+                            blocks.Add(name);
                     }
 
                     continue;
@@ -465,8 +463,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.OpenList();
 
             var keys = declared.Keys;
-            for (var i = 0; i < keys.Count; i++)
-                WriteKey(pen, values, keys[i]);
+            foreach (var key in keys)
+                WriteKey(pen, values, key);
 
             pen.CloseList();
             pen.End();
@@ -1027,16 +1025,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             pen.Body();
-            for (var i = 0; i < parts.Count; i++)
+            foreach (var part in parts)
             {
-                pen.Note(instance.NoteOn(parts[i]));
-                pen.Head(parts[i]).Says(Keyword.Equals);
+                pen.Note(instance.NoteOn(part));
+                pen.Head(part).Says(Keyword.Equals);
 
-                var positions = instance.Positions(parts[i]);
+                var positions = instance.Positions(part);
                 if (positions == null)
-                    WriteNames(pen, instance.FilledWith(parts[i]));
+                    WriteNames(pen, instance.FilledWith(part));
                 else
-                    Slots(pen, program, instance.FilledWith(parts[i]), positions);
+                    Slots(pen, program, instance.FilledWith(part), positions);
 
                 pen.End();
             }
@@ -1185,10 +1183,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (!Names(inner, 1, filled, trouble, "expected variables holding blocks in the list."))
                     continue;
 
-                for (var n = 0; n < filled.Count; n++)
+                foreach (var variable in filled)
                 {
-                    if (program.FindRef(filled[n]) == null)
-                        trouble.Say(inner, "no variable '" + filled[n] + "' holding a block above this line.");
+                    if (program.FindRef(variable) == null)
+                        trouble.Say(inner, "no variable '" + variable + "' holding a block above this line.");
                 }
 
                 instance.Fill(inner.Head, filled);

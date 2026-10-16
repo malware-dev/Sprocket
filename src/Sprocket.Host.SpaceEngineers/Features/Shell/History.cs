@@ -101,12 +101,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (!(back ? Back(subject, screen) : Forward(subject, screen)))
                 return;
 
-            for (var i = 0; i < _walk.Count; i++)
+            foreach (var entry in _walk)
             {
-                if (screen != null && _walk[i].Screens.Contains(screen))
+                if (screen != null && entry.Screens.Contains(screen))
                     continue;
 
-                var touched = _walk[i].Screens;
+                var touched = entry.Screens;
                 for (var k = 0; k < touched.Count; k++)
                 {
                     if (touched[k] != screen && !screens.Contains(touched[k]))
@@ -156,10 +156,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             for (var g = _groups.Count - 1; g >= 0; g--)
                 undone.RemoveAt(_groups[g]);
 
-            for (var i = 0; i < _walk.Count; i++)
+            foreach (var entry in _walk)
             {
-                _walk[i].Edit.Apply(subject);
-                done.Add(_walk[i]);
+                entry.Edit.Apply(subject);
+                done.Add(entry);
             }
 
             var edit = _target.Edit;
@@ -278,8 +278,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             for (var g = _groups.Count - 1; g >= 0; g--)
             {
                 var group = undone[_groups[g]];
-                for (var i = 0; i < group.Count; i++)
-                    _walk.Add(group[i]);
+                foreach (var entry in group)
+                    _walk.Add(entry);
             }
 
             return true;
@@ -288,9 +288,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether a change in the walk waits for a switch, taking it back where <paramref name="back" />, or making it again.</summary>
         bool Holds(T subject, bool back)
         {
-            for (var i = 0; i < _walk.Count; i++)
+            foreach (var entry in _walk)
             {
-                if (_walk[i].Edit.Held(subject, back))
+                if (entry.Edit.Held(subject, back))
                     return true;
             }
 
@@ -304,8 +304,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (!_done.TryGetValue(subject, out done))
                 return;
 
-            for (var i = 0; i < done.Count; i++)
-                done[i].Edit.Reassert(subject);
+            foreach (var entry in done)
+                entry.Edit.Reassert(subject);
         }
 
         /// <summary>
@@ -372,9 +372,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         static bool Touched(List<Entry> group, object screen)
         {
-            for (var i = 0; i < group.Count; i++)
+            foreach (var entry in group)
             {
-                if (group[i].Screens.Contains(screen))
+                if (entry.Screens.Contains(screen))
                     return true;
             }
 
@@ -383,9 +383,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         static bool Shares(List<Entry> group, List<object> screens)
         {
-            for (var i = 0; i < group.Count; i++)
+            foreach (var entry in group)
             {
-                if (Shares(group[i].Screens, screens))
+                if (Shares(entry.Screens, screens))
                     return true;
             }
 

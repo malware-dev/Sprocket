@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </remarks>
         public static string Pressed(GridWorld world, Vanilla.Entry entry)
         {
-            GridEntity panel = world == null ? null : world.FindEntity(entry.PanelId);
+            GridEntity panel = world?.FindEntity(entry.PanelId);
             var name = panel == null ? "a block that is gone" : panel.Name;
 
             return "When " + name + " button " + (entry.Slot + 1) + " is pressed";
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (entry.GroupName.Length > 0)
                 return entry.ActionId + " " + entry.GroupName;
 
-            GridEntity acts = world == null ? null : world.FindEntity(entry.BlockId);
+            GridEntity acts = world?.FindEntity(entry.BlockId);
             if (acts == null)
                 return entry.ActionId;
 

@@ -42,8 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>A banner showing nothing, shut.</summary>
         public Banner()
         {
-            _expands = new Relay(delegate { Carry(_notice == null ? null : _notice.Expands); });
-            _offers = new Relay(delegate { Carry(_notice == null ? null : _notice.Offers); });
+            _expands = new Relay(() => Carry(_notice?.Expands));
+            _offers = new Relay(() => Carry(_notice?.Offers));
 
             Openness = 0f;
             Content = new VStack

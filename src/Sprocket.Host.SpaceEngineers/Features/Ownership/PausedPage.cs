@@ -77,9 +77,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
         string Names(List<long> identities)
         {
             var names = new List<string>();
-            for (var i = 0; i < identities.Count; i++)
+            foreach (var identity in identities)
             {
-                var name = Editor.PlayerName == null ? "" : Editor.PlayerName(identities[i]);
+                var name = Editor.PlayerName == null ? "" : Editor.PlayerName(identity);
                 names.Add(string.IsNullOrEmpty(name) ? Editor.Texts.PausedSomeone : name);
             }
 

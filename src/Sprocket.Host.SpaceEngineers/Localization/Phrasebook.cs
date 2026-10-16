@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Localization
         {
             for (var i = 0; i < _phrases.Count; i++)
             {
-                var found = source == null ? null : source.Find(_phrases[i].Key);
+                var found = source?.Find(_phrases[i].Key);
                 _said[i] = found ?? _phrases[i].Written;
             }
         }

@@ -98,9 +98,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Says what is wrong with every slot owed that its system blueprint has nothing of the right sort called.</summary>
         public void Settle()
         {
-            for (var i = 0; i < _owed.Count; i++)
+            foreach (var owed in _owed)
             {
-                var owed = _owed[i];
                 var part = owed.System.FindPart(owed.Name);
                 if (part == null)
                     Say(owed.At, "no slot called '" + owed.Name + "'.");

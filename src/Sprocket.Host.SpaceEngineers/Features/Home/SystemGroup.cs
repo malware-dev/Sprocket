@@ -41,13 +41,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _system = system;
 
             CreateView();
-            _heading.Opens = editor.Act(Cmd.OpenSystem, delegate { page.Open(system); });
-            _heading.Flips = editor.Act(Cmd.EnableSystem, delegate { editor.SwitchSystem(system, !system.Enabled); });
+            _heading.Opens = editor.Act(Cmd.OpenSystem, () => page.Open(system));
+            _heading.Flips = editor.Act(Cmd.EnableSystem, () => editor.SwitchSystem(system, !system.Enabled));
             _heading.SwitchGovernsAll = true;
             _heading.Mark = Symbols.LogicSystem;
-            _takesOff = editor.Act(Cmd.TakeOff, delegate { editor.AskTakeOff(system); });
-            _deletes = editor.Act(Cmd.DeleteSystem, delegate { editor.DeleteSystem(system); });
-            _renews = editor.Act(Cmd.Renew, delegate { editor.AskRenew(system); });
+            _takesOff = editor.Act(Cmd.TakeOff, () => editor.AskTakeOff(system));
+            _deletes = editor.Act(Cmd.DeleteSystem, () => editor.DeleteSystem(system));
+            _renews = editor.Act(Cmd.Renew, () => editor.AskRenew(system));
             _shelves = editor.Act(Cmd.Shelve, delegate
             {
                 // Updating replaces the blueprint, so it asks first; making one shows it where it now is.
@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 editor.OpenLibrary(system.Identity);
             });
             _heading.AboutArguments = _named;
-            _another.Command = editor.Act(Cmd.AddInstance, delegate { page.Another(system); });
+            _another.Command = editor.Act(Cmd.AddInstance, () => page.Another(system));
             editor.Codex.Wire(_installations, editor.OpenCodex);
             _rows = new Keyed<SystemInstance, StatusRow>(_list.Children, Made);
         }
@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Summary = SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instance);
                 row.About = texts.SystemsOpenInstanceAbout;
                 row.AboutArguments.Set("name", row.Summary);
-                row.Deletes = only ? null : _editor.Act(Cmd.DeleteInstance, delegate { _editor.DeleteInstance(_system, instance); });
+                row.Deletes = only ? null : _editor.Act(Cmd.DeleteInstance, () => _editor.DeleteInstance(_system, instance));
                 row.DeleteText = texts.SystemDeleteInstallation;
                 row.Locked = only ? texts.SystemsKeepsOne : "";
             }
@@ -176,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             {
                 Mark = Symbols.Installation,
                 Depth = 1,
-                Opens = _editor.Act(Cmd.OpenSystem, delegate { _page.Open(_system, instance); }),
+                Opens = _editor.Act(Cmd.OpenSystem, () => _page.Open(_system, instance)),
                 AboutArguments = new Arguments()
             };
 

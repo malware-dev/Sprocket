@@ -97,15 +97,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One. A parameter is one parameter; see <see cref="Group" /> for the other case.</summary>
-        public override int Span
-        {
-            get { return 1; }
-        }
+        public override int Span => 1;
 
         /// <summary>The type the action takes it as, as the file wrote it.</summary>
-        public override string Kind
-        {
-            get { return Sort ?? ""; }
-        }
+        public override string Kind => Sort ?? "";
     }
 }

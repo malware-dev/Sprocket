@@ -49,10 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether the run should end rather than go on waiting.</summary>
         public bool Ends { get; private set; }
 
-        public bool Exists
-        {
-            get { return Cause != Cause.None; }
-        }
+        public bool Exists => Cause != Cause.None;
 
         /// <summary>Whether <paramref name="other" /> says the same thing.</summary>
         public bool Same(Trouble other)

@@ -39,13 +39,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             _offered.Clear();
             Toolbars.Offered(block, _offered);
-            for (var i = 0; i < _offered.Count; i++)
+            foreach (var offer in _offered)
             {
-                var id = _offered[i].Id;
+                var id = offer.Id;
                 if (id == null || id.IndexOf(Faces, StringComparison.OrdinalIgnoreCase) < 0)
                     continue;
 
-                words.Add(string.IsNullOrEmpty(_offered[i].Text) ? id : _offered[i].Text);
+                words.Add(string.IsNullOrEmpty(offer.Text) ? id : offer.Text);
                 means.Add(id);
                 kind.Hiding(id);
             }

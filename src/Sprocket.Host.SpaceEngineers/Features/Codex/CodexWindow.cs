@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             _editor = editor;
             CreateView();
             Position = editor.Habits.CodexAt;
-            Moved += delegate { _editor.Habits.CodexAt = Position; };
+            Moved += () => _editor.Habits.CodexAt = Position;
         }
 
         /// <summary>The term being read, or null before any has been.</summary>

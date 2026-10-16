@@ -326,8 +326,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public EntityKind Hiding(params string[] gameIds)
         {
-            for (var i = 0; i < gameIds.Length; i++)
-                _hidden.Add(gameIds[i]);
+            foreach (var gameId in gameIds)
+                _hidden.Add(gameId);
 
             return this;
         }
@@ -339,8 +339,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public EntityKind Lacking(params string[] settingIds)
         {
-            for (var i = 0; i < settingIds.Length; i++)
-                _lacking.Add(settingIds[i]);
+            foreach (var settingId in settingIds)
+                _lacking.Add(settingId);
 
             return this;
         }
@@ -348,9 +348,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether the game's member <paramref name="gameId" /> belongs to a setting this kind lacks.</summary>
         public bool Lacks(string gameId)
         {
-            for (var i = 0; i < _lacking.Count; i++)
+            foreach (var setting in _lacking)
             {
-                var setting = _lacking[i];
                 if (gameId == setting || gameId == setting + "_On" || gameId == setting + "_Off")
                     return true;
             }
@@ -361,9 +360,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this kind keeps the block's own member out of that list.</summary>
         public bool Hides(string gameId)
         {
-            for (var i = 0; i < _hidden.Count; i++)
+            foreach (var hiddenId in _hidden)
             {
-                if (_hidden[i] == gameId)
+                if (hiddenId == gameId)
                     return true;
             }
 
@@ -432,14 +431,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The unit and scale one of the block's own values is said in, where Sprocket says one.</summary>
         public bool Measures(string gameId, out string unit, out double scale, out double step, out string most)
         {
-            for (var i = 0; i < _measured.Count; i++)
+            foreach (var measure in _measured)
             {
-                if (_measured[i].GameId == gameId)
+                if (measure.GameId == gameId)
                 {
-                    unit = _measured[i].Unit;
-                    scale = _measured[i].Scale;
-                    step = _measured[i].Step;
-                    most = _measured[i].Most;
+                    unit = measure.Unit;
+                    scale = measure.Scale;
+                    step = measure.Step;
+                    most = measure.Most;
                     return true;
                 }
             }
@@ -458,8 +457,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public EntityKind Vetting(bool sets, params string[] gameIds)
         {
-            for (var i = 0; i < gameIds.Length; i++)
-                _vetted.Add(new Alias(gameIds[i], sets, null));
+            foreach (var gameId in gameIds)
+                _vetted.Add(new Alias(gameId, sets, null));
 
             return this;
         }
@@ -471,8 +470,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public EntityKind Stating(params string[] gameIds)
         {
-            for (var i = 0; i < gameIds.Length; i++)
-                _states.Add(gameIds[i]);
+            foreach (var gameId in gameIds)
+                _states.Add(gameId);
 
             return this;
         }
@@ -546,10 +545,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The moment <paramref name="eventId" />, or null where the kind has none.</summary>
         public EntityEvent FindEvent(string eventId)
         {
-            for (var i = 0; i < _events.Count; i++)
+            foreach (var entityEvent in _events)
             {
-                if (_events[i].Id == eventId)
-                    return _events[i];
+                if (entityEvent.Id == eventId)
+                    return entityEvent;
             }
             return null;
         }
@@ -557,14 +556,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The signal the one toolbar slot <paramref name="at" /> is among, or null where none of this kind's is.</summary>
         public EntityEvent Signal(Sequences.ToolbarSlot at)
         {
-            for (var i = 0; i < _events.Count; i++)
+            foreach (var entityEvent in _events)
             {
-                if (!_events[i].Answered)
+                if (!entityEvent.Answered)
                     continue;
 
-                var stands = Sequences.ToolbarSlot.Of(_events[i].Id);
+                var stands = Sequences.ToolbarSlot.Of(entityEvent.Id);
                 if (stands != null && stands.Covers(at))
-                    return _events[i];
+                    return entityEvent;
             }
 
             return null;
@@ -578,10 +577,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public EntityAction FindAction(string actionId, Nature form)
         {
-            for (var i = 0; i < _actions.Count; i++)
+            foreach (var action in _actions)
             {
-                if (_actions[i].Id == actionId && _actions[i].Form == form)
-                    return _actions[i];
+                if (action.Id == actionId && action.Form == form)
+                    return action;
             }
             return null;
         }

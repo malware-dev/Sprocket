@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var reactor = block as IMyReactor;
-            var inventory = reactor == null ? null : reactor.GetInventory(0);
+            var inventory = reactor?.GetInventory(0);
             return inventory == null ? null : new Listening(inventory, reactor, told);
         }
 

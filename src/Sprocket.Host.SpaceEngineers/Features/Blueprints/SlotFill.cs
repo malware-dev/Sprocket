@@ -44,13 +44,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 var positions = chosen.Positions(part.Id);
                 var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
                 _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, Nature.Native,
-                    delegate(PickAnswer answer) { Answered(part, chosen, answer); },
+                    answer => Answered(part, chosen, answer),
                     admits: Signaling, signalsOnly: true));
                 return;
             }
 
-            var page = new PickPage(_editor, part.Id, targets, delegate(GridEntity block) { return Fits(part, block); },
-                delegate(PickAnswer answer) { Filled(part, chosen, answer.Targets); });
+            var page = new PickPage(_editor, part.Id, targets, block => Fits(part, block),
+                answer => Filled(part, chosen, answer.Targets));
             Offer(page, chosen);
             _editor.Push(page);
         }
@@ -60,9 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             _system.Acted(_used);
             Marks.SetAside(_system, chosen, _used, _aside);
-            for (var i = 0; i < _aside.Count; i++)
+            foreach (var blockName in _aside)
             {
-                var block = _editor.Runner.Bindings.Entity(_aside[i]);
+                var block = _editor.Runner.Bindings.Entity(blockName);
                 if (block != null)
                     page.Ahead[block.Id] = _editor.Texts.SlotSetAsideNote;
             }
@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var kept = new List<ToolbarSlot>();
             _editor.Picked(answer, names, kept);
             _editor.Filling(_system, part, chosen, answer.Targets, _editor.Pressed(answer),
-                delegate { return new FillSlot(chosen, part.Id, names, kept, Settle); }, Done);
+                () => new FillSlot(chosen, part.Id, names, kept, Settle), Done);
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back.</summary>
@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// </remarks>
         void Filled(Part part, SystemInstance chosen, IList<long> ids)
         {
-            _editor.Filling(_system, part, chosen, ids, null, delegate
+            _editor.Filling(_system, part, chosen, ids, null, () =>
             {
                 var names = new List<string>();
                 for (var i = 0; i < ids.Count; i++)

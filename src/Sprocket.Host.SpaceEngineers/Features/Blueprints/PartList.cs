@@ -39,9 +39,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var wide = 0f;
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
-                var row = Children[i] as PartRow;
+                var row = child as PartRow;
                 if (row == null || !row.IsVisible)
                     continue;
 
@@ -50,9 +50,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     wide = asks;
             }
 
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
-                var row = Children[i] as PartRow;
+                var row = child as PartRow;
                 if (row != null)
                     row.Column = wide;
             }

@@ -235,9 +235,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
             var players = new List<IMyPlayer>();
             MyAPIGateway.Players.GetPlayers(players);
             double r2 = radius * radius;
-            for (int i = 0; i < players.Count; i++)
+            foreach (var p in players)
             {
-                var p = players[i];
                 if (p == null || p.SteamUserId == excludeSteamId) continue;
                 if (Vector3D.DistanceSquared(p.GetPosition(), origin) > r2) continue;
                 Network.SendMessageTo(channelId, inner, p.SteamUserId, reliable);
@@ -311,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         static ulong LocalSteamId()
         {
             var p = MyAPIGateway.Session != null ? MyAPIGateway.Session.LocalHumanPlayer : null;
-            return p != null ? p.SteamUserId : 0UL;
+            return p?.SteamUserId ?? 0UL;
         }
 
         /// <summary>

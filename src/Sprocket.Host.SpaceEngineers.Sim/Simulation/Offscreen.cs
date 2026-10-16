@@ -32,13 +32,13 @@ namespace Sprocket.Sim.Simulation
 
         /// <summary>A frame of the editor on a block holding <paramref name="holding" />, or nothing for null.</summary>
         public Offscreen(float windowWidth, float windowHeight, string holding = null)
-            : this(windowWidth, windowHeight, delegate { return holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding); })
+            : this(windowWidth, windowHeight, () => holding == null ? EditorScene.Nowhere() : EditorScene.Holding(holding))
         {
         }
 
         /// <summary>A frame of the editor on a construct of <paramref name="rig" />'s blocks that remembers nothing.</summary>
         public Offscreen(float windowWidth, float windowHeight, Rig rig)
-            : this(windowWidth, windowHeight, delegate { return EditorScene.On(rig); })
+            : this(windowWidth, windowHeight, () => EditorScene.On(rig))
         {
         }
 

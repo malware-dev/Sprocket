@@ -26,8 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (said == null || said.Actions == null)
                 return;
 
-            for (var i = 0; i < said.Actions.Count; i++)
-                Add(said.Actions[i], mod);
+            foreach (var action in said.Actions)
+                Add(action, mod);
         }
 
         /// <summary>

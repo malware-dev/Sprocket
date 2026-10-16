@@ -25,7 +25,7 @@ namespace RichTextPanels
         /// <remarks>Read by every panel running the app each time it looks for changes, so it allocates nothing.</remarks>
         public static bool Stored(IMyEntity block)
         {
-            MyModStorageComponentBase storage = block == null ? null : block.Storage;
+            MyModStorageComponentBase storage = block?.Storage;
             string text;
             return storage != null && storage.TryGetValue(Key, out text) && text == On;
         }

@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public Composer(float high, IStyle reads)
         {
             CreateView(high, reads);
-            _preview.Command = new Relay(delegate { Preview(!_previewing.IsVisible); });
+            _preview.Command = new Relay(() => Preview(!_previewing.IsVisible));
         }
 
         /// <summary>The markup written, which setting replaces, leaving the box as a new piece of writing.</summary>

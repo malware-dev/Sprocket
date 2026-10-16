@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             var moment = trigger as MomentTrigger;
             _sources = moment == null ? null : CopyOf(moment.Sources);
-            _eventId = moment == null ? null : moment.EventId;
+            _eventId = moment?.EventId;
         }
 
         /// <inheritdoc />

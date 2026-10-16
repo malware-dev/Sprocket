@@ -50,10 +50,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public Literal Operand { get; private set; }
 
         /// <summary>Whether the block says when what this reads may have changed.</summary>
-        public bool Announced => Signal != null ? Signal.Announced : Own != null && Own.Announced;
+        public bool Announced => Signal?.Announced ?? Own != null && Own.Announced;
 
         /// <summary>The flag that, while it reads true, rules out a change in what this reads; null where nothing does.</summary>
-        public Reading RuledOutBy => Signal != null ? Signal.RuledOutBy : Own == null ? null : Own.RuledOutBy;
+        public Reading RuledOutBy => Signal != null ? Signal.RuledOutBy : Own?.RuledOutBy;
 
         /// <summary>
         /// The value <paramref name="id" /> qualified by <paramref name="provider" /> as <paramref name="entity" /> has it,
@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!written.Compares(value, out operand))
                 return null;
 
-            var kind = being == null ? ValueKind.Flag : being.Kind;
+            var kind = being?.Kind ?? ValueKind.Flag;
             Gauge gauge;
             if (being == null)
             {
@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>What the value reads now as a number, for a sum.</summary>
         public double Number()
         {
-            return Gauge == null ? 0d : Gauge.Number();
+            return Gauge?.Number() ?? 0d;
         }
     }
 }

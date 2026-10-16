@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return "";
 
             var other = connector.OtherConnector;
-            var grid = other == null ? null : other.CubeGrid;
+            var grid = other?.CubeGrid;
             return grid == null ? "" : grid.CustomName;
         }
 

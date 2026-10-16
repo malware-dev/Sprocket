@@ -205,10 +205,10 @@ namespace Lumel.Screens
 
             if (ctrl)
             {
-                for (var i = 0; i < _shortcuts.Length; i++)
+                foreach (var shortcut in _shortcuts)
                 {
-                    if (input.IsNewKeyPressed(_shortcuts[i]))
-                        root.Key(_shortcuts[i], shift, true);
+                    if (input.IsNewKeyPressed(shortcut))
+                        root.Key(shortcut, shift, true);
                 }
             }
             else
@@ -227,9 +227,8 @@ namespace Lumel.Screens
             if (input.IsNewKeyPressed(MyKeys.Tab))
                 root.Key(MyKeys.Tab, shift, ctrl);
 
-            for (var i = 0; i < _editing.Length; i++)
+            foreach (var key in _editing)
             {
-                var key = _editing[i];
                 if (!_repeat.Fires((int)key, input.IsNewKeyPressed(key), input.IsKeyPress(key), now))
                     continue;
 

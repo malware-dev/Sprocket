@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 return null;
 
             if (!locator.StartsWith(Prefix, StringComparison.Ordinal))
-                return _rest == null ? null : _rest.Find(locator);
+                return _rest?.Find(locator);
 
             IImageSource mark;
             return _marks.TryGetValue(locator, out mark) ? mark : null;

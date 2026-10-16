@@ -161,8 +161,8 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public void Play(EditorScene scene, Action drawn)
         {
-            for (int i = 0; i < _steps.Count; i++)
-                Run(scene, _steps[i], drawn);
+            foreach (var step in _steps)
+                Run(scene, step, drawn);
         }
 
         private Step Add(int kind)

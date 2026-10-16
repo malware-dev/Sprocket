@@ -46,8 +46,8 @@ namespace Sprocket.Sim.Content
                 return report.ToString();
             }
 
-            for (int i = 0; i < Wanted.Length; i++)
-                One(report, Wanted[i][0], Wanted[i][1]);
+            foreach (var entry in Wanted)
+                One(report, entry[0], entry[1]);
 
             foreach (KeyValuePair<string, string> art in BlockArt.All)
                 One(report, art.Value, "what a " + art.Key + " looks like");

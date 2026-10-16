@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static int Buttons(IMyTerminalBlock block)
         {
             IMyToolbar toolbar = Toolbars.Of(block);
-            return toolbar == null ? 0 : toolbar.SlotCount;
+            return toolbar?.SlotCount ?? 0;
         }
 
         /// <summary>The button a member is given, by its number from 1 to <paramref name="buttons" />.</summary>

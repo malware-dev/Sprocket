@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var row = new HStack
                 {
                     Style = Styles.MenuRow,
-                    Command = new Relay(delegate { Choose(_words[at]); }),
+                    Command = new Relay(() => Choose(_words[at])),
                     Children = { named }
                 };
 
@@ -141,8 +141,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             var size = base.MeasureContent(g, available);
 
             var widest = 0f;
-            for (var i = 0; i < _spelled.Count; i++)
-                widest = Math.Max(widest, g.MeasureText(_said.Font, _spelled[i], _said.FontSize).X);
+            foreach (var spelled in _spelled)
+                widest = Math.Max(widest, g.MeasureText(_said.Font, spelled, _said.FontSize).X);
 
             // Exactly that, never the room it was offered: the word grows into whatever it is given when it is placed.
             size.X = widest + Spacing + Mark;

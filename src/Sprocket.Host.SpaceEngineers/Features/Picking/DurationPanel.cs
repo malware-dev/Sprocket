@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Symbol = Symbols.Minus,
                 Style = Styles.Icon,
                 Placement = Fixed.Size(32f, 32f),
-                Command = new Relay(delegate { Step(-1); }),
+                Command = new Relay(() => Step(-1)),
                 Tip = Tip.For(null, texts.WaitShorter)
             });
             number.Children.Add(new NumberBox
@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Focusable = true,
                 Least = 0,
                 Widest = Widest,
-                Submit = new Relay(delegate { Raise(Submitted); }),
+                Submit = new Relay(() => Raise(Submitted)),
                 Tip = Tip.For(null, texts.SequenceWaitTypedAbout)
             }.As(out _box));
             number.Children.Add(new Glyph
@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Symbol = Symbols.Plus,
                 Style = Styles.Icon,
                 Placement = Fixed.Size(32f, 32f),
-                Command = new Relay(delegate { Step(1); }),
+                Command = new Relay(() => Step(1)),
                 Tip = Tip.For(null, texts.WaitLonger)
             });
             // At the right end, across from the number it is the unit of.
@@ -83,7 +83,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Style = Styles.Switch,
                 Tip = Tip.For(null, texts.WaitTickAbout),
-                Command = new Relay(delegate { Unit(!_inSeconds); })
+                Command = new Relay(() => Unit(!_inSeconds))
             }.As(out _unit));
             _unit.Says(texts.WaitInSeconds, texts.WaitInTicks);
             Children.Add(number);
@@ -91,28 +91,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Children.Add(new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution));
 
             _secondsPicks = new HStack { Spacing = 6f };
-            for (var i = 0; i < SecondsPicks.Length; i++)
+            foreach (var seconds in SecondsPicks)
             {
-                var seconds = SecondsPicks[i];
                 _secondsPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
                     Placement = Fixed.Wide(PickWidth),
                     Text = seconds == 60 ? texts.WaitPickMinute : Template.Fill(texts.WaitPickSeconds, "count", Said(seconds)),
-                    Command = new Relay(delegate { Give(Said(seconds)); })
+                    Command = new Relay(() => Give(Said(seconds)))
                 });
             }
 
             _ticksPicks = new HStack { Spacing = 6f };
-            for (var i = 0; i < TicksPicks.Length; i++)
+            foreach (var ticks in TicksPicks)
             {
-                var ticks = TicksPicks[i];
                 _ticksPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
                     Placement = Fixed.Wide(PickWidth),
                     Text = Template.Fill(texts.WaitPickTicks, "count", Said(ticks)),
-                    Command = new Relay(delegate { Give(Said(ticks)); })
+                    Command = new Relay(() => Give(Said(ticks)))
                 });
             }
 

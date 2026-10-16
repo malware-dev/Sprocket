@@ -105,9 +105,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (_grip.IsHot)
                     return true;
 
-                for (var i = 0; i < _chips.Count; i++)
+                foreach (var chip in _chips)
                 {
-                    if (_chips[i].IsHot)
+                    if (chip.IsHot)
                         return true;
                 }
 
@@ -169,8 +169,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // A paused step waits for nothing, so its mark is quieter and is never lit.
             _leadWaits.Style = IsOff ? Styles.WaitsPaused : Styles.Waits;
             _leadWaits.HaloTint = !IsOff && (MarksLit || Kind == StepKind.Await && ClockLit) ? Glow : Palette.None;
-            for (var i = 0; i < _chips.Count; i++)
-                _chips[i].Glow = MarksLit && !IsOff ? Glow : Palette.None;
+            foreach (var chip in _chips)
+                chip.Glow = MarksLit && !IsOff ? Glow : Palette.None;
 
             _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.MemberWaits : Kind == StepKind.Await ? texts.SequenceAwaitRow : null);
 
@@ -349,8 +349,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 sentence.Add(_chips[i]);
             }
 
-            for (var i = 0; i < _adders.Count; i++)
-                sentence.Add(_adders[i]);
+            foreach (var adder in _adders)
+                sentence.Add(adder);
 
             _joins.RemoveRange(Slots.Count, _joins.Count - Slots.Count);
             _chips.RemoveRange(Slots.Count, _chips.Count - Slots.Count);

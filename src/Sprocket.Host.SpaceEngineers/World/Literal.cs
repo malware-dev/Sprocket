@@ -71,22 +71,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string Text { get; private set; }
 
         /// <summary>It as a flag, for <see cref="ValueKind.Flag" />.</summary>
-        public bool Flag
-        {
-            get { return Value.Bits != 0; }
-        }
+        public bool Flag => Value.Bits != 0;
 
         /// <summary>It as a whole number, for <see cref="ValueKind.Integer" />.</summary>
-        public long Whole
-        {
-            get { return Value.Bits; }
-        }
+        public long Whole => Value.Bits;
 
         /// <summary>It as a real number, for <see cref="ValueKind.Real" />.</summary>
-        public double Real
-        {
-            get { return BitConverter.Int64BitsToDouble(Value.Bits); }
-        }
+        public double Real => BitConverter.Int64BitsToDouble(Value.Bits);
 
         /// <summary>What it is as a number, whether it was written whole or with a point, and nought for anything else.</summary>
         /// <remarks>
@@ -106,28 +97,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The red of a color.</summary>
-        public byte Red
-        {
-            get { return (byte)(Value.Bits >> 24); }
-        }
+        public byte Red => (byte)(Value.Bits >> 24);
 
         /// <summary>The green of a color.</summary>
-        public byte Green
-        {
-            get { return (byte)(Value.Bits >> 16); }
-        }
+        public byte Green => (byte)(Value.Bits >> 16);
 
         /// <summary>The blue of a color.</summary>
-        public byte Blue
-        {
-            get { return (byte)(Value.Bits >> 8); }
-        }
+        public byte Blue => (byte)(Value.Bits >> 8);
 
         /// <summary>The alpha of a color.</summary>
-        public byte Alpha
-        {
-            get { return (byte)Value.Bits; }
-        }
+        public byte Alpha => (byte)Value.Bits;
 
         /// <summary>
         /// How it reads to a person, and to anything that wanted text.

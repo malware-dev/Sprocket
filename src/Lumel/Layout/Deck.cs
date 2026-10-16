@@ -44,9 +44,8 @@ namespace Lumel.Layout
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var size = Vector2.Zero;
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
-                var child = Children[i];
                 var sized = child.Placement as ISized;
                 child.Measure(g, new Vector2(Given(sized, true, available.X), Given(sized, false, available.Y)));
                 size.X = Math.Max(size.X, Given(sized, true, child.DesiredSize.X));
@@ -59,16 +58,15 @@ namespace Lumel.Layout
         /// <inheritdoc />
         protected override void ArrangeContent(RectangleF bounds)
         {
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
-                var child = Children[i];
                 var sized = child.Placement as ISized;
                 float x;
                 float width;
                 float y;
                 float height;
-                Span(child, true, bounds.X, bounds.Width, sized == null ? float.NaN : sized.Width, child.DesiredSize.X, out x, out width);
-                Span(child, false, bounds.Y, bounds.Height, sized == null ? float.NaN : sized.Height, child.DesiredSize.Y, out y, out height);
+                Span(child, true, bounds.X, bounds.Width, sized?.Width ?? float.NaN, child.DesiredSize.X, out x, out width);
+                Span(child, false, bounds.Y, bounds.Height, sized?.Height ?? float.NaN, child.DesiredSize.Y, out y, out height);
                 child.Arrange(new RectangleF(x, y, width, height));
             }
         }
@@ -85,7 +83,7 @@ namespace Lumel.Layout
         protected override Element UnderContent(Vector2 point)
         {
             var top = Top;
-            return top == null ? null : top.Under(point);
+            return top?.Under(point);
         }
 
         /// <summary>Refuses a child whose placement is not <see cref="ISized" />.</summary>

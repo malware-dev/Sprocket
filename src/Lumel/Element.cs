@@ -266,7 +266,7 @@ namespace Lumel
         public bool TakesInput => _command != null || Focusable || TakesPointer;
 
         /// <summary>How many children this has, which <see cref="GetVisualChild" /> hands out in the order they are drawn.</summary>
-        public virtual int VisualChildCount => _contents == null ? 0 : _contents.Count;
+        public virtual int VisualChildCount => _contents?.Count ?? 0;
 
         /// <summary>Says this needs measuring again, and everything above it with it.</summary>
         /// <remarks>
@@ -383,14 +383,14 @@ namespace Lumel
         /// <summary>Where <paramref name="point" />, as drawn on the screen, lies in this element's own layout: through the render transform of everything above it, and its own.</summary>
         public Vector2 FromScreen(Vector2 point)
         {
-            return Local(_parent == null ? point : _parent.FromScreen(point));
+            return Local(_parent?.FromScreen(point) ?? point);
         }
 
         /// <summary>Where <paramref name="point" />, in this element's own layout, is drawn on the screen: the reverse of <see cref="FromScreen" />.</summary>
         public Vector2 ToScreen(Vector2 point)
         {
             var drawn = _transform.IsIdentity ? point : _transform.Apply(point, new Vector2(Bounds.X, Bounds.Y));
-            return _parent == null ? drawn : _parent.ToScreen(drawn);
+            return _parent?.ToScreen(drawn) ?? drawn;
         }
 
         void DrawBox(IGraphics g)

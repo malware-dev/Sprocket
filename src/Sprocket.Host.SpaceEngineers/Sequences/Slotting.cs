@@ -88,13 +88,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _entries.Clear();
             var lists = new List<IList<string>>();
             _system.Lists(lists);
-            for (var i = 0; i < lists.Count; i++)
+            foreach (var list in lists)
             {
-                if (ReferenceEquals(lists[i], replacing))
+                if (ReferenceEquals(list, replacing))
                     continue;
 
-                var entry = new Entry { Names = lists[i] };
-                entry.Blocks = BlocksOf(lists[i], out entry.Pinned);
+                var entry = new Entry { Names = list };
+                entry.Blocks = BlocksOf(list, out entry.Pinned);
                 _entries.Add(entry);
             }
         }
@@ -142,9 +142,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         void Sets()
         {
             _sets.Clear();
-            for (var i = 0; i < _entries.Count; i++)
+            foreach (var entry in _entries)
             {
-                var entry = _entries[i];
                 if (entry.Pinned || entry.Blocks.Count == 0)
                     continue;
 
@@ -158,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 entry.Set = set;
             }
 
-            _sets.Sort(delegate(Set a, Set b) { return a.Blocks.Count.CompareTo(b.Blocks.Count); });
+            _sets.Sort((a, b) => a.Blocks.Count.CompareTo(b.Blocks.Count));
         }
 
         /// <summary>Marks each set that is not exactly the union of smaller sets as one that is a slot.</summary>
@@ -172,8 +171,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 {
                     if (n != i && _sets[n].Blocks.Count < _sets[i].Blocks.Count && Within(_sets[n].Blocks, _sets[i].Blocks))
                     {
-                        for (var b = 0; b < _sets[n].Blocks.Count; b++)
-                            Add(union, _sets[n].Blocks[b]);
+                        foreach (var block in _sets[n].Blocks)
+                            Add(union, block);
                     }
                 }
 
@@ -187,9 +186,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _taken.Clear();
             _made = 0;
             var parts = _system.Parts;
-            for (var i = 0; i < _sets.Count; i++)
+            foreach (var set in _sets)
             {
-                var set = _sets[i];
                 if (!set.IsSlot)
                     continue;
 
@@ -258,9 +256,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Names each list's set by its slot, or by the fewest slots that make it, and renames every list that changes.</summary>
         void Name(Reslot reslot, Entry picked)
         {
-            for (var i = 0; i < _entries.Count; i++)
+            foreach (var entry in _entries)
             {
-                var entry = _entries[i];
                 if (entry.Set == null)
                 {
                     entry.Now = entry.Names == null ? new List<string>() : new List<string>(entry.Names);
@@ -291,8 +288,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     continue;
 
                 names.Add(slot.Part.Id);
-                for (var b = 0; b < slot.Blocks.Count; b++)
-                    Add(covered, slot.Blocks[b]);
+                foreach (var block in slot.Blocks)
+                    Add(covered, block);
             }
 
             return names;
@@ -302,11 +299,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         void Prune(Reslot reslot)
         {
             var used = new List<string>();
-            for (var i = 0; i < _entries.Count; i++)
+            foreach (var entry in _entries)
             {
-                var names = _entries[i].Now;
-                for (var n = 0; n < names.Count; n++)
-                    Add(used, names[n]);
+                var names = entry.Now;
+                foreach (var name in names)
+                    Add(used, name);
             }
 
             var parts = _system.Parts;
@@ -369,10 +366,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         Set Find(List<string> blocks)
         {
-            for (var i = 0; i < _sets.Count; i++)
+            foreach (var set in _sets)
             {
-                if (Same(_sets[i].Blocks, blocks))
-                    return _sets[i];
+                if (Same(set.Blocks, blocks))
+                    return set;
             }
 
             return null;
@@ -408,8 +405,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether two lists hold the same names, in any order; null holds none.</summary>
         static bool Same(IList<string> left, IList<string> right)
         {
-            var leftCount = left == null ? 0 : left.Count;
-            var rightCount = right == null ? 0 : right.Count;
+            var leftCount = left?.Count ?? 0;
+            var rightCount = right?.Count ?? 0;
             if (leftCount != rightCount)
                 return false;
 

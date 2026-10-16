@@ -138,9 +138,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             var kept = new char[stem.Length];
             var at = 0;
 
-            for (var i = 0; i < stem.Length; i++)
+            foreach (char one in stem)
             {
-                char one = stem[i];
                 if (one >= 'A' && one <= 'Z')
                     kept[at++] = (char)(one + 32);
                 else if ((one >= 'a' && one <= 'z') || (one >= '0' && one <= '9'))

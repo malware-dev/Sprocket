@@ -157,8 +157,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (positions.Count == 0)
                 return "";
 
-            GridEntity block = bindings == null ? null : bindings.Entity(blocks[0]);
-            EntityEvent stands = block == null ? null : block.Kind.Signal(positions[0]);
+            GridEntity block = bindings?.Entity(blocks[0]);
+            EntityEvent stands = block?.Kind.Signal(positions[0]);
             return stands != null ? stands.Id : positions[0].EventId;
         }
 
@@ -219,10 +219,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var said = new List<Field>();
 
             var actions = ActionsOf(world, entityIds);
-            for (var i = 0; i < actions.Count; i++)
+            foreach (var action in actions)
             {
-                if (actions[i].Id == actionId && actions[i].Form == form)
-                    actions[i].Fields(said);
+                if (action.Id == actionId && action.Form == form)
+                    action.Fields(said);
             }
 
             return said;
@@ -233,10 +233,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, Nature form)
         {
             var actions = ActionsOf(world, entityIds);
-            for (var i = 0; i < actions.Count; i++)
+            foreach (var action in actions)
             {
-                if (actions[i].Id == actionId && actions[i].Form == form)
-                    return actions[i].Lasts;
+                if (action.Id == actionId && action.Form == form)
+                    return action.Lasts;
             }
 
             return false;
@@ -247,9 +247,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static bool Narrowed(GridWorld world, IList<long> entityIds, bool terminal)
         {
             var entities = Blocks(world, entityIds);
-            for (var i = 0; i < entities.Count; i++)
+            foreach (var entity in entities)
             {
-                var actions = entities[i].Kind.Actions;
+                var actions = entity.Kind.Actions;
                 for (var j = 0; j < actions.Count; j++)
                 {
                     var listed = terminal ? actions[j].Unaltered : !actions[j].Hidden;
@@ -367,9 +367,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static string Toggle(GridWorld world, IList<long> entityIds, string value)
         {
             var entities = Blocks(world, entityIds);
-            for (var i = 0; i < entities.Count; i++)
+            foreach (var entity in entities)
             {
-                var one = entities[i].Kind.FindAction(value, Nature.Value);
+                var one = entity.Kind.FindAction(value, Nature.Value);
                 if (one != null && one.Flips)
                     return one.FlippedBy;
             }
@@ -381,9 +381,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static string Flipped(GridWorld world, IList<long> entityIds, string toggle)
         {
             var entities = Blocks(world, entityIds);
-            for (var i = 0; i < entities.Count; i++)
+            foreach (var entity in entities)
             {
-                var actions = entities[i].Kind.Actions;
+                var actions = entity.Kind.Actions;
                 for (var a = 0; a < actions.Count; a++)
                 {
                     if (actions[a].Form == Nature.Value && actions[a].FlippedBy == toggle)
@@ -399,9 +399,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var planned = new List<Plan>();
             var entities = Blocks(world, entityIds);
-            for (var i = 0; i < entities.Count; i++)
+            foreach (var entity in entities)
             {
-                var plans = entities[i].Kind.Planned;
+                var plans = entity.Kind.Planned;
                 for (var p = 0; p < plans.Count; p++)
                 {
                     if (!planned.Contains(plans[p]))
@@ -420,16 +420,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public static Literal? Current(GridWorld world, IList<long> entityIds, string id)
         {
             var entities = Blocks(world, entityIds);
-            for (var i = 0; i < entities.Count; i++)
+            foreach (var entity in entities)
             {
-                var value = entities[i].Kind.FindAction(id, Nature.Value);
+                var value = entity.Kind.FindAction(id, Nature.Value);
                 if (value == null)
                     continue;
 
                 var being = value.Being;
                 var gauge = being == null
-                    ? entities[i].Gauge(value)
-                    : !being.Remembers && being.Missing(0) == null ? being.Gauge(entities[i].Block, NoArguments, null) : null;
+                    ? entity.Gauge(value)
+                    : !being.Remembers && being.Missing(0) == null ? being.Gauge(entity.Block, NoArguments, null) : null;
                 if (gauge != null)
                     return gauge.Read();
             }

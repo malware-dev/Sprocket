@@ -69,7 +69,7 @@ namespace Sprocket.Sim.Simulation
             Take(bitmap, behind, surface, size);
 
             if (script != null)
-                script.Play(scene, delegate { Take(bitmap, behind, surface, size); });
+                script.Play(scene, () => Take(bitmap, behind, surface, size));
 
             var png = new PngBitmapEncoder();
             png.Frames.Add(BitmapFrame.Create(bitmap));

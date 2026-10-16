@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override Trouble Trouble(IMyTerminalBlock block, Recall seen)
             {
-                return _doing.Troubled == null ? World.Trouble.None : _doing.Troubled((T)block, _options, seen);
+                return _doing.Troubled?.Invoke((T)block, _options, seen) ?? World.Trouble.None;
             }
 
             public override void Stop(IMyTerminalBlock block)
@@ -123,7 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override int Expected(IMyTerminalBlock block)
             {
-                return _doing.Takes == null ? GridEntity.Unestimated : _doing.Takes((T)block, _options);
+                return _doing.Takes?.Invoke((T)block, _options) ?? GridEntity.Unestimated;
             }
         }
     }

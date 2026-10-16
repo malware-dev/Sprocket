@@ -499,9 +499,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var wanted = Under(Pointer);
 
             var speaker = SayingAt(Pointer);
-            var tip = speaker == null ? null : speaker.TipAt(speaker.FromScreen(Pointer));
-            _saying = tip == null ? null : tip.Document;
-            _sayingArguments = tip == null ? null : tip.Arguments;
+            var tip = speaker?.TipAt(speaker.FromScreen(Pointer));
+            _saying = tip?.Document;
+            _sayingArguments = tip?.Arguments;
 
             if (wanted == _lit)
                 return;
@@ -594,9 +594,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _dialog.Message = screen.QuestionArguments == null ? Markdown.Parse(screen.Question) : Template.Read(screen.Question);
             _dialog.MessageArguments = screen.QuestionArguments;
             _dialog.YesText = yes != null ? yes.Text : "";
-            _dialog.YesCommand = yes != null ? yes.Command : null;
+            _dialog.YesCommand = yes?.Command;
             _dialog.NoText = no != null ? no.Text : "";
-            _dialog.NoCommand = no != null ? no.Command : null;
+            _dialog.NoCommand = no?.Command;
             _dialog.Default = yes != null && yes == screen.Default ? MessageButton.Yes
                 : no != null && no == screen.Default ? MessageButton.No
                 : (MessageButton?)null;

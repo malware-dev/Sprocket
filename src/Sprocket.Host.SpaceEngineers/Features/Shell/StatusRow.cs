@@ -47,12 +47,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>An empty row, filled in by setting what it shows and calling <see cref="Show" />.</summary>
         public StatusRow()
         {
-            _opens = new Relay(delegate { Carry(Opens); });
-            _runs = new Relay(delegate { Carry(Running ? Stops : Runs); });
-            _flips = new Relay(delegate { Carry(Flips); });
-            _copies = new Relay(delegate { Carry(Copies); });
-            _offers = new Relay(delegate { Carry(Offers); });
-            _bins = new Relay(delegate { Carry(Deletes); });
+            _opens = new Relay(() => Carry(Opens));
+            _runs = new Relay(() => Carry(Running ? Stops : Runs));
+            _flips = new Relay(() => Carry(Flips));
+            _copies = new Relay(() => Carry(Copies));
+            _offers = new Relay(() => Carry(Offers));
+            _bins = new Relay(() => Carry(Deletes));
 
             Style = Styles.Row;
             Command = _opens;

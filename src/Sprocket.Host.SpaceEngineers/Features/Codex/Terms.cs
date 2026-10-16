@@ -88,8 +88,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Lets every term go of the tooltip kept in the language that was spoken.</summary>
         public void Reword()
         {
-            for (var i = 0; i < _all.Count; i++)
-                _all[i].Reword();
+            foreach (var term in _all)
+                term.Reword();
         }
 
         /// <summary>The term called <paramref name="id" />, which is also a link's target, as in <c>installation</c>, or null where the codex has none.</summary>
@@ -122,9 +122,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
             else
             {
                 var lines = index.Split('\n');
-                for (var i = 0; i < lines.Length; i++)
+                foreach (var line in lines)
                 {
-                    var id = lines[i].Trim();
+                    var id = line.Trim();
                     var opens = id.Length > 0 && id[0] == Section;
                     if (opens)
                         id = id.Substring(1).Trim();
@@ -134,10 +134,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 }
             }
 
-            for (var i = 0; i < Linked.Length; i++)
+            foreach (var name in Linked)
             {
-                if (Listed(Linked[i]) == null)
-                    trouble.Append(trouble.Length > 0 ? "; " : "").Append("the index leaves out ").Append(Linked[i]).Append(", which a screen links to");
+                if (Listed(name) == null)
+                    trouble.Append(trouble.Length > 0 ? "; " : "").Append("the index leaves out ").Append(name).Append(", which a screen links to");
             }
 
             _trouble = trouble.ToString();
@@ -148,10 +148,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The term called <paramref name="id" /> among those read, or null where there is none.</summary>
         Term Listed(string id)
         {
-            for (var i = 0; i < _all.Count; i++)
+            foreach (var term in _all)
             {
-                if (_all[i].Id == id)
-                    return _all[i];
+                if (term.Id == id)
+                    return term;
             }
 
             return null;
@@ -166,16 +166,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>Makes the links in <paramref name="text" /> lead into the codex: pressing one gives its term to <paramref name="open" />, and resting on one shows the term's preview.</summary>
         public void Wire(RichText text, Action<Term> open)
         {
-            text.Follow = delegate(Link link)
+            text.Follow = link =>
             {
                 var term = Find(link.Target);
                 if (term != null)
                     open(term);
             };
-            text.LinkTip = delegate(Link link)
+            text.LinkTip = link =>
             {
                 var term = Find(link.Target);
-                return term == null ? null : term.Preview;
+                return term?.Preview;
             };
         }
     }

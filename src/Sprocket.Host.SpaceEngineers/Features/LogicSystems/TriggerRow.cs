@@ -173,7 +173,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return texts.TriggerTargetsAbout;
 
             var given = part as ArgumentsSlot;
-            return given == null ? null : given.About(texts);
+            return given?.About(texts);
         }
 
         /// <summary><see cref="Locked" />, or null where there is nothing to say.</summary>

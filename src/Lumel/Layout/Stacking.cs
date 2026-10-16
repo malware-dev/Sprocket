@@ -161,8 +161,8 @@ namespace Lumel.Layout
         /// <inheritdoc />
         protected override void DrawContent(IGraphics g)
         {
-            for (var i = 0; i < Children.Count; i++)
-                Children[i].Draw(g);
+            foreach (var child in Children)
+                child.Draw(g);
         }
 
         /// <inheritdoc />

@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return offensive.SearchEnemyComponent;
 
             var defensive = block as IMyDefensiveCombatBlock;
-            return defensive == null ? null : defensive.SearchEnemyComponent;
+            return defensive?.SearchEnemyComponent;
         }
 
         /// <summary>A search being listened to, until disposed.</summary>

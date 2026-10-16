@@ -96,13 +96,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _sections.Clear();
             ini.GetSections(_sections);
             var read = new List<Backup>();
-            for (var i = 0; i < _sections.Count; i++)
+            foreach (var section in _sections)
             {
-                var backup = Entry(ini, _sections[i]);
+                var backup = Entry(ini, section);
                 if (backup == null)
                 {
                     Intact = false;
-                    return Index + " says too little of " + _sections[i];
+                    return Index + " says too little of " + section;
                 }
 
                 read.Add(backup);
@@ -164,9 +164,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         string Free()
         {
             var number = 1;
-            for (var i = 0; i < _all.Count; i++)
+            foreach (var backup in _all)
             {
-                var file = _all[i].File;
+                var file = backup.File;
                 int had;
                 if (file.StartsWith(Lead, StringComparison.Ordinal) && file.EndsWith(Kind, StringComparison.Ordinal)
                     && int.TryParse(file.Substring(Lead.Length, file.Length - Lead.Length - Kind.Length), NumberStyles.None, CultureInfo.InvariantCulture, out had)
@@ -207,9 +207,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         void WriteIndex()
         {
             var ini = new MyIni();
-            for (var i = 0; i < _all.Count; i++)
+            foreach (var backup in _all)
             {
-                var backup = _all[i];
                 ini.Set(backup.File, SystemKey, backup.Identity.ToString("D"));
                 ini.Set(backup.File, NameKey, backup.Name);
                 ini.Set(backup.File, ConstructKey, backup.Construct);

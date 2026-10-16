@@ -37,7 +37,7 @@ namespace Sprocket.Localization.Generator
 
                 var comment = data.Element("comment");
                 var line = ((IXmlLineInfo)data).LineNumber - 1;
-                entries.Add(new Entry(name.Value, value.Value, comment == null ? null : comment.Value, line));
+                entries.Add(new Entry(name.Value, value.Value, comment?.Value, line));
             }
 
             return entries;

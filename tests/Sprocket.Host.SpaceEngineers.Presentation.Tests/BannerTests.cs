@@ -84,7 +84,7 @@ public class BannerTests
         var banner = new Banner();
         var notice = Said();
         notice.Detail = "What happened, in more words than fit on the line.";
-        notice.Expands = new Relay(delegate { notice.Expanded = !notice.Expanded; });
+        notice.Expands = new Relay(() => notice.Expanded = !notice.Expanded);
 
         var easel = new Easel(new VStack { Children = { banner } }, Wide, High);
         banner.Show(notice, 0);

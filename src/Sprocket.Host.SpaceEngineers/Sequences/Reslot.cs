@@ -63,20 +63,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </summary>
         public void Touches(IList<object> screens)
         {
-            for (var i = 0; i < _made.Count; i++)
-                Touch(screens, _made[i]);
+            foreach (var part in _made)
+                Touch(screens, part);
 
-            for (var i = 0; i < _refilled.Count; i++)
-                Touch(screens, _refilled[i]);
+            foreach (var part in _refilled)
+                Touch(screens, part);
 
-            for (var i = 0; i < _dropped.Count; i++)
-                Touch(screens, _dropped[i]);
+            foreach (var part in _dropped)
+                Touch(screens, part);
 
             if (_made.Count + _refilled.Count + _dropped.Count > 0)
                 Touch(screens, _shown);
 
-            for (var i = 0; i < _renamed.Count; i++)
-                Touch(screens, Owner(_renamed[i]));
+            foreach (var names in _renamed)
+                Touch(screens, Owner(names));
         }
 
         /// <summary>The sequence whose step holds <paramref name="names" />, or the logic system where a trigger does.</summary>
@@ -190,9 +190,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <remarks>What decides whether the step carrying it can still be walked; a walk of what it changed, and no more.</remarks>
         public bool Holds(bool made)
         {
-            for (var i = 0; i < _made.Count; i++)
+            foreach (var part in _made)
             {
-                if ((System.FindPart(_made[i].Id) == _made[i]) != made)
+                if ((System.FindPart(part.Id) == part) != made)
                     return false;
             }
 
@@ -202,9 +202,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     return false;
             }
 
-            for (var i = 0; i < _dropped.Count; i++)
+            foreach (var part in _dropped)
             {
-                if ((System.FindPart(_dropped[i].Id) == _dropped[i]) == made)
+                if ((System.FindPart(part.Id) == part) == made)
                     return false;
             }
 

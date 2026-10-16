@@ -322,8 +322,8 @@ public abstract class Fitting
         into.Add(new Offer("OnOff_On", "Turn block On"));
         into.Add(new Offer("OnOff_Off", "Turn block Off"));
 
-        for (var i = 0; i < _offers.Count; i++)
-            into.Add(_offers[i]);
+        foreach (var offer in _offers)
+            into.Add(offer);
     }
 
     /// <summary>
@@ -381,8 +381,8 @@ public abstract class Fitting
     {
         into.Add(new Offer("CustomName", "Name", ValueKind.Text, "", ""));
 
-        for (var i = 0; i < _carries.Count; i++)
-            into.Add(_carries[i]);
+        foreach (var carry in _carries)
+            into.Add(carry);
     }
 
     /// <summary>Gives this block one of the block's own values, with what it will accept.</summary>
@@ -469,12 +469,12 @@ public abstract class Fitting
 
     Literal Zero(string propertyId)
     {
-        for (var i = 0; i < _carries.Count; i++)
+        foreach (var carry in _carries)
         {
-            if (_carries[i].Id != propertyId)
+            if (carry.Id != propertyId)
                 continue;
 
-            switch (_carries[i].Sets)
+            switch (carry.Sets)
             {
                 case ValueKind.Integer:
                     return Literal.Of(0L);
@@ -492,9 +492,9 @@ public abstract class Fitting
 
     bool Carries(string propertyId)
     {
-        for (var i = 0; i < _carries.Count; i++)
+        foreach (var carry in _carries)
         {
-            if (_carries[i].Id == propertyId)
+            if (carry.Id == propertyId)
                 return true;
         }
 
@@ -527,9 +527,9 @@ public abstract class Fitting
 
     bool Named(string actionId)
     {
-        for (var i = 0; i < _offers.Count; i++)
+        foreach (var offer in _offers)
         {
-            if (_offers[i].Id == actionId)
+            if (offer.Id == actionId)
                 return true;
         }
 

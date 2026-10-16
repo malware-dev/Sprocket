@@ -93,8 +93,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return;
 
             pen.Head(head);
-            for (var i = 0; i < players.Count; i++)
-                pen.Whole(players[i]);
+            foreach (var player in players)
+                pen.Whole(player);
 
             pen.End();
         }
@@ -236,7 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
 
                 var since = (int)ticks.Whole;
-                recall = delegate(Poller poller) { poller.RecallSince(since); };
+                recall = poller => poller.RecallSince(since);
             }
             else if (line.Says(rest, Keyword.All))
             {
@@ -247,7 +247,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
 
                 var all = line.Says(rest + 1, Keyword.On);
-                recall = delegate(Poller poller) { poller.RecallAll(all); };
+                recall = poller => poller.RecallAll(all);
             }
             else
             {
@@ -266,7 +266,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     read.Add(line.Says(i + 1, Keyword.On));
                 }
 
-                recall = delegate(Poller poller)
+                recall = poller =>
                 {
                     for (var i = 0; i < blocks.Count; i++)
                         poller.Recall(blocks[i], read[i]);
@@ -360,9 +360,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var lines = parser.Read();
             var trouble = new Trouble(saved, parser.Trouble);
 
-            for (var i = 0; i < lines.Count; i++)
+            foreach (var line in lines)
             {
-                var line = lines[i];
                 if (line.IsOff)
                 {
                     trouble.Say(line, "unexpected '//'; only a step in a sequence can be switched off.");

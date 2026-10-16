@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (act != null)
                 return Action(bindings, act, through);
 
-            Sequence sequence = system == null ? null : system.FindSequence(trigger.Runs);
+            Sequence sequence = system?.FindSequence(trigger.Runs);
             if (sequence == null)
                 return trigger.Stops ? "stops a sequence that was deleted" : "runs a sequence that was deleted";
 
@@ -94,10 +94,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         static string Happening(Bindings bindings, string eventId, IList<string> sources)
         {
             var events = Vocabulary.EventsFor(bindings, sources);
-            for (var i = 0; i < events.Count; i++)
+            foreach (var entityEvent in events)
             {
-                if (events[i].Id == eventId)
-                    return events[i].Text;
+                if (entityEvent.Id == eventId)
+                    return entityEvent.Text;
             }
 
             return SentenceText.Empty;
@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Template.Fill(texts.SequenceStoppedBySwitch, "step", step);
 
             var system = sequence.System;
-            var from = system == null ? null : system.FindSequence(state.StoppedFrom);
+            var from = system?.FindSequence(state.StoppedFrom);
             return Fill(texts.SequenceStoppedBySequence, "step", step, "sequence",
                 from == null ? DefaultName(texts, state.StoppedFrom) : Called(texts, from));
         }
@@ -262,7 +262,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (halt == null || halt.Problem == SequenceProblem.None)
                 return texts.StoppedUnknown;
 
-            var sequence = system == null ? null : system.FindSequence(halt.Sequence);
+            var sequence = system?.FindSequence(halt.Sequence);
             var row = Row(sequence, halt.Step);
             var step = row.ToString(CultureInfo.InvariantCulture);
             var reason = halt.Because.Exists ? TroubleText.Of(texts, halt.Because, halt.Block) : Because(texts, halt.Problem, halt.Block);
@@ -397,7 +397,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (run != null)
             {
                 var system = sequence.System;
-                var called = system == null ? null : system.FindSequence(run.Number);
+                var called = system?.FindSequence(run.Number);
                 return (run.Stops ? "stop " : "run ") + (called == null || !called.HasName
                     ? Written + run.Number
                     : called.Name);

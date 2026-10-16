@@ -71,7 +71,7 @@ namespace Lumel.Controls
         public Button Add(string title, Element page, Tip about = null)
         {
             var index = _headers.Count;
-            var header = new Button { Text = title, Tip = about, Command = new Relay(delegate { Current = index; }) };
+            var header = new Button { Text = title, Tip = about, Command = new Relay(() => Current = index) };
             _headers.Add(header);
             _strip.Columns.Add(Length.Flex(1));
             _strip.Cells[0, index] = header;

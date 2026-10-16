@@ -458,8 +458,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var items = _reading.Items;
             var from = items.Count;
-            for (var i = 0; i < held.Count; i++)
-                items.Add(held[i]);
+            foreach (var value in held)
+                items.Add(value);
 
             return Value.Listed(from, held.Count);
         }

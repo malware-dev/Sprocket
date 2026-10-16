@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             get
             {
                 var run = Does as Run;
-                return run == null ? 0 : run.Number;
+                return run?.Number ?? 0;
             }
         }
 

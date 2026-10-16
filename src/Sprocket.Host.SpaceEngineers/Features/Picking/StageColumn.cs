@@ -50,10 +50,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             ShowsHidden = false;
             _kindLine.Tip = Tip.For(null, texts.PickKindAbout);
 
-            _narrow.Edited += delegate { Typed(_narrow, _narrowClear, Narrowed); };
-            _narrowClear.Command = new Relay(delegate { Emptied(_narrow, _narrowClear, Narrowed); });
-            _kindNarrow.Edited += delegate { Typed(_kindNarrow, _kindNarrowClear, KindsNarrowed); };
-            _kindNarrowClear.Command = new Relay(delegate { Emptied(_kindNarrow, _kindNarrowClear, KindsNarrowed); });
+            _narrow.Edited += () => Typed(_narrow, _narrowClear, Narrowed);
+            _narrowClear.Command = new Relay(() => Emptied(_narrow, _narrowClear, Narrowed));
+            _kindNarrow.Edited += () => Typed(_kindNarrow, _kindNarrowClear, KindsNarrowed);
+            _kindNarrowClear.Command = new Relay(() => Emptied(_kindNarrow, _kindNarrowClear, KindsNarrowed));
 
             // The list hangs off this line and is reachable only while it hangs there, so its rows cannot be pressed through it.
             _kindLine.Command = new Relay(delegate

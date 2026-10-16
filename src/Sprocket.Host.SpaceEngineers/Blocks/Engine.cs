@@ -59,9 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static MyGasFueledPowerProducerDefinition Definition(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;
-            return definitions == null
-                ? null
-                : definitions.GetCubeBlockDefinition(block.BlockDefinition) as MyGasFueledPowerProducerDefinition;
+            return definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyGasFueledPowerProducerDefinition;
         }
     }
 }

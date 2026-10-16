@@ -40,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var word = words[i];
                 _words.Add(word);
 
-                var button = new Button { Style = Styles.Word, Text = word, Command = new Relay(delegate { Give(word); }) };
+                var button = new Button { Style = Styles.Word, Text = word, Command = new Relay(() => Give(word)) };
                 _buttons.Add(button);
                 _line.Children.Add(button);
             }

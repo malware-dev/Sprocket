@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public static bool HasProgram(IMyTerminalBlock block)
         {
-            MyModStorageComponentBase storage = block == null ? null : block.Storage;
+            MyModStorageComponentBase storage = block?.Storage;
             if (storage == null)
                 return false;
 
@@ -160,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _copy = copy;
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
-            _runner.FastestUpdate = settings == null ? 1 : settings.FastestUpdate;
+            _runner.FastestUpdate = settings?.FastestUpdate ?? 1;
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
@@ -209,8 +209,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             _heldAt = revision;
-            for (var i = 0; i < _holders.Count; i++)
-                _holders[i].IsWorkingChanged -= Working;
+            foreach (var holder in _holders)
+                holder.IsWorkingChanged -= Working;
 
             _holders.Clear();
             var entities = _world.Entities;
@@ -223,8 +223,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!_holders.Contains(_block))
                 _holders.Add(_block);
 
-            for (var i = 0; i < _holders.Count; i++)
-                _holders[i].IsWorkingChanged += Working;
+            foreach (var holder in _holders)
+                holder.IsWorkingChanged += Working;
 
             _working = AnyWorking();
         }
@@ -232,9 +232,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether any programmable block on the construct is working.</summary>
         bool AnyWorking()
         {
-            for (var i = 0; i < _holders.Count; i++)
+            foreach (var holder in _holders)
             {
-                if (_holders[i].IsWorking)
+                if (holder.IsWorking)
                     return true;
             }
 
@@ -457,7 +457,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            return system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number) + "/" + sequence.Number;
+            return system.Identity.ToString("D") + "/" + (instance?.Number ?? 0) + "/" + sequence.Number;
         }
 
         /// <summary>
@@ -487,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
         {
-            var head = system.Identity.ToString("D") + "/" + (instance == null ? 0 : instance.Number);
+            var head = system.Identity.ToString("D") + "/" + (instance?.Number ?? 0);
             if (!trigger.IsWritten)
                 return head + "/part:" + trigger.Part;
 
@@ -732,10 +732,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 var sequences = Runs(system);
                 var instances = system.Uses;
 
-                for (var q = 0; q < sequences.Count; q++)
+                foreach (var sequence in sequences)
                 {
                     for (var n = 0; n < instances.Count; n++)
-                        WantedFor(into, system, instances[n], sequences[q]);
+                        WantedFor(into, system, instances[n], sequence);
                 }
             }
         }
@@ -938,35 +938,33 @@ namespace Sprocket.Host.SpaceEngineers.World
                 var sequences = Runs(system);
                 var instances = system.Uses;
 
-                for (var q = 0; q < sequences.Count; q++)
+                foreach (var sequence in sequences)
                 {
                     for (var n = 0; n < instances.Count; n++)
                     {
-                        if (Answered(system, instances[n], sequences[q]))
+                        if (Answered(system, instances[n], sequence))
                             continue;
 
-                        var start = GridWorld.Start(sequences[q].Id, instances[n]);
+                        var start = GridWorld.Start(sequence.Id, instances[n]);
                         if (_unstartable.Contains(start))
                             continue;
 
                         _unstartable.Add(start);
-                        _why[start] = Unanswer(system, instances[n], sequences[q]);
+                        _why[start] = Unanswer(system, instances[n], sequence);
                     }
                 }
             }
 
-            for (var w = 0; w < _wanted.Count; w++)
+            foreach (var want in _wanted)
             {
                 // A slot that no longer holds what the program wants leaves the program naming it: the trigger is still the
                 // reference, and what it names is reported as not answering, until picking it again writes it back.
-                Want want = _wanted[w];
                 if (Wired(want))
                     _reachable.Add(want.Start);
             }
 
-            for (var w = 0; w < _wanted.Count; w++)
+            foreach (var want in _wanted)
             {
-                Want want = _wanted[w];
                 if (_reachable.Contains(want.Start) || _unstartable.Contains(want.Start))
                     continue;
 
@@ -1057,10 +1055,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         void Mend()
         {
-            for (var w = 0; w < _wanting.Count; w++)
+            foreach (var want in _wanting)
             {
-                Want want = _wanting[w];
-
                 IMyToolbar toolbar = ToolbarOf(want);
                 MyToolbarItemInfo present;
 
@@ -1117,9 +1113,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         void Release()
         {
-            for (var i = 0; i < _wanted.Count; i++)
+            foreach (var had in _wanted)
             {
-                Want had = _wanted[i];
                 if (Holds(_wanting, had))
                     continue;
 
@@ -1201,9 +1196,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What a player had in the slot of <paramref name="want" /> before Sprocket wrote over it, or null.</summary>
         Taken Overwritten(Want want)
         {
-            for (var i = 0; i < _taken.Count; i++)
+            foreach (var kept in _taken)
             {
-                var kept = _taken[i];
                 if (kept.PanelId == want.PanelId && kept.Toolbar == want.Toolbar && kept.Slot == want.Slot)
                     return kept;
             }
@@ -1215,16 +1209,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         IMyButtonPanel PanelOf(Want want)
         {
             var grid = _runner.Bindings.Entity(want.Reference);
-            return grid == null ? null : grid.Block as IMyButtonPanel;
+            return grid?.Block as IMyButtonPanel;
         }
 
         /// <summary>Claims every button the program asks for and Sprocket does not already hold.</summary>
         void Take()
         {
-            for (var w = 0; w < _wanting.Count; w++)
+            foreach (var want in _wanting)
             {
-                Want want = _wanting[w];
-
                 // Only what is newly asked for. A button somebody cleared is no longer asked for at
                 // all - the trigger stopped naming it - so there is nothing here that could put one
                 // back, and picking it again is an honest new want.
@@ -1416,9 +1408,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (before.Count == 0)
                 return true;
 
-            for (var i = 0; i < before.Count; i++)
+            foreach (var owner in before)
             {
-                if (Among(now, before[i]) || _block.HasPlayerAccess(before[i]))
+                if (Among(now, owner) || _block.HasPlayerAccess(owner))
                     return true;
             }
 
@@ -1517,9 +1509,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Assert()
         {
             _answered.Clear();
-            for (var w = 0; w < _wanted.Count; w++)
+            foreach (var want in _wanted)
             {
-                Want want = _wanted[w];
                 if (!_asserted.Contains(want.PanelId))
                     continue;
 
@@ -1551,8 +1542,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_answered.Count == 0)
                 return;
 
-            for (var i = 0; i < _answered.Count; i++)
-                _asserted.Remove(_answered[i]);
+            foreach (var answered in _answered)
+                _asserted.Remove(answered);
 
             _world.LookAgain();
         }
@@ -1588,7 +1579,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             var grid = _runner.Bindings.Entity(want.Reference);
-            var panel = grid == null ? null : grid.Block as IMyButtonPanel;
+            var panel = grid?.Block as IMyButtonPanel;
             if (panel != null)
                 panel.SetCustomButtonName(want.Slot, want.Name);
         }
@@ -1782,8 +1773,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Order(Guid system, int instance, int sequence, bool stops)
         {
             AutomationSystem named = _program.FindSystem(system);
-            SystemInstance one = named == null ? null : named.FindInstance(instance);
-            Sequence which = named == null ? null : named.FindSequence(sequence);
+            SystemInstance one = named?.FindInstance(instance);
+            Sequence which = named?.FindSequence(sequence);
             if (one == null || which == null)
             {
                 Told.Say(Logged(_block) + " has no " + (named == null ? "such system" : which == null ? "such sequence" : "such instance")
@@ -1918,8 +1909,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <inheritdoc />
         public void Dispose()
         {
-            for (var i = 0; i < _holders.Count; i++)
-                _holders[i].IsWorkingChanged -= Working;
+            foreach (var holder in _holders)
+                holder.IsWorkingChanged -= Working;
 
             _world.AnchorRemoved -= Removed;
             _world.AnchorClosed -= Closed;

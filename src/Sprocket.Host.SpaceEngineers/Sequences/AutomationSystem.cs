@@ -68,10 +68,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (value)
                 {
                     Halt = null;
-                    for (var i = 0; i < _instances.Count; i++)
+                    foreach (var instance in _instances)
                     {
-                        if (_instances[i].Halt != null)
-                            _instances[i].Enabled = true;
+                        if (instance.Halt != null)
+                            instance.Enabled = true;
                     }
                 }
 
@@ -277,9 +277,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public bool Called(int number)
         {
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
-                var steps = _sequences[i].Steps;
+                var steps = sequence.Steps;
                 for (var q = 0; q < steps.Count; q++)
                 {
                     var run = steps[q] as Run;
@@ -321,26 +321,26 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Has everything that names the slot <paramref name="was" /> - triggers, steps, installations - name <paramref name="name" /> instead.</summary>
         public void RenameMentions(string was, string name)
         {
-            for (var i = 0; i < _triggers.Count; i++)
+            foreach (var trigger in _triggers)
             {
-                var moment = _triggers[i] as MomentTrigger;
+                var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Rename(moment.Sources, was, name);
 
-                var own = _triggers[i].Acts;
+                var own = trigger.Acts;
                 if (own != null)
                     Rename(own.Targets, was, name);
             }
 
-            for (var s = 0; s < _sequences.Count; s++)
+            foreach (var sequence in _sequences)
             {
-                var steps = _sequences[s].Steps;
+                var steps = sequence.Steps;
                 for (var i = 0; i < steps.Count; i++)
                     Rename(steps[i].Targets, was, name);
             }
 
-            for (var i = 0; i < _instances.Count; i++)
-                _instances[i].RenameSlot(was, name);
+            foreach (var instance in _instances)
+                instance.RenameSlot(was, name);
         }
 
         static void Rename(IList<string> names, string was, string now)
@@ -355,10 +355,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The slot called <paramref name="name" />, or null where it has none.</summary>
         public Part FindPart(string name)
         {
-            for (var i = 0; i < _parts.Count; i++)
+            foreach (var part in _parts)
             {
-                if (_parts[i].Id == name)
-                    return _parts[i];
+                if (part.Id == name)
+                    return part;
             }
             return null;
         }
@@ -390,8 +390,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void DropPart(Part part)
         {
             ForgetPart(part);
-            for (var i = 0; i < _instances.Count; i++)
-                _instances[i].Clear(part.Id);
+            foreach (var instance in _instances)
+                instance.Clear(part.Id);
         }
 
         /// <summary>Puts <paramref name="part" /> back at <paramref name="at" />, as it was before it was forgotten.</summary>
@@ -432,20 +432,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public int Mentions(string slot)
         {
             var uses = 0;
-            for (var i = 0; i < _triggers.Count; i++)
+            foreach (var trigger in _triggers)
             {
-                var moment = _triggers[i] as MomentTrigger;
+                var moment = trigger as MomentTrigger;
                 if (moment != null)
                     uses += Count(moment.Sources, slot);
 
-                var own = _triggers[i].Acts;
+                var own = trigger.Acts;
                 if (own != null)
                     uses += Count(own.Targets, slot);
             }
 
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
-                var steps = _sequences[i].Steps;
+                var steps = sequence.Steps;
                 for (var s = 0; s < steps.Count; s++)
                     uses += Count(steps[s].Targets, slot);
             }
@@ -471,21 +471,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             into.Clear();
 
-            for (var i = 0; i < _triggers.Count; i++)
+            foreach (var trigger in _triggers)
             {
-                var moment = _triggers[i] as MomentTrigger;
+                var moment = trigger as MomentTrigger;
                 if (moment != null)
                     Gather(moment.Sources, into);
 
-                var own = _triggers[i].Acts;
+                var own = trigger.Acts;
                 if (own != null)
                     Gather(own.Targets, into);
             }
 
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
-                var sequence = _sequences[i];
-
                 for (var s = 0; s < sequence.Steps.Count; s++)
                     Gather(sequence.Steps[s].Targets, into);
             }
@@ -496,20 +494,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             into.Clear();
 
-            for (var i = 0; i < _triggers.Count; i++)
+            foreach (var trigger in _triggers)
             {
-                var moment = _triggers[i] as MomentTrigger;
+                var moment = trigger as MomentTrigger;
                 if (moment != null && moment.Sources.Count > 0)
                     into.Add(moment.Sources);
 
-                var own = _triggers[i].Acts;
+                var own = trigger.Acts;
                 if (own != null && own.Targets.Count > 0)
                     into.Add(own.Targets);
             }
 
-            for (var i = 0; i < _sequences.Count; i++)
+            foreach (var sequence in _sequences)
             {
-                var steps = _sequences[i].Steps;
+                var steps = sequence.Steps;
                 for (var s = 0; s < steps.Count; s++)
                 {
                     if (steps[s].Targets.Count > 0)
@@ -566,10 +564,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public SystemInstance AddInstance()
         {
             var highest = 0;
-            for (var i = 0; i < _instances.Count; i++)
+            foreach (var earlier in _instances)
             {
-                if (_instances[i].Number > highest)
-                    highest = _instances[i].Number;
+                if (earlier.Number > highest)
+                    highest = earlier.Number;
             }
 
             var instance = new SystemInstance(highest + 1, this);
@@ -616,10 +614,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The instance of this system called <paramref name="name" />, or null.</summary>
         public SystemInstance FindInstance(string name)
         {
-            for (var i = 0; i < _instances.Count; i++)
+            foreach (var instance in _instances)
             {
-                if (string.Equals(_instances[i].Name, name, StringComparison.Ordinal))
-                    return _instances[i];
+                if (string.Equals(instance.Name, name, StringComparison.Ordinal))
+                    return instance;
             }
 
             return null;
@@ -687,9 +685,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public int HighestSequenceNumber()
         {
             var highest = 0;
-            for (var i = 0; i < _sequences.Count; i++)
-                if (_sequences[i].Number > highest)
-                    highest = _sequences[i].Number;
+            foreach (var sequence in _sequences)
+                if (sequence.Number > highest)
+                    highest = sequence.Number;
 
             return highest;
         }
@@ -704,9 +702,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The sequence of this system with that number, or null.</summary>
         public Sequence FindSequence(int number)
         {
-            for (var i = 0; i < _sequences.Count; i++)
-                if (_sequences[i].Number == number)
-                    return _sequences[i];
+            foreach (var sequence in _sequences)
+                if (sequence.Number == number)
+                    return sequence;
 
             return null;
         }

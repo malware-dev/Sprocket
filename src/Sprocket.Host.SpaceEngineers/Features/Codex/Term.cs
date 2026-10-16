@@ -90,9 +90,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         static string Heading(string page)
         {
             var lines = page.Split('\n');
-            for (var i = 0; i < lines.Length; i++)
+            foreach (var text in lines)
             {
-                var line = lines[i].Trim();
+                var line = text.Trim();
                 if (line.StartsWith(Title))
                     return line.Substring(Title.Length).Trim();
             }
@@ -104,7 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         string Find(string name)
         {
             var pages = _texts.Book.Pages;
-            return (pages == null ? null : pages.Find(name)) ?? "";
+            return pages?.Find(name) ?? "";
         }
     }
 }

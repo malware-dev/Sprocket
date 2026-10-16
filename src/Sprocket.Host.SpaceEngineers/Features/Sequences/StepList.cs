@@ -93,11 +93,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (_landed.Count == 0)
                 return;
 
-            for (var i = 0; i < Children.Count; i++)
+            foreach (var child in Children)
             {
                 float seen;
-                if (_landed.TryGetValue(Children[i], out seen))
-                    Children[i].RenderTransform = RenderTransform.Moved(new Vector2(0f, seen - Children[i].Bounds.Y));
+                if (_landed.TryGetValue(child, out seen))
+                    child.RenderTransform = RenderTransform.Moved(new Vector2(0f, seen - child.Bounds.Y));
             }
 
             _landed.Clear();
@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _wanted.Insert(index, 0f);
 
             var row = (StepRow)child;
-            Action<Vector2> take = delegate(Vector2 point) { Take(row, point); };
+            Action<Vector2> take = point => Take(row, point);
             _takes[row] = take;
             row.Grip.Taken += take;
             row.Grip.Carried += Carry;
@@ -159,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _carrying = Children.IndexOf(row);
             _span = Math.Max(0, Math.Min(row.Carries, Children.Count - 1 - _carrying));
             var landings = Landings;
-            _allowed = landings == null ? null : landings(_carrying);
+            _allowed = landings?.Invoke(_carrying);
             _grabbedAt = FromScreen(point).Y;
             _moved = 0f;
             row.IsCarried = true;

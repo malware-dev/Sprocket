@@ -168,9 +168,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _due.AddRange(_tens[Place(tick, Ten)]);
             _due.AddRange(_hundreds[Place(tick, Hundred)]);
 
-            for (var i = 0; i < _due.Count; i++)
+            foreach (var shift in _due)
             {
-                var shift = _due[i];
                 if (shift.List == null || shift.Ran == tick)
                     continue;
 

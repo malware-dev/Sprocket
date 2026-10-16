@@ -268,11 +268,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
                     _gone.Add(held.Key);
             }
 
-            for (var i = 0; i < _gone.Count; i++)
+            foreach (var key in _gone)
             {
-                Told.Say(Who(_held[_gone[i]].Name, _held[_gone[i]].Id) + " is gone, so block " + _gone[i]
+                Told.Say(Who(_held[key].Name, _held[key].Id) + " is gone, so block " + key
                     + " is free again");
-                _held.Remove(_gone[i]);
+                _held.Remove(key);
             }
         }
 

@@ -73,7 +73,7 @@ public class RevisionTests
             return !(bool)held!;
 
         if (type == typeof(ICommand))
-            return new Relay(delegate { });
+            return new Relay(() => { });
 
         if (type == typeof(Action<string>))
             return new Action<string>(_ => { });

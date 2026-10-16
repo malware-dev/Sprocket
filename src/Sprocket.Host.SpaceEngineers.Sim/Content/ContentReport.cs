@@ -53,12 +53,12 @@ namespace Sprocket.Sim.Content
             if (files.Length == 0)
                 report.AppendLine("  (none)");
 
-            for (int i = 0; i < files.Length; i++)
+            foreach (string file in files)
             {
-                string relative = files[i].Substring(GameContent.CacheDirectory.Length).TrimStart(
+                string relative = file.Substring(GameContent.CacheDirectory.Length).TrimStart(
                     Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-                report.AppendLine("  " + relative + "   " + new FileInfo(files[i]).Length + " bytes");
+                report.AppendLine("  " + relative + "   " + new FileInfo(file).Length + " bytes");
             }
 
             return report.ToString();

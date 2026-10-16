@@ -167,9 +167,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             _offered.Clear();
             Toolbars.Offered(block, _offered);
 
-            for (var i = 0; i < _offered.Count; i++)
+            foreach (Offer offer in _offered)
             {
-                Offer offer = _offered[i];
                 if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Nature.Action) != null || kind.Lacks(offer.Id))
                     continue;
 
@@ -239,9 +238,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             _offered.Clear();
             Toolbars.Settable(block, _offered);
 
-            for (var i = 0; i < _offered.Count; i++)
+            foreach (Offer offer in _offered)
             {
-                Offer offer = _offered[i];
 
                 if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Nature.Value) != null || kind.Lacks(offer.Id))
                     continue;
@@ -356,7 +354,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         Description Described(EntityKind kind, Offer offer)
         {
-            return _catalogue == null ? null : _catalogue.Fitting(kind.Id, offer.Id, offer.Wants);
+            return _catalogue?.Fitting(kind.Id, offer.Id, offer.Wants);
         }
 
         /// <summary>Marks what is left out of the list somebody chooses from.</summary>

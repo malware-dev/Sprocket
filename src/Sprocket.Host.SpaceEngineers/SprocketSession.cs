@@ -6,7 +6,6 @@ using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Network;
-using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
@@ -123,22 +122,19 @@ namespace Sprocket.Host.SpaceEngineers
         /// that quietly answered every default would be indistinguishable from a file saying nothing.
         /// By the time a block adopts itself the world is up.
         /// </remarks>
-        Settings Asked
-        {
-            get { return _settings ?? (_settings = IsServer ? Settings.Read() : new Settings(false)); }
-        }
+        Settings Asked => _settings ?? (_settings = IsServer ? Settings.Read() : new Settings(false));
 
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
         /// <remarks>Static for the reason <see cref="_current" /> is: a block's own component reaches the session only through statics, and it registers the terminal button and toolbar action in these words.</remarks>
-        public static Texts Texts => _current == null ? null : _current._texts;
+        public static Texts Texts => _current?._texts;
 
         /// <summary>The field boxes a gravity generator's fit is showing, or null outside a session.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: the gravity generator's buttons reach the session only through statics.</remarks>
-        public static FieldMarks Marks => _current == null ? null : _current._marks;
+        public static FieldMarks Marks => _current?._marks;
 
         /// <summary>Every door's auto-close delay, or null outside a session.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: a door's slider and its own component reach the session only through statics.</remarks>
-        public static AutoClose Doors => _current == null ? null : _current._doors;
+        public static AutoClose Doors => _current?._doors;
 
         /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: a block's own component reads it as it makes the terminal controls.</remarks>
@@ -180,7 +176,7 @@ namespace Sprocket.Host.SpaceEngineers
         {
             into.Clear();
 
-            IMyCubeGrid grid = block == null ? null : block.CubeGrid;
+            IMyCubeGrid grid = block?.CubeGrid;
             if (_current == null || grid == null || MyAPIGateway.GridGroups == null)
                 return;
 
@@ -236,10 +232,10 @@ namespace Sprocket.Host.SpaceEngineers
 
             var identities = new List<IMyIdentity>();
             MyAPIGateway.Players.GetAllIdentites(identities);
-            for (var i = 0; i < identities.Count; i++)
+            foreach (var known in identities)
             {
-                if (identities[i].IdentityId == identity)
-                    return identities[i].DisplayName;
+                if (known.IdentityId == identity)
+                    return known.DisplayName;
             }
 
             return "";
@@ -305,8 +301,8 @@ namespace Sprocket.Host.SpaceEngineers
 
             Speak();
 
-            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, delegate { return Asked.Written(); },
-                Settled, delegate(string written) { Rule(Settings.Of(written)); });
+            _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
+                Settled, written => Rule(Settings.Of(written)));
             _doors = new AutoClose(_rota, Frame, _memories.Closing);
             _channel = AutoClose.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
@@ -430,19 +426,19 @@ namespace Sprocket.Host.SpaceEngineers
 
             // Running something by hand runs it where it is kept. What is not built there yet - a
             // change still on its way - is simply not found, and nothing happens.
-            copy.Editor.Elsewhere = delegate(Sequence sequence, SystemInstance instance, bool stops)
+            copy.Editor.Elsewhere = (sequence, instance, stops) =>
             {
                 _handover.Keep(id, copy);
                 _handover.Run(id, sequence, instance, stops);
             };
 
             // And a picked button is written there too, after the program that wants it.
-            copy.Editor.Wire = delegate(long panel)
+            copy.Editor.Wire = panel =>
             {
                 _handover.Keep(id, copy);
                 _handover.Wire(id, panel);
             };
-            copy.Editor.Unwire = delegate { _handover.Unwire(id); };
+            copy.Editor.Unwire = () => _handover.Unwire(id);
 
             Lent(block, id, copy);
         }
@@ -735,7 +731,7 @@ namespace Sprocket.Host.SpaceEngineers
         void Removed(SprocketUnit unit)
         {
             if (MyAPIGateway.Utilities != null)
-                MyAPIGateway.Utilities.InvokeOnGameThread(delegate { Rehome(unit); });
+                MyAPIGateway.Utilities.InvokeOnGameThread(() => Rehome(unit));
         }
 
         /// <summary>Moves a Sprocket into another programmable block on its construct, where it is still this session's.</summary>
@@ -834,7 +830,7 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
             }
 
-            var id = multiplayer == null ? 0UL : multiplayer.MyId;
+            var id = multiplayer?.MyId ?? 0UL;
             long lent = unit.Block.EntityId;
             Handover handover = _current._handover;
 
@@ -862,9 +858,9 @@ namespace Sprocket.Host.SpaceEngineers
             unit.Editor.PlayerName = Named;
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
-            unit.Editor.Preferred = IsServer ? null : (Action)delegate { _handover.Prefer(_mine.Ticks); };
+            unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine.Ticks));
             unit.Administers = Administers;
-            unit.WorldSettings = delegate { return Asked; };
+            unit.WorldSettings = () => Asked;
             unit.ChangeSettings = ChangeSettings;
             if (_screen == null || _open != block.EntityId || _shown != unit)
             {
@@ -953,9 +949,9 @@ namespace Sprocket.Host.SpaceEngineers
             _players.Clear();
             MyAPIGateway.Players.GetPlayers(_players);
 
-            for (var i = 0; i < _players.Count; i++)
+            foreach (var player in _players)
             {
-                if (_players[i].SteamUserId == id)
+                if (player.SteamUserId == id)
                     return true;
             }
 
@@ -977,11 +973,11 @@ namespace Sprocket.Host.SpaceEngineers
             // From a list of its own, because writing a Sprocket finds its hero first, and one that has moved is filed again.
             _saving.Clear();
             _saving.AddRange(_units);
-            for (var i = 0; i < _saving.Count; i++)
+            foreach (var filed in _saving)
             {
-                SprocketUnit unit = _saving[i].Value;
+                SprocketUnit unit = filed.Value;
                 unit.Persist();
-                File(_saving[i].Key, unit);
+                File(filed.Key, unit);
                 if (unit.Lost)
                     continue;
 

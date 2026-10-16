@@ -65,9 +65,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _world = world;
             _rota = rota;
             Live = true;
-            Clock = delegate { return CurrentTick; };
+            Clock = () => CurrentTick;
 
-            _automation.Reshaped += delegate { _reshaped = true; };
+            _automation.Reshaped += () => _reshaped = true;
         }
 
         /// <summary>
@@ -172,8 +172,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             foreach (var pollers in _pollers.Values)
             {
-                for (var i = 0; i < pollers.Count; i++)
-                    pollers[i].Retire();
+                foreach (var poller in pollers)
+                    poller.Retire();
             }
         }
 
@@ -227,7 +227,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Live state for a sequence on one particular one of its system.</summary>
         public SequenceRunner Get(Sequence sequence, SystemInstance instance)
         {
-            return Get(Key(sequence.Id, instance == null ? 0 : instance.Number));
+            return Get(Key(sequence.Id, instance?.Number ?? 0));
         }
 
         SequenceRunner Get(long key)
@@ -278,10 +278,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!_pollers.TryGetValue(trigger, out pollers))
                 return null;
 
-            for (var i = 0; i < pollers.Count; i++)
+            foreach (var poller in pollers)
             {
-                if (pollers[i].Instance == instance)
-                    return pollers[i];
+                if (poller.Instance == instance)
+                    return poller;
             }
 
             return null;
@@ -313,9 +313,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 var pollers = pair.Value;
-                for (var i = 0; i < pollers.Count; i++)
+                foreach (var poller in pollers)
                 {
-                    if (pollers[i].Instance == instance && pollers[i].HasMissingSources)
+                    if (poller.Instance == instance && poller.HasMissingSources)
                         return true;
                 }
             }
@@ -419,7 +419,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (sequence == null)
                 return;
 
-            var key = Key(sequence.Id, instance == null ? 0 : instance.Number);
+            var key = Key(sequence.Id, instance?.Number ?? 0);
 
             SequenceRunner runner;
             if (_runners.TryGetValue(key, out runner))
@@ -501,7 +501,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var owner = system;
                         var one = instances[n];
                         var caller = sequences[q].Number;
-                        runner.Calls = delegate(int number, bool stops)
+                        runner.Calls = (number, stops) =>
                         {
                             var called = owner.FindSequence(number);
                             if (called == null)
@@ -529,10 +529,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _stale.Add(pair.Key);
             }
 
-            for (var i = 0; i < _stale.Count; i++)
+            foreach (var staleKey in _stale)
             {
-                Forget(_runners[_stale[i]]);
-                _runners.Remove(_stale[i]);
+                Forget(_runners[staleKey]);
+                _runners.Remove(staleKey);
             }
         }
 
@@ -544,10 +544,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         RunMemory Remembered(AutomationSystem system, int instance, int sequence)
         {
             var runs = _automation.Memory.Runs;
-            for (var i = 0; i < runs.Count; i++)
+            foreach (var run in runs)
             {
-                if (runs[i].System == system.Identity && runs[i].Instance == instance && runs[i].Sequence == sequence)
-                    return runs[i];
+                if (run.System == system.Identity && run.Instance == instance && run.Sequence == sequence)
+                    return run;
             }
 
             var made = new RunMemory { System = system.Identity, Instance = instance, Sequence = sequence };
@@ -563,10 +563,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         WatchMemory Watched(AutomationSystem system, int instance, int trigger)
         {
             var watches = _automation.Memory.Watches;
-            for (var i = 0; i < watches.Count; i++)
+            foreach (var watch in watches)
             {
-                if (watches[i].System == system.Identity && watches[i].Instance == instance && watches[i].Trigger == trigger)
-                    return watches[i];
+                if (watch.System == system.Identity && watch.Instance == instance && watch.Trigger == trigger)
+                    return watch;
             }
 
             var made = new WatchMemory { System = system.Identity, Instance = instance, Trigger = trigger };
@@ -756,8 +756,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _goneTriggers.Add(pair.Key);
             }
 
-            for (var i = 0; i < _goneTriggers.Count; i++)
-                _pollers.Remove(_goneTriggers[i]);
+            foreach (var gone in _goneTriggers)
+                _pollers.Remove(gone);
 
             _stale.Clear();
             foreach (var pair in _acting)
@@ -766,10 +766,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _stale.Add(pair.Key);
             }
 
-            for (var i = 0; i < _stale.Count; i++)
+            foreach (var staleKey in _stale)
             {
-                Forget(_acting[_stale[i]]);
-                _acting.Remove(_stale[i]);
+                Forget(_acting[staleKey]);
+                _acting.Remove(staleKey);
             }
 
             // A trigger that has gone takes what ran its act with it; one put back by a step back is given another.
@@ -780,8 +780,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     _goneTriggers.Add(trigger);
             }
 
-            for (var i = 0; i < _goneTriggers.Count; i++)
-                _alone.Remove(_goneTriggers[i]);
+            foreach (var gone in _goneTriggers)
+                _alone.Remove(gone);
         }
 
         /// <summary>The poller for <paramref name="trigger" />, at <paramref name="place" /> among its system's, on <paramref name="instance" />, made where there is none.</summary>

@@ -196,9 +196,9 @@ namespace Sprocket.Sim
             // Opened to be looked at unless told otherwise. Most runs are a check somebody will read as
             // a screenshot instead, and those have no business taking the keyboard off whoever is
             // working - so they say so, and can be called forward later with --raise.
-            for (int i = 0; i < args.Length; i++)
+            foreach (var arg in args)
             {
-                if (args[i] == "--quiet" || args[i] == "--background")
+                if (arg == "--quiet" || arg == "--background")
                     MainWindow.OpensQuietly = true;
             }
 
@@ -222,7 +222,7 @@ namespace Sprocket.Sim
         static string Text(string[] args, string name)
         {
             var given = Array.Find(args, a => a.StartsWith(name, StringComparison.Ordinal));
-            return given == null ? null : given.Substring(name.Length);
+            return given?.Substring(name.Length);
         }
 
         /// <summary>The number an argument starting <paramref name="name" /> gives, or zero where none does.</summary>

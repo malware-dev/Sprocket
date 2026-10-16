@@ -247,9 +247,9 @@ namespace Lumel.Text
             var line = FontSize;
             var y = ContentBounds.Y;
 
-            for (var i = 0; i < _lines.Count; i++)
+            foreach (var text in _lines)
             {
-                g.DrawText(Font, _lines[i], new Vector2(Left(g, _lines[i]), y), FontSize, Color);
+                g.DrawText(Font, text, new Vector2(Left(g, text), y), FontSize, Color);
                 y += line;
             }
         }
