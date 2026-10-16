@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    partial class ColorField
+    partial class ColorPicker
     {
         Flow _palette;
         Slider _hue;

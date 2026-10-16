@@ -168,6 +168,56 @@ public class ScreenChoiceTests
         Assert.Equal("Back", screen.Editor.Facets()!.Name);
     }
 
+    /// <summary>Setting a screen up asks for its content first, and then only for what that content takes, every color headed.</summary>
+    [Fact]
+    public void SettingUpAsksForWhatItsContentTakes()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.PressChoice("set up screen");
+        screen.Run(2);
+        var form = screen.Editor.Pick().Arguments!.Form;
+
+        Assert.Equal(new[] { "content" }, Asked(screen));
+
+        Press(form, "app");
+        screen.Run(2);
+        Assert.Equal(new[] { "content", "app", "app color", "app background color" }, Asked(screen));
+
+        Press(form, "text and images");
+        screen.Run(2);
+        Assert.Contains("text color", Asked(screen));
+        Assert.Contains("font size", Asked(screen));
+        Assert.DoesNotContain("app color", Asked(screen));
+    }
+
+    /// <summary>What a setting hidden by the content holds is left out of the step, so it is left as it is.</summary>
+    [Fact]
+    public void ASettingTheContentHidesIsLeftOut()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.PressChoice("set up screen");
+        screen.Run(2);
+        var form = screen.Editor.Pick().Arguments!.Form;
+
+        Press(form, "app");
+        form.Fields[1].Text = "TSS_Weather";
+        Press(form, "text and images");
+        screen.Run(2);
+
+        Assert.DoesNotContain("TSS_Weather", form.Answer);
+    }
+
+    /// <summary>Presses the word <paramref name="word" /> of the form's first value, its content, as a person does.</summary>
+    static void Press(FieldSet form, string word) =>
+        ((Lumel.Element)form.Fields[0]).Within().OfType<Lumel.Controls.Button>().First(button => button.Text == word).Command!.Execute();
+
+    /// <summary>The labels the set up form shows, in the order they stand.</summary>
+    static string[] Asked(Screen screen)
+    {
+        var form = screen.Editor.Pick().Arguments!.Form;
+        return form.Rows.Cast<Lumel.Layout.FormRow>().Where(row => row.Field.IsVisible && row.Label is Lumel.Text.Label).Select(row => ((Lumel.Text.Label)row.Label!).Text).ToArray();
+    }
+
     /// <summary>A text panel has one screen, so it opens no drop box, and its step's slot holds that screen.</summary>
     [Fact]
     public void ATextPanelsOneScreenIsChosenWithoutAsking()

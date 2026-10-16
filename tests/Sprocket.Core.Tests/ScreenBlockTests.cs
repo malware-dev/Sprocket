@@ -1,3 +1,4 @@
+using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
@@ -14,6 +15,28 @@ namespace Sprocket.Tests;
 /// <summary>What a text panel shows and an emotion controller's face, and a camera's viewer.</summary>
 public class ScreenBlockTests
 {
+    /// <summary>A value of a few names a person reads by other words shows those words, and the program keeps the names.</summary>
+    [Fact]
+    public void AValueReadByOtherWordsKeepsItsNames()
+    {
+        var kind = new EntityKind("Test/Screen", "Screen");
+        kind.WithValue("app", "app", Being.OneOf<IMyTerminalBlock>(new[] { "TSS_ClockAnalog", "TSS_Weather" }, _ => 0)
+            .Saying(new[] { "Clock Analog", "Weather" }));
+        var fields = new List<Field>();
+        kind.FindAction("app", Nature.Value)!.Fields(fields);
+
+        var field = Assert.Single(fields);
+        Assert.Equal(new[] { "Clock Analog", "Weather" }, field.Words);
+        Assert.Equal(new[] { "TSS_ClockAnalog", "TSS_Weather" }, field.Means);
+    }
+
+    /// <summary>An app the game names none for is read by its id.</summary>
+    [Fact]
+    public void AnAppTheGameNamesNoneForIsItsId()
+    {
+        Assert.Equal("TSS_Unknown", ScreenType.AppName("TSS_Unknown"));
+    }
+
     /// <summary>Showing an image replaces what the panel shows with it, and has it show text and images.</summary>
     [Fact]
     public void ShowingAnImageReplacesTheImagesShown()

@@ -1,63 +1,47 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
-using Sprocket.Host.SpaceEngineers.World;
-using VRageMath;
+using Lumel.Text;
+using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.World;
+using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A color, given from the player's own colors, by hue, saturation and value, or by writing it.</summary>
+    /// <summary>A color on one line: a swatch of it and its code, the picker hanging open under it when pressed.</summary>
     /// <remarks>
-    /// Laid out as the game's own color picker is: sliders lettered H, S and V, only hue with a track drawn, and the written
-    /// color under them. Every way of giving it moves the others with it. The elements it is drawn with are declared in
-    /// <c>ColorField.View.cs</c>, and nothing else is.
+    /// One line, so a form asking for several colors beside other values reads as one form, each color under its own
+    /// label. The picker is a <see cref="ColorPicker" />, made once with the field and opened over the screen. A color left
+    /// empty shows its swatch's edge alone.
     /// </remarks>
-    public partial class ColorField : VStack, IField
+    public class ColorField : HStack, IField
     {
-        Hsv _color = Hsv.Of(0f, 0f, 1f);
-        byte _alpha = 255;
-        bool _chose;
+        readonly ColorPicker _picker;
+        readonly Swatch _swatch;
+        readonly Label _code;
+        readonly Popup _popup;
 
-        /// <summary>A field resting on white with no color given, offering the player's <paramref name="colors" />, whose Enter carries out <paramref name="submit" />, its notes in <paramref name="texts" />.</summary>
+        /// <summary>A field holding no color, its picker offering the player's <paramref name="colors" />, Enter in it carrying out <paramref name="submit" />, its notes in <paramref name="texts" />.</summary>
         public ColorField(IList<Hsv> colors, ICommand submit, Texts texts)
         {
-            CreateView();
-            _written.Submit = submit;
+            Spacing = 8f;
+            Style = Styles.ListLine;
+            Focusable = true;
 
-            _hue.Tip = Tip.For(null, texts.ColorHue);
-            _saturation.Tip = Tip.For(null, texts.ColorSaturation);
-            _value.Tip = Tip.For(null, texts.ColorBrightness);
-            _written.Tip = Tip.For(null, texts.ColorCodeAbout);
+            _picker = new ColorPicker(colors, submit, texts) { Placement = Fixed.Wide(420f) };
+            _picker.Edited += Changed;
 
-            for (var i = 0; i < colors.Count; i++)
-            {
-                var color = colors[i];
-                _palette.Children.Add(new Swatch
-                {
-                    Background = color.Colour,
-                    Edge = Palette.Chrome,
-                    HighlightEdge = Palette.Ink,
-                    Placement = Fixed.Size(32f, 28f),
-                    Command = new Relay(() => Give(color))
-                });
-            }
+            Children.Add(new Swatch { Edge = Palette.Line, Placement = Fixed.Size(28f, 20f) }.As(out _swatch));
+            Children.Add(new Label { Style = Styles.ListWord }.As(out _code));
+            Children.Add(ListField.Fold());
 
-            _palette.IsVisible = colors.Count != 0;
-
-            _hue.Moved += () => Give(_color.Hued(_hue.Fraction));
-            _saturation.Moved += () => Give(_color.Saturated(_saturation.Fraction));
-            _value.Moved += () => Give(_color.Valued(_value.Fraction));
-            _written.Edited += () =>
-            {
-                Reread();
-                Raise();
-            };
-
+            // Hung as every menu is; in a box of its own so it is as wide as the picker and no wider.
+            _popup = new Popup { Style = Styles.Menu, Anchor = this, Gap = 4f, Content = new HStack { Children = { _picker } } };
+            Command = new Relay(() => _popup.Toggle());
             Shown();
         }
 
@@ -67,100 +51,51 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public string Text
         {
-            get { return Written; }
+            get { return _picker.Text; }
             set
             {
-                _written.Text = value ?? "";
-                Reread();
+                _picker.Text = value;
+                Shown();
             }
         }
 
         /// <inheritdoc />
         public bool IsWrong
         {
-            set { _written.Style = value ? Styles.ValueWrong : Styles.Value; }
+            set
+            {
+                Style = value ? Styles.ListLineWrong : Styles.ListLine;
+                _picker.IsWrong = value;
+            }
         }
 
         /// <inheritdoc />
-        public Element Keyboard => _written;
+        public Element Keyboard => this;
 
-        /// <summary>What is written, with the hash put in front where it was left off and the rest reads as a color.</summary>
-        string Written
-        {
-            get
-            {
-                var text = _written.Text.Trim();
-                Color said;
-                byte alpha;
-                return text.Length > 0 && text[0] != '#' && Channels.Colour("#" + text, out said, out alpha) ? "#" + text : text;
-            }
-        }
+        /// <summary>The picker hung open under it, made with it.</summary>
+        public ColorPicker Picker => _picker;
 
-        /// <summary>The color as the language writes one.</summary>
-        string Spelling
-        {
-            get
-            {
-                var rgb = _color.Colour;
-                var said = "#" + Hex(rgb.R) + Hex(rgb.G) + Hex(rgb.B);
-                return _alpha == 255 ? said : said + Hex(_alpha);
-            }
-        }
+        /// <summary>Whether the picker is hanging open.</summary>
+        public bool IsOpen => _popup.IsOpen;
 
-        /// <summary>Takes <paramref name="color" /> as the one given, moving the sliders, the swatch and the written color with it.</summary>
-        void Give(Hsv color)
+        void Changed()
         {
-            _color = color;
-            _chose = true;
             Shown();
-            _written.Text = Spelling;
-            Raise();
-        }
 
-        /// <summary>Brings the rest into line with what is written, leaving a color that cannot be read yet alone.</summary>
-        void Reread()
-        {
-            var written = Written;
-            if (written == Spelling && _chose)
-                return;
-
-            byte alpha;
-            Color said;
-            if (!Channels.Colour(written, out said, out alpha))
-            {
-                if (string.IsNullOrEmpty(written))
-                {
-                    _chose = false;
-                    Shown();
-                }
-
-                return;
-            }
-
-            _alpha = alpha;
-            _color = Hsv.Of(said);
-            _chose = true;
-            Shown();
-        }
-
-        void Shown()
-        {
-            _hue.Fraction = _color.Hue;
-            _saturation.Fraction = _color.Saturation;
-            _value.Fraction = _color.Value;
-            _chosen.Background = _chose ? _color.Colour : Palette.Page;
-        }
-
-        void Raise()
-        {
             var edited = Edited;
             if (edited != null)
                 edited();
         }
 
-        static string Hex(byte part)
+        /// <summary>Shows the color it holds, its swatch filled and its code beside it, or the swatch's edge alone where none is.</summary>
+        void Shown()
         {
-            return part.ToString("X2", CultureInfo.InvariantCulture);
+            _code.Text = _picker.Text;
+            _code.IsVisible = _picker.Text.Length > 0;
+
+            Color color;
+            byte alpha;
+            _swatch.Background = Channels.Colour(_picker.Text, out color, out alpha) ? color : Palette.None;
         }
     }
 }

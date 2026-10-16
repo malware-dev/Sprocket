@@ -31,6 +31,7 @@ public sealed class TextScreen : Fitting
             .Gives("ContentType", () => Content)
             .Takes("ContentType", value => Content = (ContentType)value)
             .Gives("Script", () => App)
+            .Does("GetScripts", args => ((List<string>)args[0]).AddRange(Apps))
             .Done();
 
         Fit(Pretend.To<IMyTextPanel>()

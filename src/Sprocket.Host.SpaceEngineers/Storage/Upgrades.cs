@@ -187,6 +187,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var screen = arguments[0].Text;
             arguments.RemoveAt(0);
+
+            // Setting a screen up asks which app it runs since, after its content: left empty, so the app is left as it is.
+            if (member == ScreenType.SetUp)
+                arguments.Insert(1, Literal.Of(""));
+
             if (!system.IsBlueprint)
                 return true;
 

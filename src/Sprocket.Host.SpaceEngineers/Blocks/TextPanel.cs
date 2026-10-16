@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return apps.ToArray();
         }
 
-        /// <summary>The app the screen runs, as one of <paramref name="apps" />, which a step can choose.</summary>
+        /// <summary>The app the screen runs, as one of <paramref name="apps" />, which a step can choose, each read by the name the game shows for it.</summary>
         /// <remarks>
         /// A look finds the app among the ids, which is a pass over the list; it is made only where an <c>if</c> reads the
         /// value or a <c>when</c> watches it, on its cadence. No app, or one the list does not hold, is none of the names.
@@ -106,8 +106,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         static Being Running(string[] apps)
         {
+            var named = new string[apps.Length];
+            for (var i = 0; i < apps.Length; i++)
+                named[i] = ScreenType.AppName(apps[i]);
+
             return Being.OneOf<IMyTextPanel>(apps, panel => Array.IndexOf(apps, panel.Script))
-                .Writing<IMyTextPanel>((panel, value) => panel.Script = apps[(int)value.Whole]);
+                .Writing<IMyTextPanel>((panel, value) => panel.Script = apps[(int)value.Whole])
+                .Saying(named);
         }
 
         /// <summary>Replaces the images the screen shows with the one a step chose, and has it show text and images.</summary>

@@ -5,10 +5,10 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>The color field takes a code written with or without its hash, and always gives it back as the script writes one.</summary>
-public class ColorFieldTests
+/// <summary>The color picker takes a code written with or without its hash, and always shows it as the script writes one.</summary>
+public class ColorPickerTests
 {
-    static ColorField Field() => new ColorField(new List<Hsv>(), new Relay(() => { }), new Texts());
+    static ColorPicker Field() => new ColorPicker(new List<Hsv>(), new Relay(() => { }), new Texts());
 
     /// <summary>A code written without the hash is taken, and given back with it.</summary>
     [Theory]

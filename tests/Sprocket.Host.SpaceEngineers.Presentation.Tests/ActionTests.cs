@@ -491,18 +491,24 @@ public class ActionTests
     [Fact]
     public void AColourIsChosenByPressingOne()
     {
-        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-            + "press step press task 200 485 press color").Split(' '));
+        var screen = WithASequence();
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Cockpit Light");
+        screen.Run(2);
+        screen.Editor.PressChoice("color");
+        screen.Run(2);
 
+        // The field is one line; pressing it hangs the picker open under it.
+        var field = Assert.IsType<ColorField>(screen.Editor.Pick().Arguments!.Form.Fields[0]);
+        field.Command!.Execute();
+        screen.Run(2);
+        Assert.True(field.IsOpen);
 
         // The third of the fourteen. They are the harness's stand-in for a player who has painted.
-        screen.Do("1064", "198");
+        field.Picker.Within().OfType<Swatch>().ElementAt(2).Command!.Execute();
+        screen.Run(2);
         Assert.Equal("#386285", Given(screen));
-
-        // And the far left of the hue track is red, at whatever saturation and value were already
-        // chosen: one slider owns one axis and leaves the other two where they stood.
-        screen.Do("1000", "265");
-        Assert.Equal("#853838", Given(screen));
+        Assert.True(screen.Shows("#386285"), "the field does not show the color chosen");
     }
 
     /// <summary>

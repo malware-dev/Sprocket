@@ -157,7 +157,7 @@ public class ScreensTests
     {
         var (ship, board) = Built();
         var empty = Literal.Of("");
-        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, empty, Literal.Colour(255, 0, 0, 255),
+        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, empty, empty, Literal.Colour(255, 0, 0, 255),
             empty, empty, Literal.Of(2.5), Literal.Of("center"), empty, empty, empty, empty, empty);
 
         Run(ship, runner, sequence, installation);
@@ -185,6 +185,22 @@ public class ScreensTests
         Run(ship, runner, sequence, installation);
         Assert.Equal("", board.Faces[0].Text);
         Assert.Equal("", board.Faces[1].Text);
+    }
+
+    /// <summary>Setting up a screen to run an app sets which app, on the screen its slot holds.</summary>
+    [Fact]
+    public void SettingUpAScreenSetsItsApp()
+    {
+        var (ship, board) = Built();
+        var empty = Literal.Of("");
+        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, Literal.Of("app"), Literal.Of("TSS_Weather"),
+            empty, empty, empty, empty, empty, empty, empty, empty, empty, empty);
+
+        Run(ship, runner, sequence, installation);
+
+        Assert.Equal(ContentType.SCRIPT, board.Faces[1].Content);
+        Assert.Equal("TSS_Weather", board.Faces[1].App);
+        Assert.Equal("", board.Faces[0].App);
     }
 
     /// <summary>A screen's setting is read off the screen its slot holds.</summary>

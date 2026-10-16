@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Sprocket.Sim.Fakes;
 using VRage.Game.GUI.TextPanel;
 using VRageMath;
@@ -22,6 +23,8 @@ public sealed class Face
             .Gives("ContentType", () => Content)
             .Takes("ContentType", value => Content = (ContentType)value)
             .Gives("Script", () => App)
+            .Takes("Script", value => App = (string)value)
+            .Does("GetScripts", arguments => ((List<string>)arguments[0]).AddRange(Apps))
             .Gives("FontSize", () => FontSize)
             .Takes("FontSize", value => FontSize = (float)value)
             .Gives("FontColor", () => FontColor)
@@ -39,6 +42,9 @@ public sealed class Face
 
     /// <summary>What it is set to show.</summary>
     public ContentType Content { get; set; }
+
+    /// <summary>The apps it can run, by the game's ids.</summary>
+    public List<string> Apps { get; } = ["TSS_ClockAnalog", "TSS_Weather"];
 
     /// <summary>The app it runs while it is set to show one, by the game's id for it.</summary>
     public string App { get; set; } = "";

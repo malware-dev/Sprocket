@@ -20,6 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<Field> _parameters = new List<Field>();
 
         Action<IMyTerminalBlock, Literal> _write;
+        IReadOnlyList<string> _said;
 
         /// <summary>What a function is given, one field per option in the order they are written; empty for a value.</summary>
         public IReadOnlyList<Field> Parameters => _parameters;
@@ -32,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The names a "one of" value is one of, in order; empty for any other kind.</summary>
         public abstract IReadOnlyList<string> Names { get; }
+
+        /// <summary>The words a person reads for <see cref="Names" />, one each in order, or null where each name is read as it is written.</summary>
+        public IReadOnlyList<string> Said => _said;
 
         /// <summary>Whether a reading needs a <see cref="Recall" /> of its own for each block it reads.</summary>
         public abstract bool Remembers { get; }
@@ -49,6 +53,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Being Taking(params Field[] parameters)
         {
             _parameters.AddRange(parameters);
+            return this;
+        }
+
+        /// <summary>Says a person reads <paramref name="words" /> for the names, one each in order, where the program names things by id.</summary>
+        /// <remarks>Part of making it, as <see cref="Taking" /> is. A screen's app is written by the game's id, and read by the name the game shows for it.</remarks>
+        public Being Saying(IReadOnlyList<string> words)
+        {
+            _said = words;
             return this;
         }
 

@@ -638,7 +638,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     for (var i = 0; i < words.Length; i++)
                     {
                         means[i] = being.Names[i];
-                        words[i] = means[i].Replace('-', ' ');
+                        words[i] = being.Said != null && i < being.Said.Count ? being.Said[i] : means[i].Replace('-', ' ');
                     }
 
                     var among = Field.Among(named, words, means);

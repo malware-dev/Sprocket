@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     // declared them: the other half of showing three numbers as one color.
                     if (_wanted[i].Edits == Editor.Colour)
                     {
-                        Channels.Spell(_fields[i].Text, _wanted[i].Covers, _parts);
+                        Channels.Spell(Asked(i) ? _fields[i].Text : "", _wanted[i].Covers, _parts);
                         while (_texts.Count < _parts.Count)
                             _texts.Add(false);
 
@@ -104,8 +104,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     // What the program holds for the word chosen, which is not the word wherever a block shows one
                     // thing and is told another. A field left empty is written as what it starts with, because a member
                     // is given every argument.
-                    var text = _fields[i].Text;
-                    if (string.IsNullOrEmpty(text) && _wanted[i].Default != null)
+                    // One not asked for is left out, so what it sets is left as it is.
+                    var text = Asked(i) ? _fields[i].Text : "";
+                    if (string.IsNullOrEmpty(text) && Asked(i) && _wanted[i].Default != null)
                         text = _wanted[i].Default;
 
                     _parts.Add(_wanted[i].Meaning(text));
@@ -167,7 +168,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (string.IsNullOrEmpty(_fields[i].Text) && (_wanted[i].Needed || _wanted[i].Default == null))
+                    if (Asked(i) && string.IsNullOrEmpty(_fields[i].Text) && (_wanted[i].Needed || _wanted[i].Default == null))
                         return true;
                 }
 
@@ -187,7 +188,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 for (var i = 0; i < _fields.Count; i++)
                 {
                     var said = _fields[i].Text;
-                    if (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0)
+                    if (Asked(i) && (said.Length == 0 || _wanted[i].Refuses(_language, Called(i), said).Length > 0))
                         return false;
                 }
 
@@ -200,9 +201,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             get
             {
-                foreach (var field in _fields)
+                for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (!string.IsNullOrEmpty(field.Text))
+                    if (Asked(i) && !string.IsNullOrEmpty(_fields[i].Text))
                         return true;
                 }
 
@@ -251,6 +252,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
                 Lay(i, field);
             }
+
+            Follow();
+        }
+
+        /// <summary>Whether the value at <paramref name="at" /> is asked for: always, or while the value it follows holds one of its words.</summary>
+        bool Asked(int at)
+        {
+            var with = _wanted[at].AskedWith;
+            if (string.IsNullOrEmpty(with))
+                return true;
+
+            for (var i = 0; i < _wanted.Count; i++)
+            {
+                if (_wanted[i].Name == with)
+                    return Asked(i) && _wanted[at].AskedFor != null && _wanted[at].AskedFor.Contains(_fields[i].Text);
+            }
+
+            return false;
+        }
+
+        /// <summary>Shows each value that is asked for as things stand, and hides the rest, keeping what they hold.</summary>
+        void Follow()
+        {
+            for (var i = 0; i < _fields.Count; i++)
+                ((Element)_fields[i]).IsVisible = Asked(i);
         }
 
         /// <summary>Says the values it holds are what the block holds now, offered rather than given, until somebody changes one.</summary>
@@ -289,7 +315,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             for (var i = 0; i < _fields.Count; i++)
             {
                 var said = _fields[i].Text;
-                if (said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
+                if (!Asked(i) || said.Length > 0 && _wanted[i].Refuses(_language, Called(i), said).Length == 0)
                     continue;
 
                 first = i;
@@ -323,12 +349,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             var blank = _judged && !Filled;
             for (var i = 0; i < _fields.Count; i++)
-                _fields[i].IsWrong = Refuses(i).Length > 0 || blank && i == 0;
+                _fields[i].IsWrong = Asked(i) && (Refuses(i).Length > 0 || blank && i == 0);
         }
 
         void Changed()
         {
             _offered = false;
+            Follow();
             for (var i = 0; i < _fields.Count; i++)
             {
                 // A value is seen once somebody has given it anything.
@@ -387,7 +414,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             var element = (Element)field;
             var color = _wanted[at].Edits == Editor.Colour;
 
-            var label = color ? "" : Label(at);
+            var label = Label(at);
             var about = _wanted[at].About;
             if (!string.IsNullOrEmpty(about))
                 element.Tip = Tip.For(element.Tip, about);

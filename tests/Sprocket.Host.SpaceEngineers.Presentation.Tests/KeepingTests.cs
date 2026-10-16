@@ -16,9 +16,6 @@ public class KeepingTests
     const string ARadiusStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
         + "press step press task 200 485 press radius 1348 232 type 5 enter";
 
-    const string AColourStep = "60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
-        + "press step press task 200 485 press color 1049 374 type #FF8800 enter";
-
     const string Again = "208 182";
 
     const string Done = "1394 72";
@@ -57,7 +54,20 @@ public class KeepingTests
     [Fact]
     public void AndOnAColourItOpensOnTheColour()
     {
-        var screen = Screen.Fresh((AColourStep + " " + Again).Split(' '));
+        var screen = Screen.Fresh();
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.PressAdd("task");
+        screen.Editor.PressBlock("Cockpit Light");
+        screen.Run(2);
+        screen.Editor.PressChoice("color");
+        screen.Run(2);
+        screen.Editor.Pick().Arguments!.Form.Fields[0].Text = "#FF8800";
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        screen.Editor.PressStepSlot(0, 1);
+        screen.Run(2);
 
         Assert.True(screen.Shows("#FF8800"), "the picker opened on no colour");
     }

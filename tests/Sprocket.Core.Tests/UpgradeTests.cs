@@ -113,6 +113,26 @@ public class UpgradeTests
         Assert.Equal(new[] { Literal.Of("Docked") }, show.Arguments);
     }
 
+    /// <summary>Setting a screen up in alpha 15 is asked which app it runs since, after its content, which is left empty.</summary>
+    [Fact]
+    public void AnAlpha15SetUpLeavesItsAppAsItIs()
+    {
+        var ship = new Rigged();
+        ship.Rig.Weld(new Billboard(1, "Billboard"));
+        ship.Tick();
+        var text = Screened("Back").Replace("ext.'show-text'(\"Back\", \"Docked\")",
+            "ext.'set-up-screen'(\"Back\", \"text and images\", #FF0000, \"\", \"\", 2.5, \"\", \"\", \"\", \"\", \"\", \"\")");
+        var program = new Automation();
+
+        Assert.Equal("", ProgramText.Load(text, program, ship.World.Values, out _, ship.World));
+
+        var setUp = (Act)program.Systems[0].Sequences[0].Steps[0];
+        Assert.Equal(12, setUp.Arguments.Count);
+        Assert.Equal("text and images", setUp.Arguments[0].Text);
+        Assert.Equal("", setUp.Arguments[1].Text);
+        Assert.Equal(ValueKind.Color, setUp.Arguments[2].Kind);
+    }
+
     /// <summary>A screen no block has by that name leaves the installation's slot of screens empty, to be filled on its panel.</summary>
     [Fact]
     public void AnAlpha15ScreenNoBlockHasIsLeftToFill()

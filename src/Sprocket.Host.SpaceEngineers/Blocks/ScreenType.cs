@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
+using VRage;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.GUI.TextPanel;
@@ -89,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             kind.Hiding(Settings)
                 .WithAction(ShowText, "show text", Doing.Of<IMyTextSurfaceProvider, Shown>(Shown.Read, Show), Lines())
                 .In(Category.Screen).Of(this)
-                .WithAction(SetUp, "set up screen", Doing.Of<IMyTextSurfaceProvider, Look>(Look.Read, Apply), Asked(Fonts(screens)))
+                .WithAction(SetUp, "set up screen", Doing.Of<IMyTextSurfaceProvider, Look>(Look.Read, Apply), Asked(Fonts(screens), Apps(screens)))
                 .In(Category.Screen).Of(this);
 
             Value(kind, "content", Being.OneOf<IMyTextSurfaceProvider, Picked>(Contents, picked,
@@ -147,6 +149,28 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return fonts;
         }
 
+        /// <summary>The apps a screen of <paramref name="screens" /> can run, by the game's ids, the ones mods add among them.</summary>
+        static IList<string> Apps(IMyTextSurfaceProvider screens)
+        {
+            var apps = new List<string>();
+            var surface = screens.GetSurface(0);
+            if (surface != null)
+                surface.GetScripts(apps);
+
+            return apps;
+        }
+
+        /// <summary>What the game calls the app <paramref name="id" /> in its own lists, or the id where it names none.</summary>
+        /// <remarks>The game's list of apps holds the ones mods add as well, each with the name its terminal shows.</remarks>
+        public static string AppName(string id)
+        {
+            var apps = MyTextSurfaceScriptFactory.Instance;
+            MyTextSurfaceScriptFactory.ScriptInfo app;
+            return apps != null && id != null && apps.Scripts.TryGetValue(id, out app) && MyTexts.Exists(app.DisplayName)
+                ? MyTexts.GetString(app.DisplayName)
+                : id;
+        }
+
         /// <summary>The text to show.</summary>
         static Field Lines()
         {
@@ -159,19 +183,37 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Each setting of the screen to set up, every one left as it is where it is left empty.</summary>
-        static Field[] Asked(IList<string> fonts)
+        static Field[] Asked(IList<string> fonts, IList<string> apps)
         {
             var font = fonts.Count > 0 ? Field.Among("font", fonts, fonts) : Field.Called("font");
             font.Entry = Entry.Text;
+            var named = new List<string>();
+            foreach (var one in apps)
+                named.Add(AppName(one));
 
+            var app = apps.Count > 0 ? Field.Among("app", named, apps) : Field.Called("app");
+            app.Entry = Entry.Text;
+
+            // Content first, and each setting asked for while the content it applies to is chosen, as the terminal shows it.
             return new[]
             {
-                Field.Among("content", Contents, Contents), Field.Holding("text color", Editor.Colour, 1),
-                Field.Holding("background color", Editor.Colour, 1), font, Decimal("font size", "0.1", "10"),
-                Field.Among("alignment", Alignments, Alignments), Decimal("padding", "0", "50"),
-                Field.Holding("app color", Editor.Colour, 1), Field.Holding("app background color", Editor.Colour, 1),
-                Decimal("image interval", "0", "30"), Switch("keep aspect ratio")
+                Field.Among("content", Contents, Contents), Showing(app, Contents[2]),
+                Showing(Field.Holding("text color", Editor.Colour, 1), Contents[1]),
+                Showing(Field.Holding("background color", Editor.Colour, 1), Contents[1]), Showing(font, Contents[1]),
+                Showing(Decimal("font size", "0.1", "10"), Contents[1]),
+                Showing(Field.Among("alignment", Alignments, Alignments), Contents[1]), Showing(Decimal("padding", "0", "50"), Contents[1]),
+                Showing(Field.Holding("app color", Editor.Colour, 1), Contents[2]),
+                Showing(Field.Holding("app background color", Editor.Colour, 1), Contents[2]),
+                Showing(Decimal("image interval", "0", "30"), Contents[1]), Showing(Switch("keep aspect ratio"), Contents[1])
             };
+        }
+
+        /// <summary><paramref name="field" />, asked for while the screen's content is set to <paramref name="content" />.</summary>
+        static Field Showing(Field field, string content)
+        {
+            field.AskedWith = "content";
+            field.AskedFor = new[] { content };
+            return field;
         }
 
         /// <summary>A number with a fraction, called <paramref name="name" />, between <paramref name="least" /> and <paramref name="most" />.</summary>
@@ -222,6 +264,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 surface.ContentType = ContentTypes[look.Content];
             if (look.TextColor.HasValue)
                 surface.FontColor = look.TextColor.Value;
+            if (look.App != null)
+                surface.Script = look.App;
             if (look.BackgroundColor.HasValue)
                 surface.BackgroundColor = look.BackgroundColor.Value;
             if (look.Font != null)
@@ -285,6 +329,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             /// <summary>Where what it shows is among <see cref="Contents" />, or -1 to leave it.</summary>
             public int Content = -1;
 
+            /// <summary>The app it runs, by the game's id for it, or null to leave it.</summary>
+            public string App;
+
             /// <summary>The color of its text, or null to leave it.</summary>
             public Color? TextColor;
 
@@ -320,17 +367,18 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             {
                 var look = new Look { Which = Picked.Read(arguments) };
                 look.Content = Chosen(arguments, 1, Contents);
-                look.TextColor = Colored(arguments, 2);
-                look.BackgroundColor = Colored(arguments, 3);
-                look.Font = Given(arguments, 4) ? arguments[4].Text : null;
-                look.FontSize = Number(arguments, 5);
-                look.Alignment = Chosen(arguments, 6, Alignments);
-                look.Padding = Number(arguments, 7);
-                look.AppColor = Colored(arguments, 8);
-                look.AppBackgroundColor = Colored(arguments, 9);
-                look.Interval = Number(arguments, 10);
-                look.KeepsAspectRatio = Given(arguments, 11) && arguments[11].Kind == ValueKind.Flag
-                    ? arguments[11].Flag
+                look.App = Given(arguments, 2) ? arguments[2].Text : null;
+                look.TextColor = Colored(arguments, 3);
+                look.BackgroundColor = Colored(arguments, 4);
+                look.Font = Given(arguments, 5) ? arguments[5].Text : null;
+                look.FontSize = Number(arguments, 6);
+                look.Alignment = Chosen(arguments, 7, Alignments);
+                look.Padding = Number(arguments, 8);
+                look.AppColor = Colored(arguments, 9);
+                look.AppBackgroundColor = Colored(arguments, 10);
+                look.Interval = Number(arguments, 11);
+                look.KeepsAspectRatio = Given(arguments, 12) && arguments[12].Kind == ValueKind.Flag
+                    ? arguments[12].Flag
                     : (bool?)null;
                 return look;
             }

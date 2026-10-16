@@ -32,6 +32,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>What it is called, or empty to leave it numbered.</summary>
         public string Name;
 
+        /// <summary>The name of the value of the same form whose word decides whether this one is asked for, or null where it always is.</summary>
+        /// <remarks>A screen's text color is asked for while its content is text and images, as the game's terminal shows it.</remarks>
+        public string AskedWith;
+
+        /// <summary>The words of <see cref="AskedWith" /> this one is asked for under.</summary>
+        public IList<string> AskedFor;
+
         /// <summary>The least it may be, or empty where nobody has said.</summary>
         public string Least;
 
