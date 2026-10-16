@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly ICommand _cancel;
         readonly Action _edited;
         readonly List<Part> _parts = new List<Part>();
+        readonly List<HeadingPart> _laid = new List<HeadingPart>();
 
         int _shown;
 
@@ -113,6 +114,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             part.Plate.Tip = Tip.For(part.Plate.Tip, why);
         }
 
+        /// <summary>Whether <paramref name="heading" /> holds the very parts the row was laid out for.</summary>
+        bool Laid(List<HeadingPart> heading)
+        {
+            if (heading.Count != _laid.Count)
+                return false;
+
+            for (var i = 0; i < heading.Count; i++)
+            {
+                if (!ReferenceEquals(heading[i], _laid[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
         static int Shape(List<HeadingPart> heading)
         {
             var shape = heading.Count;
@@ -127,16 +143,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return shape;
         }
 
-        /// <summary>Lays the row out again where the parts, or which of them have words before or after, have changed.</summary>
-        /// <remarks>An arrow joins two parts only where the second has no words of its own to lead with.</remarks>
+        /// <summary>
+        /// Lays the row out again where the heading is another screen's, or the parts, or which of them have words before
+        /// or after, have changed.
+        /// </summary>
+        /// <remarks>
+        /// A page makes its heading's parts anew each time it lays its heading out, and only changes their words after, so
+        /// parts that are not the ones laid out are another heading, whatever its shape. An arrow joins two parts only where
+        /// the second has no words of its own to lead with.
+        /// </remarks>
         void Build(List<HeadingPart> heading)
         {
             var shape = Shape(heading);
-            if (_shape == shape)
+            if (_shape == shape && Laid(heading))
                 return;
 
             _shape = shape;
             _shown = heading.Count;
+            _laid.Clear();
+            _laid.AddRange(heading);
             Children.Clear();
 
             while (_parts.Count < heading.Count)
@@ -150,14 +175,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (i > 0 && !lead)
                     Children.Add(part.Join);
 
+                // The words leading a part come first, and its mark beside its name: "of", then the logic system's mark and name.
+                if (lead)
+                    Children.Add(part.Lead);
+
                 if (!string.IsNullOrEmpty(heading[i].Mark))
                 {
                     part.Mark.Symbol = heading[i].Mark;
                     Children.Add(part.Mark);
                 }
-
-                if (lead)
-                    Children.Add(part.Lead);
 
                 Children.Add(part.Plate);
 

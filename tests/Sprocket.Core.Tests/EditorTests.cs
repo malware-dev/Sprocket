@@ -479,7 +479,7 @@ public class EditorTests
 
         editor.AddInstallation(0);
         ship.Tick();
-        editor.Screen.Heading[0].Renames!("Port airlock");
+        editor.Screen.Heading.Single(part => part.CanRename).Renames!("Port airlock");
         ship.Tick();
 
         editor.GoToRoot();

@@ -68,7 +68,7 @@ public class BlocksetTriggerTests
 
         sim.Editor.AddInstallation(0);
         sim.Tick();
-        sim.Editor.Screen.Heading[0].Renames!("Port airlock");
+        sim.Editor.Screen.Heading.Single(part => part.CanRename).Renames!("Port airlock");
         sim.Editor.GoToRoot();
         sim.Tick();
 

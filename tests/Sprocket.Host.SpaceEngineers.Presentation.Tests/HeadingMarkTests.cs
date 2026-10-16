@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -24,9 +25,9 @@ public class HeadingMarkTests
         Assert.Equal("Airlock", heading[0].Text);
     }
 
-    /// <summary>The installation panel's heading is the installation's mark and name, of the logic system's mark and name.</summary>
+    /// <summary>The installation panel's heading is a path: the logic system's mark and name, then the installation's.</summary>
     [Fact]
-    public void TheInstallationPanelNamesBothByMark()
+    public void TheInstallationPanelReadsAsAPath()
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");
@@ -36,10 +37,42 @@ public class HeadingMarkTests
         sim.Tick();
 
         var heading = sim.Editor.Screen.Heading;
-        Assert.Equal(Symbols.Installation, heading[0].Mark);
-        Assert.Equal("Installation", heading[0].MarkAbout);
-        Assert.Equal(Symbols.LogicSystem, heading[1].Mark);
-        Assert.Equal("Airlock", heading[1].Text);
+        Assert.Equal(Symbols.LogicSystem, heading[0].Mark);
+        Assert.Equal("Airlock", heading[0].Text);
+        Assert.NotNull(heading[0].Opens);
+        Assert.Equal("", heading[0].Lead);
+        Assert.Equal(Symbols.Installation, heading[1].Mark);
+        Assert.Equal("Installation", heading[1].MarkAbout);
+        Assert.True(heading[1].CanRename);
+        Assert.Equal("", heading[1].Lead);
+    }
+
+    /// <summary>A sequence opened from its logic system draws the sequence's mark in its heading, not the logic system's.</summary>
+    /// <remarks>The two headings have the same shape, so the heading keeps its parts from one screen to the next.</remarks>
+    [Fact]
+    public void ASequenceOpenedFromItsLogicSystemDrawsItsOwnMark()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.GoToRoot();
+        screen.Run(2);
+        screen.Editor.PressRow(0);
+        screen.Run(2);
+        Assert.Equal(Symbols.LogicSystem, HeadingMark(screen));
+
+        screen.Editor.PressRow(0);
+        screen.Run(2);
+
+        Assert.IsType<SequencePage>(screen.Editor.Current);
+        Assert.Equal(Symbols.Sequence, HeadingMark(screen));
+    }
+
+    /// <summary>The kind mark drawn highest on the screen, the heading's, which is above every row.</summary>
+    static string HeadingMark(Screen screen)
+    {
+        var kinds = new[] { Symbols.LogicSystem, Symbols.Sequence, Symbols.Installation };
+        return screen.Drawings.Where(drawn => drawn.IsSymbol && kinds.Contains(drawn.Text)).OrderBy(drawn => drawn.At.Y).First().Text;
     }
 
     /// <summary>A sequence's mark says it is a sequence.</summary>

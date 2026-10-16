@@ -617,12 +617,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Heading.Sequence" xml:space="preserve">
     <value>Sekvens</value>
   </data>
-  <data name="Sprocket.Blueprint.FromLead" xml:space="preserve">
-    <value>av</value>
-  </data>
-  <data name="Sprocket.Blueprint.FromAfter" xml:space="preserve">
-    <value></value>
-  </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} gikk tapt.</value>
   </data>

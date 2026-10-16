@@ -810,14 +810,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Sequence</value>
     <comment>Tooltip on the sequence mark that leads a sequence's screen heading, saying the name after it is a sequence.</comment>
   </data>
-  <data name="Sprocket.Blueprint.FromLead" xml:space="preserve">
-    <value>of</value>
-    <comment>In the editor's heading bar on the installation panel, between the installation's name and the name of its logic system, which can be pressed to open the logic system's screen.</comment>
-  </data>
-  <data name="Sprocket.Blueprint.FromAfter" xml:space="preserve">
-    <value></value>
-    <comment>In the editor's heading bar on the installation panel, right after the name of the installation's logic system. Empty in English; for languages that need a word after the name.</comment>
-  </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} was lost.</value>
     <comment>On the installation panel, on a slot whose block is no longer on the construct and that has no other block. {name} is what the lost block was called.</comment>

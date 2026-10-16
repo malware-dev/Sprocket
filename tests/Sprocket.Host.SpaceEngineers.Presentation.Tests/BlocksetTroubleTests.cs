@@ -44,7 +44,7 @@ public class BlocksetTroubleTests
         sim.Editor.RootRows()[0].Opens!.Execute();
         sim.Tick();
 
-        var from = sim.Editor.Screen.Heading[1];
+        var from = sim.Editor.Screen.Heading.Single(part => part.Opens != null);
         Assert.Equal(system.Name, from.Text);
         from.Opens!.Execute();
         sim.Tick();

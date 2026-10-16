@@ -102,6 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Arguments _sayingArguments;
 
         int _renaming = -1;
+        HeadingPart _renamed;
         HeadingPart _namedArrival;
         string _checkedText;
         bool _checkedTaken;
@@ -235,12 +236,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get
             {
-                var parts = _editor.Screen.Heading;
-                if (_renaming < 0 || _renaming >= parts.Count)
+                if (_renaming < 0)
                     return "";
 
                 // Says what to do rather than what is wrong: there is only one cure and it fits in three words.
-                var part = parts[_renaming];
+                var part = _renamed;
                 var text = _title.Box(_renaming).Text;
                 if (part.NameRequired && string.IsNullOrEmpty(text.Trim()))
                     return _editor.Texts.RenameEmpty;
@@ -779,6 +779,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             _renaming = index;
+            _renamed = parts[index];
             _checkedText = null;
             _title.Begin(index, parts[index].Name);
             _input.Focus(_title.Box(index));
@@ -813,7 +814,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_renaming < 0 || Blocked.Length > 0)
                 return;
 
-            var part = _editor.Screen.Heading[_renaming];
+            // The part the name was begun on, which a press that changed the screen has taken out of the heading.
+            var part = _renamed;
             var name = _title.Box(_renaming).Text;
 
             EndRename();
@@ -831,6 +833,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var renamed = _renaming;
             _renaming = -1;
+            _renamed = null;
             _title.End(renamed);
             _seen = -1;
 

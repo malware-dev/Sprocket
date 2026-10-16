@@ -132,7 +132,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Editor.Do(_system, new RenameInstallation(Blockset, Blockset.Name, wanted));
         }
 
-        /// <summary>Names the blueprint after the installation's name, as a part of its own that opens the blueprint's logic system screen.</summary>
+        /// <summary>
+        /// Reads as a path from the logic system to the installation: the logic system first, as a part of its own that opens
+        /// its screen, then the installation's name, the two joined by the heading's arrow.
+        /// </summary>
         public override void Heading(List<HeadingPart> parts)
         {
             base.Heading(parts);
@@ -143,11 +146,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var from = new HeadingPart(_system.Name);
             from.Mark = Symbols.LogicSystem;
             from.MarkAbout = Editor.Texts.HeadingLogicSystem;
-            from.Lead = Editor.Texts.BlueprintFromLead;
-            from.After = Editor.Texts.BlueprintFromAfter;
             from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);
             from.Opens = Editor.Act(Cmd.OpenSystem, () => Editor.Push(new LogicSystemPage(Editor, _system)));
-            parts.Add(from);
+            parts.Insert(0, from);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>The installation is the second part, after the logic system it is of.</remarks>
+        public override void RefreshHeading(List<HeadingPart> parts)
+        {
+            if (parts.Count < 2)
+            {
+                base.RefreshHeading(parts);
+                return;
+            }
+
+            parts[0].Text = _system.Name;
+            parts[1].Text = Title;
+            parts[1].Name = CustomName;
         }
 
         /// <inheritdoc />
