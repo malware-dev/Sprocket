@@ -1,5 +1,6 @@
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Sim.Machine;
 using Lumel.Text;
@@ -75,6 +76,36 @@ public class BlocksetTroubleTests
 
         Assert.IsType<SequencePage>(sim.Editor.Current);
         Assert.Same(system.Instances[0], sim.Editor.StandIn(system));
+    }
+
+    /// <summary>A slot that has lost one of its blocks says so on the installation panel, though another block still fills it.</summary>
+    [Fact]
+    public void ASlotThatLostOneOfItsBlocksSaysSo()
+    {
+        var sim = Simulation.Fresh();
+        sim.Machine.Panel(30, "Port Button");
+        sim.Tick();
+        sim.Editor.NewSystem("Airlock");
+        sim.Editor.PressStart(SentenceText.WhenWord);
+        sim.Editor.PressBlock("Airlock Button");
+        sim.Editor.TickBlock("Port Button");
+        sim.Editor.PressChoice("button 1 is pressed");
+        sim.Editor.PressPrimary();
+        sim.Editor.GoToRoot();
+        sim.Tick();
+        sim.Editor.GoToRoot();
+        sim.Tick();
+
+        sim.Editor.Program.Systems.Single().Enabled = false;
+        sim.Machine.Grind(sim.Machine.Fitted.First(fitting => fitting.Name == "Port Button"));
+        Run(sim, 1, 400);
+
+        sim.Editor.RootRows()[0].Opens!.Execute();
+        Run(sim, 401, 500);
+
+        var slot = Assert.Single(sim.Editor.Parts());
+        Assert.Equal("Port Button was lost.", slot.Problem);
+        Assert.NotNull(slot.Fills);
     }
 
     /// <summary>A blueprint whose one blockset has lost the door its sequence acts on.</summary>

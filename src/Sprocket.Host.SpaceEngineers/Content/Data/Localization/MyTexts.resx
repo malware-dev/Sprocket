@@ -812,7 +812,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Blueprint.Gone" xml:space="preserve">
     <value>{name} was lost.</value>
-    <comment>On the installation panel, on a slot whose block is no longer on the construct and that has no other block. {name} is what the lost block was called.</comment>
+    <comment>On the installation panel, on a slot one of whose blocks is no longer on the construct, whether or not other blocks still fill it. {name} is what the lost block was called.</comment>
   </data>
   <data name="Sprocket.Blueprint.Description" xml:space="preserve">
     <value>Description</value>

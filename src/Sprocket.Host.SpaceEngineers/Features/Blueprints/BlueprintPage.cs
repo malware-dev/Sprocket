@@ -359,7 +359,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(Cmd.FillPart, () => _fill.Ask(part, chosen));
 
-            row.Problem = row.Blocks.Count == 0 && gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
+            // Any block lost, as the logic system says of its steps, though others still fill the slot.
+            row.Problem = gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
 
             var changed = chosen != null && Marks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;
             row.SetAside = changed && _asideNames.Count > 0
