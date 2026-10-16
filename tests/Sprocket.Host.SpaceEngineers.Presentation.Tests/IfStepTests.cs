@@ -179,7 +179,7 @@ public class IfStepTests
     [Fact]
     public void PressingTheComparisonHangsItsMenu()
     {
-        var screen = Screen.Holding("sprocket 1 alpha 15\n\n"
+        var screen = Screen.Holding("sprocket 1 alpha 16\n\n"
             + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
             + "    sequence 1 {\n"

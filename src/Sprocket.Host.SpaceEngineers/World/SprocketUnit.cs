@@ -1617,7 +1617,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             string warning;
-            var trouble = ProgramText.Load(text, _program, _world.Values, out warning);
+            var trouble = ProgramText.Load(text, _program, _world.Values, out warning, _world);
 
             if (warning.Length > 0)
                 Told.Say(Logged(_block) + " has a program with a warning: " + warning);

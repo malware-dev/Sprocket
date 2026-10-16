@@ -56,13 +56,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
         /// </remarks>
         static List<MyToolbarType> EveryList()
         {
-            // ButtonPanel is deliberately absent. Hiding it from that type also stops an assigned
-            // slot resolving for display there, so the button never lights up - working, and looking
-            // broken, on the one toolbar type Sprocket actually writes to.
+            // Every type, button panels among them. In a local game a button panel's slot Sprocket wrote still shows and
+            // fires with it hidden there; on a dedicated server that is untested.
             return new List<MyToolbarType>
             {
                 MyToolbarType.Character, MyToolbarType.Ship,
-                MyToolbarType.Seat, MyToolbarType.BuildCockpit, MyToolbarType.Spectator
+                MyToolbarType.Seat, MyToolbarType.BuildCockpit, MyToolbarType.Spectator, MyToolbarType.ButtonPanel
             };
         }
 

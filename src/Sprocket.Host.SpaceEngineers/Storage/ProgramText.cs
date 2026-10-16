@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         const int Version = 1;
 
-        const int Draft = 15;
+        const int Draft = 16;
 
         /// <summary>The function this host names a signal with: a slot on a block's toolbar.</summary>
         /// <remarks>Persisted in every program with a trigger, and written by <see cref="Pen.Signal" />.</remarks>
@@ -354,9 +354,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </summary>
         /// <remarks>
         /// A warning is something that reads and runs but is probably a mistake, such as two systems with
-        /// the same name. It does not mark the program damaged.
+        /// the same name. It does not mark the program damaged. A program written for an earlier format finds what it
+        /// names on the blocks of <paramref name="world" />, where there is one, as it is upgraded.
         /// </remarks>
-        public static string Load(string saved, Automation program, Values values, out string warning)
+        public static string Load(string saved, Automation program, Values values, out string warning, GridWorld world = null)
         {
             if (string.IsNullOrEmpty(saved))
             {
@@ -420,7 +421,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             else if (header != null && DraftOf(header) != Draft)
             {
-                var upgraded = Upgrades.Apply(DraftOf(header), program);
+                var upgraded = Upgrades.Apply(DraftOf(header), program, world);
                 if (upgraded.Length > 0)
                     Told.Say("upgraded a program from " + upgraded);
             }

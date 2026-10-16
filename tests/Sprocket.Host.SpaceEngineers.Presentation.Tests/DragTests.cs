@@ -251,7 +251,7 @@ public class DragTests
         string.Join(", ", editor.StepRows()
             .Select(s => ((ActionSlot)s.Slots[0]).Action.Text));
 
-    const string WithAnIf = "sprocket 1 alpha 15\n\n"
+    const string WithAnIf = "sprocket 1 alpha 16\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "let door2 = block 'Door/LargeBlockDoor' [ 3 ]\n"
         + "\n"

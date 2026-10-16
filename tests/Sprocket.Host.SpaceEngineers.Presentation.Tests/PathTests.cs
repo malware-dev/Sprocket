@@ -145,7 +145,7 @@ public class PathTests
     /// <summary>Loads a program declaring one door, <c>door1</c>, found by <paramref name="keys" />.</summary>
     static void Load(Simulation sim, string keys)
     {
-        var program = "sprocket 1 alpha 15\n\nlet door1 = block 'Door/LargeBlockDoor' " + keys + "\n";
+        var program = "sprocket 1 alpha 16\n\nlet door1 = block 'Door/LargeBlockDoor' " + keys + "\n";
         Assert.Equal("", Storage.ProgramText.Load(program, sim.Editor.Program, sim.World.Values));
     }
 

@@ -1328,7 +1328,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _constructHistory.Clear();
 
             _program.Discard();
-            ProgramText.Load(text, _program, _world.Values);
+            string warning;
+            ProgramText.Load(text, _program, _world.Values, out warning, _world);
             StateText.Load(switches, _program, _runner);
 
             _told = true;

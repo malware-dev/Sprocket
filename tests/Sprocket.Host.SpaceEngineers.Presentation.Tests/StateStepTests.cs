@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A step setting a state of its blocks reads with its verb first, enable or disable, which is pressed to change it.</summary>
 public class StateStepTests
 {
-    const string Program = "sprocket 1 alpha 15\n\n"
+    const string Program = "sprocket 1 alpha 16\n\n"
                            + "let 'Tank' = block 'OxygenTank/SmallHydrogenTank' [ 40, [ (40 0 0) ], \"Tank\" ]\n\n"
                            + "system blueprint \"0b0c8f3e-5d5e-4a43-9a51-6f1c2d7e9a10\" as Malware.'Fueling' changed \"2026-10-16T10:00:00Z\" {\n"
                            + "    required slot 'Tank' expects OxygenTank\n\n"

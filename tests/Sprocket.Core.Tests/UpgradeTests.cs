@@ -1,6 +1,8 @@
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Sim.Machine;
 using Xunit;
 
 namespace Sprocket.Tests;
@@ -33,6 +35,110 @@ public class UpgradeTests
         + "        }\n"
         + "    }\n"
         + "}\n";
+
+    /// <summary>An alpha 15 blueprint that shows text on a billboard's back screen, naming the screen as its first argument.</summary>
+    static string Screened(string screen) => "sprocket 1 alpha 15\n\n"
+        + "let board = block 'LCDPanelsBlock/LargeBlockBillboard' [ 1, [ (1 0 0) ], \"Billboard\" ]\n\n"
+        + "system blueprint \"5c1d7e2a-9b3f-4a6e-8d20-7f4b1c9e3a55\" as MalTek.Status {\n"
+        + "    required slot status\n\n"
+        + "    sequence 1 as Show {\n"
+        + "        call ext.'show-text'(\"" + screen + "\", \"Docked\") on [ status ]\n"
+        + "    }\n"
+        + "}\n\n"
+        + "instance 1 of \"5c1d7e2a-9b3f-4a6e-8d20-7f4b1c9e3a55\" as 'Installation 1' {\n"
+        + "    status = [ board ]\n"
+        + "}\n";
+
+    /// <summary>An alpha 15 blueprint that checks how many things a sensor detects by the id the count had.</summary>
+    const string ThingsDetected = "sprocket 1 alpha 15\n\n"
+        + "system blueprint \"8a3e6f10-2d4c-4b7a-9e15-0c6f2a8d4b71\" as MalTek.Bay {\n"
+        + "    required slot sensor\n\n"
+        + "    when any ext.'things-detected' on [ sensor ] > 0 then run 1\n\n"
+        + "    sequence 1 as Watch {\n"
+        + "        if any ext.'things-detected' on [ sensor ] > 1 then {\n"
+        + "        }\n"
+        + "    }\n"
+        + "}\n";
+
+    /// <summary>A screen named in a step moves onto a slot of screens of its own, which the installation fills with the screen of that name.</summary>
+    [Fact]
+    public void AnAlpha15ScreenIsHeldByItsSlot()
+    {
+        var ship = new Rigged();
+        ship.Rig.Weld(new Billboard(1, "Billboard"));
+        ship.Tick();
+        var program = new Automation();
+
+        Assert.Equal("", ProgramText.Load(Screened("Back"), program, ship.World.Values, out _, ship.World));
+
+        var system = program.Systems[0];
+        var show = (Act)system.Sequences[0].Steps[0];
+        var slot = Assert.Single(show.Targets);
+        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Equal(new[] { 2 }, system.Instances[0].Facets(slot));
+        Assert.Equal(new[] { Literal.Of("Docked") }, show.Arguments);
+    }
+
+    /// <summary>An upgraded screen step is written in the current format, its screen in the installation, and reads back the same.</summary>
+    [Fact]
+    public void AnUpgradedScreenIsWrittenAndReadBack()
+    {
+        var ship = new Rigged();
+        ship.Rig.Weld(new Billboard(1, "Billboard"));
+        ship.Tick();
+        var program = new Automation();
+        ProgramText.Load(Screened("Back"), program, ship.World.Values, out _, ship.World);
+
+        var written = ProgramText.Save(program, ship.World.Values);
+
+        Assert.Contains("expects ext.screen", written);
+        Assert.Contains("ext.screen(2) on [ board ]", written);
+        Assert.DoesNotContain("\"Back\"", written);
+        var again = new Automation();
+        Assert.Equal("", ProgramText.Load(written, again, ship.World.Values));
+        Assert.Equal(written, ProgramText.Save(again, ship.World.Values));
+    }
+
+    /// <summary>Show text with its text alone is a block with one screen's, which named no screen, and is left as it is.</summary>
+    [Fact]
+    public void ShowTextOnABlockWithOneScreenIsLeftAlone()
+    {
+        var text = Screened("Back").Replace("ext.'show-text'(\"Back\", \"Docked\")", "ext.'show-text'(\"Docked\")");
+        var program = new Automation();
+
+        Assert.Equal("", ProgramText.Load(text, program, new Values()));
+
+        var show = (Act)program.Systems[0].Sequences[0].Steps[0];
+        Assert.Equal(new[] { "status" }, show.Targets);
+        Assert.Equal(new[] { Literal.Of("Docked") }, show.Arguments);
+    }
+
+    /// <summary>A screen no block has by that name leaves the installation's slot of screens empty, to be filled on its panel.</summary>
+    [Fact]
+    public void AnAlpha15ScreenNoBlockHasIsLeftToFill()
+    {
+        var ship = new Rigged();
+        ship.Rig.Weld(new Billboard(1, "Billboard"));
+        ship.Tick();
+        var program = new Automation();
+
+        Assert.Equal("", ProgramText.Load(Screened("Side"), program, ship.World.Values, out _, ship.World));
+
+        var system = program.Systems[0];
+        var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
+        Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
+        Assert.Null(system.Instances[0].FilledWith(slot));
+    }
+
+    /// <summary>A sensor's count named things-detected is named detections wherever it is checked or watched.</summary>
+    [Fact]
+    public void AnAlpha15ThingsDetectedIsDetections()
+    {
+        Assert.Equal("", ProgramText.Lone(ThingsDetected, new Values(), out var read));
+
+        Assert.Equal("detections", ((If)read!.Sequences[0].Steps[0]).Test.MemberId);
+        Assert.Equal("detections", ((WhenTrigger)read.Triggers[0]).EventId);
+    }
 
     /// <summary>Each of Sprocket's old switch actions becomes the setting of its power value, on the same blocks.</summary>
     [Fact]
@@ -71,7 +177,7 @@ public class UpgradeTests
 
         var written = ProgramText.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 15", written);
+        Assert.StartsWith("sprocket 1 alpha 16", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramText.Lone(written, new Values(), out var again));
@@ -92,7 +198,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 16")]
+    [InlineData("sprocket 1 alpha 17")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)
