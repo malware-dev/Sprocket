@@ -882,9 +882,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_system, act.Targets)));
 
-            row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, false, act.Sets);
+            // A state set on or off reads as enabled or disabled, as on a step.
+            var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
+            row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, false, act.Sets && verb.Length == 0);
+            if (verb.Length != 0)
+                row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, Opening.Arguments)));
+
             row.Does.Add(new ActionSlot(chosen, Does(trigger, Opening.What)));
             row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), true, Does(trigger, Opening.Blocks)));
+            if (verb.Length != 0)
+                return;
 
             // What it was given, where it takes anything, so the line says all of what it does.
             if (chosen == null || chosen.Wants == 0)

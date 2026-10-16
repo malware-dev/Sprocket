@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (!(block is IMyStoreBlock))
                 return;
 
-            kind.Renaming("Searchable", true, "searchable").Stating("Searchable").Renaming("Searchable", false, "toggle searchable");
+            kind.Renaming("Searchable", true, "searchable").Renaming("Searchable", false, "toggle searchable");
 
             if (block is IMyVendingMachine)
                 kind.WithAction("show-next-item", "show next item", Next).In(Category.Screen)

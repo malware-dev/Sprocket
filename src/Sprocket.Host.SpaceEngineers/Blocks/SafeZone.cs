@@ -7,10 +7,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// <summary>
     /// A safe zone block: whether its zone is up, what the zone allows, its shape, size and look, said in Sprocket's words.
     /// </summary>
-    /// <remarks>The game takes a change to what the zone allows, its shape or its size only while the zone is up.</remarks>
+    /// <remarks>
+    /// The game takes a change to what the zone allows, its shape or its size only while the zone is up. Active is a state of
+    /// the block, read and never set: the game's own pair of actions for its switch activate and deactivate the zone.
+    /// </remarks>
     public sealed class SafeZone : Capability
     {
         // The game's own id for each switch, and what Sprocket says it allows.
+        const string Unheard = "No event of the block's is known to say when its zone goes up or down.";
+
+        static readonly Being Active = Being.Flag(Reading.Of<IMySafeZoneBlock>(zone => zone.IsSafeZoneEnabled()));
+
         static readonly string[] Allows =
         {
             "SafeZoneDamageCb", "damage",
@@ -34,7 +41,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Renaming("SafeZoneCreate", true, "active").Stating("SafeZoneCreate")
+            kind.WithValue("active", "active", Active).Status().Looked(Unheard)
+                .Renaming("SafeZoneCreate_On", false, "activate")
+                .Renaming("SafeZoneCreate_Off", false, "deactivate")
+                .Hiding("SafeZoneCreate")
                 .Renaming("SafeZoneShapeCombo", true, "shape")
                 .Renaming("SafeZoneSlider", true, "radius")
                 .Measuring("SafeZoneSlider", " m")

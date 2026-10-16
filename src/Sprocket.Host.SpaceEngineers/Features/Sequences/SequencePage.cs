@@ -788,9 +788,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             // gap in its sentence is where it is picked again.
             var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
 
+            // A state set on or off reads as enabled or disabled, its verb first and pressed to change it.
+            var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
+            if (verb.Length != 0)
+            {
+                row.Kind = StepKind.Enable;
+                row.Slots.Add(ArgumentsSlot.Switching(verb, Changes(Cmd.StepSlot, () => EditStep(act, Opening.Arguments))));
+            }
+
             row.Slots.Add(new ActionSlot(chosen, Changes(Cmd.StepSlot, () => EditStep(act, Opening.What))));
             row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), true,
                 Changes(Cmd.StepSlot, () => EditStep(act, Opening.Blocks))));
+            if (verb.Length != 0)
+                return;
 
             // Last, because the blocks are what somebody scanning a list of steps is looking for and the values are the
             // detail. Pressing it opens the step where its values are given, with the caret already in them.

@@ -12,6 +12,6 @@ Ett steg kan virke på flere blokker, som alle lysene i luftslusen, og blokkvelg
 
 ## Å sette en verdi
 
-En verdi er en av egenskapene til en blokk, som fargen på et lys. Å sette en er også en oppgave, oppført sammen med handlingene og merket ![](mark:value). Den virker med én gang, så sekvensen venter aldri på den. For å sjekke en verdi i stedet bruker du et [hvis](if).
+En verdi er en av egenskapene til en blokk, som fargen på et lys. Å sette en er også en oppgave, oppført sammen med handlingene og merket ![](mark:value). Den virker med én gang, så sekvensen venter aldri på den. En verdi som er en tilstand blokken er i, som en tank som lagrer opp eller en antenne som sender, leses som å slå den på eller av: steget lyder `enable stockpiling on Tank` når det slår tilstanden på og `disable stockpiling on Tank` når det slår den av, og et trykk på det første ordet bytter mellom dem. For å sjekke en verdi i stedet bruker du et [hvis](if); den samme tilstanden lyder `if Tank is stockpiling`.
 
 Eksempelet [borearm](drill-arm) bruker handlinger med valg.

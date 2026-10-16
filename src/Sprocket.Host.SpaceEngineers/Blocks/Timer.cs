@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("TriggerNow", false, "trigger now")
                 .Renaming("TriggerDelay", true, "delay")
                 .Measuring("TriggerDelay", " s")
-                .Renaming("Silent", true, "silent").Stating("Silent")
+                .Renaming("Silent", true, "silent")
                 .Renaming("Silent", false, "toggle silent");
         }
     }

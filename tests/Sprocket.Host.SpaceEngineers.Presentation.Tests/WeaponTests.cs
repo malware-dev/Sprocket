@@ -33,7 +33,7 @@ public class WeaponTests
             step => step.ActionId == "Shoot_On");
     }
 
-    /// <summary>A warhead's safety is offered as whether it is armed.</summary>
+    /// <summary>A warhead is armed and disarmed by actions of its own, and whether it is armed is read, never set.</summary>
     [Fact]
     public void AWarheadIsArmed()
     {
@@ -46,9 +46,9 @@ public class WeaponTests
         screen.Editor.PressBlock("Warhead");
         screen.Run(2);
 
-        Assert.True(screen.Shows("armed"), "armed is not offered");
-        Assert.False(screen.Shows("toggle armed"), "the toggle is listed beside the switch that flips");
+        Assert.True(screen.Shows("arm"), "arm is not offered");
+        Assert.True(screen.Shows("disarm"), "disarm is not offered");
+        Assert.False(screen.Shows("armed"), "armed is offered to be set");
         Assert.True(screen.Shows("detonate"), "detonate is not offered");
-        Assert.False(screen.Shows("arm"), "the game's own word is offered beside Sprocket's");
     }
 }

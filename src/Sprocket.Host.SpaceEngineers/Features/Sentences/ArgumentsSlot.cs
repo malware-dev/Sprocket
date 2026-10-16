@@ -59,6 +59,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         readonly Color? _sample;
 
+        /// <summary>The verb of a step enabling or disabling a state, <paramref name="verb" />, pressed to <paramref name="opens" />, which opens on its new value.</summary>
+        public static ArgumentsSlot Switching(string verb, ICommand opens)
+        {
+            var words = new[] { SentenceText.EnableWord, SentenceText.DisableWord };
+            return new ArgumentsSlot(new[] { Literal.Name(verb) }, new[] { Field.Among("state", words, words) }, opens, Given.NewValue);
+        }
+
         /// <summary>
         /// The colour this slot holds, shown as itself rather than as the numbers behind it.
         /// </summary>

@@ -200,12 +200,15 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Warhead);
 
-        Assert.Equal("Armed", kind.FindAction("Safety", Nature.Value)!.Named);
-        Assert.Equal("toggle armed", Flipped(kind, "Safety").Text);
+        var armed = kind.FindAction("armed", Nature.Value)!;
+        Assert.True(armed.IsStatus);
+        Assert.NotNull(armed.Being);
+        Assert.True(kind.FindAction("Safety", Nature.Value)!.Hidden);
+        Assert.Equal("arm", Listed(kind, "Safety_On").Text);
+        Assert.Equal("disarm", Listed(kind, "Safety_Off").Text);
         Assert.Equal("Detonation time", kind.FindAction("DetonationTime", Nature.Value)!.Named);
         Assert.Equal("start countdown", Listed(kind, "StartCountdown").Text);
         Assert.Equal("detonate", Listed(kind, "Detonate").Text);
-        Assert.True(kind.FindAction("Safety_On", Nature.Action)!.Hidden);
         Assert.True(kind.FindAction("IncreaseDetonationTime", Nature.Action)!.Hidden);
     }
 
@@ -219,6 +222,28 @@ public class CombatTests
         ship.Warhead.CountingDown = counting;
         var cycle = ship.Program.AddSequence((Trigger)null!);
         var test = new Comparison { Provider = BlockKinds.Own, MemberId = "counting-down", Relation = Relation.Is, Value = Literal.Of(true) };
+        test.Targets.Add(ship.Name(ship.Warhead));
+        cycle.Steps.Add(new If(test));
+        cycle.Steps.Add(ship.Off());
+        cycle.Steps.Add(new EndIf());
+
+        ship.Start();
+        ship.Runner.Call(cycle);
+        ship.Tick(5);
+
+        Assert.Equal(fired, ship.Fired);
+    }
+
+    /// <summary>An <c>if</c> on a warhead being armed holds while it is.</summary>
+    [Theory]
+    [InlineData(true, 1)]
+    [InlineData(false, 0)]
+    public void AnIfReadsAWarheadArmed(bool armed, int fired)
+    {
+        var ship = new Ship();
+        ship.Warhead.Armed = armed;
+        var cycle = ship.Program.AddSequence((Trigger)null!);
+        var test = new Comparison { Provider = BlockKinds.Own, MemberId = "armed", Relation = Relation.Is, Value = Literal.Of(true) };
         test.Targets.Add(ship.Name(ship.Warhead));
         cycle.Steps.Add(new If(test));
         cycle.Steps.Add(ship.Off());
@@ -254,10 +279,10 @@ public class CombatTests
         var ship = new Ship();
         var kind = ship.Kind(ship.Warhead);
 
-        Vouched(kind, Nature.Action, "StartCountdown", "StopCountdown", "Detonate", "Safety");
-        Vouched(kind, Nature.Value, "Safety", "DetonationTime", "counting-down");
+        Vouched(kind, Nature.Action, "StartCountdown", "StopCountdown", "Detonate", "Safety_On", "Safety_Off");
+        Vouched(kind, Nature.Value, "armed", "DetonationTime", "counting-down");
 
-        Unvouched(kind, Nature.Action, "Safety_On", "Safety_Off", "IncreaseDetonationTime", "DecreaseDetonationTime");
+        Unvouched(kind, Nature.Action, "IncreaseDetonationTime", "DecreaseDetonationTime");
     }
 
     /// <summary>

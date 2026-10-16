@@ -509,6 +509,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var slot = new ArgumentsSlot(step.Arguments, fields, null);
             var given = SentenceText.Given(slot);
 
+            var verb = step.Sets ? SentenceText.Switching(named, step.Arguments) : "";
+            if (verb.Length != 0)
+                return SentenceText.Switched(verb, SentenceText.Value(named), blocks);
+
             if (step.Sets)
                 return SentenceText.Setting(SentenceText.Value(named), blocks, given);
 

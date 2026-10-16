@@ -12,6 +12,6 @@ One step can act on several blocks, like every light in the airlock, and the blo
 
 ## Setting a value
 
-A value is one of a block's properties, like a light's color. Setting one is a task too, listed with the actions and marked ![](mark:value). It takes effect straight away, so the sequence never waits for it. To check a value instead, use an [if](if).
+A value is one of a block's properties, like a light's color. Setting one is a task too, listed with the actions and marked ![](mark:value). It takes effect straight away, so the sequence never waits for it. A value that is a state the block is in, like a tank stockpiling or an antenna broadcasting, reads as enabling or disabling it: the step says `enable stockpiling on Tank` when it sets the state on and `disable stockpiling on Tank` when it sets it off, and pressing the first word switches between them. To check a value instead, use an [if](if); the same state reads `if Tank is stockpiling`.
 
 The [drill arm](drill-arm) example puts actions with options to use.

@@ -380,6 +380,8 @@ public class SensingTests
         var ship = new Rigged();
         var zone = Weld<IMySafeZoneBlock>(ship, 1, "Safe Zone", typeof(ObjectBuilders.SafeZone.MyObjectBuilder_SafeZoneBlock))
             .Carrying("SafeZoneCreate", "Enable safe zone", ValueKind.Flag)
+            .Offering("SafeZoneCreate_On", "Enable safe zone On")
+            .Offering("SafeZoneCreate_Off", "Enable safe zone Off")
             .Carrying("SafeZoneDamageCb", "Damage", ValueKind.Flag)
             .Carrying("SafeZoneXSlider", "X", ValueKind.Real, "10", "1000")
             .Carrying("UseConveyor", "Use conveyor system", ValueKind.Flag)
@@ -389,7 +391,10 @@ public class SensingTests
             .Offering("UseConveyor", "Use conveyor system On/Off");
         var kind = ship.Entity(zone.Id).Kind;
 
-        Assert.Equal("active", kind.FindAction("SafeZoneCreate", Nature.Value)!.Text);
+        Assert.True(kind.FindAction("active", Nature.Value)!.IsStatus);
+        Assert.True(kind.FindAction("SafeZoneCreate", Nature.Value)!.Hidden);
+        Assert.Equal("activate", kind.FindAction("SafeZoneCreate_On", Nature.Action)!.Text);
+        Assert.Equal("deactivate", kind.FindAction("SafeZoneCreate_Off", Nature.Action)!.Text);
         Assert.Equal("allowing damage", kind.FindAction("SafeZoneDamageCb", Nature.Value)!.Text);
         Assert.Equal("size X", kind.FindAction("SafeZoneXSlider", Nature.Value)!.Text);
         Assert.Equal("automatic push and pull", kind.FindAction("UseConveyor", Nature.Value)!.Text);
@@ -661,6 +666,8 @@ public class SensingTests
         var zone = Weld<IMySafeZoneBlock>(ship, 1, "Safe Zone",
             typeof(ObjectBuilders.SafeZone.MyObjectBuilder_SafeZoneBlock));
         zone.Carrying("SafeZoneCreate", "Enable safe zone", ValueKind.Flag)
+            .Offering("SafeZoneCreate_On", "Enable safe zone On")
+            .Offering("SafeZoneCreate_Off", "Enable safe zone Off")
             .Carrying("SafeZoneShapeCombo", "Shape", "Sphere", "0", "Box", "1")
             .Carrying("SafeZoneColor", "Color", ValueKind.Color)
             .Carrying("SafeZoneTextureCombo", "Texture", "Default", "0")
@@ -672,11 +679,24 @@ public class SensingTests
             zone.Carrying(one, one, ValueKind.Real, "10", "1000");
         var kind = ship.Entity(zone.Id).Kind;
 
-        Vetted(kind, Nature.Value, "SafeZoneCreate", "SafeZoneShapeCombo", "SafeZoneColor", "SafeZoneTextureCombo",
-            "UseConveyor");
+        Vetted(kind, Nature.Value, "active", "SafeZoneShapeCombo", "SafeZoneColor", "SafeZoneTextureCombo", "UseConveyor");
+        Vetted(kind, Nature.Action, "SafeZoneCreate_On", "SafeZoneCreate_Off");
         Vetted(kind, Nature.Value, allows);
         Vetted(kind, Nature.Value, sizes);
         Vetted(kind, Nature.Action, "UseConveyor");
+    }
+
+    /// <summary>A gyroscope's override is a state it is in: overriding.</summary>
+    [Fact]
+    public void AGyroscopeIsOverriding()
+    {
+        var ship = new Rigged();
+        var gyroscope = Weld<IMyGyro>(ship, 1, "Gyroscope", typeof(MyObjectBuilder_Gyro))
+            .Carrying("Override", "Override controls", ValueKind.Flag);
+
+        var kind = ship.Entity(gyroscope.Id).Kind;
+        Assert.Equal("overriding", kind.FindAction("Override", Nature.Value)!.Text);
+        Assert.True(kind.FindAction("Override", Nature.Value)!.IsStatus);
     }
 
     static string Said(GridEntity entity, string id)

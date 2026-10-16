@@ -16,6 +16,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Sets one of its blocks' values.</summary>
         Set,
 
+        /// <summary>Sets one of its blocks' states on or off, which reads as enabling or disabling it.</summary>
+        Enable,
+
         /// <summary>Passes time and nothing else.</summary>
         Wait,
 

@@ -27,6 +27,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The word a set is said with, on its step and wherever else it is said.</summary>
         public const string SetWord = "set";
 
+        /// <summary>What a step setting a state of its blocks on reads with in place of "set".</summary>
+        public const string EnableWord = "enable";
+
+        /// <summary>What a step setting a state of its blocks off reads with in place of "set".</summary>
+        public const string DisableWord = "disable";
+
         /// <summary>The word a trigger watching for something is offered with, as the language says it.</summary>
         public const string WhenWord = "when";
 
@@ -199,8 +205,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </summary>
         public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
         {
-            // A test's value can stand after the part saying how its blocks are read; a step's always comes first.
-            var at = tests ? Valued(slots) : 0;
+            // A test's value can stand after the part saying how its blocks are read, and a step enabling a state after the verb.
+            var at = Valued(slots);
             var value = at >= 0 && at < slots.Count ? slots[at] as ActionSlot : null;
             if (value == null || value.Action == null || !(tests || value.Action.Sets))
                 return "";
@@ -329,6 +335,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             return letters >= 2;
         }
+
+        /// <summary>
+        /// The verb a step setting <paramref name="value" /> to <paramref name="arguments" /> reads with, where the value is a
+        /// state of its blocks: "enable" for on and "disable" for off; empty for any other value or setting.
+        /// </summary>
+        /// <remarks>"enable stockpiling on Tank" says what "set stockpiling on Tank to on" does, as the check reads "if Tank is stockpiling".</remarks>
+        public static string Switching(EntityAction value, IList<Literal> arguments)
+        {
+            if (value == null || !value.IsStatus || value.Holds != ValueKind.Flag || arguments.Count != 1
+                || arguments[0].Kind != ValueKind.Flag)
+                return "";
+
+            return arguments[0].Flag ? EnableWord : DisableWord;
+        }
+
+        /// <summary>A state enabled or disabled as one line: "enable stockpiling on Tank".</summary>
+        public static string Switched(string verb, string value, string blocks) => verb + " " + value + " " + OnWord + " " + blocks;
 
         /// <summary>A set as one line: "set charge mode on Standby Battery to recharge".</summary>
         /// <remarks>
