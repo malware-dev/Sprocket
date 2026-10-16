@@ -222,6 +222,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var does = new HeadingPart("");
             does.Mark = Symbols.Sequence;
+            does.MarkAbout = Editor.Texts.HeadingSequence;
             does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.Renames = Editor.Renaming(Rename, null);

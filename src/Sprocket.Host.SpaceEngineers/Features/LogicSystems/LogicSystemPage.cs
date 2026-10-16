@@ -68,6 +68,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public override string Title => SystemSummary.Describe(Editor.Texts, Editor.Runner.Bindings, _system);
 
         /// <inheritdoc />
+        /// <remarks>Led by the logic system's mark, as every heading is led by the mark of what it names.</remarks>
+        public override void Heading(List<HeadingPart> parts)
+        {
+            base.Heading(parts);
+            parts[0].Mark = Symbols.LogicSystem;
+            parts[0].MarkAbout = Editor.Texts.HeadingLogicSystem;
+        }
+
+        /// <inheritdoc />
         public override bool Edits => true;
 
         /// <summary>The panel a timer's rate is being given in, or null while none is open.</summary>

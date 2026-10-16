@@ -798,6 +798,18 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>{count} still need a block</value>
     <comment>On the installation panel, beside the Slots heading, when several slots that need a block have none. {count} is how many, always more than one.</comment>
   </data>
+  <data name="Sprocket.Heading.LogicSystem" xml:space="preserve">
+    <value>Logic system</value>
+    <comment>Tooltip on the logic-system mark that leads a screen's heading, saying what kind of thing the name after it is. Shown on a logic system's screen and on the installation panel, where the heading names the logic system the installation is of.</comment>
+  </data>
+  <data name="Sprocket.Heading.Installation" xml:space="preserve">
+    <value>Installation</value>
+    <comment>Tooltip on the installation mark that leads the installation panel's heading, saying the name after it is an installation of a logic system.</comment>
+  </data>
+  <data name="Sprocket.Heading.Sequence" xml:space="preserve">
+    <value>Sequence</value>
+    <comment>Tooltip on the sequence mark that leads a sequence's screen heading, saying the name after it is a sequence.</comment>
+  </data>
   <data name="Sprocket.Blueprint.FromLead" xml:space="preserve">
     <value>of</value>
     <comment>In the editor's heading bar on the installation panel, between the installation's name and the name of its logic system, which can be pressed to open the logic system's screen.</comment>

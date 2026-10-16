@@ -608,6 +608,15 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Blueprint.StillMany" xml:space="preserve">
     <value>{count} mangler fortsatt en blokk</value>
   </data>
+  <data name="Sprocket.Heading.LogicSystem" xml:space="preserve">
+    <value>Logikksystem</value>
+  </data>
+  <data name="Sprocket.Heading.Installation" xml:space="preserve">
+    <value>Installasjon</value>
+  </data>
+  <data name="Sprocket.Heading.Sequence" xml:space="preserve">
+    <value>Sekvens</value>
+  </data>
   <data name="Sprocket.Blueprint.FromLead" xml:space="preserve">
     <value>av</value>
   </data>

@@ -136,9 +136,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public override void Heading(List<HeadingPart> parts)
         {
             base.Heading(parts);
+            parts[0].Mark = Blockset == null ? Symbols.LogicSystem : Symbols.Installation;
+            parts[0].MarkAbout = Blockset == null ? Editor.Texts.HeadingLogicSystem : Editor.Texts.HeadingInstallation;
 
             // Pushed rather than swapped in, so Back comes back to the blocks being filled.
             var from = new HeadingPart(_system.Name);
+            from.Mark = Symbols.LogicSystem;
+            from.MarkAbout = Editor.Texts.HeadingLogicSystem;
             from.Lead = Editor.Texts.BlueprintFromLead;
             from.After = Editor.Texts.BlueprintFromAfter;
             from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);

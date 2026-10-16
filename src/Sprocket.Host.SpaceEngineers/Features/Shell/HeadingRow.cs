@@ -57,6 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (i != renaming)
                     shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename || part.Opens != null ? part.About : null);
 
+                shown.Mark.Tip = Tip.For(shown.Mark.Tip, part.MarkAbout);
                 shown.Lead.Text = part.Lead;
                 shown.After.Text = part.After;
             }
