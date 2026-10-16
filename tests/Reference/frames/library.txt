@@ -25,5 +25,5 @@ on screen     Library
 018  Text       at {X:272 Y:207.6399} scale 0.694  #DCF5FDFF  "Test Rig (this construct)"
 019  Text       at {X:264 Y:239.2255} scale 0.833  #A2C3CDFF  "No logic systems on this construct."
 020  Text       at {X:260 Y:311.6399} scale 0.694  #85A1A9FF  "IN STORAGE"
-021  Text       at {X:264 Y:347.2255} scale 0.833  #A2C3CDFF  "None yet. A blueprint saved here goes wherever you go."
+021  Text       at {X:264 Y:347.2255} scale 0.833  #A2C3CDFF  "No blueprints yet."
 022  ClearClip  

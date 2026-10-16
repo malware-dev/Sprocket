@@ -5,7 +5,7 @@ screen bounds {X:-240 Y:0 W:1920 H:1080}
 on screen     Sequence 1
 
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
-001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
+001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #281E09FF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
 003  SetClip    {X:296 Y:53 W:1023 H:40}
 004  Text       at {X:302.1563 Y:59.01406} scale 0.401  #85A1A9FF  "q"
@@ -19,14 +19,14 @@ on screen     Sequence 1
 012  Text       at {X:1492.76 Y:61.51406} scale 0.401  #A2C3CDFF  "d"
 013  Sprite     Sprocket_Fill         {X:1527 Y:57 W:69 H:32}  #5B737BFF
 014  Sprite     Sprocket_Fill         {X:1531 Y:61 W:61 H:24}  #20272DFF
-015  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #DCF5FDFF
+015  Sprite     Sprocket_Fill         {X:1531 Y:61 W:24 H:24}  #F0AC28FF
 016  Text       at {X:1562.603 Y:63.05432} scale 0.556  #DCF5FDFF  "OFF"
 017  Sprite     Sprocket_Fill         {X:1603 Y:57 W:61 H:32}  #DCF5FDFF
 018  Text       at {X:1619.42 Y:63.05432} scale 0.556  #1B242AFF  "Done"
 019  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
 020  SetClip    {X:256 Y:118 W:1408 H:902}
 021  Text       at {X:260.0625 Y:123.2328} scale 0.161  #5F7278FF  "0"
-022  Text       at {X:280 Y:115.6399} scale 0.694  #F0AC28FF  "Nothing starts this yet."
+022  Text       at {X:280 Y:115.6399} scale 0.694  #F0AC28FF  "This sequence has no trigger, and no sequence runs it."
 023  Sprite     Sprocket_Fill         {X:280 Y:170 W:3 H:3}  #85A1A9FF
 024  Sprite     Sprocket_Fill         {X:280 Y:176 W:3 H:3}  #85A1A9FF
 025  Sprite     Sprocket_Fill         {X:280 Y:182 W:3 H:3}  #85A1A9FF
@@ -36,7 +36,7 @@ on screen     Sequence 1
 029  Text       at {X:300 Y:165.6399} scale 0.694  #85A1A9FF  "1"
 030  Sprite     Sprocket_Fill         {X:348 Y:158 W:101 H:40}  #374851FF
 031  Sprite     Sprocket_Fill         {X:348 Y:196 W:101 H:2}  #8EBCCFFF
-032  Text       at {X:364 Y:166.5141} scale 0.401  #A2C3CDFF  "k"
+032  Text       at {X:364 Y:166.5141} scale 0.401  #A2C3CDFF  "A"
 033  Text       at {X:391.6875 Y:163.2255} scale 0.833  #DCF5FDFF  "open"
 034  Sprite     Sprocket_Fill         {X:457 Y:158 W:209 H:40}  #374851FF
 035  Sprite     Sprocket_Fill         {X:457 Y:196 W:209 H:2}  #8EBCCFFF
@@ -45,11 +45,23 @@ on screen     Sequence 1
 038  Text       at {X:1522.156 Y:166.5141} scale 0.401  #A2C3CDFF  "2"
 039  Text       at {X:1570.094 Y:170.9932} scale 0.241  #A2C3CDFF  "e"
 040  Text       at {X:1610.156 Y:166.5141} scale 0.401  #A2C3CDFF  "d"
-041  Text       at {X:272 Y:219.2255} scale 0.833  #A2C3CDFF  "+ step"
-042  ClearClip  
-043  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:36}  #1B242AFF
-044  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:1}  #5B737BFF
-045  Sprite     Sprocket_Fill         {X:1403 Y:124 W:220 H:1}  #5B737BFF
-046  Sprite     Sprocket_Fill         {X:1403 Y:89 W:1 H:36}  #5B737BFF
-047  Sprite     Sprocket_Fill         {X:1623 Y:89 W:1 H:36}  #5B737BFF
-048  Text       at {X:1415.283 Y:94.6399} scale 0.694  #A2C3CDFF  "Keep any changes and return."
+041  Sprite     Sprocket_Fill         {X:280 Y:230 W:3 H:3}  #85A1A9FF
+042  Sprite     Sprocket_Fill         {X:280 Y:236 W:3 H:3}  #85A1A9FF
+043  Sprite     Sprocket_Fill         {X:280 Y:242 W:3 H:3}  #85A1A9FF
+044  Sprite     Sprocket_Fill         {X:286 Y:230 W:3 H:3}  #85A1A9FF
+045  Sprite     Sprocket_Fill         {X:286 Y:236 W:3 H:3}  #85A1A9FF
+046  Sprite     Sprocket_Fill         {X:286 Y:242 W:3 H:3}  #85A1A9FF
+047  Text       at {X:300 Y:225.6399} scale 0.694  #85A1A9FF  "2"
+048  Text       at {X:348 Y:226.5141} scale 0.401  #A2C3CDFF  "k"
+049  Text       at {X:375.6875 Y:223.2255} scale 0.833  #A2C3CDFF  "wait for pending tasks"
+050  Text       at {X:1522.156 Y:226.5141} scale 0.401  #A2C3CDFF  "2"
+051  Text       at {X:1570.094 Y:230.9932} scale 0.241  #A2C3CDFF  "e"
+052  Text       at {X:1610.156 Y:226.5141} scale 0.401  #A2C3CDFF  "d"
+053  Text       at {X:272 Y:275.2255} scale 0.833  #A2C3CDFF  "+ step"
+054  ClearClip  
+055  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:36}  #1B242AFF
+056  Sprite     Sprocket_Fill         {X:1403 Y:89 W:220 H:1}  #5B737BFF
+057  Sprite     Sprocket_Fill         {X:1403 Y:124 W:220 H:1}  #5B737BFF
+058  Sprite     Sprocket_Fill         {X:1403 Y:89 W:1 H:36}  #5B737BFF
+059  Sprite     Sprocket_Fill         {X:1623 Y:89 W:1 H:36}  #5B737BFF
+060  Text       at {X:1415.283 Y:94.6399} scale 0.694  #A2C3CDFF  "Keep any changes and return."
