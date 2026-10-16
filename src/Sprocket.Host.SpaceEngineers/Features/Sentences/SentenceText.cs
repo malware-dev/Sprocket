@@ -673,5 +673,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return byBlock != 0 ? byBlock : x.CompareTo(y);
             }
         }
+
+        /// <summary><paramref name="text" /> with its first letter a capital, to start a sentence with.</summary>
+        public static string Capitalised(string text)
+        {
+            if (string.IsNullOrEmpty(text) || char.IsUpper(text[0]))
+                return text;
+
+            return char.ToUpperInvariant(text[0]) + text.Substring(1);
+        }
     }
 }

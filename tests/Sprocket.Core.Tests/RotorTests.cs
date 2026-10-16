@@ -276,14 +276,14 @@ public class RotorTests
         action.Fields(fields);
 
         var speed = fields[2];
-        Assert.Equal("speed must be given.", speed.Refuses(new Texts(), "speed", ""));
+        Assert.Equal("Speed is missing.", speed.Refuses(new Texts(), "speed", ""));
         Assert.Equal("speed must be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "0"));
         Assert.Equal("speed must be above 0 and at most 30.", speed.Refuses(new Texts(), "speed", "31"));
         Assert.Equal("", speed.Refuses(new Texts(), "speed", "0.5"));
         Assert.Equal("(0 - 30)", speed.Takes(new Texts()));
 
-        Assert.Equal("angle must be given.", fields[1].Refuses(new Texts(), "angle", ""));
-        Assert.Equal("direction must be given.", fields[0].Refuses(new Texts(), "direction", ""));
+        Assert.Equal("Angle is missing.", fields[1].Refuses(new Texts(), "angle", ""));
+        Assert.Equal("Direction is missing.", fields[0].Refuses(new Texts(), "direction", ""));
     }
 
     /// <summary>

@@ -1067,7 +1067,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Problem on a step that lacks a value its action needs, used where the missing value has no name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Problem.Mistyped" xml:space="preserve">
-    <value>This step is given something its action can't take.</value>
+    <value>This step has a value its action doesn't allow.</value>
     <comment>Problem on a step given a value its action cannot take, used where the value has no name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
   </data>
   <data name="Sprocket.Problem.OptionMissing" xml:space="preserve">
@@ -1159,7 +1159,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Reason a run stopped: a step lacked a value its action needs, used where the value has no name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.Mistyped" xml:space="preserve">
-    <value>something it was given didn't fit the action.</value>
+    <value>a value it was set to didn't fit the action.</value>
     <comment>Reason a run stopped: a step was given a value its action cannot take, used where the value has no name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.OptionMissing" xml:space="preserve">
@@ -1587,8 +1587,8 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>The words a word value can be, listed beside its box in the picker's values column and in the refusal under that column. {rest} is every word but the last, separated by commas; {last} is the last word.</comment>
   </data>
   <data name="Sprocket.Value.Needed" xml:space="preserve">
-    <value>{name} must be given.</value>
-    <comment>Refusal under the picker's values column when a value that must be given is empty, or when no value at all is given. {name} is the value's name, or its number in the order for a value without one.</comment>
+    <value>{name} is missing.</value>
+    <comment>Refusal under the picker's values column when a value that is needed is empty, or when no value at all is filled in. {name} is the value's name, starting with a capital, or its number in the order for a value without one.</comment>
   </data>
   <data name="Sprocket.Value.OneOf" xml:space="preserve">
     <value>{name} must be {words}.</value>

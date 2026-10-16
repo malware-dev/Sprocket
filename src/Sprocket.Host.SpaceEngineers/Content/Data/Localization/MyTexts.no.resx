@@ -817,7 +817,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Dette steget mangler noe det trenger.</value>
   </data>
   <data name="Sprocket.Problem.Mistyped" xml:space="preserve">
-    <value>Dette steget har fått noe handlingen ikke kan ta.</value>
+    <value>Dette steget har en verdi handlingen ikke tillater.</value>
   </data>
   <data name="Sprocket.Problem.OptionMissing" xml:space="preserve">
     <value>Dette steget mangler {name}.</value>
@@ -886,7 +886,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>noe det trengte, manglet.</value>
   </data>
   <data name="Sprocket.Stopped.Mistyped" xml:space="preserve">
-    <value>noe det fikk, passet ikke til handlingen.</value>
+    <value>en verdi det ble satt til, passet ikke til handlingen.</value>
   </data>
   <data name="Sprocket.Stopped.OptionMissing" xml:space="preserve">
     <value>{name} manglet.</value>
@@ -1207,7 +1207,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>{rest} eller {last}</value>
   </data>
   <data name="Sprocket.Value.Needed" xml:space="preserve">
-    <value>{name} må fylles inn.</value>
+    <value>{name} mangler.</value>
   </data>
   <data name="Sprocket.Value.OneOf" xml:space="preserve">
     <value>{name} må være {words}.</value>

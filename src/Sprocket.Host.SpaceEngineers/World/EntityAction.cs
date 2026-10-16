@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Id = id;
             Text = text;
             GameActionId = gameActionId;
-            Named = Capitalised(text);
+            Named = Features.Sentences.SentenceText.Capitalised(text);
             Declared = text;
             Why = Holdback.None;
             Wants = wants;
@@ -47,22 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// a block on leads to its being on in the same tick and holds nothing; a door takes seconds.
         /// </remarks>
         public bool Lasts { get; private set; }
-
-        /// <summary>
-        /// The same word as a list of things to choose from spells it.
-        /// </summary>
-        /// <remarks>
-        /// The game capitalises the first letter of every member it names and leaves the rest of the
-        /// words as they are - <c>Open</c>, <c>Toggle block On/Off</c>. Sprocket's own are written
-        /// for the middle of a sentence, so the list is where they are made to match.
-        /// </remarks>
-        static string Capitalised(string text)
-        {
-            if (string.IsNullOrEmpty(text) || char.IsUpper(text[0]))
-                return text;
-
-            return char.ToUpperInvariant(text[0]) + text.Substring(1);
-        }
 
         /// <summary>Whether this can be made into a step, which nearly everything can.</summary>
         public Readiness Readiness { get; private set; }
@@ -100,6 +84,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The same words for nearly everything, and not for a value: a sentence needs the verb -
         /// "set Falloff" - where a list under a heading that already says Values needs the name on
         /// its own, so the names sort as themselves rather than all under S.
+        /// <para>
+        /// Starting with a capital: the game capitalises the first letter of every member it names and leaves the rest as
+        /// they are - <c>Open</c>, <c>Toggle block On/Off</c> - and Sprocket's own are written for the middle of a sentence,
+        /// so the list is where they are made to match.
+        /// </para>
         /// </remarks>
         public string Named { get; private set; }
 
@@ -109,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What a list calls it, where that is not what a sentence calls it.</summary>
         public void List(string words)
         {
-            Named = Capitalised(words);
+            Named = Features.Sentences.SentenceText.Capitalised(words);
         }
 
         /// <summary>Whether Sprocket has given one of the block's own members a word of its own.</summary>
@@ -126,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Rename(string word)
         {
             Renamed = true;
-            Named = Capitalised(word);
+            Named = Features.Sentences.SentenceText.Capitalised(word);
             Text = word;
         }
 
@@ -273,7 +262,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (Category == Category.Other)
                 Category = Categories.Of(propertyId);
 
-            Named = Capitalised(named);
+            Named = Features.Sentences.SentenceText.Capitalised(named);
             Declared = named;
             _writes = field;
             return this;

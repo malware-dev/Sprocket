@@ -73,7 +73,7 @@ public class ArgumentsColumnTests
         var screen = Open(SetRadius + " " + RadiusBox + " clear " + Done);
 
         Assert.Equal("Radius on Airlock Light", screen.Ended);
-        Assert.True(screen.Shows("radius must be given."), "nothing said why it did not finish");
+        Assert.True(screen.Shows("Radius is missing."), "nothing said why it did not finish");
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
     }
 

@@ -77,7 +77,7 @@ public class LeavingTests
         picker.Run(2);
 
         // Keeping is Done, and Done with nothing given says so and puts the caret in the field.
-        Assert.True(picker.Shows("radius must be given."), "keeping did not ask for the value");
+        Assert.True(picker.Shows("Radius is missing."), "keeping did not ask for the value");
         Assert.True(picker.Scene.IsFilling, "the caret did not go to the field");
 
         picker.Do("type", "5");

@@ -6,6 +6,7 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Input;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -152,7 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 }
 
                 if (_judged && _fields.Count > 0 && !Filled)
-                    return Template.Fill(_language.ValueNeeded, "name", Called(0));
+                    return Template.Fill(_language.ValueNeeded, "name", SentenceText.Capitalised(Called(0)));
 
                 return "";
             }

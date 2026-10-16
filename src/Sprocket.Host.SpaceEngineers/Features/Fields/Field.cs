@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
 using Lumel.Text;
@@ -375,7 +376,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             // without one - unless it declared that it needs one. Held to a bound it would be a value
             // of nothing, which is a different thing and a worse one.
             if (string.IsNullOrEmpty(said))
-                return Needed ? Template.Fill(texts.ValueNeeded, "name", called) : "";
+                return Needed ? Template.Fill(texts.ValueNeeded, "name", SentenceText.Capitalised(called)) : "";
 
             if (Words != null && Words.Count > 0)
                 return Knows(said) ? "" : Template.Fill(Template.Fill(texts.ValueOneOf, "words", Listed(texts)), "name", called);
