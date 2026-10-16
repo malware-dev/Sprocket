@@ -6,6 +6,8 @@ using Xunit;
 using CameraBlock = Sprocket.Host.SpaceEngineers.Blocks.Camera;
 using EmotionController = Sprocket.Host.SpaceEngineers.Blocks.EmotionController;
 using TextPanel = Sprocket.Host.SpaceEngineers.Blocks.TextPanel;
+using HostTypes = Sprocket.Host.SpaceEngineers.Blocks.HostTypes;
+using ScreenType = Sprocket.Host.SpaceEngineers.Blocks.ScreenType;
 
 namespace Sprocket.Tests;
 
@@ -42,31 +44,35 @@ public class ScreenBlockTests
         Assert.True(app.Is(Literal.Name("TSS_Weather")).Holds(panel.Block, null!));
     }
 
-    /// <summary>The panel's settings are said in Sprocket's words, and its title is left to the terminal.</summary>
+    /// <summary>
+    /// A panel's settings are its one screen's, read and set as any block's screen is, and its title is left to the terminal.
+    /// </summary>
     [Fact]
-    public void ThePanelsSettingsAreSaidInSprocketsWords()
+    public void APanelsSettingsAreItsScreens()
     {
         var ship = new Rigged();
         var panel = ship.Rig.TextPanel(1, "Screen");
         panel.Carrying("Title", "Title", ValueKind.Text)
             .Carrying("FontColor", "Font Color", ValueKind.Color)
-            .Carrying("ScriptForegroundColor", "Font Color", ValueKind.Color)
-            .Carrying("PreserveAspectRatio", "Preserve aspect ratio", ValueKind.Flag)
-            .Offering("PreserveAspectRatio", "Preserve aspect ratio On/Off");
+            .Carrying("ScriptForegroundColor", "Font Color", ValueKind.Color);
         var kind = ship.Entity(panel.Id).Kind;
+        var screen = HostTypes.Returned("screen");
 
         Assert.True(kind.FindAction("Title", Nature.Value)!.Hidden);
-        Assert.Equal("text color", kind.FindAction("FontColor", Nature.Value)!.Text);
-        Assert.Equal("app color", kind.FindAction("ScriptForegroundColor", Nature.Value)!.Text);
-        Assert.Equal("preserve aspect ratio", kind.FindAction("PreserveAspectRatio", Nature.Value)!.Text);
+        Assert.True(kind.FindAction("FontColor", Nature.Value)!.Hidden);
+        Assert.True(kind.FindAction("ScriptForegroundColor", Nature.Value)!.Hidden);
+        Assert.Same(screen, kind.FindAction("text-color", Nature.Value)!.Type);
+        Assert.Same(screen, kind.FindAction("app-color", Nature.Value)!.Type);
+        Assert.Same(screen, kind.FindAction(ScreenType.ShowText, Nature.Native)!.Type);
+        Assert.Single(kind.Facets(screen!));
     }
 
     /// <summary>
-    /// A text panel vouches for what it shows and every setting it offers, and not for its title, the game's steps and
-    /// pairs that only say a setting again, or the toggle that flips whether it keeps the aspect ratio.
+    /// A text panel vouches for what it shows, its rotation and its screen's members, and not for its title, the game's own
+    /// screen settings its screen reads in their place, or the game's steps and pairs that only say a setting again.
     /// </summary>
     [Fact]
-    public void ATextPanelVouchesForItsSettingsAndNotTheirSteps()
+    public void ATextPanelVouchesForItsScreenAndNotTheGamesSettings()
     {
         var ship = new Rigged();
         var panel = ship.Rig.TextPanel(1, "Screen");
@@ -91,8 +97,13 @@ public class ScreenBlockTests
         Assert.True(kind.FindAction(TextPanel.ShowImage, Nature.Native)!.Vetted);
         Assert.True(kind.FindAction(TextPanel.Shown, Nature.Value)!.Vetted);
         Assert.True(kind.FindAction(TextPanel.App, Nature.Value)!.Vetted);
-        foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio"))
+        Assert.True(kind.FindAction("Rotate", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction(ScreenType.ShowText, Nature.Native)!.Vetted);
+        foreach (var id in new[] { "text-color", "background-color", "app-color", "content", "font", "font-size", "alignment", "padding" })
             Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
+
+        foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio").Where(id => id != "Rotate"))
+            Assert.False(EntityAction.Value(kind.Actions, "", id)?.Vetted ?? false, id + " is vetted");
 
         Assert.False(kind.FindAction("PreserveAspectRatio", Nature.Action)!.Vetted);
 

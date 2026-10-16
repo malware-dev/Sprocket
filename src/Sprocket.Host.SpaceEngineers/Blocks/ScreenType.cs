@@ -6,22 +6,36 @@ using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.GUI.TextPanel;
 using VRageMath;
 
-// The mod-side provider adds nothing to the one in the Ingame namespace, and some blocks are given only that one.
+// The mod-side provider adds nothing to the one in the Ingame namespace, and some blocks provide only that one.
 using IMyTextSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A block with several screens a player can set up: what each shows and how, every member naming its screen.</summary>
+    /// <summary>A block's screen, the type this host provides as <c>ext.screen</c>: show text on it, set it up, read its settings.</summary>
     /// <remarks>
-    /// The game's own settings act on whichever screen was picked last in the terminal, so they are left to the terminal
-    /// view. Each is read here as a function whose screen option says which screen, and set through set up screen, since a
-    /// function is not set.
+    /// Every block with screens has them, a text panel's one as a cockpit's four, so a slot of screens takes any of them, and
+    /// each block in it comes with which of its screens. The game's own settings act on whichever screen was picked last in
+    /// the terminal, so they are hidden here and read as members of the screen; each member receives its screen first,
+    /// counted from 1, ahead of the step's own values.
     /// </remarks>
-    public sealed class Screens : Capability
+    public sealed class ScreenType : HostType
     {
-        /// <summary>Setting up how one of the screens shows what it shows, which is Sprocket's own.</summary>
+        /// <summary>The action that writes text on a screen.</summary>
+        public const string ShowText = "show-text";
+
+        /// <summary>Setting up how a screen shows what it shows, which is Sprocket's own.</summary>
         public const string SetUp = "set-up-screen";
+
+        /// <summary>How long the text on a screen may be: the game's own panels hold no more.</summary>
+        public const int TextLongest = 100000;
+
+        /// <summary>The game's settings of a screen, which on a block with several act on the one last picked.</summary>
+        public static readonly string[] Settings =
+        {
+            "Content", "FontColor", "BackgroundColor", "Font", "FontSize", "alignment", "TextPaddingSlider",
+            "ScriptForegroundColor", "ScriptBackgroundColor", "ChangeIntervalSlider", "PreserveAspectRatio"
+        };
 
         const string Unheard = "A screen raises no event when its settings change.";
 
@@ -32,59 +46,84 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly TextAlignment[] TextAlignments = { TextAlignment.LEFT, TextAlignment.CENTER, TextAlignment.RIGHT };
 
         /// <inheritdoc />
+        public override string Id => BlockKinds.Own + "." + Function;
+
+        /// <inheritdoc />
+        public override string Function => "screen";
+
+        /// <inheritdoc />
+        /// <remarks>A text panel sets its screen up with controls of its own, so the game does not count it among the generic ones.</remarks>
         public override bool Claims(IMyTerminalBlock block)
         {
             var screens = block as IMyTextSurfaceProvider;
-            return screens != null && screens.UseGenericLcd && !(block is IMyTextPanel) && screens.SurfaceCount > 1;
+            return screens != null && (screens.UseGenericLcd || block is IMyTextPanel) && screens.SurfaceCount > 0;
+        }
+
+        /// <inheritdoc />
+        public override void Offered(IMyTerminalBlock block, List<HostTypeFacet> into)
+        {
+            var names = Names((IMyTextSurfaceProvider)block);
+            for (var i = 0; i < names.Count; i++)
+                into.Add(new HostTypeFacet(i + 1, names[i]));
+        }
+
+        /// <inheritdoc />
+        /// <remarks>What its content reads, and the app by name where it runs one.</remarks>
+        public override string Showing(IMyTerminalBlock block, int number)
+        {
+            var screens = block as IMyTextSurfaceProvider;
+            if (screens == null || number < 1 || number > screens.SurfaceCount)
+                return "";
+
+            var screen = screens.GetSurface(number - 1);
+            var content = Contents[Math.Max(0, Array.IndexOf(ContentTypes, screen.ContentType))];
+            return screen.ContentType == ContentType.SCRIPT && !string.IsNullOrEmpty(screen.Script) ? content + " " + screen.Script : content;
         }
 
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var screens = (IMyTextSurfaceProvider)block;
-            var names = Names(screens);
-            Func<IList<Literal>, Picked> picked = arguments => Picked.Read(arguments, names);
+            Func<IList<Literal>, Picked> picked = Picked.Read;
 
-            kind.Hiding(Screen.Settings)
-                .WithAction(Screen.ShowText, "show text", Doing.Of<IMyTextSurfaceProvider, Shown>(
-                        arguments => Shown.Read(arguments, names), Show), Faces(names), Lines())
-                .In(Category.Screen)
-                .WithAction(SetUp, "set up screen", Doing.Of<IMyTextSurfaceProvider, Look>(
-                        arguments => Look.Read(arguments, names), Apply), Asked(names, Fonts(screens)))
-                .In(Category.Screen);
+            kind.Hiding(Settings)
+                .WithAction(ShowText, "show text", Doing.Of<IMyTextSurfaceProvider, Shown>(Shown.Read, Show), Lines())
+                .In(Category.Screen).Of(this)
+                .WithAction(SetUp, "set up screen", Doing.Of<IMyTextSurfaceProvider, Look>(Look.Read, Apply), Asked(Fonts(screens)))
+                .In(Category.Screen).Of(this);
 
             Value(kind, "content", Being.OneOf<IMyTextSurfaceProvider, Picked>(Contents, picked,
-                (provider, which, seen) => Position(ContentTypes, Surface(provider, which).ContentType)), names);
+                (provider, which, seen) => Position(ContentTypes, Surface(provider, which).ContentType)));
             Value(kind, "text color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).FontColor), names);
+                (provider, which, seen) => Surface(provider, which).FontColor));
             Value(kind, "background color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).BackgroundColor), names);
+                (provider, which, seen) => Surface(provider, which).BackgroundColor));
             Value(kind, "font", Being.Text<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).Font), names);
+                (provider, which, seen) => Surface(provider, which).Font));
             Value(kind, "font size", Being.Number<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).FontSize), names);
+                (provider, which, seen) => Surface(provider, which).FontSize));
             Value(kind, "alignment", Being.OneOf<IMyTextSurfaceProvider, Picked>(Alignments, picked,
-                (provider, which, seen) => Position(TextAlignments, Surface(provider, which).Alignment)), names);
+                (provider, which, seen) => Position(TextAlignments, Surface(provider, which).Alignment)));
             Value(kind, "padding", Being.Number<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).TextPadding), names);
+                (provider, which, seen) => Surface(provider, which).TextPadding));
             Value(kind, "app color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).ScriptForegroundColor), names);
+                (provider, which, seen) => Surface(provider, which).ScriptForegroundColor));
             Value(kind, "app background color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).ScriptBackgroundColor), names);
+                (provider, which, seen) => Surface(provider, which).ScriptBackgroundColor));
             Value(kind, "image interval", Being.Number<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).ChangeInterval), names);
+                (provider, which, seen) => Surface(provider, which).ChangeInterval));
             Value(kind, "keep aspect ratio", Being.Flag<IMyTextSurfaceProvider, Picked>(picked,
-                (provider, which, seen) => Surface(provider, which).PreserveAspectRatio), names);
+                (provider, which, seen) => Surface(provider, which).PreserveAspectRatio));
         }
 
-        /// <summary>Adds a reading of one screen's setting, called <paramref name="said" />, taking which screen.</summary>
-        static void Value(EntityKind kind, string said, Being being, IList<string> names)
+        /// <summary>Adds a reading of one screen's setting, called <paramref name="said" />.</summary>
+        void Value(EntityKind kind, string said, Being being)
         {
-            kind.WithValue(said.Replace(' ', '-'), said, being.Taking(Faces(names))).Looked(Unheard).In(Category.Screen);
+            kind.WithValue(said.Replace(' ', '-'), said, being).Looked(Unheard).In(Category.Screen).Of(this);
         }
 
-        /// <summary>The names of the block's screens, as the game gives them, or numbered where it gives none.</summary>
-        static IList<string> Names(IMyTextSurfaceProvider screens)
+        /// <summary>The names of the block's screens, as the game names them, or numbered where it names none.</summary>
+        public static IList<string> Names(IMyTextSurfaceProvider screens)
         {
             var names = new string[screens.SurfaceCount];
             for (var i = 0; i < names.Length; i++)
@@ -108,35 +147,26 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return fonts;
         }
 
-        /// <summary>The screen a member means, among <paramref name="names" />.</summary>
-        static Field Faces(IList<string> names)
-        {
-            var screen = Field.Among("screen", names, names);
-            screen.Entry = Entry.Text;
-            screen.Needed = true;
-            return screen;
-        }
-
         /// <summary>The text to show.</summary>
         static Field Lines()
         {
             var text = Field.Called("text");
             text.Entry = Entry.Text;
             text.Edits = Editor.Lines;
-            text.Longest = Screen.TextLongest;
+            text.Longest = TextLongest;
             text.Needed = true;
             return text;
         }
 
-        /// <summary>The screen to set up, then each setting, every one left as it is where it is left empty.</summary>
-        static Field[] Asked(IList<string> names, IList<string> fonts)
+        /// <summary>Each setting of the screen to set up, every one left as it is where it is left empty.</summary>
+        static Field[] Asked(IList<string> fonts)
         {
             var font = fonts.Count > 0 ? Field.Among("font", fonts, fonts) : Field.Called("font");
             font.Entry = Entry.Text;
 
             return new[]
             {
-                Faces(names), Field.Among("content", Contents, Contents), Field.Holding("text color", Editor.Colour, 1),
+                Field.Among("content", Contents, Contents), Field.Holding("text color", Editor.Colour, 1),
                 Field.Holding("background color", Editor.Colour, 1), font, Decimal("font size", "0.1", "10"),
                 Field.Among("alignment", Alignments, Alignments), Decimal("padding", "0", "50"),
                 Field.Holding("app color", Editor.Colour, 1), Field.Holding("app background color", Editor.Colour, 1),
@@ -184,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             Surface(provider, shown.Which).WriteText(shown.Text);
         }
 
-        /// <summary>Sets each setting <paramref name="look" /> was given on its screen, and leaves the rest.</summary>
+        /// <summary>Sets each setting <paramref name="look" /> holds on its screen, and leaves the rest.</summary>
         static void Apply(IMyTextSurfaceProvider provider, Look look, Recall seen)
         {
             var surface = Surface(provider, look.Which);
@@ -212,18 +242,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 surface.PreserveAspectRatio = look.KeepsAspectRatio.Value;
         }
 
-        /// <summary>The screen a member was given.</summary>
+        /// <summary>The screen a member acts on.</summary>
         sealed class Picked
         {
             /// <summary>Where the screen is among the block's, counted from 0.</summary>
             public int Screen;
 
-            /// <summary>The screen named first among <paramref name="arguments" />, among <paramref name="names" />.</summary>
-            public static Picked Read(IList<Literal> arguments, IList<string> names)
+            /// <summary>The screen its slot holds, first among <paramref name="arguments" />, counted from 1; the first where none is.</summary>
+            public static Picked Read(IList<Literal> arguments)
             {
-                var name = arguments != null && arguments.Count > 0 ? arguments[0].Text : null;
-                var at = name == null ? -1 : names.IndexOf(name);
-                return new Picked { Screen = at < 0 ? 0 : at };
+                var given = arguments != null && arguments.Count > 0 && arguments[0].Kind == ValueKind.Integer ? arguments[0].Whole : 1;
+                return new Picked { Screen = given < 1 || given > int.MaxValue ? 0 : (int)given - 1 };
             }
         }
 
@@ -236,18 +265,18 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             /// <summary>What is shown.</summary>
             public string Text = "";
 
-            /// <summary>What a step showing text was given.</summary>
-            public static Shown Read(IList<Literal> arguments, IList<string> names)
+            /// <summary>The values of a step showing text, after its screen.</summary>
+            public static Shown Read(IList<Literal> arguments)
             {
                 return new Shown
                 {
-                    Which = Picked.Read(arguments, names),
+                    Which = Picked.Read(arguments),
                     Text = arguments != null && arguments.Count > 1 ? arguments[1].Text ?? "" : ""
                 };
             }
         }
 
-        /// <summary>The screen a step sets up, and each setting it was given.</summary>
+        /// <summary>The screen a step sets up, and each setting it was set to.</summary>
         sealed class Look
         {
             /// <summary>The screen.</summary>
@@ -286,10 +315,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             /// <summary>Whether an image keeps its shape, or null to leave it.</summary>
             public bool? KeepsAspectRatio;
 
-            /// <summary>What a step setting up a screen was given, in the order <see cref="Screens.Asked" /> asks for it.</summary>
-            public static Look Read(IList<Literal> arguments, IList<string> names)
+            /// <summary>The values of a step setting up a screen, after its screen, in the order <see cref="Asked" /> asks for it.</summary>
+            public static Look Read(IList<Literal> arguments)
             {
-                var look = new Look { Which = Picked.Read(arguments, names) };
+                var look = new Look { Which = Picked.Read(arguments) };
                 look.Content = Chosen(arguments, 1, Contents);
                 look.TextColor = Colored(arguments, 2);
                 look.BackgroundColor = Colored(arguments, 3);
@@ -306,7 +335,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return look;
             }
 
-            /// <summary>Whether the setting at <paramref name="at" /> was given, which an empty one was not.</summary>
+            /// <summary>Whether the setting at <paramref name="at" /> holds a value, which an empty one does not.</summary>
             static bool Given(IList<Literal> arguments, int at)
             {
                 return arguments != null && at < arguments.Count

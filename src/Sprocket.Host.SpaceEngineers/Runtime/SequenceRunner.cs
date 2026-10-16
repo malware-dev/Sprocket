@@ -1363,6 +1363,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             public GridEntity Entity;
             public EntityAction Action;
+
+            /// <summary>The number of the facet a member of a type the host provides acts on, from 1, or 0 for a member of the block.</summary>
+            public int Facet;
+
             public IList<Literal> Arguments;
             public Bound Bound;
             public Order Order;
@@ -1440,7 +1444,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (action == null)
                     continue;
 
-                var shared = Shared(compiled, action, act.Arguments);
+                // A block lacking the facet its slot holds is left out, and the fault names it.
+                var type = action.Type;
+                var facet = type == null ? 0 : FacetOf(act.Targets, name);
+                if (type != null && facet > 0 && type.Find(entity.Kind, facet) == null)
+                    continue;
+
+                var shared = Shared(compiled, action, act.Arguments, facet);
                 if (shared == null)
                     continue;
 
@@ -1448,6 +1458,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 {
                     Entity = entity,
                     Action = action,
+                    Facet = facet,
                     Arguments = shared.Arguments,
                     Bound = shared.Bound,
                     Order = entity.Prepare(action, shared.Bound, shared.Arguments),
@@ -1478,8 +1489,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var reading = ActedOn(test.Targets);
             foreach (var name in reading)
             {
-                var probe = Probe.Of(_bindings.Entity(name), test.Provider, test.MemberId, test.Arguments,
-                    test.Quantifier, test.Relation, test.Value, null, _owner.Clock);
+                // A block lacking the facet its slot holds is left out, and the fault names it.
+                var entity = _bindings.Entity(name);
+                var member = entity == null ? null : test.Names(entity.Kind.Actions);
+                var facet = FacetOf(test.Targets, name);
+                if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
+                    continue;
+
+                var probe = Probe.Of(entity, test.Provider, test.MemberId, test.Arguments,
+                    test.Quantifier, test.Relation, test.Value, null, _owner.Clock, facet);
 
                 if (probe != null)
                     tested.Reads.Add(probe);
@@ -1554,13 +1572,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </summary>
         /// <remarks>
         /// Shared between the blocks of one act that do the same thing, which is every block of the
-        /// same kind: an airlock's two doors are handed one list, and one reading of it.
+        /// same kind: an airlock's two doors are handed one list, and one reading of it. A member of a type the host provides
+        /// receives the number <paramref name="facet" /> of its facet first, so its blocks share only as far as they share a facet.
         /// </remarks>
-        static Acted Shared(Compiled compiled, EntityAction action, IList<Literal> given)
+        static Acted Shared(Compiled compiled, EntityAction action, IList<Literal> given, int facet)
         {
             foreach (var acted in compiled.Acts)
             {
-                if (acted.Action == action)
+                if (acted.Action == action && acted.Facet == facet)
                     return acted;
             }
 
@@ -1571,8 +1590,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return new Acted
             {
                 Arguments = converted,
-                Bound = action.Doing?.Bind(converted)
+                Bound = action.Doing?.Bind(action.Type == null ? converted : HostType.Arguments(facet, converted))
             };
+        }
+
+        /// <summary>The number of the facet of <paramref name="block" /> the slots <paramref name="targets" /> hold, from 1, or 0 where they hold none.</summary>
+        int FacetOf(IList<string> targets, string block)
+        {
+            return _instance == null ? 0 : _instance.FacetOf(targets, block);
         }
     }
 }

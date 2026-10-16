@@ -64,10 +64,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>
         /// A value of Sprocket's own is read through what declares it; one of the block's own through the property the game
         /// hands out, found once. A one of a list is compared for sameness by its position among the names, worked out here.
-        /// Only numbers are ordered or summed.
+        /// Only numbers are ordered or summed. A value of a type the host provides reads the facet numbered <paramref name="facet" />,
+        /// the first where it names none.
         /// </remarks>
         public static Probe Of(GridEntity entity, string provider, string id, IList<Literal> arguments, Quantifier quantifier,
-            Relation relation, Literal value, ReadingMemory kept = null, Func<int> clock = null)
+            Relation relation, Literal value, ReadingMemory kept = null, Func<int> clock = null, int facet = 0)
         {
             if (entity == null || (provider.Length > 0 && provider != BlockKinds.Own))
                 return null;
@@ -96,7 +97,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
             else
             {
-                gauge = being.Gauge(entity.Block, arguments, being.Remembers ? Remembered(kept, true, clock) : null);
+                var given = written.Type == null ? arguments : HostType.Arguments(facet, arguments);
+                gauge = being.Gauge(entity.Block, given, being.Remembers ? Remembered(kept, true, clock) : null);
                 if (kind == ValueKind.Name)
                 {
                     var at = being.Position(operand.Text);

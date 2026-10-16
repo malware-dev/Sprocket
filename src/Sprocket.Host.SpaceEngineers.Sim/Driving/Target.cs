@@ -137,6 +137,10 @@ namespace Sprocket.Sim.Driving
         public static SlotStrip? Slots(this SprocketEditor editor) =>
             editor.Stages().SelectMany(column => column.Rows.OfType<SlotStrip>()).SingleOrDefault();
 
+        /// <summary>The drop box of screens open under the chosen member of a pick, or null where none is.</summary>
+        public static FacetChoice? Facets(this SprocketEditor editor) =>
+            editor.Stages().SelectMany(column => column.Rows.OfType<FacetChoice>()).SingleOrDefault();
+
         /// <summary>The choices about the picking a column offers, in the order they stand.</summary>
         public static List<OptionRow> Choices(this StageColumn column) => column.Options.OfType<OptionRow>().ToList();
 

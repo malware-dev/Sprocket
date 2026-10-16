@@ -933,14 +933,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
                 answer =>
                 {
-                    var named = Editor.Named(_sequence.System, answer.Targets, step.Targets);
+                    var named = Named(answer, step.Targets);
                     var lasts = Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form);
                     Editor.Do(_sequence,
                         new ChangeStep(index, step, named, answer.Chosen,
                             answer.Form, Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form),
                             answer.Arguments, Awaited(index, step, lasts)));
                     Editor.Pop();
-                }, arguments: step.Arguments, opens: opens));
+                }, arguments: step.Arguments, opens: opens, facet: Editor.Facet(_sequence.System, step.Targets)));
+        }
+
+        /// <summary>
+        /// The names the step answered by <paramref name="answer" /> acts on, in place of <paramref name="replacing" /> where it
+        /// replaces a list: a slot of the facet chosen, where what it does is a member of a type the host provides.
+        /// </summary>
+        List<string> Named(PickAnswer answer, IList<string> replacing)
+        {
+            var type = answer.Facet.Length == 0 ? null : Vocabulary.TypeOf(Editor.World, answer.Targets, answer.Chosen);
+            return type == null
+                ? Editor.Named(_sequence.System, answer.Targets, replacing)
+                : Editor.Named(_sequence.System, type, answer.Facet, answer.Targets, replacing);
         }
 
         /// <summary>
@@ -968,7 +980,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     var step = new Act(answer.Chosen);
                     step.Form = answer.Form;
                     step.Provider = Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form);
-                    var named = Editor.Named(_sequence.System, answer.Targets);
+                    var named = Named(answer, null);
                     foreach (var target in named)
                         step.Targets.Add(target);
 
@@ -1047,7 +1059,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 answer => chosen(Test(answer, test)),
                 true, test?.Quantifier ?? Quantifier.Any,
                 test == null ? null : stated ? new[] { Comparing.Of(test.Relation) } : new[] { Comparing.Of(test.Relation), test.Value },
-                opens, forTests: true);
+                opens, forTests: true, facet: test == null ? "" : Editor.Facet(_sequence.System, test.Targets));
         }
 
         /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>
@@ -1060,7 +1072,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var test = new Comparison();
             test.Quantifier = answer.Quantifier;
-            var named = Editor.Named(_sequence.System, answer.Targets, was?.Targets);
+            var named = Named(answer, was?.Targets);
             foreach (var target in named)
                 test.Targets.Add(target);
 

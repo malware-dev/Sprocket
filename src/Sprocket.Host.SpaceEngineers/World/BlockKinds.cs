@@ -66,6 +66,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Describe(kind, block, _capabilities.Floor);
 
+            // What the block has of each type the host provides, a screen of each, with the members of each type.
+            Describe(kind, block, HostTypes.All);
+
             // And then everything the block says it can do, which is most of what Sprocket can offer
             // about most blocks. Last, so the words chosen for a sentence come first where there are
             // any: a door reads "open" above "Open/Closed".
@@ -92,6 +95,22 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 kind.Known(capabilities[i]);
                 capabilities[i].Describe(kind, block);
+            }
+        }
+
+        /// <summary>Has every one of <paramref name="types" /> that <paramref name="block" /> has anything of describe its members, and keeps what the block has of it.</summary>
+        static void Describe(EntityKind kind, IMyTerminalBlock block, IList<HostType> types)
+        {
+            var facets = new List<HostTypeFacet>();
+            foreach (var type in types)
+            {
+                if (!type.Claims(block))
+                    continue;
+
+                facets.Clear();
+                type.Offered(block, facets);
+                kind.Offering(type, facets);
+                type.Describe(kind, block);
             }
         }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using VRageMath;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -947,6 +948,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (part.IsSignal)
                 pen.Says(Keyword.Expects).Says(Keyword.Signal);
+            else if (part.Holds.Length > 0)
+                pen.Says(Keyword.Expects).Qualified(Space(part.Holds), Name(part.Holds));
             else if (part.Expects.Length > 0)
                 pen.Says(Keyword.Expects).Word(part.Expects);
 
@@ -988,12 +991,41 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var one = statement.ValueAt(3);
             if (one.Says(Keyword.Signal))
                 part.IsSignal = true;
+            else if (one.Form == ValueForm.Qualified)
+                Holding(statement, part, trouble);
             else if (Named(one))
                 part.Expects = one.Word;
             else
-                trouble.Say(statement, "expected signal or one block type after 'expects'.");
+                trouble.Say(statement, "expected signal, one block type or a type the host provides after 'expects'.");
 
             Ends(statement, 4, trouble);
+        }
+
+        /// <summary>The type the host provides that the slot <paramref name="part" /> expects, written qualified at 3, or trouble.</summary>
+        static void Holding(Statement statement, Part part, Trouble trouble)
+        {
+            var parts = statement.Parts(3);
+            var type = parts.Count == 2 ? HostTypes.Named(parts[0].Word + "." + parts[1].Word) : null;
+            if (type == null)
+            {
+                trouble.Say(statement, "no type '" + Spelling(parts) + "' the host provides.");
+                return;
+            }
+
+            part.Holds = type.Id;
+        }
+
+        /// <summary>The namespace of a qualified id: <c>ext</c> of <c>ext.screen</c>.</summary>
+        static string Space(string id)
+        {
+            var dot = id.IndexOf('.');
+            return dot < 0 ? "" : id.Substring(0, dot);
+        }
+
+        /// <summary>The name of a qualified id: <c>screen</c> of <c>ext.screen</c>.</summary>
+        static string Name(string id)
+        {
+            return id.Substring(id.IndexOf('.') + 1);
         }
 
         /// <summary>
@@ -1031,10 +1063,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Head(part).Says(Keyword.Equals);
 
                 var positions = instance.Positions(part);
-                if (positions == null)
-                    WriteNames(pen, instance.FilledWith(part));
-                else
+                var facets = instance.Facets(part);
+                var type = facets == null ? null : HostTypes.Named(system.FindPart(part)?.Holds);
+                if (positions != null)
                     Slots(pen, program, instance.FilledWith(part), positions);
+                else if (type != null)
+                    Facets(pen, type, instance.FilledWith(part), facets);
+                else
+                    WriteNames(pen, instance.FilledWith(part));
 
                 pen.End();
             }
@@ -1179,6 +1215,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
+                var held = HostTypes.Named(part.Holds);
+                if (held != null)
+                {
+                    Facets(inner, held, instance, program, trouble);
+                    continue;
+                }
+
                 var filled = new List<string>();
                 if (!Names(inner, 1, filled, trouble, "expected variables holding blocks in the list."))
                     continue;
@@ -1191,6 +1234,72 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 instance.Fill(inner.Head, filled);
             }
+        }
+
+        /// <summary>
+        /// <c>status = [ ext.screen(1) on [ board ] ]</c>: what answers a slot of the type <paramref name="type" /> in one use of
+        /// a blueprint, each written in place by the function returning one, a thing of each block it is on.
+        /// </summary>
+        static void Facets(Statement statement, HostType type, SystemInstance instance, Automation program, Trouble trouble)
+        {
+            var items = statement.Items(1);
+            var blocks = new List<string>();
+            var facets = new List<int>();
+            var like = type.Id + "(1) on [ <block> ]";
+            for (var i = 0; i < items.Count; i++)
+            {
+                var member = statement.Member(items[i]);
+                if (items[i].Form != ValueForm.Reference || member.Count != 2 || member[0].Word + "." + member[1].Word != type.Id)
+                {
+                    trouble.Say(statement, "expected " + type.Id + " in the list, like [ " + like + " ].");
+                    return;
+                }
+
+                var given = statement.Arguments(items[i]);
+                var number = given.Count == 1 ? Statement.Counted(given[0]) : 0;
+                if (number == 0)
+                {
+                    trouble.Say(statement, "expected " + type.Id + "(<number>), a whole number from 1.");
+                    return;
+                }
+
+                var on = statement.On(items[i]);
+                if (on.Count == 0)
+                {
+                    trouble.Say(statement, "expected the blocks it is on.");
+                    return;
+                }
+
+                for (var n = 0; n < on.Count; n++)
+                {
+                    if (!Named(on[n]))
+                    {
+                        trouble.Say(statement, "expected names in the list.");
+                        return;
+                    }
+
+                    if (program.FindRef(on[n].Word) == null)
+                    {
+                        trouble.Say(statement, "no variable '" + on[n].Word + "' holding a block above this line.");
+                        return;
+                    }
+
+                    blocks.Add(on[n].Word);
+                    facets.Add(number);
+                }
+            }
+
+            instance.Fill(statement.Head, blocks, facets);
+        }
+
+        /// <summary>The answers to a slot of the type <paramref name="type" /> as a list, each block's facet written in place on it.</summary>
+        static void Facets(Pen pen, HostType type, IList<string> blocks, IList<int> facets)
+        {
+            pen.OpenList();
+            for (var i = 0; blocks != null && i < blocks.Count && i < facets.Count; i++)
+                pen.Facet(type, new[] { blocks[i] }, facets[i]);
+
+            pen.CloseList();
         }
 
         /// <summary>

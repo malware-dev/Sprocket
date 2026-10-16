@@ -453,6 +453,29 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return uses;
         }
 
+        /// <summary>The first action of its triggers and steps that acts on <paramref name="slot" />, or null where none does.</summary>
+        public Act ActingOn(string slot)
+        {
+            foreach (var trigger in _triggers)
+            {
+                var own = trigger.Acts;
+                if (own != null && own.Targets.Contains(slot))
+                    return own;
+            }
+
+            foreach (var sequence in _sequences)
+            {
+                foreach (var step in sequence.Steps)
+                {
+                    var act = step as Act;
+                    if (act != null && act.Targets.Contains(slot))
+                        return act;
+                }
+            }
+
+            return null;
+        }
+
         /// <summary>How many of <paramref name="ids" /> are <paramref name="id" />.</summary>
         public static int Count(IList<string> ids, string id)
         {

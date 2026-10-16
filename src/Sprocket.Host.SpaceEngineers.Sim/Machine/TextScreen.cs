@@ -3,6 +3,8 @@ using Sandbox.ModAPI;
 using Sprocket.Sim.Fakes;
 using VRage.Game.GUI.TextPanel;
 using VRage.ObjectBuilders;
+using IMyTextSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
+using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 
 namespace Sprocket.Sim.Machine;
 
@@ -17,7 +19,25 @@ public sealed class TextScreen : Fitting
     public TextScreen(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
+        // Its one screen is the panel itself, as the game hands a panel's screen to a mod: what it writes is the panel's text.
+        var surface = Pretend.To<IMyTextSurface>()
+            .Gives("DisplayName", () => "")
+            .Does("GetFonts", _ => null!)
+            .Does("WriteText", arguments =>
+            {
+                Text = (string)arguments[0];
+                return true;
+            })
+            .Gives("ContentType", () => Content)
+            .Takes("ContentType", value => Content = (ContentType)value)
+            .Gives("Script", () => App)
+            .Done();
+
         Fit(Pretend.To<IMyTextPanel>()
+            .Also<IMyTextSurfaceProvider>()
+            .Gives("UseGenericLcd", () => false)
+            .Gives("SurfaceCount", () => 1)
+            .Does("GetSurface", _ => surface)
             .Does("GetText", () => Text)
             .Gives("Script", () => App)
             .Takes("Script", value => App = (string)value)

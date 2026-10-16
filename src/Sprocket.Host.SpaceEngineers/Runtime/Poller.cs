@@ -281,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var probe = when != null
                     ? Probe.Of(entity, when.Provider, when.EventId, when.Arguments, when.Quantifier, when.Relation, when.Value, read,
-                        _owner.Clock)
+                        _owner.Clock, _instance == null ? 0 : _instance.FacetOf(when.Sources, name))
                     : Probe.Watching(entity, signal.Provider, signal.EventId, read, _owner.Clock);
 
                 var ruling = probe?.RuledOutBy;

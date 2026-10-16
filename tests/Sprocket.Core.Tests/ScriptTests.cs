@@ -374,7 +374,7 @@ public class ScriptTests
         Closes(program, "inner");
         var text = Save(program).Replace("expects Door\n", "expects [ Door, AirtightSlideDoor ]\n");
 
-        Assert.Contains("expected signal or one block type after 'expects'.", Load(text, new Automation()));
+        Assert.Contains("expected signal, one block type or a type the host provides after 'expects'.", Load(text, new Automation()));
     }
 
     /// <summary>A part a construct may leave unfilled is written optional, and read back as one.</summary>

@@ -30,6 +30,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public bool IsSignal { get; set; }
 
         /// <summary>
+        /// The id of the type the host provides that this part holds, as a part expecting it names it, <c>ext.screen</c>; or
+        /// empty for a part holding blocks or a signal.
+        /// </summary>
+        /// <remarks>A part holding a host type is answered by one thing of that type on each of its blocks: a screen of each.</remarks>
+        public string Holds { get; set; } = "";
+
+        /// <summary>
         /// The type of block that may fill this part, or empty for any block.
         /// </summary>
         /// <remarks>

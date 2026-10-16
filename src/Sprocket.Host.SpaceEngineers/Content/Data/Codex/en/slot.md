@@ -4,18 +4,21 @@ For one ![](mark:logic-system)&nbsp;[logic system](logic-system) to run every ai
 
 - A ![](mark:block)&nbsp;**block slot** holds the blocks a step acts on or a trigger watches, like a door, or every light in the airlock.
 - A ![](mark:signal)&nbsp;**signal slot** holds a block and the toolbar slot on it that sends the [signal](signal), like a button panel and one of its buttons.
+- A ![](mark:block)&nbsp;**slot of screens** holds blocks and which of each block's screens, for a step or an [if](if) that acts on a screen. A text panel has one screen, a cockpit or a billboard several.
 
 The blocks you select fill the slots for the installation selected under `Installation`. Every other installation fills them on its own [installation panel](installation-panel).
 
 ## How slots are made
 
-You don't make slots yourself. Each time you [select](selector) blocks for a step, a trigger or an [if](if), the blocks you selected together are a group, and the logic system makes its slots from those groups:
+You don't make slots yourself. Each time you [select](selector) blocks for a step, a trigger or an if, the blocks you selected together are a group, and the logic system makes its slots from those groups:
 
 - **The same group twice is one slot.** A step that closes the inner door and another that opens it both use *Airlock Inner Door*.
 - **A group made of other slots uses them.** Where the inner and outer doors each have a slot already, a step that closes both doors uses those two slots, and makes no new one.
 - **Any other group is a slot of its own.** A step that switches off both the inner door and the airlock's light, where the light has no slot yet, makes *Slot 1* of the two. The inner door is then in two slots, and each installation fills both.
 
 A slot of one block takes the block's name, and a slot of several is numbered.
+
+A slot of screens is the exception to the groups: each step or if that acts on a screen has one of its own, named the same way. Selecting other blocks or another screen for that step keeps its slot, and the choices of its other installations. A slot of screens that nothing uses any more goes, as other slots do.
 
 A slot takes one type of block: the nearest type its blocks all share, by the game's own types. One interior light, or several, make a slot for `Interior light`. An interior light and a spotlight make a slot for `Light`, which takes either. A light and a door make one for `Block that switches on and off`, and blocks that share nothing nearer make a slot that takes any block. The slot's page shows its type under `Expects`.
 

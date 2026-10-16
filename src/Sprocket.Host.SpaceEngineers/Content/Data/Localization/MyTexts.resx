@@ -994,6 +994,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>The {slot} slot is empty. Fill it on the installation panel.</value>
     <comment>Problem when a slot of a blueprint that a step or trigger needs has no block in this installation; {slot} is the slot's name as the blueprint's author gave it. Shown under the step's line on a sequence's screen (on the bar at the top for a trigger's slot), on the sequence's or trigger's row on a logic system's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
   </data>
+  <data name="Sprocket.Problem.MissingScreen" xml:space="preserve">
+    <value>{block} doesn't have the screen this step uses. Choose its screen on the installation panel.</value>
+    <comment>Problem when a block in a step's slot lacks the screen the installation chose of it, for example because it was replaced by a block with fewer screens; {block} is the block's name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
   <data name="Sprocket.Problem.BlockOff" xml:space="preserve">
     <value>{block} is switched off. Switch it on first.</value>
     <comment>Problem when a step asked a switched-off block for something it waits for, so the run ended there; {block} is the block's name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
@@ -1165,6 +1169,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Stopped.OptionMissing" xml:space="preserve">
     <value>its {name} was missing.</value>
     <comment>Reason a run stopped: a step lacked an option its action needs; {name} is the option, such as speed. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Stopped.MissingScreen" xml:space="preserve">
+    <value>{block} didn't have the screen the step uses.</value>
+    <comment>Reason a run stopped: a block in a step's slot lacked the screen the installation chose of it; {block} is the block's name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.OptionWrong" xml:space="preserve">
     <value>its {name} didn't fit the action.</value>

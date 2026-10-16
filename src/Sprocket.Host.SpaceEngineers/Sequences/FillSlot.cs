@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _slot;
         readonly List<string> _blocks;
         readonly List<ToolbarSlot> _at;
+        readonly List<int> _facets;
         readonly Action<AutomationSystem> _settle;
         readonly List<Kept> _was = new List<Kept>();
 
@@ -27,6 +28,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _slot = slot;
             _blocks = CopyOf(blocks);
             _at = at == null ? null : new List<ToolbarSlot>(at);
+            _settle = settle;
+        }
+
+        /// <summary>
+        /// Fills <paramref name="slot" /> of <paramref name="instance" />, a slot of a type the host provides, with
+        /// <paramref name="blocks" />, each holding the facet <paramref name="facets" /> numbers, from 1, then runs <paramref name="settle" />.
+        /// </summary>
+        public FillSlot(SystemInstance instance, string slot, IList<string> blocks, IList<int> facets, Action<AutomationSystem> settle)
+        {
+            Instance = instance;
+            _slot = slot;
+            _blocks = CopyOf(blocks);
+            _facets = new List<int>(facets);
             _settle = settle;
         }
 
@@ -76,14 +90,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 foreach (var slot in instances[i].Filled)
                 {
                     var at = instances[i].Positions(slot);
-                    _was.Add(new Kept(instances[i], slot, CopyOf(instances[i].FilledWith(slot)), at == null ? null : new List<ToolbarSlot>(at)));
+                    var facets = instances[i].Facets(slot);
+                    _was.Add(new Kept(instances[i], slot, CopyOf(instances[i].FilledWith(slot)), at == null ? null : new List<ToolbarSlot>(at),
+                        facets == null ? null : new List<int>(facets)));
                 }
             }
 
-            if (_at == null)
-                Instance.Fill(_slot, _blocks);
-            else
+            if (_at != null)
                 Instance.Fill(_slot, _blocks, _at);
+            else if (_facets != null)
+                Instance.Fill(_slot, _blocks, _facets);
+            else
+                Instance.Fill(_slot, _blocks);
 
             if (_settle != null)
                 _settle(system);
@@ -109,10 +127,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             foreach (var kept in _was)
             {
-                if (kept.At == null)
-                    kept.Instance.Fill(kept.Slot, kept.Blocks);
-                else
+                if (kept.At != null)
                     kept.Instance.Fill(kept.Slot, kept.Blocks, kept.At);
+                else if (kept.Facets != null)
+                    kept.Instance.Fill(kept.Slot, kept.Blocks, kept.Facets);
+                else
+                    kept.Instance.Fill(kept.Slot, kept.Blocks);
             }
         }
 
@@ -135,13 +155,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             public readonly string Slot;
             public readonly List<string> Blocks;
             public readonly List<ToolbarSlot> At;
+            public readonly List<int> Facets;
 
-            public Kept(SystemInstance instance, string slot, List<string> blocks, List<ToolbarSlot> at)
+            public Kept(SystemInstance instance, string slot, List<string> blocks, List<ToolbarSlot> at, List<int> facets)
             {
                 Instance = instance;
                 Slot = slot;
                 Blocks = blocks;
                 At = at;
+                Facets = facets;
             }
         }
     }

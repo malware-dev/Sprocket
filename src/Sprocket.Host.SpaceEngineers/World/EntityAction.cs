@@ -225,6 +225,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public Category Category { get; set; }
 
+        /// <summary>The type the host provides that this is a member of, or null for a member of the block itself.</summary>
+        /// <remarks>
+        /// A member of a type acts on the thing of that type its slot holds of each block, a screen of each, and its options
+        /// receive that thing's number first, from 1, ahead of the step's own values.
+        /// </remarks>
+        public HostType Type { get; set; }
+
         /// <summary>Whether this value is the status of the block, which a check in the organized view reads as the block itself: "Airlock Door is open".</summary>
         /// <remarks>The editor's wording alone; the script names the value as it names any other.</remarks>
         public bool IsStatus { get; set; }

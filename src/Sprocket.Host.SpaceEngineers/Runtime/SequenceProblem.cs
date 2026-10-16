@@ -128,6 +128,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>One of its awaits has nothing to wait for: no step since the await before it takes time.</summary>
         /// <remarks>A warning: the await passes straight on, and is most likely left over from a step taken away or changed.</remarks>
-        NothingToAwait
+        NothingToAwait,
+
+        /// <summary>A block in one of its steps' slots lacks the screen, or other facet, the installation chose of it.</summary>
+        /// <remarks>
+        /// The block was replaced by one with fewer screens, or the slot was written somewhere other than the editor. The step
+        /// does nothing to that block, and the fault names it, since choosing another screen on the installation panel mends it.
+        /// </remarks>
+        MissingFacet
     }
 }

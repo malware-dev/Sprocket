@@ -21,6 +21,7 @@ public sealed class Face
             })
             .Gives("ContentType", () => Content)
             .Takes("ContentType", value => Content = (ContentType)value)
+            .Gives("Script", () => App)
             .Gives("FontSize", () => FontSize)
             .Takes("FontSize", value => FontSize = (float)value)
             .Gives("FontColor", () => FontColor)
@@ -38,6 +39,9 @@ public sealed class Face
 
     /// <summary>What it is set to show.</summary>
     public ContentType Content { get; set; }
+
+    /// <summary>The app it runs while it is set to show one, by the game's id for it.</summary>
+    public string App { get; set; } = "";
 
     /// <summary>Its text's size.</summary>
     public float FontSize { get; set; } = 1f;

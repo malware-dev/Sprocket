@@ -96,7 +96,8 @@ the host gives that member. A flag is `on` or `off`. One of a list is written as
 Wherever a real is taken, an integer stands for one.
 
 A signal is something a block sends: `Gearbox.closes` is sent as a door finishes closing. A function
-may give back a signal too, named by the place it is sent from, a place the host offers. Either starts
+may return a signal too, named by the place it is sent from, a place the host offers, or a thing of a
+type the host provides (see [Types](#types)). Either starts
 a step with `whenever`, and is written in place after `whenever`, in a variable, or answering a slot that expects
 `signal`. Its blocks are a set like any other, and the signal is sent from any of them.
 
@@ -113,6 +114,18 @@ if all Gearbox.status on [ inner ] == closed then {
     call Gearbox.open on [ outer ]
 }
 ```
+
+### Types
+
+A host may provide types of its own, beside the built-in types: things found on a block that are not blocks, like a
+screen. A host type is named as a member is, qualified by its namespace: `Gearbox.screen`. A function of the host
+returns one from a block: `Gearbox.screen(1) on [ board ]` is the first screen of the block `board`.
+
+A thing of a host type has the members the host provides for that type, written as a block's are:
+`call Gearbox.'show text'("Docked") on [ status ]`, where `status` holds screens. A member the host does not
+provide for that type is an error.
+
+Which types a host provides, which functions return each, and which members each has, is the host's to say.
 
 ### Namespaces
 
@@ -224,7 +237,9 @@ optional slot button expects signal
 ```
 
 `required slot <name> expects <what>` asks the construct for it. `expects` names what may fill the
-slot: a block's type, or `signal` for a slot answered by a function that gives back a signal. A
+slot: a block's type; `signal`, for a slot answered by a function that returns a signal; or a type the
+host provides, written qualified, for a slot answered by functions that return one:
+`optional slot status expects Gearbox.screen`. A
 block's type is a game type id with the `MyObjectBuilder_` prefix dropped, which takes every block of
 that type and of every type the game builds on it, so `LightingBlock` takes interior lights and
 spotlights alike; or a quoted `'Type/Subtype'` for one exact block. A slot with no `expects` takes
@@ -504,8 +519,8 @@ instance <n> of <system blueprint> [as '<name>'] {
 ```
 
 `<slot> = [ <answers> ]` says what on the program's construct answers a slot of the system blueprint:
-variables holding blocks, or, for a slot that expects `signal`, functions that give back a signal,
-written in place, or variables holding one. More than one may answer a slot, and more than one answer to a
+variables holding blocks, or, for a slot that expects `signal` or a host's type, functions that return one:
+`status = [ Gearbox.screen(1) on [ board ] ]`, written in place, or variables holding one. More than one may answer a slot, and more than one answer to a
 slot that expects `signal` means any of them starts it. An instance that leaves a required slot unanswered is missing
 it.
 

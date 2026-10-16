@@ -22,9 +22,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
         }
 
-        /// <summary>An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, given <paramref name="arguments" />, reaching the blocks the way <paramref name="form" /> says.</summary>
+        /// <summary>
+        /// An answer acting on <paramref name="targets" /> with <paramref name="chosen" />, with the values <paramref name="arguments" />,
+        /// reaching the blocks the way <paramref name="form" /> says, on the facet of each called <paramref name="facet" /> where
+        /// what was chosen is a member of a type the host provides.
+        /// </summary>
         public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier, IList<Literal> arguments,
-            Nature form = Nature.Native)
+            Nature form = Nature.Native, string facet = "")
         {
             for (var i = 0; i < targets.Count; i++)
                 _targets.Add(targets[i]);
@@ -38,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Chosen = chosen;
             Quantifier = quantifier;
             Form = form;
+            Facet = facet ?? "";
         }
 
         /// <summary>The entities what was chosen acts on.</summary>
@@ -55,6 +60,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>The event or action that was chosen.</summary>
         public string Chosen { get; private set; }
+
+        /// <summary>The name, shared by every block, of the facet a member of a type the host provides acts on; empty for any other.</summary>
+        public string Facet { get; private set; }
 
         /// <summary>Which of the three ways what was chosen reaches the blocks.</summary>
         public Nature Form { get; private set; }

@@ -762,6 +762,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Problem.EmptySlot" xml:space="preserve">
     <value>Plassen {slot} er tom. Fyll den på installasjonspanelet.</value>
   </data>
+  <data name="Sprocket.Problem.MissingScreen" xml:space="preserve">
+    <value>{block} har ikke skjermen dette steget bruker. Velg skjermen på installasjonspanelet.</value>
+  </data>
   <data name="Sprocket.Problem.BlockOff" xml:space="preserve">
     <value>{block} er slått av. Slå den på først.</value>
   </data>
@@ -890,6 +893,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Stopped.OptionMissing" xml:space="preserve">
     <value>{name} manglet.</value>
+  </data>
+  <data name="Sprocket.Stopped.MissingScreen" xml:space="preserve">
+    <value>{block} hadde ikke skjermen steget bruker.</value>
   </data>
   <data name="Sprocket.Stopped.OptionWrong" xml:space="preserve">
     <value>{name} passet ikke til handlingen.</value>

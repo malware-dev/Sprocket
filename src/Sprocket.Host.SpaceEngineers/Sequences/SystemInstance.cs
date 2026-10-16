@@ -81,6 +81,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         readonly Dictionary<string, List<ToolbarSlot>> _positions = new Dictionary<string, List<ToolbarSlot>>();
 
+        readonly Dictionary<string, List<int>> _facets = new Dictionary<string, List<int>>();
+
         readonly Dictionary<string, string> _notes = new Dictionary<string, string>();
 
         /// <summary>The slots it fills.</summary>
@@ -93,12 +95,39 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void Fill(string slot, IList<string> entities)
         {
             _positions.Remove(slot);
+            _facets.Remove(slot);
             Blocks(slot, entities);
+        }
+
+        /// <summary>Answers a slot of a type the host provides: the facet <paramref name="facets" /> numbers, from 1, of each block of <paramref name="entities" />, in the same order.</summary>
+        public void Fill(string slot, IList<string> entities, IList<int> facets)
+        {
+            _positions.Remove(slot);
+            Blocks(slot, entities);
+
+            List<int> held;
+            if (!_facets.TryGetValue(slot, out held))
+            {
+                held = new List<int>();
+                _facets[slot] = held;
+            }
+
+            held.Clear();
+            for (var i = 0; i < facets.Count; i++)
+                held.Add(facets[i]);
+        }
+
+        /// <summary>Which facet of each of the blocks filling <paramref name="slot" /> it holds, by number from 1, in the blocks' order, or null where it holds no host type.</summary>
+        public IList<int> Facets(string slot)
+        {
+            List<int> held;
+            return _facets.TryGetValue(slot, out held) ? held : null;
         }
 
         /// <summary>Answers a signal slot with toolbar slots: the slot <paramref name="at" /> on each block of <paramref name="entities" />, in the same order.</summary>
         public void Fill(string slot, IList<string> entities, IList<ToolbarSlot> at)
         {
+            _facets.Remove(slot);
             Blocks(slot, entities);
 
             List<ToolbarSlot> positions;
@@ -139,6 +168,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             _fills.Remove(slot);
             _positions.Remove(slot);
+            _facets.Remove(slot);
             _notes.Remove(slot);
         }
 
@@ -173,6 +203,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 _notes.Remove(was);
                 _notes[now] = note;
+            }
+
+            List<int> facets;
+            if (_facets.TryGetValue(was, out facets))
+            {
+                _facets.Remove(was);
+                _facets[now] = facets;
             }
 
             List<ToolbarSlot> positions;
@@ -229,6 +266,28 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 foreach (var choice in chosen)
                     into.Add(choice);
             }
+        }
+
+        /// <summary>
+        /// The number of the facet of <paramref name="block" /> the first slot among <paramref name="slots" /> that holds a
+        /// host type and holds the block holds, from 1; 0 where none of them does.
+        /// </summary>
+        /// <remarks>Asked as a step is worked out, never on a tick.</remarks>
+        public int FacetOf(IList<string> slots, string block)
+        {
+            for (var i = 0; i < slots.Count; i++)
+            {
+                List<int> held;
+                List<string> chosen;
+                if (!_facets.TryGetValue(slots[i], out held) || !_fills.TryGetValue(slots[i], out chosen))
+                    continue;
+
+                var at = chosen.IndexOf(block);
+                if (at >= 0 && at < held.Count)
+                    return held[at];
+            }
+
+            return 0;
         }
     }
 }

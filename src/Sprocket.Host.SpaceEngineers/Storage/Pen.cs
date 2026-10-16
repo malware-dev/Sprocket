@@ -154,6 +154,24 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return this;
         }
 
+        /// <summary>A thing of the type <paramref name="type" /> on some blocks, by number from 1: <c>ext.screen(1) on [ board ]</c>.</summary>
+        /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
+        public Pen Facet(HostType type, IList<string> blocks, int number)
+        {
+            Space();
+            var dot = type.Id.IndexOf('.');
+            Spell(_text, type.Id.Substring(0, dot), type.Function);
+            _text.Append('(').Append(number.ToString(CultureInfo.InvariantCulture)).Append(") on [");
+            for (var i = 0; i < blocks.Count; i++)
+            {
+                _text.Append(i == 0 ? " " : ", ");
+                Write(blocks[i]);
+            }
+
+            _text.Append(" ]");
+            return this;
+        }
+
         /// <summary>A signal sent from a toolbar slot on some blocks: <c>ext.toolbar(1, 1, 4) on [ panel1 ]</c>.</summary>
         /// <remarks>Written as one value, so it can stand as one item of a list.</remarks>
         public Pen Signal(IList<string> blocks, ToolbarSlot at)

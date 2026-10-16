@@ -15,8 +15,11 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class EntityKind
     {
+        static readonly HostTypeFacet[] None = new HostTypeFacet[0];
+
         readonly List<EntityEvent> _events = new List<EntityEvent>();
         readonly List<EntityAction> _actions = new List<EntityAction>();
+        readonly Dictionary<HostType, List<HostTypeFacet>> _facets = new Dictionary<HostType, List<HostTypeFacet>>();
         readonly List<string> _hidden = new List<string>();
         readonly List<string> _lacking = new List<string>();
         readonly List<Plan> _planned = new List<Plan>();
@@ -70,6 +73,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What a block of this kind can be told to do.</summary>
         public IList<EntityAction> Actions => _actions;
+
+        /// <summary>The types the host provides that this kind of block has anything of.</summary>
+        public IEnumerable<HostType> Types => _facets.Keys;
 
         /// <summary>What knows this kind of block, in the order each described it: the block's own first, the floor every block stands on last.</summary>
         public IList<Capability> Capabilities => _capabilities;
@@ -321,6 +327,30 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _actions[_actions.Count - 1].Category = category;
             return this;
+        }
+
+        /// <summary>Says the action or value added last is a member of <paramref name="type" /> - see <see cref="EntityAction.Type" />.</summary>
+        public EntityKind Of(HostType type)
+        {
+            _actions[_actions.Count - 1].Type = type;
+            return this;
+        }
+
+        /// <summary>Keeps <paramref name="facets" /> as what this kind of block has of <paramref name="type" />.</summary>
+        public EntityKind Offering(HostType type, IList<HostTypeFacet> facets)
+        {
+            _facets[type] = new List<HostTypeFacet>(facets);
+            return this;
+        }
+
+        /// <summary>What this kind of block has of <paramref name="type" />, in order; none where it has nothing of it.</summary>
+        public IList<HostTypeFacet> Facets(HostType type)
+        {
+            List<HostTypeFacet> facets;
+            if (_facets.TryGetValue(type, out facets))
+                return facets;
+
+            return None;
         }
 
         /// <summary>

@@ -220,6 +220,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (unoffered.Exists)
                 return unoffered;
 
+            SequenceFault missing = MissingFacet(bindings, sequence, through);
+            if (missing.Exists)
+                return missing;
+
             SequenceFault unfilled = Unfilled(bindings, sequence, through);
             if (unfilled.Exists)
                 return unfilled;
@@ -570,6 +574,39 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             return true;
+        }
+
+        /// <summary>The first step with a block lacking the facet <paramref name="through" /> chose of it in a slot, naming that block; or none.</summary>
+        static SequenceFault MissingFacet(Bindings bindings, Sequence sequence, SystemInstance through)
+        {
+            if (through == null)
+                return SequenceFault.None;
+
+            for (var i = 0; i < sequence.Steps.Count; i++)
+            {
+                var test = TestOf(sequence.Steps[i]);
+                var act = sequence.Steps[i] as Act;
+                var targets = test != null ? test.Targets : act?.Targets;
+                if (targets == null)
+                    continue;
+
+                foreach (var name in SystemInstance.Through(through, targets))
+                {
+                    GridEntity entity = bindings.Entity(name);
+                    if (entity == null)
+                        continue;
+
+                    var member = test != null ? test.Names(entity.Kind.Actions) : act.Names(entity.Kind.Actions);
+                    if (member?.Type == null)
+                        continue;
+
+                    var number = through.FacetOf(targets, name);
+                    if (number > 0 && member.Type.Find(entity.Kind, number) == null)
+                        return new SequenceFault(SequenceProblem.MissingFacet, i, Trouble.None, entity.Name);
+                }
+            }
+
+            return SequenceFault.None;
         }
 
         /// <summary>The first step whose blocks do not offer what it does, or none.</summary>

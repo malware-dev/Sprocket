@@ -13,9 +13,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly SystemInstance _shown;
         readonly List<Part> _made = new List<Part>();
         readonly List<List<string>> _madeFills = new List<List<string>>();
+        readonly List<List<int>> _madeFacets = new List<List<int>>();
         readonly List<Part> _refilled = new List<Part>();
         readonly List<List<string>> _refilledWas = new List<List<string>>();
+        readonly List<List<int>> _refilledFacetsWas = new List<List<int>>();
         readonly List<List<string>> _refilledNow = new List<List<string>>();
+        readonly List<List<int>> _refilledFacetsNow = new List<List<int>>();
         readonly List<string> _expectedWas = new List<string>();
         readonly List<string> _expectedNow = new List<string>();
         readonly List<IList<string>> _renamed = new List<IList<string>>();
@@ -24,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Part> _dropped = new List<Part>();
         readonly List<int> _droppedAt = new List<int>();
         readonly List<Dictionary<SystemInstance, List<string>>> _droppedFills = new List<Dictionary<SystemInstance, List<string>>>();
+        readonly List<Dictionary<SystemInstance, List<int>>> _droppedFacets = new List<Dictionary<SystemInstance, List<int>>>();
 
         /// <summary>Changes to the slots of <paramref name="system" />, filled as <paramref name="shown" /> fills them.</summary>
         public Reslot(AutomationSystem system, SystemInstance shown)
@@ -38,20 +42,30 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether this changes nothing.</summary>
         public bool IsEmpty => _made.Count == 0 && _refilled.Count == 0 && _renamed.Count == 0 && _dropped.Count == 0;
 
-        /// <summary>Makes the slot <paramref name="part" />, filled with <paramref name="blocks" /> in the installation shown.</summary>
-        public void Make(Part part, IList<string> blocks)
+        /// <summary>
+        /// Makes the slot <paramref name="part" />, filled with <paramref name="blocks" /> in the installation shown, holding the
+        /// facet <paramref name="facets" /> numbers of each where it holds a type the host provides.
+        /// </summary>
+        public void Make(Part part, IList<string> blocks, IList<int> facets = null)
         {
             _made.Add(part);
             _madeFills.Add(new List<string>(blocks));
+            _madeFacets.Add(Copied(facets));
         }
 
-        /// <summary>Gives the slot <paramref name="part" /> the blocks <paramref name="blocks" /> in the installation shown, expecting <paramref name="expects" />.</summary>
-        public void Refill(Part part, IList<string> blocks, string expects)
+        /// <summary>
+        /// Fills the slot <paramref name="part" /> with <paramref name="blocks" /> in the installation shown, expecting
+        /// <paramref name="expects" />, and holding the facet <paramref name="facets" /> numbers of each where it holds a type
+        /// the host provides.
+        /// </summary>
+        public void Refill(Part part, IList<string> blocks, string expects, IList<int> facets = null)
         {
             var had = _shown.FilledWith(part.Id);
             _refilled.Add(part);
             _refilledWas.Add(had == null ? new List<string>() : new List<string>(had));
+            _refilledFacetsWas.Add(Copied(_shown.Facets(part.Id)));
             _refilledNow.Add(new List<string>(blocks));
+            _refilledFacetsNow.Add(Copied(facets));
             _expectedWas.Add(part.Expects);
             _expectedNow.Add(expects);
         }
@@ -116,15 +130,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _dropped.Add(part);
             _droppedAt.Add(-1);
             var fills = new Dictionary<SystemInstance, List<string>>();
-            var instances = System.Instances;
-            for (var i = 0; i < instances.Count; i++)
+            var facets = new Dictionary<SystemInstance, List<int>>();
+            foreach (var instance in System.Instances)
             {
-                var had = instances[i].FilledWith(part.Id);
+                var had = instance.FilledWith(part.Id);
                 if (had != null)
-                    fills[instances[i]] = new List<string>(had);
+                    fills[instance] = new List<string>(had);
+
+                var held = instance.Facets(part.Id);
+                if (held != null)
+                    facets[instance] = new List<int>(held);
             }
 
             _droppedFills.Add(fills);
+            _droppedFacets.Add(facets);
         }
 
         /// <summary>Makes the changes, in the order they were worked out.</summary>
@@ -133,12 +152,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = 0; i < _made.Count; i++)
             {
                 System.PutPartBack(-1, _made[i]);
-                _shown.Fill(_made[i].Id, _madeFills[i]);
+                Fill(_shown, _made[i].Id, _madeFills[i], _madeFacets[i]);
             }
 
             for (var i = 0; i < _refilled.Count; i++)
             {
-                _shown.Fill(_refilled[i].Id, _refilledNow[i]);
+                Fill(_shown, _refilled[i].Id, _refilledNow[i], _refilledFacetsNow[i]);
                 _refilled[i].Expects = _expectedNow[i];
             }
 
@@ -160,7 +179,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 System.PutPartBack(_droppedAt[i], _dropped[i]);
                 foreach (var fill in _droppedFills[i])
-                    fill.Key.Fill(_dropped[i].Id, fill.Value);
+                {
+                    List<int> facets;
+                    _droppedFacets[i].TryGetValue(fill.Key, out facets);
+                    Fill(fill.Key, _dropped[i].Id, fill.Value, facets);
+                }
             }
 
             for (var i = _renamed.Count - 1; i >= 0; i--)
@@ -169,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = _refilled.Count - 1; i >= 0; i--)
             {
                 if (_refilledWas[i].Count > 0)
-                    _shown.Fill(_refilled[i].Id, _refilledWas[i]);
+                    Fill(_shown, _refilled[i].Id, _refilledWas[i], _refilledFacetsWas[i]);
                 else
                     _shown.Clear(_refilled[i].Id);
 
@@ -224,6 +247,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             return true;
         }
+
+        /// <summary>Fills <paramref name="slot" /> of <paramref name="instance" /> with <paramref name="blocks" />, each holding its facet of <paramref name="facets" /> where there are any.</summary>
+        static void Fill(SystemInstance instance, string slot, IList<string> blocks, IList<int> facets)
+        {
+            if (facets == null)
+                instance.Fill(slot, blocks);
+            else
+                instance.Fill(slot, blocks, facets);
+        }
+
+        static List<int> Copied(IList<int> facets) => facets == null ? null : new List<int>(facets);
 
         static void Put(IList<string> target, IList<string> source)
         {

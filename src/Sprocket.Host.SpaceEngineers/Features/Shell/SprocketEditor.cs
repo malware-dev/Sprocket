@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
@@ -2487,6 +2488,99 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _picked.Add(reslot);
             _pickedNames.Add(new List<string>(named));
             return named;
+        }
+
+        /// <summary>
+        /// The names <paramref name="system" /> uses for the facet called <paramref name="facet" /> of each of
+        /// <paramref name="blocks" />, of the type <paramref name="type" />, picked in place of the names
+        /// <paramref name="replacing" /> where they replace a list: in a blueprint, a slot of that type of its own, filled in
+        /// its stand-in with those blocks and the number each has that facet by.
+        /// </summary>
+        /// <remarks>
+        /// Outside a blueprint there is no installation to keep which facet, so the blocks are named as any picks are. The slot
+        /// and every other change to the slots are kept for the edit made next, as <see cref="Named(AutomationSystem, IList{long}, IList{string})" /> keeps them.
+        /// </remarks>
+        public List<string> Named(AutomationSystem system, HostType type, string facet, IList<long> blocks, IList<string> replacing)
+        {
+            SystemInstance shown = system.IsBlueprint ? StandIn(system) : null;
+            if (shown == null)
+                return Named(system, blocks, replacing);
+
+            var declared = new List<string>();
+            var numbers = new List<int>();
+            var met = new Dictionary<string, GridEntity>();
+            foreach (var block in blocks)
+            {
+                GridEntity entity = _world.FindEntity(block);
+                if (entity == null)
+                    continue;
+
+                var name = _program.Declare(_world, entity).Name;
+                declared.Add(name);
+                numbers.Add(Numbered(entity.Kind.Facets(type), facet));
+                met[name] = entity;
+            }
+
+            if (_picked.Count > 0 && _picked[0].System != system)
+                Unpicked(null);
+
+            foreach (var pick in _picked)
+                pick.Apply();
+
+            Reslot reslot;
+            var named = Slots(system, shown, met).Hold(type.Id, declared, numbers, replacing, _pickedNames, out reslot);
+
+            for (var i = _picked.Count - 1; i >= 0; i--)
+                _picked[i].Undo();
+
+            _picked.Add(reslot);
+            _pickedNames.Add(new List<string>(named));
+            return named;
+        }
+
+        /// <summary>The number of the facet among <paramref name="facets" /> called <paramref name="name" />, or of the first where none is.</summary>
+        public static int Numbered(IList<HostTypeFacet> facets, string name)
+        {
+            foreach (var facet in facets)
+            {
+                if (facet.Name == name)
+                    return facet.Number;
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// The name of the facet the slot among <paramref name="names" /> holding a type the host provides holds of the first
+        /// block it holds, in the stand-in of <paramref name="system" />; empty where none holds one.
+        /// </summary>
+        /// <remarks>What a step's picker opens on, so changing a step keeps the screen it acts on.</remarks>
+        public string Facet(AutomationSystem system, IList<string> names)
+        {
+            return Facet(system, StandIn(system), names);
+        }
+
+        /// <summary>The same, as the installation <paramref name="shown" /> fills the slots.</summary>
+        public string Facet(AutomationSystem system, SystemInstance shown, IList<string> names)
+        {
+            if (shown == null)
+                return "";
+
+            foreach (var name in names)
+            {
+                var part = system.FindPart(name);
+                var blocks = shown.FilledWith(name);
+                var numbers = shown.Facets(name);
+                var type = part == null ? null : HostTypes.Named(part.Holds);
+                GridEntity entity = type == null || blocks == null || blocks.Count == 0 || numbers == null || numbers.Count == 0
+                    ? null
+                    : _runner.Bindings.Entity(blocks[0]);
+                var facet = entity == null ? null : type.Find(entity.Kind, numbers[0]);
+                if (facet != null)
+                    return facet.Name;
+            }
+
+            return "";
         }
 
         /// <summary>Whether the picks since the last edit change any slot of <paramref name="system" />.</summary>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -46,6 +47,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, Nature.Native,
                     answer => Answered(part, chosen, answer),
                     admits: Signaling, signalsOnly: true));
+                return;
+            }
+
+            var type = HostTypes.Named(part.Holds);
+            if (type != null)
+            {
+                // A slot of screens is a step's own, picked as its step is: its member alone, and the screen under it.
+                var step = _system.ActingOn(part.Id);
+                _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? "" : step.ActionId,
+                    step == null ? Nature.Native : step.Form, _editor.Facet(_system, chosen, new[] { part.Id }),
+                    block => block.Kind.Facets(type).Count > 0, answer => Held(part, chosen, type, answer)));
                 return;
             }
 
@@ -99,7 +111,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         names.Add(_editor.Program.Declare(_editor.World, block).Name);
                 }
 
-                return new FillSlot(chosen, part.Id, names, null, Settle);
+                return new FillSlot(chosen, part.Id, names, (IList<ToolbarSlot>)null, Settle);
+            }, Done);
+        }
+
+        /// <summary>Fills <paramref name="part" />, a slot of <paramref name="type" />, for <paramref name="chosen" /> with the blocks and facet <paramref name="answer" /> picked, and goes back.</summary>
+        void Held(Part part, SystemInstance chosen, HostType type, PickAnswer answer)
+        {
+            _editor.Filling(_system, part, chosen, answer.Targets, null, () =>
+            {
+                var names = new List<string>();
+                var numbers = new List<int>();
+                foreach (var id in answer.Targets)
+                {
+                    var block = _editor.World.FindEntity(id);
+                    if (block == null)
+                        continue;
+
+                    names.Add(_editor.Program.Declare(_editor.World, block).Name);
+                    numbers.Add(SprocketEditor.Numbered(block.Kind.Facets(type), answer.Facet));
+                }
+
+                return new FillSlot(chosen, part.Id, names, numbers, Settle);
             }, Done);
         }
 

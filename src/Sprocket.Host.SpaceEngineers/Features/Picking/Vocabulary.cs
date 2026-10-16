@@ -197,6 +197,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return EntityAction.Value(ActionsOf(world, entityIds), BlockKinds.Own, id) != null ? BlockKinds.Own : "";
         }
 
+        /// <summary>The type the host provides that the member <paramref name="id" /> these blocks share is a member of; null where it is none's.</summary>
+        public static HostType TypeOf(GridWorld world, IList<long> entityIds, string id)
+        {
+            if (string.IsNullOrEmpty(id))
+                return null;
+
+            foreach (var action in ActionsOf(world, entityIds))
+            {
+                if (action.Id == id && action.Type != null)
+                    return action.Type;
+            }
+
+            return null;
+        }
+
         /// <summary>Actions every one of the given entities accepts.</summary>
         public static List<EntityAction> ActionsFor(Bindings bindings, IList<string> names)
         {

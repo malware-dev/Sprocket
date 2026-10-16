@@ -12,8 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A text panel: a screen a sequence writes a status, a warning or an image on.</summary>
     /// <remarks>
-    /// A panel is its own one screen, so every one of its settings reads cleanly through the terminal: on a block with
-    /// several screens the terminal acts on whichever screen was picked last, which a panel never has to ask.
+    /// A panel is a block with one screen, and that screen is reached as every block's screen is, through
+    /// <see cref="ScreenType" />: showing text, setting it up, reading its settings. What is the panel's own is here.
     /// </remarks>
     public sealed class TextPanel : Capability
     {
@@ -47,21 +47,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue(Shown, "text shown", Written).Looked(Unheard)
                 .WithValue(App, "app", Running(Apps(block))).Looked(Unheard)
                 .Hiding("Title")
-                .Renaming("Content", true, "content")
-                .Renaming("FontColor", true, "text color")
-                .Renaming("BackgroundColor", true, "background color")
-                .Renaming("ScriptForegroundColor", true, "app color")
-                .Renaming("ScriptBackgroundColor", true, "app background color")
-                .Renaming("Font", true, "font")
-                .Renaming("FontSize", true, "font size")
-                .Renaming("alignment", true, "alignment")
-                .Renaming("TextPaddingSlider", true, "text padding")
-                .Measuring("TextPaddingSlider", " %")
                 .Renaming("Rotate", true, "rotation")
-                .Measuring("Rotate", "°", 1, 90, "270")
-                .Renaming("PreserveAspectRatio", true, "preserve aspect ratio")
-                .Renaming("ChangeIntervalSlider", true, "image change interval")
-                .Measuring("ChangeIntervalSlider", " s");
+                .Measuring("Rotate", "°", 1, 90, "270");
         }
 
         /// <summary>

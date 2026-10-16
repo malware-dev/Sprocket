@@ -210,6 +210,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (fault.Problem == SequenceProblem.Mistyped && !string.IsNullOrEmpty(fault.Which))
                 return Template.Fill(texts.ProblemOptionWrong, "name", fault.Which);
 
+            if (fault.Problem == SequenceProblem.MissingFacet)
+                return Template.Fill(texts.ProblemMissingScreen, "block", fault.Which);
+
             return fault.Because.Exists ? TroubleText.Of(texts, fault.Because, fault.Which) : Problem(texts, fault.Problem);
         }
 
@@ -283,6 +286,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Template.Fill(texts.StoppedOptionMissing, "name", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Mistyped)
                 return Template.Fill(texts.StoppedOptionWrong, "name", block);
+            if (problem == SequenceProblem.MissingFacet)
+                return Template.Fill(texts.StoppedMissingScreen, "block", block);
 
             if (problem == SequenceProblem.NeverTriggered)
                 return texts.StoppedNeverTriggered;

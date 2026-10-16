@@ -16,7 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </para>
     /// <para>
     /// A list naming a slot the installation shown has not filled is left as it is, since there is nothing to compare it by.
-    /// Signal slots are not worked out here: a trigger's signal slot is its own.
+    /// Signal slots are not worked out here: a trigger's signal slot is its own. Nor is a slot holding a type the host provides,
+    /// which is a step's own, made by <see cref="Hold" />, and taken out like any slot once nothing names it.
     /// </para>
     /// <para>
     /// Asked once per edit in the editor, never on a tick. The sets are a few blocks each and a system names a few dozen, so
@@ -76,6 +77,50 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return picked.Now;
         }
 
+        /// <summary>
+        /// The slot of the type <paramref name="type" /> a step acting on <paramref name="blocks" /> names, holding the facet
+        /// <paramref name="facets" /> numbers of each, in place of <paramref name="replacing" /> where it replaces a list, with
+        /// every other change to the slots that brings about in <paramref name="reslot" />; <paramref name="held" /> are as
+        /// <see cref="Pick" /> has them.
+        /// </summary>
+        /// <remarks>
+        /// Where the list replaced named exactly one slot of that type and nothing else names it, that slot keeps its name, its
+        /// description and every other installation's answer, and takes the new blocks and facets in the installation shown.
+        /// Otherwise the slot is a new one, called as a block slot of the same blocks would be.
+        /// </remarks>
+        public List<string> Hold(string type, IList<string> blocks, IList<int> facets, IList<string> replacing, IList<List<string>> held,
+            out Reslot reslot)
+        {
+            Gather(replacing);
+            for (var i = 0; i < held.Count; i++)
+            {
+                var entry = new Entry { Names = held[i], Held = true };
+                entry.Blocks = BlocksOf(held[i], out entry.Pinned);
+                _entries.Add(entry);
+            }
+
+            reslot = new Reslot(_system, _shown);
+            Sets();
+            Wanted();
+            Choose(reslot, null, null);
+            Name(reslot, null);
+
+            var part = Holding(type, replacing);
+            if (part != null)
+                reslot.Refill(part, blocks, part.Expects, facets);
+            else
+            {
+                part = new Part(blocks.Count == 1 ? Free(_called(blocks[0])) : Numbered()) { Holds = type };
+                reslot.Make(part, blocks, facets);
+            }
+
+            _taken.Add(part.Id);
+            var now = new List<string> { part.Id };
+            _entries.Add(new Entry { Names = now, Pinned = true, Now = now });
+            Prune(reslot);
+            return now;
+        }
+
         /// <summary>The changes to the slots the lists as they are now bring about, after an edit that picked nothing.</summary>
         public Reslot Settle()
         {
@@ -99,7 +144,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
         }
 
-        /// <summary>The blocks <paramref name="names" /> stand for in the installation shown, each once; pinned where one is a slot it leaves empty, or a signal.</summary>
+        /// <summary>
+        /// The blocks <paramref name="names" /> stand for in the installation shown, each once; pinned where one is a slot it leaves
+        /// empty, a signal, or a slot holding a type the host provides.
+        /// </summary>
         List<string> BlocksOf(IList<string> names, out bool pinned)
         {
             pinned = false;
@@ -114,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 }
 
                 var filled = _shown.FilledWith(part.Id);
-                if (part.IsSignal || filled == null || filled.Count == 0)
+                if (part.IsSignal || part.Holds != "" || filled == null || filled.Count == 0)
                 {
                     pinned = true;
                     return blocks;
@@ -193,7 +241,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
                 for (var p = 0; p < parts.Count && set.Part == null; p++)
                 {
-                    if (!parts[p].IsSignal && !_taken.Contains(parts[p].Id) && Same(_shown.FilledWith(parts[p].Id), set.Blocks))
+                    if (!parts[p].IsSignal && parts[p].Holds == "" && !_taken.Contains(parts[p].Id) &&
+                        Same(_shown.FilledWith(parts[p].Id), set.Blocks))
                         set.Part = parts[p];
                 }
 
@@ -235,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = 0; i < replacing.Count; i++)
             {
                 var part = _system.FindPart(replacing[i]);
-                if (part == null || part.IsSignal || (only != null && only != part))
+                if (part == null || part.IsSignal || part.Holds != "" || (only != null && only != part))
                     return null;
 
                 only = part;
@@ -251,6 +300,28 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
 
             return _system.Mentions(only.Id) == AutomationSystem.Count(replacing, only.Id) ? only : null;
+        }
+
+        /// <summary>
+        /// The one slot of the type <paramref name="type" /> that <paramref name="replacing" /> names, where it names exactly one
+        /// and nothing else names it; null otherwise.
+        /// </summary>
+        Part Holding(string type, IList<string> replacing)
+        {
+            if (replacing == null || replacing.Count == 0)
+                return null;
+
+            var part = _system.FindPart(replacing[0]);
+            if (part == null || part.Holds != type || _taken.Contains(part.Id))
+                return null;
+
+            for (var i = 1; i < replacing.Count; i++)
+            {
+                if (replacing[i] != part.Id)
+                    return null;
+            }
+
+            return _system.Mentions(part.Id) == replacing.Count ? part : null;
         }
 
         /// <summary>Names each list's set by its slot, or by the fewest slots that make it, and renames every list that changes.</summary>
@@ -295,7 +366,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return names;
         }
 
-        /// <summary>Takes out every block slot nothing names that no installation but the one shown holds blocks in.</summary>
+        /// <summary>Takes out every slot but a signal slot that nothing names and no installation but the one shown holds blocks in.</summary>
         void Prune(Reslot reslot)
         {
             var used = new List<string>();

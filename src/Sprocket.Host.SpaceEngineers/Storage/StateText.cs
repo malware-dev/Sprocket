@@ -511,7 +511,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static readonly string[] Reasons =
         {
             "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "adrift",
-            "slot empty", "circular", "unable"
+            "slot empty", "circular", "unable", "facet gone"
         };
 
         static readonly SequenceProblem[] Problems =
@@ -519,7 +519,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             SequenceProblem.NeverTriggered, SequenceProblem.MissingSource, SequenceProblem.MissingTarget,
             SequenceProblem.MissingGate, SequenceProblem.Unoffered, SequenceProblem.Unfilled, SequenceProblem.Mistyped,
             SequenceProblem.Adrift, SequenceProblem.EmptySlot, SequenceProblem.Circular,
-            SequenceProblem.Unable
+            SequenceProblem.Unable, SequenceProblem.MissingFacet
         };
 
         /// <summary>What a block's trouble is written as, beside <see cref="Troubles" />.</summary>

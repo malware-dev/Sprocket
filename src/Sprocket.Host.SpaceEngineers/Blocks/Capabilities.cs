@@ -93,9 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             new Terminal(),
             new Electric(),
             new Damage(),
-            new Inventory(),
-            new Screen(),
-            new Screens()
+            new Inventory()
         };
 
         /// <summary>What particular kinds of block are.</summary>
