@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Localization
             for (var i = 0; i < phrases.Count; i++)
             {
                 if (phrases[i].Index != i)
-                    throw new ArgumentException("The text keyed " + phrases[i].Key + " is at " + i + " but says it is at " + phrases[i].Index + ".");
+                    throw new ArgumentException($"The text keyed {phrases[i].Key} is at {i} but says it is at {phrases[i].Index}.");
             }
 
             Load(null);

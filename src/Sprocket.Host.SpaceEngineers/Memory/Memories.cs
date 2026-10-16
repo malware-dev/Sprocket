@@ -61,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
             }
             catch (Exception e)
             {
-                Trouble = "What the world remembers of Sprocket would not read, and starts afresh: " + e.Message;
+                Trouble = $"What the world remembers of Sprocket would not read, and starts afresh: {e.Message}";
                 return;
             }
 

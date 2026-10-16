@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             catch (Exception failed)
             {
                 Intact = false;
-                return Index + " will not open - " + failed.Message;
+                return $"{Index} will not open - {failed.Message}";
             }
 
             var ini = new MyIni();
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!ini.TryParse(text, out parsed))
             {
                 Intact = false;
-                return Index + " has a problem on line " + parsed.LineNo + " - " + parsed.Error;
+                return $"{Index} has a problem on line {parsed.LineNo} - {parsed.Error}";
             }
 
             _sections.Clear();
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (backup == null)
                 {
                     Intact = false;
-                    return Index + " says too little of " + section;
+                    return $"{Index} says too little of {section}";
                 }
 
                 read.Add(backup);
@@ -143,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             catch (Exception failed)
             {
-                return backup.File + " will not open - " + failed.Message;
+                return $"{backup.File} will not open - {failed.Message}";
             }
 
             return ProgramText.Lone(text, values, out read);

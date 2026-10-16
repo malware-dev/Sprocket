@@ -93,16 +93,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (found == null || found.Covers == parameters)
                 return found;
 
-            Told.Say(actionId + " on " + blockId + " takes " + parameters
-                + " parameters and is described with " + found.Covers
-                + ", so the description is being ignored");
+            Told.Say($"{actionId} on {blockId} takes {parameters} parameters and is described with {found.Covers}, so the description is being ignored");
 
             return null;
         }
 
         static string Key(string blockId, string actionId)
         {
-            return blockId + "/" + actionId;
+            return $"{blockId}/{actionId}";
         }
     }
 }

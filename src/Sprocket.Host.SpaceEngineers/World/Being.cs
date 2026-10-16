@@ -347,7 +347,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 {
                     var at = Array.IndexOf(_names, becomes.Text);
                     if (at < 0)
-                        throw new ArgumentException("'" + becomes.Text + "' is none of " + string.Join(", ", _names) + ".");
+                        throw new ArgumentException($"'{becomes.Text}' is none of {string.Join(", ", _names)}.");
 
                     operand = Literal.Of(at);
                 }

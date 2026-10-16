@@ -203,7 +203,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var chosen = Held(_chosenPage, _chosenSlot);
             var says = !chosen.Holds ? _texts.SlotFree
-                : chosen.Lines.Count > 1 ? chosen.Says + " " + Template.Fill(_texts.SlotMore, "count", Number(chosen.Lines.Count - 1))
+                : chosen.Lines.Count > 1 ? $"{chosen.Says} {Template.Fill(_texts.SlotMore, "count", Number(chosen.Lines.Count - 1))}"
                 : chosen.Says;
             var line = _pageCount > 1
                 ? Template.Fill(Template.Fill(_texts.SlotOnPage, "page", Number(_chosenPage)), "slot", Number(_chosenSlot))
@@ -215,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string Tipped(SlotHeld held)
         {
             var tip = string.Join("\n", held.Lines);
-            return held.Label.Length == 0 ? tip : Template.Fill(_texts.SlotLabel, "label", held.Label) + "\n" + tip;
+            return held.Label.Length == 0 ? tip : $"{Template.Fill(_texts.SlotLabel, "label", held.Label)}\n{tip}";
         }
 
         SlotHeld Held(int page, int slot)

@@ -325,7 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (takes.Length == 0)
                 return name;
 
-            return name.Length == 0 ? takes : name + " " + takes;
+            return name.Length == 0 ? takes : $"{name} {takes}";
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             // In brackets beside the name, as a range is written: "speed (0 - 30)".
             if (least.Length > 0 && most.Length > 0)
-                return "(" + least + " - " + most + ")";
+                return $"({least} - {most})";
 
             if (least.Length > 0)
                 return Template.Fill(texts.ValueAtLeast, "least", least);
@@ -358,7 +358,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             var rest = "";
             for (var i = 0; i < Words.Count - 1; i++)
-                rest += i == 0 ? Words[i] : ", " + Words[i];
+                rest += i == 0 ? Words[i] : $", {Words[i]}";
 
             var last = Words[Words.Count - 1];
             return rest.Length == 0 ? last : Template.Fill(Template.Fill(texts.ValueEither, "last", last), "rest", rest);
@@ -456,7 +456,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return said;
             }
 
-            return said + ".0";
+            return $"{said}.0";
         }
 
         static bool Reads(string said, out double value)

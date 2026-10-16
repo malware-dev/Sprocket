@@ -91,10 +91,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var doing = assembler == null ? "refining" : "producing";
             kind.WithValue(doing, doing, Producing).Announced().In(Category.Production)
-                .WithChange("starts-" + doing, "starts " + doing, doing, Literal.Of(true))
-                .Reading("is " + doing, "is not " + doing).Announced()
-                .WithChange("stops-" + doing, "stops " + doing, doing, Literal.Of(false))
-                .Reading("is not " + doing, "is " + doing).Announced()
+                .WithChange($"starts-{doing}", $"starts {doing}", doing, Literal.Of(true))
+                .Reading($"is {doing}", $"is not {doing}").Announced()
+                .WithChange($"stops-{doing}", $"stops {doing}", doing, Literal.Of(false))
+                .Reading($"is not {doing}", $"is {doing}").Announced()
                 .WithValue("stuck", "stuck", Stuck).Announced().In(Category.Production);
 
             if (assembler != null)

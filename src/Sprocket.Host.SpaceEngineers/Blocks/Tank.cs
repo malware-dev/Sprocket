@@ -49,11 +49,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var gas = Gas(block);
-            var level = gas + "-level";
+            var level = $"{gas}-level";
             kind.WithAction(Stockpile, "stockpile", Stockpiles, "Stockpile_On").Lasting().In(Category.Gas).Asking(Asked())
                 .Renaming("Stockpile", true, "stockpiling").Stating("Stockpile")
                 .Renaming("Stockpile", false, "toggle stockpiling")
-                .WithValue(level, gas + " level", Level).Percent().Looked(Flowing).In(Category.Gas)
+                .WithValue(level, $"{gas} level", Level).Percent().Looked(Flowing).In(Category.Gas)
                 .WithChange("fills-up", "fills up", level, Literal.Of(100.0)).Reading("is full", "is not full").Looked(Flowing)
                 .WithChange("runs-dry", "runs dry", level, Literal.Of(0.0)).Reading("is empty", "is not empty").Announced()
                 .WithValue("capacity", "capacity", Capacity).Measured(" L").Looked("A tank's capacity is its kind's, and never changes.")

@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>How a step or a test names the item <paramref name="id" />.</summary>
         public static string Said(MyDefinitionId id)
         {
-            return Plain(id.TypeId.ToString()) + "/" + id.SubtypeName;
+            return $"{Plain(id.TypeId.ToString())}/{id.SubtypeName}";
         }
 
         /// <summary>The item <paramref name="said" /> names, or false where it names none the game has.</summary>

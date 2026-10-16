@@ -274,7 +274,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
 
             if (verb.EndsWith("ies", StringComparison.Ordinal) && verb.Length > 3)
-                return verb.Substring(0, verb.Length - 3) + "y";
+                return $"{verb.Substring(0, verb.Length - 3)}y";
 
             if (verb.EndsWith("ches", StringComparison.Ordinal) || verb.EndsWith("shes", StringComparison.Ordinal)
                 || verb.EndsWith("sses", StringComparison.Ordinal) || verb.EndsWith("xes", StringComparison.Ordinal)
@@ -351,7 +351,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>A state enabled or disabled as one line: "enable stockpiling on Tank".</summary>
-        public static string Switched(string verb, string value, string blocks) => verb + " " + value + " " + OnWord + " " + blocks;
+        public static string Switched(string verb, string value, string blocks) => $"{verb} {value} {OnWord} {blocks}";
 
         /// <summary>A set as one line: "set charge mode on Standby Battery to recharge".</summary>
         /// <remarks>
@@ -359,7 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </remarks>
         public static string Setting(string value, string blocks, string given)
         {
-            return SetWord + " " + value + " " + OnWord + " " + blocks + " " + ToWord + " " + given;
+            return $"{SetWord} {value} {OnWord} {blocks} {ToWord} {given}";
         }
 
 
@@ -371,13 +371,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <param name="opens">What the line opens with: "If" for a check, "When" for what starts something.</param>
         public static string Testing(string blocks, string chosen, bool state, string reads, string opens = "If")
         {
-            var lead = reads.Length == 0 ? opens + " " : opens + " " + reads + " ";
+            var lead = reads.Length == 0 ? $"{opens} " : $"{opens} {reads} ";
             if (chosen.Length == 0)
-                return lead + blocks + " " + Empty;
+                return $"{lead}{blocks} {Empty}";
 
             return state
-                ? lead + blocks + " " + IsWord + " " + chosen
-                : lead + chosen + " " + OnWord + " " + blocks + " " + IsWord + " " + Empty;
+                ? $"{lead}{blocks} {IsWord} {chosen}"
+                : $"{lead}{chosen} {OnWord} {blocks} {IsWord} {Empty}";
         }
 
         /// <summary>
@@ -397,10 +397,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 chosen = Empty;
 
             if (forEvents)
-                return "When " + blocks + " " + chosen;
+                return $"When {blocks} {chosen}";
 
             chosen = char.ToUpperInvariant(chosen[0]) + chosen.Substring(1);
-            return sets ? chosen + " " + OnWord + " " + blocks : chosen + " " + blocks;
+            return sets ? $"{chosen} {OnWord} {blocks}" : $"{chosen} {blocks}";
         }
 
         /// <summary>What a slot of a step reads as.</summary>
@@ -450,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
 
             if (entityIds.Count > 2)
-                into.Add(new Mention(joiner + (entityIds.Count - 2) + " more", null));
+                into.Add(new Mention($"{joiner}{(entityIds.Count - 2)} more", null));
         }
 
 
@@ -584,7 +584,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             var field = fields[at];
             var said = field.Scaled(filled) + (field.Unit ?? "");
-            return string.IsNullOrEmpty(field.Lead) ? said : field.Lead + " " + said;
+            return string.IsNullOrEmpty(field.Lead) ? said : $"{field.Lead} {said}";
         }
 
         static bool Blocks(GridWorld world, SentenceSlot slot, List<Mention> into)
@@ -672,12 +672,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 if (sequence.IsEmpty)
                     return Empty;
 
-                return sequence.Name.Length > 0 ? sequence.Name : "sequence " + sequence.Number;
+                return sequence.Name.Length > 0 ? sequence.Name : $"sequence {sequence.Number}";
             }
 
             // A slot kind core invented and nobody here has words for. Saying nothing would leave a
             // gap that reads exactly like a slot waiting to be filled, which is a thing that happens.
-            return "(" + slot.GetType().Name + ")";
+            return $"({slot.GetType().Name})";
         }
 
         /// <summary>Places in a list of blocks, by the blocks in them; two blocks that are both gone keep the order they were picked in.</summary>

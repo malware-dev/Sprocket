@@ -227,7 +227,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var identity = lone.Identity;
             if (program.FindSystem(identity) != null)
-                return "system " + identity.ToString("D") + " is already declared.";
+                return $"system {identity:D} is already declared.";
 
             var parser = new Parser(text);
             var constructs = parser.Read();
@@ -376,12 +376,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             string refused = null;
             var header = constructs.Count > 0 && constructs[0].Key == Keyword.Sprocket ? constructs[0] : null;
             if (header == null && parser.Trouble.Length == 0)
-                refused = (constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0])) + "expected sprocket <format>.";
+                refused = $"{(constructs.Count == 0 ? "Line 1: " : trouble.Line(constructs[0]))}expected sprocket <format>.";
             else if (header != null && header.Whole(0) != Version)
-                refused = trouble.Line(header) + "written for sprocket " + header.Whole(0) + "; this reads sprocket " + Version + ".";
+                refused = $"{trouble.Line(header)}written for sprocket {header.Whole(0)}; this reads sprocket {Version}.";
             else if (header != null && DraftOf(header) != Draft && !Upgrades.From(Version, DraftOf(header)))
-                refused = trouble.Line(header) + "written for " + (DraftOf(header) < 0 ? "the finished format" : "alpha " + DraftOf(header))
-                    + "; this reads alpha " + Draft + ".";
+                refused = $"{trouble.Line(header)}written for {(DraftOf(header) < 0 ? "the finished format" : $"alpha {DraftOf(header)}")}; this reads alpha {Draft}.";
 
             if (refused != null)
             {
@@ -409,7 +408,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 else if (construct.Key == Keyword.Instance)
                     ReadInstance(construct, program, trouble);
                 else if (i > 0)
-                    trouble.Say(construct, "unexpected " + Headed(construct) + "; expected let, system or instance.");
+                    trouble.Say(construct, $"unexpected {Headed(construct)}; expected let, system or instance.");
             }
 
             trouble.Settle();
@@ -423,7 +422,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var upgraded = Upgrades.Apply(DraftOf(header), program, world);
                 if (upgraded.Length > 0)
-                    Told.Say("upgraded a program from " + upgraded);
+                    Told.Say($"upgraded a program from {upgraded}");
             }
 
             warning = trouble.Warning;
@@ -576,7 +575,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (program.Names(name.Word))
             {
-                trouble.Say(statement, "variable '" + name.Word + "' is already defined.");
+                trouble.Say(statement, $"variable '{name.Word}' is already defined.");
                 return;
             }
 
@@ -625,7 +624,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var member = statement.Member(value);
             if (member.Count != 2 || member[0].Word != BlockKinds.Own || member[1].Word != Toolbar)
             {
-                trouble.Say(statement, "no function " + Spelling(member) + " giving back a signal; expected ext.toolbar(<toolbar>, <page>, <slot>).");
+                trouble.Say(statement, $"no function {Spelling(member)} giving back a signal; expected ext.toolbar(<toolbar>, <page>, <slot>).");
                 return false;
             }
 
@@ -653,7 +652,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 if (program.FindRef(on[i].Word) == null)
                 {
-                    trouble.Say(statement, "no variable '" + on[i].Word + "' holding a block above this line.");
+                    trouble.Say(statement, $"no variable '{on[i].Word}' holding a block above this line.");
                     return false;
                 }
 
@@ -803,14 +802,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (program.FindSystem(identity) != null)
             {
-                trouble.Say(statement, "system " + identity.ToString("D") + " is already declared.");
+                trouble.Say(statement, $"system {identity:D} is already declared.");
                 return;
             }
 
             var space = name.Count == 2 ? name[0].Word : "";
             var called = name[name.Count - 1].Word;
             if (program.FindSystem(space, called) != null)
-                trouble.Warn(statement, "another system is also called " + Pen.Spelling(space, called) + ".");
+                trouble.Warn(statement, $"another system is also called {Pen.Spelling(space, called)}.");
 
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
@@ -860,15 +859,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if ((inner.Key == Keyword.Required || inner.Key == Keyword.Optional) && blueprint)
                     ReadSlot(inner, system, trouble);
                 else if (inner.Key == Keyword.Required || inner.Key == Keyword.Optional)
-                    trouble.Say(inner, "unexpected " + Headed(inner) + "; only a system blueprint has slots.");
+                    trouble.Say(inner, $"unexpected {Headed(inner)}; only a system blueprint has slots.");
                 else if (inner.Key == Keyword.Whenever || inner.Key == Keyword.When || inner.Key == Keyword.Every)
                     ReadTrigger(inner, system, program, trouble);
                 else if (inner.Key == Keyword.Sequence)
                     ReadSequence(inner, system, program, trouble);
                 else
-                    trouble.Say(inner, "unexpected " + Headed(inner) + (blueprint
-                        ? "; expected required, optional, whenever, when, every or sequence."
-                        : "; expected whenever, when, every or sequence."));
+                    trouble.Say(inner, $"unexpected {Headed(inner)}{(blueprint ? "; expected required, optional, whenever, when, every or sequence." : "; expected whenever, when, every or sequence.")}");
             }
 
             Resolve(system, statement, trouble);
@@ -926,7 +923,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out time))
                 return time;
 
-            trouble.Say(statement, "expected an ISO 8601 time after " + after + ", like \"2026-09-14T19:02:11Z\".");
+            trouble.Say(statement, $"expected an ISO 8601 time after {after}, like \"2026-09-14T19:02:11Z\".");
             return null;
         }
 
@@ -975,7 +972,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (system.FindPart(name.Word) != null)
             {
-                trouble.Say(statement, "slot '" + name.Word + "' is already declared.");
+                trouble.Say(statement, $"slot '{name.Word}' is already declared.");
                 return;
             }
 
@@ -1006,10 +1003,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static void Holding(Statement statement, Part part, Trouble trouble)
         {
             var parts = statement.Parts(3);
-            var type = parts.Count == 2 ? HostTypes.Named(parts[0].Word + "." + parts[1].Word) : null;
+            var type = parts.Count == 2 ? HostTypes.Named($"{parts[0].Word}.{parts[1].Word}") : null;
             if (type == null)
             {
-                trouble.Say(statement, "no type '" + Spelling(parts) + "' the host provides.");
+                trouble.Say(statement, $"no type '{Spelling(parts)}' the host provides.");
                 return;
             }
 
@@ -1140,19 +1137,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var system = SystemNamed(program, statement, 2);
             if (system == null)
             {
-                trouble.Say(statement, "no system called " + Spelled(statement, 2) + ".");
+                trouble.Say(statement, $"no system called {Spelled(statement, 2)}.");
                 return;
             }
 
             if (!system.IsBlueprint)
             {
-                trouble.Say(statement, "system " + Spelled(statement, 2) + " is not a system blueprint; only a blueprint has instances.");
+                trouble.Say(statement, $"system {Spelled(statement, 2)} is not a system blueprint; only a blueprint has instances.");
                 return;
             }
 
             if (system.FindInstance((int)number.Whole) != null)
             {
-                trouble.Say(statement, "instance " + number.Whole + " of this system is already declared.");
+                trouble.Say(statement, $"instance {number.Whole} of this system is already declared.");
                 return;
             }
 
@@ -1198,13 +1195,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 Part part = system.FindPart(inner.Head);
                 if (part == null)
                 {
-                    trouble.Say(inner, "system blueprint '" + system.Name + "' has no slot '" + inner.Head + "'.");
+                    trouble.Say(inner, $"system blueprint '{system.Name}' has no slot '{inner.Head}'.");
                     continue;
                 }
 
                 if (instance.FilledWith(inner.Head) != null)
                 {
-                    trouble.Say(inner, "slot '" + inner.Head + "' is already answered.");
+                    trouble.Say(inner, $"slot '{inner.Head}' is already answered.");
                     continue;
                 }
 
@@ -1230,7 +1227,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 foreach (var variable in filled)
                 {
                     if (program.FindRef(variable) == null)
-                        trouble.Say(inner, "no variable '" + variable + "' holding a block above this line.");
+                        trouble.Say(inner, $"no variable '{variable}' holding a block above this line.");
                 }
 
                 instance.Fill(inner.Head, filled);
@@ -1246,13 +1243,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var items = statement.Items(1);
             var blocks = new List<string>();
             var facets = new List<int>();
-            var like = type.Id + "(1) on [ <block> ]";
+            var like = $"{type.Id}(1) on [ <block> ]";
             for (var i = 0; i < items.Count; i++)
             {
                 var member = statement.Member(items[i]);
-                if (items[i].Form != ValueForm.Reference || member.Count != 2 || member[0].Word + "." + member[1].Word != type.Id)
+                if (items[i].Form != ValueForm.Reference || member.Count != 2 || $"{member[0].Word}.{member[1].Word}" != type.Id)
                 {
-                    trouble.Say(statement, "expected " + type.Id + " in the list, like [ " + like + " ].");
+                    trouble.Say(statement, $"expected {type.Id} in the list, like [ {like} ].");
                     return;
                 }
 
@@ -1260,7 +1257,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var number = given.Count == 1 ? Statement.Counted(given[0]) : 0;
                 if (number == 0)
                 {
-                    trouble.Say(statement, "expected " + type.Id + "(<number>), a whole number from 1.");
+                    trouble.Say(statement, $"expected {type.Id}(<number>), a whole number from 1.");
                     return;
                 }
 
@@ -1281,7 +1278,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                     if (program.FindRef(on[n].Word) == null)
                     {
-                        trouble.Say(statement, "no variable '" + on[n].Word + "' holding a block above this line.");
+                        trouble.Say(statement, $"no variable '{on[n].Word}' holding a block above this line.");
                         return;
                     }
 
@@ -1320,7 +1317,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     var declared = program.FindSignalRef(items[i].Word);
                     if (declared == null)
                     {
-                        trouble.Say(statement, "no variable '" + items[i].Word + "' holding a signal above this line.");
+                        trouble.Say(statement, $"no variable '{items[i].Word}' holding a signal above this line.");
                         return;
                     }
 
@@ -1541,7 +1538,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 quantifier = Quantifier.Average;
             else if (!statement.Says(at, Keyword.Any))
             {
-                trouble.Say(statement, "expected any, all, sum or average after '" + after + "'.");
+                trouble.Say(statement, $"expected any, all, sum or average after '{after}'.");
                 return false;
             }
 
@@ -1578,7 +1575,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             provider = id = "";
             if (!statement.IsMember(index))
             {
-                trouble.Say(statement, "expected " + what + ".");
+                trouble.Say(statement, $"expected {what}.");
                 return false;
             }
 
@@ -1587,13 +1584,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var qualified = member.Count == 2 && member[0].Word.Length > 0 && member[1].Word.Length > 0;
             if (!bare && !qualified)
             {
-                trouble.Say(statement, "expected " + what + ".");
+                trouble.Say(statement, $"expected {what}.");
                 return false;
             }
 
             if (qualified && member[0].Word != BlockKinds.Own)
             {
-                trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected a member, bare or qualified by ext.");
+                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a member, bare or qualified by ext.");
                 return false;
             }
 
@@ -1619,7 +1616,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (form != ValueForm.List && form != ValueForm.Vector && form != ValueForm.Reference && form != ValueForm.Qualified)
                 return true;
 
-            trouble.Say(statement, "unexpected " + Spelled(statement, value) + "; expected a value.");
+            trouble.Say(statement, $"unexpected {Spelled(statement, value)}; expected a value.");
             return false;
         }
 
@@ -1646,7 +1643,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var ordered = relation != Relation.Is && relation != Relation.IsNot;
             if ((ordered || quantifier == Quantifier.Sum) && value.Kind != ValueKind.Integer && value.Kind != ValueKind.Real)
             {
-                trouble.Say(statement, "expected a number after '" + Keywords.Name(Said(relation)) + "'.");
+                trouble.Say(statement, $"expected a number after '{Keywords.Name(Said(relation))}'.");
                 return false;
             }
 
@@ -1671,7 +1668,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (system.FindSequence((int)number.Whole) != null)
             {
-                trouble.Say(statement, "sequence " + number.Whole + " is already declared.");
+                trouble.Say(statement, $"sequence {number.Whole} is already declared.");
                 return;
             }
 
@@ -1925,7 +1922,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (system.IsBlueprint)
             {
                 if (Started(system, needed.Part))
-                    trouble.Say(statement, "slot '" + needed.Part + "' already starts something; a toolbar slot holds one action.");
+                    trouble.Say(statement, $"slot '{needed.Part}' already starts something; a toolbar slot holds one action.");
 
                 return;
             }
@@ -2011,7 +2008,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (member[0].Word != BlockKinds.Own)
             {
-                trouble.Say(statement, "no namespace '" + member[0].Word + "'; expected a signal qualified by ext.");
+                trouble.Say(statement, $"no namespace '{member[0].Word}'; expected a signal qualified by ext.");
                 return null;
             }
 
@@ -2220,7 +2217,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Key == Keyword.Set)
                 return ReadSet(statement, trouble);
 
-            trouble.Say(statement, "unexpected " + Headed(statement) + "; expected call, set, run, stop, await or wait.");
+            trouble.Say(statement, $"unexpected {Headed(statement)}; expected call, set, run, stop, await or wait.");
             return null;
         }
 
@@ -2262,7 +2259,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (provider.Length > 0 && provider != BlockKinds.Own)
             {
-                trouble.Say(statement, "no value '" + Pen.Spelling(provider, id) + "' to set; expected one of the block's own, written bare, or one qualified by " + BlockKinds.Own + ".");
+                trouble.Say(statement, $"no value '{Pen.Spelling(provider, id)}' to set; expected one of the block's own, written bare, or one qualified by {BlockKinds.Own}.");
                 return null;
             }
 
@@ -2380,7 +2377,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return Noted(run, statement);
             }
 
-            trouble.Say(statement, "expected a sequence's number or name after '" + Keywords.Name(statement.Key) + "'.");
+            trouble.Say(statement, $"expected a sequence's number or name after '{Keywords.Name(statement.Key)}'.");
             return null;
         }
 
@@ -2418,7 +2415,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var named = Called(system, run.Named);
                 if (named == null)
-                    trouble.Say(statement, "no sequence called '" + run.Named + "'.");
+                    trouble.Say(statement, $"no sequence called '{run.Named}'.");
                 else
                     run.Number = named.Number;
 
@@ -2427,7 +2424,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             if (system.FindSequence(run.Number) == null)
-                trouble.Say(statement, "no sequence " + run.Number + " to " + (run.Stops ? "stop" : "run") + ".");
+                trouble.Say(statement, $"no sequence {run.Number} to {(run.Stops ? "stop" : "run")}.");
         }
 
         static Sequence Called(AutomationSystem system, string name)
@@ -2457,14 +2454,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (statement.Count <= count)
                 return true;
 
-            trouble.Say(statement, "unexpected " + Spelled(statement, count) + ".");
+            trouble.Say(statement, $"unexpected {Spelled(statement, count)}.");
             return false;
         }
 
         /// <summary>The word a statement starts with, as it is written, for trouble to name it.</summary>
         static string Headed(Statement statement)
         {
-            return "'" + (statement.Key == Keyword.None ? statement.Head : Keywords.Name(statement.Key)) + "'";
+            return $"'{(statement.Key == Keyword.None ? statement.Head : Keywords.Name(statement.Key))}'";
         }
 
         /// <summary>The value at <paramref name="index" /> of <paramref name="statement" /> as it is written, or what it is, for trouble to name it.</summary>
@@ -2472,7 +2469,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             var value = statement.ValueAt(index);
             if (value.Form == ValueForm.Qualified)
-                return "'" + Spelling(statement.Parts(index)) + "'";
+                return $"'{Spelling(statement.Parts(index))}'";
 
             return Spelled(statement, value);
         }
@@ -2481,7 +2478,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static string Spelled(Statement statement, Value value)
         {
             if (value.Form == ValueForm.Reference)
-                return "'" + Spelling(statement.Member(value)) + "'";
+                return $"'{Spelling(statement.Member(value))}'";
 
             if (value.Form == ValueForm.Qualified)
                 return "a qualified name";
@@ -2500,22 +2497,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
 
             if (value.Form == ValueForm.Keyword)
-                return "'" + Keywords.Name(value.Keyword) + "'";
+                return $"'{Keywords.Name(value.Keyword)}'";
 
             if (value.IsWord)
-                return "'" + value.Word + "'";
+                return $"'{value.Word}'";
 
             if (value.Form == ValueForm.Text)
-                return "\"" + value.Word + "\"";
+                return $"\"{value.Word}\"";
 
             if (value.Form == ValueForm.Integer)
                 return value.Whole.ToString(CultureInfo.InvariantCulture);
 
             if (value.Form == ValueForm.Duration && value.Word == Parser.Seconds)
-                return value.Real.ToString("R", CultureInfo.InvariantCulture) + "s";
+                return $"{value.Real.ToString("R", CultureInfo.InvariantCulture)}s";
 
             if (value.Form == ValueForm.Duration)
-                return value.Whole.ToString(CultureInfo.InvariantCulture) + "t";
+                return $"{value.Whole.ToString(CultureInfo.InvariantCulture)}t";
 
             return "what follows";
         }
@@ -2597,7 +2594,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             if (trigger ? program.FindSignalRef(name) == null : program.FindRef(name) == null)
-                trouble.Say(statement, "no variable '" + name + "' holding " + (trigger ? "a trigger" : "a block") + " above this line.");
+                trouble.Say(statement, $"no variable '{name}' holding {(trigger ? "a trigger" : "a block")} above this line.");
         }
     }
 }

@@ -127,7 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>Asks the server for the Sprocket on <paramref name="block" />, as <paramref name="name" />.</summary>
         public void Ask(long block, string name)
         {
-            Told.Say("asking the server for the Sprocket on block " + block);
+            Told.Say($"asking the server for the Sprocket on block {block}");
             _channel.SendToServer(new Claim { Block = block, Name = name ?? "" }, true);
         }
 
@@ -153,7 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>Hands back the Sprocket on <paramref name="block" />, finished with.</summary>
         public void Hand(long block)
         {
-            Told.Say("handing back the Sprocket on block " + block);
+            Told.Say($"handing back the Sprocket on block {block}");
             _sent.Remove(block);
             _channel.SendToServer(new Release { Block = block }, true);
         }
@@ -180,8 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
 
             _sent[block] = new Sent { Program = program, Switches = switches };
-            Told.Say("sending the server a change to block " + block + ": "
-                + Compared(sent.Program, program, sent.Switches, switches));
+            Told.Say($"sending the server a change to block {block}: {Compared(sent.Program, program, sent.Switches, switches)}");
             _channel.SendToServer(new Change { Block = block, Program = program, Switches = switches }, true);
         }
 
@@ -194,8 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (sequence.System == null || instance == null)
                 return;
 
-            Told.Say("asking the server to " + (stops ? "stop" : "run") + " sequence " + sequence.Number
-                + " of " + sequence.System.Identity.ToString("N") + " #" + instance.Number + " on block " + block);
+            Told.Say($"asking the server to {(stops ? "stop" : "run")} sequence {sequence.Number} of {sequence.System.Identity:N} #{instance.Number} on block {block}");
             _channel.SendToServer(new Order
             {
                 Block = block,
@@ -226,8 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (_told.TryGetValue(block, out told) && told.Program == program && told.Switches == switches)
                 return;
 
-            Told.Say("telling every client what block " + block + " holds: "
-                + Compared(told.Program, program, told.Switches, switches));
+            Told.Say($"telling every client what block {block} holds: {Compared(told.Program, program, told.Switches, switches)}");
             _told[block] = new Sent { Program = program, Switches = switches };
             _channel.Broadcast(new Change { Block = block, Program = program, Switches = switches }, true);
         }
@@ -270,8 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             foreach (var key in _gone)
             {
-                Told.Say(Who(_held[key].Name, _held[key].Id) + " is gone, so block " + key
-                    + " is free again");
+                Told.Say($"{Who(_held[key].Name, _held[key].Id)} is gone, so block {key} is free again");
                 _held.Remove(key);
             }
         }
@@ -304,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (unit != null && !unit.Owns(identity))
             {
                 grant.Foreign = true;
-                Told.Say(Who(claim.Name, sender) + " asked for block " + claim.Block + ", and was refused: they own none of it");
+                Told.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was refused: they own none of it");
                 _channel.Send(grant, sender, true);
                 return;
             }
@@ -314,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             {
                 grant.Given = true;
                 unit.Written(out grant.Program, out grant.State);
-                Told.Say(Who(claim.Name, sender) + " asked for block " + claim.Block + ", and was lent it");
+                Told.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was lent it");
             }
             else
             {
@@ -322,8 +318,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 if (unit != null)
                     unit.Written(out grant.Program, out grant.State);
 
-                Told.Say(Who(claim.Name, sender) + " asked for block " + claim.Block + ", and was refused: "
-                    + (unit == null ? "it carries no Sprocket here" : holder + " holds it"));
+                Told.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was refused: {(unit == null ? "it carries no Sprocket here" : $"{holder} holds it")}");
             }
 
             _channel.Send(grant, sender, true);
@@ -340,20 +335,19 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             if (grant.Foreign)
             {
-                Told.Say("the server refused block " + grant.Block + ": its automation belongs to its owners");
+                Told.Say($"the server refused block {grant.Block}: its automation belongs to its owners");
                 _foreign(grant.Block);
                 return;
             }
 
             if (grant.Given)
             {
-                Told.Say("the server lent block " + grant.Block + ", " + grant.Program.Length + " characters of program");
+                Told.Say($"the server lent block {grant.Block}, {grant.Program.Length} characters of program");
                 _given(grant.Block, grant.Program, grant.State);
             }
             else
             {
-                Told.Say("the server refused block " + grant.Block
-                    + (grant.Holder.Length > 0 ? ": " + grant.Holder + " holds it" : ": nobody can have it"));
+                Told.Say($"the server refused block {grant.Block}{(grant.Holder.Length > 0 ? $": {grant.Holder} holds it" : ": nobody can have it")}");
                 _refused(grant.Block, grant.Holder, grant.Program, grant.State);
             }
         }
@@ -382,11 +376,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             if (MyAPIGateway.Session == null || !MyAPIGateway.Session.IsUserAdmin(sender))
             {
-                Told.Say(Who(sender) + " proposed settings for this world, and was refused: they are no admin");
+                Told.Say($"{Who(sender)} proposed settings for this world, and was refused: they are no admin");
                 return;
             }
 
-            Told.Say(Who(sender) + " changed the settings for this world");
+            Told.Say($"{Who(sender)} changed the settings for this world");
             _ruled(ruling.Settings);
             Rule();
         }
@@ -402,15 +396,14 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            Told.Say(Who(sender) + " handed back block " + release.Block
-                + (Holds(release.Block, sender) ? "" : ", which they did not hold"));
+            Told.Say($"{Who(sender)} handed back block {release.Block}{(Holds(release.Block, sender) ? "" : ", which they did not hold")}");
             Take(release.Block, sender);
         }
 
         /// <summary>Asks the server to write the buttons of <paramref name="panel" /> for the Sprocket on <paramref name="block" />, as just picked.</summary>
         public void Wire(long block, long panel)
         {
-            Told.Say("asking the server to wire panel " + panel + " for block " + block);
+            Told.Say($"asking the server to wire panel {panel} for block {block}");
             if (!_wiring.Contains(block))
                 _wiring.Add(block);
 
@@ -424,7 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!_wiring.Remove(block))
                 return;
 
-            Told.Say("asking the server to let go of the buttons picked for block " + block);
+            Told.Say($"asking the server to let go of the buttons picked for block {block}");
             _channel.SendToServer(new Unwiring { Block = block }, true);
         }
 
@@ -434,17 +427,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            var said = Who(sender) + " asked to wire panel " + wiring.Panel + " for block " + wiring.Block;
+            var said = $"{Who(sender)} asked to wire panel {wiring.Panel} for block {wiring.Block}";
             if (!Holds(wiring.Block, sender))
             {
-                Told.Say(said + ", and was ignored: they do not hold it");
+                Told.Say($"{said}, and was ignored: they do not hold it");
                 return;
             }
 
             SprocketUnit unit = _find(wiring.Block);
             if (unit == null)
             {
-                Told.Say(said + ", which carries no Sprocket here");
+                Told.Say($"{said}, which carries no Sprocket here");
                 return;
             }
 
@@ -459,17 +452,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            var said = Who(sender) + " let go of the buttons picked for block " + unwiring.Block;
+            var said = $"{Who(sender)} let go of the buttons picked for block {unwiring.Block}";
             if (!Holds(unwiring.Block, sender))
             {
-                Told.Say(said + ", and was ignored: they do not hold it");
+                Told.Say($"{said}, and was ignored: they do not hold it");
                 return;
             }
 
             SprocketUnit unit = _find(unwiring.Block);
             if (unit == null)
             {
-                Told.Say(said + ", which carries no Sprocket here");
+                Told.Say($"{said}, which carries no Sprocket here");
                 return;
             }
 
@@ -483,18 +476,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            var said = Who(sender) + " asked to " + (order.Stops ? "stop" : "run") + " sequence " + order.Sequence
-                + " of " + order.System.ToString("N") + " #" + order.Instance + " on block " + order.Block;
+            var said = $"{Who(sender)} asked to {(order.Stops ? "stop" : "run")} sequence {order.Sequence} of {order.System:N} #{order.Instance} on block {order.Block}";
             if (!Holds(order.Block, sender))
             {
-                Told.Say(said + ", and was ignored: they do not hold it");
+                Told.Say($"{said}, and was ignored: they do not hold it");
                 return;
             }
 
             SprocketUnit unit = _find(order.Block);
             if (unit == null)
             {
-                Told.Say(said + ", which carries no Sprocket here");
+                Told.Say($"{said}, which carries no Sprocket here");
                 return;
             }
 
@@ -507,17 +499,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
         static string Compared(string program, string now, string switches, string switchesNow)
         {
             if (program == null)
-                return "nothing to compare with; " + now.Length + " characters of program and "
-                    + switchesNow.Length + " of switches";
+                return $"nothing to compare with; {now.Length} characters of program and {switchesNow.Length} of switches";
 
             var said = program == now
                 ? "program unchanged"
-                : "program " + program.Length + " to " + now.Length + " characters, " + Difference(program, now);
+                : $"program {program.Length} to {now.Length} characters, {Difference(program, now)}";
 
             if (switches == switchesNow)
-                return said + "; switches unchanged";
+                return $"{said}; switches unchanged";
 
-            return said + "; switches " + (switches == null ? "unknown" : Difference(switches, switchesNow));
+            return $"{said}; switches {(switches == null ? "unknown" : Difference(switches, switchesNow))}";
         }
 
         /// <summary>The first line two texts disagree on, as it was and as it is.</summary>
@@ -530,8 +521,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             while (line < before.Length && line < after.Length && before[line] == after[line])
                 line++;
 
-            return "first difference at line " + (line + 1) + " of " + after.Length + ": "
-                + Quoted(before, line) + " became " + Quoted(after, line);
+            return $"first difference at line {(line + 1)} of {after.Length}: {Quoted(before, line)} became {Quoted(after, line)}";
         }
 
         static string Quoted(string[] lines, int line)
@@ -540,13 +530,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return "nothing";
 
             var text = lines[line].Trim();
-            return "\"" + (text.Length > 100 ? text.Substring(0, 100) + "..." : text) + "\"";
+            return $"\"{(text.Length > 100 ? $"{text.Substring(0, 100)}..." : text)}\"";
         }
 
         /// <summary>A player for the log, by the name they gave where there is one, and always by id.</summary>
         static string Who(string name, ulong id)
         {
-            return string.IsNullOrEmpty(name) ? "player " + id : name + " (" + id + ")";
+            return string.IsNullOrEmpty(name) ? $"player {id}" : $"{name} ({id})";
         }
 
         /// <summary>A player for the log, named where they hold something.</summary>
@@ -578,8 +568,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 if (!fromServer)
                     return;
 
-                Told.Say("the server wrote block " + change.Block + ", " + change.Program.Length
-                    + " characters of program and " + change.Switches.Length + " of switches");
+                Told.Say($"the server wrote block {change.Block}, {change.Program.Length} characters of program and {change.Switches.Length} of switches");
                 _stored(change.Block, change.Program, change.Switches);
 
                 return;
@@ -587,7 +576,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             if (!Holds(change.Block, sender))
             {
-                Told.Say(Who(sender) + " sent a change to block " + change.Block + ", ignored: they do not hold it");
+                Told.Say($"{Who(sender)} sent a change to block {change.Block}, ignored: they do not hold it");
                 return;
             }
 
@@ -601,8 +590,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 switches = StateText.Save(unit.Program, null);
             }
 
-            Told.Say(Who(sender) + " sent a change to block " + change.Block + ": "
-                + Compared(program, change.Program, switches, change.Switches));
+            Told.Say($"{Who(sender)} sent a change to block {change.Block}: {Compared(program, change.Program, switches, change.Switches)}");
             _changed(change.Block, change.Program, change.Switches);
         }
     }

@@ -214,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>What a value is known by in <see cref="Spell" />: its name, or its place for a value nobody named.</summary>
         public static string Key(Field field, int at)
         {
-            return string.IsNullOrEmpty(field.Name) ? "#" + Ordinal(at) : field.Name;
+            return string.IsNullOrEmpty(field.Name) ? $"#{Ordinal(at)}" : field.Name;
         }
 
         /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual, its notes in <paramref name="texts" />.</summary>

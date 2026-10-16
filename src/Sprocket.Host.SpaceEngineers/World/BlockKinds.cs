@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The kind of <paramref name="block" />, described the first time a block of that type is asked about and kept.</summary>
         public EntityKind For(IMyTerminalBlock block)
         {
-            string id = block.BlockDefinition.TypeIdString + "/" + block.BlockDefinition.SubtypeName;
+            string id = $"{block.BlockDefinition.TypeIdString}/{block.BlockDefinition.SubtypeName}";
 
             EntityKind kind;
             if (_kinds.TryGetValue(id, out kind))
@@ -155,9 +155,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         static string Placed(ToolbarSlot at, int toolbars, int pages)
         {
             if (toolbars > 1)
-                return "toolbar " + at.Toolbar + ", page " + at.Page + ", slot " + at.Slot + " runs";
+                return $"toolbar {at.Toolbar}, page {at.Page}, slot {at.Slot} runs";
 
-            return pages > 1 ? "toolbar page " + at.Page + ", slot " + at.Slot + " runs" : "toolbar slot " + at.Slot + " runs";
+            return pages > 1 ? $"toolbar page {at.Page}, slot {at.Slot} runs" : $"toolbar slot {at.Slot} runs";
         }
 
         /// <summary>

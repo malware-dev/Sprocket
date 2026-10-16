@@ -133,8 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (Kind == ValueKind.Real)
                     return Real.ToString("R", CultureInfo.InvariantCulture);
 
-                return "#" + Hex(Red) + Hex(Green) + Hex(Blue)
-                    + (Alpha == 255 ? "" : Hex(Alpha));
+                return $"#{Hex(Red)}{Hex(Green)}{Hex(Blue)}{(Alpha == 255 ? "" : Hex(Alpha))}";
             }
         }
 

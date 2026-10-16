@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var pages = toolbar.PageCount <= 1 ? 1 : toolbar.PageCount - 1;
             var buttons = toolbar.SlotCount * pages;
             var slots = toolbar.SlotCount;
-            kind.WithPressed(1, "button is pressed", pages, slots, at => "button " + ((at.Page - 1) * slots + at.Slot) + " is pressed");
+            kind.WithPressed(1, "button is pressed", pages, slots, at => $"button {((at.Page - 1) * slots + at.Slot)} is pressed");
 
             var labels = Doing.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
             {

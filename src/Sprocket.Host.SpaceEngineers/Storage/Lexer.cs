@@ -74,7 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (Letter(c))
                 return Identifier();
 
-            return Bad(_ptr++, "unexpected '" + c + "'.");
+            return Bad(_ptr++, $"unexpected '{c}'.");
         }
 
         static bool Letter(char c)
@@ -221,7 +221,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (digits == 8)
                 return new Token(TokenKind.Color, start.Index, default(StringSegment), packed);
 
-            return Bad(start, "expected six or eight hex digits in the color, not " + digits + ".");
+            return Bad(start, $"expected six or eight hex digits in the color, not {digits}.");
         }
 
         /// <summary>
@@ -331,13 +331,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var body = Since(start).ToString();
             if (digits == 0)
-                return Bad(start, "expected a number, not '" + body + "'.");
+                return Bad(start, $"expected a number, not '{body}'.");
 
             if (real)
             {
                 double value;
                 if (!double.TryParse(body, NumberStyles.Float, CultureInfo.InvariantCulture, out value))
-                    return Bad(start, "expected a number, not '" + body + "'.");
+                    return Bad(start, $"expected a number, not '{body}'.");
 
                 return Letter(_ptr.Char)
                     ? Duration(start, 0, value, true)
@@ -346,7 +346,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             long whole;
             if (!long.TryParse(body, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
-                return Bad(start, "'" + body + "' is too large for a whole number.");
+                return Bad(start, $"'{body}' is too large for a whole number.");
 
             return Letter(_ptr.Char)
                 ? Duration(start, whole, whole, false)
@@ -376,16 +376,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (unit.Length == 1 && unit[0] == 't')
             {
                 return real
-                    ? Bad(start, "expected a whole number of ticks, not '" + Since(start) + "'.")
+                    ? Bad(start, $"expected a whole number of ticks, not '{Since(start)}'.")
                     : new Token(TokenKind.Duration, start.Index, unit, whole, number);
             }
 
             if (unit.Length != 1 || unit[0] != 's')
-                return Bad(start, "expected a duration like 600t or 2s, not '" + Since(start) + "'.");
+                return Bad(start, $"expected a duration like 600t or 2s, not '{Since(start)}'.");
 
             var ticks = number * Sequences.Duration.PerSecond;
             if (ticks > int.MaxValue || ticks < int.MinValue)
-                return Bad(start, "'" + Since(start) + "' is too long a time.");
+                return Bad(start, $"'{Since(start)}' is too long a time.");
 
             return new Token(TokenKind.Duration, start.Index, unit, Sequences.Duration.TicksIn(number), number);
         }

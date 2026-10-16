@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             catch (Exception failed)
             {
                 _intact = false;
-                _say(File + " will not open - " + failed.Message);
+                _say($"{File} will not open - {failed.Message}");
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!ini.TryParse(text, out parsed))
             {
                 _intact = false;
-                _say(File + " has a problem on line " + parsed.LineNo + " - " + parsed.Error);
+                _say($"{File} has a problem on line {parsed.LineNo} - {parsed.Error}");
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             catch (Exception failed)
             {
-                _say(File + " will not write - " + failed.Message);
+                _say($"{File} will not write - {failed.Message}");
             }
         }
     }

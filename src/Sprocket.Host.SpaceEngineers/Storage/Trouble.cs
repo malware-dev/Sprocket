@@ -55,9 +55,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <remarks>A toolbar slot holds one action, so a second trigger on it could never be wired.</remarks>
         public void Takes(Statement statement, string block, ToolbarSlot at)
         {
-            if (!_taken.Add(block + "\n" + at.EventId))
-                Say(statement, "ext.toolbar(" + at.Toolbar + ", " + at.Page + ", " + at.Slot + ") on [ " + Pen.Spelling("", block) + " ]"
-                    + " already starts something; a toolbar slot holds one action.");
+            if (!_taken.Add($"{block}\n{at.EventId}"))
+                Say(statement, $"ext.toolbar({at.Toolbar}, {at.Page}, {at.Slot}) on [ {Pen.Spelling("", block)} ] already starts something; a toolbar slot holds one action.");
         }
 
         /// <summary>Says the line of <paramref name="at" /> reads but looks like a mistake, <paramref name="what" />, where nothing did before.</summary>
@@ -102,18 +101,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 var part = owed.System.FindPart(owed.Name);
                 if (part == null)
-                    Say(owed.At, "no slot called '" + owed.Name + "'.");
+                    Say(owed.At, $"no slot called '{owed.Name}'.");
                 else if (part.IsSignal && !owed.Trigger)
-                    Say(owed.At, "'" + owed.Name + "' is a signal slot; expected a slot for a block.");
+                    Say(owed.At, $"'{owed.Name}' is a signal slot; expected a slot for a block.");
                 else if (!part.IsSignal && owed.Trigger)
-                    Say(owed.At, "'" + owed.Name + "' is a slot for a block; expected a signal slot.");
+                    Say(owed.At, $"'{owed.Name}' is a slot for a block; expected a signal slot.");
             }
         }
 
         /// <summary>Where <paramref name="at" /> starts, as trouble begins: <c>Line 5: </c>.</summary>
         public string Line(Statement at)
         {
-            return "Line " + new TextPtr(_script, at.At).FindLineNo() + ": ";
+            return $"Line {new TextPtr(_script, at.At).FindLineNo()}: ";
         }
 
         /// <summary>A name a statement uses, waiting to be judged.</summary>

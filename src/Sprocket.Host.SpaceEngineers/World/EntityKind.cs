@@ -143,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var changed = FindAction(value, Nature.Value);
             if (changed == null || changed.Being == null)
-                throw new ArgumentException("The signal " + id + " is a change in " + value + ", which is no value of Sprocket's own declared before it.");
+                throw new ArgumentException($"The signal {id} is a change in {value}, which is no value of Sprocket's own declared before it.");
 
             var signal = new EntityEvent(id, changed.Being.Is(becomes), Edge.Rising, text);
             signal.Changes(value, becomes);
@@ -392,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             foreach (var setting in _lacking)
             {
-                if (gameId == setting || gameId == setting + "_On" || gameId == setting + "_Off")
+                if (gameId == setting || gameId == $"{setting}_On" || gameId == $"{setting}_Off")
                     return true;
             }
 

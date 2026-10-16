@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
             _trouble = trouble.ToString();
             if (_trouble.Length > 0)
-                Told.Say("codex: " + _trouble);
+                Told.Say($"codex: {_trouble}");
         }
 
         /// <summary>The term called <paramref name="id" /> among those read, or null where there is none.</summary>
@@ -160,7 +160,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The markdown-lite for <paramref name="words" /> as a link to the term <paramref name="id" />.</summary>
         public static string Link(string words, string id)
         {
-            return "[" + Markdown.Escape(words) + "](" + id + ")";
+            return $"[{Markdown.Escape(words)}]({id})";
         }
 
         /// <summary>Makes the links in <paramref name="text" /> lead into the codex: pressing one gives its term to <paramref name="open" />, and resting on one shows the term's preview.</summary>

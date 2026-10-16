@@ -401,7 +401,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             var name = called;
             for (var n = 2; _system.FindPart(name) != null || _taken.Contains(name); n++)
-                name = called + " " + n;
+                name = $"{called} {n}";
 
             return name;
         }

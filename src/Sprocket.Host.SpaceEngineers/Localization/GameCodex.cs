@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Localization
         public GameCodex(MyObjectBuilder_Checkpoint.ModItem mod)
         {
             _mod = mod;
-            _folders.Add(Folder + Original + "/");
+            _folders.Add($"{Folder}{Original}/");
             _folders.Add(Folder);
         }
 
@@ -38,12 +38,12 @@ namespace Sprocket.Host.SpaceEngineers.Localization
                 && !string.IsNullOrEmpty(description.CultureName) && description.CultureName != Original)
             {
                 if (!string.IsNullOrEmpty(description.SubcultureName))
-                    _folders.Add(Folder + description.CultureName + "-" + description.SubcultureName + "/");
+                    _folders.Add($"{Folder}{description.CultureName}-{description.SubcultureName}/");
 
-                _folders.Add(Folder + description.CultureName + "/");
+                _folders.Add($"{Folder}{description.CultureName}/");
             }
 
-            _folders.Add(Folder + Original + "/");
+            _folders.Add($"{Folder}{Original}/");
             _folders.Add(Folder);
         }
 

@@ -61,8 +61,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             for (var i = 0; i < Followed.Length; i++)
             {
-                kind.Renaming(Followed[i], true, "target " + Called[i])
-                    .Renaming(Followed[i], false, "toggle target " + Called[i]);
+                kind.Renaming(Followed[i], true, $"target {Called[i]}")
+                    .Renaming(Followed[i], false, $"toggle target {Called[i]}");
             }
 
             HideAiming(kind, block);

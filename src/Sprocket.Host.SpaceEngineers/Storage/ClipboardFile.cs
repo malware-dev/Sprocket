@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             catch (Exception failed)
             {
-                _say(File + " will not open - " + failed.Message);
+                _say($"{File} will not open - {failed.Message}");
             }
 
             return _held;
@@ -58,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             catch (Exception failed)
             {
-                _say(File + " will not write - " + failed.Message);
+                _say($"{File} will not write - {failed.Message}");
             }
         }
     }

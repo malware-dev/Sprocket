@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (lines[0] != Head)
             {
                 Changed = true;
-                return "the carrier's files do not start with \"" + Head + "\"";
+                return $"the carrier's files do not start with \"{Head}\"";
             }
 
             // A packed text ends every line with a newline, so the last piece is empty and stands for nothing.
@@ -105,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 {
                     _files.Clear();
                     Changed = true;
-                    return "a line of the carrier's files is in no file: " + line;
+                    return $"a line of the carrier's files is in no file: {line}";
                 }
 
                 if (!first)

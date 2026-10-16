@@ -297,7 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var result = "";
             for (var i = 0; i < shared; i++)
-                result = i == 0 ? words[i] : result + " " + words[i];
+                result = i == 0 ? words[i] : $"{result} {words[i]}";
 
             return result;
         }

@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             GridEntity panel = world?.FindEntity(entry.PanelId);
             var name = panel == null ? "a block that is gone" : panel.Name;
 
-            return "When " + name + " button " + (entry.Slot + 1) + " is pressed";
+            return $"When {name} button {(entry.Slot + 1)} is pressed";
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string Does(GridWorld world, Vanilla.Entry entry)
         {
             if (entry.GroupName.Length > 0)
-                return entry.ActionId + " " + entry.GroupName;
+                return $"{entry.ActionId} {entry.GroupName}";
 
             GridEntity acts = world?.FindEntity(entry.BlockId);
             if (acts == null)
@@ -47,10 +47,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             for (var i = 0; i < actions.Count; i++)
             {
                 if (actions[i].GameActionId == entry.ActionId)
-                    return actions[i].Text + " " + acts.Name;
+                    return $"{actions[i].Text} {acts.Name}";
             }
 
-            return entry.ActionId + " " + acts.Name;
+            return $"{entry.ActionId} {acts.Name}";
         }
     }
 }

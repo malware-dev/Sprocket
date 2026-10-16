@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             _failures++;
             if (Trouble.Length == 0)
-                Trouble = "Line " + new TextPtr(_lexer.Script, _token.At).FindLineNo() + ": " + what;
+                Trouble = $"Line {new TextPtr(_lexer.Script, _token.At).FindLineNo()}: {what}";
         }
 
         /// <summary>Past the end of this line, so reading can pick up at the next construct.</summary>
@@ -187,7 +187,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (_token.Kind == TokenKind.Annotation)
                 {
                     var line = _token.Text.ToString();
-                    note = note.Length == 0 ? line : note + "\n" + line;
+                    note = note.Length == 0 ? line : $"{note}\n{line}";
                     Step();
                     EndOfLine();
                     continue;
@@ -344,7 +344,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     // A name spelled like a keyword is quoted, beside a dot as anywhere: ext.'on'.
                     if (_token.Kind == TokenKind.Dot)
                     {
-                        Fail("unexpected '" + Keywords.Name(token.Keyword) + "' before '.'; a name spelled like a keyword is quoted.");
+                        Fail($"unexpected '{Keywords.Name(token.Keyword)}' before '.'; a name spelled like a keyword is quoted.");
                         return Value.None;
                     }
 
@@ -432,7 +432,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 if (!Valuish())
                 {
-                    Fail("expected a value or " + closing + ".");
+                    Fail($"expected a value or {closing}.");
                     return Value.None;
                 }
 
@@ -450,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (_token.Kind != close)
             {
-                Fail("expected " + closing + ".");
+                Fail($"expected {closing}.");
                 return Value.None;
             }
 

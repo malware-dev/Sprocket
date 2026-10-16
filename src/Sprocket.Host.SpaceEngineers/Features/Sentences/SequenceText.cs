@@ -72,17 +72,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 var when = moment as WhenTrigger;
                 var sources = SystemInstance.Through(through, moment.Sources);
                 if (when != null && !Watched(bindings, when, sources))
-                    return "When " + Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources);
+                    return $"When {Compared(bindings, when.Provider, when.EventId, when.Quantifier, when.Relation, when.Value, sources)}";
 
                 var all = when != null && when.Quantifier == Quantifier.All;
                 var happening = Happening(bindings, Vocabulary.EventOf(program, bindings, system, moment, through), sources);
-                return "When " + SentenceText.Named(bindings, sources, all) + " "
-                       + (all && sources.Count > 1 ? SentenceText.Plural(happening) : happening);
+                return $"When {SentenceText.Named(bindings, sources, all)} {(all && sources.Count > 1 ? SentenceText.Plural(happening) : happening)}";
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                return "Every " + TimeText.Rate(every.Interval);
+                return $"Every {TimeText.Rate(every.Interval)}";
 
             // A required trigger that names nothing: whatever answers it is on the ship's toolbars
             // and not in the system, so there is nothing to name and the line says that.
@@ -390,7 +389,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             var wait = step as Wait;
             if (wait != null)
-                return "wait " + TimeText.Duration(wait.Length);
+                return $"wait {TimeText.Duration(wait.Length)}";
 
             var run = step as SpaceEngineers.Sequences.Run;
             if (run != null)
@@ -425,13 +424,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var blocks = SentenceText.Named(bindings, targets, test.Quantifier != Quantifier.Any);
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), test.Provider, test.MemberId);
             if (value == null)
-                return SentenceText.Empty + " on " + blocks;
+                return $"{SentenceText.Empty} on {blocks}";
 
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, targets));
             var given = SentenceText.Given(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields, null,
                 Given.Checked, test.Quantifier == Quantifier.All && targets.Count > 1));
-            var read = value.IsStatus ? blocks : SentenceText.Value(value) + " on " + blocks;
-            return (targets.Count > 1 ? SentenceText.Quantified(test.Quantifier) + " " + read : read) + " " + given;
+            var read = value.IsStatus ? blocks : $"{SentenceText.Value(value)} on {blocks}";
+            return $"{(targets.Count > 1 ? $"{SentenceText.Quantified(test.Quantifier)} {read}" : read)} {given}";
         }
 
         /// <summary>
@@ -449,20 +448,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 if (state != null)
                 {
                     var said = inState ? state.State : state.Unstate;
-                    return blocks + " " + (quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said);
+                    return $"{blocks} {(quantifier == Quantifier.All && targets.Count > 1 ? SentenceText.Plural(said) : said)}";
                 }
             }
 
             var value = EntityAction.Value(Vocabulary.ActionsFor(bindings, targets), provider, id);
 
             if (value == null)
-                return SentenceText.Empty + " on " + blocks;
+                return $"{SentenceText.Empty} on {blocks}";
 
             var fields = new List<Field>();
             value.Fields(fields);
-            var read = SentenceText.Value(value) + " on " + blocks;
-            return (quantifier == Quantifier.Sum || quantifier == Quantifier.Average ? SentenceText.Quantified(quantifier) + " " + read : read) + " " + Compared(relation) + " "
-                   + SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null));
+            var read = $"{SentenceText.Value(value)} on {blocks}";
+            return $"{(quantifier == Quantifier.Sum || quantifier == Quantifier.Average ? $"{SentenceText.Quantified(quantifier)} {read}" : read)} {Compared(relation)} {SentenceText.Given(new ArgumentsSlot(new[] { compared }, fields, null))}";
         }
 
         /// <summary>Whether <paramref name="when" /> is a value of Sprocket's own coming to be what one of its signals says it becomes, which reads as that signal.</summary>
@@ -499,7 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             EntityAction named = step.Names(Vocabulary.ActionsFor(bindings, targets));
             var blocks = SentenceText.Named(bindings, targets, true);
             if (named == null)
-                return SentenceText.Empty + " " + blocks;
+                return $"{SentenceText.Empty} {blocks}";
 
             // The values in the words the step shows them in: a choice as its word, three numbers as
             // one colour. After what it acts on, because the blocks are what somebody is looking for
@@ -516,7 +514,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (step.Sets)
                 return SentenceText.Setting(SentenceText.Value(named), blocks, given);
 
-            return step.Arguments.Count == 0 || slot.Quiet ? named.Text + " " + blocks : named.Text + " " + blocks + " " + given;
+            return step.Arguments.Count == 0 || slot.Quiet ? $"{named.Text} {blocks}" : $"{named.Text} {blocks} {given}";
         }
     }
 }

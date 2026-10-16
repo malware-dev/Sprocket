@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 parts[i] = (byte)(whole < 0 ? 0 : whole > 255 ? 255 : whole);
             }
 
-            return "#" + Hex(parts[0]) + Hex(parts[1]) + Hex(parts[2]);
+            return $"#{Hex(parts[0])}{Hex(parts[1])}{Hex(parts[2])}";
         }
 
         /// <summary>

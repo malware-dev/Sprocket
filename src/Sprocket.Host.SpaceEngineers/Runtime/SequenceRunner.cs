@@ -522,7 +522,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (_busy.Listed)
                 return;
 
-            Told.Say("A run of \"" + _sequence.Name + "\" had nothing on the rota to move it, and was put back.");
+            Told.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
             _rota.At(_busy, tick);
         }
 

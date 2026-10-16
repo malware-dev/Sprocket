@@ -75,8 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
 
                 if (switched + renamed > 0)
-                    said.Add("alpha 14: " + switched + " switch step" + (switched == 1 ? "" : "s") + " set power, " + renamed + " use"
-                             + (renamed == 1 ? "" : "s") + " of switched-on named power.");
+                    said.Add($"alpha 14: {switched} switch step{(switched == 1 ? "" : "s")} set power, {renamed} use{(renamed == 1 ? "" : "s")} of switched-on named power.");
             }
 
             if (draft <= 15)
@@ -97,8 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
 
                 if (counted + held > 0)
-                    said.Add("alpha 15: " + counted + " use" + (counted == 1 ? "" : "s") + " of things-detected named detections, " + held
-                             + " screen step" + (held == 1 ? "" : "s") + " on a slot of screens.");
+                    said.Add($"alpha 15: {counted} use{(counted == 1 ? "" : "s")} of things-detected named detections, {held} screen step{(held == 1 ? "" : "s")} on a slot of screens.");
             }
 
             return string.Join(" ", said);

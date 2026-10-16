@@ -92,13 +92,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                     if (block == null)
                         return item.ActionId ?? "";
 
-                    picture = block.BlockDefinition.TypeIdString + "/" + block.BlockDefinition.SubtypeName;
+                    picture = $"{block.BlockDefinition.TypeIdString}/{block.BlockDefinition.SubtypeName}";
                     var action = block.GetActionWithName(item.ActionId);
-                    return block.CustomName + ": " + (action == null ? item.ActionId : action.Name.ToString());
+                    return $"{block.CustomName}: {(action == null ? item.ActionId : action.Name.ToString())}";
                 }
 
                 case MyToolbarItemKind.GroupAction:
-                    return item.GroupName + ": " + item.ActionId;
+                    return $"{item.GroupName}: {item.ActionId}";
 
                 case MyToolbarItemKind.Definition:
                 {

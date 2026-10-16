@@ -346,7 +346,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
             var name = called;
             for (var n = 2; Names(name); n++)
-                name = called + " " + n;
+                name = $"{called} {n}";
 
             return name;
         }

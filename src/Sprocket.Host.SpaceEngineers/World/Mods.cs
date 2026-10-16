@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (said == null)
                     continue;
 
-                Told.Say(named, "described " + said.Actions.Count + " actions");
+                Told.Say(named, $"described {said.Actions.Count} actions");
                 into.Add(said, named);
             }
         }
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             catch (System.Exception trouble)
             {
-                Told.Say(named, "has a " + File + " that will not read - " + trouble.Message);
+                Told.Say(named, $"has a {File} that will not read - {trouble.Message}");
                 return null;
             }
         }

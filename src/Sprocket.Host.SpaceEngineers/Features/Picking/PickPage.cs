@@ -621,7 +621,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // Two ways of looking at what somebody does to a block or checks of one. What happens to one is Sprocket's own
             // wording throughout, so there is no second way to look at it.
             // The angle marks point the way each link goes; the words alone are translated.
-            var views = _forEvents ? null : new[] { "‹ " + Editor.Texts.PickToOrganized, Editor.Texts.PickToTerminal + " ›" };
+            var views = _forEvents ? null : new[] { $"‹ {Editor.Texts.PickToOrganized}", $"{Editor.Texts.PickToTerminal} ›" };
 
             _what = new StageColumn(_strip.Width, true, views, Editor.Texts);
             _what.Title = _forTests ? Editor.Texts.PickWhatToCheck : _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
@@ -805,7 +805,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _strip.ArgumentsIn = _forEvents ? _does ?? _what : null;
 
-            var shown = IsComplete ? _chosenForm + " " + _chosen : "";
+            var shown = IsComplete ? $"{_chosenForm} {_chosen}" : "";
             _strip.ShowsArguments = _what != null && shown.Length != 0;
 
             var fields = Wanted();
@@ -1273,7 +1273,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 note = _forTests && Editor.ShowsTerminal ? texts.PickTerminalNote : "";
                 var totals = _quantifier == Quantifier.Sum ? texts.PickSumNote : _quantifier == Quantifier.Average ? texts.PickAverageNote : "";
                 if (totals.Length > 0)
-                    note = note.Length == 0 ? totals : note + " " + totals;
+                    note = note.Length == 0 ? totals : $"{note} {totals}";
             }
             else if (!_forEvents && !_forTests)
             {
@@ -1337,8 +1337,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             foreach (var at in _rows)
             {
                 var key = at < 0
-                    ? "#" + (-1 - at).ToString(CultureInfo.InvariantCulture)
-                    : (_forms.Count > at ? _forms[at] : Nature.Native) + " " + _ids[at];
+                    ? $"#{(-1 - at).ToString(CultureInfo.InvariantCulture)}"
+                    : $"{(_forms.Count > at ? _forms[at] : Nature.Native)} {_ids[at]}";
 
                 _whatKeys.Add(key);
                 _whatAt[key] = at;
@@ -1348,7 +1348,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _whatShown.Clear();
             _whatShown.AddRange(_whatKeys);
             var pressed = Pressing(Editor.World, _selection, _chosen);
-            var under = pressed == null ? -1 : _whatKeys.IndexOf(Nature.Native + " " + pressed.Id);
+            var under = pressed == null ? -1 : _whatKeys.IndexOf($"{Nature.Native} {pressed.Id}");
             if (under >= 0)
                 _whatShown.Insert(under + 1, SlotsKey);
 
@@ -1356,7 +1356,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var type = pressed == null && !_forEvents ? Vocabulary.TypeOf(Editor.World, _selection, _chosen) : null;
             var shared = type == null ? null : Shared(type);
             Keep(shared);
-            var over = shared == null || shared.Count < 2 ? -1 : _whatKeys.IndexOf(_chosenForm + " " + _chosen);
+            var over = shared == null || shared.Count < 2 ? -1 : _whatKeys.IndexOf($"{_chosenForm} {_chosen}");
             if (over >= 0)
                 _whatShown.Insert(over + 1, FacetsKey);
 
@@ -1911,7 +1911,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var joined = "";
             foreach (var block in blocks)
-                joined += " " + block.ToString(CultureInfo.InvariantCulture);
+                joined += $" {block.ToString(CultureInfo.InvariantCulture)}";
             return joined;
         }
 
@@ -1945,7 +1945,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     if (pressed.At(at).Text != words)
                         continue;
 
-                    Chosen(Nature.Native + " " + pressed.Id, 1);
+                    Chosen($"{Nature.Native} {pressed.Id}", 1);
                     PickSlot(at.Page, at.Slot);
                     return true;
                 }

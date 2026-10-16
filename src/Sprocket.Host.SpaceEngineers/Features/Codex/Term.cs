@@ -55,11 +55,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         }
 
         /// <summary>What the term is, in a sentence or two of markdown-lite: the preview under the pointer.</summary>
-        public string Summary => _summary ?? (_summary = Find(Id + ".tldr.md").Trim());
+        public string Summary => _summary ?? (_summary = Find($"{Id}.tldr.md").Trim());
 
         /// <summary>The note on a link to this term: what it is, and that pressing it reads more.</summary>
         /// <remarks>Made once and kept, because a link's note is asked for on every frame the pointer rests on it.</remarks>
-        public Tip Preview => _preview ?? (_preview = new Tip(Summary + "\n\n*" + _texts.CodexMore + "*"));
+        public Tip Preview => _preview ?? (_preview = new Tip($"{Summary}\n\n*{_texts.CodexMore}*"));
 
         /// <summary>Lets go of the tooltip kept in the language that was spoken, so the next reading is in the one spoken now.</summary>
         public void Reword()
@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The page as it shows, read now, and its <paramref name="name" />: <see cref="Page" /> and <see cref="Name" /> from one reading.</summary>
         public string Read(out string name)
         {
-            var page = Find(Id + ".md").Replace("\r\n", "\n").TrimStart('\n');
+            var page = Find($"{Id}.md").Replace("\r\n", "\n").TrimStart('\n');
             if (page.StartsWith(Title))
             {
                 var end = page.IndexOf('\n');

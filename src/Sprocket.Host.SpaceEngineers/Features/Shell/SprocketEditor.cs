@@ -1121,7 +1121,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     names.Add(name);
             }
 
-            return names.Count == 0 ? label : label + " " + Template.Fill(Texts.UndoAlso, "screens", string.Join(", ", names.ToArray()));
+            return names.Count == 0 ? label : $"{label} {Template.Fill(Texts.UndoAlso, "screens", string.Join(", ", names.ToArray()))}";
         }
 
         /// <summary>What the screen of <paramref name="screen" /> is called: the sequence's, slot's, installation's or logic system's name.</summary>
@@ -1267,7 +1267,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             arguments = arguments ?? new Arguments();
             arguments.Set("named", named ?? "");
 
-            Ask(question + "\n\n**{named}**" + (string.IsNullOrEmpty(warning) ? "" : "\n\n" + warning), arguments);
+            Ask($"{question}\n\n**{{named}}**{(string.IsNullOrEmpty(warning) ? "" : $"\n\n{warning}")}", arguments);
             Answer(Texts.DeleteKeep, () => { }, true);
             Answer(Texts.DeleteConfirm, delete);
         }
@@ -1287,7 +1287,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             for (var i = 0; i < shown; i++)
             {
-                var slot = "item" + i.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                var slot = $"item{i.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
                 arguments.Set(slot, name(i));
                 list.Append("\n- {").Append(slot).Append('}');
             }
@@ -2156,7 +2156,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var held = _program.FindSignalRefOnly(block, at);
             return held != null
                 ? held.Name
-                : _program.Free(block + " " + at.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture));
+                : _program.Free($"{block} {at.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
         }
 
         /// <summary>
@@ -3143,13 +3143,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (!ChangedSince(system))
             {
-                Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffKept, arguments);
+                Ask($"{Texts.LibraryTakeOffQuestion}\n\n**{{named}}**\n\n{Texts.LibraryTakeOffKept}", arguments);
                 Answer(Texts.LibraryTakeOffKeep, () => { }, true);
                 Answer(Texts.LibraryTakeOffConfirm, () => TakeOff(system, false));
                 return;
             }
 
-            Ask(Texts.LibraryTakeOffQuestion + "\n\n**{named}**\n\n" + Texts.LibraryTakeOffGoes, arguments);
+            Ask($"{Texts.LibraryTakeOffQuestion}\n\n**{{named}}**\n\n{Texts.LibraryTakeOffGoes}", arguments);
             Answer(Texts.LibraryTakeOffKeep, () => { }, true);
             Answer(Texts.LibraryTakeOffConfirm, () => AskTakeOffBlueprint(system));
         }
@@ -3176,7 +3176,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var arguments = new Arguments();
             arguments.Set("named", system.Name);
 
-            Ask(Texts.LibraryUpdateQuestion + "\n\n**{named}**\n\n" + Texts.LibraryUpdateReplaced, arguments);
+            Ask($"{Texts.LibraryUpdateQuestion}\n\n**{{named}}**\n\n{Texts.LibraryUpdateReplaced}", arguments);
             Answer(Texts.LibraryUpdateKeep, () => { }, true);
             Answer(Texts.LibraryUpdateConfirm, () => Shelve(system));
         }
@@ -3199,7 +3199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var arguments = new Arguments();
             arguments.Set("named", backed.Name);
 
-            Ask(Texts.LibraryKeepBackupQuestion + "\n\n**{named}**\n\n" + Texts.LibraryKeepBackupLinked, arguments);
+            Ask($"{Texts.LibraryKeepBackupQuestion}\n\n**{{named}}**\n\n{Texts.LibraryKeepBackupLinked}", arguments);
             Answer(Texts.LibraryKeepBackupLeave, () => { }, true);
             Answer(Texts.LibraryKeepBackupUpdate, () => Shelve(backed));
             Answer(Texts.LibraryKeepBackupNew, delegate
@@ -3218,7 +3218,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var arguments = new Arguments();
             arguments.Set("named", system.Name);
 
-            Ask(Texts.LibraryRenewQuestion + "\n\n**{named}**\n\n" + Texts.LibraryRenewReplaced, arguments);
+            Ask($"{Texts.LibraryRenewQuestion}\n\n**{{named}}**\n\n{Texts.LibraryRenewReplaced}", arguments);
             Answer(Texts.LibraryRenewKeep, () => { }, true);
             Answer(Texts.LibraryRenewConfirm, () => Renew(system, Change.UpdateFromLibrary));
         }
@@ -3231,7 +3231,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var arguments = new Arguments();
             arguments.Set("named", system.Name);
 
-            Ask(Texts.LibraryResetQuestion + "\n\n**{named}**\n\n" + Texts.LibraryResetReplaced, arguments);
+            Ask($"{Texts.LibraryResetQuestion}\n\n**{{named}}**\n\n{Texts.LibraryResetReplaced}", arguments);
             Answer(Texts.LibraryRenewKeep, () => { }, true);
             Answer(Texts.LibraryResetConfirm, () => Renew(system, Change.ResetToBlueprint));
         }
@@ -3355,8 +3355,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var listed = Bullets(instances.Count,
                 i => SystemSummary.DescribeInstance(Texts, _runner.Bindings, system, instances[i]), arguments);
             var running = SystemSummary.IsRunning(system, _runner, null);
-            Ask(Texts.BlueprintSwitchOffQuestion + "\n\n" + Texts.BlueprintSwitchOffStops + listed
-                + (running ? "\n\n" + Texts.BlueprintSwitchOffRunning : ""), arguments);
+            Ask($"{Texts.BlueprintSwitchOffQuestion}\n\n{Texts.BlueprintSwitchOffStops}{listed}{(running ? $"\n\n{Texts.BlueprintSwitchOffRunning}" : "")}", arguments);
 
             // Keeping them running is the one Enter takes.
             Answer(Texts.BlueprintKeepRunning, () => { }, true);

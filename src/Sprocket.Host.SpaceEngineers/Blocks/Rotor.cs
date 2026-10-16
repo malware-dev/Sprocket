@@ -91,8 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Reverse", false, "reverse")
                 .Renaming("Attach", false, "attach")
                 .Renaming("Detach", false, "detach")
-                .Renaming(locks + "_On", false, "lock")
-                .Renaming(locks + "_Off", false, "unlock")
+                .Renaming($"{locks}_On", false, "lock")
+                .Renaming($"{locks}_Off", false, "unlock")
                 .Renaming(locks, false, "toggle lock")
                 .Renaming("Velocity", true, "velocity")
                 .Measuring("Velocity", " rpm")
@@ -153,15 +153,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var stem = hinge ? "Hinge" : "Rotor";
             var heads = new string[Sizes.Length];
-            heads[0] = "Add" + stem + "TopPart";
+            heads[0] = $"Add{stem}TopPart";
             if (block.CubeGrid == null || block.CubeGrid.GridSizeEnum != MyCubeSize.Large)
                 return heads;
 
             var definition = Definition(block);
             if (definition == null || definition.MediumTopPart != null)
-                heads[1] = "AddMedium" + stem + "TopPart";
+                heads[1] = $"AddMedium{stem}TopPart";
 
-            heads[2] = "AddSmall" + stem + "TopPart";
+            heads[2] = $"AddSmall{stem}TopPart";
             return heads;
         }
 

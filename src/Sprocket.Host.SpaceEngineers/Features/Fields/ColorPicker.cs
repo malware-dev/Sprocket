@@ -92,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var text = _written.Text.Trim();
                 Color said;
                 byte alpha;
-                return text.Length > 0 && text[0] != '#' && Channels.Colour("#" + text, out said, out alpha) ? "#" + text : text;
+                return text.Length > 0 && text[0] != '#' && Channels.Colour($"#{text}", out said, out alpha) ? $"#{text}" : text;
             }
         }
 
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             get
             {
                 var rgb = _color.Colour;
-                var said = "#" + Hex(rgb.R) + Hex(rgb.G) + Hex(rgb.B);
+                var said = $"#{Hex(rgb.R)}{Hex(rgb.G)}{Hex(rgb.B)}";
                 return _alpha == 255 ? said : said + Hex(_alpha);
             }
         }

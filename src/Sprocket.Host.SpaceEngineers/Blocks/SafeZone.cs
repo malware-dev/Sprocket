@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("UseConveyor", false, "toggle automatic push and pull");
 
             for (var i = 0; i < Allows.Length; i += 2)
-                kind.Renaming(Allows[i], true, "allowing " + Allows[i + 1]);
+                kind.Renaming(Allows[i], true, $"allowing {Allows[i + 1]}");
         }
     }
 }

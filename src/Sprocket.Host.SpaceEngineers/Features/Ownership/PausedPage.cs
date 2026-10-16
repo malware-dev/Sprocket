@@ -51,13 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
             var size = Counted(program.Systems.Count, texts.PausedSizeOne, texts.PausedSize);
             var lost = Editor.World.Unshared.Count;
             if (lost > 0)
-                size += " " + Counted(lost, texts.PausedLostOne, texts.PausedLost);
+                size += $" {Counted(lost, texts.PausedLostOne, texts.PausedLost)}";
 
             var returned = Editor.Returned.Count;
             if (returned > 0)
-                size += " " + Counted(returned, texts.PausedReturnedOne, texts.PausedReturned);
+                size += $" {Counted(returned, texts.PausedReturnedOne, texts.PausedReturned)}";
 
-            _body.Markdown = "::: center\n![](Sprocket_Sleepy =160)\n\n# " + texts.PausedHeading + "\n\n" + why + " " + size + "\n:::";
+            _body.Markdown = $"::: center\n![](Sprocket_Sleepy =160)\n\n# {texts.PausedHeading}\n\n{why} {size}\n:::";
 
             _resume.Text = texts.PausedResume;
             _resume.Command = Editor.Act(Cmd.Resume, Editor.Resume);

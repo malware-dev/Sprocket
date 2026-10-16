@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("BroadcastTargetEveryone", "BroadcastTargetOwner", "BroadcastTargetFaction");
 
             for (var i = 1; i <= Saved; i++)
-                kind.Hiding("Transmit Message " + i);
+                kind.Hiding($"Transmit Message {i}");
         }
 
         /// <summary>The controller's chat component, which every block this claims has.</summary>

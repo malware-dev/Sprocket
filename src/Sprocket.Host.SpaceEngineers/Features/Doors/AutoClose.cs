@@ -159,14 +159,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
 
             if (door == null)
             {
-                Told.Say("player " + sender + " set auto-close on door " + closing.Door + ", which is not here");
+                Told.Say($"player {sender} set auto-close on door {closing.Door}, which is not here");
                 return;
             }
 
             var identity = MyAPIGateway.Players == null ? 0L : MyAPIGateway.Players.TryGetIdentityId(sender);
             if (identity == 0L || !door.HasPlayerAccess(identity))
             {
-                Told.Say("player " + sender + " set auto-close on " + door.CustomName + ", and was ignored: they may not change it");
+                Told.Say($"player {sender} set auto-close on {door.CustomName}, and was ignored: they may not change it");
                 return;
             }
 

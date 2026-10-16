@@ -68,8 +68,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             for (var i = 0; i < Switches.Length; i++)
             {
-                kind.Renaming("Target" + Switches[i], true, "target " + Targeted[i])
-                    .Renaming("Target" + Switches[i], false, "toggle target " + Targeted[i]);
+                kind.Renaming($"Target{Switches[i]}", true, $"target {Targeted[i]}")
+                    .Renaming($"Target{Switches[i]}", false, $"toggle target {Targeted[i]}");
             }
         }
 

@@ -26,15 +26,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("UpdateInterval", true, "search interval")
                 .Measuring("UpdateInterval", " s")
                 .Hiding("SetTargetPriority_Closest", "SetTargetPriority_Largest", "SetTargetPriority_Smallest")
-                .Renaming(Circle + "CircleDistance", true, "circle distance")
-                .Renaming(Circle + "CircleInPGravity", true, "circling in planet gravity")
-                .Renaming(Circle + "CircleInPGravity", false, "toggle circling in planet gravity")
-                .Renaming(Circle + "FacingMode", true, "circle facing mode")
-                .Renaming(Range + "MinimalDistance", true, "minimal distance")
-                .Renaming(Range + "MaximalDistance", true, "maximal distance")
-                .Renaming(Range + "EvasiveManeuvers", true, "evasive maneuvers")
-                .Renaming(Range + "EvasiveManeuvers", false, "toggle evasive maneuvers")
-                .Renaming(Range + "FacingMode", true, "stay at range facing mode")
+                .Renaming($"{Circle}CircleDistance", true, "circle distance")
+                .Renaming($"{Circle}CircleInPGravity", true, "circling in planet gravity")
+                .Renaming($"{Circle}CircleInPGravity", false, "toggle circling in planet gravity")
+                .Renaming($"{Circle}FacingMode", true, "circle facing mode")
+                .Renaming($"{Range}MinimalDistance", true, "minimal distance")
+                .Renaming($"{Range}MaximalDistance", true, "maximal distance")
+                .Renaming($"{Range}EvasiveManeuvers", true, "evasive maneuvers")
+                .Renaming($"{Range}EvasiveManeuvers", false, "toggle evasive maneuvers")
+                .Renaming($"{Range}FacingMode", true, "stay at range facing mode")
                 .Renaming("OffensiveCombatHitAndRun_BreakOffDistance", true, "break-off distance")
                 .Measuring("OffensiveCombatHitAndRun_BreakOffDistance", " m")
                 .Renaming("OffensiveCombatHitAndRun_RetreatDistance", true, "retreat distance")
@@ -50,10 +50,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             foreach (var direction in Facings)
             {
                 var facing = direction.ToLowerInvariant();
-                kind.Renaming(Circle + "Facing" + direction, true, "circle facing " + facing)
-                    .Renaming(Circle + "Facing" + direction, false, "toggle circle facing " + facing)
-                    .Renaming(Range + "Facing" + direction, true, "stay at range facing " + facing)
-                    .Renaming(Range + "Facing" + direction, false, "toggle stay at range facing " + facing);
+                kind.Renaming($"{Circle}Facing{direction}", true, $"circle facing {facing}")
+                    .Renaming($"{Circle}Facing{direction}", false, $"toggle circle facing {facing}")
+                    .Renaming($"{Range}Facing{direction}", true, $"stay at range facing {facing}")
+                    .Renaming($"{Range}Facing{direction}", false, $"toggle stay at range facing {facing}");
             }
         }
     }

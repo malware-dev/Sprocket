@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 fastestUpdate = Nearest(ticks);
                 if (fastestUpdate != ticks)
-                    Told.Say(where + " gives " + Fastest + " as " + ticks + ", which is not 1, 10 or 100; it is taken as " + fastestUpdate);
+                    Told.Say($"{where} gives {Fastest} as {ticks}, which is not 1, 10 or 100; it is taken as {fastestUpdate}");
             }
 
             return new Layer(developerMode, fastestUpdate);

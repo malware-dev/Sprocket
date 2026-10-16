@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (string.IsNullOrEmpty(status))
                 return secondary;
 
-            return secondary + "   " + status;
+            return $"{secondary}   {status}";
         }
     }
 }

@@ -457,7 +457,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            return system.Identity.ToString("D") + "/" + (instance?.Number ?? 0) + "/" + sequence.Number;
+            return $"{system.Identity:D}/{(instance?.Number ?? 0)}/{sequence.Number}";
         }
 
         /// <summary>
@@ -472,7 +472,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             bool stops)
         {
             var key = KeyOf(system, instance, sequence);
-            return stops ? key + "/stop" : key;
+            return stops ? $"{key}/stop" : key;
         }
 
         /// <summary>
@@ -487,11 +487,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
         {
-            var head = system.Identity.ToString("D") + "/" + (instance?.Number ?? 0);
+            var head = $"{system.Identity:D}/{(instance?.Number ?? 0)}";
             if (!trigger.IsWritten)
-                return head + "/part:" + trigger.Part;
+                return $"{head}/part:{trigger.Part}";
 
-            return head + "/at:" + (trigger.At == null ? "" : trigger.At.EventId) + ":" + string.Join(",", trigger.Sources);
+            return $"{head}/at:{(trigger.At == null ? "" : trigger.At.EventId)}:{string.Join(",", trigger.Sources)}";
         }
 
         readonly List<Sequence> _runs = new List<Sequence>();
@@ -530,13 +530,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             Target target;
             if (!_byKey.TryGetValue(key, out target))
             {
-                Told.Say("a button fired " + key + ", which nothing here answers");
+                Told.Say($"a button fired {key}, which nothing here answers");
                 return;
             }
 
-            Told.Say("a button fired " + key + ", " + (target.Stops ? "stopping " : "running ")
-                + (!target.Sequence.IsAlone ? "sequence " + target.Sequence.Number : "what its trigger does")
-                + (target.Instance == null ? "" : " on " + target.Instance.Number));
+            Told.Say($"a button fired {key}, {(target.Stops ? "stopping " : "running ")}{(!target.Sequence.IsAlone ? $"sequence {target.Sequence.Number}" : "what its trigger does")}{(target.Instance == null ? "" : $" on {target.Instance.Number}")}");
 
             if (target.Stops)
                 _runner.Halt(target.Sequence, target.Instance, Stopper.Trigger, 0);
@@ -1075,11 +1073,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId),
                         SignalAction.Argument(want.Key)))
                 {
-                    Told.Say("the write was refused mending slot " + want.Slot);
+                    Told.Say($"the write was refused mending slot {want.Slot}");
                     continue;
                 }
 
-                Told.Say("mended slot " + want.Slot + ", now " + want.Key);
+                Told.Say($"mended slot {want.Slot}, now {want.Key}");
                 Name(want);
             }
         }
@@ -1131,7 +1129,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
 
                 Toolbars.Clear(toolbar, had.Slot);
-                Told.Say("released slot " + had.Slot + " on panel " + had.PanelId);
+                Told.Say($"released slot {had.Slot} on panel {had.PanelId}");
                 GiveBack(toolbar, had);
             }
         }
@@ -1244,17 +1242,17 @@ namespace Sprocket.Host.SpaceEngineers.World
                     // Somebody's panel already does something. Overwriting it would configure
                     // Sprocket by breaking their ship, which is worse than not working - and another
                     // Sprocket holding it is somebody, whose program that button belongs to.
-                    Told.Say("slot " + want.Slot + " in use by " + present.Kind + " " + present.ActionId);
+                    Told.Say($"slot {want.Slot} in use by {present.Kind} {present.ActionId}");
                     continue;
                 }
 
                 if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
                 {
-                    Told.Say("the write was refused for slot " + want.Slot);
+                    Told.Say($"the write was refused for slot {want.Slot}");
                     continue;
                 }
 
-                Told.Say("wired slot " + want.Slot + " to " + want.Key);
+                Told.Say($"wired slot {want.Slot} to {want.Key}");
                 Name(want);
             }
         }
@@ -1388,7 +1386,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (!_program.Paused && !Shared(owners, now))
             {
-                Told.Say(_world.Name + " changed hands outside sharing, and its automation is paused");
+                Told.Say($"{_world.Name} changed hands outside sharing, and its automation is paused");
                 _program.PausedFrom.AddRange(owners);
                 _runner.Live = false;
                 _returned.Clear();
@@ -1531,11 +1529,11 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
                 {
-                    Told.Say("the write was refused for slot " + want.Slot);
+                    Told.Say($"the write was refused for slot {want.Slot}");
                     continue;
                 }
 
-                Told.Say("wired slot " + want.Slot + " to " + want.Key + ", as picked");
+                Told.Say($"wired slot {want.Slot} to {want.Key}, as picked");
                 Name(want);
             }
 
@@ -1620,7 +1618,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var trouble = ProgramText.Load(text, _program, _world.Values, out warning, _world);
 
             if (warning.Length > 0)
-                Told.Say(Logged(_block) + " has a program with a warning: " + warning);
+                Told.Say($"{Logged(_block)} has a program with a warning: {warning}");
 
             // What is switched off, read after the program, because it names what the program
             // declared. A construct that has nothing parked has nothing here at all. What runs and what the triggers read is
@@ -1629,7 +1627,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 var wrong = StateText.Load(state, _program, _copy ? _runner : null);
                 if (wrong.Length > 0)
-                    Told.Say(Logged(_block) + " has switches that would not read: " + wrong);
+                    Told.Say($"{Logged(_block)} has switches that would not read: {wrong}");
             }
 
             if (trouble.Length == 0)
@@ -1637,7 +1635,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // Logged here; the editor says it on its notice and shows the text on the script page, where it is mended.
             // Nothing of the program was kept, and it is marked not to be saved over, which is what protects somebody's work.
-            Told.Say(Logged(_block) + " has a program that would not read: " + trouble);
+            Told.Say($"{Logged(_block)} has a program that would not read: {trouble}");
         }
 
         /// <summary>How the log names <paramref name="block" />: its name, or where it has none yet, as a dedicated server
@@ -1647,8 +1645,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!string.IsNullOrEmpty(block.CustomName))
                 return block.CustomName;
 
-            var grid = block.CubeGrid == null ? "" : " on " + block.CubeGrid.DisplayName;
-            return block.DefinitionDisplayNameText + " " + block.EntityId + grid;
+            var grid = block.CubeGrid == null ? "" : $" on {block.CubeGrid.DisplayName}";
+            return $"{block.DefinitionDisplayNameText} {block.EntityId}{grid}";
         }
 
         /// <summary>
@@ -1757,7 +1755,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Logged rather than thrown. This runs on the way out of a screen and from the world save,
             // and taking the game down over it would cost far more than the program does.
             if (storage == null)
-                Told.Say("mod storage would not attach to " + Logged(block) + "; program not saved");
+                Told.Say($"mod storage would not attach to {Logged(block)}; program not saved");
 
             return storage;
         }
@@ -1777,8 +1775,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Sequence which = named?.FindSequence(sequence);
             if (one == null || which == null)
             {
-                Told.Say(Logged(_block) + " has no " + (named == null ? "such system" : which == null ? "such sequence" : "such instance")
-                    + " for an order to " + (stops ? "stop" : "run"));
+                Told.Say($"{Logged(_block)} has no {(named == null ? "such system" : which == null ? "such sequence" : "such instance")} for an order to {(stops ? "stop" : "run")}");
                 return;
             }
 
@@ -1884,7 +1881,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return true;
             }
 
-            Told.Say(Logged(_block) + " is gone, and its construct has no programmable block left to keep the automation");
+            Told.Say($"{Logged(_block)} is gone, and its construct has no programmable block left to keep the automation");
             Lost = true;
             return false;
         }
@@ -1892,7 +1889,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Makes <paramref name="block" /> the hero: the automation is kept in it from here on, and its buttons name it.</summary>
         void Move(IMyTerminalBlock block)
         {
-            Told.Say(Logged(_block) + " is gone; " + Logged(block) + " keeps the automation now");
+            Told.Say($"{Logged(_block)} is gone; {Logged(block)} keeps the automation now");
 
             _block = block;
             _memory.Keeper = block.EntityId;

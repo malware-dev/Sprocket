@@ -177,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             catch (Exception failed)
             {
                 Intact = false;
-                return Index + " will not open - " + failed.Message;
+                return $"{Index} will not open - {failed.Message}";
             }
 
             var trouble = new StringBuilder();
@@ -226,7 +226,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return new Volume(name, VolumeState.Unreadable, trouble);
 
             if (Find(read.Identity) != null)
-                return new Volume(name, VolumeState.Twice, "system " + read.Identity.ToString("D") + " is already in the library.");
+                return new Volume(name, VolumeState.Twice, $"system {read.Identity:D} is already in the library.");
 
             return new Volume(name, read.Identity, read.Namespace, read.Name, read.Changed, text);
         }
@@ -255,7 +255,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var clean = Clean(name);
             var file = Lead + clean + Kind;
             for (var number = 2; Taken(file); number++)
-                file = Lead + clean + " " + number.ToString(CultureInfo.InvariantCulture) + Kind;
+                file = $"{Lead}{clean} {number.ToString(CultureInfo.InvariantCulture)}{Kind}";
 
             return file;
         }
@@ -303,18 +303,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             if (!Intact)
             {
-                _say(file + " is not written, because the library's index did not read");
+                _say($"{file} is not written, because the library's index did not read");
                 return;
             }
 
             try
             {
                 _files.Write(file, text);
-                _say("wrote " + file + " in the library");
+                _say($"wrote {file} in the library");
             }
             catch (Exception failed)
             {
-                _say(file + " will not write - " + failed.Message);
+                _say($"{file} will not write - {failed.Message}");
             }
         }
 
@@ -329,7 +329,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             catch (Exception failed)
             {
-                _say(file + " will not delete - " + failed.Message);
+                _say($"{file} will not delete - {failed.Message}");
             }
         }
     }

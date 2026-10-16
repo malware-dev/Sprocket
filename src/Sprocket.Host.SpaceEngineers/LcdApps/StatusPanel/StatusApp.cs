@@ -220,7 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             {
                 if (y + height > bottom)
                 {
-                    Line(frame, "and " + (rows.Count - i) + " more", left, y, scale * 0.7f,
+                    Line(frame, $"and {(rows.Count - i)} more", left, y, scale * 0.7f,
                         _quiet);
                     return;
                 }
@@ -238,7 +238,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
             var name = string.IsNullOrEmpty(row.Name) ? "Unnamed" : row.Name;
             if (row.Instances > 1)
-                name = name + "  x" + row.Instances;
+                name = $"{name}  x{row.Instances}";
 
             Line(frame, name, left + (lamp * 2f), y, scale * 0.8f, _ink);
             Line(frame, Says(row, texts), right, y, scale * 0.8f, Lamp(row), TextAlignment.RIGHT);
@@ -255,13 +255,13 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         string Says(Overview.Row row, Texts texts)
         {
             if (row.Problems > 0)
-                return row.Problems == 1 ? "1 problem" : row.Problems + " problems";
+                return row.Problems == 1 ? "1 problem" : $"{row.Problems} problems";
 
             if (row.Parked)
                 return SequenceText.Status(texts, SequenceStatus.Off);
 
             if (row.Warnings > 0)
-                return row.Warnings == 1 ? "1 warning" : row.Warnings + " warnings";
+                return row.Warnings == 1 ? "1 warning" : $"{row.Warnings} warnings";
 
             return SequenceText.Status(texts, row.Status);
         }
@@ -298,12 +298,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             string news;
             if (_overview.Problems > 0)
             {
-                news = _overview.Problems == 1 ? "1 problem" : _overview.Problems + " problems";
+                news = _overview.Problems == 1 ? "1 problem" : $"{_overview.Problems} problems";
                 colour = Palette.Problem;
             }
             else if (_overview.Warnings > 0)
             {
-                news = _overview.Warnings == 1 ? "1 warning" : _overview.Warnings + " warnings";
+                news = _overview.Warnings == 1 ? "1 warning" : $"{_overview.Warnings} warnings";
                 colour = Palette.Notice;
             }
             else
@@ -313,7 +313,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
 
             Line(frame, news, left, y, scale * 0.8f, colour);
-            Line(frame, _overview.Running == 0 ? "nothing running" : _overview.Running + " running",
+            Line(frame, _overview.Running == 0 ? "nothing running" : $"{_overview.Running} running",
                 right, y, scale * 0.8f, _ink, TextAlignment.RIGHT);
         }
 

@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     continue;
 
                 var panel = block.Block as IMyButtonPanel;
-                var prefix = blocks.Count > 1 ? block.Name + ": " : "";
+                var prefix = blocks.Count > 1 ? $"{block.Name}: " : "";
                 for (var i = 0; i < count; i++)
                 {
                     var held = into[i];

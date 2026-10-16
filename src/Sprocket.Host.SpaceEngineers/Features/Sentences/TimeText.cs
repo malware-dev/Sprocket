@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>A length of time in ticks.</summary>
         public static string Duration(int ticks)
         {
-            return ticks == 1 ? "1 tick" : ticks + " ticks";
+            return ticks == 1 ? "1 tick" : $"{ticks} ticks";
         }
 
         /// <summary>A length of time in the unit the program writes it in: seconds, or ticks.</summary>
@@ -26,13 +26,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Duration(length.Ticks);
 
             var seconds = length.Seconds;
-            return seconds == 1 ? "1 second" : seconds.ToString("R", CultureInfo.InvariantCulture) + " seconds";
+            return seconds == 1 ? "1 second" : $"{seconds.ToString("R", CultureInfo.InvariantCulture)} seconds";
         }
 
         /// <summary>How often, after "every", in ticks.</summary>
         public static string Rate(int ticks)
         {
-            return ticks == 1 ? "tick" : ticks + " ticks";
+            return ticks == 1 ? "tick" : $"{ticks} ticks";
         }
 
         /// <summary>How often, after "every", in the unit the program writes it in: seconds, or ticks.</summary>
@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Rate(interval.Ticks);
 
             var seconds = interval.Seconds;
-            return seconds == 1 ? "second" : seconds.ToString("R", CultureInfo.InvariantCulture) + " seconds";
+            return seconds == 1 ? "second" : $"{seconds.ToString("R", CultureInfo.InvariantCulture)} seconds";
         }
     }
 }

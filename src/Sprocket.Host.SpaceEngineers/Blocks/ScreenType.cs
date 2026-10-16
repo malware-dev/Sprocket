@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly TextAlignment[] TextAlignments = { TextAlignment.LEFT, TextAlignment.CENTER, TextAlignment.RIGHT };
 
         /// <inheritdoc />
-        public override string Id => BlockKinds.Own + "." + Function;
+        public override string Id => $"{BlockKinds.Own}.{Function}";
 
         /// <inheritdoc />
         public override string Function => "screen";
@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var screen = screens.GetSurface(number - 1);
             var content = Contents[Math.Max(0, Array.IndexOf(ContentTypes, screen.ContentType))];
-            return screen.ContentType == ContentType.SCRIPT && !string.IsNullOrEmpty(screen.Script) ? content + " " + screen.Script : content;
+            return screen.ContentType == ContentType.SCRIPT && !string.IsNullOrEmpty(screen.Script) ? $"{content} {AppName(screen.Script)}" : content;
         }
 
         /// <inheritdoc />
@@ -132,7 +132,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             {
                 var surface = screens.GetSurface(i);
                 var name = surface?.DisplayName;
-                names[i] = string.IsNullOrEmpty(name) ? "screen " + (i + 1) : name;
+                names[i] = string.IsNullOrEmpty(name) ? $"screen {(i + 1)}" : name;
             }
 
             return names;

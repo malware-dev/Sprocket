@@ -103,8 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static Settings From(string global, string world)
         {
             return new Settings(
-                Layer.Read(Parse(global, "global"), Section, "the global " + File),
-                Layer.Read(Parse(world, "world"), Section, "the world " + File));
+                Layer.Read(Parse(global, "global"), Section, $"the global {File}"),
+                Layer.Read(Parse(world, "world"), Section, $"the world {File}"));
         }
 
         /// <summary>The settings a server sent, as <see cref="Written" /> wrote them; every default where they will not read.</summary>
@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             catch (Exception trouble)
             {
-                Told.Say("the " + Where(everywhere) + " " + File + " will not write - " + trouble.Message);
+                Told.Say($"the {Where(everywhere)} {File} will not write - {trouble.Message}");
             }
         }
 
@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             catch (Exception trouble)
             {
-                Told.Say("the " + Where(everywhere) + " " + File + " will not open - " + trouble.Message);
+                Told.Say($"the {Where(everywhere)} {File} will not open - {trouble.Message}");
                 return null;
             }
         }
@@ -208,7 +208,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (read.TryParse(text, out trouble))
                 return read;
 
-            Told.Say("the " + which + " " + File + " has a problem on line " + trouble.LineNo + " - " + trouble.Error);
+            Told.Say($"the {which} {File} has a problem on line {trouble.LineNo} - {trouble.Error}");
             return null;
         }
 

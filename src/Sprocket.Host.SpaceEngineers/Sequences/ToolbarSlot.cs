@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>The id of the trigger this slot, or these slots, are on its block: <c>toolbar-1-1-4</c>, or <c>toolbar-1-0-1</c> for many.</summary>
         /// <remarks>What the picker offers and answers with; the language writes one slot itself, never this.</remarks>
-        public string EventId => Spelling + Toolbar + "-" + Page + "-" + Slot;
+        public string EventId => $"{Spelling}{Toolbar}-{Page}-{Slot}";
 
         /// <summary>Whether <paramref name="other" /> is the same slot.</summary>
         public bool Same(ToolbarSlot other)

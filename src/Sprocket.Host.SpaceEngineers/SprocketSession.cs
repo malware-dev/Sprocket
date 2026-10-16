@@ -259,7 +259,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (!_shelf.Intact)
                 Told.Say("the library is not kept this session");
             else
-                Told.Say("read " + _shelf.All.Count + " blueprints from the library");
+                Told.Say($"read {_shelf.All.Count} blueprints from the library");
         }
 
         /// <summary>Reads the index of the world's backups out of world storage, once, as the world starts.</summary>
@@ -270,7 +270,7 @@ namespace Sprocket.Host.SpaceEngineers
         void FindBackups()
         {
             var trouble = _backups.Read();
-            Told.Say(trouble.Length > 0 ? trouble + "; the backups are not kept this session" : "read " + _backups.All.Count + " backups");
+            Told.Say(trouble.Length > 0 ? $"{trouble}; the backups are not kept this session" : $"read {_backups.All.Count} backups");
         }
 
         /// <summary>Unpacks the files in the world's carrier, once, as the world starts.</summary>
@@ -280,8 +280,8 @@ namespace Sprocket.Host.SpaceEngineers
             var found = Carrier.Find();
             var trouble = found == null ? "" : _carried.Unpack(found.Text);
             Told.Say(trouble.Length > 0
-                ? trouble + "; what the carrier held is ignored, and the next save writes the files over it"
-                : "read " + _carried.Count + " files from the carrier");
+                ? $"{trouble}; what the carrier held is ignored, and the next save writes the files over it"
+                : $"read {_carried.Count} files from the carrier");
 
             _carrier = found;
             _carries = true;
@@ -394,7 +394,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (block == null)
             {
-                Told.Say("block " + id + " was lent but is not here, so it goes straight back");
+                Told.Say($"block {id} was lent but is not here, so it goes straight back");
                 _handover.Hand(id);
                 return;
             }
@@ -481,14 +481,14 @@ namespace Sprocket.Host.SpaceEngineers
             SprocketUnit was;
             if (!_units.TryGetValue(id, out was))
             {
-                Told.Say("a change arrived for block " + id + ", which carries no Sprocket here");
+                Told.Say($"a change arrived for block {id}, which carries no Sprocket here");
                 return;
             }
 
             SprocketUnit rebuilt = was.Rebuilt(program, switches, Asked, _rota);
             if (!rebuilt.Program.Intact)
             {
-                Told.Say("a change to " + was.Block.CustomName + " would not read, and was not taken");
+                Told.Say($"a change to {was.Block.CustomName} would not read, and was not taken");
                 rebuilt.Dispose();
                 return;
             }
@@ -499,7 +499,7 @@ namespace Sprocket.Host.SpaceEngineers
             rebuilt.Persist();
             File(id, rebuilt);
             Spread(rebuilt);
-            Told.Say(was.Block.CustomName + " was built again from the change, and saved");
+            Told.Say($"{was.Block.CustomName} was built again from the change, and saved");
         }
 
         /// <summary>Whether the player at this machine may change the world's settings now: an admin, or higher, with creative tools on or in a creative world.</summary>
@@ -709,8 +709,7 @@ namespace Sprocket.Host.SpaceEngineers
             {
                 if (unit.Block != block && SprocketUnit.HasProgram(block))
                 {
-                    Told.Say(block.CustomName + " holds a program on a construct whose automation " + unit.Block.CustomName
-                        + " keeps; it was not taken on");
+                    Told.Say($"{block.CustomName} holds a program on a construct whose automation {unit.Block.CustomName} keeps; it was not taken on");
                 }
 
                 return unit;

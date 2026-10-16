@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What one mod's file got wrong, named so its author can find it.</summary>
         public static void Say(string mod, string what)
         {
-            Say(string.IsNullOrEmpty(mod) ? what : mod + ": " + what);
+            Say(string.IsNullOrEmpty(mod) ? what : $"{mod}: {what}");
         }
 
         /// <summary>Every line as it is said, for a local build to keep.</summary>
