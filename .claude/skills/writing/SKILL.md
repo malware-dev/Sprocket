@@ -22,7 +22,7 @@ Decide this first; it changes the words. Read this file, then only the one for t
 - **A ticket:** the `issues` skill holds its form. **A commit message or a code comment:** the
   `code-review` skill holds what they may say. The rules below apply to both as well.
 - **`docs/Language.md`:** nothing in it changes without Mal's yes to that exact text, and every addition
-  to the language goes in there first.
+  to the language goes in there first. Read `language.md`.
 
 ## What every text does
 

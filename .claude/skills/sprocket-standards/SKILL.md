@@ -1,268 +1,147 @@
 ---
 name: sprocket-standards
-description: How the Sprocket repository is built, constrained and verified - one mod project and the harness that drives it, the Space Engineers compiler ceiling and whitelist, the simulator as the behavioural guard, and the values that are transcriptions rather than choices. Use alongside the general csharp-standards skill whenever writing, reviewing or cleaning up code in this repository.
+description: What is true of code in the Sprocket repository and would be wrong anywhere else - its projects and where code goes, the C# 6 ceiling, building and deploying, the simulator and reference suite as guards, transcribed values, drawing invalidation, the rota, how block changes are watched, and how Sprocket reports to a person. Load alongside csharp-standards for any code in this repository.
 ---
 
-The general rules live in the user-level **csharp-standards** skill. This one holds only what is true
-of Sprocket and would be wrong anywhere else.
+The general rules are in **csharp-standards**. These hold only here.
 
-## How this repository is put together
+## Projects
 
-Four projects of code, and the first one is the mod:
+- `src/Sprocket.Host.SpaceEngineers` is the mod: everything that runs in the game. One folder per
+  capability. Files are globbed: a file in the folder is in the build.
+- UI code lives in `Features/`. A sequence's model is in `Sequences/`; how a sentence is composed and
+  drawn is in `Features/Sentences/`.
+- The model and the runtime hold ids, never words. Every word a player reads comes from `Texts`, put
+  there by the page that shows it.
+- `src/Lumel` is the UI framework, a shared project compiled into the mod's assembly. It names nothing
+  of Sprocket. A control, layout or drawing primitive with nothing of Sprocket in it goes in Lumel, with
+  its colors and sizes as properties. `Features/Look` holds Sprocket's palette, sizes and styles.
+- Lumel controls (anything deriving from `Element`) are never `sealed`. A user control derives from the
+  layout it needs; there is no `UserControl` base.
+- `src/Sprocket.Host.SpaceEngineers.Sim` is the harness: it references the mod and drives it over
+  made-up blocks.
+- `src/Sprocket.Localization.Generator` writes `Texts` from `MyTexts.resx` at build time and reports
+  every text that cannot be said. Roslyn source generator, `netstandard2.0`.
+- `tools/Sprocket.Wiki` writes the GitHub wiki from the codex. It compiles Lumel's markdown-lite reader
+  from `src/Lumel/Text`, `net10.0`.
+- Test projects reference the mod, or the harness where they need a screen, and drive the editor
+  through `Driving/Target`. The generator and the wiki tool have test projects of their own.
+- The game is reached through two interfaces only: `Lumel/Drawing/IScreenSpace` for drawing and
+  `World/ISlots` for toolbars. The harness answers both. Everything else (mod storage, grid events,
+  block interfaces) the harness uses for real through Castle proxies (`Fakes/Pretend.cs`).
+- A game type is never shadowed: a shadowing declaration only wins inside its own assembly. What the
+  harness must answer differently is an interface.
+- A `.debug.cs` file is compiled locally, left out of the pack and ignored by the analyzers. It holds
+  what only the harness needs.
+- Nothing is `internal`. A type or member is public or private; analyzer STD001 reports anything else.
 
-- **`src/Sprocket.Host.SpaceEngineers`** is everything that runs in the game, in one tree, one folder
-  per capability and each holding the whole of it. **Anything that belongs to the user interface lives
-  within `Features/`, and code outside it reaches in there.** A sequence's model sits in `Sequences/`, and
-  the sentence as drawn in `Features/Sentences/`, which also decides how a sentence is composed - not the
-  same as holding the English, see below. Files are globbed, so a new file is in the build by being in
-  the folder.
+## Compiler ceiling
 
-  **The model and the runtime hold ids and never words.** Every word a player reads comes from `Texts`,
-  put there by the page that shows it.
-- **`src/Lumel`** is the UI framework, a shared project the mod imports, so its files compile into the
-  mod's own assembly. It knows nothing of Sprocket, so any other mod can import it as it is. Its files
-  are globbed in the same way. **A piece of UI with nothing of Sprocket in it - a control, a layout, a
-  drawing primitive - goes in Lumel, with its colors and sizes as properties; `Features/Look` holds
-  Sprocket's own palette, sizes and styles, which it hands to them.**
-- **`src/Sprocket.Host.SpaceEngineers.Sim`** is the harness. It references the mod and drives it over
-  blocks it makes up, answering the game's own interfaces.
-- **`src/Sprocket.Localization.Generator`** writes the mod's `Texts` class from its `MyTexts.resx` at
-  build time, and reports every text that cannot be said. A Roslyn source generator, so `netstandard2.0`.
+- The mod is C# 6: no nullable reference types, no implicit usings.
+- MDK's analyzers are the authority on what the game loads. `MDK01` fails the build and names the
+  member.
+- Not available in the mod: pattern matching, tuples, `record`, `FormattableString` interpolation,
+  default interface members.
+- C# 6 has `=>` members, `?.`, `nameof` and string interpolation; csharp-standards' idiom applies.
+- No LINQ that allocates in a per-frame or per-tick path.
+- The harness and tests are `net48` and not held to the ceiling.
+- The build runs after every file, not at the end.
 
-Beside them, **`tools/Sprocket.Wiki`** writes the project's GitHub wiki from the codex. It compiles Lumel's
-markdown-lite reader in from `src/Lumel/Text` and needs nothing of the game, so it is `net10.0`.
-
-The mod's three test projects reference the mod, or the harness where they need a screen, and drive the
-editor the way a target would through the harness's `Driving/Target`. The generator has a test project
-of its own, which runs it as the compiler does and needs nothing of the game, and so does the wiki tool.
-
-**Two things only the game can do, and each is an interface the mod asks through.**
-`Lumel/Drawing/IScreenSpace` for drawing and `World/ISlots` for toolbars: the harness answers
-both, which is how a frame is recorded rather than drawn and how a toolbar slot is read without one.
-Everything else - mod storage, the grid's events, the block interfaces - the harness uses for real,
-through Castle proxies over the game's own types. See `Fakes/Pretend.cs`.
-
-**Shadowing a game type does not work across an assembly, so nothing tries.** A declaration that
-replaces one of Keen's only wins inside the assembly making it, and the harness is not that
-assembly. Anything the mod needs the harness to answer differently is an interface or it is nothing.
-
-**A `.debug.cs` file is compiled locally, left out of what is packed and ignored by the analysers.**
-It holds what only the harness needs, such as `Told.debug.cs` keeping every line the mod has said.
-
-**Nothing is internal.** A mod is one assembly with no friends, so internal hides nothing; a type or
-member is public or private, and the `Sprocket.Standards` analyzer reports anything else as STD001.
-
-## The compiler ceiling
-
-The mod's own project pins it to **C# 6**, no nullable reference types, no implicit usings, and
-says why.
-
-**MDK's own analysers are the authority on what the game will load.** They fail the build with
-`MDK01`, naming the member, and they know the real mod whitelist. There was a hand-written list
-beside them for a while, stricter and guessed at, enforced on core alone by a project that has since
-been merged away - it is gone, and it was wrong: it rejected `GetType().Name`, which a mod may
-use.
-
-The harness and the tests are `net48` - the same framework MDK spells `netframework48` - and are not
-held to the ceiling: they are never compiled by the game.
-
-The practical consequence, for the mod's own tree: **a refactor that would be natural in modern C#
-is often illegal here.** No expression-bodied members beyond what C# 6 allows, no pattern matching, no tuples,
-no `record`, no string interpolation into `FormattableString`, no `nameof` beyond C# 6's, no LINQ
-where it allocates in a per-frame path. When in doubt the build says so, which is why the build runs
-after every file rather than at the end.
-
-## Building and running
+## Building
 
 ```
 dotnet test                                     # every test project
-dotnet build src/Sprocket.Host.SpaceEngineers    # builds AND DEPLOYS the mod
+dotnet build src/Sprocket.Host.SpaceEngineers    # builds AND deploys the mod
 dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 ```
 
-**`dotnet test` does not deploy the mod.** Nothing changes in the game until
-`dotnet build src/Sprocket.Host.SpaceEngineers` has run. Never tell Mal something is ready to look at
-without having run it.
+- `dotnet test` does not deploy. Nothing is ready to look at in the game until the mod's build has run.
+- Saves, mods and logs are at `E:\Data\sesaves`, never under `AppData`.
 
-Space Engineers saves, mods and logs are at `E:\Data\sesaves`, never under `AppData`.
+## Guards
 
-## The simulator is the guard
-
-`Sprocket.Host.SpaceEngineers.Sim` draws the real screen code against a substitute of the game's
-graphics, and it is the only way to prove a cleanup changed nothing visible.
+- The simulator draws the real screen code against a substitute of the game's graphics.
 
 ```
 --shot <file.png> [at <w> <h>] <script>   render a script and write a picture
 --dump                                     the current frame as readable text
 --content                                  what the game's own assets say
---profile                                  how long saving and loading a program takes, worst cases included
---blueprint <scenario> [folder]            a game test scenario written as a blueprint (the test-scenarios skill)
---checks <scenario> [first]                its game-only checks, as rows for the Testing artifact
+--profile                                  save and load cost per program size
+--blueprint <scenario> [folder]            a game test scenario as a blueprint (test-scenarios skill)
+--checks <scenario> [first]                its game-only checks, as Testing rows
 ```
 
-**`--profile` is the parser's guard, and it only means anything in Release** (`-c Release`). Loading a
-program lands inside a world load, once per Sprocket on every grid on a server, so the column that
-matters is cost per statement across the headroom table: flat means linear. Re-run it whenever the
-language grows - expressions and branching will multiply program sizes - and before believing any claim
-that a change to storage made it faster.
+- A script is screen actions in order: `press <text>`, `move x y`, `drag x y x y`, `scroll x y n`,
+  `tick n`, `type "words"`, `clear`, `enter`, `escape`. A kept script presses by name, never by
+  position. Shots default to 1920x1080.
+- `--profile` is the parser's guard and is run in Release only. The column that matters is cost per
+  statement across the headroom table; flat means linear. It runs whenever the language grows and
+  before any claim that storage got faster.
+- Where the simulator and the game disagree, the simulator is wrong. A measurement is checked against
+  `--content` or the game before it is trusted.
+- Every change to a screen, and every block given members, comes with presentation tests that press
+  and read by name. A test about particular blocks uses its own rig with `Screen.On(rig)`. The harness
+  uses stand-in font widths, so a test about fit picks words that fail under any font.
+- The reference suite (`tests/Reference/suite.txt`) is shot before a cleanup and after each folder.
+  A difference is a defect in the cleanup.
 
-A script is a list of things done to the screen in order: `press <text>` presses whatever says it,
-a symbol included, and then `move x y`, `drag x y x y`, `scroll x y n`, `tick n`, `type "words"`,
-`clear`, `enter`, `escape`. A bare `x y` pair is a press by position, which breaks the moment a
-layout moves, so a script that is kept presses by name.
-Shots default to 1920x1080 because that is the size a letter actually lands at for a player.
+## Transcribed values
 
-**The simulator has been wrong before, and when it disagrees with the game the simulator is what is
-broken.** It has confirmed three wrong answers by returning line height where the game returns cell
-height, and by lacking `==` on its substitute `VRageMath` types. Before trusting it on a measurement,
-check it against `--content` or the game itself.
+- The palette in `Features/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
+  transcribed from the game. Each cites its source. They are never adjusted.
 
-**The UI's guard is the presentation tests.** Every change to a screen, and every block given
-members, comes with tests that press and read by name and assert what matters on that screen; a
-test about particular blocks fits a rig of its own with `Screen.On(rig)`. The harness draws the
-game's font with stand-in widths, so a test about what fits picks words that fail under any font.
+## Drawing
 
-**Reference suite.** A handful of screens meant to hold still, in `tests/Reference/suite.txt`,
-pressed by name and dumped whole. A cleanup shoots them before it starts and after each folder,
-and a difference is a defect in the cleanup, not a thing to explain.
+- `Draw` runs every frame. Nothing measures text in the draw path. Nothing lays out unless something
+  changed.
+- A property that changes a size or position calls `Element.InvalidateMeasure` or
+  `InvalidateArrange`. A color change calls neither.
+- A change to a property setter checks which of the three it is.
 
-## Values that are transcriptions, not choices
+## The rota
 
-The palette in `Features/Look/` and the font metrics in `Sim/Content/SeFontMetrics.cs` are
-taken from the game's own textures and constants. **They are never adjusted by eye and never
-"improved".** Each carries a citation saying where it came from; that citation is the reason it may
-not be touched, and it is why the values need no further comment.
+- One `Rota` per world, shared by every Sprocket. Periods `Each`, `Ten`, `Hundred`; each shift gets
+  its own place in the period.
+- Repeating work joins the rota. Nothing keeps its own clock. `Every` puts a shift on a period, `At`
+  gives a deadline, `Leave` takes it off. A wait is a deadline; `Hold` decides how often it looks.
+- Elapsed time is `now - then` against the game's frame. Nothing counts its own wake-ups.
 
-## Drawing runs sixty times a second
+## Watching blocks
 
-`Draw` is called every frame; a screen is used perhaps twice a minute. **Nothing measures text in the
-draw path, and nothing lays out unless something changed.** Layout is invalidation-driven:
-`Element.InvalidateMeasure` and `InvalidateArrange` propagate upward, and a property that changes a
-size or a position must call one of them. Colour changes call neither, because the views set colours
-on every element on every tick.
+- A block's members are actions, values, functions and signals. A value is a state; a function is a
+  value with parameters; a signal is a change.
+- A Sprocket value is declared on its kind with `EntityKind.WithValue(id, named, Being)`. A signal
+  watched for is declared after it with `WithChange(id, text, value, becomes)` and carries its state
+  words (`Reading(state, unstate)`). A signal only a toolbar sends is an answered `EntityEvent`.
+- A value is watched one of three ways, never a fourth:
+  - `Announced()`: the game raises an event; the capability listens through `Capability.Listen`.
+    Looked at the tick after, with a backstop every hundred ticks.
+  - `RuledOutBy(reading)`: the game announces a reading that rules the change out. Looked for on its
+    cadence only while a block is outside that reading.
+  - `Looked(reason)`: the cadence through the rota, where neither event exists.
+- An event first. A look only where the game has no event, and only while the change is possible.
+- The game's terminal actions are never wrapped or replaced. What Sprocket asks of a block prompts a
+  look by itself (`GridEntity.Invoke`).
 
-A cleanup that touches a property setter checks which of the three it is. Getting this wrong breaks
-scrolling in a way every test still passes, which has happened.
+## Reporting to a person
 
-## The runtime runs on the world's rota
+- Details of a fault are recorded when it is found and travel with what they explain, saved state
+  included.
+- Each kind of message has one surface. A new message is a case of one of these:
+  - Something wrong with a sequence: `SequenceFault` + `SequenceProblem`, naming the step.
+    `IsWarning` makes it amber. Worded in `SequenceText`.
+  - What a sequence is doing: `SequenceStatus`.
+  - A message about the screen: the banner's `Notice`, `NoticeLevel.Info` or `Problem`.
+  - Why a logic system was switched off: `Halt`, worded by `SequenceText.Stopped`.
+  - Knowledge about a kind of block: `Capability`. What a block offers: `Offer`. What a value asks
+    for: `Field`.
+- The wording of every text is the `writing` skill's.
 
-One `Rota` per world, shared by every Sprocket on it. Its periods are the three the game wakes a mod
-at - `Each`, `Ten`, `Hundred` - and a shift joining it is handed a place in that period in turn, so
-two machines built the same afternoon do not land on the same tick. `Rota.Run` walks every tick
-number from the last one it saw to now, so nothing is skipped when the game wakes it late.
+## Documents
 
-**Repeating work joins the rota. It does not keep its own clock.** A `Shift` is a place, a callback
-and the list it sits in; `Every` puts it on a period, `At` gives it a deadline, `Leave` takes it off.
-A wait is a deadline rather than a countdown, and how often it looks is `Hold`'s to decide.
-
-**Per tick is a judgement, not a ban.** What it costs, how often the answer actually changes, and who
-suffers if it arrives a tick later. A reading behind a short-circuit is cheap, and the comment says
-so; a reading on its own is not.
-
-**Nothing counts its own wake-ups.** Elapsed time is `now - then` against the frame the game reports,
-because the slower two periods are not guaranteed to land on exact multiples - when they fire depends
-on what else is in the game's component list. A shift counting how often it was called is measuring
-server load and calling it time.
-
-## Watching what a block does
-
-A block's members are actions, values, functions and signals. A value is a state, read after "is" (`if all
-ext.status on [ inner ] == closed`). A function is a value with parameters. A signal is a change, read after "when" on
-screen and started with `whenever` in script (`whenever ext.'finishes-closing' on [ inner ] then`). A `when` compares a value and
-fires as the comparison comes to hold.
-
-One of Sprocket's own values is declared once on its kind with `EntityKind.WithValue(id, named, Being)`; `Being`
-reads it (`Being.Flag`, `OneOf`, `Number`, `Whole`, `Text`, `Color`, and the `<T, TOptions>` forms with `Taking`
-for a function). A signal Sprocket watches for is a change in one of those values, declared right after it with
-`WithChange(id, text, value, becomes)`, and carries the state words the `if` picker and sentences use
-(`Reading(state, unstate)`). A signal only a toolbar sends is an answered `EntityEvent`.
-
-A value and its signals are watched in one of three ways, and a new one uses one of them, never a mechanism of its
-own; a value of the block's own is looked for on the `when`'s cadence:
-
-- **Announced** (`Announced()` after `WithValue` or `WithChange`): the game raises an event when the value may have
-  changed, and the block's capability listens through `Capability.Listen`. Looked for on the tick after, with a
-  backstop look every hundred ticks.
-- **Ruled out** (`RuledOutBy(reading)`): the game does not announce the change, but does announce a reading that rules
-  it out. Looked for on its cadence only while a watched block is outside that reading, otherwise as if announced. A
-  door starting to close is the case: it can only between starting to open and having closed.
-- **Looked for** (`Looked(reason)`): the cadence through the rota, where neither of the others exists. A signal has no
-  `every` of its own: the host picks its cadence, and a change it cannot give a sensible cadence is no signal.
-
-**An event first.** A look only where the game has no event, and only while the change is possible. Never wrap or
-replace the game's own terminal actions to learn of a change: another mod doing the same collides. What Sprocket asks
-of a block prompts a look by itself (`GridEntity.Invoke`).
-
-## What Sprocket tells a person
-
-**Every word on screen is clear, concise and unconfusing.** The fewest words that still say what
-happened, why, and what to do. A sentence that is accurate but wordy, or says little, is a defect.
-
-**An error names exactly what went wrong.** The step, the block, and the block's own words where it
-gave any: "Stopped at step 3: Airlock 1 Outer Door was gone." Never "a block" where the block is
-known.
-
-**Details are recorded when the fault is found, and kept.** That moment is when Sprocket knows them
-exactly; later the cause may be mended or the block gone, and nothing can be worked out again. What
-is recorded travels with whatever it explains, saved state included.
-
-**A fallback stays, short and plain.** For a cause that really is not known: "Stopped for an unknown
-reason." Removing a message is never the fix for a bad one.
-
-**How Sprocket tells somebody something - one surface each, and a new message is a new case of one of
-these, never a new mechanism:**
-
-- *Something wrong with a sequence:* `SequenceFault` + `SequenceProblem`, naming the step. A fault is
-  red and counted as broken; `IsWarning` makes it amber and counted as a remark. Worded in
-  `SequenceText`.
-- *What a sequence is doing:* `SequenceStatus`, said in plain words beside when it last ran. Nothing
-  wrong. A run stopped from outside is one of these.
-- *A message about the screen, not about a sequence:* the banner's `Notice`, at `NoticeLevel.Info` or
-  `Problem`.
-- *Why a logic system was switched off:* `Halt`, worded by `SequenceText.Stopped`.
-- *Knowledge about a kind of block:* `Capability`. *What a block offers:* `Offer`. *What a value
-  asks for:* `Field`.
-
-## The language's spec is `docs/Language.md`
-
-**It holds the current truth of the script language and nothing else.** What the language is right
-now: its shape, its values, its constructs, with an example of each. No history, no rationale, no
-alternatives that were considered, no roadmap, and nothing about what is undecided.
-
-**Any change to a rule, keyword, construct or spelling updates it in the same change as the code.**
-The spec is never left trailing, and the old wording is deleted rather than kept beside the new.
-
-**The language's slot is the model's `Part`.** The spec, the stored text and the screens all say
-slot; `Part`, `PartFor` and `FindPart` are the same thing in code.
-
-
-Six rules, each of which the document has already been wrong about:
-
-- **Only the language.** How Sprocket or an editor happens to behave is not a rule of the language.
-  "Sprocket writes the id" and "a name can be changed, an id cannot" were both wrong for that reason:
-  the second is true of a visual editor and says nothing about a script, where renaming is merely
-  likelier than renumbering.
-- **A limit of the parser is not a rule.** Where something is unsupported because nothing needs it
-  yet - a list inside a list - it is not mentioned at all. Writing it down as a rule only obstructs
-  the build that adds it.
-- **Say what the language is, not what it is not.** A sentence stating an absence earns its place
-  only where a reader would otherwise assume the opposite: somebody arriving from another language
-  assumes statements continue across lines, so "no continuations" is worth saying, while "no comma
-  between a statement's parts" is not, because none is ever shown.
-- **A recommendation for whatever writes scripts belongs beside the thing it is about**, not in a
-  section of its own. Where `last sequence` is defined is where somebody looks to find out when it is
-  worth writing.
-- **A recommendation is offered, not demanded.** It reads as what the choice buys, never as an
-  obligation.
-- **Every sentence carries something.** A lead-in explaining the difference between a person and a
-  tool, or a heading restated as prose, is cut rather than reworded.
-
-## Documentation
-
-`docs/` is a guide for people working on Sprocket: how the repository is put together and how its parts
-work, written from the code as it is. It holds no planning: open questions and unbuilt work are tracked as
-issues and on the work ledger.
-Agent instructions state their own facts and never lean on it, apart from `docs/Language.md`, the spec.
-
-**The guide is kept true like the codex.** A change to something a page describes fixes the page in the
-same change, and anything renamed gets its mention in `docs/` and `README.md` fixed with it.
+- `docs/Language.md` is the language spec. A change to a rule, keyword, construct or spelling updates
+  it in the same change as the code. How it is written is in the `writing` skill (`language.md`).
+- The language's slot is the model's `Part` (`Part`, `PartFor`, `FindPart`).
+- `docs/` describes the repository as the code is. No planning: that is issues and the work ledger.
+- A change to something a `docs/` page or `README.md` describes fixes the page in the same change.
+- Agent instructions state their own facts and never lean on `docs/`, except the spec.

@@ -13,7 +13,7 @@ a second copy of them.
 
 **The job is to hold the change to every rule in both, not to the list below.** The diff passes only
 where nothing in it breaks a standard: what a comment may say, what may be static, one type per file,
-folders by capability, member order, names, what a repeating path may do, and the questions to be
+folders by capability, documentation, names, what a repeating path may do, and the questions to be
 answered before changing anything. The sections that follow are the traps this repository falls into
 most often, written down because they were missed - they are a prompt, never the whole of it. A
 finding that breaks a rule not listed here is still a finding.
@@ -145,10 +145,9 @@ Then the structural questions, in this order, because the early ones invalidate 
 4. **The same sentence in two places.** Two views carrying one sentence is the symptom. Where a
    phrase is written is not a finding: the text is legacy and due a complete rework, done on the
    screens rather than string by string.
-5. **Member order**: constants, fields, constructors, properties, methods. A field among the
-   properties is the common slip.
-6. **Names**: a word, not a description, and no role suffixes.
-7. **What the tests do not cover**, said out loud. The harness models no power and no conveyors, and
+5. **Names**: each says what the thing is to a reader who has not opened it. A one-word type name
+   that needs explaining is a finding.
+6. **What the tests do not cover**, said out loud. The harness models no power and no conveyors, and
    gas only as far as the flow through a vent, so anything resting on more than that is proved in the
    game or not at all.
 
