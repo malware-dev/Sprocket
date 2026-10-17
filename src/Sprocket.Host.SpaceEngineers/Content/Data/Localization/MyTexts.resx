@@ -1074,6 +1074,14 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>{block}'s button isn't set up for this trigger yet.</value>
     <comment>Problem on a button trigger whose toolbar slot is not set to start the sequence; {block} is the name of the block whose toolbar holds the button. Shown on the trigger's row on a logic system's screen and on the bar at the top of the sequence's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
   </data>
+  <data name="Sprocket.Problem.SourceLost" xml:space="preserve">
+    <value>{block}, which this trigger watches, was lost.</value>
+    <comment>Problem when a block a trigger listens to was lost from the construct; {block} is the block's name. Shown on the trigger's row on a logic system's screen and on the bar at the top of the sequence's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Problem.BlockLost" xml:space="preserve">
+    <value>{block} was lost.</value>
+    <comment>Problem when a block a step acts on or checks was lost from the construct; {block} is the block's name. Shown under the step's line on a sequence's screen and on the sequence's row on a logic system's screen; on the home screen (under the logic system's row) and at the top of the installation panel it follows the step number, as in "Step 3: ...".</comment>
+  </data>
   <data name="Sprocket.Problem.MissingSource" xml:space="preserve">
     <value>A block this trigger watches was lost.</value>
     <comment>Problem when a block a trigger listens to was lost from the construct. Shown on the trigger's row on a logic system's screen and on the bar at the top of the sequence's screen, and under the logic system's row on the home screen and at the top of the installation panel.</comment>

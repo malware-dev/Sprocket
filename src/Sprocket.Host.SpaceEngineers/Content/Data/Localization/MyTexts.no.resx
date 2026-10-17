@@ -822,6 +822,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Problem.Unset" xml:space="preserve">
     <value>Knappen på {block} er ikke satt opp for denne utløseren ennå.</value>
   </data>
+  <data name="Sprocket.Problem.SourceLost" xml:space="preserve">
+    <value>{block}, som denne utløseren fulgte med på, gikk tapt.</value>
+  </data>
+  <data name="Sprocket.Problem.BlockLost" xml:space="preserve">
+    <value>{block} gikk tapt.</value>
+  </data>
   <data name="Sprocket.Problem.MissingSource" xml:space="preserve">
     <value>En blokk denne utløseren fulgte med på, gikk tapt.</value>
   </data>

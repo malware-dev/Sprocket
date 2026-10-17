@@ -212,6 +212,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (fault.Problem == SequenceProblem.MissingFacet)
                 return Template.Fill(texts.ProblemMissingScreen, "block", fault.Which);
 
+            if (fault.Problem == SequenceProblem.MissingSource && !string.IsNullOrEmpty(fault.Which))
+                return Template.Fill(texts.ProblemSourceLost, "block", fault.Which);
+
+            if ((fault.Problem == SequenceProblem.MissingTarget || fault.Problem == SequenceProblem.MissingGate) && !string.IsNullOrEmpty(fault.Which))
+                return Template.Fill(texts.ProblemBlockLost, "block", fault.Which);
+
             return fault.Because.Exists ? TroubleText.Of(texts, fault.Because, fault.Which) : Problem(texts, fault.Problem);
         }
 
@@ -277,7 +283,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return Template.Fill(texts.StoppedEmptySlot, "slot", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.NeverTriggered)
                 return Template.Fill(texts.StoppedButtonFailed, "block", block);
-            if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.MissingTarget)
+            if (!string.IsNullOrEmpty(block) && (problem == SequenceProblem.MissingTarget || problem == SequenceProblem.MissingGate
+                    || problem == SequenceProblem.MissingSource))
                 return Template.Fill(texts.StoppedBlockGone, "block", block);
             if (!string.IsNullOrEmpty(block) && problem == SequenceProblem.Adrift)
                 return Template.Fill(texts.StoppedBlockReplaced, "block", block);

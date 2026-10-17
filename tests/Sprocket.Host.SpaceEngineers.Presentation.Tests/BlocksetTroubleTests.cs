@@ -11,7 +11,33 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>What is wrong with one blockset is said on its row and on its installation panel, which leads to where it is mended.</summary>
 public class BlocksetTroubleTests
 {
-    const string Why = "Sequence 1, step 1: A block this step acts on was lost.";
+    const string Why = "Sequence 1, step 1: Airlock Inner Door was lost.";
+
+    /// <summary>A lost block a trigger watches is named where the trouble is said.</summary>
+    [Fact]
+    public void ALostWatchedBlockIsNamed()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewSystem("Doors");
+        sim.Editor.PressStart(SentenceText.WhenWord);
+        sim.Editor.PressBlock("Airlock Inner Door");
+        sim.Editor.PressChoice("finishes closing");
+        sim.Editor.PressPrimary();
+        sim.Editor.PressAdd("task");
+        sim.Editor.PressBlock("Airlock Outer Door");
+        sim.Editor.PressChoice("close");
+        sim.Editor.PressPrimary();
+        sim.Editor.SwitchOn();
+        sim.Tick();
+
+        sim.Machine.Grind(sim.Machine.Fitted.Single(fitting => fitting.Name == "Airlock Inner Door"));
+        for (var i = 0; i < 120; i++)
+            sim.Tick();
+        sim.Editor.GoToRoot();
+        sim.Tick();
+
+        Assert.Contains("Airlock Inner Door, which this trigger watches, was lost.", sim.Editor.RootRows()[0].Problem);
+    }
 
     /// <summary>The blockset's row says what is wrong in place of what it is doing.</summary>
     [Fact]

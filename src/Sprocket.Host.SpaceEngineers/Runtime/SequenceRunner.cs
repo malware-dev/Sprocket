@@ -235,12 +235,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 if (_missingSeen != _owner.MissingStamp)
                 {
-                    _missing = _owner.Missing(_sequence, _instance);
+                    _lost = _owner.Lost(_sequence, _instance);
                     _missingSeen = _owner.MissingStamp;
                 }
 
-                if (_missing)
-                    return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger);
+                if (_lost != null)
+                    return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger, Trouble.None, _lost);
                 if (_met.Exists)
                     return _met;
                 if (Looked.Exists)
@@ -272,7 +272,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         SequenceFault _stuck;
 
         int _missingSeen = -1;
-        bool _missing;
+        string _lost;
 
 
         /// <summary>

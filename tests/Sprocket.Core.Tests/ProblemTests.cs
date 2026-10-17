@@ -230,7 +230,7 @@ public class ProblemTests
 
         var rows = ship.Editor.Rows();
         Assert.Equal(1, rows[0].Problems);
-        Assert.Equal("A block this step acts on was lost.", rows[0].Problem);
+        Assert.Equal("Inner Door was lost.", rows[0].Problem);
     }
 
     /// <summary>

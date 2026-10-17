@@ -103,8 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             private set { _memory.Live = value; }
         }
 
-        /// <summary>Whether one or more of the blocks it watches is no longer on the construct.</summary>
-        public bool HasMissingSources { get; private set; }
+        /// <summary>The first of the blocks it watches that is no longer on the construct, by its reference, or null.</summary>
+        public string Lost { get; private set; }
 
         /// <summary>How many times it has fired.</summary>
         public int FiredCount
@@ -363,13 +363,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             var fired = 0;
             var anyTrue = false;
-            var anyMissing = false;
+            string lost = null;
 
             for (var i = 0; i < _entities.Length; i++)
             {
                 if (_entities[i] == null)
                 {
-                    anyMissing = true;
+                    lost = lost ?? _watched[i];
                     continue;
                 }
 
@@ -392,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             Live = anyTrue;
-            Missed(anyMissing);
+            Missed(lost);
             return fired;
         }
 
@@ -418,13 +418,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool SampleWhenAll()
         {
             var all = _entities.Length > 0;
-            var anyMissing = false;
+            string lost = null;
 
             for (var i = 0; i < _entities.Length; i++)
             {
                 if (_entities[i] == null)
                 {
-                    anyMissing = true;
+                    lost = lost ?? _watched[i];
                     all = false;
                     continue;
                 }
@@ -442,7 +442,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             Live = all;
-            Missed(anyMissing);
+            Missed(lost);
             return Edge(all);
         }
 
@@ -454,13 +454,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             var total = 0d;
             var readable = _entities.Length > 0;
-            var anyMissing = false;
+            string lost = null;
 
             for (var i = 0; i < _entities.Length; i++)
             {
                 if (_entities[i] == null)
                 {
-                    anyMissing = true;
+                    lost = lost ?? _watched[i];
                     readable = false;
                     continue;
                 }
@@ -482,7 +482,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             var holds = readable && Relations.Holds(Literal.Of(total), when.Relation, when.Value);
             Live = holds;
-            Missed(anyMissing);
+            Missed(lost);
             return Edge(holds);
         }
 
@@ -524,13 +524,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return true;
         }
 
-        /// <summary>Keeps whether a block it watches is gone, telling the runner where that changed.</summary>
-        void Missed(bool missing)
+        void Missed(string lost)
         {
-            if (HasMissingSources == missing)
+            if (Lost == lost)
                 return;
 
-            HasMissingSources = missing;
+            Lost = lost;
             _owner.MissingChanged();
         }
     }

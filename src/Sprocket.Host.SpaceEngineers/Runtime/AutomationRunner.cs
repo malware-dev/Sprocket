@@ -303,9 +303,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Revision++;
         }
 
-        /// <summary>Whether a block that something about <paramref name="sequence" /> watches on <paramref name="instance" /> is no longer on the construct.</summary>
+        /// <summary>A block a trigger of <paramref name="sequence" /> watches on <paramref name="instance" /> that is no longer on the construct, by its reference, or null.</summary>
         /// <remarks>Walks every poller, so it is read through <see cref="MissingStamp" /> rather than on every look.</remarks>
-        public bool Missing(Sequence sequence, SystemInstance instance)
+        public string Lost(Sequence sequence, SystemInstance instance)
         {
             foreach (var pair in _pollers)
             {
@@ -315,12 +315,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var pollers = pair.Value;
                 foreach (var poller in pollers)
                 {
-                    if (poller.Instance == instance && poller.HasMissingSources)
-                        return true;
+                    if (poller.Instance == instance && poller.Lost != null)
+                        return poller.Lost;
                 }
             }
 
-            return false;
+            return null;
         }
 
         /// <summary>Does what <paramref name="trigger" /> of <paramref name="system" /> does on <paramref name="instance" />, because what it watches for came round.</summary>
