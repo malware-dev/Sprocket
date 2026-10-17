@@ -120,15 +120,14 @@ git diff -U0 | grep "^+" | grep -nE "(^|[^A-Za-z])static([^A-Za-z]|$)" | grep -v
 ```
 
 Every hit answers: **what owns this, and when does it die?** A `static readonly` holding an immutable
-value is a constant. A collection added to at runtime is state, and it belongs to something with a
-lifetime - the world, the unit, the runner - so that it dies with what it is about. That another
-class already does it this way is not an answer: copying the flaw is how the second one appears.
+value is a constant. A static that holds state is rare and earns its place when it makes sense; it says
+why at its declaration. One with no stated reason is a finding, and "another class does it this way"
+is not a reason.
 
 **Every static, not only the collections.** A `static bool`, a `static int`, a static event and an
 `Instance` are the same question with a smaller type, and a grep naming container types walks past
 all four. Most hits are methods and constants and are dismissed in a glance, which is what makes the
-wide pattern affordable. Where the game leaves no choice - a session component, a one-time
-registration - the static stays and says at its declaration which requirement forces it.
+wide pattern affordable.
 
 Then the structural questions, in this order, because the early ones invalidate the later ones:
 
@@ -154,7 +153,7 @@ Then the structural questions, in this order, because the early ones invalidate 
 ## When the subject is the whole codebase
 
 A pass over everything is not this review made bigger, and `git diff` says nothing about it.
-**csharp-standards, "Cleaning up existing code", governs it**: behaviour does not change, every
+**csharp-standards, "Cleanup passes", governs it**: behavior does not change, every
 change is proved rather than believed, any difference is a defect in the pass, and no test is ever
 weakened to make a change pass. The evidence here is `dotnet test` and the reference suite, and a
 pass that touches drawing re-shoots the suite and expects no pixel to move.

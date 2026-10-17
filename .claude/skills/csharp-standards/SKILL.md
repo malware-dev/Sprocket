@@ -52,22 +52,9 @@ Each rule is absolute unless it names its exception.
 
 ## Statics
 
-- Allowed: `const`; `static readonly` holding an immutable value; pure static methods; extension
-  methods; static factory methods.
-- Never: static mutable fields, static setters, static events, static caches or collections added to
-  at runtime, singletons (`Instance`, `Current`, `Default`), service locators.
-- Dependencies are passed in through the constructor.
-- The one exception is an instance the game makes and the mod cannot hand on, such as a session
-  component. It may be reachable through one static, under these conditions:
-  - The game calls into the mod at a place where no instance can be passed: a terminal control
-    callback, a block's game logic, a handler the game registers.
-  - Passing the instance there instead would cost more than it saves. That is weighed and written
-    in the static's comment: which entry points need it and why passing it fails or costs.
-  - The static is read only at those entry points. The entry point reads it once and passes it on;
-    nothing below an entry point reads the static.
-  - Code the mod constructs itself is given the instance. Reading the static from such code is a
-    breach, even when it is shorter.
-  - The static holds a reference to an ordinary instance and has no behavior of its own.
+- Statics are rare, not forbidden. A static earns its place when it makes sense, and says why beside it.
+- Constants, pure static methods, extension methods and factories need no reason.
+- Otherwise a dependency is passed in.
 
 ## Structure
 
