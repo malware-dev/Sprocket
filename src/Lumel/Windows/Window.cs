@@ -5,7 +5,7 @@ using VRageMath;
 namespace Lumel.Windows
 {
     /// <summary>Something that floats over the screen in a window layer, holding one element and placed by the layer rather than by a container.</summary>
-    public class Window : ContentControl
+    public class Window : ContentControl, IClosingWindow
     {
         /// <summary>Raised when the layer it was open in takes it away, however it was closed.</summary>
         public event Action Closed;
@@ -30,8 +30,8 @@ namespace Lumel.Windows
                 layer.Close(this);
         }
 
-        /// <summary>Raises <see cref="Closed" />; called by the layer as it takes the window away.</summary>
-        public void OnClosed()
+        /// <inheritdoc />
+        void IClosingWindow.TakenAway()
         {
             var closed = Closed;
             if (closed != null)

@@ -460,7 +460,7 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             _from = point;
 
@@ -487,7 +487,7 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnPointerMove(Vector2 point)
+        protected override void OnPointerMove(Vector2 point)
         {
             if (_held == Held.Down)
                 Scrolled = _down.Dragged(point.Y - _from.Y);
@@ -505,13 +505,13 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnPointerUp(Vector2 point)
+        protected override void OnPointerUp(Vector2 point)
         {
             _held = Held.Nothing;
         }
 
         /// <inheritdoc />
-        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (_readOnly)
                 return false;
@@ -566,7 +566,7 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnText(char c)
+        protected override void OnText(char c)
         {
             if (_readOnly || c < ' ' || c == (char)127)
                 return;

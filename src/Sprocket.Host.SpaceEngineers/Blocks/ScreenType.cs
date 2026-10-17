@@ -26,8 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>How long the text on a screen may be: the game's own panels hold no more.</summary>
         public const int TextLongest = 100000;
 
-        /// <summary>The game's settings of a screen, which on a block with several act on the one last picked.</summary>
-        public static readonly string[] Settings =
+        // The game's settings of a screen; on a block with several they act on the one last picked.
+        static readonly string[] Settings =
         {
             "Content", "FontColor", "BackgroundColor", "Font", "FontSize", "alignment", "TextPaddingSlider",
             "ScriptForegroundColor", "ScriptBackgroundColor", "ChangeIntervalSlider", "PreserveAspectRatio"

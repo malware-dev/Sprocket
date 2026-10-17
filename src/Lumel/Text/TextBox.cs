@@ -235,7 +235,7 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             // The press that gave it the keyboard keeps what taking it selected.
             if (_entering)
@@ -263,20 +263,20 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnPointerMove(Vector2 point)
+        protected override void OnPointerMove(Vector2 point)
         {
             if (_dragging)
                 MoveCaret(IndexAt(point.X), true);
         }
 
         /// <inheritdoc />
-        public override void OnPointerUp(Vector2 point)
+        protected override void OnPointerUp(Vector2 point)
         {
             _dragging = false;
         }
 
         /// <inheritdoc />
-        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             _entering = false;
             if (ctrl)
@@ -318,7 +318,7 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        public override void OnText(char c)
+        protected override void OnText(char c)
         {
             _entering = false;
             if (c < ' ' || c == (char)127)

@@ -14,6 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     {
         const string CustomData = "CustomData";
 
+        // The game keeps terminal controls for the life of the process, across world loads, so they are made once per
+        // process and held here; an instance would add them again with every load.
         static bool _done;
 
         static IMyTerminalControlSeparator _above;

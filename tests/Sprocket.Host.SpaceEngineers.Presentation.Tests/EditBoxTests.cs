@@ -1,3 +1,4 @@
+using Lumel.Input;
 using System.Text;
 using VRageMath;
 using Xunit;
@@ -246,18 +247,18 @@ public class EditBoxTests
         EditBox listing = Long(5000);
         var easel = new Easel(listing, Width, Height);
 
-        listing.OnPointerDown(new Vector2(100f, 100f), 1, false, false);
+        ((IInputTarget)listing).PointerDown(new Vector2(100f, 100f), 1, false, false);
         Assert.True(listing.IsPanning);
 
-        listing.OnPointerMove(new Vector2(100f, 40f));
+        ((IInputTarget)listing).PointerMove(new Vector2(100f, 40f));
         easel.Draw(Width, Height);
 
         Assert.Equal(60f, listing.Scrolled, 1);
 
-        listing.OnPointerUp(new Vector2(100f, 40f));
+        ((IInputTarget)listing).PointerUp(new Vector2(100f, 40f));
         Assert.False(listing.IsPanning);
 
-        listing.OnPointerMove(new Vector2(100f, 10f));
+        ((IInputTarget)listing).PointerMove(new Vector2(100f, 10f));
         Assert.Equal(60f, listing.Scrolled, 1);
     }
 
@@ -268,12 +269,12 @@ public class EditBoxTests
         var listing = new EditBox { IsReadOnly = true, Text = new string('x', 400) };
         Laid(listing);
 
-        listing.OnPointerDown(new Vector2(100f, 10f), 1, false, false);
-        listing.OnPointerMove(new Vector2(40f, 10f));
+        ((IInputTarget)listing).PointerDown(new Vector2(100f, 10f), 1, false, false);
+        ((IInputTarget)listing).PointerMove(new Vector2(40f, 10f));
 
         Assert.Equal(60f, listing.Shifted, 1);
 
-        listing.OnPointerMove(new Vector2(-100000f, 10f));
+        ((IInputTarget)listing).PointerMove(new Vector2(-100000f, 10f));
         Assert.Equal(listing.Widest - Width, listing.Shifted, 1);
     }
 
@@ -284,11 +285,11 @@ public class EditBoxTests
         var listing = new EditBox { IsReadOnly = true, Text = Lines(5000), BarWidth = 20f, Thumb = Color.White };
         Laid(listing);
 
-        listing.OnPointerDown(new Vector2(Width - 10f, 10f), 1, false, false);
+        ((IInputTarget)listing).PointerDown(new Vector2(Width - 10f, 10f), 1, false, false);
         Assert.False(listing.IsPanning);
 
         // Carried down, a thumb goes down with the hand, where the text would have gone the other way.
-        listing.OnPointerMove(new Vector2(Width - 10f, 30f));
+        ((IInputTarget)listing).PointerMove(new Vector2(Width - 10f, 30f));
         Assert.True(listing.Scrolled > 0f, "the thumb did not move the listing down");
     }
 
@@ -299,7 +300,7 @@ public class EditBoxTests
         var listing = new EditBox { IsReadOnly = true, Text = "one\ntwo" };
         _ = new Easel(listing, Width, Height);
 
-        listing.OnPointerDown(new Vector2(100f, 10f), 1, false, false);
+        ((IInputTarget)listing).PointerDown(new Vector2(100f, 10f), 1, false, false);
         Assert.False(listing.IsPanning);
     }
 

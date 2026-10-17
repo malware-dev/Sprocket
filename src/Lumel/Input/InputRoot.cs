@@ -41,12 +41,12 @@ namespace Lumel.Input
                 return;
 
             if (_focused != null)
-                _focused.OnBlur();
+                ((IInputTarget)_focused).Blur();
 
             _focused = element;
 
             if (_focused != null)
-                _focused.OnFocus();
+                ((IInputTarget)_focused).Focus();
 
             var changed = FocusChanged;
             if (changed != null)
@@ -74,7 +74,7 @@ namespace Lumel.Input
                 return false;
 
             target.Presses = presses;
-            target.OnPointerDown(target.FromScreen(point), presses, shift, ctrl);
+            ((IInputTarget)target).PointerDown(target.FromScreen(point), presses, shift, ctrl);
             return true;
         }
 
@@ -82,7 +82,7 @@ namespace Lumel.Input
         public void PointerMove(Vector2 point)
         {
             if (_captured != null)
-                _captured.OnPointerMove(_captured.FromScreen(point));
+                ((IInputTarget)_captured).PointerMove(_captured.FromScreen(point));
         }
 
         /// <summary>The press ending at <paramref name="point" />, carrying out the pressed element's command when it ends on it.</summary>
@@ -95,7 +95,7 @@ namespace Lumel.Input
                 return;
 
             var local = released.FromScreen(point);
-            released.OnPointerUp(local);
+            ((IInputTarget)released).PointerUp(local);
 
             if (released.Command != null && released.IsEnabled && released.Holds(local))
                 released.Command.Execute();
@@ -110,7 +110,7 @@ namespace Lumel.Input
         {
             for (var at = _focused; at != null; at = Above(at))
             {
-                if (at.OnKey(this, key, shift, ctrl))
+                if (((IInputTarget)at).Key(this, key, shift, ctrl))
                     return true;
             }
 
@@ -130,7 +130,7 @@ namespace Lumel.Input
         public void Text(char c)
         {
             if (_focused != null)
-                _focused.OnText(c);
+                ((IInputTarget)_focused).Text(c);
         }
 
         /// <summary>Moves the focus to the next focusable element in the order the tree is built in, or the one before; answers whether there was one.</summary>

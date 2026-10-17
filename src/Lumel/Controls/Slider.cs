@@ -47,13 +47,13 @@ namespace Lumel.Controls
         protected override bool TakesPointer => true;
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             Follow(point);
         }
 
         /// <inheritdoc />
-        public override void OnPointerMove(Vector2 point)
+        protected override void OnPointerMove(Vector2 point)
         {
             Follow(point);
         }

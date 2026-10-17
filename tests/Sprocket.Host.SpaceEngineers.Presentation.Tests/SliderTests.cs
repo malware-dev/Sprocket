@@ -1,3 +1,4 @@
+using Lumel.Input;
 using Lumel.Controls;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -52,10 +53,10 @@ public class SliderTests
     public void ANumberBoxReplacesWhatItHeldWhenTypedInto()
     {
         var box = new NumberBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Text = "4.5" };
-        var input = new Lumel.Input.InputRoot(box);
+        var input = new InputRoot(box);
 
         input.Focus(box);
-        box.OnText('7');
+        ((IInputTarget)box).Text('7');
 
         Assert.Equal("7", box.Text);
     }

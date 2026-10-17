@@ -42,6 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             };
         }
 
+        // The game keeps custom terminal actions for the life of the process, across world loads, so the action is
+        // registered once per process; an instance would register it again with every load.
         static bool _registered;
 
         /// <summary>What a slot points at: this block, and this trigger of it.</summary>

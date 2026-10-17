@@ -29,6 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         }
 
         /// <summary>The network every channel sends through, the game's unless a test puts another in its place.</summary>
+        // Static because the game's network is one per process, and the harness swaps it for every channel at once.
         public static INetworkProxy Network { get; set; } = new GameNetwork();
 
         /// <summary>Unregisters the channel's message handler.</summary>

@@ -15,7 +15,7 @@ namespace Lumel.Windows
         protected override bool TakesPointer => Window != null;
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             if (Window == null)
                 return;
@@ -27,14 +27,14 @@ namespace Lumel.Windows
         }
 
         /// <inheritdoc />
-        public override void OnPointerMove(Vector2 point)
+        protected override void OnPointerMove(Vector2 point)
         {
             if (_holding && Window != null)
                 Window.Position = Placed(point) - _held;
         }
 
         /// <inheritdoc />
-        public override void OnPointerUp(Vector2 point)
+        protected override void OnPointerUp(Vector2 point)
         {
             if (!_holding || Window == null)
                 return;

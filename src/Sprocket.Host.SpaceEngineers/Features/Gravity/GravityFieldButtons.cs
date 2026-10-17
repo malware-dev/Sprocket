@@ -20,6 +20,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
 
         const float Air = 0.01f;
 
+        // The game keeps terminal controls for the life of the process, across world loads, so they are made once per
+        // process and held here; an instance would add them again with every load.
         static bool _done;
 
         static IMyTerminalControlButton _extents;

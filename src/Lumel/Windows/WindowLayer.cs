@@ -53,7 +53,7 @@ namespace Lumel.Windows
         /// <summary>Makes this the layer over <paramref name="screen" />, so everything on it opens its windows here.</summary>
         public void Covers(Element screen)
         {
-            screen.Layer = this;
+            ((ILayered)screen).Layer = this;
         }
 
         /// <summary>Puts <paramref name="window" /> on top; one already open is left where it is.</summary>
@@ -63,7 +63,7 @@ namespace Lumel.Windows
                 return;
 
             _open.Add(window);
-            window.Layer = this;
+            ((ILayered)window).Layer = this;
         }
 
         /// <summary>Takes <paramref name="window" /> away, if it is open.</summary>
@@ -72,8 +72,8 @@ namespace Lumel.Windows
             if (!_open.Remove(window))
                 return;
 
-            window.Layer = null;
-            window.OnClosed();
+            ((ILayered)window).Layer = null;
+            ((IClosingWindow)window).TakenAway();
         }
 
         /// <summary>Whether <paramref name="window" /> is open.</summary>
@@ -127,8 +127,8 @@ namespace Lumel.Windows
                     break;
 
                 _open.RemoveAt(i);
-                window.Layer = null;
-                window.OnClosed();
+                ((ILayered)window).Layer = null;
+                ((IClosingWindow)window).TakenAway();
                 closed = true;
             }
 

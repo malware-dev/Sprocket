@@ -113,14 +113,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             _held = shift ? HeldModifier.Through : ctrl ? HeldModifier.Also : HeldModifier.Alone;
             _presses = presses;
         }
 
         /// <inheritdoc />
-        public override void OnPointerUp(Vector2 point)
+        protected override void OnPointerUp(Vector2 point)
         {
             if (!IsPickable || !Holds(point))
                 return;

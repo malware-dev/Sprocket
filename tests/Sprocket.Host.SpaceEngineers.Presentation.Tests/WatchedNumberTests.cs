@@ -1,3 +1,4 @@
+using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -115,7 +116,7 @@ public class WatchedNumberTests
         var reads = rig.Editor.Pick().Stages[0].Options.OfType<ListField>().Single();
         while (reads.Text != reading)
         {
-            reads.OnText('t');
+            ((IInputTarget)reads).Text('t');
             rig.Tick();
         }
 

@@ -175,7 +175,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <inheritdoc />
         /// <remarks>Escape is said as <see cref="Cancelled" />, whatever in the panel holds the keyboard, where anything listens.</remarks>
-        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (key != MyKeys.Escape || Cancelled == null)
                 return base.OnKey(input, key, shift, ctrl);

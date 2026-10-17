@@ -10,7 +10,7 @@ using VRageMath;
 namespace Lumel
 {
     /// <summary>Anything that occupies a rectangle and draws in it.</summary>
-    public abstract partial class Element
+    public abstract partial class Element : IInputTarget, ILayered
     {
         /// <summary>Room along an axis that stands for no limit at all, as a scroll gives its content.</summary>
         public const float Unbounded = 1000000f;
@@ -59,9 +59,10 @@ namespace Lumel
 
         /// <summary>The layer this is the top of, as a screen it covers or a window open in it; null for anything else.</summary>
         /// <remarks>Set by the layer, through <see cref="WindowLayer.Covers" /> and <see cref="WindowLayer.Open" />.</remarks>
-        public WindowLayer Layer
+        public WindowLayer Layer => _layer;
+
+        WindowLayer ILayered.Layer
         {
-            get { return _layer; }
             set { _layer = value; }
         }
 
@@ -585,33 +586,63 @@ namespace Lumel
         ///     The pointer's moves and its release come to this until it is released, wherever they are. Every point a
         ///     pointer handler is given is in this element's own layout, as <see cref="FromScreen" /> finds it.
         /// </remarks>
-        public virtual void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected virtual void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
         }
 
         /// <summary>Told that the pointer has moved to <paramref name="point" /> during a press begun on this.</summary>
-        public virtual void OnPointerMove(Vector2 point)
+        protected virtual void OnPointerMove(Vector2 point)
         {
         }
 
         /// <summary>Told that a press begun on this has been released at <paramref name="point" />.</summary>
-        public virtual void OnPointerUp(Vector2 point)
+        protected virtual void OnPointerUp(Vector2 point)
         {
         }
 
         /// <summary>Offered a key while this holds the keyboard, answering whether it took it.</summary>
-        public virtual bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected virtual bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             return false;
         }
 
         /// <summary>Given a typed character while this holds the keyboard.</summary>
-        public virtual void OnText(char c)
+        protected virtual void OnText(char c)
         {
         }
 
-        /// <summary>Told that this now holds the keyboard.</summary>
-        public void OnFocus()
+        /// <inheritdoc />
+        void IInputTarget.PointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        {
+            OnPointerDown(point, presses, shift, ctrl);
+        }
+
+        /// <inheritdoc />
+        void IInputTarget.PointerMove(Vector2 point)
+        {
+            OnPointerMove(point);
+        }
+
+        /// <inheritdoc />
+        void IInputTarget.PointerUp(Vector2 point)
+        {
+            OnPointerUp(point);
+        }
+
+        /// <inheritdoc />
+        bool IInputTarget.Key(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        {
+            return OnKey(input, key, shift, ctrl);
+        }
+
+        /// <inheritdoc />
+        void IInputTarget.Text(char c)
+        {
+            OnText(c);
+        }
+
+        /// <inheritdoc />
+        void IInputTarget.Focus()
         {
             if (_focused)
                 return;
@@ -621,13 +652,13 @@ namespace Lumel
             Focused();
         }
 
-        /// <summary>Told, by <see cref="OnFocus" />, that this has just taken the keyboard.</summary>
+        /// <summary>Told that this has just taken the keyboard.</summary>
         protected virtual void Focused()
         {
         }
 
-        /// <summary>Told that this no longer holds the keyboard.</summary>
-        public void OnBlur()
+        /// <inheritdoc />
+        void IInputTarget.Blur()
         {
             if (!_focused)
                 return;

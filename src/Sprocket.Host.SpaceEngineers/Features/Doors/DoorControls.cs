@@ -82,7 +82,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <summary>Whether the slider has been made for doors of type <typeparamref name="TBlock" />.</summary>
         static class Made<TBlock>
         {
-            /// <summary>Whether the slider has been made.</summary>
+            // The game keeps terminal controls for the life of the process, across world loads, so each door type's
+            // slider is made once per process.
             // ReSharper disable once StaticMemberInGenericType
             public static bool Done;
         }

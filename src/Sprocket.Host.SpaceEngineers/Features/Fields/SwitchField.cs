@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public Element Keyboard => this;
 
         /// <inheritdoc />
-        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             var by = KeyboardChoice.By(key);
             if (by == 0)
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        public override void OnText(char c)
+        protected override void OnText(char c)
         {
             var word = KeyboardChoice.Letter(_words, _text, c);
             if (word != null)

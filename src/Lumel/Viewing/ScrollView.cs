@@ -130,7 +130,7 @@ namespace Lumel.Viewing
         }
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             if (!Hits(point))
                 return;
@@ -143,7 +143,7 @@ namespace Lumel.Viewing
         }
 
         /// <inheritdoc />
-        public override void OnPointerMove(Vector2 point)
+        protected override void OnPointerMove(Vector2 point)
         {
             if (!_held)
                 return;
@@ -153,7 +153,7 @@ namespace Lumel.Viewing
         }
 
         /// <inheritdoc />
-        public override void OnPointerUp(Vector2 point)
+        protected override void OnPointerUp(Vector2 point)
         {
             IsHeld = false;
         }

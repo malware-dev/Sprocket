@@ -205,13 +205,13 @@ public class TextBoxTests
         var edits = 0;
         box.Edited += () => edits++;
 
-        box.OnText('x');
+        ((IInputTarget)box).Text('x');
         box.Insert("3a");
         Assert.Equal("12", box.Text);
         Assert.Equal(1, box.Caret);
         Assert.Equal(0, edits);
 
-        box.OnText('5');
+        ((IInputTarget)box).Text('5');
         Assert.Equal("152", box.Text);
         Assert.Equal(1, edits);
     }

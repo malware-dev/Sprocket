@@ -262,7 +262,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Finishes the form on Enter, while it or a part of it that does not take Enter holds the keyboard.</summary>
-        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (key != MyKeys.Enter)
                 return false;

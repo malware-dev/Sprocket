@@ -1,3 +1,4 @@
+using Lumel.Input;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -153,7 +154,7 @@ public class CheckViewTests
 
         var reads = rig.Editor.Pick().Stages[0].Options.OfType<ListField>().Single();
         Assert.Equal("any", reads.Text);
-        reads.OnText('t');
+        ((IInputTarget)reads).Text('t');
         rig.Tick();
         Assert.Equal("the sum of", reads.Text);
 
@@ -163,7 +164,7 @@ public class CheckViewTests
         Assert.Equal(rig.Texts.PickSumNote, What(rig).Note);
         Assert.Empty(((PickPage)rig.Editor.Current).Fields);
 
-        reads.OnText('t');
+        ((IInputTarget)reads).Text('t');
         rig.Tick();
         Assert.Equal("the average of", reads.Text);
         Assert.Equal(rig.Texts.PickAverageNote, What(rig).Note);

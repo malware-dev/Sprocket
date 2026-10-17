@@ -72,7 +72,7 @@ namespace Lumel.Controls
         protected override bool TakesPointer => CanCarry;
 
         /// <inheritdoc />
-        public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
+        protected override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             IsCarrying = true;
             var taken = Taken;
@@ -81,7 +81,7 @@ namespace Lumel.Controls
         }
 
         /// <inheritdoc />
-        public override void OnPointerMove(Vector2 point)
+        protected override void OnPointerMove(Vector2 point)
         {
             var carried = Carried;
             if (carried != null)
@@ -89,7 +89,7 @@ namespace Lumel.Controls
         }
 
         /// <inheritdoc />
-        public override void OnPointerUp(Vector2 point)
+        protected override void OnPointerUp(Vector2 point)
         {
             IsCarrying = false;
             var dropped = Dropped;

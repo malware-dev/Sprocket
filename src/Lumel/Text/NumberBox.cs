@@ -64,7 +64,7 @@ namespace Lumel.Text
 
         /// <inheritdoc />
         /// <remarks>Up and down move the number a step.</remarks>
-        public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
+        protected override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (!ctrl && (key == MyKeys.Up || key == MyKeys.Down))
             {
