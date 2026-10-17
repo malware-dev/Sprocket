@@ -8,9 +8,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unheard = "A module raises nothing as blocks are built or taken away beside it.";
 
-        static readonly Being Connections = Being.Whole<IMyUpgradeModule>(module => module.Connections);
+        static readonly OwnValue Connections = OwnValue.Whole<IMyUpgradeModule>(module => module.Connections);
 
-        static readonly Being Upgrades = Being.Whole<IMyUpgradeModule>(module => module.UpgradeCount);
+        static readonly OwnValue Upgrades = OwnValue.Whole<IMyUpgradeModule>(module => module.UpgradeCount);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

@@ -33,41 +33,41 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Making = Reading.Of<IMyProductionBlock>(block => block.IsProducing);
 
-        static readonly Being Producing = Being.Flag(Making);
+        static readonly OwnValue Producing = OwnValue.Flag(Making);
 
         // Work waiting and nothing made, on a block that could make it: short of materials, or with nowhere to put what it
         // makes. The game's own reason is on a type mods cannot reach.
-        static readonly Being Stuck = Being.Flag(Reading.Of<IMyProductionBlock>(block =>
+        static readonly OwnValue Stuck = OwnValue.Flag(Reading.Of<IMyProductionBlock>(block =>
             !block.IsQueueEmpty && !block.IsProducing && block.Enabled && block.IsWorking));
 
-        static readonly Being Progress = Being.Number<IMyAssembler>(assembler => assembler.CurrentProgress * 100.0);
+        static readonly OwnValue Progress = OwnValue.Number<IMyAssembler>(assembler => assembler.CurrentProgress * 100.0);
 
-        static readonly Being Mode = Being.OneOf<IMyAssembler>(Modes, Position)
+        static readonly OwnValue Mode = OwnValue.OneOf<IMyAssembler>(Modes, Position)
             .Writing<IMyAssembler>((assembler, mode) =>
                 assembler.Mode = mode.Whole == 1 ? MyAssemblerMode.Disassembly : MyAssemblerMode.Assembly);
 
         // The mode of an assembler whose definition keeps it from taking apart, which its production screen offers no
         // choice of.
-        static readonly Being Locked = Being.OneOf<IMyAssembler>(Modes, Position);
+        static readonly OwnValue Locked = OwnValue.OneOf<IMyAssembler>(Modes, Position);
 
-        static readonly Being Repeating = Being.Flag(Reading.Of<IMyAssembler>(assembler => assembler.Repeating))
+        static readonly OwnValue Repeating = OwnValue.Flag(Reading.Of<IMyAssembler>(assembler => assembler.Repeating))
             .Writing<IMyAssembler>((assembler, repeating) => assembler.Repeating = repeating.Flag);
 
-        static readonly Being InputFill = Being.Number<IMyProductionBlock>(block => block.InputInventory.VolumeFillFactor * 100.0);
+        static readonly OwnValue InputFill = OwnValue.Number<IMyProductionBlock>(block => block.InputInventory.VolumeFillFactor * 100.0);
 
-        static readonly Being OutputFill = Being.Number<IMyProductionBlock>(block => block.OutputInventory.VolumeFillFactor * 100.0);
+        static readonly OwnValue OutputFill = OwnValue.Number<IMyProductionBlock>(block => block.OutputInventory.VolumeFillFactor * 100.0);
 
         static readonly OwnAction Clears = OwnAction.Of<IMyProductionBlock>(block => block.ClearQueue());
 
         // Filled and emptied by one reading at a time, on the game's main thread, so one list serves every assembler.
         readonly List<MyProductionItem> _queue = new List<MyProductionItem>();
 
-        readonly Being _queued;
+        readonly OwnValue _queued;
 
         /// <summary>Production, with the list the queue is read into.</summary>
         public Production()
         {
-            _queued = Being.Whole<IMyAssembler>(Queued);
+            _queued = OwnValue.Whole<IMyAssembler>(Queued);
         }
 
         /// <inheritdoc />
@@ -159,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // Whether an assembler can take apart is fixed by its definition, so it never changes and there is nothing to announce.
             var able = TakesApart(block);
             kind.WithValue("mode", "mode", able ? Mode : Locked).Announced().In(Category.Production)
-                .WithValue("able-to-take-apart", "able to take apart", Being.Flag(Reading.Of<IMyAssembler>(assembler => able)))
+                .WithValue("able-to-take-apart", "able to take apart", OwnValue.Flag(Reading.Of<IMyAssembler>(assembler => able)))
                 .Announced().In(Category.Production)
                 .WithValue("repeating", "repeating", Repeating).Looked(Repeat).In(Category.Production);
         }
@@ -215,7 +215,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // /// <summary>How much of an item one of the block's two inventories holds: in kilograms for ore and ingots, and in pieces for anything else.</summary>
         // static Being Holding(bool input)
         // {
-        //     return Being.Number<IMyProductionBlock, Item>(Item.First, (block, item, seen) =>
+        //     return OwnValue.Number<IMyProductionBlock, Item>(Item.First, (block, item, seen) =>
         //             item.Known ? (double)(input ? block.InputInventory : block.OutputInventory).GetItemAmount(item.Id) : 0.0)
         //         .Taking(ItemIds.Asked("item"));
         // }

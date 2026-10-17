@@ -34,19 +34,19 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             (drive, recharging, seen) => !recharging.Waits,
             (drive, recharging, seen) => recharging.Waits ? Why(drive) : BlockTrouble.None);
 
-        static readonly Being Status = Being.OneOf<IMyJumpDrive>(Statuses, drive => Position(drive.Status));
+        static readonly OwnValue Status = OwnValue.OneOf<IMyJumpDrive>(Statuses, drive => Position(drive.Status));
 
-        static readonly Being Charge = Being.Number<IMyJumpDrive>(drive =>
+        static readonly OwnValue Charge = OwnValue.Number<IMyJumpDrive>(drive =>
             drive.MaxStoredPower > 0f ? drive.CurrentStoredPower / drive.MaxStoredPower * 100.0 : 0.0);
 
-        static readonly Being Stored = Being.Number<IMyJumpDrive>(drive => drive.CurrentStoredPower);
+        static readonly OwnValue Stored = OwnValue.Number<IMyJumpDrive>(drive => drive.CurrentStoredPower);
 
-        static readonly Being Capacity = Being.Number<IMyJumpDrive>(drive => drive.MaxStoredPower);
+        static readonly OwnValue Capacity = OwnValue.Number<IMyJumpDrive>(drive => drive.MaxStoredPower);
 
 
-        static readonly Being Shortest = Being.Number<IMyJumpDrive>(drive => drive.MinJumpDistanceMeters / 1000.0);
+        static readonly OwnValue Shortest = OwnValue.Number<IMyJumpDrive>(drive => drive.MinJumpDistanceMeters / 1000.0);
 
-        static readonly Being Longest = Being.Number<IMyJumpDrive>(drive => drive.MaxJumpDistanceMeters / 1000.0);
+        static readonly OwnValue Longest = OwnValue.Number<IMyJumpDrive>(drive => drive.MaxJumpDistanceMeters / 1000.0);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

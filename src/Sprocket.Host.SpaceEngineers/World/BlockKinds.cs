@@ -304,7 +304,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         static void Unread(EntityAction one, Offer offer)
         {
             if (offer.Unreadable)
-                one.Withhold(Readiness.Pending, Holdback.Unread);
+                one.Withhold(Readiness.Pending, UnreadyReason.Unread);
         }
 
         /// <summary>

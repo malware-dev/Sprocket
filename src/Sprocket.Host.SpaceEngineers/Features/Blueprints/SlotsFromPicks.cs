@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <remarks>
         /// A system names the program's variables, and a blueprint its own slots: so each trigger it is started by becomes a
         /// signal slot, called what the block is called now, and the blocks its steps and triggers name become slots by the
-        /// sets they name, as <see cref="Slotting" /> works them out. The first instance answers them with those variables.
+        /// sets they name, as <see cref="SlotFinder" /> works them out. The first instance answers them with those variables.
         /// </remarks>
         public SystemInstance Blueprinted(AutomationSystem system)
         {
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <summary>The names <paramref name="system" /> uses for <paramref name="blocks" />, picked in place of the names <paramref name="replacing" />, the list itself, where they replace one: a system's variables, or the slots a blueprint's stand-in fills with them.</summary>
         /// <remarks>
-        /// In a blueprint the slots are worked out by <see cref="Slotting" />, and what that changes beyond the names given
+        /// In a blueprint the slots are worked out by <see cref="SlotFinder" />, and what that changes beyond the names given
         /// back is kept for the edit made next, which carries it so taking the edit back takes it back too.
         /// </remarks>
         public List<string> Named(AutomationSystem system, IList<long> blocks, IList<string> replacing)
@@ -287,9 +287,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Works out the slots of <paramref name="system" /> as <paramref name="shown" /> fills them, knowing the blocks just picked as <paramref name="met" />.</summary>
-        Slotting Slots(AutomationSystem system, SystemInstance shown, Dictionary<string, GridEntity> met)
+        SlotFinder Slots(AutomationSystem system, SystemInstance shown, Dictionary<string, GridEntity> met)
         {
-            return new Slotting(system, shown,
+            return new SlotFinder(system, shown,
                 name =>
                 {
                     GridEntity entity = Known(name, met);

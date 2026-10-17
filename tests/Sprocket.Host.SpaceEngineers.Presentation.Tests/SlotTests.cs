@@ -38,7 +38,7 @@ public class SlotTests
     [Fact]
     public void APartThatCannotBePressedStaysStill()
     {
-        var chip = new Slot();
+        var chip = new SlotChip();
         chip.Say("Airlock");
         chip.IsHot = true;
 
@@ -56,12 +56,12 @@ public class SlotTests
         Assert.Equal(Palette.Chrome, chip.Background);
     }
 
-    static Slot Pressable()
+    static SlotChip Pressable()
     {
-        var chip = new Slot { Command = new Relay(() => { }) };
+        var chip = new SlotChip { Command = new Relay(() => { }) };
         chip.Say("Airlock");
         return chip;
     }
 
-    static Label Words(Slot chip) => chip.Within().OfType<Label>().Single();
+    static Label Words(SlotChip chip) => chip.Within().OfType<Label>().Single();
 }

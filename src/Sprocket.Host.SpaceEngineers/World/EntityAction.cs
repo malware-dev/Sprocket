@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             GameActionId = gameActionId;
             Named = Features.Sentences.SentenceText.Capitalised(text);
             Declared = text;
-            Why = Holdback.None;
+            Why = UnreadyReason.None;
             Wants = wants;
             Category = Categories.Of(gameActionId);
         }
@@ -51,11 +51,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether this can be made into a step, which nearly everything can.</summary>
         public Readiness Readiness { get; private set; }
 
-        /// <summary>Why it cannot be made into a step, for the person looking at it, or <see cref="Holdback.None" /> where it can.</summary>
-        public Holdback Why { get; private set; }
+        /// <summary>Why it cannot be made into a step, for the person looking at it, or <see cref="UnreadyReason.None" /> where it can.</summary>
+        public UnreadyReason Why { get; private set; }
 
         /// <summary>Keeps this from being made into a step, saying why.</summary>
-        public void Withhold(Readiness readiness, Holdback why)
+        public void Withhold(Readiness readiness, UnreadyReason why)
         {
             Readiness = readiness;
             Why = why;
@@ -165,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>What this reads as one of Sprocket's own values, or null for anything else.</summary>
         /// <remarks>Written qualified by its namespace; set where its Being can be set, and read only otherwise.</remarks>
-        public Being Being { get; private set; }
+        public OwnValue Being { get; private set; }
 
         /// <summary>Whether the block says when this value of Sprocket's own may have changed, so it is looked at then rather than only on a cadence.</summary>
         /// <remarks>See <see cref="Capability.Listen" />.</remarks>
@@ -324,7 +324,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Makes this one of Sprocket's own values, read by <paramref name="being" /> and shown by <paramref name="field" />.</summary>
-        public EntityAction Reads(Being being, Field field)
+        public EntityAction Reads(OwnValue being, Field field)
         {
             Being = being;
             _holds = being.Kind;

@@ -19,9 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // it switches raise the block's properties-changed event.
         const string Unswitched = "The game does not announce every switch of the autopilot.";
 
-        static readonly Being Flying = Being.Flag(Reading.Of<IMyRemoteControl>(remote => remote.IsAutoPilotEnabled));
+        static readonly OwnValue Flying = OwnValue.Flag(Reading.Of<IMyRemoteControl>(remote => remote.IsAutoPilotEnabled));
 
-        static readonly Being Waypoint = Being.Text<IMyRemoteControl>(remote => remote.CurrentWaypoint.Name);
+        static readonly OwnValue Waypoint = OwnValue.Text<IMyRemoteControl>(remote => remote.CurrentWaypoint.Name);
 
         // The flight switches the game's terminal shows on a remote control, each a value and the toggle that flips it.
         static readonly string[] Switches =

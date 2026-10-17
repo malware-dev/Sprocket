@@ -10,11 +10,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         static readonly Reading Hurt = Reading.Of<IMyTerminalBlock>(block => block.SlimBlock.CurrentDamage > 0);
 
-        static readonly Being Integrity = Being.Number<IMyTerminalBlock>(block => Whole(block.SlimBlock));
+        static readonly OwnValue Integrity = OwnValue.Number<IMyTerminalBlock>(block => Whole(block.SlimBlock));
 
-        static readonly Being Built = Being.Number<IMyTerminalBlock>(block => block.SlimBlock.BuildLevelRatio * 100d);
+        static readonly OwnValue Built = OwnValue.Number<IMyTerminalBlock>(block => block.SlimBlock.BuildLevelRatio * 100d);
 
-        static readonly Being Damaged = Being.Flag(Hurt);
+        static readonly OwnValue Damaged = OwnValue.Flag(Hurt);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

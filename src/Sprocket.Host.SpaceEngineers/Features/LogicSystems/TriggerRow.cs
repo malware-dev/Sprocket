@@ -21,10 +21,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     /// </remarks>
     public partial class TriggerRow : HStack
     {
-        readonly List<Slot> _starts = new List<Slot>();
+        readonly List<SlotChip> _starts = new List<SlotChip>();
         readonly List<Label> _joins = new List<Label>();
         readonly List<Label> _startJoins = new List<Label>();
-        readonly List<Slot> _does = new List<Slot>();
+        readonly List<SlotChip> _does = new List<SlotChip>();
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
         readonly List<Mention> _pieces = new List<Mention>();
 
@@ -193,7 +193,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return at >= 0 && at < _does.Count ? _does[at] : null;
         }
 
-        void Part(Slot chip, int at, SentenceSlot part, GridWorld world)
+        void Part(SlotChip chip, int at, SentenceSlot part, GridWorld world)
         {
             if (ReferenceEquals(_shown[at], part))
                 return;
@@ -209,13 +209,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             while (_starts.Count < Starts.Count)
             {
                 _startJoins.Add(new Label { Style = Styles.Phrase, IsVisible = false });
-                _starts.Add(new Slot());
+                _starts.Add(new SlotChip());
             }
 
             while (_does.Count < Does.Count)
             {
                 _joins.Add(new Label { Style = Styles.Phrase, IsVisible = false });
-                _does.Add(new Slot());
+                _does.Add(new SlotChip());
             }
 
             var sentence = _sentence.Children;

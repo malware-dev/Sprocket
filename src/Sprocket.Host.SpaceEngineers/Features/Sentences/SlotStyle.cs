@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <inheritdoc />
         protected override void LayStates(Element element)
         {
-            var slot = element as Slot;
+            var slot = element as SlotChip;
             if (slot != null && slot.IsEmpty)
                 Lay(Empty, element);
 

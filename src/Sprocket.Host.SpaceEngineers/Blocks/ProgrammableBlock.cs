@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>Running the block's script, which is Sprocket's own.</summary>
         public const string Run = "run";
 
-        static readonly Being Broken = Being.Flag(Reading.Of<IMyProgrammableBlock>(block => block.HasCompileErrors));
+        static readonly OwnValue Broken = OwnValue.Flag(Reading.Of<IMyProgrammableBlock>(block => block.HasCompileErrors));
 
         static readonly OwnAction Runs = OwnAction.Of<IMyProgrammableBlock, Argument>(Argument.Read, Ran, trouble: Refused);
 

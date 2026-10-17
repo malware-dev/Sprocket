@@ -15,11 +15,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Works = Reading.Of<IMyTerminalBlock>(block => block.IsWorking);
 
-        static readonly Being Working = Being.Flag(Works);
+        static readonly OwnValue Working = OwnValue.Flag(Works);
 
-        static readonly Being Hacked = Being.Flag(Reading.Of<IMyTerminalBlock>(block => block.IsBeingHacked));
+        static readonly OwnValue Hacked = OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block => block.IsBeingHacked));
 
-        static readonly Being Data = Being.Text<IMyTerminalBlock>(block => block.CustomData)
+        static readonly OwnValue Data = OwnValue.Text<IMyTerminalBlock>(block => block.CustomData)
             .Writing<IMyTerminalBlock>((block, value) => block.CustomData = value.Text ?? "");
 
         /// <inheritdoc />

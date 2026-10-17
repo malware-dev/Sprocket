@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         static readonly Reading Away = Reading.Of<IMyDefensiveCombatBlock>(block => block.IsFleeing);
 
-        static readonly Being Fleeing = Being.Flag(Away);
+        static readonly OwnValue Fleeing = OwnValue.Flag(Away);
 
         static readonly OwnAction Flees = OwnAction.Of<IMyDefensiveCombatBlock>(block => block.Flee());
 

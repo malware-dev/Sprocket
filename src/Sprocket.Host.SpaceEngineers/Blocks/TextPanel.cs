@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly OwnAction Shows = OwnAction.Of<IMyTextPanel, Chosen>(Chosen.Read, Showed);
 
         // Each look reads the text afresh, as the terminal's own text values do: the screen hands it out only as a new string.
-        static readonly Being Written = Being.Text<IMyTextPanel>(panel => panel.GetText());
+        static readonly OwnValue Written = OwnValue.Text<IMyTextPanel>(panel => panel.GetText());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -104,13 +104,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Choosing one leaves the screen's content as it was: the screen runs the app while its content is an app, which is
         /// when the terminal shows its list of them.
         /// </remarks>
-        static Being Running(string[] apps)
+        static OwnValue Running(string[] apps)
         {
             var named = new string[apps.Length];
             for (var i = 0; i < apps.Length; i++)
                 named[i] = ScreenType.AppName(apps[i]);
 
-            return Being.OneOf<IMyTextPanel>(apps, panel => Array.IndexOf(apps, panel.Script))
+            return OwnValue.OneOf<IMyTextPanel>(apps, panel => Array.IndexOf(apps, panel.Script))
                 .Writing<IMyTextPanel>((panel, value) => panel.Script = apps[(int)value.Whole])
                 .Saying(named);
         }

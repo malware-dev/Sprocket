@@ -225,7 +225,7 @@ public class EditorTests
         foreach (var one in ship.Rig.Entity(light.Id).Kind.Actions)
         {
             if (one.GamePropertyId == "Pattern")
-                one.Withhold(Readiness.Unsupported, Holdback.Events);
+                one.Withhold(Readiness.Unsupported, UnreadyReason.Events);
         }
 
         StartOnTheButton(editor);

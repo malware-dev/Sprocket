@@ -32,24 +32,24 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             (battery, recharging, seen) => !recharging.Waits,
             (battery, recharging, seen) => recharging.Waits ? Why(battery) : BlockTrouble.None);
 
-        static readonly Being Charge = Being.Number<IMyBatteryBlock>(battery =>
+        static readonly OwnValue Charge = OwnValue.Number<IMyBatteryBlock>(battery =>
             battery.MaxStoredPower > 0f ? battery.CurrentStoredPower / battery.MaxStoredPower * 100.0 : 0.0);
 
-        static readonly Being Stored = Being.Number<IMyBatteryBlock>(battery => battery.CurrentStoredPower);
+        static readonly OwnValue Stored = OwnValue.Number<IMyBatteryBlock>(battery => battery.CurrentStoredPower);
 
-        static readonly Being Capacity = Being.Number<IMyBatteryBlock>(battery => battery.MaxStoredPower);
+        static readonly OwnValue Capacity = OwnValue.Number<IMyBatteryBlock>(battery => battery.MaxStoredPower);
 
-        static readonly Being Charging = Being.Flag(Reading.Of<IMyBatteryBlock>(battery => battery.IsCharging));
+        static readonly OwnValue Charging = OwnValue.Flag(Reading.Of<IMyBatteryBlock>(battery => battery.IsCharging));
 
-        static readonly Being Topped = Being.Flag(Full);
+        static readonly OwnValue Topped = OwnValue.Flag(Full);
 
-        static readonly Being Input = Being.Number<IMyBatteryBlock>(battery => battery.CurrentInput);
+        static readonly OwnValue Input = OwnValue.Number<IMyBatteryBlock>(battery => battery.CurrentInput);
 
-        static readonly Being MostIn = Being.Number<IMyBatteryBlock>(battery => battery.MaxInput);
+        static readonly OwnValue MostIn = OwnValue.Number<IMyBatteryBlock>(battery => battery.MaxInput);
 
-        static readonly Being Output = Being.Number<IMyBatteryBlock>(battery => battery.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Number<IMyBatteryBlock>(battery => battery.CurrentOutput);
 
-        static readonly Being MostOut = Being.Number<IMyBatteryBlock>(battery => battery.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Number<IMyBatteryBlock>(battery => battery.MaxOutput);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

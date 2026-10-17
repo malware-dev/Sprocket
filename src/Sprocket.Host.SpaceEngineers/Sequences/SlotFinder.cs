@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// comparing every set with every other is cheap at that size.
     /// </para>
     /// </remarks>
-    public sealed class Slotting
+    public sealed class SlotFinder
     {
         readonly AutomationSystem _system;
         readonly SystemInstance _shown;
@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <paramref name="called" /> says of it, one of several is called <paramref name="numbered" /> of the first number free,
         /// and either expects the nearest type the lineages <paramref name="lineage" /> gives its blocks share.
         /// </summary>
-        public Slotting(AutomationSystem system, SystemInstance shown, Func<string, string> called, Func<string, IList<string>> lineage,
+        public SlotFinder(AutomationSystem system, SystemInstance shown, Func<string, string> called, Func<string, IList<string>> lineage,
             Func<int, string> numbered)
         {
             _system = system;

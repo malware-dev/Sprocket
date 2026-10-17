@@ -12,13 +12,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly MyItemType Ice = MyItemType.MakeOre("Ice");
 
         // Ice is read off the generator's inventory, in kilograms.
-        static readonly Being Held = Being.Number<IMyGasGenerator>(generator =>
+        static readonly OwnValue Held = OwnValue.Number<IMyGasGenerator>(generator =>
         {
             var inventory = generator.GetInventory(0);
             return inventory == null ? 0.0 : (double)inventory.GetItemAmount(Ice);
         });
 
-        static readonly Being Producing = Being.Flag(Reading.Of<IMyGasGenerator>(generator => generator.IsProducing));
+        static readonly OwnValue Producing = OwnValue.Flag(Reading.Of<IMyGasGenerator>(generator => generator.IsProducing));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

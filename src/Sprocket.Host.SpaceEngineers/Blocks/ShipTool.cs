@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unheard = "Nothing says when a pilot takes up a tool's trigger.";
 
-        static readonly Being Piloted = Being.Flag(Reading.Of<IMyShipToolBase>(tool => tool.IsActivated));
+        static readonly OwnValue Piloted = OwnValue.Flag(Reading.Of<IMyShipToolBase>(tool => tool.IsActivated));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

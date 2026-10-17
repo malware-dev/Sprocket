@@ -9,11 +9,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed class OxygenFarm : Capability
     {
         // The game gives the output as a fraction of the farm's best; every share Sprocket says is in percent.
-        static readonly Being Effectiveness = Being.Number<IMyOxygenFarm>(farm => farm.GetOutput() * 100.0);
+        static readonly OwnValue Effectiveness = OwnValue.Number<IMyOxygenFarm>(farm => farm.GetOutput() * 100.0);
 
-        static readonly Being Able = Being.Flag(Reading.Of<IMyOxygenFarm>(farm => farm.CanProduce));
+        static readonly OwnValue Able = OwnValue.Flag(Reading.Of<IMyOxygenFarm>(farm => farm.CanProduce));
 
-        static readonly Being Shadowed = Being.Flag(Reading.Of<IMyOxygenFarm>(farm => farm.IsSolarOccluded));
+        static readonly OwnValue Shadowed = OwnValue.Flag(Reading.Of<IMyOxygenFarm>(farm => farm.IsSolarOccluded));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

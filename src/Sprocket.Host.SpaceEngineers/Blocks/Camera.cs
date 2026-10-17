@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const string Unheard = "A camera raises no event when somebody starts or stops looking through it.";
 
-        static readonly Being Watched = Being.Flag(Reading.Of<IMyCameraBlock>(camera => camera.IsActive));
+        static readonly OwnValue Watched = OwnValue.Flag(Reading.Of<IMyCameraBlock>(camera => camera.IsActive));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

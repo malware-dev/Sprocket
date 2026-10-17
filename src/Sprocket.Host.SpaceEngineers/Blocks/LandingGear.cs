@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
 
-        static readonly Being State = Being.OneOf<IMyLandingGear>(Statuses, gear => Position(gear.LockMode));
+        static readonly OwnValue State = OwnValue.OneOf<IMyLandingGear>(Statuses, gear => Position(gear.LockMode));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// value with options of its own: it reads them into a type of its own when a test is compiled, and is handed that
     /// from then on. See <see cref="Gauge" />.
     /// </remarks>
-    public abstract class Being
+    public abstract class OwnValue
     {
         static readonly string[] None = Array.Empty<string>();
 
@@ -49,8 +49,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         public abstract Reading Is(Literal becomes);
 
         /// <summary>Says this is a function, given an argument for each of <paramref name="parameters" />.</summary>
-        /// <remarks>Part of making it, in the same initializer: a Being is shared by every kind that lists it.</remarks>
-        public Being Taking(params Field[] parameters)
+        /// <remarks>Part of making it, in the same initializer: an OwnValue is shared by every kind that lists it.</remarks>
+        public OwnValue Taking(params Field[] parameters)
         {
             _parameters.AddRange(parameters);
             return this;
@@ -58,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Says a person reads <paramref name="words" /> for the names, one each in order, where the program names things by id.</summary>
         /// <remarks>Part of making it, as <see cref="Taking" /> is. A screen's app is written by the game's id, and read by the name the game shows for it.</remarks>
-        public Being Saying(IReadOnlyList<string> words)
+        public OwnValue Saying(IReadOnlyList<string> words)
         {
             _said = words;
             return this;
@@ -69,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// text, a color, and a one of a list as its position among the names.
         /// </summary>
         /// <remarks>Part of making it, as <see cref="Taking" /> is. Only what a player could set at the block in the game.</remarks>
-        public Being Writing<T>(Action<T, Literal> write) where T : class
+        public OwnValue Writing<T>(Action<T, Literal> write) where T : class
         {
             _write = (block, value) => write((T)block, value);
             return this;
@@ -167,55 +167,55 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A flag of Sprocket's own, read by <paramref name="flag" />.</summary>
-        public static Being Flag(Reading flag)
+        public static OwnValue Flag(Reading flag)
         {
             return new Flagged(flag);
         }
 
         /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them.</summary>
-        public static Being OneOf<T>(string[] names, Func<T, int> position) where T : class
+        public static OwnValue OneOf<T>(string[] names, Func<T, int> position) where T : class
         {
             return new Typed<T, object>(ValueKind.Name, names, false, Nothing,
                 (block, options, seen) => Literal.Of(position(block)));
         }
 
         /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them, remembering between looks.</summary>
-        public static Being OneOf<T>(string[] names, Func<T, ReaderMemory, int> position) where T : class
+        public static OwnValue OneOf<T>(string[] names, Func<T, ReaderMemory, int> position) where T : class
         {
             return new Typed<T, object>(ValueKind.Name, names, true, Nothing,
                 (block, options, seen) => Literal.Of(position(block, seen)));
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />.</summary>
-        public static Being Number<T>(Func<T, double> number) where T : class
+        public static OwnValue Number<T>(Func<T, double> number) where T : class
         {
             return new Typed<T, object>(ValueKind.Real, None, false, Nothing,
                 (block, options, seen) => Literal.Of(number(block)));
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />, remembering between looks.</summary>
-        public static Being Number<T>(Func<T, ReaderMemory, double> number) where T : class
+        public static OwnValue Number<T>(Func<T, ReaderMemory, double> number) where T : class
         {
             return new Typed<T, object>(ValueKind.Real, None, true, Nothing,
                 (block, options, seen) => Literal.Of(number(block, seen)));
         }
 
         /// <summary>A whole number read off a <typeparamref name="T" />.</summary>
-        public static Being Whole<T>(Func<T, long> whole) where T : class
+        public static OwnValue Whole<T>(Func<T, long> whole) where T : class
         {
             return new Typed<T, object>(ValueKind.Integer, None, false, Nothing,
                 (block, options, seen) => Literal.Of(whole(block)));
         }
 
         /// <summary>Text read off a <typeparamref name="T" />.</summary>
-        public static Being Text<T>(Func<T, string> text) where T : class
+        public static OwnValue Text<T>(Func<T, string> text) where T : class
         {
             return new Typed<T, object>(ValueKind.Text, None, false, Nothing,
                 (block, options, seen) => Literal.Of(text(block) ?? ""));
         }
 
         /// <summary>A color read off a <typeparamref name="T" />.</summary>
-        public static Being Color<T>(Func<T, Color> color) where T : class
+        public static OwnValue Color<T>(Func<T, Color> color) where T : class
         {
             return new Typed<T, object>(ValueKind.Color, None, false, Nothing, (block, options, seen) =>
             {
@@ -225,7 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a real number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, double> number)
+        public static OwnValue Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, double> number)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Real, None, true, options,
@@ -233,7 +233,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back one of <paramref name="names" /> as a position among them, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
+        public static OwnValue OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
             Func<T, TOptions, ReaderMemory, int> position) where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Name, names, true, options,
@@ -241,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a color, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, Color> color)
+        public static OwnValue Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, Color> color)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Color, None, true, options, (block, given, seen) =>
@@ -252,7 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a flag, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, bool> flag)
+        public static OwnValue Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, bool> flag)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Flag, None, true, options,
@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a whole number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, long> whole)
+        public static OwnValue Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, long> whole)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Integer, None, true, options,
@@ -268,7 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back text, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, string> text)
+        public static OwnValue Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, string> text)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Text, None, true, options,
@@ -281,7 +281,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A flag read by a <see cref="Reading" />.</summary>
-        sealed class Flagged : Being
+        sealed class Flagged : OwnValue
         {
             readonly Reading _flag;
 
@@ -308,7 +308,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A value read off a <typeparamref name="T" />, with options read into a <typeparamref name="TOptions" />.</summary>
-        sealed class Typed<T, TOptions> : Being where T : class
+        sealed class Typed<T, TOptions> : OwnValue where T : class
         {
             readonly ValueKind _kind;
             readonly string[] _names;

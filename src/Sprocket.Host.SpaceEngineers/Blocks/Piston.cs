@@ -42,9 +42,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly string[] Statuses = { "extended", "retracted", "extending", "retracting", "stopped" };
 
-        static readonly Being State = Being.OneOf<IMyPistonBase>(Statuses, piston => Rank(piston.Status));
+        static readonly OwnValue State = OwnValue.OneOf<IMyPistonBase>(Statuses, piston => Rank(piston.Status));
 
-        static readonly Being Travelled = Being.Number<IMyPistonBase>(piston => piston.CurrentPosition);
+        static readonly OwnValue Travelled = OwnValue.Number<IMyPistonBase>(piston => piston.CurrentPosition);
 
         static readonly Reading Out = Reading.Of<IMyPistonBase>(piston => piston.Status == PistonStatus.Extended);
 

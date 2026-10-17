@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unheard = "The game raises no event when a ship's speed changes.";
 
-        static readonly Being Speed = Being.Number<IMyShipController>(controller => controller.GetShipSpeed());
+        static readonly OwnValue Speed = OwnValue.Number<IMyShipController>(controller => controller.GetShipSpeed());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

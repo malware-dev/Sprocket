@@ -15,8 +15,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         const string Uncounted = "A warhead raises no event that says its countdown has started or stopped.";
         const string Unarmed = "A warhead raises no event that says it was armed or disarmed.";
 
-        static readonly Being Counting = Being.Flag(Reading.Of<IMyWarhead>(warhead => warhead.IsCountingDown));
-        static readonly Being Armed = Being.Flag(Reading.Of<IMyWarhead>(warhead => warhead.IsArmed));
+        static readonly OwnValue Counting = OwnValue.Flag(Reading.Of<IMyWarhead>(warhead => warhead.IsCountingDown));
+        static readonly OwnValue Armed = OwnValue.Flag(Reading.Of<IMyWarhead>(warhead => warhead.IsArmed));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

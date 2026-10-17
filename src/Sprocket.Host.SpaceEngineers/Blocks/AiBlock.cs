@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class AiBlock : Capability
     {
-        static readonly Being Running = Being.Flag(Reading.Of<IMyTerminalBlock>(block =>
+        static readonly OwnValue Running = OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block =>
         {
             var ai = block.Components.Get<MyAiBlockComponent>();
             return ai != null && ai.IsActivated;

@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (block is IMyUserControllableGun)
             {
-                Withhold(kind, "SelectedAmmoType", Readiness.Pending, Holdback.Ammo);
+                Withhold(kind, "SelectedAmmoType", Readiness.Pending, UnreadyReason.Ammo);
                 HideValue(kind, "Shoot");
             }
 
@@ -127,8 +127,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (block is IMyEventControllerBlock)
             {
-                Withhold(kind, "AvailableEvents", Readiness.Unsupported, Holdback.Events);
-                Withhold(kind, "Condition", Readiness.Unsupported, Holdback.Events);
+                Withhold(kind, "AvailableEvents", Readiness.Unsupported, UnreadyReason.Events);
+                Withhold(kind, "Condition", Readiness.Unsupported, UnreadyReason.Events);
             }
 
             if (block is IMyRadioAntenna || block is IMyBeacon)
@@ -358,7 +358,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             In(kind, "CameraList", Category.Behaviour);
-            Withhold(kind, "CameraList", Readiness.Pending, Holdback.Camera);
+            Withhold(kind, "CameraList", Readiness.Pending, UnreadyReason.Camera);
             In(kind, "SpeedLimit", Category.Behaviour);
 
             // How the autopilot flies its route, and the start of the route again.
@@ -396,9 +396,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             In(kind, "RotorElevation", Category.Behaviour);
             In(kind, "CameraList", Category.Behaviour);
 
-            Withhold(kind, "RotorAzimuth", Readiness.Pending, Holdback.Rotor);
-            Withhold(kind, "RotorElevation", Readiness.Pending, Holdback.Rotor);
-            Withhold(kind, "CameraList", Readiness.Pending, Holdback.Camera);
+            Withhold(kind, "RotorAzimuth", Readiness.Pending, UnreadyReason.Rotor);
+            Withhold(kind, "RotorElevation", Readiness.Pending, UnreadyReason.Rotor);
+            Withhold(kind, "CameraList", Readiness.Pending, UnreadyReason.Camera);
         }
 
         /// <summary>A screen: what is written on it, and how it was set up to write.</summary>
@@ -448,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Keeps every member the game named <paramref name="stem" /> from being made into a step.</summary>
-        static void Withhold(EntityKind kind, string stem, Readiness readiness, Holdback why)
+        static void Withhold(EntityKind kind, string stem, Readiness readiness, UnreadyReason why)
         {
             var actions = kind.Actions;
             for (var i = 0; i < actions.Count; i++)

@@ -15,13 +15,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class Reactor : Capability
     {
-        static readonly Being Output = Being.Number<IMyReactor>(reactor => reactor.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Number<IMyReactor>(reactor => reactor.CurrentOutput);
 
-        static readonly Being MostOut = Being.Number<IMyReactor>(reactor => reactor.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Number<IMyReactor>(reactor => reactor.MaxOutput);
 
         /// <summary>The uranium a reactor holds, made as the first reactor is described.</summary>
         /// <remarks>Not before: the uranium ingot's type can be named only once the game has registered its types.</remarks>
-        Being _fuel;
+        OwnValue _fuel;
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (_fuel == null)
             {
                 var uranium = new MyItemType("MyObjectBuilder_Ingot", "Uranium");
-                _fuel = Being.Number<IMyReactor>(reactor => Held(reactor, uranium));
+                _fuel = OwnValue.Number<IMyReactor>(reactor => Held(reactor, uranium));
             }
 
             kind.WithValue("uranium", "uranium", _fuel).Measured(" kg").Announced().In(Category.Fuel)

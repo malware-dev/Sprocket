@@ -34,9 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             (tank, waiting, seen) => waiting.Waits ? Why(tank) : BlockTrouble.None);
 
         // The game reads the fill as a fraction; every fill Sprocket says is in percent.
-        static readonly Being Level = Being.Number<IMyGasTank>(tank => tank.FilledRatio * 100.0);
+        static readonly OwnValue Level = OwnValue.Number<IMyGasTank>(tank => tank.FilledRatio * 100.0);
 
-        static readonly Being Capacity = Being.Number<IMyGasTank>(tank => tank.Capacity);
+        static readonly OwnValue Capacity = OwnValue.Number<IMyGasTank>(tank => tank.Capacity);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

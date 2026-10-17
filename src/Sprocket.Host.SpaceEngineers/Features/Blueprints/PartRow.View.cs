@@ -13,8 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Glyph _mark;
         Label _name;
         RichText _about;
-        Slot _blocks;
-        Slot _signals;
+        SlotChip _blocks;
+        SlotChip _signals;
         Label _problem;
         Label _marks;
         Label _aside;
@@ -55,8 +55,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 20f,
                         Children =
                         {
-                            new Slot().As(out _blocks),
-                            new Slot { IsVisible = false }.As(out _signals),
+                            new SlotChip().As(out _blocks),
+                            new SlotChip { IsVisible = false }.As(out _signals),
                             new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem)
                         }
                     },

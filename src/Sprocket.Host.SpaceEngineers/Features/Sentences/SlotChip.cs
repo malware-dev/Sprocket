@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// under it is what distinguishes it from a row at a glance, and it is drawn rather than being a border because
     /// a rectangle of color is all the game can be asked for.
     /// </remarks>
-    public class Slot : HStack, ITextual
+    public class SlotChip : HStack, ITextual
     {
         const float UnderlineThickness = 2f;
 
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         Color _color = Color.White;
 
         /// <summary>An empty part, pressable where it is given a command, in the look every part of a sentence has.</summary>
-        public Slot()
+        public SlotChip()
         {
             Style = Styles.Slot;
         }

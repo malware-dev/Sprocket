@@ -28,17 +28,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Sat = Reading.Of<IMyCockpit>(cockpit => cockpit.IsOccupied);
 
-        static readonly Being Seated = Being.Flag(Sat);
+        static readonly OwnValue Seated = OwnValue.Flag(Sat);
 
-        static readonly Being Occupant = Being.Text<IMyCockpit>(cockpit => cockpit.Pilot == null ? "" : cockpit.Pilot.DisplayName);
+        static readonly OwnValue Occupant = OwnValue.Text<IMyCockpit>(cockpit => cockpit.Pilot == null ? "" : cockpit.Pilot.DisplayName);
 
-        static readonly Being Controlled = Being.Flag(Reading.Of<IMyCockpit>(cockpit => cockpit.IsUnderControl));
+        static readonly OwnValue Controlled = OwnValue.Flag(Reading.Of<IMyCockpit>(cockpit => cockpit.IsUnderControl));
 
-        static readonly Being Air = Being.Number<IMyCockpit>(cockpit => cockpit.OxygenFilledRatio * 100.0);
+        static readonly OwnValue Air = OwnValue.Number<IMyCockpit>(cockpit => cockpit.OxygenFilledRatio * 100.0);
 
-        static readonly Being Gravity = Being.Number<IMyCockpit>(cockpit => cockpit.GetNaturalGravity().Length() / G);
+        static readonly OwnValue Gravity = OwnValue.Number<IMyCockpit>(cockpit => cockpit.GetNaturalGravity().Length() / G);
 
-        static readonly Being Mass = Being.Number<IMyCockpit>(cockpit => cockpit.CalculateShipMass().TotalMass);
+        static readonly OwnValue Mass = OwnValue.Number<IMyCockpit>(cockpit => cockpit.CalculateShipMass().TotalMass);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

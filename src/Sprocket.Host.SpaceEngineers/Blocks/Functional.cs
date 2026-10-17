@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         static readonly Reading On = Reading.Of<IMyFunctionalBlock>(block => block.Enabled);
 
-        static readonly Being SwitchedOn = Being.Flag(On)
+        static readonly OwnValue SwitchedOn = OwnValue.Flag(On)
             .Writing<IMyFunctionalBlock>((block, value) => block.Enabled = value.Flag);
 
         /// <inheritdoc />

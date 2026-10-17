@@ -12,9 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly Reading Wheeled = Reading.Of<IMyMotorSuspension>(suspension => suspension.IsAttached);
 
         // The game's steering angle is in radians; the terminal says degrees.
-        static readonly Being Turned = Being.Number<IMyMotorSuspension>(suspension => suspension.SteerAngle * 180.0 / Math.PI);
+        static readonly OwnValue Turned = OwnValue.Number<IMyMotorSuspension>(suspension => suspension.SteerAngle * 180.0 / Math.PI);
 
-        static readonly Being Attached = Being.Flag(Wheeled);
+        static readonly OwnValue Attached = OwnValue.Flag(Wheeled);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

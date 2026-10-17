@@ -46,9 +46,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         /// <summary>The fuel held, in percent of <paramref name="capacity" />, which is the definition's.</summary>
         /// <remarks>One per kind, since the capacity is the definition's and read once.</remarks>
-        static Being Level(float capacity)
+        static OwnValue Level(float capacity)
         {
-            return Being.Number<IMyPowerProducer>(engine =>
+            return OwnValue.Number<IMyPowerProducer>(engine =>
             {
                 var source = engine.Components.Get<MyResourceSourceComponent>();
                 return source == null || capacity <= 0f ? 0.0 : source.RemainingCapacityByType(Electricity) / capacity * 100.0;

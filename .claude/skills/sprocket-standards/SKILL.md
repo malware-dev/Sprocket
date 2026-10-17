@@ -110,7 +110,7 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 
 - A block's members are actions, values, functions and signals. A value is a state; a function is a
   value with parameters; a signal is a change.
-- A Sprocket value is declared on its kind with `EntityKind.WithValue(id, named, Being)`. A signal
+- A Sprocket value is declared on its kind with `EntityKind.WithValue(id, named, OwnValue)`. A signal
   watched for is declared after it with `WithChange(id, text, value, becomes)` and carries its state
   words (`Reading(state, unstate)`). A signal only a toolbar sends is an answered `EntityEvent`.
 - A value is watched one of three ways, never a fourth:

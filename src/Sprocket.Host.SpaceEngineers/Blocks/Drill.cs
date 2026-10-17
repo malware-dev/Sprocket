@@ -14,9 +14,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly string[] Modes = { "mining", "clearing-terrain" };
 
-        static readonly Being Drilling = Being.Flag(Reading.Of<IMyShipDrill>(drill => drill.IsActivated));
+        static readonly OwnValue Drilling = OwnValue.Flag(Reading.Of<IMyShipDrill>(drill => drill.IsActivated));
 
-        static readonly Being Mode = Being.OneOf<IMyShipDrill>(Modes, drill => drill.TerrainClearingMode ? 1 : 0)
+        static readonly OwnValue Mode = OwnValue.OneOf<IMyShipDrill>(Modes, drill => drill.TerrainClearingMode ? 1 : 0)
             .Writing<IMyShipDrill>((drill, mode) => drill.TerrainClearingMode = mode.Whole == 1);
 
         /// <inheritdoc />

@@ -110,12 +110,12 @@ public class WhatItHoldsTests
             sim.Tick();
 
         var row = sim.Editor.Triggers()[0];
-        Assert.Equal(sim.Texts.SequenceNewValueAbout, row.Within().OfType<Slot>().Last().Tip?.Text);
+        Assert.Equal(sim.Texts.SequenceNewValueAbout, row.Within().OfType<SlotChip>().Last().Tip?.Text);
     }
 
     static string Named(Simulation sim, Fitting fitting) =>
         sim.Editor.Program.Declare(sim.World, sim.World.FindEntity(fitting.Id)).Name;
 
     /// <summary>The tooltip on the row's last part, the one holding what the step was given.</summary>
-    static string? Tip(StepRow row) => row.Within().OfType<Slot>().Last().Tip?.Text;
+    static string? Tip(StepRow row) => row.Within().OfType<SlotChip>().Last().Tip?.Text;
 }

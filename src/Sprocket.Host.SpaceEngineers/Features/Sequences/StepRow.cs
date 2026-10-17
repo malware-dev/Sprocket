@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         const float JoinOut = 10f;
 
         readonly List<Label> _joins = new List<Label>();
-        readonly List<Slot> _chips = new List<Slot>();
+        readonly List<SlotChip> _chips = new List<SlotChip>();
         readonly List<SentenceSlot> _shown = new List<SentenceSlot>();
         readonly List<Mention> _pieces = new List<Mention>();
         readonly List<PlusMenu> _adders = new List<PlusMenu>();
@@ -330,7 +330,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             while (_chips.Count < Slots.Count)
             {
                 _joins.Add(new Label { Style = Styles.Phrase, IsVisible = false });
-                _chips.Add(new Slot());
+                _chips.Add(new SlotChip());
             }
 
             while (_adders.Count < Adds.Count)

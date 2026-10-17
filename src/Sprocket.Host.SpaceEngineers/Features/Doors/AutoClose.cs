@@ -40,14 +40,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <summary>Registers what auto-close sends on the channel being built, and answers the builder.</summary>
         public static NetworkChannel.Builder Carry(NetworkChannel.Builder builder)
         {
-            return builder.UsingModel<Closing>(Closing.SizeOf, Closing.Read, Closing.Write);
+            return builder.UsingModel<CloseDelayUpdate>(CloseDelayUpdate.SizeOf, CloseDelayUpdate.Read, CloseDelayUpdate.Write);
         }
 
         /// <summary>Starts hearing what arrives on <paramref name="channel" />, which is built with <see cref="Carry" />.</summary>
         public void Listen(NetworkChannel channel)
         {
             _channel = channel;
-            _channel.ListenFor<Closing>(Received);
+            _channel.ListenFor<CloseDelayUpdate>(Received);
         }
 
         /// <summary>Sets <paramref name="door" />'s delay to <paramref name="seconds" />, as its terminal slider does on whichever machine it was moved.</summary>
@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
 
             CloseDelay.Store(door, seconds);
             if (_channel != null)
-                _channel.SendToServer(new Closing { Door = door.EntityId, Seconds = seconds }, true);
+                _channel.SendToServer(new CloseDelayUpdate { Door = door.EntityId, Seconds = seconds }, true);
         }
 
         /// <summary>A door come alive on the server, which starts closing itself where it keeps a delay.</summary>
@@ -115,7 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
             CloseDelay.Store(door, seconds);
             Follow(door, seconds, -1);
             if (_channel != null)
-                _channel.Broadcast(new Closing { Door = door.EntityId, Seconds = seconds }, true);
+                _channel.Broadcast(new CloseDelayUpdate { Door = door.EntityId, Seconds = seconds }, true);
         }
 
         /// <summary>Closes <paramref name="door" /> <paramref name="seconds" /> after it opens, or never where that is none; on <paramref name="due" /> where it is open and that is not -1.</summary>
@@ -146,7 +146,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// A delay arriving: at the server, taken from a player who may change the door; at a client, what the server's door
         /// keeps now.
         /// </summary>
-        void Received(ushort channel, Closing closing, ulong sender, bool fromServer)
+        void Received(ushort channel, CloseDelayUpdate closing, ulong sender, bool fromServer)
         {
             var door = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(closing.Door) as IMyDoor;
             if (!NetworkChannel.Network.IsServer)

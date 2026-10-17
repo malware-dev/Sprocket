@@ -18,9 +18,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
 
-        static readonly Being State = Being.OneOf<IMyShipConnector>(Statuses, connector => Position(connector.Status));
+        static readonly OwnValue State = OwnValue.OneOf<IMyShipConnector>(Statuses, connector => Position(connector.Status));
 
-        static readonly Being Docked = Being.Text<IMyShipConnector>(Ship);
+        static readonly OwnValue Docked = OwnValue.Text<IMyShipConnector>(Ship);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

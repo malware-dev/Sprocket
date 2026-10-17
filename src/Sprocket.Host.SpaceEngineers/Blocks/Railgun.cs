@@ -16,11 +16,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Uncounted = "A capacitor says when it is charged and when it is not, and nothing as its charge moves.";
 
-        readonly Being _charge;
-        readonly Being _remaining;
-        readonly Being _charged;
+        readonly OwnValue _charge;
+        readonly OwnValue _remaining;
+        readonly OwnValue _charged;
 
-        readonly Being _charging;
+        readonly OwnValue _charging;
 
         /// <summary>
         /// The type the game keeps a capacitor under among a block's components, learned from the first one found; null until
@@ -35,25 +35,25 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>A railgun's values, each reading the block's capacitor.</summary>
         public Railgun()
         {
-            _charge = Being.Number<IMyTerminalBlock>(block =>
+            _charge = OwnValue.Number<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
                 return capacitor == null || capacitor.Capacity <= 0f ? 0d : 100d * capacitor.StoredPower / capacitor.Capacity;
             });
 
-            _remaining = Being.Number<IMyTerminalBlock>(block =>
+            _remaining = OwnValue.Number<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
                 return capacitor?.TimeRemaining ?? 0d;
             });
 
-            _charged = Being.Flag(Reading.Of<IMyTerminalBlock>(block =>
+            _charged = OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
                 return capacitor != null && capacitor.IsCharged;
             }));
 
-            _charging = Being.Flag(Reading.Of<IMyTerminalBlock>(block =>
+            _charging = OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block =>
             {
                 var capacitor = Capacitor(block);
                 return capacitor != null && !capacitor.IsCharged && capacitor.TimeRemaining > 0f;

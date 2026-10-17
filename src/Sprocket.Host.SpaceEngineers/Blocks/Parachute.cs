@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unheard = "A parachute raises nothing as the air around it changes.";
 
-        static readonly Being Air = Being.Number<IMyParachute>(parachute => parachute.Atmosphere);
+        static readonly OwnValue Air = OwnValue.Number<IMyParachute>(parachute => parachute.Atmosphere);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // Its waypoint-reached event comes only at the last point of a one-way route, and carries a type a mod may not name.
         const string Unheard = "The flight block raises no event a mod can hear as its current waypoint changes.";
 
-        static readonly Being Waypoint = Being.Text<IMyFlightMovementBlock>(block =>
+        static readonly OwnValue Waypoint = OwnValue.Text<IMyFlightMovementBlock>(block =>
             block.CurrentWaypoint == null ? "" : block.CurrentWaypoint.Name);
 
         /// <inheritdoc />

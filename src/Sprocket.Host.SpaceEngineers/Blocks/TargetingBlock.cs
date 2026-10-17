@@ -16,18 +16,18 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unaimed = "The game raises no event as a turret finds a target, loses one or comes to bear on it.";
 
-        static readonly Being TurretTargeting = Being.Flag(Reading.Of<IMyLargeTurretBase>(turret => turret.HasTarget));
+        static readonly OwnValue TurretTargeting = OwnValue.Flag(Reading.Of<IMyLargeTurretBase>(turret => turret.HasTarget));
 
-        static readonly Being TurretOnTarget = Being.Flag(Reading.Of<IMyLargeTurretBase>(turret => turret.IsAimed));
+        static readonly OwnValue TurretOnTarget = OwnValue.Flag(Reading.Of<IMyLargeTurretBase>(turret => turret.IsAimed));
 
-        static readonly Being TurretControlled = Being.Flag(Reading.Of<IMyLargeTurretBase>(turret => turret.IsUnderControl));
+        static readonly OwnValue TurretControlled = OwnValue.Flag(Reading.Of<IMyLargeTurretBase>(turret => turret.IsUnderControl));
 
-        static readonly Being ControllerTargeting = Being.Flag(Reading.Of<IMyTurretControlBlock>(controller => controller.HasTarget));
+        static readonly OwnValue ControllerTargeting = OwnValue.Flag(Reading.Of<IMyTurretControlBlock>(controller => controller.HasTarget));
 
-        static readonly Being ControllerOnTarget = Being.Flag(Reading.Of<IMyTurretControlBlock>(controller => controller.IsAimed));
+        static readonly OwnValue ControllerOnTarget = OwnValue.Flag(Reading.Of<IMyTurretControlBlock>(controller => controller.IsAimed));
 
-        static readonly Being ControllerControlled =
-            Being.Flag(Reading.Of<IMyTurretControlBlock>(controller => controller.IsUnderControl));
+        static readonly OwnValue ControllerControlled =
+            OwnValue.Flag(Reading.Of<IMyTurretControlBlock>(controller => controller.IsUnderControl));
 
         static readonly string[] Switches =
         {

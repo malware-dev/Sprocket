@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class Sensor : Capability
     {
-        static readonly Being Detecting = Being.Flag(Reading.Of<IMySensorBlock>(sensor => sensor.IsActive));
+        static readonly OwnValue Detecting = OwnValue.Flag(Reading.Of<IMySensorBlock>(sensor => sensor.IsActive));
 
         // The game's own words for each switch, which name its value.
         static readonly string[] Switches =
@@ -44,12 +44,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // has seen. Holds nothing between looks: the game's main thread is the only one that reads a block.
         readonly List<MyDetectedEntityInfo> _detected = new List<MyDetectedEntityInfo>();
 
-        readonly Being _count;
+        readonly OwnValue _count;
 
         /// <summary>A sensor's capability, with nothing read yet.</summary>
         public Sensor()
         {
-            _count = Being.Whole<IMySensorBlock>(Count);
+            _count = OwnValue.Whole<IMySensorBlock>(Count);
         }
 
         /// <inheritdoc />

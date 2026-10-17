@@ -81,10 +81,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             label.Entry = FieldInput.Text;
 
             kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
-                .WithValue(LabelOf, "label of button", Being.Text<IMyButtonPanel, Labelled>(Labelled.Read,
+                .WithValue(LabelOf, "label of button", OwnValue.Text<IMyButtonPanel, Labelled>(Labelled.Read,
                     (panel, labelled, seen) => panel.GetButtonName(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Screen)
-                .WithValue(Assigned, "button has an action", Being.Flag<IMyButtonPanel, Labelled>(Labelled.Read,
+                .WithValue(Assigned, "button has an action", OwnValue.Flag<IMyButtonPanel, Labelled>(Labelled.Read,
                     (panel, labelled, seen) => panel.IsButtonAssigned(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Automation);
         }

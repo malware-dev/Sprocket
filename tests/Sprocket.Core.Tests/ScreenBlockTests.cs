@@ -20,7 +20,7 @@ public class ScreenBlockTests
     public void AValueReadByOtherWordsKeepsItsNames()
     {
         var kind = new EntityKind("Test/Screen", "Screen");
-        kind.WithValue("app", "app", Being.OneOf<IMyTerminalBlock>(new[] { "TSS_ClockAnalog", "TSS_Weather" }, _ => 0)
+        kind.WithValue("app", "app", OwnValue.OneOf<IMyTerminalBlock>(new[] { "TSS_ClockAnalog", "TSS_Weather" }, _ => 0)
             .Saying(new[] { "Clock Analog", "Weather" }));
         var fields = new List<Field>();
         kind.FindAction("app", ReachKind.Value)!.Fields(fields);

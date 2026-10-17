@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class ArtificialMass : Capability
     {
-        static readonly Being Mass = Being.Number<IMyArtificialMassBlock>(block => block.VirtualMass);
+        static readonly OwnValue Mass = OwnValue.Number<IMyArtificialMassBlock>(block => block.VirtualMass);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

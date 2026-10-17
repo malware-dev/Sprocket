@@ -22,15 +22,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Why a member is held back, in <paramref name="texts" />, or empty where nothing holds it.</summary>
-        public static string Why(Texts texts, Holdback why)
+        public static string Why(Texts texts, UnreadyReason why)
         {
             switch (why)
             {
-                case Holdback.Events: return texts.WithheldEvents;
-                case Holdback.Camera: return texts.WithheldCamera;
-                case Holdback.Rotor: return texts.WithheldRotor;
-                case Holdback.Ammo: return texts.WithheldAmmo;
-                case Holdback.Unread: return texts.WithheldUnread;
+                case UnreadyReason.Events: return texts.WithheldEvents;
+                case UnreadyReason.Camera: return texts.WithheldCamera;
+                case UnreadyReason.Rotor: return texts.WithheldRotor;
+                case UnreadyReason.Ammo: return texts.WithheldAmmo;
+                case UnreadyReason.Unread: return texts.WithheldUnread;
                 default: return "";
             }
         }

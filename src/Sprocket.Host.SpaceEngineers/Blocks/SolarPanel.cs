@@ -13,11 +13,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class SolarPanel : Capability
     {
-        static readonly Being Sunlight = Being.Number<IMySolarPanel>((panel, seen) => Lit(panel, seen));
+        static readonly OwnValue Sunlight = OwnValue.Number<IMySolarPanel>((panel, seen) => Lit(panel, seen));
 
-        static readonly Being Output = Being.Number<IMySolarPanel>(panel => panel.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Number<IMySolarPanel>(panel => panel.CurrentOutput);
 
-        static readonly Being MostOut = Being.Number<IMySolarPanel>(panel => panel.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Number<IMySolarPanel>(panel => panel.MaxOutput);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

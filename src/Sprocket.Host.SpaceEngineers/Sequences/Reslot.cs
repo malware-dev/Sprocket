@@ -4,7 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What a blueprint's slots become as the sets of blocks its steps and triggers name change, and how to take it back.</summary>
     /// <remarks>
-    /// Worked out by <see cref="Slotting" /> and carried by the edit that brought it about, so taking the edit back puts every
+    /// Worked out by <see cref="SlotFinder" /> and carried by the edit that brought it about, so taking the edit back puts every
     /// slot, every installation's blocks in it and every name a step uses back as it was. Each part records what it replaced,
     /// so undoing never has to work anything out again.
     /// </remarks>

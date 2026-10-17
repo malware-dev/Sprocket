@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class Timer : Capability
     {
-        static readonly Being Counting = Being.Flag(Reading.Of<IMyTimerBlock>(timer => timer.IsCountingDown));
+        static readonly OwnValue Counting = OwnValue.Flag(Reading.Of<IMyTimerBlock>(timer => timer.IsCountingDown));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

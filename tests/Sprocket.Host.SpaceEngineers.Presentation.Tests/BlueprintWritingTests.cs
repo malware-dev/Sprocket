@@ -145,7 +145,7 @@ public class BlueprintWritingTests
         Assert.Equal("button 1 is pressed", Assert.Single(row.Signals).Text);
 
         // The block and the signal are two parts, as a trigger's row shows them: the signal carries its mark.
-        var chips = row.Within().OfType<Slot>().Where(chip => chip.IsVisible).ToList();
+        var chips = row.Within().OfType<SlotChip>().Where(chip => chip.IsVisible).ToList();
         Assert.Equal(2, chips.Count);
         Assert.Equal("Airlock Button", chips[0].Text);
         Assert.Contains("button 1 is pressed", chips[1].Text);

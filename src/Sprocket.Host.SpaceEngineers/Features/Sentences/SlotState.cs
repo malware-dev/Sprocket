@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             base.Neutral(element);
 
-            var slot = element as Slot;
+            var slot = element as SlotChip;
             if (slot != null)
                 slot.Underline = VRageMath.Color.Transparent;
         }
@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         {
             base.Lay(element);
 
-            var slot = element as Slot;
+            var slot = element as SlotChip;
             if (slot != null && Underline.HasValue)
                 slot.Underline = Underline.Value;
         }

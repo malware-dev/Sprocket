@@ -12,9 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class Inventory : Capability
     {
-        static readonly Being Fill = Being.Number<IMyTerminalBlock>(block => block.GetInventory(0).VolumeFillFactor * 100d);
+        static readonly OwnValue Fill = OwnValue.Number<IMyTerminalBlock>(block => block.GetInventory(0).VolumeFillFactor * 100d);
 
-        static readonly Being Mass = Being.Number<IMyTerminalBlock>(block => (double)block.GetInventory(0).CurrentMass);
+        static readonly OwnValue Mass = OwnValue.Number<IMyTerminalBlock>(block => (double)block.GetInventory(0).CurrentMass);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

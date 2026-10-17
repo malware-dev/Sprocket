@@ -107,9 +107,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// reads the value or a <c>when</c> watches it, on its cadence. A sound the list does not hold, or none, is no
         /// position among them, and is none of the names.
         /// </remarks>
-        static Being Holding(string[] sounds)
+        static OwnValue Holding(string[] sounds)
         {
-            return Being.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound))
+            return OwnValue.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound))
                 .Writing<IMySoundBlock>((block, value) => block.SelectedSound = sounds[(int)value.Whole]);
         }
 

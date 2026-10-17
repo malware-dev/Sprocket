@@ -16,15 +16,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unheard = "A projector raises nothing as its build moves on.";
 
-        static readonly Being Projecting = Being.Flag(Reading.Of<IMyProjector>(projector => projector.IsProjecting));
+        static readonly OwnValue Projecting = OwnValue.Flag(Reading.Of<IMyProjector>(projector => projector.IsProjecting));
 
-        static readonly Being Left = Being.Whole<IMyProjector>(projector => projector.RemainingBlocks);
+        static readonly OwnValue Left = OwnValue.Whole<IMyProjector>(projector => projector.RemainingBlocks);
 
-        static readonly Being ArmorLeft = Being.Whole<IMyProjector>(projector => projector.RemainingArmorBlocks);
+        static readonly OwnValue ArmorLeft = OwnValue.Whole<IMyProjector>(projector => projector.RemainingArmorBlocks);
 
-        static readonly Being Total = Being.Whole<IMyProjector>(projector => projector.TotalBlocks);
+        static readonly OwnValue Total = OwnValue.Whole<IMyProjector>(projector => projector.TotalBlocks);
 
-        static readonly Being Ready = Being.Whole<IMyProjector>(projector => projector.BuildableBlocksCount);
+        static readonly OwnValue Ready = OwnValue.Whole<IMyProjector>(projector => projector.BuildableBlocksCount);
 
         // The terminal's own Remove, which every player sees go.
         static readonly OwnAction Removes = OwnAction.Of<IMyProjector>(projector => projector.SetProjectedGrid(null));

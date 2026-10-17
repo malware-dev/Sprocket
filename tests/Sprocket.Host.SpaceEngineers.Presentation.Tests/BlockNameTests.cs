@@ -65,7 +65,7 @@ public class BlockNameTests
     public void APartNamingABlockShowsItWithItsIcon()
     {
         var sim = Built();
-        var chip = sim.Editor.Triggers()[0].Within().OfType<Slot>().First();
+        var chip = sim.Editor.Triggers()[0].Within().OfType<SlotChip>().First();
 
         var block = chip.Within().OfType<BlockName>().Single();
         Assert.Equal("Airlock Button", block.Name);
@@ -116,7 +116,7 @@ public class BlockNameTests
     [Fact]
     public void NewWordsOverTheSameBlocksMakeNothingNew()
     {
-        var chip = new Slot();
+        var chip = new SlotChip();
         chip.Say(new List<Mention> { new("Inner Door", "Door"), new(" or ", null), new("Outer Door", "Door") });
         var before = chip.Within().Skip(1).ToList();
 

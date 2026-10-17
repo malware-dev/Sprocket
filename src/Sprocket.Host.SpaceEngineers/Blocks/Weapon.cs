@@ -16,11 +16,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     {
         const string Unshot = "A gun raises no event as it starts or stops shooting.";
 
-        static readonly Being Firing = Being.Flag(Reading.Of<IMyUserControllableGun>(gun => gun.IsShooting));
+        static readonly OwnValue Firing = OwnValue.Flag(Reading.Of<IMyUserControllableGun>(gun => gun.IsShooting));
 
         // Every vanilla weapon block is also the game's gun object, which counts the rounds loaded and the magazines of the
         // chosen kind in its inventory, in rounds.
-        static readonly Being Rounds = Being.Whole<IMyGunObject<MyGunBase>>(gun => gun.GetTotalAmmunitionAmount());
+        static readonly OwnValue Rounds = OwnValue.Whole<IMyGunObject<MyGunBase>>(gun => gun.GetTotalAmmunitionAmount());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

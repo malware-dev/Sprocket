@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return search != null && search.FoundEnemy != null;
         });
 
-        static readonly Being Targeting = Being.Flag(Found);
+        static readonly OwnValue Targeting = OwnValue.Flag(Found);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>Why a member cannot be made into a step, for the person looking at it.</summary>
-    public enum Holdback
+    public enum UnreadyReason
     {
         /// <summary>Nothing holds it back.</summary>
         None,

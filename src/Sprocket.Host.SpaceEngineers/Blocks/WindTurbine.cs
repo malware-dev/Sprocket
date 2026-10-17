@@ -12,15 +12,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class WindTurbine : Capability
     {
-        static readonly Being Wind = Being.Number<IMyWindTurbine>(turbine => turbine.Effectivity * 100.0);
+        static readonly OwnValue Wind = OwnValue.Number<IMyWindTurbine>(turbine => turbine.Effectivity * 100.0);
 
-        static readonly Being Strength = Being.Number<IMyWindTurbine>(turbine => turbine.WindEffectivity * 100.0);
+        static readonly OwnValue Strength = OwnValue.Number<IMyWindTurbine>(turbine => turbine.WindEffectivity * 100.0);
 
-        static readonly Being Clearance = Being.Number<IMyWindTurbine>(turbine => turbine.PlacementEffectivity * 100.0);
+        static readonly OwnValue Clearance = OwnValue.Number<IMyWindTurbine>(turbine => turbine.PlacementEffectivity * 100.0);
 
-        static readonly Being Output = Being.Number<IMyWindTurbine>(turbine => turbine.CurrentOutput);
+        static readonly OwnValue Output = OwnValue.Number<IMyWindTurbine>(turbine => turbine.CurrentOutput);
 
-        static readonly Being MostOut = Being.Number<IMyWindTurbine>(turbine => turbine.MaxOutput);
+        static readonly OwnValue MostOut = OwnValue.Number<IMyWindTurbine>(turbine => turbine.MaxOutput);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

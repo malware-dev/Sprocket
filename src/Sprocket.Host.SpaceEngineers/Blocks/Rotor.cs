@@ -57,13 +57,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         // The game's angle is in radians; the terminal says degrees, a rotor's nought to three hundred and sixty and a
         // hinge's a quarter turn either way.
-        static readonly Being RotorAngle = Being.Number<IMyMotorStator>(rotor => Degrees(rotor.Angle));
+        static readonly OwnValue RotorAngle = OwnValue.Number<IMyMotorStator>(rotor => Degrees(rotor.Angle));
 
-        static readonly Being HingeAngle = Being.Number<IMyMotorStator>(rotor => rotor.Angle * 180.0 / Math.PI);
+        static readonly OwnValue HingeAngle = OwnValue.Number<IMyMotorStator>(rotor => rotor.Angle * 180.0 / Math.PI);
 
-        static readonly Being Locked = Being.Flag(Held);
+        static readonly OwnValue Locked = OwnValue.Flag(Held);
 
-        static readonly Being Attached = Being.Flag(Joined);
+        static readonly OwnValue Attached = OwnValue.Flag(Joined);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

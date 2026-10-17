@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // The game's own id for each switch, and what Sprocket says it allows.
         const string Unheard = "No event of the block's is known to say when its zone goes up or down.";
 
-        static readonly Being Active = Being.Flag(Reading.Of<IMySafeZoneBlock>(zone => zone.IsSafeZoneEnabled()));
+        static readonly OwnValue Active = OwnValue.Flag(Reading.Of<IMySafeZoneBlock>(zone => zone.IsSafeZoneEnabled()));
 
         static readonly string[] Allows =
         {

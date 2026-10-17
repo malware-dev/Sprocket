@@ -20,13 +20,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>The game's resource id for electricity, transcribed from its resource distributor.</summary>
         static readonly MyDefinitionId Electricity = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Electricity");
 
-        static readonly Being Use = Being.Number<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(Electricity));
+        static readonly OwnValue Use = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(Electricity));
 
-        static readonly Being Required = Being.Number<IMyTerminalBlock>(block => block.ResourceSink.RequiredInputByType(Electricity));
+        static readonly OwnValue Required = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.RequiredInputByType(Electricity));
 
-        static readonly Being Most = Being.Number<IMyTerminalBlock>(block => block.ResourceSink.MaxRequiredInputByType(Electricity));
+        static readonly OwnValue Most = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.MaxRequiredInputByType(Electricity));
 
-        static readonly Being Supplied = Being.Number<IMyTerminalBlock>(block => block.ResourceSink.SuppliedRatioByType(Electricity) * 100d);
+        static readonly OwnValue Supplied = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.SuppliedRatioByType(Electricity) * 100d);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

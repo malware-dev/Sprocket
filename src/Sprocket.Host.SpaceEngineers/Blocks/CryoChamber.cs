@@ -12,13 +12,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class CryoChamber : Capability
     {
-        static readonly Being Sleeping = Being.Flag(Reading.Of<IMyCryoChamber>(chamber => chamber.IsOccupied));
+        static readonly OwnValue Sleeping = OwnValue.Flag(Reading.Of<IMyCryoChamber>(chamber => chamber.IsOccupied));
 
-        static readonly Being Sleeper = Being.Text<IMyCryoChamber>(chamber =>
+        static readonly OwnValue Sleeper = OwnValue.Text<IMyCryoChamber>(chamber =>
             chamber.Pilot == null ? "" : chamber.Pilot.DisplayName);
 
         // The game reads the chamber's air as a fraction; every fill Sprocket says is in percent.
-        static readonly Being Air = Being.Number<IMyCryoChamber>(chamber => chamber.OxygenFilledRatio * 100.0);
+        static readonly OwnValue Air = OwnValue.Number<IMyCryoChamber>(chamber => chamber.OxygenFilledRatio * 100.0);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class PathRecorder : Capability
     {
-        static readonly Being Playing = Being.Flag(Reading.Of<IMyPathRecorderBlock>(block =>
+        static readonly OwnValue Playing = OwnValue.Flag(Reading.Of<IMyPathRecorderBlock>(block =>
         {
             IMyPathRecorderComponent recorder;
             return block.GetComponent(out recorder) && recorder.IsPlaying;

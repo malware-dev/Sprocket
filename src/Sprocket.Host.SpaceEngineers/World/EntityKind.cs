@@ -154,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Adds Sprocket's own value <paramref name="id" />, named <paramref name="named" />, read by <paramref name="being" />.</summary>
         /// <remarks>Read, never set. What it is called in a list is what the field beside a test asks for.</remarks>
-        public EntityKind WithValue(string id, string named, Being being)
+        public EntityKind WithValue(string id, string named, OwnValue being)
         {
             var value = new EntityAction(id, named, null).Reads(being, Asked(named, being));
             value.List(named);
@@ -628,7 +628,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The field a test of a value of Sprocket's own asks for what it is compared with.</summary>
-        static Field Asked(string named, Being being)
+        static Field Asked(string named, OwnValue being)
         {
             switch (being.Kind)
             {

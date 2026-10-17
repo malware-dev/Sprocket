@@ -97,7 +97,7 @@ public class SystemSwitchTests
         sim.Editor.SwitchOn();
         sim.Tick();
 
-        var chips = sim.Editor.Triggers()[0].Within().OfType<Slot>().ToList();
+        var chips = sim.Editor.Triggers()[0].Within().OfType<SlotChip>().ToList();
         Assert.NotEmpty(chips);
         Assert.All(chips, chip => Assert.Equal("The system must be turned off in order to make changes safely.", chip.Tip?.Text));
 
@@ -106,7 +106,7 @@ public class SystemSwitchTests
         sim.Editor.PressChoice("Switch them off");
         sim.Tick();
 
-        Assert.All(sim.Editor.Triggers()[0].Within().OfType<Slot>(), chip => Assert.NotEqual("The system must be turned off in order to make changes safely.", chip.Tip?.Text));
+        Assert.All(sim.Editor.Triggers()[0].Within().OfType<SlotChip>(), chip => Assert.NotEqual("The system must be turned off in order to make changes safely.", chip.Tip?.Text));
     }
 
     /// <summary>Switching a blueprint off asks first, naming each logic system it stops; keeping them running changes nothing.</summary>

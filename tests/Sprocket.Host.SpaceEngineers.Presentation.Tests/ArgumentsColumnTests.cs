@@ -139,7 +139,7 @@ public class ArgumentsColumnTests
         var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
         var speed = 0;
         door.Kind.WithValue("speed", "speed",
-                Being.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new[] { "low", "middle", "high" }, _ => speed)
+                OwnValue.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new[] { "low", "middle", "high" }, _ => speed)
                     .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
             .Looked("A test value.");
         screen.Editor.PressBlock("Airlock Inner Door");

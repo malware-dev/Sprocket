@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // emptying are the vent on its way, and stopped is a vent switched off, unpowered or broken. A room that is not
         // airtight never fills, and stays filling. Written out rather than asking Air and Empty, which would read whether
         // the vent works and its level once each on every look (BudgetTests.ALookedForMomentIsLookedAtOnItsCadence).
-        static readonly Being Room = Being.OneOf<IMyAirVent>(Rooms, (vent, seen) =>
+        static readonly OwnValue Room = OwnValue.OneOf<IMyAirVent>(Rooms, (vent, seen) =>
         {
             if (!vent.IsWorking)
                 return 4;
@@ -85,16 +85,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return vent.Depressurize ? 2 : 0;
         });
 
-        static readonly Being Airtight = Being.Flag(Reading.Of<IMyAirVent>(vent => vent.CanPressurize));
+        static readonly OwnValue Airtight = OwnValue.Flag(Reading.Of<IMyAirVent>(vent => vent.CanPressurize));
 
         // The game reads the room as a fraction; every fill Sprocket says is in percent.
-        static readonly Being Level = Being.Number<IMyAirVent>(vent => vent.GetOxygenLevel() * 100.0);
+        static readonly OwnValue Level = OwnValue.Number<IMyAirVent>(vent => vent.GetOxygenLevel() * 100.0);
 
-        static readonly Being Into = Being.Number<IMyAirVent>(vent => vent.GasInputPerSecond);
+        static readonly OwnValue Into = OwnValue.Number<IMyAirVent>(vent => vent.GasInputPerSecond);
 
-        static readonly Being OutOf = Being.Number<IMyAirVent>(vent => vent.GasOutputPerSecond);
+        static readonly OwnValue OutOf = OwnValue.Number<IMyAirVent>(vent => vent.GasOutputPerSecond);
 
-        static readonly Being Airtightness = Being.Flag(Reading.Of<IMyAirVent>(vent => vent.PressurizationEnabled));
+        static readonly OwnValue Airtightness = OwnValue.Flag(Reading.Of<IMyAirVent>(vent => vent.PressurizationEnabled));
 
         static readonly OwnAction Fills = OwnAction.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = false, Air,

@@ -141,6 +141,6 @@ public class WatchedNumberTests
     static string[] Said(TriggerRow row) =>
         row.Within().OfType<Flow>().Single().Children
             .Where(part => part.IsVisible)
-            .Select(part => part is Slot chip ? chip.Text : ((Label)part).Text)
+            .Select(part => part is SlotChip chip ? chip.Text : ((Label)part).Text)
             .ToArray();
 }

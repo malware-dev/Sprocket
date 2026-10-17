@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly Reading Connected =
             Reading.Of<IMyLaserAntenna>(antenna => antenna.Status == MyLaserAntennaStatus.Connected);
 
-        static readonly Being Link = Being.OneOf<IMyLaserAntenna>(Links, antenna => Position(antenna.Status));
+        static readonly OwnValue Link = OwnValue.OneOf<IMyLaserAntenna>(Links, antenna => Position(antenna.Status));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

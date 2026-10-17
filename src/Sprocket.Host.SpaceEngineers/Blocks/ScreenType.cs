@@ -94,32 +94,32 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithAction(SetUp, "set up screen", OwnAction.Of<IMyTextSurfaceProvider, Look>(Look.Read, Apply), Asked(Fonts(screens), Apps(screens)))
                 .In(Category.Screen).Of(this);
 
-            Value(kind, "content", Being.OneOf<IMyTextSurfaceProvider, Picked>(Contents, picked,
+            Value(kind, "content", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(Contents, picked,
                 (provider, which, seen) => Position(ContentTypes, Surface(provider, which).ContentType)));
-            Value(kind, "text color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "text color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).FontColor));
-            Value(kind, "background color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "background color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).BackgroundColor));
-            Value(kind, "font", Being.Text<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "font", OwnValue.Text<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).Font));
-            Value(kind, "font size", Being.Number<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "font size", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).FontSize));
-            Value(kind, "alignment", Being.OneOf<IMyTextSurfaceProvider, Picked>(Alignments, picked,
+            Value(kind, "alignment", OwnValue.OneOf<IMyTextSurfaceProvider, Picked>(Alignments, picked,
                 (provider, which, seen) => Position(TextAlignments, Surface(provider, which).Alignment)));
-            Value(kind, "padding", Being.Number<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "padding", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).TextPadding));
-            Value(kind, "app color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "app color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).ScriptForegroundColor));
-            Value(kind, "app background color", Being.Color<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "app background color", OwnValue.Color<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).ScriptBackgroundColor));
-            Value(kind, "image interval", Being.Number<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "image interval", OwnValue.Number<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).ChangeInterval));
-            Value(kind, "keep aspect ratio", Being.Flag<IMyTextSurfaceProvider, Picked>(picked,
+            Value(kind, "keep aspect ratio", OwnValue.Flag<IMyTextSurfaceProvider, Picked>(picked,
                 (provider, which, seen) => Surface(provider, which).PreserveAspectRatio));
         }
 
         /// <summary>Adds a reading of one screen's setting, called <paramref name="said" />.</summary>
-        void Value(EntityKind kind, string said, Being being)
+        void Value(EntityKind kind, string said, OwnValue being)
         {
             kind.WithValue(said.Replace(' ', '-'), said, being).Looked(Unheard).In(Category.Screen).Of(this);
         }

@@ -27,7 +27,7 @@ public class TriggerRowTests
     {
         var sim = Built();
         var row = sim.Editor.Triggers()[0];
-        var chips = row.Within().OfType<Slot>().ToList();
+        var chips = row.Within().OfType<SlotChip>().ToList();
 
         Assert.Equal(3, chips.Count);
         Assert.Same(row.Starts[0].Opens, chips[0].Command);
@@ -71,12 +71,12 @@ public class TriggerRowTests
     {
         var sim = Built();
         var row = sim.Editor.Triggers()[0];
-        var first = row.Within().OfType<Slot>().First();
+        var first = row.Within().OfType<SlotChip>().First();
 
         row.Starts.RemoveAt(1);
         row.Show(sim.World, sim.Texts);
 
-        Assert.Same(first, row.Within().OfType<Slot>().First());
+        Assert.Same(first, row.Within().OfType<SlotChip>().First());
         Assert.Equal(new[] { "When", "Airlock Button", "then run", "Sequence 1" }, Said(row));
     }
 
@@ -109,6 +109,6 @@ public class TriggerRowTests
     static string[] Said(TriggerRow row) =>
         row.Within().OfType<Flow>().Single().Children
             .Where(part => part.IsVisible)
-            .Select(part => part is Slot chip ? chip.Text : ((Label)part).Text)
+            .Select(part => part is SlotChip chip ? chip.Text : ((Label)part).Text)
             .ToArray();
 }
