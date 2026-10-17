@@ -33,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public FacetChoice()
         {
             var line = new HStack();
-            line.Children.Add(new Layers { Placement = Fixed.Size(Indent, 1f) });
+            line.Children.Add(new Layers { Placement = FixedSize.Size(Indent, 1f) });
             line.Children.Add(new VStack { Spacing = 8f }.As(out _body));
             Content = line;
             _body.Children.Add(new Label { Style = Styles.ValueLabel }.As(out _says));

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// <remarks>Round, never square: exactly one of these holds at a time, and that is what the shape says before anybody reads the words.</remarks>
     public class OptionRow : HStack
     {
-        readonly Mark _mark;
+        readonly ChoiceMark _mark;
         readonly Label _words;
 
         /// <summary>An answer saying nothing yet, given by pressing it once it has a command.</summary>
@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Spacing = 8f;
             Style = Styles.Option;
 
-            Children.Add(new Mark { Placement = Fixed.Size(20f, 20f) }.As(out _mark));
+            Children.Add(new ChoiceMark { Placement = FixedSize.Size(20f, 20f) }.As(out _mark));
             Children.Add(new Label { Style = Styles.OptionWord }.As(out _words));
         }
 

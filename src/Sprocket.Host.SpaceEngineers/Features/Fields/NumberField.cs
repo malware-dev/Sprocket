@@ -43,12 +43,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 Focusable = true,
                 SelectsAll = true,
                 Submit = submit,
-                Placement = Fixed.Wide(wide),
-                Whole = field.Entry == Entry.Whole,
+                Placement = FixedSize.Wide(wide),
+                Whole = field.Entry == FieldInput.Whole,
                 Negative = !floored || least < 0,
                 Least = floored ? least : (double?)null,
                 Most = ceilinged ? most : (double?)null,
-                Format = field.Entry == Entry.Whole ? "0" : field.Entry == Entry.Decimal ? "0.0#" : "0.##"
+                Format = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##"
             }.As(out _box));
 
             var unit = (field.Unit ?? "").Trim();
@@ -85,10 +85,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Whether a field takes a number: one it says is whole or decimal, or one with a bound that says nothing else.</summary>
         public static bool Takes(Field field)
         {
-            if (field.Entry == Entry.Whole || field.Entry == Entry.Decimal)
+            if (field.Entry == FieldInput.Whole || field.Entry == FieldInput.Decimal)
                 return true;
 
-            return field.Entry == Entry.Any && Math.Max((field.Least ?? "").Length, (field.Most ?? "").Length) > 0;
+            return field.Entry == FieldInput.Any && Math.Max((field.Least ?? "").Length, (field.Most ?? "").Length) > 0;
         }
 
         /// <summary>Whether <paramref name="written" /> is a bound, and which, written as a program writes a number.</summary>

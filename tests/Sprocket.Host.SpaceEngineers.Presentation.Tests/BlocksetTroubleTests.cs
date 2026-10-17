@@ -207,7 +207,7 @@ public class BlocksetTroubleTests
         var system = sim.Editor.Program.Systems.Single();
         system.Enabled = true;
         system.First!.Enabled = false;
-        system.First.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, Trouble.None, "Airlock Inner Door");
+        system.First.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, BlockTrouble.None, "Airlock Inner Door");
         return sim;
     }
 

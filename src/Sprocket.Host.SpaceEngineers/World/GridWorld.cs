@@ -20,19 +20,19 @@ namespace Sprocket.Host.SpaceEngineers.World
     public sealed class GridWorld : IDisposable
     {
         IMyTerminalBlock _anchor;
-        readonly Catalogue _catalogue = Catalogue();
+        readonly ParameterCatalog _catalogue = Catalogue();
 
         readonly BlockKinds _kinds;
 
         readonly Capabilities _capabilities = new Capabilities();
 
-        static Catalogue Catalogue()
+        static ParameterCatalog Catalogue()
         {
             // Sprocket's own descriptions go in first, so a mod may override them, which is the rule the mods
             // themselves follow.
-            var catalogue = new Catalogue();
-            catalogue.Add(Known.Descriptions(), "");
-            Mods.Read(catalogue);
+            var catalogue = new ParameterCatalog();
+            catalogue.Add(KnownActions.Descriptions(), "");
+            ModActions.Read(catalogue);
             return catalogue;
         }
 
@@ -226,7 +226,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly HashSet<long> _unstartable = new HashSet<long>();
 
-        readonly Dictionary<long, Unanswered> _why = new Dictionary<long, Unanswered>();
+        readonly Dictionary<long, UnansweredButton> _why = new Dictionary<long, UnansweredButton>();
 
         /// <summary>
         /// Whether toolbar slot <paramref name="at" /> of <paramref name="panel" /> holds something this program did not write: any
@@ -254,7 +254,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public int Unstarted { get; private set; }
 
         /// <summary>Which sequences nothing can start on which one of their system, each as <see cref="Start" /> gives it, and why, where that is known.</summary>
-        public void Unstartable(List<long> starts, Dictionary<long, Unanswered> why)
+        public void Unstartable(List<long> starts, Dictionary<long, UnansweredButton> why)
         {
             Unstarted++;
             _unstartable.Clear();
@@ -267,9 +267,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Why nothing can start <paramref name="sequence" /> on <paramref name="instance" />, or null where that is not known.</summary>
-        public Unanswered Why(Sequence sequence, SystemInstance instance)
+        public UnansweredButton Why(Sequence sequence, SystemInstance instance)
         {
-            Unanswered why;
+            UnansweredButton why;
             return _why.TryGetValue(Start(sequence.Id, instance), out why) ? why : null;
         }
 
@@ -520,11 +520,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Tells a block to do something, with the values <paramref name="arguments" /> the action asked for.</summary>
         public void Invoke(GridEntity entity, string actionId, IList<Literal> arguments)
         {
-            Invoke(entity, actionId, arguments, Nature.Native);
+            Invoke(entity, actionId, arguments, ReachKind.Native);
         }
 
         /// <summary>Tells a block to do something, with the values <paramref name="arguments" /> the action asked for, <paramref name="form" /> saying which of the three ways the step reaches the block.</summary>
-        public void Invoke(GridEntity entity, string actionId, IList<Literal> arguments, Nature form)
+        public void Invoke(GridEntity entity, string actionId, IList<Literal> arguments, ReachKind form)
         {
             if (entity != null)
                 entity.Invoke(actionId, arguments, form);

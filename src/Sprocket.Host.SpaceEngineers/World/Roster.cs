@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Action<SprocketUnit> Dropped { get; set; }
 
         /// <summary>The library a lost Sprocket's backup is shelved beside.</summary>
-        public Shelf Shelf { get; set; }
+        public LibraryShelf Shelf { get; set; }
 
         /// <summary>How many there are.</summary>
         public int Count => _units.Count;
@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public SprocketUnit Adopt(IMyTerminalBlock block)
         {
             SprocketUnit unit = On(block);
-            if (unit != null && (unit.Block == block || !Locker.HasProgram(block)))
+            if (unit != null && (unit.Block == block || !BlockStorage.HasProgram(block)))
                 return unit;
 
             SprocketUnit arrived = new SprocketUnit(block, _settings(), _rota, _texts, _memories.Claim(block.EntityId), _backups);
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             SprocketUnit rebuilt = was.Rebuilt(program, switches, _settings(), _rota);
             if (!rebuilt.Program.Intact)
             {
-                Told.Say($"a change to {was.Block.CustomName} would not read, and was not taken");
+                GameLog.Say($"a change to {was.Block.CustomName} would not read, and was not taken");
                 rebuilt.Dispose();
                 return null;
             }
@@ -231,21 +231,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             string program;
             string state;
             unit.Written(out program, out state);
-            Locker.Store(block, program, StateText.Save(unit.Program, null, false));
+            BlockStorage.Store(block, program, StateText.Save(unit.Program, null, false));
 
             SprocketUnit half = Adopt(block);
             if (half == null)
                 return;
 
-            Told.Say($"{block.CustomName} parted from the construct of {unit.Block.CustomName}, with a copy of its automation");
+            GameLog.Say($"{block.CustomName} parted from the construct of {unit.Block.CustomName}, with a copy of its automation");
             string switches;
             var away = half.World;
-            program = Meeting.Part(half, unit.World, out switches);
+            program = AutomationMerge.Part(half, unit.World, out switches);
             var parted = Replace(half, program, switches);
             if (parted != null)
                 parted.TakeOver(unit.Block.EntityId);
 
-            program = Meeting.Part(unit, away, out switches);
+            program = AutomationMerge.Part(unit, away, out switches);
             Replace(unit, program, switches);
         }
 
@@ -254,13 +254,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var conflicts = new List<ConflictMemory>();
             string switches;
-            var program = Meeting.Join(kept, other, conflicts, out switches);
+            var program = AutomationMerge.Join(kept, other, conflicts, out switches);
 
             // Both stay as they are where the joined program will not read.
-            var trouble = Reader.Load(program, new Automation(), kept.World.Values);
+            var trouble = ProgramReader.Load(program, new Automation(), kept.World.Values);
             if (trouble.Length > 0)
             {
-                Told.Say($"the automation of {other.Block.CustomName} could not join that of {kept.Block.CustomName}: {trouble}");
+                GameLog.Say($"the automation of {other.Block.CustomName} could not join that of {kept.Block.CustomName}: {trouble}");
                 if (!_units.ContainsKey(other.Block.EntityId))
                     other.Dispose();
 
@@ -268,14 +268,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             var id = other.Block.EntityId;
-            Locker.Store(other.Block, "", "");
+            BlockStorage.Store(other.Block, "", "");
             if (Emptied != null)
                 Emptied(id);
 
             _units.Remove(id);
             Drop(other);
             kept.Memory.Conflicts.AddRange(conflicts);
-            Told.Say($"the automation of {other.Block.CustomName} joined that of {kept.Block.CustomName}, {conflicts.Count} logic system(s) waiting for a choice");
+            GameLog.Say($"the automation of {other.Block.CustomName} joined that of {kept.Block.CustomName}, {conflicts.Count} logic system(s) waiting for a choice");
             var joined = Replace(kept, program, switches);
             if (joined != null)
                 joined.TakeOver(id);

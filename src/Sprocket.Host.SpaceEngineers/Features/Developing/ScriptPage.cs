@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
             if (_listing == null)
                 return;
 
-            _apply.Command = Editor.Act(Cmd.Mend, Applied);
+            _apply.Command = Editor.Act(CommandKind.Mend, Applied);
             Settle();
         }
 
@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         protected override void ViewCreated()
         {
             _apply.Text = Editor.Texts.ScriptApply;
-            _apply.Command = Editor.Act(Cmd.Mend, Applied);
+            _apply.Command = Editor.Act(CommandKind.Mend, Applied);
             Show();
             Said();
             Point();
@@ -113,7 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         string Written()
         {
             var program = Editor.Program;
-            return program.Unread.Length > 0 ? program.Unread : Scribe.Save(program, Editor.World.Values);
+            return program.Unread.Length > 0 ? program.Unread : ProgramWriter.Save(program, Editor.World.Values);
         }
 
         /// <summary>Says what is wrong with the text, in the reader's own words.</summary>
@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         /// <summary>Selects the line what is wrong names, in view and ready to be typed over, where it names one.</summary>
         void Point()
         {
-            var line = Reader.LineOf(Trouble);
+            var line = ProgramReader.LineOf(Trouble);
             if (line < 1)
                 return;
 

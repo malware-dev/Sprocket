@@ -16,8 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class AutomationRunner
     {
-        readonly Runs _runs;
-        readonly Watches _watches;
+        readonly Runners _runs;
+        readonly Pollers _watches;
         readonly Automation _automation;
         readonly GridWorld _world;
         readonly Bindings _bindings = new Bindings();
@@ -49,8 +49,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _automation = automation;
             _world = world;
             _rota = rota;
-            _runs = new Runs(this, automation);
-            _watches = new Watches(this, automation);
+            _runs = new Runners(this, automation);
+            _watches = new Pollers(this, automation);
             Live = true;
             Clock = () => CurrentTick;
 
@@ -199,13 +199,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 ? system.Uses[0].Number
                 : 0;
 
-            return _runs.Get(Runs.Key(sequence.Id, first));
+            return _runs.Get(Runners.Key(sequence.Id, first));
         }
 
         /// <summary>Live state for a sequence on one particular one of its system.</summary>
         public SequenceRunner Get(Sequence sequence, SystemInstance instance)
         {
-            return _runs.Get(Runs.Key(sequence.Id, instance?.Number ?? 0));
+            return _runs.Get(Runners.Key(sequence.Id, instance?.Number ?? 0));
         }
 
         /// <summary>
@@ -218,10 +218,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The runners of the program.</summary>
-        public Runs Runs => _runs;
+        public Runners Runs => _runs;
 
         /// <summary>The pollers of the program.</summary>
-        public Watches Watches => _watches;
+        public Pollers Watches => _watches;
 
         /// <summary>Says something an open screen shows of the runs has changed, on the tick it changed.</summary>
         public void Revise()
@@ -245,7 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 if (run.Stops)
                 {
-                    Halt(sequence, instance, Stopper.Trigger, 0);
+                    Halt(sequence, instance, StopCause.Trigger, 0);
                     return;
                 }
 
@@ -300,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// a machine with no power is a machine whose sequences are held anyway.
         /// </para>
         /// </remarks>
-        public void Halt(Sequence sequence, SystemInstance instance, Stopper by, int from)
+        public void Halt(Sequence sequence, SystemInstance instance, StopCause by, int from)
         {
             var runner = Get(sequence, instance);
             if (runner != null)

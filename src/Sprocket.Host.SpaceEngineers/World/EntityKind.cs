@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Dictionary<HostType, List<HostTypeFacet>> _facets = new Dictionary<HostType, List<HostTypeFacet>>();
         readonly List<string> _hidden = new List<string>();
         readonly List<string> _lacking = new List<string>();
-        readonly List<Plan> _planned = new List<Plan>();
+        readonly List<PlannedMember> _planned = new List<PlannedMember>();
         readonly Dictionary<string, string> _flippers = new Dictionary<string, string>();
         readonly List<Capability> _capabilities = new List<Capability>();
         readonly List<string> _lineage = new List<string>();
@@ -96,10 +96,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What this kind is to offer that is not built yet, in the order it was said.</summary>
-        public IList<Plan> Planned => _planned;
+        public IList<PlannedMember> Planned => _planned;
 
         /// <summary>Says this kind is to offer <paramref name="plan" />, which is not built yet.</summary>
-        public EntityKind Planning(Plan plan)
+        public EntityKind Planning(PlannedMember plan)
         {
             if (!_planned.Contains(plan))
                 _planned.Add(plan);
@@ -128,7 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Adds the moment <paramref name="id" />: <paramref name="flag" /> crossing <paramref name="edge" />, read as <paramref name="text" />.</summary>
-        public EntityKind WithEvent(string id, Reading flag, Edge edge, string text)
+        public EntityKind WithEvent(string id, Reading flag, SignalEdge edge, string text)
         {
             _events.Add(new EntityEvent(id, flag, edge, text));
             _value = null;
@@ -141,11 +141,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public EntityKind WithChange(string id, string text, string value, Literal becomes)
         {
-            var changed = FindAction(value, Nature.Value);
+            var changed = FindAction(value, ReachKind.Value);
             if (changed == null || changed.Being == null)
                 throw new ArgumentException($"The signal {id} is a change in {value}, which is no value of Sprocket's own declared before it.");
 
-            var signal = new EntityEvent(id, changed.Being.Is(becomes), Edge.Rising, text);
+            var signal = new EntityEvent(id, changed.Being.Is(becomes), SignalEdge.Rising, text);
             signal.Changes(value, becomes);
             _events.Add(signal);
             _value = null;
@@ -296,7 +296,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Adds one of Sprocket's own actions, doing <paramref name="doing" />, which is the game's member
         /// <paramref name="gameActionId" /> said another way.
         /// </summary>
-        public EntityKind WithAction(string id, string text, Doing doing, string gameActionId)
+        public EntityKind WithAction(string id, string text, OwnAction doing, string gameActionId)
         {
             _actions.Add(new EntityAction(id, text, gameActionId).Performing(doing));
             return this;
@@ -316,7 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Adds one of Sprocket's own actions, doing <paramref name="doing" />, given values each asked for by its field.
         /// </summary>
-        public EntityKind WithAction(string id, string text, Doing doing, params Field[] asks)
+        public EntityKind WithAction(string id, string text, OwnAction doing, params Field[] asks)
         {
             _actions.Add(new EntityAction(id, text, null).Performing(doing).Asking(asks));
             return this;
@@ -617,7 +617,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// it are both called <c>OnOff</c>, and a program tells them apart by writing one as a
         /// <c>set</c>.
         /// </remarks>
-        public EntityAction FindAction(string actionId, Nature form)
+        public EntityAction FindAction(string actionId, ReachKind form)
         {
             foreach (var action in _actions)
             {
@@ -642,14 +642,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                     }
 
                     var among = Field.Among(named, words, means);
-                    among.Entry = Entry.Name;
+                    among.Entry = FieldInput.Name;
                     return among;
                 case ValueKind.Flag:
                     var either = Field.OneOf(named, Literal.Of(true).Said, Literal.Of(false).Said);
-                    either.Edits = Editor.Chosen;
+                    either.Edits = FieldEditor.Chosen;
                     return either;
                 case ValueKind.Color:
-                    return Field.Holding(named, Editor.Colour, 1);
+                    return Field.Holding(named, FieldEditor.Colour, 1);
             }
 
             var box = Field.Called(named);

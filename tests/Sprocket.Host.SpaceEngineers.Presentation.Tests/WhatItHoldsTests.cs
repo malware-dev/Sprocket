@@ -67,7 +67,7 @@ public class WhatItHoldsTests
     public void AnIfHoldsTheValueItChecksFor()
     {
         var rig = Simulation.Fresh();
-        Assert.Equal("", Storage.Reader.Load(Program, rig.Editor.Program, rig.World.Values));
+        Assert.Equal("", Storage.ProgramReader.Load(Program, rig.Editor.Program, rig.World.Values));
         rig.Editor.Invalidate();
         rig.Tick();
         var system = rig.Editor.Program.Systems[0];
@@ -80,7 +80,7 @@ public class WhatItHoldsTests
             rig.Tick();
         rig.Editor.StepRows()[0].Slots[0].Opens!.Execute();
         rig.Tick();
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "how far open").Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "how far open").Pick(HeldModifier.Alone, 1);
         rig.Tick();
         rig.Editor.Typed("50");
         rig.Tick();
@@ -100,7 +100,7 @@ public class WhatItHoldsTests
         var system = program.AddSystem();
         program.AddSequence(system, Pressed.On(program, system, Named(sim, button)));
 
-        var set = new Act("Falloff") { Form = Nature.Value };
+        var set = new Act("Falloff") { Form = ReachKind.Value };
         set.Targets.Add(Named(sim, light));
         set.Arguments.Add(Literal.Of(2L));
         system.Triggers[0].Does = set;

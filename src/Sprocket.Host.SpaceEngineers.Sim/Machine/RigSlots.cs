@@ -168,7 +168,7 @@ public sealed class RigSlots : ISlots
     /// A made-up block's action or value, made ready the way the game's are: each value built as the
     /// type it is taken as, which the fitting keeps for a test to look at when it is given.
     /// </summary>
-    public Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
+    public BlockOrder Prepare(IMyTerminalBlock block, string id, ReachKind form, IList<Literal> arguments,
         IList<Primitive> types)
     {
         foreach (Fitting fitting in _rig.InWorld)
@@ -176,7 +176,7 @@ public sealed class RigSlots : ISlots
             if (fitting.Block != block)
                 continue;
 
-            if (form == Nature.Value)
+            if (form == ReachKind.Value)
                 return arguments == null || arguments.Count == 0 ? null : new Told(fitting, id, arguments, null, true);
 
             if (!fitting.Offers(id))
@@ -195,7 +195,7 @@ public sealed class RigSlots : ISlots
         return null;
     }
 
-    sealed class Told : Order
+    sealed class Told : BlockOrder
     {
         readonly Fitting _fitting;
         readonly string _id;

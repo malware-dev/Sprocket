@@ -214,8 +214,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             {
                 Renames = new Relay(() => row.Rename(index));
 
-                Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = Fixed.Size(32f, 32f) };
-                Mark = new Glyph { Style = Styles.Join, Placement = Fixed.Size(32f, 32f), Padding = EditorView.LevelWithCapitals };
+                Join = new Glyph { Symbol = Symbols.Arrow, Style = Styles.Join, Placement = FixedSize.Size(32f, 32f) };
+                Mark = new Glyph { Style = Styles.Join, Placement = FixedSize.Size(32f, 32f), Padding = EditorView.LevelWithCapitals };
                 Lead = new Label { Style = Styles.TitleLead };
                 After = new Label { Style = Styles.TitleLead };
 
@@ -233,7 +233,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             Submit = row._commit,
                             Cancel = row._cancel
                         }.As(out Box),
-                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = Fixed.Size(32f, 32f), Padding = EditorView.LevelWithCapitals }.As(out Pen)
+                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = FixedSize.Size(32f, 32f), Padding = EditorView.LevelWithCapitals }.As(out Pen)
                     }
                 };
 

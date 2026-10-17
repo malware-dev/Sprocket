@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// what was chosen is a member of a type the host provides.
         /// </summary>
         public PickAnswer(IList<long> targets, string chosen, Quantifier quantifier, IList<Literal> arguments,
-            Nature form = Nature.Native, string facet = "")
+            ReachKind form = ReachKind.Native, string facet = "")
         {
             for (var i = 0; i < targets.Count; i++)
                 _targets.Add(targets[i]);
@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public string Facet { get; private set; }
 
         /// <summary>Which of the three ways what was chosen reaches the blocks.</summary>
-        public Nature Form { get; private set; }
+        public ReachKind Form { get; private set; }
 
         /// <summary>How the blocks are read: any one of them, all of them together, or their sum.</summary>
         public Quantifier Quantifier { get; private set; }

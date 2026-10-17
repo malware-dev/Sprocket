@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _now ? Change.Optional : Change.Required;
+        public override ChangeKind Change => _now ? ChangeKind.Optional : ChangeKind.Required;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

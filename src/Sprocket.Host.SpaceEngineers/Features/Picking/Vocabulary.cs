@@ -186,12 +186,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// The namespace a step doing <paramref name="id" /> as <paramref name="form" /> on these blocks is qualified by:
         /// Sprocket's own for its own actions and values, empty for the game's.
         /// </summary>
-        public static string Provider(GridWorld world, IList<long> entityIds, string id, Nature form)
+        public static string Provider(GridWorld world, IList<long> entityIds, string id, ReachKind form)
         {
-            if (form == Nature.Native)
+            if (form == ReachKind.Native)
                 return BlockKinds.Own;
 
-            if (form != Nature.Value)
+            if (form != ReachKind.Value)
                 return "";
 
             return EntityAction.Value(ActionsOf(world, entityIds), BlockKinds.Own, id) != null ? BlockKinds.Own : "";
@@ -236,7 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// name more than one: a switch's value and the act that flips it share one.
         /// </para>
         /// </remarks>
-        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, Nature form)
+        public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, ReachKind form)
         {
             var said = new List<Field>();
 
@@ -252,7 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Whether the action these blocks share by that id and form takes time to finish.</summary>
         /// <remarks>Which is whether a step doing it is followed by a wait for it.</remarks>
-        public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, Nature form)
+        public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, ReachKind form)
         {
             var actions = ActionsOf(world, entityIds);
             foreach (var action in actions)
@@ -323,7 +323,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             for (var i = 0; i < kind.Actions.Count; i++)
             {
-                if (kind.Actions[i].Form == Nature.Value)
+                if (kind.Actions[i].Form == ReachKind.Value)
                     return true;
             }
 
@@ -387,7 +387,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
             {
-                var one = entity.Kind.FindAction(value, Nature.Value);
+                var one = entity.Kind.FindAction(value, ReachKind.Value);
                 if (one != null && one.Flips)
                     return one.FlippedBy;
             }
@@ -404,7 +404,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var actions = entity.Kind.Actions;
                 for (var a = 0; a < actions.Count; a++)
                 {
-                    if (actions[a].Form == Nature.Value && actions[a].FlippedBy == toggle)
+                    if (actions[a].Form == ReachKind.Value && actions[a].FlippedBy == toggle)
                         return actions[a].Id;
                 }
             }
@@ -413,9 +413,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>What any of the blocks is to offer that is not built yet, each once, in the order the blocks say them.</summary>
-        public static List<Plan> Planned(GridWorld world, IList<long> entityIds)
+        public static List<PlannedMember> Planned(GridWorld world, IList<long> entityIds)
         {
-            var planned = new List<Plan>();
+            var planned = new List<PlannedMember>();
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
             {
@@ -440,7 +440,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
             {
-                var value = entity.Kind.FindAction(id, Nature.Value);
+                var value = entity.Kind.FindAction(id, ReachKind.Value);
                 if (value == null)
                     continue;
 

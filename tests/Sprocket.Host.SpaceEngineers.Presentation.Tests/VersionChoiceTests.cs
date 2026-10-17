@@ -101,7 +101,7 @@ public class VersionChoiceTests
         here = program.Systems[0];
         here.Changed = new DateTime(2026, 10, 1, 12, 0, 0, DateTimeKind.Utc);
         var identity = Guid.NewGuid();
-        Assert.Equal("", Reader.AddBlueprint(Scribe.Blueprint(here, identity), program, sim.World.Values));
+        Assert.Equal("", ProgramReader.AddBlueprint(ProgramWriter.Blueprint(here, identity), program, sim.World.Values));
         waiting = program.FindSystem(identity)!;
         waiting.Sequences[0].Name = "Cycle";
         waiting.Changed = new DateTime(2026, 10, 2, 12, 0, 0, DateTimeKind.Utc);

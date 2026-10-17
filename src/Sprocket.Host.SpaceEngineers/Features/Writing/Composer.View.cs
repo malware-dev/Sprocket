@@ -51,13 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                         Thumb = Palette.Thumb,
                         HeldThumb = Palette.ThumbHeld,
                         LeastThumb = 24f,
-                        Placement = Fixed.High(high)
+                        Placement = FixedSize.High(high)
                     }.As(out _box),
                     new ScrollView
                     {
                         Style = Styles.Preview,
                         IsVisible = false,
-                        Placement = Fixed.High(high),
+                        Placement = FixedSize.High(high),
                         Content = new RichText { Style = reads }.As(out _previewed)
                     }.As(out _previewing)
                 }

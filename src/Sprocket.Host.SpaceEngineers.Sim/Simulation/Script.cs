@@ -136,7 +136,7 @@ namespace Sprocket.Sim.Simulation
                 {
                     Step held = script.Add(Step.Press);
                     held.At = Point(args, i + 1);
-                    held.Held = word == "also" ? Held.Also : Held.Through;
+                    held.Held = word == "also" ? HeldModifier.Also : HeldModifier.Through;
                     i += 2;
                     continue;
                 }
@@ -208,7 +208,7 @@ namespace Sprocket.Sim.Simulation
                 // shifted press would make every press after it a run.
                 scene.Held = step.Held;
                 scene.Press(step.At, 1);
-                scene.Held = Held.Alone;
+                scene.Held = HeldModifier.Alone;
 
                 drawn();
                 return;

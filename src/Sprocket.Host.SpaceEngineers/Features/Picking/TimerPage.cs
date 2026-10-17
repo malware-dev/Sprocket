@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public sealed class TimerPage : EditorPage
     {
-        readonly Aim _aim;
+        readonly OutcomeColumn _aim;
         readonly Action<Duration> _done;
         readonly Duration _start;
 
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         ICommand _finish;
 
         /// <summary>Opens on <paramref name="start" />, and hands the rate given to <paramref name="done" />.</summary>
-        public TimerPage(SprocketEditor editor, Duration start, Aim aim, Action<Duration> done) : base(editor)
+        public TimerPage(SprocketEditor editor, Duration start, OutcomeColumn aim, Action<Duration> done) : base(editor)
         {
             _start = start;
             _aim = aim;
@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (_strip == null)
             {
                 _strip = new PickStrip(Editor.Texts);
-                _finish = Editor.Act(Cmd.Primary, Primary);
+                _finish = Editor.Act(CommandKind.Primary, Primary);
 
                 _rates = new StageColumn(_strip.Width, false, null, Editor.Texts);
                 _rates.Title = Editor.Texts.PickHowOften;
@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _strip.Returns = null;
             _strip.ShowsArguments = false;
-            _strip.Onward = _aim.Outcome == Outcome.One ? Editor.Act(Cmd.PageOn, Primary) : null;
+            _strip.Onward = _aim.Outcome == Outcome.One ? Editor.Act(CommandKind.PageOn, Primary) : null;
 
             _rates.ShowEmpty();
             _aim.Fill(_does);

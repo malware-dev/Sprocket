@@ -81,7 +81,7 @@ public class FlowTests
 
     static Label Box(float width, float height)
     {
-        return new Label { Placement = Fixed.Size(width, height) };
+        return new Label { Placement = FixedSize.Size(width, height) };
     }
 
     /// <summary>A placement no flow understands.</summary>

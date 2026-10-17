@@ -28,10 +28,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Full = Reading.Of<IMyGasTank>(tank => tank.FilledRatio >= 1.0);
 
-        static readonly Doing Stockpiles = Doing.Of<IMyGasTank, Waiting>(Waiting.Read,
+        static readonly OwnAction Stockpiles = OwnAction.Of<IMyGasTank, Waiting>(Waiting.Read,
             (tank, waiting, seen) => tank.Stockpile = true, Full,
             (tank, waiting, seen) => !waiting.Waits,
-            (tank, waiting, seen) => waiting.Waits ? Why(tank) : Trouble.None);
+            (tank, waiting, seen) => waiting.Waits ? Why(tank) : BlockTrouble.None);
 
         // The game reads the fill as a fraction; every fill Sprocket says is in percent.
         static readonly Being Level = Being.Number<IMyGasTank>(tank => tank.FilledRatio * 100.0);
@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
-            return Remaining.Heard(block, told);
+            return ResourceListener.Heard(block, told);
         }
 
         /// <inheritdoc />
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             if (tank.Stockpile)
             {
-                Trouble stuck = Filling(tank);
+                BlockTrouble stuck = Filling(tank);
                 if (stuck.Exists)
                     return Status.Of(stuck);
             }
@@ -138,28 +138,28 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Stockpile switched off is its own answer: whatever switched it has overruled the step, and
         /// a tank that is not stockpiling hands its gas on as fast as it takes it in.
         /// </remarks>
-        static Trouble Why(IMyGasTank tank)
+        static BlockTrouble Why(IMyGasTank tank)
         {
             if (tank.FilledRatio >= 1.0)
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (!tank.Stockpile)
-                return Trouble.Fatal(Cause.TankStockpileOff);
+                return BlockTrouble.Fatal(Cause.TankStockpileOff);
 
             return Filling(tank);
         }
 
         /// <summary>Why a stockpiling tank is not filling, or null while it is or nothing can say.</summary>
-        static Trouble Filling(IMyGasTank tank)
+        static BlockTrouble Filling(IMyGasTank tank)
         {
             if (!tank.IsWorking)
-                return Trouble.Waiting(Cause.TankNoPower);
+                return BlockTrouble.Waiting(Cause.TankNoPower);
 
             MyGasTankDefinition definition = Definition(tank);
             if (definition == null || In(tank, definition.StoredGasId) != 0f)
-                return Trouble.None;
+                return BlockTrouble.None;
 
-            return Trouble.Waiting(Cause.TankNoGas, definition.StoredGasId.SubtypeName.ToLowerInvariant());
+            return BlockTrouble.Waiting(Cause.TankNoGas, definition.StoredGasId.SubtypeName.ToLowerInvariant());
         }
 
         /// <summary>The gas coming in, or zero where nothing says.</summary>

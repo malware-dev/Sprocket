@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     partial class PickRow
     {
-        Mark _mark;
+        ChoiceMark _mark;
         HStack _content;
         Image _picture;
         MemberName _name;
@@ -22,9 +22,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             // The box's control fills the strip at the row's head, down its whole height and out to its edge, so a press
             // anywhere near the box is the box's and never takes the row alone; its padding sets where the box is drawn.
-            Children.Add(new Mark
+            Children.Add(new ChoiceMark
             {
-                Placement = Fixed.Wide(40f),
+                Placement = FixedSize.Wide(40f),
                 Align = Align.Tall,
                 Padding = new Thickness(12f, 0f, 8f, 0f),
                 IsVisible = false
@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Children =
                 {
                     // Reserved for the whole column or for none of it, so rows never jog sideways with which kinds are listed.
-                    new Image { Style = Styles.Picture, Placement = Fixed.Size(56f, 56f), IsVisible = false }.As(out _picture),
+                    new Image { Style = Styles.Picture, Placement = FixedSize.Size(56f, 56f), IsVisible = false }.As(out _picture),
                     new VStack
                     {
                         Spacing = 4f,

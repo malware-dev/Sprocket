@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 Spacing = (Gutter - Sizes.Spine) / 2f,
                 Children =
                 {
-                    new Spine(Sizes.Spine, Sizes.SpineTurn, Palette.Line) { Placement = Fixed.Wide(Sizes.Spine) }.As(out _spine),
+                    new Spine(Sizes.Spine, Sizes.SpineTurn, Palette.Line) { Placement = FixedSize.Wide(Sizes.Spine) }.As(out _spine),
                     new VStack
                     {
                         Placement = Flex.Grow,

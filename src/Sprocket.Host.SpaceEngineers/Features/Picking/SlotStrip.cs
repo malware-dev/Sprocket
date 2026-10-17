@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _texts = texts;
             var line = new HStack();
-            line.Children.Add(new Layers { Placement = Fixed.Size(Indent, 1f) });
+            line.Children.Add(new Layers { Placement = FixedSize.Size(Indent, 1f) });
             VStack body;
             line.Children.Add(new VStack { Spacing = 8f }.As(out body));
             Content = line;
@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             for (var slot = 1; slot <= slots; slot++)
             {
                 var pressed = slot;
-                var square = new Layers { Style = Styles.SlotFree, Placement = Fixed.Size(Square, Square), Command = new Relay(() => Press(pressed)) };
+                var square = new Layers { Style = Styles.SlotFree, Placement = FixedSize.Size(Square, Square), Command = new Relay(() => Press(pressed)) };
                 var picture = new Image { Padding = new Thickness(4f), IsVisible = false };
                 var number = new Label { Style = Styles.SlotNumber, Text = Number(slot), Align = Align.Center };
                 var ring = new Layers { Style = Styles.SlotChosen, IsVisible = false };

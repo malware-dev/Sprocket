@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public SystemInstance Instance { get; }
 
         /// <inheritdoc />
-        public override Change Change => Change.RenameInstallation;
+        public override ChangeKind Change => ChangeKind.RenameInstallation;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

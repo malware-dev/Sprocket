@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         public static string Save(Automation program, AutomationRunner runner, bool players = true)
         {
-            var pen = new Pen();
+            var pen = new ScriptWriter();
             if (players)
             {
                 Players(pen, Owned, program.Owners);
@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Writes a line headed <paramref name="head" /> naming <paramref name="players" />, where there are any.</summary>
-        static void Players(Pen pen, string head, List<long> players)
+        static void Players(ScriptWriter pen, string head, List<long> players)
         {
             if (players.Count == 0)
                 return;
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// </remarks>
         public static string Running(Automation program, AutomationRunner runner)
         {
-            var pen = new Pen();
+            var pen = new ScriptWriter();
             var systems = program.Systems;
 
             for (var i = 0; i < systems.Count; i++)
@@ -146,7 +146,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// An <c>every</c> is written as how long since it last fell due, so it keeps its beat rather than starting a whole
         /// interval again. A trigger is counted by its place in its system, which reading the program keeps.
         /// </remarks>
-        static void Watches(Pen pen, AutomationRunner runner, AutomationSystem system, string identity)
+        static void Watches(ScriptWriter pen, AutomationRunner runner, AutomationSystem system, string identity)
         {
             var uses = system.Uses;
             var triggers = system.Triggers;
@@ -216,7 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Dropped rather than reported where what it names has gone, or is no longer that kind of trigger, the same as a run:
         /// a program edited between saving and loading leaves those behind. A malformed line is reported.
         /// </remarks>
-        static void Watch(Statement line, Automation program, AutomationRunner runner, Trouble trouble)
+        static void Watch(Statement line, Automation program, AutomationRunner runner, ScriptTrouble trouble)
         {
             Guid identity;
             if (!Guid.TryParseExact(line.Text(0), "D", out identity))
@@ -316,7 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// asking the doors is the only answer worth having.
         /// </para>
         /// </remarks>
-        static void Runs(Pen pen, AutomationRunner runner, AutomationSystem system, string identity)
+        static void Runs(ScriptWriter pen, AutomationRunner runner, AutomationSystem system, string identity)
         {
             var uses = system.Uses;
             var sequences = system.Sequences;
@@ -369,7 +369,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var parser = new Parser(saved);
             var lines = parser.Read();
-            var trouble = new Trouble(saved, parser.Trouble);
+            var trouble = new ScriptTrouble(saved, parser.Trouble);
 
             foreach (var line in lines)
             {
@@ -418,7 +418,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return trouble.What;
         }
 
-        static void Waiting(Statement line, Automation program, Trouble trouble)
+        static void Waiting(Statement line, Automation program, ScriptTrouble trouble)
         {
             Guid here;
             Guid waiting;
@@ -438,7 +438,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Reads the players a line names into <paramref name="into" />, in place of what it held.</summary>
-        static void Players(Statement line, List<long> into, Trouble trouble)
+        static void Players(Statement line, List<long> into, ScriptTrouble trouble)
         {
             into.Clear();
             for (var i = 0; i < line.Count; i++)
@@ -468,7 +468,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// leaves behind.
         /// </para>
         /// </remarks>
-        static void Resume(Statement line, Automation program, AutomationRunner runner, Trouble trouble)
+        static void Resume(Statement line, Automation program, AutomationRunner runner, ScriptTrouble trouble)
         {
             Guid identity;
             if (!Guid.TryParseExact(line.Text(0), "D", out identity))
@@ -586,7 +586,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         };
 
         /// <summary>Writes why Sprocket switched something off: what was wrong, in which sequence, at which step, with which block, and what the block said.</summary>
-        static void Why(Pen pen, Halt halt)
+        static void Why(ScriptWriter pen, Halt halt)
         {
             if (halt == null)
                 return;
@@ -651,12 +651,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
             }
 
-            var because = cause == Cause.None ? World.Trouble.None : World.Trouble.Kept(cause, string.IsNullOrEmpty(about) ? null : about);
+            var because = cause == Cause.None ? BlockTrouble.None : BlockTrouble.Kept(cause, string.IsNullOrEmpty(about) ? null : about);
             return new Halt(at < 0 ? SequenceProblem.None : Problems[at], sequence, step, because,
                 string.IsNullOrEmpty(block) ? null : block);
         }
 
-        static void Switch(Statement line, Automation program, Trouble trouble)
+        static void Switch(Statement line, Automation program, ScriptTrouble trouble)
         {
             Guid identity;
             if (!Guid.TryParseExact(line.Text(0), "D", out identity))

@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             NumberField.Bound(field.Scaled(field.Most), out _most);
             _field = field;
             _logarithmic = _least > 0 && _most / _least >= Wide;
-            _format = field.Entry == Entry.Whole ? "0" : field.Entry == Entry.Decimal ? "0.0#" : "0.##";
+            _format = field.Entry == FieldInput.Whole ? "0" : field.Entry == FieldInput.Decimal ? "0.0#" : "0.##";
 
             Spacing = 12f;
             Children.Add(new Slider { TrackTint = Palette.Line, TrackHeight = 4f, GripColor = Palette.Ink, Placement = Flex.Grow }.As(out _slider));

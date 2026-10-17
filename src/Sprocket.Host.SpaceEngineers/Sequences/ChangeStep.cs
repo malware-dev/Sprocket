@@ -15,12 +15,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly int _index;
         readonly List<string> _wasTargets;
         readonly string _wasAction;
-        readonly Nature _wasForm;
+        readonly ReachKind _wasForm;
         readonly string _wasProvider;
         readonly List<Literal> _wasValues;
         readonly List<string> _nowTargets;
         readonly string _nowAction;
-        readonly Nature _nowForm;
+        readonly ReachKind _nowForm;
         readonly string _nowProvider;
         readonly List<Literal> _nowValues;
         readonly bool _awaited;
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// A change to <paramref name="step" />, at <paramref name="index" />, followed by an await where
         /// <paramref name="awaited" /> says what it is changed to takes time to finish.
         /// </summary>
-        public ChangeStep(int index, Act step, IList<string> targets, string actionId, Nature form, string provider,
+        public ChangeStep(int index, Act step, IList<string> targets, string actionId, ReachKind form, string provider,
             IList<Literal> arguments, bool awaited)
         {
             _index = index;
@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.Step;
+        public override ChangeKind Change => ChangeKind.Step;
 
         /// <inheritdoc />
         public override bool Changes =>
@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Put(sequence, _wasTargets, _wasAction, _wasForm, _wasProvider, _wasValues);
         }
 
-        void Put(Sequence sequence, IList<string> targets, string action, Nature form, string provider,
+        void Put(Sequence sequence, IList<string> targets, string action, ReachKind form, string provider,
             IList<Literal> arguments)
         {
             var step = sequence.Steps[_index] as Act;

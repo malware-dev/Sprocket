@@ -92,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Renames the slot wherever its logic system names it, as one step back.</summary>
         public override void Rename(string name)
         {
-            var wanted = Naming.Clean(name);
+            var wanted = NameRules.Clean(name);
             if (wanted.Length == 0 || !AcceptsName(wanted) || wanted == _part.Id)
                 return;
 
@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Whether no other slot that is used, or that an installation holds blocks in, has <paramref name="name" />.</summary>
         public override bool AcceptsName(string name)
         {
-            var other = _system.FindPart(Naming.Clean(name));
+            var other = _system.FindPart(NameRules.Clean(name));
             if (other == null || other == _part)
                 return true;
 
@@ -194,7 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _required.IsOn = !_part.Optional;
             _required.Tip = Tip.For(_required.Tip, texts.BlueprintRequiredAbout);
             _required.Command = editable
-                ? Editor.Act(Cmd.MakeOptional, () => Editor.Do(_system, new SetOptional(_part, !_part.Optional)))
+                ? Editor.Act(CommandKind.MakeOptional, () => Editor.Do(_system, new SetOptional(_part, !_part.Optional)))
                 : null;
         }
 
@@ -266,7 +266,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (box == null || _composer == null || box != _composer.Box || !Editable)
                 return;
 
-            Editor.Do(_system, new AnnotatePart(_part, _composer.Text, Change.DescribeSlot));
+            Editor.Do(_system, new AnnotatePart(_part, _composer.Text, ChangeKind.DescribeSlot));
         }
     }
 }

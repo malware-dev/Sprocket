@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly WindowLayer _windows = new WindowLayer();
         readonly MessageBox _dialog;
-        readonly Confirm _confirm = new Confirm();
+        readonly ConfirmPopup _confirm = new ConfirmPopup();
         readonly RichText _tip = new RichText { Style = Styles.Tip };
         readonly InputRoot _input;
         readonly List<ChoiceEntry> _actionsShown = new List<ChoiceEntry>();
@@ -141,21 +141,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 Spacing = 8f,
                                 Children =
                                 {
-                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
+                                    new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
                                     _title,
                                     // Quietest first, and Done or the close cross last: the row stands against the right edge, so a
                                     // control's place depends only on what stands to its right, and the last cannot be moved by anything.
                                     // Meant to stand out: it changes the whole world for everyone, and only an admin sees it.
                                     new HazardButton { Style = Styles.Button, Command = new Relay(OpenAdmin) }.As(out _admin),
-                                    new Glyph { Symbol = "?", Style = Styles.Help, Placement = Fixed.Size(32f, 32f), Command = _helps }.As(out _help),
-                                    new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
-                                    new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _undoes }.As(out _undo),
-                                    new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _redoes }.As(out _redo),
+                                    new Glyph { Symbol = "?", Style = Styles.Help, Placement = FixedSize.Size(32f, 32f), Command = _helps }.As(out _help),
+                                    new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
+                                    new Glyph { Symbol = Symbols.Undo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _undoes }.As(out _undo),
+                                    new Glyph { Symbol = Symbols.Redo, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _redoes }.As(out _redo),
                                     new Button { Style = Styles.Button, Command = _libraries }.As(out _library),
-                                    new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _deletes }.As(out _delete),
+                                    new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f), Command = _deletes }.As(out _delete),
                                     new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
                                     new Button { Style = Styles.Primary, Command = _dones }.As(out _done),
-                                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Back) }.As(out _close)
+                                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = new Relay(Back) }.As(out _close)
                                 }
                             },
                             new Label { Style = Styles.Detail }.As(out _subtitle)
@@ -166,8 +166,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     {
                         Padding = new Thickness(16f),
                         Placement = Flex.Grow,
-                        Columns = { Length.Flex(1f) },
-                        Rows = { Length.Auto, Length.Flex(1f) },
+                        Columns = { GridLength.Flex(1f) },
+                        Rows = { GridLength.Auto, GridLength.Flex(1f) },
                         Cells = { [0, 0] = _banner }
                     }.As(out _page),
                     // Only while the screen has actions, which only developer mode gives it, so everybody else has the room.
@@ -186,7 +186,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _dialog = new MessageBox
             {
                 Style = Styles.Dialog,
-                Placement = Fixed.Wide(Sizes.Popup),
+                Placement = FixedSize.Wide(Sizes.Popup),
                 MessageStyle = Styles.Question,
                 ButtonStyle = Styles.Button,
                 DefaultStyle = Styles.Primary,
@@ -530,14 +530,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _tip.Measure(g, new Vector2(Sizes.Popup, bounds.Height));
 
             var size = _tip.DesiredSize;
-            var x = Pointer.X + Space.Item;
-            var y = Pointer.Y + Space.Region;
+            var x = Pointer.X + Spacing.Item;
+            var y = Pointer.Y + Spacing.Region;
 
             if (x + size.X > bounds.X + bounds.Width)
-                x = Pointer.X - size.X - Space.Item;
+                x = Pointer.X - size.X - Spacing.Item;
 
             if (y + size.Y > bounds.Y + bounds.Height)
-                y = Pointer.Y - size.Y - Space.Row;
+                y = Pointer.Y - size.Y - Spacing.Row;
 
             if (x < bounds.X)
                 x = bounds.X;

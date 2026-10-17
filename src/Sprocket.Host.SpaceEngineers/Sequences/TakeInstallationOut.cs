@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.DeleteInstallation;
+        public override ChangeKind Change => ChangeKind.DeleteInstallation;
 
         /// <inheritdoc />
         public override void Apply(Automation program)

@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Children =
                         {
                             new Label { Style = Styles.Name, Wraps = true, Placement = Flex.Grow }.As(out _text),
-                            new Glyph { Symbol = Symbols.Down, Style = Styles.Chevron, Placement = Fixed.Size(32f, 32f) }.As(out _chevron)
+                            new Glyph { Symbol = Symbols.Down, Style = Styles.Chevron, Placement = FixedSize.Size(32f, 32f) }.As(out _chevron)
                         }
                     }.As(out _heading),
                     new Reveal
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         void Say(Notice notice)
         {
-            var ink = Inks.Of(notice.Level, Palette.Ink);
+            var ink = RemarkColors.Of(notice.Level, Palette.Ink);
 
             _column.Background = notice.Level == NoticeLevel.Problem
                 ? Palette.ProblemWash

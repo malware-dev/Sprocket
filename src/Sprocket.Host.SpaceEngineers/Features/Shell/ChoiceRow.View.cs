@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution)
                 }
             });
-            Children.Add(new Glyph { Symbol = Symbols.Check, Style = Styles.Icon, Placement = Fixed.Size(24f, 24f), IsVisible = false }.As(out _given));
+            Children.Add(new Glyph { Symbol = Symbols.Check, Style = Styles.Icon, Placement = FixedSize.Size(24f, 24f), IsVisible = false }.As(out _given));
         }
     }
 }

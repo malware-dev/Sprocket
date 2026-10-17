@@ -17,7 +17,7 @@ public class BlockNameTests
     [Fact]
     public void AnImageDrawsItsPictureAcrossItsBounds()
     {
-        var image = new Image { Source = new Sprite(Picture, Vector2.Zero), Placement = Fixed.Size(24f, 24f) };
+        var image = new Image { Source = new Sprite(Picture, Vector2.Zero), Placement = FixedSize.Size(24f, 24f) };
         var easel = new Easel(new VStack { Children = { new HStack { Children = { image } } } }, 400f, 200f);
 
         var drawn = easel.Sprites.Single(sprite => sprite.Material == Picture);
@@ -30,7 +30,7 @@ public class BlockNameTests
     [Fact]
     public void AnImageWithNoPictureDrawsNothing()
     {
-        var easel = new Easel(new VStack { Children = { new HStack { Children = { new Image { Placement = Fixed.Size(24f, 24f) } } } } }, 400f, 200f);
+        var easel = new Easel(new VStack { Children = { new HStack { Children = { new Image { Placement = FixedSize.Size(24f, 24f) } } } } }, 400f, 200f);
 
         Assert.Empty(easel.Sprites);
     }

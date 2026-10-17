@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var turbine = block as IMyWindTurbine;
-            return turbine == null ? null : new Producing(turbine, told);
+            return turbine == null ? null : new OutputListener(turbine, told);
         }
     }
 }

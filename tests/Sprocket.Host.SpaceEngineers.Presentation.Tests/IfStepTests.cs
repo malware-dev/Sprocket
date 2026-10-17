@@ -372,7 +372,7 @@ public class IfStepTests
     }
 
     /// <summary>The words of those of <paramref name="choices" /> that may be added now.</summary>
-    static List<string> Offered(IList<Adder> choices) => choices.Where(choice => choice.Adds != null).Select(choice => choice.Text).ToList();
+    static List<string> Offered(IList<AddOption> choices) => choices.Where(choice => choice.Adds != null).Select(choice => choice.Text).ToList();
 
     /// <summary>Changing the blocks of a test written in the script keeps how it compares and that it is a sum.</summary>
     [Fact]
@@ -451,7 +451,7 @@ public class IfStepTests
 
     static void What(Simulation rig, string text)
     {
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text && !entry.IsHeading).Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
     }
 

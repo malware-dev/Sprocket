@@ -31,7 +31,7 @@ public class SetTests
     [Fact]
     public void ASetNamesTheValue()
     {
-        var off = new Act("OnOff") { Form = Nature.Value };
+        var off = new Act("OnOff") { Form = ReachKind.Value };
         off.Arguments.Add(Literal.Of(false));
 
         Assert.Same(_value, off.Names(Both()));

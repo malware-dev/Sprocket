@@ -136,21 +136,21 @@ public class AirlockTests
     {
         var ship = new Rigged();
         var vent = ship.Vent(1, "Vent");
-        var action = ship.Entity(vent.Id).Kind.FindAction(Blocks.Vent.Depressurize, Nature.Native)!;
+        var action = ship.Entity(vent.Id).Kind.FindAction(Blocks.Vent.Depressurize, ReachKind.Native)!;
 
         var fields = new List<Field>();
         action.Fields(fields);
         var field = Assert.Single(fields);
-        Assert.Equal(Editor.Chosen, field.Edits);
+        Assert.Equal(FieldEditor.Chosen, field.Edits);
         Assert.Equal(new[] { "move on", "hold" }, field.Words);
         Assert.False(field.Needed);
 
         var shown = new List<string>();
-        Channels.Shown(new Literal[0], fields, shown);
+        ColorChannels.Shown(new Literal[0], fields, shown);
         Assert.Equal(new[] { "hold" }, shown);
 
         shown.Clear();
-        Channels.Shown(new[] { Literal.Of(Blocks.Vent.MoveOn) }, fields, shown);
+        ColorChannels.Shown(new[] { Literal.Of(Blocks.Vent.MoveOn) }, fields, shown);
         Assert.Equal(new[] { "move on" }, shown);
         Assert.False(string.IsNullOrEmpty(field.About));
 
@@ -169,11 +169,11 @@ public class AirlockTests
         var a = Build();
         ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
 
-        var saved = Scribe.Save(a.Automation, a.World.Values);
+        var saved = ProgramWriter.Save(a.Automation, a.World.Values);
         Assert.Contains("call ext.depressurize(1) on [ ", saved);
 
         var after = new Automation();
-        Assert.Equal("", Reader.Load(saved, after, a.World.Values));
+        Assert.Equal("", ProgramReader.Load(saved, after, a.World.Values));
         var told = Assert.IsType<Act>(after.Sequences[0].Steps[2]);
         Assert.Equal(Blocks.Vent.MoveOn, Assert.Single(told.Arguments).Whole);
     }
@@ -436,7 +436,7 @@ public class AirlockTests
         Assert.Equal(VentStatus.Depressurizing, ((IMyAirVent)a.Vent.Block).Status);
 
         var emptied = vent.Kind.FindEvent("finishes-emptying")!;
-        Assert.True(vent.In(emptied, new Recall()),
+        Assert.True(vent.In(emptied, new ReaderMemory()),
             "the airlock has no air left and does not read as empty");
     }
 
@@ -533,7 +533,7 @@ public class AirlockTests
         a.Vent.Enabled = false;
         a.Tick();
 
-        Assert.False(vent.In(emptied, new Recall()),
+        Assert.False(vent.In(emptied, new ReaderMemory()),
             "a vent that cannot be read is saying the room is empty");
     }
 
@@ -1005,7 +1005,7 @@ public class AirlockTests
         var system = a.Automation.Systems[0];
 
         var cycle = a.Automation.AddSequence(system);
-        var empty = new Act("Depressurize") { Form = Nature.Value };
+        var empty = new Act("Depressurize") { Form = ReachKind.Value };
         empty.Targets.Add(a.Ref(a.Seen(a.Vent)));
         empty.Arguments.Add(Literal.Of(true));
         cycle.Steps.Add(empty);
@@ -1029,7 +1029,7 @@ public class AirlockTests
         var system = a.Automation.Systems[0];
 
         var cycle = a.Automation.AddSequence(system);
-        var radius = new Act("Radius") { Form = Nature.Value };
+        var radius = new Act("Radius") { Form = ReachKind.Value };
         radius.Targets.Add(a.Ref(a.Seen(lamp)));
         radius.Arguments.Add(Literal.Of(4.5));
         cycle.Steps.Add(radius);
@@ -1883,15 +1883,15 @@ public class PropertyTests
         var ship = new Rigged();
         var door = ship.Door(1, "Door");
         door.Carrying("Open", "Open", ValueKind.Flag);
-        Assert.True(ship.Entity(door.Id).Kind.FindAction("Open", Nature.Value)!.Hidden);
+        Assert.True(ship.Entity(door.Id).Kind.FindAction("Open", ReachKind.Value)!.Hidden);
 
         var kind = ship.Entity(ship.Vent(2, "Vent").Id).Kind;
-        var depressurizing = kind.FindAction("Depressurize", Nature.Value)!;
+        var depressurizing = kind.FindAction("Depressurize", ReachKind.Value)!;
         Assert.False(depressurizing.Hidden);
         Assert.Equal("Depressurizing", depressurizing.Named);
 
         // Flipping it is the third choice on its own switch, so the act that flips it is kept to the terminal view.
-        var toggle = kind.FindAction("Depressurize", Nature.Action)!;
+        var toggle = kind.FindAction("Depressurize", ReachKind.Action)!;
         Assert.True(toggle.Hidden);
         Assert.True(depressurizing.Flips);
         Assert.Equal("toggle depressurizing", toggle.Text);

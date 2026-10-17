@@ -35,8 +35,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Its parameters, in the order the action declares them.</summary>
         [XmlElement("parameter", typeof(Parameter))]
-        [XmlElement("group", typeof(Group))]
-        public List<Piece> Pieces = new List<Piece>();
+        [XmlElement("group", typeof(ParameterGroup))]
+        public List<ParameterPiece> Pieces = new List<ParameterPiece>();
 
         /// <summary>
         /// How many of the action's parameters are accounted for.
@@ -78,15 +78,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                var group = piece as Group;
+                var group = piece as ParameterGroup;
                 if (group == null)
                     continue;
 
                 // One field for the whole group where there is a control that asks for what it is.
                 // The parameters are still described one by one in the file - that is what says how
                 // many values the group covers, and what order they go back in.
-                Editor edits = Drawn(group.Kind);
-                if (edits != Editor.Typed)
+                FieldEditor edits = Drawn(group.Kind);
+                if (edits != FieldEditor.Typed)
                 {
                     into.Add(Field.Holding("", edits, group.Span));
                     continue;
@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                var group = piece as Group;
+                var group = piece as ParameterGroup;
                 if (group == null)
                     continue;
 
@@ -136,9 +136,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// if nobody had grouped them. A file written against a later Sprocket therefore still works
         /// here, and loses only the control.
         /// </remarks>
-        static Editor Drawn(string kind)
+        static FieldEditor Drawn(string kind)
         {
-            return kind == "color" ? Editor.Colour : Editor.Typed;
+            return kind == "color" ? FieldEditor.Colour : FieldEditor.Typed;
         }
 
         static Field Asks(Parameter one)

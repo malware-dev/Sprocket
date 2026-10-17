@@ -180,7 +180,7 @@ public static class Blueprint
             return null;
 
         var items = new XElement("dictionary");
-        foreach (var key in new[] { Locker.ProgramKey, Locker.StateKey })
+        foreach (var key in new[] { BlockStorage.ProgramKey, BlockStorage.StateKey })
         {
             string value;
             if (storage.TryGetValue(key, out value) && value != null)

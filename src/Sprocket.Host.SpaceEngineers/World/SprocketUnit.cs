@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         Backups _backups;
 
-        Shelf _shelf;
+        LibraryShelf _shelf;
 
         Preferences _preferences;
 
@@ -43,11 +43,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
-        readonly Holders _holders;
-        readonly Hands _hands;
-        readonly Keys _keys;
-        readonly Buttons _buttons;
-        readonly Reach _reach;
+        readonly HostBlocks _holders;
+        readonly Ownership _hands;
+        readonly SlotKeys _keys;
+        readonly WiredButtons _buttons;
+        readonly UnreachableSequences _reach;
 
         readonly Texts _texts;
         readonly ConstructMemory _memory;
@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <paramref name="texts" /> are what its editor says, in the player's language.
         /// </remarks>
         public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, ConstructMemory memory, Backups backups = null)
-            : this(block, settings, rota, texts, false, Locker.Stored(block, Locker.ProgramKey), Locker.Stored(block, Locker.StateKey), memory)
+            : this(block, settings, rota, texts, false, BlockStorage.Stored(block, BlockStorage.ProgramKey), BlockStorage.Stored(block, BlockStorage.StateKey), memory)
         {
             _backups = backups;
         }
@@ -120,9 +120,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
             _runner.FastestUpdate = settings?.FastestUpdate ?? 1;
-            _keys = new Keys(_program, _runner);
-            _buttons = new Buttons(_world, _program, _runner, _keys, block);
-            _reach = new Reach(_world, _program, _runner, _buttons);
+            _keys = new SlotKeys(_program, _runner);
+            _buttons = new WiredButtons(_world, _program, _runner, _keys, block);
+            _reach = new UnreachableSequences(_world, _program, _runner, _buttons);
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
@@ -137,8 +137,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             // automation runs at all, and it changes when the lights go out rather than on a tick - so asking them sixty times
             // a second would be many questions for one answer that hardly ever moves. Released in Dispose, because a listener
             // left on a block the game has let go of is a leak that holds the whole unit alive.
-            _hands = new Hands(_world, _program, _runner);
-            _holders = new Holders(_world);
+            _hands = new Ownership(_world, _program, _runner);
+            _holders = new HostBlocks(_world);
             _holders.Changed += Working;
             _holders.Gathered += Regathered;
             _holders.Hold(_block);
@@ -213,7 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public IReadOnlyList<IMyTerminalBlock> Parted => _holders.Parted;
 
         /// <summary>The player's library, which the editor is given; null on a machine that keeps none.</summary>
-        public Shelf Shelf
+        public LibraryShelf Shelf
         {
             get { return _shelf; }
             set
@@ -435,10 +435,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             string warning;
-            var trouble = Reader.Load(text, _program, _world.Values, out warning, _world);
+            var trouble = ProgramReader.Load(text, _program, _world.Values, out warning, _world);
 
             if (warning.Length > 0)
-                Told.Say($"{Logged(_block)} has a program with a warning: {warning}");
+                GameLog.Say($"{Logged(_block)} has a program with a warning: {warning}");
 
             // What is switched off, read after the program, because it names what the program
             // declared. A construct that has nothing parked has nothing here at all. What runs and what the triggers read is
@@ -447,7 +447,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 var wrong = StateText.Load(state, _program, _copy ? _runner : null);
                 if (wrong.Length > 0)
-                    Told.Say($"{Logged(_block)} has switches that would not read: {wrong}");
+                    GameLog.Say($"{Logged(_block)} has switches that would not read: {wrong}");
             }
 
             if (trouble.Length == 0)
@@ -455,7 +455,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // Logged here; the editor says it on its notice and shows the text on the script page, where it is mended.
             // Nothing of the program was kept, and it is marked not to be saved over, which is what protects somebody's work.
-            Told.Say($"{Logged(_block)} has a program that would not read: {trouble}");
+            GameLog.Say($"{Logged(_block)} has a program that would not read: {trouble}");
         }
 
         /// <summary>How the log names <paramref name="block" />: its name, or where it has none yet, as a dedicated server
@@ -487,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (Lost)
                 return;
 
-            MyModStorageComponentBase storage = Locker.Attached(_block);
+            MyModStorageComponentBase storage = BlockStorage.Attached(_block);
             if (storage == null)
                 return;
 
@@ -500,12 +500,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_editor != null)
                 _editor.Stamp(true);
 
-            var program = Scribe.Save(_program, _world.Values);
+            var program = ProgramWriter.Save(_program, _world.Values);
             var state = StateText.Save(_program, null, false);
-            storage.SetValue(Locker.ProgramKey, program);
+            storage.SetValue(BlockStorage.ProgramKey, program);
             // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
             // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
-            storage.SetValue(Locker.StateKey, state);
+            storage.SetValue(BlockStorage.StateKey, state);
         }
 
         /// <summary>Keeps a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
@@ -514,7 +514,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// since the library has it already; where that is every one, no backup is kept. Only the logic systems are kept: their
         /// installations stay behind with their blocks.
         /// </remarks>
-        public void BackUp(Backups backups, DateTime saved, Shelf shelf)
+        public void BackUp(Backups backups, DateTime saved, LibraryShelf shelf)
         {
             if (!_program.Intact)
                 return;
@@ -554,7 +554,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Sequence which = named?.FindSequence(sequence);
             if (one == null || which == null)
             {
-                Told.Say($"{Logged(_block)} has no {(named == null ? "such system" : which == null ? "such sequence" : "such instance")} for an order to {(stops ? "stop" : "run")}");
+                GameLog.Say($"{Logged(_block)} has no {(named == null ? "such system" : which == null ? "such sequence" : "such instance")} for an order to {(stops ? "stop" : "run")}");
                 return;
             }
 
@@ -566,7 +566,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             var state = _runner.Get(which, one);
             if (state != null)
-                state.Interrupt(Stopper.Hand, 0);
+                state.Interrupt(StopCause.Hand, 0);
         }
 
         /// <summary>
@@ -579,7 +579,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_editor != null)
                 _editor.Stamp(true);
 
-            program = Scribe.Save(_program, _world.Values);
+            program = ProgramWriter.Save(_program, _world.Values);
             state = StateText.Save(_program, _runner);
         }
 
@@ -660,7 +660,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return true;
             }
 
-            Told.Say($"{Logged(_block)} is gone, and its construct has no programmable block left to keep the automation");
+            GameLog.Say($"{Logged(_block)} is gone, and its construct has no programmable block left to keep the automation");
             Lost = true;
             return false;
         }
@@ -668,7 +668,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Makes <paramref name="block" /> the hero: the automation is kept in it from here on, and its buttons name it.</summary>
         void Move(IMyTerminalBlock block)
         {
-            Told.Say($"{Logged(_block)} is gone; {Logged(block)} keeps the automation now");
+            GameLog.Say($"{Logged(_block)} is gone; {Logged(block)} keeps the automation now");
 
             _block = block;
             _memory.Keeper = block.EntityId;

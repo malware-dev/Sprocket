@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 Spacing = 4f,
                 Style = Styles.Plate,
-                Placement = Fixed.Wide(PartList.Widest),
+                Placement = FixedSize.Wide(PartList.Widest),
                 Children =
                 {
                     new HStack

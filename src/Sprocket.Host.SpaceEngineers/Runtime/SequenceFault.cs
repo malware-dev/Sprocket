@@ -26,13 +26,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Nothing can start the sequence, for <paramref name="why" />, on the button of <paramref name="block" /> where one is known.</summary>
         public static SequenceFault Unstarted(Unwired why, string block)
         {
-            var fault = new SequenceFault(SequenceProblem.NeverTriggered, Trigger, Trouble.None, block);
+            var fault = new SequenceFault(SequenceProblem.NeverTriggered, Trigger, BlockTrouble.None, block);
             fault.Unwired = why;
             return fault;
         }
 
         /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with nothing said by a block.</summary>
-        public SequenceFault(SequenceProblem problem, int step) : this(problem, step, Trouble.None)
+        public SequenceFault(SequenceProblem problem, int step) : this(problem, step, BlockTrouble.None)
         {
         }
 
@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// the wording. A block that cannot finish is not: only it knows why, and the reason is
         /// worth more than the category.
         /// </remarks>
-        public SequenceFault(SequenceProblem problem, int step, Trouble because) : this()
+        public SequenceFault(SequenceProblem problem, int step, BlockTrouble because) : this()
         {
             Problem = problem;
             Step = step;
@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with what the block at fault said in <paramref name="because" />, naming that block by <paramref name="which" />, its reference.</summary>
-        public SequenceFault(SequenceProblem problem, int step, Trouble because, string which) : this(problem, step, because)
+        public SequenceFault(SequenceProblem problem, int step, BlockTrouble because, string which) : this(problem, step, because)
         {
             Which = which;
         }
@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public Unwired Unwired { get; private set; }
 
         /// <summary>What the block at fault said is wrong, or none where it said nothing.</summary>
-        public Trouble Because { get; private set; }
+        public BlockTrouble Because { get; private set; }
 
         /// <summary>What is wrong.</summary>
         public SequenceProblem Problem { get; private set; }

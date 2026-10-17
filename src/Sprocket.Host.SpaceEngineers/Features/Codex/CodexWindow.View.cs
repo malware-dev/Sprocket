@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         {
             var texts = _editor.Texts;
             Style = Styles.CodexWindow;
-            Placement = Fixed.Size(Wide, High);
+            Placement = FixedSize.Size(Wide, High);
 
             _stepsBack = new Relay(StepBack);
             _stepsForward = new Relay(StepForward);
@@ -63,11 +63,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                             Spacing = 8f,
                             Children =
                             {
-                                new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = EditorView.LevelWithCapitals, Command = _stepsBack, Tip = new Tip(texts.CodexBack) },
-                                new Glyph { Symbol = Symbols.Right, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Padding = EditorView.LevelWithCapitals, Command = _stepsForward, Tip = new Tip(texts.CodexForward) },
+                                new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Padding = EditorView.LevelWithCapitals, Command = _stepsBack, Tip = new Tip(texts.CodexBack) },
+                                new Glyph { Symbol = Symbols.Right, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Padding = EditorView.LevelWithCapitals, Command = _stepsForward, Tip = new Tip(texts.CodexForward) },
                                 new Button { Style = Styles.Button, Text = texts.CodexContents, Command = new Relay(() => List(!_listing)) }.As(out _contents),
                                 new Label { Style = Styles.Name, Placement = Flex.Grow }.As(out _title),
-                                new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = new Relay(Close), Tip = new Tip(texts.CodexClose) }
+                                new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = new Relay(Close), Tip = new Tip(texts.CodexClose) }
                             }
                         }
                     },

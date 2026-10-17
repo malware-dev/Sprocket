@@ -25,7 +25,7 @@ public class ImageTests
     [Fact]
     public void AnImageGivenAWidthKeepsItsShape()
     {
-        var image = new Image { Source = Banner, Placement = Fixed.Wide(100f) };
+        var image = new Image { Source = Banner, Placement = FixedSize.Wide(100f) };
         _ = new Easel(new VStack { Children = { new HStack { Children = { image } } } }, Wide, High);
 
         Assert.Equal(new Vector2(100f, 50f), new Vector2(image.Bounds.Width, image.Bounds.Height));
@@ -35,7 +35,7 @@ public class ImageTests
     [Fact]
     public void AnImageGivenAHeightKeepsItsShape()
     {
-        var image = new Image { Source = Banner, Placement = Fixed.High(30f) };
+        var image = new Image { Source = Banner, Placement = FixedSize.High(30f) };
         _ = new Easel(new VStack { Children = { new HStack { Children = { image } } } }, Wide, High);
 
         Assert.Equal(new Vector2(60f, 30f), new Vector2(image.Bounds.Width, image.Bounds.Height));
@@ -55,7 +55,7 @@ public class ImageTests
     [Fact]
     public void APictureOfNoKnownSizeIsSquare()
     {
-        var image = new Image { Source = Unknown, Placement = Fixed.Wide(40f) };
+        var image = new Image { Source = Unknown, Placement = FixedSize.Wide(40f) };
         _ = new Easel(new VStack { Children = { new HStack { Children = { image } } } }, Wide, High);
 
         Assert.Equal(40f, image.Bounds.Height);
@@ -239,7 +239,7 @@ public class ImageTests
             Color = Body,
             BlockSpacing = 8f,
             Indent = 20f,
-            Placement = Fixed.Wide(Wide)
+            Placement = FixedSize.Wide(Wide)
         };
 
         return new Easel(new VStack { Children = { text } }, Wide, High, pictures);

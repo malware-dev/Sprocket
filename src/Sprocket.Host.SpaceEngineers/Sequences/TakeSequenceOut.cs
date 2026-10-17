@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.DeleteSequence;
+        public override ChangeKind Change => ChangeKind.DeleteSequence;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     // Quoted as a program quotes text, so its entities are read back as what they stand for: a line break
                     // written as one comes back a break.
                     var text = Quoted(said, ref at);
-                    into.Add(Literal.Of(text.IndexOf('&') < 0 ? text : Entities.Read(new StringSegment(text))));
+                    into.Add(Literal.Of(text.IndexOf('&') < 0 ? text : TextEntities.Read(new StringSegment(text))));
                     continue;
                 }
 

@@ -76,7 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>
         /// Null where the block was not asked. What an action declares is often wrong: most of the
         /// game's own declare text for values they refuse unless they are numbers, which is what
-        /// <see cref="Known" /> is there to correct.
+        /// <see cref="KnownActions" /> is there to correct.
         /// </remarks>
         public IList<Primitive> Declares { get; private set; }
 

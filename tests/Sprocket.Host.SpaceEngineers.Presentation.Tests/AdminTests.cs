@@ -43,7 +43,7 @@ public class AdminTests
     [Fact]
     public void ThisWorldLeavesEveryRuleToEveryWorld()
     {
-        var screen = Opened(new Settings(Layer.Empty, Layer.Empty));
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
 
         Assert.True(screen.Shows("Default (every tick)"));
         Assert.True(screen.Shows("Default (off)"));
@@ -53,7 +53,7 @@ public class AdminTests
     [Fact]
     public void AChangeAppliesAtOnce()
     {
-        var screen = Opened(new Settings(Layer.Empty, Layer.Empty));
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
 
         Choose(screen, "Default (every tick)", "Every 100 ticks (lightest)");
         Assert.Equal(100, screen.Scene.Ship.Settings.World.FastestUpdate);
@@ -70,7 +70,7 @@ public class AdminTests
     [Fact]
     public void TheDefaultLeavesItToEveryWorld()
     {
-        var screen = Opened(new Settings(new Layer(null, 10), new Layer(null, 100)));
+        var screen = Opened(new Settings(new SettingsLayer(null, 10), new SettingsLayer(null, 100)));
 
         Choose(screen, "Every 100 ticks (lightest)", "Default (every 10 ticks)");
 
@@ -83,7 +83,7 @@ public class AdminTests
     [Fact]
     public void EveryWorldIsFollowedWhereThisWorldLeavesIt()
     {
-        var screen = Opened(new Settings(Layer.Empty, Layer.Empty));
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
 
         screen.Do("press", "Every world").Run(1);
         Choose(screen, "Every tick (most accurate)", "Every 10 ticks");
@@ -101,7 +101,7 @@ public class AdminTests
     [Fact]
     public void CloseKeepsWhatChanged()
     {
-        var screen = Opened(new Settings(Layer.Empty, Layer.Empty));
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
         Choose(screen, "Default (every tick)", "Every 10 ticks");
         screen.Do("press", "Close").Run(1);
 

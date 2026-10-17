@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var slots = toolbar.SlotCount;
             kind.WithPressed(1, "button is pressed", pages, slots, at => $"button {((at.Page - 1) * slots + at.Slot)} is pressed");
 
-            var labels = Doing.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
+            var labels = OwnAction.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
             {
                 // A function's button is held to the panel's when a program is checked; an action's is not, so a button the
                 // panel lacks is never handed to the game, which would keep a label for it.
@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             });
 
             var label = Field.Called("label");
-            label.Entry = Entry.Text;
+            label.Entry = FieldInput.Text;
 
             kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
                 .WithValue(LabelOf, "label of button", Being.Text<IMyButtonPanel, Labelled>(Labelled.Read,
@@ -122,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field Asked(int buttons)
         {
             var button = Field.Between("button", "1", buttons.ToString(CultureInfo.InvariantCulture));
-            button.Entry = Entry.Whole;
+            button.Entry = FieldInput.Whole;
             button.Needed = true;
             return button;
         }

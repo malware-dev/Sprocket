@@ -4,7 +4,7 @@ namespace Lumel.Layout
     public sealed class FormRow
     {
         /// <summary>A row of <paramref name="label" />, or null, and <paramref name="field" />, on as many lines as <paramref name="lines" /> says.</summary>
-        public FormRow(Element label, Element field, Lines lines)
+        public FormRow(Element label, Element field, FormRowLines lines)
         {
             Label = label;
             Field = field;
@@ -18,7 +18,7 @@ namespace Lumel.Layout
         public Element Field { get; }
 
         /// <summary>Whether the row may sit on one line.</summary>
-        public Lines Lines { get; }
+        public FormRowLines Lines { get; }
 
         /// <summary>Whether the last layout put the field under the label.</summary>
         public bool Stacked { get; set; }

@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public partial class PickRow : HStack
     {
-        Held _held;
+        HeldModifier _held;
         int _presses;
         string _art;
 
@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Raised when the row is pressed, with what was held down and how many presses in quick succession it was.</summary>
-        public event Action<Held, int> Picked;
+        public event Action<HeldModifier, int> Picked;
 
         /// <summary>What it is called.</summary>
         public string Text { get; set; }
@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override void OnPointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
-            _held = shift ? Held.Through : ctrl ? Held.Also : Held.Alone;
+            _held = shift ? HeldModifier.Through : ctrl ? HeldModifier.Also : HeldModifier.Alone;
             _presses = presses;
         }
 
@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Presses the row the way a pointer does, with <paramref name="held" /> held down.</summary>
-        public void Pick(Held held, int presses)
+        public void Pick(HeldModifier held, int presses)
         {
             var picked = Picked;
             if (picked != null && IsPickable)

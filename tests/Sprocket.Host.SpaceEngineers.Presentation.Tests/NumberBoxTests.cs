@@ -118,7 +118,7 @@ public class NumberBoxTests
         form.Show(new[]
         {
             Field.Between("speed", "0", "5"),
-            new Field { Name = "count", Entry = Entry.Whole },
+            new Field { Name = "count", Entry = FieldInput.Whole },
             Field.Called("label")
         }, new[] { "", "", "" }, new Hsv[0], new Texts());
 
@@ -129,7 +129,7 @@ public class NumberBoxTests
 
     static (NumberBox, Easel, InputRoot) Laid(string text, Action<NumberBox>? shape = null)
     {
-        var box = new NumberBox { Placement = Fixed.Wide(300f) };
+        var box = new NumberBox { Placement = FixedSize.Wide(300f) };
         shape?.Invoke(box);
         box.Text = text;
         var root = new VStack { Children = { box } };

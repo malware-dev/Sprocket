@@ -36,16 +36,16 @@ namespace Sprocket.Host.SpaceEngineers.Network
     ///     {
     ///         var start = offset;
     ///         msg = new PlayerActionMsg();
-    ///         ByteData.TryReadInt32(data, ref offset, out msg.ActionType);
-    ///         ByteData.TryReadVector3D(data, ref offset, out msg.Position);
+    ///         ByteCodec.TryReadInt32(data, ref offset, out msg.ActionType);
+    ///         ByteCodec.TryReadVector3D(data, ref offset, out msg.Position);
     ///         return offset - start;
     ///     }
     ///     
     ///     public static int Write(ref PlayerActionMsg msg, byte[] data, ref int offset)
     ///     {
     ///         var start = offset;
-    ///         ByteData.Write(msg.ActionType, data, ref offset);
-    ///         ByteData.Write(msg.Position, data, ref offset);
+    ///         ByteCodec.Write(msg.ActionType, data, ref offset);
+    ///         ByteCodec.Write(msg.Position, data, ref offset);
     ///         return offset - start;
     ///     }
     /// }
@@ -183,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var pos = 0;
             int typeId;
-            if (!ByteData.TryReadInt32(data, ref pos, out typeId))
+            if (!ByteCodec.TryReadInt32(data, ref pos, out typeId))
             {
                 MyLog.Default.Warning($"NetworkChannel received malformed message on channel {_channelId}.");
                 return;
@@ -214,9 +214,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
             Vector3D origin;
             double radius;
             int reliableFlag;
-            if (!ByteData.TryReadVector3D(data, ref pos, out origin)) return;
-            if (!ByteData.TryReadDouble(data, ref pos, out radius)) return;
-            if (!ByteData.TryReadInt32(data, ref pos, out reliableFlag)) return;
+            if (!ByteCodec.TryReadVector3D(data, ref pos, out origin)) return;
+            if (!ByteCodec.TryReadDouble(data, ref pos, out radius)) return;
+            if (!ByteCodec.TryReadInt32(data, ref pos, out reliableFlag)) return;
             if (!Network.IsServer) return;
 
             int innerLen = data.Length - pos;
@@ -286,10 +286,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 // Wrap inner in a proximity envelope and ship it to the server to relay.
                 var env = new byte[4 + 24 + 8 + 4 + innerLen];
                 var ep = 0;
-                ByteData.Write(ProximityEnvelopeTypeId, env, ref ep);
-                ByteData.Write(origin, env, ref ep);
-                ByteData.Write(radius, env, ref ep);
-                ByteData.Write(reliable ? 1 : 0, env, ref ep);
+                ByteCodec.Write(ProximityEnvelopeTypeId, env, ref ep);
+                ByteCodec.Write(origin, env, ref ep);
+                ByteCodec.Write(radius, env, ref ep);
+                ByteCodec.Write(reliable ? 1 : 0, env, ref ep);
                 Array.Copy(inner, 0, env, ep, innerLen);
                 Network.SendMessageToServer(_channelId, env, reliable);
             }
@@ -552,7 +552,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             // to build the relayable bytes without the channel's send buffer.
             public void WriteInner(ref TModel model, byte[] data, ref int offset)
             {
-                ByteData.Write(TypeId, data, ref offset);
+                ByteCodec.Write(TypeId, data, ref offset);
                 _writeFn(ref model, data, ref offset);
             }
 
@@ -564,7 +564,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                     if (_buffer == null || _buffer.Length < size)
                         _buffer = new byte[size];
                     var offset = 0;
-                    ByteData.Write(TypeId, _buffer, ref offset);
+                    ByteCodec.Write(TypeId, _buffer, ref offset);
                     _writeFn(ref model, _buffer, ref offset);
 
                     switch (recipientId)

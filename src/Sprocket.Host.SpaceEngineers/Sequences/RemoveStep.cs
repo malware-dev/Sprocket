@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>Takes one or more lines out of a sequence as one edit.</summary>
     public sealed class RemoveStep : SequenceEdit
     {
-        readonly Change _change;
+        readonly ChangeKind _change;
         readonly int _index;
         readonly List<Step> _steps = new List<Step>();
 
@@ -16,12 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// A step and the await after it go together, because they arrived together and an await left
         /// behind would wait for nothing.
         /// </remarks>
-        public RemoveStep(int index, params Step[] steps) : this(Change.RemoveStep, index, steps)
+        public RemoveStep(int index, params Step[] steps) : this(ChangeKind.RemoveStep, index, steps)
         {
         }
 
         /// <summary>Takes out one or more lines as one edit, called what <paramref name="change" /> says: a whole if, or a branch of one.</summary>
-        public RemoveStep(Change change, int index, params Step[] steps)
+        public RemoveStep(ChangeKind change, int index, params Step[] steps)
         {
             _change = change;
             _index = index;
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)

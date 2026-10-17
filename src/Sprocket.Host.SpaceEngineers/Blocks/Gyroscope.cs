@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class Gyroscope : Capability
     {
-        static readonly Doing Releases = Doing.Of<IMyGyro>(gyro => gyro.GyroOverride = false);
+        static readonly OwnAction Releases = OwnAction.Of<IMyGyro>(gyro => gyro.GyroOverride = false);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

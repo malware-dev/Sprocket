@@ -67,7 +67,7 @@ public class CheckViewTests
         var sequence = rig.Editor.Program.Systems[0].Sequences[0];
         Open(rig);
 
-        What(rig).Entries().First(entry => entry.Text == "open" && !entry.IsHeading).Pick(Held.Alone, 1);
+        What(rig).Entries().First(entry => entry.Text == "open" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         rig.Editor.Typed("is-not");
         rig.Tick();
@@ -89,7 +89,7 @@ public class CheckViewTests
         rig.Tick();
         rig.Tick();
 
-        What(rig).Entries().First(entry => entry.Text == "open" && !entry.IsHeading).Pick(Held.Alone, 1);
+        What(rig).Entries().First(entry => entry.Text == "open" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         rig.Editor.Typed("is");
         rig.Tick();
@@ -110,7 +110,7 @@ public class CheckViewTests
         var sequence = rig.Editor.Program.Systems[0].Sequences[0];
         Open(rig);
 
-        What(rig).Entries().First(entry => entry.Text == "power" && !entry.IsHeading).Pick(Held.Alone, 1);
+        What(rig).Entries().First(entry => entry.Text == "power" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         var relation = ((PickPage)rig.Editor.Current).Fields[0];
         Assert.Equal(new[] { "is", "is not" }, relation.Words);
@@ -148,7 +148,7 @@ public class CheckViewTests
         Open(rig);
         rig.Editor.TickBlock("Airlock Inner Door");
         rig.Tick();
-        What(rig).Entries().First(entry => entry.Text == "power" && !entry.IsHeading).Pick(Held.Alone, 1);
+        What(rig).Entries().First(entry => entry.Text == "power" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
 
         var reads = rig.Editor.Pick().Stages[0].Options.OfType<ListField>().Single();
@@ -169,7 +169,7 @@ public class CheckViewTests
         Assert.Equal(rig.Texts.PickAverageNote, What(rig).Note);
 
         var number = listed[0];
-        What(rig).Entries().First(entry => entry.Text == number && !entry.IsHeading).Pick(Held.Alone, 1);
+        What(rig).Entries().First(entry => entry.Text == number && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         rig.Editor.Typed("above 50");
         rig.Tick();

@@ -70,7 +70,7 @@ public class QuoteTests
             RuleColor = Rule,
             BlockSpacing = 8f,
             Indent = 20f,
-            Placement = Fixed.Wide(Wide)
+            Placement = FixedSize.Wide(Wide)
         };
 
         return new Easel(new VStack { Children = { text } }, Wide, High);

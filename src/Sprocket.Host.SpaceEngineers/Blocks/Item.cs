@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var item = new Item();
             if (arguments != null && arguments.Count > 0)
-                item.Known = Items.Read(arguments[0].Text, out item.Id);
+                item.Known = ItemIds.Read(arguments[0].Text, out item.Id);
 
             return item;
         }

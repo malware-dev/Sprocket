@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     new VStack
                     {
                         Spacing = 12f,
-                        Placement = Fixed.Wide(640f),
+                        Placement = FixedSize.Wide(640f),
                         Children =
                         {
                             new TextBox { Style = Styles.Search, Focusable = true }.As(out _search),

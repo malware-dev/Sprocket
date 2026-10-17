@@ -344,7 +344,7 @@ public class ActionTests
         // a light is Sprocket itself, since these are the game's own blocks. The action still says
         // nothing about them, and a block nobody has described still gets a box for each.
         Field asked = Assert.Single(screen.Editor.Picking().Fields);
-        Assert.Equal(Editor.Colour, asked.Edits);
+        Assert.Equal(FieldEditor.Colour, asked.Edits);
         Assert.Equal(3, asked.Covers);
 
         screen.Editor.Typed("255 136 0");
@@ -465,7 +465,7 @@ public class ActionTests
             + "press step press task 150 203 type Approach 200 360 press \"Terminal ›\" press \"Chime On Approach\"").Split(' '));
 
         Assert.True(screen.Shows("Chime On Approach"), "the sensor's chime does not ask for anything");
-        Assert.Equal(Editor.Chosen, screen.Editor.Picking().Fields.Single().Edits);
+        Assert.Equal(FieldEditor.Chosen, screen.Editor.Picking().Fields.Single().Edits);
         Assert.Equal(2, screen.Editor.Picking().Fields.Single().Words.Count);
 
         // A switch says the word it is on, and pressing it gives the other one.

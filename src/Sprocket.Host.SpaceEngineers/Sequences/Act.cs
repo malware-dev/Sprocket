@@ -32,18 +32,18 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// head, <c>action</c> or <c>set</c>. Carried here rather than read off how many arguments the
         /// step holds, because arguments have no bearing on which it is.
         /// </remarks>
-        public Nature Form { get; set; }
+        public ReachKind Form { get; set; }
 
         /// <summary>What adds the member, where it is one a host adds rather than the game's own: <c>sprocket</c> for Sprocket's.</summary>
         /// <remarks>Kept as the program says it, so a member added by something this host does not have is never taken for one it does.</remarks>
         public string Provider
         {
-            get { return _provider ?? (Form == Nature.Native ? BlockKinds.Own : ""); }
+            get { return _provider ?? (Form == ReachKind.Native ? BlockKinds.Own : ""); }
             set { _provider = value; }
         }
 
         /// <summary>Whether this writes one of the block's own values rather than performing an action.</summary>
-        public bool Sets => Form == Nature.Value;
+        public bool Sets => Form == ReachKind.Value;
 
         /// <summary>The parts affected. All of them, together, in this step.</summary>
         public override IList<string> Targets => _targets;
@@ -69,13 +69,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <remarks>A value is found in its namespace, and only where a step can set it.</remarks>
         public EntityAction Names(IList<EntityAction> actions)
         {
-            if (Form == Nature.Value)
+            if (Form == ReachKind.Value)
             {
                 var value = EntityAction.Value(actions, Provider, ActionId);
                 return value != null && value.Sets ? value : null;
             }
 
-            if (Form == Nature.Native && Provider != BlockKinds.Own)
+            if (Form == ReachKind.Native && Provider != BlockKinds.Own)
                 return null;
 
             for (var i = 0; i < actions.Count; i++)

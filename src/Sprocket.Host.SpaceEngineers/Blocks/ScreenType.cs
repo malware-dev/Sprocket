@@ -89,9 +89,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             Func<IList<Literal>, Picked> picked = Picked.Read;
 
             kind.Hiding(Settings)
-                .WithAction(ShowText, "show text", Doing.Of<IMyTextSurfaceProvider, Shown>(Shown.Read, Show), Lines())
+                .WithAction(ShowText, "show text", OwnAction.Of<IMyTextSurfaceProvider, Shown>(Shown.Read, Show), Lines())
                 .In(Category.Screen).Of(this)
-                .WithAction(SetUp, "set up screen", Doing.Of<IMyTextSurfaceProvider, Look>(Look.Read, Apply), Asked(Fonts(screens), Apps(screens)))
+                .WithAction(SetUp, "set up screen", OwnAction.Of<IMyTextSurfaceProvider, Look>(Look.Read, Apply), Asked(Fonts(screens), Apps(screens)))
                 .In(Category.Screen).Of(this);
 
             Value(kind, "content", Being.OneOf<IMyTextSurfaceProvider, Picked>(Contents, picked,
@@ -175,8 +175,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field Lines()
         {
             var text = Field.Called("text");
-            text.Entry = Entry.Text;
-            text.Edits = Editor.Lines;
+            text.Entry = FieldInput.Text;
+            text.Edits = FieldEditor.Lines;
             text.Longest = TextLongest;
             text.Needed = true;
             return text;
@@ -186,24 +186,24 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field[] Asked(IList<string> fonts, IList<string> apps)
         {
             var font = fonts.Count > 0 ? Field.Among("font", fonts, fonts) : Field.Called("font");
-            font.Entry = Entry.Text;
+            font.Entry = FieldInput.Text;
             var named = new List<string>();
             foreach (var one in apps)
                 named.Add(AppName(one));
 
             var app = apps.Count > 0 ? Field.Among("app", named, apps) : Field.Called("app");
-            app.Entry = Entry.Text;
+            app.Entry = FieldInput.Text;
 
             // Content first, and each setting asked for while the content it applies to is chosen, as the terminal shows it.
             return new[]
             {
                 Field.Among("content", Contents, Contents), Showing(app, Contents[2]),
-                Showing(Field.Holding("text color", Editor.Colour, 1), Contents[1]),
-                Showing(Field.Holding("background color", Editor.Colour, 1), Contents[1]), Showing(font, Contents[1]),
+                Showing(Field.Holding("text color", FieldEditor.Colour, 1), Contents[1]),
+                Showing(Field.Holding("background color", FieldEditor.Colour, 1), Contents[1]), Showing(font, Contents[1]),
                 Showing(Decimal("font size", "0.1", "10"), Contents[1]),
                 Showing(Field.Among("alignment", Alignments, Alignments), Contents[1]), Showing(Decimal("padding", "0", "50"), Contents[1]),
-                Showing(Field.Holding("app color", Editor.Colour, 1), Contents[2]),
-                Showing(Field.Holding("app background color", Editor.Colour, 1), Contents[2]),
+                Showing(Field.Holding("app color", FieldEditor.Colour, 1), Contents[2]),
+                Showing(Field.Holding("app background color", FieldEditor.Colour, 1), Contents[2]),
                 Showing(Decimal("image interval", "0", "30"), Contents[1]), Showing(Switch("keep aspect ratio"), Contents[1])
             };
         }
@@ -220,7 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field Decimal(string name, string least, string most)
         {
             var field = Field.Between(name, least, most);
-            field.Entry = Entry.Decimal;
+            field.Entry = FieldInput.Decimal;
             return field;
         }
 
@@ -228,7 +228,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field Switch(string name)
         {
             var field = Field.OneOf(name, Literal.Of(true).Said, Literal.Of(false).Said);
-            field.Edits = Editor.Chosen;
+            field.Edits = FieldEditor.Chosen;
             return field;
         }
 
@@ -251,13 +251,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// The text alone: a screen set to show nothing or an app keeps that, so a mod drawing the text itself, rich text from
         /// a screen's own text, is left to do so. Setting it to show text is "set up screen"'s to do.
         /// </remarks>
-        static void Show(IMyTextSurfaceProvider provider, Shown shown, Recall seen)
+        static void Show(IMyTextSurfaceProvider provider, Shown shown, ReaderMemory seen)
         {
             Surface(provider, shown.Which).WriteText(shown.Text);
         }
 
         /// <summary>Sets each setting <paramref name="look" /> holds on its screen, and leaves the rest.</summary>
-        static void Apply(IMyTextSurfaceProvider provider, Look look, Recall seen)
+        static void Apply(IMyTextSurfaceProvider provider, Look look, ReaderMemory seen)
         {
             var surface = Surface(provider, look.Which);
             if (look.Content >= 0)

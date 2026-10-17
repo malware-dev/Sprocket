@@ -11,8 +11,8 @@ public class DeckTests
     [Fact]
     public void ADeckIsAsLargeAsItsLargestCardWhicheverIsOnTop()
     {
-        var wide = new HStack { Placement = Fixed.Size(100f, 20f) };
-        var tall = new HStack { Placement = Fixed.Size(60f, 40f) };
+        var wide = new HStack { Placement = FixedSize.Size(100f, 20f) };
+        var tall = new HStack { Placement = FixedSize.Size(60f, 40f) };
         var deck = new Deck { Children = { wide, tall } };
         var easel = new Easel(new HStack { Children = { deck } }, 400f, 200f);
 
@@ -27,8 +27,8 @@ public class DeckTests
     [Fact]
     public void LayersShowEveryCardEachWhereItIsAligned()
     {
-        var under = new Label { Text = "under", Placement = Fixed.Size(200f, 80f) };
-        var over = new Label { Text = "over", Placement = Fixed.Size(50f, 20f), Align = Lumel.Align.Right | Lumel.Align.Bottom };
+        var under = new Label { Text = "under", Placement = FixedSize.Size(200f, 80f) };
+        var over = new Label { Text = "over", Placement = FixedSize.Size(50f, 20f), Align = Lumel.Align.Right | Lumel.Align.Bottom };
         var layers = new Layers { Children = { under, over } };
         var easel = new Easel(new HStack { Children = { layers } }, 400f, 200f);
 

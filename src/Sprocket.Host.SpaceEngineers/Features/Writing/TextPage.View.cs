@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
                     },
                     new EditBox
                     {
-                        Font = Lettering.Mono,
+                        Font = TextSizes.Mono,
                         FontSize = 20f,
                         Color = Palette.Ink,
                         CaretColor = Palette.Ink,

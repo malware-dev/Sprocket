@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public EntityAction Own { get; private set; }
 
         /// <summary>What a signal remembers between looks at this block, or null where it remembers nothing.</summary>
-        public Recall Seen { get; private set; }
+        public ReaderMemory Seen { get; private set; }
 
         /// <summary>How the value is compared.</summary>
         public Relation Relation { get; private set; }
@@ -126,10 +126,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// signal watched, as <paramref name="gauge" /> says, made and kept there where it holds none; a fresh one where nothing
         /// keeps it; told the tick by <paramref name="clock" />.
         /// </summary>
-        static Recall Remembered(ReadingMemory kept, bool gauge, Func<int> clock)
+        static ReaderMemory Remembered(ReadingMemory kept, bool gauge, Func<int> clock)
         {
             if (kept == null)
-                return new Recall { Clock = clock };
+                return new ReaderMemory { Clock = clock };
 
             var recall = gauge ? kept.Gauge : kept.Seen;
             if (recall != null)
@@ -138,7 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return recall;
             }
 
-            recall = new Recall { Clock = clock };
+            recall = new ReaderMemory { Clock = clock };
             if (gauge)
                 kept.Gauge = recall;
             else

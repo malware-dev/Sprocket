@@ -10,7 +10,7 @@ public class CapabilityTests
     [Fact]
     public void WhatStopsTheBlockIsShownBeforeWhatItIsDoing()
     {
-        var entity = Entity(new Saying(Status.Of(Condition.Open)), new Saying(Status.Of(Trouble.Waiting(Cause.VentNoOxygen))));
+        var entity = Entity(new Saying(Status.Of(Condition.Open)), new Saying(Status.Of(BlockTrouble.Waiting(Cause.VentNoOxygen))));
 
         Assert.Equal(Cause.VentNoOxygen, entity.Status.Trouble.Cause);
     }

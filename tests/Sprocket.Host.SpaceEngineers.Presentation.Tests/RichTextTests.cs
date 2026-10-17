@@ -37,7 +37,7 @@ public class RichTextTests
             BlockSpacing = 8f,
             RuleColor = Color.Orange,
             RuledHeadings = 2,
-            Placement = Fixed.Wide(Wide)
+            Placement = FixedSize.Wide(Wide)
         };
         var easel = new Easel(new VStack { Children = { text } }, 1920f, 1080f);
 
@@ -339,7 +339,7 @@ public class RichTextTests
             HeadingColor = Bright,
             BlockSpacing = 8f,
             Indent = 20f,
-            Placement = Fixed.Wide(wide)
+            Placement = FixedSize.Wide(wide)
         };
 
         var easel = new Easel(new VStack { Children = { text } }, Wide, High);

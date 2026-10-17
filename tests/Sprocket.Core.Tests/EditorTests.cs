@@ -80,7 +80,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light").CarryingUnread("Pattern", "Pattern");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
-        ship.Rig.Entity(4).Kind.FindAction("Pattern", Nature.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("Pattern", ReachKind.Value)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -122,8 +122,8 @@ public class EditorTests
             .Offering("AIBehavior", "AI Behavior On/Off");
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
-        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Nature.Value)!.Vouch();
-        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", Nature.Action)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", ReachKind.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("AIBehavior", ReachKind.Action)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -160,7 +160,7 @@ public class EditorTests
         ship.Rig.Light(4, "Airlock Light").Carrying("Mode", "Mode:", ValueKind.Flag);
         ship.Runner = new AutomationRunner(ship.Automation, ship.World);
         ship.Editor = new SprocketEditor(ship.World, ship.Automation, ship.Runner, new Texts());
-        ship.Rig.Entity(4).Kind.FindAction("Mode", Nature.Value)!.Vouch();
+        ship.Rig.Entity(4).Kind.FindAction("Mode", ReachKind.Value)!.Vouch();
         var editor = ship.Editor;
 
         StartOnTheButton(editor);
@@ -975,7 +975,7 @@ public class EditorTests
         // Each row takes its own block, and only that one.
         for (var i = 0; i < rows.Count; i++)
         {
-            rows[i].Pick(Held.Alone, 1);
+            rows[i].Pick(HeldModifier.Alone, 1);
             Assert.True(rows[i].IsChosen, $"row {i} did not take its own block");
             Assert.Single(rows, r => r.IsChosen);
         }
@@ -1350,10 +1350,10 @@ public class EditorTests
         StartOnTheButton(ship.Editor);
         ship.Tick();
 
-        ship.Editor.Name(new string('x', Naming.MaxLength + 20));
+        ship.Editor.Name(new string('x', NameRules.MaxLength + 20));
         ship.Tick();
 
-        Assert.Equal(Naming.MaxLength, ship.Editor.Screen.CustomName().Length);
+        Assert.Equal(NameRules.MaxLength, ship.Editor.Screen.CustomName().Length);
     }
 
     /// <summary>

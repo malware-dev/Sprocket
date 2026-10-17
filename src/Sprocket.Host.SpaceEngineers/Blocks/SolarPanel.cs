@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var panel = block as IMySolarPanel;
-            return panel == null ? null : new Producing(panel, told);
+            return panel == null ? null : new OutputListener(panel, told);
         }
 
         /// <summary>What <paramref name="panel" /> could make now against its best, from 0 to 100; none where nothing says its best.</summary>
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Its best is the definition's, looked up on the first read and kept in <paramref name="seen" /> from then on, so a
         /// read after that is one division.
         /// </remarks>
-        static double Lit(IMySolarPanel panel, Recall seen)
+        static double Lit(IMySolarPanel panel, ReaderMemory seen)
         {
             if (!seen.Seen)
             {

@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.TakeOver;
+        public override ChangeKind Change => ChangeKind.TakeOver;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

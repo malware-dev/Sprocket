@@ -172,13 +172,13 @@ public class SwitchTests
         var ship = Build();
         var stopped = ship.Airlock.First!;
         stopped.Enabled = false;
-        stopped.Halt = new Halt(SequenceProblem.MissingTarget, ship.Secure.Number, 0, Trouble.None, "Outer Door");
+        stopped.Halt = new Halt(SequenceProblem.MissingTarget, ship.Secure.Number, 0, BlockTrouble.None, "Outer Door");
 
         var parked = ship.Airlock.AddInstance();
         parked.Enabled = false;
 
         ship.Airlock.Enabled = false;
-        ship.Airlock.Halt = new Halt(SequenceProblem.NeverTriggered, ship.Secure.Number, -1, Trouble.None, null);
+        ship.Airlock.Halt = new Halt(SequenceProblem.NeverTriggered, ship.Secure.Number, -1, BlockTrouble.None, null);
         var starts = ship.Program.Starts;
 
         ship.Airlock.Enabled = true;

@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _off ? Change.PauseStep : Change.ResumeStep;
+        public override ChangeKind Change => _off ? ChangeKind.PauseStep : ChangeKind.ResumeStep;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)

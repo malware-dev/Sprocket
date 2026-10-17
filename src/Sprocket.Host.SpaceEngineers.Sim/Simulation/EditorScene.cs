@@ -54,7 +54,7 @@ namespace Sprocket.Sim.Simulation
         public static EditorScene Holding(string program)
         {
             var store = Store.Nowhere();
-            store.SetValue(Locker.ProgramKey, program);
+            store.SetValue(BlockStorage.ProgramKey, program);
             return new EditorScene(Ship.On(store));
         }
 
@@ -102,7 +102,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public string Load(string program)
         {
-            var trouble = Reader.Load(program, _ship.Editor.Program, _ship.World.Values);
+            var trouble = ProgramReader.Load(program, _ship.Editor.Program, _ship.World.Values);
 
             // The editor built its screen from an empty program, so it has to be told: in the game
             // the program is read before the editor exists and this is the moment that stands in.
@@ -341,7 +341,7 @@ namespace Sprocket.Sim.Simulation
         }
 
         /// <summary>What is held down with the pointer, which the game's own screen reads off the keyboard as a press lands.</summary>
-        public Held Held { get; set; }
+        public HeldModifier Held { get; set; }
 
         /// <summary>Presses at <paramref name="point" />, in UI units, the <paramref name="presses" />th time in quick succession.</summary>
         public void Press(Vector2 point, int presses)
@@ -354,7 +354,7 @@ namespace Sprocket.Sim.Simulation
         public void Down(Vector2 point, int presses = 1)
         {
             _at = point;
-            _view.PointerDown(point, presses, Held == Held.Through, Held == Held.Also);
+            _view.PointerDown(point, presses, Held == HeldModifier.Through, Held == HeldModifier.Also);
         }
 
         /// <summary>The pointer moving to <paramref name="point" /> with the button down.</summary>

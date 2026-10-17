@@ -290,7 +290,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (ruling == null || !ruling.Remembers)
                     read.Ruling = null;
                 else if (read.Ruling == null)
-                    read.Ruling = new Recall { Clock = _owner.Clock };
+                    read.Ruling = new ReaderMemory { Clock = _owner.Clock };
                 else
                     read.Ruling.Clock = _owner.Clock;
 
@@ -397,7 +397,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Notes where the block <paramref name="probe" /> reads could change unannounced: one whose change it does not announce, and nothing rules out now.</summary>
-        void Mark(Probe probe, Recall ruling)
+        void Mark(Probe probe, ReaderMemory ruling)
         {
             if (_possible || probe.Announced)
                 return;

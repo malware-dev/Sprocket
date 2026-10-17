@@ -17,12 +17,12 @@ public class ChoosingKeysTests
 {
     static Field Words(string name, params string[] words)
     {
-        return new Field { Name = name, Edits = Editor.Chosen, Words = new List<string>(words) };
+        return new Field { Name = name, Edits = FieldEditor.Chosen, Words = new List<string>(words) };
     }
 
     static Field Angle()
     {
-        return new Field { Name = "Angle", Edits = Editor.Angle, Least = "-90", Most = "90", Entry = Entry.Decimal };
+        return new Field { Name = "Angle", Edits = FieldEditor.Angle, Least = "-90", Most = "90", Entry = FieldInput.Decimal };
     }
 
     /// <summary>A form holding the fields, with the keyboard in the first.</summary>

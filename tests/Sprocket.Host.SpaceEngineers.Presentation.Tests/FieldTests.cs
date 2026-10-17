@@ -165,7 +165,7 @@ public class FieldTests
     public void OnlyOnOrOffIsASwitch()
     {
         var flag = Field.OneOf("keep aspect ratio", Literal.Of(true).Said, Literal.Of(false).Said);
-        flag.Edits = Editor.Chosen;
+        flag.Edits = FieldEditor.Chosen;
         var named = Field.Among("mode", new[] { "Keep the current direction", "Turn round at the end" }, new[] { "0", "1" });
         var form = new FieldSet();
         form.Show(new[] { flag, named }, new string[0], new Hsv[0], new Texts());
@@ -179,7 +179,7 @@ public class FieldTests
     public void ADoublePressOnASwitchFinishes()
     {
         var flag = Field.OneOf("keep aspect ratio", Literal.Of(true).Said, Literal.Of(false).Said);
-        flag.Edits = Editor.Chosen;
+        flag.Edits = FieldEditor.Chosen;
         var form = new FieldSet();
         form.Show(new[] { flag }, new string[0], new Hsv[0], new Texts());
         var finished = 0;

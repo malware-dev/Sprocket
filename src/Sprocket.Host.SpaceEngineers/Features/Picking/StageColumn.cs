@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     return;
 
                 _width = value;
-                Placement = Fixed.Wide(value);
+                Placement = FixedSize.Wide(value);
             }
         }
 

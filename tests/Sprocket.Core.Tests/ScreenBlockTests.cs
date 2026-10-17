@@ -23,7 +23,7 @@ public class ScreenBlockTests
         kind.WithValue("app", "app", Being.OneOf<IMyTerminalBlock>(new[] { "TSS_ClockAnalog", "TSS_Weather" }, _ => 0)
             .Saying(new[] { "Clock Analog", "Weather" }));
         var fields = new List<Field>();
-        kind.FindAction("app", Nature.Value)!.Fields(fields);
+        kind.FindAction("app", ReachKind.Value)!.Fields(fields);
 
         var field = Assert.Single(fields);
         Assert.Equal(new[] { "Clock Analog", "Weather" }, field.Words);
@@ -62,7 +62,7 @@ public class ScreenBlockTests
         panel.App = "TSS_Weather";
 
         Assert.Equal("DOCKED", Ran.Read(ship, panel, TextPanel.Shown).Text);
-        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, Nature.Value)!.Being!;
+        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, ReachKind.Value)!.Being!;
         Assert.Equal(new[] { "TSS_ClockAnalog", "TSS_Weather" }, app.Names);
         Assert.True(app.Is(Literal.Name("TSS_Weather")).Holds(panel.Block, null!));
     }
@@ -81,12 +81,12 @@ public class ScreenBlockTests
         var kind = ship.Entity(panel.Id).Kind;
         var screen = HostTypes.Returned("screen");
 
-        Assert.True(kind.FindAction("Title", Nature.Value)!.Hidden);
-        Assert.True(kind.FindAction("FontColor", Nature.Value)!.Hidden);
-        Assert.True(kind.FindAction("ScriptForegroundColor", Nature.Value)!.Hidden);
-        Assert.Same(screen, kind.FindAction("text-color", Nature.Value)!.Type);
-        Assert.Same(screen, kind.FindAction("app-color", Nature.Value)!.Type);
-        Assert.Same(screen, kind.FindAction(ScreenType.ShowText, Nature.Native)!.Type);
+        Assert.True(kind.FindAction("Title", ReachKind.Value)!.Hidden);
+        Assert.True(kind.FindAction("FontColor", ReachKind.Value)!.Hidden);
+        Assert.True(kind.FindAction("ScriptForegroundColor", ReachKind.Value)!.Hidden);
+        Assert.Same(screen, kind.FindAction("text-color", ReachKind.Value)!.Type);
+        Assert.Same(screen, kind.FindAction("app-color", ReachKind.Value)!.Type);
+        Assert.Same(screen, kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Type);
         Assert.Single(kind.Facets(screen!));
     }
 
@@ -117,26 +117,26 @@ public class ScreenBlockTests
             .Offering("IncreaseChangeIntervalSlider", "Increase Image change interval");
         var kind = ship.Entity(panel.Id).Kind;
 
-        Assert.True(kind.FindAction(TextPanel.ShowImage, Nature.Native)!.Vetted);
-        Assert.True(kind.FindAction(TextPanel.Shown, Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction(TextPanel.App, Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction("Rotate", Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction(ScreenType.ShowText, Nature.Native)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.ShowImage, ReachKind.Native)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.Shown, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction(TextPanel.App, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction("Rotate", ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
         foreach (var id in new[] { "text-color", "background-color", "app-color", "content", "font", "font-size", "alignment", "padding" })
-            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
+            Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in colors.Concat(layout).Append("PreserveAspectRatio").Where(id => id != "Rotate"))
             Assert.False(EntityAction.Value(kind.Actions, "", id)?.Vetted ?? false, id + " is vetted");
 
-        Assert.False(kind.FindAction("PreserveAspectRatio", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("PreserveAspectRatio", ReachKind.Action)!.Vetted);
 
-        Assert.False(kind.FindAction("Title", Nature.Value)!.Vetted);
+        Assert.False(kind.FindAction("Title", ReachKind.Value)!.Vetted);
         foreach (var id in new[]
                  {
                      "PreserveAspectRatio_On", "PreserveAspectRatio_Off", "IncreaseFontSize", "DecreaseTextPaddingSlider",
                      "IncreaseChangeIntervalSlider"
                  })
-            Assert.False(kind.FindAction(id, Nature.Action)!.Vetted, id + " is vetted");
+            Assert.False(kind.FindAction(id, ReachKind.Action)!.Vetted, id + " is vetted");
     }
 
     /// <summary>A step chooses the app a panel runs, and leaves what the panel shows as it was.</summary>
@@ -174,9 +174,9 @@ public class ScreenBlockTests
         var faces = ship.Rig.EmotionController(1, "Face");
         var kind = ship.Entity(faces.Id).Kind;
 
-        Assert.True(kind.FindAction(EmotionController.ShowFace, Nature.Native)!.Vetted);
-        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Happy.dds", Nature.Action)!.Vetted);
-        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Nature.Action)!.Vetted);
+        Assert.True(kind.FindAction(EmotionController.ShowFace, ReachKind.Native)!.Vetted);
+        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Happy.dds", ReachKind.Action)!.Vetted);
+        Assert.False(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", ReachKind.Action)!.Vetted);
     }
 
     /// <summary>
@@ -196,14 +196,14 @@ public class ScreenBlockTests
             .Offering("View", "View");
         var kind = ship.Entity(camera.Id).Kind;
 
-        Assert.True(kind.FindAction(CameraBlock.InUse, Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction("EnablePanning", Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction("EnablePanning", Nature.Action)!.Vetted);
-        Assert.True(kind.FindAction("ViewRotation", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction(CameraBlock.InUse, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction("EnablePanning", ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction("EnablePanning", ReachKind.Action)!.Vetted);
+        Assert.True(kind.FindAction("ViewRotation", ReachKind.Value)!.Vetted);
 
-        Assert.False(kind.FindAction("EnablePanning_On", Nature.Action)!.Vetted);
-        Assert.False(kind.FindAction("EnablePanning_Off", Nature.Action)!.Vetted);
-        Assert.False(kind.FindAction("View", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("EnablePanning_On", ReachKind.Action)!.Vetted);
+        Assert.False(kind.FindAction("EnablePanning_Off", ReachKind.Action)!.Vetted);
+        Assert.False(kind.FindAction("View", ReachKind.Action)!.Vetted);
     }
 
     /// <summary>Showing a face offers every face the block has by its own name, and runs the game's action for the one chosen.</summary>
@@ -215,11 +215,11 @@ public class ScreenBlockTests
         var kind = ship.Entity(faces.Id).Kind;
 
         var fields = new List<Field>();
-        kind.FindAction(EmotionController.ShowFace, Nature.Native)!.Fields(fields);
+        kind.FindAction(EmotionController.ShowFace, ReachKind.Native)!.Fields(fields);
         var face = Assert.Single(fields);
         Assert.Equal(new[] { "Happy", "Sad" }, face.Words);
-        Assert.True(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", Nature.Action)!.Hidden);
-        Assert.False(kind.FindAction("Blink", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction(@"Textures\Models\Emotes\Sad.dds", ReachKind.Action)!.Hidden);
+        Assert.False(kind.FindAction("Blink", ReachKind.Action)!.Hidden);
 
         Ran.Step(ship, faces, EmotionController.ShowFace, Literal.Of(@"Textures\Models\Emotes\Sad.dds"));
 
@@ -239,7 +239,7 @@ public class ScreenBlockTests
         Assert.Equal(Literal.Of(true), Ran.Read(ship, camera, CameraBlock.InUse));
 
         var kind = ship.Entity(camera.Id).Kind;
-        Assert.Equal("panning", kind.FindAction("EnablePanning", Nature.Value)!.Text);
-        Assert.Equal("toggle panning", kind.FindAction("EnablePanning", Nature.Action)!.Text);
+        Assert.Equal("panning", kind.FindAction("EnablePanning", ReachKind.Value)!.Text);
+        Assert.Equal("toggle panning", kind.FindAction("EnablePanning", ReachKind.Action)!.Text);
     }
 }

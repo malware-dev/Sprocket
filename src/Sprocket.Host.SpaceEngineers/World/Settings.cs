@@ -37,10 +37,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         const string Here = "This world";
 
         /// <summary>The settings at the two levels.</summary>
-        public Settings(Layer global, Layer world)
+        public Settings(SettingsLayer global, SettingsLayer world)
         {
-            Global = global ?? Layer.Empty;
-            World = world ?? Layer.Empty;
+            Global = global ?? SettingsLayer.Empty;
+            World = world ?? SettingsLayer.Empty;
         }
 
         /// <summary>
@@ -51,15 +51,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// through <see cref="Read" />.
         /// </remarks>
         public Settings(bool developerMode, int fastestUpdate = 1)
-            : this(new Layer(developerMode, fastestUpdate), Layer.Empty)
+            : this(new SettingsLayer(developerMode, fastestUpdate), SettingsLayer.Empty)
         {
         }
 
         /// <summary>What every world says.</summary>
-        public Layer Global { get; }
+        public SettingsLayer Global { get; }
 
         /// <summary>What this world says, which wins.</summary>
-        public Layer World { get; }
+        public SettingsLayer World { get; }
 
         /// <summary>Tools that are not part of the product, off unless somebody asked for them.</summary>
         public bool DeveloperMode => World.DeveloperMode ?? DefaultDeveloperMode;
@@ -75,13 +75,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         public int DefaultFastestUpdate => Global.FastestUpdate ?? 1;
 
         /// <summary>These settings with every world saying what <paramref name="global" /> says.</summary>
-        public Settings WithGlobal(Layer global)
+        public Settings WithGlobal(SettingsLayer global)
         {
             return new Settings(global, World);
         }
 
         /// <summary>These settings with this world saying what <paramref name="world" /> says.</summary>
-        public Settings WithWorld(Layer world)
+        public Settings WithWorld(SettingsLayer world)
         {
             return new Settings(Global, world);
         }
@@ -94,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // Only when it is on. A line every world load saying everything is as it ships is the
             // noise that gets a log stopped being read, and on is the state worth being reminded of.
             if (asked.DeveloperMode)
-                Told.Say("developer mode is on");
+                GameLog.Say("developer mode is on");
 
             return asked;
         }
@@ -103,15 +103,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static Settings From(string global, string world)
         {
             return new Settings(
-                Layer.Read(Parse(global, "global"), Section, $"the global {File}"),
-                Layer.Read(Parse(world, "world"), Section, $"the world {File}"));
+                SettingsLayer.Read(Parse(global, "global"), Section, $"the global {File}"),
+                SettingsLayer.Read(Parse(world, "world"), Section, $"the world {File}"));
         }
 
         /// <summary>The settings a server sent, as <see cref="Written" /> wrote them; every default where they will not read.</summary>
         public static Settings Of(string written)
         {
             var read = Parse(written, "sent");
-            return new Settings(Layer.Read(read, Everywhere, "the server's settings"), Layer.Read(read, Here, "the server's settings"));
+            return new Settings(SettingsLayer.Read(read, Everywhere, "the server's settings"), SettingsLayer.Read(read, Here, "the server's settings"));
         }
 
         /// <summary>Both levels as one text, the way the server hands them to a client.</summary>
@@ -137,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Writes <paramref name="layer" /> into the global file where <paramref name="everywhere" /> says, and the world's otherwise.</summary>
-        static void Keep(Layer layer, bool everywhere)
+        static void Keep(SettingsLayer layer, bool everywhere)
         {
             IMyUtilities files = MyAPIGateway.Utilities;
             if (files == null)
@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             catch (Exception trouble)
             {
-                Told.Say($"the {Where(everywhere)} {File} will not write - {trouble.Message}");
+                GameLog.Say($"the {Where(everywhere)} {File} will not write - {trouble.Message}");
             }
         }
 
@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             catch (Exception trouble)
             {
-                Told.Say($"the {Where(everywhere)} {File} will not open - {trouble.Message}");
+                GameLog.Say($"the {Where(everywhere)} {File} will not open - {trouble.Message}");
                 return null;
             }
         }
@@ -208,7 +208,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (read.TryParse(text, out trouble))
                 return read;
 
-            Told.Say($"the {which} {File} has a problem on line {trouble.LineNo} - {trouble.Error}");
+            GameLog.Say($"the {which} {File} has a problem on line {trouble.LineNo} - {trouble.Error}");
             return null;
         }
 

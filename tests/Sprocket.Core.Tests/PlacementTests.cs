@@ -26,10 +26,10 @@ public class PlacementTests
             .Carrying("ShareInertiaTensor", "Share inertia tensor", ValueKind.Flag);
         var kind = ship.Entity(wheel.Id).Kind;
 
-        Assert.Equal(Category.Movement, kind.FindAction("Braking", Nature.Value)!.Category);
-        Assert.Equal(Category.Movement, kind.FindAction("Power", Nature.Value)!.Category);
-        Assert.Equal(Category.Movement, kind.FindAction("Speed Limit", Nature.Value)!.Category);
-        Assert.Equal(Category.Behaviour, kind.FindAction("ShareInertiaTensor", Nature.Value)!.Category);
+        Assert.Equal(Category.Movement, kind.FindAction("Braking", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Movement, kind.FindAction("Power", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Movement, kind.FindAction("Speed Limit", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Behaviour, kind.FindAction("ShareInertiaTensor", ReachKind.Value)!.Category);
     }
 
     /// <summary>A timer's delay is set by the sequence that starts it, and its countdown is read beside start and stop.</summary>
@@ -40,8 +40,8 @@ public class PlacementTests
         var timer = ship.Rig.Timer(1, "Timer").Carrying("TriggerDelay", "Delay", ValueKind.Real, "1", "3600");
         var kind = ship.Entity(timer.Id).Kind;
 
-        Assert.Equal(Category.Automation, kind.FindAction("TriggerDelay", Nature.Value)!.Category);
-        Assert.Equal(Category.Automation, kind.FindAction("counting-down", Nature.Value)!.Category);
+        Assert.Equal(Category.Automation, kind.FindAction("TriggerDelay", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Automation, kind.FindAction("counting-down", ReachKind.Value)!.Category);
     }
 
     /// <summary>A survival kit's respawn name is its name, as a medical room's is; the kit is known by its capability.</summary>
@@ -52,7 +52,7 @@ public class PlacementTests
         var kit = ship.Rig.Weld(new Standing<IMyAssembler>(1, "Survival Kit", typeof(MyObjectBuilder_SurvivalKit), "SurvivalKit"))
             .Carrying("SpawnName", "Spawn name", ValueKind.Text);
 
-        Assert.Equal(Category.Identity, ship.Entity(kit.Id).Kind.FindAction("SpawnName", Nature.Value)!.Category);
+        Assert.Equal(Category.Identity, ship.Entity(kit.Id).Kind.FindAction("SpawnName", ReachKind.Value)!.Category);
     }
 
     /// <summary>The pull a gravity generator exerts fits no heading there is, so it is Other.</summary>
@@ -65,9 +65,9 @@ public class PlacementTests
             .Carrying("Width", "Width", ValueKind.Real, "1", "150");
         var kind = ship.Entity(field.Id).Kind;
 
-        Assert.Equal(Category.Other, kind.FindAction("Gravity", Nature.Value)!.Category);
-        Assert.Equal(Category.Other, kind.FindAction("Width", Nature.Value)!.Category);
-        Assert.Equal(Category.Other, kind.FindAction("reverse", Nature.Native)!.Category);
+        Assert.Equal(Category.Other, kind.FindAction("Gravity", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Other, kind.FindAction("Width", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Other, kind.FindAction("reverse", ReachKind.Native)!.Category);
     }
 
     /// <summary>How whole a block is reads under Repair, on any block.</summary>
@@ -77,9 +77,9 @@ public class PlacementTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Door(1, "Door").Id).Kind;
 
-        Assert.Equal(Category.Repair, kind.FindAction("integrity", Nature.Value)!.Category);
-        Assert.Equal(Category.Repair, kind.FindAction("damaged", Nature.Value)!.Category);
-        Assert.Equal(Category.Repair, kind.FindAction("build-level", Nature.Value)!.Category);
+        Assert.Equal(Category.Repair, kind.FindAction("integrity", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Repair, kind.FindAction("damaged", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Repair, kind.FindAction("build-level", ReachKind.Value)!.Category);
     }
 
     /// <summary>Who sits in a cockpit, and whether they control it, read under Usage.</summary>
@@ -89,8 +89,8 @@ public class PlacementTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Rig.Cockpit(1, "Cockpit").Id).Kind;
 
-        Assert.Equal(Category.Usage, kind.FindAction("occupant-name", Nature.Value)!.Category);
-        Assert.Equal(Category.Usage, kind.FindAction("under-control", Nature.Value)!.Category);
+        Assert.Equal(Category.Usage, kind.FindAction("occupant-name", ReachKind.Value)!.Category);
+        Assert.Equal(Category.Usage, kind.FindAction("under-control", ReachKind.Value)!.Category);
     }
 
     /// <summary>What is fitted to an upgrade module, counted, reads under State.</summary>
@@ -101,8 +101,8 @@ public class PlacementTests
         var module = ship.Rig.Weld(new Standing<IMyUpgradeModule>(1, "Module", typeof(MyObjectBuilder_UpgradeModule), "Module"));
         var kind = ship.Entity(module.Id).Kind;
 
-        Assert.Equal(Category.State, kind.FindAction("connections", Nature.Value)!.Category);
-        Assert.Equal(Category.State, kind.FindAction("upgrade-count", Nature.Value)!.Category);
+        Assert.Equal(Category.State, kind.FindAction("connections", ReachKind.Value)!.Category);
+        Assert.Equal(Category.State, kind.FindAction("upgrade-count", ReachKind.Value)!.Category);
     }
 
     /// <summary>A panel's text, said as text, and its app are what it writes on itself.</summary>
@@ -111,10 +111,10 @@ public class PlacementTests
     {
         var ship = new Rigged();
         var panel = ship.Rig.TextPanel(1, "Panel");
-        var text = ship.Entity(panel.Id).Kind.FindAction(TextPanel.Shown, Nature.Value)!;
+        var text = ship.Entity(panel.Id).Kind.FindAction(TextPanel.Shown, ReachKind.Value)!;
 
         Assert.Equal("text", text.Text);
         Assert.Equal(Category.Screen, text.Category);
-        Assert.Equal(Category.Screen, ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, Nature.Value)!.Category);
+        Assert.Equal(Category.Screen, ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, ReachKind.Value)!.Category);
     }
 }

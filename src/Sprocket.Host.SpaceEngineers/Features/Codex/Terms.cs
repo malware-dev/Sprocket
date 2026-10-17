@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
             _trouble = trouble.ToString();
             if (_trouble.Length > 0)
-                Told.Say($"codex: {_trouble}");
+                GameLog.Say($"codex: {_trouble}");
         }
 
         /// <summary>The term called <paramref name="id" /> among those read, or null where there is none.</summary>

@@ -59,7 +59,7 @@ public class UnitTests
         var door = sim.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door").Kind;
         var open = door.Actions.First(action => action.Id == "how-far-open");
 
-        var fields = Comparing.Fields(open, door.Events);
+        var fields = ComparisonQuestion.Fields(open, door.Events);
         var compared = fields[1];
         Assert.Equal(" %", compared.Unit);
         Assert.True(SliderField.Takes(compared));

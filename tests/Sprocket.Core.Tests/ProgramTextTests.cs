@@ -19,7 +19,7 @@ public class ProgramTextTests
 {
     static readonly Values Store = new Values();
 
-    static string Save(Automation program) => Scribe.Save(program, Store);
+    static string Save(Automation program) => ProgramWriter.Save(program, Store);
 
     /// <summary>Declares a block called <paramref name="name" />, which is what a program names.</summary>
     static void Block(Automation program, string name) =>
@@ -28,7 +28,7 @@ public class ProgramTextTests
     /// <summary>Loads, and refuses anything this file writes that does not read back cleanly.</summary>
     static void Load(string text, Automation program)
     {
-        Assert.Equal("", Reader.Load(text, program, Store));
+        Assert.Equal("", ProgramReader.Load(text, program, Store));
     }
 
     /// <summary>
@@ -83,7 +83,7 @@ public class ProgramTextTests
         out1.Name = "Let me out";
         out1.Annotation = "Inside to outside.";
         airlock.Enabled = false;
-        airlock.Halt = new Halt(SequenceProblem.MissingTarget, out1.Number, 2, Host.SpaceEngineers.World.Trouble.None, "Front Inner Door");
+        airlock.Halt = new Halt(SequenceProblem.MissingTarget, out1.Number, 2, BlockTrouble.None, "Front Inner Door");
 
         var close = new Act("close");
         close.Targets.Add("inner");
@@ -281,17 +281,17 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(arm, null);
 
-        var reverse = new Act("Reverse") { Form = Nature.Action };
+        var reverse = new Act("Reverse") { Form = ReachKind.Action };
         reverse.Targets.Add("rotor");
         sequence.Steps.Add(reverse);
 
-        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = Nature.Native };
+        var rotate = new Act(Blocks.Rotor.RotateTo) { Form = ReachKind.Native };
         rotate.Targets.Add("rotor");
         rotate.Arguments.Add(Literal.Of(90L));
         rotate.Arguments.Add(Literal.Of(2.5));
         sequence.Steps.Add(rotate);
 
-        var speed = new Act("Velocity") { Form = Nature.Value };
+        var speed = new Act("Velocity") { Form = ReachKind.Value };
         speed.Targets.Add("rotor");
         speed.Arguments.Add(Literal.Of(5.0));
         sequence.Steps.Add(speed);
@@ -306,19 +306,19 @@ public class ProgramTextTests
         var steps = after.Sequences[0].Steps;
 
         var game = Assert.IsType<Act>(steps[0]);
-        Assert.Equal(Nature.Action, game.Form);
+        Assert.Equal(ReachKind.Action, game.Form);
         Assert.Equal("Reverse", game.ActionId);
         Assert.Empty(game.Arguments);
 
         var own = Assert.IsType<Act>(steps[1]);
-        Assert.Equal(Nature.Native, own.Form);
+        Assert.Equal(ReachKind.Native, own.Form);
         Assert.Equal(Blocks.Rotor.RotateTo, own.ActionId);
         Assert.Equal(2, own.Arguments.Count);
         Assert.Equal(90, own.Arguments[0].Whole);
         Assert.Equal(2.5, own.Arguments[1].Real);
 
         var value = Assert.IsType<Act>(steps[2]);
-        Assert.Equal(Nature.Value, value.Form);
+        Assert.Equal(ReachKind.Value, value.Form);
         Assert.Equal("Velocity", value.ActionId);
     }
 
@@ -334,14 +334,14 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
 
-        var colour = new Act("SetColor") { Form = Nature.Action };
+        var colour = new Act("SetColor") { Form = ReachKind.Action };
         colour.Targets.Add("light");
         colour.Arguments.Add(Literal.Of(255));
         colour.Arguments.Add(Literal.Of(136));
         colour.Arguments.Add(Literal.Of(0));
         sequence.Steps.Add(colour);
 
-        var each = new Act("SetEverything") { Form = Nature.Action };
+        var each = new Act("SetEverything") { Form = ReachKind.Action };
         each.Targets.Add("light");
         each.Arguments.Add(Literal.Of("four and a half"));
         each.Arguments.Add(Literal.Of(4.5));
@@ -400,7 +400,7 @@ public class ProgramTextTests
         program.Restore(Declared("lcd", "lcd", values, 1, "Airlock Screen"));
 
         var sequence = program.AddSequence(program.AddSystem(), null);
-        var show = new Act("Show") { Form = Nature.Action };
+        var show = new Act("Show") { Form = ReachKind.Action };
         show.Targets.Add("lcd");
         show.Arguments.Add(Literal.Of(text));
         sequence.Steps.Add(show);
@@ -448,7 +448,7 @@ public class ProgramTextTests
 
         var sequence = program.AddSequence(lights, null);
         var radius = new Act("Radius");
-        radius.Form = Nature.Value;
+        radius.Form = ReachKind.Value;
         radius.Targets.Add("light");
         radius.Arguments.Add(Literal.Of(4.5));
         sequence.Steps.Add(radius);

@@ -29,10 +29,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Full = Reading.Of<IMyJumpDrive>(Charged);
 
-        static readonly Doing Recharges = Doing.Of<IMyJumpDrive, Recharging>(Recharging.Read,
+        static readonly OwnAction Recharges = OwnAction.Of<IMyJumpDrive, RechargeOptions>(RechargeOptions.Read,
             (drive, recharging, seen) => drive.Recharge = true, Full,
             (drive, recharging, seen) => !recharging.Waits,
-            (drive, recharging, seen) => recharging.Waits ? Why(drive) : Trouble.None);
+            (drive, recharging, seen) => recharging.Waits ? Why(drive) : BlockTrouble.None);
 
         static readonly Being Status = Being.OneOf<IMyJumpDrive>(Statuses, drive => Position(drive.Status));
 
@@ -67,7 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction(Recharge, "recharge", Recharges, (string)null).Lasting().Asking(Recharging.Asked())
+            kind.WithAction(Recharge, "recharge", Recharges, (string)null).Lasting().Asking(RechargeOptions.Asked())
                 .In(Category.Power)
                 .Renaming("Recharge", true, "recharging").Stating("Recharge")
                 .Renaming("Recharge", false, "toggle recharging")
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var store = block as IMyStoredPowerRatio;
-            return block is IMyJumpDrive && store != null ? new Storing(store, told) : null;
+            return block is IMyJumpDrive && store != null ? new ChargeListener(store, told) : null;
         }
 
         /// <summary>Why this drive will not charge, or none while it might.</summary>
@@ -93,12 +93,12 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Switched off, unpowered or damaged is said by the step being stalled. Recharging switched off is its own answer:
         /// whatever switched it has overruled the step, and nothing is heading towards charged any more.
         /// </remarks>
-        static Trouble Why(IMyJumpDrive drive)
+        static BlockTrouble Why(IMyJumpDrive drive)
         {
             if (Charged(drive) || drive.Recharge)
-                return Trouble.None;
+                return BlockTrouble.None;
 
-            return Trouble.Fatal(Cause.JumpDriveRechargeOff);
+            return BlockTrouble.Fatal(Cause.JumpDriveRechargeOff);
         }
 
         static bool Charged(IMyJumpDrive drive)

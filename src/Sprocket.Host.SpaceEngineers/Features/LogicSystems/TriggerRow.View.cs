@@ -46,8 +46,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 }
             });
 
-            Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f) }.As(out _duplicate));
-            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f) }.As(out _delete));
+            Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f) }.As(out _duplicate));
+            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f) }.As(out _delete));
         }
     }
 }

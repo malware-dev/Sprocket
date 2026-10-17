@@ -61,7 +61,7 @@ namespace Lumel.Text
             var escaped = new StringBuilder(text.Length + 8);
             for (var i = 0; i < text.Length; i++)
             {
-                if (Inlines.IsAsciiPunctuation(text[i]))
+                if (InlineReader.IsAsciiPunctuation(text[i]))
                     escaped.Append('\\');
 
                 escaped.Append(text[i]);
@@ -308,7 +308,7 @@ namespace Lumel.Text
             if (current == null)
                 return;
 
-            Inlines.Parse(open.ToString(), current.Runs);
+            InlineReader.Parse(open.ToString(), current.Runs);
             blocks.Add(current);
             current = null;
             open.Clear();
@@ -366,7 +366,7 @@ namespace Lumel.Text
             for (var i = 0; i < table.Columns.Count; i++)
             {
                 var cell = new Block(BlockKind.Cell, level);
-                Inlines.Parse(i < cells.Count ? cells[i].Trim() : "", cell.Runs);
+                InlineReader.Parse(i < cells.Count ? cells[i].Trim() : "", cell.Runs);
                 row.Blocks.Add(cell);
             }
 

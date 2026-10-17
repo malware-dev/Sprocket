@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public abstract class Edit<T>
     {
         /// <summary>What this did, as it will be offered back.</summary>
-        public abstract Change Change { get; }
+        public abstract ChangeKind Change { get; }
 
         /// <summary>Makes this change to <paramref name="subject" />.</summary>
         public abstract void Apply(T subject);

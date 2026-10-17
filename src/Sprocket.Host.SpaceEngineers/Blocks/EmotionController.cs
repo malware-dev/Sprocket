@@ -20,7 +20,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <remarks>From the game's emotion controller component, which makes one action for each such texture.</remarks>
         const string Faces = @"\emotes\";
 
-        static readonly Doing Shows = Doing.Of<IMyEmotionControllerBlock, Chosen>(Chosen.Read, Showed);
+        static readonly OwnAction Shows = OwnAction.Of<IMyEmotionControllerBlock, Chosen>(Chosen.Read, Showed);
 
         readonly List<Offer> _offered = new List<Offer>();
 
@@ -51,14 +51,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             var face = Field.Among("face", words, means);
-            face.Entry = Entry.Text;
+            face.Entry = FieldInput.Text;
             face.Needed = true;
 
             kind.WithAction(ShowFace, "show face", Shows, face).In(Category.Screen);
         }
 
         /// <summary>Runs the game's own action for the face a step chose.</summary>
-        static void Showed(IMyEmotionControllerBlock controller, Chosen chosen, Recall seen)
+        static void Showed(IMyEmotionControllerBlock controller, Chosen chosen, ReaderMemory seen)
         {
             Toolbars.Perform(controller, chosen.Face, null);
         }

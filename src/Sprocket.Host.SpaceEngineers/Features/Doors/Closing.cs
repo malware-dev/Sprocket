@@ -25,8 +25,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         public static int Write(ref Closing closing, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteData.Write(closing.Door, data, ref offset);
-            ByteData.Write(closing.Seconds, data, ref offset);
+            ByteCodec.Write(closing.Door, data, ref offset);
+            ByteCodec.Write(closing.Seconds, data, ref offset);
             return offset - start;
         }
 
@@ -35,8 +35,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         {
             var start = offset;
             closing = new Closing();
-            ByteData.TryReadInt64(data, ref offset, out closing.Door);
-            ByteData.TryReadInt32(data, ref offset, out closing.Seconds);
+            ByteCodec.TryReadInt64(data, ref offset, out closing.Door);
+            ByteCodec.TryReadInt32(data, ref offset, out closing.Seconds);
             return offset - start;
         }
     }

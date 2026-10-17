@@ -63,10 +63,10 @@ public class GasTests
         tank.Filled = 0.25;
         var kind = ship.Entity(tank.Id).Kind;
 
-        var level = kind.FindAction("hydrogen-level", Nature.Value)!;
+        var level = kind.FindAction("hydrogen-level", ReachKind.Value)!;
         Assert.Equal("Hydrogen level", level.Named);
         Assert.Equal(Category.Gas, level.Category);
-        Assert.Null(kind.FindAction("oxygen-level", Nature.Value));
+        Assert.Null(kind.FindAction("oxygen-level", ReachKind.Value));
         Assert.Equal(25.0, Read(ship, tank, "hydrogen-level").Real, 3);
         Assert.Equal(tank.Capacity, Read(ship, tank, "capacity").Real, 3);
     }
@@ -145,7 +145,7 @@ public class GasTests
     {
         var ship = new Rigged();
         var tank = ship.Tank(1, "Tank");
-        var action = ship.Entity(tank.Id).Kind.FindAction(Blocks.Tank.Stockpile, Nature.Native)!;
+        var action = ship.Entity(tank.Id).Kind.FindAction(Blocks.Tank.Stockpile, ReachKind.Native)!;
 
         var fields = new List<Field>();
         action.Fields(fields);
@@ -161,9 +161,9 @@ public class GasTests
         stockpile.Targets.Add(automation.Declare(ship.World, ship.Entity(tank.Id)).Name);
         sequence.Steps.Add(stockpile);
 
-        var saved = Scribe.Save(automation, ship.World.Values);
+        var saved = ProgramWriter.Save(automation, ship.World.Values);
         Assert.Contains("call ext.stockpile(off) on [ ", saved);
-        Assert.Equal("", Reader.Load(saved, new Automation(), ship.World.Values));
+        Assert.Equal("", ProgramReader.Load(saved, new Automation(), ship.World.Values));
     }
 
     /// <summary>A tank's stockpiling is a state of the tank, which a check reads as the tank itself.</summary>
@@ -172,7 +172,7 @@ public class GasTests
     {
         var ship = new Rigged();
         var tank = ship.Tank(1, "Tank");
-        Assert.True(ship.Entity(tank.Id).Kind.FindAction("Stockpile", Nature.Value)!.IsStatus);
+        Assert.True(ship.Entity(tank.Id).Kind.FindAction("Stockpile", ReachKind.Value)!.IsStatus);
 
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
@@ -198,13 +198,13 @@ public class GasTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Tank(1, "Tank").Id).Kind;
 
-        Assert.Equal("refill bottles", kind.FindAction("Refill", Nature.Action)!.Text);
+        Assert.Equal("refill bottles", kind.FindAction("Refill", ReachKind.Action)!.Text);
 
-        var automatic = kind.FindAction("Auto-Refill", Nature.Value)!;
+        var automatic = kind.FindAction("Auto-Refill", ReachKind.Value)!;
         Assert.Equal("Refill bottles automatically", automatic.Named);
         Assert.False(automatic.Hidden);
 
-        var toggle = kind.FindAction("Auto-Refill", Nature.Action)!;
+        var toggle = kind.FindAction("Auto-Refill", ReachKind.Action)!;
         Assert.Equal("toggle refill bottles automatically", toggle.Text);
         Assert.True(toggle.Hidden);
         Assert.True(automatic.Flips);
@@ -225,14 +225,14 @@ public class GasTests
                      "room-status", "airtight", "oxygen-level", "flow-into-the-room", "flow-out-of-the-room",
                      "in-a-world-with-airtightness", "Depressurize"
                  })
-            Assert.True(Vetted(kind, id, Nature.Value), id);
+            Assert.True(Vetted(kind, id, ReachKind.Value), id);
 
-        Assert.True(Vetted(kind, Blocks.Vent.Pressurize, Nature.Native));
-        Assert.True(Vetted(kind, Blocks.Vent.Depressurize, Nature.Native));
-        Assert.True(Vetted(kind, "Depressurize", Nature.Action));
+        Assert.True(Vetted(kind, Blocks.Vent.Pressurize, ReachKind.Native));
+        Assert.True(Vetted(kind, Blocks.Vent.Depressurize, ReachKind.Native));
+        Assert.True(Vetted(kind, "Depressurize", ReachKind.Action));
 
-        Assert.False(Vetted(kind, "Depressurize_On", Nature.Action));
-        Assert.False(Vetted(kind, "Depressurize_Off", Nature.Action));
+        Assert.False(Vetted(kind, "Depressurize_On", ReachKind.Action));
+        Assert.False(Vetted(kind, "Depressurize_Off", ReachKind.Action));
     }
 
     /// <summary>
@@ -246,14 +246,14 @@ public class GasTests
         var kind = ship.Entity(ship.Tank(1, "Tank").Id).Kind;
 
         foreach (var id in new[] { "hydrogen-level", "capacity", "Stockpile", "Auto-Refill" })
-            Assert.True(Vetted(kind, id, Nature.Value), id);
+            Assert.True(Vetted(kind, id, ReachKind.Value), id);
 
-        Assert.True(Vetted(kind, Blocks.Tank.Stockpile, Nature.Native));
+        Assert.True(Vetted(kind, Blocks.Tank.Stockpile, ReachKind.Native));
         foreach (var id in new[] { "Stockpile", "Refill", "Auto-Refill" })
-            Assert.True(Vetted(kind, id, Nature.Action), id);
+            Assert.True(Vetted(kind, id, ReachKind.Action), id);
 
-        Assert.False(Vetted(kind, "Stockpile_On", Nature.Action));
-        Assert.False(Vetted(kind, "Stockpile_Off", Nature.Action));
+        Assert.False(Vetted(kind, "Stockpile_On", ReachKind.Action));
+        Assert.False(Vetted(kind, "Stockpile_Off", ReachKind.Action));
     }
 
     /// <summary>
@@ -275,21 +275,21 @@ public class GasTests
         var kind = ship.Entity(chamber.Id).Kind;
 
         foreach (var id in new[] { "occupied", "occupant-name", "oxygen-level", "speed" })
-            Assert.True(Vetted(kind, id, Nature.Value), id);
+            Assert.True(Vetted(kind, id, ReachKind.Value), id);
 
         foreach (var id in new[] { "DampenersOverride", "HandBrake", "Park", "MainCockpit" })
         {
-            Assert.True(Vetted(kind, id, Nature.Value), id);
-            Assert.True(Vetted(kind, id, Nature.Action), id);
-            Assert.False(Vetted(kind, id + "_On", Nature.Action), id + "_On");
-            Assert.False(Vetted(kind, id + "_Off", Nature.Action), id + "_Off");
+            Assert.True(Vetted(kind, id, ReachKind.Value), id);
+            Assert.True(Vetted(kind, id, ReachKind.Action), id);
+            Assert.False(Vetted(kind, id + "_On", ReachKind.Action), id + "_On");
+            Assert.False(Vetted(kind, id + "_Off", ReachKind.Action), id + "_Off");
         }
 
-        Assert.False(Vetted(kind, "ControlThrusters", Nature.Value));
-        Assert.False(Vetted(kind, "ControlThrusters", Nature.Action));
+        Assert.False(Vetted(kind, "ControlThrusters", ReachKind.Value));
+        Assert.False(Vetted(kind, "ControlThrusters", ReachKind.Action));
 
-        Assert.Null(kind.FindAction("HorizonIndicator", Nature.Value));
-        Assert.Null(kind.FindAction("HorizonIndicator", Nature.Action));
+        Assert.Null(kind.FindAction("HorizonIndicator", ReachKind.Value));
+        Assert.Null(kind.FindAction("HorizonIndicator", ReachKind.Action));
     }
 
     /// <summary>A cryo chamber says the ship's speed once, as every ship controller does, under the cockpit's heading.</summary>
@@ -310,13 +310,13 @@ public class GasTests
         }
 
         Assert.Equal(1, speeds);
-        var seated = ship.Entity(cockpit.Id).Kind.FindAction("speed", Nature.Value)!;
-        Assert.Equal(seated.Category, kind.FindAction("speed", Nature.Value)!.Category);
+        var seated = ship.Entity(cockpit.Id).Kind.FindAction("speed", ReachKind.Value)!;
+        Assert.Equal(seated.Category, kind.FindAction("speed", ReachKind.Value)!.Category);
         Assert.Equal(12.5, Ran.Read(ship, chamber, "speed").Real, 3);
     }
 
     /// <summary>Whether the member <paramref name="id" /> of <paramref name="kind" />, reached as <paramref name="form" />, is one Sprocket vouches for.</summary>
-    static bool Vetted(EntityKind kind, string id, Nature form)
+    static bool Vetted(EntityKind kind, string id, ReachKind form)
     {
         var member = kind.FindAction(id, form);
         Assert.True(member != null, id + " is not on the block as " + form);
@@ -327,8 +327,8 @@ public class GasTests
     static Literal Read(Rigged ship, Fitting fitting, string id)
     {
         var entity = ship.Entity(fitting.Id);
-        var being = entity.Kind.FindAction(id, Nature.Value)!.Being!;
-        return being.Gauge(entity.Block, new Literal[0], being.Remembers ? new Recall() : null).Read();
+        var being = entity.Kind.FindAction(id, ReachKind.Value)!.Being!;
+        return being.Gauge(entity.Block, new Literal[0], being.Remembers ? new ReaderMemory() : null).Read();
     }
 
     /// <summary>How many frames after <paramref name="change" /> a trigger on <paramref name="fitting" /> switched the lamp on.</summary>

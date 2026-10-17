@@ -28,10 +28,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>How many messages the controller's terminal saves, numbered from 1.</summary>
         const int Saved = 8;
 
-        static readonly Doing Says = Doing.Of<IMyBroadcastController, Words>(Words.Read,
+        static readonly OwnAction Says = OwnAction.Of<IMyBroadcastController, Words>(Words.Read,
             (controller, words, seen) => Chat(controller).SendMessage(words.Text));
 
-        static readonly Doing Sends = Doing.Of<IMyBroadcastController, Numbered>(Numbered.Read,
+        static readonly OwnAction Sends = OwnAction.Of<IMyBroadcastController, Numbered>(Numbered.Read,
             (controller, numbered, seen) => Chat(controller).SendMessage(numbered.Index));
 
         /// <inheritdoc />
@@ -75,7 +75,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field AskedText()
         {
             var text = Field.Called("text");
-            text.Entry = Entry.Text;
+            text.Entry = FieldInput.Text;
             text.Needed = true;
             return text;
         }
@@ -84,7 +84,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field AskedMessage()
         {
             var message = Field.Between("message", "1", Saved.ToString());
-            message.Entry = Entry.Whole;
+            message.Entry = FieldInput.Whole;
             message.Needed = true;
             return message;
         }

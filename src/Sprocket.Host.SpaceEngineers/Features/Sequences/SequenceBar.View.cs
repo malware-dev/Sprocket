@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Spacing = 8f,
                 Children =
                 {
-                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = Fixed.Size(16f, 16f) }.As(out _light),
+                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),
                     new Label { Style = Styles.Status }.As(out _status),
                     new Label { Style = Styles.Status, IsVisible = false }.As(out _problem),
                     new Label { Style = Styles.Aside }.As(out _lastRun)

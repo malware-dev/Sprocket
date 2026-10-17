@@ -36,7 +36,7 @@ public class ScreensTests
         installation.Fill("status", new[] { program.Declare(ship.World, ship.Entity(board.Id)).Name }, new[] { facet });
 
         var sequence = program.AddSequence(system, null!);
-        var act = new Act(actionId) { Form = Nature.Native, Provider = BlockKinds.Own };
+        var act = new Act(actionId) { Form = ReachKind.Native, Provider = BlockKinds.Own };
         act.Targets.Add("status");
         foreach (var argument in arguments)
             act.Arguments.Add(argument);
@@ -66,16 +66,16 @@ public class ScreensTests
         var kind = ship.Entity(board.Id).Kind;
         var screen = HostTypes.Returned("screen");
 
-        Assert.Same(screen, kind.FindAction(ScreenType.ShowText, Nature.Native)!.Type);
-        Assert.True(kind.FindAction(ScreenType.ShowText, Nature.Native)!.Vetted);
-        Assert.True(kind.FindAction(ScreenType.SetUp, Nature.Native)!.Vetted);
+        Assert.Same(screen, kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Type);
+        Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
+        Assert.True(kind.FindAction(ScreenType.SetUp, ReachKind.Native)!.Vetted);
         foreach (var id in new[] { "content", "text-color", "font-size", "alignment", "keep-aspect-ratio" })
         {
-            Assert.True(kind.FindAction(id, Nature.Value)!.Vetted, id + " is not vetted");
-            Assert.Same(screen, kind.FindAction(id, Nature.Value)!.Type);
+            Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
+            Assert.Same(screen, kind.FindAction(id, ReachKind.Value)!.Type);
         }
 
-        Assert.False(kind.FindAction("FontSize", Nature.Value)!.Vetted);
+        Assert.False(kind.FindAction("FontSize", ReachKind.Value)!.Vetted);
     }
 
     /// <summary>A block offers each of its screens by number and by the name the game gives it.</summary>
@@ -96,7 +96,7 @@ public class ScreensTests
         var (ship, board) = Built();
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
-        var show = new Act(ScreenType.ShowText) { Form = Nature.Native, Provider = BlockKinds.Own };
+        var show = new Act(ScreenType.ShowText) { Form = ReachKind.Native, Provider = BlockKinds.Own };
         show.Targets.Add(automation.Declare(ship.World, ship.Entity(board.Id)).Name);
         show.Arguments.Add(Literal.Of(new string('x', 5000)));
         sequence.Steps.Add(show);
@@ -226,16 +226,16 @@ public class ScreensTests
         var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
         var values = new Values();
 
-        var text = Scribe.Save(program, values);
+        var text = ProgramWriter.Save(program, values);
         Assert.Contains("slot status expects ext.screen", text);
         Assert.Contains("status = [ ext.screen(2) on [ ", text);
 
         var read = new Automation();
-        Assert.Equal("", Reader.Load(text, read, values));
+        Assert.Equal("", ProgramReader.Load(text, read, values));
         var system = read.Systems[0];
         Assert.Equal(HostTypes.All[0].Id, system.FindPart("status")!.Holds);
         Assert.Equal(new[] { 2 }, system.Instances[0].Facets("status"));
-        Assert.Equal(text, Scribe.Save(read, values));
+        Assert.Equal(text, ProgramWriter.Save(read, values));
     }
 
     /// <summary>A slot can expect only a type the host provides; anything else qualified is refused, saying so.</summary>
@@ -245,8 +245,8 @@ public class ScreensTests
         var (ship, board) = Built();
         var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
         var values = new Values();
-        var text = Scribe.Save(program, values).Replace("expects ext.screen", "expects ext.window");
+        var text = ProgramWriter.Save(program, values).Replace("expects ext.screen", "expects ext.window");
 
-        Assert.Contains("no type 'ext.window' the host provides", Reader.Load(text, new Automation(), values));
+        Assert.Contains("no type 'ext.window' the host provides", ProgramReader.Load(text, new Automation(), values));
     }
 }

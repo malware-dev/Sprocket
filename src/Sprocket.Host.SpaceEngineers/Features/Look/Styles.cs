@@ -47,10 +47,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                StrongFont = Lettering.Bold,
-                EmphasisFont = Lettering.Italic,
-                StrongEmphasisFont = Lettering.BoldItalic,
-                CodeFont = Lettering.Mono,
+                StrongFont = TextSizes.Bold,
+                EmphasisFont = TextSizes.Italic,
+                StrongEmphasisFont = TextSizes.BoldItalic,
+                CodeFont = TextSizes.Mono,
                 FontSize = 20f,
                 Heading1Size = 24f,
                 Heading2Size = 20f,
@@ -80,10 +80,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                StrongFont = Lettering.Bold,
-                EmphasisFont = Lettering.Italic,
-                StrongEmphasisFont = Lettering.BoldItalic,
-                CodeFont = Lettering.Mono,
+                StrongFont = TextSizes.Bold,
+                EmphasisFont = TextSizes.Italic,
+                StrongEmphasisFont = TextSizes.BoldItalic,
+                CodeFont = TextSizes.Mono,
                 FontSize = 20f,
                 Heading1Size = 40f,
                 Heading2Size = 32f,
@@ -107,10 +107,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         {
             Base =
             {
-                Font = Lettering.Sans,
-                StrongFont = Lettering.SansBold,
-                EmphasisFont = Lettering.SansItalic,
-                StrongEmphasisFont = Lettering.SansBoldItalic,
+                Font = TextSizes.Sans,
+                StrongFont = TextSizes.SansBold,
+                EmphasisFont = TextSizes.SansItalic,
+                StrongEmphasisFont = TextSizes.SansBoldItalic,
                 Padding = new Thickness(20f, 24f)
             }
         };
@@ -166,10 +166,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base =
             {
                 Font = MyFontEnum.White,
-                StrongFont = Lettering.Bold,
-                EmphasisFont = Lettering.Italic,
-                StrongEmphasisFont = Lettering.BoldItalic,
-                CodeFont = Lettering.Mono,
+                StrongFont = TextSizes.Bold,
+                EmphasisFont = TextSizes.Italic,
+                StrongEmphasisFont = TextSizes.BoldItalic,
+                CodeFont = TextSizes.Mono,
                 FontSize = 24f,
                 Color = Palette.Ink,
                 StrongColor = Palette.Ink,
@@ -312,7 +312,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Table-talk said in a line of its own: a word about the game itself rather than the world, in italics.</summary>
         public static readonly TextStyle TableTalk = new TextStyle
         {
-            Base = { Font = Lettering.Italic, FontSize = 16f, Color = Palette.Faint }
+            Base = { Font = TextSizes.Italic, FontSize = 16f, Color = Palette.Faint }
         };
 
         /// <summary>What a thing is doing, said in a line of its own tools rather than under its name.</summary>
@@ -624,7 +624,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The term in the codex's margin that heads a section, the terms of the section listed under it.</summary>
         public static readonly ButtonStyle CodexSection = new ButtonStyle(CodexEntry)
         {
-            Base = { Font = Lettering.Bold, Padding = new Thickness(12f, 16f, 12f, 6f) }
+            Base = { Font = TextSizes.Bold, Padding = new Thickness(12f, 16f, 12f, 6f) }
         };
 
         /// <summary>The section heading in the codex's margin whose page is being read.</summary>

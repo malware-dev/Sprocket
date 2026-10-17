@@ -27,20 +27,20 @@ public class PistonTests
         var kind = ship.Entity(piston.Id).Kind;
 
         foreach (var id in new[] { Blocks.Piston.Extend, Blocks.Piston.Retract, Blocks.Piston.MoveTo })
-            Assert.True(kind.FindAction(id, Nature.Native)!.Lasts, id + " is not waited for");
+            Assert.True(kind.FindAction(id, ReachKind.Native)!.Lasts, id + " is not waited for");
 
         // Extending and retracting are said by Sprocket's own acts, and a move to a position stands in
         // for the game's setter that does the same.
-        Assert.True(kind.FindAction("Extend", Nature.Action)!.Hidden);
-        Assert.True(kind.FindAction("Retract", Nature.Action)!.Hidden);
-        Assert.True(kind.FindAction("SetAndMove", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("Extend", ReachKind.Action)!.Hidden);
+        Assert.True(kind.FindAction("Retract", ReachKind.Action)!.Hidden);
+        Assert.True(kind.FindAction("SetAndMove", ReachKind.Action)!.Hidden);
 
-        Assert.Equal("Velocity", kind.FindAction("Velocity", Nature.Value)!.Named);
-        Assert.Equal("Maximum distance", kind.FindAction("UpperLimit", Nature.Value)!.Named);
-        Assert.Equal("Reverse", kind.FindAction("Reverse", Nature.Action)!.Named);
+        Assert.Equal("Velocity", kind.FindAction("Velocity", ReachKind.Value)!.Named);
+        Assert.Equal("Maximum distance", kind.FindAction("UpperLimit", ReachKind.Value)!.Named);
+        Assert.Equal("Reverse", kind.FindAction("Reverse", ReachKind.Action)!.Named);
 
         var asked = new List<Field>();
-        kind.FindAction(Blocks.Piston.MoveTo, Nature.Native)!.Fields(asked);
+        kind.FindAction(Blocks.Piston.MoveTo, ReachKind.Native)!.Fields(asked);
         Assert.Equal(2, asked.Count);
         Assert.Equal("0", asked[0].Least);
         Assert.Equal("10", asked[0].Most);

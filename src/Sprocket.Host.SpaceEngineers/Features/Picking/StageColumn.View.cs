@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 {
                     new Label { Style = Styles.ColumnTitle, Placement = Flex.Grow }.As(out _title),
                     new HStack().As(out _viewLinks),
-                    new Glyph { Symbol = Symbols.HiddenHidden, Style = Styles.Icon, Placement = Fixed.Size(28f, 24f), IsVisible = false }
+                    new Glyph { Symbol = Symbols.HiddenHidden, Style = Styles.Icon, Placement = FixedSize.Size(28f, 24f), IsVisible = false }
                         .As(out _hidden)
                 }
             });
@@ -68,7 +68,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     new TextBox { Style = Styles.Search, Focusable = true, Hint = "Search", Placement = Flex.Grow }.As(out _narrow),
 
                     // Made invisible rather than taken out, so nothing moves when the first letter is typed.
-                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }
+                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(28f, 28f), IsVisible = false }
                         .As(out _narrowClear)
                 }
             }.As(out _search));
@@ -92,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                             ListField.Fold()
                         }
                     }.As(out _kindLine),
-                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = Fixed.Size(28f, 28f), IsVisible = false }
+                    new Glyph { Symbol = Symbols.Close, Style = Styles.Icon, Placement = FixedSize.Size(28f, 28f), IsVisible = false }
                         .As(out _kindClear)
                 }
             }.As(out _kindHead));
@@ -146,7 +146,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                                 {
                                     Symbol = Symbols.Close,
                                     Style = Styles.Icon,
-                                    Placement = Fixed.Size(28f, 28f),
+                                    Placement = FixedSize.Size(28f, 28f),
                                     IsVisible = false
                                 }.As(out _kindNarrowClear)
                             }

@@ -25,7 +25,7 @@ public static class Given
     /// <summary>A step that switches <paramref name="targets" /> on or off, as the editor writes one: by setting their power.</summary>
     public static Act Power(bool on, params string[] targets)
     {
-        var act = new Act("power") { Form = Nature.Value, Provider = BlockKinds.Own };
+        var act = new Act("power") { Form = ReachKind.Value, Provider = BlockKinds.Own };
         act.Arguments.Add(Literal.Of(on));
         foreach (var target in targets)
             act.Targets.Add(target);

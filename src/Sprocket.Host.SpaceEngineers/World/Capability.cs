@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Sprocket exists.
     /// <para>
     /// <b>Holds nothing about any one block.</b> What a member remembers of a block between looks belongs to whatever
-    /// reads it - see <see cref="Recall" /> - so one capability serves every block of every construct.
+    /// reads it - see <see cref="ReaderMemory" /> - so one capability serves every block of every construct.
     /// </para>
     /// </remarks>
     public abstract class Capability

@@ -110,8 +110,8 @@ public class VocabularyTests
             + "}\n";
 
         var program = new Automation();
-        Assert.Equal("", Reader.Load(written, program, new Values()));
-        Assert.Equal(written, Scribe.Save(program, new Values()));
+        Assert.Equal("", ProgramReader.Load(written, program, new Values()));
+        Assert.Equal(written, ProgramWriter.Save(program, new Values()));
 
         var when = (WhenTrigger)program.Systems[0].Triggers[4];
         Assert.Equal(Quantifier.Sum, when.Quantifier);
@@ -128,11 +128,11 @@ public class VocabularyTests
     public void AComparisonReadsWhateverItsSpacing(string line)
     {
         var program = new Automation();
-        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 16\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Lamp {\n    sequence 1 {\n        " + line + "\n        }\n    }\n}\n",
             program, new Values()));
 
-        Assert.Contains("        if any Radius on [ light ] >= 4 then {\n", Scribe.Save(program, new Values()));
+        Assert.Contains("        if any Radius on [ light ] >= 4 then {\n", ProgramWriter.Save(program, new Values()));
     }
 
     /// <summary>Each comparison holds where the block's value stands that way to what it is compared with.</summary>
@@ -336,7 +336,7 @@ public class VocabularyTests
         var ship = new Ship();
         var ways = new[] { "up", "down" };
         var amount = Field.Between("by", "0", "10");
-        amount.Entry = Entry.Decimal;
+        amount.Entry = FieldInput.Decimal;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
             Being.Number<IMyTerminalBlock, double>(arguments => arguments[1].Real, (_, more, _) => more)
                 .Taking(Field.Among("way", ways, ways), amount));
@@ -369,14 +369,14 @@ public class VocabularyTests
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var set = new Act("level") { Form = Nature.Value, Provider = BlockKinds.Own };
+        var set = new Act("level") { Form = ReachKind.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Left));
         set.Arguments.Add(Literal.Of(3.0));
         cycle.Steps.Add(set);
 
         ship.Start();
         Assert.Contains("    sequence 1 {\n        set ext.level on [ 'Left Lamp' ] to 3\n",
-            Scribe.Save(ship.Program, new Values()));
+            ProgramWriter.Save(ship.Program, new Values()));
 
         ship.Runner.Call(cycle, cycle.System.First);
         ship.Tick();
@@ -399,7 +399,7 @@ public class VocabularyTests
             .Looked("A test value.");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
-        var set = new Act(value) { Form = Nature.Value, Provider = BlockKinds.Own };
+        var set = new Act(value) { Form = ReachKind.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Door));
         set.Arguments.Add(Literal.Name(name));
         cycle.Steps.Add(set);
@@ -423,7 +423,7 @@ public class VocabularyTests
             .Looked("A test value.").Between("0", "10");
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
-        var set = new Act("level") { Form = Nature.Value, Provider = BlockKinds.Own };
+        var set = new Act("level") { Form = ReachKind.Value, Provider = BlockKinds.Own };
         set.Targets.Add(ship.Name(ship.Left));
         set.Arguments.Add(Literal.Of(given));
         cycle.Steps.Add(set);
@@ -440,7 +440,7 @@ public class VocabularyTests
         Assert.Throws<InvalidOperationException>(() => kind.Between("0", "10"));
 
         kind.WithValue("level", "level", Being.Number<IMyTerminalBlock>(_ => 0.0))
-            .WithEvent("bumped", Host.SpaceEngineers.World.Reading.Of<IMyTerminalBlock>(_ => false), Edge.Rising, "bumped");
+            .WithEvent("bumped", Reading.Of<IMyTerminalBlock>(_ => false), SignalEdge.Rising, "bumped");
         Assert.Throws<InvalidOperationException>(() => kind.Between("0", "10"));
     }
 
@@ -457,11 +457,11 @@ public class VocabularyTests
             + "}\n";
 
         var program = new Automation();
-        Assert.Equal("", Reader.Load(written, program, new Values()));
-        Assert.Equal(written, Scribe.Save(program, new Values()));
+        Assert.Equal("", ProgramReader.Load(written, program, new Values()));
+        Assert.Equal(written, ProgramWriter.Save(program, new Values()));
         var set = Assert.IsType<Act>(program.Systems[0].Sequences[0].Steps[0]);
         Assert.Equal(BlockKinds.Own, set.Provider);
-        Assert.Equal(Nature.Value, set.Form);
+        Assert.Equal(ReachKind.Value, set.Form);
     }
 
     /// <summary>
@@ -481,7 +481,7 @@ public class VocabularyTests
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
         var vents = member == "depressurize";
-        var step = new Act(member) { Form = vents ? Nature.Native : Nature.Value };
+        var step = new Act(member) { Form = vents ? ReachKind.Native : ReachKind.Value };
         step.Targets.Add(vents ? ship.Name(vent) : ship.Name(ship.Left));
         step.Arguments.Add(Literal.Of(given));
         cycle.Steps.Add(step);
@@ -604,7 +604,7 @@ public class VocabularyTests
     {
         var ship = new Ship();
         var by = Field.Called("by");
-        by.Entry = Entry.Decimal;
+        by.Entry = FieldInput.Decimal;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
             Being.Number<IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more, _) => more).Taking(by));
 
@@ -673,7 +673,7 @@ public class VocabularyTests
     public void ASignalWrittenInPlaceIsAnsweredOnItsBlocks()
     {
         var program = new Automation();
-        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 16\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Bell {\n    whenever ext.toolbar(1, 2, 3) on [ panel2 ] then run 1\n\n"
@@ -701,7 +701,7 @@ public class VocabularyTests
         var ship = new Ship();
         var vent = ship.Rig.Vent(6, "Vent");
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var act = new Act(Blocks.Vent.Depressurize) { Form = Nature.Native };
+        var act = new Act(Blocks.Vent.Depressurize) { Form = ReachKind.Native };
         act.Targets.Add(ship.Name(vent));
         for (var i = 0; i < given; i++)
             act.Arguments.Add(Literal.Of(Blocks.Vent.Hold));
@@ -720,7 +720,7 @@ public class VocabularyTests
     {
         var ship = new Ship();
         var cycle = ship.Program.AddSequence((Trigger)null!);
-        var act = new Act("close") { Form = Nature.Native };
+        var act = new Act("close") { Form = ReachKind.Native };
         act.Targets.Add(ship.Name(ship.Door));
         act.Arguments.Add(Literal.Of(1L));
         cycle.Steps.Add(act);
@@ -736,7 +736,7 @@ public class VocabularyTests
     public void ASignalOnTwoBlocksIsAnsweredOnBoth()
     {
         var program = new Automation();
-        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 16\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
@@ -756,7 +756,7 @@ public class VocabularyTests
     public void ASignalPickedOnOneBlockIsNotOneOnSeveral()
     {
         var program = new Automation();
-        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\n"
+        Assert.Equal("", ProgramReader.Load("sprocket 1 alpha 16\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n",
@@ -781,14 +781,14 @@ public class VocabularyTests
             + "    whenever bell then run 1\n\n    sequence 1 {\n    }\n}\n\n";
 
         var whole = new Automation();
-        Assert.Equal("", Reader.Load(head + "instance 1 of MalTek.Bell {\n    bell = [ button ]\n}\n", whole, new Values()));
-        Assert.Contains("    bell = [ button ]\n", Scribe.Save(whole, new Values()));
+        Assert.Equal("", ProgramReader.Load(head + "instance 1 of MalTek.Bell {\n    bell = [ button ]\n}\n", whole, new Values()));
+        Assert.Contains("    bell = [ button ]\n", ProgramWriter.Save(whole, new Values()));
 
         var part = new Automation();
-        Assert.Equal("", Reader.Load(head.Replace("let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
+        Assert.Equal("", ProgramReader.Load(head.Replace("let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
             + "instance 1 of MalTek.Bell {\n    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n}\n", part, new Values()));
         part.Restore(new SignalRef("button", new[] { "panel1", "panel2" }, new ToolbarSlot(1, 1, 4)));
 
-        Assert.Contains("    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n", Scribe.Save(part, new Values()));
+        Assert.Contains("    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n", ProgramWriter.Save(part, new Values()));
     }
 }

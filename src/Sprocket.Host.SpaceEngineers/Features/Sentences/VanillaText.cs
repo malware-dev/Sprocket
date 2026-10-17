@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// Numbered from one, the way the terminal numbers them, because the slot's own index counts
         /// from zero and nobody reading a panel thinks of a button nought.
         /// </remarks>
-        public static string Pressed(GridWorld world, Vanilla.Entry entry)
+        public static string Pressed(GridWorld world, VanillaWiring.Entry entry)
         {
             GridEntity panel = world?.FindEntity(entry.PanelId);
             var name = panel == null ? "a block that is gone" : panel.Name;
@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// else on the screen. Anything else is said in the game's own words rather than guessed at,
         /// because a wrong translation of somebody's wiring is worse than an unfamiliar one.
         /// </remarks>
-        public static string Does(GridWorld world, Vanilla.Entry entry)
+        public static string Does(GridWorld world, VanillaWiring.Entry entry)
         {
             if (entry.GroupName.Length > 0)
                 return $"{entry.ActionId} {entry.GroupName}";

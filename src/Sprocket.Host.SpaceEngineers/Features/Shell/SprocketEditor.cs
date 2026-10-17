@@ -40,45 +40,45 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly AutomationRunner _runner;
         string _author = "";
         string _holder;
-        Habits _habits = new Habits();
+        EditorHabits _habits = new EditorHabits();
         PlayerMemory _viewer = new PlayerMemory();
         readonly List<EditorPage> _stack = new List<EditorPage>();
 
         readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
-        readonly Gate _gate;
-        readonly Bulletin _bulletin;
-        readonly Dates _dates;
-        readonly Claims _claims;
-        readonly Picks _picks;
-        readonly Versions _versions;
-        readonly Starts _starts;
-        readonly Holdings _holdings;
+        readonly PressFilter _gate;
+        readonly EditorNotices _bulletin;
+        readonly ChangeDates _dates;
+        readonly SlotClaims _claims;
+        readonly SlotsFromPicks _picks;
+        readonly VersionChoice _versions;
+        readonly TriggerQuestions _starts;
+        readonly LibraryTransfers _holdings;
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
         bool _structureDirty;
         bool _developerMode;
         bool _toldPasting;
-        Shelf _shelf;
+        LibraryShelf _shelf;
 
         /// <summary>An editor of <paramref name="program" />, saying what it says in <paramref name="texts" />.</summary>
         public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner, Texts texts)
         {
-            _gate = new Gate(this);
-            _bulletin = new Bulletin(this, _gate);
+            _gate = new PressFilter(this);
+            _bulletin = new EditorNotices(this, _gate);
             _world = world;
             _program = program;
             _runner = runner;
             Texts = texts;
-            Ago = new Ago(texts);
+            Ago = new AgoText(texts);
             Codex = new Terms(texts);
 
-            _dates = new Dates(_program);
-            _claims = new Claims(this);
-            _picks = new Picks(this);
-            _versions = new Versions(this, _dates);
-            _starts = new Starts(this);
-            _holdings = new Holdings(this, _dates);
+            _dates = new ChangeDates(_program);
+            _claims = new SlotClaims(this);
+            _picks = new SlotsFromPicks(this);
+            _versions = new VersionChoice(this, _dates);
+            _starts = new TriggerQuestions(this);
+            _holdings = new LibraryTransfers(this, _dates);
 
             _stack.Add(new HomePage(this));
             Rebuild();
@@ -88,19 +88,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public EditorScreen Screen => _screen;
 
         /// <summary>Who already claims the toolbar slots somebody picks.</summary>
-        public Claims Claims => _claims;
+        public SlotClaims Claims => _claims;
 
         /// <summary>How picked blocks become the slots of a blueprint.</summary>
-        public Picks Picks => _picks;
+        public SlotsFromPicks Picks => _picks;
 
         /// <summary>The choice between two versions of a logic system.</summary>
-        public Versions Versions => _versions;
+        public VersionChoice Versions => _versions;
 
         /// <summary>How a trigger is made, changed or copied.</summary>
-        public Starts Starts => _starts;
+        public TriggerQuestions Starts => _starts;
 
         /// <summary>Moving logic systems between the construct and the library.</summary>
-        public Holdings Holdings => _holdings;
+        public LibraryTransfers Holdings => _holdings;
 
         /// <summary>The name the game knows a player by, from their identity, set by whatever shows the editor; null where nothing can say.</summary>
         public Func<long, string> PlayerName { get; set; }
@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public CodexWindow CodexWindow { get; private set; }
 
         /// <summary>How long ago something happened, in <see cref="Texts" />.</summary>
-        public Ago Ago { get; }
+        public AgoText Ago { get; }
 
         /// <summary>Where the screen showing the editor takes the keyboard and the pointer, or null while nothing shows it.</summary>
         public InputRoot Input { get; set; }
@@ -199,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public string Author
         {
             get { return _author; }
-            set { _author = Naming.Clean(value); }
+            set { _author = NameRules.Clean(value); }
         }
 
         /// <summary>
@@ -360,7 +360,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void Answer(string text, Action chosen, bool byDefault)
         {
-            var command = _gate.Refuses(Cmd.Answer) ? null : new Relay(() => Reply(chosen));
+            var command = _gate.Refuses(CommandKind.Answer) ? null : new Relay(() => Reply(chosen));
             _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
         }
 
@@ -394,12 +394,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// The first edit of a program that could not be read asks first, a press while a question stands only puts it
         /// away, and the editor settles after.
         /// </remarks>
-        public ICommand Act(Cmd kind, Action action)
+        public ICommand Act(CommandKind kind, Action action)
         {
             return _gate.Refuses(kind) ? null : new Relay(() => Carry(kind, action));
         }
 
-        void Carry(Cmd kind, Action action)
+        void Carry(CommandKind kind, Action action)
         {
             if (_gate.Replacing(kind))
             {
@@ -418,7 +418,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What an action's values ask for, one per value, asked of the blocks it acts on.</summary>
-        public List<Field> Fields(IList<long> entityIds, string actionId, Nature form)
+        public List<Field> Fields(IList<long> entityIds, string actionId, ReachKind form)
         {
             return Vocabulary.Fields(_world, entityIds, actionId, form);
         }
@@ -434,7 +434,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public Action<string> Renaming(Action<string> rename, Func<string, bool> accepts)
         {
-            if (_gate.Refuses(Cmd.Rename))
+            if (_gate.Refuses(CommandKind.Rename))
                 return null;
 
             Action<string> gives = null;
@@ -444,7 +444,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (accepts != null && !accepts(name))
                     return;
 
-                if (_gate.Replacing(Cmd.Rename))
+                if (_gate.Replacing(CommandKind.Rename))
                 {
                     _gate.AskBeforeReplacing(() => gives(name));
                     return;
@@ -463,7 +463,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>The player's library, which keeps blueprints for every world; null on a machine that keeps none.</summary>
         /// <remarks>Each logic system that links to no blueprint is linked, as the library is given, to the one in it of its identity.</remarks>
-        public Shelf Shelf
+        public LibraryShelf Shelf
         {
             get { return _shelf; }
             set
@@ -479,10 +479,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>How somebody is working in this editor, as against what they are building in it: which list of what to do they read, and where they keep the codex.</summary>
         /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
-        public Habits Habits
+        public EditorHabits Habits
         {
             get { return _habits; }
-            set { _habits = value ?? new Habits(); }
+            set { _habits = value ?? new EditorHabits(); }
         }
 
         /// <summary>The settings in this world of the player at the screen.</summary>
@@ -716,7 +716,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <paramref name="change" /> in words, and where walking it takes changes on other screens along, back where
         /// <paramref name="back" /> or forward, what those screens are called.
         /// </summary>
-        string Label(Change change, AutomationSystem system, object screen, bool back)
+        string Label(ChangeKind change, AutomationSystem system, object screen, bool back)
         {
             var label = ChangeText.Of(Texts, change);
             _also.Clear();
@@ -924,7 +924,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public string Apply(string text)
         {
             var trial = new Automation();
-            var trouble = Reader.Load(text, trial, _world.Values);
+            var trouble = ProgramReader.Load(text, trial, _world.Values);
             if (trouble.Length > 0)
                 return trouble;
 
@@ -940,7 +940,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _program.Discard();
             string warning;
-            Reader.Load(text, _program, _world.Values, out warning, _world);
+            ProgramReader.Load(text, _program, _world.Values, out warning, _world);
             StateText.Load(switches, _program, _runner);
 
             _gate.Told = true;
@@ -1029,10 +1029,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.Reheaded();
 
             _screen.CanGoBack = _stack.Count > 1;
-            _screen.Back = _screen.CanGoBack ? Act(Cmd.Back, Leave) : null;
+            _screen.Back = _screen.CanGoBack ? Act(CommandKind.Back, Leave) : null;
             _screen.Library = page.Library;
-            _screen.Help = page.Help != null ? Act(Cmd.OpenCodex, () => Helped(page)) : null;
-            _screen.Flip = page.CanSwitch ? Act(Cmd.Switch, () => page.Switch(!page.SwitchIsOn)) : null;
+            _screen.Help = page.Help != null ? Act(CommandKind.OpenCodex, () => Helped(page)) : null;
+            _screen.Flip = page.CanSwitch ? Act(CommandKind.Switch, () => page.Switch(!page.SwitchIsOn)) : null;
             _screen.SwitchAbout = page.SwitchAbout;
 
             // Asked as the screen is built: what locks a switch is another page's switch, so it cannot change while this page shows.
@@ -1046,9 +1046,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // Made whether or not there is anything to walk back, because what there is to walk back changes without a
             // rebuild. So this decides whether the command may exist at all, and the tick decides whether it is offered.
             _screen.HasHistory = page.HasHistory;
-            _undo = page.HasHistory ? Act(Cmd.Undo, page.Undo) : null;
-            _redo = page.HasHistory ? Act(Cmd.Redo, page.Redo) : null;
-            _primary = Act(Cmd.Primary, page.Primary);
+            _undo = page.HasHistory ? Act(CommandKind.Undo, page.Undo) : null;
+            _redo = page.HasHistory ? Act(CommandKind.Redo, page.Redo) : null;
+            _primary = Act(CommandKind.Primary, page.Primary);
 
             page.Build();
 
@@ -1096,7 +1096,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (DeveloperMode)
             {
                 _actionBar.Add(new ChoiceEntry(Texts.ScriptTitle, Current is ScriptPage,
-                    Act(Cmd.ShowScript, ShowScript)));
+                    Act(CommandKind.ShowScript, ShowScript)));
             }
 
             _screen.ShowActions(_actionBar);
@@ -1118,7 +1118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Style = Styles.Menu,
                 Anchor = Input.Focused,
                 Gap = 4f,
-                Placement = Fixed.Wide(360f),
+                Placement = FixedSize.Wide(360f),
                 Content = new Label { Style = Styles.TableTalk, Wraps = true, Text = Texts.WritingPasteNote }
             }.Open();
         }
@@ -1143,7 +1143,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Opens the codex's window at <paramref name="term" />, beside whatever screen is showing.</summary>
         public void OpenCodex(Term term)
         {
-            var open = Act(Cmd.OpenCodex, delegate
+            var open = Act(CommandKind.OpenCodex, delegate
             {
                 if (CodexWindow == null)
                     CodexWindow = new CodexWindow(this);
@@ -1220,7 +1220,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var sequence = _program.AddSequence(system);
             sequence.Name = Name(sequence);
-            Do(system, new MakeSequence(_program, sequence, Change.NewSequence));
+            Do(system, new MakeSequence(_program, sequence, ChangeKind.NewSequence));
 
             Invalidate();
             PushMade(new SequencePage(this, sequence));
@@ -1355,7 +1355,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             SequenceRunner state = _runner.Get(sequence, StandIn(sequence.System));
             if (state != null)
-                state.Interrupt(Stopper.Hand, 0);
+                state.Interrupt(StopCause.Hand, 0);
         }
 
         /// <summary>Runs <paramref name="sequence" /> by hand, at once, where it is or on the construct <see cref="Elsewhere" /> runs it on.</summary>
@@ -1458,7 +1458,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Without asking: undo brings it back, switched off, with its own way back.</remarks>
         public void DeleteSystem(AutomationSystem system)
         {
-            Do(new TakeSystemOut(system, Change.DeleteSystem));
+            Do(new TakeSystemOut(system, ChangeKind.DeleteSystem));
             Gone(system);
         }
 
@@ -1601,7 +1601,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             var copy = _program.Duplicate(sequence);
             copy.Name = Name(copy);
-            Do(copy.System, new MakeSequence(_program, copy, Change.CopySequence));
+            Do(copy.System, new MakeSequence(_program, copy, ChangeKind.CopySequence));
 
             PushMade(new SequencePage(this, copy));
         }

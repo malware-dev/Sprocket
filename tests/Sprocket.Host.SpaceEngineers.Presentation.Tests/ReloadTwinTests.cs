@@ -107,7 +107,7 @@ public class ReloadTwinTests
         cut.Editor.Program.Systems[0].Enabled = false;
         cut.Run(110);
         var cycle = cut.Editor.Program.Sequences[0];
-        Assert.Equal(Stopper.Switch, cut.Scene.Ship.Runner.Get(cycle, cycle.System.First)!.StoppedBy);
+        Assert.Equal(StopCause.Switch, cut.Scene.Ship.Runner.Get(cycle, cycle.System.First)!.StoppedBy);
 
         var vented = Screen.Fresh();
         Vented(vented);
@@ -178,7 +178,7 @@ public class ReloadTwinTests
     {
         Twins(screen =>
         {
-            screen.Scene.Ship.Settle(new Settings(Layer.Empty, new Layer(true, null)));
+            screen.Scene.Ship.Settle(new Settings(SettingsLayer.Empty, new SettingsLayer(true, null)));
             Cycle(screen);
         }, reloadAt, (screen, tick) =>
         {

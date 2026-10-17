@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         const int Kept = 2;
 
         readonly List<Entry> _entries = new List<Entry>();
-        readonly List<Volume> _volumes = new List<Volume>();
+        readonly List<LibraryEntry> _volumes = new List<LibraryEntry>();
         readonly List<string> _names = new List<string>();
         readonly List<Backup> _group = new List<Backup>();
         readonly HashSet<Backup> _listed = new HashSet<Backup>();
@@ -207,7 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Summary = backup.Name,
                 Depth = 1,
                 Status = Template.Fill(texts.LibraryLost, "time", Time(backup.Lost)),
-                Deletes = Editor.Act(Cmd.ForgetBackup, () => Editor.Holdings.ForgetBackup(backup)),
+                Deletes = Editor.Act(CommandKind.ForgetBackup, () => Editor.Holdings.ForgetBackup(backup)),
                 DeleteText = texts.LibraryForgetBackup
             });
         }
@@ -228,10 +228,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             foreach (var volume in _volumes)
             {
                 var entry = new Entry { Section = Kept, Identity = volume.Identity };
-                if (volume.State == VolumeState.Read)
+                if (volume.State == LibraryEntryState.Read)
                 {
                     var trial = new Automation();
-                    entry.Trouble = Reader.Load(volume.Text, trial, Editor.World.Values);
+                    entry.Trouble = ProgramReader.Load(volume.Text, trial, Editor.World.Values);
                     if (entry.Trouble.Length == 0)
                         entry.Read = trial.FindSystem(volume.Identity);
                 }
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     Summary = Called(volume),
                     Depth = 1,
                     Status = Made(volume, texts),
-                    Deletes = Editor.Act(Cmd.Unshelve, () => Editor.Holdings.Unshelve(volume)),
+                    Deletes = Editor.Act(CommandKind.Unshelve, () => Editor.Holdings.Unshelve(volume)),
                     DeleteText = texts.LibraryForget
                 };
 
@@ -267,7 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         void Add(Entry entry, StatusRow row)
         {
             entry.Row = row;
-            row.Opens = Editor.Act(Cmd.Expand, () => Choose(entry));
+            row.Opens = Editor.Act(CommandKind.Expand, () => Choose(entry));
             row.Show(Editor.Texts);
             _entries.Add(entry);
             _list.Children.Add(row);
@@ -440,13 +440,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             if (entry.Backup != null)
             {
-                Run(Cmd.PutOn, () => _refused = Editor.Holdings.PutOn(entry.Read));
+                Run(CommandKind.PutOn, () => _refused = Editor.Holdings.PutOn(entry.Read));
             }
             else
             {
                 var volume = Editor.Shelf?.Find(entry.Identity);
                 if (volume != null)
-                    Run(Cmd.PutOn, () => _refused = Editor.Holdings.PutOn(volume));
+                    Run(CommandKind.PutOn, () => _refused = Editor.Holdings.PutOn(volume));
             }
 
             Describe();
@@ -463,7 +463,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             {
                 var backed = entry.Read;
                 if (backed != null)
-                    Run(Cmd.Shelve, () => Editor.Holdings.ShelveBackup(backed));
+                    Run(CommandKind.Shelve, () => Editor.Holdings.ShelveBackup(backed));
 
                 return;
             }
@@ -475,11 +475,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             // Either update replaces something, so it asks first: the blueprint where the logic system is the newer, and the
             // logic system where the blueprint is.
             if (!Editor.Holdings.Stored(live))
-                Run(Cmd.Shelve, () => Editor.Holdings.Shelve(live));
+                Run(CommandKind.Shelve, () => Editor.Holdings.Shelve(live));
             else if (Editor.Holdings.ChangedSince(live))
-                Run(Cmd.Shelve, () => Editor.Holdings.AskUpdate(live));
+                Run(CommandKind.Shelve, () => Editor.Holdings.AskUpdate(live));
             else
-                Run(Cmd.Renew, () => Editor.Holdings.AskRenew(live));
+                Run(CommandKind.Renew, () => Editor.Holdings.AskRenew(live));
         }
 
         /// <summary>Puts the chosen blueprint in the library back in the place of the logic system on this construct, after asking.</summary>
@@ -487,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             var live = _chosen == null || _chosen.Section != OnConstruct ? null : Live(_chosen);
             if (live != null)
-                Run(Cmd.Renew, () => Editor.Holdings.AskReset(live));
+                Run(CommandKind.Renew, () => Editor.Holdings.AskReset(live));
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
@@ -499,7 +499,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (text == null)
                 return;
 
-            Run(Cmd.PutOn, delegate
+            Run(CommandKind.PutOn, delegate
             {
                 var made = Editor.Holdings.Copy(text, out _refused);
                 if (made != null)
@@ -509,7 +509,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             Describe();
         }
 
-        void Run(Cmd kind, Action action)
+        void Run(CommandKind kind, Action action)
         {
             var command = Editor.Act(kind, action);
             if (command != null)
@@ -531,7 +531,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// The blueprint in the library <paramref name="entry" /> is, or the one its logic system, <paramref name="live" /> or the
         /// backup's, is linked to; null where the library has none.
         /// </summary>
-        Volume Shelved(Entry entry, AutomationSystem live)
+        LibraryEntry Shelved(Entry entry, AutomationSystem live)
         {
             var shelf = Editor.Shelf;
             if (shelf == null)
@@ -554,7 +554,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             }
 
             var system = entry.Section == BackedUp ? entry.Read : Live(entry);
-            return system == null ? null : Scribe.Blueprint(system);
+            return system == null ? null : ProgramWriter.Blueprint(system);
         }
 
         /// <summary>Who made <paramref name="system" /> and when it last changed, as far as either is known.</summary>
@@ -580,15 +580,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>What <paramref name="volume" /> is called on its row: the blueprint's name, or its file's where it did not read.</summary>
-        static string Called(Volume volume)
+        static string Called(LibraryEntry volume)
         {
-            return volume.State == VolumeState.Read ? volume.Name : volume.File;
+            return volume.State == LibraryEntryState.Read ? volume.Name : volume.File;
         }
 
         /// <summary>Who made the blueprint in <paramref name="volume" /> and when it last changed, as far as its text says.</summary>
-        string Made(Volume volume, Texts texts)
+        string Made(LibraryEntry volume, Texts texts)
         {
-            if (volume.State != VolumeState.Read)
+            if (volume.State != LibraryEntryState.Read)
                 return "";
 
             var own = volume.Namespace.Length == 0 || volume.Namespace == Editor.Author;
@@ -602,15 +602,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Why <paramref name="volume" /> gave no blueprint.</summary>
-        static string Unkept(Volume volume, Texts texts)
+        static string Unkept(LibraryEntry volume, Texts texts)
         {
             switch (volume.State)
             {
-                case VolumeState.Missing:
+                case LibraryEntryState.Missing:
                     return texts.LibraryMissing;
-                case VolumeState.Path:
+                case LibraryEntryState.Path:
                     return texts.LibraryFolder;
-                case VolumeState.Twice:
+                case LibraryEntryState.Twice:
                     return texts.LibraryTwice;
                 default:
                     return texts.LibraryUnreadable;

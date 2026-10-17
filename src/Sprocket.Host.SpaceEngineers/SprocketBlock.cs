@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers
                 SprocketControls.DoOnce(texts, SprocketSession.DeveloperMode);
 
             IMyTerminalBlock block = Entity as IMyTerminalBlock;
-            if (block != null && Locker.HasProgram(block))
+            if (block != null && BlockStorage.HasProgram(block))
                 SprocketSession.Adopt(block);
         }
     }

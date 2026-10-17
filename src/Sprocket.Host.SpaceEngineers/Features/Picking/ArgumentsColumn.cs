@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _width = value;
                 if (!_inset)
-                    Placement = Fixed.Wide(value);
+                    Placement = FixedSize.Wide(value);
             }
         }
 
@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _inset = value;
                 Style = value ? null : Styles.Column;
-                Placement = value ? null : Fixed.Wide(_width);
+                Placement = value ? null : FixedSize.Wide(_width);
                 _head.IsVisible = !value;
                 _rest.IsVisible = !value;
             }

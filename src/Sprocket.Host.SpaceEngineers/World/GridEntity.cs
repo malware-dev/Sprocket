@@ -120,13 +120,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the block is in <paramref name="moment" />: the flag it reads is set where the moment rises, clear where it falls.</summary>
-        public bool In(EntityEvent moment, Recall seen)
+        public bool In(EntityEvent moment, ReaderMemory seen)
         {
-            return moment.Flag != null && moment.Flag.Holds(_block, seen) == (moment.Edge == Edge.Rising);
+            return moment.Flag != null && moment.Flag.Holds(_block, seen) == (moment.Edge == SignalEdge.Rising);
         }
 
         /// <summary>Whether <paramref name="reading" /> reads true of the block; false where there is no reading, as for a signal.</summary>
-        public bool Reads(Reading reading, Recall seen)
+        public bool Reads(Reading reading, ReaderMemory seen)
         {
             return reading != null && reading.Holds(_block, seen);
         }
@@ -188,18 +188,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// of the game's actions or values, or one of Sprocket's own that the game's action does. Null where Sprocket
         /// does it itself, or the block does not have it.
         /// </summary>
-        public Order Prepare(EntityAction action, Bound bound, IList<Literal> arguments)
+        public BlockOrder Prepare(EntityAction action, BoundAction bound, IList<Literal> arguments)
         {
             if (action.Being != null)
                 return arguments == null || arguments.Count == 0 ? null : action.Being.Order(_block, arguments[0]);
 
-            if (action.Form != Nature.Native)
+            if (action.Form != ReachKind.Native)
                 return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
 
             if (bound != null && bound.Acts || action.GameActionId == null)
                 return null;
 
-            return Toolbars.Prepare(_block, action.GameActionId, Nature.Action, arguments, action.Primitives);
+            return Toolbars.Prepare(_block, action.GameActionId, ReachKind.Action, arguments, action.Primitives);
         }
 
         /// <summary>Tells the block to do <paramref name="actionId" />.</summary>
@@ -211,7 +211,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />.</summary>
         public void Invoke(string actionId, IList<Literal> arguments)
         {
-            Invoke(actionId, arguments, Nature.Native);
+            Invoke(actionId, arguments, ReachKind.Native);
         }
 
         /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />, <paramref name="form" /> saying which of the three ways the step reaches it.</summary>
@@ -224,7 +224,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// that went looking for whatever answered to its id could find the wrong one.
         /// </para>
         /// </remarks>
-        public void Invoke(string actionId, IList<Literal> arguments, Nature form)
+        public void Invoke(string actionId, IList<Literal> arguments, ReachKind form)
         {
             Perform(actionId, arguments, form);
             Asked();
@@ -240,23 +240,23 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Why this block cannot finish <paramref name="actionId" /> as told with <paramref name="arguments" />, or none while it might.</summary>
         /// <remarks>For the editor and the harness: it works out what the action was told on every call, and remembers nothing.</remarks>
-        public Trouble Trouble(string actionId, IList<Literal> arguments)
+        public BlockTrouble Trouble(string actionId, IList<Literal> arguments)
         {
             var bound = Bind(actionId, arguments);
-            return bound?.Trouble(_block, new Recall()) ?? World.Trouble.None;
+            return bound?.Trouble(_block, new ReaderMemory()) ?? BlockTrouble.None;
         }
 
         /// <summary>One of Sprocket's own actions as told <paramref name="arguments" />, or null where the block has no such action.</summary>
-        Bound Bind(string actionId, IList<Literal> arguments)
+        BoundAction Bind(string actionId, IList<Literal> arguments)
         {
-            var action = _kind.FindAction(actionId, Nature.Native);
+            var action = _kind.FindAction(actionId, ReachKind.Native);
             return action == null || action.Doing == null ? null : action.Doing.Bind(arguments ?? new Literal[0]);
         }
 
-        void Perform(string actionId, IList<Literal> arguments, Nature form)
+        void Perform(string actionId, IList<Literal> arguments, ReachKind form)
         {
             // The block's own members are named by the block's ids, so those go straight to the game.
-            if (form == Nature.Value)
+            if (form == ReachKind.Value)
             {
                 if (arguments != null && arguments.Count > 0)
                     Toolbars.Set(_block, actionId, arguments[0]);
@@ -264,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            if (form == Nature.Action)
+            if (form == ReachKind.Action)
             {
                 Toolbars.Perform(_block, actionId, arguments);
                 return;
@@ -272,13 +272,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // An id this block does not have is a sequence written against a vocabulary it no longer offers, and it does
             // nothing rather than throwing - the same answer a reading gives.
-            var entry = _kind.FindAction(actionId, Nature.Native);
+            var entry = _kind.FindAction(actionId, ReachKind.Native);
             if (entry == null)
                 return;
 
             var bound = entry.Doing?.Bind(arguments ?? new Literal[0]);
             if (bound != null && bound.Acts)
-                bound.Do(_block, new Recall());
+                bound.Do(_block, new ReaderMemory());
             else if (entry.GameActionId != null)
                 // One of Sprocket's own that is the game's act said another way.
                 Toolbars.Perform(_block, entry.GameActionId, arguments);

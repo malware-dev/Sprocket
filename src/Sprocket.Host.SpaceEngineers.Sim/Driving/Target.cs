@@ -100,10 +100,10 @@ namespace Sprocket.Sim.Driving
             editor.Sentence().Rows.OfType<StepRow>().ToList();
 
         /// <summary>Presses a block's row, which takes that block and drops whatever was taken before.</summary>
-        public static void PressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Alone, 1);
+        public static void PressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(HeldModifier.Alone, 1);
 
         /// <summary>Presses a block's row twice in quick succession, which takes that block alone and finishes where nothing is left to ask.</summary>
-        public static void DoublePressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Alone, 2);
+        public static void DoublePressBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(HeldModifier.Alone, 2);
 
         /// <summary>
         /// Ticks a block's box, which takes it as well as whatever was already taken.
@@ -112,7 +112,7 @@ namespace Sprocket.Sim.Driving
         /// The other of the two acts a row offers. A test building a set of blocks up is doing what the
         /// box is for, and pressing the rows would leave it with the last one only.
         /// </remarks>
-        public static void TickBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Also, 1);
+        public static void TickBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(HeldModifier.Also, 1);
 
         /// <summary>
         /// Reaches from the last block taken on its own to this one, taking everything between.
@@ -121,7 +121,7 @@ namespace Sprocket.Sim.Driving
         /// In the order the blocks are listed rather than the order they were pressed, because a run is
         /// what somebody drew down the screen.
         /// </remarks>
-        public static void ThroughBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(Held.Through, 1);
+        public static void ThroughBlock(this SprocketEditor editor, string name) => Row(editor, name).Pick(HeldModifier.Through, 1);
 
         /// <summary>The strip of the pick the editor is on, or an exception naming the screen.</summary>
         public static PickStrip Pick(this SprocketEditor editor)
@@ -229,7 +229,7 @@ namespace Sprocket.Sim.Driving
             if (pick == null || pick.Fields.Count == 0)
                 throw new InvalidOperationException($"'{editor.Screen.Title()}' asks nothing to be typed.");
 
-            Run(editor.Act(Cmd.Primary, () => pick.Give(said)));
+            Run(editor.Act(CommandKind.Primary, () => pick.Give(said)));
         }
 
         /// <summary>Writes <paramref name="text" /> into the script page's listing in place of what it holds, as somebody editing it by hand.</summary>
@@ -319,7 +319,7 @@ namespace Sprocket.Sim.Driving
                 var entry = pane.Entries().FirstOrDefault(e => e.Text == text && !e.IsHeading);
                 if (entry != null)
                 {
-                    entry.Pick(Held.Alone, 1);
+                    entry.Pick(HeldModifier.Alone, 1);
                     return;
                 }
             }
@@ -337,7 +337,7 @@ namespace Sprocket.Sim.Driving
         {
             var entry = editor.Stages().SelectMany(pane => pane.Entries()).FirstOrDefault(e => e.Text == text && !e.IsHeading)
                         ?? throw new InvalidOperationException($"No choice '{text}' on '{editor.Screen.Title()}'.");
-            entry.Pick(Held.Alone, 2);
+            entry.Pick(HeldModifier.Alone, 2);
         }
 
         /// <summary>Whether anything on the screen offers <paramref name="text" /> to be chosen: an answer, a choice, or an option or block in a picker.</summary>

@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.RenameSlot;
+        public override ChangeKind Change => ChangeKind.RenameSlot;
 
         /// <inheritdoc />
         /// <remarks>The logic system's and the slot's own: a name is said by every sequence that names the slot, and none of them changed.</remarks>

@@ -992,9 +992,9 @@ namespace Lumel.Text
                 height = size;
 
             if (float.IsNaN(width))
-                width = Shape.WidthFor(image.Size, height);
+                width = AspectRatio.WidthFor(image.Size, height);
             else if (float.IsNaN(height))
-                height = Shape.HeightFor(image.Size, width);
+                height = AspectRatio.HeightFor(image.Size, width);
 
             return new Vector2(width, height);
         }

@@ -60,11 +60,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
             _body.Markdown = $"::: center\n![](Sprocket_Sleepy =160)\n\n# {texts.PausedHeading}\n\n{why} {size}\n:::";
 
             _resume.Text = texts.PausedResume;
-            _resume.Command = Editor.Act(Cmd.Resume, Editor.Resume);
+            _resume.Command = Editor.Act(CommandKind.Resume, Editor.Resume);
             _leave.Text = texts.PausedLeave;
-            _leave.Command = Editor.Act(Cmd.LeavePaused, Editor.LeavePaused);
+            _leave.Command = Editor.Act(CommandKind.LeavePaused, Editor.LeavePaused);
             _remove.Text = texts.PausedRemoveAll;
-            _remove.Command = Editor.Act(Cmd.RemoveAll, Editor.RemoveAll);
+            _remove.Command = Editor.Act(CommandKind.RemoveAll, Editor.RemoveAll);
         }
 
         /// <summary><paramref name="one" /> where <paramref name="count" /> is one, and <paramref name="many" /> filled with it otherwise.</summary>

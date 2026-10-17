@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     public static class PlanText
     {
         /// <summary>The note naming each of <paramref name="plans" />, in the words <paramref name="texts" /> give, or empty where there are none.</summary>
-        public static string Note(Texts texts, IList<Plan> plans)
+        public static string Note(Texts texts, IList<PlannedMember> plans)
         {
             if (plans.Count == 0)
                 return "";
@@ -22,12 +22,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>What <paramref name="plan" /> is called, in the words <paramref name="texts" /> give.</summary>
-        static string Of(Texts texts, Plan plan)
+        static string Of(Texts texts, PlannedMember plan)
         {
             switch (plan)
             {
-                case Plan.MovingItems: return texts.PlanMovingItems;
-                case Plan.SorterList: return texts.PlanSorterList;
+                case PlannedMember.MovingItems: return texts.PlanMovingItems;
+                case PlannedMember.SorterList: return texts.PlanSorterList;
                 default: return plan.ToString();
             }
         }

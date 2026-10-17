@@ -267,9 +267,9 @@ namespace Sprocket.Sim.Shell
             // the screen is showing.
             _surface.Focus();
 
-            _editor.Held = (Keyboard.Modifiers & ModifierKeys.Shift) != 0 ? Held.Through
-                : (Keyboard.Modifiers & ModifierKeys.Control) != 0 ? Held.Also
-                : Held.Alone;
+            _editor.Held = (Keyboard.Modifiers & ModifierKeys.Shift) != 0 ? HeldModifier.Through
+                : (Keyboard.Modifiers & ModifierKeys.Control) != 0 ? HeldModifier.Also
+                : HeldModifier.Alone;
             _editor.Down(ToUi(e.GetPosition(_surface)), e.ClickCount);
 
             _surface.InvalidateVisual();

@@ -39,10 +39,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("link", "link", Link).Status().RuledOutBy(Idle)
-                .WithEvent("starts-connecting", Idle, Edge.Falling, "starts connecting").RuledOutBy(Idle)
+                .WithEvent("starts-connecting", Idle, SignalEdge.Falling, "starts connecting").RuledOutBy(Idle)
                 .WithChange("connects", "connects", "link", Literal.Name("connected")).RuledOutBy(Idle)
                 .Reading("is connected", "is not connected")
-                .WithEvent("disconnects", Connected, Edge.Falling, "disconnects").RuledOutBy(Idle)
+                .WithEvent("disconnects", Connected, SignalEdge.Falling, "disconnects").RuledOutBy(Idle)
                 .Renaming("Idle", false, "disconnect")
                 .Renaming("Range", true, "range")
                 .Measuring("Range", " m")

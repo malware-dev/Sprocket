@@ -130,11 +130,11 @@ public class UndoTests
 
     [Fact]
     public void AddingAStepReversesExactly() =>
-        RoundTrip(new AddStep(Change.AddStep, 3, StepFor("close", "outer")));
+        RoundTrip(new AddStep(ChangeKind.AddStep, 3, StepFor("close", "outer")));
 
     [Fact]
     public void AddingAStepInTheMiddleReversesExactly() =>
-        RoundTrip(new AddStep(Change.AddStep, 1, StepFor("close", "outer")));
+        RoundTrip(new AddStep(ChangeKind.AddStep, 1, StepFor("close", "outer")));
 
     [Fact]
     public void RemovingAStepReversesExactly()
@@ -160,7 +160,7 @@ public class UndoTests
     public void ChangingAStepReversesExactly()
     {
         Sequence sequence = Build();
-        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", Nature.Native, BlockKinds.Own, new[] { Literal.Of(4L) }, true));
+        RoundTrip(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner", "outer" }, "lock", ReachKind.Native, BlockKinds.Own, new[] { Literal.Of(4L) }, true));
     }
 
     /// <summary>A step changed to something that takes no time loses the wait after it, and undoing puts that wait back.</summary>
@@ -172,7 +172,7 @@ public class UndoTests
         sequence.Steps.Insert(1, awaited);
         var before = Shape(sequence);
 
-        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", Nature.Native, BlockKinds.Own, new Literal[0], false);
+        var edit = new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "on", ReachKind.Native, BlockKinds.Own, new Literal[0], false);
         edit.Apply(sequence);
         Assert.IsNotType<Await>(sequence.Steps[1]);
 
@@ -196,7 +196,7 @@ public class UndoTests
     }
 
     [Fact]
-    public void RenamingReversesExactly() => RoundTrip(new Rename("Let me out", "Cycle"));
+    public void RenamingReversesExactly() => RoundTrip(new RenameSequence("Let me out", "Cycle"));
 
     /// <summary>
     /// Running or parked is deliberately not an edit.
@@ -371,7 +371,7 @@ public class UndoTests
     public void DescribingABlueprintReversesExactly()
     {
         _ = Slot(out var system);
-        RoundTrip(system, new Annotate(system.Annotation, "Cycles an airlock with **one button**."), () => system.Annotation);
+        RoundTrip(system, new AnnotateSystem(system.Annotation, "Cycles an airlock with **one button**."), () => system.Annotation);
     }
 
     /// <summary>Renaming a slot renames it everywhere its system names it, keeps what it says, and reverses exactly.</summary>
@@ -418,7 +418,7 @@ public class UndoTests
     public void DescribingASlotReversesExactly()
     {
         var part = Slot(out var system);
-        var edit = new AnnotatePart(part, "The door to the **inside** of the ship.", Change.DescribeSlot);
+        var edit = new AnnotatePart(part, "The door to the **inside** of the ship.", ChangeKind.DescribeSlot);
 
         RoundTrip(system, edit, () => part.Annotation);
 
@@ -462,7 +462,7 @@ public class UndoTests
         return program;
     }
 
-    static string Written(Automation program) => Scribe.Save(program, new Values());
+    static string Written(Automation program) => ProgramWriter.Save(program, new Values());
 
     /// <summary>A logic system taken out and put back is the same system, where it stood, and the program reads as it did.</summary>
     [Fact]
@@ -472,7 +472,7 @@ public class UndoTests
         var before = Written(program);
         var airlock = program.Systems[0];
 
-        var edit = new TakeSystemOut(airlock, Change.DeleteSystem);
+        var edit = new TakeSystemOut(airlock, ChangeKind.DeleteSystem);
         edit.Apply(program);
         Assert.Single(program.Systems);
         Assert.True(edit.Undoable(program));
@@ -561,14 +561,14 @@ public class UndoTests
     {
         Sequence sequence = Build();
 
-        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", Nature.Native, BlockKinds.Own, new Literal[0], true).Changes);
-        Assert.False(new Rename("Let me out", "Let me out").Changes);
+        Assert.False(new ChangeStep(0, (Act)sequence.Steps[0], new[] { "inner" }, "close", ReachKind.Native, BlockKinds.Own, new Literal[0], true).Changes);
+        Assert.False(new RenameSequence("Let me out", "Let me out").Changes);
         Assert.False(new MoveStep(1, 1).Changes);
 
         var part = Slot(out var system);
-        Assert.False(new Annotate(system.Annotation, system.Annotation).Changes);
+        Assert.False(new AnnotateSystem(system.Annotation, system.Annotation).Changes);
         Assert.False(new RenamePart(part, "inner").Changes);
-        Assert.False(new AnnotatePart(part, part.Annotation, Change.DescribeSlot).Changes);
+        Assert.False(new AnnotatePart(part, part.Annotation, ChangeKind.DescribeSlot).Changes);
         Assert.False(new SetOptional(part, false).Changes);
     }
 }

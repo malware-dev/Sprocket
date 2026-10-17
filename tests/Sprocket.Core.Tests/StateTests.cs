@@ -69,9 +69,9 @@ public class StateTests
     {
         var before = Ship();
         before.Systems[0].Enabled = false;
-        before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3, Host.SpaceEngineers.World.Trouble.None, "Airlock 1 Outer Door");
+        before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3, BlockTrouble.None, "Airlock 1 Outer Door");
         before.Systems[0].Instances[1].Enabled = false;
-        before.Systems[0].Instances[1].Halt = new Halt(SequenceProblem.EmptySlot, 1, -1, Host.SpaceEngineers.World.Trouble.None, "Inner Door");
+        before.Systems[0].Instances[1].Halt = new Halt(SequenceProblem.EmptySlot, 1, -1, BlockTrouble.None, "Inner Door");
 
         var text = StateText.Save(before, null);
         Assert.Equal(
@@ -106,7 +106,7 @@ public class StateTests
 
             var before = Ship();
             before.Systems[0].Enabled = false;
-            before.Systems[0].Halt = new Halt(problem, 2, 3, Host.SpaceEngineers.World.Trouble.None, "Airlock 1 Outer Door");
+            before.Systems[0].Halt = new Halt(problem, 2, 3, BlockTrouble.None, "Airlock 1 Outer Door");
 
             var after = Ship();
             Assert.Equal("", StateText.Load(StateText.Save(before, null), after, null));
@@ -121,7 +121,7 @@ public class StateTests
         var before = Ship();
         before.Systems[0].Enabled = false;
         before.Systems[0].Halt = new Halt(SequenceProblem.MissingTarget, 2, 3,
-            Host.SpaceEngineers.World.Trouble.Waiting(Cause.TankNoGas, "hydrogen"), "Airlock 1 Tank");
+            BlockTrouble.Waiting(Cause.TankNoGas, "hydrogen"), "Airlock 1 Tank");
 
         var text = StateText.Save(before, null);
         Assert.Equal(
@@ -243,17 +243,17 @@ public class StateTests
     {
         var program = Ship();
         program.Systems[0].Enabled = false;
-        program.Systems[0].Halt = new Halt(SequenceProblem.NeverTriggered, 1, -1, Host.SpaceEngineers.World.Trouble.None, null);
+        program.Systems[0].Halt = new Halt(SequenceProblem.NeverTriggered, 1, -1, BlockTrouble.None, null);
         program.Systems[0].Instances[0].Enabled = false;
 
-        var text = Scribe.Save(program, new Values());
+        var text = ProgramWriter.Save(program, new Values());
 
         Assert.DoesNotContain(" is on", text);
         Assert.DoesNotContain(" is off", text);
 
         // And a program read without its switches is a construct with everything running.
         var after = new Automation();
-        Assert.Equal("", Reader.Load(text, after, new Values()));
+        Assert.Equal("", ProgramReader.Load(text, after, new Values()));
         Assert.True(after.Systems[0].Enabled);
         Assert.Null(after.Systems[0].Halt);
         Assert.True(after.Systems[0].Instances[0].Enabled);

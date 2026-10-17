@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class TimeTextTests
 {
-    readonly Ago _ago = new Ago(new Texts());
+    readonly AgoText _ago = new AgoText(new Texts());
 
     [Fact]
     public void HowLongAgoReadsInTheUnitsAPersonWouldUse()

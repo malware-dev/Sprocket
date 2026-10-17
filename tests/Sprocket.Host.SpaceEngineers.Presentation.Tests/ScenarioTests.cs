@@ -105,9 +105,9 @@ public class ScenarioTests
         var built = scenario.Build(BlockDefinitions.FromGame());
         var blueprint = XDocument.Parse(scenario.Blueprint(built));
 
-        var program = blueprint.Descendants("item").Single(item => (string)item.Element("Key") == Locker.ProgramKey.ToString("D"));
+        var program = blueprint.Descendants("item").Single(item => (string)item.Element("Key") == BlockStorage.ProgramKey.ToString("D"));
         var read = new Automation();
-        Assert.Equal("", Reader.Load((string)program.Element("Value")!, read, built.Sim.World.Values));
+        Assert.Equal("", ProgramReader.Load((string)program.Element("Value")!, read, built.Sim.World.Values));
 
         Assert.NotEmpty(read.Refs);
         foreach (var declared in read.Refs)

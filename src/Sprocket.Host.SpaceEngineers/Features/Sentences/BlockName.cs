@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         void Resize(float size)
         {
-            _icon.Placement = Fixed.Size(size, size);
+            _icon.Placement = FixedSize.Size(size, size);
         }
     }
 }

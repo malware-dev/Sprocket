@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.ChooseVersion;
+        public override ChangeKind Change => ChangeKind.ChooseVersion;
 
         /// <inheritdoc />
         public override void Apply(Automation program)

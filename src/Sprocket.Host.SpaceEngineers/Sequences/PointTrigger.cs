@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.Target;
+        public override ChangeKind Change => ChangeKind.Target;
 
         /// <summary>Whether it does something else: a sequence run the same way again is no change.</summary>
         public override bool Changes

@@ -20,7 +20,7 @@ public class StackTests
         {
             Children =
             {
-                new Label { Placement = Fixed.Wide(40f) },
+                new Label { Placement = FixedSize.Wide(40f) },
                 new Label { Placement = Flex.By(1f) }.As(out one),
                 new Label { Placement = Flex.By(3f) }.As(out three)
             }
@@ -43,14 +43,14 @@ public class StackTests
         {
             Children =
             {
-                new HStack { Placement = Fixed.Wide(300f) },
+                new HStack { Placement = FixedSize.Wide(300f) },
                 new HStack
                 {
                     Children =
                     {
-                        new Label { Placement = Fixed.Wide(40f) },
+                        new Label { Placement = FixedSize.Wide(40f) },
                         new HStack { Placement = Flex.Spare },
-                        new Label { Placement = Fixed.Wide(60f) }.As(out last)
+                        new Label { Placement = FixedSize.Wide(60f) }.As(out last)
                     }
                 }.As(out row)
             }
@@ -70,7 +70,7 @@ public class StackTests
         Label held;
         var stack = new HStack
         {
-            Children = { new Label { Text = "Far too long for the room", Placement = Fixed.Wide(30f) }.As(out held) }
+            Children = { new Label { Text = "Far too long for the room", Placement = FixedSize.Wide(30f) }.As(out held) }
         };
 
         _ = new Easel(stack, Wide, High);
@@ -86,7 +86,7 @@ public class StackTests
         var stack = new HStack { Children = { new Label { Text = "Name" }.As(out moved) } };
         var easel = new Easel(stack, Wide, High);
 
-        moved.Placement = Fixed.Wide(50f);
+        moved.Placement = FixedSize.Wide(50f);
         easel.Draw(Wide, High);
 
         Assert.Equal(50f, moved.Bounds.Width, 3);

@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public SystemInstance Instance { get; }
 
         /// <inheritdoc />
-        public override Change Change => Change.FillSlot;
+        public override ChangeKind Change => ChangeKind.FillSlot;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

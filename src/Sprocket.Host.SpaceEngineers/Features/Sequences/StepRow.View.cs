@@ -30,8 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Spacing = 4f,
                 Children =
                 {
-                    new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = Fixed.Size(24f, 24f) }.As(out _grip),
-                    new Label { Style = Styles.Aside, Placement = Fixed.Wide(36f) }.As(out _number)
+                    new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
+                    new Label { Style = Styles.Aside, Placement = FixedSize.Wide(36f) }.As(out _number)
                 }
             });
 
@@ -59,11 +59,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 }
             });
 
-            Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f) }.As(out _duplicate));
-            Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = Fixed.Size(32f, 32f) }.As(out _pause));
+            Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f) }.As(out _duplicate));
+            Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = FixedSize.Size(32f, 32f) }.As(out _pause));
 
             // The one control on the row that destroys something, so the one place that warns under the pointer.
-            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f) }.As(out _delete));
+            Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f) }.As(out _delete));
         }
     }
 }

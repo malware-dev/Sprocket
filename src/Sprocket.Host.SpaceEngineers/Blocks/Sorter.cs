@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Planning(Plan.SorterList)
+            kind.Planning(PlannedMember.SorterList)
                 .Renaming("blacklistWhitelist", true, "filter mode")
                 .Renaming("DrainAll", true, "draining all").Stating("DrainAll")
                 .Renaming("DrainAll", false, "toggle draining all");

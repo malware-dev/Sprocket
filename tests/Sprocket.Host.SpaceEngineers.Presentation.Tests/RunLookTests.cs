@@ -118,7 +118,7 @@ public class RunLookTests
             Color = Body,
             StrongColor = Body,
             EmphasisColor = Body,
-            Placement = Fixed.Wide(Wide)
+            Placement = FixedSize.Wide(Wide)
         };
         styled(text);
 

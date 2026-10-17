@@ -65,7 +65,7 @@ namespace Sprocket.Sim.Simulation
         /// the same place and reaches the same control, and only what that control makes of it
         /// differs.
         /// </remarks>
-        public Held Held;
+        public HeldModifier Held;
         /// <summary>Where it happens, in UI units; for an arrow, which way.</summary>
         public Vector2 At;
 

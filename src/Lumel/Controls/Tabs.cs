@@ -73,7 +73,7 @@ namespace Lumel.Controls
             var index = _headers.Count;
             var header = new Button { Text = title, Tip = about, Command = new Relay(() => Current = index) };
             _headers.Add(header);
-            _strip.Columns.Add(Length.Flex(1));
+            _strip.Columns.Add(GridLength.Flex(1));
             _strip.Cells[0, index] = header;
             _pages.Children.Add(page);
             Show();

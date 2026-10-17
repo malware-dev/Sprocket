@@ -38,7 +38,7 @@ public class StateStepTests
     {
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
-        var set = new Act(id) { Form = Nature.Value };
+        var set = new Act(id) { Form = ReachKind.Value };
         set.Targets.Add(automation.Declare(ship.World, ship.Entity(block)).Name);
         set.Arguments.Add(value);
         sequence.Steps.Add(set);

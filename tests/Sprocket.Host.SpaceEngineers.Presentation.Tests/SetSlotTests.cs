@@ -150,12 +150,12 @@ public class SetSlotTests
 
         var values = screen.Editor.World.Values;
         var after = new Automation();
-        Assert.Equal("", Reader.Load(Scribe.Save(screen.Editor.Program, values), after, values));
+        Assert.Equal("", ProgramReader.Load(ProgramWriter.Save(screen.Editor.Program, values), after, values));
 
         var read = after.FindSystem(system.Identity)!;
         Assert.NotNull(read.FindPart(whole));
         Assert.Equal(new[] { Declared(screen, "Hangar Door") }, read.Instances[1].FilledWith(whole));
-        Assert.DoesNotContain("'" + whole + "'", Scribe.Blueprint(system));
+        Assert.DoesNotContain("'" + whole + "'", ProgramWriter.Blueprint(system));
     }
 
     /// <summary>Another installation is marked under each slot it has to fill again, on the logic system's screen.</summary>
@@ -280,7 +280,7 @@ public class SetSlotTests
         // Nothing holds it any more, so the slot goes with its blocks.
         Assert.Null(system.FindPart(whole));
         Assert.Null(port.FilledWith(whole));
-        Assert.DoesNotContain("'" + whole + "'", Scribe.Save(screen.Editor.Program, screen.Editor.World.Values));
+        Assert.DoesNotContain("'" + whole + "'", ProgramWriter.Save(screen.Editor.Program, screen.Editor.World.Values));
     }
 
     /// <summary>A slot that four blocks filled, split in two while a second installation held a door in it; on the logic system's screen.</summary>

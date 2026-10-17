@@ -7,10 +7,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Part _part;
         readonly string _was;
         readonly string _now;
-        readonly Change _change;
+        readonly ChangeKind _change;
 
         /// <summary>Writes <paramref name="now" /> about <paramref name="part" />, a change of the kind <paramref name="change" />.</summary>
-        public AnnotatePart(Part part, string now, Change change)
+        public AnnotatePart(Part part, string now, ChangeKind change)
         {
             _part = part;
             _was = part.Annotation;
@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

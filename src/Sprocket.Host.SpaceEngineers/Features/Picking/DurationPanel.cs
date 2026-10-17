@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Symbol = Symbols.Minus,
                 Style = Styles.Icon,
-                Placement = Fixed.Size(32f, 32f),
+                Placement = FixedSize.Size(32f, 32f),
                 Command = new Relay(() => Step(-1)),
                 Tip = Tip.For(null, texts.WaitShorter)
             });
@@ -73,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 Symbol = Symbols.Plus,
                 Style = Styles.Icon,
-                Placement = Fixed.Size(32f, 32f),
+                Placement = FixedSize.Size(32f, 32f),
                 Command = new Relay(() => Step(1)),
                 Tip = Tip.For(null, texts.WaitLonger)
             });
@@ -96,7 +96,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _secondsPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
-                    Placement = Fixed.Wide(PickWidth),
+                    Placement = FixedSize.Wide(PickWidth),
                     Text = seconds == 60 ? texts.WaitPickMinute : Template.Fill(texts.WaitPickSeconds, "count", Said(seconds)),
                     Command = new Relay(() => Give(Said(seconds)))
                 });
@@ -108,7 +108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _ticksPicks.Children.Add(new Button
                 {
                     Style = Styles.Word,
-                    Placement = Fixed.Wide(PickWidth),
+                    Placement = FixedSize.Wide(PickWidth),
                     Text = Template.Fill(texts.WaitPickTicks, "count", Said(ticks)),
                     Command = new Relay(() => Give(Said(ticks)))
                 });

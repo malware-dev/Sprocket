@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.Wait;
+        public override ChangeKind Change => ChangeKind.Wait;
 
         /// <inheritdoc />
         public override bool Changes => _was != _now;

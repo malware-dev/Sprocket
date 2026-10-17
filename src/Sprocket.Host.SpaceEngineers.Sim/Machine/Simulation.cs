@@ -49,7 +49,7 @@ public sealed class Simulation
 
     readonly Preferences _preferences;
 
-    readonly Shelf _shelf;
+    readonly LibraryShelf _shelf;
 
     readonly Texts _texts = new Texts();
 
@@ -105,12 +105,12 @@ public sealed class Simulation
     {
         _store = store;
         _rig = rig;
-        _shelf = new Shelf(_folder, delegate { });
+        _shelf = new LibraryShelf(_folder, delegate { });
         _backups = new Backups(_worldFolder);
         _backups.Read();
         _preferences = new Preferences(_folder, delegate { });
         _preferences.Read();
-        _saidBefore = Told.Lines.Count;
+        _saidBefore = GameLog.Lines.Count;
         _texts.Book.Pages = new CodexFiles(CodexFiles.Beside, "");
 
         // Before the unit, which reads the program out of this the moment it is built.
@@ -148,7 +148,7 @@ public sealed class Simulation
 
         foreach (var fitting in _rig.InWorld)
         {
-            if (fitting is Programmable && fitting != _rig.Sprocket && Locker.HasProgram(fitting.Block))
+            if (fitting is Programmable && fitting != _rig.Sprocket && BlockStorage.HasProgram(fitting.Block))
                 _roster.Adopt(fitting.Block);
         }
     }
@@ -214,7 +214,7 @@ public sealed class Simulation
     public Preferences Preferences => _preferences;
 
     /// <summary>The player's library, kept in memory for as long as the harness runs.</summary>
-    public Shelf Shelf => _shelf;
+    public LibraryShelf Shelf => _shelf;
 
     /// <summary>The storage folder the library is kept in.</summary>
     public Folder Folder => _folder;
@@ -249,7 +249,7 @@ public sealed class Simulation
     public AutomationRunner Runner => Unit.Runner;
 
     /// <summary>What the mod has written to the game's log since this began.</summary>
-    public List<string> Log => Told.Lines.GetRange(_saidBefore, Told.Lines.Count - _saidBefore);
+    public List<string> Log => GameLog.Lines.GetRange(_saidBefore, GameLog.Lines.Count - _saidBefore);
 
     /// <summary>The construct itself, for a test that has to weld, grind or cut the power.</summary>
     public Rig Machine => _rig;

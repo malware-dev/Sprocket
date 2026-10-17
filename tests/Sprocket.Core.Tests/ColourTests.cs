@@ -16,14 +16,14 @@ public class ColourTests
     [Fact]
     public void ThreeNumbersAreShownAsTheColourTheyMake()
     {
-        Assert.Equal("#FF8800", Channels.Said(Values(255, 136, 0), 0, 3));
+        Assert.Equal("#FF8800", ColorChannels.Said(Values(255, 136, 0), 0, 3));
     }
 
     [Fact]
     public void AndTheColourGoesBackAsThoseThreeNumbers()
     {
         var into = new List<string>();
-        Channels.Spell("#FF8800", 3, into);
+        ColorChannels.Spell("#FF8800", 3, into);
 
         Assert.Equal(new[] { "255", "136", "0" }, into);
     }
@@ -39,7 +39,7 @@ public class ColourTests
     public void AndComesBackTheSameWayItWentIn()
     {
         var into = new List<string>();
-        Channels.Spell(Channels.Said(Values(18, 52, 86), 0, 3), 3, into);
+        ColorChannels.Spell(ColorChannels.Said(Values(18, 52, 86), 0, 3), 3, into);
 
         Assert.Equal(new[] { "18", "52", "86" }, into);
     }
@@ -52,8 +52,8 @@ public class ColourTests
     [Fact]
     public void ValuesThatWereNeverGivenAreNoColour()
     {
-        Assert.Equal("", Channels.Said(new List<Literal>(), 0, 3));
-        Assert.Equal("", Channels.Said(Values(255, 136, 0), 1, 3));
+        Assert.Equal("", ColorChannels.Said(new List<Literal>(), 0, 3));
+        Assert.Equal("", ColorChannels.Said(Values(255, 136, 0), 1, 3));
     }
 
     /// <summary>And a value that is not a number is not a channel of anything.</summary>
@@ -62,7 +62,7 @@ public class ColourTests
     {
         var said = new List<Literal> { Literal.Of("red"), Literal.Of(136L), Literal.Of(0L) };
 
-        Assert.Equal("", Channels.Said(said, 0, 3));
+        Assert.Equal("", ColorChannels.Said(said, 0, 3));
     }
 
     /// <summary>What is not a colour yet leaves the values alone rather than inventing them.</summary>
@@ -70,7 +70,7 @@ public class ColourTests
     public void HalfATypedColourFillsNothingIn()
     {
         var into = new List<string>();
-        Channels.Spell("#FF88", 3, into);
+        ColorChannels.Spell("#FF88", 3, into);
 
         Assert.Equal(new[] { "", "", "" }, into);
     }
@@ -82,7 +82,7 @@ public class ColourTests
     public void AndHowSolidItIsIsNotOneOfTheThree()
     {
         var into = new List<string>();
-        Channels.Spell("#FF8800CC", 3, into);
+        ColorChannels.Spell("#FF8800CC", 3, into);
 
         Assert.Equal(new[] { "255", "136", "0" }, into);
     }
@@ -98,10 +98,10 @@ public class ColourTests
     public void AColourThatIsOneValueGoesStraightThrough()
     {
         var kept = new List<Literal> { Literal.Colour(255, 136, 0, 255) };
-        string said = Channels.Said(kept, 0, 1);
+        string said = ColorChannels.Said(kept, 0, 1);
 
         var into = new List<string>();
-        Channels.Spell(said, 1, into);
+        ColorChannels.Spell(said, 1, into);
 
         Assert.Equal(new[] { said }, into);
     }

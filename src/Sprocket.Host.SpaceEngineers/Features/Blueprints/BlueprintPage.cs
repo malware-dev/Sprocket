@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         string _madeName;
         bool _madeOn;
         int _shape = -1;
-        Keyed<Part, PartRow> _partRows;
+        KeyedChildren<Part, PartRow> _partRows;
 
         /// <summary>The installation panel of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />, filling an installation's slots.</summary>
         public BlueprintPage(SprocketEditor editor, AutomationSystem system) : base(editor)
@@ -118,13 +118,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <inheritdoc />
         public override bool AcceptsName(string name)
         {
-            return Naming.Clean(name).Length > 0;
+            return NameRules.Clean(name).Length > 0;
         }
 
         /// <inheritdoc />
         public override void Rename(string name)
         {
-            var wanted = Naming.Clean(name);
+            var wanted = NameRules.Clean(name);
             if (!AcceptsName(wanted))
                 return;
 
@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             from.Mark = Symbols.LogicSystem;
             from.MarkAbout = Editor.Texts.HeadingLogicSystem;
             from.About = Template.Fill(Editor.Texts.SystemsEditBlueprint, "name", _system.Name);
-            from.Opens = Editor.Act(Cmd.OpenSystem, () => Editor.Push(new LogicSystemPage(Editor, _system)));
+            from.Opens = Editor.Act(CommandKind.OpenSystem, () => Editor.Push(new LogicSystemPage(Editor, _system)));
             parts.Insert(0, from);
         }
 
@@ -223,7 +223,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Keeps the rows by slot, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _partRows = new Keyed<Part, PartRow>(_partList.Children, delegate { return new PartRow(); });
+            _partRows = new KeyedChildren<Part, PartRow>(_partList.Children, delegate { return new PartRow(); });
             Show();
         }
 
@@ -295,7 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _openTrouble.IsVisible = true;
                 _openTrouble.Text = Editor.Texts.BlueprintSwitchOn;
-                _openTrouble.Command = Editor.Act(Cmd.EnableInstance, delegate { Editor.SwitchInstance(_system, chosen, true); });
+                _openTrouble.Command = Editor.Act(CommandKind.EnableInstance, delegate { Editor.SwitchInstance(_system, chosen, true); });
                 return;
             }
 
@@ -303,7 +303,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _openTrouble.IsVisible = opens;
             _openTrouble.Text = opens ? Template.Fill(Editor.Texts.BlueprintOpenSequence, "name", sequence.Name) : "";
             _openTrouble.Command = opens
-                ? Editor.Act(Cmd.OpenSequence, delegate
+                ? Editor.Act(CommandKind.OpenSequence, delegate
                 {
                     Editor.Choose(_system, chosen);
                     Editor.Push(new SequencePage(Editor, sequence));
@@ -326,7 +326,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void Needs(SystemInstance chosen, int unfilled)
         {
             var texts = Editor.Texts;
-            var again = chosen == null ? 0 : Marks.Changed(_system, chosen, _used);
+            var again = chosen == null ? 0 : SlotMarks.Changed(_system, chosen, _used);
             var count = again > 0 ? again : unfilled;
 
             _needs.IsVisible = chosen != null && count > 0;
@@ -348,7 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (chosen == null)
                 return;
 
-            Marks.SetAside(_system, chosen, _used, _aside);
+            SlotMarks.SetAside(_system, chosen, _used, _aside);
             foreach (var reference in _aside)
             {
                 var block = Editor.Runner.Bindings.Entity(reference);
@@ -368,12 +368,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var gone = row.Take(Editor.Runner.Bindings, chosen?.FilledWith(part.Id),
                 chosen == null || !part.IsSignal ? null : chosen.Positions(part.Id));
 
-            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(Cmd.FillPart, () => _fill.Ask(part, chosen));
+            row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(CommandKind.FillPart, () => _fill.Ask(part, chosen));
 
             // Any block lost, as the logic system says of its steps, though others still fill the slot.
             row.Problem = gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
 
-            var changed = chosen != null && Marks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;
+            var changed = chosen != null && SlotMarks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;
             row.SetAside = changed && _asideNames.Count > 0
                 ? Template.Fill(Editor.Texts.SlotSetAside, "blocks", string.Join(", ", _asideNames.ToArray()))
                 : null;

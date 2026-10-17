@@ -490,13 +490,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <inheritdoc />
-        public Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
+        public BlockOrder Prepare(IMyTerminalBlock block, string id, ReachKind form, IList<Literal> arguments,
             IList<Primitive> types)
         {
             if (block == null)
                 return null;
 
-            if (form == Nature.Value)
+            if (form == ReachKind.Value)
                 return arguments == null || arguments.Count == 0 ? null : Written(block, id, arguments[0]);
 
             ITerminalAction action = block.GetActionWithName(id);
@@ -512,7 +512,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A value made ready to be written as the type the property holds, or null where it is not that kind.</summary>
-        static Order Written(IMyTerminalBlock block, string propertyId, Literal value)
+        static BlockOrder Written(IMyTerminalBlock block, string propertyId, Literal value)
         {
             ITerminalProperty property = block.GetProperty(propertyId);
             if (property == null)
@@ -525,7 +525,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                         return null;
 
                     return Flips(block, propertyId)
-                        ? (Order)new Switches(block, property.AsBool(), value.Flag)
+                        ? (BlockOrder)new Switches(block, property.AsBool(), value.Flag)
                         : new Writes<bool>(block, property.AsBool(), value.Flag);
                 case "Single":
                     return value.Kind == ValueKind.Real
@@ -650,7 +650,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One of the block's actions, with its values already the types it takes.</summary>
-        sealed class Performed : Order
+        sealed class Performed : BlockOrder
         {
             readonly IMyTerminalBlock _block;
             readonly ITerminalAction _action;
@@ -674,7 +674,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One of the block's values, already the type it holds.</summary>
-        sealed class Writes<T> : Order
+        sealed class Writes<T> : BlockOrder
         {
             readonly IMyTerminalBlock _block;
             readonly ITerminalProperty<T> _property;
@@ -695,7 +695,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One of the block's switches whose setter flips it, told only where it does not already read as asked.</summary>
-        sealed class Switches : Order
+        sealed class Switches : BlockOrder
         {
             readonly IMyTerminalBlock _block;
             readonly ITerminalProperty<bool> _property;
@@ -723,7 +723,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A fresh builder every time it is given, because the block is handed the builder itself and
         /// what it does with it afterwards is the block's business.
         /// </remarks>
-        sealed class Texts : Order
+        sealed class Texts : BlockOrder
         {
             readonly IMyTerminalBlock _block;
             readonly ITerminalProperty<StringBuilder> _property;

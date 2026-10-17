@@ -150,7 +150,7 @@ public class CompileTests
         var ship = new Rigged();
         var block = ship.Rig.Panel(1, "Mover").Offering("SetAndMove", "Set and move",
             Primitive.String, Primitive.String);
-        var action = ship.Entity(block.Id).Kind.FindAction("SetAndMove", Nature.Action)!;
+        var action = ship.Entity(block.Id).Kind.FindAction("SetAndMove", ReachKind.Action)!;
 
         var converted = new List<Literal>();
         Assert.True(action.Converts([Literal.Of(4L), Literal.Of(0.5)], converted));
@@ -158,7 +158,7 @@ public class CompileTests
 
         var fields = new List<Field>();
         action.Fields(fields);
-        Assert.All(fields, field => Assert.Equal(Entry.Decimal, field.Entry));
+        Assert.All(fields, field => Assert.Equal(FieldInput.Decimal, field.Entry));
     }
 
     /// <summary>What an action declares stands where nothing corrects it.</summary>
@@ -167,7 +167,7 @@ public class CompileTests
     {
         var ship = new Rigged();
         var block = ship.Rig.Panel(1, "Brain").Offering("Run", "Run", Primitive.String);
-        var action = ship.Entity(block.Id).Kind.FindAction("Run", Nature.Action)!;
+        var action = ship.Entity(block.Id).Kind.FindAction("Run", ReachKind.Action)!;
 
         Assert.True(action.Takes([Literal.Of("doors open")]));
         Assert.False(action.Takes([Literal.Of(5L)]));
@@ -179,7 +179,7 @@ public class CompileTests
     {
         var ship = new Rigged();
         var block = ship.Rig.Panel(1, "Oddment").Offering("Twiddle", "Twiddle", 1);
-        var action = ship.Entity(block.Id).Kind.FindAction("Twiddle", Nature.Action)!;
+        var action = ship.Entity(block.Id).Kind.FindAction("Twiddle", ReachKind.Action)!;
 
         var converted = new List<Literal>();
         Assert.True(action.Converts([Literal.Of(5L)], converted));
@@ -215,7 +215,7 @@ public class CompileTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var steer = new Act("Steer") { Form = Nature.Action };
+        var steer = new Act("Steer") { Form = ReachKind.Action };
         steer.Targets.Add(automation.Declare(ship.World, ship.Entity(remote.Id)).Name);
         steer.Arguments.Add(Literal.Of(3L));
         steer.Arguments.Add(Literal.Of(2L));
@@ -242,7 +242,7 @@ public class CompileTests
         var automation = new Automation();
         var sequence = automation.AddSequence((Trigger)null!);
 
-        var steer = new Act("Steer") { Form = Nature.Action };
+        var steer = new Act("Steer") { Form = ReachKind.Action };
         steer.Targets.Add(automation.Declare(ship.World, ship.Entity(remote.Id)).Name);
         steer.Arguments.Add(Literal.Of(300L));
         sequence.Steps.Add(steer);
@@ -265,10 +265,10 @@ public class CompileTests
         var ship = new Rigged();
         var remote = ship.Rig.Panel(1, "Remote").Offering("Steer", "Steer", Primitive.Byte);
         var fields = new List<Field>();
-        ship.Entity(remote.Id).Kind.FindAction("Steer", Nature.Action)!.Fields(fields);
+        ship.Entity(remote.Id).Kind.FindAction("Steer", ReachKind.Action)!.Fields(fields);
 
         var field = Assert.Single(fields);
-        Assert.Equal(Entry.Whole, field.Entry);
+        Assert.Equal(FieldInput.Whole, field.Entry);
         Assert.Equal("0", field.Least);
         Assert.Equal("255", field.Most);
     }
@@ -277,7 +277,7 @@ public class CompileTests
     public void AWholeNumberBoxRefusesAFraction()
     {
         var field = Field.Between("count", "0", "10");
-        field.Entry = Entry.Whole;
+        field.Entry = FieldInput.Whole;
 
         Assert.Equal("count must be a whole number.", field.Refuses(new Texts(), "count", "2.5"));
         Assert.Equal("", field.Refuses(new Texts(), "count", "2"));
@@ -287,7 +287,7 @@ public class CompileTests
     public void ADecimalBoxShowsAPlaceAfterThePoint()
     {
         var field = Field.Between("speed", "0", "5");
-        field.Entry = Entry.Decimal;
+        field.Entry = FieldInput.Decimal;
 
         Assert.Equal("1.0", field.Shown("1"));
         Assert.Equal("0.25", field.Shown("0.25"));

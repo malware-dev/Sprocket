@@ -49,7 +49,7 @@ public class SalvageTests
     static Store Holding(string program)
     {
         Store store = Store.Nowhere();
-        store.SetValue(Locker.ProgramKey, program);
+        store.SetValue(BlockStorage.ProgramKey, program);
         return store;
     }
 
@@ -70,7 +70,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.Equal(Older, store.GetValue(Locker.ProgramKey));
+        Assert.Equal(Older, store.GetValue(BlockStorage.ProgramKey));
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class SalvageTests
         Assert.True(shown == null || shown.Leaving, "the banner stayed");
 
         rig.Save();
-        Assert.Contains("as Airlock", store.GetValue(Locker.ProgramKey));
+        Assert.Contains("as Airlock", store.GetValue(BlockStorage.ProgramKey));
     }
 
     /// <summary>A text still wrong changes nothing, and says what is wrong with it now.</summary>
@@ -178,7 +178,7 @@ public class SalvageTests
         Assert.Contains("expected the sequence's number", Assert.IsType<ScriptPage>(rig.Editor.Current).Problem);
 
         rig.Save();
-        Assert.Equal(Broken, store.GetValue(Locker.ProgramKey));
+        Assert.Equal(Broken, store.GetValue(BlockStorage.ProgramKey));
     }
 
     /// <summary>
@@ -204,7 +204,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        var saved = store.GetValue(Locker.ProgramKey);
+        var saved = store.GetValue(BlockStorage.ProgramKey);
 
         Assert.StartsWith("sprocket 1 alpha 16", saved);
         Assert.Contains("Airlock", saved);
@@ -218,7 +218,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.Contains("Hangar", store.GetValue(Locker.ProgramKey));
+        Assert.Contains("Hangar", store.GetValue(BlockStorage.ProgramKey));
     }
 
     /// <summary>
@@ -273,7 +273,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.Equal(Older, store.GetValue(Locker.ProgramKey));
+        Assert.Equal(Older, store.GetValue(BlockStorage.ProgramKey));
         Assert.Empty(rig.Editor.Program.Systems);
     }
 
@@ -289,7 +289,7 @@ public class SalvageTests
         rig.Save();
 
         Assert.False(rig.Editor.Screen.HasQuestion);
-        Assert.StartsWith("sprocket 1 alpha 16", store.GetValue(Locker.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 16", store.GetValue(BlockStorage.ProgramKey));
         Assert.Null(Said(rig));
     }
 
@@ -310,7 +310,7 @@ public class SalvageTests
 
         Assert.False(rig.Editor.Screen.HasQuestion);
         Assert.False(Said(rig).Leaving);
-        Assert.Equal(Older, store.GetValue(Locker.ProgramKey));
+        Assert.Equal(Older, store.GetValue(BlockStorage.ProgramKey));
     }
 
     /// <summary>
@@ -350,7 +350,7 @@ public class SalvageTests
         rig.Tick();
         rig.Save();
 
-        Assert.StartsWith("sprocket 1 alpha 16", store.GetValue(Locker.ProgramKey));
-        Assert.Contains("Airlock", store.GetValue(Locker.ProgramKey));
+        Assert.StartsWith("sprocket 1 alpha 16", store.GetValue(BlockStorage.ProgramKey));
+        Assert.Contains("Airlock", store.GetValue(BlockStorage.ProgramKey));
     }
 }

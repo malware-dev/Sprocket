@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         int _shape;
 
-        Keyed<AutomationSystem, SystemGroup> _groups;
+        KeyedChildren<AutomationSystem, SystemGroup> _groups;
 
         /// <summary>The root of the editor built on <paramref name="editor" />.</summary>
         public HomePage(SprocketEditor editor) : base(editor)
@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <inheritdoc />
-        public override ICommand Library => Editor.Act(Cmd.LoadSystem, Editor.OpenLibrary);
+        public override ICommand Library => Editor.Act(CommandKind.LoadSystem, Editor.OpenLibrary);
 
         /// <summary>
         /// Reaching outside the automation to rename the machine itself, which is deliberate.
@@ -177,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             if (instance == null)
                 return;
 
-            row.Flips = Editor.Act(Cmd.EnableInstance, delegate
+            row.Flips = Editor.Act(CommandKind.EnableInstance, delegate
             {
                 Editor.SwitchInstance(system, instance, !instance.Enabled);
             });
@@ -242,7 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         string FillAgain(Texts texts, AutomationSystem system, SystemInstance instance)
         {
             system.Acted(_used);
-            var again = Marks.Changed(system, instance, _used);
+            var again = SlotMarks.Changed(system, instance, _used);
             if (again == 0)
                 return "";
 
@@ -276,8 +276,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>Gives the button its press, keeps the groups by system, and fills the view from the systems as they are.</summary>
         protected override void ViewCreated()
         {
-            _new.Command = Editor.Act(Cmd.NewSystem, Make);
-            _groups = new Keyed<AutomationSystem, SystemGroup>(_list.Children, system => new SystemGroup(Editor, this, system));
+            _new.Command = Editor.Act(CommandKind.NewSystem, Make);
+            _groups = new KeyedChildren<AutomationSystem, SystemGroup>(_list.Children, system => new SystemGroup(Editor, this, system));
             Editor.Codex.Wire(_heading, Editor.OpenCodex);
 
             Show(true);

@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.Cadence;
+        public override ChangeKind Change => ChangeKind.Cadence;
 
         /// <inheritdoc />
         public override bool Changes => _was != _now;

@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// reference while the model asks for every word as a string regardless. Keeping the segment made a
     /// load up to 9% slower and allocated 14% more, and saved nothing.
     /// <para>
-    /// A list value does not own its items; it names where they are - see <see cref="Reading.Items" />.
+    /// A list value does not own its items; it names where they are - see <see cref="ScriptValues.Items" />.
     /// </para>
     /// </remarks>
     public struct Value
@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>How many items a list holds, or parts a name has.</summary>
         public int Count => (int)(Whole & 0xFFFFFFFF);
 
-        /// <summary>A list whose items are a run of <see cref="Reading.Items" />.</summary>
+        /// <summary>A list whose items are a run of <see cref="ScriptValues.Items" />.</summary>
         public static Value Listed(int from, int count)
         {
             return new Value(ValueForm.List, null, Run(from, count));
@@ -68,13 +68,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return new Value(ValueForm.Vector, null, Run(from, 3));
         }
 
-        /// <summary>A name whose parts are a run of <see cref="Reading.Parts" />.</summary>
+        /// <summary>A name whose parts are a run of <see cref="ScriptValues.Parts" />.</summary>
         public static Value Qualified(int from, int count)
         {
             return new Value(ValueForm.Qualified, null, Run(from, count));
         }
 
-        /// <summary>A member and its blocks, whose name's parts, arguments and names are a run of <see cref="Reading.Parts" />.</summary>
+        /// <summary>A member and its blocks, whose name's parts, arguments and names are a run of <see cref="ScriptValues.Parts" />.</summary>
         public static Value Referenced(int from, int count)
         {
             return new Value(ValueForm.Reference, null, Run(from, count));

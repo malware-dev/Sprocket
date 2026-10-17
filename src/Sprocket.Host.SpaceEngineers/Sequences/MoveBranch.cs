@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.MoveBranch;
+        public override ChangeKind Change => ChangeKind.MoveBranch;
 
         /// <inheritdoc />
         public override bool Changes => _from != _to;

@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             _editor = editor;
             var texts = editor.Texts;
             Style = Styles.Dialog;
-            Placement = Fixed.Wide(Wide);
+            Placement = FixedSize.Wide(Wide);
             var close = new Relay(Close);
             Cancel = close;
             Accept = close;
@@ -74,9 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                     Setting(texts.AdminFastest, texts.AdminFastestAbout, Choose(texts, world,
                         new[] { texts.AdminEveryTick, texts.AdminEveryTen, texts.AdminEveryHundred },
                         new[] { texts.AdminDefaultEveryTick, texts.AdminDefaultEveryTen, texts.AdminDefaultEveryHundred },
-                        layer => layer.FastestUpdate.HasValue ? Array.IndexOf(World.Layer.Updates, layer.FastestUpdate.Value) : -1,
-                        settings => Array.IndexOf(World.Layer.Updates, settings.DefaultFastestUpdate),
-                        (layer, at) => layer.WithFastestUpdate(at < 0 ? (int?)null : World.Layer.Updates[at]))),
+                        layer => layer.FastestUpdate.HasValue ? Array.IndexOf(SettingsLayer.Updates, layer.FastestUpdate.Value) : -1,
+                        settings => Array.IndexOf(SettingsLayer.Updates, settings.DefaultFastestUpdate),
+                        (layer, at) => layer.WithFastestUpdate(at < 0 ? (int?)null : SettingsLayer.Updates[at]))),
                     Setting(texts.AdminDeveloper, texts.AdminDeveloperAbout, Choose(texts, world,
                         new[] { texts.AdminOn, texts.AdminOff },
                         new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
@@ -91,8 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         /// The list of one setting at one level: <paramref name="words" /> for its values, and under this world, first, the default,
         /// spelled as <paramref name="defaults" /> has the value it stands for, where the setting has one.
         /// </summary>
-        Element Choose(Texts texts, bool world, string[] words, string[] defaults, Func<Layer, int> given, Func<Settings, int> standing,
-            Func<Layer, int, Layer> giving)
+        Element Choose(Texts texts, bool world, string[] words, string[] defaults, Func<SettingsLayer, int> given, Func<Settings, int> standing,
+            Func<SettingsLayer, int, SettingsLayer> giving)
         {
             var defaulted = world && defaults != null;
             var listed = new List<string>();
@@ -165,8 +165,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         /// <summary>One setting's list at one level, and how its words stand for the setting's values.</summary>
         sealed class Choice
         {
-            public Choice(bool world, ListField field, string[] words, string[] defaults, Func<Layer, int> given,
-                Func<Settings, int> standing, Func<Layer, int, Layer> giving)
+            public Choice(bool world, ListField field, string[] words, string[] defaults, Func<SettingsLayer, int> given,
+                Func<Settings, int> standing, Func<SettingsLayer, int, SettingsLayer> giving)
             {
                 World = world;
                 Field = field;
@@ -190,13 +190,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             public string[] Defaults { get; }
 
             /// <summary>Where the value a level gives stands among <see cref="Words" />, or -1 where the level leaves it.</summary>
-            public Func<Layer, int> Given { get; }
+            public Func<SettingsLayer, int> Given { get; }
 
             /// <summary>Where the value a world that leaves the setting takes stands among <see cref="Words" />.</summary>
             public Func<Settings, int> Standing { get; }
 
             /// <summary>A level giving the value at a place among <see cref="Words" />, or leaving it at -1.</summary>
-            public Func<Layer, int, Layer> Giving { get; }
+            public Func<SettingsLayer, int, SettingsLayer> Giving { get; }
         }
     }
 }

@@ -27,10 +27,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Full = Reading.Of<IMyBatteryBlock>(Charged);
 
-        static readonly Doing Recharges = Doing.Of<IMyBatteryBlock, Recharging>(Recharging.Read,
+        static readonly OwnAction Recharges = OwnAction.Of<IMyBatteryBlock, RechargeOptions>(RechargeOptions.Read,
             (battery, recharging, seen) => battery.ChargeMode = ChargeMode.Recharge, Full,
             (battery, recharging, seen) => !recharging.Waits,
-            (battery, recharging, seen) => recharging.Waits ? Why(battery) : Trouble.None);
+            (battery, recharging, seen) => recharging.Waits ? Why(battery) : BlockTrouble.None);
 
         static readonly Being Charge = Being.Number<IMyBatteryBlock>(battery =>
             battery.MaxStoredPower > 0f ? battery.CurrentStoredPower / battery.MaxStoredPower * 100.0 : 0.0);
@@ -64,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction(Recharge, "recharge", Recharges, "Recharge_On").Lasting().Asking(Recharging.Asked())
+            kind.WithAction(Recharge, "recharge", Recharges, "Recharge_On").Lasting().Asking(RechargeOptions.Asked())
                 .In(Category.Power)
                 .Renaming("Recharge", false, "toggle recharge")
                 .Renaming("Discharge", false, "toggle discharge")
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var battery = block as IMyBatteryBlock;
             var store = block as IMyStoredPowerRatio;
-            return battery == null || store == null ? null : new Listening(new Storing(store, told), new Producing(battery, told));
+            return battery == null || store == null ? null : new Listening(new ChargeListener(store, told), new OutputListener(battery, told));
         }
 
         /// <inheritdoc />
@@ -100,7 +100,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             if (battery.ChargeMode == ChargeMode.Recharge)
             {
-                Trouble stuck = Filling(battery);
+                BlockTrouble stuck = Filling(battery);
                 if (stuck.Exists)
                     return Status.Of(stuck);
             }
@@ -130,16 +130,16 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Set to another mode is its own answer: whatever set it has overruled the step, and nothing
         /// is heading towards full any more.
         /// </remarks>
-        static Trouble Why(IMyBatteryBlock battery)
+        static BlockTrouble Why(IMyBatteryBlock battery)
         {
             if (Charged(battery))
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (battery.ChargeMode == ChargeMode.Discharge)
-                return Trouble.Fatal(Cause.BatteryToldToDischarge);
+                return BlockTrouble.Fatal(Cause.BatteryToldToDischarge);
 
             if (battery.ChargeMode == ChargeMode.Auto)
-                return Trouble.Fatal(Cause.BatteryToldToAuto);
+                return BlockTrouble.Fatal(Cause.BatteryToldToAuto);
 
             return Filling(battery);
         }
@@ -150,17 +150,17 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// calls a battery with nothing left in it not working, and an empty battery is the one most
         /// likely to be recharged.
         /// </remarks>
-        static Trouble Filling(IMyBatteryBlock battery)
+        static BlockTrouble Filling(IMyBatteryBlock battery)
         {
             if (!battery.Enabled)
-                return Trouble.Waiting(Cause.BatteryOff);
+                return BlockTrouble.Waiting(Cause.BatteryOff);
 
             if (!battery.IsFunctional)
-                return Trouble.Waiting(Cause.BatteryDamaged);
+                return BlockTrouble.Waiting(Cause.BatteryDamaged);
 
             return battery.CurrentInput > 0f
-                ? Trouble.None
-                : Trouble.Waiting(Cause.BatteryNoPower);
+                ? BlockTrouble.None
+                : BlockTrouble.Waiting(Cause.BatteryNoPower);
         }
 
         static bool Charged(IMyBatteryBlock battery)
@@ -171,10 +171,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>A battery's charge and output being listened to, until disposed.</summary>
         sealed class Listening : IDisposable
         {
-            readonly Storing _charge;
-            readonly Producing _output;
+            readonly ChargeListener _charge;
+            readonly OutputListener _output;
 
-            public Listening(Storing charge, Producing output)
+            public Listening(ChargeListener charge, OutputListener output)
             {
                 _charge = charge;
                 _output = output;

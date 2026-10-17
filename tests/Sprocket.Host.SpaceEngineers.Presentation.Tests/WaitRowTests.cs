@@ -246,7 +246,7 @@ public class WaitRowTests
     }
 
     /// <summary>The menu of steps at the end of the if's branch.</summary>
-    static IList<Adder> Menu(Simulation rig) =>
+    static IList<AddOption> Menu(Simulation rig) =>
         Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.Adds).Adds).Choices!;
 
     /// <summary>The words the menu of steps offers.</summary>

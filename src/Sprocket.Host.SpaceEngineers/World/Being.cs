@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What one of Sprocket's own values reads off a block, and how a change in it is heard.</summary>
     /// <remarks>
-    /// Declared once, beside the value, by what knows the block, as <see cref="Doing" /> is for an action, and never changed
+    /// Declared once, beside the value, by what knows the block, as <see cref="OwnAction" /> is for an action, and never changed
     /// after: how a change in it is heard belongs to the value a kind lists, <see cref="EntityAction.Announced" />. A function is a
     /// value with options of its own: it reads them into a type of its own when a test is compiled, and is handed that
     /// from then on. See <see cref="Gauge" />.
@@ -37,12 +37,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The words a person reads for <see cref="Names" />, one each in order, or null where each name is read as it is written.</summary>
         public IReadOnlyList<string> Said => _said;
 
-        /// <summary>Whether a reading needs a <see cref="Recall" /> of its own for each block it reads.</summary>
+        /// <summary>Whether a reading needs a <see cref="ReaderMemory" /> of its own for each block it reads.</summary>
         public abstract bool Remembers { get; }
 
         /// <summary>The value on <paramref name="block" /> as a test given <paramref name="arguments" /> reads it, made ready once.</summary>
         /// <remarks>Asked when a test is compiled, and never while it runs. <paramref name="seen" /> is the block's own, or null where this remembers nothing.</remarks>
-        public abstract Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, Recall seen);
+        public abstract Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, ReaderMemory seen);
 
         /// <summary>The flag that the value, read with no arguments, is <paramref name="becomes" />: on or off for a flag, a name for one of a list.</summary>
         /// <remarks>What a signal that is a change in this value is a change of: a door finishing closing is its status coming to be closed.</remarks>
@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// set, or a one of a list is given none of its names.
         /// </summary>
         /// <remarks>Made when a step is compiled, and given when it runs, which only calls the writer.</remarks>
-        public Order Order(IMyTerminalBlock block, Literal value)
+        public BlockOrder Order(IMyTerminalBlock block, Literal value)
         {
             if (_write == null || block == null)
                 return null;
@@ -180,7 +180,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them, remembering between looks.</summary>
-        public static Being OneOf<T>(string[] names, Func<T, Recall, int> position) where T : class
+        public static Being OneOf<T>(string[] names, Func<T, ReaderMemory, int> position) where T : class
         {
             return new Typed<T, object>(ValueKind.Name, names, true, Nothing,
                 (block, options, seen) => Literal.Of(position(block, seen)));
@@ -194,7 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />, remembering between looks.</summary>
-        public static Being Number<T>(Func<T, Recall, double> number) where T : class
+        public static Being Number<T>(Func<T, ReaderMemory, double> number) where T : class
         {
             return new Typed<T, object>(ValueKind.Real, None, true, Nothing,
                 (block, options, seen) => Literal.Of(number(block, seen)));
@@ -225,7 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a real number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, double> number)
+        public static Being Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, double> number)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Real, None, true, options,
@@ -234,14 +234,14 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>A function of a <typeparamref name="T" /> giving back one of <paramref name="names" /> as a position among them, with options read into a <typeparamref name="TOptions" />.</summary>
         public static Being OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
-            Func<T, TOptions, Recall, int> position) where T : class
+            Func<T, TOptions, ReaderMemory, int> position) where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Name, names, true, options,
                 (block, given, seen) => Literal.Of(position(block, given, seen)));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a color, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, Color> color)
+        public static Being Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, Color> color)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Color, None, true, options, (block, given, seen) =>
@@ -252,7 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a flag, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, bool> flag)
+        public static Being Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, bool> flag)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Flag, None, true, options,
@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a whole number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, long> whole)
+        public static Being Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, long> whole)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Integer, None, true, options,
@@ -268,7 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back text, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static Being Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Recall, string> text)
+        public static Being Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, string> text)
             where T : class
         {
             return new Typed<T, TOptions>(ValueKind.Text, None, true, options,
@@ -296,7 +296,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override bool Remembers => _flag.Remembers;
 
-            public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, Recall seen)
+            public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, ReaderMemory seen)
             {
                 return new FlagGauge(_flag, block, seen);
             }
@@ -313,10 +313,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             readonly ValueKind _kind;
             readonly string[] _names;
             readonly Func<IList<Literal>, TOptions> _options;
-            readonly Func<T, TOptions, Recall, Literal> _read;
+            readonly Func<T, TOptions, ReaderMemory, Literal> _read;
 
             public Typed(ValueKind kind, string[] names, bool remembers, Func<IList<Literal>, TOptions> options,
-                Func<T, TOptions, Recall, Literal> read)
+                Func<T, TOptions, ReaderMemory, Literal> read)
             {
                 _kind = kind;
                 _names = names;
@@ -331,7 +331,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override bool Remembers { get; }
 
-            public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, Recall seen)
+            public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, ReaderMemory seen)
             {
                 return new Measured<T, TOptions>(this, _options(arguments), block, seen);
             }
@@ -355,7 +355,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return new Equal<T, TOptions>(this, operand);
             }
 
-            public Literal Read(T block, TOptions options, Recall seen)
+            public Literal Read(T block, TOptions options, ReaderMemory seen)
             {
                 return _read(block, options, seen);
             }
@@ -367,7 +367,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One block told what this is to be, by one step.</summary>
-        sealed class Setting : Order
+        sealed class Setting : BlockOrder
         {
             readonly Action<IMyTerminalBlock, Literal> _write;
             readonly IMyTerminalBlock _block;
@@ -393,9 +393,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             readonly Typed<T, TOptions> _being;
             readonly TOptions _options;
             readonly T _block;
-            readonly Recall _seen;
+            readonly ReaderMemory _seen;
 
-            public Measured(Typed<T, TOptions> being, TOptions options, IMyTerminalBlock block, Recall seen)
+            public Measured(Typed<T, TOptions> being, TOptions options, IMyTerminalBlock block, ReaderMemory seen)
             {
                 _being = being;
                 _options = options;
@@ -417,9 +417,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             readonly Reading _flag;
             readonly IMyTerminalBlock _block;
-            readonly Recall _seen;
+            readonly ReaderMemory _seen;
 
-            public FlagGauge(Reading flag, IMyTerminalBlock block, Recall seen)
+            public FlagGauge(Reading flag, IMyTerminalBlock block, ReaderMemory seen)
             {
                 _flag = flag;
                 _block = block;
@@ -450,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override bool Remembers => _being.Remembers;
 
-            public override bool Holds(IMyTerminalBlock block, Recall seen)
+            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
             {
                 return Relations.Holds(_being.Read((T)block, _options, seen), Relation.Is, _operand);
             }
@@ -468,7 +468,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override bool Remembers => _flag.Remembers;
 
-            public override bool Holds(IMyTerminalBlock block, Recall seen)
+            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
             {
                 return !_flag.Holds(block, seen);
             }

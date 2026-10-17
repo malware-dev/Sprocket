@@ -44,7 +44,7 @@ public class LibraryTests
 
         Assert.Equal("", read.Open(read.All[1], new Values(), out var opened));
         Assert.Equal(airlock.Identity, opened!.Identity);
-        Assert.Equal(Scribe.Blueprint(airlock), folder.Files["backup-2.cog"]);
+        Assert.Equal(ProgramWriter.Blueprint(airlock), folder.Files["backup-2.cog"]);
     }
 
     /// <summary>An index that will not read gives no backups, says what was wrong, and is never written over.</summary>
@@ -322,7 +322,7 @@ public class LibraryTests
 
         var volume = Assert.Single(rig.Shelf.All);
         Assert.NotEqual(lost.Identity, volume.Identity);
-        Assert.Equal(Scribe.Blueprint(lost, volume.Identity), volume.Text);
+        Assert.Equal(ProgramWriter.Blueprint(lost, volume.Identity), volume.Text);
         Assert.Empty(rig.Editor.Program.Systems);
     }
 
@@ -369,7 +369,7 @@ public class LibraryTests
     {
         var rig = WithLost(out var lost, out var page, (sim, system) =>
         {
-            sim.Folder.Write("sprocket-bp-Airlock.cog", Scribe.Blueprint(system));
+            sim.Folder.Write("sprocket-bp-Airlock.cog", ProgramWriter.Blueprint(system));
             sim.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n");
             Assert.Equal("", sim.Shelf.Read());
         });
@@ -529,7 +529,7 @@ public class LibraryTests
     public void MakingABlueprintOpensTheLibraryAtIt()
     {
         var rig = Blueprinted();
-        var copy = rig.Editor.Holdings.Copy(Scribe.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
+        var copy = rig.Editor.Holdings.Copy(ProgramWriter.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
         Assert.True(copy != null, trouble);
         rig.Editor.GoToRoot();
         rig.Tick();
@@ -656,13 +656,13 @@ public class LibraryTests
         Assert.Equal(Saved, blueprint.OriginChanged);
 
         Assert.Equal("sprocket-bp-Airlock.cog\n", rig.Folder.Files["sprocket-bp.index"]);
-        Assert.Equal(Scribe.Blueprint(blueprint, blueprint.Origin), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
+        Assert.Equal(ProgramWriter.Blueprint(blueprint, blueprint.Origin), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
 
-        var read = new Shelf(rig.Folder, delegate { });
+        var read = new LibraryShelf(rig.Folder, delegate { });
         Assert.Equal("", read.Read());
 
         var volume = Assert.Single(read.All);
-        Assert.Equal(VolumeState.Read, volume.State);
+        Assert.Equal(LibraryEntryState.Read, volume.State);
         Assert.Equal(blueprint.Origin, volume.Identity);
         Assert.Equal("Airlock", volume.Name);
         Assert.Equal(Saved, volume.Changed);
@@ -671,24 +671,24 @@ public class LibraryTests
 
     /// <summary>A line of the index that gives no blueprint is listed with why, and the lines after it are read all the same.</summary>
     [Theory]
-    [InlineData("gone.cog", VolumeState.Missing)]
-    [InlineData("Blueprints/given.cog", VolumeState.Path)]
-    [InlineData("..\\given.cog", VolumeState.Path)]
-    [InlineData("C:given.cog", VolumeState.Path)]
-    [InlineData("junk.doot", VolumeState.Unreadable)]
-    [InlineData("sprocket-bp-Airlock.cog", VolumeState.Twice)]
-    public void ALineThatGivesNoBlueprintSaysWhy(string line, VolumeState state)
+    [InlineData("gone.cog", LibraryEntryState.Missing)]
+    [InlineData("Blueprints/given.cog", LibraryEntryState.Path)]
+    [InlineData("..\\given.cog", LibraryEntryState.Path)]
+    [InlineData("C:given.cog", LibraryEntryState.Path)]
+    [InlineData("junk.doot", LibraryEntryState.Unreadable)]
+    [InlineData("sprocket-bp-Airlock.cog", LibraryEntryState.Twice)]
+    public void ALineThatGivesNoBlueprintSaysWhy(string line, LibraryEntryState state)
     {
         var rig = Blueprinted();
         rig.Shelf.Keep(rig.Editor.Program.Systems[0]);
         rig.Folder.Write("junk.doot", "not a blueprint");
         rig.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n" + line + "\n");
 
-        var read = new Shelf(rig.Folder, delegate { });
+        var read = new LibraryShelf(rig.Folder, delegate { });
         Assert.NotEqual("", read.Read());
 
         Assert.True(read.Intact);
-        Assert.Equal(new[] { VolumeState.Read, state }, read.All.Select(v => v.State));
+        Assert.Equal(new[] { LibraryEntryState.Read, state }, read.All.Select(v => v.State));
         Assert.Equal(line, read.All[1].File);
     }
 
@@ -717,7 +717,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        rig.Folder.Write("stoopid.doot", Scribe.Blueprint(blueprint));
+        rig.Folder.Write("stoopid.doot", ProgramWriter.Blueprint(blueprint));
         rig.Folder.Write("sprocket-bp.index", "# from a friend\r\n\r\n  stoopid.doot  \r\n");
         Assert.Equal("", rig.Shelf.Read());
 
@@ -818,7 +818,7 @@ public class LibraryTests
         var rig = Blueprinted();
         var system = rig.Editor.Program.Systems[0];
         system.Changed = Saved;
-        rig.Folder.Write("sprocket-bp-Airlock.cog", Scribe.Blueprint(system));
+        rig.Folder.Write("sprocket-bp-Airlock.cog", ProgramWriter.Blueprint(system));
         rig.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n");
         Assert.Equal("", rig.Shelf.Read());
         Assert.False(system.HasOrigin);
@@ -1021,7 +1021,7 @@ public class LibraryTests
         var blueprint = rig.Editor.Program.Systems[0];
         rig.Shelf.Keep(blueprint);
 
-        var copy = rig.Editor.Holdings.Copy(Scribe.Blueprint(blueprint), out var trouble);
+        var copy = rig.Editor.Holdings.Copy(ProgramWriter.Blueprint(blueprint), out var trouble);
 
         Assert.Equal("", trouble);
         Assert.NotNull(copy);
@@ -1030,7 +1030,7 @@ public class LibraryTests
         Assert.True(copy.IsBlueprint);
         Assert.Equal("Installation 1", Assert.Single(copy.Instances).Name);
         Assert.Equal(2, blueprint.Instances.Count);
-        Assert.Equal("Airlock 3", rig.Editor.Holdings.Copy(Scribe.Blueprint(blueprint), out trouble)!.Name);
+        Assert.Equal("Airlock 3", rig.Editor.Holdings.Copy(ProgramWriter.Blueprint(blueprint), out trouble)!.Name);
     }
 
     /// <summary>A construct with no automation leaves no backup.</summary>

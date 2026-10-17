@@ -67,7 +67,7 @@ public class InputRootTests
     [Fact]
     public void PressingABoxFocusesItAndPressingNothingLetsGo()
     {
-        var box = new TextBox { Placement = Fixed.Wide(200f) };
+        var box = new TextBox { Placement = FixedSize.Wide(200f) };
         var input = Laid(new VStack { Children = { box } });
 
         input.PointerDown(Middle(box), 1, false, false);
@@ -83,9 +83,9 @@ public class InputRootTests
     [Fact]
     public void TabMovesTheFocusInTreeOrder()
     {
-        var first = new TextBox { Placement = Fixed.Wide(200f) };
-        var second = new TextBox { Placement = Fixed.Wide(200f) };
-        var third = new TextBox { Placement = Fixed.Wide(200f) };
+        var first = new TextBox { Placement = FixedSize.Wide(200f) };
+        var second = new TextBox { Placement = FixedSize.Wide(200f) };
+        var third = new TextBox { Placement = FixedSize.Wide(200f) };
         var input = Laid(new VStack { Children = { first, new HStack { Children = { second } }, third } });
 
         input.Key(MyKeys.Tab, false, false);
@@ -106,7 +106,7 @@ public class InputRootTests
     [Fact]
     public void MovingTheFocusSaysSo()
     {
-        var box = new TextBox { Placement = Fixed.Wide(200f) };
+        var box = new TextBox { Placement = FixedSize.Wide(200f) };
         var input = Laid(new VStack { Children = { box } });
         var moves = 0;
         input.FocusChanged += () => moves++;
@@ -122,7 +122,7 @@ public class InputRootTests
     [Fact]
     public void EscapeLetsTheFocusGo()
     {
-        var box = new TextBox { Placement = Fixed.Wide(200f) };
+        var box = new TextBox { Placement = FixedSize.Wide(200f) };
         var input = Laid(new VStack { Children = { box } });
 
         input.Focus(box);
@@ -135,7 +135,7 @@ public class InputRootTests
     [Fact]
     public void TypingGoesToTheFocusedBox()
     {
-        var box = new TextBox { Placement = Fixed.Wide(200f) };
+        var box = new TextBox { Placement = FixedSize.Wide(200f) };
         var input = Laid(new VStack { Children = { box } });
 
         input.Focus(box);
@@ -190,9 +190,9 @@ public class InputRootTests
     [Fact]
     public void TabPassesOverWhatIsTransparent()
     {
-        var first = new TextBox { Placement = Fixed.Wide(200f), InputTransparency = InputTransparency.Self };
-        var inner = new TextBox { Placement = Fixed.Wide(200f) };
-        var last = new TextBox { Placement = Fixed.Wide(200f) };
+        var first = new TextBox { Placement = FixedSize.Wide(200f), InputTransparency = InputTransparency.Self };
+        var inner = new TextBox { Placement = FixedSize.Wide(200f) };
+        var last = new TextBox { Placement = FixedSize.Wide(200f) };
         var input = Laid(new VStack
         {
             Children = { first, new HStack { InputTransparency = InputTransparency.Children, Children = { inner } }, last }

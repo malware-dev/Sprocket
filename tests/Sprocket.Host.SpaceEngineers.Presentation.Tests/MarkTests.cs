@@ -100,8 +100,8 @@ public class MarkTests
         Assert.Equal(Symbols.Value, Entry(screen, "radius").Mark);
 
         var light = screen.Editor.World.Entities.Single(entity => entity.Name == "Airlock Light");
-        Assert.Equal(Symbols.Value, MarkText.Of(light.Kind.FindAction("Radius", Nature.Value)!));
-        Assert.Equal(Symbols.Action, MarkText.Of(light.Kind.FindAction("OnOff_On", Nature.Action)!));
+        Assert.Equal(Symbols.Value, MarkText.Of(light.Kind.FindAction("Radius", ReachKind.Value)!));
+        Assert.Equal(Symbols.Action, MarkText.Of(light.Kind.FindAction("OnOff_On", ReachKind.Action)!));
     }
 
     /// <summary>A trigger's row marks the signal that starts it and the sequence it runs.</summary>

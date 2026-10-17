@@ -44,9 +44,9 @@ public class AutoCloseTests
         }
     }
 
-    Closer Closer(int seconds)
+    DoorCloser Closer(int seconds)
     {
-        var closer = new Closer(Block, _rota, () => _tick);
+        var closer = new DoorCloser(Block, _rota, () => _tick);
         closer.Set(seconds);
         return closer;
     }

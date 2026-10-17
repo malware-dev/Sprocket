@@ -173,13 +173,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string CalledOff(Texts texts, Sequence sequence, SequenceRunner state)
         {
             var step = Row(sequence, state.StoppedAt).ToString(CultureInfo.InvariantCulture);
-            if (state.StoppedBy == Stopper.Hand)
+            if (state.StoppedBy == StopCause.Hand)
                 return Template.Fill(texts.SequenceStoppedByHand, "step", step);
 
-            if (state.StoppedBy == Stopper.Trigger)
+            if (state.StoppedBy == StopCause.Trigger)
                 return Template.Fill(texts.SequenceStoppedByTrigger, "step", step);
 
-            if (state.StoppedBy == Stopper.Switch)
+            if (state.StoppedBy == StopCause.Switch)
                 return Template.Fill(texts.SequenceStoppedBySwitch, "step", step);
 
             var system = sequence.System;
@@ -445,9 +445,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (value == null)
                 return $"{SentenceText.Empty} on {blocks}";
 
-            var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, targets));
-            var given = SentenceText.Given(new ArgumentsSlot(new[] { Comparing.Of(test.Relation), test.Value }, fields, null,
-                Given.Checked, test.Quantifier == Quantifier.All && targets.Count > 1));
+            var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, targets));
+            var given = SentenceText.Given(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation), test.Value }, fields, null,
+                ArgumentRole.Checked, test.Quantifier == Quantifier.All && targets.Count > 1));
             var read = value.IsStatus ? blocks : $"{SentenceText.Value(value)} on {blocks}";
             return $"{(targets.Count > 1 ? $"{SentenceText.Quantified(test.Quantifier)} {read}" : read)} {given}";
         }

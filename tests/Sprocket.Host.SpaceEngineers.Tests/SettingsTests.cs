@@ -19,7 +19,7 @@ public class SettingsTests
     [Fact]
     public void WrittenSettingsReadBackTheSame()
     {
-        var written = new Settings(new Layer(true, 10), new Layer(null, 100));
+        var written = new Settings(new SettingsLayer(true, 10), new SettingsLayer(null, 100));
         var read = Settings.Of(written.Written());
 
         Assert.True(read.Global.Same(written.Global));
@@ -100,10 +100,10 @@ public class SettingsTests
     [InlineData(5000, 100)]
     public void AnotherFastestUpdateIsTakenAsTheNearest(int written, int taken)
     {
-        var from = Told.Lines.Count;
+        var from = GameLog.Lines.Count;
 
         Assert.Equal(taken, Settings.From(null, "[Sprocket]\nfastestUpdate=" + written + "\n").FastestUpdate);
-        Assert.Contains(Told.Lines.Skip(from), line => line.Contains("fastestUpdate as " + written) && line.Contains("taken as " + taken));
+        Assert.Contains(GameLog.Lines.Skip(from), line => line.Contains("fastestUpdate as " + written) && line.Contains("taken as " + taken));
     }
 
     /// <summary>The old name for the fastest update is not read, so an old file leaves it at every tick.</summary>

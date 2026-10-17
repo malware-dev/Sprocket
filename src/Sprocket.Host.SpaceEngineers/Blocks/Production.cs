@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being OutputFill = Being.Number<IMyProductionBlock>(block => block.OutputInventory.VolumeFillFactor * 100.0);
 
-        static readonly Doing Clears = Doing.Of<IMyProductionBlock>(block => block.ClearQueue());
+        static readonly OwnAction Clears = OwnAction.Of<IMyProductionBlock>(block => block.ClearQueue());
 
         // Filled and emptied by one reading at a time, on the game's main thread, so one list serves every assembler.
         readonly List<MyProductionItem> _queue = new List<MyProductionItem>();
@@ -136,18 +136,18 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             Blueprints(assembler, words, means, blueprints);
 
             var amount = Field.Between("amount", "1", "");
-            amount.Entry = Entry.Whole;
+            amount.Entry = FieldInput.Whole;
             amount.Needed = true;
             amount.Default = "1";
 
-            var makes = Doing.Of<IMyAssembler, Order>(given => Order.Read(given, blueprints),
+            var makes = OwnAction.Of<IMyAssembler, Order>(given => Order.Read(given, blueprints),
                 (made, order, seen) =>
                 {
                     if (order.Known)
                         made.AddQueueItem(order.Blueprint, (double)order.Amount);
                 });
 
-            kind.WithAction("make", "make", makes, Items.Choosing("item", words, means), amount).In(Category.Production)
+            kind.WithAction("make", "make", makes, ItemIds.Choosing("item", words, means), amount).In(Category.Production)
                 .WithAction("clear-the-queue", "clear the queue", Clears).In(Category.Production)
                 .WithValue("items-queued", "items queued", _queued).Looked(Queue).In(Category.Production)
                 .WithValue("progress", "progress", Progress).Percent().Announced().In(Category.Production);
@@ -186,7 +186,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                     || blueprint.Results[0].Amount != 1 || !assembler.CanUseBlueprint(blueprint.Id))
                     continue;
 
-                var said = Items.Said(blueprint.Results[0].Id);
+                var said = ItemIds.Said(blueprint.Results[0].Id);
                 if (blueprints.ContainsKey(said))
                     continue;
 
@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // {
         //     return Being.Number<IMyProductionBlock, Item>(Item.First, (block, item, seen) =>
         //             item.Known ? (double)(input ? block.InputInventory : block.OutputInventory).GetItemAmount(item.Id) : 0.0)
-        //         .Taking(Items.Asked("item"));
+        //         .Taking(ItemIds.Asked("item"));
         // }
 
         /// <summary>How many items an assembler has queued, all orders together.</summary>

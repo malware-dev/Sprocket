@@ -157,7 +157,7 @@ public class WindowLayerTests
     static (WindowLayer, Window, Button) Opened(bool modal)
     {
         var button = new Button { Text = "Go", Command = new Relay(() => { }) };
-        var window = new Window { IsModal = modal, Placement = Fixed.Wide(300f), Content = new VStack { Children = { button } } };
+        var window = new Window { IsModal = modal, Placement = FixedSize.Wide(300f), Content = new VStack { Children = { button } } };
         var layer = new WindowLayer();
         layer.Open(window);
         layer.Draw(new Recording(Area), Area);
@@ -169,7 +169,7 @@ public class WindowLayerTests
     public void AWindowKeepsWhatIsOnItToItself()
     {
         var layer = new WindowLayer();
-        var window = new FloatingWindow { Placement = Fixed.Size(200f, 100f), Content = new Label { Text = "Words" } };
+        var window = new FloatingWindow { Placement = FixedSize.Size(200f, 100f), Content = new Label { Text = "Words" } };
         layer.Open(window);
         layer.Draw(new Recording(Area), Area);
 
@@ -242,7 +242,7 @@ public class WindowLayerTests
             Side = PopupSide.Beside,
             Gap = 4f,
             Padding = new Thickness(8f),
-            Placement = Fixed.Wide(150f),
+            Placement = FixedSize.Wide(150f),
             Content = new VStack { Children = { first, new Button { Text = "Second" }, new Button { Text = "Third" } } }
         };
         var screen = new VStack { Children = { anchor } };
@@ -272,7 +272,7 @@ public class WindowLayerTests
         {
             Anchor = anchor,
             Flush = flush,
-            Placement = Fixed.Wide(40f),
+            Placement = FixedSize.Wide(40f),
             Content = new VStack { Children = { new Button { Text = "A" }, new Button { Text = "B" } } }
         };
         var screen = new VStack { Children = { anchor } };
@@ -296,7 +296,7 @@ public class WindowLayerTests
     {
         var shade = new NineSlice(MyStringId.GetOrCompute("Shade"), 64, 24);
         var style = new WindowStyle { Base = { Shadow = casts ? new Shadow(shade, 8f, new Vector2(2f, 4f), Color.Black) : null } };
-        var window = new Window { Style = style, Placement = Fixed.Size(200f, 100f), Content = new Label { Text = "Words" } };
+        var window = new Window { Style = style, Placement = FixedSize.Size(200f, 100f), Content = new Label { Text = "Words" } };
         var layer = new WindowLayer();
         var graphics = new Recording(Area);
         layer.Open(window);

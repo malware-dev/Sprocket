@@ -21,14 +21,14 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public const string Seconds = "s";
 
         readonly Lexer _lexer;
-        readonly Reading _reading = new Reading();
+        readonly ScriptValues _reading = new ScriptValues();
 
         /// <summary>
         /// A list's items as they are read, one buffer for each list open at once.
         /// </summary>
         /// <remarks>
         /// Kept aside until the list closes, because a list or a vector inside it writes its own run
-        /// into <see cref="Reading.Items" /> first: held back, the outer list's items still land in one
+        /// into <see cref="ScriptValues.Items" /> first: held back, the outer list's items still land in one
         /// unbroken run of their own. Kept for the life of the reading rather than made per list, since
         /// a program is mostly lists and loading one lands inside a world load.
         /// </remarks>

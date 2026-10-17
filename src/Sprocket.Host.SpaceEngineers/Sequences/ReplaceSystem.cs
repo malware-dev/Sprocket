@@ -5,13 +5,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     {
         readonly AutomationSystem _was;
         readonly AutomationSystem _now;
-        readonly Change _change;
+        readonly ChangeKind _change;
 
         int _at = -1;
         bool _again;
 
         /// <summary>Puts <paramref name="now" /> where <paramref name="was" /> stands, offered back as <paramref name="change" />.</summary>
-        public ReplaceSystem(AutomationSystem was, AutomationSystem now, Change change)
+        public ReplaceSystem(AutomationSystem was, AutomationSystem now, ChangeKind change)
         {
             _was = was;
             _now = now;
@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <summary>The identity the two share.</summary>
         public System.Guid Identity => _now.Identity;

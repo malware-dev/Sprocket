@@ -31,7 +31,7 @@ public class EditorLifetimeTests
         first.Unit.Written(out var program, out _);
 
         var store = Store.Nowhere();
-        store.SetValue(Locker.ProgramKey, program);
+        store.SetValue(BlockStorage.ProgramKey, program);
         var sim = Simulation.On(store);
         sim.Tick();
 

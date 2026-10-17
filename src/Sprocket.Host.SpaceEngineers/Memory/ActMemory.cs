@@ -21,6 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 
         /// <summary>What the act's action remembers of the block, or null where it remembers nothing.</summary>
         [ProtoMember(4)]
-        public Recall Seen { get; set; }
+        public ReaderMemory Seen { get; set; }
     }
 }

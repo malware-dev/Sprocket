@@ -286,10 +286,10 @@ public class HandoverTests : IDisposable
     public void WhatAClientIsToldIsInItsBlock()
     {
         var block = _sim.Machine.Sprocket.Block;
-        Locker.Store(block, "the program", "the switches");
+        BlockStorage.Store(block, "the program", "the switches");
 
         string stored;
-        Assert.True(block.Storage.TryGetValue(Locker.ProgramKey, out stored));
+        Assert.True(block.Storage.TryGetValue(BlockStorage.ProgramKey, out stored));
         Assert.Equal("the program", stored);
     }
 
@@ -584,7 +584,7 @@ public class HandoverTests : IDisposable
     public void AChangeSaysWhatChangedAtBothEnds()
     {
         var (anna, hers, copy) = Lent();
-        var from = Told.Lines.Count;
+        var from = GameLog.Lines.Count;
 
         _wire.As(anna, () =>
         {
@@ -593,7 +593,7 @@ public class HandoverTests : IDisposable
         });
         _wire.Settle();
 
-        var said = Told.Lines.Skip(from).ToList();
+        var said = GameLog.Lines.Skip(from).ToList();
         var sent = Assert.Single(said, l => l.StartsWith("sending the server a change"));
         var taken = Assert.Single(said, l => l.Contains("sent a change to block"));
 

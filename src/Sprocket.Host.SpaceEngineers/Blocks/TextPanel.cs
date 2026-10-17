@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const string Unheard = "A screen raises no event when what it shows changes.";
 
-        static readonly Doing Shows = Doing.Of<IMyTextPanel, Chosen>(Chosen.Read, Showed);
+        static readonly OwnAction Shows = OwnAction.Of<IMyTextPanel, Chosen>(Chosen.Read, Showed);
 
         // Each look reads the text afresh, as the terminal's own text values do: the screen hands it out only as a new string.
         static readonly Being Written = Being.Text<IMyTextPanel>(panel => panel.GetText());
@@ -80,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             var image = Field.Among("image", words, means);
-            image.Entry = Entry.Text;
+            image.Entry = FieldInput.Text;
             image.Needed = true;
             return image;
         }
@@ -116,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Replaces the images the screen shows with the one a step chose, and has it show text and images.</summary>
-        static void Showed(IMyTextPanel panel, Chosen chosen, Recall seen)
+        static void Showed(IMyTextPanel panel, Chosen chosen, ReaderMemory seen)
         {
             panel.ContentType = ContentType.TEXT_AND_IMAGE;
             panel.ClearImagesFromSelection();

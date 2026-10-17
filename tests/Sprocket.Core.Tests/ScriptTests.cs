@@ -33,9 +33,9 @@ public class ScriptTests
 
     static readonly Values Store = new Values();
 
-    static string Save(Automation program) => Scribe.Save(program, Store);
+    static string Save(Automation program) => ProgramWriter.Save(program, Store);
 
-    static string Load(string text, Automation program) => Reader.Load(text, program, Store);
+    static string Load(string text, Automation program) => ProgramReader.Load(text, program, Store);
 
     /// <summary>The same three doors before a system blueprint, so the blueprint's instances may answer with them.</summary>
     const string DoorsBlueprint = Version + Doors + "\nsystem blueprint \"" + Identity + "\" as ";
@@ -436,7 +436,7 @@ public class ScriptTests
         var text = Save(program);
         Assert.Contains("required slot spare", text);
         Assert.Contains("spare = [ door2 ]", text);
-        Assert.DoesNotContain("spare", Scribe.Blueprint(system));
+        Assert.DoesNotContain("spare", ProgramWriter.Blueprint(system));
     }
 
     /// <summary>
@@ -817,7 +817,7 @@ public class ScriptTests
         var triggers = after.Systems[0].Triggers;
         var open = Assert.IsType<Act>(triggers[0].Does);
         Assert.Equal("open", open.ActionId);
-        Assert.Equal(Nature.Native, open.Form);
+        Assert.Equal(ReachKind.Native, open.Form);
         Assert.Equal(new[] { "outer" }, open.Targets);
 
         var dim = Assert.IsType<Act>(triggers[1].Does);
@@ -828,7 +828,7 @@ public class ScriptTests
         Assert.True(triggers[2].Stops);
 
         var reverse = Assert.IsType<Act>(Assert.IsType<WhenTrigger>(triggers[3]).Does);
-        Assert.Equal(Nature.Action, reverse.Form);
+        Assert.Equal(ReachKind.Action, reverse.Form);
         Assert.Equal(2, reverse.Arguments[0].Whole);
 
         Assert.True(Assert.IsType<EveryTrigger>(triggers[4]).Stops);
@@ -1112,7 +1112,7 @@ public class ScriptTests
     {
         var after = new Automation();
         string warning;
-        var trouble = Reader.Load(
+        var trouble = ProgramReader.Load(
             Head + "MalTek.Airlock {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock {\n}\n",
             after, Store, out warning);
 
@@ -1216,8 +1216,8 @@ public class ScriptTests
         Assert.Equal("", Load(Blueprint + "MalTek.Airlock from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {\n}\n", after));
 
         var system = after.Systems[0];
-        Assert.DoesNotContain(" from ", Scribe.Blueprint(system));
-        Assert.Contains(" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {", Scribe.Linked(system));
+        Assert.DoesNotContain(" from ", ProgramWriter.Blueprint(system));
+        Assert.Contains(" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {", ProgramWriter.Linked(system));
     }
 
     /// <summary>A <c>from</c> that does not name a blueprint by its GUID, gives a version that is no time, comes twice, or heads a plain system, is trouble.</summary>
@@ -1300,7 +1300,7 @@ public class ScriptTests
         program.Systems[0].PartFor("thing");
 
         var odd = new Act("every");
-        odd.Form = Nature.Action;
+        odd.Form = ReachKind.Action;
         odd.Targets.Add("thing");
         sequence.Steps.Add(odd);
 
@@ -1316,10 +1316,10 @@ public class ScriptTests
         Assert.Equal("", Load(text, after));
         var game = Assert.IsType<Act>(after.Sequences[0].Steps[0]);
         Assert.Equal("every", game.ActionId);
-        Assert.Equal(Nature.Action, game.Form);
+        Assert.Equal(ReachKind.Action, game.Form);
         var native = Assert.IsType<Act>(after.Sequences[0].Steps[1]);
         Assert.Equal("every", native.ActionId);
-        Assert.Equal(Nature.Native, native.Form);
+        Assert.Equal(ReachKind.Native, native.Form);
     }
 
     /// <summary>
@@ -1436,12 +1436,12 @@ public class ScriptTests
         program.Restore(declared);
         Uses(program, "thing");
 
-        var text = Scribe.Save(program, values);
+        var text = ProgramWriter.Save(program, values);
         Assert.Contains("[ 74857693847562934, 0.25, 1E-05, \"Airlock Inner Door\", on, #FF8800CC ]", text);
 
         var read = new Values();
         var after = new Automation();
-        Assert.Equal("", Reader.Load(text, after, read));
+        Assert.Equal("", ProgramReader.Load(text, after, read));
 
         var keys = after.Refs[0].Keys;
         Assert.Equal(6, keys.Count);
@@ -1560,13 +1560,13 @@ public class ScriptTests
     /// <remarks>
     /// Text that genuinely wants lines is an annotation, which is written a line at a time. A name
     /// holding a newline would write a save that cannot be read back, so the model folds it - see
-    /// <see cref="Naming.Clean" /> - and the writer folds it again, because a writer that can produce
+    /// <see cref="NameRules.Clean" /> - and the writer folds it again, because a writer that can produce
     /// an unreadable save eventually does.
     /// </remarks>
     [Fact]
     public void ANameWithALineBreakInItFolds()
     {
-        Assert.Equal("one two", Naming.Clean("one\ntwo"));
+        Assert.Equal("one two", NameRules.Clean("one\ntwo"));
 
         var after = new Automation();
         Assert.Equal("", Load(Save(SystemCalled("", "one\ntwo")), after));

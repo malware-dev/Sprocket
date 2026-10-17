@@ -50,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
         const byte Faint = 110;
 
-        readonly Overview _overview = new Overview();
+        readonly StatusOverview _overview = new StatusOverview();
         readonly List<SprocketUnit> _found = new List<SprocketUnit>();
 
         Color _ink;
@@ -231,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
         }
 
-        void Row(MySpriteDrawFrame frame, Overview.Row row, Texts texts, float left, float right, float y, float scale)
+        void Row(MySpriteDrawFrame frame, StatusOverview.Row row, Texts texts, float left, float right, float y, float scale)
         {
             var lamp = 10f * scale;
             frame.Add(Fill(new Vector2(left + (lamp / 2f), y + (9f * scale)),
@@ -253,7 +253,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// broken. The words are the editor's own - see <see cref="SequenceText" /> - so the two
         /// screens cannot come to disagree about what a state is called.
         /// </remarks>
-        string Says(Overview.Row row, Texts texts)
+        string Says(StatusOverview.Row row, Texts texts)
         {
             if (row.Problems > 0)
                 return row.Problems == 1 ? "1 problem" : $"{row.Problems} problems";
@@ -267,7 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return SequenceText.Status(texts, row.Status);
         }
 
-        Color Lamp(Overview.Row row)
+        Color Lamp(StatusOverview.Row row)
         {
             if (row.Problems > 0)
                 return Palette.Problem;

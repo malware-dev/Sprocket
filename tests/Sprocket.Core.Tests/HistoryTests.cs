@@ -94,7 +94,7 @@ public class HistoryTests
 
         public int Reasserted { get; private set; }
 
-        public override Change Change => Change.AddStep;
+        public override ChangeKind Change => ChangeKind.AddStep;
 
         public override void Apply(List<string> subject) => subject.Add(_word);
 

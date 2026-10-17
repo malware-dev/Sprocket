@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Dictionary<string, EntityEvent> _slots;
 
         /// <summary>The moment <paramref name="id" />: <paramref name="flag" /> crossing <paramref name="edge" />, read in a sentence as <paramref name="text" />.</summary>
-        public EntityEvent(string id, Reading flag, Edge edge, string text)
+        public EntityEvent(string id, Reading flag, SignalEdge edge, string text)
         {
             Id = id;
             Flag = flag;
@@ -89,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Reading Flag { get; private set; }
 
         /// <summary>Which change in <see cref="Flag" /> this moment is.</summary>
-        public Edge Edge { get; private set; }
+        public SignalEdge Edge { get; private set; }
 
         /// <summary>
         /// How this reads inside a sentence, e.g. "finishes opening". Phrased to

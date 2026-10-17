@@ -55,14 +55,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // Inside the band and no longer moving gas. Both halves are needed: the level alone finishes a room the vent
         // is still taking to full, and the gas alone would finish one it gave up on at a tenth.
         static readonly Reading Air = Reading.Remembering<IMyAirVent>((vent, seen) =>
-            vent.IsWorking && vent.GetOxygenLevel() >= Filled && !VentGas.Working(vent, false, seen));
+            vent.IsWorking && vent.GetOxygenLevel() >= Filled && !VentFlow.Working(vent, false, seen));
 
         // Emptied is a band rather than a reading. A sealed room with gas to spare settles below full, 95.4% on an
         // airlock measured in game, and nothing says where a given room stops. The game's own status cannot stand in:
         // it calls a room pressurized only at a level of one or more, and reports an empty airtight room as
         // depressurizing.
         static readonly Reading Empty = Reading.Remembering<IMyAirVent>((vent, seen) =>
-            vent.IsWorking && vent.GetOxygenLevel() <= Emptied && !VentGas.Working(vent, true, seen));
+            vent.IsWorking && vent.GetOxygenLevel() <= Emptied && !VentFlow.Working(vent, true, seen));
 
         static readonly string[] Rooms = { "filling", "full", "emptying", "empty", "stopped" };
 
@@ -76,10 +76,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return 4;
 
             var level = vent.GetOxygenLevel();
-            if (level >= Filled && !VentGas.Working(vent, false, seen))
+            if (level >= Filled && !VentFlow.Working(vent, false, seen))
                 return 1;
 
-            if (level <= Emptied && !VentGas.Working(vent, true, seen))
+            if (level <= Emptied && !VentFlow.Working(vent, true, seen))
                 return 3;
 
             return vent.Depressurize ? 2 : 0;
@@ -96,15 +96,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Airtightness = Being.Flag(Reading.Of<IMyAirVent>(vent => vent.PressurizationEnabled));
 
-        static readonly Doing Fills = Doing.Of<IMyAirVent, Stuck>(Stuck.Read,
+        static readonly OwnAction Fills = OwnAction.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = false, Air,
             (vent, stuck, seen) => vent.IsWorking && Passes(Filling(vent, seen), stuck, Cause.VentNoOxygen),
-            (vent, stuck, seen) => vent.IsWorking ? Unless(Filling(vent, seen), stuck, Cause.VentNoOxygen) : Trouble.None);
+            (vent, stuck, seen) => vent.IsWorking ? Unless(Filling(vent, seen), stuck, Cause.VentNoOxygen) : BlockTrouble.None);
 
-        static readonly Doing Empties = Doing.Of<IMyAirVent, Stuck>(Stuck.Read,
+        static readonly OwnAction Empties = OwnAction.Of<IMyAirVent, Stuck>(Stuck.Read,
             (vent, stuck, seen) => vent.Depressurize = true, Empty,
             (vent, stuck, seen) => vent.IsWorking && Passes(Emptying(vent, seen), stuck, Cause.VentNowhere),
-            (vent, stuck, seen) => vent.IsWorking ? Unless(Emptying(vent, seen), stuck, Cause.VentNowhere) : Trouble.None);
+            (vent, stuck, seen) => vent.IsWorking ? Unless(Emptying(vent, seen), stuck, Cause.VentNowhere) : BlockTrouble.None);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // currently set to do. A vent that has stopped moving gas short of where it was going
             // goes on reporting Pressurizing for as long as the world exists, so the game's own
             // word for it is the one thing that never says so.
-            Trouble stuck = Said(vent);
+            BlockTrouble stuck = Said(vent);
             if (stuck.Exists)
                 return Status.Of(stuck);
 
@@ -184,7 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static Field Asked(string about)
         {
             var field = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { Literal.Of(MoveOn).Said, Literal.Of(Hold).Said });
-            field.Entry = Entry.Whole;
+            field.Entry = FieldInput.Whole;
             field.Default = "hold";
             field.Quiet = "hold";
             field.Lead = "or";
@@ -196,9 +196,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Why the room will not finish what a step asked, or none while it might: what stands in its way, unless the step
         /// moves on past it.
         /// </summary>
-        static Trouble Unless(Trouble trouble, Stuck stuck, Cause passes)
+        static BlockTrouble Unless(BlockTrouble trouble, Stuck stuck, Cause passes)
         {
-            return Passes(trouble, stuck, passes) ? Trouble.None : trouble;
+            return Passes(trouble, stuck, passes) ? BlockTrouble.None : trouble;
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// nothing to move the gas with.
         /// </summary>
         /// <remarks>A room that is not airtight never passes: carrying on would open it to the leak.</remarks>
-        static bool Passes(Trouble trouble, Stuck stuck, Cause passes)
+        static bool Passes(BlockTrouble trouble, Stuck stuck, Cause passes)
         {
             return stuck.MovesOn && trouble.Cause == passes;
         }
@@ -219,22 +219,22 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// the runtime settles a step by, and it has no use for it: what is on screen is about this
         /// moment and is drawn again a moment later.
         /// </remarks>
-        static Trouble Said(IMyAirVent vent)
+        static BlockTrouble Said(IMyAirVent vent)
         {
             if (vent.Depressurize)
-                return vent.GetOxygenLevel() > Emptied && !VentGas.Moving(vent, true)
-                    ? Trouble.Waiting(Cause.VentNowhere)
-                    : Trouble.None;
+                return vent.GetOxygenLevel() > Emptied && !VentFlow.Moving(vent, true)
+                    ? BlockTrouble.Waiting(Cause.VentNowhere)
+                    : BlockTrouble.None;
 
             if (vent.GetOxygenLevel() >= Filled)
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (!vent.CanPressurize)
-                return Trouble.Waiting(Cause.VentNotAirtight);
+                return BlockTrouble.Waiting(Cause.VentNotAirtight);
 
-            return VentGas.Moving(vent, false)
-                ? Trouble.None
-                : Trouble.Waiting(Cause.VentNoOxygen);
+            return VentFlow.Moving(vent, false)
+                ? BlockTrouble.None
+                : BlockTrouble.Waiting(Cause.VentNoOxygen);
         }
 
         /// <summary>
@@ -245,34 +245,34 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// a cycle out and a cycle in - and the one that has been overruled is left waiting for a
         /// state nothing is heading towards any more.
         /// </remarks>
-        static Trouble Emptying(IMyAirVent vent, Recall seen)
+        static BlockTrouble Emptying(IMyAirVent vent, ReaderMemory seen)
         {
             if (vent.GetOxygenLevel() <= Emptied)
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (!vent.Depressurize)
-                return Trouble.Fatal(Cause.VentToldToFill);
+                return BlockTrouble.Fatal(Cause.VentToldToFill);
 
-            return VentGas.Working(vent, true, seen)
-                ? Trouble.None
-                : Trouble.Waiting(Cause.VentNowhere);
+            return VentFlow.Working(vent, true, seen)
+                ? BlockTrouble.None
+                : BlockTrouble.Waiting(Cause.VentNowhere);
         }
 
         /// <summary>Why the room will not fill, or null while it still might.</summary>
-        static Trouble Filling(IMyAirVent vent, Recall seen)
+        static BlockTrouble Filling(IMyAirVent vent, ReaderMemory seen)
         {
             if (vent.GetOxygenLevel() >= Filled)
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (vent.Depressurize)
-                return Trouble.Fatal(Cause.VentToldToEmpty);
+                return BlockTrouble.Fatal(Cause.VentToldToEmpty);
 
             if (!vent.CanPressurize)
-                return Trouble.Waiting(Cause.VentNotAirtight);
+                return BlockTrouble.Waiting(Cause.VentNotAirtight);
 
-            return VentGas.Working(vent, false, seen)
-                ? Trouble.None
-                : Trouble.Waiting(Cause.VentNoOxygen);
+            return VentFlow.Working(vent, false, seen)
+                ? BlockTrouble.None
+                : BlockTrouble.Waiting(Cause.VentNoOxygen);
         }
 
         /// <summary>What a step told a vent to do where the room is stuck.</summary>

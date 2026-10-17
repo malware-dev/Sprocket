@@ -27,9 +27,9 @@ public static class PanelShot
         Base =
         {
             Font = MyFontEnum.White,
-            StrongFont = Lettering.Bold,
-            EmphasisFont = Lettering.Italic,
-            StrongEmphasisFont = Lettering.BoldItalic,
+            StrongFont = TextSizes.Bold,
+            EmphasisFont = TextSizes.Italic,
+            StrongEmphasisFont = TextSizes.BoldItalic,
             CodeFont = Surface.GameMonospace,
             FontSize = 24f,
             Heading1Size = 36f,
@@ -72,8 +72,8 @@ public static class PanelShot
             text.RuleColor = Color.Lerp(screen ?? Palette.Page, ink.Value, 0.5f);
         }
 
-        Element shown = fit ? new Viewbox { Content = text, Placement = Fixed.Size(room.X, room.Y) } : text;
-        var page = new VStack { Background = screen ?? Palette.Page, Padding = new Thickness(margin), Placement = Fixed.Size(wide, high), Children = { shown } };
+        Element shown = fit ? new Viewbox { Content = text, Placement = FixedSize.Size(room.X, room.Y) } : text;
+        var page = new VStack { Background = screen ?? Palette.Page, Padding = new Thickness(margin), Placement = FixedSize.Size(wide, high), Children = { shown } };
 
         var surface = new Surface { Target = new PixelSize(1920, 1080) };
         var said = "full";

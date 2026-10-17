@@ -24,7 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         readonly List<SystemInstance> _keys = new List<SystemInstance>();
 
-        readonly Keyed<SystemInstance, StatusRow> _rows;
+        readonly KeyedChildren<SystemInstance, StatusRow> _rows;
 
         readonly ICommand _takesOff;
 
@@ -44,15 +44,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _system = system;
 
             CreateView();
-            _heading.Opens = editor.Act(Cmd.OpenSystem, () => page.Open(system));
-            _heading.Flips = editor.Act(Cmd.EnableSystem, () => editor.SwitchSystem(system, !system.Enabled));
+            _heading.Opens = editor.Act(CommandKind.OpenSystem, () => page.Open(system));
+            _heading.Flips = editor.Act(CommandKind.EnableSystem, () => editor.SwitchSystem(system, !system.Enabled));
             _heading.SwitchGovernsAll = true;
             _heading.Mark = Symbols.LogicSystem;
-            _takesOff = editor.Act(Cmd.TakeOff, () => editor.Holdings.AskTakeOff(system));
-            _deletes = editor.Act(Cmd.DeleteSystem, () => editor.DeleteSystem(system));
-            _renews = editor.Act(Cmd.Renew, () => editor.Holdings.AskRenew(system));
-            _chooses = editor.Act(Cmd.ChooseVersion, () => editor.Versions.AskChoose(system));
-            _shelves = editor.Act(Cmd.Shelve, delegate
+            _takesOff = editor.Act(CommandKind.TakeOff, () => editor.Holdings.AskTakeOff(system));
+            _deletes = editor.Act(CommandKind.DeleteSystem, () => editor.DeleteSystem(system));
+            _renews = editor.Act(CommandKind.Renew, () => editor.Holdings.AskRenew(system));
+            _chooses = editor.Act(CommandKind.ChooseVersion, () => editor.Versions.AskChoose(system));
+            _shelves = editor.Act(CommandKind.Shelve, delegate
             {
                 // Updating replaces the blueprint, so it asks first; making one shows it where it now is.
                 if (editor.Holdings.Stored(system))
@@ -65,9 +65,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 editor.OpenLibrary(system.Identity);
             });
             _heading.AboutArguments = _named;
-            _another.Command = editor.Act(Cmd.AddInstance, () => page.Another(system));
+            _another.Command = editor.Act(CommandKind.AddInstance, () => page.Another(system));
             editor.Codex.Wire(_installations, editor.OpenCodex);
-            _rows = new Keyed<SystemInstance, StatusRow>(_list.Children, Made);
+            _rows = new KeyedChildren<SystemInstance, StatusRow>(_list.Children, Made);
         }
 
         /// <summary>The row over the installations of the logic system, which opens it.</summary>
@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Summary = SystemSummary.DescribeInstance(texts, _editor.Runner.Bindings, _system, instance);
                 row.About = texts.SystemsOpenInstanceAbout;
                 row.AboutArguments.Set("name", row.Summary);
-                row.Deletes = only ? null : _editor.Act(Cmd.DeleteInstance, () => _editor.DeleteInstance(_system, instance));
+                row.Deletes = only ? null : _editor.Act(CommandKind.DeleteInstance, () => _editor.DeleteInstance(_system, instance));
                 row.DeleteText = texts.SystemDeleteInstallation;
                 row.Locked = only ? texts.SystemsKeepsOne : "";
             }
@@ -192,7 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             {
                 Mark = Symbols.Installation,
                 Depth = 1,
-                Opens = _editor.Act(Cmd.OpenSystem, () => _page.Open(_system, instance)),
+                Opens = _editor.Act(CommandKind.OpenSystem, () => _page.Open(_system, instance)),
                 AboutArguments = new Arguments()
             };
 

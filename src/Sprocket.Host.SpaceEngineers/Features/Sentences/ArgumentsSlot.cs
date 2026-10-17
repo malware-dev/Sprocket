@@ -21,14 +21,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         readonly List<Literal> _arguments = new List<Literal>();
         readonly List<Field> _fields = new List<Field>();
         readonly List<string> _filled = new List<string>();
-        readonly Given _holds;
+        readonly ArgumentRole _holds;
 
         /// <summary>
         /// The arguments <paramref name="arguments" />, asked for by <paramref name="fields" />, pressed to <paramref name="opens" />,
         /// which are <paramref name="holds" /> to what holds them; the first said for several blocks together where
         /// <paramref name="plural" /> says so: "are open".
         /// </summary>
-        public ArgumentsSlot(IList<Literal> arguments, IList<Field> fields, ICommand opens, Given holds = Given.Options,
+        public ArgumentsSlot(IList<Literal> arguments, IList<Field> fields, ICommand opens, ArgumentRole holds = ArgumentRole.Options,
             bool plural = false) : base(opens)
         {
             _holds = holds;
@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             // One per field and not one per argument, and worked out where the question that fills a
             // step in works it out, so the two cannot arrive at different words for one argument.
-            Channels.Shown(_arguments, _fields, _filled);
+            ColorChannels.Shown(_arguments, _fields, _filled);
             if (plural && _filled.Count > 0)
                 _filled[0] = SentenceText.Plural(_filled[0]);
 
@@ -50,8 +50,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             // was not there.
             Color shade;
             byte alpha;
-            if (_fields.Count == 1 && _fields[0].Edits == Editor.Colour
-                && Channels.Colour(_filled[0], out shade, out alpha))
+            if (_fields.Count == 1 && _fields[0].Edits == FieldEditor.Colour
+                && ColorChannels.Colour(_filled[0], out shade, out alpha))
             {
                 _sample = shade;
             }
@@ -63,7 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static ArgumentsSlot Switching(string verb, ICommand opens)
         {
             var words = new[] { SentenceText.EnableWord, SentenceText.DisableWord };
-            return new ArgumentsSlot(new[] { Literal.Name(verb) }, new[] { Field.Among("state", words, words) }, opens, Given.NewValue);
+            return new ArgumentsSlot(new[] { Literal.Name(verb) }, new[] { Field.Among("state", words, words) }, opens, ArgumentRole.NewValue);
         }
 
         /// <summary>
@@ -135,16 +135,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What pressing this part does, worded for what it holds.</summary>
         public string About(Texts texts)
         {
-            if (_holds == Given.NewValue)
+            if (_holds == ArgumentRole.NewValue)
                 return texts.SequenceNewValueAbout;
 
-            if (_holds == Given.Compared)
+            if (_holds == ArgumentRole.Compared)
                 return texts.SequenceComparedAbout;
 
-            if (_holds == Given.Read)
+            if (_holds == ArgumentRole.Read)
                 return texts.SequenceReadAbout;
 
-            return _holds == Given.Checked ? texts.SequenceCheckedAbout : texts.SequenceOptionsAbout;
+            return _holds == ArgumentRole.Checked ? texts.SequenceCheckedAbout : texts.SequenceOptionsAbout;
         }
     }
 }

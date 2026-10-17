@@ -157,11 +157,11 @@ public class MalformedTests
     [InlineData("    whenever ext.'finishes-closing' on [ inner ] then run 1\n", "    when any ext.closed on [ inner ] ! on then run 1\n")]
     public void ALineNotAsTheLanguageSaysIsAnError(string was, string now)
     {
-        Assert.Equal("", Reader.Load(Good, new Automation(), new Values()));
+        Assert.Equal("", ProgramReader.Load(Good, new Automation(), new Values()));
         Assert.Contains(was, Good);
 
         var after = new Automation();
-        Assert.StartsWith("Line ", Reader.Load(Good.Replace(was, now), after, new Values()));
+        Assert.StartsWith("Line ", ProgramReader.Load(Good.Replace(was, now), after, new Values()));
         Assert.False(after.Intact);
         Assert.Empty(after.Systems);
     }
@@ -171,7 +171,7 @@ public class MalformedTests
     public void AHeaderThatWillNotParseIsDamage()
     {
         var after = new Automation();
-        var said = Reader.Load(Good.Replace("sprocket 1 alpha 16\n", "sprocket 1 alpha 16 ,\n"), after, new Values());
+        var said = ProgramReader.Load(Good.Replace("sprocket 1 alpha 16\n", "sprocket 1 alpha 16 ,\n"), after, new Values());
 
         Assert.StartsWith("Line 1: ", said);
         Assert.False(after.Intact);
@@ -182,7 +182,7 @@ public class MalformedTests
     [Fact]
     public void TroubleSpellsANameInParts()
     {
-        var said = Reader.Load(Good.Replace("instance 1 of MalTek.Airlock {", "instance 1 of MalTek.Nope {"), new Automation(), new Values());
+        var said = ProgramReader.Load(Good.Replace("instance 1 of MalTek.Airlock {", "instance 1 of MalTek.Nope {"), new Automation(), new Values());
 
         Assert.Contains("'MalTek.Nope'", said);
     }
@@ -204,7 +204,7 @@ public class MalformedTests
     public void AMemberOrMomentTheHostHasNotGotIsAnError(string was, string now, string said)
     {
         var after = new Automation();
-        Assert.Contains(said, Reader.Load(Good.Replace(was, now), after, new Values()));
+        Assert.Contains(said, ProgramReader.Load(Good.Replace(was, now), after, new Values()));
         Assert.False(after.Intact);
     }
 
@@ -221,8 +221,8 @@ public class MalformedTests
             .Replace("    inner = [ door1 ]\n", "    # The door to the ship.\n    inner = [ door1 ]\n");
         var after = new Automation();
 
-        Assert.Equal("", Reader.Load(script, after, new Values()));
-        var saved = Scribe.Save(after, new Values());
+        Assert.Equal("", ProgramReader.Load(script, after, new Values()));
+        var saved = ProgramWriter.Save(after, new Values());
 
         Assert.Contains("# The ship's automation.\nsprocket 1 alpha 16", saved);
         Assert.Contains("# The inner door.\nlet door1 = ", saved);
@@ -239,8 +239,8 @@ public class MalformedTests
         var script = Good.Replace("        run 1\n", "        run 9\n");
         var line = script.Substring(0, script.IndexOf("        run 9", StringComparison.Ordinal)).Split('\n').Length;
 
-        var said = Reader.Load(script, new Automation(), new Values());
+        var said = ProgramReader.Load(script, new Automation(), new Values());
 
-        Assert.Equal(line, Reader.LineOf(said));
+        Assert.Equal(line, ProgramReader.LineOf(said));
     }
 }

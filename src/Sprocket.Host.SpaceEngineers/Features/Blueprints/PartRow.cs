@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _level = value;
-                _problem.Color = Inks.Of(value, Palette.Faint);
+                _problem.Color = RemarkColors.Of(value, Palette.Faint);
             }
         }
 
@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     return;
 
                 _wide = value;
-                _column.Placement = Fixed.Wide(value);
+                _column.Placement = FixedSize.Wide(value);
             }
         }
 

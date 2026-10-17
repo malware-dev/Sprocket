@@ -92,9 +92,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 {
                     // A field standing over several values becomes those values again, in the order its description
                     // declared them: the other half of showing three numbers as one color.
-                    if (_wanted[i].Edits == Editor.Colour)
+                    if (_wanted[i].Edits == FieldEditor.Colour)
                     {
-                        Channels.Spell(Asked(i) ? _fields[i].Text : "", _wanted[i].Covers, _parts);
+                        ColorChannels.Spell(Asked(i) ? _fields[i].Text : "", _wanted[i].Covers, _parts);
                         while (_texts.Count < _parts.Count)
                             _texts.Add(false);
 
@@ -110,7 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                         text = _wanted[i].Default;
 
                     _parts.Add(_wanted[i].Meaning(text));
-                    _texts.Add(_wanted[i].Entry == Entry.Text);
+                    _texts.Add(_wanted[i].Entry == FieldInput.Text);
                 }
 
                 if (_parts.Count == 0)
@@ -373,13 +373,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>The field a value is given in: a switch for on or off, a line of words for a few others, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
         IField Make(Field field, IList<Hsv> colors, Texts texts)
         {
-            if (field.Edits == Editor.Colour)
+            if (field.Edits == FieldEditor.Colour)
                 return new ColorField(colors, _submit, texts);
 
-            if (field.Edits == Editor.Angle)
+            if (field.Edits == FieldEditor.Angle)
                 return new AngleField(field.Least, field.Most, _submit);
 
-            if (field.Edits == Editor.Lines)
+            if (field.Edits == FieldEditor.Lines)
             {
                 var lines = new LinesField(field.Longest, texts);
                 lines.Opened += delegate
@@ -392,7 +392,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return lines;
             }
 
-            var words = field.Edits == Editor.Chosen ? field.Words : null;
+            var words = field.Edits == FieldEditor.Chosen ? field.Words : null;
             if (field.IsOnOff)
                 return new SwitchField(field.Words[0], field.Words[1], _submit);
 
@@ -412,7 +412,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         void Lay(int at, IField field)
         {
             var element = (Element)field;
-            var color = _wanted[at].Edits == Editor.Colour;
+            var color = _wanted[at].Edits == FieldEditor.Colour;
 
             var label = Label(at);
             var about = _wanted[at].About;
@@ -429,7 +429,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 if (!string.IsNullOrEmpty(about))
                     named.Tip = Tip.For(named.Tip, about);
 
-                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? Lines.Two : Lines.Fit);
+                Rows.Add(named, element, field is TypedField || field is LinesField || field is SliderField ? FormRowLines.Two : FormRowLines.Fit);
                 return;
             }
 
@@ -444,7 +444,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         string Label(int at)
         {
             var edits = _wanted[at].Edits;
-            if (edits == Editor.Chosen || edits == Editor.Angle || SliderField.Takes(_wanted[at]))
+            if (edits == FieldEditor.Chosen || edits == FieldEditor.Angle || SliderField.Takes(_wanted[at]))
                 return _wanted[at].Name ?? "";
 
             var said = _wanted[at].Label(_language);
@@ -496,7 +496,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 if (said[i] == '"')
                     quoted.Append('"');
 
-                Storage.Entities.Write(quoted, said, i);
+                Storage.TextEntities.Write(quoted, said, i);
             }
 
             return quoted.Append('"').ToString();

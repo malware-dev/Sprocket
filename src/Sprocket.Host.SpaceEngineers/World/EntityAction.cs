@@ -123,13 +123,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What this does as one of Sprocket's own, what it waits for and how it finishes; null for one of the game's own
         /// members, which the game performs.
         /// </summary>
-        public Doing Doing { get; private set; }
+        public OwnAction Doing { get; private set; }
 
         /// <summary>What it waits for, or null where it is done the moment it is told.</summary>
         public Reading Until => Doing?.Until;
 
         /// <summary>Gives it what it does as one of Sprocket's own.</summary>
-        public EntityAction Performing(Doing doing)
+        public EntityAction Performing(OwnAction doing)
         {
             Doing = doing;
             return this;
@@ -182,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A value, the block's own or Sprocket's, is a value; anything the block itself declared is the game's action,
         /// whatever Sprocket calls it; and what is left is Sprocket's own.
         /// </remarks>
-        public Nature Form => Sets || Being != null ? Nature.Value : Unaltered ? Nature.Action : Nature.Native;
+        public ReachKind Form => Sets || Being != null ? ReachKind.Value : Unaltered ? ReachKind.Action : ReachKind.Native;
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         /// <remarks>
@@ -301,7 +301,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Has a step set this value as text written over several lines, up to <paramref name="longest" /> characters.</summary>
         public void Lines(int longest)
         {
-            _writes.Edits = Editor.Lines;
+            _writes.Edits = FieldEditor.Lines;
             _writes.Longest = longest;
         }
 
@@ -339,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>
         /// The action declares how many parameters it takes; this is the only thing that can say
         /// what they are for. It comes from a file a mod ships, or from this mod's own description
-        /// of the game's own blocks - see <see cref="Catalogue" />.
+        /// of the game's own blocks - see <see cref="ParameterCatalog" />.
         /// </remarks>
         public Description Description { get; private set; }
 
@@ -353,7 +353,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<Field> _described = new List<Field>();
 
         /// <summary>Says what type each of the values it is handed is taken as, one per value.</summary>
-        /// <remarks>For one of the game's actions, whose declaration says and is often wrong - see <see cref="Known" />.</remarks>
+        /// <remarks>For one of the game's actions, whose declaration says and is often wrong - see <see cref="KnownActions" />.</remarks>
         public EntityAction Taking(IList<Primitive> types)
         {
             _takes = types;
@@ -451,7 +451,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public bool Compares(Literal value, out Literal became)
         {
             became = value;
-            return Form == Nature.Value && value.Becomes(_holds, out became);
+            return Form == ReachKind.Value && value.Becomes(_holds, out became);
         }
 
         /// <summary>Whether every value a test compares this with is one it can be: its kind, and one of its words where it lists some.</summary>
@@ -584,7 +584,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 var action = actions[i];
-                if (action.Id == id && action.Form == Nature.Value && (action.Being != null) == own)
+                if (action.Id == id && action.Form == ReachKind.Value && (action.Being != null) == own)
                     return action;
             }
 
@@ -592,34 +592,34 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What may be typed into a box for a value of this kind.</summary>
-        public static Entry Entered(ValueKind kind)
+        public static FieldInput Entered(ValueKind kind)
         {
             switch (kind)
             {
                 case ValueKind.Integer:
-                    return Entry.Whole;
+                    return FieldInput.Whole;
                 case ValueKind.Real:
-                    return Entry.Decimal;
+                    return FieldInput.Decimal;
                 case ValueKind.Text:
-                    return Entry.Text;
+                    return FieldInput.Text;
             }
 
-            return Entry.Any;
+            return FieldInput.Any;
         }
 
         /// <summary>The kind a box of this sort holds, or false where it may hold anything.</summary>
-        public static bool Kind(Entry entry, out ValueKind kind)
+        public static bool Kind(FieldInput entry, out ValueKind kind)
         {
             kind = ValueKind.Text;
             switch (entry)
             {
-                case Entry.Whole:
+                case FieldInput.Whole:
                     kind = ValueKind.Integer;
                     return true;
-                case Entry.Decimal:
+                case FieldInput.Decimal:
                     kind = ValueKind.Real;
                     return true;
-                case Entry.Text:
+                case FieldInput.Text:
                     return true;
             }
 
@@ -644,7 +644,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = from; i < into.Count; i++)
             {
                 var field = into[i];
-                if (field.Covers == 1 && field.Entry == Entry.Any && at < _takes.Count)
+                if (field.Covers == 1 && field.Entry == FieldInput.Any && at < _takes.Count)
                 {
                     field.Entry = Entered(_takes[at]);
                     Bound(ref field, _takes[at]);
@@ -656,7 +656,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What may be typed into a box for a value taken as this type.</summary>
-        static Entry Entered(Primitive type)
+        static FieldInput Entered(Primitive type)
         {
             switch (type)
             {
@@ -668,16 +668,16 @@ namespace Sprocket.Host.SpaceEngineers.World
                 case Primitive.UInt32:
                 case Primitive.Int64:
                 case Primitive.UInt64:
-                    return Entry.Whole;
+                    return FieldInput.Whole;
                 case Primitive.Single:
                 case Primitive.Double:
-                    return Entry.Decimal;
+                    return FieldInput.Decimal;
                 case Primitive.Char:
                 case Primitive.String:
-                    return Entry.Text;
+                    return FieldInput.Text;
             }
 
-            return Entry.Any;
+            return FieldInput.Any;
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Lumel.Layout
 {
     /// <summary>The rows of a <see cref="Form" />, in order, each a label and a field, or one element across the whole width.</summary>
-    /// <remarks>Written as a collection initializer: <c>Rows = { { label, field }, { label, field, Lines.Two }, { swatches } }</c>.</remarks>
+    /// <remarks>Written as a collection initializer: <c>Rows = { { label, field }, { label, field, FormRowLines.Two }, { swatches } }</c>.</remarks>
     public sealed class FormRows : IEnumerable
     {
         readonly List<FormRow> _rows = new List<FormRow>();
@@ -28,11 +28,11 @@ namespace Lumel.Layout
         /// <summary>A row of <paramref name="label" /> and <paramref name="field" />, side by side where they fit.</summary>
         public void Add(Element label, Element field)
         {
-            Add(label, field, Lines.Fit);
+            Add(label, field, FormRowLines.Fit);
         }
 
         /// <summary>A row of <paramref name="label" /> and <paramref name="field" />, on as many lines as <paramref name="lines" /> says.</summary>
-        public void Add(Element label, Element field, Lines lines)
+        public void Add(Element label, Element field, FormRowLines lines)
         {
             if (label == null || field == null)
                 throw new ArgumentNullException(label == null ? nameof(label) : nameof(field));
@@ -48,7 +48,7 @@ namespace Lumel.Layout
             if (whole == null)
                 throw new ArgumentNullException(nameof(whole));
 
-            _rows.Add(new FormRow(null, whole, Lines.Two));
+            _rows.Add(new FormRow(null, whole, FormRowLines.Two));
             _joined(whole);
         }
 

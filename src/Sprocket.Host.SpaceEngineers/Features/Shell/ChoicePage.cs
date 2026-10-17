@@ -86,7 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     Text = option.Text,
                     IsGiven = option.IsCurrent,
                     Caution = option.Warning,
-                    Command = Editor.Act(Cmd.Choice, option.Choose)
+                    Command = Editor.Act(CommandKind.Choice, option.Choose)
                 };
 
                 _rows.Add(row);

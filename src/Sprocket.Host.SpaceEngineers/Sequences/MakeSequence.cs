@@ -6,12 +6,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class MakeSequence : SystemEdit
     {
         readonly Automation _program;
-        readonly Change _change;
+        readonly ChangeKind _change;
 
         int _at = -1;
 
         /// <summary>Records <paramref name="made" />, just made in its logic system of <paramref name="program" />, as <paramref name="change" />.</summary>
-        public MakeSequence(Automation program, Sequence made, Change change)
+        public MakeSequence(Automation program, Sequence made, ChangeKind change)
         {
             _program = program;
             Sequence = made;
@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public Sequence Sequence { get; }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)

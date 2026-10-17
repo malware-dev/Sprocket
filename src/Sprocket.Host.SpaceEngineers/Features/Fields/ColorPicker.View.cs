@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                         Placement = Flex.Grow,
                         ColumnSpacing = 8f,
                         RowSpacing = 8f,
-                        Columns = { 20f, Length.Flex(1) },
+                        Columns = { 20f, GridLength.Flex(1) },
                         Cells =
                         {
                             [0, 0] = new Label { Style = Styles.ValueLabel, Text = "H" },
@@ -43,10 +43,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                             [2, 1] = new Slider { TrackTint = Palette.Well, GripColor = Palette.Ink }.As(out _value)
                         }
                     },
-                    new Swatch { Edge = Palette.Line, Placement = Fixed.Size(96f, 88f) }.As(out _chosen)
+                    new Swatch { Edge = Palette.Line, Placement = FixedSize.Size(96f, 88f) }.As(out _chosen)
                 }
             });
-            Children.Add(new TextBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Placement = Fixed.Wide(148f) }.As(out _written));
+            Children.Add(new TextBox { Style = Styles.Value, Focusable = true, SelectsAll = true, Placement = FixedSize.Wide(148f) }.As(out _written));
         }
     }
 }

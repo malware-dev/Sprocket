@@ -1,6 +1,6 @@
 # Errors from reading a script
 
-Errors from the reader (`Reader` and `Systems`), the parser and Trouble are read by somebody editing the script by hand. Mal:
+Errors from the reader (`ProgramReader` and `SystemReader`), the parser and `ScriptTrouble` are read by somebody editing the script by hand. Mal:
 "We need to remember the context we're in. *Here* our target group isn't John Normal. It's Dave
 Developer."
 

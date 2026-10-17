@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.Step;
+        public override ChangeKind Change => ChangeKind.Step;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)

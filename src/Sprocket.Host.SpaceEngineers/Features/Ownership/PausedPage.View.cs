@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
                     new VStack
                     {
                         Align = Align.Center,
-                        Placement = Fixed.Wide(Column),
+                        Placement = FixedSize.Wide(Column),
                         Spacing = 16f,
                         Children =
                         {

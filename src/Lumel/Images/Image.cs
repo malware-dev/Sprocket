@@ -70,10 +70,10 @@ namespace Lumel.Images
                 return available;
 
             if (wide)
-                return new Vector2(available.X, Shape.HeightFor(size, available.X));
+                return new Vector2(available.X, AspectRatio.HeightFor(size, available.X));
 
             if (high)
-                return new Vector2(Shape.WidthFor(size, available.Y), available.Y);
+                return new Vector2(AspectRatio.WidthFor(size, available.Y), available.Y);
 
             var acrossBounded = available.X < Unbounded;
             var downBounded = available.Y < Unbounded;
@@ -81,12 +81,12 @@ namespace Lumel.Images
             if (!acrossBounded && !downBounded)
                 return size;
 
-            var across = acrossBounded ? available.X : Shape.WidthFor(size, available.Y);
-            var down = Shape.HeightFor(size, across);
+            var across = acrossBounded ? available.X : AspectRatio.WidthFor(size, available.Y);
+            var down = AspectRatio.HeightFor(size, across);
             if (downBounded && down > available.Y)
             {
                 down = available.Y;
-                across = Shape.WidthFor(size, down);
+                across = AspectRatio.WidthFor(size, down);
             }
 
             return new Vector2(across, down);

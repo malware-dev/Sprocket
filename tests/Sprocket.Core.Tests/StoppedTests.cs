@@ -75,7 +75,7 @@ public class StoppedTests
 
         Assert.False(a.State.IsRunning);
         Assert.Equal(SequenceStatus.Stopped, a.Status);
-        Assert.Equal(Stopper.Sequence, a.State.StoppedBy);
+        Assert.Equal(StopCause.Sequence, a.State.StoppedBy);
         Assert.Equal(a.Abort.Number, a.State.StoppedFrom);
         Assert.Equal(at, a.State.StoppedAt);
 
@@ -85,18 +85,18 @@ public class StoppedTests
 
     /// <summary>A trigger stopping it, and a hand at the editor, are said as such.</summary>
     [Theory]
-    [InlineData(Stopper.Trigger)]
-    [InlineData(Stopper.Hand)]
-    public void AStopByATriggerOrByHandIsSaid(Stopper by)
+    [InlineData(StopCause.Trigger)]
+    [InlineData(StopCause.Hand)]
+    public void AStopByATriggerOrByHandIsSaid(StopCause by)
     {
         var a = new Airlock();
         a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
         a.Tick(5);
 
-        if (by == Stopper.Trigger)
-            a.Runner.Halt(a.Cycle, a.Cycle.System.First, Stopper.Trigger, 0);
+        if (by == StopCause.Trigger)
+            a.Runner.Halt(a.Cycle, a.Cycle.System.First, StopCause.Trigger, 0);
         else
-            a.State.Interrupt(Stopper.Hand, 0);
+            a.State.Interrupt(StopCause.Hand, 0);
 
         Assert.Equal(SequenceStatus.Stopped, a.Status);
         Assert.Equal(by, a.State.StoppedBy);
@@ -117,7 +117,7 @@ public class StoppedTests
 
         Assert.False(a.State.IsRunning);
         Assert.Equal(SequenceStatus.Off, a.Status);
-        Assert.Equal(Stopper.Switch, a.State.StoppedBy);
+        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
         Assert.Equal(at, a.State.StoppedAt);
 
         a.Cycle.System.Enabled = true;
@@ -136,7 +136,7 @@ public class StoppedTests
         a.Tick(101);
 
         Assert.False(a.State.IsRunning);
-        Assert.Equal(Stopper.Switch, a.State.StoppedBy);
+        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
     }
 
     /// <summary>A run started by hand ignores the switch, so switching off leaves it running.</summary>
@@ -151,7 +151,7 @@ public class StoppedTests
         a.Tick(5);
 
         Assert.True(a.State.IsRunning);
-        Assert.Equal(Stopper.None, a.State.StoppedBy);
+        Assert.Equal(StopCause.None, a.State.StoppedBy);
     }
 
     /// <summary>The next run forgets the stop, and a sequence stopped while at rest has nothing to say.</summary>
@@ -159,17 +159,17 @@ public class StoppedTests
     public void TheNextRunForgetsTheStop()
     {
         var a = new Airlock();
-        a.State.Interrupt(Stopper.Hand, 0);
-        Assert.Equal(Stopper.None, a.State.StoppedBy);
+        a.State.Interrupt(StopCause.Hand, 0);
+        Assert.Equal(StopCause.None, a.State.StoppedBy);
 
         a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
         a.Tick(5);
-        a.State.Interrupt(Stopper.Hand, 0);
+        a.State.Interrupt(StopCause.Hand, 0);
         Assert.Equal(SequenceStatus.Stopped, a.Status);
 
         a.Runner.Call(a.Cycle, a.Cycle.System.First, true);
         a.Tick();
-        Assert.Equal(Stopper.None, a.State.StoppedBy);
+        Assert.Equal(StopCause.None, a.State.StoppedBy);
         Assert.NotEqual(SequenceStatus.Stopped, a.Status);
     }
 }

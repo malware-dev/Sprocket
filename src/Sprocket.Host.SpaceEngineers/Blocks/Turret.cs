@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     public sealed class Turret : Capability
     {
         // Restores the target switches and idle movement from the block's definition, read from the game's code.
-        static readonly Doing Resets = Doing.Of<IMyLargeTurretBase>(turret => turret.ResetTargetingToDefault());
+        static readonly OwnAction Resets = OwnAction.Of<IMyLargeTurretBase>(turret => turret.ResetTargetingToDefault());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

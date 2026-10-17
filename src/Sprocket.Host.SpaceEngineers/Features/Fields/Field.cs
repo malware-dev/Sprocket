@@ -63,7 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// Not a bound and not a name: it says which control asks the question, and everything else
         /// here describes what that control may answer with.
         /// </remarks>
-        public Editor Edits;
+        public FieldEditor Edits;
 
         /// <summary>Whether the value has to be given: a field that stands for nothing when it is empty.</summary>
         /// <remarks>
@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// can be and nothing about the rest: a piston goes from nought to ten metres and stops at a
         /// quarter of one.
         /// </remarks>
-        public Entry Entry;
+        public FieldInput Entry;
 
         /// <summary>How many characters text written over several lines may run to, or zero for no limit: what the block itself holds.</summary>
         public int Longest;
@@ -139,11 +139,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <summary>Whether it is a choice between on and off and nothing else.</summary>
         public bool IsOnOff =>
-            Edits == Editor.Chosen && Words != null && Words.Count == 2
+            Edits == FieldEditor.Chosen && Words != null && Words.Count == 2
             && Words.Contains(Literal.Of(true).Said) && Words.Contains(Literal.Of(false).Said);
 
         /// <summary>One field standing over several values, filled in by a control of its own.</summary>
-        public static Field Holding(string name, Editor edits, int spans)
+        public static Field Holding(string name, FieldEditor edits, int spans)
         {
             Field field = Called(name);
             field.Edits = edits;
@@ -244,7 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public static Field Among(string name, IList<string> words, IList<string> means)
         {
             Field field = Called(name);
-            field.Edits = Editor.Chosen;
+            field.Edits = FieldEditor.Chosen;
             field.Words = words;
             field.Means = means;
             return field;
@@ -391,7 +391,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             double low, high;
             bool hasLow = Reads(Least, out low);
             bool hasHigh = Reads(Most, out high);
-            bool numeric = Entry == Entry.Whole || Entry == Entry.Decimal;
+            bool numeric = Entry == FieldInput.Whole || Entry == FieldInput.Decimal;
 
             if (!hasLow && !hasHigh && !numeric)
                 return "";
@@ -401,7 +401,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return Template.Fill(texts.ValueNumber, "name", called);
 
             long whole;
-            if (Entry == Entry.Whole
+            if (Entry == FieldInput.Whole
                 && !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
             {
                 return Template.Fill(texts.ValueWhole, "name", called);
@@ -450,7 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public string Shown(string said)
         {
             long whole;
-            if (Entry != Entry.Decimal || string.IsNullOrEmpty(said)
+            if (Entry != FieldInput.Decimal || string.IsNullOrEmpty(said)
                 || !long.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out whole))
             {
                 return said;

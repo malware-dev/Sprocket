@@ -11,8 +11,8 @@ namespace Sprocket.Sim.Content
         /// <summary>Every face the mod's styles name that a font mod declares.</summary>
         public static readonly IReadOnlyList<string> All = new[]
         {
-            Symbols.Font, Lettering.Mono, Lettering.Sans, Lettering.SansBold, Lettering.SansItalic, Lettering.SansBoldItalic,
-            Lettering.Bold, Lettering.Italic, Lettering.BoldItalic
+            Symbols.Font, TextSizes.Mono, TextSizes.Sans, TextSizes.SansBold, TextSizes.SansItalic, TextSizes.SansBoldItalic,
+            TextSizes.Bold, TextSizes.Italic, TextSizes.BoldItalic
         };
 
         /// <summary>The folder the font mods' pages and tables are copied to.</summary>

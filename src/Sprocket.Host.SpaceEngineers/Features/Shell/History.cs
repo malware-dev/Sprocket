@@ -80,16 +80,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return Forward(subject, screen) && !Holds(subject, false);
         }
 
-        /// <summary>What undoing on <paramref name="screen" /> would undo, or <see cref="Change.None" /> where there is nothing.</summary>
-        public Change Undoes(T subject, object screen)
+        /// <summary>What undoing on <paramref name="screen" /> would undo, or <see cref="ChangeKind.None" /> where there is nothing.</summary>
+        public ChangeKind Undoes(T subject, object screen)
         {
-            return Back(subject, screen) ? _walk[0].Edit.Change : Change.None;
+            return Back(subject, screen) ? _walk[0].Edit.Change : ChangeKind.None;
         }
 
-        /// <summary>What redoing on <paramref name="screen" /> would put back, or <see cref="Change.None" /> where there is nothing.</summary>
-        public Change Redoes(T subject, object screen)
+        /// <summary>What redoing on <paramref name="screen" /> would put back, or <see cref="ChangeKind.None" /> where there is nothing.</summary>
+        public ChangeKind Redoes(T subject, object screen)
         {
-            return Forward(subject, screen) ? _target.Edit.Change : Change.None;
+            return Forward(subject, screen) ? _target.Edit.Change : ChangeKind.None;
         }
 
         /// <summary>

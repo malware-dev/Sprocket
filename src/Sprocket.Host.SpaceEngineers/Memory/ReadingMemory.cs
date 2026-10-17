@@ -21,14 +21,14 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 
         /// <summary>What the reading that rules its moment out remembers of the block, or null.</summary>
         [ProtoMember(4)]
-        public Recall Ruling { get; set; }
+        public ReaderMemory Ruling { get; set; }
 
         /// <summary>What the watched signal remembers of the block, or null.</summary>
         [ProtoMember(5)]
-        public Recall Seen { get; set; }
+        public ReaderMemory Seen { get; set; }
 
         /// <summary>What the value read remembers of the block, or null.</summary>
         [ProtoMember(6)]
-        public Recall Gauge { get; set; }
+        public ReaderMemory Gauge { get; set; }
     }
 }

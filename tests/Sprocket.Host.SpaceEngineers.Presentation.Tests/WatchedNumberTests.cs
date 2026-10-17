@@ -27,7 +27,7 @@ public class WatchedNumberTests
         var heading = happens.Entries().FindIndex(entry => entry.IsHeading && string.Equals(entry.Text, "values", StringComparison.OrdinalIgnoreCase));
         Assert.True(heading > 0, "the numbers come after the moments, under a heading of their own");
 
-        happens.Entries().First(entry => entry.Text == "radius" && !entry.IsHeading).Pick(Held.Alone, 1);
+        happens.Entries().First(entry => entry.Text == "radius" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
 
         var strip = rig.Editor.Pick();
@@ -126,7 +126,7 @@ public class WatchedNumberTests
     static Simulation Made()
     {
         var rig = Picking("the average of");
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "radius" && !entry.IsHeading).Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == "radius" && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         rig.Editor.Typed("below 5");
         rig.Tick();

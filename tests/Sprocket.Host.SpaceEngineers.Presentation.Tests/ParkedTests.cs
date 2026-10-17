@@ -33,7 +33,7 @@ public class ParkedTests
         var installation = system.First!;
         system.Enabled = true;
         installation.Enabled = false;
-        installation.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, Trouble.None, "Airlock Inner Door");
+        installation.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, BlockTrouble.None, "Airlock Inner Door");
         return screen.Run(120);
     }
 

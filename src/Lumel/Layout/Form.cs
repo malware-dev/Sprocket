@@ -117,7 +117,7 @@ namespace Lumel.Layout
                 var natural = Width(row.Field, row.Field.DesiredSize.X);
 
                 var alone = row.Label == null;
-                var beside = !alone && row.Lines == Lines.Fit
+                var beside = !alone && row.Lines == FormRowLines.Fit
                              && (!bounded || label.X + ColumnSpacing + natural <= room);
                 row.Stacked = !alone && !beside;
 
@@ -184,7 +184,7 @@ namespace Lumel.Layout
                 {
                     var label = _labels[i];
                     row.Label.Arrange(new RectangleF(bounds.X, y, Math.Min(label.X, bounds.Width), label.Y));
-                    Put(row.Field, row.Lines == Lines.Two ? Align.Wide : Align.Left, bounds.X, bounds.Width,
+                    Put(row.Field, row.Lines == FormRowLines.Two ? Align.Wide : Align.Left, bounds.X, bounds.Width,
                         y + label.Y + LabelSpacing, field);
                 }
 

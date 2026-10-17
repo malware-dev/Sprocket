@@ -231,7 +231,7 @@ public class TextBoxTests
 
     static (TextBox, Easel, InputRoot) Laid(string text)
     {
-        var box = new TextBox { Text = text, Placement = Fixed.Wide(300f) };
+        var box = new TextBox { Text = text, Placement = FixedSize.Wide(300f) };
         var root = new VStack { Children = { box } };
         var easel = new Easel(root, Wide, High);
         return (box, easel, new InputRoot(root));

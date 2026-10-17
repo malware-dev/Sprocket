@@ -27,19 +27,19 @@ namespace Lumel.Layout
         public Grid()
         {
             _children = Hold();
-            Columns = new Tracks(InvalidateMeasure);
-            Rows = new Tracks(InvalidateMeasure);
-            Cells = new Cells(At, Place);
+            Columns = new GridTracks(InvalidateMeasure);
+            Rows = new GridTracks(InvalidateMeasure);
+            Cells = new GridCells(At, Place);
         }
 
         /// <summary>How wide each column is, left to right.</summary>
-        public Tracks Columns { get; }
+        public GridTracks Columns { get; }
 
         /// <summary>How tall each row is, top to bottom.</summary>
-        public Tracks Rows { get; }
+        public GridTracks Rows { get; }
 
         /// <summary>What is in each cell.</summary>
-        public Cells Cells { get; }
+        public GridCells Cells { get; }
 
         /// <summary>Blank room left between one column and the next.</summary>
         public float ColumnSpacing
@@ -296,7 +296,7 @@ namespace Lumel.Layout
         }
 
         /// <summary>Shares what the fixed and auto tracks leave of <paramref name="room" /> among the flex ones, and says whether it did.</summary>
-        static bool Share(float[] sizes, Tracks tracks, int count, float room, float spacing)
+        static bool Share(float[] sizes, GridTracks tracks, int count, float room, float spacing)
         {
             if (room >= Unbounded)
                 return false;
@@ -327,7 +327,7 @@ namespace Lumel.Layout
         }
 
         /// <summary>Makes a span of tracks at least <paramref name="wanted" /> long, adding what is missing to its last track that is not fixed.</summary>
-        static void Widen(float[] sizes, Tracks tracks, int from, int count, float spacing, float wanted)
+        static void Widen(float[] sizes, GridTracks tracks, int from, int count, float spacing, float wanted)
         {
             var missing = wanted - Span(sizes, from, count, spacing);
             if (!(missing > 0f))

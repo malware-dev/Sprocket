@@ -10,7 +10,7 @@ namespace Lumel.Viewing
     /// </remarks>
     public class ScrollView : ContentControl, IScrolls
     {
-        readonly Rail _rail = new Rail { MinThumb = ScrollViewState.NeutralLeastThumb };
+        readonly ScrollAxis _rail = new ScrollAxis { MinThumb = ScrollViewState.NeutralLeastThumb };
 
         float _barWidth = ScrollViewState.NeutralBarWidth;
         bool _held;
@@ -175,7 +175,7 @@ namespace Lumel.Viewing
             if (Content == null)
                 return _fits ? Vector2.Zero : available;
 
-            Content.Measure(g, new Vector2(Rail.Room(available.X, _barWidth), Unbounded));
+            Content.Measure(g, new Vector2(ScrollAxis.Room(available.X, _barWidth), Unbounded));
             if (!_fits)
                 return available;
 
@@ -226,7 +226,7 @@ namespace Lumel.Viewing
         {
             float x;
             float wide;
-            Span(Content, true, bounds.X, Rail.Room(bounds.Width, _barWidth), float.NaN, Content.DesiredSize.X, out x, out wide);
+            Span(Content, true, bounds.X, ScrollAxis.Room(bounds.Width, _barWidth), float.NaN, Content.DesiredSize.X, out x, out wide);
             Content.Arrange(new RectangleF(x, bounds.Y - _rail.Offset, wide, _rail.Extent));
         }
 

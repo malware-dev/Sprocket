@@ -4,19 +4,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class TakeSystemOut : ProgramEdit
     {
         readonly AutomationSystem _system;
-        readonly Change _change;
+        readonly ChangeKind _change;
 
         int _at = -1;
 
         /// <summary>Takes <paramref name="system" /> out, offered back as <paramref name="change" />: deleting it, or taking it off the construct.</summary>
-        public TakeSystemOut(AutomationSystem system, Change change)
+        public TakeSystemOut(AutomationSystem system, ChangeKind change)
         {
             _system = system;
             _change = change;
         }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <inheritdoc />
         public override void Apply(Automation program)

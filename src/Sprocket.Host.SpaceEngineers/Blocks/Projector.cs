@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly Being Ready = Being.Whole<IMyProjector>(projector => projector.BuildableBlocksCount);
 
         // The terminal's own Remove, which every player sees go.
-        static readonly Doing Removes = Doing.Of<IMyProjector>(projector => projector.SetProjectedGrid(null));
+        static readonly OwnAction Removes = OwnAction.Of<IMyProjector>(projector => projector.SetProjectedGrid(null));
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

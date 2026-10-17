@@ -89,7 +89,7 @@ public class DefinitionTests
         Description glow = said.Actions[2];
         Assert.Equal(3, glow.Covers);
 
-        var group = Assert.IsType<Group>(glow.Pieces[0]);
+        var group = Assert.IsType<ParameterGroup>(glow.Pieces[0]);
         Assert.Equal("color", group.Kind);
         Assert.Equal(3, group.Parameters.Count);
     }
@@ -107,7 +107,7 @@ public class DefinitionTests
         var fields = Fields(2);
 
         Field whole = Assert.Single(fields);
-        Assert.Equal(Editor.Colour, whole.Edits);
+        Assert.Equal(FieldEditor.Colour, whole.Edits);
         Assert.Equal(3, whole.Covers);
     }
 

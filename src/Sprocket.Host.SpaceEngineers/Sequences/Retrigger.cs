@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.Trigger;
+        public override ChangeKind Change => ChangeKind.Trigger;
 
         /// <inheritdoc />
         public override bool Changes => _start.Changes || _does.Changes;

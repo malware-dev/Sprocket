@@ -19,7 +19,7 @@ public class FormTests
     public void ALabelAndAFieldThatFitShareALine()
     {
         Label label, field;
-        var form = new Form { Rows = { { new Label { Text = "radius" }.As(out label), new Label { Text = "4", Placement = Fixed.Wide(Box) }.As(out field) } } };
+        var form = new Form { Rows = { { new Label { Text = "radius" }.As(out label), new Label { Text = "4", Placement = FixedSize.Wide(Box) }.As(out field) } } };
 
         _ = new Easel(form, Wide, High);
 
@@ -36,7 +36,7 @@ public class FormTests
         Label label, field;
         var form = new Form
         {
-            Rows = { { new Label { Text = "the longest label a value was ever given" }.As(out label), new Label { Text = "4", Placement = Fixed.Wide(Box) }.As(out field) } }
+            Rows = { { new Label { Text = "the longest label a value was ever given" }.As(out label), new Label { Text = "4", Placement = FixedSize.Wide(Box) }.As(out field) } }
         };
 
         _ = new Easel(form, 200f, High);
@@ -55,8 +55,8 @@ public class FormTests
         {
             Rows =
             {
-                { new Label { Text = "radius" }, new Label { Text = "4", Placement = Fixed.Wide(Box) } },
-                { new Label { Text = "the longest label a value was ever given" }, new Label { Text = "5", Placement = Fixed.Wide(Box) } }
+                { new Label { Text = "radius" }, new Label { Text = "4", Placement = FixedSize.Wide(Box) } },
+                { new Label { Text = "the longest label a value was ever given" }, new Label { Text = "5", Placement = FixedSize.Wide(Box) } }
             }
         };
 
@@ -71,7 +71,7 @@ public class FormTests
     public void TwoLinesPutsTheFieldUnderTheLabelAcrossTheWholeWidth()
     {
         Label label, field;
-        var form = new Form { Rows = { { new Label { Text = "text" }.As(out label), new Label { Text = "Hello", Align = Align.Wide }.As(out field), Lines.Two } } };
+        var form = new Form { Rows = { { new Label { Text = "text" }.As(out label), new Label { Text = "Hello", Align = Align.Wide }.As(out field), FormRowLines.Two } } };
 
         _ = new Easel(form, Wide, High);
 

@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Fleeing = Being.Flag(Away);
 
-        static readonly Doing Flees = Doing.Of<IMyDefensiveCombatBlock>(block => block.Flee());
+        static readonly OwnAction Flees = OwnAction.Of<IMyDefensiveCombatBlock>(block => block.Flee());
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)

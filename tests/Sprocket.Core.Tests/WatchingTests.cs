@@ -55,8 +55,8 @@ public class WatchingTests
     public void EachKindHearsItsValueItsOwnWay()
     {
         var ship = new Rigged();
-        var hangar = ship.Entity(ship.HangarDoor(1, "Hangar").Id).Kind.FindAction("status", Nature.Value)!;
-        var door = ship.Entity(ship.Door(2, "Door").Id).Kind.FindAction("status", Nature.Value)!;
+        var hangar = ship.Entity(ship.HangarDoor(1, "Hangar").Id).Kind.FindAction("status", ReachKind.Value)!;
+        var door = ship.Entity(ship.Door(2, "Door").Id).Kind.FindAction("status", ReachKind.Value)!;
 
         Assert.True(hangar.Announced);
         Assert.False(door.Announced);

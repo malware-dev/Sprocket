@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.Planning(Plan.MovingItems);
+            kind.Planning(PlannedMember.MovingItems);
             if (block.InventoryCount != 1)
                 return;
 

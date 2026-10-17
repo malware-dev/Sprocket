@@ -24,10 +24,10 @@ public static class RichShot
         Base =
         {
             Font = MyFontEnum.White,
-            StrongFont = Lettering.Bold,
-            EmphasisFont = Lettering.Italic,
-            StrongEmphasisFont = Lettering.BoldItalic,
-            CodeFont = Lettering.Mono,
+            StrongFont = TextSizes.Bold,
+            EmphasisFont = TextSizes.Italic,
+            StrongEmphasisFont = TextSizes.BoldItalic,
+            CodeFont = TextSizes.Mono,
             FontSize = 20f,
             Heading1Size = 32f,
             Heading2Size = 24f,
@@ -60,7 +60,7 @@ public static class RichShot
         if (emphasis.HasValue)
             text.EmphasisColor = emphasis.Value;
 
-        Element shown = fit > 0f ? new Viewbox { Content = text, Grows = false, Placement = Fixed.Size(wide, fit) } : text;
+        Element shown = fit > 0f ? new Viewbox { Content = text, Grows = false, Placement = FixedSize.Size(wide, fit) } : text;
         var page = new VStack { Background = Palette.Page, Padding = new Thickness(24f), Children = { shown } };
 
         var surface = new Surface { Target = new PixelSize(1920, 1080) };

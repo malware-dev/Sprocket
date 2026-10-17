@@ -111,8 +111,8 @@ public class ScrollBarTests
     [Fact]
     public void AnUnstyledScrollShowsItsBar()
     {
-        var content = new VStack { Children = { new VStack { Placement = Fixed.High(1000f) } } };
-        var scroll = new ScrollView { Content = content, Placement = Fixed.Size(Wide, High) };
+        var content = new VStack { Children = { new VStack { Placement = FixedSize.High(1000f) } } };
+        var scroll = new ScrollView { Content = content, Placement = FixedSize.Size(Wide, High) };
         var easel = new Easel(new VStack { Children = { scroll } }, Wide, High);
 
         var thumb = Assert.Single(easel.Sprites, s => s.Color == ScrollViewState.NeutralThumb);
@@ -121,8 +121,8 @@ public class ScrollBarTests
 
     static (ScrollView, Element, Easel, InputRoot) Laid(float tall)
     {
-        var content = new VStack { Children = { new VStack { Placement = Fixed.High(tall) } } };
-        var scroll = new ScrollView { Style = Barred, Content = content, Placement = Fixed.Size(Wide, High) };
+        var content = new VStack { Children = { new VStack { Placement = FixedSize.High(tall) } } };
+        var scroll = new ScrollView { Style = Barred, Content = content, Placement = FixedSize.Size(Wide, High) };
         var root = new VStack { Children = { scroll } };
         var easel = new Easel(root, Wide, High);
         return (scroll, content, easel, new InputRoot(root));

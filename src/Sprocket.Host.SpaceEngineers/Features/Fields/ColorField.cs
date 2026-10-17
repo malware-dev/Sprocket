@@ -32,10 +32,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Style = Styles.ListLine;
             Focusable = true;
 
-            _picker = new ColorPicker(colors, submit, texts) { Placement = Fixed.Wide(420f) };
+            _picker = new ColorPicker(colors, submit, texts) { Placement = FixedSize.Wide(420f) };
             _picker.Edited += Changed;
 
-            Children.Add(new Swatch { Edge = Palette.Line, Placement = Fixed.Size(28f, 20f) }.As(out _swatch));
+            Children.Add(new Swatch { Edge = Palette.Line, Placement = FixedSize.Size(28f, 20f) }.As(out _swatch));
             Children.Add(new Label { Style = Styles.ListWord }.As(out _code));
             Children.Add(ListField.Fold());
 
@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             Color color;
             byte alpha;
-            _swatch.Background = Channels.Colour(_picker.Text, out color, out alpha) ? color : Palette.None;
+            _swatch.Background = ColorChannels.Colour(_picker.Text, out color, out alpha) ? color : Palette.None;
         }
     }
 }

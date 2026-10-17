@@ -36,12 +36,12 @@ public class OrganizerTests
         var kind = ship.Entity(tank.Id).Kind;
 
         foreach (var id in new[] { "Stockpile_On", "Stockpile_Off", "IncreaseRadius", "DecreaseRadius" })
-            Assert.True(kind.FindAction(id, Nature.Action)!.Hidden, id + " is offered beside its value");
+            Assert.True(kind.FindAction(id, ReachKind.Action)!.Hidden, id + " is offered beside its value");
 
-        Assert.False(kind.FindAction("Stockpile", Nature.Value)!.Hidden);
-        Assert.False(kind.FindAction("Stockpile", Nature.Action)!.Hidden);
-        Assert.False(kind.FindAction("Radius", Nature.Value)!.Hidden);
-        Assert.False(kind.FindAction("ResetRadius", Nature.Action)!.Hidden);
+        Assert.False(kind.FindAction("Stockpile", ReachKind.Value)!.Hidden);
+        Assert.False(kind.FindAction("Stockpile", ReachKind.Action)!.Hidden);
+        Assert.False(kind.FindAction("Radius", ReachKind.Value)!.Hidden);
+        Assert.False(kind.FindAction("ResetRadius", ReachKind.Action)!.Hidden);
     }
 
     /// <summary>
@@ -55,8 +55,8 @@ public class OrganizerTests
         lamp.Carrying("UseConveyor", "Use Conveyor System", ValueKind.Flag).Offering("UseConveyor", "Use Conveyor System On/Off");
         var kind = ship.Entity(lamp.Id).Kind;
 
-        Assert.True(kind.FindAction("UseConveyor", Nature.Action)!.Hidden);
-        Assert.False(kind.FindAction("UseConveyor", Nature.Value)!.Hidden);
+        Assert.True(kind.FindAction("UseConveyor", ReachKind.Action)!.Hidden);
+        Assert.False(kind.FindAction("UseConveyor", ReachKind.Value)!.Hidden);
     }
 
     /// <summary>
@@ -74,12 +74,12 @@ public class OrganizerTests
             .Offering("ShowOnHUD_Off", "Show on HUD Off");
         var kind = ship.Entity(lamp.Id).Kind;
 
-        var value = kind.FindAction("ShowOnHUD", Nature.Value)!;
+        var value = kind.FindAction("ShowOnHUD", ReachKind.Value)!;
         Assert.False(value.Hidden);
         Assert.Equal("Show on HUD", value.Named);
         Assert.True(value.Vetted);
 
-        var toggle = kind.FindAction("ShowOnHUD", Nature.Action)!;
+        var toggle = kind.FindAction("ShowOnHUD", ReachKind.Action)!;
         Assert.True(toggle.Hidden);
         Assert.Equal("Toggle show on HUD", toggle.Named);
         Assert.True(toggle.Vetted);
@@ -87,7 +87,7 @@ public class OrganizerTests
 
         foreach (var id in new[] { "ShowOnHUD_On", "ShowOnHUD_Off" })
         {
-            var each = kind.FindAction(id, Nature.Action)!;
+            var each = kind.FindAction(id, ReachKind.Action)!;
             Assert.False(each.Renamed, id + " is renamed");
             Assert.False(each.Vetted, id + " is vetted");
         }
@@ -105,13 +105,13 @@ public class OrganizerTests
         lamp.Carrying("Radius", "Radius", ValueKind.Real).Offering("Strobe", "Strobe", 0);
 
         var kind = ship.Entity(lamp.Id).Kind;
-        Assert.True(kind.FindAction("power", Nature.Value)!.Vetted);
+        Assert.True(kind.FindAction("power", ReachKind.Value)!.Vetted);
 
-        var renamed = kind.FindAction("Radius", Nature.Value)!;
+        var renamed = kind.FindAction("Radius", ReachKind.Value)!;
         Assert.True(renamed.Renamed);
         Assert.True(renamed.Vetted);
 
-        var strobe = kind.FindAction("Strobe", Nature.Action)!;
+        var strobe = kind.FindAction("Strobe", ReachKind.Action)!;
         Assert.False(strobe.Vetted);
         strobe.Vouch();
         Assert.True(strobe.Vetted);
@@ -135,7 +135,7 @@ public class OrganizerTests
         var hatch = ship.Door(2, "Hatch");
         hatch.Carrying("HudText", "Text", ValueKind.Text).Offering("SetHudText", "Set HUD Text", 1);
 
-        Assert.True(ship.Entity(beacon.Id).Kind.FindAction("SetHudText", Nature.Action)!.Hidden);
-        Assert.False(ship.Entity(hatch.Id).Kind.FindAction("SetHudText", Nature.Action)!.Hidden);
+        Assert.True(ship.Entity(beacon.Id).Kind.FindAction("SetHudText", ReachKind.Action)!.Hidden);
+        Assert.False(ship.Entity(hatch.Id).Kind.FindAction("SetHudText", ReachKind.Action)!.Hidden);
     }
 }

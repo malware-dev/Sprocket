@@ -105,7 +105,7 @@ public class SettingTests
         dim.Name = "Dim";
 
         var set = new Act("Falloff");
-        set.Form = Nature.Value;
+        set.Form = ReachKind.Value;
         set.Targets.Add(Named(sim, light));
         set.Arguments.Add(Literal.Of(2L));
         dim.Steps.Add(set);
@@ -149,7 +149,7 @@ public class SettingTests
         dark.Name = "Dark";
 
         var off = new Act("OnOff");
-        off.Form = Nature.Value;
+        off.Form = ReachKind.Value;
         off.Targets.Add(Named(sim, light));
         off.Arguments.Add(Literal.Of(false));
         dark.Steps.Add(off);
@@ -285,7 +285,7 @@ public class SettingTests
         screen.Run(2);
 
         var set = screen.Editor.Program.Systems[0].Sequences[0].Steps.OfType<Act>().Single(step => step.ActionId == "speed");
-        Assert.Equal(Nature.Value, set.Form);
+        Assert.Equal(ReachKind.Value, set.Form);
         Assert.Equal(BlockKinds.Own, set.Provider);
         Assert.Equal(Literal.Name("high"), Assert.Single(set.Arguments));
     }

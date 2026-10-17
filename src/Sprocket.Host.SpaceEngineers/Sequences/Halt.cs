@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class Halt
     {
         /// <summary>A halt for <paramref name="problem" /> in sequence <paramref name="sequence" /> at <paramref name="step" />, naming the block at fault and what it said was wrong where it said anything.</summary>
-        public Halt(SequenceProblem problem, int sequence, int step, Trouble because, string block)
+        public Halt(SequenceProblem problem, int sequence, int step, BlockTrouble because, string block)
         {
             Problem = problem;
             Sequence = sequence;
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public int Step { get; private set; }
 
         /// <summary>What the block at fault said was wrong, or none where it said nothing.</summary>
-        public Trouble Because { get; private set; }
+        public BlockTrouble Because { get; private set; }
 
         /// <summary>The name the block at fault was last known by on the construct, or null where no one block was.</summary>
         public string Block { get; private set; }

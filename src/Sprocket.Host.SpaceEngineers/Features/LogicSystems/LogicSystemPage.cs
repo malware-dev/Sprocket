@@ -49,9 +49,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         string _madeAbout;
         bool _madeOn;
 
-        Keyed<Trigger, TriggerRow> _triggerRows;
-        Keyed<Sequence, StatusRow> _sequenceRows;
-        Keyed<Part, PartRow> _slotRows;
+        KeyedChildren<Trigger, TriggerRow> _triggerRows;
+        KeyedChildren<Sequence, StatusRow> _sequenceRows;
+        KeyedChildren<Part, PartRow> _slotRows;
         LengthQuestion _rate;
 
         /// <summary>The page of <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
@@ -125,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             && _system.Enabled == _madeOn && _system.Triggers.Count == 0 && _system.Sequences.Count == 0;
 
         /// <summary>Deletes the system, asking first; a blueprint only once its name is typed, since every logic system made from it goes too.</summary>
-        public override ICommand Deletes => Editor.Act(Cmd.DeleteSystem, () => Editor.DeleteSystem(_system));
+        public override ICommand Deletes => Editor.Act(CommandKind.DeleteSystem, () => Editor.DeleteSystem(_system));
 
         /// <inheritdoc />
         public override string DeleteAbout => Editor.Texts.SystemDelete;
@@ -162,7 +162,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override void Rename(string name)
         {
-            var wanted = Naming.Clean(name);
+            var wanted = NameRules.Clean(name);
 
             // Refused here as well as wherever it was typed, so the rule lives in the one place that owns it. A name
             // another system already has is refused for the same reason: it is how a person tells two apart.
@@ -175,7 +175,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <inheritdoc />
         public override bool AcceptsName(string name)
         {
-            var other = Editor.Program.FindSystem(_system.Namespace, Naming.Clean(name));
+            var other = Editor.Program.FindSystem(_system.Namespace, NameRules.Clean(name));
             return other == null || other == _system;
         }
 
@@ -295,9 +295,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>Keeps the rows by trigger and by sequence, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _triggerRows = new Keyed<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
-            _sequenceRows = new Keyed<Sequence, StatusRow>(_sequenceList.Children, Own);
-            _slotRows = new Keyed<Part, PartRow>(_slotList.Children, delegate { return new PartRow(); });
+            _triggerRows = new KeyedChildren<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
+            _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
+            _slotRows = new KeyedChildren<Part, PartRow>(_slotList.Children, delegate { return new PartRow(); });
 
             Show(true);
         }
@@ -414,12 +414,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
             // A blueprint's line of whose blocks the sentences name stands above it; a logic system of its own has nothing there.
             _triggersHeading.Style = _system.IsBlueprint ? Styles.NextHeading : Styles.Heading;
-            _addTrigger.Show(new Adder(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
+            _addTrigger.Show(new AddOption(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
             {
-                new Adder(SentenceText.WhenWord, texts.SystemWhenAbout,
-                    Changes(Cmd.StartWhen, () => Editor.Starts.StartSequence(_system, new WhenTrigger("")))),
-                new Adder(SentenceText.EveryWord, texts.SystemEveryAbout,
-                    Changes(Cmd.StartEvery, () => Editor.Starts.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
+                new AddOption(SentenceText.WhenWord, texts.SystemWhenAbout,
+                    Changes(CommandKind.StartWhen, () => Editor.Starts.StartSequence(_system, new WhenTrigger("")))),
+                new AddOption(SentenceText.EveryWord, texts.SystemEveryAbout,
+                    Changes(CommandKind.StartEvery, () => Editor.Starts.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
             }));
 
             _runs.Clear();
@@ -438,7 +438,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // The way to make a sequence without starting from what would start it. Somebody who knows what the
             // machine should do can write that first and give it a trigger afterwards.
-            _newSequence.Command = Changes(Cmd.NewSequence, () => Editor.NewSequence(_system));
+            _newSequence.Command = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system));
 
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0;
@@ -454,8 +454,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.AboutArguments.Set("name", SequenceText.Called(texts, sequence));
 
                 // Copying one or deleting it is changing the system, so it waits for the switch like any other change.
-                row.Copies = Changes(Cmd.DuplicateSequence, () => Editor.Duplicate(sequence));
-                row.Deletes = Changes(Cmd.DeleteSequence, () => Editor.DeleteSequence(sequence));
+                row.Copies = Changes(CommandKind.DuplicateSequence, () => Editor.Duplicate(sequence));
+                row.Deletes = Changes(CommandKind.DeleteSequence, () => Editor.DeleteSequence(sequence));
                 row.DeleteText = texts.SequenceDelete;
                 row.Locked = Locked();
             }
@@ -482,7 +482,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _descriptionHeading.Text = texts.BlueprintDescription.ToUpperInvariant();
             _composer.IsVisible = editable;
             _composer.Show(texts);
-            _composer.Guides = Editor.Act(Cmd.OpenCodex, delegate
+            _composer.Guides = Editor.Act(CommandKind.OpenCodex, delegate
             {
                 var term = Editor.Codex.Find(Terms.Writing);
                 if (term != null)
@@ -524,9 +524,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
                 row.Described = part.Annotation;
                 // Like everything else on this screen, waiting for the switch, and saying why.
-                row.Opens = Changes(Cmd.OpenSlot, () => Editor.Push(new SlotPage(Editor, _system, part)));
+                row.Opens = Changes(CommandKind.OpenSlot, () => Editor.Push(new SlotPage(Editor, _system, part)));
                 row.OpensAbout = Editable ? texts.SlotOpenAbout : Locked();
-                row.Fills = Changes(Cmd.FillPart, () => _fill.Ask(part, shown));
+                row.Fills = Changes(CommandKind.FillPart, () => _fill.Ask(part, shown));
                 row.Marks = Marked(texts, part, shown);
                 row.Take(Editor.Runner.Bindings, shown.FilledWith(part.Id), part.IsSignal ? shown.Positions(part.Id) : null);
 
@@ -547,7 +547,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (instances[i] == shown)
                     continue;
 
-                var mark = Marks.Of(Editor.Runner.Bindings, _system, instances[i], part, _used);
+                var mark = SlotMarks.Of(Editor.Runner.Bindings, _system, instances[i], part, _used);
                 if (mark == SlotMark.None)
                     continue;
 
@@ -587,7 +587,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (box == null || _composer == null || box != _composer.Box || !Editable)
                 return;
 
-            Editor.Do(_system, new Annotate(_system.Annotation, _composer.Text));
+            Editor.Do(_system, new AnnotateSystem(_system.Annotation, _composer.Text));
         }
 
         /// <summary>Hides the ways to add something while the system may run, and says why in their place.</summary>
@@ -626,7 +626,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         }
 
         /// <summary>A command made only while the system may be changed, and null while it may not.</summary>
-        ICommand Changes(Cmd kind, Action action)
+        ICommand Changes(CommandKind kind, Action action)
         {
             return Editable ? Editor.Act(kind, action) : null;
         }
@@ -690,7 +690,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return;
 
             var instance = _system.Instances[at];
-            var choose = Editor.Act(Cmd.ChooseInstance, () => Editor.Choose(_system, instance));
+            var choose = Editor.Act(CommandKind.ChooseInstance, () => Editor.Choose(_system, instance));
             if (choose != null)
                 choose.Execute();
         }
@@ -703,9 +703,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             return new StatusRow
             {
                 Mark = Symbols.Sequence,
-                Opens = Editor.Act(Cmd.OpenSequence, () => Editor.Push(new SequencePage(Editor, sequence))),
-                Runs = Editor.Act(Cmd.RunNow, () => Editor.RunNow(sequence)),
-                Stops = Editor.Act(Cmd.StopNow, () => Editor.StopNow(sequence)),
+                Opens = Editor.Act(CommandKind.OpenSequence, () => Editor.Push(new SequencePage(Editor, sequence))),
+                Runs = Editor.Act(CommandKind.RunNow, () => Editor.RunNow(sequence)),
+                Stops = Editor.Act(CommandKind.StopNow, () => Editor.StopNow(sequence)),
                 AboutArguments = new Arguments()
             };
         }
@@ -777,18 +777,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 var all = watching != null && watching.Quantifier != Quantifier.Any;
                 var blocks = Editor.Blocks(_system, moment.Sources);
-                row.Starts.Add(new EntitiesSlot(blocks, all, Starts(trigger, Opening.Blocks)));
-                row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, Opening.What), all && blocks.Count > 1));
+                row.Starts.Add(new EntitiesSlot(blocks, all, Starts(trigger, OpeningColumn.Blocks)));
+                row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, OpeningColumn.What), all && blocks.Count > 1));
             }
 
             var every = trigger as EveryTrigger;
             if (every != null)
-                row.Starts.Add(new DurationSlot(every.Interval, Changes(Cmd.OpenTrigger, () => OpenRate(every))));
+                row.Starts.Add(new DurationSlot(every.Interval, Changes(CommandKind.OpenTrigger, () => OpenRate(every))));
 
             Doing(row, trigger);
 
-            row.Deletes = Changes(Cmd.DeleteTrigger, () => Editor.Starts.Forget(_system, trigger));
-            row.Copies = Changes(Cmd.DuplicateTrigger, () => Editor.Starts.CopyTrigger(_system, trigger));
+            row.Deletes = Changes(CommandKind.DeleteTrigger, () => Editor.Starts.Forget(_system, trigger));
+            row.Copies = Changes(CommandKind.DuplicateTrigger, () => Editor.Starts.CopyTrigger(_system, trigger));
             row.Locked = Locked();
         }
 
@@ -813,19 +813,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 var said = SentenceText.Quantified(when.Quantifier);
                 row.Starts.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(Cmd.OpenTrigger, () => Quantify(when)), Given.Read));
+                    Changes(CommandKind.OpenTrigger, () => Quantify(when)), ArgumentRole.Read));
             }
 
-            row.Starts.Add(new ActionSlot(value, Starts(when, Opening.What)));
-            row.Starts.Add(new EntitiesSlot(blocks, when.Quantifier != Quantifier.Any, Starts(when, Opening.Blocks)));
+            row.Starts.Add(new ActionSlot(value, Starts(when, OpeningColumn.What)));
+            row.Starts.Add(new EntitiesSlot(blocks, when.Quantifier != Quantifier.Any, Starts(when, OpeningColumn.Blocks)));
             if (value == null)
                 return;
 
-            var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
+            var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, seen));
             var plural = when.Quantifier == Quantifier.All && blocks.Count > 1;
-            row.Starts.Add(new ArgumentsSlot(new[] { Comparing.Of(when.Relation) }, fields.GetRange(0, 1),
-                Changes(Cmd.OpenTrigger, () => Relate(when, fields[0], plural)), Given.Compared, plural));
-            row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, Opening.Arguments), Given.Checked));
+            row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(when.Relation) }, fields.GetRange(0, 1),
+                Changes(CommandKind.OpenTrigger, () => Relate(when, fields[0], plural)), ArgumentRole.Compared, plural));
+            row.Starts.Add(new ArgumentsSlot(new[] { when.Value }, fields.GetRange(1, fields.Count - 1), Starts(when, OpeningColumn.Arguments), ArgumentRole.Checked));
         }
 
         /// <summary>Offers the comparisons <paramref name="relation" /> takes in a menu under the part pressed, the one <paramref name="when" /> makes marked, and changes it to the one chosen as one edit.</summary>
@@ -834,7 +834,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Editor.AskHere("");
             for (var i = 0; i < relation.Words.Count; i++)
             {
-                var related = Comparing.Read(Literal.Name(relation.Means[i]));
+                var related = ComparisonQuestion.Read(Literal.Name(relation.Means[i]));
                 var said = plural ? SentenceText.Plural(relation.Words[i]) : relation.Words[i];
                 Editor.Answer(said, delegate
                 {
@@ -889,7 +889,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var sequence = _system.FindSequence(trigger.Runs);
                 row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, true, false);
                 row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
-                    Changes(Cmd.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, Opening.Nothing, false))));
+                    Changes(CommandKind.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false))));
 
                 return;
             }
@@ -900,10 +900,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
             row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, false, act.Sets && verb.Length == 0);
             if (verb.Length != 0)
-                row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, Opening.Arguments)));
+                row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, OpeningColumn.Arguments)));
 
-            row.Does.Add(new ActionSlot(chosen, Does(trigger, Opening.What)));
-            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), true, Does(trigger, Opening.Blocks)));
+            row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
+            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), true, Does(trigger, OpeningColumn.Blocks)));
             if (verb.Length != 0)
                 return;
 
@@ -913,19 +913,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Does(trigger, Opening.Arguments), act.Sets ? Given.NewValue : Given.Options);
+            var given = new ArgumentsSlot(act.Arguments, fields, Does(trigger, OpeningColumn.Arguments), act.Sets ? ArgumentRole.NewValue : ArgumentRole.Options);
             if (!given.Quiet)
                 row.Does.Add(given);
         }
 
-        ICommand Does(Trigger trigger, Opening opens)
+        ICommand Does(Trigger trigger, OpeningColumn opens)
         {
-            return Changes(Cmd.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, opens, true));
+            return Changes(CommandKind.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, opens, true));
         }
 
-        ICommand Starts(Trigger trigger, Opening opens)
+        ICommand Starts(Trigger trigger, OpeningColumn opens)
         {
-            return Changes(Cmd.OpenTrigger, () => Editor.Starts.ChangeTrigger(_system, trigger, opens, false));
+            return Changes(CommandKind.OpenTrigger, () => Editor.Starts.ChangeTrigger(_system, trigger, opens, false));
         }
 
         void Collect()

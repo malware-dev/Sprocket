@@ -207,7 +207,7 @@ public class BoxTests
             RuleColor = Rule,
             BlockSpacing = 8f,
             Indent = 20f,
-            Placement = Fixed.Wide(Wide)
+            Placement = FixedSize.Wide(Wide)
         };
 
         var easel = new Easel(new VStack { Children = { text } }, Wide, High);

@@ -8,8 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <remarks>
     /// The whole syntax tree is this one type.
     /// <para>
-    /// It owns no values. They are a run of <see cref="Reading.Values" />, which is what keeps a statement
-    /// to one object - see <see cref="Reading" /> for the measurement behind that. Reading a value that is
+    /// It owns no values. They are a run of <see cref="ScriptValues.Values" />, which is what keeps a statement
+    /// to one object - see <see cref="ScriptValues" /> for the measurement behind that. Reading a value that is
     /// not there answers empty rather than failing, so a reader asks for what a shape needs and says what
     /// is missing itself.
     /// </para>
@@ -18,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         static readonly Statement[] Nothing = new Statement[0];
 
-        readonly Reading _reading;
+        readonly ScriptValues _reading;
         readonly int _from;
         readonly List<Statement> _body;
 
@@ -26,7 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// A statement at <paramref name="at" /> in the script, headed by <paramref name="key" /> or <paramref name="head" />,
         /// whose values are the <paramref name="count" /> of <paramref name="reading" />'s from <paramref name="from" />.
         /// </summary>
-        public Statement(Reading reading, int at, Keyword key, string head, int from, int count,
+        public Statement(ScriptValues reading, int at, Keyword key, string head, int from, int count,
             List<Statement> body)
         {
             _reading = reading;

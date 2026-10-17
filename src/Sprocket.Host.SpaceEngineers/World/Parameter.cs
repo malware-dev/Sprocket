@@ -11,14 +11,14 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// action declares wrongly is put right.
     /// <para>
     /// One of these is one parameter, always. Several that are one thing to a person go in a
-    /// <see cref="Group" />, which is what keeps "every parameter is described once" true and
+    /// <see cref="ParameterGroup" />, which is what keeps "every parameter is described once" true and
     /// visible.
     /// </para>
     /// <para>
     /// Public fields because the game's own serialiser reads it out of a file a mod ships.
     /// </para>
     /// </remarks>
-    public sealed class Parameter : Piece
+    public sealed class Parameter : ParameterPiece
     {
         /// <summary>What to call it, or empty to leave it numbered.</summary>
         [XmlAttribute("name")]
@@ -97,7 +97,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>One. A parameter is one parameter; see <see cref="Group" /> for the other case.</summary>
+        /// <summary>One. A parameter is one parameter; see <see cref="ParameterGroup" /> for the other case.</summary>
         public override int Span => 1;
 
         /// <summary>The type the action takes it as, as the file wrote it.</summary>

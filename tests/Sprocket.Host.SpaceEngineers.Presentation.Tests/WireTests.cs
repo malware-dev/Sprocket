@@ -33,13 +33,13 @@ public class WireTests : IDisposable
         public int Number;
         public string Words;
 
-        public static int SizeOf(ref Note note) => sizeof(int) + ByteData.SizeOfString(note.Words);
+        public static int SizeOf(ref Note note) => sizeof(int) + ByteCodec.SizeOfString(note.Words);
 
         public static int Write(ref Note note, byte[] data, ref int offset)
         {
             var start = offset;
-            ByteData.Write(note.Number, data, ref offset);
-            ByteData.WriteString(note.Words, data, ref offset);
+            ByteCodec.Write(note.Number, data, ref offset);
+            ByteCodec.WriteString(note.Words, data, ref offset);
             return offset - start;
         }
 
@@ -47,8 +47,8 @@ public class WireTests : IDisposable
         {
             var start = offset;
             note = new Note();
-            ByteData.TryReadInt32(data, ref offset, out note.Number);
-            ByteData.TryReadString(data, ref offset, out note.Words);
+            ByteCodec.TryReadInt32(data, ref offset, out note.Number);
+            ByteCodec.TryReadString(data, ref offset, out note.Words);
             return offset - start;
         }
     }

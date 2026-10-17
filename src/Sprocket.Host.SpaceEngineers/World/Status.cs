@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Nothing to say about the block: it is doing nothing, and nothing is stopping it.</summary>
         public static readonly Status None = new Status();
 
-        Status(Condition condition, Trouble trouble) : this()
+        Status(Condition condition, BlockTrouble trouble) : this()
         {
             Condition = condition;
             Trouble = trouble;
@@ -17,7 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public Condition Condition { get; private set; }
 
         /// <summary>What is stopping it, where anything is.</summary>
-        public Trouble Trouble { get; private set; }
+        public BlockTrouble Trouble { get; private set; }
 
         /// <summary>Whether there is anything to say.</summary>
         public bool Exists => Condition != Condition.None || Trouble.Exists;
@@ -25,11 +25,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>A block doing <paramref name="condition" />.</summary>
         public static Status Of(Condition condition)
         {
-            return new Status(condition, Trouble.None);
+            return new Status(condition, BlockTrouble.None);
         }
 
         /// <summary>A block stopped by <paramref name="trouble" />.</summary>
-        public static Status Of(Trouble trouble)
+        public static Status Of(BlockTrouble trouble)
         {
             return new Status(Condition.None, trouble);
         }

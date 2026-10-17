@@ -19,9 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Everything the run remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
         readonly RunMemory _memory;
 
-        readonly Workings _workings;
+        readonly CompiledRun _workings;
 
-        readonly Faults _faults;
+        readonly RunFaults _faults;
 
         /// <summary>
         /// One sequence, running for one of a system.
@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _owner = owner;
             _rota = owner.Rota;
             _memory = memory;
-            _workings = new Workings(sequence, instance, owner, memory);
+            _workings = new CompiledRun(sequence, instance, owner, memory);
 
             var kept = memory.Busy != null && memory.Sampling != null;
             if (!kept)
@@ -59,7 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _sampling = new Shift(memory.Sampling, Sample);
             _busy = new Shift(memory.Busy, Continued);
-            _faults = new Faults(sequence, instance, owner, memory, kept);
+            _faults = new RunFaults(sequence, instance, owner, memory, kept);
 
             if (!kept)
                 return;
@@ -106,9 +106,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>What stopped the last run from outside before it finished, or none.</summary>
-        public Stopper StoppedBy
+        public StopCause StoppedBy
         {
-            get { return (Stopper)_memory.StoppedBy; }
+            get { return (StopCause)_memory.StoppedBy; }
             private set
             {
                 if (_memory.StoppedBy != (int)value)
@@ -159,7 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public SequenceFault Fault => _faults.Fault;
 
         /// <summary>What is known to be wrong with this run, as each part of Sprocket finds it.</summary>
-        public Faults Faults => _faults;
+        public RunFaults Faults => _faults;
 
         readonly AutomationRunner _owner;
         readonly Rota _rota;
@@ -201,7 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     if (!reached && entity.Stalls(acted.Action))
                     {
                         if (!stuck.Exists)
-                            stuck = new SequenceFault(SequenceProblem.Stalled, step, Trouble.None, entity.Name);
+                            stuck = new SequenceFault(SequenceProblem.Stalled, step, BlockTrouble.None, entity.Name);
 
                         continue;
                     }
@@ -213,7 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         continue;
                     }
 
-                    Trouble said = acted.Bound.Trouble(entity.Block, acted.Seen);
+                    BlockTrouble said = acted.Bound.Trouble(entity.Block, acted.Seen);
                     if (said.Ends)
                     {
                         _faults.Hold(stuck);
@@ -325,7 +325,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!CanRun && !_memory.ByHand)
                 {
                     if (IsRunning)
-                        Interrupt(Stopper.Switch, 0);
+                        Interrupt(StopCause.Switch, 0);
                 }
                 else if (IsRunning)
                 {
@@ -352,7 +352,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             if (!CanRun && !_memory.ByHand)
             {
-                Interrupt(Stopper.Switch, 0);
+                Interrupt(StopCause.Switch, 0);
                 return;
             }
 
@@ -407,7 +407,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (_busy.Listed)
                 return;
 
-            Told.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
+            GameLog.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
             _rota.At(_busy, tick);
         }
 
@@ -602,7 +602,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Information rather than anything wrong: somebody meant it, and the construct is wherever the run got to. Kept until
         /// the sequence next runs, and only where it was running, since stopping a sequence at rest is nothing happening.
         /// </remarks>
-        public void Interrupt(Stopper by, int sequence)
+        public void Interrupt(StopCause by, int sequence)
         {
             var running = IsRunning;
             var at = _memory.Step;
@@ -715,7 +715,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _faults.Quit = SequenceFault.None;
             _faults.Met(SequenceFault.None);
             _faults.Hold(SequenceFault.None);
-            StoppedBy = Stopper.None;
+            StoppedBy = StopCause.None;
             _memory.Step = 0;
             EnterStep();
             Advance();
@@ -770,7 +770,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     var needed = act.HasAction ? _workings.Compile(_memory.Step, _bindings) : null;
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
-                        Meet(new SequenceFault(needed.Problem, _memory.Step, Trouble.None, needed.Which));
+                        Meet(new SequenceFault(needed.Problem, _memory.Step, BlockTrouble.None, needed.Which));
                         return;
                     }
 
@@ -821,7 +821,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     if (!CanRun && !_memory.ByHand)
                     {
-                        Interrupt(Stopper.Switch, 0);
+                        Interrupt(StopCause.Switch, 0);
                         return;
                     }
 
@@ -950,7 +950,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var tested = _workings.Test(at, test, _bindings);
                 if (tested.Problem != SequenceProblem.None)
                 {
-                    Meet(new SequenceFault(tested.Problem, at, Trouble.None, tested.Which));
+                    Meet(new SequenceFault(tested.Problem, at, BlockTrouble.None, tested.Which));
                     return false;
                 }
 
@@ -974,7 +974,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Whether <paramref name="test" /> holds on its blocks as they are now: on one of them, on all, or on their sum or average.</summary>
         /// <remarks>Read once, when the run reaches the test; with no block to read, <c>all</c> holds and <c>any</c> does not.</remarks>
-        static bool Holds(Tested tested, Comparison test)
+        static bool Holds(CompiledTest tested, Comparison test)
         {
             if (test.Quantifier == Quantifier.Sum || test.Quantifier == Quantifier.Average)
             {
@@ -1006,7 +1006,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first block of an act that is switched off, and so cannot do what it is asked; none where all can.</summary>
-        SequenceFault Unable(Compiled compiled)
+        SequenceFault Unable(CompiledAct compiled)
         {
             foreach (var acted in compiled.Acts)
             {
@@ -1016,7 +1016,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
 
                 if (acted.Entity.Refuses(acted.Action))
-                    return new SequenceFault(SequenceProblem.Unable, _memory.Step, Trouble.None, acted.Entity.Name);
+                    return new SequenceFault(SequenceProblem.Unable, _memory.Step, BlockTrouble.None, acted.Entity.Name);
             }
 
             return SequenceFault.None;
@@ -1036,7 +1036,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var compiled = _workings.Compile(step, _bindings);
                 if (compiled.Problem != SequenceProblem.None)
-                    return new SequenceFault(compiled.Problem, step, Trouble.None, compiled.Which);
+                    return new SequenceFault(compiled.Problem, step, BlockTrouble.None, compiled.Which);
             }
 
             return SequenceFault.None;
@@ -1122,7 +1122,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 // Done again, so what its blocks said of the last time is no answer for this one.
                 acted.Done = false;
 
-                if (act.Form != Nature.Native)
+                if (act.Form != ReachKind.Native)
                 {
                     if (acted.Order != null)
                         acted.Order.Give();
@@ -1144,7 +1144,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         SequenceFault Refused(int step)
         {
             var act = (Act)_sequence.Steps[step];
-            if (!act.HasAction || act.Form != Nature.Native)
+            if (!act.HasAction || act.Form != ReachKind.Native)
                 return SequenceFault.None;
 
             var compiled = _workings.Compile(step, _bindings);

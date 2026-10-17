@@ -79,8 +79,8 @@ public class AlignTests
         Label held;
         var grid = new Grid
         {
-            Columns = { Length.Flex(1) },
-            Rows = { Length.Flex(1) },
+            Columns = { GridLength.Flex(1) },
+            Rows = { GridLength.Flex(1) },
             Cells = { [0, 0] = new Label { Text = "Held", Align = Align.Center | Align.Tall }.As(out held) }
         };
 

@@ -12,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
     /// <remarks>
     /// The delay lives in the door's mod storage, which the game saves with the world and sends to a client with the grid,
     /// and nothing after that: so a client's change goes to the server, and the server tells every client what the door
-    /// keeps now. The same object on every machine; only the server closes doors, holding a <see cref="Closer" /> for each
+    /// keeps now. The same object on every machine; only the server closes doors, holding a <see cref="DoorCloser" /> for each
     /// door that has a delay and nothing for the rest.
     /// </remarks>
     public sealed class AutoClose : IDisposable
@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
 
         readonly Func<long, int> _kept;
 
-        readonly Dictionary<long, Closer> _closers = new Dictionary<long, Closer>();
+        readonly Dictionary<long, DoorCloser> _closers = new Dictionary<long, DoorCloser>();
 
         NetworkChannel _channel;
 
@@ -91,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <remarks>Only the closer of this door: a grid that splits makes its blocks again, and the new door may already be here under the same id.</remarks>
         public void Left(IMyDoor door)
         {
-            Closer closer;
+            DoorCloser closer;
             if (!_closers.TryGetValue(door.EntityId, out closer) || closer.Door != door)
                 return;
 
@@ -102,7 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <inheritdoc />
         public void Dispose()
         {
-            foreach (Closer closer in _closers.Values)
+            foreach (DoorCloser closer in _closers.Values)
                 closer.Dispose();
 
             _closers.Clear();
@@ -121,7 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <summary>Closes <paramref name="door" /> <paramref name="seconds" /> after it opens, or never where that is none; on <paramref name="due" /> where it is open and that is not -1.</summary>
         void Follow(IMyDoor door, int seconds, int due)
         {
-            Closer closer;
+            DoorCloser closer;
             _closers.TryGetValue(door.EntityId, out closer);
             if (closer != null && (seconds == 0 || closer.Door != door))
             {
@@ -135,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
 
             if (closer == null)
             {
-                closer = new Closer(door, _rota, _now);
+                closer = new DoorCloser(door, _rota, _now);
                 _closers.Add(door.EntityId, closer);
             }
 
@@ -159,14 +159,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
 
             if (door == null)
             {
-                Told.Say($"player {sender} set auto-close on door {closing.Door}, which is not here");
+                GameLog.Say($"player {sender} set auto-close on door {closing.Door}, which is not here");
                 return;
             }
 
             var identity = MyAPIGateway.Players == null ? 0L : MyAPIGateway.Players.TryGetIdentityId(sender);
             if (identity == 0L || !door.HasPlayerAccess(identity))
             {
-                Told.Say($"player {sender} set auto-close on {door.CustomName}, and was ignored: they may not change it");
+                GameLog.Say($"player {sender} set auto-close on {door.CustomName}, and was ignored: they may not change it");
                 return;
             }
 

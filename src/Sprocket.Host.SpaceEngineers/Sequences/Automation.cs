@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <para>
         /// It is here rather than in whatever did the reading because it is a fact about this program,
         /// and every host that saves has to honour it. What was wrong is a separate answer, from
-        /// <see cref="Storage.Reader.Load(string, Automation, Values, out string, GridWorld)" />, and it stays out of the model: core has no words.
+        /// <see cref="Storage.ProgramReader.Load(string, Automation, Values, out string, GridWorld)" />, and it stays out of the model: core has no words.
         /// </para>
         /// </remarks>
         public bool Intact { get; private set; } = true;
@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     return entityRef;
             }
 
-            var called = Naming.Clean(entity.Name);
+            var called = NameRules.Clean(entity.Name);
             var declared = new EntityRef(Free(called.Length > 0 ? called : entity.Kind.DisplayName), entity.Kind.Id);
             world.Identify(entity, declared.Keys);
             return Restore(declared);

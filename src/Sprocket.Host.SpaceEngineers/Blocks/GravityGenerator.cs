@@ -12,10 +12,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// </remarks>
     public sealed class GravityGenerator : Capability
     {
-        static readonly Doing Reverses = Doing.Of<IMyGravityGeneratorBase>(generator =>
+        static readonly OwnAction Reverses = OwnAction.Of<IMyGravityGeneratorBase>(generator =>
             generator.GravityAcceleration = -generator.GravityAcceleration);
 
-        static readonly Doing Fits = Doing.Of<IMyGravityGenerator>(Fit);
+        static readonly OwnAction Fits = OwnAction.Of<IMyGravityGenerator>(Fit);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static void Fit(IMyGravityGenerator generator)
         {
             var grid = generator.CubeGrid;
-            generator.FieldSize = FieldFit.Covering(generator, grid.Min, grid.Max);
+            generator.FieldSize = GravityFieldSize.Covering(generator, grid.Min, grid.Max);
         }
     }
 }

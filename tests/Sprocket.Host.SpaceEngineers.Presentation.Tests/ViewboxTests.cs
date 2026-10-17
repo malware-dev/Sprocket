@@ -42,7 +42,7 @@ public class ViewboxTests
     public void AParagraphKeepsItsLine()
     {
         var text = new RichText { Document = Markdown.Parse("The airlock cycles when the inner door shuts and the outer door is sealed.\nNext"), FontSize = 20f };
-        var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, 300f) };
+        var box = new Viewbox { Content = text, Placement = FixedSize.Size(Wide, 300f) };
         var easel = new Easel(new VStack { Children = { box } }, Wide, High);
 
         var first = easel.Written.Where(w => w.Text.Trim().Length > 0 && w.Text.Trim() != "Next").Select(w => w.Position.Y).Distinct();
@@ -66,7 +66,7 @@ public class ViewboxTests
     public void ACenteredPartStaysCentered()
     {
         var text = new RichText { Document = Markdown.Parse("::: center\nAirlock\n:::\n\nThe outer door"), FontSize = 20f };
-        var box = new Viewbox { Content = text, Padding = new Thickness(25f), Placement = Fixed.Size(Wide, 120f) };
+        var box = new Viewbox { Content = text, Padding = new Thickness(25f), Placement = FixedSize.Size(Wide, 120f) };
         var easel = new Easel(new VStack { Children = { box } }, Wide, High);
 
         var word = Assert.Single(easel.Written, w => w.Text.Trim() == "Airlock");
@@ -103,7 +103,7 @@ public class ViewboxTests
     public void FixedContentMeetsTheNearerSide()
     {
         var label = new Label { Text = "Airlock", FontSize = 20f };
-        var box = new Viewbox { Content = label, Placement = Fixed.Size(Wide, 300f) };
+        var box = new Viewbox { Content = label, Placement = FixedSize.Size(Wide, 300f) };
         _ = new Easel(new VStack { Children = { box } }, Wide, High);
 
         Assert.Equal(Wide, box.DesiredSize.X, 2);
@@ -115,7 +115,7 @@ public class ViewboxTests
     public void APointReachesTheLinkDrawnUnderIt()
     {
         var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = _ => { } };
-        var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, 300f) };
+        var box = new Viewbox { Content = text, Placement = FixedSize.Size(Wide, 300f) };
         _ = new Easel(new VStack { Children = { box } }, Wide, High);
 
         var origin = new Vector2(box.ContentBounds.X, box.ContentBounds.Y);
@@ -132,7 +132,7 @@ public class ViewboxTests
     public void TheScaledTextIsDrawnAcrossTheRoom()
     {
         var text = new RichText { Document = Markdown.Parse("Airlock"), FontSize = 20f };
-        var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, 300f) };
+        var box = new Viewbox { Content = text, Placement = FixedSize.Size(Wide, 300f) };
         var easel = new Easel(new VStack { Children = { box } }, Wide, High);
 
         var word = Assert.Single(easel.Written, command => command.Text.Trim() == "Airlock");
@@ -145,7 +145,7 @@ public class ViewboxTests
     static Viewbox Boxed(string markdown, float high, Action<Viewbox> set)
     {
         var text = new RichText { Document = Markdown.Parse(markdown), FontSize = 20f, BlockSpacing = 8f };
-        var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, high) };
+        var box = new Viewbox { Content = text, Placement = FixedSize.Size(Wide, high) };
         set(box);
 
         _ = new Easel(new VStack { Children = { box } }, Wide, High);

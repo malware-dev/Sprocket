@@ -53,13 +53,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly Reading Arrived = Reading.Of<IMyPistonBase>(AtLimit);
 
         // Extending and retracting are the game's own, performed as its.
-        static readonly Doing Extends = Doing.Of<IMyPistonBase>(null, Out,
+        static readonly OwnAction Extends = OwnAction.Of<IMyPistonBase>(null, Out,
             piston => Why(piston, piston.Status == PistonStatus.Extended, 1), Stop, Outwards);
 
-        static readonly Doing Retracts = Doing.Of<IMyPistonBase>(null, In,
+        static readonly OwnAction Retracts = OwnAction.Of<IMyPistonBase>(null, In,
             piston => Why(piston, piston.Status == PistonStatus.Retracted, -1), Stop, Inwards);
 
-        static readonly Doing Moves = Doing.Of<IMyPistonBase, Move>(Move.Read, Moved, Arrived, null,
+        static readonly OwnAction Moves = OwnAction.Of<IMyPistonBase, Move>(Move.Read, Moved, Arrived, null,
             (piston, move, seen) => Why(piston, AtLimit(piston), 0), Stop, Expected);
 
         /// <inheritdoc />
@@ -163,7 +163,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var position = Field.Between("position", Said(least), Said(most));
             position.Needed = true;
-            position.Entry = Entry.Decimal;
+            position.Entry = FieldInput.Decimal;
             position.Lead = "to";
             position.Unit = " m";
             return position;
@@ -177,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var speed = Field.Between("speed", "0", Said(piston?.MaxVelocity ?? 5f));
             speed.Needed = true;
             speed.Above = true;
-            speed.Entry = Entry.Decimal;
+            speed.Entry = FieldInput.Decimal;
             speed.Default = "1";
             speed.Lead = "at";
             speed.Unit = " m/s";
@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Moves the piston to the position a step gave it.</summary>
-        static void Moved(IMyPistonBase piston, Move move, Recall seen)
+        static void Moved(IMyPistonBase piston, Move move, ReaderMemory seen)
         {
             if (!move.Given)
                 return;
@@ -247,27 +247,27 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// by what sent it, so a speed of nought or the wrong way round means something else has been at
         /// it and nothing is heading there any more.
         /// </remarks>
-        static Trouble Why(IMyPistonBase piston, bool arrived, int sense)
+        static BlockTrouble Why(IMyPistonBase piston, bool arrived, int sense)
         {
             if (arrived)
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (!piston.IsWorking)
-                return Trouble.Waiting(Cause.PistonNoPower);
+                return BlockTrouble.Waiting(Cause.PistonNoPower);
 
             if (!piston.IsAttached)
-                return Trouble.Waiting(Cause.PistonNoHead);
+                return BlockTrouble.Waiting(Cause.PistonNoHead);
 
             if (piston.Velocity == 0f)
-                return Trouble.Fatal(Cause.PistonStopped);
+                return BlockTrouble.Fatal(Cause.PistonStopped);
 
             if (sense > 0 && piston.Velocity < 0f)
-                return Trouble.Fatal(Cause.PistonReversedExtending);
+                return BlockTrouble.Fatal(Cause.PistonReversedExtending);
 
             if (sense < 0 && piston.Velocity > 0f)
-                return Trouble.Fatal(Cause.PistonReversedRetracting);
+                return BlockTrouble.Fatal(Cause.PistonReversedRetracting);
 
-            return Trouble.None;
+            return BlockTrouble.None;
         }
 
         /// <summary>The ticks extending should take: the distance to its upper limit, at the speed it goes.</summary>

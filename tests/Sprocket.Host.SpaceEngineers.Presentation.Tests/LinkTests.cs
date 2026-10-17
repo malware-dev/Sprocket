@@ -157,7 +157,7 @@ public class LinkTests
             FontSize = 20f,
             Color = Body,
             EmphasisColor = Stressed,
-            Placement = Fixed.Wide(Wide)
+            Placement = FixedSize.Wide(Wide)
         };
 
         var easel = new Easel(new VStack { Children = { text } }, Wide, High);

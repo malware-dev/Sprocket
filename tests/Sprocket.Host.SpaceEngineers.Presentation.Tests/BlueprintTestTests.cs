@@ -72,7 +72,7 @@ public class BlueprintTestTests
     {
         rig.Editor.StepRows()[0].Slots[0].Opens!.Execute();
         rig.Tick();
-        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text && !entry.IsHeading).Pick(Held.Alone, 1);
+        rig.Editor.Pick().Stages[1].Entries().First(entry => entry.Text == text && !entry.IsHeading).Pick(HeldModifier.Alone, 1);
         rig.Tick();
         if (value != null)
             rig.Editor.Typed(value);
@@ -87,7 +87,7 @@ public class BlueprintTestTests
     static Simulation Opened(out Sequence sequence)
     {
         var rig = Simulation.Fresh();
-        Assert.Equal("", Storage.Reader.Load(Program, rig.Editor.Program, rig.World.Values));
+        Assert.Equal("", Storage.ProgramReader.Load(Program, rig.Editor.Program, rig.World.Values));
         rig.Editor.Invalidate();
         rig.Tick();
 

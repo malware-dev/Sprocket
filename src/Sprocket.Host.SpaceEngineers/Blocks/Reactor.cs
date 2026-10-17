@@ -68,14 +68,14 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             readonly IMyInventory _inventory;
             readonly Action _told;
-            readonly Producing _output;
+            readonly OutputListener _output;
 
             public Listening(IMyInventory inventory, IMyPowerProducer reactor, Action told)
             {
                 _inventory = inventory;
                 _told = told;
                 _inventory.OnVolumeChanged += Changed;
-                _output = new Producing(reactor, told);
+                _output = new OutputListener(reactor, told);
             }
 
             /// <inheritdoc />

@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
 
             var texts = SprocketSession.Texts;
             if (texts != null)
-                FieldControls.DoOnce(texts);
+                GravityFieldButtons.DoOnce(texts);
         }
     }
 }

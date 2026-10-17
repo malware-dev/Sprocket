@@ -75,7 +75,7 @@ public class MechanicsTests
         /// <summary>Sprocket's own <paramref name="member" /> as it reads on <paramref name="block" /> now.</summary>
         public Literal Read(string member, Fitting block)
         {
-            var kind = Rig.Entity(block.Id).Kind.FindAction(member, Nature.Value)!;
+            var kind = Rig.Entity(block.Id).Kind.FindAction(member, ReachKind.Value)!;
             var operand = kind.Being!.Kind == ValueKind.Name ? Literal.Name(kind.Being.Names[0]) : Literal.Of(0.0);
             if (kind.Being.Kind == ValueKind.Flag)
                 operand = Literal.Of(true);
@@ -113,7 +113,7 @@ public class MechanicsTests
     public void HowFarADoorIsOpenIsRuledOutWhileItIsShut()
     {
         var ship = new Ship();
-        var value = ship.Rig.Entity(ship.Rig.Door(1, "Door").Id).Kind.FindAction("how-far-open", Nature.Value)!;
+        var value = ship.Rig.Entity(ship.Rig.Door(1, "Door").Id).Kind.FindAction("how-far-open", ReachKind.Value)!;
 
         Assert.NotNull(value.RuledOutBy);
         Assert.False(value.Announced);
@@ -219,7 +219,7 @@ public class MechanicsTests
         var ship = new Ship();
         var kind = ship.Rig.Entity(ship.Rig.Piston(1, "Piston").Id).Kind;
 
-        var add = kind.FindAction("Add Top Part", Nature.Action)!;
+        var add = kind.FindAction("Add Top Part", ReachKind.Action)!;
         Assert.False(add.Hidden);
         Assert.Equal("add piston head", add.Text);
     }
@@ -243,13 +243,13 @@ public class MechanicsTests
             .Carrying(DoorControls.Id, "Close automatically after", ValueKind.Real, "0", "600");
 
         var kind = rig.Entity(door.Id).Kind;
-        Vetted(kind, Nature.Native, "open", "close");
-        Vetted(kind, Nature.Value, "status", "how-far-open", "AnyoneCanUse");
-        Unvetted(kind, Nature.Value, DoorControls.Id);
-        Vetted(kind, Nature.Action, "Open", "AnyoneCanUse");
+        Vetted(kind, ReachKind.Native, "open", "close");
+        Vetted(kind, ReachKind.Value, "status", "how-far-open", "AnyoneCanUse");
+        Unvetted(kind, ReachKind.Value, DoorControls.Id);
+        Vetted(kind, ReachKind.Action, "Open", "AnyoneCanUse");
 
-        Unvetted(kind, Nature.Action, "Open_On", "Open_Off");
-        Unvetted(kind, Nature.Value, "Open");
+        Unvetted(kind, ReachKind.Action, "Open_On", "Open_Off");
+        Unvetted(kind, ReachKind.Value, "Open");
     }
 
     /// <summary>
@@ -273,12 +273,12 @@ public class MechanicsTests
         Stepped(piston, "Velocity", "UpperLimit", "LowerLimit", "MaxImpulseAxis", "MaxImpulseNonAxis", "SafetyDetach");
 
         var kind = rig.Entity(piston.Id).Kind;
-        Vetted(kind, Nature.Native, Blocks.Piston.Extend, Blocks.Piston.Retract, Blocks.Piston.MoveTo);
-        Vetted(kind, Nature.Value, "position", "status", "Velocity", "LowerLimit", "UpperLimit", "MaxImpulseAxis",
+        Vetted(kind, ReachKind.Native, Blocks.Piston.Extend, Blocks.Piston.Retract, Blocks.Piston.MoveTo);
+        Vetted(kind, ReachKind.Value, "position", "status", "Velocity", "LowerLimit", "UpperLimit", "MaxImpulseAxis",
             "MaxImpulseNonAxis", "SafetyDetach", "ShareInertiaTensor");
-        Vetted(kind, Nature.Action, "Reverse", "Add Top Part", "ShareInertiaTensor");
+        Vetted(kind, ReachKind.Action, "Reverse", "Add Top Part", "ShareInertiaTensor");
 
-        Unvetted(kind, Nature.Action, "Extend", "Retract", "SetAndMove", "SetVelocity", "ResetVelocity");
+        Unvetted(kind, ReachKind.Action, "Extend", "Retract", "SetAndMove", "SetVelocity", "ResetVelocity");
         Unstepped(kind, "Velocity", "UpperLimit", "LowerLimit", "MaxImpulseAxis", "MaxImpulseNonAxis", "SafetyDetach");
     }
 
@@ -307,17 +307,17 @@ public class MechanicsTests
         Stepped(rotor, "Torque", "BrakingTorque", "Velocity", "LowerLimit", "UpperLimit", "Displacement", "SafetyDetach");
 
         var kind = rig.Entity(rotor.Id).Kind;
-        Vetted(kind, Nature.Native, Blocks.Rotor.RotateTo, Blocks.Rotor.AddHead);
-        Vetted(kind, Nature.Value, "angle", "locked", "attached", "Velocity", "LowerLimit", "UpperLimit", "Torque",
+        Vetted(kind, ReachKind.Native, Blocks.Rotor.RotateTo, Blocks.Rotor.AddHead);
+        Vetted(kind, ReachKind.Value, "angle", "locked", "attached", "Velocity", "LowerLimit", "UpperLimit", "Torque",
             "BrakingTorque", "Displacement", "SafetyDetach", "ShareInertiaTensor");
-        Vetted(kind, Nature.Action, "Reverse", "Attach", "Detach", locks + "_On", locks + "_Off", locks, "ShareInertiaTensor");
+        Vetted(kind, ReachKind.Action, "Reverse", "Attach", "Detach", locks + "_On", locks + "_Off", locks, "ShareInertiaTensor");
 
-        Unvetted(kind, Nature.Value, locks);
-        Unvetted(kind, Nature.Action, "RotateToAngle", "SetVelocity", "SetLowerLimit", "SetUpperLimit", "ResetVelocity");
+        Unvetted(kind, ReachKind.Value, locks);
+        Unvetted(kind, ReachKind.Action, "RotateToAngle", "SetVelocity", "SetLowerLimit", "SetUpperLimit", "ResetVelocity");
         if (hinge)
-            Unvetted(kind, Nature.Action, "AddHingeTopPart");
+            Unvetted(kind, ReachKind.Action, "AddHingeTopPart");
         else
-            Unvetted(kind, Nature.Action, "AddRotorTopPart", "AddSmallRotorTopPart", "AddMediumRotorTopPart");
+            Unvetted(kind, ReachKind.Action, "AddRotorTopPart", "AddSmallRotorTopPart", "AddMediumRotorTopPart");
         Unstepped(kind, "Torque", "BrakingTorque", "Velocity", "LowerLimit", "UpperLimit", "Displacement", "SafetyDetach");
     }
 
@@ -332,11 +332,11 @@ public class MechanicsTests
     static void Unstepped(EntityKind kind, params string[] ids)
     {
         foreach (var id in ids)
-            Unvetted(kind, Nature.Action, "Increase" + id, "Decrease" + id);
+            Unvetted(kind, ReachKind.Action, "Increase" + id, "Decrease" + id);
     }
 
     /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" /> and vouched for.</summary>
-    static void Vetted(EntityKind kind, Nature form, params string[] ids)
+    static void Vetted(EntityKind kind, ReachKind form, params string[] ids)
     {
         foreach (var id in ids)
         {
@@ -347,7 +347,7 @@ public class MechanicsTests
     }
 
     /// <summary>Asserts each of <paramref name="ids" /> is on <paramref name="kind" /> as <paramref name="form" /> and not vouched for.</summary>
-    static void Unvetted(EntityKind kind, Nature form, params string[] ids)
+    static void Unvetted(EntityKind kind, ReachKind form, params string[] ids)
     {
         foreach (var id in ids)
         {

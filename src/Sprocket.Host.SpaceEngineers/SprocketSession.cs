@@ -53,11 +53,11 @@ namespace Sprocket.Host.SpaceEngineers
 
         bool _carries;
 
-        readonly Shelf _shelf = new Shelf(new GlobalFiles(), Told.Say);
+        readonly LibraryShelf _shelf = new LibraryShelf(new GlobalFiles(), GameLog.Say);
 
-        readonly Preferences _preferences = new Preferences(new GlobalFiles(), Told.Say);
+        readonly Preferences _preferences = new Preferences(new GlobalFiles(), GameLog.Say);
 
-        readonly FieldMarks _marks = new FieldMarks();
+        readonly ShortfallMarks _marks = new ShortfallMarks();
 
         readonly Rota _rota = new Rota();
 
@@ -88,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers
 
         long _asked;
 
-        readonly Dictionary<long, Habits> _habits = new Dictionary<long, Habits>();
+        readonly Dictionary<long, EditorHabits> _habits = new Dictionary<long, EditorHabits>();
 
         /// <summary>This client's player's settings, as the server last lent them; the world's own are on the server.</summary>
         readonly PlayerMemory _mine = new PlayerMemory();
@@ -126,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers
 
         /// <summary>The field boxes a gravity generator's fit is showing, or null outside a session.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: the gravity generator's buttons reach the session only through statics.</remarks>
-        public static FieldMarks Marks => _current?._marks;
+        public static ShortfallMarks Marks => _current?._marks;
 
         /// <summary>Every door's auto-close delay, or null outside a session.</summary>
         /// <remarks>Static for the reason <see cref="Texts" /> is: a door's slider and its own component reach the session only through statics.</remarks>
@@ -197,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers
         public override void BeforeStart()
         {
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
-            MyAPIGateway.TerminalControls.CustomControlGetter += FieldControls.Arrange;
+            MyAPIGateway.TerminalControls.CustomControlGetter += GravityFieldButtons.Arrange;
             MyAPIGateway.TerminalControls.CustomControlGetter += DoorControls.Arrange;
 
             if (IsServer)
@@ -248,12 +248,12 @@ namespace Sprocket.Host.SpaceEngineers
         {
             var trouble = _shelf.Read();
             if (trouble.Length > 0)
-                Told.Say(trouble);
+                GameLog.Say(trouble);
 
             if (!_shelf.Intact)
-                Told.Say("the library is not kept this session");
+                GameLog.Say("the library is not kept this session");
             else
-                Told.Say($"read {_shelf.All.Count} blueprints from the library");
+                GameLog.Say($"read {_shelf.All.Count} blueprints from the library");
         }
 
         /// <summary>Reads the index of the world's backups out of world storage, once, as the world starts.</summary>
@@ -264,7 +264,7 @@ namespace Sprocket.Host.SpaceEngineers
         void FindBackups()
         {
             var trouble = _backups.Read();
-            Told.Say(trouble.Length > 0 ? $"{trouble}; the backups are not kept this session" : $"read {_backups.All.Count} backups");
+            GameLog.Say(trouble.Length > 0 ? $"{trouble}; the backups are not kept this session" : $"read {_backups.All.Count} backups");
         }
 
         /// <summary>Unpacks the files in the world's carrier, once, as the world starts.</summary>
@@ -273,7 +273,7 @@ namespace Sprocket.Host.SpaceEngineers
         {
             var found = Carrier.Find();
             var trouble = found == null ? "" : _carried.Unpack(found.Text);
-            Told.Say(trouble.Length > 0
+            GameLog.Say(trouble.Length > 0
                 ? $"{trouble}; what the carrier held is ignored, and the next save writes the files over it"
                 : $"read {_carried.Count} files from the carrier");
 
@@ -282,7 +282,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             _memories.Read(_carried.Has(Memories.File) ? _carried.Read(Memories.File) : null, GameFrame());
             if (_memories.Trouble.Length > 0)
-                Told.Say(_memories.Trouble);
+                GameLog.Say(_memories.Trouble);
         }
 
         /// <inheritdoc />
@@ -315,7 +315,7 @@ namespace Sprocket.Host.SpaceEngineers
             _handover.Listen(_channel);
             _doors.Listen(_channel);
 
-            Told.Say(IsServer
+            GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"
                 : "this machine is a client; the Sprockets run on the server");
         }
@@ -390,7 +390,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (block == null)
             {
-                Told.Say($"block {id} was lent but is not here, so it goes straight back");
+                GameLog.Say($"block {id} was lent but is not here, so it goes straight back");
                 _handover.Hand(id);
                 return;
             }
@@ -476,12 +476,12 @@ namespace Sprocket.Host.SpaceEngineers
             SprocketUnit was = _roster.Kept(id);
             if (was == null)
             {
-                Told.Say($"a change arrived for block {id}, which carries no Sprocket here");
+                GameLog.Say($"a change arrived for block {id}, which carries no Sprocket here");
                 return;
             }
 
             if (_roster.Replace(was, program, switches) != null)
-                Told.Say($"{was.Block.CustomName} was built again from the change, and saved");
+                GameLog.Say($"{was.Block.CustomName} was built again from the change, and saved");
         }
 
         /// <summary>Whether the player at this machine may change the world's settings now: an admin, or higher, with creative tools on or in a creative world.</summary>
@@ -534,12 +534,12 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>How this player has been working in the editor for a block, made the first time it is asked.</summary>
-        Habits HabitsFor(long id)
+        EditorHabits HabitsFor(long id)
         {
-            Habits habits;
+            EditorHabits habits;
             if (!_habits.TryGetValue(id, out habits))
             {
-                habits = new Habits();
+                habits = new EditorHabits();
                 _habits.Add(id, habits);
             }
 
@@ -571,7 +571,7 @@ namespace Sprocket.Host.SpaceEngineers
                 : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
 
             if (block != null)
-                Locker.Store(block, program, switches);
+                BlockStorage.Store(block, program, switches);
         }
 
         /// <summary>
@@ -906,7 +906,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.TerminalControls != null)
             {
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;
-                MyAPIGateway.TerminalControls.CustomControlGetter -= FieldControls.Arrange;
+                MyAPIGateway.TerminalControls.CustomControlGetter -= GravityFieldButtons.Arrange;
                 MyAPIGateway.TerminalControls.CustomControlGetter -= DoorControls.Arrange;
             }
 

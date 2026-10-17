@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => Change.RenameSystem;
+        public override ChangeKind Change => ChangeKind.RenameSystem;
 
         /// <inheritdoc />
         public override bool Changes => _was != _now;

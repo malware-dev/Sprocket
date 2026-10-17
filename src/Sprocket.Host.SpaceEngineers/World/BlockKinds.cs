@@ -28,11 +28,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
-        readonly Catalogue _catalogue;
+        readonly ParameterCatalog _catalogue;
         readonly Capabilities _capabilities;
 
         /// <summary>The kinds of block, described from <paramref name="capabilities" /> and what <paramref name="catalogue" /> says of each block's actions.</summary>
-        public BlockKinds(Catalogue catalogue, Capabilities capabilities)
+        public BlockKinds(ParameterCatalog catalogue, Capabilities capabilities)
         {
             _catalogue = catalogue;
             _capabilities = capabilities;
@@ -77,7 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // And last of all the values it carries, because an act reads better than telling a
             // value what to be wherever there is one that does the same thing.
             Values(kind, block);
-            Meanings.Settle(kind, block);
+            MemberMeanings.Settle(kind, block);
             Hide(kind);
             Flips(kind);
 
@@ -188,7 +188,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             foreach (Offer offer in _offered)
             {
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Nature.Action) != null || kind.Lacks(offer.Id))
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, ReachKind.Action) != null || kind.Lacks(offer.Id))
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -260,7 +260,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             foreach (Offer offer in _offered)
             {
 
-                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, Nature.Value) != null || kind.Lacks(offer.Id))
+                if (string.IsNullOrEmpty(offer.Id) || kind.FindAction(offer.Id, ReachKind.Value) != null || kind.Lacks(offer.Id))
                     continue;
 
                 var said = string.IsNullOrEmpty(offer.Text) ? offer.Id : offer.Text;
@@ -328,7 +328,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 // The same thing with two of them, and the one case where each word is its own
                 // value: a flag is written on or off, which is what the block is told.
                 Field either = Field.OneOf(said, Literal.Of(true).Said, Literal.Of(false).Said);
-                either.Edits = Editor.Chosen;
+                either.Edits = FieldEditor.Chosen;
                 return either;
             }
 
@@ -336,7 +336,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             // action are a colour only because somebody wrote that down, a value declared as one is
             // one, so it gets the same control without anybody having to describe it.
             if (offer.Sets == ValueKind.Color)
-                return Field.Holding(said, Editor.Colour, 1);
+                return Field.Holding(said, FieldEditor.Colour, 1);
 
             // What is typed is held to the kind the block says the value is, whatever its bounds look
             // like: a real number takes a fraction and a whole one refuses it.
@@ -419,7 +419,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
-                if (one.Form != Nature.Value || !one.Sets || !one.Vetted || one.Hidden)
+                if (one.Form != ReachKind.Value || !one.Sets || !one.Vetted || one.Hidden)
                     continue;
 
                 var toggleId = one.GamePropertyId ?? kind.Flipper(one.Id);
@@ -431,7 +431,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (fields.Count != 1 || !fields[0].IsOnOff)
                     continue;
 
-                var toggle = kind.FindAction(toggleId, Nature.Action);
+                var toggle = kind.FindAction(toggleId, ReachKind.Action);
                 if (toggle == null || toggle.Hidden || !toggle.Vetted)
                     continue;
 
@@ -512,7 +512,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>
         /// Only what the game's own controls make, which follows the value's id exactly. A setter
         /// somebody wrote by hand beside a value is a different thing, and is said per block - see
-        /// <c>Meanings</c>.
+        /// <c>MemberMeanings</c>.
         /// </remarks>
         static bool Steps(string gameActionId, string step, string propertyId)
         {

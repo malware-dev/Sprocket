@@ -74,7 +74,7 @@ public class UndoTests
         editor.OpenSlot("Airlock Light");
         screen.Run(2);
         var part = system.FindPart("Airlock Light")!;
-        editor.Do(system, new AnnotatePart(part, "Over the inner door.", Change.DescribeSlot));
+        editor.Do(system, new AnnotatePart(part, "Over the inner door.", ChangeKind.DescribeSlot));
         screen.Run(2);
 
         editor.Screen.Undo!.Execute();
@@ -265,7 +265,7 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         Light(screen);
-        var text = Storage.Scribe.Save(editor.Program, editor.World.Values);
+        var text = Storage.ProgramWriter.Save(editor.Program, editor.World.Values);
 
         Assert.Equal("", editor.Apply(text));
         editor.GoToRoot();

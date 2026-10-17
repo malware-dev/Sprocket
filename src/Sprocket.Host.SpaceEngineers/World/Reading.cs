@@ -11,12 +11,12 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public abstract class Reading
     {
-        /// <summary>Whether this needs a <see cref="Recall" /> of its own for each block it reads.</summary>
+        /// <summary>Whether this needs a <see cref="ReaderMemory" /> of its own for each block it reads.</summary>
         public abstract bool Remembers { get; }
 
         /// <summary>Whether <paramref name="block" /> reads true, remembering into <paramref name="seen" /> where this <see cref="Remembers" />.</summary>
         /// <remarks>Asked on the tick path. <paramref name="block" /> is always one this was declared for, so the cast in it never fails.</remarks>
-        public abstract bool Holds(IMyTerminalBlock block, Recall seen);
+        public abstract bool Holds(IMyTerminalBlock block, ReaderMemory seen);
 
         /// <summary>A reading of a <typeparamref name="T" />.</summary>
         public static Reading Of<T>(Func<T, bool> reads) where T : class
@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A reading of a <typeparamref name="T" /> that remembers between looks.</summary>
-        public static Reading Remembering<T>(Func<T, Recall, bool> reads) where T : class
+        public static Reading Remembering<T>(Func<T, ReaderMemory, bool> reads) where T : class
         {
             return new Kept<T>(reads);
         }
@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             public override bool Remembers => false;
 
-            public override bool Holds(IMyTerminalBlock block, Recall seen)
+            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
             {
                 return _reads((T)block);
             }
@@ -51,16 +51,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>A reading that remembers between looks.</summary>
         sealed class Kept<T> : Reading where T : class
         {
-            readonly Func<T, Recall, bool> _reads;
+            readonly Func<T, ReaderMemory, bool> _reads;
 
-            public Kept(Func<T, Recall, bool> reads)
+            public Kept(Func<T, ReaderMemory, bool> reads)
             {
                 _reads = reads;
             }
 
             public override bool Remembers => true;
 
-            public override bool Holds(IMyTerminalBlock block, Recall seen)
+            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
             {
                 return _reads((T)block, seen);
             }

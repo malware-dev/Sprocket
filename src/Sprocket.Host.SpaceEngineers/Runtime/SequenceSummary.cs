@@ -187,7 +187,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (state == null)
                 return SequenceStatus.NeverRun;
 
-            if (state.StoppedBy != Stopper.None)
+            if (state.StoppedBy != StopCause.None)
                 return SequenceStatus.Stopped;
 
             return state.LastFiredTick < 0 ? SequenceStatus.NeverRun : SequenceStatus.Waiting;
@@ -352,9 +352,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var name = filled == null ? slot : filled[n];
                         var points = bindings.State(name);
                         if (points == RefState.Lost && (part == null || !part.Optional))
-                            return new SequenceFault(lost, i, Trouble.None, name);
+                            return new SequenceFault(lost, i, BlockTrouble.None, name);
                         if (points == RefState.Adrift && !adrift.Exists)
-                            adrift = new SequenceFault(SequenceProblem.Adrift, i, Trouble.None, name);
+                            adrift = new SequenceFault(SequenceProblem.Adrift, i, BlockTrouble.None, name);
                     }
                 }
             }
@@ -379,14 +379,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 var slot = EmptyOf(system, through, moment.Sources);
                 if (slot != null)
-                    return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, Trouble.None, slot);
+                    return new SequenceFault(SequenceProblem.EmptySlot, SequenceFault.Trigger, BlockTrouble.None, slot);
             }
 
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var slot = EmptyOf(system, through, sequence.Steps[i].Targets);
                 if (slot != null)
-                    return new SequenceFault(SequenceProblem.EmptySlot, i, Trouble.None, slot);
+                    return new SequenceFault(SequenceProblem.EmptySlot, i, BlockTrouble.None, slot);
             }
 
             return SequenceFault.None;
@@ -475,7 +475,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var value = entity == null ? null : test.Names(entity.Kind.Actions);
                         var left = value == null || value.Being == null ? null : value.Being.Missing(test.Arguments.Count);
                         if (left != null)
-                            return new SequenceFault(SequenceProblem.Unfilled, i, Trouble.None, left);
+                            return new SequenceFault(SequenceProblem.Unfilled, i, BlockTrouble.None, left);
                     }
 
                     continue;
@@ -498,7 +498,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     var missing = doing.Missing(act.Arguments.Count);
                     if (missing != null)
-                        return new SequenceFault(SequenceProblem.Unfilled, i, Trouble.None, missing);
+                        return new SequenceFault(SequenceProblem.Unfilled, i, BlockTrouble.None, missing);
                 }
             }
 
@@ -540,7 +540,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     EntityAction doing = act.Names(entity.Kind.Actions);
                     var refused = doing?.Refused(act.Arguments);
                     if (refused != null)
-                        return new SequenceFault(SequenceProblem.Mistyped, i, Trouble.None, refused);
+                        return new SequenceFault(SequenceProblem.Mistyped, i, BlockTrouble.None, refused);
                 }
             }
 
@@ -602,7 +602,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     var number = through.FacetOf(targets, name);
                     if (number > 0 && member.Type.Find(entity.Kind, number) == null)
-                        return new SequenceFault(SequenceProblem.MissingFacet, i, Trouble.None, entity.Name);
+                        return new SequenceFault(SequenceProblem.MissingFacet, i, BlockTrouble.None, entity.Name);
                 }
             }
 

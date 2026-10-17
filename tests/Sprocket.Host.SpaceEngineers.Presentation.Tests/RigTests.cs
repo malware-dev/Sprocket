@@ -50,7 +50,7 @@ public class RigTests
         // And what the program says about it: the construct starts this, which is what the game's
         // own arrangement is, through the signal slot the installation fills with the button. A "when" here
         // would be Sprocket claiming it watches the button.
-        var program = store.GetValue(Locker.ProgramKey);
+        var program = store.GetValue(BlockStorage.ProgramKey);
         Assert.Contains("whenever 'Airlock Button' then run 1", program);
         Assert.Contains("'Airlock Button' = [ ext.toolbar(1, 1, 1) on [ 'Airlock Button' ] ]", program);
         Assert.DoesNotContain("when ", program);
@@ -469,7 +469,7 @@ public class RigTests
         var program = "sprocket 1 alpha 16\n\nlet door1 = block '" + sort + "' [ 2, \"Airlock Inner Door\" ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
 
-        Assert.Equal("", Reader.Load(program, rig.Editor.Program, rig.World.Values));
+        Assert.Equal("", ProgramReader.Load(program, rig.Editor.Program, rig.World.Values));
 
         rig.Tick();
 
@@ -481,7 +481,7 @@ public class RigTests
         Assert.Equal("MyObjectBuilder_Door/LargeBlockDoor", found.Kind.Id);
 
         // Written back the way the language spells it, which is where the prefix comes off.
-        var saved = Scribe.Save(rig.Editor.Program, rig.World.Values);
+        var saved = ProgramWriter.Save(rig.Editor.Program, rig.World.Values);
         Assert.Contains("let door1 = block 'Door/LargeBlockDoor'", saved);
         Assert.DoesNotContain("MyObjectBuilder_", saved);
     }

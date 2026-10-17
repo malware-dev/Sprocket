@@ -107,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             return new Glyph
             {
-                Symbol = Symbols.Down, Style = Styles.ListMark, Placement = Fixed.Size(Mark, Mark), Padding = Level
+                Symbol = Symbols.Down, Style = Styles.ListMark, Placement = FixedSize.Size(Mark, Mark), Padding = Level
             };
         }
 
@@ -174,11 +174,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
-            var by = Choosing.By(key);
+            var by = KeyboardChoice.By(key);
             if (by == 0)
                 return false;
 
-            var word = Choosing.Step(_words, _text, by);
+            var word = KeyboardChoice.Step(_words, _text, by);
             if (word != null)
                 Give(word);
 
@@ -188,7 +188,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public override void OnText(char c)
         {
-            var word = Choosing.Letter(_words, _text, c);
+            var word = KeyboardChoice.Letter(_words, _text, c);
             if (word != null)
                 Give(word);
         }

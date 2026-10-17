@@ -78,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var hinge = Hinge(block);
             var locks = hinge ? "HingeLock" : "RotorLock";
 
-            var turns = Doing.Of<IMyMotorStator, Turn>(given => Turn.Read(given, hinge), Turned, Arrived, null, Why,
+            var turns = OwnAction.Of<IMyMotorStator, Turn>(given => Turn.Read(given, hinge), Turned, Arrived, null, Why,
                 Stop, Expected);
 
             if (hinge)
@@ -112,7 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
 
             var heads = Heads(block, hinge);
-            var adds = Doing.Of<IMyMotorStator, string>(given => Head(given, heads), Added);
+            var adds = OwnAction.Of<IMyMotorStator, string>(given => Head(given, heads), Added);
             if (heads[1] != null || heads[2] != null)
                 kind.WithAction(AddHead, "add head", adds, AskedSize(heads)).In(Category.Repair);
             else
@@ -181,7 +181,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             var size = Field.Among("size", words, means);
-            size.Entry = Entry.Whole;
+            size.Entry = FieldInput.Whole;
             size.Needed = true;
             size.Default = Sizes[0];
             return size;
@@ -195,7 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Adds the head through the game's own action, which does nothing while one is attached.</summary>
-        static void Added(IMyMotorStator rotor, string head, Recall seen)
+        static void Added(IMyMotorStator rotor, string head, ReaderMemory seen)
         {
             if (head != null)
                 Toolbars.Perform(rotor, head, null);
@@ -249,7 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             // The game's own values for MyRotationDirection: shortest way, then clockwise, then counter-clockwise.
             var way = Field.Among("direction", Ways, Directions);
-            way.Entry = Entry.Whole;
+            way.Entry = FieldInput.Whole;
             way.Needed = true;
             way.Default = Ways[0];
             return way;
@@ -275,8 +275,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var angle = Field.Between("angle", Said(least), Said(most));
             angle.Needed = true;
-            angle.Entry = Entry.Decimal;
-            angle.Edits = Editor.Angle;
+            angle.Entry = FieldInput.Decimal;
+            angle.Edits = FieldEditor.Angle;
             angle.Lead = "to";
             angle.Unit = "°";
             return angle;
@@ -289,7 +289,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var speed = Field.Between("speed", "0", Said(Fastest(block)));
             speed.Needed = true;
             speed.Above = true;
-            speed.Entry = Entry.Decimal;
+            speed.Entry = FieldInput.Decimal;
             speed.Default = "1";
             speed.Lead = "at";
             speed.Unit = " rpm";
@@ -317,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Sets the rotor turning to the angle, and starts watching whether it is held.</summary>
-        static void Turned(IMyMotorStator rotor, Turn turn, Recall seen)
+        static void Turned(IMyMotorStator rotor, Turn turn, ReaderMemory seen)
         {
             if (!turn.Given)
                 return;
@@ -327,7 +327,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             else
                 rotor.RotateToAngle(turn.Way, turn.Angle, turn.Speed);
 
-            RotorTurn.Began(rotor, seen);
+            RotorMotion.Began(rotor, seen);
         }
 
         /// <summary>Whether the rotor already stands at the angle, by the game's own test.</summary>
@@ -385,32 +385,32 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// answer worth giving up on - it was set by the turn, so nought means something else has
         /// been at it and nothing is heading for the angle any more.
         /// </remarks>
-        static Trouble Why(IMyMotorStator rotor, Turn turn, Recall seen)
+        static BlockTrouble Why(IMyMotorStator rotor, Turn turn, ReaderMemory seen)
         {
             if (AtLimit(rotor))
-                return Trouble.None;
+                return BlockTrouble.None;
 
             if (!rotor.IsWorking)
-                return Trouble.Waiting(Cause.RotorNoPower);
+                return BlockTrouble.Waiting(Cause.RotorNoPower);
 
             if (!rotor.IsAttached)
-                return Trouble.Waiting(Cause.RotorNoHead);
+                return BlockTrouble.Waiting(Cause.RotorNoHead);
 
             if (rotor.RotorLock)
-                return Trouble.Waiting(Cause.RotorLocked);
+                return BlockTrouble.Waiting(Cause.RotorLocked);
 
             if (rotor.Torque <= 0f)
-                return Trouble.Waiting(Cause.RotorNoTorque);
+                return BlockTrouble.Waiting(Cause.RotorNoTorque);
 
             if (rotor.TargetVelocityRPM == 0f)
-                return Trouble.Fatal(Cause.RotorStopped);
+                return BlockTrouble.Fatal(Cause.RotorStopped);
 
             // Waited through rather than given up on. Whatever is holding the rotor may be moved, and
             // the rotor leaning on it meanwhile is no worse than the rotor stopped: measured in game,
             // taking its speed away does not settle what the pushing does to a construct.
-            return RotorTurn.Turning(rotor, seen)
-                ? Trouble.None
-                : Trouble.Waiting(Cause.RotorHeld);
+            return RotorMotion.Turning(rotor, seen)
+                ? BlockTrouble.None
+                : BlockTrouble.Waiting(Cause.RotorHeld);
         }
 
         /// <summary>

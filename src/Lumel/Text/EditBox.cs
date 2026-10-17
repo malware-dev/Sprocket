@@ -31,8 +31,8 @@ namespace Lumel.Text
 
         static readonly string[] Endings = { "\r\n", "\n", "\r" };
 
-        readonly Rail _across = new Rail();
-        readonly Rail _down = new Rail();
+        readonly ScrollAxis _across = new ScrollAxis();
+        readonly ScrollAxis _down = new ScrollAxis();
         readonly List<string> _lines = new List<string>();
         readonly List<float> _widths = new List<float>();
         readonly List<string> _numbers = new List<string>();
@@ -328,7 +328,7 @@ namespace Lumel.Text
             get
             {
                 var room = ContentBounds;
-                return new RectangleF(room.X, room.Y, Rail.Room(room.Width, _barWidth), Rail.Room(room.Height, _barWidth));
+                return new RectangleF(room.X, room.Y, ScrollAxis.Room(room.Width, _barWidth), ScrollAxis.Room(room.Height, _barWidth));
             }
         }
 
@@ -608,8 +608,8 @@ namespace Lumel.Text
         {
             _down.Extent = _tall;
             _across.Extent = Math.Max(_widest, CaretX + CaretWidth);
-            _down.Viewport = Rail.Room(bounds.Height, _barWidth);
-            _across.Viewport = Rail.Room(Rail.Room(bounds.Width, _barWidth), _gutter);
+            _down.Viewport = ScrollAxis.Room(bounds.Height, _barWidth);
+            _across.Viewport = ScrollAxis.Room(ScrollAxis.Room(bounds.Width, _barWidth), _gutter);
 
             if (_follow)
             {
@@ -633,7 +633,7 @@ namespace Lumel.Text
 
                 Gutter(g, view, first, last, top);
 
-                var words = new RectangleF(WordsX, view.Y, Rail.Room(view.Width, _gutter), view.Height);
+                var words = new RectangleF(WordsX, view.Y, ScrollAxis.Room(view.Width, _gutter), view.Height);
                 var x = words.X - _across.Offset;
                 var y = top;
                 var selecting = HasSelection && IsFocused;
@@ -1229,8 +1229,8 @@ namespace Lumel.Text
         {
             var room = ContentBounds;
             return way == Held.Across
-                ? new RectangleF(room.X, room.Y + room.Height - _barWidth, Rail.Room(room.Width, _barWidth), _barWidth)
-                : new RectangleF(room.X + room.Width - _barWidth, room.Y, _barWidth, Rail.Room(room.Height, _barWidth));
+                ? new RectangleF(room.X, room.Y + room.Height - _barWidth, ScrollAxis.Room(room.Width, _barWidth), _barWidth)
+                : new RectangleF(room.X + room.Width - _barWidth, room.Y, _barWidth, ScrollAxis.Room(room.Height, _barWidth));
         }
 
         RectangleF ThumbBounds(Held way)
@@ -1242,7 +1242,7 @@ namespace Lumel.Text
                 : new RectangleF(track.X, track.Y + rail.ThumbStart, track.Width, rail.ThumbLength);
         }
 
-        Rail Of(Held way)
+        ScrollAxis Of(Held way)
         {
             return way == Held.Across ? _across : _down;
         }

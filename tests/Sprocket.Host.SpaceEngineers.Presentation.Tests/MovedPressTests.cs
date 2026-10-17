@@ -52,7 +52,7 @@ public class MovedPressTests
     {
         Link? followed = null;
         var text = new RichText { Document = Markdown.Parse("[codex](codex) and more"), FontSize = 20f, Follow = l => followed = l };
-        var box = new Viewbox { Content = text, Placement = Fixed.Size(Wide, 300f) };
+        var box = new Viewbox { Content = text, Placement = FixedSize.Size(Wide, 300f) };
         var root = new VStack { Children = { box } };
         _ = new Easel(root, Wide, High);
 
@@ -88,7 +88,7 @@ public class MovedPressTests
     [Fact]
     public void AGripInAMovedRowSaysWhereThePointerIs()
     {
-        var grip = new Grip { CanCarry = true, Placement = Fixed.Size(24f, 24f) };
+        var grip = new Grip { CanCarry = true, Placement = FixedSize.Size(24f, 24f) };
         var row = new HStack { RenderTransform = RenderTransform.Moved(new Vector2(0f, 50f)), Children = { grip } };
         var root = new VStack { Children = { row } };
         _ = new Easel(root, Wide, High);

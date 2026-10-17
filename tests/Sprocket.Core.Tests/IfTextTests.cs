@@ -21,7 +21,7 @@ public class IfTextTests
 
     readonly Values _store = new Values();
 
-    string Load(string text, Automation program) => Reader.Load(text, program, _store);
+    string Load(string text, Automation program) => ProgramReader.Load(text, program, _store);
 
     static string Steps(string lines) => Top + lines + Bottom;
 
@@ -46,7 +46,7 @@ public class IfTextTests
 
         var program = new Automation();
         Assert.Equal("", Load(written, program));
-        Assert.Equal(written, Scribe.Save(program, _store));
+        Assert.Equal(written, ProgramWriter.Save(program, _store));
     }
 
     /// <summary>The lines of an if are its line, its branches' lines and an end, in the order they are read.</summary>
@@ -126,6 +126,6 @@ public class IfTextTests
         var program = new Automation();
         Assert.Equal("", Load(written, program));
         Assert.True(program.Systems[0].Sequences[0].Steps[0].IsOff);
-        Assert.Equal(written, Scribe.Save(program, _store));
+        Assert.Equal(written, ProgramWriter.Save(program, _store));
     }
 }

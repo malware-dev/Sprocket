@@ -5,7 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>Adds one or more lines to a sequence as one edit.</summary>
     public sealed class AddStep : SequenceEdit
     {
-        readonly Change _change;
+        readonly ChangeKind _change;
         readonly int _index;
         readonly List<Step> _steps = new List<Step>();
 
@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Several, because a step and the await after it are one thing somebody did and have to be
         /// one thing they can take back. Undoing half of it would leave an await waiting for nothing.
         /// </remarks>
-        public AddStep(Change change, int index, params Step[] steps)
+        public AddStep(ChangeKind change, int index, params Step[] steps)
         {
             _change = change;
             _index = index;
@@ -25,7 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <inheritdoc />
         public override void Apply(Sequence sequence)

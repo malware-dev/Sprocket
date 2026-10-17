@@ -285,7 +285,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Text with its entities read as what they stand for; a name, or text holding none, as it lies.</summary>
         static StringSegment Read(TokenKind kind, StringSegment text)
         {
-            return kind == TokenKind.Text && Entities.Holds(text) ? new StringSegment(Entities.Read(text)) : text;
+            return kind == TokenKind.Text && TextEntities.Holds(text) ? new StringSegment(TextEntities.Read(text)) : text;
         }
 
         static string Unclosed(TokenKind kind)

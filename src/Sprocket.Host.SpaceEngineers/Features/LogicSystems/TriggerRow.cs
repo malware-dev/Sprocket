@@ -133,11 +133,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _problem.Text = Problem;
             _problem.IsVisible = Problem.Length != 0;
-            _problem.Color = Inks.Of(Level, Palette.Faint);
+            _problem.Color = RemarkColors.Of(Level, Palette.Faint);
 
             // The same wash a broken row in a list gets, so arriving here from one arrives at something
             // already recognised.
-            Background = Problem.Length != 0 ? Inks.Wash(Level) : Palette.None;
+            Background = Problem.Length != 0 ? RemarkColors.Wash(Level) : Palette.None;
 
             // Quiet rather than gone while it cannot be copied or deleted, saying why.
             _duplicate.Command = Copies;

@@ -103,7 +103,7 @@ public class RenderTransformTests
         Assert.False(box.Reaches(new Vector2(5f, 5f)));
     }
 
-    static Label Box() => new Label { Background = Paint, Placement = Fixed.Size(100f, 40f) };
+    static Label Box() => new Label { Background = Paint, Placement = FixedSize.Size(100f, 40f) };
 
     static Rectangle Painted(Easel easel) => easel.Sprites.Single(sprite => sprite.Color == Paint).Destination;
 }

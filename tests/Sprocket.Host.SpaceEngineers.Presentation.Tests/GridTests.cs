@@ -44,7 +44,7 @@ public class GridTests
         Label grip, number, sentence;
         var grid = new Grid
         {
-            Columns = { 26, Length.Auto, Length.Flex(1) },
+            Columns = { 26, GridLength.Auto, GridLength.Flex(1) },
             Cells =
             {
                 [0, 0] = new Label { Text = "::" }.As(out grip),
@@ -68,7 +68,7 @@ public class GridTests
         Label one, three;
         var grid = new Grid
         {
-            Columns = { Length.Flex(1), Length.Flex(3) },
+            Columns = { GridLength.Flex(1), GridLength.Flex(3) },
             Cells =
             {
                 [0, 0] = new Label().As(out one),
@@ -150,7 +150,7 @@ public class GridTests
     {
         var grid = new Grid
         {
-            Columns = { Length.Auto, Length.Flex(1) },
+            Columns = { GridLength.Auto, GridLength.Flex(1) },
             Cells =
             {
                 [0, 0] = new Label { Text = "Name" },

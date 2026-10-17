@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 // A signal slot is a block and one of its toolbar slots, picked as a trigger's signal is.
                 var positions = chosen.Positions(part.Id);
                 var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
-                _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, Nature.Native,
+                _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, ReachKind.Native,
                     answer => Answered(part, chosen, answer),
                     admits: Signaling, signalsOnly: true));
                 return;
@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 // A slot of screens is a step's own, picked as its step is: its member alone, and the screen under it.
                 var step = _system.ActingOn(part.Id);
                 _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? "" : step.ActionId,
-                    step == null ? Nature.Native : step.Form, _editor.Picks.Facet(_system, chosen, new[] { part.Id }),
+                    step == null ? ReachKind.Native : step.Form, _editor.Picks.Facet(_system, chosen, new[] { part.Id }),
                     block => block.Kind.Facets(type).Count > 0, answer => Held(part, chosen, type, answer)));
                 return;
             }
@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void Offer(PickPage page, SystemInstance chosen)
         {
             _system.Acted(_used);
-            Marks.SetAside(_system, chosen, _used, _aside);
+            SlotMarks.SetAside(_system, chosen, _used, _aside);
             foreach (var blockName in _aside)
             {
                 var block = _editor.Runner.Bindings.Entity(blockName);
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         continue;
 
                     names.Add(_editor.Program.Declare(_editor.World, block).Name);
-                    numbers.Add(Picks.Numbered(block.Kind.Facets(type), answer.Facet));
+                    numbers.Add(SlotsFromPicks.Numbered(block.Kind.Facets(type), answer.Facet));
                 }
 
                 return new FillSlot(chosen, part.Id, names, numbers, Settle);
@@ -142,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             var used = new List<string>();
             system.Acted(used);
-            Marks.Settle(system, used);
+            SlotMarks.Settle(system, used);
         }
 
         /// <summary>Goes back to the screen the picker was opened from.</summary>

@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public Edit<T> Edit => _edit;
 
         /// <inheritdoc />
-        public override Change Change => _edit.Change;
+        public override ChangeKind Change => _edit.Change;
 
         /// <inheritdoc />
         public override bool Changes => _edit.Changes || Reslots;

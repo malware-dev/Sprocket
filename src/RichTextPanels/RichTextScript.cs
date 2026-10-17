@@ -65,8 +65,8 @@ namespace RichTextPanels
             _box = new Viewbox { Content = _text };
             _page = new Grid
             {
-                Columns = { Length.Flex(1f) },
-                Rows = { Length.Flex(1f) },
+                Columns = { GridLength.Flex(1f) },
+                Rows = { GridLength.Flex(1f) },
                 Cells = { [0, 0] = _box }
             };
             PanelControls.Refresh(block as Sandbox.ModAPI.IMyTerminalBlock);

@@ -20,7 +20,7 @@ public class ContainerTests
     [Fact]
     public void AContainersPaddingIsRoomInsideIt()
     {
-        var child = new Label { Placement = Fixed.Size(100f, 40f) };
+        var child = new Label { Placement = FixedSize.Size(100f, 40f) };
         var holder = new VStack { Padding = new Thickness(10f, 20f), Children = { child } };
         _ = new Easel(new VStack { Children = { holder } }, Wide, High);
 
@@ -76,7 +76,7 @@ public class ContainerTests
         {
             Padding = new Thickness(8f),
             Content = content,
-            Placement = Fixed.Size(200f, 100f)
+            Placement = FixedSize.Size(200f, 100f)
         };
         _ = new Easel(new VStack { Children = { window } }, Wide, High);
 
@@ -87,11 +87,11 @@ public class ContainerTests
     [Fact]
     public void WhatMustClipClipsOnItsOwn()
     {
-        var scroll = new ScrollView { Placement = Fixed.Size(200f, 100f), Content = new Label { Text = "Held" } };
+        var scroll = new ScrollView { Placement = FixedSize.Size(200f, 100f), Content = new Label { Text = "Held" } };
         var easel = new Easel(new VStack { Children = { scroll } }, Wide, High);
         Assert.Contains(easel.Commands, command => command.Kind == DrawKind.SetClip);
 
-        var box = new TextBox { Placement = Fixed.Size(200f, 40f), Text = "Typed" };
+        var box = new TextBox { Placement = FixedSize.Size(200f, 40f), Text = "Typed" };
         easel = new Easel(new VStack { Children = { box } }, Wide, High);
         Assert.Contains(easel.Commands, command => command.Kind == DrawKind.SetClip);
     }

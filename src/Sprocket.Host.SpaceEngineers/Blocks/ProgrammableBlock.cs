@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Being Broken = Being.Flag(Reading.Of<IMyProgrammableBlock>(block => block.HasCompileErrors));
 
-        static readonly Doing Runs = Doing.Of<IMyProgrammableBlock, Argument>(Argument.Read, Ran, trouble: Refused);
+        static readonly OwnAction Runs = OwnAction.Of<IMyProgrammableBlock, Argument>(Argument.Read, Ran, trouble: Refused);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -36,23 +36,23 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Runs the script with <paramref name="argument" />, keeping in <paramref name="seen" /> whether it ran.</summary>
-        static void Ran(IMyProgrammableBlock block, Argument argument, Recall seen)
+        static void Ran(IMyProgrammableBlock block, Argument argument, ReaderMemory seen)
         {
             seen.Number = block.TryRun(argument.Text) ? 1 : 0;
             seen.Frame = 0;
         }
 
         /// <summary>Why the script did not run, which ends the run there, or nothing where it ran.</summary>
-        static Trouble Refused(IMyProgrammableBlock block, Argument argument, Recall seen)
+        static BlockTrouble Refused(IMyProgrammableBlock block, Argument argument, ReaderMemory seen)
         {
-            return seen.Seen && seen.Number <= 0 ? Trouble.Fatal(Cause.ScriptNotRun) : Trouble.None;
+            return seen.Seen && seen.Number <= 0 ? BlockTrouble.Fatal(Cause.ScriptNotRun) : BlockTrouble.None;
         }
 
         /// <summary>The argument to run the script with.</summary>
         static Field Asked()
         {
             var argument = Field.Called("argument");
-            argument.Entry = Entry.Text;
+            argument.Entry = FieldInput.Text;
             return argument;
         }
 

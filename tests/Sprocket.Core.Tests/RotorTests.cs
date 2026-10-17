@@ -34,31 +34,31 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var kind = ship.Entity(rotor.Id).Kind;
 
-        Assert.Equal("reverse", kind.FindAction("Reverse", Nature.Action)!.Text);
-        Assert.Equal("lock", kind.FindAction("RotorLock_On", Nature.Action)!.Text);
-        Assert.Equal("Velocity", kind.FindAction("Velocity", Nature.Value)!.Named);
-        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Nature.Value)!.Named);
+        Assert.Equal("reverse", kind.FindAction("Reverse", ReachKind.Action)!.Text);
+        Assert.Equal("lock", kind.FindAction("RotorLock_On", ReachKind.Action)!.Text);
+        Assert.Equal("Velocity", kind.FindAction("Velocity", ReachKind.Value)!.Named);
+        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", ReachKind.Value)!.Named);
 
         // One member each, under the block's id, offered in the organized view and shown in the
         // terminal one as the block words it.
-        var lockOn = kind.FindAction("RotorLock_On", Nature.Action)!;
+        var lockOn = kind.FindAction("RotorLock_On", ReachKind.Action)!;
         Assert.False(lockOn.Hidden);
         Assert.True(lockOn.Unaltered);
         Assert.Equal("Rotor lock On", lockOn.Declared);
-        Assert.Null(kind.FindAction("lock", Nature.Native));
-        Assert.Null(kind.FindAction("speed", Nature.Value));
+        Assert.Null(kind.FindAction("lock", ReachKind.Native));
+        Assert.Null(kind.FindAction("speed", ReachKind.Value));
 
         // Lock and unlock are the lock's own pair, offered because the rotor keeps the value they
         // were made out of to the terminal - not because they have been renamed.
-        Assert.True(kind.FindAction("RotorLock", Nature.Value)!.Hidden);
-        Assert.False(kind.FindAction("RotorLock_Off", Nature.Action)!.Hidden);
+        Assert.True(kind.FindAction("RotorLock", ReachKind.Value)!.Hidden);
+        Assert.False(kind.FindAction("RotorLock_Off", ReachKind.Action)!.Hidden);
 
         // Rotating to an angle is Sprocket's own, performed its own way, so the game's is left out.
-        Assert.NotNull(kind.FindAction(Blocks.Rotor.RotateTo, Nature.Native));
-        Assert.True(kind.FindAction("RotateToAngle", Nature.Action)!.Hidden);
+        Assert.NotNull(kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native));
+        Assert.True(kind.FindAction("RotateToAngle", ReachKind.Action)!.Hidden);
 
         // Displacement is the rotor's own word for it, which Sprocket keeps.
-        Assert.Equal("Displacement", kind.FindAction("Displacement", Nature.Value)!.Named);
+        Assert.Equal("Displacement", kind.FindAction("Displacement", ReachKind.Value)!.Named);
     }
 
     /// <summary>
@@ -76,10 +76,10 @@ public class RotorTests
                      "AddRotorTopPart", "AddSmallRotorTopPart", "AddMediumRotorTopPart"
                  })
         {
-            Assert.True(kind.FindAction(id, Nature.Action)!.Hidden, id + " is offered as a step");
+            Assert.True(kind.FindAction(id, ReachKind.Action)!.Hidden, id + " is offered as a step");
         }
 
-        var add = kind.FindAction(Blocks.Rotor.AddHead, Nature.Native)!;
+        var add = kind.FindAction(Blocks.Rotor.AddHead, ReachKind.Native)!;
         Assert.False(add.Hidden);
         var fields = new List<Field>();
         add.Fields(fields);
@@ -106,16 +106,16 @@ public class RotorTests
         var kind = ship.Entity(hinge.Id).Kind;
 
         var asked = new List<Field>();
-        kind.FindAction(Blocks.Rotor.RotateTo, Nature.Native)!.Fields(asked);
+        kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Fields(asked);
 
         Assert.Equal(2, asked.Count);
         Assert.Equal("-90", asked[0].Least);
         Assert.Equal("90", asked[0].Most);
-        Assert.Equal(Editor.Angle, asked[0].Edits);
+        Assert.Equal(FieldEditor.Angle, asked[0].Edits);
 
-        Assert.Equal("Lock", kind.FindAction("HingeLock_On", Nature.Action)!.Named);
-        Assert.Equal("Unlock", kind.FindAction("HingeLock_Off", Nature.Action)!.Named);
-        Assert.True(kind.FindAction("HingeLock", Nature.Value)!.Hidden);
+        Assert.Equal("Lock", kind.FindAction("HingeLock_On", ReachKind.Action)!.Named);
+        Assert.Equal("Unlock", kind.FindAction("HingeLock_Off", ReachKind.Action)!.Named);
+        Assert.True(kind.FindAction("HingeLock", ReachKind.Value)!.Hidden);
     }
 
     [Fact]
@@ -141,12 +141,12 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var kind = ship.Entity(rotor.Id).Kind;
 
-        Assert.Equal("Rotate to", kind.FindAction(Blocks.Rotor.RotateTo, Nature.Native)!.Named);
-        Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", Nature.Action)!.Named);
-        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", Nature.Value)!.Named);
+        Assert.Equal("Rotate to", kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Named);
+        Assert.Equal("Unlock", kind.FindAction("RotorLock_Off", ReachKind.Action)!.Named);
+        Assert.Equal("Braking torque", kind.FindAction("BrakingTorque", ReachKind.Value)!.Named);
 
         // And the sentence keeps the word it needs, which is the one the capability wrote.
-        Assert.Equal("rotate", kind.FindAction(Blocks.Rotor.RotateTo, Nature.Native)!.Text);
+        Assert.Equal("rotate", kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!.Text);
     }
 
     /// <summary>A renamed member is the game's own, and does what the game's does.</summary>
@@ -157,8 +157,8 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
         var entity = ship.Entity(rotor.Id);
 
-        ship.World.Invoke(entity, "Reverse", null, Nature.Action);
-        ship.World.Invoke(entity, "Velocity", [Literal.Of(5.0)], Nature.Value);
+        ship.World.Invoke(entity, "Reverse", null, ReachKind.Action);
+        ship.World.Invoke(entity, "Velocity", [Literal.Of(5.0)], ReachKind.Value);
 
         Assert.Contains("Rotor:Reverse", ship.Rig.Log);
         Assert.Contains("Rotor:Velocity 5", ship.Rig.Log);
@@ -271,7 +271,7 @@ public class RotorTests
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
-        var action = ship.Entity(rotor.Id).Kind.FindAction(Blocks.Rotor.RotateTo, Nature.Native)!;
+        var action = ship.Entity(rotor.Id).Kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!;
         var fields = new List<Field>();
         action.Fields(fields);
 
@@ -427,16 +427,16 @@ public class RotorTests
         var rotor = ship.Rotor(1, "Rotor");
 
         var block = (IMyMotorStator)rotor.Block;
-        var seen = new Recall { Clock = () => MyAPIGateway.Session.GameplayFrameCounter };
-        Assert.True(Blocks.RotorTurn.Turning(block, seen), "a rotor just looked at is already called held");
+        var seen = new ReaderMemory { Clock = () => MyAPIGateway.Session.GameplayFrameCounter };
+        Assert.True(Blocks.RotorMotion.Turning(block, seen), "a rotor just looked at is already called held");
 
         for (var frame = 0; frame < 120; frame++)
             ship.Tick();
 
-        Assert.False(Blocks.RotorTurn.Turning(block, seen), "a rotor that has not moved for two seconds reads as turning");
+        Assert.False(Blocks.RotorMotion.Turning(block, seen), "a rotor that has not moved for two seconds reads as turning");
 
-        Blocks.RotorTurn.Began(block, seen);
-        Assert.True(Blocks.RotorTurn.Turning(block, seen), "a turn just begun is called held before it can move");
+        Blocks.RotorMotion.Began(block, seen);
+        Assert.True(Blocks.RotorMotion.Turning(block, seen), "a turn just begun is called held before it can move");
     }
 
     /// <summary>What is plainly wrong with a rotor is read off it, and needs no watching.</summary>
@@ -559,7 +559,7 @@ public class RotorTests
     {
         var ship = new Rigged();
         var rotor = ship.Rotor(1, "Rotor");
-        var action = ship.Entity(rotor.Id).Kind.FindAction(Blocks.Rotor.RotateTo, Nature.Native)!;
+        var action = ship.Entity(rotor.Id).Kind.FindAction(Blocks.Rotor.RotateTo, ReachKind.Native)!;
         var fields = new List<Field>();
         action.Fields(fields);
 

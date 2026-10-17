@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const string Unheard = "A sound block raises no event when its sound is chosen.";
 
-        static readonly Doing Plays = Doing.Of<IMySoundBlock, Chosen>(Chosen.Read, Played);
+        static readonly OwnAction Plays = OwnAction.Of<IMySoundBlock, Chosen>(Chosen.Read, Played);
 
         /// <inheritdoc />
         public override bool Claims(IMyTerminalBlock block)
@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             Sounds(block, words, means);
 
             var sound = Field.Among("sound", words, means);
-            sound.Entry = Entry.Text;
+            sound.Entry = FieldInput.Text;
             sound.Needed = true;
 
             kind.WithAction(Play, "play", Plays, sound).In(Category.Sound)
@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Plays the sound a step chose, or the one left selected where it chose none.</summary>
-        static void Played(IMySoundBlock sounds, Chosen chosen, Recall seen)
+        static void Played(IMySoundBlock sounds, Chosen chosen, ReaderMemory seen)
         {
             if (chosen.Sound.Length > 0)
                 sounds.SelectedSound = chosen.Sound;

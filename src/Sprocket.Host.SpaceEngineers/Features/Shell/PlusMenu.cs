@@ -19,13 +19,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// </remarks>
     public class PlusMenu : Button
     {
-        static readonly Adder[] _none = Array.Empty<Adder>();
+        static readonly AddOption[] _none = Array.Empty<AddOption>();
 
         readonly Popup _menu;
         readonly VStack _entries;
         readonly ICommand _toggles;
 
-        IList<Adder> _choices = _none;
+        IList<AddOption> _choices = _none;
 
         /// <summary>A plus offering nothing yet, hidden until it is shown something to add.</summary>
         public PlusMenu()
@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Everything it was given to offer, in the order the menu lists them, those that may not be added now among them.</summary>
-        public IList<Adder> Choices => _choices;
+        public IList<AddOption> Choices => _choices;
 
         /// <summary>Whether anything it offers may be added now.</summary>
         public bool Offers => Offered() > 0;
@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Offers the choices <paramref name="head" /> holds: as a menu under its words where several may be added now, as the
         /// one itself where one may, and not at all where none may.
         /// </summary>
-        public void Show(Adder head)
+        public void Show(AddOption head)
         {
             _choices = head.Choices ?? _none;
 
@@ -117,7 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Puts the menu away, then adds what <paramref name="choice" /> adds.</summary>
-        void Choose(Adder choice)
+        void Choose(AddOption choice)
         {
             _menu.Close();
             choice.Adds.Execute();

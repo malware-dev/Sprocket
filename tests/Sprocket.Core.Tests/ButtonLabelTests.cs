@@ -33,7 +33,7 @@ public class ButtonLabelTests
         Ran.Step(ship, panel, ButtonPanel.Label, Literal.Of(5L), Literal.Of("Open"));
 
         Assert.DoesNotContain(ship.Rig.Log, line => line.StartsWith("Panel:label"));
-        var label = ship.Entity(panel.Id).Kind.FindAction(ButtonPanel.LabelOf, Nature.Value)!.Being!;
+        var label = ship.Entity(panel.Id).Kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.Being!;
         Assert.Equal("button", label.Refused(new[] { Literal.Of(5L) }));
         Assert.Equal("button", label.Refused(new[] { Literal.Of(0L) }));
         Assert.Null(label.Refused(new[] { Literal.Of(4L) }));
@@ -60,10 +60,10 @@ public class ButtonLabelTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Panel(1, "Panel", 4).Id).Kind;
 
-        var label = Assert.Single(kind.FindAction(ButtonPanel.LabelOf, Nature.Value)!.Being!.Parameters);
+        var label = Assert.Single(kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.Being!.Parameters);
         Assert.Equal("button", label.Name);
         Assert.Equal("4", label.Most);
-        Assert.Single(kind.FindAction(ButtonPanel.Assigned, Nature.Value)!.Being!.Parameters);
+        Assert.Single(kind.FindAction(ButtonPanel.Assigned, ReachKind.Value)!.Being!.Parameters);
     }
 
     /// <summary>
@@ -82,15 +82,15 @@ public class ButtonLabelTests
             .Offering("AnyoneCanUse_Off", "Anyone can use Off");
         var kind = ship.Entity(panel.Id).Kind;
 
-        Assert.True(kind.FindAction(ButtonPanel.Label, Nature.Native)!.Vetted);
-        Assert.True(kind.FindAction(ButtonPanel.LabelOf, Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction(ButtonPanel.Assigned, Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction("AnyoneCanUse", Nature.Value)!.Vetted);
-        Assert.True(kind.FindAction("AnyoneCanUse", Nature.Action)!.Vetted);
+        Assert.True(kind.FindAction(ButtonPanel.Label, ReachKind.Native)!.Vetted);
+        Assert.True(kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction(ButtonPanel.Assigned, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction("AnyoneCanUse", ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction("AnyoneCanUse", ReachKind.Action)!.Vetted);
 
-        Assert.False(kind.FindAction("ButtonName", Nature.Value)!.Vetted);
-        Assert.False(kind.FindAction("AnyoneCanUse_On", Nature.Action)!.Vetted);
-        Assert.False(kind.FindAction("AnyoneCanUse_Off", Nature.Action)!.Vetted);
+        Assert.False(kind.FindAction("ButtonName", ReachKind.Value)!.Vetted);
+        Assert.False(kind.FindAction("AnyoneCanUse_On", ReachKind.Action)!.Vetted);
+        Assert.False(kind.FindAction("AnyoneCanUse_Off", ReachKind.Action)!.Vetted);
     }
 
     /// <summary>A panel offers flipping who may use it on the value's own switch, its toggle kept to the terminal view, where every other block keeps it to the value.</summary>
@@ -103,11 +103,11 @@ public class ButtonLabelTests
         var lamp = ship.Light(2, "Lamp");
         lamp.Offering("AnyoneCanUse", "Anyone can use On/Off").Carrying("AnyoneCanUse", "Anyone can use", ValueKind.Flag);
 
-        var toggle = ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Nature.Action)!;
+        var toggle = ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", ReachKind.Action)!;
         Assert.True(toggle.Hidden);
         Assert.Equal("toggle anyone can use", toggle.Text);
-        Assert.Equal("anyone can use", ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Nature.Value)!.Text);
-        Assert.True(ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", Nature.Value)!.Flips);
-        Assert.True(ship.Entity(lamp.Id).Kind.FindAction("AnyoneCanUse", Nature.Action)!.Hidden);
+        Assert.Equal("anyone can use", ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", ReachKind.Value)!.Text);
+        Assert.True(ship.Entity(panel.Id).Kind.FindAction("AnyoneCanUse", ReachKind.Value)!.Flips);
+        Assert.True(ship.Entity(lamp.Id).Kind.FindAction("AnyoneCanUse", ReachKind.Action)!.Hidden);
     }
 }

@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public StepRow()
         {
             Slots = new List<SentenceSlot>();
-            Adds = new List<Adder>();
+            Adds = new List<AddOption>();
             CreateView();
         }
 
@@ -60,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public int Carries { get; set; }
 
         /// <summary>The pluses it offers to add to the sequence with, after its sentence, each holding every choice it has: the end of a branch, the row closing an if, an otherwise.</summary>
-        public List<Adder> Adds { get; }
+        public List<AddOption> Adds { get; }
 
         /// <summary>What sort of step it is, which is what its line opens with.</summary>
         public StepKind Kind { get; set; }
@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _problem.Padding = _sentence.Padding;
             _problem.Text = HasProblem ? Problem : "";
             _problem.IsVisible = HasProblem && Problem.Length != 0;
-            _problem.Color = Inks.Of(Level, Palette.Faint);
+            _problem.Color = RemarkColors.Of(Level, Palette.Faint);
 
             if (_led != Kind)
             {

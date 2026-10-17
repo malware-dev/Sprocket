@@ -7,17 +7,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class MakeSystem : ProgramEdit
     {
         readonly AutomationSystem _system;
-        readonly Change _change;
+        readonly ChangeKind _change;
 
         int _at = -1;
 
         /// <summary>The making of <paramref name="system" />, which is in the program already.</summary>
-        public MakeSystem(AutomationSystem system) : this(system, Change.AddSystem)
+        public MakeSystem(AutomationSystem system) : this(system, ChangeKind.AddSystem)
         {
         }
 
         /// <summary>The making of <paramref name="system" />, which is in the program already, offered back as <paramref name="change" />.</summary>
-        public MakeSystem(AutomationSystem system, Change change)
+        public MakeSystem(AutomationSystem system, ChangeKind change)
         {
             _system = system;
             _change = change;
@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public AutomationSystem System => _system;
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <summary>Taking it away waits while it runs; putting it back, switched off, waits for nothing.</summary>
         public override bool Held(Automation program, bool back)

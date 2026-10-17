@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What goes before the words of anything that adds.</summary>
         public const string Plus = "+ ";
 
-        static readonly Fixed ThingHeight = Fixed.High(68f);
+        static readonly FixedSize ThingHeight = FixedSize.High(68f);
 
         readonly Relay _opens;
         readonly Relay _runs;
@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Placement = Flex.Grow,
                 Children =
                 {
-                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = Fixed.Size(16f, 16f) }.As(out _light),
+                    new Glyph { Symbol = Symbols.Disc, Style = Styles.Light, Placement = FixedSize.Size(16f, 16f) }.As(out _light),
                     new VStack
                     {
                         Spacing = 4f,
@@ -72,17 +72,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                             new HStack
                             {
                                 Spacing = 8f,
-                                Placement = Fixed.High(32f),
+                                Placement = FixedSize.High(32f),
                                 Children =
                                 {
                                     new Label { Style = Styles.Name, Trims = true }.As(out _summary),
-                                    new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = Fixed.Size(32f, 32f) }.As(out _below)
+                                    new Glyph { Symbol = Symbols.Warning, Style = Styles.Flag, Placement = FixedSize.Size(32f, 32f) }.As(out _below)
                                 }
                             },
                             new HStack
                             {
                                 Spacing = 8f,
-                                Placement = Fixed.High(16f),
+                                Placement = FixedSize.High(16f),
                                 Children =
                                 {
                                     new Label { Style = Styles.Detail }.As(out _status),
@@ -97,11 +97,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Spacing = 8f,
                         Children =
                         {
-                            new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _runs }.As(out _run),
-                            new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = Fixed.Size(32f, 32f), Command = _copies }.As(out _duplicate),
+                            new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
+                            new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _copies }.As(out _duplicate),
                             new Button { Style = Styles.Button, Command = _offers }.As(out _button),
                             new Switch { Style = Styles.SystemSwitch, Command = _flips }.As(out _switch),
-                            new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = Fixed.Size(32f, 32f), Command = _bins }.As(out _delete)
+                            new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f), Command = _bins }.As(out _delete)
                         }
                     }
                 }
@@ -300,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _problem.Text = Problem;
             _problem.IsVisible = saying;
-            _problem.Color = Inks.Of(Level, Palette.Faint);
+            _problem.Color = RemarkColors.Of(Level, Palette.Faint);
 
             // A note is part of the line, so it has no flag; a warning's flag is amber and a problem's red.
             var marked = saying && Level != NoticeLevel.Info || Problems > 0 || Remarks > 0;

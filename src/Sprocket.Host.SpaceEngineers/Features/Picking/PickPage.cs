@@ -44,13 +44,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Dictionary<string, int> _whatAt = new Dictionary<string, int>();
         readonly List<long> _arrived = new List<long>();
         readonly List<Literal> _arrivedValues = new List<Literal>();
-        readonly Opening _opens;
-        readonly Aim _aim;
+        readonly OpeningColumn _opens;
+        readonly OutcomeColumn _aim;
         readonly int _base;
         readonly string _arrivedChosen;
         readonly ToolbarSlot _arrivedSlot;
         readonly string _arrivedFacet;
-        readonly Nature _arrivedForm;
+        readonly ReachKind _arrivedForm;
         readonly Quantifier _arrivedQuantifier;
         readonly List<string> _filled = new List<string>();
         readonly List<Field> _nothing = new List<Field>();
@@ -58,18 +58,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly Func<GridEntity, bool> _fits;
         readonly bool _signalsOnly;
         readonly bool _memberOnly;
-        readonly Offers _offers;
-        readonly Occupancy _occupancy;
-        readonly Wording _wording;
-        readonly Listing _listing;
-        readonly Kinds _kinds = new Kinds();
+        readonly MemberOffers _offers;
+        readonly SlotOccupancy _occupancy;
+        readonly PickTitle _wording;
+        readonly BlockListing _listing;
+        readonly KindFilter _kinds = new KindFilter();
 
         string _chosen;
         ToolbarSlot _slot;
         string _facet;
-        Nature _chosenForm;
+        ReachKind _chosenForm;
         string _dropped = "";
-        Nature _droppedForm;
+        ReachKind _droppedForm;
         Quantifier _quantifier;
         string _whatSearch = "";
         bool _goesOn;
@@ -83,9 +83,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         StageColumn _blocks;
         StageColumn _what;
         StageColumn _does;
-        Keyed<long, PickRow> _blockRows;
-        Keyed<string, KindRow> _kindRows;
-        Keyed<string, Element> _whatRows;
+        KeyedChildren<long, PickRow> _blockRows;
+        KeyedChildren<string, KindRow> _kindRows;
+        KeyedChildren<string, Element> _whatRows;
         SlotStrip _slots;
         FacetChoice _facets;
         ListField _reads;
@@ -107,9 +107,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// not have is dropped later, where it is.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
-            IList<long> targets, string chosen, Nature chosenForm, Action<PickAnswer> done,
+            IList<long> targets, string chosen, ReachKind chosenForm, Action<PickAnswer> done,
             bool asksAll = false, Quantifier quantifier = Quantifier.Any, IList<Literal> arguments = null,
-            Opening opens = Opening.Blocks, Aim aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
+            OpeningColumn opens = OpeningColumn.Blocks, OutcomeColumn aim = null, PickStrip after = null, Func<GridEntity, bool> admits = null,
             bool signalsOnly = false, bool forTests = false, string facet = "")
             : base(editor)
         {
@@ -147,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _screen = editor.Opener;
 
-            var pressed = forEvents ? Occupancy.Pressing(editor.World, targets, _chosen) : null;
+            var pressed = forEvents ? SlotOccupancy.Pressing(editor.World, targets, _chosen) : null;
             if (pressed != null)
             {
                 _slot = ToolbarSlot.Of(_chosen);
@@ -163,29 +163,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             // A step that flips a switch was made by choosing toggle on the switch's value, so that is what it opens on.
-            var flipped = !forEvents && !forTests && chosenForm == Nature.Action
+            var flipped = !forEvents && !forTests && chosenForm == ReachKind.Action
                 ? Vocabulary.Flipped(editor.World, _selection, _chosen)
                 : null;
             if (flipped != null)
             {
                 _chosen = flipped;
                 _arrivedChosen = flipped;
-                _chosenForm = Nature.Value;
-                _arrivedForm = Nature.Value;
+                _chosenForm = ReachKind.Value;
+                _arrivedForm = ReachKind.Value;
                 _arrivedValues.Clear();
                 _arrivedValues.Add(Literal.Of(EntityAction.Toggle));
             }
 
-            _offers = new Offers(editor, forEvents, forTests, signalsOnly);
-            _occupancy = new Occupancy(editor);
-            _wording = new Wording(editor, _offers, title, forEvents, forTests);
-            _listing = new Listing(editor, admits, forEvents, forTests);
+            _offers = new MemberOffers(editor, forEvents, forTests, signalsOnly);
+            _occupancy = new SlotOccupancy(editor);
+            _wording = new PickTitle(editor, _offers, title, forEvents, forTests);
+            _listing = new BlockListing(editor, admits, forEvents, forTests);
         }
 
         /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>
         public PickPage(SprocketEditor editor, string title, IList<long> targets, Func<GridEntity, bool> fits,
             Action<PickAnswer> done)
-            : this(editor, title, false, targets, "", Nature.Native, done)
+            : this(editor, title, false, targets, "", ReachKind.Native, done)
         {
             _fits = fits;
         }
@@ -196,7 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// for none of its values, starting from <paramref name="targets" /> and the facet called <paramref name="facet" />,
         /// and only blocks <paramref name="admits" /> allows listed.
         /// </summary>
-        public PickPage(SprocketEditor editor, string title, IList<long> targets, string member, Nature form, string facet,
+        public PickPage(SprocketEditor editor, string title, IList<long> targets, string member, ReachKind form, string facet,
             Func<GridEntity, bool> admits, Action<PickAnswer> done)
             : this(editor, title, false, targets, member, form, done, admits: admits, facet: facet)
         {
@@ -245,17 +245,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _offering = false;
                 if (_arrivedValues.Count > 0 && _chosen == _arrivedChosen && _chosenForm == _arrivedForm)
                 {
-                    Channels.Shown(_arrivedValues, Wanted(), _filled);
+                    ColorChannels.Shown(_arrivedValues, Wanted(), _filled);
                     return _filled;
                 }
 
                 // A value being set opens on what the block holds now, as the terminal's own control does.
-                if (_chosenForm == Nature.Value && !_forTests && !_forEvents && _selection.Count > 0)
+                if (_chosenForm == ReachKind.Value && !_forTests && !_forEvents && _selection.Count > 0)
                 {
                     var current = Vocabulary.Current(Editor.World, _selection, _chosen);
                     if (current.HasValue)
                     {
-                        Channels.Shown(new[] { Opaque(current.Value) }, Wanted(), _filled);
+                        ColorChannels.Shown(new[] { Opaque(current.Value) }, Wanted(), _filled);
                         _offering = true;
                     }
                 }
@@ -280,7 +280,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 foreach (var id in _selection)
                 {
-                    if (!Listing.Contains(_arrived, id))
+                    if (!BlockListing.Contains(_arrived, id))
                         return true;
                 }
 
@@ -341,7 +341,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         int Own => (_blocks == null ? 0 : 1) + (_what == null ? 0 : 1) + (_does == null ? 0 : 1);
 
         /// <summary>The stage whose box takes the keyboard when its page is first shown, or minus one where none does.</summary>
-        int Opens => _opens == Opening.Blocks ? _base : _opens == Opening.What ? _base + 1 : -1;
+        int Opens => _opens == OpeningColumn.Blocks ? _base : _opens == OpeningColumn.What ? _base + 1 : -1;
 
         /// <inheritdoc />
         public override bool TakeRetitle()
@@ -381,7 +381,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override void Primary()
         {
             var arguments = _strip.Arguments;
-            if (_forEvents && _chosenForm != Nature.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
+            if (_forEvents && _chosenForm != ReachKind.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
                 _done(new PickAnswer(_selection, Answered, _quantifier, null, _chosenForm, _facet));
                 return;
@@ -407,11 +407,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Named(arguments);
 
             // Toggle on a switch is the game's toggle for it, which takes nothing.
-            if (_chosenForm == Nature.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text
+            if (_chosenForm == ReachKind.Value && arguments.Count == 1 && arguments[0].Kind == ValueKind.Text
                 && arguments[0].Text == EntityAction.Toggle)
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _selection, _chosen) ?? _chosen;
-                _done(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), Nature.Action, _facet));
+                _done(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), ReachKind.Action, _facet));
                 return;
             }
 
@@ -426,7 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var at = 0;
             for (var f = 0; f < fields.Count && at < arguments.Count; f++)
             {
-                if (fields[f].Entry == Entry.Name && arguments[at].Kind == ValueKind.Text)
+                if (fields[f].Entry == FieldInput.Name && arguments[at].Kind == ValueKind.Text)
                     arguments[at] = Literal.Name(arguments[at].Text);
 
                 at += fields[f].Covers;
@@ -454,11 +454,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     _strip.Add(_does);
             }
 
-            _strip.Returns = _base > 0 ? Editor.Act(Cmd.PageBack, PageBack) : null;
-            _strip.Onward = _aim != null && _aim.Outcome == Outcome.One ? Editor.Act(Cmd.PageOn, Primary) : null;
+            _strip.Returns = _base > 0 ? Editor.Act(CommandKind.PageBack, PageBack) : null;
+            _strip.Onward = _aim != null && _aim.Outcome == Outcome.One ? Editor.Act(CommandKind.PageOn, Primary) : null;
 
             if (_finish == null)
-                _finish = Editor.Act(Cmd.Primary, Primary);
+                _finish = Editor.Act(CommandKind.Primary, Primary);
 
             if (_blocks == null)
                 MakeBlocks();
@@ -561,15 +561,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _blocks.Narrowed += OnBlockSearch;
             _blocks.KindsNarrowed += NarrowKinds;
 
-            _blockRows = new Keyed<long, PickRow>(_blocks.Rows, BlockRow);
-            _kindRows = new Keyed<string, KindRow>(_blocks.Kinds, KindRow);
+            _blockRows = new KeyedChildren<long, PickRow>(_blocks.Rows, BlockRow);
+            _kindRows = new KeyedChildren<string, KindRow>(_blocks.Kinds, KindRow);
             _blocks.KindsOpened += delegate
             {
                 if (Editor.Input != null)
                     Editor.Input.Focus(_blocks.KindNarrow);
             };
-            _clearKind = Editor.Act(Cmd.AnyKind, () => SetKind(""));
-            _toggleHidden = Editor.Act(Cmd.HiddenBlocks, delegate
+            _clearKind = Editor.Act(CommandKind.AnyKind, () => SetKind(""));
+            _toggleHidden = Editor.Act(CommandKind.HiddenBlocks, delegate
             {
                 ShowsHidden = !ShowsHidden;
                 Editor.Invalidate();
@@ -592,10 +592,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 ? Editor.Texts.PickNothingChecked
                 : _forEvents ? Editor.Texts.PickNothingHappens : Editor.Texts.PickNothingDone;
             _what.Narrowed += OnWhatSearch;
-            _whatRows = new Keyed<string, Element>(_what.Rows, WhatRow);
+            _whatRows = new KeyedChildren<string, Element>(_what.Rows, WhatRow);
 
-            _organized = Editor.Act(Cmd.ShowOrganized, () => Show(false));
-            _terminal = Editor.Act(Cmd.ShowTerminal, () => Show(true));
+            _organized = Editor.Act(CommandKind.ShowOrganized, () => Show(false));
+            _terminal = Editor.Act(CommandKind.ShowTerminal, () => Show(true));
 
             _strip.Add(_what);
         }
@@ -604,17 +604,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var row = new PickRow();
             row.Picked += (held, presses) => Picked(id, held, presses);
-            row.Ticks = Editor.Act(Cmd.PickEntity, () => Pick(id, Held.Also));
+            row.Ticks = Editor.Act(CommandKind.PickEntity, () => Pick(id, HeldModifier.Also));
             return row;
         }
 
         KindRow KindRow(string kind)
         {
-            var family = Kinds.FamilyOf(kind);
+            var family = KindFilter.FamilyOf(kind);
 
             return new KindRow
             {
-                Command = Editor.Act(kind.Length == 0 ? Cmd.AnyKind : Cmd.OneKind, delegate
+                Command = Editor.Act(kind.Length == 0 ? CommandKind.AnyKind : CommandKind.OneKind, delegate
                 {
                     _blocks.CloseKinds();
                     if (family != Family.None)
@@ -642,7 +642,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             var row = new PickRow();
-            row.Picked += delegate(Held held, int presses) { Chosen(key, presses); };
+            row.Picked += delegate(HeldModifier held, int presses) { Chosen(key, presses); };
             return row;
         }
 
@@ -652,14 +652,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// gesture as in a list where only one can be chosen. With something held, a second press is building a set, and
         /// moving on would cut that short.
         /// </remarks>
-        void Picked(long id, Held held, int presses)
+        void Picked(long id, HeldModifier held, int presses)
         {
-            var pick = Editor.Act(Cmd.PickEntity, () => Pick(id, held));
+            var pick = Editor.Act(CommandKind.PickEntity, () => Pick(id, held));
             if (pick == null)
                 return;
 
             pick.Execute();
-            if (presses > 1 && held == Held.Alone)
+            if (presses > 1 && held == HeldModifier.Alone)
                 MoveOn();
         }
 
@@ -671,8 +671,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
 
             var id = _offers.Ids[at];
-            var form = _offers.Forms.Count > at ? _offers.Forms[at] : Nature.Native;
-            var choose = Editor.Act(Cmd.PickChoice, () => Choose(id, form));
+            var form = _offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native;
+            var choose = Editor.Act(CommandKind.PickChoice, () => Choose(id, form));
             if (choose == null)
                 return;
 
@@ -734,16 +734,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return _nothing;
 
             // A number watched to start something is compared as a check compares it.
-            if (_forEvents && _chosenForm == Nature.Value)
-                return Comparing.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
+            if (_forEvents && _chosenForm == ReachKind.Value)
+                return ComparisonQuestion.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
 
             if (!_forTests)
                 return Editor.Fields(_selection, _chosen, _chosenForm);
 
             string value, state;
-            return Comparing.Split(_chosen, out value, out state)
-                ? Comparing.StateFields()
-                : Comparing.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
+            return ComparisonQuestion.Split(_chosen, out value, out state)
+                ? ComparisonQuestion.StateFields()
+                : ComparisonQuestion.Fields(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen), Vocabulary.EventsOf(Editor.World, _selection));
         }
 
         /// <summary>
@@ -758,7 +758,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             // A moment takes nothing; a number watched asks how it compares, and with what, over what the trigger does, which
             // is the order the sentence says them in and keeps every column on the one page.
-            if (_forEvents && _chosenForm != Nature.Value || _memberOnly)
+            if (_forEvents && _chosenForm != ReachKind.Value || _memberOnly)
             {
                 _strip.ShowsArguments = false;
                 return;
@@ -781,7 +781,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var colors = new List<Hsv>();
             for (var i = 0; i < fields.Count; i++)
             {
-                if (fields[i].Edits != Features.Fields.Editor.Colour)
+                if (fields[i].Edits != FieldEditor.Colour)
                     continue;
 
                 Player.Colours(colors);
@@ -819,7 +819,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _entered = arguments.Form.Answer;
 
             // Nowhere to type is nowhere to keep the keyboard. Somebody who came for the values gets it in them, once.
-            if (_opens == Opening.Arguments && !_openedArguments && arguments.Form.Count > 0)
+            if (_opens == OpeningColumn.Arguments && !_openedArguments && arguments.Form.Count > 0)
             {
                 _openedArguments = true;
                 arguments.Form.Take(Editor.Input);
@@ -901,7 +901,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;
-                row.IsChosen = Listing.Contains(_selection, entity.Id);
+                row.IsChosen = BlockListing.Contains(_selection, entity.Id);
                 row.Show();
             }
 
@@ -954,7 +954,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (said == _kinds.Search)
                 return;
 
-            var narrow = Editor.Act(Cmd.NarrowKinds, delegate
+            var narrow = Editor.Act(CommandKind.NarrowKinds, delegate
             {
                 _kinds.Search = said;
                 Editor.Invalidate();
@@ -971,7 +971,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         void FillOptions()
         {
-            var asks = _asksAll && (_forTests || _forEvents && !_signalsOnly && (_chosen.Length == 0 || Watched() || _chosenForm == Nature.Value || Totals));
+            var asks = _asksAll && (_forTests || _forEvents && !_signalsOnly && (_chosen.Length == 0 || Watched() || _chosenForm == ReachKind.Value || Totals));
             if (!asks)
             {
                 _blocks.Options.Clear();
@@ -987,7 +987,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _reads = new ListField(words);
                 _reads.Edited += delegate
                 {
-                    var reads = Editor.Act(Cmd.ReadBlocks, () => Quantify(Read(_reads.Text)));
+                    var reads = Editor.Act(CommandKind.ReadBlocks, () => Quantify(Read(_reads.Text)));
                     if (reads != null)
                         reads.Execute();
                 };
@@ -1062,7 +1062,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _dropped = _chosen;
                 _droppedForm = _chosenForm;
                 _chosen = "";
-                _chosenForm = Nature.Native;
+                _chosenForm = ReachKind.Native;
             }
             else if (_chosen.Length == 0 && _dropped.Length > 0 && _offers.At(_dropped, _droppedForm) >= 0)
             {
@@ -1108,7 +1108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var key = at < 0
                     ? $"#{(-1 - at).ToString(CultureInfo.InvariantCulture)}"
-                    : $"{(_offers.Forms.Count > at ? _offers.Forms[at] : Nature.Native)} {_offers.Ids[at]}";
+                    : $"{(_offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native)} {_offers.Ids[at]}";
 
                 _whatKeys.Add(key);
                 _whatAt[key] = at;
@@ -1117,8 +1117,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // The slots of a toolbar a person presses open under its line once it is chosen.
             _whatShown.Clear();
             _whatShown.AddRange(_whatKeys);
-            var pressed = Occupancy.Pressing(Editor.World, _selection, _chosen);
-            var under = pressed == null ? -1 : _whatKeys.IndexOf($"{Nature.Native} {pressed.Id}");
+            var pressed = SlotOccupancy.Pressing(Editor.World, _selection, _chosen);
+            var under = pressed == null ? -1 : _whatKeys.IndexOf($"{ReachKind.Native} {pressed.Id}");
             if (under >= 0)
                 _whatShown.Insert(under + 1, SlotsKey);
 
@@ -1164,7 +1164,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 // Something that cannot be made into a step is listed to be read about and not chosen.
                 var ready = _offers.Ready.Count > at ? _offers.Ready[at] : Readiness.Ready;
-                var form = _offers.Forms.Count > at ? _offers.Forms[at] : Nature.Native;
+                var form = _offers.Forms.Count > at ? _offers.Forms[at] : ReachKind.Native;
 
                 row.Text = _offers.Names[at];
                 row.IsHeading = false;
@@ -1199,9 +1199,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// says what happens to everything else. The anchor a run starts from follows the presses that take one block
         /// deliberately, and shift with nothing to reach back to is the first press of a run.
         /// </remarks>
-        void Pick(long entityId, Held how)
+        void Pick(long entityId, HeldModifier how)
         {
-            if (how == Held.Through && _anchor != 0L)
+            if (how == HeldModifier.Through && _anchor != 0L)
             {
                 Span(_anchor, entityId);
                 Editor.Invalidate();
@@ -1210,7 +1210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _anchor = entityId;
 
-            if (how == Held.Also)
+            if (how == HeldModifier.Also)
                 Toggle(entityId);
             else
                 Only(entityId);
@@ -1220,7 +1220,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void Toggle(long entityId)
         {
-            if (Listing.Contains(_selection, entityId))
+            if (BlockListing.Contains(_selection, entityId))
                 _selection.Remove(entityId);
             else
                 _selection.Add(entityId);
@@ -1294,7 +1294,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     if (pressed.At(at).Text != words)
                         continue;
 
-                    Chosen($"{Nature.Native} {pressed.Id}", 1);
+                    Chosen($"{ReachKind.Native} {pressed.Id}", 1);
                     PickSlot(at.Page, at.Slot);
                     return true;
                 }
@@ -1309,7 +1309,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (whole == null)
                 return;
 
-            var pick = Editor.Act(Cmd.PickChoice, delegate
+            var pick = Editor.Act(CommandKind.PickChoice, delegate
             {
                 _slot = new ToolbarSlot(whole.Toolbar, page, slot);
                 Editor.Invalidate();
@@ -1329,7 +1329,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void PickFacet(string name)
         {
-            var pick = Editor.Act(Cmd.PickChoice, delegate
+            var pick = Editor.Act(CommandKind.PickChoice, delegate
             {
                 _facet = name;
                 Editor.Invalidate();
@@ -1338,9 +1338,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 pick.Execute();
         }
 
-        void Choose(string id, Nature form)
+        void Choose(string id, ReachKind form)
         {
-            var pressed = form == Nature.Native ? Occupancy.Pressing(Editor.World, _selection, id) : null;
+            var pressed = form == ReachKind.Native ? SlotOccupancy.Pressing(Editor.World, _selection, id) : null;
             if (pressed == null)
                 _slot = null;
             else if (id != _chosen || _slot == null)
@@ -1359,7 +1359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             string value, state;
             if (Totals && _chosen.Length > 0
-                && (Comparing.Split(_chosen, out value, out state) || !Offers.Number(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen))))
+                && (ComparisonQuestion.Split(_chosen, out value, out state) || !MemberOffers.Number(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen))))
             {
                 _chosen = "";
             }
@@ -1374,7 +1374,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (value == _screen.Search)
                 return;
 
-            var narrow = Editor.Act(Cmd.NarrowEntities, delegate
+            var narrow = Editor.Act(CommandKind.NarrowEntities, delegate
             {
                 _screen.Search = value;
                 Editor.Invalidate();
@@ -1390,7 +1390,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (value == _whatSearch)
                 return;
 
-            var narrow = Editor.Act(Cmd.NarrowChoices, delegate
+            var narrow = Editor.Act(CommandKind.NarrowChoices, delegate
             {
                 _whatSearch = value;
                 Editor.Invalidate();

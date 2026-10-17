@@ -42,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     Background = color.Colour,
                     Edge = Palette.Chrome,
                     HighlightEdge = Palette.Ink,
-                    Placement = Fixed.Size(32f, 28f),
+                    Placement = FixedSize.Size(32f, 28f),
                     Command = new Relay(() => Give(color))
                 });
             }
@@ -92,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var text = _written.Text.Trim();
                 Color said;
                 byte alpha;
-                return text.Length > 0 && text[0] != '#' && Channels.Colour($"#{text}", out said, out alpha) ? $"#{text}" : text;
+                return text.Length > 0 && text[0] != '#' && ColorChannels.Colour($"#{text}", out said, out alpha) ? $"#{text}" : text;
             }
         }
 
@@ -126,7 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             byte alpha;
             Color said;
-            if (!Channels.Colour(written, out said, out alpha))
+            if (!ColorChannels.Colour(written, out said, out alpha))
             {
                 if (string.IsNullOrEmpty(written))
                 {

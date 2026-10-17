@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<SystemEdit> _before;
         readonly Trigger _replaced;
         readonly int _replacedAt;
-        readonly Change _change;
+        readonly ChangeKind _change;
 
         bool _again;
         int _madeAt = -1;
@@ -27,13 +27,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <paramref name="replaced" />, a trigger it took the place of at <paramref name="replacedAt" />, or null.
         /// </summary>
         public AddTrigger(Automation program, Trigger trigger, Sequence made, IList<SystemEdit> before, Trigger replaced, int replacedAt)
-            : this(program, trigger, made, before, replaced, replacedAt, Change.AddTrigger)
+            : this(program, trigger, made, before, replaced, replacedAt, ChangeKind.AddTrigger)
         {
         }
 
         /// <summary>Adds <paramref name="trigger" /> to its logic system of <paramref name="program" />, with <paramref name="made" />, <paramref name="before" /> and <paramref name="replaced" /> at <paramref name="replacedAt" />, called what <paramref name="change" /> says: a trigger copied rather than made.</summary>
         public AddTrigger(Automation program, Trigger trigger, Sequence made, IList<SystemEdit> before, Trigger replaced, int replacedAt,
-            Change change)
+            ChangeKind change)
         {
             _change = change;
             _program = program;
@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <inheritdoc />
-        public override Change Change => _change;
+        public override ChangeKind Change => _change;
 
         /// <inheritdoc />
         public override void Touches(AutomationSystem system, IList<object> screens)
