@@ -1265,7 +1265,7 @@ public class AirlockTests
         a.Tick(20);
 
         Assert.Equal(["Inner Door:close", "Inner Door:close"], a.Log);
-        Assert.Equal(2, a.Runner.Poller(on, system.First)!.FiredCount);
+        Assert.Equal(2, a.Runner.Watches.Poller(on, system.First)!.FiredCount);
     }
 
     /// <summary>The names a <c>when</c> watches stand for one set of blocks, so a block two variables hold fires once.</summary>
@@ -1297,7 +1297,7 @@ public class AirlockTests
         a.Tick(20);
 
         Assert.Equal(["Inner Door:close"], a.Log);
-        Assert.Equal(1, a.Runner.Poller(on, system.First)!.FiredCount);
+        Assert.Equal(1, a.Runner.Watches.Poller(on, system.First)!.FiredCount);
     }
 
 

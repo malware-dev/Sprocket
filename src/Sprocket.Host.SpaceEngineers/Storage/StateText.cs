@@ -165,7 +165,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 for (var n = 0; n < uses.Count; n++)
                 {
-                    var poller = runner.Poller(triggers[t], uses[n]);
+                    var poller = runner.Watches.Poller(triggers[t], uses[n]);
                     if (poller == null)
                         continue;
 
@@ -300,7 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!kind || one == null)
                 return;
 
-            runner.Recall(trigger, one, recall);
+            runner.Watches.Recall(trigger, one, recall);
         }
 
         /// <summary>
@@ -530,7 +530,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (one == null || which == null)
                 return;
 
-            runner.Resume(which, one, (int)step.Whole, waiting, held, byHand);
+            runner.Runs.Resume(which, one, (int)step.Whole, waiting, held, byHand);
         }
 
         /// <summary>A whole number in the line, or zero where it is not one.</summary>

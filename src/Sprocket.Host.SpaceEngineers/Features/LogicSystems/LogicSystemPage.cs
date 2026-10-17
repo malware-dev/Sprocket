@@ -329,7 +329,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             for (var i = 0; i < _triggers.Count; i++)
             {
                 var row = _triggerRows[_triggers[i]];
-                var poller = Editor.Runner.Poller(_triggers[i], through);
+                var poller = Editor.Runner.Watches.Poller(_triggers[i], through);
                 row.IsLiveNow = poller != null && poller.Live;
 
                 // A trigger's own act has no row of its own, so what goes wrong with it is said on the trigger's.

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -20,11 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Everything the run remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
         readonly RunMemory _memory;
 
-        SequenceFault _quit;
+        readonly Workings _workings;
 
-        SequenceFault _found;
-
-        SequenceFault _looked;
+        readonly Faults _faults;
 
         /// <summary>
         /// One sequence, running for one of a system.
@@ -49,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _owner = owner;
             _rota = owner.Rota;
             _memory = memory;
+            _workings = new Workings(sequence, instance, owner, memory);
 
             var kept = memory.Busy != null && memory.Sampling != null;
             if (!kept)
@@ -61,10 +59,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _sampling = new Shift(memory.Sampling, Sample);
             _busy = new Shift(memory.Busy, Continued);
-            _quit = Spellings.Fault(memory.Quit);
-            _met = Spellings.Fault(memory.Met);
-            _found = Spellings.Fault(memory.Found);
-            _restored = kept;
+            _faults = new Faults(sequence, instance, owner, memory, kept);
 
             if (!kept)
                 return;
@@ -99,25 +94,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool CanRun => _sequence.CanRun(_instance);
 
         Bindings _bindings;
-
-        readonly List<string> _actedOn = new List<string>();
-
-        List<string> ActedOn(IList<string> slots)
-        {
-            _actedOn.Clear();
-            if (_instance == null)
-            {
-                for (var i = 0; i < slots.Count; i++)
-                    _actedOn.Add(slots[i]);
-            }
-            else
-            {
-                _instance.Resolve(slots, _actedOn);
-            }
-
-            _bindings.Distinct(_actedOn);
-            return _actedOn;
-        }
 
         /// <summary>The sequence this runs.</summary>
         public Sequence Sequence => _sequence;
@@ -172,55 +148,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
-        /// <summary>
-        /// Why the last run ended before its last step, or none where it did not.
-        /// </summary>
-        /// <remarks>
-        /// Kept after the run has stopped, because that is the only moment somebody can be told: the
-        /// sequence is no longer running and nothing is outstanding to be asked. Cleared when the
-        /// sequence next runs, so it says what happened last time and never what happened once.
-        /// </remarks>
-        public SequenceFault Quit
-        {
-            get { return _quit; }
-            private set
-            {
-                if (!_quit.Same(value))
-                    _owner.Revise();
-
-                _quit = value;
-                _memory.Quit = Spellings.Kept(value);
-            }
-        }
-
-        /// <summary>What was wrong with the program for this sequence when it was last built, or none.</summary>
-        /// <remarks>Set by the runner of the whole program when the program or its wiring changes, and on no tick.</remarks>
-        public SequenceFault Found
-        {
-            get { return _found; }
-            private set
-            {
-                if (!_found.Same(value))
-                    _owner.Revise();
-
-                _found = value;
-                _memory.Found = Spellings.Kept(value);
-            }
-        }
-
-        /// <summary>What an open editor last saw gone, or possibly swapped, among the blocks this names, or none.</summary>
-        public SequenceFault Looked
-        {
-            get { return _looked; }
-            set
-            {
-                if (!_looked.Same(value))
-                    _owner.Revise();
-
-                _looked = value;
-            }
-        }
-
         /// <summary>The one of its system this runs on, or null where the system has none.</summary>
         public SystemInstance Instance => _instance;
 
@@ -229,31 +156,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Read, never worked out: what a run met, what an open editor saw, what the program said when it was built, and
         /// what the blocks of a step being waited on said. The worst news first, because a line can only say one thing.
         /// </remarks>
-        public SequenceFault Fault
-        {
-            get
-            {
-                if (_missingSeen != _owner.MissingStamp)
-                {
-                    _lost = _owner.Lost(_sequence, _instance);
-                    _missingSeen = _owner.MissingStamp;
-                }
+        public SequenceFault Fault => _faults.Fault;
 
-                if (_lost != null)
-                    return new SequenceFault(SequenceProblem.MissingSource, SequenceFault.Trigger, Trouble.None, _lost);
-                if (_met.Exists)
-                    return _met;
-                if (Looked.Exists)
-                    return Looked;
-                if (Found.Exists && !Found.IsWarning)
-                    return Found;
-                if (_stuck.Exists && IsWaiting)
-                    return _stuck;
-                if (Quit.Exists)
-                    return Quit;
-                return Found;
-            }
-        }
+        /// <summary>What is known to be wrong with this run, as each part of Sprocket finds it.</summary>
+        public Faults Faults => _faults;
 
         readonly AutomationRunner _owner;
         readonly Rota _rota;
@@ -261,18 +167,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Shift _sampling;
 
         readonly Shift _busy;
-
-        SequenceFault _met;
-
-        /// <summary>Whether it was made from what the world remembered and has not been checked since, so the first check keeps what its last run met.</summary>
-        bool _restored;
-
-        /// <summary>How many times what every act comes to has been worked out afresh; the first takes up what the world remembered of each block waited on, and every later one lets it go.</summary>
-        int _generation;
-        SequenceFault _stuck;
-
-        int _missingSeen = -1;
-        string _lost;
 
 
         /// <summary>
@@ -294,7 +188,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var stuck = SequenceFault.None;
             foreach (var step in _memory.Outstanding)
             {
-                var compiled = Compile(step);
+                var compiled = _workings.Compile(step, _bindings);
                 foreach (var acted in compiled.Acts)
                 {
                     var until = acted.Action.Until;
@@ -322,7 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Trouble said = acted.Bound.Trouble(entity.Block, acted.Seen);
                     if (said.Ends)
                     {
-                        Hold(stuck);
+                        _faults.Hold(stuck);
                         return new SequenceFault(SequenceProblem.Conflicted, step, said, entity.Name);
                     }
 
@@ -331,17 +225,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
             }
 
-            Hold(stuck);
+            _faults.Hold(stuck);
             return SequenceFault.None;
-        }
-
-        /// <summary>Keeps what the blocks of a step being waited on said stops it finishing, and says so where it changed.</summary>
-        void Hold(SequenceFault stuck)
-        {
-            if (!_stuck.Same(stuck))
-                _owner.Revise();
-
-            _stuck = stuck;
         }
 
         /// <summary>How much of a wait is left to spend, in ticks.</summary>
@@ -759,7 +644,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!act.HasAction || act.Sets)
                     continue;
 
-                var compiled = Compile(step);
+                var compiled = _workings.Compile(step, _bindings);
                 foreach (var acted in compiled.Acts)
                 {
                     if (acted.Bound != null)
@@ -792,7 +677,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!act.HasAction)
                 return true;
 
-            var compiled = Compile(step);
+            var compiled = _workings.Compile(step, _bindings);
             foreach (var acted in compiled.Acts)
             {
                 var until = acted.Action.Until;
@@ -806,12 +691,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Lets go of everything being waited on, forgetting what any block said it was done with.</summary>
         void Release()
         {
-            foreach (var step in _memory.Outstanding)
-            {
-                var compiled = step < _steps.Length ? _steps[step] : null;
-                for (var t = 0; compiled != null && t < compiled.Acts.Count; t++)
-                    compiled.Acts[t].Done = false;
-            }
+            _workings.Forget();
 
             _memory.Outstanding.Clear();
             _memory.Acts.Clear();
@@ -821,39 +701,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void WaitOn(int step)
         {
             _memory.Outstanding.Add(step);
-            Listed(Compile(step));
-        }
-
-        /// <summary>Keeps what is remembered of each block of <paramref name="compiled" /> in what the world saves, where it is not kept already.</summary>
-        void Listed(Compiled compiled)
-        {
-            foreach (var acted in compiled.Acts)
-            {
-                if (!_memory.Acts.Contains(acted.Kept))
-                    _memory.Acts.Add(acted.Kept);
-            }
-        }
-
-        /// <summary>
-        /// What is remembered of the block at <paramref name="index" /> of the act at <paramref name="step" />: what the world kept
-        /// where this is the first working out since a load, and a fresh one otherwise, remembering what the block does where
-        /// <paramref name="remembers" /> says.
-        /// </summary>
-        ActMemory Kept(int step, int index, bool remembers)
-        {
-            for (var i = 0; _generation == 1 && i < _memory.Acts.Count; i++)
-            {
-                var kept = _memory.Acts[i];
-                if (kept.Step != step || kept.Index != index)
-                    continue;
-
-                if (kept.Seen != null)
-                    kept.Seen.Clock = _owner.Clock;
-
-                return kept;
-            }
-
-            return new ActMemory { Step = step, Index = index, Seen = remembers ? new Recall { Clock = _owner.Clock } : null };
+            _workings.Listed(_workings.Compile(step, _bindings));
         }
 
         void Start(int tick)
@@ -864,9 +712,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             // What stopped the last run is about the last run. Somebody starting this one has
             // either mended it or is about to find out again.
-            Quit = SequenceFault.None;
-            Met(SequenceFault.None);
-            Hold(SequenceFault.None);
+            _faults.Quit = SequenceFault.None;
+            _faults.Met(SequenceFault.None);
+            _faults.Hold(SequenceFault.None);
             StoppedBy = Stopper.None;
             _memory.Step = 0;
             EnterStep();
@@ -919,7 +767,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     // A block the step needs that is gone, or may have been swapped, is found here, where the run needs
                     // it; the working-out it rests on is already done once per change.
-                    var needed = act.HasAction ? Compile(_memory.Step) : null;
+                    var needed = act.HasAction ? _workings.Compile(_memory.Step, _bindings) : null;
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
                         Meet(new SequenceFault(needed.Problem, _memory.Step, Trouble.None, needed.Which));
@@ -1043,7 +891,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         if (quit.Exists)
                         {
                             Stop();
-                            Quit = quit;
+                            _faults.Quit = quit;
                             return;
                         }
 
@@ -1054,7 +902,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Release();
                     _memory.Started.Clear();
                     _memory.Holding = false;
-                    Hold(SequenceFault.None);
+                    _faults.Hold(SequenceFault.None);
                     IsWaiting = false;
                     Step();
                     continue;
@@ -1099,7 +947,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var at = _memory.Step;
             while (true)
             {
-                var tested = Test(at, test);
+                var tested = _workings.Test(at, test, _bindings);
                 if (tested.Problem != SequenceProblem.None)
                 {
                     Meet(new SequenceFault(tested.Problem, at, Trouble.None, tested.Which));
@@ -1186,7 +1034,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!((Act)_sequence.Steps[step]).HasAction)
                     continue;
 
-                var compiled = Compile(step);
+                var compiled = _workings.Compile(step, _bindings);
                 if (compiled.Problem != SequenceProblem.None)
                     return new SequenceFault(compiled.Problem, step, Trouble.None, compiled.Which);
             }
@@ -1198,35 +1046,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Meet(SequenceFault fault)
         {
             Stop();
-            Met(fault);
+            _faults.Met(fault);
             _owner.Faulted(_sequence, _instance, fault);
-        }
-
-        /// <summary>Takes what the program says is wrong, now it has been built again, forgetting what the last run met.</summary>
-        /// <remarks>
-        /// The first check of a run the world remembered is of the same program it was last checked as, so what that check
-        /// found, and what the run met, still stand: a construct changed since is found by a run, at the step that needs it,
-        /// as it would have been had the world not been saved.
-        /// </remarks>
-        public void Checked(SequenceFault found)
-        {
-            if (!_restored)
-            {
-                Found = found;
-                Met(SequenceFault.None);
-            }
-
-            _restored = false;
-        }
-
-        /// <summary>Keeps what the run met.</summary>
-        void Met(SequenceFault fault)
-        {
-            if (!_met.Same(fault))
-                _owner.Revise();
-
-            _met = fault;
-            _memory.Met = Spellings.Kept(fault);
         }
 
         /// <summary>Whether conflicts are due to be looked for, once every <see cref="Conflicts" /> ticks, and notes that they are.</summary>
@@ -1252,7 +1073,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (!((Act)_sequence.Steps[step]).HasAction)
                     continue;
 
-                var compiled = Compile(step);
+                var compiled = _workings.Compile(step, _bindings);
                 foreach (var acted in compiled.Acts)
                 {
                     var expected = acted.Bound?.Expected(acted.Entity.Block) ?? GridEntity.Unestimated;
@@ -1295,7 +1116,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!act.HasAction)
                 return;
 
-            var compiled = Compile(step);
+            var compiled = _workings.Compile(step, _bindings);
             foreach (var acted in compiled.Acts)
             {
                 // Done again, so what its blocks said of the last time is no answer for this one.
@@ -1326,7 +1147,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!act.HasAction || act.Form != Nature.Native)
                 return SequenceFault.None;
 
-            var compiled = Compile(step);
+            var compiled = _workings.Compile(step, _bindings);
             foreach (var acted in compiled.Acts)
             {
                 if (acted.Bound == null || acted.Action.Until != null)
@@ -1340,264 +1161,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return SequenceFault.None;
         }
 
-        /// <summary>
-        /// What one act comes to on this one's blocks: each block it acts on and what it does there, or why it cannot be
-        /// done.
-        /// </summary>
-        sealed class Compiled
-        {
-            public readonly List<Acted> Acts = new List<Acted>();
-
-            /// <summary>Why the act cannot be done, gone or possibly swapped, or none.</summary>
-            public SequenceProblem Problem;
-
-            /// <summary>The block that is so, by its reference.</summary>
-            public string Which;
-        }
-
-        /// <summary>
-        /// One block an act reaches: what it does there, its values as that takes them, what the action makes of them, the
-        /// order made ready where the game does it, and what the action remembers of the block.
-        /// </summary>
-        sealed class Acted
-        {
-            public GridEntity Entity;
-            public EntityAction Action;
-
-            /// <summary>The number of the facet a member of a type the host provides acts on, from 1, or 0 for a member of the block.</summary>
-            public int Facet;
-
-            public IList<Literal> Arguments;
-            public Bound Bound;
-            public Order Order;
-
-            /// <summary>What is remembered of the block, kept in what the world saves while its act is waited on.</summary>
-            public ActMemory Kept;
-
-            /// <summary>What the action remembers of the block between looks, or null.</summary>
-            public Recall Seen => Kept.Seen;
-
-            /// <summary>Whether the block has said it is done with what it was told, short of what the action waits for.</summary>
-            public bool Done
-            {
-                get { return Kept.Done; }
-                set { Kept.Done = value; }
-            }
-        }
-
-        /// <summary>
-        /// What one test comes to on this one's blocks: each block it reads, or why it cannot be read.
-        /// </summary>
-        sealed class Tested
-        {
-            public readonly List<Probe> Reads = new List<Probe>();
-
-            /// <summary>Why the test cannot be read, a slot empty or a block gone or possibly swapped, or none.</summary>
-            public SequenceProblem Problem;
-
-            /// <summary>The slot or block that is so, by its reference.</summary>
-            public string Which;
-        }
-
-        Compiled[] _steps = new Compiled[0];
-
-        Tested[] _tests = new Tested[0];
-
-        int _boundAt = -1;
-        int _editedAt = -1;
-
         /// <summary>How many times an act has been worked out.</summary>
         /// <remarks>Counted so it can be shown that a run repeating what it asks works nothing out again.</remarks>
-        public int Compilations { get; private set; }
-
-        /// <summary>
-        /// What the act at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests
-        /// on has changed.
-        /// </summary>
-        /// <remarks>
-        /// <b>Every act a run does and waits on is asked for here, on the tick it happens.</b> So the
-        /// blocks, what each is told and the values it is handed are found once per change to the
-        /// program or to what its names point at, and a tick that repeats a step reads an array and does
-        /// the act. A block whose action takes a value as some other kind is left out: the step is
-        /// at fault, and the fault says so.
-        /// </remarks>
-        Compiled Compile(int step)
-        {
-            Fresh();
-
-            var compiled = _steps[step];
-            if (compiled != null)
-                return compiled;
-
-            Compilations++;
-            var act = (Act)_sequence.Steps[step];
-            compiled = new Compiled();
-            compiled.Problem = Needed(act.Targets, SequenceProblem.MissingTarget, out compiled.Which);
-            var acting = ActedOn(act.Targets);
-            foreach (var name in acting)
-            {
-                var entity = _bindings.Entity(name);
-                if (entity == null)
-                    continue;
-
-                var action = act.Names(entity.Kind.Actions);
-                if (action == null)
-                    continue;
-
-                // A block lacking the facet its slot holds is left out, and the fault names it.
-                var type = action.Type;
-                var facet = type == null ? 0 : FacetOf(act.Targets, name);
-                if (type != null && facet > 0 && type.Find(entity.Kind, facet) == null)
-                    continue;
-
-                var shared = Shared(compiled, action, act.Arguments, facet);
-                if (shared == null)
-                    continue;
-
-                compiled.Acts.Add(new Acted
-                {
-                    Entity = entity,
-                    Action = action,
-                    Facet = facet,
-                    Arguments = shared.Arguments,
-                    Bound = shared.Bound,
-                    Order = entity.Prepare(action, shared.Bound, shared.Arguments),
-                    Kept = Kept(step, compiled.Acts.Count, action.Doing != null)
-                });
-            }
-
-            _steps[step] = compiled;
-            if (_memory.Outstanding.Contains(step))
-                Listed(compiled);
-
-            return compiled;
-        }
-
-        /// <summary>What the test at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests on has changed, as an act is.</summary>
-        /// <remarks>A block that has no such member, or cannot compare it as the test does, is left out: the step is at fault, and the fault says so.</remarks>
-        Tested Test(int step, Comparison test)
-        {
-            Fresh();
-
-            var tested = _tests[step];
-            if (tested != null)
-                return tested;
-
-            tested = new Tested();
-            tested.Problem = Needed(test.Targets, SequenceProblem.MissingGate, out tested.Which);
-
-            var reading = ActedOn(test.Targets);
-            foreach (var name in reading)
-            {
-                // A block lacking the facet its slot holds is left out, and the fault names it.
-                var entity = _bindings.Entity(name);
-                var member = entity == null ? null : test.Names(entity.Kind.Actions);
-                var facet = FacetOf(test.Targets, name);
-                if (facet > 0 && member?.Type != null && member.Type.Find(entity.Kind, facet) == null)
-                    continue;
-
-                var probe = Probe.Of(entity, test.Provider, test.MemberId, test.Arguments,
-                    test.Quantifier, test.Relation, test.Value, null, _owner.Clock, facet);
-
-                if (probe != null)
-                    tested.Reads.Add(probe);
-            }
-
-            _tests[step] = tested;
-            return tested;
-        }
-
-        /// <summary>Forgets what every act and test came to, where the program or what its names point at has changed since.</summary>
-        void Fresh()
-        {
-            var bound = _bindings.Revision;
-            var edited = _owner.Program.Edits;
-            if (bound == _boundAt && edited == _editedAt)
-                return;
-
-            var count = _sequence.Steps.Count;
-            _steps = new Compiled[count];
-            _tests = new Tested[count];
-            _boundAt = bound;
-            _editedAt = edited;
-
-            // Worked out again after something changed: the blocks may be other blocks, so nothing remembered of them stands.
-            _generation++;
-            if (_generation > 1)
-                _memory.Acts.Clear();
-        }
-
-        /// <summary>
-        /// The first block a step needs and cannot have, by its reference: a slot left empty, a block gone, or one possibly
-        /// swapped for another; with why, where a block gone is <paramref name="lost" />.
-        /// </summary>
-        /// <remarks>A slot that may be left empty is skipped, and so is a block gone from one.</remarks>
-        SequenceProblem Needed(IList<string> targets, SequenceProblem lost, out string which)
-        {
-            which = null;
-            var system = _sequence.System;
-            for (var s = 0; s < targets.Count; s++)
-            {
-                var slot = targets[s];
-                var part = system?.FindPart(slot);
-                var filled = _instance?.FilledWith(slot);
-                if (part != null && _instance != null && (filled == null || filled.Count == 0))
-                {
-                    if (part.Optional)
-                        continue;
-
-                    which = slot;
-                    return SequenceProblem.EmptySlot;
-                }
-
-                var count = filled?.Count ?? 1;
-                for (var n = 0; n < count; n++)
-                {
-                    var name = filled == null ? slot : filled[n];
-                    var points = _bindings.State(name);
-                    if (points == RefState.Bound || (points == RefState.Lost && part != null && part.Optional))
-                        continue;
-
-                    which = name;
-                    return points == RefState.Lost ? lost : SequenceProblem.Adrift;
-                }
-            }
-
-            return SequenceProblem.None;
-        }
-
-        /// <summary>
-        /// The values as <paramref name="action" /> takes them, and what the action makes of them, or null where it cannot
-        /// take them.
-        /// </summary>
-        /// <remarks>
-        /// Shared between the blocks of one act that do the same thing, which is every block of the
-        /// same kind: an airlock's two doors are handed one list, and one reading of it. A member of a type the host provides
-        /// receives the number <paramref name="facet" /> of its facet first, so its blocks share only as far as they share a facet.
-        /// </remarks>
-        static Acted Shared(Compiled compiled, EntityAction action, IList<Literal> given, int facet)
-        {
-            foreach (var acted in compiled.Acts)
-            {
-                if (acted.Action == action && acted.Facet == facet)
-                    return acted;
-            }
-
-            var converted = new List<Literal>(given.Count);
-            if (!action.Converts(given, converted))
-                return null;
-
-            return new Acted
-            {
-                Arguments = converted,
-                Bound = action.Doing?.Bind(action.Type == null ? converted : HostType.Arguments(facet, converted))
-            };
-        }
-
-        /// <summary>The number of the facet of <paramref name="block" /> the slots <paramref name="targets" /> hold, from 1, or 0 where they hold none.</summary>
-        int FacetOf(IList<string> targets, string block)
-        {
-            return _instance == null ? 0 : _instance.FacetOf(targets, block);
-        }
+        public int Compilations => _workings.Compilations;
     }
 }

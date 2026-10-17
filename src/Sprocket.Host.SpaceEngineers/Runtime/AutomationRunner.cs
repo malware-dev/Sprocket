@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -18,20 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </remarks>
     public sealed class AutomationRunner
     {
-        readonly Dictionary<long, SequenceRunner> _runners = new Dictionary<long, SequenceRunner>();
-        readonly Dictionary<long, SequenceRunner> _acting = new Dictionary<long, SequenceRunner>();
-        readonly Dictionary<Trigger, Sequence> _alone = new Dictionary<Trigger, Sequence>();
-        readonly Dictionary<Trigger, List<Poller>> _pollers = new Dictionary<Trigger, List<Poller>>();
-
-        int _missingStamp;
-        readonly HashSet<Poller> _keptPollers = new HashSet<Poller>();
-
-        readonly List<Recalling> _recalling = new List<Recalling>();
-        readonly HashSet<long> _keptActing = new HashSet<long>();
-        readonly HashSet<Trigger> _keptTriggers = new HashSet<Trigger>();
-        readonly List<Trigger> _goneTriggers = new List<Trigger>();
-        readonly List<long> _stale = new List<long>();
-        readonly List<long> _live = new List<long>();
+        readonly Runs _runs;
+        readonly Watches _watches;
         readonly Automation _automation;
         readonly GridWorld _world;
         readonly Bindings _bindings = new Bindings();
@@ -47,7 +33,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int _lookedBindings = -1;
         int _lookedEdits = -1;
         int _lookedRunners = -1;
-        int _aloneIds;
 
         /// <summary>
         /// A runner with a rota of its own, which it runs itself, for a program that shares its world
@@ -64,6 +49,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _automation = automation;
             _world = world;
             _rota = rota;
+            _runs = new Runs(this, automation);
+            _watches = new Watches(this, automation);
             Live = true;
             Clock = () => CurrentTick;
 
@@ -164,17 +151,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Takes everything this program put on the rota off it, when its Sprocket goes away.</summary>
         public void Retire()
         {
-            foreach (var runner in _runners.Values)
-                runner.Retire();
-
-            foreach (var runner in _acting.Values)
-                runner.Retire();
-
-            foreach (var pollers in _pollers.Values)
-            {
-                foreach (var poller in pollers)
-                    poller.Retire();
-            }
+            _runs.Retire();
+            _watches.Retire();
         }
 
         /// <summary>How many times the program has been checked.</summary>
@@ -221,106 +199,34 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 ? system.Uses[0].Number
                 : 0;
 
-            return Get(Key(sequence.Id, first));
+            return _runs.Get(Runs.Key(sequence.Id, first));
         }
 
         /// <summary>Live state for a sequence on one particular one of its system.</summary>
         public SequenceRunner Get(Sequence sequence, SystemInstance instance)
         {
-            return Get(Key(sequence.Id, instance?.Number ?? 0));
-        }
-
-        SequenceRunner Get(long key)
-        {
-            SequenceRunner runner;
-            if (_runners.TryGetValue(key, out runner))
-                return runner;
-
-            return _acting.TryGetValue(key, out runner) ? runner : null;
+            return _runs.Get(Runs.Key(sequence.Id, instance?.Number ?? 0));
         }
 
         /// <summary>
         /// What runs the act a trigger does itself: a sequence with no number and that act for its one step, or null
         /// where the trigger runs or stops a sequence instead.
         /// </summary>
-        /// <remarks>
-        /// The runtime's alone, and never in the system: the program says only that the trigger acts. Running the act as a
-        /// step is what has it worked out, checked, reported and switched off at fault exactly as a step of a sequence is.
-        /// Kept per trigger for the life of the program, and given the act again where the trigger was pointed at another.
-        /// </remarks>
         public Sequence Alone(AutomationSystem system, Trigger trigger)
         {
-            var act = trigger.Acts;
-            if (act == null)
-                return null;
-
-            Sequence alone;
-            if (!_alone.TryGetValue(trigger, out alone))
-            {
-                alone = new Sequence(--_aloneIds);
-                alone.System = system;
-                _alone.Add(trigger, alone);
-            }
-
-            if (alone.Steps.Count != 1 || alone.Steps[0] != act)
-            {
-                alone.Steps.Clear();
-                alone.Steps.Add(act);
-            }
-
-            return alone;
+            return _runs.Alone(system, trigger);
         }
 
-        /// <summary>What watches <paramref name="trigger" /> on <paramref name="instance" />, or null where nothing is looked for.</summary>
-        public Poller Poller(Trigger trigger, SystemInstance instance)
-        {
-            List<Poller> pollers;
-            if (!_pollers.TryGetValue(trigger, out pollers))
-                return null;
+        /// <summary>The runners of the program.</summary>
+        public Runs Runs => _runs;
 
-            foreach (var poller in pollers)
-            {
-                if (poller.Instance == instance)
-                    return poller;
-            }
-
-            return null;
-        }
-
-        /// <summary>Counts up whenever what <see cref="Lost" /> answers may have changed, so a reader asks again only then.</summary>
-        public int MissingStamp => _missingStamp;
-
-        /// <summary>Says a poller now finds a block it watches gone, or back, or the pollers themselves changed.</summary>
-        public void MissingChanged()
-        {
-            _missingStamp++;
-            Revise();
-        }
+        /// <summary>The pollers of the program.</summary>
+        public Watches Watches => _watches;
 
         /// <summary>Says something an open screen shows of the runs has changed, on the tick it changed.</summary>
         public void Revise()
         {
             Revision++;
-        }
-
-        /// <summary>A block a trigger of <paramref name="sequence" /> watches on <paramref name="instance" /> that is no longer on the construct, by its reference, or null.</summary>
-        /// <remarks>Walks every poller, so it is read through <see cref="MissingStamp" /> rather than on every look.</remarks>
-        public string Lost(Sequence sequence, SystemInstance instance)
-        {
-            foreach (var pair in _pollers)
-            {
-                if (!pair.Key.IsAbout(sequence))
-                    continue;
-
-                var pollers = pair.Value;
-                foreach (var poller in pollers)
-                {
-                    if (poller.Instance == instance && poller.Lost != null)
-                        return poller.Lost;
-                }
-            }
-
-            return null;
         }
 
         /// <summary>Does what <paramref name="trigger" /> of <paramref name="system" /> does on <paramref name="instance" />, because what it watches for came round.</summary>
@@ -354,11 +260,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var acting = alone == null ? null : Get(alone, instance);
             if (acting != null)
                 acting.Triggered(_bindings, CurrentTick);
-        }
-
-        static long Key(int sequenceId, int instanceNumber)
-        {
-            return ((long)sequenceId << 20) | (uint)instanceNumber;
         }
 
         /// <summary>Starts a named sequence, as a trigger or another sequence would.</summary>
@@ -407,64 +308,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Puts a saved run back, as soon as there is a runner to put it in.
-        /// </summary>
-        /// <remarks>
-        /// Held rather than applied where the runner does not exist yet, which is the ordinary case:
-        /// state is read as a world loads, and the runners are made on the first tick after that. A
-        /// run held for a sequence that never appears is simply never applied, and costs one entry.
-        /// </remarks>
-        public void Resume(Sequence sequence, SystemInstance instance, int step, bool waiting, int waitTicks, bool byHand)
-        {
-            if (sequence == null)
-                return;
-
-            var key = Key(sequence.Id, instance?.Number ?? 0);
-
-            SequenceRunner runner;
-            if (_runners.TryGetValue(key, out runner))
-            {
-                runner.Resume(step, waiting, waitTicks, byHand);
-                return;
-            }
-
-            var held = new Held();
-            held.Which = key;
-            held.Step = step;
-            held.Waiting = waiting;
-            held.WaitTicks = waitTicks;
-            held.ByHand = byHand;
-            _resuming.Add(held);
-        }
-
-        /// <summary>One run read out of storage, waiting for its runner to be made.</summary>
-        struct Held
-        {
-            public long Which;
-            public int Step;
-            public bool Waiting;
-            public int WaitTicks;
-            public bool ByHand;
-        }
-
-        readonly List<Held> _resuming = new List<Held>();
-
-        /// <summary>Gives a freshly made runner whatever was read for it, if anything.</summary>
-        void Resumed(long key, SequenceRunner runner)
-        {
-            for (var i = 0; i < _resuming.Count; i++)
-            {
-                if (_resuming[i].Which != key)
-                    continue;
-
-                var held = _resuming[i];
-                _resuming.RemoveAt(i);
-                runner.Resume(held.Step, held.Waiting, held.WaitTicks, held.ByHand);
-                return;
-            }
-        }
-
-        /// <summary>
         /// Keeps the set of runners matching the sequences and the ones of each system.
         /// </summary>
         /// <remarks>
@@ -475,110 +318,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             Reconciled++;
             Revise();
-            _live.Clear();
-
-            var systems = _automation.Systems;
-            for (var s = 0; s < systems.Count; s++)
-            {
-                var system = systems[s];
-                var instances = system.Uses;
-                var sequences = system.Sequences;
-
-                for (var n = 0; n < instances.Count; n++)
-                {
-                    for (var q = 0; q < sequences.Count; q++)
-                    {
-                        var key = Key(sequences[q].Id, instances[n].Number);
-                        _live.Add(key);
-
-                        if (_runners.ContainsKey(key))
-                            continue;
-
-                        var runner = new SequenceRunner(sequences[q], instances[n], this,
-                            Remembered(system, instances[n].Number, sequences[q].Number));
-
-                        // What a run step reaches: the same system, the same one of it, by number.
-                        var owner = system;
-                        var one = instances[n];
-                        var caller = sequences[q].Number;
-                        runner.Calls = (number, stops) =>
-                        {
-                            var called = owner.FindSequence(number);
-                            if (called == null)
-                                return;
-
-                            if (stops)
-                                Halt(called, one, Stopper.Sequence, caller);
-                            else
-                                Call(called, one);
-                        };
-
-                        _runners.Add(key, runner);
-                        Resumed(key, runner);
-                    }
-                }
-            }
-
-            if (_runners.Count == _live.Count)
-                return;
-
-            _stale.Clear();
-            foreach (var pair in _runners)
-            {
-                if (!_live.Contains(pair.Key))
-                    _stale.Add(pair.Key);
-            }
-
-            foreach (var staleKey in _stale)
-            {
-                Forget(_runners[staleKey]);
-                _runners.Remove(staleKey);
-            }
-        }
-
-        /// <summary>
-        /// What the world remembers of sequence <paramref name="sequence" /> on installation <paramref name="instance" /> of
-        /// <paramref name="system" />, kept from now on where it remembers nothing yet.
-        /// </summary>
-        /// <remarks>Asked as a runner is made, which is when the program gains something, never on a tick.</remarks>
-        RunMemory Remembered(AutomationSystem system, int instance, int sequence)
-        {
-            var runs = _automation.Memory.Runs;
-            foreach (var run in runs)
-            {
-                if (run.System == system.Identity && run.Instance == instance && run.Sequence == sequence)
-                    return run;
-            }
-
-            var made = new RunMemory { System = system.Identity, Instance = instance, Sequence = sequence };
-            runs.Add(made);
-            return made;
-        }
-
-        /// <summary>
-        /// What the world remembers of trigger <paramref name="trigger" />, counted from one, on installation
-        /// <paramref name="instance" /> of <paramref name="system" />, kept from now on where it remembers nothing yet.
-        /// </summary>
-        /// <remarks>Asked as a poller is made, which is when the program gains something, never on a tick.</remarks>
-        WatchMemory Watched(AutomationSystem system, int instance, int trigger)
-        {
-            var watches = _automation.Memory.Watches;
-            foreach (var watch in watches)
-            {
-                if (watch.System == system.Identity && watch.Instance == instance && watch.Trigger == trigger)
-                    return watch;
-            }
-
-            var made = new WatchMemory { System = system.Identity, Instance = instance, Trigger = trigger };
-            watches.Add(made);
-            return made;
-        }
-
-        /// <summary>Retires a runner whose sequence or trigger is gone, and forgets what it remembered.</summary>
-        void Forget(SequenceRunner runner)
-        {
-            runner.Retire();
-            _automation.Memory.Runs.Remove(runner.Memory);
+            _runs.Reconcile();
         }
 
         /// <summary>Matches the runners to the program where it gained or lost something, and checks it where it or its wiring changed; nothing otherwise.</summary>
@@ -635,7 +375,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     {
                         var runner = Get(sequences[q], instances[n]);
                         if (runner != null)
-                            runner.Checked(SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]));
+                            runner.Faults.Checked(SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]));
                     }
 
                     for (var t = 0; t < triggers.Count; t++)
@@ -643,7 +383,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var alone = Alone(system, triggers[t]);
                         var runner = alone == null ? null : Get(alone, instances[n]);
                         if (runner != null)
-                            runner.Checked(SequenceSummary.Checked(_world, Bindings, alone, instances[n]));
+                            runner.Faults.Checked(SequenceSummary.Checked(_world, Bindings, alone, instances[n]));
                     }
                 }
 
@@ -692,10 +432,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         bool Parks(Sequence sequence, SystemInstance instance)
         {
             var runner = Get(sequence, instance);
-            if (runner == null || !runner.Found.Parks)
+            if (runner == null || !runner.Faults.Found.Parks)
                 return false;
 
-            Faulted(sequence, instance, runner.Found);
+            Faulted(sequence, instance, runner.Faults.Found);
             return true;
         }
 
@@ -706,9 +446,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>Done with the check, when the program or its wiring has changed, and on no other tick: triggers come and go only by those.</remarks>
         void Match()
         {
-            _keptPollers.Clear();
-            _keptActing.Clear();
-            _keptTriggers.Clear();
+            _watches.Begin();
+            _runs.Begin();
 
             var systems = _automation.Systems;
             for (var s = 0; s < systems.Count; s++)
@@ -720,151 +459,24 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 for (var t = 0; t < triggers.Count; t++)
                 {
                     var trigger = triggers[t];
-                    _keptTriggers.Add(trigger);
+                    _runs.KeepTrigger(trigger);
                     var signal = trigger as SignalTrigger;
                     var watched = trigger is WhenTrigger || trigger is EveryTrigger || (signal != null && signal.IsWatched);
-                    var alone = Alone(system, trigger);
+                    var alone = _runs.Alone(system, trigger);
 
                     for (var n = 0; n < instances.Count; n++)
                     {
                         if (watched)
-                            _keptPollers.Add(Watching(system, t, trigger, instances[n]));
+                            _watches.Keep(system, t, trigger, instances[n]);
 
                         if (alone != null)
-                            _keptActing.Add(Acting(system, t, alone, instances[n]));
+                            _runs.Keep(system, t, alone, instances[n]);
                     }
                 }
             }
 
-            _missingStamp++;
-            Revise();
-            _goneTriggers.Clear();
-            foreach (var pair in _pollers)
-            {
-                var pollers = pair.Value;
-                for (var i = pollers.Count - 1; i >= 0; i--)
-                {
-                    if (_keptPollers.Contains(pollers[i]))
-                        continue;
-
-                    pollers[i].Retire();
-                    _automation.Memory.Watches.Remove(pollers[i].Memory);
-                    pollers.RemoveAt(i);
-                }
-
-                if (pollers.Count == 0)
-                    _goneTriggers.Add(pair.Key);
-            }
-
-            foreach (var gone in _goneTriggers)
-                _pollers.Remove(gone);
-
-            _stale.Clear();
-            foreach (var pair in _acting)
-            {
-                if (!_keptActing.Contains(pair.Key))
-                    _stale.Add(pair.Key);
-            }
-
-            foreach (var staleKey in _stale)
-            {
-                Forget(_acting[staleKey]);
-                _acting.Remove(staleKey);
-            }
-
-            // A trigger that has gone takes what ran its act with it; one put back by a step back is given another.
-            _goneTriggers.Clear();
-            foreach (var trigger in _alone.Keys)
-            {
-                if (!_keptTriggers.Contains(trigger))
-                    _goneTriggers.Add(trigger);
-            }
-
-            foreach (var gone in _goneTriggers)
-                _alone.Remove(gone);
-        }
-
-        /// <summary>The poller for <paramref name="trigger" />, at <paramref name="place" /> among its system's, on <paramref name="instance" />, made where there is none.</summary>
-        /// <remarks>
-        /// One just made takes up what the world remembers of it, and is handed whatever a copy was sent. Its place is written
-        /// again on every check, so what it remembers follows the trigger when one before it goes.
-        /// </remarks>
-        Poller Watching(AutomationSystem system, int place, Trigger trigger, SystemInstance instance)
-        {
-            var poller = Poller(trigger, instance);
-            if (poller != null)
-            {
-                poller.Memory.Trigger = place + 1;
-                return poller;
-            }
-
-            List<Poller> pollers;
-            if (!_pollers.TryGetValue(trigger, out pollers))
-            {
-                pollers = new List<Poller>();
-                _pollers.Add(trigger, pollers);
-            }
-
-            poller = new Poller(system, trigger, instance, this, Watched(system, instance.Number, place + 1));
-            pollers.Add(poller);
-
-            for (var i = _recalling.Count - 1; i >= 0; i--)
-            {
-                if (_recalling[i].Trigger != trigger || _recalling[i].Instance != instance)
-                    continue;
-
-                _recalling[i].Recall(poller);
-                _recalling.RemoveAt(i);
-            }
-
-            return poller;
-        }
-
-        /// <summary>
-        /// Gives the poller for <paramref name="trigger" /> on <paramref name="instance" /> what a save remembered of it, now or
-        /// as it is made.
-        /// </summary>
-        /// <remarks>
-        /// State is read as a world loads, and the pollers are made on the first check after that. One held for a trigger
-        /// that never comes is never applied, and costs one entry.
-        /// </remarks>
-        public void Recall(Trigger trigger, SystemInstance instance, Action<Poller> recall)
-        {
-            var poller = Poller(trigger, instance);
-            if (poller != null)
-            {
-                recall(poller);
-                return;
-            }
-
-            _recalling.Add(new Recalling { Trigger = trigger, Instance = instance, Recall = recall });
-        }
-
-        /// <summary>What a save remembered of a poller, waiting for it to be made.</summary>
-        struct Recalling
-        {
-            public Trigger Trigger;
-            public SystemInstance Instance;
-            public Action<Poller> Recall;
-        }
-
-        /// <summary>The key of the runner for the own act of trigger <paramref name="trigger" /> of <paramref name="system" /> on <paramref name="instance" />, made where there is none.</summary>
-        /// <remarks>
-        /// Remembered as a sequence numbered below nought, minus the trigger's place counted from one, which no sequence of the
-        /// system's is. The place is written again on every check, so it follows the trigger when one before it goes.
-        /// </remarks>
-        long Acting(AutomationSystem system, int trigger, Sequence alone, SystemInstance instance)
-        {
-            var key = Key(alone.Id, instance.Number);
-            SequenceRunner runner;
-            if (!_acting.TryGetValue(key, out runner))
-            {
-                runner = new SequenceRunner(alone, instance, this, Remembered(system, instance.Number, -(trigger + 1)));
-                _acting.Add(key, runner);
-            }
-
-            runner.Memory.Sequence = -(trigger + 1);
-            return key;
+            _watches.Sweep();
+            _runs.Sweep();
         }
 
         /// <summary>Switches off what <paramref name="sequence" /> runs on, with why, where it is switched on.</summary>
@@ -921,11 +533,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _lookedEdits = _automation.Edits;
             _lookedRunners = Reconciled;
 
-            foreach (var runner in _runners.Values)
-                runner.Looked = SequenceSummary.Looked(bindings, runner.Sequence, runner.Instance);
-
-            foreach (var runner in _acting.Values)
-                runner.Looked = SequenceSummary.Looked(bindings, runner.Sequence, runner.Instance);
+            _runs.Look(bindings);
         }
     }
 }

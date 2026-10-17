@@ -530,7 +530,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
 
             Lost = lost;
-            _owner.MissingChanged();
+            _owner.Watches.MissingChanged();
         }
     }
 }
