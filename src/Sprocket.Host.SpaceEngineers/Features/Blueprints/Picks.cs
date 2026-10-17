@@ -128,7 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return Named(system, blocks, null);
         }
 
-        /// <summary>The same, for blocks picked in place of the names <paramref name="replacing" />, the list itself, where they replace one.</summary>
+        /// <summary>The names <paramref name="system" /> uses for <paramref name="blocks" />, picked in place of the names <paramref name="replacing" />, the list itself, where they replace one: a system's variables, or the slots a blueprint's stand-in fills with them.</summary>
         /// <remarks>
         /// In a blueprint the slots are worked out by <see cref="Slotting" />, and what that changes beyond the names given
         /// back is kept for the edit made next, which carries it so taking the edit back takes it back too.
@@ -240,7 +240,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return Facet(system, _editor.StandIn(system), names);
         }
 
-        /// <summary>The same, as the installation <paramref name="shown" /> fills the slots.</summary>
+        /// <summary>The name of the facet the slot among <paramref name="names" /> holding a type the host provides holds of the first block it holds, as the installation <paramref name="shown" /> fills the slots; empty where none holds one.</summary>
         public string Facet(AutomationSystem system, SystemInstance shown, IList<string> names)
         {
             if (shown == null)

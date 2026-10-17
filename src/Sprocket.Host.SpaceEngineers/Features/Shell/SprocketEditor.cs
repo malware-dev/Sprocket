@@ -28,17 +28,10 @@ using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>
-    /// The editor. All of it.
-    /// </summary>
+    /// <summary>The editor of a construct's automation: the pages open, the screen built from the one on top, and every edit made from them.</summary>
     /// <remarks>
-    /// Navigation, page contents, slot filling and search live here rather than in the screens.
-    /// What is drawn renders <see cref="Screen" /> and each page's view, and carries out the commands they hand it; it
-    /// decides nothing about what the editor means or does, and nothing it draws has to be worked out twice.
-    ///
-    /// The wording is the one thing this does not own - see <see cref="Sentences.SequenceText" />, which
-    /// decides word order, capitals and every other thing that is a language's business rather than
-    /// automation's.
+    /// What is drawn renders <see cref="Screen" /> and each page's view, and carries out the commands they hand back, so
+    /// nothing it draws has to be worked out twice.
     /// </remarks>
     public sealed class SprocketEditor
     {
@@ -143,19 +136,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public Notice Notice => _bulletin.Notice;
 
         /// <summary>
-        /// Who the systems made here are by: the namespace a new system gets.
-        /// </summary>
-        /// <remarks>
-        /// Set by the host, which knows who is at the screen - in the game, the player's name until they
-        /// choose one of their own. Empty makes systems with no namespace, which is only ever a host that has
-        /// not said.
-        /// <para>
-        /// <b>Held to the same rule as any other name, because that is what it becomes.</b> It is written
-        /// into a save as a namespace and read back out of one, so the length and the line it has to fit
-        /// on are the same length and the same line. What a host hands over is its own business.
-        /// </para>
-        /// </remarks>
-        /// <summary>
         /// Where running a sequence by hand, or stopping it, goes where it is not the runner here, or
         /// null: the sequence, the one of its system, and whether it stops.
         /// </summary>
@@ -210,6 +190,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Who is editing, by player name: the namespace a logic system copied in is made by; empty where nobody is named.</summary>
+        /// <remarks>
+        /// Set by the host, which knows who is at the screen: in the game, the player's name until they choose one of their
+        /// own.
+        /// <para>
+        /// <b>Held to the same rule as any other name, because that is what it becomes.</b> It is written
+        /// into a save as a namespace and read back out of one, so the length and the line it has to fit
+        /// on are the same length and the same line. What a host hands over is its own business.
+        /// </para>
+        /// </remarks>
         public string Author
         {
             get { return _author; }
@@ -241,18 +230,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>Ticks elapsed. The only honest unit of time available.</summary>
+        /// <summary>The ticks the runner has counted.</summary>
         public int CurrentTick => _runner.CurrentTick;
 
-        /// <summary>
-        /// Advances everything to the given frame and brings the screen up to date.
-        /// </summary>
-        /// <remarks>
-        /// The clock belongs to the target, and so does the frame number: Space
-        /// Engineers passes its own counter, a desktop host passes one it keeps, a
-        /// test passes whatever it likes. Nothing in core counts time for itself.
-        /// </remarks>
-        /// <summary>One frame of a screen somebody is looking at.</summary>
+        /// <summary>Brings the screen up to date for frame <paramref name="tick" />, which the host counts.</summary>
         /// <remarks>
         /// Only while a screen is open: everything here is about what a screen shows. What runs the
         /// program, and what switches off a sequence that cannot work, is the runtime's and goes on
@@ -338,15 +319,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.Ask(question, false);
         }
 
-        /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
+        /// <summary>Puts the short question <paramref name="question" /> on the screen, to be answered before anything else, its named slots taking their words from <paramref name="arguments" />.</summary>
         public void Ask(string question, Arguments arguments)
         {
             _screen.Ask(question, arguments, false);
         }
 
-        /// <summary>
-        /// The same, for a question that belongs to the control somebody just pressed.
-        /// </summary>
+        /// <summary>Puts the question <paramref name="question" /> under the control somebody just pressed, to be answered before anything else.</summary>
         /// <remarks>
         /// A menu rather than a dialog: it hangs under what was pressed, because the answers are
         /// about that thing and the row it is on has to stay in sight. A question about the screen -
@@ -358,13 +337,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.Ask(question, true);
         }
 
-        /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
+        /// <summary>Puts the question <paramref name="question" /> under the control somebody just pressed, to be answered before anything else, its named slots taking their words from <paramref name="arguments" />.</summary>
         public void AskHere(string question, Arguments arguments)
         {
             _screen.Ask(question, arguments, true);
         }
 
-        /// <summary>Adds a way to answer, in the order they are offered.</summary>
+        /// <summary>Adds the answer <paramref name="text" /> to the standing question, carrying out <paramref name="chosen" />, after the answers already offered.</summary>
         /// <remarks>The answer that does what was asked about comes first and the one that does not second, as Yes and No stand in the game's own message boxes.</remarks>
         public void Answer(string text, Action chosen)
         {
@@ -377,9 +356,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Answer(text, () => Current.Primary(), byDefault);
         }
 
-        /// <summary>
-        /// The same, saying whether this is the one Enter takes.
-        /// </summary>
+        /// <summary>Adds the answer <paramref name="text" /> to the standing question, carrying out <paramref name="chosen" />, after the answers already offered; the one Enter takes where <paramref name="byDefault" />.</summary>
         /// <remarks>
         /// Said here rather than inferred from the order, because the order is what reads best and
         /// the default is what is safe, and those are not the same question.
@@ -503,7 +480,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How the player likes the screens to look in every world; null on a machine that keeps none.</summary>
         public Preferences Preferences { get; set; }
 
-        /// <summary>How somebody is working in this editor; see <see cref="Shell.Habits" />.</summary>
+        /// <summary>How somebody is working in this editor, as against what they are building in it: which list of what to do they read, and where they keep the codex.</summary>
         /// <remarks>Replaced on a client's copy by the ones its earlier copies of the same block used.</remarks>
         public Habits Habits
         {
@@ -628,14 +605,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Pop();
         }
 
-        /// <summary>The shape of the screen has changed and must be rebuilt.</summary>
+        /// <summary>Has the screen built again on the next tick, its shape having changed.</summary>
         public void Invalidate()
         {
             _structureDirty = true;
         }
 
 
-        /// <summary>Dates each system whose words have changed since they were last read; see <see cref="Dates.Stamp" />.</summary>
+        /// <summary>Dates each logic system whose words have changed since they were last read with the time now, or reads every one where <paramref name="surely" />.</summary>
         public void Stamp(bool surely = false)
         {
             _dates.Stamp(surely);
@@ -681,9 +658,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Settled(edit);
         }
 
-        /// <summary>
-        /// What every edit costs whatever level it was at.
-        /// </summary>
+        /// <summary>Has the program edited and rewired after <paramref name="edit" />, and the screen built again where it changes its shape.</summary>
         /// <remarks>
         /// Rewiring because any deliberate change may have moved what a trigger points at, and
         /// whatever arranges triggers outside the program has no other way to know. Undoing one
@@ -861,7 +836,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return _constructHistory.CanRedo(_program, null);
         }
 
-        /// <summary>What walking forward again does, as the redo arrow names it.</summary>
+        /// <summary>What walking forward again the last change to the program as a whole that was walked back redoes, as the redo arrow names it.</summary>
         public string RedoLabelConstruct()
         {
             return ChangeText.Of(Texts, _constructHistory.Redoes(_program, null));
@@ -873,7 +848,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Walked(_constructHistory.Redo(_program, null));
         }
 
-        /// <summary>Whatever a step back or forward changed, once it has changed it.</summary>
+        /// <summary>Has the program edited and rewired and the screen built again after a step back or forward made <paramref name="edit" />.</summary>
         /// <remarks>
         /// Always a rebuild, unlike making the edit in the first place: somebody walking back is
         /// looking for what they had, and a screen that only re-worded itself would leave a step
@@ -1237,9 +1212,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Push(new LibraryPage(this, identity));
         }
 
-        /// <summary>
-        /// A sequence made on its own, with nothing starting it yet.
-        /// </summary>
+        /// <summary>Adds a sequence with nothing starting it yet to <paramref name="system" />, and opens it to be named.</summary>
         /// <remarks>
         /// The other way round from the wizard, and both are ordinary. Somebody who knows what the
         /// machine should do writes it and says what starts it afterwards; somebody who knows which
@@ -1363,18 +1336,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Runs a sequence now, as whatever starts it would.
-        /// </summary>
-        /// <remarks>
-        /// What starts a sequence is usually a door or a button somewhere else on the ship, so
-        /// watching one work meant going and pressing it. This is the same call a trigger makes, on
-        /// the one of its system there is - which is the only one until more than one can be made.
-        /// <para>
-        /// A sequence already running is not started twice. The runner counts that as a skip, the
-        /// same as a button pressed twice, and the row says so.
-        /// </para>
-        /// </remarks>
-        /// <summary>
         /// Ends a run that is going, by hand.
         /// </summary>
         /// <remarks>
@@ -1401,6 +1362,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Runs <paramref name="sequence" /> by hand, at once, where it is or on the construct <see cref="Elsewhere" /> runs it on.</summary>
+        /// <remarks>
+        /// What starts a sequence is usually a door or a button somewhere else on the ship, so this saves going and pressing
+        /// it. It is the same call a trigger makes, on the installation the editor shows.
+        /// <para>
+        /// A sequence already running is not started twice. The runner counts that as a skip, the
+        /// same as a button pressed twice, and the row says so.
+        /// </para>
+        /// </remarks>
         public void RunNow(Sequence sequence)
         {
             if (Elsewhere != null)
@@ -1626,9 +1595,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
-        /// <summary>
-        /// Another sequence saying what this one says, opened for whatever is to be different.
-        /// </summary>
+        /// <summary>Adds a copy of <paramref name="sequence" /> to its logic system, and opens it for whatever is to be different.</summary>
         /// <remarks>
         /// Named like any other new sequence rather than after the one it came from: a script may run a
         /// sequence by its name, so a copied name would leave that name meaning two sequences.

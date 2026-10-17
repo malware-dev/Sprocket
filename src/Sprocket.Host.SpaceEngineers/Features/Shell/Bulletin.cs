@@ -40,9 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         ICommand Mends => _mends ?? (_mends = _editor.Act(Cmd.ShowScript, _editor.ShowScript));
 
-        /// <summary>
-        /// Says it on every screen where the block holds a program that would not read.
-        /// </summary>
+        /// <summary>Brings the banner up to date: a program that would not read, somebody else holding the Sprocket, the automation paused, or nothing.</summary>
         /// <remarks>
         /// <b>Every screen, not the front one.</b> What it says is that this is not what the block
         /// holds, and that is as true three pages deep as it is on arrival - somebody who walked

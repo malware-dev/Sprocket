@@ -300,9 +300,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 _editor.Do(system, start);
         }
 
-        /// <summary>
-        /// Where every choice of what a trigger does lands.
-        /// </summary>
+        /// <summary>Makes <paramref name="trigger" /> do <paramref name="does" />: added to <paramref name="system" /> where it is <paramref name="fresh" />, and otherwise changed as one edit with <paramref name="start" />.</summary>
         /// <remarks>
         /// A trigger being made is not yet in the system, and nothing has been done that could be
         /// taken back - the way back from making one is the bin on its row. A trigger being changed

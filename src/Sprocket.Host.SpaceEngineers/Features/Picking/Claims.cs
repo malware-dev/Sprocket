@@ -22,8 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// Does it, unless something already answers a button it is given; then asks first, and takes the button only where
-        /// that is the answer.
+        /// Carries out <paramref name="then" />, unless something already answers a button <paramref name="made" /> is given;
+        /// then asks first, and goes on, taking the button, only where that is the answer.
         /// </summary>
         /// <remarks>
         /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,

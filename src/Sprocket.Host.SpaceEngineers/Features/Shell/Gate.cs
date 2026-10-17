@@ -56,9 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>
-        /// Says what the first edit costs, and does it only if they say so.
-        /// </summary>
+        /// <summary>Asks whether to let the program that would not read go, and carries out <paramref name="go" /> only on the answer that does.</summary>
         /// <remarks>
         /// The screen has been saying all along that what it shows is not what the block holds. This is
         /// the other half: the press that makes it so, held until somebody has been told that the one
@@ -153,9 +151,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>
-        /// Takes the decision the banner and the question both ask for.
-        /// </summary>
+        /// <summary>Lets the program that would not read go: from here on the block keeps the program being edited.</summary>
         /// <remarks>
         /// One place, two ways in: the question the first edit raises, and the operation on the banner.
         /// Both mean "the program on this block is not coming back", and after it every edit saves like
