@@ -210,7 +210,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 {
                     var problems = SystemSummary.Problems(Editor.Runner, system, instance);
                     var remarks = SystemSummary.Remarks(Editor.Runner, system, instance);
-                    var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system);
+                    var stopped = on || halt == null ? "" : SequenceText.Stopped(texts, halt, system, problems == 0);
                     var again = system.IsBlueprint ? FillAgain(texts, system, instance) : "";
                     var said = again.Length > 0 ? again : stopped.Length > 0 || problems == 0 ? stopped : Failing(system, instance);
                     changed |= row.Problems != problems || row.Remarks != remarks || row.Problem != said;

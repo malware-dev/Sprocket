@@ -1,9 +1,12 @@
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
+using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
-using Lumel.Text;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -12,6 +15,38 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 public class BlocksetTroubleTests
 {
     const string Why = "Sequence 1, step 1: Airlock Inner Door was lost.";
+
+    /// <summary>A stopped installation whose lost block is still gone says it was lost.</summary>
+    [Fact]
+    public void AStopWhoseBlockIsStillGoneSaysItWasLost()
+    {
+        var sim = Stopped();
+        sim.Machine.Grind(sim.Machine.Fitted.First(fitting => fitting.Name == "Airlock Inner Door"));
+        Run(sim, 1, 400);
+
+        Assert.Equal("Stopped at step 1 of Sequence 1: Airlock Inner Door was lost.", sim.Editor.RootRows()[0].Problem);
+    }
+
+    /// <summary>A stopped installation whose lost block is back says so on its panel, where a button switches it on.</summary>
+    [Fact]
+    public void ARestoredStopIsSwitchedOnFromItsPanel()
+    {
+        var sim = Stopped();
+        var installation = sim.Editor.Program.Systems.Single().First!;
+        Run(sim, 1, 400);
+
+        sim.Editor.RootRows()[0].Opens!.Execute();
+        Run(sim, 401, 500);
+
+        const string restored = "Stopped at step 1 of Sequence 1: Airlock Inner Door was lost but is now restored.";
+        Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(), label => label.Text == restored && label.IsVisible);
+
+        sim.Editor.PressStart("Switch on");
+        Run(sim, 501, 520);
+
+        Assert.True(installation.Enabled);
+        Assert.Null(installation.Halt);
+    }
 
     /// <summary>A lost block a trigger watches is named where the trouble is said.</summary>
     [Fact]
@@ -154,6 +189,25 @@ public class BlocksetTroubleTests
         sim.Machine.Grind(sim.Machine.Fitted.First(fitting => fitting.Name == "Airlock Inner Door"));
         Run(sim, 1, 400);
 
+        return sim;
+    }
+
+    /// <summary>An installation Sprocket switched off for losing the door its sequence closes, with the door there.</summary>
+    static Simulation Stopped()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Editor.PressAdd("task");
+        sim.Editor.PressBlock("Airlock Inner Door");
+        sim.Editor.PressChoice("close");
+        sim.Editor.PressPrimary();
+        sim.Editor.GoToRoot();
+        sim.Tick();
+
+        var system = sim.Editor.Program.Systems.Single();
+        system.Enabled = true;
+        system.First!.Enabled = false;
+        system.First.Halt = new Halt(SequenceProblem.MissingTarget, system.Sequences[0].Number, 0, Trouble.None, "Airlock Inner Door");
         return sim;
     }
 

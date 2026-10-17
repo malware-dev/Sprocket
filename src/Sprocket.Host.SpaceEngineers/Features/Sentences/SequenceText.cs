@@ -258,8 +258,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Template.Fill(texts.ProblemUnset, "block", block);
         }
 
-        /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it.</summary>
-        public static string Stopped(Texts texts, Halt halt, AutomationSystem system)
+        /// <summary>Whether <paramref name="halt" /> stopped a run because a block was lost.</summary>
+        public static bool Lost(Halt halt)
+        {
+            return halt != null && !halt.Because.Exists && !string.IsNullOrEmpty(halt.Block)
+                && (halt.Problem == SequenceProblem.MissingTarget || halt.Problem == SequenceProblem.MissingGate
+                    || halt.Problem == SequenceProblem.MissingSource);
+        }
+
+        /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it, and that a lost block is back where <paramref name="restored" />.</summary>
+        public static string Stopped(Texts texts, Halt halt, AutomationSystem system, bool restored)
         {
             if (halt == null || halt.Problem == SequenceProblem.None)
                 return texts.StoppedUnknown;
@@ -267,7 +275,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             var sequence = system?.FindSequence(halt.Sequence);
             var row = Row(sequence, halt.Step);
             var step = row.ToString(CultureInfo.InvariantCulture);
-            var reason = halt.Because.Exists ? TroubleText.Of(texts, halt.Because, halt.Block) : Because(texts, halt.Problem, halt.Block);
+            var reason = restored && Lost(halt)
+                ? Template.Fill(texts.StoppedBlockRestored, "block", halt.Block)
+                : halt.Because.Exists
+                    ? TroubleText.Of(texts, halt.Because, halt.Block)
+                    : Because(texts, halt.Problem, halt.Block);
 
             if (sequence == null || !sequence.HasName)
                 return row > 0 ? Fill(texts.StoppedAtStep, "step", step, "reason", reason) : Template.Fill(texts.StoppedPlain, "reason", reason);

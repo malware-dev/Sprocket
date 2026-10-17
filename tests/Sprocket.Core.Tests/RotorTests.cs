@@ -533,7 +533,7 @@ public class RotorTests
 
         var halt = sequence.System.Halt!;
         Assert.Equal("angle", halt.Block);
-        Assert.EndsWith("its angle was missing.", SequenceText.Stopped(new Texts(), halt, sequence.System));
+        Assert.EndsWith("its angle was missing.", SequenceText.Stopped(new Texts(), halt, sequence.System, false));
     }
 
     /// <summary>A turn given an option it cannot take names that option.</summary>

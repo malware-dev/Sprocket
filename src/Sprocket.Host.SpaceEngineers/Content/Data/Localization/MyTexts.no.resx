@@ -697,6 +697,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Blueprint.Optional" xml:space="preserve">
     <value>valgfri</value>
   </data>
+  <data name="Sprocket.Blueprint.SwitchOn" xml:space="preserve">
+    <value>Slå på</value>
+  </data>
   <data name="Sprocket.Blueprint.OpenSequence" xml:space="preserve">
     <value>Åpne {name}</value>
   </data>
@@ -893,6 +896,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Stopped.BlockGone" xml:space="preserve">
     <value>{block} gikk tapt.</value>
+  </data>
+  <data name="Sprocket.Stopped.BlockRestored" xml:space="preserve">
+    <value>{block} gikk tapt, men er nå tilbake.</value>
   </data>
   <data name="Sprocket.Stopped.BlockReplaced" xml:space="preserve">
     <value>{block} kan ha blitt byttet ut.</value>

@@ -267,11 +267,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var said = "";
             var mended = false;
             var empty = false;
+            var restored = false;
 
             if (chosen != null && !chosen.Enabled && chosen.Halt != null)
             {
-                said = SequenceText.Stopped(Editor.Texts, chosen.Halt, _system);
-                sequence = _system.FindSequence(chosen.Halt.Sequence);
+                restored = SequenceText.Lost(chosen.Halt) && SystemSummary.Problems(Editor.Runner, _system, chosen) == 0;
+                said = SequenceText.Stopped(Editor.Texts, chosen.Halt, _system, restored);
+                sequence = restored ? null : _system.FindSequence(chosen.Halt.Sequence);
                 empty = chosen.Halt.Problem == Runtime.SequenceProblem.EmptySlot;
                 mended = true;
             }
@@ -287,7 +289,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _trouble.Text = said;
             _trouble.Style = mended ? Styles.Caution : Styles.Problem;
 
-            // An empty slot is filled on this page, so there is nowhere else to go.
+            // A lost block that is back leaves only the switch; an empty slot is filled on this page, so there is nowhere
+            // else to go.
+            if (restored)
+            {
+                _openTrouble.IsVisible = true;
+                _openTrouble.Text = Editor.Texts.BlueprintSwitchOn;
+                _openTrouble.Command = Editor.Act(Cmd.EnableInstance, delegate { Editor.SwitchInstance(_system, chosen, true); });
+                return;
+            }
+
             var opens = sequence != null && !empty;
             _openTrouble.IsVisible = opens;
             _openTrouble.Text = opens ? Template.Fill(Editor.Texts.BlueprintOpenSequence, "name", sequence.Name) : "";

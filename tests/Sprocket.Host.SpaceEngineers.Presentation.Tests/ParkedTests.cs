@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </remarks>
 public class ParkedTests
 {
-    const string Why = "Stopped at step 1 of Sequence 1: Airlock Inner Door was lost.";
+    const string Why = "Stopped at step 1 of Sequence 1: Airlock Inner Door was lost but is now restored.";
 
     static Screen WithOneStopped()
     {

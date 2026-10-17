@@ -610,7 +610,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 : _system.Enabled ? null : _system.Halt;
 
             _halted.IsVisible = halt != null;
-            _halted.Text = halt == null ? "" : SequenceText.Stopped(Editor.Texts, halt, _system);
+            _halted.Text = halt == null
+                ? ""
+                : SequenceText.Stopped(Editor.Texts, halt, _system, SystemSummary.Problems(Editor.Runner, _system, through) == 0);
         }
 
         /// <summary>Why nothing can be changed, said over each part that cannot be pressed; empty while it can.</summary>

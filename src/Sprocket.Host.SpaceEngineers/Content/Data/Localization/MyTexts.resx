@@ -914,6 +914,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>optional</value>
     <comment>On a slot's page, the half of the required/optional switch for a slot that may be left without a block. Short: it shares the switch with the word for required.</comment>
   </data>
+  <data name="Sprocket.Blueprint.SwitchOn" xml:space="preserve">
+    <value>Switch on</value>
+    <comment>Button on the installation panel beside why Sprocket switched the installation off, once the block it lost is back; it switches the installation on again.</comment>
+  </data>
   <data name="Sprocket.Blueprint.OpenSequence" xml:space="preserve">
     <value>Open {name}</value>
     <comment>Button on the installation panel beside what is wrong with the installation, opening the sequence at fault as that installation runs it. {name} is the sequence's name.</comment>
@@ -1169,6 +1173,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Stopped.BlockGone" xml:space="preserve">
     <value>{block} was lost.</value>
     <comment>Reason a run stopped: a block a step acts on was lost; {block} is the block's name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
+  </data>
+  <data name="Sprocket.Stopped.BlockRestored" xml:space="preserve">
+    <value>{block} was lost but is now restored.</value>
+    <comment>Reason a run stopped, once the block it lost is back on the construct and nothing else is wrong; {block} is the block's name. It completes the sentence saying why Sprocket switched off a logic system (or one of its installations), such as "Stopped at step 3: ...", shown near the top of the logic system's screen, under its row on the home screen and at the top of the installation panel.</comment>
   </data>
   <data name="Sprocket.Stopped.BlockReplaced" xml:space="preserve">
     <value>{block} may have been replaced.</value>
