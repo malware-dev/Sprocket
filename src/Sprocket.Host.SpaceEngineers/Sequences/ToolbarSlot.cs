@@ -40,6 +40,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return other != null && Toolbar == other.Toolbar && Page == other.Page && Slot == other.Slot;
         }
 
+        /// <summary>Whether <paramref name="one" /> and <paramref name="other" /> are the same slot, or both none.</summary>
+        public static bool Same(ToolbarSlot one, ToolbarSlot other)
+        {
+            return one == null ? other == null : one.Same(other);
+        }
+
         /// <summary>Whether the one slot <paramref name="other" /> is among those this stands for.</summary>
         public bool Covers(ToolbarSlot other)
         {

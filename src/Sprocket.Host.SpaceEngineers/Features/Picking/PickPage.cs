@@ -9,7 +9,6 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
@@ -23,22 +22,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// its own answer and hands it back when somebody says they are done: ticking entries straight into a step would make a
     /// tentative tap an edit to a sequence that might be running, and would leave back with nothing to back out of. The
     /// strip it is drawn in is declared in <c>PickPage.View.cs</c>, and shared with the page before or after it in the same
-    /// pick; this half is what it asks and what each answer does.
+    /// pick.
     /// </remarks>
     public sealed partial class PickPage : EditorPage
     {
-        const string FamilyPrefix = "family:";
-        const int Actions = 0;
-        const int Values = 1;
-
-        // The group a moment stands in, in a list of what starts something: under no heading, before the values.
-        const int Moments = -1;
-
-        // The group a check's status values stand in, first, past every category's.
-        const int Statuses = (int)Category.Other + 1;
-
-        static readonly NameOrder ByName = new NameOrder();
-        static readonly SaidOrder ByDeclared = new SaidOrder();
 
         readonly string _title;
         readonly List<long> _selection = new List<long>();
@@ -49,32 +36,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         bool _offering;
         readonly bool _asksAll;
         readonly Action<PickAnswer> _done;
-        readonly List<GridEntity> _candidates = new List<GridEntity>();
-        readonly List<GridEntity> _filtered = new List<GridEntity>();
-        readonly List<long> _filteredIds = new List<long>();
-        readonly HashSet<long> _wasShown = new HashSet<long>();
-        readonly List<EntityKind> _kinds = new List<EntityKind>();
         readonly EditorPage _screen;
-        readonly List<EntityKind> _shownKinds = new List<EntityKind>();
-        readonly List<Family> _shownFamilies = new List<Family>();
-        readonly List<string> _kindKeys = new List<string>();
-        readonly Dictionary<Family, string> _familyKeys = new Dictionary<Family, string>();
-        readonly List<string> _names = new List<string>();
-        readonly List<string> _ids = new List<string>();
         readonly List<int> _matched = new List<int>();
-        readonly List<Nature> _forms = new List<Nature>();
-        readonly List<int> _groups = new List<int>();
-        readonly List<string> _marks = new List<string>();
-        readonly List<bool> _sets = new List<bool>();
-        readonly List<Readiness> _ready = new List<Readiness>();
-        readonly List<string> _why = new List<string>();
         readonly List<int> _rows = new List<int>();
         readonly List<string> _whatKeys = new List<string>();
         readonly List<string> _whatShown = new List<string>();
-        readonly List<SlotHeld> _held = new List<SlotHeld>();
         readonly Dictionary<string, int> _whatAt = new Dictionary<string, int>();
         readonly List<long> _arrived = new List<long>();
-        readonly List<long> _saidBlocks = new List<long>();
         readonly List<Literal> _arrivedValues = new List<Literal>();
         readonly Opening _opens;
         readonly Aim _aim;
@@ -88,10 +56,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Field> _nothing = new List<Field>();
         readonly List<Field> _shownFields = new List<Field>();
         readonly Func<GridEntity, bool> _fits;
-        readonly Func<GridEntity, bool> _admits;
         readonly bool _signalsOnly;
         readonly bool _memberOnly;
-        readonly Dictionary<long, string> _ahead = new Dictionary<long, string>();
+        readonly Offers _offers;
+        readonly Occupancy _occupancy;
+        readonly Wording _wording;
+        readonly Listing _listing;
+        readonly Kinds _kinds = new Kinds();
 
         string _chosen;
         ToolbarSlot _slot;
@@ -100,19 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _dropped = "";
         Nature _droppedForm;
         Quantifier _quantifier;
-        string _kind = "";
-        Family _family;
-        string _narrowedSearch;
-        string _narrowedKind;
-        string _kindSearch = "";
         string _whatSearch = "";
-        string _said;
-        string _saidChosen = "";
-        ToolbarSlot _saidSlot;
-        string _heldFor;
-        int _saidOffered;
-        Quantifier _saidQuantifier;
-        bool _retitled;
         bool _goesOn;
         bool _straight;
         string _entered;
@@ -157,7 +116,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _facet = facet ?? "";
             _arrivedFacet = _facet;
             _forTests = forTests;
-            _admits = admits;
             _signalsOnly = signalsOnly;
             _opens = opens;
             _aim = aim;
@@ -189,7 +147,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _screen = editor.Opener;
 
-            var pressed = forEvents ? Pressing(editor.World, targets, _chosen) : null;
+            var pressed = forEvents ? Occupancy.Pressing(editor.World, targets, _chosen) : null;
             if (pressed != null)
             {
                 _slot = ToolbarSlot.Of(_chosen);
@@ -217,6 +175,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _arrivedValues.Clear();
                 _arrivedValues.Add(Literal.Of(EntityAction.Toggle));
             }
+
+            _offers = new Offers(editor, forEvents, forTests, signalsOnly);
+            _occupancy = new Occupancy(editor);
+            _wording = new Wording(editor, _offers, title, forEvents, forTests);
+            _listing = new Listing(editor, admits, forEvents, forTests);
         }
 
         /// <summary>Asks which blocks fill a slot: the blocks alone, only those <paramref name="fits" /> allows, starting from <paramref name="targets" />.</summary>
@@ -241,7 +204,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>The title as the answer stands, or the picker's own name where nothing is chosen.</summary>
-        public override string Title => _said ?? _title;
+        public override string Title => _wording.Said ?? _title;
 
         /// <inheritdoc />
         public override string Help => Terms.Picking;
@@ -266,7 +229,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public IList<Field> Fields => Wanted();
 
         /// <summary>Blocks listed ahead of the rest, by entity id, each with what is said of it in place of its kind.</summary>
-        public IDictionary<long, string> Ahead => _ahead;
+        public IDictionary<long, string> Ahead => _listing.Ahead;
 
         /// <summary>What the values open holding, where this opened on something that has values.</summary>
         /// <remarks>
@@ -317,12 +280,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 foreach (var id in _selection)
                 {
-                    if (!Contains(_arrived, id))
+                    if (!Listing.Contains(_arrived, id))
                         return true;
                 }
 
                 if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _quantifier != _arrivedQuantifier
-                    || !Same(_slot, _arrivedSlot) || _facet != _arrivedFacet)
+                    || !ToolbarSlot.Same(_slot, _arrivedSlot) || _facet != _arrivedFacet)
                     return true;
 
                 if (_aim != null && _aim.Moved)
@@ -371,7 +334,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         bool IsComplete => _selection.Count > 0 && (_fits != null || !string.IsNullOrEmpty(_chosen)
-            && ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
+            && _offers.ReadinessOf(_chosen, _chosenForm) == Readiness.Ready
             && (_aim == null || _aim.Chosen));
 
         /// <summary>The stages this page asks, which are the last in the pick while it is on top.</summary>
@@ -383,11 +346,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override bool TakeRetitle()
         {
-            Reword();
+            // A slot's pick keeps the slot's name: the blocks chosen for it are the whole answer, and they are marked in its column.
+            if (_fits == null)
+                _wording.Reword(_chosen, _chosenForm, _slot, _quantifier, Totals, _selection);
 
-            var retitled = _retitled;
-            _retitled = false;
-            return retitled;
+            return _wording.Take();
         }
 
         /// <summary>Asks before throwing away what was picked here, where there is something to lose and something to do with it.</summary>
@@ -473,7 +436,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override void Build()
         {
-            Collect();
+            _listing.Collect(_selection, _screen.Search, _kinds.Kind, _kinds.Family, ShowsHidden, _fits, _kinds.Present);
 
             if (_aim != null)
                 _aim.Pick = _strip;
@@ -594,7 +557,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 : _forEvents ? Editor.Texts.PickNoBlocksHappen : Editor.Texts.PickNoBlocksDone;
 
             // For the whole life of the column, so the line does not come and go as the list of kinds is narrowed.
-            _blocks.HasKinds = _kinds.Count > 0;
+            _blocks.HasKinds = _kinds.Present.Count > 0;
             _blocks.Narrowed += OnBlockSearch;
             _blocks.KindsNarrowed += NarrowKinds;
 
@@ -647,9 +610,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         KindRow KindRow(string kind)
         {
-            var family = kind.StartsWith(FamilyPrefix, StringComparison.Ordinal)
-                ? (Family)Enum.Parse(typeof(Family), kind.Substring(FamilyPrefix.Length))
-                : Family.None;
+            var family = Kinds.FamilyOf(kind);
 
             return new KindRow
             {
@@ -709,8 +670,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (!_whatAt.TryGetValue(key, out at) || at < 0)
                 return;
 
-            var id = _ids[at];
-            var form = _forms.Count > at ? _forms[at] : Nature.Native;
+            var id = _offers.Ids[at];
+            var form = _offers.Forms.Count > at ? _offers.Forms[at] : Nature.Native;
             var choose = Editor.Act(Cmd.PickChoice, () => Choose(id, form));
             if (choose == null)
                 return;
@@ -877,13 +838,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return null;
         }
 
-        /// <summary>Whether <paramref name="id" /> checks the blocks' status for one of its states, which reads as the blocks themselves.</summary>
-        static bool IsState(string id)
-        {
-            string value, state;
-            return Comparing.Split(id, out value, out state);
-        }
-
         static bool Same(IList<Field> held, IList<Field> fields)
         {
             if (held.Count != fields.Count)
@@ -925,29 +879,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // Off the whole catalogue, not the rows shown: narrowing must not take the picture column away and shuffle every
             // row sideways.
             var icons = false;
-            for (var i = 0; i < _candidates.Count && !icons; i++)
-                icons = !string.IsNullOrEmpty(_candidates[i].Kind.Icon);
+            for (var i = 0; i < _listing.Candidates.Count && !icons; i++)
+                icons = !string.IsNullOrEmpty(_listing.Candidates[i].Kind.Icon);
 
             FillFilters();
             FillOptions();
 
-            _blocks.Showing = _filtered.Count == _candidates.Count
-                ? Template.Fill(texts.PickAllShown, "count", _candidates.Count.ToString(CultureInfo.InvariantCulture))
-                : Template.Fill(Template.Fill(texts.PickSomeShown, "shown", _filtered.Count.ToString(CultureInfo.InvariantCulture)),
-                    "count", _candidates.Count.ToString(CultureInfo.InvariantCulture));
+            _blocks.Showing = _listing.Filtered.Count == _listing.Candidates.Count
+                ? Template.Fill(texts.PickAllShown, "count", _listing.Candidates.Count.ToString(CultureInfo.InvariantCulture))
+                : Template.Fill(Template.Fill(texts.PickSomeShown, "shown", _listing.Filtered.Count.ToString(CultureInfo.InvariantCulture)),
+                    "count", _listing.Candidates.Count.ToString(CultureInfo.InvariantCulture));
 
-            _blockRows.Show(_filteredIds);
-            foreach (var entity in _filtered)
+            _blockRows.Show(_listing.FilteredIds);
+            foreach (var entity in _listing.Filtered)
             {
                 var row = _blockRows[entity.Id];
 
                 string note;
                 row.Text = entity.Name;
-                row.Secondary = _ahead.TryGetValue(entity.Id, out note) ? note : entity.Kind.DisplayName;
+                row.Secondary = _listing.Ahead.TryGetValue(entity.Id, out note) ? note : entity.Kind.DisplayName;
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;
-                row.IsChosen = Contains(_selection, entity.Id);
+                row.IsChosen = Listing.Contains(_selection, entity.Id);
                 row.Show();
             }
 
@@ -958,161 +912,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             var texts = Editor.Texts;
 
-            // A family left with one kind of block on the construct stands as that kind alone, and so does the narrowing to it.
-            if (_family != Family.None && KindsOf(_family) == 1)
-                SetKind(OnlyKindOf(_family).Id);
+            if (_kinds.Settle())
+                Editor.Invalidate();
 
-            // A kind whose last block has gone from the construct would hide every block with nothing on screen to say why.
-            if (_kind.Length > 0 && !HasKind(_kind))
-                SetKind("");
+            _kinds.Fill(texts);
 
-            _shownKinds.Clear();
-            _shownFamilies.Clear();
-            for (var i = 0; i < _kinds.Count; i++)
-            {
-                var family = _kinds[i].Family;
-                if (family == Family.None || KindsOf(family) < 2)
-                {
-                    if (Offered(_kinds[i]))
-                        Shows(_kinds[i], Family.None);
-
-                    continue;
-                }
-
-                // A family is listed whole at its first kind, so its kinds stand together under it whatever their names.
-                if (Listed(family, i))
-                    continue;
-
-                var named = EntityQuery.MatchesText(FamilyText.Of(texts, family), _kindSearch);
-                var at = _shownKinds.Count;
-                for (var j = i; j < _kinds.Count; j++)
-                {
-                    if (_kinds[j].Family == family && (named || Offered(_kinds[j])))
-                        Shows(_kinds[j], family);
-                }
-
-                // The family in force is always offered, and a kind shown always has its family above it.
-                if (named || _shownKinds.Count > at || _family == family)
-                {
-                    _shownKinds.Insert(at, null);
-                    _shownFamilies.Insert(at, family);
-                }
-            }
-
-            _kindKeys.Clear();
-            _kindKeys.Add("");
-            for (var i = 0; i < _shownKinds.Count; i++)
-                _kindKeys.Add(_shownKinds[i] == null ? FamilyKey(_shownFamilies[i]) : _shownKinds[i].Id);
-
-            _kindRows.Show(_kindKeys);
+            _kindRows.Show(_kinds.Keys);
 
             var anything = _kindRows[""];
             anything.Text = texts.PickAnything;
-            anything.Count = _candidates.Count;
-            anything.IsCurrent = _kind.Length == 0;
+            anything.Count = _listing.Candidates.Count;
+            anything.IsCurrent = _kinds.Kind.Length == 0;
 
             var current = texts.PickAnything;
-            for (var i = 0; i < _shownKinds.Count; i++)
+            for (var i = 0; i < _kinds.Shown.Count; i++)
             {
-                var row = _kindRows[_kindKeys[i + 1]];
-                var kind = _shownKinds[i];
-                row.Text = kind == null ? FamilyText.Of(texts, _shownFamilies[i]) : kind.DisplayName;
-                row.Count = kind == null ? CountOfFamily(_shownFamilies[i]) : CountOfKind(kind.Id);
-                row.IsNested = kind != null && _shownFamilies[i] != Family.None;
-                row.IsCurrent = _kind == _kindKeys[i + 1];
+                var row = _kindRows[_kinds.Keys[i + 1]];
+                var kind = _kinds.Shown[i];
+                row.Text = kind == null ? FamilyText.Of(texts, _kinds.Families[i]) : kind.DisplayName;
+                row.Count = kind == null ? _listing.CountOfFamily(_kinds.Families[i]) : _listing.CountOfKind(kind.Id);
+                row.IsNested = kind != null && _kinds.Families[i] != Family.None;
+                row.IsCurrent = _kinds.Kind == _kinds.Keys[i + 1];
                 if (row.IsCurrent)
                     current = row.Text;
             }
 
             _blocks.Kind = current;
-            _blocks.KindText = _kindSearch;
-            _blocks.ClearKind = _kind.Length > 0 ? _clearKind : null;
+            _blocks.KindText = _kinds.Search;
+            _blocks.ClearKind = _kinds.Kind.Length > 0 ? _clearKind : null;
             _blocks.ShowsHidden = ShowsHidden;
-        }
-
-        bool HasKind(string kindId)
-        {
-            foreach (var kind in _kinds)
-            {
-                if (kind.Id == kindId || (_family != Family.None && kind.Family == _family))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Whether <paramref name="kind" /> is offered on its own: it is the one in force, or its name answers the box.</summary>
-        /// <remarks>The one in force is always offered, so what the line says is showing is always something the list says too.</remarks>
-        bool Offered(EntityKind kind)
-        {
-            return kind.Id == _kind || EntityQuery.MatchesText(kind.DisplayName, _kindSearch);
-        }
-
-        void Shows(EntityKind kind, Family family)
-        {
-            _shownKinds.Add(kind);
-            _shownFamilies.Add(family);
-        }
-
-        /// <summary>Whether a kind of <paramref name="family" /> comes before the one at <paramref name="index" />, which listed the family already.</summary>
-        bool Listed(Family family, int index)
-        {
-            for (var i = 0; i < index; i++)
-            {
-                if (_kinds[i].Family == family)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>How many kinds of block on offer are of <paramref name="family" />.</summary>
-        int KindsOf(Family family)
-        {
-            var count = 0;
-            foreach (var kind in _kinds)
-            {
-                if (kind.Family == family)
-                    count++;
-            }
-
-            return count;
-        }
-
-        EntityKind OnlyKindOf(Family family)
-        {
-            foreach (var kind in _kinds)
-            {
-                if (kind.Family == family)
-                    return kind;
-            }
-
-            return null;
-        }
-
-        int CountOfFamily(Family family)
-        {
-            var count = 0;
-            foreach (var candidate in _candidates)
-            {
-                if (candidate.Kind.Family == family)
-                    count++;
-            }
-
-            return count;
-        }
-
-        /// <summary>The key a family's row is kept under, made once for the page.</summary>
-        string FamilyKey(Family family)
-        {
-            string key;
-            if (!_familyKeys.TryGetValue(family, out key))
-            {
-                key = FamilyPrefix + family;
-                _familyKeys.Add(family, key);
-            }
-
-            return key;
         }
 
         /// <summary>Narrows the kinds on offer, and nothing else.</summary>
@@ -1123,12 +951,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void NarrowKinds(string said)
         {
             said = said ?? "";
-            if (said == _kindSearch)
+            if (said == _kinds.Search)
                 return;
 
             var narrow = Editor.Act(Cmd.NarrowKinds, delegate
             {
-                _kindSearch = said;
+                _kinds.Search = said;
                 Editor.Invalidate();
             });
 
@@ -1137,9 +965,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// Offered wherever the distinction between the blocks means anything: on a test, and on a trigger watching for a state,
-        /// never on a signal the blocks send. A list in the words the sentence says them in; a test is offered their sum and
-        /// their average as well, which list only what is a number to check.
+        /// Puts the choice of how several blocks are read under them, wherever the distinction between them means anything: on a
+        /// test, and on a trigger watching for a state, never on a signal the blocks send. The ways are listed in the words the
+        /// sentence says them in; a test is offered their sum and their average as well, which list only what is a number to check.
         /// </summary>
         void FillOptions()
         {
@@ -1204,67 +1032,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return false;
         }
 
-        /// <summary>Whether <paramref name="value" /> is a number, which is what a sum can be taken of.</summary>
-        static bool Number(EntityAction value)
-        {
-            return value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
-        }
-
         void FillWhat()
         {
-            _names.Clear();
-            _ids.Clear();
-            _forms.Clear();
-            _groups.Clear();
-            _marks.Clear();
-            _sets.Clear();
-            _ready.Clear();
-            _why.Clear();
-
-            if (_forTests)
-            {
-                Testable();
-            }
-            else if (_forEvents)
-            {
-                // A total is taken of numbers alone, so while one is asked for no moment is listed.
-                var events = Totals ? new List<EntityEvent>() : Vocabulary.EventsOf(Editor.World, _selection);
-                foreach (var entityEvent in events)
-                {
-                    if (_signalsOnly && !entityEvent.Answered)
-                        continue;
-
-                    _names.Add(entityEvent.Text);
-                    _marks.Add(MarkText.Of(entityEvent));
-
-                    _ids.Add(entityEvent.Id);
-                    _sets.Add(false);
-                    _forms.Add(Nature.Native);
-                    _groups.Add(Moments);
-                    _ready.Add(Readiness.Ready);
-                    _why.Add(null);
-                }
-
-                // A number on the blocks can start something as it comes to compare as asked: the states already come as
-                // moments, so numbers alone are listed.
-                if (!_signalsOnly)
-                {
-                    var actions = Vocabulary.ActionsOf(Editor.World, _selection);
-                    foreach (var action in actions)
-                    {
-                        if (!action.IsStatus && (action.Being != null || (action.Sets && Lists(action))) && Number(action))
-                            Read(action, Values);
-                    }
-                }
-            }
-            else
-            {
-                var actions = Vocabulary.ActionsOf(Editor.World, _selection);
-                if (_memberOnly)
-                    actions.RemoveAll(action => action.Id != _arrivedChosen);
-
-                Grouped(actions);
-            }
+            _offers.Fill(_selection, Totals, _memberOnly ? _arrivedChosen : null);
 
             var texts = Editor.Texts;
             var note = "";
@@ -1287,14 +1057,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // A choice the blocks can no longer honor is dropped rather than left showing, so Done never appears over a
             // sentence that could not run. It is kept aside until something else is chosen, and blocks that honor it again
             // bring it back, so a detour through other blocks loses nothing: a step's own action comes back with its values.
-            if (_chosen.Length > 0 && At(_chosen, _chosenForm) < 0)
+            if (_chosen.Length > 0 && _offers.At(_chosen, _chosenForm) < 0)
             {
                 _dropped = _chosen;
                 _droppedForm = _chosenForm;
                 _chosen = "";
                 _chosenForm = Nature.Native;
             }
-            else if (_chosen.Length == 0 && _dropped.Length > 0 && At(_dropped, _droppedForm) >= 0)
+            else if (_chosen.Length == 0 && _dropped.Length > 0 && _offers.At(_dropped, _droppedForm) >= 0)
             {
                 _chosen = _dropped;
                 _chosenForm = _droppedForm;
@@ -1308,11 +1078,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _what.ShowViews(Editor.ShowsTerminal ? 1 : 0, new[] { _organized, _terminal });
 
             _matched.Clear();
-            for (var i = 0; i < _names.Count; i++)
+            for (var i = 0; i < _offers.Names.Count; i++)
             {
                 // What is chosen stays listed whatever the search, as a chosen block does, so a search never hides the
                 // answer this picker opened with.
-                if (EntityQuery.MatchesText(_names[i], _whatSearch) || _ids[i] == _chosen)
+                if (EntityQuery.MatchesText(_offers.Names[i], _whatSearch) || _offers.Ids[i] == _chosen)
                     _matched.Add(i);
             }
 
@@ -1322,7 +1092,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var group = -1;
             foreach (var at in _matched)
             {
-                var mine = _groups.Count > at ? _groups[at] : group;
+                var mine = _offers.Groups.Count > at ? _offers.Groups[at] : group;
                 if (mine != group)
                 {
                     group = mine;
@@ -1338,7 +1108,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var key = at < 0
                     ? $"#{(-1 - at).ToString(CultureInfo.InvariantCulture)}"
-                    : $"{(_forms.Count > at ? _forms[at] : Nature.Native)} {_ids[at]}";
+                    : $"{(_offers.Forms.Count > at ? _offers.Forms[at] : Nature.Native)} {_offers.Ids[at]}";
 
                 _whatKeys.Add(key);
                 _whatAt[key] = at;
@@ -1347,14 +1117,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // The slots of a toolbar a person presses open under its line once it is chosen.
             _whatShown.Clear();
             _whatShown.AddRange(_whatKeys);
-            var pressed = Pressing(Editor.World, _selection, _chosen);
+            var pressed = Occupancy.Pressing(Editor.World, _selection, _chosen);
             var under = pressed == null ? -1 : _whatKeys.IndexOf($"{Nature.Native} {pressed.Id}");
             if (under >= 0)
                 _whatShown.Insert(under + 1, SlotsKey);
 
             // As do the facets a member of a type the host provides acts on, where the blocks share more than one.
             var type = pressed == null && !_forEvents ? Vocabulary.TypeOf(Editor.World, _selection, _chosen) : null;
-            var shared = type == null ? null : Shared(type);
+            var shared = type == null ? null : Facets.Shared(Editor.World, _selection, type);
             Keep(shared);
             var over = shared == null || shared.Count < 2 ? -1 : _whatKeys.IndexOf($"{_chosenForm} {_chosen}");
             if (over >= 0)
@@ -1367,7 +1137,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _slots = null;
 
             if (over >= 0)
-                _facets.Show(shared, _facet, Showing(type));
+                _facets.Show(shared, _facet, Facets.Showing(Editor.World, _selection, type, _facet));
             else
                 _facets = null;
 
@@ -1381,7 +1151,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 if (at < 0)
                 {
-                    row.Text = Heading(-1 - at);
+                    row.Text = _offers.Heading(-1 - at);
                     row.IsHeading = true;
                     row.IsWithheld = false;
                     row.IsChosen = false;
@@ -1393,16 +1163,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 }
 
                 // Something that cannot be made into a step is listed to be read about and not chosen.
-                var ready = _ready.Count > at ? _ready[at] : Readiness.Ready;
-                var form = _forms.Count > at ? _forms[at] : Nature.Native;
+                var ready = _offers.Ready.Count > at ? _offers.Ready[at] : Readiness.Ready;
+                var form = _offers.Forms.Count > at ? _offers.Forms[at] : Nature.Native;
 
-                row.Text = _names[at];
+                row.Text = _offers.Names[at];
                 row.IsHeading = false;
                 row.IsWithheld = ready != Readiness.Ready;
-                row.Why = row.IsWithheld ? _why[at] : null;
+                row.Why = row.IsWithheld ? _offers.Why[at] : null;
                 row.Status = ReadinessText.Tag(Editor.Texts, ready);
-                row.IsChosen = _ids[at] == chosen && form == _chosenForm;
-                row.Mark = _marks.Count > at ? _marks[at] : "";
+                row.IsChosen = _offers.Ids[at] == chosen && form == _chosenForm;
+                row.Mark = _offers.Marks.Count > at ? _offers.Marks[at] : "";
                 row.About = MarkText.About(texts, row.Mark);
                 row.Show();
             }
@@ -1416,370 +1186,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Editor.Invalidate();
         }
 
-        /// <summary>What a test can read of the blocks, in the view now showing.</summary>
-        /// <remarks>
-        /// The values a step can set, and Sprocket's own besides, which a test reads whether or not a step could set them; how
-        /// each is compared is its options' to say. The organized view lists first each state the blocks' status can be in,
-        /// to be checked for as it is, then the other values under the headings the actions stand under, each in the order its
-        /// capability declares it; the terminal view lists the values the blocks declare, under the terminal's own names, by
-        /// those names.
-        /// </remarks>
-        void Testable()
-        {
-            var actions = Vocabulary.ActionsOf(Editor.World, _selection);
-            if (Editor.ShowsTerminal)
-            {
-                actions.Sort(ByDeclared);
-                foreach (var action in actions)
-                {
-                    if (action.Sets && action.Unaltered && (!Totals || Number(action)))
-                        Read(action, Values);
-                }
-
-                return;
-            }
-
-            // A sum or an average is taken of numbers alone, so while one is asked for nothing else is listed.
-            var sums = Totals;
-            var events = Vocabulary.EventsOf(Editor.World, _selection);
-            for (var i = 0; i < actions.Count && !sums; i++)
-            {
-                if (actions[i].IsStatus)
-                    States(actions[i], events);
-            }
-
-            for (var group = 0; group <= (int)Category.Other; group++)
-            {
-                foreach (var one in actions)
-                {
-                    if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && (int)one.Category == group
-                        && (!sums || Number(one)))
-                        Read(one, group);
-                }
-            }
-        }
-
-        /// <summary>Lists each state the status <paramref name="status" /> can be in, in the words <paramref name="events" /> say it in, to be checked for.</summary>
-        void States(EntityAction status, List<EntityEvent> events)
-        {
-            var fields = Comparing.Fields(status, events);
-            var states = fields.Count > 1 ? fields[1] : default(Field);
-            if (states.Words == null)
-                return;
-
-            for (var i = 0; i < states.Words.Count; i++)
-            {
-                var word = states.Words[i];
-                _names.Add(word);
-                _ids.Add(Comparing.Id(status.Id, states.Means == null ? word : states.Means[i]));
-                _forms.Add(Nature.Native);
-                _groups.Add(Statuses);
-                _marks.Add(Symbols.Value);
-                _sets.Add(false);
-                _ready.Add(status.Readiness);
-                _why.Add(ReadinessText.Why(Editor.Texts, status.Why));
-            }
-        }
-
-        /// <summary>Lists the value <paramref name="one" /> to be read, under <paramref name="group" />.</summary>
-        void Read(EntityAction one, int group)
-        {
-            _names.Add(Said(one));
-            _ids.Add(one.Id);
-            _forms.Add(Nature.Value);
-            _groups.Add(group);
-            _marks.Add(Symbols.Value);
-            _sets.Add(true);
-            _ready.Add(one.Readiness);
-            _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
-        }
-
-        /// <summary>Everything the blocks offer, values first and each group in its own order.</summary>
-        /// <remarks>
-        /// The organized view keeps the order the blocks' capabilities declare their members in, which is a deliberate one:
-        /// open before close, the block's own before what every block shares. The terminal view is sorted by the terminal's
-        /// names, because a block hands its members out in the order its code happens to create them and a person reading
-        /// twenty of them is looking one up. The headings are not in here: a search matches only what somebody can choose.
-        /// </remarks>
-        void Grouped(List<EntityAction> actions)
-        {
-            if (Editor.ShowsTerminal)
-            {
-                actions.Sort(ByDeclared);
-                Listed(actions, Values);
-                Listed(actions, Actions);
-                return;
-            }
-
-            // Sprocket's groups, in the order the categories are declared, so a player who has learnt where a light's color
-            // sits finds a sorter's in the same place.
-            for (var group = 0; group <= (int)Category.Other; group++)
-                Listed(actions, group);
-        }
-
-        void Listed(List<EntityAction> actions, int group)
-        {
-            foreach (var one in actions)
-            {
-                if (!Lists(one) || Group(one) != group)
-                    continue;
-
-                _names.Add(Said(one));
-                _ids.Add(one.Id);
-                _forms.Add(one.Form);
-                _groups.Add(group);
-                _marks.Add(MarkText.Of(one));
-                _sets.Add(one.Sets);
-                _ready.Add(one.Readiness);
-                _why.Add(ReadinessText.Why(Editor.Texts, one.Why));
-            }
-        }
-
-        /// <summary>What the view now showing calls this one: the block's own words in the terminal view, as-is, and Sprocket's in the organized one, in lower case.</summary>
-        /// <remarks>Values and actions are listed together in the organized view, so everything is said as something to do.</remarks>
-        string Said(EntityAction one)
-        {
-            if (Editor.ShowsTerminal)
-                return one.Declared;
-
-            var said = one.Sets ? one.Text : one.Named;
-            if (one.Unaltered && !one.Renamed)
-                said = Unlabelled(said);
-
-            return SentenceText.Lowered(said);
-        }
-
-        /// <summary>The game's name for a member, without the colon it ends a terminal label with.</summary>
-        /// <remarks>Only ever given the game's own names: a word Sprocket or a mod's definition chose is left as written.</remarks>
-        static string Unlabelled(string named)
-        {
-            if (string.IsNullOrEmpty(named))
-                return named;
-
-            var trimmed = named.TrimEnd();
-            return trimmed.EndsWith(":", StringComparison.Ordinal)
-                ? trimmed.Substring(0, trimmed.Length - 1).TrimEnd()
-                : named;
-        }
-
-        /// <summary>Whether what is on offer under that id can be made into a step.</summary>
-        Readiness ReadinessOf(string id, Nature form)
-        {
-            var at = At(id, form);
-            return at >= 0 && at < _ready.Count ? _ready[at] : Readiness.Ready;
-        }
-
-        /// <summary>Works the title out again where the answer has changed since it was last worked out.</summary>
-        /// <remarks>Asked after every command and every tick, so it compares before it builds: a tick where nothing was picked makes no string.</remarks>
-        void Reword()
-        {
-            // A slot's pick keeps the slot's name: the blocks chosen for it are the whole answer, and they are marked in its column.
-            if (_fits != null)
-                return;
-
-            if (_said != null && _saidChosen == _chosen && Same(_saidSlot, _slot) && _saidOffered == _ids.Count
-                && _saidQuantifier == _quantifier && Same(_saidBlocks, _selection))
-            {
-                return;
-            }
-
-            _saidChosen = _chosen;
-            _saidSlot = _slot;
-            _saidOffered = _ids.Count;
-            _saidQuantifier = _quantifier;
-            _saidBlocks.Clear();
-            _saidBlocks.AddRange(_selection);
-
-            var at = _chosen.Length == 0 ? -1 : At(_chosen, _chosenForm);
-            var pressed = _slot == null ? null : Pressing(Editor.World, _selection, _chosen);
-            var chosen = at < 0 ? "" : pressed != null ? pressed.At(_slot).Text : _names[at];
-
-            // A step acts on every block it names, so its blocks are always joined with "and". Only what starts something can
-            // be any one of them, and then only where it was asked.
-            var blocks = SentenceText.Entities(Editor.World, _selection, !_forEvents && !_forTests || _quantifier != Quantifier.Any);
-
-            _said = _selection.Count == 0 && chosen.Length == 0
-                ? _title
-                : _forTests
-                    ? SentenceText.Testing(blocks, chosen, IsState(_chosen), _selection.Count > 1 ? SentenceText.Quantified(_quantifier) : "")
-                    : _forEvents && (_chosenForm == Nature.Value || Totals)
-                        ? SentenceText.Testing(blocks, chosen, false, _selection.Count > 1 ? SentenceText.Quantified(_quantifier) : "", "When")
-                        : SentenceText.Picking(_forEvents, blocks, chosen, at >= 0 && _sets[at]);
-
-            _retitled = true;
-        }
-
-        static bool Same(List<long> one, List<long> other)
-        {
-            if (one.Count != other.Count)
-                return false;
-
-            for (var i = 0; i < one.Count; i++)
-            {
-                if (one[i] != other[i])
-                    return false;
-            }
-
-            return true;
-        }
-
         /// <summary>The name what is chosen is listed under, or empty where nothing is.</summary>
         string Chosen()
         {
-            var at = At(_chosen, _chosenForm);
-            return at < 0 ? "" : _names[at];
-        }
-
-        /// <summary>Where the thing on offer under that id is in the list, or -1 where it is not listed.</summary>
-        /// <remarks>By the id and by which of the three ways it reaches the block, because a switch's value and the act that flips it share one id.</remarks>
-        int At(string id, Nature form)
-        {
-            for (var i = 0; i < _ids.Count; i++)
-            {
-                if (_ids[i] == id && (_forms.Count > i ? _forms[i] : Nature.Native) == form)
-                    return i;
-            }
-
-            return -1;
-        }
-
-        /// <summary>Whether the view now showing lists this one.</summary>
-        /// <remarks>
-        /// The terminal view lists what the block declares, whether or not something has been offered in its place; the
-        /// organized view lists what is on offer and usable, whoever worded it. A value of
-        /// Sprocket's own is a step only where it can be set; a test lists it itself.
-        /// </remarks>
-        bool Lists(EntityAction one)
-        {
-            if (one.Being != null && !one.Sets)
-                return false;
-
-            if (Editor.ShowsTerminal)
-                return one.Unaltered;
-
-            return one.Vetted && !one.Hidden && one.Readiness == Readiness.Ready;
-        }
-
-        /// <summary>Which group of the view now showing this one is listed in: the terminal's two kinds of member, or the organized view's categories.</summary>
-        int Group(EntityAction one)
-        {
-            if (Editor.ShowsTerminal)
-                return one.Sets ? Values : Actions;
-
-            return (int)one.Category;
-        }
-
-        /// <summary>What a group is headed.</summary>
-        string Heading(int group)
-        {
-            // What starts something lists its moments under no heading, and its numbers under one.
-            if (_forEvents)
-                return Editor.Texts.PickValues;
-
-            if (Editor.ShowsTerminal)
-                return group == Values ? Editor.Texts.PickValues : Editor.Texts.PickToolbarActions;
-
-            return group == Statuses ? Editor.Texts.PickStatus : CategoryText.Of(Editor.Texts, (Category)group);
-        }
-
-        int CountOfKind(string kindId)
-        {
-            var count = 0;
-            foreach (var candidate in _candidates)
-            {
-                if (candidate.Kind.Id == kindId)
-                    count++;
-            }
-
-            return count;
-        }
-
-        /// <summary>Works out what is on offer, which does not depend on what has been picked.</summary>
-        /// <remarks>
-        /// Ticking a block narrows what can be said about it in the next stage and nothing else, so nobody watches the list of
-        /// their own blocks shrink underneath them. Narrowing is the one thing that can hide a row, and a picked block is
-        /// exempt: a tick nobody can find is a tick nobody can clear. A row stays on the list until the narrowing changes, so a
-        /// block kept only because it was picked is still there after somebody picks another in its place. Sorted by name,
-        /// because the order the world hands them over is whatever walking the grid produced.
-        /// <para>
-        /// A block hidden from toolbars is left out until the eye is opened, as the game's toolbar list leaves it out, unless
-        /// it is picked.
-        /// </para>
-        /// </remarks>
-        void Collect()
-        {
-            _candidates.Clear();
-
-            if (_fits != null)
-            {
-                var entities = Editor.World.Entities;
-                for (var i = 0; i < entities.Count; i++)
-                {
-                    if (_fits(entities[i]) && Listed(entities[i]))
-                        _candidates.Add(entities[i]);
-                }
-            }
-            else
-            {
-                var capable = _forTests ? Vocabulary.Testable(Editor.World) : Vocabulary.Capable(Editor.World, _forEvents);
-                foreach (var entity in capable)
-                {
-                    if ((_admits == null || _admits(entity)) && Listed(entity))
-                        _candidates.Add(entity);
-                }
-            }
-
-            _candidates.Sort(ByName);
-            Lead();
-
-            _kinds.Clear();
-            EntityQuery.KindsPresent(_candidates, _kinds);
-
-            _wasShown.Clear();
-            if (_screen.Search == _narrowedSearch && _kind == _narrowedKind)
-            {
-                foreach (var id in _filteredIds)
-                    _wasShown.Add(id);
-            }
-
-            _narrowedSearch = _screen.Search;
-            _narrowedKind = _kind;
-
-            _filtered.Clear();
-            _filteredIds.Clear();
-            foreach (var entity in _candidates)
-            {
-                if (!_wasShown.Contains(entity.Id) && !Contains(_selection, entity.Id)
-                    && !EntityQuery.Matches(entity, _screen.Search, _kind, _family))
-                    continue;
-
-                _filtered.Add(entity);
-                _filteredIds.Add(entity.Id);
-            }
-        }
-
-        /// <summary>Moves the blocks listed ahead of the rest to the front, keeping their order among themselves and the rest's among theirs.</summary>
-        void Lead()
-        {
-            if (_ahead.Count == 0)
-                return;
-
-            var at = 0;
-            for (var i = 0; i < _candidates.Count; i++)
-            {
-                if (!_ahead.ContainsKey(_candidates[i].Id))
-                    continue;
-
-                var entity = _candidates[i];
-                _candidates.RemoveAt(i);
-                _candidates.Insert(at++, entity);
-            }
-        }
-
-        /// <summary>Whether <paramref name="entity" /> is listed: shown in toolbars, or the eye open, or picked already.</summary>
-        bool Listed(GridEntity entity)
-        {
-            return ShowsHidden || entity.Block == null || entity.Block.ShowInToolbarConfig || Contains(_selection, entity.Id);
+            var at = _offers.At(_chosen, _chosenForm);
+            return at < 0 ? "" : _offers.Names[at];
         }
 
         /// <summary>Takes a block, the way the press said it was taken.</summary>
@@ -1809,25 +1220,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void Toggle(long entityId)
         {
-            if (Contains(_selection, entityId))
+            if (Listing.Contains(_selection, entityId))
                 _selection.Remove(entityId);
             else
                 _selection.Add(entityId);
         }
 
-        /// <summary>This one and nothing else, which is what pressing a row plainly means.</summary>
+        /// <summary>Takes the block <paramref name="entityId" /> and nothing else, which is what pressing a row plainly means.</summary>
         void Only(long entityId)
         {
             _selection.Clear();
             _selection.Add(entityId);
         }
 
-        /// <summary>Everything between two blocks, in the order they are listed.</summary>
+        /// <summary>Takes every block listed from <paramref name="from" /> to <paramref name="to" />, in the order they are listed.</summary>
         /// <remarks>A run is what somebody drew down the screen, so a block filtered out since the anchor was set leaves the selection alone.</remarks>
         void Span(long from, long to)
         {
-            var first = Listed(from);
-            var last = Listed(to);
+            var first = _listing.Index(from);
+            var last = _listing.Index(to);
 
             if (first < 0 || last < 0)
                 return;
@@ -1841,18 +1252,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _selection.Clear();
             for (var i = first; i <= last; i++)
-                _selection.Add(_filtered[i].Id);
-        }
-
-        int Listed(long entityId)
-        {
-            for (var i = 0; i < _filtered.Count; i++)
-            {
-                if (_filtered[i].Id == entityId)
-                    return i;
-            }
-
-            return -1;
+                _selection.Add(_listing.Filtered[i].Id);
         }
 
         /// <summary>The key the slots of a chosen toolbar are kept under among the rows, which no row's key can be.</summary>
@@ -1864,64 +1264,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>What is chosen as the program names it: the one slot, where a toolbar a person presses is chosen.</summary>
         string Answered => _slot == null ? _chosen : _slot.EventId;
 
-        /// <summary>
-        /// The toolbar a person presses among what <paramref name="targets" /> share that <paramref name="eventId" /> names,
-        /// the toolbar itself or one of its slots; null where it names none.
-        /// </summary>
-        static EntityEvent Pressing(GridWorld world, IList<long> targets, string eventId)
-        {
-            if (string.IsNullOrEmpty(eventId) || ToolbarSlot.Of(eventId) == null)
-                return null;
-
-            foreach (var entityEvent in Vocabulary.EventsOf(world, targets))
-            {
-                if (entityEvent.IsPressed && entityEvent.Names(eventId))
-                    return entityEvent;
-            }
-
-            return null;
-        }
-
-        /// <summary>The first slot of <paramref name="pressed" /> that holds nothing on any of the blocks, or its first slot where every one holds something.</summary>
-        ToolbarSlot Free(EntityEvent pressed)
-        {
-            Occupy(pressed);
-            var toolbar = ToolbarSlot.Of(pressed.Id).Toolbar;
-            for (var i = 0; i < _held.Count; i++)
-            {
-                if (!_held[i].Holds)
-                    return new ToolbarSlot(toolbar, i / pressed.Slots + 1, i % pressed.Slots + 1);
-            }
-
-            return new ToolbarSlot(toolbar, 1, 1);
-        }
-
-        /// <summary>Reads what the slots of <paramref name="pressed" /> hold, where the toolbar or the blocks have changed since they were read.</summary>
-        void Occupy(EntityEvent pressed)
-        {
-            var reading = pressed.Id + Joined(_selection);
-            if (reading == _heldFor)
-                return;
-
-            _heldFor = reading;
-            Occupancy.Read(Editor, _selection, pressed, _held);
-        }
-
-        static string Joined(List<long> blocks)
-        {
-            var joined = "";
-            foreach (var block in blocks)
-                joined += $" {block.ToString(CultureInfo.InvariantCulture)}";
-            return joined;
-        }
-
         void ShowSlots(EntityEvent pressed)
         {
-            Occupy(pressed);
+            _occupancy.Occupy(_selection, pressed);
             if (_slot == null)
-                _slot = Free(pressed);
+                _slot = _occupancy.Free(_selection, pressed);
 
-            _slots.Show(pressed.Pages, pressed.Slots, _held, _slot.Page, _slot.Slot);
+            _slots.Show(pressed.Pages, pressed.Slots, _occupancy.Held, _slot.Page, _slot.Slot);
         }
 
         /// <summary>
@@ -1969,42 +1318,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 pick.Execute();
         }
 
-        /// <summary>The names of the facets of <paramref name="type" /> every block picked has, in the first block's order.</summary>
-        List<string> Shared(HostType type)
-        {
-            var shared = new List<string>();
-            for (var i = 0; i < _selection.Count; i++)
-            {
-                GridEntity entity = Editor.World.FindEntity(_selection[i]);
-                if (entity == null)
-                    continue;
-
-                var facets = entity.Kind.Facets(type);
-                if (i == 0)
-                {
-                    foreach (var facet in facets)
-                        shared.Add(facet.Name);
-
-                    continue;
-                }
-
-                shared.RemoveAll(name => !Has(facets, name));
-            }
-
-            return shared;
-        }
-
-        static bool Has(IList<HostTypeFacet> facets, string name)
-        {
-            foreach (var facet in facets)
-            {
-                if (facet.Name == name)
-                    return true;
-            }
-
-            return false;
-        }
-
         /// <summary>Keeps the facet chosen where the blocks still share it, and otherwise chooses the first they share, or none.</summary>
         void Keep(List<string> shared)
         {
@@ -2012,22 +1325,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _facet = "";
             else if (!shared.Contains(_facet))
                 _facet = shared[0];
-        }
-
-        /// <summary>What the facet chosen of <paramref name="type" /> is doing now on the first block picked.</summary>
-        string Showing(HostType type)
-        {
-            GridEntity entity = _selection.Count == 0 ? null : Editor.World.FindEntity(_selection[0]);
-            if (entity == null)
-                return "";
-
-            foreach (var facet in entity.Kind.Facets(type))
-            {
-                if (facet.Name == _facet)
-                    return type.Showing(entity.Block, facet.Number);
-            }
-
-            return "";
         }
 
         void PickFacet(string name)
@@ -2041,18 +1338,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 pick.Execute();
         }
 
-        static bool Same(ToolbarSlot one, ToolbarSlot other)
-        {
-            return one == null ? other == null : one.Same(other);
-        }
-
         void Choose(string id, Nature form)
         {
-            var pressed = form == Nature.Native ? Pressing(Editor.World, _selection, id) : null;
+            var pressed = form == Nature.Native ? Occupancy.Pressing(Editor.World, _selection, id) : null;
             if (pressed == null)
                 _slot = null;
             else if (id != _chosen || _slot == null)
-                _slot = Free(pressed);
+                _slot = _occupancy.Free(_selection, pressed);
 
             _chosen = id;
             _chosenForm = form;
@@ -2067,7 +1359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             string value, state;
             if (Totals && _chosen.Length > 0
-                && (Comparing.Split(_chosen, out value, out state) || !Number(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen))))
+                && (Comparing.Split(_chosen, out value, out state) || !Offers.Number(Valued(Vocabulary.ActionsOf(Editor.World, _selection), _chosen))))
             {
                 _chosen = "";
             }
@@ -2111,38 +1403,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Narrows the blocks to one kind.</summary>
         void SetKind(string kindId)
         {
-            _kind = kindId ?? "";
-            _family = Family.None;
+            _kinds.Set(kindId);
             Editor.Invalidate();
         }
 
         /// <summary>Narrows the blocks to every kind of <paramref name="family" />.</summary>
         void SetFamily(Family family)
         {
-            _kind = FamilyKey(family);
-            _family = family;
+            _kinds.SetFamily(family);
             Editor.Invalidate();
-        }
-
-        static bool Contains(IList<long> ids, long id)
-        {
-            for (var i = 0; i < ids.Count; i++)
-            {
-                if (ids[i] == id)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Members in the order of the terminal's names for them.</summary>
-        sealed class SaidOrder : IComparer<EntityAction>
-        {
-            public int Compare(EntityAction left, EntityAction right)
-            {
-                return string.Compare(left == null ? "" : left.Declared, right == null ? "" : right.Declared,
-                    StringComparison.OrdinalIgnoreCase);
-            }
         }
 
         /// <summary><paramref name="value" /> as a step would give it: a color fully opaque, whatever the block reads back.</summary>
