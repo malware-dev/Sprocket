@@ -40,6 +40,25 @@ public class SystemSwitchTests
         Assert.False(sim.Editor.Program.Systems[0].Enabled);
     }
 
+    /// <summary>A sequence's row shows no state while its logic system is off.</summary>
+    [Fact]
+    public void ASequenceRowSaysNothingWhileItsSystemIsOff()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Editor.Back();
+        sim.Tick();
+
+        var row = sim.Editor.Rows()[0];
+        Assert.False(sim.Editor.Program.Systems[0].Enabled);
+        Assert.Equal("", row.Status);
+
+        sim.Editor.SwitchOn();
+        sim.Tick();
+
+        Assert.Equal("ready", sim.Editor.Rows()[0].Status);
+    }
+
     /// <summary>A logic system or installation switched off is washed as a warning, an installation as well while its logic system is off.</summary>
     [Fact]
     public void ASwitchedOffRowIsWashedAsAWarning()

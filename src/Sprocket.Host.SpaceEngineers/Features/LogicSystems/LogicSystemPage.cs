@@ -715,7 +715,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var running = SequenceSummary.Live(Editor.Runner, sequence);
 
-            row.Status = SequenceText.Status(Editor.Texts, SequenceSummary.Status(sequence, running));
+            // Nothing while the system is off: its switch says so.
+            var status = SequenceSummary.Status(sequence, running);
+            row.Status = status == SequenceStatus.Off ? "" : SequenceText.Status(Editor.Texts, status);
             row.Running = running != null && running.IsRunning;
             row.JustRan = running != null && running.LastFiredTick >= 0 && tick - running.LastFiredTick < JustRanTicks;
             row.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(running, tick));

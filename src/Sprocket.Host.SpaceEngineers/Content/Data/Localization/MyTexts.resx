@@ -948,7 +948,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Sequence.Off" xml:space="preserve">
     <value>switched off</value>
-    <comment>A sequence's state, shown on its row on a logic system's screen and in the line saying what it is doing on its own screen, while its logic system is switched off.</comment>
+    <comment>A sequence's state, shown in the line saying what it is doing on its own screen, and on the status panel, while its logic system is switched off.</comment>
   </data>
   <data name="Sprocket.Sequence.Running" xml:space="preserve">
     <value>running</value>
