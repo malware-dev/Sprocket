@@ -123,6 +123,24 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Systems.UpdateFromLibrary" xml:space="preserve">
     <value>Oppdater fra biblioteket</value>
   </data>
+  <data name="Sprocket.Systems.ChooseVersion" xml:space="preserve">
+    <value>Velg en versjon</value>
+  </data>
+  <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
+    <value>To konstruksjoner ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du beholder én.</value>
+  </data>
+  <data name="Sprocket.Conflict.Question" xml:space="preserve">
+    <value>Hvilken versjon av **{name}** vil du beholde?</value>
+  </data>
+  <data name="Sprocket.Conflict.Explains" xml:space="preserve">
+    <value>To konstruksjoner ble satt sammen, hver med sin egen versjon. Installasjonene fra begge flyttes til den du beholder, og den andre slettes.</value>
+  </data>
+  <data name="Sprocket.Conflict.Keep" xml:space="preserve">
+    <value>Behold den som ble endret {date}</value>
+  </data>
+  <data name="Sprocket.Conflict.KeepUndated" xml:space="preserve">
+    <value>Behold den udaterte</value>
+  </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
     <value>Plantegningen i biblioteket har nyere endringer. Oppdater versjonen på konstruksjonen din.</value>
   </data>
@@ -1376,6 +1394,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
     <value>oppdatering av et logikksystem fra biblioteket</value>
+  </data>
+  <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
+    <value>valg av versjon for et logikksystem</value>
   </data>
   <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
     <value>tilbakestilling av et logikksystem til plantegningen</value>

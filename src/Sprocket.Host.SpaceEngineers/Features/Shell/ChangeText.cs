@@ -57,6 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case Change.AddInstallation: return texts.ChangeAddInstallation;
                 case Change.UpdateFromLibrary: return texts.ChangeUpdateFromLibrary;
                 case Change.ResetToBlueprint: return texts.ChangeResetToBlueprint;
+                case Change.ChooseVersion: return texts.ChangeChooseVersion;
                 default: return "";
             }
         }

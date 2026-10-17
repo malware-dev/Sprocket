@@ -4,4 +4,6 @@ En konstruksjon er et sett med rutenett som er satt sammen av mekaniske blokker,
 
 Automasjonen ligger i de programmerbare blokkene til konstruksjonen, og kjører så lenge en av dem virker. Er alle slått av eller uten strøm, venter den, og en ![](mark:sequence)&nbsp;[sekvens](sequence) som er midt i kjøringen, fortsetter fra steget sitt når en av dem virker igjen. Når den siste går tapt, tas logikksystemene vare på som sikkerhetskopier i [biblioteket](library).
 
+Når en konstruksjon deles, beholder hver del med en programmerbar blokk sin egen kopi av automasjonen. Når to konstruksjoner med automasjon slås sammen, blir automasjonene til én. Hadde begge en ulik versjon av samme logikksystem, ber overskriften på [startskjermen](home) deg velge én.
+
 Automasjonen tilhører eierne av konstruksjonen, og bare de kan åpne den. [Eierskifte](changing-hands) sier hvem de er, og hva som skjer når konstruksjonen går over til en annen.

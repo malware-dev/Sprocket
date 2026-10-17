@@ -3,7 +3,7 @@ using ProtoBuf;
 
 namespace Sprocket.Host.SpaceEngineers.Memory
 {
-    /// <summary>What one construct's automation is doing: who it belongs to, whether it is paused, its runs and what its triggers last read.</summary>
+    /// <summary>What one construct's automation is doing at a moment of time.</summary>
     [ProtoContract]
     public sealed class ConstructMemory
     {
@@ -26,5 +26,9 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>One for each trigger on each installation that watches or keeps time.</summary>
         [ProtoMember(5)]
         public List<WatchMemory> Watches { get; set; } = new List<WatchMemory>();
+
+        /// <summary>The logic systems with two versions waiting for a choice.</summary>
+        [ProtoMember(6)]
+        public List<ConflictMemory> Conflicts { get; set; } = new List<ConflictMemory>();
     }
 }

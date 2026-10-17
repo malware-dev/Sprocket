@@ -204,7 +204,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             Written(_focused);
             _focused = null;
 
-            if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps())
+            // Nor for a version waiting for a choice.
+            if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps() || Editor.Rival(_system) != null)
                 return true;
 
             var arguments = new Arguments();

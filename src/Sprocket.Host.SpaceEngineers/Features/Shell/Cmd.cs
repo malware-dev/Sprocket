@@ -232,6 +232,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Putting a logic system's blueprint in the library in the place of the logic system, which changes the program.</summary>
         Renew,
 
+        /// <summary>Keeping one of two versions of a logic system, which changes the program.</summary>
+        ChooseVersion,
+
         // A list of answers.
         /// <summary>Picking one of a list of answers.</summary>
         Choice,

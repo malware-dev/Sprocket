@@ -33,7 +33,7 @@ public sealed class RigSlots : ISlots
 
         // The rig knows which of its own blocks this is, which is the same question the game answers
         // by looking for a toolbar component on it.
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block == block)
                 return fitting.Toolbar;
@@ -82,7 +82,7 @@ public sealed class RigSlots : ISlots
         if (item.Kind != MyToolbarItemKind.BlockAction)
             return item.Kind == MyToolbarItemKind.Definition ? item.DefinitionId.SubtypeName : "";
 
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block.EntityId != item.BlockEntityId)
                 continue;
@@ -105,7 +105,7 @@ public sealed class RigSlots : ISlots
     /// <inheritdoc />
     public bool Offers(IMyTerminalBlock block, string actionId)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block == block)
                 return fitting.Offers(actionId);
@@ -117,7 +117,7 @@ public sealed class RigSlots : ISlots
     /// <inheritdoc />
     public void Offered(IMyTerminalBlock block, List<Offer> into)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block != block)
                 continue;
@@ -130,7 +130,7 @@ public sealed class RigSlots : ISlots
     /// <inheritdoc />
     public void Settable(IMyTerminalBlock block, List<Offer> into)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block != block)
                 continue;
@@ -143,7 +143,7 @@ public sealed class RigSlots : ISlots
     /// <inheritdoc />
     public bool Set(IMyTerminalBlock block, string propertyId, Literal value)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block == block)
                 return fitting.Set(propertyId, value);
@@ -155,7 +155,7 @@ public sealed class RigSlots : ISlots
     /// <inheritdoc />
     public Gauge Gauge(IMyTerminalBlock block, string propertyId)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block == block)
                 return fitting.Gauge(propertyId);
@@ -171,7 +171,7 @@ public sealed class RigSlots : ISlots
     public Order Prepare(IMyTerminalBlock block, string id, Nature form, IList<Literal> arguments,
         IList<Primitive> types)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block != block)
                 continue;
@@ -229,7 +229,7 @@ public sealed class RigSlots : ISlots
     /// <inheritdoc />
     public bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> arguments)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block != block || !fitting.Offers(actionId))
                 continue;
@@ -250,7 +250,7 @@ public sealed class RigSlots : ISlots
     /// </remarks>
     public bool Exists(long entityId)
     {
-        foreach (Fitting fitting in _rig.Fitted)
+        foreach (Fitting fitting in _rig.InWorld)
         {
             if (fitting.Block.EntityId == entityId)
                 return true;

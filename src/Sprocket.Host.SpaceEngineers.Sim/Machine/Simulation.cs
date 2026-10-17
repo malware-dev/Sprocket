@@ -33,6 +33,10 @@ public sealed class Simulation
     readonly Store _store;
     SprocketUnit _unit;
 
+    Roster _roster;
+
+    readonly List<Action> _later = new List<Action>();
+
     Rota _rota = new Rota();
 
     readonly Folder _folder = new Folder();
@@ -46,8 +50,6 @@ public sealed class Simulation
     readonly Preferences _preferences;
 
     readonly Shelf _shelf;
-
-    bool _rehoming;
 
     readonly Texts _texts = new Texts();
 
@@ -135,27 +137,32 @@ public sealed class Simulation
         Tick();
     }
 
-    /// <summary>Builds Sprocket on the block that keeps it, from what that block's storage holds.</summary>
+    /// <summary>Takes on the rig's programmable blocks, as each comes alive in the game.</summary>
     void Adopt()
     {
         // Said outright rather than read: the harness has no mod storage. A test that wants the
         // developer tools sets Editor.DeveloperMode on the way past.
-        _unit = new SprocketUnit(_rig.Sprocket.Block, _settings, _rota, _texts,
-            _memories.Claim(_rig.Sprocket.Block.EntityId), _backups);
-        _unit.Begin(Now);
+        _roster = new Roster(() => _settings, _rota, _texts, _memories, _backups, () => Now, _later.Add) { Shelf = _shelf };
+        _unit = _roster.Adopt(_rig.Sprocket.Block);
+        Dress(_unit);
 
-        // The harness is always drawing the screen, which is what the unit ticks its editor for.
-        _unit.Showing = true;
-        _unit.Shelf = _shelf;
-        _unit.Preferences = _preferences;
-        _unit.Viewer = _memories.Player(Viewer);
-        _unit.Administers = () => Admin;
-        _unit.WorldSettings = () => _settings;
-        _unit.ChangeSettings = Settle;
+        foreach (var fitting in _rig.InWorld)
+        {
+            if (fitting is Programmable && fitting != _rig.Sprocket && SprocketUnit.HasProgram(fitting.Block))
+                _roster.Adopt(fitting.Block);
+        }
+    }
 
-        // Answered on the next tick, which is where the game's invoke on the game thread lands: after the grid that
-        // removed the hero has finished changing.
-        _unit.HeroRemoved += delegate { _rehoming = true; };
+    /// <summary>Gives <paramref name="unit" /> what the session gives one as its screen opens.</summary>
+    void Dress(SprocketUnit unit)
+    {
+        unit.Showing = true;
+        unit.Shelf = _shelf;
+        unit.Preferences = _preferences;
+        unit.Viewer = _memories.Player(Viewer);
+        unit.Administers = () => Admin;
+        unit.WorldSettings = () => _settings;
+        unit.ChangeSettings = Settle;
     }
 
     /// <summary>
@@ -170,7 +177,8 @@ public sealed class Simulation
     public void Reload()
     {
         Save();
-        _unit.Dispose();
+        _roster.Dispose();
+        _later.Clear();
         _rota = new Rota();
         _frame = 0;
         _memories.Read(_worldFolder.Has(Memories.File) ? _worldFolder.Read(Memories.File) : null, _frame);
@@ -180,8 +188,24 @@ public sealed class Simulation
     /// <summary>Sprocket's clock: the harness's frame carried on from where the world was saved, as the session keeps it.</summary>
     public int Now => _memories.Now(_frame);
 
-    /// <summary>The Sprocket the construct carries, as the machine keeping it holds it.</summary>
-    public SprocketUnit Unit => _unit;
+    /// <summary>The Sprocket the construct carries.</summary>
+    public SprocketUnit Unit
+    {
+        get
+        {
+            var now = _roster.Kept(_unit.Block);
+            if (now != null && now != _unit)
+            {
+                _unit = now;
+                Dress(_unit);
+            }
+
+            return _unit;
+        }
+    }
+
+    /// <summary>Every Sprocket there is.</summary>
+    public Roster Roster => _roster;
 
     /// <summary>The world's backups, which the library lists.</summary>
     public Backups Backups => _backups;
@@ -202,7 +226,7 @@ public sealed class Simulation
     public Texts Texts => _texts;
 
     /// <summary>The editor on the rig's programmable block.</summary>
-    public SprocketEditor Editor => _unit.Editor;
+    public SprocketEditor Editor => Unit.Editor;
 
     /// <summary>Whether the player at the harness's screen is an admin with creative tools on, who sees the world's settings.</summary>
     public bool Admin { get; set; }
@@ -211,17 +235,18 @@ public sealed class Simulation
     public Settings Settings => _settings;
 
     /// <summary>The blocks the automation sees.</summary>
-    public GridWorld World => _unit.World;
+    public GridWorld World => Unit.World;
 
     /// <summary>Runs the harness's world by <paramref name="next" /> from now on, as the server does when an admin changes them.</summary>
     public void Settle(Settings next)
     {
         _settings = next;
-        _unit.Apply(next);
+        foreach (var unit in _roster.All)
+            unit.Apply(next);
     }
 
     /// <summary>What runs the automation's sequences.</summary>
-    public AutomationRunner Runner => _unit.Runner;
+    public AutomationRunner Runner => Unit.Runner;
 
     /// <summary>What the mod has written to the game's log since this began.</summary>
     public List<string> Log => Told.Lines.GetRange(_saidBefore, Told.Lines.Count - _saidBefore);
@@ -235,17 +260,23 @@ public sealed class Simulation
     /// <summary>Takes the construct's backup, as losing its automation does, saying it was taken at <paramref name="saved" />.</summary>
     public void BackUp(DateTime saved)
     {
-        _unit.Persist();
-        _unit.BackUp(_backups, saved, _shelf);
+        Unit.Persist();
+        Unit.BackUp(_backups, saved, _shelf);
     }
 
     /// <summary>Writes the program, the wiring and what the world remembers out now, whatever the clock says.</summary>
     public void Save()
     {
-        _unit.Persist();
+        _roster.Persist();
         _store.SetValue(Wiring.Key, Wiring.Save(_rig));
-        _worldFolder.Write(Memories.File, _memories.Write(_frame, _unit.Lost ? new List<ConstructMemory>() : new List<ConstructMemory> { _unit.Memory },
-            new List<DoorMemory>()));
+        var remembered = new List<ConstructMemory>();
+        foreach (var unit in _roster.All)
+        {
+            if (!unit.Lost)
+                remembered.Add(unit.Memory);
+        }
+
+        _worldFolder.Write(Memories.File, _memories.Write(_frame, remembered, new List<DoorMemory>()));
     }
 
     /// <summary>
@@ -265,26 +296,14 @@ public sealed class Simulation
         // nobody hears, which looks exactly like Sprocket failing to claim the slot.
         Connect();
 
-        if (_rehoming)
-        {
-            _rehoming = false;
-            _unit.Rehome();
-
-            // As the session does: nothing holds the automation after this, so its backup is taken from it now.
-            if (_unit.Lost && _unit.Destroyed)
-                _unit.BackUp(_backups, DateTime.UtcNow, _shelf);
-        }
+        // Where the game's invoke on its own thread lands.
+        var later = new List<Action>(_later);
+        _later.Clear();
+        foreach (var action in later)
+            action();
 
         _rig.Tick();
-        if (!_unit.Lost)
-            _unit.Tick(Now);
-
-        // After the unit, as the session does it, so its bindings are current when its sequences run.
-        _rota.Run(Now);
-
-        // After the runs, as the session does it, so what a run changed on a tick shows on that tick.
-        if (!_unit.Lost)
-            _unit.Show(Now);
+        _roster.Tick(Now);
 
         if (_frame % SaveEvery == 0)
             Save();
@@ -300,8 +319,14 @@ public sealed class Simulation
     /// </remarks>
     void Fire(long block, string key)
     {
-        if (block == _unit.Block.EntityId)
-            _unit.Fire(key);
+        foreach (var unit in _roster.All)
+        {
+            if (unit.Block.EntityId == block)
+            {
+                unit.Fire(key);
+                return;
+            }
+        }
     }
 
     /// <summary>
@@ -326,7 +351,7 @@ public sealed class Simulation
     /// <summary>Has every block with a toolbar that is not yet connected run what its slots hold through this simulation.</summary>
     void Connect()
     {
-        foreach (var fitting in _rig.Fitted)
+        foreach (var fitting in _rig.InWorld)
         {
             if (fitting.Toolbar == null || fitting.Invokes != null)
                 continue;
@@ -340,7 +365,7 @@ public sealed class Simulation
 
     public IEnumerable<Panel> Panels()
     {
-        foreach (var fitting in _rig.Fitted)
+        foreach (var fitting in _rig.InWorld)
         {
             var panel = fitting as Panel;
             if (panel != null)

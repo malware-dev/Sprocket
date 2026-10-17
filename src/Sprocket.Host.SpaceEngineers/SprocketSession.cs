@@ -39,12 +39,6 @@ namespace Sprocket.Host.SpaceEngineers
 
         static SprocketSession _current;
 
-        readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
-
-        readonly Dictionary<long, long> _moved = new Dictionary<long, long>();
-
-        readonly List<KeyValuePair<long, SprocketUnit>> _saving = new List<KeyValuePair<long, SprocketUnit>>();
-
         readonly Backups _backups = new Backups(new WorldFiles());
 
         readonly CarrierFiles _carried = new CarrierFiles();
@@ -66,6 +60,8 @@ namespace Sprocket.Host.SpaceEngineers
         readonly FieldMarks _marks = new FieldMarks();
 
         readonly Rota _rota = new Rota();
+
+        Roster _roster;
 
         AutoClose _doors;
 
@@ -149,9 +145,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         public static SprocketUnit UnitOf(IMyTerminalBlock block)
         {
-            SprocketUnit unit;
-            return _current != null && block != null
-                && _current._units.TryGetValue(block.EntityId, out unit) ? unit : null;
+            return _current == null ? null : _current._roster.Kept(block);
         }
 
         /// <summary>
@@ -183,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers
             _current._group.Clear();
             MyAPIGateway.GridGroups.GetGroup(grid, GridLinkTypeEnum.Mechanical, _current._group);
 
-            foreach (SprocketUnit unit in _current._units.Values)
+            foreach (SprocketUnit unit in _current._roster.All)
             {
                 IMyTerminalBlock owner = unit.Block;
                 if (owner == null || owner.CubeGrid == null)
@@ -244,8 +238,8 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>A faction joined, left, made peace or went to war, which may change what every construct shares with whom.</summary>
         void Refactioned(MyFactionStateChange change, long fromFaction, long toFaction, long playerId, long senderId)
         {
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.World.Reshare();
+            foreach (SprocketUnit unit in _roster.All)
+                unit.World.Reshare();
         }
 
         /// <summary>Reads the player's library out of the global store, once, as the world starts.</summary>
@@ -299,6 +293,19 @@ namespace Sprocket.Host.SpaceEngineers
             // instance, which is an ordinary object.
             _current = this;
 
+            // Before Speak, which rewords every Sprocket.
+            _roster = new Roster(() => Asked, _rota, _texts, _memories, _backups, Frame, Later)
+            {
+                Shelf = _shelf,
+                Spreading = Spread,
+                Emptied = id => _handover.Tell(id, "", ""),
+                Dropped = unit =>
+                {
+                    if (_shown == unit && _screen != null)
+                        _screen.CloseNow();
+                }
+            };
+
             Speak();
 
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
@@ -347,8 +354,8 @@ namespace Sprocket.Host.SpaceEngineers
             _codex.Load(MyAPIGateway.Session.Config.Language);
             _texts.Book.Load(_gameTexts);
 
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.Reword();
+            foreach (SprocketUnit unit in _roster.All)
+                unit.Reword();
 
             if (_copy != null)
                 _copy.Reword();
@@ -363,20 +370,9 @@ namespace Sprocket.Host.SpaceEngineers
         {
             var block = MyAPIGateway.Entities == null
                 ? null
-                : MyAPIGateway.Entities.GetEntityById(Key(id)) as IMyProgrammableBlock;
+                : MyAPIGateway.Entities.GetEntityById(_roster.Key(id)) as IMyProgrammableBlock;
 
             return block == null ? null : Adopt(block);
-        }
-
-        /// <summary>The id the automation once kept under <paramref name="id" /> is kept under now.</summary>
-        /// <remarks>Leases and a client's copy keep the id they were given, so what they send is followed through every move since.</remarks>
-        long Key(long id)
-        {
-            long next;
-            while (_moved.TryGetValue(id, out next))
-                id = next;
-
-            return id;
         }
 
         /// <summary>
@@ -477,29 +473,15 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         void Changed(long id, string program, string switches)
         {
-            id = Key(id);
-            SprocketUnit was;
-            if (!_units.TryGetValue(id, out was))
+            SprocketUnit was = _roster.Kept(id);
+            if (was == null)
             {
                 Told.Say($"a change arrived for block {id}, which carries no Sprocket here");
                 return;
             }
 
-            SprocketUnit rebuilt = was.Rebuilt(program, switches, Asked, _rota);
-            if (!rebuilt.Program.Intact)
-            {
-                Told.Say($"a change to {was.Block.CustomName} would not read, and was not taken");
-                rebuilt.Dispose();
-                return;
-            }
-
-            _units[id] = rebuilt;
-            rebuilt.HeroRemoved += Removed;
-            was.Dispose();
-            rebuilt.Persist();
-            File(id, rebuilt);
-            Spread(rebuilt);
-            Told.Say($"{was.Block.CustomName} was built again from the change, and saved");
+            if (_roster.Replace(was, program, switches) != null)
+                Told.Say($"{was.Block.CustomName} was built again from the change, and saved");
         }
 
         /// <summary>Whether the player at this machine may change the world's settings now: an admin, or higher, with creative tools on or in a creative world.</summary>
@@ -533,7 +515,7 @@ namespace Sprocket.Host.SpaceEngineers
             var was = Asked;
             _settings = next;
             next.Keep(was);
-            foreach (var unit in _units.Values)
+            foreach (var unit in _roster.All)
                 unit.Apply(next);
         }
 
@@ -681,7 +663,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_current == null || block == null || !IsServer)
                 return null;
 
-            return _current.UnitFor(block);
+            return _current._roster.Adopt(block);
         }
 
         /// <summary>
@@ -696,101 +678,6 @@ namespace Sprocket.Host.SpaceEngineers
         /// True in single player, where the client is the server.
         /// </remarks>
         static bool IsServer => MyAPIGateway.Multiplayer == null || MyAPIGateway.Multiplayer.IsServer;
-
-        /// <summary>The Sprocket of the construct <paramref name="block" /> is on, made with it as the hero where the construct has none.</summary>
-        /// <remarks>
-        /// A construct has one Sprocket, so a programmable block holding a program of its own on a construct that already
-        /// has one is not taken on; it is logged, and its program is left where it is.
-        /// </remarks>
-        SprocketUnit UnitFor(IMyTerminalBlock block)
-        {
-            SprocketUnit unit = UnitOn(block);
-            if (unit != null)
-            {
-                if (unit.Block != block && SprocketUnit.HasProgram(block))
-                {
-                    Told.Say($"{block.CustomName} holds a program on a construct whose automation {unit.Block.CustomName} keeps; it was not taken on");
-                }
-
-                return unit;
-            }
-
-            unit = new SprocketUnit(block, Asked, _rota, _texts, _memories.Claim(block.EntityId), _backups);
-            unit.Begin(Frame());
-            unit.HeroRemoved += Removed;
-            _units.Add(block.EntityId, unit);
-            return unit;
-        }
-
-        /// <summary>A Sprocket's hero removed from its construct, answered once the game is back on its own thread.</summary>
-        /// <remarks>
-        /// Raised inside the grid's own event, while the grid is still changing; the game's invoke on the game thread runs the
-        /// move after it has finished, so nothing of Sprocket's waits on a tick for it.
-        /// </remarks>
-        void Removed(SprocketUnit unit)
-        {
-            if (MyAPIGateway.Utilities != null)
-                MyAPIGateway.Utilities.InvokeOnGameThread(() => Rehome(unit));
-        }
-
-        /// <summary>Moves a Sprocket into another programmable block on its construct, where it is still this session's.</summary>
-        void Rehome(SprocketUnit unit)
-        {
-            long was = unit.Block.EntityId;
-            SprocketUnit held;
-            if (!_units.TryGetValue(was, out held) || held != unit)
-                return;
-
-            unit.Rehome();
-            File(was, unit);
-        }
-
-        /// <summary>Files a Sprocket kept under <paramref name="was" /> under the block that holds it now, or lets it go where it is lost.</summary>
-        /// <remarks>
-        /// A moved Sprocket is told to every client, so their copies of the construct keep the program in the block that holds
-        /// it, and the id it moved from is remembered for the leases and copies still holding it.
-        /// </remarks>
-        void File(long was, SprocketUnit unit)
-        {
-            if (unit.Lost)
-            {
-                // Taken now, from what it was running, because nothing holds the automation after this.
-                if (unit.Destroyed)
-                    unit.BackUp(_backups, DateTime.UtcNow, _shelf);
-                _units.Remove(was);
-                if (_shown == unit && _screen != null)
-                    _screen.CloseNow();
-
-                unit.Dispose();
-                return;
-            }
-
-            long now = unit.Block.EntityId;
-            if (now == was)
-                return;
-
-            _units.Remove(was);
-            _units[now] = unit;
-            _moved[was] = now;
-            Spread(unit);
-        }
-
-        /// <summary>The Sprocket of the construct <paramref name="block" /> is on, or null where it has none.</summary>
-        /// <remarks>One lookup per Sprocket in the world, asked when a block is opened or comes alive with a program, never on a tick.</remarks>
-        SprocketUnit UnitOn(IMyTerminalBlock block)
-        {
-            SprocketUnit unit;
-            if (_units.TryGetValue(block.EntityId, out unit))
-                return unit;
-
-            foreach (KeyValuePair<long, SprocketUnit> each in _units)
-            {
-                if (each.Value.World.FindEntity(block.EntityId) != null)
-                    return each.Value;
-            }
-
-            return null;
-        }
 
         /// <summary>
         /// Opens the editor on the construct this block sits on.
@@ -906,18 +793,18 @@ namespace Sprocket.Host.SpaceEngineers
                 _handover.Reclaim(Connected);
 
             // The rota holds a door's coming close as well as the Sprockets' work, so it runs while either is there.
-            if (_units.Count == 0 && _rota.Count == 0)
+            if (_roster.Count == 0 && _rota.Count == 0)
                 return;
 
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.Tick(frame);
+            _roster.Tick(frame);
+        }
 
-            // After every Sprocket has ticked, so each one's bindings are current when the rota calls
-            // its sequences.
-            _rota.Run(frame);
-
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.Show(frame);
+        /// <summary>Runs <paramref name="action" /> once the game has finished its current event.</summary>
+        /// <remarks>A grid raises its events while it is still changing.</remarks>
+        static void Later(Action action)
+        {
+            if (MyAPIGateway.Utilities != null)
+                MyAPIGateway.Utilities.InvokeOnGameThread(action);
         }
 
         /// <summary>Sprocket's clock, which the rota counts in: the game's frame carried on from where the world was saved.</summary>
@@ -969,21 +856,7 @@ namespace Sprocket.Host.SpaceEngineers
         /// </remarks>
         public override MyObjectBuilder_SessionComponent GetObjectBuilder()
         {
-            // From a list of its own, because writing a Sprocket finds its hero first, and one that has moved is filed again.
-            _saving.Clear();
-            _saving.AddRange(_units);
-            foreach (var filed in _saving)
-            {
-                SprocketUnit unit = filed.Value;
-                unit.Persist();
-                File(filed.Key, unit);
-                if (unit.Lost)
-                    continue;
-
-                Spread(unit);
-            }
-
-            _saving.Clear();
+            _roster.Persist();
             Remember();
             Carry();
             return base.GetObjectBuilder();
@@ -996,10 +869,10 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
 
             _remembered.Clear();
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
+            foreach (SprocketUnit unit in _roster.All)
             {
-                if (!unit.Value.Lost)
-                    _remembered.Add(unit.Value.Memory);
+                if (!unit.Lost)
+                    _remembered.Add(unit.Memory);
             }
 
             _closing.Clear();
@@ -1054,8 +927,8 @@ namespace Sprocket.Host.SpaceEngineers
             if (_rested != null && _rested != _copy)
                 _rested.Dispose();
 
-            foreach (KeyValuePair<long, SprocketUnit> unit in _units)
-                unit.Value.Dispose();
+            if (_roster != null)
+                _roster.Dispose();
 
             if (_doors != null)
                 _doors.Dispose();
@@ -1063,7 +936,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_channel != null)
                 _channel.Dispose();
 
-            _units.Clear();
+            _roster = null;
             _screen = null;
             _shown = null;
             _copy = null;

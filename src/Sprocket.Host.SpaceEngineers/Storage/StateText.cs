@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -34,13 +35,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <remarks>Persisted. A name rather than a keyword, so it reserves no word in a script.</remarks>
         const string Paused = "paused";
 
+        /// <summary>What heads a line naming a logic system and the version waiting beside it.</summary>
+        /// <remarks>Sent to a copy being edited only. A name rather than a keyword, so it reserves no word in a script.</remarks>
+        const string Versions = "versions";
+
         /// <summary>
         /// What is switched off and what is running, as a document, and who the automation belongs to where
         /// <paramref name="players" /> says.
         /// </summary>
         /// <remarks>
-        /// A null runner writes the switches alone, which is what a caller with no runtime has. Who it belongs to goes only
-        /// to a copy being edited: what a block keeps travels with every copy of the construct, which starts as nobody's.
+        /// A null runner writes the switches alone, which is what a caller with no runtime has. Who it belongs to, and the
+        /// versions waiting, go only to a copy being edited: what a block keeps travels with every copy of the construct,
+        /// which starts as nobody's.
         /// </remarks>
         public static string Save(Automation program, AutomationRunner runner, bool players = true)
         {
@@ -49,6 +55,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 Players(pen, Owned, program.Owners);
                 Players(pen, Paused, program.PausedFrom);
+                foreach (var conflict in program.Memory.Conflicts)
+                {
+                    pen.Head(Versions).Text(conflict.System.ToString("D")).Text(conflict.Waiting.ToString("D"));
+                    pen.End();
+                }
             }
 
             var systems = program.Systems;
@@ -392,13 +403,38 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
-                trouble.Say(line, "expected 'off', 'running', 'when', 'every', 'owned' or 'paused'.");
+                if (line.Key == Keyword.None && line.Head == Versions)
+                {
+                    Waiting(line, program, trouble);
+                    continue;
+                }
+
+                trouble.Say(line, "expected 'off', 'running', 'when', 'every', 'owned', 'paused' or 'versions'.");
             }
 
             if (trouble.What.Length > 0)
                 program.Damaged(trouble.What);
 
             return trouble.What;
+        }
+
+        static void Waiting(Statement line, Automation program, Trouble trouble)
+        {
+            Guid here;
+            Guid waiting;
+            if (line.Count != 2 || !Guid.TryParseExact(line.Text(0), "D", out here) || !Guid.TryParseExact(line.Text(1), "D", out waiting))
+            {
+                trouble.Say(line, "expected two systems' identities.");
+                return;
+            }
+
+            foreach (var conflict in program.Memory.Conflicts)
+            {
+                if (conflict.System == here && conflict.Waiting == waiting)
+                    return;
+            }
+
+            program.Memory.Conflicts.Add(new ConflictMemory { System = here, Waiting = waiting });
         }
 
         /// <summary>Reads the players a line names into <paramref name="into" />, in place of what it held.</summary>

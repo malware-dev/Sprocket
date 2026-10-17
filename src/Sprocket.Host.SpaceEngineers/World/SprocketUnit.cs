@@ -212,6 +212,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             foreach (var holder in _holders)
                 holder.IsWorkingChanged -= Working;
 
+            _was.Clear();
+            _was.AddRange(_holders);
             _holders.Clear();
             var entities = _world.Entities;
             for (var i = 0; i < entities.Count; i++)
@@ -227,6 +229,24 @@ namespace Sprocket.Host.SpaceEngineers.World
                 holder.IsWorkingChanged += Working;
 
             _working = AnyWorking();
+            Regathered();
+        }
+
+        void Regathered()
+        {
+            _parted.Clear();
+            foreach (var was in _was)
+            {
+                if (!_holders.Contains(was) && !was.MarkedForClose && !was.Closed)
+                    _parted.Add(was);
+            }
+
+            var arrived = false;
+            foreach (var holder in _holders)
+                arrived |= !_was.Contains(holder);
+
+            if ((_parted.Count > 0 || arrived) && Gathered != null)
+                Gathered(this);
         }
 
         /// <summary>Whether any programmable block on the construct is working.</summary>
@@ -287,6 +307,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// finished: the session through the game's own invoke on the game thread, the harness on its next tick.
         /// </remarks>
         public event Action<SprocketUnit> HeroRemoved;
+
+        /// <summary>Raised when programmable blocks leave or join the construct.</summary>
+        /// <remarks>Raised on a tick, so an answer that builds Sprockets waits for the tick to end.</remarks>
+        public event Action<SprocketUnit> Gathered;
+
+        /// <summary>The construct's programmable blocks, the hero among them.</summary>
+        public IReadOnlyList<IMyTerminalBlock> Holders => _holders;
+
+        /// <summary>The programmable blocks that just left the construct and still stand.</summary>
+        public IReadOnlyList<IMyTerminalBlock> Parted => _parted;
 
         /// <summary>The player's library, which the editor is given; null on a machine that keeps none.</summary>
         public Shelf Shelf
@@ -420,6 +450,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         bool _adopted;
 
+        long _from;
+
         bool _read;
 
         bool _working;
@@ -429,6 +461,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>The construct's revision <see cref="_holders" /> were gathered at.</summary>
         int _heldAt = int.MinValue;
+
+        readonly List<IMyTerminalBlock> _was = new List<IMyTerminalBlock>();
+
+        readonly List<IMyTerminalBlock> _parted = new List<IMyTerminalBlock>();
 
         /// <summary>The blocks the automation could reach again when it paused, which the resume screen names.</summary>
         readonly List<string> _returned = new List<string>();
@@ -1059,7 +1095,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(want.Slot, out present)
-                    || (!Mine(present) && !Orphaned(present)))
+                    || (!Mine(present) && !Orphaned(present) && !Handed(present)))
                 {
                     continue;
                 }
@@ -1080,6 +1116,8 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Told.Say($"mended slot {want.Slot}, now {want.Key}");
                 Name(want);
             }
+
+            _from = 0;
         }
 
         /// <summary>Whether a slot of Sprocket's carries a key this program can resolve.</summary>
@@ -1311,6 +1349,19 @@ namespace Sprocket.Host.SpaceEngineers.World
             return SignalAction.IsOurs(present)
                 && present.BlockEntityId != _block.EntityId
                 && !Toolbars.Exists(present.BlockEntityId);
+        }
+
+        bool Handed(MyToolbarItemInfo present)
+        {
+            return _from != 0 && SignalAction.IsOurs(present) && present.BlockEntityId == _from;
+        }
+
+        /// <summary>Takes over, on its next pass, its program's buttons that still name <paramref name="from" />, the block its automation came from.</summary>
+        public void TakeOver(long from)
+        {
+            _from = from;
+            _adopted = false;
+            _reconciled = int.MinValue;
         }
 
         long PanelId(string reference)

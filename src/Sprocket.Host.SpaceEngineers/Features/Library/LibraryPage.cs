@@ -618,7 +618,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>A time in UTC, said as the player's clock has it.</summary>
-        static string Time(DateTime utc)
+        public static string Time(DateTime utc)
         {
             return utc.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
         }

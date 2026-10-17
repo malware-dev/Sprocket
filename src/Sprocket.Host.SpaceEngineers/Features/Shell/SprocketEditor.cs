@@ -3299,6 +3299,91 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return "";
         }
 
+        /// <summary>The other version of <paramref name="system" /> waiting for a choice, or null.</summary>
+        public AutomationSystem Rival(AutomationSystem system)
+        {
+            var conflict = Conflict(system);
+            if (conflict == null)
+                return null;
+
+            return _program.FindSystem(conflict.System == system.Identity ? conflict.Waiting : conflict.System);
+        }
+
+        /// <summary>Asks which version of <paramref name="system" /> to keep.</summary>
+        public void AskChoose(AutomationSystem system)
+        {
+            var conflict = Conflict(system);
+            if (conflict == null)
+                return;
+
+            var here = _program.FindSystem(conflict.System);
+            var waiting = _program.FindSystem(conflict.Waiting);
+            var arguments = new Arguments();
+            arguments.Set("name", here.Name);
+            Ask($"{Texts.ConflictQuestion}\n\n{Texts.ConflictExplains}", arguments);
+            Answer(Kept(here), () => Choose(here, waiting, conflict, here));
+            Answer(Kept(waiting), () => Choose(here, waiting, conflict, waiting));
+        }
+
+        ConflictMemory Conflict(AutomationSystem system)
+        {
+            foreach (var conflict in _program.Memory.Conflicts)
+            {
+                if (conflict.System != system.Identity && conflict.Waiting != system.Identity)
+                    continue;
+
+                if (_program.FindSystem(conflict.System) != null && _program.FindSystem(conflict.Waiting) != null)
+                    return conflict;
+            }
+
+            return null;
+        }
+
+        string Kept(AutomationSystem version)
+        {
+            return version.Changed.HasValue
+                ? Template.Fill(Texts.ConflictKeep, "date", LibraryPage.Time(version.Changed.Value))
+                : Texts.ConflictKeepUndated;
+        }
+
+        // Under the identity of the one here, which the construct's buttons name.
+        void Choose(AutomationSystem here, AutomationSystem waiting, ConflictMemory conflict, AutomationSystem keep)
+        {
+            var scratch = new Automation();
+            if (ProgramText.Load(ProgramText.Save(_program, _world.Values), scratch, _world.Values).Length > 0)
+                return;
+
+            var kept = scratch.FindSystem(keep.Identity);
+            var dropped = scratch.FindSystem(keep == here ? waiting.Identity : here.Identity);
+            foreach (var instance in dropped.Instances)
+                Meeting.Bring(instance, kept, name => name);
+
+            scratch.RemoveSystem(dropped);
+            kept.Identity = here.Identity;
+            var text = ProgramText.Save(scratch, _world.Values);
+
+            Stamp(true);
+            var at = 0;
+            while (at < _program.Systems.Count && _program.Systems[at] != here)
+                at++;
+
+            _program.RemoveSystem(here);
+            var trouble = ProgramText.ReadOne(text, here.Identity, _program);
+            var chosen = _program.FindSystem(here.Identity);
+            if (chosen != null)
+                _program.RemoveSystem(chosen);
+
+            _program.PutBack(here, at);
+            if (trouble.Length > 0 || chosen == null)
+                return;
+
+            _said[chosen.Identity] = ProgramText.Said(chosen);
+            Do(new ChooseVersion(here, waiting, chosen, conflict));
+            Gone(here);
+            Gone(waiting);
+            Invalidate();
+        }
+
         /// <summary>Whether the logic system <paramref name="system" /> was changed after the version of its blueprint in the library it is linked to.</summary>
         public bool ChangedSince(AutomationSystem system)
         {
@@ -3341,6 +3426,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Switches <paramref name="system" /> on or off; a blueprint off only after asking, since that stops every logic system made from it.</summary>
         public void SwitchSystem(AutomationSystem system, bool on)
         {
+            // A version waiting for a choice asks for it instead.
+            if (on && Rival(system) != null)
+            {
+                AskChoose(system);
+                return;
+            }
+
             if (on || !system.IsBlueprint || system.Instances.Count == 0)
             {
                 system.Enabled = on;

@@ -156,6 +156,30 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Update from library</value>
     <comment>Button on a logic system's heading row on the home screen, and in the library's details of a logic system on this construct, shown where the blueprint in the library was changed after the logic system. Pressing it puts the blueprint in the logic system's place.</comment>
   </data>
+  <data name="Sprocket.Systems.ChooseVersion" xml:space="preserve">
+    <value>Choose a version</value>
+    <comment>Button on a logic system's heading row on the home screen, shown where two versions of the logic system met when two constructs joined. Pressing it asks which version to keep.</comment>
+  </data>
+  <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
+    <value>Two constructs joined, each with its own version of {name}. Both stay switched off until you keep one.</value>
+    <comment>Tooltip on the Choose a version button on a logic system's heading row on the home screen. {name} is the logic system's name.</comment>
+  </data>
+  <data name="Sprocket.Conflict.Question" xml:space="preserve">
+    <value>Which version of **{name}** do you keep?</value>
+    <comment>First line of a question dialog asked from the Choose a version button, or from the switch of a logic system that came in two versions when two constructs joined. {name} is the logic system's name.</comment>
+  </data>
+  <data name="Sprocket.Conflict.Explains" xml:space="preserve">
+    <value>Two constructs joined, each with its own version. The installations of both move to the one you keep, and the other is deleted.</value>
+    <comment>Second paragraph of the question dialog asking which version of a logic system to keep.</comment>
+  </data>
+  <data name="Sprocket.Conflict.Keep" xml:space="preserve">
+    <value>Keep the one changed {date}</value>
+    <comment>An answer in the question dialog asking which version of a logic system to keep. {date} is when that version was last changed, as a date and a time.</comment>
+  </data>
+  <data name="Sprocket.Conflict.KeepUndated" xml:space="preserve">
+    <value>Keep the undated one</value>
+    <comment>An answer in the question dialog asking which version of a logic system to keep, for a version that says nothing of when it was last changed.</comment>
+  </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
     <value>The blueprint in the library has more recent changes. Update your construct's version.</value>
     <comment>Tooltip on the button on a logic system's heading row on the home screen, and in the library's details, that puts the library's newer blueprint in the logic system's place; shown where the blueprint was changed after the logic system.</comment>
@@ -1813,6 +1837,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Change.UpdateFromLibrary" xml:space="preserve">
     <value>updating a logic system from the library</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is replacing a logic system with its newer blueprint from the library.</comment>
+  </data>
+  <data name="Sprocket.Change.ChooseVersion" xml:space="preserve">
+    <value>choosing a version of a logic system</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar on the home screen, after the word Undo or Redo. Shows when the change to be undone or redone is keeping one of two versions of a logic system that met when two constructs joined.</comment>
   </data>
   <data name="Sprocket.Change.ResetToBlueprint" xml:space="preserve">
     <value>resetting a logic system to its blueprint</value>

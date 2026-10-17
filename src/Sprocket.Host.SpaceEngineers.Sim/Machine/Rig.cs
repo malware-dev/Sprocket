@@ -30,6 +30,8 @@ public sealed class Rig
     /// <summary>Every grid of the construct, the one the block Sprocket runs in stands on first.</summary>
     readonly List<Grid> _grids = new List<Grid>();
 
+    readonly List<Grid> _parted = new List<Grid>();
+
     /// <summary>The grid a block is welded to next.</summary>
     Grid _welding;
 
@@ -251,6 +253,50 @@ public sealed class Rig
         }
     }
 
+    /// <summary>Splits <paramref name="part" /> off onto a grid of its own, outside the construct, as grinding the last joining block does.</summary>
+    public Grid Split(IEnumerable<Fitting> part)
+    {
+        var grid = new Grid("Test Rig Part", _grid.Journal, 9500 + _parted.Count);
+        foreach (var fitting in part)
+        {
+            foreach (var from in _grids)
+                from.Release(fitting);
+
+            grid.Take(fitting);
+        }
+
+        _parted.Add(grid);
+        if (_left != null)
+            _left(_group, grid.Block, null);
+
+        return grid;
+    }
+
+    /// <summary>Merges <paramref name="part" /> into the construct's own grid, as merge blocks or a weld do.</summary>
+    public void Merge(Grid part)
+    {
+        if (!_parted.Remove(part))
+            return;
+
+        foreach (var fitting in new List<Fitting>(part.Fitted))
+        {
+            part.Release(fitting);
+            _grid.Take(fitting);
+        }
+
+        if (_joined != null)
+            _joined(_group, part.Block, null);
+    }
+
+    /// <summary>Welds what comes next onto another ship, outside the construct.</summary>
+    public Grid Apart(string name)
+    {
+        var grid = new Grid(name, _grid.Journal, 9700 + _parted.Count);
+        _parted.Add(grid);
+        _welding = grid;
+        return grid;
+    }
+
     /// <summary>Detaches the head of <paramref name="rotor" />, which floats away with whatever is on it, outside the construct.</summary>
     /// <remarks>No block is added or removed; the construct's mechanical group says the head's grid left it.</remarks>
     public void Detach(Rotor rotor)
@@ -262,6 +308,7 @@ public sealed class Rig
 
             var head = _grids[i];
             _grids.RemoveAt(i);
+            _parted.Add(head);
             rotor.TopGrid = null;
             if (_welding == head)
                 _welding = _grid;
@@ -576,6 +623,19 @@ public sealed class Rig
         }
     }
 
+    /// <summary>Every block in the world, whatever construct it is on.</summary>
+    public IReadOnlyList<Fitting> InWorld
+    {
+        get
+        {
+            var all = new List<Fitting>(Fitted);
+            foreach (var grid in _parted)
+                all.AddRange(grid.Fitted);
+
+            return all;
+        }
+    }
+
     /// <summary>Everything the construct has been told to do, oldest first.</summary>
     public List<string> Log => _grid.Journal;
 
@@ -604,8 +664,12 @@ public sealed class Rig
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()
             .Does("GetGroup", arguments =>
             {
+                // A grid that left the construct is a group of its own.
+                var asked = arguments[0] as IMyCubeGrid;
                 var into = arguments[2] as List<IMyCubeGrid>;
-                if (into != null)
+                if (into != null && asked != null && !_grids.Exists(grid => grid.Block == asked))
+                    into.Add(asked);
+                else if (into != null)
                 {
                     foreach (var grid in _grids)
                         into.Add(grid.Block);
@@ -644,6 +708,10 @@ public sealed class Rig
         Clock.Tick();
         for (var i = 0; i < _grids.Count; i++)
             _grids[i].Tick();
+
+        // Every grid in the world moves, whatever construct it is on.
+        for (var i = 0; i < _parted.Count; i++)
+            _parted[i].Tick();
     }
 
     static MyObjectBuilderType Type<T>()

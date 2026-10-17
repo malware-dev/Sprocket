@@ -32,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         readonly ICommand _shelves;
         readonly ICommand _renews;
+        readonly ICommand _chooses;
+
+        bool _waiting;
 
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>
         public SystemGroup(SprocketEditor editor, HomePage page, AutomationSystem system)
@@ -48,6 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _takesOff = editor.Act(Cmd.TakeOff, () => editor.AskTakeOff(system));
             _deletes = editor.Act(Cmd.DeleteSystem, () => editor.DeleteSystem(system));
             _renews = editor.Act(Cmd.Renew, () => editor.AskRenew(system));
+            _chooses = editor.Act(Cmd.ChooseVersion, () => editor.AskChoose(system));
             _shelves = editor.Act(Cmd.Shelve, delegate
             {
                 // Updating replaces the blueprint, so it asks first; making one shows it where it now is.
@@ -95,6 +99,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.ButtonText = !stored ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _heading.ButtonAbout = !stored ? texts.SystemsMakeBlueprintAbout
                 : newer ? texts.SystemsUpdateFromLibraryAbout : texts.SystemsUpdateBlueprintAbout;
+
+            // Kept from here: a version comes or goes only with a change that arranges the group again.
+            _waiting = _editor.Rival(_system) != null;
+            if (_waiting)
+            {
+                _heading.Offers = _chooses;
+                _heading.ButtonText = texts.SystemsChooseVersion;
+                _heading.ButtonAbout = Template.Fill(texts.SystemsChooseVersionAbout, "name", _system.Name);
+            }
 
             _keys.Clear();
             var instances = _system.Instances;
@@ -153,6 +166,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 parked |= row.Parked;
                 running |= row.Running;
             }
+
+            if (_waiting)
+                problems++;
 
             var on = _system.Enabled;
             if (!shown && _heading.Problems == problems && _heading.Remarks == remarks && _heading.Parked == parked

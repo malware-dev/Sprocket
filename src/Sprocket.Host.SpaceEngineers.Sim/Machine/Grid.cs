@@ -106,6 +106,22 @@ public sealed class Grid
         return fitting;
     }
 
+    /// <summary>Lets go of <paramref name="fitting" /> without removing it, as a split or merge moves a block.</summary>
+    /// <remarks>The game moves the block itself, id kept, and reports it neither removed nor closed.</remarks>
+    public void Release(Fitting fitting)
+    {
+        if (_fitted.Remove(fitting))
+            _slim.Remove(fitting);
+    }
+
+    /// <summary>Takes <paramref name="fitting" /> onto this grid where it stands.</summary>
+    public void Take(Fitting fitting)
+    {
+        var cell = fitting.Cell;
+        Weld(fitting);
+        fitting.Cell = cell;
+    }
+
     /// <summary>Grinding one off, which leaves whatever named it pointing at nothing.</summary>
     /// <remarks>The game reports the block removed from the grid, then closes it.</remarks>
     public void Grind(Fitting fitting)
