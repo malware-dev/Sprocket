@@ -625,7 +625,7 @@ public class EditorTests
 
         StartOnTheButton(editor);
         var sequence = ship.Automation.Sequences[0];
-        var one = editor.Blueprinted(sequence.System);
+        var one = editor.Picks.Blueprinted(sequence.System);
         editor.SwitchOn();
         ship.Tick();
 

@@ -62,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     if (SignalAction.IsOurs(present))
                     {
                         held.Answering = true;
-                        says = prefix + editor.Answering(block, at);
+                        says = prefix + editor.Claims.Answering(block, at);
                     }
                     else
                     {

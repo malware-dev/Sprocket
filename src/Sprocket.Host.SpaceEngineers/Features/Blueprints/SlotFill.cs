@@ -56,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 // A slot of screens is a step's own, picked as its step is: its member alone, and the screen under it.
                 var step = _system.ActingOn(part.Id);
                 _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? "" : step.ActionId,
-                    step == null ? Nature.Native : step.Form, _editor.Facet(_system, chosen, new[] { part.Id }),
+                    step == null ? Nature.Native : step.Form, _editor.Picks.Facet(_system, chosen, new[] { part.Id }),
                     block => block.Kind.Facets(type).Count > 0, answer => Held(part, chosen, type, answer)));
                 return;
             }
@@ -89,8 +89,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             var names = new List<string>();
             var kept = new List<ToolbarSlot>();
-            _editor.Picked(answer, names, kept);
-            _editor.Filling(_system, part, chosen, answer.Targets, _editor.Pressed(answer),
+            _editor.Starts.Picked(answer, names, kept);
+            _editor.Claims.Filling(_system, part, chosen, answer.Targets, _editor.Claims.Pressed(answer),
                 () => new FillSlot(chosen, part.Id, names, kept, Settle), Done);
         }
 
@@ -101,7 +101,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// </remarks>
         void Filled(Part part, SystemInstance chosen, IList<long> ids)
         {
-            _editor.Filling(_system, part, chosen, ids, null, () =>
+            _editor.Claims.Filling(_system, part, chosen, ids, null, () =>
             {
                 var names = new List<string>();
                 for (var i = 0; i < ids.Count; i++)
@@ -118,7 +118,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Fills <paramref name="part" />, a slot of <paramref name="type" />, for <paramref name="chosen" /> with the blocks and facet <paramref name="answer" /> picked, and goes back.</summary>
         void Held(Part part, SystemInstance chosen, HostType type, PickAnswer answer)
         {
-            _editor.Filling(_system, part, chosen, answer.Targets, null, () =>
+            _editor.Claims.Filling(_system, part, chosen, answer.Targets, null, () =>
             {
                 var names = new List<string>();
                 var numbers = new List<int>();
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         continue;
 
                     names.Add(_editor.Program.Declare(_editor.World, block).Name);
-                    numbers.Add(SprocketEditor.Numbered(block.Kind.Facets(type), answer.Facet));
+                    numbers.Add(Picks.Numbered(block.Kind.Facets(type), answer.Facet));
                 }
 
                 return new FillSlot(chosen, part.Id, names, numbers, Settle);

@@ -207,7 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 Summary = backup.Name,
                 Depth = 1,
                 Status = Template.Fill(texts.LibraryLost, "time", Time(backup.Lost)),
-                Deletes = Editor.Act(Cmd.ForgetBackup, () => Editor.ForgetBackup(backup)),
+                Deletes = Editor.Act(Cmd.ForgetBackup, () => Editor.Holdings.ForgetBackup(backup)),
                 DeleteText = texts.LibraryForgetBackup
             });
         }
@@ -246,7 +246,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     Summary = Called(volume),
                     Depth = 1,
                     Status = Made(volume, texts),
-                    Deletes = Editor.Act(Cmd.Unshelve, () => Editor.Unshelve(volume)),
+                    Deletes = Editor.Act(Cmd.Unshelve, () => Editor.Holdings.Unshelve(volume)),
                     DeleteText = texts.LibraryForget
                 };
 
@@ -362,7 +362,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var here = entry.Section == OnConstruct;
             var kept = here ? live : entry.Section == BackedUp ? entry.Read : null;
             var same = shelf != null && kept != null && volume != null && shelf.Holds(kept);
-            var newer = here && live != null && volume != null && !same && !Editor.ChangedSince(live);
+            var newer = here && live != null && volume != null && !same && !Editor.Holdings.ChangedSince(live);
             _keep.IsVisible = kept != null && shelf != null;
             _keep.Text = volume == null ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _keeps.CanExecute = !same;
@@ -440,13 +440,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             if (entry.Backup != null)
             {
-                Run(Cmd.PutOn, () => _refused = Editor.PutOn(entry.Read));
+                Run(Cmd.PutOn, () => _refused = Editor.Holdings.PutOn(entry.Read));
             }
             else
             {
                 var volume = Editor.Shelf?.Find(entry.Identity);
                 if (volume != null)
-                    Run(Cmd.PutOn, () => _refused = Editor.PutOn(volume));
+                    Run(Cmd.PutOn, () => _refused = Editor.Holdings.PutOn(volume));
             }
 
             Describe();
@@ -463,7 +463,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             {
                 var backed = entry.Read;
                 if (backed != null)
-                    Run(Cmd.Shelve, () => Editor.ShelveBackup(backed));
+                    Run(Cmd.Shelve, () => Editor.Holdings.ShelveBackup(backed));
 
                 return;
             }
@@ -474,12 +474,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             // Either update replaces something, so it asks first: the blueprint where the logic system is the newer, and the
             // logic system where the blueprint is.
-            if (!Editor.Stored(live))
-                Run(Cmd.Shelve, () => Editor.Shelve(live));
-            else if (Editor.ChangedSince(live))
-                Run(Cmd.Shelve, () => Editor.AskUpdate(live));
+            if (!Editor.Holdings.Stored(live))
+                Run(Cmd.Shelve, () => Editor.Holdings.Shelve(live));
+            else if (Editor.Holdings.ChangedSince(live))
+                Run(Cmd.Shelve, () => Editor.Holdings.AskUpdate(live));
             else
-                Run(Cmd.Renew, () => Editor.AskRenew(live));
+                Run(Cmd.Renew, () => Editor.Holdings.AskRenew(live));
         }
 
         /// <summary>Puts the chosen blueprint in the library back in the place of the logic system on this construct, after asking.</summary>
@@ -487,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         {
             var live = _chosen == null || _chosen.Section != OnConstruct ? null : Live(_chosen);
             if (live != null)
-                Run(Cmd.Renew, () => Editor.AskReset(live));
+                Run(Cmd.Renew, () => Editor.Holdings.AskReset(live));
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
@@ -501,7 +501,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
 
             Run(Cmd.PutOn, delegate
             {
-                var made = Editor.Copy(text, out _refused);
+                var made = Editor.Holdings.Copy(text, out _refused);
                 if (made != null)
                     Editor.Push(new LogicSystemPage(Editor, made));
             });

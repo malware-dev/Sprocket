@@ -324,7 +324,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             var system = Editor.Program.AddSystem(Editor.Texts.SystemsDefault);
             system.Namespace = Editor.Author;
             system.Enabled = false;
-            Editor.Blueprinted(system);
+            Editor.Picks.Blueprinted(system);
             Editor.Do(new MakeSystem(system));
 
             Editor.PushMade(new LogicSystemPage(Editor, system));

@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             foreach (var system in new List<AutomationSystem>(other.Program.Systems))
             {
                 if (!system.IsBlueprint)
-                    other.Editor.Blueprinted(system);
+                    other.Editor.Picks.Blueprinted(system);
             }
 
             foreach (var system in other.Program.Systems)

@@ -308,7 +308,7 @@ public class ProblemTests
     /// </summary>
     static string Unanswer(Ship ship)
     {
-        var first = ship.Editor.Blueprinted(ship.Sequence.System);
+        var first = ship.Editor.Picks.Blueprinted(ship.Sequence.System);
         var part = ((SignalTrigger)ship.Sequence.Trigger).Part;
         ship.Sequence.System.FindPart(part)!.Optional = false;
         first.Clear(part);

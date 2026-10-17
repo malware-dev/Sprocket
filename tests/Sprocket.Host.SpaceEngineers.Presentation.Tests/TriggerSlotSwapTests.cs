@@ -76,7 +76,7 @@ public class TriggerSlotSwapTests
     /// <summary>Opens the trigger's blocks and picks <paramref name="door" /> in place of what it watches.</summary>
     static void Repick(Simulation sim, AutomationSystem system, string door)
     {
-        sim.Editor.ChangeTrigger(system, system.Triggers[0], Opening.Blocks, false);
+        sim.Editor.Starts.ChangeTrigger(system, system.Triggers[0], Opening.Blocks, false);
         sim.Tick();
         sim.Tick();
         sim.Editor.PressBlock(door);

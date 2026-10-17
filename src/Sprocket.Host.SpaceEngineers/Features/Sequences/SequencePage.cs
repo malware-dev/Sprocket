@@ -951,7 +951,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                             answer.Form, Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form),
                             answer.Arguments, Awaited(index, step, lasts)));
                     Editor.Pop();
-                }, arguments: step.Arguments, opens: opens, facet: Editor.Facet(_sequence.System, step.Targets)));
+                }, arguments: step.Arguments, opens: opens, facet: Editor.Picks.Facet(_sequence.System, step.Targets)));
         }
 
         /// <summary>
@@ -962,8 +962,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var type = answer.Facet.Length == 0 ? null : Vocabulary.TypeOf(Editor.World, answer.Targets, answer.Chosen);
             return type == null
-                ? Editor.Named(_sequence.System, answer.Targets, replacing)
-                : Editor.Named(_sequence.System, type, answer.Facet, answer.Targets, replacing);
+                ? Editor.Picks.Named(_sequence.System, answer.Targets, replacing)
+                : Editor.Picks.Named(_sequence.System, type, answer.Facet, answer.Targets, replacing);
         }
 
         /// <summary>
@@ -1070,7 +1070,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 answer => chosen(Test(answer, test)),
                 true, test?.Quantifier ?? Quantifier.Any,
                 test == null ? null : stated ? new[] { Comparing.Of(test.Relation) } : new[] { Comparing.Of(test.Relation), test.Value },
-                opens, forTests: true, facet: test == null ? "" : Editor.Facet(_sequence.System, test.Targets));
+                opens, forTests: true, facet: test == null ? "" : Editor.Picks.Facet(_sequence.System, test.Targets));
         }
 
         /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>

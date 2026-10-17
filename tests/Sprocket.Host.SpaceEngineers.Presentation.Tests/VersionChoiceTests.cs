@@ -80,7 +80,7 @@ public class VersionChoiceTests
         sim.Unit.Written(out program, out state);
         var copy = SprocketUnit.Copy(sim.Unit.Block, new Settings(developerMode: false), sim.Texts, program, state);
 
-        Assert.NotNull(copy.Editor.Rival(copy.Program.FindSystem(here.Identity)!));
+        Assert.NotNull(copy.Editor.Versions.Rival(copy.Program.FindSystem(here.Identity)!));
     }
 
     /// <summary>

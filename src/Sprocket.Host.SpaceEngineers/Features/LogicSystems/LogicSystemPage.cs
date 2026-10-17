@@ -205,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _focused = null;
 
             // Nor for a version waiting for a choice.
-            if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps() || Editor.Rival(_system) != null)
+            if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps() || Editor.Versions.Rival(_system) != null)
                 return true;
 
             var arguments = new Arguments();
@@ -343,7 +343,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     row.Level = NoticeLevel.Problem;
 
                     // A button trigger's copy says why its start is empty until it is picked, in place of the empty slot that follows.
-                    if (Editor.Copied(_triggers[i]))
+                    if (Editor.Starts.Copied(_triggers[i]))
                     {
                         row.Problem = texts.TriggerCopiedButton;
                         row.Level = NoticeLevel.Info;
@@ -417,9 +417,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _addTrigger.Show(new Adder(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
             {
                 new Adder(SentenceText.WhenWord, texts.SystemWhenAbout,
-                    Changes(Cmd.StartWhen, () => Editor.StartSequence(_system, new WhenTrigger("")))),
+                    Changes(Cmd.StartWhen, () => Editor.Starts.StartSequence(_system, new WhenTrigger("")))),
                 new Adder(SentenceText.EveryWord, texts.SystemEveryAbout,
-                    Changes(Cmd.StartEvery, () => Editor.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
+                    Changes(Cmd.StartEvery, () => Editor.Starts.StartSequence(_system, new EveryTrigger(Editor.NewLength))))
             }));
 
             _runs.Clear();
@@ -787,8 +787,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             Doing(row, trigger);
 
-            row.Deletes = Changes(Cmd.DeleteTrigger, () => Editor.Forget(_system, trigger));
-            row.Copies = Changes(Cmd.DuplicateTrigger, () => Editor.CopyTrigger(_system, trigger));
+            row.Deletes = Changes(Cmd.DeleteTrigger, () => Editor.Starts.Forget(_system, trigger));
+            row.Copies = Changes(Cmd.DuplicateTrigger, () => Editor.Starts.CopyTrigger(_system, trigger));
             row.Locked = Locked();
         }
 
@@ -889,7 +889,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var sequence = _system.FindSequence(trigger.Runs);
                 row.DoesLead = SentenceText.Then(row.Kind, trigger.Stops, true, false);
                 row.Does.Add(new SequenceSlot(trigger.Runs, sequence == null || !sequence.HasName ? "" : sequence.Name,
-                    Changes(Cmd.TriggerTarget, () => Editor.ChangeTrigger(_system, trigger, Opening.Nothing, false))));
+                    Changes(Cmd.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, Opening.Nothing, false))));
 
                 return;
             }
@@ -920,12 +920,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         ICommand Does(Trigger trigger, Opening opens)
         {
-            return Changes(Cmd.TriggerTarget, () => Editor.ChangeTrigger(_system, trigger, opens, true));
+            return Changes(Cmd.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, opens, true));
         }
 
         ICommand Starts(Trigger trigger, Opening opens)
         {
-            return Changes(Cmd.OpenTrigger, () => Editor.ChangeTrigger(_system, trigger, opens, false));
+            return Changes(Cmd.OpenTrigger, () => Editor.Starts.ChangeTrigger(_system, trigger, opens, false));
         }
 
         void Collect()

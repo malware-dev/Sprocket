@@ -395,7 +395,7 @@ public class LibraryTests
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.Equal(lost.Identity, arrived.Identity);
         Assert.Equal(lost.Origin, arrived.Origin);
-        Assert.True(rig.Editor.Stored(arrived));
+        Assert.True(rig.Editor.Holdings.Stored(arrived));
     }
 
     /// <summary>Make a copy on a backup copies the backup, even while the logic system it keeps is on this construct, changed.</summary>
@@ -529,7 +529,7 @@ public class LibraryTests
     public void MakingABlueprintOpensTheLibraryAtIt()
     {
         var rig = Blueprinted();
-        var copy = rig.Editor.Copy(ProgramText.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
+        var copy = rig.Editor.Holdings.Copy(ProgramText.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
         Assert.True(copy != null, trouble);
         rig.Editor.GoToRoot();
         rig.Tick();
@@ -587,7 +587,7 @@ public class LibraryTests
         var volume = Assert.Single(rig.Shelf.All);
         Assert.Equal(volume.Identity, now.Origin);
         Assert.Equal(volume.Changed, now.OriginChanged);
-        Assert.False(rig.Editor.ChangedSince(now));
+        Assert.False(rig.Editor.Holdings.ChangedSince(now));
         Assert.Equal(filled, now.Instances.Select(i => string.Join(",", i.Filled.OrderBy(s => s))).ToList());
         Assert.Equal(switched, now.Instances.Select(i => i.Enabled).ToList());
         Assert.True(rig.Shelf.Holds(now));
@@ -796,7 +796,7 @@ public class LibraryTests
         rig.Shelf.Read();
         var volume = rig.Shelf.All[0];
 
-        Assert.Equal("", rig.Editor.PutOn(volume));
+        Assert.Equal("", rig.Editor.Holdings.PutOn(volume));
 
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.True(arrived.IsBlueprint);
@@ -807,7 +807,7 @@ public class LibraryTests
         Assert.Equal(blueprint.Parts.Select(p => p.Id), arrived.Parts.Select(p => p.Id));
         Assert.Equal(blueprint.Sequences.Count, arrived.Sequences.Count);
 
-        Assert.Equal(rig.Texts.LibraryOnAlready, rig.Editor.PutOn(volume));
+        Assert.Equal(rig.Texts.LibraryOnAlready, rig.Editor.Holdings.PutOn(volume));
         Assert.Single(rig.Editor.Program.Systems);
     }
 
@@ -828,7 +828,7 @@ public class LibraryTests
         Assert.Equal(system.Identity, system.Origin);
         Assert.Equal(Saved, system.OriginChanged);
         Assert.True(rig.Shelf.Holds(system));
-        Assert.False(rig.Editor.ChangedSince(system));
+        Assert.False(rig.Editor.Holdings.ChangedSince(system));
     }
 
     /// <summary>A blueprint put on from the library is a step home's undo takes back, and redo puts it on again, switched off.</summary>
@@ -843,7 +843,7 @@ public class LibraryTests
             rig.Folder.Write(file.Key, file.Value);
 
         rig.Shelf.Read();
-        Assert.Equal("", rig.Editor.PutOn(rig.Shelf.All[0]));
+        Assert.Equal("", rig.Editor.Holdings.PutOn(rig.Shelf.All[0]));
         rig.Editor.GoToRoot();
         rig.Tick();
         var arrived = Assert.Single(rig.Editor.Program.Systems);
@@ -877,19 +877,19 @@ public class LibraryTests
         var blueprint = rig.Editor.Program.Systems[0];
         Assert.Equal(2, blueprint.Instances.Count);
 
-        rig.Editor.TakeOff(blueprint, true);
+        rig.Editor.Holdings.TakeOff(blueprint, true);
         Assert.Single(rig.Editor.Program.Systems);
         Assert.Empty(rig.Shelf.All);
 
         rig.Shelf.Keep(blueprint);
         blueprint.Name = "Airlock Mk II";
-        rig.Editor.TakeOff(blueprint, false);
+        rig.Editor.Holdings.TakeOff(blueprint, false);
         Assert.Empty(rig.Editor.Program.Systems);
         Assert.Equal("Airlock", Assert.Single(rig.Shelf.All).Name);
 
         rig.Editor.Screen.Undo!.Execute();
         rig.Tick();
-        rig.Editor.TakeOff(blueprint, true);
+        rig.Editor.Holdings.TakeOff(blueprint, true);
         Assert.Equal("Airlock Mk II", Assert.Single(rig.Shelf.All).Name);
     }
 
@@ -941,7 +941,7 @@ public class LibraryTests
         rig.Shelf.Keep(blueprint);
 
         blueprint.Name = "Airlock Mk II";
-        rig.Editor.AskTakeOff(blueprint);
+        rig.Editor.Holdings.AskTakeOff(blueprint);
         return rig;
     }
 
@@ -954,7 +954,7 @@ public class LibraryTests
         rig.Editor.Stamp(true);
         rig.Shelf.Keep(blueprint);
 
-        rig.Editor.AskTakeOff(blueprint);
+        rig.Editor.Holdings.AskTakeOff(blueprint);
 
         Assert.Contains(rig.Texts.LibraryTakeOffKept, rig.Editor.Question());
         Assert.False(rig.Editor.HasChoice(rig.Texts.LibraryTakeOffUpdate));
@@ -1021,7 +1021,7 @@ public class LibraryTests
         var blueprint = rig.Editor.Program.Systems[0];
         rig.Shelf.Keep(blueprint);
 
-        var copy = rig.Editor.Copy(ProgramText.Blueprint(blueprint), out var trouble);
+        var copy = rig.Editor.Holdings.Copy(ProgramText.Blueprint(blueprint), out var trouble);
 
         Assert.Equal("", trouble);
         Assert.NotNull(copy);
@@ -1030,7 +1030,7 @@ public class LibraryTests
         Assert.True(copy.IsBlueprint);
         Assert.Equal("Installation 1", Assert.Single(copy.Instances).Name);
         Assert.Equal(2, blueprint.Instances.Count);
-        Assert.Equal("Airlock 3", rig.Editor.Copy(ProgramText.Blueprint(blueprint), out trouble)!.Name);
+        Assert.Equal("Airlock 3", rig.Editor.Holdings.Copy(ProgramText.Blueprint(blueprint), out trouble)!.Name);
     }
 
     /// <summary>A construct with no automation leaves no backup.</summary>
@@ -1122,7 +1122,7 @@ public class LibraryTests
         Assert.All(system.Instances, i => Assert.NotNull(i.FilledWith("Inner")));
         var kept = system.Instances.Select(i => string.Join(",", i.Filled.Where(s => s != "Inner").OrderBy(s => s))).ToList();
 
-        rig.Editor.AskRenew(system);
+        rig.Editor.Holdings.AskRenew(system);
         rig.Editor.PressChoice(rig.Texts.LibraryRenewConfirm);
         rig.Tick();
 

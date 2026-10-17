@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Blocks;
+using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Developing;
@@ -54,6 +55,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly List<EditorPage> _stack = new List<EditorPage>();
 
         readonly Dictionary<int, int> _standIns = new Dictionary<int, int>();
+        readonly Gate _gate;
+        readonly Bulletin _bulletin;
+        readonly Dates _dates;
+        readonly Claims _claims;
+        readonly Picks _picks;
+        readonly Versions _versions;
+        readonly Starts _starts;
+        readonly Holdings _holdings;
         readonly EditorScreen _screen = new EditorScreen();
         readonly List<ChoiceEntry> _actionBar = new List<ChoiceEntry>();
 
@@ -65,6 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>An editor of <paramref name="program" />, saying what it says in <paramref name="texts" />.</summary>
         public SprocketEditor(GridWorld world, Automation program, AutomationRunner runner, Texts texts)
         {
+            _gate = new Gate(this);
+            _bulletin = new Bulletin(this, _gate);
             _world = world;
             _program = program;
             _runner = runner;
@@ -72,13 +83,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Ago = new Ago(texts);
             Codex = new Terms(texts);
 
-            // What each system says as the editor finds it, so only what changes from here on is dated.
-            var systems = _program.Systems;
-            for (var i = 0; i < systems.Count; i++)
-                _said[systems[i].Identity] = ProgramText.Said(systems[i]);
-
-            _saidEdits = _program.Edits;
-            _program.Reshaped += () => _reshaped = true;
+            _dates = new Dates(_program);
+            _claims = new Claims(this);
+            _picks = new Picks(this);
+            _versions = new Versions(this, _dates);
+            _starts = new Starts(this);
+            _holdings = new Holdings(this, _dates);
 
             _stack.Add(new HomePage(this));
             Rebuild();
@@ -86,6 +96,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>What to show right now.</summary>
         public EditorScreen Screen => _screen;
+
+        /// <summary>Who already claims the toolbar slots somebody picks.</summary>
+        public Claims Claims => _claims;
+
+        /// <summary>How picked blocks become the slots of a blueprint.</summary>
+        public Picks Picks => _picks;
+
+        /// <summary>The choice between two versions of a logic system.</summary>
+        public Versions Versions => _versions;
+
+        /// <summary>How a trigger is made, changed or copied.</summary>
+        public Starts Starts => _starts;
+
+        /// <summary>Moving logic systems between the construct and the library.</summary>
+        public Holdings Holdings => _holdings;
 
         /// <summary>The name the game knows a player by, from their identity, set by whatever shows the editor; null where nothing can say.</summary>
         public Func<long, string> PlayerName { get; set; }
@@ -115,7 +140,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public int Rebuilds { get; private set; }
 
         /// <summary>What the person at the editor needs told above whatever page is showing, or null for nothing.</summary>
-        public Notice Notice => _notice;
+        public Notice Notice => _bulletin.Notice;
 
         /// <summary>
         /// Who the systems made here are by: the namespace a new system gets.
@@ -334,7 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The same, <paramref name="question" /> a template whose named slots take their words from <paramref name="arguments" />.</summary>
-        void AskHere(string question, Arguments arguments)
+        public void AskHere(string question, Arguments arguments)
         {
             _screen.Ask(question, arguments, true);
         }
@@ -361,7 +386,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public void Answer(string text, Action chosen, bool byDefault)
         {
-            var command = Refuses(Cmd.Answer) ? null : new Relay(() => Reply(chosen));
+            var command = _gate.Refuses(Cmd.Answer) ? null : new Relay(() => Reply(chosen));
             _screen.Answer(new ChoiceEntry(text, false, command), byDefault);
         }
 
@@ -390,286 +415,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
 
-        /// <summary>
-        /// Says it on every screen where the block holds a program that would not read.
-        /// </summary>
-        /// <remarks>
-        /// <b>Every screen, not the front one.</b> What it says is that this is not what the block
-        /// holds, and that is as true three pages deep as it is on arrival - somebody who walked
-        /// straight into a system and started building is exactly the person it is for.
-        /// <para>
-        /// Two things to say, and which one depends on whether they have decided yet. Until the edit
-        /// that replaces it, the block still holds the old program and this is a warning about what is
-        /// in front of them. Afterwards it is the answer to "what happened to the old one".
-        /// </para>
-        /// <para>
-        /// Above the page, because a notice below the thing it is about is a footnote.
-        /// </para>
-        /// </remarks>
-        void Said()
-        {
-            if (_holder != null && _program.Trouble.Length == 0)
-            {
-                Held();
-                return;
-            }
-
-            if (_program.Trouble.Length == 0 && _program.Paused && !(Current is PausedPage))
-            {
-                Paused();
-                return;
-            }
-
-            if (_program.Trouble.Length == 0)
-            {
-                if (_notice == null)
-                    return;
-
-                // Told to go rather than dropped, and kept until it says it has gone: a banner taken away
-                // between two frames is the jump this whole arrangement avoids.
-                _notice.Leaving = true;
-
-                if (_notice.Closed)
-                    _notice = null;
-
-                return;
-            }
-
-            if (_notice == null)
-                _notice = new Notice();
-
-            _notice.Leaving = false;
-            _notice.Level = NoticeLevel.Problem;
-
-            // One line, and the rest when they ask for it. The line says what is wrong; opening it
-            // says what happened and what it will cost, which is what somebody needs to decide. Two
-            // faults, because what somebody can do differs: a program from another version, and one
-            // with an error in its text, which can be mended there.
-            if (_program.Incompatible)
-            {
-                _notice.Text = Texts.SalvageDifferent;
-                _notice.Detail = Texts.SalvageDifferentDetail;
-            }
-            else
-            {
-                _notice.Text = Texts.SalvageBroken;
-                _notice.Detail = Texts.SalvageBrokenDetail;
-            }
-
-            // The reader's own words, kept because somebody has to be able to say what happened to
-            // whoever mends it, and because a person who can read it is better off than one who cannot.
-            _notice.Diagnostic = Template.Fill(Texts.SalvageTrouble, "trouble", _program.Trouble);
-
-            _notice.Expanded = _open;
-            _notice.Expands = Expands;
-
-            // The mending, on the thing that reports the fault, so somebody who has read what it costs
-            // does not have to go and find an edit to make. A text with an error in it is mended in the
-            // text; one from another version can only be replaced, which asks the same question the
-            // first edit does, because it throws away the same program.
-            if (_program.Incompatible)
-            {
-                _notice.OfferText = Texts.SalvageReplace;
-                _notice.Offers = Resolves;
-            }
-            else
-            {
-                _notice.OfferText = Texts.SalvageMend;
-                _notice.Offers = Mends;
-            }
-        }
-
-        /// <summary>
-        /// Says, at the head of every page, who is editing the Sprocket this editor only shows.
-        /// </summary>
-        /// <remarks>
-        /// For as long as the editor is open, so it never comes or goes while somebody is looking. Not
-        /// a problem: nothing is wrong, the Sprocket is simply somebody else's for now.
-        /// </remarks>
-        void Held()
-        {
-            if (_notice == null)
-                _notice = new Notice();
-
-            _notice.Leaving = false;
-            _notice.Level = NoticeLevel.Info;
-            _notice.Text = Template.Fill(Texts.LeaseHolder, "holder", _holder);
-            _notice.Detail = Texts.LeaseDetail;
-            _notice.Diagnostic = "";
-            _notice.Expanded = _open;
-            _notice.Expands = Expands;
-            _notice.OfferText = "";
-            _notice.Offers = null;
-        }
-
-        /// <summary>Says, on every screen but the resume screen, that the automation is paused, with the way back to that screen.</summary>
-        void Paused()
-        {
-            if (_notice == null)
-                _notice = new Notice();
-
-            _notice.Leaving = false;
-            _notice.Level = NoticeLevel.Warning;
-            _notice.Text = Template.Fill(Texts.PausedBanner, "construct", _world.Name);
-            _notice.Detail = "";
-            _notice.Diagnostic = "";
-            _notice.Expanded = false;
-            _notice.Expands = null;
-            _notice.OfferText = Texts.PausedReview;
-            _notice.Offers = Reviews;
-        }
-
-        Notice _notice;
-
-        ICommand _reviews;
-
-        ICommand Reviews => _reviews ?? (_reviews = Act(Cmd.ReviewPaused, Review));
-
-        ICommand _expands;
-        ICommand _resolves;
-        ICommand _mends;
-
-        ICommand Expands => _expands ?? (_expands = Act(Cmd.Expand, delegate
-        {
-            _open = !_open;
-            if (_notice != null)
-                _notice.Expanded = _open;
-        }));
-
-        ICommand Resolves => _resolves ?? (_resolves = Act(Cmd.Resolve, () => AskBeforeReplacing(() => { })));
-
-        ICommand Mends => _mends ?? (_mends = Act(Cmd.ShowScript, ShowScript));
-
-        bool _open;
-
-        bool _told;
-
-
-        /// <summary>
-        /// Whether a press of <paramref name="kind" /> would be the edit that replaces a program Sprocket could not read.
-        /// </summary>
-        /// <remarks>
-        /// Only ever true on a block whose program failed to load, and only until it is answered once.
-        /// A failed load leaves what the block holds untouched, so the first edit is the moment that
-        /// stops being reversible, and it is the moment to say so.
-        /// </remarks>
-        bool Replacing(Cmd kind)
-        {
-            return !_program.Intact && !_told && !_screen.HasQuestion && Changes(kind);
-        }
-
-        /// <summary>
-        /// Whether a command changes the program rather than where somebody is looking.
-        /// </summary>
-        /// <remarks>
-        /// <b>Anything not listed here changes something.</b> The list is the navigating half because
-        /// that is the half that can be enumerated safely: a command added later and forgotten about is
-        /// then treated as an edit, which costs one question, where the other default would cost
-        /// somebody the only copy of what their block held.
-        /// <para>
-        /// Picking is navigation. Choosing a block or narrowing a list changes what the picker is
-        /// showing and nothing in the program; the trip ends at <see cref="Cmd.Primary" />, which is
-        /// where the edit is, and that is not listed.
-        /// </para>
-        /// <para>
-        /// The same line undo draws: what is shown, switches, and the library's files change no program here.
-        /// </para>
-        /// </remarks>
-        static bool Changes(Cmd kind)
-        {
-            switch (kind)
-            {
-                case Cmd.None:
-                case Cmd.Back:
-                case Cmd.Answer:
-                case Cmd.Expand:
-                case Cmd.Resolve:
-                case Cmd.Mend:
-                case Cmd.Choice:
-                case Cmd.OpenSystem:
-                case Cmd.OpenSequence:
-                case Cmd.OpenTrigger:
-                case Cmd.LoadSystem:
-                case Cmd.ShowScript:
-                case Cmd.OpenCodex:
-                case Cmd.RunNow:
-                case Cmd.StopNow:
-                case Cmd.TriggerTarget:
-                case Cmd.StartWhen:
-                case Cmd.StartEvery:
-                case Cmd.AddAction:
-                case Cmd.AddWait:
-                case Cmd.StepSlot:
-                case Cmd.PickEntity:
-                case Cmd.PickChoice:
-                case Cmd.NarrowEntities:
-                case Cmd.NarrowChoices:
-                case Cmd.NarrowKinds:
-                case Cmd.AnyKind:
-                case Cmd.OneKind:
-                case Cmd.ReadBlocks:
-                case Cmd.TriggerStops:
-                case Cmd.TriggerDoes:
-                case Cmd.PageOn:
-                case Cmd.PageBack:
-                case Cmd.ShowOrganized:
-                case Cmd.ShowTerminal:
-                case Cmd.HiddenBlocks:
-                case Cmd.ChooseInstance:
-                case Cmd.OpenSlot:
-                case Cmd.EnableSystem:
-                case Cmd.EnableInstance:
-                case Cmd.Shelve:
-                case Cmd.Unshelve:
-                case Cmd.ForgetBackup:
-                    return false;
-
-                default:
-                    return true;
-            }
-        }
-
-        /// <summary>
-        /// Takes the decision the banner and the question both ask for.
-        /// </summary>
-        /// <remarks>
-        /// One place, two ways in: the question the first edit raises, and the operation on the banner.
-        /// Both mean "the program on this block is not coming back", and after it every edit saves like
-        /// any other - so the warning has nothing left to say and leaves.
-        /// </remarks>
-        void Replace()
-        {
-            _told = true;
-            _program.Kept();
-            Invalidate();
-        }
-
-        /// <summary>
-        /// Says what the first edit costs, and does it only if they say so.
-        /// </summary>
-        /// <remarks>
-        /// The screen has been saying all along that what it shows is not what the block holds. This is
-        /// the other half: the press that makes it so, held until somebody has been told that the one
-        /// that would not read goes with it. There is no undo for that - it is not an edit to a program,
-        /// it is which program the block has.
-        /// </remarks>
-        void AskBeforeReplacing(Action go)
-        {
-            Ask(Texts.SalvageQuestion);
-
-            // Said here rather than at the save, because this press is the decision and everything
-            // after it is ordinary editing. It also settles the banner: what it was warning about has
-            // just stopped being true, and nothing else would have told it.
-            Answer(Texts.SalvageReplace, delegate
-            {
-                Replace();
-                go();
-            });
-
-            // The one Enter takes: a key pressed without reading must not throw a program away.
-            Answer(Texts.SalvageKeep, () => { }, true);
-        }
-
         /// <summary>A command that carries <paramref name="action" /> out as a press of <paramref name="kind" />, or null where the editor refuses that kind of press.</summary>
         /// <remarks>
         /// The first edit of a program that could not be read asks first, a press while a question stands only puts it
@@ -677,14 +422,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public ICommand Act(Cmd kind, Action action)
         {
-            return Refuses(kind) ? null : new Relay(() => Carry(kind, action));
+            return _gate.Refuses(kind) ? null : new Relay(() => Carry(kind, action));
         }
 
         void Carry(Cmd kind, Action action)
         {
-            if (Replacing(kind))
+            if (_gate.Replacing(kind))
             {
-                AskBeforeReplacing(() => Carry(kind, action));
+                _gate.AskBeforeReplacing(() => Carry(kind, action));
                 return;
             }
 
@@ -715,7 +460,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// </remarks>
         public Action<string> Renaming(Action<string> rename, Func<string, bool> accepts)
         {
-            if (Refuses(Cmd.Rename))
+            if (_gate.Refuses(Cmd.Rename))
                 return null;
 
             Action<string> gives = null;
@@ -725,9 +470,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (accepts != null && !accepts(name))
                     return;
 
-                if (Replacing(Cmd.Rename))
+                if (_gate.Replacing(Cmd.Rename))
                 {
-                    AskBeforeReplacing(() => gives(name));
+                    _gate.AskBeforeReplacing(() => gives(name));
                     return;
                 }
 
@@ -836,33 +581,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _structureDirty = true;
         }
 
-        /// <summary>Whether a command is refused because somebody else holds the Sprocket.</summary>
-        /// <remarks>Moving around is all a copy lent to look at may do.</remarks>
-        bool Refuses(Cmd kind)
-        {
-            if (Holder == null)
-                return false;
-
-            switch (kind)
-            {
-                case Cmd.Back:
-                case Cmd.Expand:
-                case Cmd.OpenSystem:
-                case Cmd.OpenSequence:
-                case Cmd.OpenSlot:
-                case Cmd.PageOn:
-                case Cmd.PageBack:
-                case Cmd.ShowScript:
-                case Cmd.OpenCodex:
-                case Cmd.Shelve:
-                case Cmd.Unshelve:
-                case Cmd.ForgetBackup:
-                    return false;
-                default:
-                    return true;
-            }
-        }
-
 
         /// <summary>Shows <paramref name="page" /> over the current one.</summary>
         public void Push(EditorPage page)
@@ -917,75 +635,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
 
-        /// <summary>What the picks in a blueprint since the last edit do to its slots beyond the names they gave, in order, for the edit made next to carry.</summary>
-        readonly List<Reslot> _picked = new List<Reslot>();
-
-        /// <summary>The names those picks gave, which count as named until their edit is made.</summary>
-        readonly List<List<string>> _pickedNames = new List<List<string>>();
-
-        /// <summary>What adding a trigger has settled while its blocks were picked, made already, for the step that adds it to carry.</summary>
-        readonly List<SystemEdit> _starting = new List<SystemEdit>();
-
-        /// <summary>The copies of button triggers whose start nobody has picked yet, whose lines say why they have a slot of their own.</summary>
-        readonly List<Trigger> _copies = new List<Trigger>();
-
-        /// <summary>The trigger the one being added takes the place of, or null; and where it stood.</summary>
-        Trigger _replaced;
-
-        int _replacedAt;
-
-        readonly Dictionary<Guid, string> _said = new Dictionary<Guid, string>();
-
-        readonly List<Guid> _gone = new List<Guid>();
-
-        int _saidEdits;
-
-        bool _reshaped;
-
-        /// <summary>
-        /// Dates each system whose words have changed since they were last read with the time now; a few comparisons where
-        /// nothing has, unless <paramref name="surely" /> asks for every system to be read.
-        /// </summary>
-        /// <remarks>
-        /// Asked on every tick, where the program saying it was edited, reshaped or given another system is what makes it
-        /// read anything; and surely at the end of every command and before the program or a blueprint is written out, so a
-        /// change made by a way that says nothing is dated by then. A system's words are read without its date, so
-        /// switching it, which is not something it says, dates nothing. Known by identity, so a program read again over this
-        /// one is compared with what it was. A system met for the first time is dated only where it has no date: one just
-        /// made.
-        /// </remarks>
+        /// <summary>Dates each system whose words have changed since they were last read; see <see cref="Dates.Stamp" />.</summary>
         public void Stamp(bool surely = false)
         {
-            if (!surely && !_reshaped && _program.Edits == _saidEdits && _program.Systems.Count == _said.Count)
-                return;
-
-            _reshaped = false;
-            _saidEdits = _program.Edits;
-
-            var now = DateTime.UtcNow;
-            var systems = _program.Systems;
-            for (var i = 0; i < systems.Count; i++)
-            {
-                var said = ProgramText.Said(systems[i]);
-                string was;
-                if (_said.TryGetValue(systems[i].Identity, out was) ? was != said : !systems[i].Changed.HasValue)
-                    systems[i].Changed = now;
-
-                _said[systems[i].Identity] = said;
-            }
-
-            if (_said.Count == systems.Count)
-                return;
-
-            _gone.Clear();
-            foreach (var identity in _said.Keys)
-            {
-                if (_program.FindSystem(identity) == null)
-                    _gone.Add(identity);
-            }
-
-            foreach (var gone in _gone)
-                _said.Remove(gone);
+            _dates.Stamp(surely);
         }
 
         readonly History<AutomationSystem> _systemHistory = new History<AutomationSystem>();
@@ -999,14 +652,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void Do(Sequence sequence, SequenceEdit edit)
         {
             var system = sequence.System;
-            Record(system, new OnSequence(sequence, Slotted(system, edit)));
+            Record(system, new OnSequence(sequence, _picks.Slotted(system, edit)));
         }
 
         /// <summary>Makes a change to a system and remembers how to take it back.</summary>
         /// <remarks>The only way anything changes a trigger.</remarks>
         public void Do(AutomationSystem system, SystemEdit edit)
         {
-            Record(system, Slotted(system, edit));
+            Record(system, _picks.Slotted(system, edit));
         }
 
         /// <summary>Makes <paramref name="edit" /> to <paramref name="system" /> as the next step of its history.</summary>
@@ -1016,20 +669,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             Settled(edit);
-        }
-
-        /// <summary>
-        /// <paramref name="edit" />, together with what it does to the slots of <paramref name="system" /> where that is a
-        /// blueprint: what the pick before it worked out, or what the lists come to once it is made.
-        /// </summary>
-        Edit<T> Slotted<T>(AutomationSystem system, Edit<T> edit)
-        {
-            var picked = Unpicked(system);
-            var shown = system != null && system.IsBlueprint ? StandIn(system) : null;
-            if (shown == null)
-                return edit;
-
-            return new Reslotted<T>(edit, picked, () => Slots(system, shown, null).Settle());
         }
 
         /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
@@ -1250,7 +889,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var replaced = edit as ReplaceSystem;
             var standing = replaced == null ? null : _program.FindSystem(replaced.Identity);
             if (standing != null)
-                _said[standing.Identity] = ProgramText.Said(standing);
+                _dates.Know(standing);
 
             _program.Edited();
             _program.Rewire();
@@ -1262,7 +901,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Keeping is the first answer and the one Enter takes, so the press made without reading keeps what is there. The
         /// warning's own slots take their words from <paramref name="arguments" />, and it has none where that is null.
         /// </remarks>
-        void Deleting(string question, string named, string warning, Arguments arguments, Action delete)
+        public void Deleting(string question, string named, string warning, Arguments arguments, Action delete)
         {
             arguments = arguments ?? new Arguments();
             arguments.Set("named", named ?? "");
@@ -1332,7 +971,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             ProgramText.Load(text, _program, _world.Values, out warning, _world);
             StateText.Load(switches, _program, _runner);
 
-            _told = true;
+            _gate.Told = true;
             _program.Kept();
             _program.Edited();
             _program.Rewire();
@@ -1349,7 +988,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Lets go of every page and choice the editor kept about <paramref name="system" />, which has just been taken out of the program.</summary>
         /// <remarks>Its history is kept, so a logic system put back by undo comes back with its own way back.</remarks>
-        void Gone(AutomationSystem system)
+        public void Gone(AutomationSystem system)
         {
             var sequences = system.Sequences;
             for (var i = sequences.Count - 1; i >= 0; i--)
@@ -1448,7 +1087,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Rebuild();
                 return;
             }
-            Said();
+            _bulletin.Say();
 
             // Everything, not just what the cadence is due to say: what the page shows may have been made from nothing a
             // moment ago.
@@ -1575,7 +1214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// does not check either: the check belongs where the way in is put on a screen, so there is one place to
         /// read rather than two that can disagree.
         /// </remarks>
-        void ShowScript()
+        public void ShowScript()
         {
             // Also the way to a program's text that would not read, which is mended there whether or not developer mode is on.
             // Offered from every screen including this one, where it is already lit. Pressing it there
@@ -1599,90 +1238,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// Asks the questions a new sequence needs, one screen at a time.
-        /// </summary>
-        /// <remarks>
-        /// Answering "when something happens" and then being handed a half-empty
-        /// sentence to poke at is a stall, so the next question is asked straight
-        /// away: what should it listen to, then what should it do.
-        ///
-        /// Going back retreats one question, all the way out to where the user
-        /// started. It is never repurposed as "finished" - moving on is its own
-        /// action, so somebody who genuinely wants to retreat still has somewhere to
-        /// press.
-        /// </remarks>
-        public void StartSequence(AutomationSystem system, Trigger trigger)
-        {
-            _starting.Clear();
-            _replaced = null;
-
-            // Where to unwind to once the questions are answered. The system's screen is
-            // already underneath - the starters live on it now - so everything the questions
-            // pushed is dropped and the finished sequence lands directly on it.
-            var origin = _stack.Count;
-
-            // A new sequence is what a trigger usually does, and one being made does nothing yet.
-            var aim = new Aim(this, system, null);
-
-            var moment = trigger as MomentTrigger;
-            if (moment != null)
-            {
-                // Nothing picked yet: the sequence is being made, so there is nothing to resolve.
-                var picker = new PickPage(this, "When something happens", true,
-                    new List<long>(), moment.EventId, Nature.Native,
-                    answer =>
-                    {
-                        // Nothing to record: the sequence does not exist yet, so there is no
-                        // history for it and nothing to take back to - which is why the trigger
-                        // losing the button here loses it outright, the way the bin on its row is
-                        // the way back from making one at all.
-                        MomentTrigger made = Starter(system, answer, null, null);
-                        Unless(system, made, answer, null, taken =>
-                        {
-                            // Settled now, so the questions that follow see it, and recorded, so adding the trigger takes it
-                            // all back as one step.
-                            if (Shares(taken, system))
-                            {
-                                made = SignalTrigger.Named(taken.Trigger.Part);
-                                _replaced = taken.Trigger;
-                                _replacedAt = system.IndexOfTrigger(taken.Trigger);
-                                system.ReplaceTrigger(taken.Trigger, null);
-                            }
-                            else if (taken != null)
-                            {
-                                Starting(system, TakingOver(null, taken));
-                            }
-
-                            var answering = Answering(system, made, answer, null);
-                            if (answering != null)
-                                Starting(system, answering);
-
-                            _program.Edited();
-                            _program.Rewire();
-
-                            Aimed(system, made, aim, origin, true, null);
-                        }, () => { });
-                    },
-                    true, aim: aim);
-
-                Push(picker);
-                return;
-            }
-
-            var every = trigger as EveryTrigger;
-            if (every == null)
-                return;
-
-            var timer = new TimerPage(this, every.Interval, aim, interval =>
-            {
-                every.Interval = interval;
-                Aimed(system, every, aim, origin, true, null);
-            });
-
-            Push(timer);
-        }
-
-        /// <summary>
         /// A sequence made on its own, with nothing starting it yet.
         /// </summary>
         /// <remarks>
@@ -1703,7 +1258,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Opens <paramref name="page" /> on something just made and given a name of its own, with that name in hand to be given.</summary>
         /// <remarks>A made-up name, "Sequence 3", is one somebody means to replace, so the box is open for it before anything else is pressed.</remarks>
-        void PushNamed(EditorPage page)
+        public void PushNamed(EditorPage page)
         {
             page.NameOnArrival = true;
             Push(page);
@@ -1714,925 +1269,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             page.Made();
             PushNamed(page);
-        }
-
-        /// <summary>
-        /// Does it, unless something already answers a button it is given; then asks first, and takes the button only where
-        /// that is the answer.
-        /// </summary>
-        /// <remarks>
-        /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,
-        /// and the one written last silently wins, so it is asked before it happens rather than found afterwards on a row that
-        /// has gone quiet. Taking a button from another installation empties the signal slot that had it there, which then needs
-        /// another; taking it from a trigger in the same installation takes that trigger out and its slot over; either way the
-        /// button is written, whatever its slot holds by then.
-        /// <para>
-        /// Only where the construct is what announces the moment. Two sequences both watching the inner door close is an
-        /// ordinary way to build and costs nothing: Sprocket does that watching, and it can watch for two.
-        /// </para>
-        /// <para>
-        /// Its own trigger never counts, so settling on what was already there is not a clash with itself.
-        /// </para>
-        /// </remarks>
-        /// <param name="system">The logic system the trigger is in.</param>
-        /// <param name="made">The trigger as it would be once done.</param>
-        /// <param name="answer">What was picked, buttons and all.</param>
-        /// <param name="except">The trigger being changed, which never clashes with itself; null for a new one.</param>
-        /// <param name="then">What is done once it may be, given the trigger the button is taken from and the blockset it was in, or null where it takes none.</param>
-        /// <param name="otherwise">What is done where the answer is to leave the button as it is.</param>
-        void Unless(AutomationSystem system, MomentTrigger made, PickAnswer answer, Trigger except, Action<Occupant> then,
-            Action otherwise)
-        {
-            var signal = made as SignalTrigger;
-            if (signal == null || signal.IsWatched)
-            {
-                then(null);
-                return;
-            }
-
-            // A system's trigger is one variable, holding the first button picked, so no other is checked or written.
-            IList<long> panels = system.IsBlueprint || answer.Targets.Count <= 1 ? answer.Targets : new[] { answer.Targets[0] };
-            var holder = Holding(panels, Pressed(answer), except, StandIn(system), null);
-
-            if (holder == null)
-            {
-                then(null);
-                Wired(panels);
-                return;
-            }
-
-            AskAbout(holder);
-            Answer(Texts.ButtonTakeOver, delegate
-            {
-                then(holder.Trigger == null ? null : holder);
-                Wired(panels);
-            });
-            Answer(Texts.ButtonLeaveAlone, otherwise, true);
-        }
-
-        /// <summary>
-        /// The toolbar slot answering the picked trigger on each picked block: the trigger's own, or one of the slots a trigger
-        /// that stands for many runs; slot 0 where what was picked is no trigger.
-        /// </summary>
-        public List<ToolbarSlot> Pressed(PickAnswer answer)
-        {
-            var picked = ToolbarSlot.Of(answer.Chosen);
-            var at = new List<ToolbarSlot>();
-            for (var i = 0; i < answer.Targets.Count; i++)
-            {
-                GridEntity block = picked != null && picked.IsMany ? _world.FindEntity(answer.Targets[i]) : null;
-                at.Add(picked == null ? new ToolbarSlot(1, 1, 0) : block != null ? Free(block, picked) : picked);
-            }
-
-            return at;
-        }
-
-        /// <summary>The first of the slots <paramref name="many" /> stands for on <paramref name="block" /> that holds nothing, or the first of them where every one holds something.</summary>
-        /// <remarks>Each trigger written to a timer takes a slot of its own, so two sequences started by one timer both run when it goes off.</remarks>
-        static ToolbarSlot Free(GridEntity block, ToolbarSlot many)
-        {
-            IMyToolbar toolbar = Toolbars.Of(block.Block, many.Toolbar);
-            ToolbarSlot first = null;
-            for (var page = 1; toolbar != null && page <= toolbar.PageCount; page++)
-            {
-                for (var slot = 1; slot <= toolbar.SlotCount; slot++)
-                {
-                    var one = new ToolbarSlot(many.Toolbar, page, slot);
-                    if (!many.Covers(one))
-                        continue;
-
-                    if (first == null)
-                        first = one;
-
-                    MyToolbarItemInfo held;
-                    if (!toolbar.TryGetItem(Toolbars.Index(toolbar, one), out held))
-                        return one;
-                }
-            }
-
-            return first ?? new ToolbarSlot(many.Toolbar, 1, 0);
-        }
-
-        /// <summary>
-        /// Fills <paramref name="part" /> of <paramref name="chosen" /> with the blocks <paramref name="blocks" /> by
-        /// <paramref name="fill" />, asking first where it is a signal part and something else already answers one of the
-        /// toolbar slots <paramref name="at" /> it is given.
-        /// </summary>
-        /// <remarks>
-        /// One question at a time. Taking a button empties the signal slot of the blockset that had it; nothing is taken until
-        /// every question is answered, and leaving any of them alone leaves the part as it was.
-        /// </remarks>
-        public void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
-            Func<SystemEdit> fill, Action done)
-        {
-            Filling(system, part, chosen, blocks, at, fill, done, new List<Occupant>());
-        }
-
-        void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
-            Func<SystemEdit> fill, Action done, List<Occupant> taking)
-        {
-            var trigger = part.IsSignal && at != null ? TriggerOf(system, part.Id) : null;
-            var holder = trigger == null ? null : Holding(blocks, at, trigger, chosen, taking);
-            if (holder != null)
-            {
-                AskAbout(holder);
-                Answer(Texts.ButtonTakeOver, delegate
-                {
-                    taking.Add(holder);
-                    Filling(system, part, chosen, blocks, at, fill, done, taking);
-                });
-                Answer(Texts.ButtonLeaveAlone, () => { }, true);
-                return;
-            }
-
-            // One step: the fill, and every button it takes from somewhere else.
-            var edit = fill();
-            foreach (var occupant in taking)
-            {
-                if (occupant.Trigger != null)
-                    edit = TakingOver(edit, occupant);
-            }
-
-            Do(system, edit);
-            Wired(blocks);
-            done();
-        }
-
-        /// <summary>The trigger that is the signal part <paramref name="part" /> of <paramref name="system" />, or null.</summary>
-        static SignalTrigger TriggerOf(AutomationSystem system, string part)
-        {
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var trigger = triggers[i] as SignalTrigger;
-                if (trigger != null && trigger.Part == part)
-                    return trigger;
-            }
-
-            return null;
-        }
-
-        /// <summary>What already answers a toolbar slot: a trigger of the program on one of its system, or, with no trigger, a slot the program did not write.</summary>
-        sealed class Occupant
-        {
-            public GridEntity Panel;
-            public ToolbarSlot At;
-            public AutomationSystem System;
-            public SignalTrigger Trigger;
-            public SystemInstance Instance;
-
-            public bool Same(Occupant other)
-            {
-                return Panel.Id == other.Panel.Id && At.Same(other.At) && Trigger == other.Trigger && Instance == other.Instance;
-            }
-        }
-
-        /// <summary>
-        /// The first of <paramref name="panels" /> whose toolbar slot in <paramref name="at" /> something other than
-        /// <paramref name="trigger" /> on <paramref name="instance" /> already answers, passing over what is in
-        /// <paramref name="taking" />; or null where nothing does.
-        /// </summary>
-        /// <remarks>
-        /// Compared as blocks and slots, through every one of every system: a toolbar slot belongs to a block, whichever part
-        /// of whichever system names it. A trigger of the program comes first, since it can be named; then a slot holding what
-        /// the program did not write, which is only read where no trigger has the slot.
-        /// </remarks>
-        Occupant Holding(IList<long> panels, IList<ToolbarSlot> at, Trigger trigger, SystemInstance instance, List<Occupant> taking)
-        {
-            for (var p = 0; p < panels.Count && p < at.Count; p++)
-            {
-                GridEntity panel = _world.FindEntity(panels[p]);
-                var where = at[p];
-                if (panel == null || where.Slot < 1)
-                    continue;
-
-                var named = false;
-                for (var s = 0; s < _program.Systems.Count; s++)
-                {
-                    AutomationSystem each = _program.Systems[s];
-                    var triggers = each.Triggers;
-                    for (var i = 0; i < triggers.Count; i++)
-                    {
-                        var other = triggers[i] as SignalTrigger;
-                        if (other == null)
-                            continue;
-
-                        var instances = each.Uses;
-                        for (var n = 0; n < instances.Count; n++)
-                        {
-                            var through = instances[n];
-                            if ((other == trigger && (through == instance || !each.IsBlueprint))
-                                || !Answers(each, through, other, panel.Id, where))
-                                continue;
-
-                            named = true;
-                            var holder = new Occupant { Panel = panel, At = where, System = each, Trigger = other, Instance = through };
-                            if (!Taken(taking, holder))
-                                return holder;
-                        }
-                    }
-                }
-
-                if (!named && _world.Foreign(panel.Block, where))
-                {
-                    var holder = new Occupant { Panel = panel, At = where };
-                    if (!Taken(taking, holder))
-                        return holder;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Which trigger of this automation the toolbar slot <paramref name="at" /> of <paramref name="panel" /> answers, in
-        /// words: its logic system or installation and the sequence it runs; another automation block's where none of this one's does.
-        /// </summary>
-        public string Answering(GridEntity panel, ToolbarSlot at)
-        {
-            foreach (var system in _program.Systems)
-            {
-                foreach (var trigger in system.Triggers)
-                {
-                    var answered = trigger as SignalTrigger;
-                    if (answered == null)
-                        continue;
-
-                    foreach (var through in system.Uses)
-                    {
-                        if (!Answers(system, through, answered, panel.Id, at))
-                            continue;
-
-                        var sequence = system.FindSequence(answered.Runs);
-                        var named = system.IsBlueprint && through != null
-                            ? SystemSummary.DescribeInstanceOf(Texts, _runner.Bindings, system, through)
-                            : system.Name;
-                        var said = Template.Fill(Texts.SlotAnswers, "system", named);
-                        return Template.Fill(said, "sequence",
-                            sequence == null ? "" : sequence.HasName ? sequence.Name : SequenceText.DefaultName(Texts, sequence.Number));
-                    }
-                }
-            }
-
-            return Texts.SlotElsewhere;
-        }
-
-        static bool Taken(List<Occupant> taking, Occupant holder)
-        {
-            for (var i = 0; taking != null && i < taking.Count; i++)
-            {
-                if (taking[i].Same(holder))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Whether <paramref name="instance" /> of <paramref name="system" /> answers trigger <paramref name="trigger" /> with the slot <paramref name="where" /> on the block <paramref name="block" />.</summary>
-        bool Answers(AutomationSystem system, SystemInstance instance, SignalTrigger trigger, long block, ToolbarSlot where)
-        {
-            var blocks = new List<string>();
-            var positions = new List<ToolbarSlot>();
-            _program.Answers(system, instance, trigger, blocks, positions);
-            for (var i = 0; i < blocks.Count && i < positions.Count; i++)
-            {
-                GridEntity entity = _runner.Bindings.Entity(blocks[i]);
-                if (entity != null && entity.Id == block && positions[i].Same(where))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Asks whether to take the button <paramref name="holder" /> has, saying what it does now.</summary>
-        void AskAbout(Occupant holder)
-        {
-            var arguments = new Arguments();
-            arguments.Set("block", holder.Panel.Name);
-
-            if (holder.Trigger == null)
-            {
-                arguments.Set("button", holder.At.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                AskHere(Texts.ButtonElsewhere, arguments);
-                return;
-            }
-
-            var sequence = holder.System.FindSequence(holder.Trigger.Runs);
-            arguments.Set("sequence", sequence == null ? "" : sequence.HasName ? sequence.Name : SequenceText.DefaultName(Texts, sequence.Number));
-            arguments.Set("blockset", holder.System.IsBlueprint && holder.Instance != null
-                ? SystemSummary.DescribeInstanceOf(Texts, _runner.Bindings, holder.System, holder.Instance)
-                : holder.System.Name);
-            AskHere(holder.Trigger.Acts != null ? Texts.ButtonActs : holder.Trigger.Stops ? Texts.ButtonStops : Texts.ButtonStarts,
-                arguments);
-        }
-
-        /// <summary>Whether <paramref name="taken" /> is another trigger in the installation of <paramref name="system" /> being edited.</summary>
-        /// <remarks>
-        /// Then the button stays in the slot it is in: the trigger that had it gives that slot up and goes, and the trigger taking
-        /// the button takes the slot. Emptying the slot is for another installation, which goes on needing a button of its own.
-        /// </remarks>
-        bool Shares(Occupant taken, AutomationSystem system)
-        {
-            return taken != null && taken.Trigger != null && system.IsBlueprint && taken.System == system && taken.Instance == StandIn(system);
-        }
-
-        /// <summary>Makes <paramref name="edit" /> now, and keeps it for the step that adds the trigger being made.</summary>
-        void Starting(AutomationSystem system, SystemEdit edit)
-        {
-            edit.Apply(system);
-            _starting.Add(edit);
-        }
-
-        /// <summary>Does <paramref name="made" />, where there is anything, and takes <paramref name="holder" />'s button, as one edit.</summary>
-        SystemEdit TakingOver(SystemEdit made, Occupant holder)
-        {
-            if (!holder.System.IsBlueprint)
-                return new TakeOverTrigger(made, holder.System, holder.Trigger);
-
-            var kept = new List<string>();
-            var keptAt = new List<ToolbarSlot>();
-            Kept(holder, kept, keptAt);
-            return new TakeOver(made, holder.Instance, holder.Trigger.Part, kept, keptAt);
-        }
-
-        /// <summary>What answers <paramref name="holder" />'s signal part in its blockset once its toolbar slot is taken out.</summary>
-        void Kept(Occupant holder, List<string> kept, List<ToolbarSlot> keptAt)
-        {
-            var part = holder.Trigger.Part;
-            var blocks = holder.Instance.FilledWith(part);
-            var positions = holder.Instance.Positions(part);
-            for (var i = 0; blocks != null && positions != null && i < blocks.Count && i < positions.Count; i++)
-            {
-                GridEntity entity = _runner.Bindings.Entity(blocks[i]);
-                if (entity != null && entity.Id == holder.Panel.Id && positions[i].Same(holder.At))
-                    continue;
-
-                kept.Add(blocks[i]);
-                keptAt.Add(positions[i]);
-            }
-        }
-
-        /// <summary>Has every slot the program wants on <paramref name="panels" /> written, whatever it holds, as somebody has just picked them.</summary>
-        void Wired(IList<long> panels)
-        {
-            if (Wire == null)
-                return;
-
-            for (var i = 0; i < panels.Count; i++)
-                Wire(panels[i]);
-        }
-
-        /// <summary>
-        /// What somebody has just described, as the trigger that makes it happen.
-        /// </summary>
-        /// <remarks>
-        /// The one place the two arrangements are told apart, and nobody is asked: picking a button means the construct
-        /// already announces it and Sprocket wires a slot, picking a door means Sprocket watches for it. See
-        /// <see cref="Vocabulary.Starter" />. In a system blueprint a button names a signal slot, new or, picked again for
-        /// <paramref name="keeping" />, that trigger's own; the slot is taken and answered once the question of whether
-        /// the buttons are free is answered - see <see cref="Answering" />. In a system it names the variable holding the
-        /// first button picked, defined at that answer too. Blocks picked again for a trigger watching <paramref name="replacing" />
-        /// keep its slot where they are one block of the kind it expects, as a step's do.
-        /// </remarks>
-        public MomentTrigger Starter(AutomationSystem system, PickAnswer answer, SignalTrigger keeping, IList<string> replacing)
-        {
-            // A number on the blocks starts it as it comes to compare as asked.
-            if (answer.Form == Nature.Value)
-            {
-                var given = answer.Arguments;
-                var when = new WhenTrigger(answer.Chosen)
-                {
-                    Provider = Vocabulary.Provider(_world, answer.Targets, answer.Chosen, Nature.Value),
-                    Quantifier = answer.Quantifier,
-                    Relation = given.Count > 0 ? Comparing.Read(given[0]) : Relation.Is,
-                    Value = given.Count > 1 ? given[1] : Literal.Of(0)
-                };
-
-                var sources = Named(system, answer.Targets, replacing);
-                foreach (var source in sources)
-                    when.Sources.Add(source);
-
-                return when;
-            }
-
-            MomentTrigger made = Vocabulary.Starter(
-                Vocabulary.EventsOf(_world, answer.Targets), answer.Chosen, answer.Quantifier == Quantifier.All);
-
-            var signal = made as SignalTrigger;
-            if (signal == null || signal.IsWatched)
-            {
-                var named = Named(system, answer.Targets, replacing);
-                foreach (var name in named)
-                    made.Sources.Add(name);
-
-                return made;
-            }
-
-            if (keeping != null && system.IsBlueprint)
-                return SignalTrigger.Named(keeping.Part);
-
-            var declared = new List<string>();
-            var at = new List<ToolbarSlot>();
-            var first = Picked(answer, declared, at);
-            if (first == null)
-                return made;
-
-            if (!system.IsBlueprint)
-                return SignalTrigger.Named(SignalName(declared[0], at[0]));
-
-            if (StandIn(system) == null)
-                return made;
-
-            var called = declared.Count == 1 ? Called(first) : first.Kind.DisplayName;
-            return SignalTrigger.Named(system.Free(called));
-        }
-
-        /// <summary>
-        /// What the variable holding slot <paramref name="at" /> on the block <paramref name="block" /> names is called: its
-        /// own name where there is one, and the block's with the slot's number after it otherwise.
-        /// </summary>
-        string SignalName(string block, ToolbarSlot at)
-        {
-            var held = _program.FindSignalRefOnly(block, at);
-            return held != null
-                ? held.Name
-                : _program.Free($"{block} {at.Slot.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
-        }
-
-        /// <summary>
-        /// The edit that answers the signal part <paramref name="made" /> names in the blockset shown with the buttons
-        /// <paramref name="answer" /> picked, taking the part where it is new, around <paramref name="then" />; null where
-        /// <paramref name="made" /> names no part or nothing was picked.
-        /// </summary>
-        /// <remarks>
-        /// Made once the question about the buttons is answered, so leaving them alone leaves no part behind. A system's
-        /// trigger is a variable of the program's, defined here for the first button picked, and <paramref name="then" /> is
-        /// all there is to do.
-        /// </remarks>
-        SystemEdit Answering(AutomationSystem system, MomentTrigger made, PickAnswer answer, SystemEdit then)
-        {
-            var required = made as SignalTrigger;
-            if (required == null || required.IsWatched)
-                return null;
-
-            var declared = new List<string>();
-            var at = new List<ToolbarSlot>();
-            var first = Picked(answer, declared, at);
-            if (first == null)
-                return null;
-
-            if (!system.IsBlueprint)
-            {
-                _program.DeclareSignal(declared[0], at[0], required.Part);
-                return then;
-            }
-
-            var instance = StandIn(system);
-            if (instance == null)
-                return null;
-
-            return new AnswerSignal(then, system, instance, required.Part, Part.Nearest(new[] { first.Kind.Lineage }), declared, at);
-        }
-
-        /// <summary>The blocks <paramref name="answer" /> picked, as the construct declares them, each with the toolbar slot its press is answered on; the first of them, or null.</summary>
-        public GridEntity Picked(PickAnswer answer, List<string> declared, List<ToolbarSlot> at)
-        {
-            var pressed = Pressed(answer);
-            GridEntity first = null;
-            for (var i = 0; i < answer.Targets.Count; i++)
-            {
-                GridEntity entity = _world.FindEntity(answer.Targets[i]);
-                if (entity == null)
-                    continue;
-
-                if (first == null)
-                    first = entity;
-
-                declared.Add(_program.Declare(_world, entity).Name);
-                at.Add(pressed[i]);
-            }
-
-            return first;
-        }
-
-        /// <summary>
-        /// Carries out what a trigger was chosen to do, with the change to what starts it where there
-        /// is one.
-        /// </summary>
-        /// <remarks>
-        /// A trigger being changed that goes on doing what it did has only its start to change, and one
-        /// that did nothing takes what the column opened on. What starts it goes in with what it does,
-        /// as one edit.
-        /// <para>
-        /// A single action is chosen on the page after, in the same pick, and nothing is kept until it
-        /// is. A trigger being made does not exist until then, so backing out leaves nothing behind.
-        /// </para>
-        /// </remarks>
-        void Aimed(AutomationSystem system, Trigger trigger, Aim aim, int origin, bool fresh,
-            SystemEdit start)
-        {
-            if (aim.Outcome == Outcome.One)
-            {
-                DoOneThing(system, trigger, origin, fresh, start, aim);
-                return;
-            }
-
-            UnwindTo(origin);
-
-            if (!fresh && !aim.Moved)
-            {
-                if (start != null)
-                    Do(system, start);
-
-                return;
-            }
-
-            if (aim.Outcome == Outcome.New)
-            {
-                RunNew(system, trigger, origin, fresh, start);
-                return;
-            }
-
-            var sequence = system.FindSequence(aim.Sequence);
-            if (sequence != null)
-                Points(system, trigger, new Run(sequence.Number, aim.Stops), fresh, null, start);
-            else if (start != null)
-                Do(system, start);
-        }
-
-        /// <summary>
-        /// Where every choice of what a trigger does lands.
-        /// </summary>
-        /// <remarks>
-        /// A trigger being made is not yet in the system, and nothing has been done that could be
-        /// taken back - the way back from making one is the bin on its row. A trigger being changed
-        /// is already there, so this is an edit, and it is the system's to walk back, together with
-        /// <paramref name="start" /> where what starts it changed too.
-        /// </remarks>
-        void Points(AutomationSystem system, Trigger trigger, Step does, bool fresh, Sequence made, SystemEdit start)
-        {
-            if (fresh)
-            {
-                trigger.Does = does;
-                Do(system, new AddTrigger(_program, trigger, made, _starting, _replaced, _replacedAt));
-                _starting.Clear();
-                _replaced = null;
-                Invalidate();
-                return;
-            }
-
-            var point = new PointTrigger(_program, trigger, does, made);
-            Do(system, start == null ? point : (SystemEdit)new Retrigger(start, point));
-        }
-
-        /// <summary>
-        /// Makes the sequence this trigger runs, and opens it.
-        /// </summary>
-        /// <remarks>Made in a system switched off, as everything in one is, so a trigger with no steps behind it is never live.</remarks>
-        void RunNew(AutomationSystem system, Trigger trigger, int origin, bool fresh, SystemEdit start)
-        {
-            // The picker goes with the answer. Left on the stack, backing out of the sequence would
-            // land on the choice of what it does, for a trigger that already does something.
-            UnwindTo(origin);
-
-            var sequence = _program.AddSequence(system);
-            sequence.Name = Name(sequence);
-
-            Points(system, trigger, new Run(sequence.Number), fresh, sequence, start);
-
-            PushNamed(new SequencePage(this, sequence));
-        }
-
-        /// <summary>
-        /// Asks what one thing the trigger should do, as the next page of the pick what it does was
-        /// chosen in, and makes it do exactly that.
-        /// </summary>
-        /// <remarks>
-        /// What it holds is an act of its own. Where the block has an action of the game's own for it,
-        /// the host writes that into the button and Sprocket is not part of the press - see
-        /// <c>SprocketUnit</c>, which decides that by looking at the act rather than by being told.
-        /// <para>
-        /// A trigger that already does one thing opens on it, and finishing puts the act chosen in its
-        /// place, together with <paramref name="start" />.
-        /// </para>
-        /// <para>
-        /// The page is kept on <paramref name="aim" /> while the single action stays chosen, so going
-        /// back to look at what starts the trigger and on again finds it as it was left. What finishing
-        /// it does is set afresh every time, since what starts the trigger may have changed between.
-        /// </para>
-        /// </remarks>
-        void DoOneThing(AutomationSystem system, Trigger trigger, int origin, bool fresh,
-            SystemEdit start, Aim aim)
-        {
-            aim.Finish = answer =>
-            {
-                var act = new Act(answer.Chosen);
-                act.Form = answer.Form;
-                act.Provider = Vocabulary.Provider(_world, answer.Targets, answer.Chosen, answer.Form);
-                var named = Named(system, answer.Targets, fresh || trigger.Acts == null ? null : trigger.Acts.Targets);
-                foreach (var name in named)
-                    act.Targets.Add(name);
-
-                for (var i = 0; i < answer.Arguments.Count; i++)
-                    act.Arguments.Add(answer.Arguments[i]);
-
-                UnwindTo(origin);
-                Points(system, trigger, act, fresh, null, start);
-            };
-
-            var only = fresh ? null : trigger.Acts;
-            if (only != null)
-            {
-                if (aim.Following == null)
-                {
-                    aim.Following = new PickPage(this, Texts.PickSingleTask, false, Blocks(system, only.Targets),
-                        only.ActionId, only.Form, answer => aim.Finish(answer),
-                        arguments: only.Arguments, opens: aim.Opens, after: aim.Pick);
-                }
-
-                aim.Following.Arrived(aim.Straight);
-                aim.Straight = false;
-                Push(aim.Following);
-                return;
-            }
-
-            if (aim.Following == null)
-            {
-                aim.Following = new PickPage(this, Texts.PickSingleTask, false, new List<long>(), "", Nature.Native,
-                    answer => aim.Finish(answer), opens: aim.Opens, after: aim.Pick);
-            }
-
-            aim.Following.Arrived(aim.Straight);
-            aim.Straight = false;
-            Push(aim.Following);
-        }
-
-        /// <summary>
-        /// Makes <paramref name="system" /> a system blueprint, with a first instance answering its slots with what it named;
-        /// that instance, or the first of a blueprint already.
-        /// </summary>
-        /// <remarks>
-        /// A system names the program's variables, and a blueprint its own slots: so each trigger it is started by becomes a
-        /// signal slot, called what the block is called now, and the blocks its steps and triggers name become slots by the
-        /// sets they name, as <see cref="Slotting" /> works them out. The first instance answers them with those variables.
-        /// </remarks>
-        public SystemInstance Blueprinted(AutomationSystem system)
-        {
-            if (system.IsBlueprint)
-                return system.First;
-
-            var name = SystemSummary.NewInstanceName(Texts, system);
-            var first = system.AddInstance();
-            first.Name = name;
-            system.IsBlueprint = true;
-
-            var slots = new Dictionary<string, string>();
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var needed = triggers[i] as SignalTrigger;
-                var declared = needed == null ? null : _program.FindSignalRef(needed.Part);
-                if (declared == null || slots.ContainsKey(needed.Part))
-                    continue;
-
-                GridEntity panel = _runner.Bindings.Entity(declared.Name);
-                var slot = system.Free(panel == null ? declared.Name : Called(panel));
-                var part = system.PartFor(slot);
-                part.IsSignal = true;
-
-                var at = new ToolbarSlot[declared.Blocks.Count];
-                for (var n = 0; n < at.Length; n++)
-                    at[n] = declared.At;
-
-                first.Fill(slot, declared.Blocks, at);
-
-                slots[needed.Part] = slot;
-            }
-
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var moment = triggers[i] as MomentTrigger;
-                if (moment != null)
-                    Slotted(moment.Sources, slots);
-            }
-
-            // The blocks the steps and triggers name become slots as any picks do, the smallest sets first.
-            Slots(system, first, null).Settle().Apply();
-
-            _program.Edited();
-            _program.Rewire();
-            return first;
-        }
-
-        /// <summary>Names the signal slot for each variable in <paramref name="names" /> that <paramref name="slots" /> has one for.</summary>
-        static void Slotted(IList<string> names, Dictionary<string, string> slots)
-        {
-            for (var i = 0; i < names.Count; i++)
-            {
-                string slot;
-                if (slots.TryGetValue(names[i], out slot))
-                    names[i] = slot;
-            }
-        }
-
-        /// <summary>
-        /// The names <paramref name="system" /> uses for these blocks: a system's variables, each block declared where the
-        /// construct has not named it yet, or the slots a blueprint's stand-in fills with them.
-        /// </summary>
-        /// <remarks>
-        /// Where picking a block turns into naming one. What a blueprint's sentence stores is a slot, and which block fills
-        /// it belongs to each instance - so the same sentence acts on the port airlock's door in one and the starboard's in
-        /// another.
-        /// </remarks>
-        public List<string> Named(AutomationSystem system, IList<long> blocks)
-        {
-            return Named(system, blocks, null);
-        }
-
-        /// <summary>The same, for blocks picked in place of the names <paramref name="replacing" />, the list itself, where they replace one.</summary>
-        /// <remarks>
-        /// In a blueprint the slots are worked out by <see cref="Slotting" />, and what that changes beyond the names given
-        /// back is kept for the edit made next, which carries it so taking the edit back takes it back too.
-        /// </remarks>
-        public List<string> Named(AutomationSystem system, IList<long> blocks, IList<string> replacing)
-        {
-            var declared = new List<string>();
-            var met = new Dictionary<string, GridEntity>();
-            for (var i = 0; i < blocks.Count; i++)
-            {
-                GridEntity entity = _world.FindEntity(blocks[i]);
-                if (entity == null)
-                    continue;
-
-                var name = _program.Declare(_world, entity).Name;
-                declared.Add(name);
-                met[name] = entity;
-            }
-
-            SystemInstance shown = system.IsBlueprint ? StandIn(system) : null;
-            if (shown == null)
-                return declared;
-
-            // Worked out as though the picks before it in this command were made, and undone again, since their edits come later.
-            if (_picked.Count > 0 && _picked[0].System != system)
-                Unpicked(null);
-
-            foreach (var pick in _picked)
-                pick.Apply();
-
-            Reslot reslot;
-            var named = Slots(system, shown, met).Pick(declared, replacing, _pickedNames, out reslot);
-
-            for (var i = _picked.Count - 1; i >= 0; i--)
-                _picked[i].Undo();
-
-            _picked.Add(reslot);
-            _pickedNames.Add(new List<string>(named));
-            return named;
-        }
-
-        /// <summary>
-        /// The names <paramref name="system" /> uses for the facet called <paramref name="facet" /> of each of
-        /// <paramref name="blocks" />, of the type <paramref name="type" />, picked in place of the names
-        /// <paramref name="replacing" /> where they replace a list: in a blueprint, a slot of that type of its own, filled in
-        /// its stand-in with those blocks and the number each has that facet by.
-        /// </summary>
-        /// <remarks>
-        /// Outside a blueprint there is no installation to keep which facet, so the blocks are named as any picks are. The slot
-        /// and every other change to the slots are kept for the edit made next, as <see cref="Named(AutomationSystem, IList{long}, IList{string})" /> keeps them.
-        /// </remarks>
-        public List<string> Named(AutomationSystem system, HostType type, string facet, IList<long> blocks, IList<string> replacing)
-        {
-            SystemInstance shown = system.IsBlueprint ? StandIn(system) : null;
-            if (shown == null)
-                return Named(system, blocks, replacing);
-
-            var declared = new List<string>();
-            var numbers = new List<int>();
-            var met = new Dictionary<string, GridEntity>();
-            foreach (var block in blocks)
-            {
-                GridEntity entity = _world.FindEntity(block);
-                if (entity == null)
-                    continue;
-
-                var name = _program.Declare(_world, entity).Name;
-                declared.Add(name);
-                numbers.Add(Numbered(entity.Kind.Facets(type), facet));
-                met[name] = entity;
-            }
-
-            if (_picked.Count > 0 && _picked[0].System != system)
-                Unpicked(null);
-
-            foreach (var pick in _picked)
-                pick.Apply();
-
-            Reslot reslot;
-            var named = Slots(system, shown, met).Hold(type.Id, declared, numbers, replacing, _pickedNames, out reslot);
-
-            for (var i = _picked.Count - 1; i >= 0; i--)
-                _picked[i].Undo();
-
-            _picked.Add(reslot);
-            _pickedNames.Add(new List<string>(named));
-            return named;
-        }
-
-        /// <summary>The number of the facet among <paramref name="facets" /> called <paramref name="name" />, or of the first where none is.</summary>
-        public static int Numbered(IList<HostTypeFacet> facets, string name)
-        {
-            foreach (var facet in facets)
-            {
-                if (facet.Name == name)
-                    return facet.Number;
-            }
-
-            return 1;
-        }
-
-        /// <summary>
-        /// The name of the facet the slot among <paramref name="names" /> holding a type the host provides holds of the first
-        /// block it holds, in the stand-in of <paramref name="system" />; empty where none holds one.
-        /// </summary>
-        /// <remarks>What a step's picker opens on, so changing a step keeps the screen it acts on.</remarks>
-        public string Facet(AutomationSystem system, IList<string> names)
-        {
-            return Facet(system, StandIn(system), names);
-        }
-
-        /// <summary>The same, as the installation <paramref name="shown" /> fills the slots.</summary>
-        public string Facet(AutomationSystem system, SystemInstance shown, IList<string> names)
-        {
-            if (shown == null)
-                return "";
-
-            foreach (var name in names)
-            {
-                var part = system.FindPart(name);
-                var blocks = shown.FilledWith(name);
-                var numbers = shown.Facets(name);
-                var type = part == null ? null : HostTypes.Named(part.Holds);
-                GridEntity entity = type == null || blocks == null || blocks.Count == 0 || numbers == null || numbers.Count == 0
-                    ? null
-                    : _runner.Bindings.Entity(blocks[0]);
-                var facet = entity == null ? null : type.Find(entity.Kind, numbers[0]);
-                if (facet != null)
-                    return facet.Name;
-            }
-
-            return "";
-        }
-
-        /// <summary>Whether the picks since the last edit change any slot of <paramref name="system" />.</summary>
-        bool Reslots(AutomationSystem system)
-        {
-            foreach (var pick in _picked)
-            {
-                if (pick.System == system && !pick.IsEmpty)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>The changes the picks since the last edit worked out for <paramref name="system" />, in order, forgetting them; none where they were for another.</summary>
-        List<Reslot> Unpicked(AutomationSystem system)
-        {
-            var picked = new List<Reslot>();
-            if (_picked.Count > 0 && _picked[0].System == system)
-                picked.AddRange(_picked);
-
-            _picked.Clear();
-            _pickedNames.Clear();
-            return picked;
-        }
-
-        /// <summary>Works out the slots of <paramref name="system" /> as <paramref name="shown" /> fills them, knowing the blocks just picked as <paramref name="met" />.</summary>
-        Slotting Slots(AutomationSystem system, SystemInstance shown, Dictionary<string, GridEntity> met)
-        {
-            return new Slotting(system, shown,
-                name =>
-                {
-                    GridEntity entity = Known(name, met);
-                    return entity != null ? Called(entity) : _program.Called(name, _world.Values);
-                },
-                name =>
-                {
-                    GridEntity entity = Known(name, met);
-                    return entity != null ? entity.Kind.Lineage : new string[0];
-                },
-                number => Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture)));
-        }
-
-        /// <summary>The block the variable <paramref name="name" /> holds: one just picked, or one the construct has bound.</summary>
-        GridEntity Known(string name, Dictionary<string, GridEntity> met)
-        {
-            GridEntity entity;
-            if (met != null && met.TryGetValue(name, out entity))
-                return entity;
-
-            return _runner.Bindings.Entity(name);
         }
 
         /// <summary>
@@ -2668,7 +1304,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             if (!system.IsBlueprint)
             {
-                Blueprinted(system);
+                _picks.Blueprinted(system);
                 return;
             }
 
@@ -2700,133 +1336,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _standIns[system.Id] = instance.Number;
             Invalidate();
-        }
-
-        /// <summary>What a slot taken for <paramref name="entity" /> is called at first: the block's own name, or its kind where it has none.</summary>
-        static string Called(GridEntity entity)
-        {
-            var name = Naming.Clean(entity.Name);
-            return name.Length > 0 ? name : entity.Kind.DisplayName;
-        }
-
-        /// <summary>
-        /// Takes a trigger out of a system.
-        /// </summary>
-        /// <remarks>
-        /// No question asked, because the system's arrows are the answer to a deletion nobody meant -
-        /// and a question in front of every one of them is how people learn to press through
-        /// questions. A sequence deleted from its own screen still asks: that is work somebody can
-        /// see, and its way back would be on a screen that went with it.
-        /// </remarks>
-        public void Forget(AutomationSystem system, Trigger trigger)
-        {
-            Do(system, new ForgetTrigger(system, trigger));
-        }
-
-        /// <summary>
-        /// Opens the picker a trigger was made in, on what starts it and what it does now, and puts
-        /// the answer in its place.
-        /// </summary>
-        /// <remarks>
-        /// Wherever the trigger's row was pressed - what starts it, or what it does - because the two
-        /// are chosen side by side. A trigger that listens for a moment stays one: turning a repeat
-        /// into a moment is deleting it and making the one that was meant.
-        /// <para>
-        /// Whatever somebody wrote about it is carried over, and what it does is changed only where a
-        /// different choice was made.
-        /// </para>
-        /// <para>
-        /// It opens on the column of the part pressed. A part of the single action a trigger does is
-        /// on the page after, so the picker goes straight on to that page, where the action was made.
-        /// </para>
-        /// </remarks>
-        public void ChangeTrigger(AutomationSystem system, Trigger trigger, Opening opens, bool action)
-        {
-            // Back to the screen the row is on, which is where the answer lands.
-            var origin = _stack.Count;
-            var aim = new Aim(this, system, trigger);
-            aim.Opens = action ? opens : Opening.Blocks;
-            aim.Straight = action;
-
-            var every = trigger as EveryTrigger;
-            if (every != null)
-            {
-                var rate = every.Interval;
-                var timer = new TimerPage(this, rate, aim, interval =>
-                    Aimed(system, every, aim, origin, false, interval == rate ? null : new SetCadence(every, rate, interval)));
-
-                Push(timer);
-                if (action)
-                    timer.GoOn();
-
-                return;
-            }
-
-            var moment = trigger as MomentTrigger;
-            if (moment == null)
-                return;
-
-            var was = moment as WhenTrigger;
-
-            // A when comparing a number opens on that number and how it compares; anything else on its moment.
-            var compares = was != null && Vocabulary.Compares(_runner.Bindings, was, SystemInstance.Through(StandIn(system), was.Sources));
-            var picker = new PickPage(this, "When something happens", true,
-                Blocks(system, moment.Sources), compares ? was.EventId : Vocabulary.EventOf(_program, _runner.Bindings, system, moment, StandIn(system)),
-                compares ? Nature.Value : Nature.Native,
-                answer =>
-                {
-                    // The first pick on a copy is the answer its line was asking for.
-                    _copies.Remove(moment);
-
-                    var keeping = moment as SignalTrigger;
-                    if (keeping != null && keeping.IsWritten)
-                        keeping = null;
-
-                    MomentTrigger made = Starter(system, answer, keeping, moment.Sources);
-                    Unless(system, made, answer, moment, taken =>
-                    {
-                        if (Shares(taken, system))
-                        {
-                            var taking = SignalTrigger.Named(taken.Trigger.Part);
-                            var moved = new ChangeTrigger(moment, taking);
-                            Aimed(system, taking, aim, origin, false,
-                                new TakeOverTrigger(Answering(system, taking, answer, moved) ?? moved, system, taken.Trigger));
-                            return;
-                        }
-
-                        // A button picked again for a button trigger answers the same signal part, so the trigger is kept:
-                        // its toolbar slots name it.
-                        var answered = made as SignalTrigger;
-                        if (keeping != null && answered != null && !answered.IsWritten && system.IsBlueprint)
-                        {
-                            var refill = Answering(system, made, answer, null);
-                            if (refill != null)
-                                Aimed(system, moment, aim, origin, false, taken == null ? refill : TakingOver(refill, taken));
-                            else
-                                Aimed(system, moment, aim, origin, false, null);
-
-                            return;
-                        }
-
-                        // A trigger left as it was by a block traded within its slot still changes that slot.
-                        var change = new ChangeTrigger(moment, made);
-                        if (!change.Changes && taken == null && !Reslots(system))
-                        {
-                            Aimed(system, moment, aim, origin, false, null);
-                            return;
-                        }
-
-                        // One edit either way, because it is one answer to one question.
-                        var edit = Answering(system, made, answer, change) ?? change;
-                        Aimed(system, made, aim, origin, false, taken == null ? edit : TakingOver(edit, taken));
-                    }, () => UnwindTo(origin));
-                },
-                true, was?.Quantifier ?? Quantifier.Any, compares ? new[] { Comparing.Of(was.Relation), was.Value } : null,
-                opens: action ? Opening.Nothing : opens, aim: aim);
-
-            Push(picker);
-            if (action)
-                picker.GoOn();
         }
 
         /// <summary>
@@ -2987,428 +1496,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Gone(system);
         }
 
-        /// <summary>Puts the blueprint <paramref name="system" /> in the library as it is now.</summary>
-        public void Shelve(AutomationSystem system)
-        {
-            Stamp(true);
-            Shelf.Keep(system);
-            Invalidate();
-        }
-
-        /// <summary>Asks before deleting <paramref name="volume" /> from the library.</summary>
-        public void Unshelve(Volume volume)
-        {
-            Deleting(Texts.LibraryForgetQuestion, volume.State == VolumeState.Read ? volume.Name : volume.File, Texts.DeleteFinal, null, delegate
-            {
-                Shelf.Forget(volume);
-                Invalidate();
-            });
-        }
-
-        /// <summary>Asks before forgetting <paramref name="backup" />, a logic system kept of a construct that lost its automation.</summary>
-        public void ForgetBackup(Backup backup)
-        {
-            Deleting(Texts.LibraryForgetBackupQuestion, backup.Name, Texts.DeleteFinal, null, delegate
-            {
-                Backups.Forget(backup);
-                Invalidate();
-            });
-        }
-
-        /// <summary>
-        /// Puts the blueprint <paramref name="volume" /> from the library on the construct as a logic system of its own, linked
-        /// to it, with its first installation, answering what was wrong, or empty.
-        /// </summary>
-        /// <remarks>Refused where a logic system made from it is here already: another of the same is another installation of that one.</remarks>
-        public string PutOn(Volume volume)
-        {
-            if (_program.MadeFrom(volume.Identity) != null)
-                return Texts.LibraryOnAlready;
-
-            AutomationSystem system;
-            var trouble = ProgramText.Lone(volume.Text, _world.Values, out system);
-            if (trouble.Length > 0)
-                return trouble;
-
-            system.Identity = Guid.NewGuid();
-            system.Origin = volume.Identity;
-            system.OriginChanged = volume.Changed;
-            return PutOn(ProgramText.Linked(system), system.Identity);
-        }
-
-        /// <summary>
-        /// Puts the logic system <paramref name="backed" />, as a backup keeps it, back on the construct with its own identity
-        /// and its link, with its first installation, answering what was wrong with it, or empty.
-        /// </summary>
-        /// <remarks>Refused where a logic system of its identity is here already.</remarks>
-        public string PutOn(AutomationSystem backed)
-        {
-            if (Shelf != null)
-                Shelf.Link(backed);
-
-            return PutOn(ProgramText.Linked(backed), backed.Identity);
-        }
-
-        string PutOn(string text, Guid identity)
-        {
-            var trouble = ProgramText.AddBlueprint(text, _program, _world.Values);
-            if (trouble.Length > 0)
-                return trouble;
-
-            var made = _program.FindSystem(identity);
-            Installed(made);
-            Do(new MakeSystem(made, Change.PutOnSystem));
-            Invalidate();
-            return "";
-        }
-
-        /// <summary>
-        /// Puts a copy of the logic system written as <paramref name="text" /> on the construct, as a logic system of its own with
-        /// its first installation, answering it; or null, with what was wrong in <paramref name="trouble" />.
-        /// </summary>
-        /// <remarks>
-        /// A blueprint of its own because it has an identity of its own: changing either never touches the other. It is named
-        /// with the first number no blueprint here or in the library has, and is by whoever made the copy.
-        /// </remarks>
-        public AutomationSystem Copy(string text, out string trouble)
-        {
-            var trial = new Automation();
-            trouble = ProgramText.Load(text, trial, _world.Values);
-            if (trouble.Length > 0)
-                return null;
-
-            if (trial.Systems.Count != 1)
-            {
-                trouble = "expected one system blueprint and nothing else.";
-                return null;
-            }
-
-            var copy = trial.Systems[0];
-            copy.Identity = Guid.NewGuid();
-            copy.Changed = DateTime.UtcNow;
-            copy.Name = Numbered(copy.Name);
-            if (_author.Length > 0)
-                copy.Namespace = _author;
-
-            trouble = ProgramText.AddBlueprint(ProgramText.Blueprint(copy), _program, _world.Values);
-            if (trouble.Length > 0)
-                return null;
-
-            var made = _program.FindSystem(copy.Identity);
-            Installed(made);
-            Do(new MakeSystem(made, Change.CopyBlueprint));
-            Invalidate();
-            return made;
-        }
-
-        /// <summary><paramref name="name" /> with the first number from 2 that no system here and no blueprint in the library is called.</summary>
-        string Numbered(string name)
-        {
-            for (var number = 2; ; number++)
-            {
-                // The number first, so a name with braces in it is never read as a slot.
-                var wanted = Template.Fill(Template.Fill(Texts.LibraryCopyName, "number",
-                    number.ToString(System.Globalization.CultureInfo.InvariantCulture)), "name", name);
-
-                var taken = false;
-                for (var i = 0; i < _program.Systems.Count && !taken; i++)
-                    taken = _program.Systems[i].Name == wanted;
-
-                for (var i = 0; Shelf != null && i < Shelf.All.Count && !taken; i++)
-                    taken = Shelf.All[i].Name == wanted;
-
-                if (!taken)
-                    return wanted;
-            }
-        }
-
-        /// <summary>Whether the library keeps the blueprint the logic system <paramref name="system" /> is linked to.</summary>
-        public bool Stored(AutomationSystem system)
-        {
-            return Shelf != null && system.HasOrigin && Shelf.Find(system.Origin) != null;
-        }
-
-        /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
-        /// <remarks>
-        /// Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.
-        /// Where the logic system was changed after its blueprint in the library, a second question asks whether the blueprint
-        /// is brought up to date; otherwise the blueprint is left as it is, unasked.
-        /// </remarks>
-        public void AskTakeOff(AutomationSystem system)
-        {
-            Stamp(true);
-
-            var arguments = new Arguments();
-            arguments.Set("named", system.Name);
-
-            if (!ChangedSince(system))
-            {
-                Ask($"{Texts.LibraryTakeOffQuestion}\n\n**{{named}}**\n\n{Texts.LibraryTakeOffKept}", arguments);
-                Answer(Texts.LibraryTakeOffKeep, () => { }, true);
-                Answer(Texts.LibraryTakeOffConfirm, () => TakeOff(system, false));
-                return;
-            }
-
-            Ask($"{Texts.LibraryTakeOffQuestion}\n\n**{{named}}**\n\n{Texts.LibraryTakeOffGoes}", arguments);
-            Answer(Texts.LibraryTakeOffKeep, () => { }, true);
-            Answer(Texts.LibraryTakeOffConfirm, () => AskTakeOffBlueprint(system));
-        }
-
-        /// <summary>
-        /// Asks whether taking off the logic system <paramref name="system" /> brings its blueprint in the library up to date;
-        /// leaving the blueprint is the answer Enter takes, and backing out takes nothing off.
-        /// </summary>
-        void AskTakeOffBlueprint(AutomationSystem system)
-        {
-            var arguments = new Arguments();
-            arguments.Set("named", system.Name);
-
-            Ask(Texts.LibraryTakeOffChanged, arguments);
-            Answer(Texts.LibraryTakeOffUpdate, () => TakeOff(system, true));
-            Answer(Texts.LibraryTakeOffLeave, () => TakeOff(system, false), true);
-        }
-
-        /// <summary>Asks before putting the logic system <paramref name="system" /> in place of its blueprint in the library; keeping the blueprint is the answer Enter takes.</summary>
-        public void AskUpdate(AutomationSystem system)
-        {
-            Stamp(true);
-
-            var arguments = new Arguments();
-            arguments.Set("named", system.Name);
-
-            Ask($"{Texts.LibraryUpdateQuestion}\n\n**{{named}}**\n\n{Texts.LibraryUpdateReplaced}", arguments);
-            Answer(Texts.LibraryUpdateKeep, () => { }, true);
-            Answer(Texts.LibraryUpdateConfirm, () => Shelve(system));
-        }
-
-        /// <summary>
-        /// Puts the logic system <paramref name="backed" />, as a backup keeps it, in the library: where the blueprint it is
-        /// linked to is there, after asking whether it updates that blueprint or is kept as a new one; leaving both is the
-        /// answer Enter takes.
-        /// </summary>
-        public void ShelveBackup(AutomationSystem backed)
-        {
-            if (!Stored(backed))
-            {
-                Shelve(backed);
-                return;
-            }
-
-            Stamp(true);
-
-            var arguments = new Arguments();
-            arguments.Set("named", backed.Name);
-
-            Ask($"{Texts.LibraryKeepBackupQuestion}\n\n**{{named}}**\n\n{Texts.LibraryKeepBackupLinked}", arguments);
-            Answer(Texts.LibraryKeepBackupLeave, () => { }, true);
-            Answer(Texts.LibraryKeepBackupUpdate, () => Shelve(backed));
-            Answer(Texts.LibraryKeepBackupNew, delegate
-            {
-                backed.Origin = Guid.Empty;
-                backed.OriginChanged = null;
-                Shelve(backed);
-            });
-        }
-
-        /// <summary>Asks before putting the blueprint of <paramref name="system" /> in the library in its place; keeping it is the answer Enter takes.</summary>
-        public void AskRenew(AutomationSystem system)
-        {
-            Stamp(true);
-
-            var arguments = new Arguments();
-            arguments.Set("named", system.Name);
-
-            Ask($"{Texts.LibraryRenewQuestion}\n\n**{{named}}**\n\n{Texts.LibraryRenewReplaced}", arguments);
-            Answer(Texts.LibraryRenewKeep, () => { }, true);
-            Answer(Texts.LibraryRenewConfirm, () => Renew(system, Change.UpdateFromLibrary));
-        }
-
-        /// <summary>Asks before putting the blueprint of <paramref name="system" /> in the library back in its place, losing what changed since; keeping it is the answer Enter takes.</summary>
-        public void AskReset(AutomationSystem system)
-        {
-            Stamp(true);
-
-            var arguments = new Arguments();
-            arguments.Set("named", system.Name);
-
-            Ask($"{Texts.LibraryResetQuestion}\n\n**{{named}}**\n\n{Texts.LibraryResetReplaced}", arguments);
-            Answer(Texts.LibraryRenewKeep, () => { }, true);
-            Answer(Texts.LibraryResetConfirm, () => Renew(system, Change.ResetToBlueprint));
-        }
-
-        /// <summary>
-        /// Puts the blueprint <paramref name="system" /> is linked to in its place, its installations keeping their blocks in
-        /// every slot the blueprint still uses, offered back as <paramref name="change" />, answering what was wrong, or empty.
-        /// </summary>
-        /// <remarks>
-        /// It keeps its own identity, so its buttons go on naming it, and is linked to the blueprint as it now is. Its runs end,
-        /// as they do when a logic system goes, and each installation stays switched as it was. The whole program as it would
-        /// stand is read first, because a text with an error in it is trusted in no part.
-        /// </remarks>
-        public string Renew(AutomationSystem system, Change change)
-        {
-            var volume = Stored(system) ? Shelf.Find(system.Origin) : null;
-            if (volume == null)
-                return "";
-
-            AutomationSystem copy;
-            var trouble = ProgramText.Lone(volume.Text, _world.Values, out copy);
-            if (trouble.Length > 0)
-                return trouble;
-
-            copy.Identity = system.Identity;
-            copy.Origin = volume.Identity;
-            copy.OriginChanged = volume.Changed;
-
-            var text = ProgramText.Replacing(_program, _world.Values, copy);
-            trouble = ProgramText.Load(text, new Automation(), _world.Values);
-            if (trouble.Length > 0)
-                return trouble;
-
-            Stamp(true);
-
-            // Read in beside the rest of the program, then set aside, so that the edit is the swap of the two alone.
-            var at = 0;
-            while (at < _program.Systems.Count && _program.Systems[at] != system)
-                at++;
-
-            _program.RemoveSystem(system);
-            trouble = ProgramText.ReadOne(text, system.Identity, _program);
-            var fresh = _program.FindSystem(system.Identity);
-            if (fresh != null)
-                _program.RemoveSystem(fresh);
-
-            _program.PutBack(system, at);
-            if (trouble.Length > 0 || fresh == null)
-                return trouble;
-
-            fresh.Enabled = system.Enabled;
-            var instances = fresh.Instances;
-            for (var i = 0; i < instances.Count; i++)
-            {
-                var was = system.FindInstance(instances[i].Number);
-                if (was != null)
-                    instances[i].Enabled = was.Enabled;
-            }
-
-            // Said as it is, so its date stays the library's and nothing reads it as changed since.
-            _said[fresh.Identity] = ProgramText.Said(fresh);
-
-            Do(new ReplaceSystem(system, fresh, change));
-            Gone(system);
-            return "";
-        }
-
-        /// <summary>The other version of <paramref name="system" /> waiting for a choice, or null.</summary>
-        public AutomationSystem Rival(AutomationSystem system)
-        {
-            var conflict = Conflict(system);
-            if (conflict == null)
-                return null;
-
-            return _program.FindSystem(conflict.System == system.Identity ? conflict.Waiting : conflict.System);
-        }
-
-        /// <summary>Asks which version of <paramref name="system" /> to keep.</summary>
-        public void AskChoose(AutomationSystem system)
-        {
-            var conflict = Conflict(system);
-            if (conflict == null)
-                return;
-
-            var here = _program.FindSystem(conflict.System);
-            var waiting = _program.FindSystem(conflict.Waiting);
-            var arguments = new Arguments();
-            arguments.Set("name", here.Name);
-            Ask($"{Texts.ConflictQuestion}\n\n{Texts.ConflictExplains}", arguments);
-            Answer(Kept(here), () => Choose(here, waiting, conflict, here));
-            Answer(Kept(waiting), () => Choose(here, waiting, conflict, waiting));
-        }
-
-        ConflictMemory Conflict(AutomationSystem system)
-        {
-            foreach (var conflict in _program.Memory.Conflicts)
-            {
-                if (conflict.System != system.Identity && conflict.Waiting != system.Identity)
-                    continue;
-
-                if (_program.FindSystem(conflict.System) != null && _program.FindSystem(conflict.Waiting) != null)
-                    return conflict;
-            }
-
-            return null;
-        }
-
-        string Kept(AutomationSystem version)
-        {
-            return version.Changed.HasValue
-                ? Template.Fill(Texts.ConflictKeep, "date", LibraryPage.Time(version.Changed.Value))
-                : Texts.ConflictKeepUndated;
-        }
-
-        // Under the identity of the one here, which the construct's buttons name.
-        void Choose(AutomationSystem here, AutomationSystem waiting, ConflictMemory conflict, AutomationSystem keep)
-        {
-            var scratch = new Automation();
-            if (ProgramText.Load(ProgramText.Save(_program, _world.Values), scratch, _world.Values).Length > 0)
-                return;
-
-            var kept = scratch.FindSystem(keep.Identity);
-            var dropped = scratch.FindSystem(keep == here ? waiting.Identity : here.Identity);
-            foreach (var instance in dropped.Instances)
-                Meeting.Bring(instance, kept, name => name);
-
-            scratch.RemoveSystem(dropped);
-            kept.Identity = here.Identity;
-            var text = ProgramText.Save(scratch, _world.Values);
-
-            Stamp(true);
-            var at = 0;
-            while (at < _program.Systems.Count && _program.Systems[at] != here)
-                at++;
-
-            _program.RemoveSystem(here);
-            var trouble = ProgramText.ReadOne(text, here.Identity, _program);
-            var chosen = _program.FindSystem(here.Identity);
-            if (chosen != null)
-                _program.RemoveSystem(chosen);
-
-            _program.PutBack(here, at);
-            if (trouble.Length > 0 || chosen == null)
-                return;
-
-            _said[chosen.Identity] = ProgramText.Said(chosen);
-            Do(new ChooseVersion(here, waiting, chosen, conflict));
-            Gone(here);
-            Gone(waiting);
-            Invalidate();
-        }
-
-        /// <summary>Whether the logic system <paramref name="system" /> was changed after the version of its blueprint in the library it is linked to.</summary>
-        public bool ChangedSince(AutomationSystem system)
-        {
-            return Stored(system) && system.Changed.HasValue
-                && (!system.OriginChanged.HasValue || system.Changed.Value > system.OriginChanged.Value);
-        }
-
-        /// <summary>
-        /// Takes the logic system <paramref name="system" />, whose blueprint is in the library, off the construct with its
-        /// installations, bringing the blueprint up to date first where <paramref name="update" /> says so.
-        /// </summary>
-        /// <remarks>One with no blueprint in the library is deleted instead, by <see cref="DeleteSystem" />: taking it off would lose it.</remarks>
-        public void TakeOff(AutomationSystem system, bool update)
-        {
-            if (!Stored(system))
-                return;
-
-            Stamp(true);
-            if (update && !Shelf.Holds(system))
-                Shelf.Keep(system);
-
-            Do(new TakeSystemOut(system, Change.TakeOffSystem));
-            Gone(system);
-        }
-
         /// <summary>Takes <paramref name="instance" />, one of the installations of <paramref name="system" />, out of it, as a step home's undo takes back.</summary>
         /// <remarks>
         /// Without asking: undo brings it back, switched off, with its blocks. A logic system keeps at least one installation, so
@@ -3427,9 +1514,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public void SwitchSystem(AutomationSystem system, bool on)
         {
             // A version waiting for a choice asks for it instead.
-            if (on && Rival(system) != null)
+            if (on && _versions.Rival(system) != null)
             {
-                AskChoose(system);
+                _versions.AskChoose(system);
                 return;
             }
 
@@ -3555,97 +1642,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             PushMade(new SequencePage(this, copy));
         }
 
-        /// <summary>Adds a copy of <paramref name="trigger" /> to <paramref name="system" />, after its last trigger, doing what it does.</summary>
-        /// <remarks>
-        /// A button starts only one trigger, so a button trigger's copy starts from a new, empty signal slot of the kinds the
-        /// original's expects, and its line says so until the first pick on it. Every other trigger is copied whole.
-        /// </remarks>
-        public void CopyTrigger(AutomationSystem system, Trigger trigger)
-        {
-            var signal = trigger as SignalTrigger;
-            var shown = system.IsBlueprint ? StandIn(system) : null;
-            if (signal == null || signal.IsWritten || shown == null)
-            {
-                Do(system, new AddTrigger(_program, Automation.Copied(trigger, null), null, new List<SystemEdit>(), null, -1,
-                    Change.CopyTrigger));
-
-                return;
-            }
-
-            var part = new Part(FreeSlotName(system));
-            part.IsSignal = true;
-            part.Expects = Expected(system, signal);
-
-            var reslot = new Reslot(system, shown);
-            reslot.Make(part, new List<string>());
-            _picked.Add(reslot);
-            _pickedNames.Add(new List<string> { part.Id });
-
-            var copy = Automation.Copied(trigger, part.Id);
-            Do(system, new AddTrigger(_program, copy, null, new List<SystemEdit>(), null, -1, Change.CopyTrigger));
-            _copies.Add(copy);
-        }
-
-        /// <summary>Whether <paramref name="trigger" /> is a copy of a button trigger nobody has picked a start for yet, whose line says why it has a slot of its own.</summary>
-        public bool Copied(Trigger trigger)
-        {
-            return _copies.Contains(trigger);
-        }
-
-        /// <summary>The first slot name of the numbered kind that <paramref name="system" /> does not use, counting on from how many slots it has.</summary>
-        string FreeSlotName(AutomationSystem system)
-        {
-            for (var number = system.Parts.Count + 1;; number++)
-            {
-                var name = Template.Fill(Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                if (system.FindPart(name) == null)
-                    return name;
-            }
-        }
-
-        /// <summary>The nearest type every slot <paramref name="trigger" /> starts from expects, or empty for any block.</summary>
-        string Expected(AutomationSystem system, MomentTrigger trigger)
-        {
-            var lineages = new List<IList<string>>();
-            for (var i = 0; i < trigger.Sources.Count; i++)
-            {
-                var part = system.FindPart(trigger.Sources[i]);
-                if (part == null)
-                    continue;
-
-                if (part.Expects.Length == 0)
-                    return "";
-
-                lineages.Add(Lineage(part.Expects));
-            }
-
-            return Part.Nearest(lineages);
-        }
-
-        /// <summary>
-        /// The type <paramref name="type" /> and each type the game builds it on, nearest first, as a kind on the construct has
-        /// them; the type alone where no block on the construct is of it.
-        /// </summary>
-        IList<string> Lineage(string type)
-        {
-            var entities = _world.Entities;
-            for (var i = 0; i < entities.Count; i++)
-            {
-                var lineage = entities[i].Kind.Lineage;
-                var at = lineage.IndexOf(type);
-                if (at >= 0)
-                {
-                    var from = new List<string>();
-                    for (var k = at; k < lineage.Count; k++)
-                        from.Add(lineage[k]);
-
-                    return from;
-                }
-            }
-
-            return new List<string> { type };
-        }
-
         /// <summary>
         /// Names a new sequence by the first free number, counting on from the sequences its system already has.
         /// </summary>
@@ -3655,7 +1651,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Stored from here on, and never re-derived, so renaming one cannot renumber another.
         /// </para>
         /// </remarks>
-        string Name(Sequence sequence)
+        public string Name(Sequence sequence)
         {
             AutomationSystem owner = null;
             for (var i = 0; i < _program.Systems.Count && owner == null; i++)

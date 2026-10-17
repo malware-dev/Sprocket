@@ -49,7 +49,7 @@ public class TriggerCopyTests
         Assert.Equal(original.Sources, copy.Sources);
         Assert.Equal(original.Runs, copy.Runs);
         Assert.Equal(slots, system.Parts.Count);
-        Assert.False(sim.Editor.Copied(copy));
+        Assert.False(sim.Editor.Starts.Copied(copy));
         Assert.NotEqual(NoticeLevel.Info, sim.Editor.Triggers()[1].Level);
     }
 
@@ -103,14 +103,14 @@ public class TriggerCopyTests
         Assert.Equal(NoticeLevel.Info, sim.Editor.Triggers()[1].Level);
 
         var copy = system.Triggers[1];
-        sim.Editor.ChangeTrigger(system, copy, Opening.Blocks, false);
+        sim.Editor.Starts.ChangeTrigger(system, copy, Opening.Blocks, false);
         sim.Tick();
         sim.Editor.PressBlock("Airlock Button");
         sim.Editor.PressChoice("button 1 is pressed");
         sim.Editor.PressPrimary();
         sim.Tick();
 
-        Assert.False(sim.Editor.Copied(copy));
+        Assert.False(sim.Editor.Starts.Copied(copy));
     }
 
     /// <summary>The copy and its empty slot are written with the program and read back as they were.</summary>

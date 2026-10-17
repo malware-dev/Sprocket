@@ -48,20 +48,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Flips = editor.Act(Cmd.EnableSystem, () => editor.SwitchSystem(system, !system.Enabled));
             _heading.SwitchGovernsAll = true;
             _heading.Mark = Symbols.LogicSystem;
-            _takesOff = editor.Act(Cmd.TakeOff, () => editor.AskTakeOff(system));
+            _takesOff = editor.Act(Cmd.TakeOff, () => editor.Holdings.AskTakeOff(system));
             _deletes = editor.Act(Cmd.DeleteSystem, () => editor.DeleteSystem(system));
-            _renews = editor.Act(Cmd.Renew, () => editor.AskRenew(system));
-            _chooses = editor.Act(Cmd.ChooseVersion, () => editor.AskChoose(system));
+            _renews = editor.Act(Cmd.Renew, () => editor.Holdings.AskRenew(system));
+            _chooses = editor.Act(Cmd.ChooseVersion, () => editor.Versions.AskChoose(system));
             _shelves = editor.Act(Cmd.Shelve, delegate
             {
                 // Updating replaces the blueprint, so it asks first; making one shows it where it now is.
-                if (editor.Stored(system))
+                if (editor.Holdings.Stored(system))
                 {
-                    editor.AskUpdate(system);
+                    editor.Holdings.AskUpdate(system);
                     return;
                 }
 
-                editor.Shelve(system);
+                editor.Holdings.Shelve(system);
                 editor.OpenLibrary(system.Identity);
             });
             _heading.AboutArguments = _named;
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             // A logic system with a blueprint in the library is taken off the construct, with a minus; one without is deleted,
             // with a bin, since this is its only copy. Its installations go with it either way.
-            var stored = _editor.Stored(_system);
+            var stored = _editor.Holdings.Stored(_system);
             _heading.BinMark = stored ? Symbols.Minus : null;
             _heading.Deletes = stored ? _takesOff : _deletes;
             _heading.DeleteText = stored ? texts.LibraryTakeOff : texts.LibraryDeletes;
@@ -94,14 +94,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             // time and brought up to date after. Where the blueprint was changed after the logic system, the logic system is
             // brought up to date from it instead, and with the two the same there is nothing to offer.
             var shelf = _editor.Shelf;
-            var newer = stored && !_editor.ChangedSince(_system);
+            var newer = stored && !_editor.Holdings.ChangedSince(_system);
             _heading.Offers = shelf == null || stored && shelf.Holds(_system) ? null : newer ? _renews : _shelves;
             _heading.ButtonText = !stored ? texts.SystemsMakeBlueprint : newer ? texts.SystemsUpdateFromLibrary : texts.SystemsUpdateBlueprint;
             _heading.ButtonAbout = !stored ? texts.SystemsMakeBlueprintAbout
                 : newer ? texts.SystemsUpdateFromLibraryAbout : texts.SystemsUpdateBlueprintAbout;
 
             // Kept from here: a version comes or goes only with a change that arranges the group again.
-            _waiting = _editor.Rival(_system) != null;
+            _waiting = _editor.Versions.Rival(_system) != null;
             if (_waiting)
             {
                 _heading.Offers = _chooses;
