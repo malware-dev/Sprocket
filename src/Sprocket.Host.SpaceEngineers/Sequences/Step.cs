@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     {
         static readonly string[] Nothing = new string[0];
 
+        /// <summary>A step with nothing written about it yet.</summary>
         protected Step()
         {
             Annotation = "";

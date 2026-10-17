@@ -24,11 +24,13 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public struct EntityValue
     {
+        /// <summary>A value held as the 64 bits <paramref name="bits" />.</summary>
         public EntityValue(long bits) : this()
         {
             Bits = bits;
         }
 
+        /// <summary>The value <paramref name="flag" />, as one or nought.</summary>
         public static EntityValue Of(bool flag)
         {
             return new EntityValue(flag ? 1 : 0);
@@ -47,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return new EntityValue(integer);
         }
 
+        /// <summary>The value <paramref name="real" />, held as its bits.</summary>
         public static EntityValue Of(double real)
         {
             return new EntityValue(BitConverter.DoubleToInt64Bits(real));

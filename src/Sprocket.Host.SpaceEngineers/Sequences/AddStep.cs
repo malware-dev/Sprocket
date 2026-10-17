@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
+    /// <summary>Adds one or more lines to a sequence as one edit.</summary>
     public sealed class AddStep : SequenceEdit
     {
         readonly Change _change;

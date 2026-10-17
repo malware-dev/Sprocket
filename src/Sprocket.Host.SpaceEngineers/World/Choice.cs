@@ -15,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public struct Choice
     {
+        /// <summary>The choice said as <paramref name="word" />, meaning <paramref name="means" />.</summary>
         public Choice(string word, string means) : this()
         {
             Word = word ?? "";

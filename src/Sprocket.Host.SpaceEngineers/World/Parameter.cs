@@ -46,6 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         [XmlAttribute("min")]
         public string Least;
 
+        /// <summary>The most it takes, or empty where the file says nothing.</summary>
         [XmlAttribute("max")]
         public string Most;
 

@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public sealed class Run : Step
     {
+        /// <summary>A step that runs the sequence <paramref name="number" /> of the same system.</summary>
         public Run(int number)
         {
             Number = number;

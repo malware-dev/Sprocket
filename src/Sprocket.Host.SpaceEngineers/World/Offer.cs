@@ -12,10 +12,12 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public struct Offer
     {
+        /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, taking no values.</summary>
         public Offer(string id, string text) : this(id, text, 0)
         {
         }
 
+        /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, taking <paramref name="wants" /> values.</summary>
         public Offer(string id, string text, int wants)
         {
             Id = id;
@@ -61,6 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The least it will accept, and the most, or empty where it says nothing.</summary>
         public string Least { get; private set; }
 
+        /// <summary>The most it will accept, or empty where it says nothing.</summary>
         public string Most { get; private set; }
 
         /// <summary>What kind of value it holds, where it is one.</summary>

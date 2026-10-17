@@ -26,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     {
         const string File = "Data/SprocketDefinitions.xml";
 
+        /// <summary>Reads every loaded mod's descriptions file into <paramref name="into" />, in the order the game loads them.</summary>
         public static void Read(Catalogue into)
         {
             if (into == null || MyAPIGateway.Session == null || MyAPIGateway.Utilities == null)

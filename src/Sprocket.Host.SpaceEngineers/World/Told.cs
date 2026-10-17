@@ -19,6 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     {
         const string Ours = "[Sprocket] ";
 
+        /// <summary>Writes <paramref name="what" /> to the game's log, marked as Sprocket's.</summary>
         public static void Say(string what)
         {
             Heard(what);

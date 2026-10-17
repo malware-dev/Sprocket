@@ -27,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     {
         readonly List<EntityKey> _keys = new List<EntityKey>();
 
+        /// <summary>A variable called <paramref name="name" />, holding a block of the kind <paramref name="kindId" />.</summary>
         public EntityRef(string name, string kindId)
         {
             Name = name;

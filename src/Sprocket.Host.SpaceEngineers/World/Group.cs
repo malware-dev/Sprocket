@@ -16,9 +16,11 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class Group : Piece
     {
+        /// <summary>What the parameters make up together, as the file names it: <c>color</c>, for one.</summary>
         [XmlAttribute("kind")]
         public string Sort;
 
+        /// <summary>The parameters the group covers, in order.</summary>
         [XmlElement("parameter")]
         public List<Parameter> Parameters = new List<Parameter>();
 

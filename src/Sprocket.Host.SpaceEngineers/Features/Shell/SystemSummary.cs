@@ -123,6 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return false;
         }
 
+        /// <summary>What a row says while its logic system is <paramref name="running" />, in <paramref name="texts" />, or empty while it is not.</summary>
         public static string RunningText(Texts texts, bool running)
         {
             return running ? texts.SystemsRunning : "";

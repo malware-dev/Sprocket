@@ -13,6 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public struct Trouble
     {
+        /// <summary>No trouble.</summary>
         public static readonly Trouble None = new Trouble();
 
         /// <summary>Something to wait through: <paramref name="cause" />, about <paramref name="about" /> where it names something, and still worth holding for.</summary>
@@ -49,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether the run should end rather than go on waiting.</summary>
         public bool Ends { get; private set; }
 
+        /// <summary>Whether there is any trouble.</summary>
         public bool Exists => Cause != Cause.None;
 
         /// <summary>Whether <paramref name="other" /> says the same thing.</summary>

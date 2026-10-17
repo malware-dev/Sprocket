@@ -13,12 +13,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// </remarks>
     public sealed class EntitiesSlot : SentenceSlot
     {
+        /// <summary>The part naming the blocks <paramref name="entities" />, all of them where <paramref name="requiresAll" /> and any one otherwise, opening the question it was answered with through <paramref name="opens" />.</summary>
         public EntitiesSlot(IList<long> entities, bool requiresAll, ICommand opens) : base(opens)
         {
             Entities = new List<long>(entities);
             RequiresAll = requiresAll;
         }
 
+        /// <summary>The blocks the part names, by entity id.</summary>
         public List<long> Entities { get; private set; }
 
         /// <summary>

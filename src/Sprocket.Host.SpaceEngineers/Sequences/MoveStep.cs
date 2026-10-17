@@ -2,12 +2,14 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
+    /// <summary>Moves one or more lines of a sequence to another place in it, as one edit.</summary>
     public sealed class MoveStep : SequenceEdit
     {
         readonly int _from;
         readonly int _to;
         readonly int _count;
 
+        /// <summary>Moves the line at <paramref name="from" /> to <paramref name="to" />.</summary>
         public MoveStep(int from, int to) : this(from, to, 1)
         {
         }

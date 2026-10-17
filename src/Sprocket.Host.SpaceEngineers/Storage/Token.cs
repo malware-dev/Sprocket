@@ -5,6 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <summary>One piece of script text, with whatever it carries.</summary>
     public struct Token
     {
+        /// <summary>A piece of the sort <paramref name="kind" />, starting at <paramref name="at" />, spelled <paramref name="text" />, carrying <paramref name="whole" />, <paramref name="real" /> or <paramref name="keyword" /> where it is one of those.</summary>
         public Token(TokenKind kind, int at, StringSegment text = default(StringSegment), long whole = 0,
             double real = 0, Keyword keyword = Keyword.None) : this()
         {
@@ -16,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Keyword = keyword;
         }
 
+        /// <summary>What sort of piece of text this is.</summary>
         public TokenKind Kind { get; private set; }
 
         /// <summary>
@@ -39,6 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>An integer's value, or a colour's four bytes packed red-green-blue-alpha.</summary>
         public long Whole { get; private set; }
 
+        /// <summary>A real number's value.</summary>
         public double Real { get; private set; }
 
         /// <summary>Which of the format's words this is, for a <see cref="TokenKind.Keyword" />.</summary>

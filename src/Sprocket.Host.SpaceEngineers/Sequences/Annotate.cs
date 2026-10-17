@@ -6,6 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _was;
         readonly string _now;
 
+        /// <summary>Changes what a system says about itself from <paramref name="was" /> to <paramref name="now" />.</summary>
         public Annotate(string was, string now)
         {
             _was = was;

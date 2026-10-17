@@ -57,6 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         Color _ground;
         Color _quiet;
 
+        /// <summary>The status panel drawn on <paramref name="surface" /> of <paramref name="block" />, <paramref name="size" /> big.</summary>
         public StatusApp(IMyTextSurface surface, IngameBlock block, Vector2 size)
             : base(surface, block, size)
         {

@@ -12,12 +12,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// </remarks>
     public sealed class SequenceSlot : SentenceSlot
     {
+        /// <summary>The part naming the sequence <paramref name="number" />, called <paramref name="name" />, opening the question it was answered with through <paramref name="opens" />.</summary>
         public SequenceSlot(int number, string name, ICommand opens) : base(opens)
         {
             Number = number;
             Name = name ?? "";
         }
 
+        /// <summary>The number of the sequence the part names.</summary>
         public int Number { get; private set; }
 
         /// <summary>What it is called, or empty where nobody has named it.</summary>

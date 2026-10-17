@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         int _last;
 
+        /// <summary>Something done at most once every <paramref name="every" /> ticks, due at once.</summary>
         public Interval(int every)
         {
             _every = every;

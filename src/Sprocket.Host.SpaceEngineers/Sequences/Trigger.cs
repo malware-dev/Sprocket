@@ -11,6 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// </remarks>
     public abstract class Trigger
     {
+        /// <summary>A trigger with nothing written about it yet.</summary>
         protected Trigger()
         {
             Annotation = "";

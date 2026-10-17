@@ -7,6 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly int _was;
         readonly int _now;
 
+        /// <summary>Changes which sequence the step at <paramref name="index" /> runs or stops, from <paramref name="was" /> to <paramref name="now" />.</summary>
         public SetRun(int index, int was, int now)
         {
             _index = index;

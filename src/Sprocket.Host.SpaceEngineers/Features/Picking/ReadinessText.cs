@@ -10,6 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// </remarks>
     public static class ReadinessText
     {
+        /// <summary>The short tag a picker row carries for <paramref name="readiness" />, in <paramref name="texts" />, or empty where the member is ready.</summary>
         public static string Tag(Texts texts, Readiness readiness)
         {
             switch (readiness)

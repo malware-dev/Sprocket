@@ -45,13 +45,16 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
         readonly List<Row> _rows = new List<Row>();
 
+        /// <summary>One row for each logic system on the construct, in order.</summary>
         public IReadOnlyList<Row> Rows => _rows;
 
         /// <summary>How many systems are doing something this instant.</summary>
         public int Running { get; private set; }
 
+        /// <summary>How many problems the logic systems on the construct have between them.</summary>
         public int Problems { get; private set; }
 
+        /// <summary>How many warnings the logic systems on the construct have between them.</summary>
         public int Warnings { get; private set; }
 
         /// <summary>
@@ -68,6 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             Include(world, program, runner);
         }
 
+        /// <summary>Empties every row and count.</summary>
         public void Clear()
         {
             _rows.Clear();

@@ -10,6 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public abstract class Order
     {
+        /// <summary>Tells the block what it was made ready to be told.</summary>
         public abstract void Give();
     }
 }

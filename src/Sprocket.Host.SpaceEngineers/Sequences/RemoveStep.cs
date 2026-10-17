@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
+    /// <summary>Takes one or more lines out of a sequence as one edit.</summary>
     public sealed class RemoveStep : SequenceEdit
     {
         readonly Change _change;

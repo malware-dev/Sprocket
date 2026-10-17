@@ -19,6 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     {
         readonly List<Step> _steps = new List<Step>();
 
+        /// <summary>An empty sequence with the identity <paramref name="id" />.</summary>
         public Sequence(int id)
         {
             Id = id;
@@ -63,6 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What the user calls this, e.g. "Let me out". May be empty.</summary>
         public string Name { get; set; }
 
+        /// <summary>Whether somebody has given it a name.</summary>
         public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>
@@ -75,6 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </remarks>
         public Trigger Trigger => System?.TriggerFor(Number);
 
+        /// <summary>Its steps, in the order they run.</summary>
         public IList<Step> Steps => _steps;
 
         /// <summary>The system this belongs to.</summary>

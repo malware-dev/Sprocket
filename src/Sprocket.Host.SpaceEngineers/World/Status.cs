@@ -4,6 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <remarks>What is stopping it comes first where there is anything: a vent that has stopped short goes on saying it is filling.</remarks>
     public struct Status
     {
+        /// <summary>Nothing to say about the block: it is doing nothing, and nothing is stopping it.</summary>
         public static readonly Status None = new Status();
 
         Status(Condition condition, Trouble trouble) : this()

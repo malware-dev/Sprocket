@@ -18,6 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly SystemEdit _start;
         readonly SystemEdit _does;
 
+        /// <summary>Changes what starts a trigger by <paramref name="start" /> and what it does by <paramref name="does" />, as one edit.</summary>
         public Retrigger(SystemEdit start, SystemEdit does)
         {
             _start = start;

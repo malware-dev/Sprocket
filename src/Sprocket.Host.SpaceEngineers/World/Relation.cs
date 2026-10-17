@@ -19,11 +19,17 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public enum Relation
     {
+        /// <summary>Equal to.</summary>
         Is,
+        /// <summary>Not equal to.</summary>
         IsNot,
+        /// <summary>Greater than.</summary>
         Above,
+        /// <summary>Greater than or equal to.</summary>
         AtLeast,
+        /// <summary>Less than.</summary>
         Below,
+        /// <summary>Less than or equal to.</summary>
         AtMost
     }
 }

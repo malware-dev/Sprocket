@@ -27,10 +27,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         readonly List<Value[]> _chunks = new List<Value[]>();
         Value[] _current;
 
+        /// <summary>How many values it holds.</summary>
         public int Count { get; private set; }
 
+        /// <summary>The value at <paramref name="index" />.</summary>
         public Value this[int index] => _chunks[index >> Shift][index & Mask];
 
+        /// <summary>Adds <paramref name="value" /> after the last.</summary>
         public void Add(Value value)
         {
             var slot = Count & Mask;

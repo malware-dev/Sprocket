@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     [XmlRoot("sprocket-definitions")]
     public sealed class Descriptions
     {
+        /// <summary>Every action described, each by its id.</summary>
         [XmlArray("actions")]
         [XmlArrayItem("action")]
         public List<Description> Actions = new List<Description>();
