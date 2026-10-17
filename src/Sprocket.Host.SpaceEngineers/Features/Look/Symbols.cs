@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>An arrow that turns back on itself, for walking a change back.</summary>
         public const string Undo = "u";
 
-        /// <summary>The same arrow the other way, for walking it forward again.</summary>
+        /// <summary>An arrow that turns forward on itself, for walking a change forward again.</summary>
         public const string Redo = "r";
 
         /// <summary>A bin, for destroying something.</summary>
@@ -24,19 +24,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>An open arrowhead, leftward.</summary>
         public const string Left = "<";
 
-        /// <summary>The same arrowhead, upward.</summary>
+        /// <summary>An open arrowhead, upward.</summary>
         public const string Up = "^";
 
-        /// <summary>The same arrowhead, rightward.</summary>
+        /// <summary>An open arrowhead, rightward.</summary>
         public const string Right = ">";
 
-        /// <summary>The same arrowhead, downward.</summary>
+        /// <summary>An open arrowhead, downward.</summary>
         public const string Down = "v";
 
         /// <summary>An unfilled circle: a choice not taken, where only one may be.</summary>
         public const string Ring = "o";
 
-        /// <summary>The same circle filled: the one that was taken.</summary>
+        /// <summary>A filled circle: the choice taken, where only one may be.</summary>
         public const string Disc = "0";
 
         /// <summary>Taking one away.</summary>
@@ -120,7 +120,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>An open eye over a toolbar: blocks hidden from toolbars are shown.</summary>
         public const string HiddenShown = "h";
 
-        /// <summary>The same eye shut: blocks hidden from toolbars stay hidden.</summary>
+        /// <summary>A shut eye over a toolbar: blocks hidden from toolbars stay hidden.</summary>
         /// <remarks>Drawn on the open eye's frame, so one replaces the other without the toolbar moving.</remarks>
         public const string HiddenHidden = "H";
 

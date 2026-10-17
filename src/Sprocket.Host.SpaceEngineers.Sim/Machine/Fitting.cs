@@ -343,7 +343,7 @@ public abstract class Fitting
         return Offering(id, text, 0);
     }
 
-    /// <summary>The same, for one that has to be given values before it can do anything.</summary>
+    /// <summary>Gives this block one more of the game's own actions, which has to be given <paramref name="wants" /> values before it can do anything.</summary>
     /// <remarks>
     /// Most of the game's value-taking actions want text and parse it themselves - a radius, a
     /// colour as three numbers. Sprocket leaves them out until a step can carry a value, and the
@@ -355,7 +355,7 @@ public abstract class Fitting
         return this;
     }
 
-    /// <summary>The same, declaring what type each of its values is, as the game's own actions do.</summary>
+    /// <summary>Gives this block one more of the game's own actions, declaring with <paramref name="declares" /> what type each of its values is, as the game's own actions do.</summary>
     public Fitting Offering(string id, string text, params Primitive[] declares)
     {
         _offers.Add(new Offer(id, text, declares.Length).Declaring(declares));
@@ -366,19 +366,17 @@ public abstract class Fitting
     public IList<object> Handed { get; set; }
 
     /// <summary>
-    /// Every value this block carries that can be told what to be.
+    /// Every value this block carries that can be told what to be, into <paramref name="into" />, the name every block
+    /// carries first.
     /// </summary>
     /// <remarks>
     /// The other half of <see cref="Offered" />. A real block answers this out of its own terminal
     /// controls, which describe themselves; the rig says what it carries so a test can watch a value
     /// being told something.
-    /// </remarks>
-    /// <summary>
-    /// Every value this block carries, the name every block carries first.
-    /// </summary>
-    /// <remarks>
+    /// <para>
     /// The game gives every terminal block a name that can be written to, which is the floor under
     /// the values the way the switch is the floor under the actions.
+    /// </para>
     /// </remarks>
     public virtual void Carried(List<Offer> into)
     {

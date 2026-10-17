@@ -165,19 +165,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public bool HasName => !string.IsNullOrEmpty(Name);
 
         /// <summary>
-        /// What this thing is, in the words of whoever built it.
+        /// What somebody wrote about this, in their own words, or empty.
         /// </summary>
         /// <remarks>
         /// A label to its author and the only explanation anybody who receives it will ever
         /// get, so it travels with the system when it is shared.
-        /// </remarks>
-        /// <summary>
-        /// What somebody wrote about this, in their own words, or empty.
-        /// </summary>
-        /// <remarks>
+        /// <para>
         /// Data somebody typed, not a comment: it is part of the model, round-tripped like a name, and
         /// shown by whatever is drawing. What a target labels it on screen - "description", "notes",
         /// anything, in any language - is the host's word and has no bearing on this one.
+        /// </para>
         /// </remarks>
         public string Annotation { get; set; }
 

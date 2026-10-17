@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
         }
 
-        /// <summary>The same, called what <paramref name="change" /> says: a whole if, or a branch of one.</summary>
+        /// <summary>Takes out one or more lines as one edit, called what <paramref name="change" /> says: a whole if, or a branch of one.</summary>
         public RemoveStep(Change change, int index, params Step[] steps)
         {
             _change = change;

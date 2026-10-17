@@ -148,7 +148,7 @@ public static class RichTextReport
             Pad((parse * 1000d / (source.Length / 1024d)).ToString("0.0", CultureInfo.InvariantCulture), 8));
     }
 
-    /// <summary>The same text at doubling sizes, so the curve can be read: while us/KB holds steady, cost grows with the text.</summary>
+    /// <summary>Times one text at doubling sizes, so the curve can be read: while us/KB holds steady, cost grows with the text.</summary>
     static void Headroom(StringBuilder report, ScreenSpaceGraphics graphics)
     {
         report.AppendLine("Headroom, mixed text at doubling sizes.");

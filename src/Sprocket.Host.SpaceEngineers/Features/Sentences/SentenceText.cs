@@ -145,7 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Of(world, slot);
         }
 
-        /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
+        /// <summary>What a slot of a trigger reads as, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
         public static void InTrigger(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
             if (!Blocks(world, slot, into) && !Marked(world, slot, into))
@@ -416,7 +416,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Of(world, slot);
         }
 
-        /// <summary>The same, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
+        /// <summary>What a slot of a step reads as, as pieces added to <paramref name="into" />: each block it names with its icon, and the words around them.</summary>
         public static void InStep(GridWorld world, SentenceSlot slot, List<Mention> into)
         {
             if (!Blocks(world, slot, into) && !Marked(world, slot, into))

@@ -517,13 +517,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             Invoke(entity, actionId, null);
         }
 
-        /// <summary>The same, with the values the action asked for.</summary>
+        /// <summary>Tells a block to do something, with the values <paramref name="arguments" /> the action asked for.</summary>
         public void Invoke(GridEntity entity, string actionId, IList<Literal> arguments)
         {
             Invoke(entity, actionId, arguments, Nature.Native);
         }
 
-        /// <summary>The same, told which of the three ways the step reaches the block.</summary>
+        /// <summary>Tells a block to do something, with the values <paramref name="arguments" /> the action asked for, <paramref name="form" /> saying which of the three ways the step reaches the block.</summary>
         public void Invoke(GridEntity entity, string actionId, IList<Literal> arguments, Nature form)
         {
             if (entity != null)

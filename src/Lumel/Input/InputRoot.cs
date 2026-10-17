@@ -64,7 +64,7 @@ namespace Lumel.Input
             return PointerDown(_root.Under(point), point, presses, shift, ctrl);
         }
 
-        /// <summary>The same, on a <paramref name="target" /> the host has already found, as one that layers other trees over this one does.</summary>
+        /// <summary>A press beginning at <paramref name="point" /> on <paramref name="target" />, which the host has already found, as one that layers other trees over this one does; the <paramref name="presses" />th in quick succession, with <paramref name="shift" /> and <paramref name="ctrl" /> saying whether those keys were held.</summary>
         public bool PointerDown(Element target, Vector2 point, int presses, bool shift, bool ctrl)
         {
             Focus(FocusableFrom(target));

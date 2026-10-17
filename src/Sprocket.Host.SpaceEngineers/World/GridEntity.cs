@@ -214,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Invoke(actionId, arguments, Nature.Native);
         }
 
-        /// <summary>The same, told which of the three ways the step reaches the block.</summary>
+        /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />, <paramref name="form" /> saying which of the three ways the step reaches it.</summary>
         /// <remarks>
         /// <b>For the editor and the harness, never the runtime,</b> which compiles what a step does once and does that.
         /// This finds it by name and works it out on every call.

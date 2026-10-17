@@ -57,7 +57,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <remarks>Kept as the program says it, so a member added by something this host does not have is never taken for one it does.</remarks>
         public string Provider { get; set; } = BlockKinds.Own;
 
-        /// <summary>The same trigger, to change one thing of as an edit; what it starts is the edit's to carry over.</summary>
+        /// <summary>A copy of this trigger, to change one thing of as an edit; what it starts is the edit's to carry over.</summary>
         public WhenTrigger Copy()
         {
             var copy = new WhenTrigger(EventId)

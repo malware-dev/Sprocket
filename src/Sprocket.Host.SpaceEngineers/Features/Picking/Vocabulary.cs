@@ -218,7 +218,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return ActionsOf(Held(bindings, names));
         }
 
-        /// <summary>The same, asked about blocks somebody is holding.</summary>
+        /// <summary>Actions every one of the blocks <paramref name="entityIds" /> accepts, asked of blocks somebody is holding.</summary>
         public static List<EntityAction> ActionsOf(GridWorld world, IList<long> entityIds)
         {
             return ActionsOf(Blocks(world, entityIds));
@@ -299,25 +299,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return result;
         }
 
-        /// <summary>
-        /// Entities that have anything to offer at all: something that can happen to
-        /// them, or something that can be done to them.
-        /// </summary>
-        /// <remarks>
-        /// Deliberately blind to what is already picked. Picking blocks decides what
-        /// can be said about them, never the other way round: a list that loses rows
-        /// as they are ticked reads as the ship shrinking, and a block somebody knows
-        /// they have going missing is the one thing a picker must never do.
-        ///
-        /// So an impossible pair is allowed to be made, and answered where the answer
-        /// belongs - the next stage has nothing in it and says so. That is a sentence
-        /// the user can read, which is worth more than a row that silently was not
-        /// there.
-        ///
-        /// A block with no events at all still never appears in an event picker. That
-        /// is not the selection talking, it is the question: there is nothing to ask
-        /// about a block that nothing can happen to.
-        /// </remarks>
         /// <summary>The blocks a test can read anything of: a state, or one of their values.</summary>
         public static List<GridEntity> Testable(GridWorld world)
         {
@@ -350,6 +331,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Every block in <paramref name="world" /> with anything to offer: a moment to be watched where <paramref name="forEvents" />, and an action otherwise.</summary>
+        /// <remarks>
+        /// Deliberately blind to what is already picked. Picking blocks decides what
+        /// can be said about them, never the other way round: a list that loses rows
+        /// as they are ticked reads as the ship shrinking, and a block somebody knows
+        /// they have going missing is the one thing a picker must never do.
+        ///
+        /// So an impossible pair is allowed to be made, and answered where the answer
+        /// belongs - the next stage has nothing in it and says so. That is a sentence
+        /// the user can read, which is worth more than a row that silently was not
+        /// there.
+        ///
+        /// A block with no events at all still never appears in an event picker. That
+        /// is not the selection talking, it is the question: there is nothing to ask
+        /// about a block that nothing can happen to.
+        /// </remarks>
         public static List<GridEntity> Capable(GridWorld world, bool forEvents)
         {
             var result = new List<GridEntity>();

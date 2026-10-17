@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What the member is compared with.</summary>
         public Literal Value { get; set; }
 
-        /// <summary>The same test, to change one thing of as an edit.</summary>
+        /// <summary>A copy of this test, to change one thing of as an edit.</summary>
         public Comparison Copy()
         {
             var copy = new Comparison

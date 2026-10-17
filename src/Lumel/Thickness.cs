@@ -21,7 +21,7 @@ namespace Lumel
         /// <summary>Room along the bottom.</summary>
         public readonly float Bottom;
 
-        /// <summary>The same room on every side.</summary>
+        /// <summary>Room of <paramref name="all" /> on every side.</summary>
         public Thickness(float all)
         {
             Left = all;

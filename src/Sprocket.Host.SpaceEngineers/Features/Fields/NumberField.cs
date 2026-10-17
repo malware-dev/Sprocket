@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
         }
 
-        /// <summary>The same, <paramref name="wide" /> wide.</summary>
+        /// <summary>An empty box <paramref name="wide" /> wide for what <paramref name="field" /> asks for, whose Enter carries out <paramref name="submit" />.</summary>
         /// <remarks>
         /// It shows what a person reads and is read as what is stored: a value the game holds as 0 to 1 is typed as a percent.
         /// Its unit stands after it.

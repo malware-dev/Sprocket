@@ -53,7 +53,7 @@ public sealed class Toolbar : IMyToolbar
     /// <inheritdoc />
     public MyToolbarType Type => MyToolbarType.ButtonPanel;
 
-    /// <summary>The same slots. A gamepad is not something the harness has.</summary>
+    /// <summary>The toolbar's own slots, standing for a gamepad's: a gamepad is not something the harness has.</summary>
     public IMyToolbarSlots GamepadSlots => this;
 
     /// <inheritdoc />
@@ -97,7 +97,7 @@ public sealed class Toolbar : IMyToolbar
         return Changing();
     }
 
-    /// <summary>The same, typed, so a write can carry what the item is to run with.</summary>
+    /// <summary>Begins a batch of changes to the toolbar, typed, so a write can carry what the item is to run with.</summary>
     public Changes Changing()
     {
         return new Changes(this);

@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         {
         }
 
-        /// <summary>The same, called what <paramref name="change" /> says: a trigger copied rather than made.</summary>
+        /// <summary>Adds <paramref name="trigger" /> to its logic system of <paramref name="program" />, with <paramref name="made" />, <paramref name="before" /> and <paramref name="replaced" /> at <paramref name="replacedAt" />, called what <paramref name="change" /> says: a trigger copied rather than made.</summary>
         public AddTrigger(Automation program, Trigger trigger, Sequence made, IList<SystemEdit> before, Trigger replaced, int replacedAt,
             Change change)
         {

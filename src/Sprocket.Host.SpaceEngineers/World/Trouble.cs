@@ -27,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return new Trouble(cause, null, true);
         }
 
-        /// <summary>The same trouble read back from a save: <paramref name="cause" />, about <paramref name="about" />, whose run has already ended.</summary>
+        /// <summary>Trouble read back from a save: <paramref name="cause" />, about <paramref name="about" />, whose run has already ended.</summary>
         public static Trouble Kept(Cause cause, string about)
         {
             return new Trouble(cause, about, true);

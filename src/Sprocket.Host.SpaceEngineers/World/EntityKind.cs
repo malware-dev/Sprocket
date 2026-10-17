@@ -302,7 +302,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
-        /// <summary>The same, for one the game will not perform until it is given values.</summary>
+        /// <summary>Adds the game's action <paramref name="gameActionId" /> as <paramref name="id" />, said as <paramref name="text" />, which the game will not perform until it is given <paramref name="wants" /> values of the types <paramref name="takes" />, described by <paramref name="described" />.</summary>
         public EntityKind WithAction(string id, string text, string gameActionId, int wants,
             Description described, IList<Primitive> takes)
         {
@@ -575,7 +575,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly List<string> _states = new List<string>();
 
-        /// <summary>The same, for one of the block's own values rather than one of its actions.</summary>
+        /// <summary>Adds the block's own value <paramref name="propertyId" /> as <paramref name="id" />, said as <paramref name="named" />, set through <paramref name="field" /> and holding <paramref name="holds" />.</summary>
         public EntityKind WithValue(string id, string named, string propertyId, Field field, ValueKind holds)
         {
             _actions.Add(new EntityAction(id, named, null, 1)

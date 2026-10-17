@@ -71,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return true;
         }
 
-        /// <summary>The same in the other direction: whether what undoing left is still there.</summary>
+        /// <summary>Whether what undoing this left is still what is there, so redoing it would make this change and nothing else.</summary>
         public virtual bool Redoable(T subject)
         {
             return true;

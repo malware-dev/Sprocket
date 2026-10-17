@@ -32,7 +32,7 @@ namespace Sprocket.Sim.Simulation
             return Save(path, width, height, script, scene, culture, developer, admin);
         }
 
-        /// <summary>The same, of <paramref name="scene" />, for a construct somebody fitted out for the picture.</summary>
+        /// <summary>Runs the script on <paramref name="scene" />, a construct somebody fitted out for the picture, and writes what the last step left on screen.</summary>
         public static string Save(string path, int width, int height, Script script, EditorScene scene,
             string culture = null, bool developer = false, bool admin = false)
         {

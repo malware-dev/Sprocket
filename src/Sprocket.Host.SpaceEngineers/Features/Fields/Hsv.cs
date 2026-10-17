@@ -55,19 +55,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return Of(MyColorPickerConstants.HSVOffsetToHSV(slot));
         }
 
-        /// <summary>The same colour with one of the three moved, for a slider that owns one axis.</summary>
+        /// <summary>This colour at the hue <paramref name="hue" />, for a slider that owns one axis.</summary>
         public Hsv Hued(float hue)
         {
             return Of(hue, Saturation, Value);
         }
 
-        /// <summary>The same colour at another saturation.</summary>
+        /// <summary>This colour at the saturation <paramref name="saturation" />.</summary>
         public Hsv Saturated(float saturation)
         {
             return Of(Hue, saturation, Value);
         }
 
-        /// <summary>The same colour at another value.</summary>
+        /// <summary>This colour at the value <paramref name="value" />.</summary>
         public Hsv Valued(float value)
         {
             return Of(Hue, Saturation, value);

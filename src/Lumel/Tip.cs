@@ -51,7 +51,7 @@ namespace Lumel
             return current != null && current.Arguments == null && current.Text == markdown ? current : new Tip(markdown);
         }
 
-        /// <summary>The same, for a template whose slots <paramref name="arguments" /> say.</summary>
+        /// <summary>The tip saying <paramref name="template" />, its slots filled from <paramref name="arguments" />: <paramref name="current" /> where it already says just that, a new one otherwise, and null for nothing to say.</summary>
         public static Tip For(Tip current, string template, Arguments arguments)
         {
             if (string.IsNullOrEmpty(template))

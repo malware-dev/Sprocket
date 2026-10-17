@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return texts.SequenceRunNow;
         }
 
-        /// <summary>The same button, facing the other way.</summary>
+        /// <summary>What the one button that starts and stops a sequence promises while the sequence is running, facing the way that stops it.</summary>
         public static string Stops(Texts texts)
         {
             return texts.SequenceStopNow;

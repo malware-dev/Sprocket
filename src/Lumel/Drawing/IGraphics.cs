@@ -48,7 +48,7 @@ namespace Lumel.Drawing
         /// <remarks><paramref name="size" /> is the height of one line, in UI units.</remarks>
         void DrawText(string font, string text, Vector2 position, float size, Color color);
 
-        /// <summary>The same, with <paramref name="align" /> saying which end of the run the position names.</summary>
+        /// <summary>Draws one run of text at <paramref name="position" />, <paramref name="align" /> saying which end of the run the position names.</summary>
         void DrawText(string font, string text, Vector2 position, float size, Color color, TextAlign align);
 
         /// <summary>The size of <paramref name="text" /> if it were drawn at <paramref name="size" />, in UI units.</summary>

@@ -103,7 +103,7 @@ public sealed class Rig
         return Demo(new Rig());
     }
 
-    /// <summary>The same ship, with the block Sprocket runs in given a particular id.</summary>
+    /// <summary>The ship testers are given, with the block Sprocket runs in given the id <paramref name="sprocket" />.</summary>
     public static Rig Demo(long sprocket)
     {
         return Demo(new Rig(sprocket));

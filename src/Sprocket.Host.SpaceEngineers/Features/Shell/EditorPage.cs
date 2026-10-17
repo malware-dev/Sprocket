@@ -111,14 +111,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>
-        /// The obvious next move on this page, or empty for none.
-        /// </summary>
-        /// <remarks>
-        /// Never the same thing as going back. A page in the middle of a run of
-        /// questions moves the user on; going back retreats one question. Both have
-        /// to exist, or one of them ends up lying.
-        /// </remarks>
-        /// <summary>
         /// The name somebody gave this page's subject, or empty when the heading is worked
         /// out from what the thing is.
         /// </summary>
@@ -286,6 +278,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public virtual bool Edits => false;
 
         /// <summary>The words on the button at the right end of the header, or empty where the page has none.</summary>
+        /// <remarks>
+        /// The obvious next move on the page, and never the same thing as going back. A page in the middle of a run of
+        /// questions moves the user on; going back retreats one question. Both have to exist, or one of them ends up lying.
+        /// </remarks>
         public virtual string PrimaryText => Edits ? Editor.Texts.ChromeDone : "";
 
         /// <summary>Whether the header's button can be pressed yet.</summary>

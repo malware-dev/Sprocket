@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             "TargetNeutrals", "TargetFriends", "TargetEnemies"
         };
 
-        /// <summary>The same switches in Sprocket's words, in the same order.</summary>
+        /// <summary>The switches for what the light follows, in Sprocket's words, in the order of <see cref="Followed" />.</summary>
         static readonly string[] Called =
         {
             "meteors", "missiles", "small ships", "large ships", "characters", "stations", "neutrals", "friends", "enemies"

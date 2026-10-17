@@ -301,12 +301,6 @@ namespace Lumel.Drawing
             return _lastLine > 0f ? size / _lastLine : 0f;
         }
 
-        /// <summary>The game's <see cref="TopSideBearing" /> for <paramref name="font" />, as a share of one of its lines.</summary>
-        /// <remarks>
-        ///     A share of the line because the line is what a size is: the game scales the bearing and the line
-        ///     alike, so a run <c>size</c> tall is drawn <c>size</c> times this too low. Nothing for a font
-        ///     whose line cannot be read. Kept per font, since reading one opens its file.
-        /// </remarks>
         /// <summary>Takes <paramref name="font" />'s line and lift from the fonts last drawn in, answering whether it was one of them.</summary>
         bool Recall(string font)
         {
@@ -323,6 +317,12 @@ namespace Lumel.Drawing
             return false;
         }
 
+        /// <summary>The game's <see cref="TopSideBearing" /> for <paramref name="font" />, as a share of one of its lines.</summary>
+        /// <remarks>
+        ///     A share of the line because the line is what a size is: the game scales the bearing and the line
+        ///     alike, so a run <c>size</c> tall is drawn <c>size</c> times this too low. Nothing for a font
+        ///     whose line cannot be read. Kept per font, since reading one opens its file.
+        /// </remarks>
         float Lift(string font)
         {
             if (font == null)

@@ -36,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
         }
 
-        /// <summary>The same, where the block at fault said what is wrong.</summary>
+        /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with what the block at fault said is wrong in <paramref name="because" />.</summary>
         /// <remarks>
         /// Most problems are the same sentence every time they happen, and that sentence lives in
         /// the wording. A block that cannot finish is not: only it knows why, and the reason is
@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Because = because;
         }
 
-        /// <summary>The same, naming the one block at fault by <paramref name="which" />, its reference.</summary>
+        /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with what the block at fault said in <paramref name="because" />, naming that block by <paramref name="which" />, its reference.</summary>
         public SequenceFault(SequenceProblem problem, int step, Trouble because, string which) : this(problem, step, because)
         {
             Which = which;

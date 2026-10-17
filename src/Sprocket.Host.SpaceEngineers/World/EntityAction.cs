@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         IList<Primitive> _takes;
 
-        /// <summary>The same, for one the game will not perform until it is given <paramref name="wants" /> values.</summary>
+        /// <summary>The action <paramref name="id" />, said as <paramref name="text" />, standing for the game's member <paramref name="gameActionId" />, which the game will not perform until it is given <paramref name="wants" /> values.</summary>
         public EntityAction(string id, string text, string gameActionId, int wants)
         {
             Id = id;
@@ -245,7 +245,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             _vouched = true;
         }
 
-        /// <summary>Leaves this out of the list somebody chooses from.</summary>
         /// <summary>Says this flag is also flipped, by the game's toggle <paramref name="toggle" />: its switch offers on, off and toggle.</summary>
         public void Flipped(string toggle)
         {

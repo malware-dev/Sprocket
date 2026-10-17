@@ -335,7 +335,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Ask(question, null, here);
         }
 
-        /// <summary>The same, with the words for its named slots in <paramref name="arguments" />, so a name is shown as it was written.</summary>
+        /// <summary>Raises <paramref name="question" />, with no answers yet, the words for its named slots in <paramref name="arguments" /> so a name is shown as it was written; <paramref name="here" /> says it belongs to what was pressed.</summary>
         public void Ask(string question, Arguments arguments, bool here)
         {
             _question = question ?? "";

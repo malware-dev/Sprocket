@@ -38,7 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return false;
         }
 
-        /// <summary>The same, for the one installation <paramref name="instance" /> of <paramref name="system" />.</summary>
+        /// <summary>Whether the installation <paramref name="instance" /> of <paramref name="system" /> answers a signal slot with a toolbar slot another installation in <paramref name="program" /> answers now.</summary>
         protected static bool Clashes(Automation program, AutomationSystem system, SystemInstance instance)
         {
             var parts = system.Parts;

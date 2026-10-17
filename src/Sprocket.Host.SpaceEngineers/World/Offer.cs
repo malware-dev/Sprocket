@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
         }
 
-        /// <summary>The same, for a value the block says it will only accept within bounds.</summary>
+        /// <summary>One value a block carries, which it can be told to be, and which it will only accept from <paramref name="least" /> to <paramref name="most" />.</summary>
         public Offer(string id, string text, ValueKind sets, string least, string most)
         {
             Id = id;
@@ -77,7 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public IList<Primitive> Declares { get; private set; }
 
-        /// <summary>The same, saying what type each of its values is declared as.</summary>
+        /// <summary>This offer, saying with <paramref name="types" /> what type each of its values is declared as.</summary>
         public Offer Declaring(IList<Primitive> types)
         {
             Offer declaring = this;
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return declaring;
         }
 
-        /// <summary>The same, for a value whose list the game would not hand over.</summary>
+        /// <summary>This offer, for a value whose list the game would not hand over.</summary>
         public Offer Unread()
         {
             Offer unread = this;

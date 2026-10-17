@@ -231,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Focused = { Edge = Palette.ControlEdgeHot }
         };
 
-        /// <summary>The same box holding a name that cannot be given.</summary>
+        /// <summary>The box a heading's name is typed in, holding a name that cannot be given.</summary>
         public static readonly TextBoxStyle TitleRefused = new TextBoxStyle(TitleBox)
         {
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
@@ -273,7 +273,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { EmphasisColor = Palette.Ink, LinkColor = Palette.Link, Padding = new Thickness(4f, 8f, 0f, 8f) }
         };
 
-        /// <summary>The same, a size down, heading part of a section.</summary>
+        /// <summary>A section's name a size down, heading part of a section, where the name is a term in the codex.</summary>
         public static readonly RichTextStyle SubHeadingTerm = new RichTextStyle(HeadingTerm)
         {
             Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
@@ -291,7 +291,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
         };
 
-        /// <summary>The same, following other content, with room above it so it reads as the start of what comes after.</summary>
+        /// <summary>A section's name following other content, with room above it so it reads as the start of what comes after.</summary>
         public static readonly TextStyle NextHeading = new TextStyle(Heading)
         {
             Base = { Padding = new Thickness(4f, 48f, 0f, 8f) }
@@ -669,13 +669,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Edge = Palette.Problem }
         };
 
-        /// <summary>The same strip on a banner with a warning.</summary>
+        /// <summary>The strip a banner with a warning is opened by, lit by an edge in its color.</summary>
         public static readonly ElementStyle NoticeStrip = new ElementStyle(ProblemStrip)
         {
             Hot = { Edge = Palette.Notice }
         };
 
-        /// <summary>The same strip on a banner with a note, lit in the ink of its words.</summary>
+        /// <summary>The strip a banner with a note is opened by, lit in the ink of its words.</summary>
         public static readonly ElementStyle InfoStrip = new ElementStyle(ProblemStrip)
         {
             Hot = { Edge = Palette.Ink }
@@ -687,7 +687,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { FontSize = 20f, Padding = new Thickness(12f, 8f) }
         };
 
-        /// <summary>The same box holding something its value will not take.</summary>
+        /// <summary>A box a value is typed into, in a form of values, holding something its value will not take.</summary>
         public static readonly TextBoxStyle ValueWrong = new TextBoxStyle(Value)
         {
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
@@ -734,7 +734,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.Panel, Edge = Palette.Muted }
         };
 
-        /// <summary>The same line saying a word its value will not take.</summary>
+        /// <summary>The line a list hangs from, saying a word its value will not take.</summary>
         public static readonly ElementStyle ListLineWrong = new ElementStyle(ListLine)
         {
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
@@ -948,7 +948,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 16f, Tint = Palette.Faint }
         };
 
-        /// <summary>The same mark where it is pressed by itself, lit under the pointer.</summary>
+        /// <summary>A mark saying something has not been chosen, where it is pressed by itself, lit under the pointer.</summary>
         public static readonly GlyphStyle MarkPressed = new GlyphStyle(Mark)
         {
             Hot = { Background = Palette.PanelHot }
@@ -960,7 +960,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Tint = Palette.Live }
         };
 
-        /// <summary>The same mark where it is pressed by itself.</summary>
+        /// <summary>A mark saying something has been chosen, where it is pressed by itself.</summary>
         public static readonly GlyphStyle MarkOnPressed = new GlyphStyle(MarkOn)
         {
             Hot = { Background = Palette.PanelHot }
@@ -972,7 +972,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 20f, Tint = Palette.Muted }
         };
 
-        /// <summary>The same mark on a paused step, as quiet as its words.</summary>
+        /// <summary>A mark beside words on a paused step, as quiet as its words.</summary>
         public static readonly GlyphStyle WaitsPaused = new GlyphStyle(Waits)
         {
             Base = { Tint = Palette.Dim }
