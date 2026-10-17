@@ -571,7 +571,7 @@ namespace Sprocket.Host.SpaceEngineers
                 : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
 
             if (block != null)
-                SprocketUnit.Store(block, program, switches);
+                Locker.Store(block, program, switches);
         }
 
         /// <summary>

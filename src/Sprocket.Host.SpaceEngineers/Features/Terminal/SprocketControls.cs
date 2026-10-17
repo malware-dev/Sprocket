@@ -70,7 +70,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
                     .CreateControl<IMyTerminalControlLabel, IMyProgrammableBlock>("Sprocket_Hero");
 
                 _hero.Label = MyStringId.GetOrCompute(texts.TerminalHero);
-                _hero.Visible = SprocketUnit.HasProgram;
+                _hero.Visible = Locker.HasProgram;
                 MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_hero);
             }
 

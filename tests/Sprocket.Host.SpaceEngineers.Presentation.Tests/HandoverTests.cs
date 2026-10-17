@@ -286,10 +286,10 @@ public class HandoverTests : IDisposable
     public void WhatAClientIsToldIsInItsBlock()
     {
         var block = _sim.Machine.Sprocket.Block;
-        SprocketUnit.Store(block, "the program", "the switches");
+        Locker.Store(block, "the program", "the switches");
 
         string stored;
-        Assert.True(block.Storage.TryGetValue(SprocketUnit.ProgramKey, out stored));
+        Assert.True(block.Storage.TryGetValue(Locker.ProgramKey, out stored));
         Assert.Equal("the program", stored);
     }
 

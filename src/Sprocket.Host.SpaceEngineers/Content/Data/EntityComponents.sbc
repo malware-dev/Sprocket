@@ -11,7 +11,7 @@
         line in the log saying "not claimed". So the program is written, works for the whole session,
         survives being read back - and is gone the moment the world is saved and loaded.
 
-        The first GUID must match SprocketUnit.ProgramKey exactly, the second SprocketUnit.StateKey, the
+        The first GUID must match Locker.ProgramKey exactly, the second Locker.StateKey, the
         third Carrier.Key and the fourth CloseDelay.Key, and none must ever change. A different one reads as
         a Sprocket nobody has written a program on yet, which discards somebody's ship without saying so, as
         a world that remembers nothing, or as every door set to stay open.

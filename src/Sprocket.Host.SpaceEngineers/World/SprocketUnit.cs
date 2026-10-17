@@ -1,21 +1,13 @@
-using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Memory;
 using System.Collections.Generic;
 using System;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
-using Sandbox.Game.EntityComponents;
 using Sandbox.ModAPI;
-using SpaceEngineers.Game.ModAPI;
 using VRage.Game.Components;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
-using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Localization;
-
-// The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
-// way SignalAction does, because the Ingame namespaces collide with the mod-side ones.
-using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -30,24 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// </remarks>
     public sealed class SprocketUnit : IDisposable
     {
-        /// <summary>
-        /// Where the program sits in the block's mod storage.
-        /// </summary>
-        /// <remarks>
-        /// Mod storage is shared with every other mod on the entity, so the key has to be Sprocket's and has to
-        /// never change: a new one would read as an empty Sprocket and quietly discard somebody's ship.
-        /// <para>
-        /// <b>It also has to be claimed in <c>Content/Data/EntityComponents.sbc</c>, and the two must
-        /// match.</b> The game writes out only the keys some mod has registered there and drops the rest
-        /// with a line in the log, so an unclaimed key works perfectly all session and vanishes on save.
-        /// </para>
-        /// </remarks>
-        public static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
-
-        /// <summary>The key of the switches beside the program.</summary>
-        public static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
-
-
         IMyTerminalBlock _block;
 
         Backups _backups;
@@ -69,6 +43,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
+        readonly Holders _holders;
+        readonly Hands _hands;
+        readonly Keys _keys;
+        readonly Buttons _buttons;
+        readonly Reach _reach;
 
         readonly Texts _texts;
         readonly ConstructMemory _memory;
@@ -77,30 +56,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         SprocketEditor _editor;
 
-        /// <summary>
-        /// Whether this block already carries a program, without building anything to find out.
-        /// </summary>
-        /// <remarks>
-        /// Asked of every programmable block in the world as it comes alive, so it has to be one lookup and
-        /// no allocation. A block that answers false is left entirely alone.
-        /// </remarks>
-        public static bool HasProgram(IMyTerminalBlock block)
-        {
-            MyModStorageComponentBase storage = block?.Storage;
-            if (storage == null)
-                return false;
-
-            string text;
-            return storage.TryGetValue(ProgramKey, out text) && !string.IsNullOrEmpty(text);
-        }
-
         /// <summary>The Sprocket a block carries, reading its program out of the block and what it is doing out of <paramref name="memory" />.</summary>
         /// <remarks>
         /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
         /// <paramref name="texts" /> are what its editor says, in the player's language.
         /// </remarks>
         public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, ConstructMemory memory, Backups backups = null)
-            : this(block, settings, rota, texts, false, Stored(block, ProgramKey), Stored(block, StateKey), memory)
+            : this(block, settings, rota, texts, false, Locker.Stored(block, Locker.ProgramKey), Locker.Stored(block, Locker.StateKey), memory)
         {
             _backups = backups;
         }
@@ -141,14 +103,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_editor != null)
                 rebuilt.Editor.Habits = _editor.Habits;
 
-            // What this one had wired goes with it. A Sprocket that believed it had just been loaded
-            // would write no slot, and would read a button the client has just added - and nobody has
-            // wired yet - as one somebody cleared, and drop it.
-            rebuilt._adopted = _adopted;
-            rebuilt._wanted.AddRange(_wanted);
-
-            // And what was picked and not written yet, which a new trigger's button is until the edit that adds it.
-            rebuilt._asserted.AddRange(_asserted);
+            // What this one had wired goes with it, and what was picked and not written yet. A Sprocket that believed it had
+            // just been loaded would write no slot, and would read a button the client has just added - and nobody has wired
+            // yet - as one somebody cleared, and drop it.
+            rebuilt._buttons.Carry(_buttons);
             return rebuilt;
         }
 
@@ -162,6 +120,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world = new GridWorld(block);
             _runner = new AutomationRunner(_program, _world, rota);
             _runner.FastestUpdate = settings?.FastestUpdate ?? 1;
+            _keys = new Keys(_program, _runner);
+            _buttons = new Buttons(_world, _program, _runner, _keys, block);
+            _reach = new Reach(_world, _program, _runner, _buttons);
 
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
@@ -176,96 +137,28 @@ namespace Sprocket.Host.SpaceEngineers.World
             // automation runs at all, and it changes when the lights go out rather than on a tick - so asking them sixty times
             // a second would be many questions for one answer that hardly ever moves. Released in Dispose, because a listener
             // left on a block the game has let go of is a leak that holds the whole unit alive.
-            Hold();
-            _runner.Live = _working && !_program.Paused;
+            _hands = new Hands(_world, _program, _runner);
+            _holders = new Holders(_world);
+            _holders.Changed += Working;
+            _holders.Gathered += Regathered;
+            _holders.Hold(_block);
+            _runner.Live = _holders.Working && !_program.Paused;
             _world.AnchorRemoved += Removed;
             _world.AnchorClosed += Closed;
-            _world.HandsChanged += Handed;
             _world.Renamed += Renamed;
         }
 
-        /// <summary>
-        /// A programmable block on the construct losing or regaining power, or being switched off or on.
-        /// </summary>
-        /// <remarks>
-        /// The automation is the construct's, kept in its programmable blocks alike, so it runs while any of them works and
-        /// holds only while none does, rather than stopping: a cycle interrupted by a blackout carries on when the lights come
-        /// back, which is the same promise as one interrupted by a reload.
-        /// </remarks>
-        void Working(IMyCubeBlock block)
+        /// <summary>Whether any of the construct's programmable blocks working changed, which decides whether the automation runs.</summary>
+        void Working()
         {
-            _working = AnyWorking();
-            _runner.Live = _working && !_program.Paused;
+            _runner.Live = _holders.Working && !_program.Paused;
         }
 
-        /// <summary>Listens to every programmable block on the construct for its working state, gathering them again only when the construct was read again.</summary>
-        /// <remarks>
-        /// Called on every tick, and one comparison on a tick where nothing on the construct changed. The runner reads the same
-        /// revision on that tick, so a construct that changed is read again once whoever asks first.
-        /// </remarks>
-        void Hold()
-        {
-            var revision = _world.Revision;
-            if (revision == _heldAt)
-                return;
-
-            _heldAt = revision;
-            foreach (var holder in _holders)
-                holder.IsWorkingChanged -= Working;
-
-            _was.Clear();
-            _was.AddRange(_holders);
-            _holders.Clear();
-            var entities = _world.Entities;
-            for (var i = 0; i < entities.Count; i++)
-            {
-                if (entities[i].Block is IMyProgrammableBlock)
-                    _holders.Add(entities[i].Block);
-            }
-
-            if (!_holders.Contains(_block))
-                _holders.Add(_block);
-
-            foreach (var holder in _holders)
-                holder.IsWorkingChanged += Working;
-
-            _working = AnyWorking();
-            Regathered();
-        }
-
+        /// <summary>Programmable blocks left or joined the construct.</summary>
         void Regathered()
         {
-            _parted.Clear();
-            foreach (var was in _was)
-            {
-                if (!_holders.Contains(was) && !was.MarkedForClose && !was.Closed)
-                    _parted.Add(was);
-            }
-
-            var arrived = false;
-            foreach (var holder in _holders)
-                arrived |= !_was.Contains(holder);
-
-            if ((_parted.Count > 0 || arrived) && Gathered != null)
+            if (Gathered != null)
                 Gathered(this);
-        }
-
-        /// <summary>Whether any programmable block on the construct is working.</summary>
-        bool AnyWorking()
-        {
-            foreach (var holder in _holders)
-            {
-                if (holder.IsWorking)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>A block on the construct changing hands, or sharing changing, which the next tick looks at.</summary>
-        void Handed()
-        {
-            _handsChanged = true;
         }
 
         /// <summary>A block on the construct renamed, so the screen names it anew: at once where it is open, as it next opens otherwise.</summary>
@@ -314,10 +207,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         public event Action<SprocketUnit> Gathered;
 
         /// <summary>The construct's programmable blocks, the hero among them.</summary>
-        public IReadOnlyList<IMyTerminalBlock> Holders => _holders;
+        public IReadOnlyList<IMyTerminalBlock> Holders => _holders.All;
 
         /// <summary>The programmable blocks that just left the construct and still stand.</summary>
-        public IReadOnlyList<IMyTerminalBlock> Parted => _parted;
+        public IReadOnlyList<IMyTerminalBlock> Parted => _holders.Parted;
 
         /// <summary>The player's library, which the editor is given; null on a machine that keeps none.</summary>
         public Shelf Shelf
@@ -424,7 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 {
                     _editor.Wire = Wire;
                     _editor.Unwire = Unwire;
-                    _editor.Returned = _returned;
+                    _editor.Returned = _hands.Returned;
                 }
 
                 if (_author != null)
@@ -447,953 +340,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>What runs its program.</summary>
         public AutomationRunner Runner => _runner;
 
-        int _reconciled = -1;
 
-        bool _adopted;
-
-        long _from;
-
-        bool _read;
-
-        bool _working;
-
-        /// <summary>The construct's programmable blocks, listened to for their working state.</summary>
-        readonly List<IMyTerminalBlock> _holders = new List<IMyTerminalBlock>();
-
-        /// <summary>The construct's revision <see cref="_holders" /> were gathered at.</summary>
-        int _heldAt = int.MinValue;
-
-        readonly List<IMyTerminalBlock> _was = new List<IMyTerminalBlock>();
-
-        readonly List<IMyTerminalBlock> _parted = new List<IMyTerminalBlock>();
-
-        /// <summary>The blocks the automation could reach again when it paused, which the resume screen names.</summary>
-        readonly List<string> _returned = new List<string>();
-
-        /// <summary>Whether the construct's owners are to be looked at, which a load and every change of hands asks for.</summary>
-        bool _handsChanged = true;
-
-        /// <summary>What a key names: a sequence, which one of its system, and what to do to it.</summary>
-        struct Target
-        {
-            public Sequence Sequence;
-            public SystemInstance Instance;
-            public bool Stops;
-        }
-
-        readonly Dictionary<string, Target> _byKey =
-            new Dictionary<string, Target>(StringComparer.Ordinal);
-
-        /// <summary>
-        /// What goes in a slot: which system, which one of it, which sequence.
-        /// </summary>
-        /// <remarks>
-        /// <b>The system is named by its identity</b>, because a number cannot say which system it means once
-        /// systems are exported, imported, or on constructs that join, and a name changes. So a button keeps
-        /// working through a rename. Built once, at bind, and read back verbatim.
-        /// </remarks>
-        static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
-        {
-            return $"{system.Identity:D}/{(instance?.Number ?? 0)}/{sequence.Number}";
-        }
-
-        /// <summary>
-        /// The same, for a button that stops the sequence rather than starting it.
-        /// </summary>
-        /// <remarks>
-        /// The verb is on the end rather than the front, so every key written before stopping existed
-        /// still says what it always said. A slot is never rewritten, so that is not a courtesy - it
-        /// is the only way the old ones keep working.
-        /// </remarks>
-        static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence,
-            bool stops)
-        {
-            var key = KeyOf(system, instance, sequence);
-            return stops ? $"{key}/stop" : key;
-        }
-
-        /// <summary>
-        /// What goes in a slot for a trigger that acts itself: which system, which one of it, and the signal part, or the
-        /// slot and blocks of a signal written in place.
-        /// </summary>
-        /// <remarks>
-        /// By the part's name, because a trigger has no number and its part is what each instance answers. Renaming the part
-        /// changes what is wanted, and the slot is written again with the rest of the wiring. Marked <c>part:</c>, because a
-        /// part may be called anything, a sequence's number and <c>2/stop</c> among it, and <c>at:</c> for one written in
-        /// place, which is the slot and the blocks it is sent from.
-        /// </remarks>
-        static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
-        {
-            var head = $"{system.Identity:D}/{(instance?.Number ?? 0)}";
-            if (!trigger.IsWritten)
-                return $"{head}/part:{trigger.Part}";
-
-            return $"{head}/at:{(trigger.At == null ? "" : trigger.At.EventId)}:{string.Join(",", trigger.Sources)}";
-        }
-
-        readonly List<Sequence> _runs = new List<Sequence>();
-
-        /// <summary>The sequences of <paramref name="system" />, and the runtime's sequence for each trigger that acts itself.</summary>
-        List<Sequence> Runs(AutomationSystem system)
-        {
-            _runs.Clear();
-
-            var sequences = system.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-                _runs.Add(sequences[i]);
-
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var alone = _runner.Alone(system, triggers[i]);
-                if (alone != null)
-                    _runs.Add(alone);
-            }
-
-            return _runs;
-        }
-
-        /// <summary>A block fired one of the actions Sprocket put in it.</summary>
+        /// <summary>A block fired one of the actions Sprocket put in it, carrying <paramref name="key" />.</summary>
         public void Fire(string key)
         {
-            // A press can come before the first tick after a load, as a timer block's can, and finds what it starts all the same.
-            if (_byKey.Count == 0)
-            {
-                Reindex();
-                _runner.Prepare();
-            }
-
-            // Said every time, because a press that does nothing is otherwise invisible: this says whether it arrived.
-            Target target;
-            if (!_byKey.TryGetValue(key, out target))
-            {
-                Told.Say($"a button fired {key}, which nothing here answers");
-                return;
-            }
-
-            Told.Say($"a button fired {key}, {(target.Stops ? "stopping " : "running ")}{(!target.Sequence.IsAlone ? $"sequence {target.Sequence.Number}" : "what its trigger does")}{(target.Instance == null ? "" : $" on {target.Instance.Number}")}");
-
-            if (target.Stops)
-                _runner.Halt(target.Sequence, target.Instance, Stopper.Trigger, 0);
-            else
-                _runner.Call(target.Sequence, target.Instance);
-        }
-
-        /// <summary>
-        /// Rebuilds what the keys name, from the program.
-        /// </summary>
-        /// <remarks>
-        /// Cleared rather than merged, so a deleted sequence stops answering. Runs with the rest of
-        /// the reconcile, on the same one-integer signal, because a sequence or one of a system
-        /// appears and disappears only by an edit to the program.
-        /// </remarks>
-        void Reindex()
-        {
-            _byKey.Clear();
-
-            for (var s = 0; s < _program.Systems.Count; s++)
-            {
-                AutomationSystem system = _program.Systems[s];
-                var sequences = system.Sequences;
-                var instances = system.Uses;
-
-                var triggers = system.Triggers;
-                for (var t = 0; t < triggers.Count; t++)
-                {
-                    var needed = triggers[t] as SignalTrigger;
-                    var alone = needed == null || needed.IsWatched ? null : _runner.Alone(system, needed);
-                    for (var n = 0; alone != null && n < instances.Count; n++)
-                    {
-                        var target = new Target();
-                        target.Sequence = alone;
-                        target.Instance = instances[n];
-                        _byKey[KeyOf(system, instances[n], needed)] = target;
-                    }
-                }
-
-                for (var q = 0; q < sequences.Count; q++)
-                {
-                    for (var n = 0; n < instances.Count; n++)
-                        Register(system, instances[n], sequences[q]);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Both names a sequence answers to: the one that runs it and the one that stops it.
-        /// </summary>
-        /// <remarks>
-        /// Both always, rather than only the ones some trigger asks for, because a key is a name and
-        /// not a permission - a slot naming one is a slot somebody made, whatever the program has
-        /// since become.
-        /// </remarks>
-        void Register(AutomationSystem system, SystemInstance instance, Sequence sequence)
-        {
-            var target = new Target();
-            target.Sequence = sequence;
-            target.Instance = instance;
-            _byKey[KeyOf(system, instance, sequence)] = target;
-
-            var halting = new Target();
-            halting.Sequence = sequence;
-            halting.Instance = instance;
-            halting.Stops = true;
-            _byKey[KeyOf(system, instance, sequence, true)] = halting;
-        }
-
-        /// <summary>
-        /// What the program wants wired right now: this button of this panel runs this sequence.
-        /// </summary>
-        struct Want
-        {
-            public long PanelId;
-
-            /// <summary>Which of the block's toolbars, from 1.</summary>
-            public int Toolbar;
-
-            /// <summary>Where in that toolbar's items, from 0, across its pages.</summary>
-            public int Slot;
-
-            public string Key;
-
-            /// <summary>What the trigger named, so the block can be resolved again without a search.</summary>
-            public string Reference;
-
-            /// <summary>Which sequence on which one of its system, so reachability is reported for each one.</summary>
-            public long Start;
-
-            /// <summary>The name of the signal slot the toolbar slot answers, which a button wired to it is named; null for a trigger written in the script.</summary>
-            public string Name;
-
-            public bool Same(Want other)
-            {
-                return PanelId == other.PanelId && Toolbar == other.Toolbar && Slot == other.Slot
-                    && string.Equals(Key, other.Key, StringComparison.Ordinal);
-            }
-        }
-
-        List<Want> _wanted = new List<Want>();
-
-        List<Want> _wanting = new List<Want>();
-
-        /// <summary>
-        /// Wires a button the moment the program asks for one, and never touches it again.
-        /// </summary>
-        /// <remarks>
-        /// Sprocket is told nothing about this: core says a sequence is started by a block, and this
-        /// side works out that a button panel needs a slot set for that to be true. The program's
-        /// revision is the whole signal, so an ordinary tick is one integer comparison, and reading a
-        /// toolbar is never on the tick path.
-        /// <para>
-        /// <b>Assignment happens once, where the block is bound, and then the game owns the slot.</b>
-        /// Sprocket's part afterwards is to answer when the action is invoked. Anything that kept
-        /// asserting what a slot should hold is Sprocket arguing with a player who can edit that slot
-        /// whenever they like - and losing the argument is the only acceptable outcome, so it is
-        /// better not to have it.
-        /// </para>
-        /// <para>
-        /// A diff rather than a sweep, because the interesting case is subtraction: somebody who picks
-        /// button 2 after button 1 leaves button 1 wired to something nothing references, which is a
-        /// button on their ship that does something they cannot see.
-        /// </para>
-        /// <para>
-        /// <b>A slot somebody else is using is left alone.</b> Overwriting it would configure Sprocket
-        /// by breaking their ship, which is worse than not working.
-        /// </para>
-        /// </remarks>
-        void Reconcile()
-        {
-            // Wiring, not Revision. Revision is about declarations moving; this is about somebody
-            // having said what a trigger is, which is the thing that has to be acted on - and which
-            // happens even when the trigger ends up identical to what it was.
-            if (_program.Wiring == _reconciled)
-                return;
-
-            _reconciled = _program.Wiring;
-
-            // Somebody has just said what a trigger is, so what is wired has changed under whatever a
-            // screen is showing - including by Sprocket writing a slot itself a moment ago. Read it
-            // again, or a sequence the player has just mended goes on being reported as unstartable
-            // and parked a second later.
-            _world.LookAgain();
-
-            Reindex();
-            Wanted(_wanting);
-
-            // Nothing is written for a program that has just been loaded. Every button it asks for was
-            // wired by the session that built it and the game has owned those slots ever since; a slot
-            // that is empty now is somebody having cleared it by hand, which is an instruction and not
-            // a gap to fill.
-            if (_adopted)
-            {
-                Release();
-                Take();
-            }
-            else
-            {
-                _adopted = true;
-                Mend();
-            }
-
-            // Two lists swapped rather than one rebuilt, so comparing costs nothing. The previous set is all that is
-            // remembered about wiring: what a panel actually holds is the panel's business, and the game's.
-            List<Want> was = _wanted;
-            _wanted = _wanting;
-            _wanting = was;
-
-            // Here alone, because what the program wants changes only when its wiring does.
-            if (_asserted.Count > 0)
-                Assert();
-        }
-
-        /// <summary>
-        /// Every button the program's triggers ask for, once per one of each system.
-        /// </summary>
-        /// <remarks>
-        /// Per one of a system rather than per sequence, because a button belongs to one of them:
-        /// the panel by the front airlock starts the front airlock, and the panel by the port one
-        /// starts the port one. <see cref="SystemInstance.Resolve" /> is what turns the block
-        /// slots a sequence names into the blocks this particular one uses, and a slot nobody
-        /// filled resolves to what the system was built with - which is right for the first of
-        /// them and an honest failure for a later one.
-        /// </remarks>
-        void Wanted(List<Want> into)
-        {
-            into.Clear();
-
-            for (var s = 0; s < _program.Systems.Count; s++)
-            {
-                AutomationSystem system = _program.Systems[s];
-                var sequences = Runs(system);
-                var instances = system.Uses;
-
-                foreach (var sequence in sequences)
-                {
-                    for (var n = 0; n < instances.Count; n++)
-                        WantedFor(into, system, instances[n], sequence);
-                }
-            }
-        }
-
-        /// <summary>
-        /// The buttons one sequence asks for on one of its system.
-        /// </summary>
-        /// <remarks>
-        /// Every trigger that runs the sequence, not the first of them. Two buttons starting one
-        /// sequence is the ordinary case - the one inside the airlock and the one outside - and a
-        /// slot is wanted for each, on its own panel.
-        /// </remarks>
-        void WantedFor(List<Want> into, AutomationSystem system, SystemInstance instance,
-            Sequence sequence)
-        {
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                if (!triggers[i].IsAbout(sequence))
-                    continue;
-
-                var needed = triggers[i] as SignalTrigger;
-                if (needed != null && !needed.IsWatched)
-                    WantedForSignal(into, system, instance, sequence, needed);
-            }
-        }
-
-        /// <summary>The toolbar slots <paramref name="instance" /> answers <paramref name="needed" /> with, each a want.</summary>
-        void WantedForSignal(List<Want> into, AutomationSystem system, SystemInstance instance,
-            Sequence sequence, SignalTrigger needed)
-        {
-            var blocks = _answering;
-            var positions = _answeringAt;
-            _program.Answers(system, instance, needed, blocks, positions);
-
-            for (var i = 0; i < blocks.Count && i < positions.Count; i++)
-            {
-                var at = positions[i];
-                var slot = Toolbars.Index(ToolbarOf(blocks[i], at.Toolbar), at);
-                if (slot < 0)
-                    continue;
-
-                var want = new Want();
-                want.PanelId = PanelId(blocks[i]);
-                want.Toolbar = at.Toolbar;
-                want.Slot = slot;
-                want.Key = needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence, needed.Stops);
-                want.Reference = blocks[i];
-                want.Start = GridWorld.Start(sequence.Id, instance);
-                want.Name = needed.IsWritten ? null : needed.Part;
-                into.Add(want);
-            }
-        }
-
-        readonly List<string> _answering = new List<string>();
-        readonly List<ToolbarSlot> _answeringAt = new List<ToolbarSlot>();
-
-        static bool Holds(List<Want> wants, Want one)
-        {
-            for (var i = 0; i < wants.Count; i++)
-            {
-                if (wants[i].Same(one))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Whether the block this want names is arranged to start exactly this.
-        /// </summary>
-        /// <remarks>Read off the slot itself: Sprocket's action carrying this want's key.</remarks>
-        bool Wired(Want want)
-        {
-            GridEntity grid = _runner.Bindings.Entity(want.Reference);
-            if (grid == null)
-                return true;
-
-            IMyToolbar held = ToolbarOf(want);
-            MyToolbarItemInfo present;
-            return held != null && held.TryGetItem(want.Slot, out present) && Asked(held, present, want);
-        }
-
-        readonly Dictionary<string, int> _claims = new Dictionary<string, int>(StringComparer.Ordinal);
-
-        readonly Dictionary<string, int> _needed = new Dictionary<string, int>(StringComparer.Ordinal);
-
-        /// <summary>Which key a trigger's slot holds: the one that runs, or the stopping one.</summary>
-        string Wanting(AutomationSystem system, SystemInstance instance, Sequence sequence,
-            Trigger trigger)
-        {
-            if (trigger.Stops)
-                return KeyOf(system, instance, sequence, true);
-
-            var needed = trigger as SignalTrigger;
-            return needed != null && needed.Acts != null ? KeyOf(system, instance, needed) : KeyOf(system, instance, sequence);
-        }
-
-        void Claims()
-        {
-            _claims.Clear();
-
-            // Every slot of every page of every toolbar, since a trigger may be on any of them: a cockpit's target lock is
-            // its third toolbar, and a timer runs all of its pages.
-            for (var i = 0; i < _world.Entities.Count; i++)
-            {
-                GridEntity grid = _world.Entities[i];
-                for (var t = 1; Toolbars.Of(grid.Block, t) != null; t++)
-                    Claims(Toolbars.Of(grid.Block, t));
-            }
-        }
-
-        /// <summary>Counts what each slot of <paramref name="toolbar" /> holds that answers this program.</summary>
-        void Claims(IMyToolbar toolbar)
-        {
-            for (var slot = 0; slot < toolbar.ItemCount; slot++)
-            {
-                MyToolbarItemInfo present;
-                if (!toolbar.TryGetItem(slot, out present))
-                    continue;
-
-                // Sprocket's action counts only where it points here. One pointed at another Sprocket runs that one's
-                // program, and one pointed at a block that is gone runs nothing at all, so counting either would be this
-                // program reporting a button that answers somebody else - or nobody - as its own.
-                if (!Mine(present))
-                    continue;
-
-                _arguments.Clear();
-                Toolbars.Parameters(toolbar, slot, _arguments);
-                if (_arguments.Count == 0)
-                    continue;
-
-                var key = _arguments[0].Value as string;
-                if (string.IsNullOrEmpty(key))
-                    continue;
-
-                Claimed(key);
-            }
-        }
-
-        void Claimed(string key)
-        {
-            int held;
-            _claims[key] = _claims.TryGetValue(key, out held) ? held + 1 : 1;
-        }
-
-        /// <summary>
-        /// Whether enough of this construct answers what a sequence says it needs.
-        /// </summary>
-        /// <remarks>
-        /// Nothing records which slot answers which declaration, so this is a count: three declared
-        /// triggers and two slots means one of them is unanswered, and which one is a question only the
-        /// person standing in front of it can settle.
-        /// </remarks>
-        bool Answered(AutomationSystem system, SystemInstance instance, Sequence sequence)
-        {
-            // Counted per key rather than per sequence: a button that stops this sequence names it
-            // by a different key from one that runs it, and one slot cannot answer for both.
-            _needed.Clear();
-
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var signal = triggers[i] as SignalTrigger;
-                if (signal == null || signal.IsWatched || !triggers[i].IsAbout(sequence))
-                    continue;
-
-                var wanted = Wanting(system, instance, sequence, triggers[i]);
-
-                int asked;
-                _needed[wanted] = _needed.TryGetValue(wanted, out asked) ? asked + 1 : 1;
-            }
-
-            if (_needed.Count == 0)
-                return true;
-
-            foreach (var pair in _needed)
-            {
-                int found;
-                _claims.TryGetValue(pair.Key, out found);
-                if (found < pair.Value)
-                    return false;
-            }
-
-            return true;
-        }
-
-        void Reach()
-        {
-            _unstartable.Clear();
-            _reachable.Clear();
-            _why.Clear();
-            Claims();
-
-            // What the construct has to provide, counted. A sequence nothing answers is reported the
-            // same way one whose button was cleared is.
-            for (var s = 0; s < _program.Systems.Count; s++)
-            {
-                AutomationSystem system = _program.Systems[s];
-                var sequences = Runs(system);
-                var instances = system.Uses;
-
-                foreach (var sequence in sequences)
-                {
-                    for (var n = 0; n < instances.Count; n++)
-                    {
-                        if (Answered(system, instances[n], sequence))
-                            continue;
-
-                        var start = GridWorld.Start(sequence.Id, instances[n]);
-                        if (_unstartable.Contains(start))
-                            continue;
-
-                        _unstartable.Add(start);
-                        _why[start] = Unanswer(system, instances[n], sequence);
-                    }
-                }
-            }
-
-            foreach (var want in _wanted)
-            {
-                // A slot that no longer holds what the program wants leaves the program naming it: the trigger is still the
-                // reference, and what it names is reported as not answering, until picking it again writes it back.
-                if (Wired(want))
-                    _reachable.Add(want.Start);
-            }
-
-            foreach (var want in _wanted)
-            {
-                if (_reachable.Contains(want.Start) || _unstartable.Contains(want.Start))
-                    continue;
-
-                _unstartable.Add(want.Start);
-                _why[want.Start] = Unanswer(ToolbarOf(want), want.Slot, want.Key, want.Reference);
-            }
-
-            _world.Unstartable(_unstartable, _why);
-        }
-
-        /// <summary>Whose button leaves <paramref name="sequence" /> unstarted on <paramref name="instance" />, and what its slot holds instead.</summary>
-        /// <remarks>Asked only of a sequence already found unanswered, which is after the wiring changes and never on a tick.</remarks>
-        Unanswered Unanswer(AutomationSystem system, SystemInstance instance, Sequence sequence)
-        {
-            var triggers = system.Triggers;
-            for (var i = 0; i < triggers.Count; i++)
-            {
-                var needed = triggers[i] as SignalTrigger;
-                if (needed == null || needed.IsWatched || !needed.IsAbout(sequence))
-                    continue;
-
-                var wanted = Wanting(system, instance, sequence, needed);
-                var blocks = _answering;
-                var positions = _answeringAt;
-                _program.Answers(system, instance, needed, blocks, positions);
-                for (var s = 0; s < blocks.Count && s < positions.Count; s++)
-                {
-                    IMyToolbar toolbar = ToolbarOf(blocks[s], positions[s].Toolbar);
-                    var why = Unanswer(toolbar, Toolbars.Index(toolbar, positions[s]), wanted, blocks[s]);
-                    if (why.Why != Unwired.Unknown)
-                        return why;
-                }
-            }
-
-            return new Unanswered(null, Unwired.Unknown);
-        }
-
-        /// <summary>What the slot of the button of <paramref name="reference" /> holds, where it is not <paramref name="wanted" />.</summary>
-        Unanswered Unanswer(IMyToolbar toolbar, int slot, string wanted, string reference)
-        {
-            var block = _program.Called(reference, _world.Values);
-            if (toolbar == null || slot < 0)
-                return new Unanswered(block, Unwired.Unknown);
-
-            MyToolbarItemInfo present;
-            if (!toolbar.TryGetItem(slot, out present))
-                return new Unanswered(block, Unwired.Cleared);
-
-            return new Unanswered(block, KeyIn(toolbar, slot, present) == wanted ? Unwired.Unknown : Unwired.Taken);
-        }
-
-        /// <summary>The key a slot holds where it holds this Sprocket's action, or null.</summary>
-        string KeyIn(IMyToolbar toolbar, int slot, MyToolbarItemInfo present)
-        {
-            if (!Mine(present))
-                return null;
-
-            _arguments.Clear();
-            Toolbars.Parameters(toolbar, slot, _arguments);
-            return _arguments.Count == 0 ? null : _arguments[0].Value as string;
-        }
-
-        readonly List<long> _unstartable = new List<long>();
-        readonly HashSet<long> _reachable = new HashSet<long>();
-        readonly Dictionary<long, Unanswered> _why = new Dictionary<long, Unanswered>();
-
-        /// <summary>
-        /// Rewrites the slots that are Sprocket's and say nothing it understands.
-        /// </summary>
-        /// <remarks>
-        /// The one exception to leaving a loaded program's slots alone, and it is not a loophole in
-        /// that rule - it is the rule's missing case. Three things a slot can be, and only one of them
-        /// is a person's decision:
-        /// <list type="bullet">
-        /// <item>empty, or holding somebody else's action - a person changed it, so it stands;</item>
-        /// <item>Sprocket's, with a key that resolves - working, so leave it;</item>
-        /// <item><b>Sprocket's, with a key that means nothing</b> - nobody typed that, and nobody could.</item>
-        /// </list>
-        /// The third can only be Sprocket's own writing gone stale: a key format that has changed
-        /// underneath it, or a payload of the wrong type entirely. Leaving it would leave somebody's
-        /// buttons permanently dead with no way back but re-picking each one, and calling that
-        /// "respecting their choice" would be dishonest about whose writing it is.
-        /// <para>
-        /// Which makes this the migration path for the key, once and for all. Change what a key looks
-        /// like and every slot in every saved world mends itself on the next load, with nothing to
-        /// version and nothing to ask anybody.
-        /// </para>
-        /// </remarks>
-        void Mend()
-        {
-            foreach (var want in _wanting)
-            {
-                IMyToolbar toolbar = ToolbarOf(want);
-                MyToolbarItemInfo present;
-
-                if (toolbar == null || !toolbar.TryGetItem(want.Slot, out present)
-                    || (!Mine(present) && !Orphaned(present) && !Handed(present)))
-                {
-                    continue;
-                }
-
-                // One of Sprocket's that already says something this program can resolve is left alone.
-                // An orphan is rewritten whatever its key says, because the id is the broken part:
-                // the block it names is gone, so nothing it says can be honoured by anybody.
-                if (Mine(present) && Understood(toolbar, want.Slot))
-                    continue;
-
-                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId),
-                        SignalAction.Argument(want.Key)))
-                {
-                    Told.Say($"the write was refused mending slot {want.Slot}");
-                    continue;
-                }
-
-                Told.Say($"mended slot {want.Slot}, now {want.Key}");
-                Name(want);
-            }
-
-            _from = 0;
-        }
-
-        /// <summary>Whether a slot of Sprocket's carries a key this program can resolve.</summary>
-        /// <remarks>
-        /// Read once per wanted button on the first pass after a load, never on a tick. A slot holds
-        /// whatever was written into it rather than what the action declares, so anything that is not
-        /// a key this program knows answers no - wrong type included.
-        /// </remarks>
-        bool Understood(IMyToolbar toolbar, int slot)
-        {
-            _arguments.Clear();
-            Toolbars.Parameters(toolbar, slot, _arguments);
-
-            if (_arguments.Count == 0)
-                return false;
-
-            var key = _arguments[0].Value as string;
-            return !string.IsNullOrEmpty(key) && _byKey.ContainsKey(key);
-        }
-
-        readonly List<TerminalActionParameter> _arguments = new List<TerminalActionParameter>();
-
-        /// <summary>
-        /// Lets go of every button the program no longer asks for.
-        /// </summary>
-        /// <remarks>
-        /// Only ever clears a slot Sprocket still holds. Somebody who re-pointed the slot themselves
-        /// has said what they want it to do, and taking it back would be Sprocket arguing with them.
-        /// </remarks>
-        void Release()
-        {
-            foreach (var had in _wanted)
-            {
-                if (Holds(_wanting, had))
-                    continue;
-
-                IMyToolbar toolbar = ToolbarOf(had);
-                MyToolbarItemInfo present;
-
-                if (toolbar == null || !toolbar.TryGetItem(had.Slot, out present)
-                    || !Asked(toolbar, present, had))
-                {
-                    // Already empty, already somebody else's, or no longer what this want asked for.
-                    // None of those is Sprocket's to clear, and whoever changed it has said what they
-                    // wanted it to do.
-                    continue;
-                }
-
-                Toolbars.Clear(toolbar, had.Slot);
-                Told.Say($"released slot {had.Slot} on panel {had.PanelId}");
-                GiveBack(toolbar, had);
-            }
-        }
-
-        /// <summary>
-        /// Notes what a player had in the slot <paramref name="want" /> is about to write over, where it is their own item, so
-        /// letting go of the slot gives it back.
-        /// </summary>
-        void Keep(IMyToolbar toolbar, Want want, MyToolbarItemInfo present)
-        {
-            var kept = Overwritten(want);
-            if (kept == null)
-            {
-                kept = new Taken { PanelId = want.PanelId, Toolbar = want.Toolbar, Slot = want.Slot };
-                _taken.Add(kept);
-            }
-
-            kept.Key = want.Key;
-            kept.Back = false;
-            kept.Item = present;
-            kept.Parameters.Clear();
-            Toolbars.Parameters(toolbar, want.Slot, kept.Parameters);
-
-            var panel = want.Toolbar != 1 ? null : PanelOf(want);
-            kept.Named = false;
-            kept.Name = null;
-            if (panel == null || !panel.HasCustomButtonName(want.Slot))
-                return;
-
-            kept.Named = true;
-            kept.Name = panel.GetButtonName(want.Slot);
-        }
-
-        /// <summary>Puts back in the slot <paramref name="had" /> let go of the player's own item it held before Sprocket took it, where there was one.</summary>
-        /// <remarks>
-        /// Remembered as taken back, so the same button taken over again, by a step made again, is taken again rather than
-        /// left as somebody's.
-        /// </remarks>
-        void GiveBack(IMyToolbar toolbar, Want had)
-        {
-            var kept = Overwritten(had);
-            if (kept == null || kept.Back)
-                return;
-
-            if (!Toolbars.Write(toolbar, had.Slot, kept.Item, kept.Parameters))
-            {
-                _taken.Remove(kept);
-                return;
-            }
-
-            kept.Back = true;
-            var panel = had.Toolbar != 1 ? null : PanelOf(had);
-            if (panel == null)
-                return;
-
-            if (kept.Named)
-                panel.SetCustomButtonName(had.Slot, kept.Name);
-            else
-                panel.ClearCustomButtonName(had.Slot);
-        }
-
-        /// <summary>What a player had in the slot of <paramref name="want" /> before Sprocket wrote over it, or null.</summary>
-        Taken Overwritten(Want want)
-        {
-            foreach (var kept in _taken)
-            {
-                if (kept.PanelId == want.PanelId && kept.Toolbar == want.Toolbar && kept.Slot == want.Slot)
-                    return kept;
-            }
-
-            return null;
-        }
-
-        /// <summary>The button panel <paramref name="want" /> is on, or null where it is another kind of block.</summary>
-        IMyButtonPanel PanelOf(Want want)
-        {
-            var grid = _runner.Bindings.Entity(want.Reference);
-            return grid?.Block as IMyButtonPanel;
-        }
-
-        /// <summary>Claims every button the program asks for and Sprocket does not already hold.</summary>
-        void Take()
-        {
-            foreach (var want in _wanting)
-            {
-                // Only what is newly asked for. A button somebody cleared is no longer asked for at
-                // all - the trigger stopped naming it - so there is nothing here that could put one
-                // back, and picking it again is an honest new want.
-                if (Holds(_wanted, want))
-                    continue;
-
-                IMyToolbar toolbar = ToolbarOf(want);
-                if (toolbar == null)
-                    continue;
-
-                MyToolbarItemInfo present;
-                var filled = toolbar.TryGetItem(want.Slot, out present);
-
-                // Already exactly this.
-                if (filled && Asked(toolbar, present, want))
-                    continue;
-
-                var given = Overwritten(want);
-                if (filled && given != null && given.Back && string.Equals(given.Key, want.Key, StringComparison.Ordinal))
-                {
-                    Keep(toolbar, want, present);
-                }
-                else if (filled && !Mine(present) && !Orphaned(present))
-                {
-                    // Somebody's panel already does something. Overwriting it would configure
-                    // Sprocket by breaking their ship, which is worse than not working - and another
-                    // Sprocket holding it is somebody, whose program that button belongs to.
-                    Told.Say($"slot {want.Slot} in use by {present.Kind} {present.ActionId}");
-                    continue;
-                }
-
-                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
-                {
-                    Told.Say($"the write was refused for slot {want.Slot}");
-                    continue;
-                }
-
-                Told.Say($"wired slot {want.Slot} to {want.Key}");
-                Name(want);
-            }
-        }
-
-        /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
-        /// <remarks>
-        /// Sprocket's own action is exactly this only when it carries this want's key. The action on
-        /// this block with any other key is this block's writing for something else - a program it has
-        /// replaced, or a sequence it no longer has - and is to be written over, not taken as done.
-        /// </remarks>
-        bool Asked(IMyToolbar toolbar, MyToolbarItemInfo present, Want want)
-        {
-            if (!Mine(present))
-                return false;
-
-            _arguments.Clear();
-            Toolbars.Parameters(toolbar, want.Slot, _arguments);
-
-            return _arguments.Count > 0
-                && string.Equals(_arguments[0].Value as string, want.Key, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Whether a slot holds Sprocket's action pointed at <em>this</em> Sprocket.
-        /// </summary>
-        /// <remarks>
-        /// The action's name alone is not enough, and answering with it was a real fault: cut the
-        /// programmable block and paste it back and the game gives it a new id, so every slot on the
-        /// construct names a block that is gone. Reading only the name, Sprocket found its own action
-        /// in each of them and reported every button as wired while none of them did anything.
-        /// <para>
-        /// The id it needs was in the slot the whole time, because Sprocket writes its own block into
-        /// the action it puts there.
-        /// </para>
-        /// </remarks>
-        bool Mine(MyToolbarItemInfo present)
-        {
-            return SignalAction.IsOurs(present) && present.BlockEntityId == _block.EntityId;
-        }
-
-        /// <summary>
-        /// Whether a slot holds Sprocket's action pointed at a block that is no longer there.
-        /// </summary>
-        /// <remarks>
-        /// Wiring nothing can honour, and nobody decided on: the block it names is gone, so there is
-        /// no Sprocket left for that button to reach and no owner to argue with. It is adopted rather
-        /// than reported, which is what makes a programmable block survive being cut and pasted, or
-        /// ground down while another holds the same systems.
-        /// <para>
-        /// A live block is somebody's, even when that somebody is another Sprocket, and a slot that is
-        /// simply empty is somebody having cleared it - which is an instruction. Neither is touched.
-        /// </para>
-        /// </remarks>
-        bool Orphaned(MyToolbarItemInfo present)
-        {
-            return SignalAction.IsOurs(present)
-                && present.BlockEntityId != _block.EntityId
-                && !Toolbars.Exists(present.BlockEntityId);
-        }
-
-        bool Handed(MyToolbarItemInfo present)
-        {
-            return _from != 0 && SignalAction.IsOurs(present) && present.BlockEntityId == _from;
-        }
-
-        /// <summary>Takes over, on its next pass, its program's buttons that still name <paramref name="from" />, the block its automation came from.</summary>
-        public void TakeOver(long from)
-        {
-            _from = from;
-            _adopted = false;
-            _reconciled = int.MinValue;
-        }
-
-        long PanelId(string reference)
-        {
-            GridEntity grid = _runner.Bindings.Entity(reference);
-            return grid == null ? 0 : grid.Block.EntityId;
-        }
-
-        IMyToolbar ToolbarOf(string reference, int toolbar)
-        {
-            GridEntity grid = _runner.Bindings.Entity(reference);
-            return grid == null ? null : ToolbarOfBlock(grid.Block, toolbar);
-        }
-
-        /// <summary>The toolbar a want is on.</summary>
-        IMyToolbar ToolbarOf(Want want)
-        {
-            for (var i = 0; i < _world.Entities.Count; i++)
-            {
-                GridEntity grid = _world.Entities[i];
-                if (grid.Block.EntityId == want.PanelId)
-                    return ToolbarOfBlock(grid.Block, want.Toolbar);
-            }
-
-            return null;
-        }
-
-        /// <summary>Toolbar <paramref name="toolbar" /> of <paramref name="block" />, from 1, whatever block it is, or null where it has none.</summary>
-        static IMyToolbar ToolbarOfBlock(IMyTerminalBlock block, int toolbar)
-        {
-            return Toolbars.Of(block, toolbar);
+            _keys.Fire(key);
         }
 
         /// <summary>Runs its program for the game's frame <paramref name="frame" />, and keeps the toolbars it owns as it wants them.</summary>
@@ -1404,10 +355,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!_copy)
                 Touch();
 
-            Hold();
+            _holders.Hold(_block);
 
             // Two flags read, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
-            _runner.Live = _working && !_program.Paused;
+            _runner.Live = _holders.Working && !_program.Paused;
             _runner.Tick(frame);
         }
 
@@ -1419,219 +370,44 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Tick(frame);
         }
 
-        /// <summary>
-        /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing.
-        /// </summary>
-        /// <remarks>
-        /// Sharing works both ways: an owner the automation had who may still use its block now is exactly the case where the new
-        /// owner could use it before, such as a faction mate handed a ship shared with the faction. A capture, or a hand-over to
-        /// somebody it was not shared with, pauses it until a big owner resumes it. Once paused it stays paused, whoever owns it
-        /// next, and remembers who it was taken from.
-        /// </remarks>
-        void Owned()
-        {
-            _handsChanged = false;
-            var now = _world.BigOwners;
-            var owners = _program.Owners;
-            if (Same(owners, now))
-                return;
-
-            if (!_program.Paused && !Shared(owners, now))
-            {
-                Told.Say($"{_world.Name} changed hands outside sharing, and its automation is paused");
-                _program.PausedFrom.AddRange(owners);
-                _runner.Live = false;
-                _returned.Clear();
-                _returned.AddRange(_world.Returned);
-            }
-
-            owners.Clear();
-            for (var i = 0; i < now.Count; i++)
-                owners.Add(now[i]);
-
-            Persist();
-        }
-
-        /// <summary>Whether <paramref name="before" />, the owners the automation had, holds one who is among <paramref name="now" /> or may still use its block.</summary>
-        bool Shared(List<long> before, IReadOnlyList<long> now)
-        {
-            if (before.Count == 0)
-                return true;
-
-            foreach (var owner in before)
-            {
-                if (Among(now, owner) || _block.HasPlayerAccess(owner))
-                    return true;
-            }
-
-            return false;
-        }
-
         /// <summary>Whether <paramref name="player" /> may open the automation: one of the construct's big owners, or anybody where nobody owns any of it.</summary>
         public bool Owns(long player)
         {
-            var owners = _world.BigOwners;
-            return owners.Count == 0 || Among(owners, player);
-        }
-
-        /// <summary>Whether <paramref name="player" /> is among <paramref name="players" />.</summary>
-        static bool Among(IReadOnlyList<long> players, long player)
-        {
-            for (var i = 0; i < players.Count; i++)
-            {
-                if (players[i] == player)
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>Whether <paramref name="one" /> and <paramref name="other" /> name the same players, both in order.</summary>
-        static bool Same(List<long> one, IReadOnlyList<long> other)
-        {
-            if (one.Count != other.Count)
-                return false;
-
-            for (var i = 0; i < one.Count; i++)
-            {
-                if (one[i] != other[i])
-                    return false;
-            }
-
-            return true;
+            return _hands.Owns(player);
         }
 
         /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
         void Touch()
         {
-            if (_handsChanged)
-                Owned();
+            if (_hands.Due && _hands.Owned(_block))
+                Persist();
 
-            Reconcile();
+            _buttons.Reconcile();
+            _reach.Look();
+        }
 
-            // Only when something asks. Reading a toolbar is the expensive thing Sprocket does, and what
-            // it is read for is what a screen says about a sequence - so a screen asks when it opens,
-            // and can ask again when somebody suspects another player has wired something. Nothing is
-            // read on a timer, and nothing is read while nobody is looking.
-            //
-            // Firing does not depend on any of it: a slot invokes Sprocket's action itself and arrives
-            // carrying its key, so a button works whether or not anything has ever looked at it.
-            if (_world.TakeLook() || !_read)
-            {
-                _read = true;
-                Reach();
-            }
+        /// <summary>Takes over, on its next pass, its program's buttons that still name <paramref name="from" />, the block its automation came from.</summary>
+        public void TakeOver(long from)
+        {
+            _buttons.TakeOver(from);
         }
 
         /// <summary>Writes every slot the program wants on <paramref name="panel" /> on the next pass, whatever the slot holds by then.</summary>
-        /// <remarks>
-        /// A person picking a button in the editor, after being asked about anything its slot already held. That pick is the
-        /// instruction a slot changed by hand waits for, so it is written even where Sprocket believes it already did.
-        /// </remarks>
         public void Wire(long panel)
         {
-            if (!_asserted.Contains(panel))
-                _asserted.Add(panel);
+            _buttons.Wire(panel);
         }
 
         /// <summary>Lets go of every panel <see cref="Wire" /> asked for and no pass has written yet, as a pick is backed out of.</summary>
         public void Unwire()
         {
-            _asserted.Clear();
+            _buttons.Unwire();
         }
 
         /// <summary>Brings the toolbars into line with the program on the next tick, as though its wiring had changed.</summary>
-        /// <remarks>
-        /// For a button picked on a client's copy. The client's edit arrives as a program, and none arrives where the same
-        /// button was picked again, so nothing here changes to bring that pass about.
-        /// </remarks>
         public void Revisit()
         {
-            _reconciled = int.MinValue;
-        }
-
-        /// <summary>Writes the slots <see cref="Wire" /> asked for that do not hold what the program wants of them.</summary>
-        /// <remarks>
-        /// On the program's own pass, after it, so what is wanted is what the edit that picked the button left. A panel nothing
-        /// wants yet stays asked for until <see cref="Unwire" />: a trigger joins the program only once what it does is chosen,
-        /// some screens after its button.
-        /// </remarks>
-        void Assert()
-        {
-            _answered.Clear();
-            foreach (var want in _wanted)
-            {
-                if (!_asserted.Contains(want.PanelId))
-                    continue;
-
-                if (!_answered.Contains(want.PanelId))
-                    _answered.Add(want.PanelId);
-
-                IMyToolbar toolbar = ToolbarOf(want);
-                if (toolbar == null)
-                    continue;
-
-                MyToolbarItemInfo present;
-                var filled = toolbar.TryGetItem(want.Slot, out present);
-                if (filled && Asked(toolbar, present, want))
-                    continue;
-
-                if (filled && !Mine(present) && !Orphaned(present))
-                    Keep(toolbar, want, present);
-
-                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_block.EntityId), SignalAction.Argument(want.Key)))
-                {
-                    Told.Say($"the write was refused for slot {want.Slot}");
-                    continue;
-                }
-
-                Told.Say($"wired slot {want.Slot} to {want.Key}, as picked");
-                Name(want);
-            }
-
-            if (_answered.Count == 0)
-                return;
-
-            foreach (var answered in _answered)
-                _asserted.Remove(answered);
-
-            _world.LookAgain();
-        }
-
-        readonly List<long> _asserted = new List<long>();
-        readonly List<long> _answered = new List<long>();
-
-        /// <summary>The players' own items Sprocket wrote over because somebody took their button, kept for the life of the session to be given back.</summary>
-        readonly List<Taken> _taken = new List<Taken>();
-
-        /// <summary>A player's own item in a toolbar slot, as it was before Sprocket took the slot.</summary>
-        sealed class Taken
-        {
-            public long PanelId;
-            public int Toolbar;
-            public int Slot;
-            public string Key;
-            public bool Back;
-            public MyToolbarItemInfo Item;
-            public readonly List<TerminalActionParameter> Parameters = new List<TerminalActionParameter>();
-            public bool Named;
-            public string Name;
-        }
-
-        /// <summary>Names the button <paramref name="want" /> has just wired after the signal slot it answers.</summary>
-        /// <remarks>
-        /// Right after the slot is written, since the game names a button after any action put in its slot, Sprocket's
-        /// included; the game passes a button's name on to every player.
-        /// </remarks>
-        void Name(Want want)
-        {
-            if (string.IsNullOrEmpty(want.Name) || want.Toolbar != 1)
-                return;
-
-            var grid = _runner.Bindings.Entity(want.Reference);
-            var panel = grid?.Block as IMyButtonPanel;
-            if (panel != null)
-                panel.SetCustomButtonName(want.Slot, want.Name);
+            _buttons.Revisit();
         }
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
@@ -1644,14 +420,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get { return _runner.Looking; }
             set { _runner.Looking = value; }
-        }
-
-        /// <summary>What a block holds under one of Sprocket's keys, or empty.</summary>
-        static string Stored(IMyTerminalBlock block, Guid key)
-        {
-            MyModStorageComponentBase storage = block.Storage;
-            string text;
-            return storage != null && storage.TryGetValue(key, out text) && text != null ? text : "";
         }
 
         /// <summary>
@@ -1719,7 +487,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (Lost)
                 return;
 
-            MyModStorageComponentBase storage = Attached(_block);
+            MyModStorageComponentBase storage = Locker.Attached(_block);
             if (storage == null)
                 return;
 
@@ -1734,10 +502,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             var program = ProgramText.Save(_program, _world.Values);
             var state = StateText.Save(_program, null, false);
-            storage.SetValue(ProgramKey, program);
+            storage.SetValue(Locker.ProgramKey, program);
             // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
             // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
-            storage.SetValue(StateKey, state);
+            storage.SetValue(Locker.StateKey, state);
         }
 
         /// <summary>Keeps a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
@@ -1769,47 +537,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             backups.Take(_world.Name, saved, unkept);
-        }
-
-        /// <summary>
-        /// Writes a program and its switches into a client's copy of a block, as the server wrote them.
-        /// </summary>
-        /// <remarks>
-        /// The game copies, pastes and blueprints a grid from the copy on the machine doing it, and it
-        /// does not carry a block's storage from the server to the clients. A client's copy of the block
-        /// holds what the server last sent here, so a grid a client copies takes its programs along.
-        /// </remarks>
-        public static void Store(IMyTerminalBlock block, string program, string switches)
-        {
-            MyModStorageComponentBase storage = Attached(block);
-            if (storage == null)
-                return;
-
-            storage.SetValue(ProgramKey, program);
-            storage.SetValue(StateKey, switches);
-        }
-
-        /// <summary>The storage on a block, attached where it has none yet; or null, which is logged.</summary>
-        static MyModStorageComponentBase Attached(IMyTerminalBlock block)
-        {
-            MyModStorageComponentBase storage = block.Storage;
-
-            // Shared with every other mod on this block, so one may already be here - and if it is, it is
-            // the one to use rather than one to replace. Assigning it is what registers it with the
-            // block's component container, which is what makes the game write it out at all; the getter
-            // only answers once that has happened, so it is worth asking again rather than assuming.
-            if (storage == null)
-            {
-                block.Storage = new MyModStorageComponent();
-                storage = block.Storage;
-            }
-
-            // Logged rather than thrown. This runs on the way out of a screen and from the world save,
-            // and taking the game down over it would cost far more than the program does.
-            if (storage == null)
-                Told.Say($"mod storage would not attach to {Logged(block)}; program not saved");
-
-            return storage;
         }
 
         /// <summary>
@@ -1946,24 +673,21 @@ namespace Sprocket.Host.SpaceEngineers.World
             _block = block;
             _memory.Keeper = block.EntityId;
             _world.Anchor(block);
-            _heldAt = int.MinValue;
-            Hold();
+            _holders.Regather(block);
             Destroyed = false;
 
             // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
-            _adopted = false;
-            _reconciled = int.MinValue;
+            _buttons.Rehomed(block);
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            foreach (var holder in _holders)
-                holder.IsWorkingChanged -= Working;
+            _holders.Release();
 
             _world.AnchorRemoved -= Removed;
             _world.AnchorClosed -= Closed;
-            _world.HandsChanged -= Handed;
+            _hands.Release();
             _world.Renamed -= Renamed;
             _runner.Retire();
             _world.Dispose();

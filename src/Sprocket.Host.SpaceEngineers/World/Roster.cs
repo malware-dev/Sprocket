@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public SprocketUnit Adopt(IMyTerminalBlock block)
         {
             SprocketUnit unit = On(block);
-            if (unit != null && (unit.Block == block || !SprocketUnit.HasProgram(block)))
+            if (unit != null && (unit.Block == block || !Locker.HasProgram(block)))
                 return unit;
 
             SprocketUnit arrived = new SprocketUnit(block, _settings(), _rota, _texts, _memories.Claim(block.EntityId), _backups);
@@ -231,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             string program;
             string state;
             unit.Written(out program, out state);
-            SprocketUnit.Store(block, program, StateText.Save(unit.Program, null, false));
+            Locker.Store(block, program, StateText.Save(unit.Program, null, false));
 
             SprocketUnit half = Adopt(block);
             if (half == null)
@@ -268,7 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             var id = other.Block.EntityId;
-            SprocketUnit.Store(other.Block, "", "");
+            Locker.Store(other.Block, "", "");
             if (Emptied != null)
                 Emptied(id);
 

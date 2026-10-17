@@ -64,7 +64,7 @@ public class RootTests
     public void APressWhileAQuestionStandsOnlyPutsItAway()
     {
         var store = Store.Nowhere();
-        store.SetValue(SprocketUnit.ProgramKey, Older);
+        store.SetValue(Locker.ProgramKey, Older);
         var sim = Simulation.On(store);
         sim.Tick();
 
@@ -103,7 +103,7 @@ public class RootTests
 
         var store = Store.Nowhere();
         sim.Unit.Written(out var program, out _);
-        store.SetValue(SprocketUnit.ProgramKey, program);
+        store.SetValue(Locker.ProgramKey, program);
         var lent = Simulation.On(store);
         lent.Editor.Holder = "Bert";
         lent.Tick();

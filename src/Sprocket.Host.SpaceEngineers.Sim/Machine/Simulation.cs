@@ -148,7 +148,7 @@ public sealed class Simulation
 
         foreach (var fitting in _rig.InWorld)
         {
-            if (fitting is Programmable && fitting != _rig.Sprocket && SprocketUnit.HasProgram(fitting.Block))
+            if (fitting is Programmable && fitting != _rig.Sprocket && Locker.HasProgram(fitting.Block))
                 _roster.Adopt(fitting.Block);
         }
     }

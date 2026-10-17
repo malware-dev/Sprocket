@@ -54,7 +54,7 @@ namespace Sprocket.Sim.Simulation
         public static EditorScene Holding(string program)
         {
             var store = Store.Nowhere();
-            store.SetValue(SprocketUnit.ProgramKey, program);
+            store.SetValue(Locker.ProgramKey, program);
             return new EditorScene(Ship.On(store));
         }
 

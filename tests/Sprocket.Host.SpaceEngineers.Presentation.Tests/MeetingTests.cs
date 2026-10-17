@@ -120,7 +120,7 @@ public class MeetingTests
 
         string written;
         sim.Unit.Written(out written, out _);
-        SprocketUnit.Store(theirs.Block, written, "");
+        Locker.Store(theirs.Block, written, "");
         sim.Roster.Adopt(theirs.Block);
         Assert.Equal(2, sim.Roster.Count);
 
@@ -129,7 +129,7 @@ public class MeetingTests
             sim.Tick();
 
         Assert.Single(sim.Roster.All);
-        Assert.False(SprocketUnit.HasProgram(theirs.Block), "the joined automation's copy stayed in its block");
+        Assert.False(Locker.HasProgram(theirs.Block), "the joined automation's copy stayed in its block");
         sim.Press("Airlock Button");
         for (var i = 0; i < 300; i++)
             sim.Tick();
@@ -166,7 +166,7 @@ public class MeetingTests
         sim.Tick();
         string written;
         sim.Unit.Written(out written, out _);
-        SprocketUnit.Store(spare.Block, written, "");
+        Locker.Store(spare.Block, written, "");
         var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
         half.TakeOver(sim.Unit.Block.EntityId);
         half.Begin(sim.Now);
@@ -207,7 +207,7 @@ public class MeetingTests
 
         string written;
         sim.Unit.Written(out written, out _);
-        SprocketUnit.Store(spare.Block, written, "");
+        Locker.Store(spare.Block, written, "");
         var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
 
         var onHead = Read(sim, Meeting.Part(half, sim.World, out _));
@@ -236,7 +236,7 @@ public class MeetingTests
         sim.Tick();
         string written;
         sim.Unit.Written(out written, out _);
-        SprocketUnit.Store(spare.Block, written, "");
+        Locker.Store(spare.Block, written, "");
         var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
 
         Assert.Empty(Read(sim, Meeting.Part(half, sim.World, out _)).Systems);
@@ -264,7 +264,7 @@ public class MeetingTests
 
         string program;
         sim.Unit.Written(out program, out _);
-        SprocketUnit.Store(block.Block, program, StateText.Save(sim.Unit.Program, null, false));
+        Locker.Store(block.Block, program, StateText.Save(sim.Unit.Program, null, false));
         return new SprocketUnit(block.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
     }
 

@@ -123,7 +123,7 @@ public class TriggerCopyTests
         sim.Unit.Written(out var program, out _);
 
         var store = Store.Nowhere();
-        store.SetValue(World.SprocketUnit.ProgramKey, program);
+        store.SetValue(World.Locker.ProgramKey, program);
         var again = Simulation.On(store);
         again.Tick();
 

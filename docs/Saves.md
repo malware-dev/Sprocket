@@ -7,8 +7,8 @@ outlives every build.
 
 | What | Where | Written | By |
 |---|---|---|---|
-| A construct's program | The mod storage of its programmable block, the unit's hero, under `SprocketUnit.ProgramKey` | When the program may have changed, and as the world saves | `World/SprocketUnit.cs`, `Storage/ProgramText.cs` |
-| What is switched off, and why | The same block, under `SprocketUnit.StateKey` | With the program | `Storage/StateText.cs` |
+| A construct's program | The mod storage of its programmable block, the unit's hero, under `Locker.ProgramKey` | When the program may have changed, and as the world saves | `World/SprocketUnit.cs`, `Storage/ProgramText.cs` |
+| What is switched off, and why | The same block, under `Locker.StateKey` | With the program | `Storage/StateText.cs` |
 | What the world remembers while it runs: Sprocket's clock, every run and every watch, owners, pauses, players' settings, doors' close times | A file named `state` among Sprocket's files for the world, kept on the carrier | As the world saves, on the server, where anything changed | `Memory/`, `World/Carrier.cs` |
 | A door's auto-close delay | The door's mod storage, under `CloseDelay.Key` | When it is set | `Features/Doors/CloseDelay.cs` |
 | The library | The game's Storage folder on the player's own computer: `sprocket-bp.index`, and a `sprocket-bp-*.cog` for each blueprint | When a blueprint is kept | `Storage/Shelf.cs` |
@@ -79,7 +79,7 @@ clipboard belong to each player's own computer.
 
 Each of these is written into saves, and a change reads an old world as empty or wrong, often without a word:
 
-- **The storage keys**: `SprocketUnit.ProgramKey` and `StateKey`, `Carrier.Key` and `CloseDelay.Key`. Each is also
+- **The storage keys**: `Locker.ProgramKey` and `StateKey`, `Carrier.Key` and `CloseDelay.Key`. Each is also
   claimed in `Content/Data/EntityComponents.sbc`, without which the game drops it from the save.
 - **The world variable** naming the carrier, `sprocket.carrier`.
 - **Ids written into the game's own data**: the toolbar action `Sprocket_Trigger`, the LCD app `Sprocket_Status`, and

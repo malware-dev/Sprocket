@@ -22,7 +22,7 @@ public class HeroTests
 
         Assert.Same(spare.Block, rig.Unit.Block);
         Assert.False(rig.Unit.Lost);
-        Assert.True(SprocketUnit.HasProgram(spare.Block), "the automation was not written into the block that keeps it now");
+        Assert.True(Locker.HasProgram(spare.Block), "the automation was not written into the block that keeps it now");
 
         // The button named the block that was ground off; it is mended to name the one that keeps the automation now.
         Sequence sequence = rig.Editor.Program.Sequences[0];
