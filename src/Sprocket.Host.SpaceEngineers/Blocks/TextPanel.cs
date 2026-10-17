@@ -11,10 +11,6 @@ using VRage.Utils;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A text panel: a screen a sequence writes a status, a warning or an image on.</summary>
-    /// <remarks>
-    /// A panel is a block with one screen, and that screen is reached as every block's screen is, through
-    /// <see cref="ScreenType" />: showing text, setting it up, reading its settings. What is the panel's own is here.
-    /// </remarks>
     public sealed class TextPanel : Capability
     {
         /// <summary>Showing a chosen image, which is Sprocket's own.</summary>
@@ -40,7 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>The title is a label shown only in the terminal, like the block's name.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(ShowImage, "show image", Shows, AskedImage()).In(Category.Screen)
@@ -51,13 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Measuring("Rotate", "°", 1, 90, "270");
         }
 
-        /// <summary>
-        /// The image to show, from the screen images the terminal lists and by the names it shows them by.
-        /// </summary>
-        /// <remarks>
-        /// The game's LCD texture definitions that are public and selectable, each named by its localized text, or its id
-        /// where it has none. Where none are loaded - the test harness - the list is empty.
-        /// </remarks>
+        /// <summary>The image to show, from the screen images the terminal lists and by the names it shows them by.</summary>
         static Field AskedImage()
         {
             var words = new List<string>();
@@ -86,7 +75,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Every app the screen can run, by id.</summary>
-        /// <remarks>The game's own list, which holds the apps mods add as well.</remarks>
         static string[] Apps(IMyTerminalBlock block)
         {
             var apps = new List<string>();
@@ -99,10 +87,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         /// <summary>The app the screen runs, as one of <paramref name="apps" />, which a step can choose, each read by the name the game shows for it.</summary>
         /// <remarks>
-        /// A look finds the app among the ids, which is a pass over the list; it is made only where an <c>if</c> reads the
-        /// value or a <c>when</c> watches it, on its cadence. No app, or one the list does not hold, is none of the names.
-        /// Choosing one leaves the screen's content as it was: the screen runs the app while its content is an app, which is
-        /// when the terminal shows its list of them.
+        /// A look is a pass over the list, made only where an <c>if</c> reads the value or a <c>when</c> watches it. Choosing an
+        /// app leaves the screen's content as it was.
         /// </remarks>
         static OwnValue Running(string[] apps)
         {

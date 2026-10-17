@@ -13,16 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>
     /// The words for a sequence where a person can only read it: a list row, a heading, a caption.
     /// </summary>
-    /// <remarks>
-    /// The other half of <see cref="SentenceText" />. A sentence is slots because every part of one
-    /// is somebody's to change; these are labels, so they are one string each and this decides all
-    /// of it - including the word order, which is the part core must never own. A line written the
-    /// way the program writes it stays in the program's words; everything else is said in the
-    /// player's language.
-    /// </remarks>
     public static class SequenceText
     {
-        /// <summary>The program's own word for a sequence nobody has named, in the lines written as the program writes them.</summary>
+        // The program's own word for a sequence nobody has named.
         const string Written = "Sequence ";
 
 
@@ -30,13 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// What a trigger does: run a sequence, stop one, or the one thing it does itself.
         /// </summary>
         /// <remarks>
-        /// A named sequence is said by name, because the name is what somebody chose for it and a
-        /// list of triggers is a list of what they set up. A trigger that does one thing has nothing
-        /// to name, so its own sentence is the answer - "open Airlock Inner Door" - which is also
-        /// what it reads as in the construct's own wiring, where it ends up.
-        /// <para>
         /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
-        /// </para>
         /// </remarks>
         public static string Runs(Bindings bindings, AutomationSystem system, Trigger trigger, SystemInstance through)
         {
@@ -56,12 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// The whole first line: "When the hangar door finishes opening".
         /// </summary>
         /// <remarks>
-        /// The same line whether Sprocket watches for the moment or the construct announces it. That
-        /// difference is real and it is not a difference in what somebody asked for, so it is not
-        /// something to read about on every row.
-        /// <para>
         /// Its blocks are named as <paramref name="through" /> fills them, or as written where that is null.
-        /// </para>
         /// </remarks>
         public static string Trigger(Automation program, Bindings bindings, AutomationSystem system, Trigger trigger,
             SystemInstance through)
@@ -83,8 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (every != null)
                 return $"Every {TimeText.Rate(every.Interval)}";
 
-            // A required trigger that names nothing: whatever answers it is on the ship's toolbars
-            // and not in the system, so there is nothing to name and the line says that.
+            // A signal trigger naming nothing is answered from the construct's toolbars, so the line says so.
             return trigger is SignalTrigger ? "When something on this construct starts it" : SentenceText.Empty;
         }
 
@@ -98,11 +79,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>What to call a sequence nobody has renamed: "Sequence 3".</summary>
-        /// <remarks>
-        /// Numbered, not described. A row worded out of what the sequence does reads well and makes
-        /// a row's identity change as somebody edits it. The game names a block and lets the name be
-        /// overtyped, and everybody already knows that.
-        /// </remarks>
         public static string DefaultName(Texts texts, int number)
         {
             return Template.Fill(texts.SequenceNumbered, "number", number.ToString(CultureInfo.InvariantCulture));
@@ -128,30 +104,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (status == SequenceStatus.Stopped)
                 return texts.SequenceStopped;
 
-            // Not "waiting", which is what a sequence held mid-run says two lines above. The same
-            // word for a sequence doing nothing and for one stopped part-way through is the one
-            // reading somebody most needs to tell apart.
-            //
-            // Ready rather than idle, because a sequence with a trigger is not merely doing
-            // nothing: it is loaded and pointed at a button, and whether that button will work is
-            // what somebody who has just built one is asking.
-            // Both, and the same word, because the difference between them is not known. Having
-            // never run is worth saying and would be said here - but only a run in progress is
-            // written to the save, so after a world is loaded every sequence looks like one that
-            // has never fired, including the one that has cycled an airlock every day for a month.
+            // One word for idle and for never run: only a run in progress is written to the save, so
+            // after a load the two cannot be told apart.
             return texts.SequenceReady;
         }
 
 
         /// <summary>
-        /// What the one button that starts and stops a sequence promises, whichever way it faces.
+        /// What the one button that starts and stops a sequence promises while the sequence is not running, facing the way that starts it.
         /// </summary>
-        /// <remarks>
-        /// Two screens carry that button and it is the same button on both, so the words are here
-        /// rather than written out in each view. Starting says what it is <em>not</em> - a preview -
-        /// because "run" and "play" are not the same promise; stopping says what it leaves behind,
-        /// because a machine halfway through a cycle stays halfway through it.
-        /// </remarks>
         public static string Starts(Texts texts)
         {
             return texts.SequenceRunNow;
@@ -345,8 +306,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>The number a step's row shows, or 0 where there is none.</summary>
         /// <remarks>
-        /// Counted as the sequence's screen numbers its rows: a wait for what is running is a row of its own, and the line closing an
-        /// if has no number. Zero where the line has no row of its own to point at.
+        /// Counted as the sequence's screen numbers its rows, where the line closing an if has no number.
         /// </remarks>
         static int Row(Sequence sequence, int step)
         {
@@ -518,9 +478,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (named == null)
                 return $"{SentenceText.Empty} {blocks}";
 
-            // The values in the words the step shows them in: a choice as its word, three numbers as
-            // one colour. After what it acts on, because the blocks are what somebody is looking for
-            // in a list of steps and the values are the detail.
             var fields = new List<Field>();
             named.Fields(fields);
             var slot = new ArgumentsSlot(step.Arguments, fields, null);

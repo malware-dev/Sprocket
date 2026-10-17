@@ -18,11 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>Picks blocks and then what happens to them, with both stages on screen at once.</summary>
     /// <remarks>
-    /// Side by side, the whole path reads at a glance and changing an earlier answer is a glance to the left. The page keeps
-    /// its own answer and hands it back when somebody says they are done: ticking entries straight into a step would make a
-    /// tentative tap an edit to a sequence that might be running, and would leave back with nothing to back out of. The
-    /// strip it is drawn in is declared in <c>PickPage.View.cs</c>, and shared with the page before or after it in the same
-    /// pick.
+    /// The page keeps its own answer and hands it back only when the pick is done.
     /// </remarks>
     public sealed partial class PickPage : EditorPage
     {
@@ -101,10 +97,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <paramref name="after" /> is the strip of the pick this page goes on in, as its next page, or null for a pick of its
         /// own. <paramref name="admits" /> says which of the blocks able to do what is asked are listed, or null for all of
         /// them. <paramref name="signalsOnly" /> offers only what the construct does to start something, for a signal slot.
-        /// <paramref name="forTests" /> offers what an if can test: the values of its blocks, each compared as its options say.
+        /// <paramref name="forTests" /> offers what an if can test.
         /// <paramref name="facet" /> is the name of the facet the step acts on, where what it does is a member of a type the host
-        /// provides. Opened the way the last picker of its sort was left: what is on this construct is not known yet, so a kind it does
-        /// not have is dropped later, where it is.
+        /// provides.
         /// </remarks>
         public PickPage(SprocketEditor editor, string title, bool forEvents,
             IList<long> targets, string chosen, ReachKind chosenForm, Action<PickAnswer> done,
@@ -233,9 +228,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>What the values open holding, where this opened on something that has values.</summary>
         /// <remarks>
-        /// A picker opened to change which blocks a step acts on already has that step's values, and opening them empty would
-        /// make somebody type them again to keep them. Only for what the step did: another action's values are not these,
-        /// whatever their count happens to be.
+        /// The step's own values only while its own action is chosen.
         /// </remarks>
         public IList<string> Filled
         {
@@ -355,10 +348,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Asks before throwing away what was picked here, where there is something to lose and something to do with it.</summary>
         /// <remarks>
-        /// Back means back, and both answers go back: the question is only about what survives it. So the one Enter takes is
-        /// the one that keeps the work, and keeping is finishing, with the values held to what they take exactly as Done holds
-        /// them. Back retraces the way here: through the pick where it was paged through, and out of it where it was opened
-        /// straight on this page.
+        /// Both answers go back; the one Enter takes keeps the work, which finishes the pick as Done does.
         /// </remarks>
         public override bool Leaving()
         {
@@ -581,8 +571,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void MakeWhat()
         {
-            // Two ways of looking at what somebody does to a block or checks of one. What happens to one is Sprocket's own
-            // wording throughout, so there is no second way to look at it.
+            // Two views of what is done to a block or checked of one; what happens to one has Sprocket's wording alone.
             // The angle marks point the way each link goes; the words alone are translated.
             var views = _forEvents ? null : new[] { $"‹ {Editor.Texts.PickToOrganized}", $"{Editor.Texts.PickToTerminal} ›" };
 
@@ -647,11 +636,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Takes a block the way the press said, and moves on where a plain press was a second in quick succession.</summary>
-        /// <remarks>
-        /// A plain press takes this one and nothing else, so pressing it twice is taking one thing and moving on, the same
-        /// gesture as in a list where only one can be chosen. With something held, a second press is building a set, and
-        /// moving on would cut that short.
-        /// </remarks>
         void Picked(long id, HeldModifier held, int presses)
         {
             var pick = Editor.Act(CommandKind.PickEntity, () => Pick(id, held));
@@ -750,14 +734,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// Says what the chosen thing takes, and what it opens holding, where either has changed; and puts the values beside
         /// the stages once something that can be finished is chosen.
         /// </summary>
-        /// <remarks>
-        /// The same thing can be asked for differently as the blocks change - a hinge picked beside a rotor turns without a
-        /// direction - so the fields are compared as well as what they are for.
-        /// </remarks>
         void FillGiven()
         {
-            // A moment takes nothing; a number watched asks how it compares, and with what, over what the trigger does, which
-            // is the order the sentence says them in and keeps every column on the one page.
+            // A moment takes nothing; a number watched asks how it compares, and with what, over what the trigger does.
             if (_forEvents && _chosenForm != ReachKind.Value || _memberOnly)
             {
                 _strip.ShowsArguments = false;
@@ -769,6 +748,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var shown = IsComplete ? $"{_chosenForm} {_chosen}" : "";
             _strip.ShowsArguments = _what != null && shown.Length != 0;
 
+            // The fields are compared too, since they change with the blocks: a hinge picked beside a rotor turns without a
+            // direction.
             var fields = Wanted();
             if (_shown == shown && Same(_shownFields, fields))
                 return;
@@ -873,11 +854,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     ? texts.PickOnePicked
                     : Template.Fill(texts.PickSomePicked, "count", _selection.Count.ToString(CultureInfo.InvariantCulture));
 
-            // Always offered, never conditioned on how long the list is.
+            // Offered whatever the length of the list.
             _blocks.NarrowText = _screen.Search;
 
-            // Off the whole catalogue, not the rows shown: narrowing must not take the picture column away and shuffle every
-            // row sideways.
+            // Off the whole catalogue, so narrowing never takes the picture column away and shifts every row sideways.
             var icons = false;
             for (var i = 0; i < _listing.Candidates.Count && !icons; i++)
                 icons = !string.IsNullOrEmpty(_listing.Candidates[i].Kind.Icon);
@@ -944,10 +924,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Narrows the kinds on offer, and nothing else.</summary>
-        /// <remarks>
-        /// The box over the kinds and the box over the blocks are two questions: one asks which sort, the other asks which one.
-        /// Typing into either while the other holds something is an ordinary thing to do, so neither clears the other.
-        /// </remarks>
         void NarrowKinds(string said)
         {
             said = said ?? "";
@@ -965,9 +941,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// Puts the choice of how several blocks are read under them, wherever the distinction between them means anything: on a
-        /// test, and on a trigger watching for a state, never on a signal the blocks send. The ways are listed in the words the
-        /// sentence says them in; a test is offered their sum and their average as well, which list only what is a number to check.
+        /// Puts the choice of how several blocks are read under them, on a test and on a trigger watching for a state.
         /// </summary>
         void FillOptions()
         {
@@ -1054,9 +1028,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         : Template.Fill(Template.Fill(texts.PickNoteAndShared, "shared", texts.PickShared), "note", note);
             }
 
-            // A choice the blocks can no longer honor is dropped rather than left showing, so Done never appears over a
-            // sentence that could not run. It is kept aside until something else is chosen, and blocks that honor it again
-            // bring it back, so a detour through other blocks loses nothing: a step's own action comes back with its values.
+            // A choice the blocks can no longer honor is dropped, so Done never shows over a sentence that could not run, and
+            // kept aside until something else is chosen: blocks that honor it again bring it back with its values.
             if (_chosen.Length > 0 && _offers.At(_chosen, _chosenForm) < 0)
             {
                 _dropped = _chosen;
@@ -1086,8 +1059,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     _matched.Add(i);
             }
 
-            // A heading before the first of each group that survived the search, worked out here because which groups have
-            // anything left in them is decided by what somebody has just typed. An event list has no groups.
+            // A heading before the first of each group that survived the search. An event list has no groups.
             _rows.Clear();
             var group = -1;
             foreach (var at in _matched)
@@ -1194,11 +1166,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Takes a block, the way the press said it was taken.</summary>
-        /// <remarks>
-        /// Three acts and not three commands, because they are one act with a qualifier: a row was chosen, and the qualifier
-        /// says what happens to everything else. The anchor a run starts from follows the presses that take one block
-        /// deliberately, and shift with nothing to reach back to is the first press of a run.
-        /// </remarks>
         void Pick(long entityId, HeldModifier how)
         {
             if (how == HeldModifier.Through && _anchor != 0L)
@@ -1255,10 +1222,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _selection.Add(_listing.Filtered[i].Id);
         }
 
-        /// <summary>The key the slots of a chosen toolbar are kept under among the rows, which no row's key can be.</summary>
+        // Keys among the rows that no row's own key can be.
         const string SlotsKey = "slots";
 
-        /// <summary>The key the facets of a chosen member are kept under among the rows, which no row's key can be.</summary>
         const string FacetsKey = "facets";
 
         /// <summary>What is chosen as the program names it: the one slot, where a toolbar a person presses is chosen.</summary>

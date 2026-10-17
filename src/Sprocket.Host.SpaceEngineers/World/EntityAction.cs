@@ -6,11 +6,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// Something a sequence can tell an entity to do.
     /// </summary>
-    /// <remarks>
-    /// Most carry no values at all. Of the game's own that do, each declares how many it wants and a
-    /// type for each, which is often wrong, and nothing else: no names, and no set of what a value may
-    /// be one of.
-    /// </remarks>
     public sealed class EntityAction
     {
         /// <summary>The third choice on a flag's switch, after on and off, which writes the game's toggle for it.</summary>
@@ -42,10 +37,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether reaching the state it leads to takes time, rather than happening in the tick it is done.</summary>
-        /// <remarks>
-        /// What the list somebody chooses from marks as holding the sequence until finished. Switching
-        /// a block on leads to its being on in the same tick and holds nothing; a door takes seconds.
-        /// </remarks>
         public bool Lasts { get; private set; }
 
         /// <summary>Whether this can be made into a step, which nearly everything can.</summary>
@@ -71,25 +62,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Stable identifier, referenced by saved sequences.</summary>
         public string Id { get; private set; }
 
-        /// <summary>
-        /// How it reads in a sentence, e.g. "open". Phrased as an instruction so it
-        /// completes "___ the hangar door".
-        /// </summary>
+        /// <summary>How it reads in a sentence, as the instruction that completes "___ the hangar door": "open".</summary>
         public string Text { get; private set; }
 
         /// <summary>
         /// What it is called in a list of things to choose from.
         /// </summary>
-        /// <remarks>
-        /// The same words for nearly everything, and not for a value: a sentence needs the verb -
-        /// "set Falloff" - where a list under a heading that already says Values needs the name on
-        /// its own, so the names sort as themselves rather than all under S.
-        /// <para>
-        /// Starting with a capital: the game capitalises the first letter of every member it names and leaves the rest as
-        /// they are - <c>Open</c>, <c>Toggle block On/Off</c> - and Sprocket's own are written for the middle of a sentence,
-        /// so the list is where they are made to match.
-        /// </para>
-        /// </remarks>
         public string Named { get; private set; }
 
         /// <summary>What the block itself calls it, which the terminal view shows as written.</summary>
@@ -107,11 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Gives one of the block's own members Sprocket's word for it, and nothing else.
         /// </summary>
-        /// <remarks>
-        /// The member stays the block's: the same id, performed the same way, written into a program
-        /// the same way. Only what a list and a sentence call it changes, and the terminal view goes on
-        /// showing what the block calls it.
-        /// </remarks>
+        /// <remarks>The id, and what a program writes for it, stay the block's.</remarks>
         public void Rename(string word)
         {
             Renamed = true;
@@ -138,37 +112,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The game's own name for this act, or null where the game has no single action for it.
         /// </summary>
-        /// <remarks>
-        /// What lets a toolbar slot somebody wired to the game's own action be said in Sprocket's words.
-        /// The game's convention is that an on/off switch called <c>X</c> offers <c>X_On</c> and
-        /// <c>X_Off</c>; a door's switch is <c>Open</c>, a vent's is <c>Depressurize</c>, and every
-        /// functional block has <c>OnOff</c>.
-        /// <para>
-        /// Null for anything Sprocket performs out of several property writes, and for any block whose
-        /// own actions have not been mapped yet.
-        /// </para>
-        /// </remarks>
         public string GameActionId { get; private set; }
 
         /// <summary>
         /// The block's own value this writes, or null where it is an act rather than a value.
         /// </summary>
-        /// <remarks>
-        /// The second of the two ways an act is carried out. A block declares a handful of actions
-        /// and carries far more values than that, and a value says what it is and what it will take
-        /// where an action says only how many values it wants.
-        /// </remarks>
         public string GamePropertyId { get; private set; }
 
         /// <summary>Whether this is a value a step can write, which a program says with <c>set</c>: one of the block's own, or of Sprocket's own that can be set.</summary>
         public bool Sets => GamePropertyId != null || (Being != null && Being.Settable);
 
         /// <summary>What this reads as one of Sprocket's own values, or null for anything else.</summary>
-        /// <remarks>Written qualified by its namespace; set where its Being can be set, and read only otherwise.</remarks>
+        /// <remarks>Written in a program qualified by its namespace.</remarks>
         public OwnValue Being { get; private set; }
 
         /// <summary>Whether the block says when this value of Sprocket's own may have changed, so it is looked at then rather than only on a cadence.</summary>
-        /// <remarks>See <see cref="Capability.Listen" />.</remarks>
         public bool Announced { get; private set; }
 
         /// <summary>The flag that, while it reads true, rules out a change in this value, so the block need not be looked at then; null where nothing does.</summary>
@@ -178,35 +136,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string LookedBecause { get; private set; } = "";
 
         /// <summary>Which of the three ways a step reaches this one.</summary>
-        /// <remarks>
-        /// A value, the block's own or Sprocket's, is a value; anything the block itself declared is the game's action,
-        /// whatever Sprocket calls it; and what is left is Sprocket's own.
-        /// </remarks>
         public ReachKind Form => Sets || Being != null ? ReachKind.Value : Unaltered ? ReachKind.Action : ReachKind.Native;
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
-        /// <remarks>
-        /// What the terminal view lists, whether or not the organized one has replaced it. A
-        /// capability's entry is Sprocket's; one the block declares and nothing has reworded is this.
-        /// </remarks>
         public bool Unaltered { get; set; }
 
         /// <summary>Whether this is something Sprocket vouches for, which is what the organized view lists.</summary>
-        /// <remarks>
-        /// Sprocket's own members are vouched for by being written, and one of the block's own by a capability renaming it
-        /// or naming it as vetted in the game's words. Anything else the block declares, a member a game update or a mod
-        /// adds among them, is listed by the terminal view alone.
-        /// </remarks>
         public bool Vetted => !Unaltered || Renamed || _vouched;
 
         bool _vouched;
 
         /// <summary>Whether this is left out of the list somebody chooses from.</summary>
-        /// <remarks>
-        /// Only where a capability's entry stands in for it, naming it as the game's own form of what
-        /// that entry does. Still there for anything that names it, and for a list that shows
-        /// everything.
-        /// </remarks>
+        /// <remarks>A hidden entry still answers anything that names it.</remarks>
         public bool Hidden { get; private set; }
 
         /// <summary>Whether this flag is also flipped, by the game's toggle beside it, chosen as <see cref="Toggle" /> on its switch.</summary>
@@ -218,22 +159,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What this member is about, which is the group it is listed under.
         /// </summary>
-        /// <remarks>
-        /// Worked out from the game's own id where there is one - see <see cref="Categories" /> - and
-        /// said outright by a capability for anything Sprocket invented, which has no game id to ask
-        /// about.
-        /// </remarks>
         public Category Category { get; set; }
 
         /// <summary>The type the host provides that this is a member of, or null for a member of the block itself.</summary>
-        /// <remarks>
-        /// A member of a type acts on the thing of that type its slot holds of each block, a screen of each, and its options
-        /// receive that thing's number first, from 1, ahead of the step's own values.
-        /// </remarks>
+        /// <remarks>Its options receive the number of the thing it acts on first, from 1, ahead of the step's own values.</remarks>
         public HostType Type { get; set; }
 
         /// <summary>Whether this value is the status of the block, which a check in the organized view reads as the block itself: "Airlock Door is open".</summary>
-        /// <remarks>The editor's wording alone; the script names the value as it names any other.</remarks>
         public bool IsStatus { get; set; }
 
         /// <summary>The kind of value this holds, where it is a value.</summary>
@@ -264,7 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             GamePropertyId = propertyId;
             _holds = holds;
 
-            // A value is asked about by the id it writes, since that is the only id the game gave it.
+            // The id it writes is the only id the game gives a value.
             if (Category == Category.Other)
                 Category = Categories.Of(propertyId);
 
@@ -336,11 +268,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What somebody has said its parameters are, or null where nobody has.
         /// </summary>
-        /// <remarks>
-        /// The action declares how many parameters it takes; this is the only thing that can say
-        /// what they are for. It comes from a file a mod ships, or from this mod's own description
-        /// of the game's own blocks - see <see cref="ParameterCatalog" />.
-        /// </remarks>
         public Description Description { get; private set; }
 
         /// <summary>Gives it the description of its values that a block's definition or a capability declares.</summary>
@@ -353,7 +280,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<Field> _described = new List<Field>();
 
         /// <summary>Says what type each of the values it is handed is taken as, one per value.</summary>
-        /// <remarks>For one of the game's actions, whose declaration says and is often wrong - see <see cref="KnownActions" />.</remarks>
+        /// <remarks>For one of the game's actions, whose declared types are often wrong.</remarks>
         public EntityAction Taking(IList<Primitive> types)
         {
             _takes = types;
@@ -364,7 +291,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public IList<Primitive> Primitives => _takes;
 
         /// <summary>Gives it the values it asks for, one field per value, in the order they are written.</summary>
-        /// <remarks>For an action of Sprocket's own, which describes itself rather than being described.</remarks>
+        /// <remarks>For an action of Sprocket's own.</remarks>
         public EntityAction Asking(IList<Field> fields)
         {
             _asks = fields;
@@ -378,10 +305,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         IList<Field> _asks;
 
         /// <summary>Whether a value it takes is among the ones it has not been given, every one being needed.</summary>
-        /// <remarks>
-        /// Asked of the action rather than worked out from a list of its fields, so nothing has to keep
-        /// a list to ask the question - which is asked of every step of every sequence being looked at.
-        /// </remarks>
+        /// <remarks>Asked of every step of every sequence being looked at; the caller keeps no list of fields.</remarks>
         public bool Needs(int given)
         {
             return Missing(given) != null;
@@ -391,7 +315,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What the first option among those <paramref name="given" /> leaves out is called; empty where nothing names it, and
         /// null where none is missing.
         /// </summary>
-        /// <remarks>A member is given an argument for every parameter it declares, so each option is needed.</remarks>
         public string Missing(int given)
         {
             _wanted.Clear();
@@ -465,13 +388,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Puts the values a step was given into the kinds this takes, or answers false where one
         /// cannot be.
         /// </summary>
-        /// <remarks>
-        /// Asked when a program is bound and never while it runs, so what a block is handed is already
-        /// what it takes: the kind a value of the block's holds, the type one of the game's actions
-        /// takes it as, the kind the box for one of Sprocket's own is for. A value nothing says the
-        /// kind of goes as it was written. Given nowhere to put them, it only answers.
-        /// </remarks>
-        /// <remarks>Each value is also held to its field: one of its words where it lists some, and within its bounds.</remarks>
+        /// <remarks>Asked when a program is bound, never while it runs. Given null for <paramref name="into" />, it only answers.</remarks>
         public bool Converts(IList<Literal> given, List<Literal> into)
         {
             var from = into?.Count ?? 0;
@@ -505,7 +422,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Puts the values a step was given into the kinds this takes, or answers false where one cannot be.</summary>
         bool Convert(IList<Literal> given, List<Literal> into)
         {
-            // An argument for a parameter it does not declare is one it cannot take.
             if (given.Count > Wants)
                 return false;
 
@@ -683,7 +599,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Gives a box the bounds of a small whole-number type, where nobody has given it any.
         /// </summary>
-        /// <remarks>Only the small ones: the bounds of a 32-bit number are nothing anybody wants to read beside a box.</remarks>
         static void Bound(ref Field field, Primitive type)
         {
             if (field.Least.Length > 0 || field.Most.Length > 0)
@@ -720,7 +635,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            // A value describes itself, so nothing has to have been written about it.
             if (GamePropertyId != null || Being != null)
             {
                 into.Add(_writes);
@@ -738,9 +652,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _described.Clear();
             Description.Fields(_described);
 
-            // Counted by what each field stands for rather than by how many fields there are. One of
-            // them can cover several values - a colour covers three - so a description of two fields
-            // can account for all four values an action wants.
+            // Counted by what each field covers: a color covers three values.
             var covered = 0;
             for (var i = 0; i < _described.Count && covered < Wants; i++)
             {
@@ -748,8 +660,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 covered += _described[i].Covers;
             }
 
-            // Whatever the description did not reach is still asked for, told nothing. A description
-            // that has fallen behind the block it is about loses the names and keeps the values.
             for (var i = covered; i < Wants; i++)
                 into.Add(Field.Unnamed());
         }
@@ -757,12 +667,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// How many values it has to be given before it will do anything.
         /// </summary>
-        /// <remarks>
-        /// For one of the game's actions, the game declares one default per value it wants, so this is the count of those
-        /// - which is all it declares: what each one is for is not said, and the type of each is the runtime type of the
-        /// default it was declared with. For an action of Sprocket's own it is what its fields cover, and for a value
-        /// one: what it is set to, or compared with.
-        /// </remarks>
         public int Wants { get; private set; }
     }
 }

@@ -8,17 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// Turns script text into tokens, one at a time.
     /// </summary>
     /// <remarks>
-    /// Built on the game's own <see cref="TextPtr" /> and <see cref="StringSegment" />, which exist for
-    /// exactly this: a token is where it lies in the script, and nothing is copied out of the text until
-    /// something asks for it. A keyword never is.
-    /// <para>
-    /// Two rules here are worth knowing before reading the code, because both exist to make a mistake loud
-    /// rather than silent. <b>A quote is escaped by doubling it</b> and backslash means nothing, so a
-    /// writer that forgets to escape cannot produce a file that still parses wrongly - a Windows path
-    /// reading back as something else. And <b>every number is read with the invariant culture</b>, so a
-    /// player whose decimal separator is a comma does not write <c>0,25</c> and read back <c>25</c> on
-    /// somebody else's machine.
-    /// </para>
+    /// Persisted: a quote is escaped by doubling it, a backslash means nothing, and every number is read in the invariant
+    /// culture.
     /// </remarks>
     public sealed class Lexer
     {
@@ -167,11 +158,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// An annotation line, or a color, told apart by one character of lookahead.
         /// </summary>
-        /// <remarks>
-        /// Lookahead rather than position in the line, so the lexer stays context-free and a list holding a
-        /// color is not a special case. The cost is one wart: a hash with no space after it is trouble
-        /// rather than an annotation. A writer always emits the space.
-        /// </remarks>
         Token Hash()
         {
             var start = _ptr;
@@ -183,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!_ptr.IsEndOfLine() && _ptr.Char != ' ')
                 return Bad(start, "expected '# ' and an annotation, or a color, after '#'.");
 
-            // Everything after the hash and one optional space, so a writer emitting "# " round-trips.
+            // One optional space is dropped, so a writer's "# " round-trips.
             if (_ptr.Char == ' ')
                 _ptr++;
 
@@ -197,11 +183,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             long packed = 0;
             var digits = 0;
 
-            // Walked as a local. Stepping the cursor in its field pays a write barrier per digit,
-            // which is per digit of every color in the file - see Run, which does the same.
-            // Walked as a local and written back once, measured: a TextPtr holds a string, so storing one into a
-            // field pays the collector's write barrier on every step. Stepping the field made lexing 54% slower
-            // than stepping an integer; walking a local brings it to 11%.
+            // Walked as a local and written back once, measured: storing a TextPtr into a field pays a write barrier on
+            // every step. Stepping the field made lexing 54% slower than stepping an integer; a local brings it to 11%.
             var ptr = _ptr;
             while (digits < 8)
             {
@@ -227,12 +210,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Something in quotes, left where it lies unless something in it was doubled.
         /// </summary>
-        /// <remarks>
-        /// Double quotes are text and single quotes are a name, and each escapes only its own quote, by
-        /// doubling it. Most values in a save are quoted and almost none contain their own quote, so the
-        /// ordinary path finds the closing one and keeps a segment, and only a value that actually holds a
-        /// doubled quote has a new string built.
-        /// </remarks>
         Token Quoted(char quote, TokenKind kind)
         {
             var start = _ptr;
@@ -296,10 +273,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A whole number, or a real told by a dot or an exponent.
         /// </summary>
-        /// <remarks>
-        /// Scientific notation is forced rather than chosen: a writer emitting a double so that it can be read
-        /// back exactly produces <c>1E-05</c> on its own, so refusing it would mean refusing what Sprocket wrote.
-        /// </remarks>
         Token Number()
         {
             var start = _ptr;
@@ -356,16 +329,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A number that had a unit written against it: ticks, or seconds counted as the nearest whole tick.
         /// </summary>
-        /// <remarks>
-        /// Any other unit is trouble rather than a number followed by a word: <c>600m</c> is somebody meaning minutes, and
-        /// reading it as anything else would run their airlock at the wrong pace. The token's text is its unit, and its real
-        /// the number as written, so seconds are written back as they were.
-        /// </remarks>
         Token Duration(TextPtr start, long whole, double number, bool real)
         {
             var from = _ptr;
 
-            // A local for the walk, like Run and Colour: the field is what a write barrier watches.
+            // A local for the walk: stepping the field pays a write barrier per step.
             var ptr = _ptr;
             while (Letter(ptr.Char))
                 ptr++;
@@ -404,10 +372,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A word starting with a letter, so a leading dash is always part of a number.
         /// </summary>
-        /// <remarks>
-        /// Checked against the format's own words where it lies. A keyword comes back as a number with no
-        /// text at all.
-        /// </remarks>
         Token Identifier()
         {
             var start = _ptr;
@@ -415,8 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             while (true)
             {
                 var c = ptr.Char;
-                // No dash. It is subtraction, and a name that could hold one would make a-1 a name
-                // and a - 1 a subtraction, which is the same text meaning two things over a space.
+                // No dash: a-1 is a subtraction.
                 if (!Letter(c) && !Digit(c) && c != '_')
                     break;
 

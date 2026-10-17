@@ -6,11 +6,6 @@ using VRage.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>The blocks a construct's automation is kept in, listened to for whether any of them is working.</summary>
-    /// <remarks>
-    /// The automation is the construct's, kept in its programmable blocks alike, so it runs while any of them works and
-    /// holds only while none does, rather than stopping: a cycle interrupted by a blackout carries on when the lights come
-    /// back, which is the same promise as one interrupted by a reload.
-    /// </remarks>
     public sealed class HostBlocks
     {
         readonly GridWorld _world;
@@ -18,10 +13,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<IMyTerminalBlock> _was = new List<IMyTerminalBlock>();
         readonly List<IMyTerminalBlock> _parted = new List<IMyTerminalBlock>();
 
-        // The construct's revision the blocks were gathered at.
         int _heldAt = int.MinValue;
 
-        /// <summary>The programmable blocks of <paramref name="world" />.</summary>
+        /// <summary>The blocks the automation is kept in, of <paramref name="world" />.</summary>
         public HostBlocks(GridWorld world)
         {
             _world = world;
@@ -43,10 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public IReadOnlyList<IMyTerminalBlock> Parted => _parted;
 
         /// <summary>Listens to every programmable block on the construct and <paramref name="hero" /> for their working state, gathering them again only when the construct was read again.</summary>
-        /// <remarks>
-        /// Called on every tick, and one comparison on a tick where nothing on the construct changed. The runner reads the same
-        /// revision on that tick, so a construct that changed is read again once whoever asks first.
-        /// </remarks>
+        /// <remarks>Called on every tick: one comparison on a tick where nothing on the construct changed.</remarks>
         public void Hold(IMyTerminalBlock hero)
         {
             var revision = _world.Revision;

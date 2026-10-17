@@ -11,8 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// with.
     /// </summary>
     /// <remarks>
-    /// Made when a program is bound and kept until it changes, so an <c>if</c> or a <c>when</c> reading the block asks
-    /// nothing by name: a look is a delegate call or a property read, and a comparison.
+    /// Made when a program is bound and kept until it changes, so a look asks nothing by name: a delegate call or a
+    /// property read, and a comparison.
     /// </remarks>
     public sealed class Probe
     {
@@ -62,10 +62,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// asks.
         /// </summary>
         /// <remarks>
-        /// A value of Sprocket's own is read through what declares it; one of the block's own through the property the game
-        /// hands out, found once. A one of a list is compared for sameness by its position among the names, worked out here.
-        /// Only numbers are ordered or summed. A value of a type the host provides reads the facet numbered <paramref name="facet" />,
-        /// the first where it names none.
+        /// Only numbers are ordered or summed. A value of a type the host provides reads the facet numbered
+        /// <paramref name="facet" />, the first where it names none.
         /// </remarks>
         public static Probe Of(GridEntity entity, string provider, string id, IList<Literal> arguments, Quantifier quantifier,
             Relation relation, Literal value, ReadingMemory kept = null, Func<int> clock = null, int facet = 0)

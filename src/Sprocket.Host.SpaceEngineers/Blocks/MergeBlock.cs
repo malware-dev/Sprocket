@@ -10,13 +10,7 @@ using MergeState = SpaceEngineers.Game.ModAPI.Ingame.MergeState;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A merge block: how far it has got with joining two ships into one.</summary>
-    /// <remarks>
-    /// It merges while switched on and lets go when switched off, so the switch every block has is its merge and release.
-    /// <para>
-    /// Everything is told by the merge state changing, which the game raises on the server alone. Its event for a merge
-    /// about to happen is not used: the game cannot take a handler for it back.
-    /// </para>
-    /// </remarks>
+    /// <remarks>The game raises its merge state changes on the server alone.</remarks>
     public sealed class MergeBlock : Capability
     {
         static readonly string[] Statuses = { "merged", "ready-to-merge", "nothing-in-reach", "not-working" };
@@ -47,10 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Where <paramref name="state" /> stands among the merge block's statuses.</summary>
-        /// <remarks>
-        /// Constrained is another merge block in reach, its magnets pulling the two into line; working is switched on with
-        /// none near; none, switched off or damaged, and unset read the same.
-        /// </remarks>
         static int Position(MergeState state)
         {
             switch (state)

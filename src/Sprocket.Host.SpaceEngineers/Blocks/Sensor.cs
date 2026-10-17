@@ -10,13 +10,10 @@ using MyDetectedEntityInfo = Sandbox.ModAPI.Ingame.MyDetectedEntityInfo;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A sensor: the two signals its toolbar sends, whether it is detecting and how many things, and the members of its
-    /// terminal said in Sprocket's words.
-    /// </summary>
+    /// <summary>A sensor, with the two signals its toolbar sends, read for whether it is detecting and how many things.</summary>
     /// <remarks>
-    /// The game runs the first slot of every page when it starts detecting, and the second when it stops. It says when it
-    /// starts and stops detecting; nothing tells of a change in how many things it detects.
+    /// The game runs the first slot of every page as it starts detecting and the second as it stops; nothing tells of a
+    /// change in the count.
     /// </remarks>
     public sealed class Sensor : Capability
     {
@@ -40,8 +37,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly string[] Extents = { "Left", "Right", "Top", "Bottom", "Front", "Back" };
 
-        // Filled and emptied on every look at the count, so a look allocates nothing once it has held the most a sensor
-        // has seen. Holds nothing between looks: the game's main thread is the only one that reads a block.
+        // Reused on every look at the count, so a look allocates nothing once the list has grown; only the game's main
+        // thread reads a block.
         readonly List<MyDetectedEntityInfo> _detected = new List<MyDetectedEntityInfo>();
 
         readonly OwnValue _count;

@@ -6,15 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <summary>
     /// Reads tokens into statements.
     /// </summary>
-    /// <remarks>
-    /// <b>Trouble is recorded, not thrown.</b> The script is the only copy of somebody's program, so
-    /// what is wrong with it is an answer to show them, with the line it is on, rather than an exception -
-    /// see <see cref="Trouble" />.
-    /// <para>
-    /// Recovery is to the end of the line. Braces are still counted through it, so the rest of the script
-    /// is read in its right place and the first trouble reported is the one that matters.
-    /// </para>
-    /// </remarks>
+    /// <remarks>What is wrong with the text is recorded in <see cref="ScriptTrouble" />, never thrown.</remarks>
     public sealed class Parser
     {
         /// <summary>The word a duration in seconds carries, where one in ticks carries none.</summary>
@@ -23,18 +15,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         readonly Lexer _lexer;
         readonly ScriptValues _reading = new ScriptValues();
 
-        /// <summary>
-        /// A list's items as they are read, one buffer for each list open at once.
-        /// </summary>
-        /// <remarks>
-        /// Kept aside until the list closes, because a list or a vector inside it writes its own run
-        /// into <see cref="ScriptValues.Items" /> first: held back, the outer list's items still land in one
-        /// unbroken run of their own. Kept for the life of the reading rather than made per list, since
-        /// a program is mostly lists and loading one lands inside a world load.
-        /// </remarks>
         readonly List<List<Value>> _held = new List<List<Value>>();
 
-        /// <summary>How many lists are open, which is the buffer the next one reads into.</summary>
         int _depth;
 
         Token _token;
@@ -94,10 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Whether a member's arguments or blocks follow the name just read: <c>(</c>, or <c>on</c> and a list.
         /// </summary>
-        /// <remarks>
-        /// <c>on</c> alone is not enough, since a name followed by a flag is written that way too: the reading a run left
-        /// behind says <c>door1 on</c>.
-        /// </remarks>
+        /// <remarks>A name followed by the flag <c>on</c> is written the same way: <c>door1 on</c>.</remarks>
         bool Referencing()
         {
             if (_token.Kind == TokenKind.VectorOpen)
@@ -109,11 +88,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Counts something that went wrong, and says where the first one was.
         /// </summary>
-        /// <remarks>
-        /// The line is worked out here, by counting from the start, rather than kept up to date as the text
-        /// is read. Only the first trouble is ever reported, so a program that reads cleanly - which is nearly
-        /// all of them - never pays for knowing which line anything was on.
-        /// </remarks>
         void Fail(string what)
         {
             _failures++;
@@ -218,10 +192,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Annotation text with nothing to belong to.
         /// </summary>
-        /// <remarks>
-        /// There is no state where somebody's words exist and nobody knows what they are about, so this is
-        /// trouble rather than something to drop quietly.
-        /// </remarks>
         void Orphan(string note)
         {
             if (note.Length > 0)
@@ -267,8 +237,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 values.Add(Next());
             }
 
-            // A line that went wrong is not made a statement at all, since the trouble already says what is wrong
-            // with it and half a statement would only be judged again for what is missing.
+            // A line that went wrong makes no statement, so it is judged once, by its trouble.
             if (_failures > failures)
             {
                 Recover();
@@ -389,9 +358,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A list, its items written into the reading's shared run once it closes.
         /// </summary>
-        /// <remarks>
-        /// A list may hold lists and vectors, each of which is a run of its own: see <see cref="_held" />.
-        /// </remarks>
         Value List()
         {
             return Run(TokenKind.ListClose, "']'");
@@ -406,6 +372,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Values separated by commas up to <paramref name="close" />, written as one run once it closes.</summary>
         Value Run(TokenKind close, string closing)
         {
+            // One buffer per open list, held until it closes because a list inside writes its own run first. Kept for the
+            // life of the reading, since loading lands inside a world load.
             if (_depth == _held.Count)
                 _held.Add(new List<Value>());
 
@@ -467,11 +435,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A name in parts, <c>MalTek.Airlock</c>, having read its first part already.
         /// </summary>
-        /// <remarks>
-        /// The dot is an operator, so spaces around it are nothing and <c>'MalTek Inc.' . Airlock</c> is the
-        /// same name as <c>'MalTek Inc.'.Airlock</c>. Any part may be a keyword written bare, since only a name can stand
-        /// beside a dot, and its text is its part.
-        /// </remarks>
+        /// <remarks>Spaces around the dot are nothing: <c>'MalTek Inc.' . Airlock</c> is <c>'MalTek Inc.'.Airlock</c>.</remarks>
         Value Qualified(Value first)
         {
             var parts = _reading.Parts;
@@ -500,10 +464,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// member's name already.
         /// </summary>
         /// <remarks>
-        /// One value, because a member is never written apart from its blocks. Which members there are, and what each takes,
-        /// is the host's, so the arguments are read as whatever they are and judged by whoever reads the statement. The run
-        /// is written once everything is read, because an argument may write a run of its own first: the name's parts, then
-        /// the arguments as a list, empty where there are none, then the names.
+        /// The run holds the name's parts, then the arguments as a list, empty where there are none, then the names.
         /// </remarks>
         Value Referenced(Value member)
         {
@@ -587,11 +548,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Annotation text with its empty first and last lines taken off, so the form round-trips.
         /// </summary>
-        /// <remarks>
-        /// A bare hash is an empty paragraph line, which is how spacing works inside a note without a blank
-        /// line breaking the attachment. Leading and trailing ones carry nothing, and keeping them would mean
-        /// a note growing a line every time it was written out and read back.
-        /// </remarks>
         static string Trim(string note)
         {
             var from = 0;

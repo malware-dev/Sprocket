@@ -11,12 +11,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// </summary>
     public sealed class SequenceRunner
     {
-        /// <summary>How often a run held at an await looks for something that has sent its blocks the other way.</summary>
+        // Ticks between looks, at an await, for something that has sent its blocks the other way.
         const int Conflicts = 60;
 
         readonly Sequence _sequence;
 
-        /// <summary>Everything the run remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
+        // Kept in what the world saves.
         readonly RunMemory _memory;
 
         readonly CompiledRun _workings;
@@ -27,17 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// One sequence, running for one of a system.
         /// </summary>
         /// <remarks>
-        /// The same sequence runs once for each of a system on the ship, each resolving the
-        /// block slots the author built with into its own doors. Null means the slots are the
-        /// blocks themselves, which is what the first one of a system does and what every
-        /// system built before block slots existed keeps doing.
-        /// <para>
-        /// The owner is the runner for the whole program, which knows the world, its bindings and the rota.
-        /// </para>
-        /// <para>
-        /// What it remembers is <paramref name="memory" />: a run the world kept takes up where it was, on the rota as well, and
-        /// a new one is given the next place.
-        /// </para>
+        /// A null <paramref name="instance" /> means the slots are the blocks themselves. A run <paramref name="memory" />
+        /// already holds takes up where it was, on the rota as well; a new one is given the next place.
         /// </remarks>
         public SequenceRunner(Sequence sequence, SystemInstance instance, AutomationRunner owner, RunMemory memory)
         {
@@ -74,10 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Starts another sequence of the same system, on the same one of it.
         /// </summary>
-        /// <remarks>
-        /// Set by whatever owns the runners, because a sequence knows nothing about anything running
-        /// beside it. Null until then, which is what a sequence run on its own in a test has.
-        /// </remarks>
+        /// <remarks>Set by whatever owns the runners; null until then.</remarks>
         public Action<int, bool> Calls { get; set; }
 
         readonly SystemInstance _instance;
@@ -85,12 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Whether this sequence may run for this one of its system.
         /// </summary>
-        /// <remarks>
-        /// Three switches, all of which have to be on: the sequence's, its system's, and this
-        /// one of the system's. They are asked separately everywhere else because they are
-        /// three different intentions - "I parked this rule", "I am rewiring the whole thing",
-        /// "leave the port airlock alone while I weld" - and none may overwrite another.
-        /// </remarks>
+        /// <remarks>Three switches, all of which have to be on: the sequence's, its system's, and this instance's.</remarks>
         bool CanRun => _sequence.CanRun(_instance);
 
         Bindings _bindings;
@@ -152,10 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public SystemInstance Instance => _instance;
 
         /// <summary>What is known to be wrong with this sequence on the one of its system it runs on, or none.</summary>
-        /// <remarks>
-        /// Read, never worked out: what a run met, what an open editor saw, what the program said when it was built, and
-        /// what the blocks of a step being waited on said. The worst news first, because a line can only say one thing.
-        /// </remarks>
+        /// <remarks>Read, never worked out, and the worst news first.</remarks>
         public SequenceFault Fault => _faults.Fault;
 
         /// <summary>What is known to be wrong with this run, as each part of Sprocket finds it.</summary>
@@ -174,14 +154,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// and keeps what one says stops it finishing.
         /// </summary>
         /// <remarks>
-        /// Asked of a run that is already held, and only of the blocks of the steps holding it -
-        /// which for an airlock is one vent. Each answer costs the block a component lookup and a
-        /// comparison, which is why it is asked on a cadence rather than on the tick.
-        /// <para>
-        /// About the state the step is waiting for, not about the block. One vent serves the cycle out and the cycle in,
-        /// and they wait for opposite things of it - so what is wrong with the vent has two answers, and only the step
-        /// knows which it is owed.
-        /// </para>
+        /// Asked on a cadence of a run already held, and only of the blocks of the steps holding it; each answer costs the
+        /// block a component lookup and a comparison.
         /// </remarks>
         SequenceFault Troubled()
         {
@@ -260,13 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// How often the trigger fired while the sequence was already running.
         /// </summary>
-        /// <remarks>
-        /// Re-triggering skips rather than queueing, restarting, or running a second
-        /// copy. Skipping is the only option that cannot silently accumulate work,
-        /// and it matches how people think about a system that is busy. With real
-        /// gates the wait is legible - "waiting for the inner door to shut" - so busy
-        /// explains itself instead of being a mystery.
-        /// </remarks>
+        /// <remarks>A trigger that fires while the sequence runs is skipped, never queued.</remarks>
         public int SkippedCount
         {
             get { return _memory.Skipped; }
@@ -283,15 +251,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// How often something called this sequence while it was switched off.
         /// </summary>
-        /// <remarks>
-        /// Counted separately from being busy because it is a different piece of news, and counted at
-        /// all because the alternative is silence: a step saying <c>run</c> that meets a parked sequence
-        /// would otherwise evaporate, which is the one thing Sprocket does nowhere else.
-        /// <para>
-        /// Calls only. Its own trigger firing while it is off is not news - that is what off means, and
-        /// counting it would report a door somebody opened ten times as ten refusals.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Calls only: its own trigger firing while it is off is not counted.</remarks>
         public int RefusedCount
         {
             get { return _memory.Refused; }
@@ -302,16 +262,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Keeps an eye on a run: done every ten ticks while one is under way.
         /// </summary>
         /// <remarks>
-        /// Whether the machine Sprocket runs on can do anything at all - its own block powered and
-        /// switched on - is asked here. Nothing moves on while it cannot, and what was already running
-        /// is <b>kept</b> rather than stopped: a power cut is not somebody pressing a switch, and coming
-        /// back up part way through a cycle is the whole point of remembering the run at all.
-        /// <para>
-        /// The same rule the programmable block follows: it will not instantiate a script until its
-        /// block is powered and enabled, and it asks for updates again when power arrives. On a world
-        /// still loading, that deferral is also what keeps a resumed run from judging a half-built
-        /// construct.
-        /// </para>
+        /// Nothing moves on while the machine Sprocket runs on is unpowered or switched off, and what was running is kept
+        /// rather than stopped.
         /// </remarks>
         void Sample(int tick)
         {
@@ -319,9 +271,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             if (_owner.Live)
             {
-                // A run somebody started by hand is theirs, and the switch is not about them: they
-                // are standing at the screen watching it. Everything else a switched-off sequence
-                // refuses.
+                // A switched-off sequence stops its run, unless the run was started by hand.
                 if (!CanRun && !_memory.ByHand)
                 {
                     if (IsRunning)
@@ -397,11 +347,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// A run that is going on with nothing on the rota to move it, put back on.
         /// </summary>
-        /// <remarks>
-        /// Every change of state schedules the next look, and a run left without one would never move
-        /// again with nothing to say so. Said in the log when it happens, because it means something
-        /// forgot to.
-        /// </remarks>
+        /// <remarks>Said in the log when it happens.</remarks>
         void Rescue(int tick)
         {
             if (_busy.Listed)
@@ -432,17 +378,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Starts the sequence by name, from another sequence, a trigger or a button.</summary>
         /// <remarks>
-        /// The switch holds here. A parked sequence is parked for everything, including being called by
-        /// another one - what a person switched off must not run because something else asked.
-        /// <para>
-        /// So is the machine's own power. A press arrives as a call rather than as a tick, so a slot
-        /// on somebody's panel would otherwise start a cycle on a Sprocket that has no power at all.
-        /// </para>
-        /// <para>
-        /// Either way the call is refused rather than dropped. Off is a legitimate answer and silence
-        /// is not: the refusal is counted and shown, the way a switched-off block refuses an action
-        /// whoever asks.
-        /// </para>
+        /// Refused, and counted, where the machine has no power, or where the sequence is switched off and the call is not
+        /// by hand.
         /// </remarks>
         public void Call(Bindings bindings, int tick, bool live = true,
             bool byHand = false)
@@ -450,17 +387,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _bindings = bindings;
             _memory.Looked = tick;
 
-            // Power is refused whoever asks: a machine with none does nothing, and a person at the
-            // screen of a dead block is not an exception to that.
+            // Power is refused whoever asks, a person at the screen included.
             if (!live)
             {
                 RefusedCount++;
                 return;
             }
 
-            // The switch is not. Somebody who parks a sequence so its triggers leave it alone, and
-            // then presses run, has said exactly what they want - and that is the state anybody
-            // debugging one is in.
+            // The switch is not refused to a run by hand.
             if (!CanRun && !byHand)
             {
                 RefusedCount++;
@@ -485,9 +419,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Starts the sequence because its trigger fired, where it may run and is not already running.
         /// </summary>
         /// <remarks>
-        /// A switched-off sequence lets its own trigger go by without counting it: that is what off
-        /// means, and counting it would report a door somebody opened ten times as ten refusals. One
-        /// already running skips, which is counted, because the press or the moment was real.
+        /// A switched-off sequence lets its own trigger go by uncounted; one already running counts it as skipped.
         /// </remarks>
         public void Triggered(Bindings bindings, int tick)
         {
@@ -512,20 +444,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Puts a run back where a reload interrupted it.
         /// </summary>
         /// <remarks>
-        /// A world saved mid-cycle has to carry on when it is loaded: the doors are where they were
-        /// and the room is as empty as it was, so forgetting the run would leave an airlock with its
-        /// inner door shut, its outer door closed, and nobody left to open either.
-        /// <para>
-        /// The step and the clock are restored; what was started is not. Whatever was invoked before
-        /// the save has either arrived by now or has not, and an await asks the world rather than
-        /// anything written down - so the acts between the previous await and this step are put back
-        /// as what it is waiting on, and the answer comes from the doors themselves.
-        /// </para>
-        /// <para>
-        /// Nothing is restored where the sequence cannot run or the step is no longer there. Both
-        /// happen when a program is edited between saving and loading, and a run resumed into a
-        /// sequence that has since changed is a machine doing something nobody asked for.
-        /// </para>
+        /// The step and the clock are restored, and the acts since the previous await are waited on again. Nothing is
+        /// restored where the sequence cannot run or the step is no longer there.
         /// </remarks>
         public void Resume(int step, bool waiting, int waitTicks, bool byHand)
         {
@@ -536,8 +456,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             IsRunning = true;
             IsWaiting = waiting;
             _memory.Step = step;
-            // What was left when the world was written down, and the first tick after loading is the
-            // one after that: pinning the whole of it there would end the wait a tick late.
+            // One less than was left at the save, since the first tick after loading is the one after it.
             _memory.WaitTicks = waitTicks > 1 ? waitTicks - 1 : 0;
             _memory.WaitUntil = -1;
             _memory.Holding = false;
@@ -545,12 +464,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Release();
             _memory.Started.Clear();
 
-            // Backwards to the await before this step, because that is the span an await covers. An
-            // act that has already arrived is no burden: Settled says so at once, and a sequence no
-            // longer running is none either.
-            //
-            // Which branch of an if ran is not written down, so a whole if before this step is passed over, and from
-            // inside a branch the branches before it are: what they started is left to the blocks.
+            // Backwards to the await before this step, the span an await covers. Which branch of an if ran is not
+            // written down, so a whole if before this step is passed over, and from inside a branch the branches
+            // before it are.
             for (var i = step - 1; i >= 0; i--)
             {
                 var earlier = _sequence.Steps[i];
@@ -583,11 +499,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Ends the run, and calls off what it had in flight.
         /// </summary>
-        /// <remarks>
-        /// Every way a run is cut short comes through here - switched off, stopped by hand, taken over,
-        /// at fault - so this is where a machine left moving is told to stop. What that means is the
-        /// block's own to say, and for most of them it means nothing at all.
-        /// </remarks>
         public void Stop()
         {
             Called();
@@ -598,10 +509,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Ends the run from outside, as <see cref="Stop" /> does, and keeps what stopped it and at which step, where
         /// <paramref name="sequence" /> is the number of the sequence that did, where one did.
         /// </summary>
-        /// <remarks>
-        /// Information rather than anything wrong: somebody meant it, and the construct is wherever the run got to. Kept until
-        /// the sequence next runs, and only where it was running, since stopping a sequence at rest is nothing happening.
-        /// </remarks>
+        /// <remarks>Kept until the sequence next runs, and only where it was running.</remarks>
         public void Interrupt(StopCause by, int sequence)
         {
             var running = IsRunning;
@@ -658,18 +566,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// was reaching for.
         /// </summary>
         /// <remarks>
-        /// An action that waits for nothing - switching a light on - is done
-        /// the instant it is invoked, so instant things stay instant and only things
-        /// that genuinely take time are waited on.
-        ///
-        /// A block that never gets there holds the sequence indefinitely. That is
-        /// the right failure: carrying on regardless is how a jammed door vents a
-        /// ship. It does mean being visibly stuck has to be impossible to miss, which
-        /// is why the step being waited on is reported rather than inferred.
-        /// <para>
-        /// A block that has said it is done with what it was told, short of what it waits for, is settled: found on the
-        /// cadence troubles are asked on, and kept until the act is done again or the run ends.
-        /// </para>
+        /// An action that waits for nothing is done the instant it is invoked. A block that has said it is done with what it
+        /// was told, short of what it waits for, is settled until the act is done again or the run ends.
         /// </remarks>
         bool Settled(int step)
         {
@@ -710,8 +608,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             FiredCount++;
             IsRunning = true;
 
-            // What stopped the last run is about the last run. Somebody starting this one has
-            // either mended it or is about to find out again.
+            // What stopped the last run is about the last run.
             _faults.Quit = SequenceFault.None;
             _faults.Met(SequenceFault.None);
             _faults.Hold(SequenceFault.None);
@@ -738,11 +635,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Walks the steps until something holds the sequence up.
         /// </summary>
-        /// <remarks>
-        /// An act starts and the next line follows in the same tick, so several acts overlap by
-        /// default. <see cref="Await" /> is what stops that, and it is what makes a numbered list
-        /// mean what it looks like it means.
-        /// </remarks>
+        /// <remarks>An act starts and the next line follows in the same tick, so acts overlap until an await.</remarks>
         void Advance()
         {
             while (_memory.Step >= 0 && _memory.Step < _sequence.Steps.Count)
@@ -765,8 +658,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 {
                     IsWaiting = false;
 
-                    // A block the step needs that is gone, or may have been swapped, is found here, where the run needs
-                    // it; the working-out it rests on is already done once per change.
+                    // A block the step needs that is gone, or may have been swapped, is found here; the working-out it rests
+                    // on is done once per change.
                     var needed = act.HasAction ? _workings.Compile(_memory.Step, _bindings) : null;
                     if (needed != null && needed.Problem != SequenceProblem.None)
                     {
@@ -774,7 +667,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
-                    // Asked of a block that is off, an action or a value is lost; so the run ends where it was asked, and says so.
+                    // Asked of a block that is off, an action or a value is lost, so the run ends here and says so.
                     var unable = needed == null ? SequenceFault.None : Unable(needed);
                     if (unable.Exists)
                     {
@@ -784,7 +677,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     Execute(_memory.Step);
 
-                    // Refused on the spot, as a script that does not run is: the run ends there and says which block.
+                    // Refused on the spot: the run ends here and says which block.
                     var refused = Refused(_memory.Step);
                     if (refused.Exists)
                     {
@@ -792,9 +685,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
-                    // Kept so an await below knows what it is waiting for. Nothing with a
-                    // destination is nothing to wait on, which is how an instant action stays
-                    // instant.
+                    // Kept so an await below knows what it is waiting for; an instant action is nothing to wait on.
                     if (!Settled(_memory.Step))
                         WaitOn(_memory.Step);
 
@@ -855,14 +746,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 if (step is Await)
                 {
-                    // Nothing to ask is not nothing to wait for. The half of the job that was
-                    // asked for has not happened, and walking on would act on the rest of the ship
-                    // as though it had - which for an airlock means opening the outer door because
-                    // the inner one is no longer there to be shut.
-                    //
-                    // A block gone while it is waited on ends the run there, the same as one gone when its step
-                    // is reached. Looked at the moment the wait is reached, so what has already arrived passes in
-                    // the same tick, and from then on when the hold's pace brings it round.
+                    // A block gone while it is waited on ends the run here, as one gone when its step is reached. Looked
+                    // at as the wait is reached, and from then on at the hold's pace.
                     var gone = Gone();
                     if (gone.Exists)
                     {
@@ -879,14 +764,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                             _memory.Holding = true;
                         }
 
-                        // A block that has been sent the other way by something else is not worth
-                        // waiting for: nothing is heading towards the state this step wants, and
-                        // no amount of waiting changes that. The run ends where it stands.
-                        //
-                        // Once a second, not every tick. A conflict is made by a person pressing
-                        // something or a trigger firing, so it cannot arrive faster than that, and
-                        // giving up a second later than it could have is a second nobody can
-                        // measure against a machine that has already stopped moving.
+                        // A block sent the other way by something else ends the run where it stands. Looked for once a
+                        // second, since a conflict comes from a press or a trigger.
                         var quit = ConflictsDue() ? Troubled() : SequenceFault.None;
                         if (quit.Exists)
                         {
@@ -909,9 +788,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 if (_memory.WaitUntil < 0)
-                    // A tick of the game's rather than a count of calls, so a wait lasts as long as it says however often
-                    // the runner is woken. Pinned when the step is first reached rather than entered, because a run resumed
-                    // from a save is entered before it knows what tick it is.
+                    // A tick of the game's, so a wait lasts as long as it says however often the runner is woken. Pinned
+                    // when the step is first reached, since a run resumed from a save is entered before it knows the tick.
                     _memory.WaitUntil = _memory.Looked + _memory.WaitTicks;
 
                 if (_memory.Looked < _memory.WaitUntil)
@@ -1023,10 +901,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first block still being waited for that is gone, or may have been swapped, or none.</summary>
-        /// <remarks>
-        /// Unbound rather than unsettled: the question is not whether the door has shut, it is whether there is still a
-        /// door. What the step's blocks come to is worked out once per change, so this is a lookup per step waited on.
-        /// </remarks>
+        /// <remarks>A lookup per step waited on; what the step's blocks come to is worked out once per change.</remarks>
         SequenceFault Gone()
         {
             foreach (var step in _memory.Outstanding)
@@ -1140,7 +1015,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first block an act at <paramref name="step" /> was refused by as it was done, with the block's reason; none where every block did it.</summary>
-        /// <remarks>Asked once, as the act is done, of what is done the moment it is told: what takes time says its troubles while it is waited for.</remarks>
+        /// <remarks>Asked once, as the act is done, and only of what is done the moment it is told.</remarks>
         SequenceFault Refused(int step)
         {
             var act = (Act)_sequence.Steps[step];
@@ -1162,7 +1037,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>How many times an act has been worked out.</summary>
-        /// <remarks>Counted so it can be shown that a run repeating what it asks works nothing out again.</remarks>
         public int Compilations => _workings.Compilations;
     }
 }

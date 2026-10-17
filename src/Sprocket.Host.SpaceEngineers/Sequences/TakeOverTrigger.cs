@@ -4,11 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// Does what was picked, and takes the trigger whose button it was given out of the system that had it.
     /// </summary>
-    /// <remarks>
-    /// A system's trigger is its own button and nothing else, so a system that loses the button loses the trigger with it,
-    /// and is left needing another. One edit, because it is one answer to one question; undoing it puts the trigger back
-    /// where it was.
-    /// </remarks>
     public sealed class TakeOverTrigger : SystemEdit
     {
         readonly SystemEdit _made;

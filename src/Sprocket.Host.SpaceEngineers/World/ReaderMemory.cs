@@ -5,18 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What one reader of one block remembers of it between looks.</summary>
     /// <remarks>
-    /// One per block a compiled step or trigger reads, made when it is compiled and let go when it is compiled again, so
-    /// nothing it holds outlives what it is about and nothing finds it by a lookup. Kept in what the world remembers, so the
-    /// first compile after a load takes up the one saved and the reader carries on as if nothing happened.
-    /// <para>
-    /// A class rather than a struct passed by reference, because a lambda taking a <c>ref</c> parameter has to spell out
-    /// every parameter's type in C# 6.
-    /// </para>
-    /// <para>
-    /// The same small shape for every member, so one list holds them all: a frame and a number covers a rotor's angle
-    /// and the frame it was seen at, and a vent's last frame moving gas. A member that needs more is a question about
-    /// the design, not a field to add.
-    /// </para>
+    /// Made when a step or trigger is compiled, and saved with the world, so the first compile after a load takes up the one
+    /// saved.
     /// </remarks>
     [ProtoContract]
     public sealed class ReaderMemory

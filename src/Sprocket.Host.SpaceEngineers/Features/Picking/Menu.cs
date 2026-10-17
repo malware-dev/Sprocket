@@ -5,10 +5,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>A list that hangs open, as wide as its last child and no wider, whatever the children above it would take.</summary>
-    /// <remarks>
-    /// A menu is as wide as its longest entry rather than as wide as whatever offered it room, so the box that narrows it,
-    /// above the entries, is given that width rather than asking for all there is.
-    /// </remarks>
     public class Menu : VStack
     {
         /// <inheritdoc />

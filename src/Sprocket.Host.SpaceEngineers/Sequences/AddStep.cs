@@ -12,10 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// One or more lines added as one edit.
         /// </summary>
-        /// <remarks>
-        /// Several, because a step and the await after it are one thing somebody did and have to be
-        /// one thing they can take back. Undoing half of it would leave an await waiting for nothing.
-        /// </remarks>
         public AddStep(ChangeKind change, int index, params Step[] steps)
         {
             _change = change;

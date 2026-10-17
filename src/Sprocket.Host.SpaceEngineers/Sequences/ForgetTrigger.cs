@@ -6,10 +6,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Takes a trigger out of a system, with the signal slot it names and what each instance answered it with, where no
     /// other trigger names that slot.
     /// </summary>
-    /// <remarks>
-    /// It comes back where it was. A trigger put back on the end would reorder the list somebody is looking at, which
-    /// reads as a second change rather than as the first one being undone.
-    /// </remarks>
     public sealed class ForgetTrigger : SystemEdit
     {
         readonly Trigger _going;

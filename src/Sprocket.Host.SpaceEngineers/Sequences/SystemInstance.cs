@@ -5,26 +5,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// One run of a system pointed at real blocks: an instance of a system blueprint, or a system's own run.
     /// </summary>
-    /// <remarks>
-    /// A system is what a system is; this is one somebody has. The front airlock and the port
-    /// airlock are two of these over one system, and fixing the system fixes both.
-    ///
-    /// The player never meets the word. It is called <c>Airlock 1</c> until they rename it,
-    /// the way the game itself calls a block <c>Interior Light 4</c> - provisional enough to
-    /// invite a better name without a dialog asking for one, and it never collides with the
-    /// name of the system it belongs to.
-    ///
-    /// What it is for is the blocks: each instance of a system blueprint answers the blueprint's slots with its own
-    /// doors and its own vent, which is why one blueprint can run two airlocks at opposite ends
-    /// of a ship. See <see cref="Fill(string, IList{string})" /> and <see cref="Resolve" /> - the runtime goes through them
-    /// whenever it works out which blocks a step or a watch is about.
-    /// </remarks>
     public sealed class SystemInstance
     {
         readonly AutomationSystem _system;
         bool _enabled;
 
-        /// <summary>Use <paramref name="number" /> of <paramref name="system" />.</summary>
+        /// <summary>Run <paramref name="number" /> of <paramref name="system" />.</summary>
         public SystemInstance(int number, AutomationSystem system)
         {
             Number = number;
@@ -39,11 +25,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// What the player called it, or empty if they have not said.
         /// </summary>
-        /// <remarks>
-        /// Empty is the ordinary state. The name shown is worked out from the system and this
-        /// number - Airlock 1 - so a system that only learns its own name later takes its
-        /// children with it rather than leaving them called something stale.
-        /// </remarks>
         public string Name { get; set; }
 
         /// <summary>Whether somebody has named it.</summary>
@@ -55,13 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// Whether this one may run, independently of the others.
         /// </summary>
-        /// <remarks>
-        /// Welding on the port airlock should stop the port airlock, not every airlock made from the
-        /// same blueprint.
-        ///
-        /// Separate from the system's switch, and each has to survive the other. Stopping the whole
-        /// system to work on it and starting it again must leave a deliberately stopped one stopped.
-        /// </remarks>
         public bool Enabled
         {
             get { return _enabled; }

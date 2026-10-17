@@ -34,8 +34,7 @@ namespace Lumel.Text
     {
         /// <summary>How many boxes deep a document can nest.</summary>
         /// <remarks>
-        ///     Reading a box and laying it out each go one call deeper per box, so a document that could nest without limit
-        ///     could run the stack out, which takes the game down.
+        ///     Each box is read and laid out one call deeper, and running the stack out takes the game down.
         /// </remarks>
         public const int Deepest = 16;
 
@@ -210,8 +209,8 @@ namespace Lumel.Text
 
         /// <summary>For each line of <paramref name="lines" /> that opens a box, the line of the fence that closes it, or -1 where none does; null where no line opens one.</summary>
         /// <remarks>
-        ///     One pass, pairing each closing fence with the innermost box still open, so finding where a box ends costs
-        ///     nothing however deep boxes nest. A closing fence with no box open pairs with nothing, and is words.
+        ///     One pass, so finding where a box ends costs nothing however deep boxes nest. A closing fence with no box open
+        ///     pairs with nothing, and is words.
         /// </remarks>
         static int[] Pairs(string[] lines)
         {

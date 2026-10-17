@@ -3,7 +3,6 @@ using VRageMath;
 namespace Lumel
 {
     /// <summary>An element that draws words, whose face, size and color a style can set.</summary>
-    /// <remarks>An element made of parts passes these on to whichever of its parts draw the words.</remarks>
     public interface ITextual
     {
         /// <summary>Which face the words are drawn in.</summary>

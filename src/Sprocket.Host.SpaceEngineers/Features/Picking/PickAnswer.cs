@@ -8,8 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// What somebody settled on: the things to act on, and what should happen to them.
     /// </summary>
     /// <remarks>
-    /// Handed back once, when they say they are done, rather than written into the sequence as the
-    /// picking goes along. There is therefore a moment where an answer exists and can be refused.
+    /// Handed back once, when the picking is done, and can still be refused then.
     /// </remarks>
     public sealed class PickAnswer
     {
@@ -51,11 +50,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>
         /// What was given for the action, where it takes options or sets a value, and empty otherwise.
         /// </summary>
-        /// <remarks>
-        /// Asked for on the button that finishes the picking, because an action that needs options is
-        /// not finished without them - so they arrive with the rest of the answer rather than
-        /// afterwards.
-        /// </remarks>
         public IList<Literal> Arguments => _arguments;
 
         /// <summary>The event or action that was chosen.</summary>

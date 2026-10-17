@@ -4,11 +4,7 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>The two entities a program's text is written with: <c>&amp;br;</c> for a line break and <c>&amp;amp;</c> for an ampersand.</summary>
-    /// <remarks>
-    /// Text is quoted on one line, so a line break in it is written as an entity and read back as a break. An ampersand is
-    /// written as <c>&amp;amp;</c> only where it would otherwise begin one of the two, so ordinary text keeps its ampersands as
-    /// they are.
-    /// </remarks>
+    /// <remarks>Persisted. An ampersand is written as <c>&amp;amp;</c> only where it would otherwise begin one of the two.</remarks>
     public static class TextEntities
     {
         const string Break = "&br;";

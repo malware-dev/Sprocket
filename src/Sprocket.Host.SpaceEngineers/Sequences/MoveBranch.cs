@@ -6,10 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Moves a branch of an if to another place in its chain, with its test and its steps; the first branch is always the if,
     /// so a branch moved to the top makes the if that was there an otherwise if.
     /// </summary>
-    /// <remarks>
-    /// The lines that open the branches stay where they stand and take the tests in their new order, so the if keeps what
-    /// belongs to the whole of it, its switch among them. An otherwise comes last and is not moved.
-    /// </remarks>
+    /// <remarks>The lines that open the branches stay where they stand and take the tests in their new order; an otherwise is never moved.</remarks>
     public sealed class MoveBranch : SequenceEdit
     {
         readonly int _open;

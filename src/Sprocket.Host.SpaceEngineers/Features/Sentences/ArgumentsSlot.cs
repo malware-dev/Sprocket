@@ -10,12 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>
     /// What an action was given: its options, or the new value a step sets.
     /// </summary>
-    /// <remarks>
-    /// One slot for all of them rather than one each, because the action says how many it wants and
-    /// nothing whatever about what they are for: three slots with no names on them would be three
-    /// questions somebody cannot tell apart. They are asked for and shown together, in order, which
-    /// is the only thing the game declares about them.
-    /// </remarks>
     public sealed class ArgumentsSlot : SentenceSlot
     {
         readonly List<Literal> _arguments = new List<Literal>();
@@ -39,15 +33,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             for (var i = 0; i < fields.Count; i++)
                 _fields.Add(fields[i]);
 
-            // One per field and not one per argument, and worked out where the question that fills a
-            // step in works it out, so the two cannot arrive at different words for one argument.
+            // The question that fills a step words its fields here too, so both say the same.
             ColorChannels.Shown(_arguments, _fields, _filled);
             if (plural && _filled.Count > 0)
                 _filled[0] = SentenceText.Plural(_filled[0]);
 
-            // Only where the whole slot is one colour. A slot showing a colour and two other arguments
-            // has no one thing to draw, and a rectangle standing for part of it would say the rest
-            // was not there.
             Color shade;
             byte alpha;
             if (_fields.Count == 1 && _fields[0].Edits == FieldEditor.Colour
@@ -67,11 +57,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>
-        /// The colour this slot holds, shown as itself rather than as the numbers behind it.
+        /// The color this slot shows as a swatch, or null where it holds none.
         /// </summary>
         /// <remarks>
-        /// Worked out when the slot is made, like everything else here, because a sentence is dressed
-        /// on every tick and reading a colour out of three arguments is not a per-tick job.
+        /// Made with the slot, because a sentence is dressed every tick.
         /// </remarks>
         public override Color? Sample => _sample;
 
@@ -111,24 +100,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// What each argument asks for, one per argument the action wants.
         /// </summary>
-        /// <remarks>
-        /// From the action rather than from what the step holds: a step whose arguments were never
-        /// filled in still has to be asked with as many fields as the action declared.
-        /// </remarks>
         public override IList<Field> Fields => _fields;
 
         /// <summary>
-        /// What opens in each field, one per field rather than one per argument.
+        /// What opens in each field, one per field.
         /// </summary>
         /// <remarks>
-        /// The spelling the program holds, so what opens in the field is what somebody put into it
-        /// rather than a rendering of it that would come back different. The exception is a field
-        /// standing over several arguments, where there is no one spelling in the program to show: a
-        /// colour's three numbers are shown as the one colour they make, and go back as three.
-        /// <para>
-        /// Made when the slot is, which is when the sentence is built. Worked out on the way past
-        /// instead, it would be worked out every tick, because dressing a chip is a per-tick job.
-        /// </para>
+        /// The spelling the program holds, with a color's three numbers shown as one color. Made with the slot,
+        /// because dressing a chip is a per-tick job.
         /// </remarks>
         public override IList<string> Filled => _filled;
 

@@ -10,11 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// Works out what a slot is allowed to contain, given what is already in the
     /// sequence.
     /// </summary>
-    /// <remarks>
-    /// Nothing invalid is ever offered. An illegal sequence is not rejected with a
-    /// message - it is simply unreachable, which is worth more than any error text
-    /// because the user never has to recover from anything.
-    /// </remarks>
     public static class Vocabulary
     {
         // What a value read with no arguments is given.
@@ -23,23 +18,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>
         /// Events every one of the given entities can raise.
         /// </summary>
-        /// <remarks>
-        /// The intersection, not the union. "When any of these happens" has to mean
-        /// something for every entity in the selection, or the sentence stops being
-        /// true of the things it names.
-        /// </remarks>
         public static List<EntityEvent> EventsFor(Bindings bindings, IList<string> names)
         {
             return EventsOf(Held(bindings, names));
         }
 
         /// <summary>
-        /// The same, asked about blocks somebody is holding rather than about a sequence.
+        /// Events every one of the blocks <paramref name="entityIds" /> can raise, asked of blocks somebody is holding.
         /// </summary>
-        /// <remarks>
-        /// A picker has blocks and no declarations yet - it is the thing that turns one into the
-        /// other. Everything else asks the first form.
-        /// </remarks>
         public static List<EntityEvent> EventsOf(GridWorld world, IList<long> entityIds)
         {
             return EventsOf(Blocks(world, entityIds));
@@ -64,22 +50,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// What starts a sequence when somebody picks these blocks and this moment.
         /// </summary>
         /// <remarks>
-        /// <b>The player is never asked this.</b> "When the airlock button is pressed" and "when the
-        /// inner door finishes closing" are one sentence to write and two different arrangements
-        /// underneath: the game already starts things from a button, through a toolbar slot, and it
-        /// announces nothing at all about a door finishing. Which of those it is belongs to the
-        /// block, so it is read off the block rather than put to the person at the screen.
-        /// <para>
-        /// Asked of the whole selection, because the moment has to arrive the same way for all of
-        /// them: a trigger that was half watched and half answered would fire twice for some of its
-        /// blocks and not at all for the rest. A mixed selection is treated as watched, which is the
-        /// one that reports itself honestly - see <c>SignalTrigger</c>.
-        /// </para>
-        /// <para>
-        /// A change Sprocket watches for is a signal written on the blocks, sent from any of them. Asked of all of them, it is
-        /// the value it is a change in, coming to be so on the last of them: "when all of these doors finish closing" is the
-        /// doors' status coming to be closed on all of them.
-        /// </para>
+        /// The block decides whether the moment is answered from a toolbar slot or watched by Sprocket. Asked of all the
+        /// blocks, a watched change is its value coming to be so on every one of them.
         /// </remarks>
         public static MomentTrigger Starter(List<EntityEvent> events, string eventId, bool all)
         {
@@ -115,7 +87,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <paramref name="compared" /> says, with whether the comparison asks for the block to be in that state rather than
         /// out of it; null where no signal is, or the comparison is no sameness.
         /// </summary>
-        /// <remarks>How a test or a watch on one of Sprocket's own values reads in a sentence: by the words of its signal.</remarks>
         public static EntityEvent Change(IList<EntityEvent> events, string value, Relation relation, Literal compared,
             out bool inState)
         {
@@ -225,16 +196,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// What each value one of those actions wants asks for, one per value.
+        /// What each value the action <paramref name="actionId" /> of these blocks wants asks for, one per value.
         /// </summary>
         /// <remarks>
-        /// Empty where the action wants nothing, so its length is how many are wanted and whether
-        /// to ask at all. Asked of the blocks somebody has just picked, because that is where the
-        /// answer is: the action is the block's own.
-        /// <para>
-        /// Asked by id and by which of the three ways it reaches the block, because the id alone can
-        /// name more than one: a switch's value and the act that flips it share one.
-        /// </para>
+        /// Asked by id and by form, because a switch's value and the act that flips it share one id.
         /// </remarks>
         public static List<Field> Fields(GridWorld world, IList<long> entityIds, string actionId, ReachKind form)
         {
@@ -251,7 +216,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether the action these blocks share by that id and form takes time to finish.</summary>
-        /// <remarks>Which is whether a step doing it is followed by a wait for it.</remarks>
         public static bool Lasts(GridWorld world, IList<long> entityIds, string actionId, ReachKind form)
         {
             var actions = ActionsOf(world, entityIds);
@@ -265,7 +229,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether any of the blocks offers something the others do not, which the shared list leaves out.</summary>
-        /// <remarks>Asked of the view showing, because each lists a different set.</remarks>
         public static bool Narrowed(GridWorld world, IList<long> entityIds, bool terminal)
         {
             var entities = Blocks(world, entityIds);
@@ -332,19 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Every block in <paramref name="world" /> with anything to offer: a moment to be watched where <paramref name="forEvents" />, and an action otherwise.</summary>
         /// <remarks>
-        /// Deliberately blind to what is already picked. Picking blocks decides what
-        /// can be said about them, never the other way round: a list that loses rows
-        /// as they are ticked reads as the ship shrinking, and a block somebody knows
-        /// they have going missing is the one thing a picker must never do.
-        ///
-        /// So an impossible pair is allowed to be made, and answered where the answer
-        /// belongs - the next stage has nothing in it and says so. That is a sentence
-        /// the user can read, which is worth more than a row that silently was not
-        /// there.
-        ///
-        /// A block with no events at all still never appears in an event picker. That
-        /// is not the selection talking, it is the question: there is nothing to ask
-        /// about a block that nothing can happen to.
+        /// Takes no account of what is already picked.
         /// </remarks>
         public static List<GridEntity> Capable(GridWorld world, bool forEvents)
         {
@@ -365,9 +316,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// What these names currently point at, skipping the ones that point at nothing.
         /// </summary>
         /// <remarks>
-        /// An adrift reference is included, because this decides what may be <i>said</i> about a
-        /// selection rather than what may be done to it. Refusing to offer "open" for a door whose
-        /// id died would leave somebody unable to describe the thing they are about to re-point.
+        /// An adrift reference is included, because this decides what may be said about a selection.
         /// </remarks>
         static List<GridEntity> Held(Bindings bindings, IList<string> names)
         {
@@ -432,8 +381,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>What the first of the blocks that has the value <paramref name="id" /> holds in it now, or null where none can say.</summary>
         /// <remarks>
-        /// Read the way a check reads it, so a step setting the value opens on what the block holds. A value that is worked
-        /// out from what was seen before, or that wants arguments to be read, has nothing to say here.
+        /// A value worked out from what was seen before, or one that wants arguments to be read, gives null.
         /// </remarks>
         public static Literal? Current(GridWorld world, IList<long> entityIds, string id)
         {

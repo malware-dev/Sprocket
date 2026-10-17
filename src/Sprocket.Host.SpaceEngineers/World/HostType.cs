@@ -4,11 +4,7 @@ using Sandbox.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>A type the host provides: things found on a block that are not blocks, like a screen.</summary>
-    /// <remarks>
-    /// Described once per definition, as a capability is, from a block standing for every block of it, and holding nothing
-    /// about any one block. A thing of the type is a block and the number passed to its function: screen 2 of a board. A
-    /// slot that expects the type holds one of each of its blocks, and a member of the type acts on that one.
-    /// </remarks>
+    /// <remarks>Described once per definition, from a block standing for every block of it, and holds nothing about any one block.</remarks>
     public abstract class HostType
     {
         /// <summary>The type as a slot expecting it names it, qualified: <c>ext.screen</c>.</summary>
@@ -46,7 +42,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The facet numbered <paramref name="number" /> a block of <paramref name="kind" /> has, or null where it has no such one.</summary>
-        /// <remarks>How an answer is checked against a block, and how a picker names what a slot holds of it.</remarks>
         public HostTypeFacet Find(EntityKind kind, int number)
         {
             foreach (var facet in kind.Facets(this))

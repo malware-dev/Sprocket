@@ -8,9 +8,8 @@ namespace Lumel.Controls
     /// <see cref="Ends" />.
     /// </summary>
     /// <remarks>
-    /// The turn is drawn past the spine's own width, into the room between the gutter and what it holds. Something that draws
-    /// its own share of a longer spine - one row of many - draws it with <see cref="Down" /> and <see cref="Turning" />, so every
-    /// stretch of a spine looks the same.
+    /// The turn is drawn past the spine's own width. Something that draws its own share of a longer spine, such as one row of
+    /// many, draws it with <see cref="Down" /> and <see cref="Turning" />.
     /// </remarks>
     public class Spine : Element
     {
@@ -28,7 +27,7 @@ namespace Lumel.Controls
         /// <summary>How far the line turns in at its end.</summary>
         public float Turn { get; set; }
 
-        /// <summary>The colour of the line.</summary>
+        /// <summary>The color of the line.</summary>
         public Color Color { get; set; }
 
         /// <summary>The element the spine turns in at, or null for a line the whole height of the spine.</summary>

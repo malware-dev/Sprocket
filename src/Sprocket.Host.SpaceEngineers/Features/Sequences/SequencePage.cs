@@ -19,12 +19,6 @@ using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     /// <summary>The screen of one sequence: what it is doing, its steps, and the ways to add a step.</summary>
-    /// <remarks>
-    /// The live state here is the reason this is more than an editor: watching a sequence fire, sit on step three and
-    /// skip a re-trigger saves somebody from running the program in their head. Locked, it is the same page with
-    /// nothing to press: every grip, part, bin and arrow stays where it stands and goes quiet, and the line the adders
-    /// stand on says why instead. The elements it is drawn with are declared in <c>SequencePage.View.cs</c>.
-    /// </remarks>
     public sealed partial class SequencePage : EditorPage
     {
         const int JustRanTicks = 10;
@@ -59,10 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public DurationPanel Lengths => _length != null && _length.IsOpen ? _length.Panel : null;
 
         /// <summary>What the sequence is called: its name, or its number where it has none.</summary>
-        /// <remarks>
-        /// No subtitle. What the sequence is doing belongs beside the switch that changes it, and what starts it is a row
-        /// on its system's screen: a sequence three triggers start has no one line to say so.
-        /// </remarks>
         public override string Title => SequenceText.Called(Editor.Texts, _sequence);
 
         /// <inheritdoc />
@@ -71,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string Help => Terms.Sequence;
 
-        /// <summary>Whether the screen has a switch: the logic system's, which also keeps the sequence from being changed while it may run.</summary>
+        /// <summary>Whether the screen has a switch, which is its logic system's.</summary>
         public override bool CanSwitch => _sequence.System != null;
 
         /// <inheritdoc />
@@ -91,16 +81,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>The command that runs the sequence by hand, whatever the switch says.</summary>
-        /// <remarks>
-        /// Somebody working on a system switches it off so its triggers leave it alone, which is exactly when they want to
-        /// see a sequence work.
-        /// </remarks>
         public override ICommand Runs => Editor.Act(CommandKind.RunNow, () => Editor.RunNow(_sequence));
 
         /// <inheritdoc />
         public override ICommand Stops => Editor.Act(CommandKind.StopNow, () => Editor.StopNow(_sequence));
 
-        /// <summary>Deletes the sequence, as a step its logic system's undo takes back; like every edit, while it cannot run.</summary>
+        /// <summary>The command that deletes the sequence, or null while it cannot be changed.</summary>
         public override ICommand Deletes => Editable ? Editor.Act(CommandKind.DeleteSequence, () => Editor.DeleteSequence(_sequence)) : null;
 
         /// <inheritdoc />
@@ -109,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string DeleteAbout => Editor.Texts.SequenceDelete;
 
-        /// <summary>Always true: the screen walks back the changes to the sequence's logic system, the last thing done to it on any of its screens.</summary>
+        /// <summary>Always true: the screen walks back the changes to the sequence's logic system.</summary>
         public override bool HasHistory => true;
 
         /// <summary>Whether a change to the sequence's logic system can be taken back from this screen, while nobody else holds the editor.</summary>
@@ -124,10 +110,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string RedoText => Editor.RedoLabel(_sequence.System, _sequence);
 
-        /// <summary>The sequence just made is as it was made: its name, and nothing done in the program since.</summary>
+        /// <summary>Whether the sequence just made is unchanged since it was made.</summary>
         public override bool Untouched => _sequence.Name == _madeName && Editor.Program.Edits == _madeEdits;
 
-        /// <summary>The name renaming overtypes: a sequence arrives already named, "Sequence 3", the way a block does.</summary>
+        /// <summary>The sequence's name, which renaming overtypes.</summary>
         public override string CustomName => _sequence.Name ?? "";
 
         /// <inheritdoc />
@@ -136,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.SequenceNameAbout;
 
-        /// <summary>Always true: a sequence has to be called something, as its name is what identifies it.</summary>
+        /// <summary>Always true: a sequence must have a name.</summary>
         public override bool NameRequired => true;
 
         /// <summary>Whether the sequence may be changed now: not while its system is switched on, and not while somebody else holds the editor.</summary>
@@ -158,8 +144,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override void Rename(string name)
         {
-            // Refused here as well as wherever it was typed, and cut to length in the one place that owns what a name
-            // may be. Folded into one edit, because a name arrives a letter at a time.
             var wanted = NameRules.Clean(name);
             if (wanted.Length == 0)
                 return;
@@ -206,7 +190,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Puts the screen's heading in <paramref name="parts" />: one part, what the sequence is called.</summary>
-        /// <remarks>What starts it is not here: a sequence may be started from several places, and its system already lists them.</remarks>
         public override void Heading(List<HeadingPart> parts)
         {
             var does = new HeadingPart("");
@@ -239,10 +222,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Brings the view up to what the sequence is doing, and to its steps where they have changed.</summary>
-        /// <remarks>
-        /// Every tick the page is showing. What it is doing and which step it is on are read off its state, which costs
-        /// nothing; what is wrong with it is worked out once a second.
-        /// </remarks>
+        /// <remarks>Called every tick the page is showing; faults are worked out once a second.</remarks>
         public override void Refresh()
         {
             var reshaped = _wiring != Editor.Program.Wiring;
@@ -271,7 +251,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var texts = Editor.Texts;
 
-            // Counted when the rows are new as well, so a broken step is marked from the first frame.
             var recount = Revised() || reshaped;
 
             if (reshaped)
@@ -289,12 +268,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (recount)
                 Mark();
 
-            // The ring around what is tied to what is under the pointer pulses while there is one.
             _ties.Light(_keys, _rows, _steps.IsCarrying);
             var glow = _ties.Glow(tick);
 
-            // A row is lit while the sequence is anywhere inside it, so a step stays lit while the wait after it is what
-            // is being waited on.
             for (var i = 0; i < _keys.Count; i++)
             {
                 var row = _rows[_keys[i]];
@@ -330,19 +306,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Puts a row in place for each step with the parts of its sentence, and offers what may be done now.</summary>
-        /// <remarks>
-        /// Walks the steps' blocks for their names, which is why it runs only when the program changes. A wait for a step
-        /// to finish is not a row: each row stands for a step and any wait after it, moved and deleted as one.
-        /// </remarks>
+        /// <remarks>Walks the steps' blocks for their names, so it runs only when the program changes.</remarks>
         void Arrange(Texts texts)
         {
             _wiring = Editor.Program.Wiring;
 
-            // Joined again after anything that builds the page, a change of language among them.
             _account.Forget();
 
-            // Everything that changes what the sequence does waits until its system is switched off: the commands are not
-            // made, so there is nothing to press by accident, and the page keeps its shape either way.
             var editable = Editable;
             _add.Show(new AddOption(texts.SequenceStep, texts.SequenceStepAbout, Kinds(texts, _sequence.Steps.Count)));
             _locked.IsVisible = !editable;
@@ -354,8 +324,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     ? Template.Fill(texts.SequenceHeld, "holder", Editor.Holder)
                     : texts.SystemTurnOffToEdit;
 
-            // While it can be changed, every branch ends in a row of its own holding the ways to add to it, standing where the
-            // line after the branch does. Kept by that line, so the row is the same row from one change to the next.
             var ends = new Dictionary<Step, object>();
             _keys.Clear();
             _shown.Clear();
@@ -380,8 +348,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _ends = ends;
             _rows.Show(_keys);
 
-            // Every line is counted but the ones that hold only ways to add: the end of a branch and the row closing an if. A
-            // branch's line stands where its if does, and the steps in it one further in.
             var depth = 0;
             var number = 0;
             var offTo = -1;
@@ -402,7 +368,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if ((branch || closes) && depth > 0)
                     depth--;
 
-                // Passed over whole while its if is switched off, so drawn as passed over, whatever each says.
                 if (step is If && step.IsOff && index > offTo)
                     offTo = _sequence.EndOf(index);
 
@@ -429,7 +394,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _ties.Cover(_keys, _rows);
         }
 
-        /// <summary>Makes <paramref name="row" /> the end of a branch: the ways to add a step to it, at the line <paramref name="at" /> the branch ends before.</summary>
+        /// <summary>Makes <paramref name="row" /> the end of a branch, holding the ways to add a step at the line <paramref name="at" />.</summary>
         void BranchEnd(StepRow row, Texts texts, int at, int depth, bool off, string locked)
         {
             row.Depth = depth;
@@ -448,7 +413,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Every kind of step there is, each added at the line <paramref name="at" />, in the order a menu offers them.</summary>
-        /// <remarks>Made when the page is arranged, which is when the program changes, so the line each adds at is current.</remarks>
         List<AddOption> Kinds(Texts texts, int at)
         {
             var kinds = new List<AddOption>
@@ -457,7 +421,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 new AddOption(SentenceText.WaitWord, texts.SequenceWaitAbout, Changes(CommandKind.AddWait, () => AddWait(at)))
             };
 
-            // Beside the delay.
             kinds.Add(new AddOption(SentenceText.AwaitWords, texts.SequenceAwaitAbout,
                 Changes(CommandKind.AddAwait, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, at, new Await())))));
 
@@ -467,10 +430,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return kinds;
         }
 
-        /// <summary>
-        /// Gives the row closing an if its plus for a branch, offering an otherwise only while it has none, and an otherwise the
-        /// way to make it an otherwise if where it stands.
-        /// </summary>
+        /// <summary>Gives the row closing an if, or an otherwise, its plus for adding a branch or a test.</summary>
         void Branches(StepRow row, Texts texts, Step step, int index)
         {
             row.Adds.Clear();
@@ -516,10 +476,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Says what is wrong once, on the bar, and marks the row it is wrong on.</summary>
-        /// <remarks>
-        /// Two statements that do not repeat each other: the words say what, the mark says where. A fault in what starts
-        /// it has no row here to mark, because what starts it is not on this page; the words still say it.
-        /// </remarks>
         void Mark()
         {
             var through = Editor.StandIn(_sequence.System);
@@ -528,7 +484,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var said = fault.Exists ? SequenceText.Problem(Editor.Texts, fault, _sequence) : "";
             var level = fault.IsWarning ? NoticeLevel.Warning : NoticeLevel.Problem;
 
-            // Said under the row of the line at fault; on the bar only where no row is.
             var at = -1;
             for (var i = 0; i < _keys.Count; i++)
             {
@@ -576,7 +531,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var run = step as Run;
             if (run != null)
             {
-                // Opened on the list that made it, to run or stop another.
                 var called = _sequence.System?.FindSequence(run.Number);
                 row.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name,
                     Changes(CommandKind.StepSlot, () => _stepwork.ChangeRun(run))));
@@ -587,11 +541,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (act == null)
                 return;
 
-            // Shown as written. A step whose blocks do not offer what it does is a fault, said on the sequence, and the
-            // gap in its sentence is where it is picked again.
             var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
 
-            // A state set on or off reads as enabled or disabled, its verb first and pressed to change it.
             var verb = act.Sets ? SentenceText.Switching(chosen, act.Arguments) : "";
             if (verb.Length != 0)
             {
@@ -605,8 +556,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (verb.Length != 0)
                 return;
 
-            // Last, because the blocks are what somebody scanning a list of steps is looking for and the values are the
-            // detail. Pressing it opens the step where its values are given, with the caret already in them.
             if (chosen == null || chosen.Wants == 0)
                 return;
 
@@ -618,10 +567,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Slots.Add(given);
         }
 
-        /// <summary>
-        /// Gives the row of an if, or of a branch that tests, the parts of its test: the blocks, the value unless it is their
-        /// status, and how it is compared with what.
-        /// </summary>
+        /// <summary>Gives the row of an if, or of a branch that tests, the parts of its test.</summary>
         void Tested(StepRow row, Step step, Comparison test)
         {
             var blocks = Editor.Blocks(_sequence.System, test.Targets);
@@ -629,8 +575,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var bindings = Editor.Runner.Bindings;
             var value = test.Names(Vocabulary.ActionsFor(bindings, seen));
 
-            // How several blocks are read is said first, and chosen from a menu under it as the comparison is; one block is read
-            // the same way whichever it is.
             if (blocks.Count > 1)
             {
                 var said = SentenceText.Quantified(test.Quantifier);
@@ -639,7 +583,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     Changes(CommandKind.StepSlot, () => _stepwork.Quantify(step, test, numeric)), ArgumentRole.Read));
             }
 
-            // A value on some blocks, as a set step and the script say it; a status is the blocks themselves.
             if (value == null || !value.IsStatus)
                 row.Slots.Add(new ActionSlot(value, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.What))));
 
@@ -649,8 +592,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (value == null)
                 return;
 
-            // The comparison is a part of its own, chosen from a menu hanging under it, and the value another, chosen with the
-            // picker as every other part is.
             var fields = ComparisonQuestion.Fields(value, Vocabulary.EventsFor(bindings, seen));
             var plural = test.Quantifier == Quantifier.All && blocks.Count > 1;
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, fields.GetRange(0, 1),
@@ -685,7 +626,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return StepKind.Do;
         }
 
-        /// <summary>Adds a wait of a second at <paramref name="at" />, in the player's unit, and opens the panel its length is given in.</summary>
+        /// <summary>Adds a wait of a second at <paramref name="at" /> and opens the panel its length is given in.</summary>
         void AddWait(int at)
         {
             var wait = new Wait(Editor.NewLength);
@@ -693,12 +634,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Open(wait, true);
         }
 
-        /// <summary>Opens the panel the length of <paramref name="wait" /> is given in, hung from its chip once the chip is on a screen.</summary>
-        /// <remarks>
-        /// The length is changed as the panel closes, as one change: a press anywhere else or Enter keeps what it says, and
-        /// Escape leaves the wait as it was. A wait <paramref name="added" /> a moment ago is added again with its length,
-        /// so adding it and giving it a length are one change, and Escape takes it away.
-        /// </remarks>
+        /// <summary>Opens the panel the length of <paramref name="wait" /> is given in, hung from its chip.</summary>
         void Open(Wait wait, bool added)
         {
             if (_length != null)
@@ -709,11 +645,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _length.Hang();
         }
 
-        /// <summary>
-        /// Where the row at <paramref name="from" /> may land, counted among the rows it does not carry: for an otherwise if, right
-        /// above each line opening a branch of its if, the if's own included, up to the otherwise or the end; for the rest, every
-        /// gap but the one just under the end of a branch.
-        /// </summary>
+        /// <summary>The places the row at <paramref name="from" /> may land, counted among the rows it does not carry.</summary>
         IList<int> Landings(int from)
         {
             if (from < 0 || from >= _keys.Count)
@@ -733,7 +665,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (r >= from && r < from + span || !(_keys[r] is Step))
                     continue;
 
-                // The line opening a branch, up to the otherwise, or the row closing the if where it has none.
                 var line = _shown[r];
                 if (!branches.Contains(line) && (line != end || otherwise >= 0))
                     continue;
@@ -747,10 +678,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Every gap between the rows the row at <paramref name="from" /> does not carry, but the one just under the end of a branch.</summary>
-        /// <remarks>
-        /// The end of a branch stands where the line after it does, so the gap under it is the same place as the gap above it:
-        /// a row dropped there would land at the end of the branch, and opening both would show two places that are one.
-        /// </remarks>
         List<int> Gaps(int from)
         {
             var span = _rows[_keys[from]].Carries + 1;
@@ -762,7 +689,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (r < _keys.Count && r >= from && r < from + span)
                     continue;
 
-                // An end row is the one key that is no step.
                 if (last == null || last is Step)
                     gaps.Add(above);
 
@@ -776,10 +702,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return gaps;
         }
 
-        /// <summary>
-        /// Moves the branch whose row somebody dragged to the place in its if they dropped it: above the if, it becomes the if,
-        /// and the if an otherwise if. Dropped anywhere else, or below the otherwise, it goes back where it was.
-        /// </summary>
+        /// <summary>Moves the dragged branch row at <paramref name="from" /> to the place in its if it was dropped.</summary>
         void Reorder(int from, int to)
         {
             var line = _shown[from];
@@ -789,8 +712,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (open < 0 || to < 0 || to > others)
                 return;
 
-            // The line the branch would land in front of; the row it lands above may be the end of the branch before, which
-            // stands where the line opening the next one does.
             var before = to == others ? _sequence.Steps.Count : _shown[to < from ? to : to + last - from + 1];
 
             var branches = _sequence.Branches(open);
@@ -798,7 +719,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (target < 0)
                 return;
 
-            // Counted with the branch itself taken out, and never past an otherwise, which comes last.
             var source = branches.IndexOf(line);
             if (target > source)
                 target--;
@@ -810,11 +730,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Editor.Do(_sequence, new MoveBranch(open, source, target));
         }
 
-        /// <summary>
-        /// Moves the row somebody dragged, with the rows it carries, to where they dropped it: <paramref name="to" /> is how many of
-        /// the rows it did not carry are above it now.
-        /// </summary>
-        /// <remarks>Where it lands in the sequence says which branch of which if it is in, as it says which step it follows.</remarks>
+        /// <summary>Moves the dragged row, with the rows it carries, to the place among the other rows given by <paramref name="to" />.</summary>
         void Move(int from, int to)
         {
             if (from < 0 || from >= _shown.Count || to == from)
@@ -834,7 +750,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var start = _shown[from];
             var count = _shown[last] + 1 - start;
 
-            // In front of the line the row it lands above starts on, less the run itself where it is moving down.
             var before = to == others ? _sequence.Steps.Count : _shown[to < from ? to : to + last - from + 1];
             var landing = before > start ? before - count : before;
 

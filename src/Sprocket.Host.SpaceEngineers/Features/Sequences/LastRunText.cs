@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
-    /// <summary>The bar's words for how the last run of a sequence ended and what it skipped, joined again only when they change.</summary>
+    /// <summary>The bar's words for how the last run of a sequence ended and what it skipped.</summary>
     public sealed class LastRunText
     {
         readonly Sequence _sequence;
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>What stopped the last run and where, in one line.</summary>
-        /// <remarks>Asked every tick while it is the status, so the line is joined again only when the stop it says is another.</remarks>
+        /// <remarks>Called every tick while it is the status; makes a new line only when the stop changes.</remarks>
         public string CalledOff(Texts texts, SequenceRunner state)
         {
             if (state.StoppedBy == _stoppedBy && state.StoppedAt == _stoppedAt && state.StoppedFrom == _stoppedFrom
@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>What was asked for and did not happen, and why not, in one line when both happened.</summary>
-        /// <remarks>Asked every tick, so the line is joined again only when a count has changed.</remarks>
+        /// <remarks>Called every tick; makes a new line only when a count changes.</remarks>
         public string Skips(Texts texts, int busy, int off)
         {
             if (busy == _busy && off == _off)

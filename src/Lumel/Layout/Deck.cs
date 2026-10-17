@@ -6,8 +6,8 @@ namespace Lumel.Layout
 {
     /// <summary>Children in one place, one over another like a deck of cards, with only the one on top shown.</summary>
     /// <remarks>
-    /// Every card is measured and the deck takes the largest, so turning to another card never changes its size. Only the
-    /// card on top is drawn, pressed or reached by the keyboard; the rest are its visual children only while on top.
+    /// The deck is as large as its largest card, so turning to another card never changes its size. Only the card on top
+    /// is drawn, pressed or reached by the keyboard.
     /// </remarks>
     public class Deck : Panel
     {

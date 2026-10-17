@@ -4,14 +4,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A projector: whether a blueprint is showing, how far its build has come, and where and how it shows.</summary>
-    /// <remarks>
-    /// The projector's own switch runs it, so the words every switch has show and hide the blueprint. None of the build's
-    /// counts raises an event; the projector works them out again on its own pace, and they are looked at.
-    /// <para>
-    /// The game keeps the counts of the last blueprint once it is taken away, so blocks left comes to nothing only as a
-    /// build is finished, whether or not the projection is kept.
-    /// </para>
-    /// </remarks>
+    /// <remarks>The build's counts raise no event and are looked at; the game keeps the last blueprint's counts after it is taken away.</remarks>
     public sealed class Projector : Capability
     {
         const string Unheard = "A projector raises nothing as its build moves on.";

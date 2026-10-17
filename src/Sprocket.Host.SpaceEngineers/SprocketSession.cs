@@ -23,12 +23,7 @@ namespace Sprocket.Host.SpaceEngineers
     /// Owns the Sprockets this machine runs, and the copy of one it is editing, and gives them a clock.
     /// </summary>
     /// <remarks>
-    /// A unit runs whether or not anybody is looking at it, which is the whole point of automation, so the
-    /// ticking lives here and not in the screen. The screen is a way to look at a unit and nothing more.
-    /// <para>
-    /// Sprockets run on the server alone. A client edits a copy the server lends it - see
-    /// <see cref="Handover" /> - and the copy runs nothing.
-    /// </para>
+    /// Sprockets run on the server alone; a client edits a copy the server lends it, and the copy runs nothing.
     /// </remarks>
     [MySessionComponentDescriptor(MyUpdateOrder.AfterSimulation)]
     public class SprocketSession : MySessionComponentBase
@@ -78,19 +73,16 @@ namespace Sprocket.Host.SpaceEngineers
 
         long _copyOf;
 
-        /// <summary>The last copy this client edited, kept after it was handed back so its way back is there if it is lent again unchanged; or null.</summary>
         SprocketUnit _rested;
 
         long _restedOf;
 
-        /// <summary>The program <see cref="_rested" /> handed back, which the server lends again where nobody changed it since.</summary>
         string _restedProgram;
 
         long _asked;
 
         readonly Dictionary<long, EditorHabits> _habits = new Dictionary<long, EditorHabits>();
 
-        /// <summary>This client's player's settings, as the server last lent them; the world's own are on the server.</summary>
         readonly PlayerMemory _mine = new PlayerMemory();
 
         Interval _keeping = new Interval(Keeping);
@@ -109,63 +101,33 @@ namespace Sprocket.Host.SpaceEngineers
 
         GameCodex _codex;
 
-        /// <summary>
-        /// The settings the world runs by: read the first time anything wants to know where this machine runs the world, and
-        /// as the server last said on a client, every default until it has.
-        /// </summary>
-        /// <remarks>
-        /// Not in <see cref="LoadData" />: mod storage is not reliably there that early, and a read
-        /// that quietly answered every default would be indistinguishable from a file saying nothing.
-        /// By the time a block adopts itself the world is up.
-        /// </remarks>
+        /// <summary>The settings the world runs by, read on first use on the server and as the server last sent them on a client.</summary>
+        /// <remarks>Not to be asked from <see cref="LoadData" />, where mod storage is not reliably there yet.</remarks>
         Settings Asked => _settings ?? (_settings = IsServer ? Settings.Read() : new Settings(false));
 
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
-        /// <remarks>Static for the reason <see cref="_current" /> is: a block's own component reaches the session only through statics, and it registers the terminal button and toolbar action in these words.</remarks>
         public static Texts Texts => _current?._texts;
 
         /// <summary>The field boxes a gravity generator's fit is showing, or null outside a session.</summary>
-        /// <remarks>Static for the reason <see cref="Texts" /> is: the gravity generator's buttons reach the session only through statics.</remarks>
         public static ShortfallMarks Marks => _current?._marks;
 
         /// <summary>Every door's auto-close delay, or null outside a session.</summary>
-        /// <remarks>Static for the reason <see cref="Texts" /> is: a door's slider and its own component reach the session only through statics.</remarks>
         public static AutoClose Doors => _current?._doors;
 
         /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
-        /// <remarks>Static for the reason <see cref="Texts" /> is: a block's own component reads it as it makes the terminal controls.</remarks>
         public static bool DeveloperMode => _current != null && _current.Asked.DeveloperMode;
 
-        /// <summary>
-        /// The unit a block carries, or null. Never creates one.
-        /// </summary>
-        /// <remarks>
-        /// What a fired toolbar slot resolves through: the slot names the block, and the block is
-        /// the only thing that says which program it belongs to.
-        /// </remarks>
+        /// <summary>The unit a block carries, or null; never creates one.</summary>
         public static SprocketUnit UnitOf(IMyTerminalBlock block)
         {
             return _current == null ? null : _current._roster.Kept(block);
         }
 
-        /// <summary>
-        /// Whether this machine is the one running programs.
-        /// </summary>
-        /// <remarks>
-        /// For anything that has to tell "there is no Sprocket here" from "this machine is not the one
-        /// keeping it": a display drawn on a client has no program to read, and saying the construct has
-        /// no automation would be a lie in the one place a person would believe it.
-        /// </remarks>
+        /// <summary>Whether this machine is the one running programs.</summary>
         public static bool Runs => IsServer;
 
-        /// <summary>
-        /// Every Sprocket mechanically connected to this block, in no particular order.
-        /// </summary>
-        /// <remarks>
-        /// The same reach a Sprocket itself has - <c>GridGroups</c> on the mechanical group, which is
-        /// what a player means by "this ship" - so a display on a rotor head lists the Sprocket in the
-        /// hull. Filled into a list the caller owns, because this is asked on a cadence forever.
-        /// </remarks>
+        /// <summary>Every Sprocket mechanically connected to this block, in no particular order.</summary>
+        /// <remarks>Clears and fills <paramref name="into" />, allocating nothing.</remarks>
         public static void OnConstruct(IMyCubeBlock block, List<SprocketUnit> into)
         {
             into.Clear();
@@ -189,13 +151,10 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Puts the automation button where a programmable block's controls are shown.</summary>
-        /// <remarks>
-        /// Here rather than in <see cref="LoadData" />, where <c>MyAPIGateway.TerminalControls</c> does not
-        /// exist yet. Subscribing adds nothing to the block type, unlike adding a control, so it is safe
-        /// before any programmable block has come alive. See <c>SprocketControls</c>.
-        /// </remarks>
         public override void BeforeStart()
         {
+            // MyAPIGateway.TerminalControls does not exist yet in LoadData. Subscribing adds nothing to
+            // the block type, so it is safe before any programmable block has come alive.
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
             MyAPIGateway.TerminalControls.CustomControlGetter += GravityFieldButtons.Arrange;
             MyAPIGateway.TerminalControls.CustomControlGetter += DoorControls.Arrange;
@@ -218,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>The name the game knows the player <paramref name="identity" /> by, online or not; empty where it knows none.</summary>
-        /// <remarks>Asked only as the resume screen is made, so the game's list of identities is walked a handful of times a session.</remarks>
+        /// <remarks>Walks the game's whole list of identities; asked only as the resume screen is made.</remarks>
         static string Named(long identity)
         {
             if (MyAPIGateway.Players == null)
@@ -243,7 +202,6 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Reads the player's library out of the global store, once, as the world starts.</summary>
-        /// <remarks>A file that will not read is logged and listed as it is; an index that will not read is never written over.</remarks>
         void FindShelf()
         {
             var trouble = _shelf.Read();
@@ -257,10 +215,6 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Reads the index of the world's backups out of world storage, once, as the world starts.</summary>
-        /// <remarks>
-        /// An index that will not read is logged and never written over: the backups go on being taken this session, and are
-        /// not kept.
-        /// </remarks>
         void FindBackups()
         {
             var trouble = _backups.Read();
@@ -268,7 +222,6 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Unpacks the files in the world's carrier, once, as the world starts.</summary>
-        /// <remarks>Files that will not read are logged and ignored, and the next save writes the files over them.</remarks>
         void FindCarrier()
         {
             var found = Carrier.Find();
@@ -288,12 +241,11 @@ namespace Sprocket.Host.SpaceEngineers
         /// <inheritdoc />
         public override void LoadData()
         {
-            // Static because Space Engineers constructs a session component and hands it to nothing: a terminal
-            // control, a screen host and a block's own component reach it only through statics. It holds the one
-            // instance, which is an ordinary object.
+            // Space Engineers hands a session component to nothing, so terminal controls, screen hosts and
+            // block components reach it only through this static.
             _current = this;
 
-            // Before Speak, which rewords every Sprocket.
+            // Made before Speak, which rewords every Sprocket.
             _roster = new Roster(() => Asked, _rota, _texts, _memories, _backups, Frame, Later)
             {
                 Shelf = _shelf,
@@ -321,7 +273,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Loads the mod's texts in the player's language, and listens for the language to change.</summary>
-        /// <remarks>A dedicated server has nobody to read them, and says them as they were written.</remarks>
+        /// <remarks>On a dedicated server the texts stay as written.</remarks>
         void Speak()
         {
             if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated || MyAPIGateway.Gui == null
@@ -336,10 +288,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Loads the texts again where the language has changed.</summary>
-        /// <remarks>
-        /// Asked whenever a screen closes, because the options screen closing is when a new language takes
-        /// and the game announces nothing more particular. One comparison each time.
-        /// </remarks>
+        /// <remarks>Called whenever any screen closes, since the game announces no language change; costs one comparison.</remarks>
         void Closed(object screen)
         {
             if (_gameTexts != null && MyAPIGateway.Session != null && MyAPIGateway.Session.Config != null
@@ -362,10 +311,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>The Sprocket of the construct a programmable block is on, by entity id, made where it has none; or null.</summary>
-        /// <remarks>
-        /// On the server, for a client's claim, so only a programmable block is ever taken on. An id the automation has
-        /// moved on from is followed to the block it moved to, so a client that was lent it goes on reaching it.
-        /// </remarks>
+        /// <remarks>Runs on the server, for a client's claim.</remarks>
         SprocketUnit Found(long id)
         {
             var block = MyAPIGateway.Entities == null
@@ -375,13 +321,7 @@ namespace Sprocket.Host.SpaceEngineers
             return block == null ? null : Adopt(block);
         }
 
-        /// <summary>
-        /// The server lending this client a Sprocket: the editor opens on a copy of it.
-        /// </summary>
-        /// <remarks>
-        /// Handed straight back where the block is not here, which is a client that has not been sent the
-        /// grid yet, or one that has lost it since asking.
-        /// </remarks>
+        /// <summary>The server lending this client a Sprocket, which opens the editor on a copy of it.</summary>
         void Given(long id, string program, string state)
         {
             var block = MyAPIGateway.Entities == null
@@ -398,8 +338,7 @@ namespace Sprocket.Host.SpaceEngineers
             if (_copy != null)
                 _copy.Dispose();
 
-            // The copy handed back last, lent again with nothing changed since, is taken up again with its way back; anything
-            // else is built afresh, since a history of what somebody else's change replaced cannot be walked.
+            // A copy's undo history holds only while nobody else has changed the program since it was handed back.
             var again = _rested != null && _restedOf == id && _restedProgram == program;
             var copy = again ? _rested : SprocketUnit.Copy(block, Asked, _texts, program, state);
             if (!again && _rested != null)
@@ -420,15 +359,14 @@ namespace Sprocket.Host.SpaceEngineers
 
             copy.Editor.Habits = HabitsFor(id);
 
-            // Running something by hand runs it where it is kept. What is not built there yet - a
-            // change still on its way - is simply not found, and nothing happens.
+            // Runs on the server, where a change still on its way is not found yet.
             copy.Editor.Elsewhere = (sequence, instance, stops) =>
             {
                 _handover.Keep(id, copy);
                 _handover.Run(id, sequence, instance, stops);
             };
 
-            // And a picked button is written there too, after the program that wants it.
+            // The program that wants the button reaches the server first.
             copy.Editor.Wire = panel =>
             {
                 _handover.Keep(id, copy);
@@ -444,8 +382,7 @@ namespace Sprocket.Host.SpaceEngineers
         {
             Show(Opened(block), copy, delegate
             {
-                // What changed since the last comparison goes before the Sprocket is handed back,
-                // because a change arriving from somebody who no longer holds it is not taken.
+                // Kept before handed back: the server ignores a change from somebody who no longer holds it.
                 _handover.Keep(id, copy);
                 _handover.Hand(id);
                 if (_copy == copy)
@@ -463,14 +400,7 @@ namespace Sprocket.Host.SpaceEngineers
             });
         }
 
-        /// <summary>
-        /// A client's change arriving at the server: the Sprocket is built again from it, carrying on
-        /// with what it was running, and written into the block.
-        /// </summary>
-        /// <remarks>
-        /// Left as it was where the client's text will not read, which is logged: a program half read
-        /// is one nothing must be saved over.
-        /// </remarks>
+        /// <summary>A client's change arriving at the server, which builds the Sprocket again from it and writes it into the block.</summary>
         void Changed(long id, string program, string switches)
         {
             SprocketUnit was = _roster.Kept(id);
@@ -485,12 +415,10 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Whether the player at this machine may change the world's settings now: an admin, or higher, with creative tools on or in a creative world.</summary>
-        /// <remarks>
-        /// The game gives a mod no way to ask about creative tools directly. Copy and paste is on for the local player exactly
-        /// while they have creative tools on, or the world is creative and allows it.
-        /// </remarks>
         static bool Administers()
         {
+            // The game gives a mod no way to ask about creative tools. Copy and paste is on for the local
+            // player exactly while they have creative tools on, or the world is creative and allows it.
             var session = MyAPIGateway.Session;
             return session != null && session.PromoteLevel >= MyPromoteLevel.Admin && (session.EnableCopyPaste || session.CreativeMode);
         }
@@ -509,7 +437,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Runs the world by <paramref name="next" /> from now on, keeps each level that changed in its own file, and has every Sprocket here follow.</summary>
-        /// <remarks>On the machine that runs the world.</remarks>
+        /// <remarks>Called on the machine that runs the world.</remarks>
         void Rule(Settings next)
         {
             var was = Asked;
@@ -527,7 +455,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _copy.Apply(_settings);
         }
 
-        /// <summary>The settings in this world of the player with <paramref name="identity" />; on a client, which knows its own alone, its own.</summary>
+        /// <summary>The settings in this world of the player with <paramref name="identity" />, or on a client its own player's.</summary>
         PlayerMemory Player(long identity)
         {
             return IsServer ? _memories.Player(identity) : _mine;
@@ -547,11 +475,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Tells every client what the server wrote into a Sprocket's block.</summary>
-        /// <remarks>
-        /// The program and its switches, and never what is running: a grid pasted from a client's copy
-        /// starts as a fresh Sprocket rather than halfway through somebody else's run. Told only where
-        /// it changed since the last telling, so the world save costs a comparison per Sprocket.
-        /// </remarks>
+        /// <remarks>Sends only what changed since the last telling, so a world save costs a comparison per Sprocket.</remarks>
         void Spread(SprocketUnit unit)
         {
             if (!IsServer || !unit.Program.Intact)
@@ -574,14 +498,7 @@ namespace Sprocket.Host.SpaceEngineers
                 BlockStorage.Store(block, program, switches);
         }
 
-        /// <summary>
-        /// The server turning this client down, which it says rather than doing nothing, and where
-        /// somebody else is editing it, opening it to look at.
-        /// </summary>
-        /// <remarks>
-        /// What opens is the Sprocket as it stood when this client asked. The holder's edits reach the
-        /// server, not the ones looking on.
-        /// </remarks>
+        /// <summary>The server turning this client down, which says so or, where somebody else is editing it, opens it to look at.</summary>
         void Refused(long id, string holder, string program, string state)
         {
             var block = MyAPIGateway.Entities == null
@@ -597,7 +514,7 @@ namespace Sprocket.Host.SpaceEngineers
             Look(block, holder, program, state);
         }
 
-        /// <summary>Tells the player that the automation on <paramref name="id" />'s construct belongs to its owners, and opens nothing.</summary>
+        /// <summary>Tells the player that the automation on <paramref name="id" />'s construct belongs to its owners.</summary>
         void Foreign(long id)
         {
             var block = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
@@ -605,13 +522,7 @@ namespace Sprocket.Host.SpaceEngineers
             Say(Template.Fill(_texts.TerminalForeign, "construct", construct));
         }
 
-        /// <summary>
-        /// Opens the editor on a copy to look at while <paramref name="holder" /> edits the real one.
-        /// </summary>
-        /// <remarks>
-        /// The editor is what says who is editing, at the head of every page, so there is no message
-        /// beside it: this is pressed in the terminal, where nothing on the HUD can be seen.
-        /// </remarks>
+        /// <summary>Opens the editor on a copy to look at while <paramref name="holder" /> edits the real one.</summary>
         void Look(IMyTerminalBlock block, string holder, string program, string state)
         {
             if (_copy != null)
@@ -640,24 +551,15 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Says something to the player in a box over whatever screen is open.</summary>
-        /// <remarks>
-        /// Not the HUD's notifications: this answers a press in the terminal, and the HUD does not
-        /// draw while the terminal is open.
-        /// </remarks>
         void Say(string what)
         {
+            // A mission screen, since the HUD does not draw while the terminal is open.
             if (MyAPIGateway.Utilities != null)
                 MyAPIGateway.Utilities.ShowMissionScreen(_texts.TerminalOpen, null, null, what);
         }
 
-        /// <summary>
-        /// Takes on a block that carries a program, so it starts running.
-        /// </summary>
-        /// <remarks>
-        /// Static because the caller is a game logic component on the block, which has no way to reach a
-        /// session component otherwise. Answers null off the main path rather than throwing: a block can
-        /// come alive during a session teardown and that is not a thing to crash over.
-        /// </remarks>
+        /// <summary>Takes on a block that carries a program, so it starts running.</summary>
+        /// <remarks>Returns null outside a session or on a client.</remarks>
         public static SprocketUnit Adopt(IMyTerminalBlock block)
         {
             if (_current == null || block == null || !IsServer)
@@ -666,30 +568,12 @@ namespace Sprocket.Host.SpaceEngineers
             return _current._roster.Adopt(block);
         }
 
-        /// <summary>
-        /// Whether this machine is the one that runs things.
-        /// </summary>
-        /// <remarks>
-        /// Sprocket's runtime lives on the server and nowhere else, which is also where the game raises a
-        /// button press: <c>MyButtonPanel.ActivateButton</c> is a server event, so a client never hears one.
-        /// A client running its own copy would be a second airlock nobody asked for, opening the same doors
-        /// a moment apart.
-        ///
-        /// True in single player, where the client is the server.
-        /// </remarks>
+        /// <summary>Whether this machine is the one that runs things.</summary>
+        /// <remarks>True in single player.</remarks>
         static bool IsServer => MyAPIGateway.Multiplayer == null || MyAPIGateway.Multiplayer.IsServer;
 
-        /// <summary>
-        /// Opens the editor on the construct this block sits on.
-        /// </summary>
-        /// <remarks>
-        /// The terminal is closed rather than left standing behind, because two screens describing the same
-        /// ship is clutter and the one underneath cannot be reached anyway while this one has focus.
-        /// <para>
-        /// A client asks the server for it and opens when the server answers. The server's own player
-        /// opens it at once, holding it the way a client would, so nobody else can edit it meanwhile.
-        /// </para>
-        /// </remarks>
+        /// <summary>Opens the editor on the construct this block sits on.</summary>
+        /// <remarks>On a client the editor opens only once the server answers.</remarks>
         public static void Open(IMyTerminalBlock block)
         {
             if (_current == null || block == null)
@@ -779,8 +663,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             int frame = Frame();
 
-            // Ticked for its editor, which is all a copy has that moves, and compared with what the
-            // server was last sent on a cadence of its own. A copy lent to look at sends nothing.
+            // A copy with a holder is only being looked at, and sends nothing.
             if (_copy != null)
             {
                 _copy.Tick(frame);
@@ -820,10 +703,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Whether the player with <paramref name="id" /> is connected to this server.</summary>
-        /// <remarks>
-        /// The server's own player counts, which is a host holding a Sprocket from its own screen. The
-        /// list is read afresh for each lease, every few seconds, and only while a lease stands.
-        /// </remarks>
+        /// <remarks>The server's own player counts. Reads the player list afresh, every few seconds while a lease stands.</remarks>
         bool Connected(ulong id)
         {
             if (MyAPIGateway.Multiplayer != null && id == MyAPIGateway.Multiplayer.MyId)
@@ -846,13 +726,10 @@ namespace Sprocket.Host.SpaceEngineers
 
 
 
-        /// <summary>
-        /// Writes every program into its hero as the world saves, before the entities are written out.
-        /// </summary>
+        /// <summary>Writes every program into its hero as the world saves, before the entities are written out.</summary>
         /// <remarks>
-        /// The game asks for a session component's object builder before it writes the entities, and runs its
-        /// <c>SaveData</c> after, so this is the last moment a block's storage can still reach this save. The screen also
-        /// writes as it closes; this covers saving with the editor open, and costs a string per Sprocket.
+        /// The game asks for this before writing the entities and runs <c>SaveData</c> after, so this is the last moment a
+        /// block's storage reaches the save. Costs a string per Sprocket.
         /// </remarks>
         public override MyObjectBuilder_SessionComponent GetObjectBuilder()
         {
@@ -885,10 +762,7 @@ namespace Sprocket.Host.SpaceEngineers
         }
 
         /// <summary>Packs the carrier's files into the world's carrier where they changed, making it where the world has none yet.</summary>
-        /// <remarks>
-        /// Once a save, and only after a change, which costs what packing the files costs and nothing during play. A world that
-        /// never had a file written is given no carrier.
-        /// </remarks>
+        /// <remarks>Runs once a save and packs only after a change, so it costs nothing during play.</remarks>
         void Carry()
         {
             if (!_carries || !IsServer || !_carried.Changed)

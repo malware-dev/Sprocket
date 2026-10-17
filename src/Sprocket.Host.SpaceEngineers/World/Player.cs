@@ -15,12 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// A display name without the mark the game draws in front of it.
         /// </summary>
-        /// <remarks>
-        /// <b>Only from the front, and only the game's own marks.</b> What the game prefixes is not part
-        /// of anybody's name and means nothing in another font, so it has no business becoming the
-        /// namespace a system is written under. Everything after it is what the player typed, and people
-        /// put all sorts into a name - so the rest is left exactly as it arrived, whatever it holds.
-        /// </remarks>
         public static string Plain(string shown)
         {
             if (string.IsNullOrEmpty(shown))
@@ -36,23 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// The colours this player keeps to paint with, copied out into <paramref name="into" />.
+        /// The colors this player keeps to paint with, copied out into <paramref name="into" />.
         /// </summary>
-        /// <remarks>
-        /// <b>Read and never written.</b> These are the fourteen swatches somebody paints their ship
-        /// with, and a colour chosen for a light has no business rewriting them. The property does have
-        /// a setter, and what it writes is local: it fills the slots and refreshes a client-side cache,
-        /// and tells the server nothing.
-        /// <para>
-        /// Copied rather than held, because the getter hands back the live list. Anything that kept it
-        /// and changed an entry would have edited the player's palette without going through the setter
-        /// at all.
-        /// </para>
-        /// <para>
-        /// Empty where there is nobody to ask, which is every machine with no session on it. A dialog
-        /// with no swatches to show leaves the row out rather than drawing an empty one.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Adds none on a machine with no session. The game's getter hands back the live list, so it is copied.</remarks>
         public static void Colours(IList<Hsv> into)
         {
             if (MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null)

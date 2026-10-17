@@ -11,10 +11,9 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look
 {
-    /// <summary>How the views converted to the size scale look.</summary>
+    /// <summary>How the screens' views look.</summary>
     public static class Styles
     {
-        /// <summary>The soft square every shadow is drawn with.</summary>
         static readonly NineSlice Shade = new NineSlice(Materials.Shadow, 64, 24);
 
         /// <summary>The shadow a floating window casts, lying well away from the page as if lit from the top left.</summary>
@@ -372,11 +371,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         };
 
         /// <summary>A part of a sentence: a chip with a line along its bottom, the one look nothing else may borrow.</summary>
-        /// <remarks>
-        /// One that cannot be pressed keeps its place and its shape, lifted only a notch off the page so the words still
-        /// read as one part. Color alone marks one still waiting to be filled, because the game ships one weight and
-        /// there is no italic to lean it into.
-        /// </remarks>
         public static readonly SlotStyle Slot = new SlotStyle
         {
             Base =
@@ -559,7 +553,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.Line }
         };
 
-        /// <summary>The button that finishes a screen or answers a dialog as Enter would, greyed while there is nothing to finish.</summary>
+        /// <summary>The button that finishes a screen or answers a dialog as Enter would, grayed while there is nothing to finish.</summary>
         public static readonly ButtonStyle Primary = new ButtonStyle
         {
             Base =
@@ -841,7 +835,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         };
 
         /// <summary>A thing to choose in a column, lit under the pointer.</summary>
-        /// <remarks>Padded on its right alone: the box at its head and what follows it hold the rest of the room themselves.</remarks>
         public static readonly ElementStyle Pick = new ElementStyle
         {
             Base = { Padding = new Thickness(0f, 0f, 12f, 0f) },

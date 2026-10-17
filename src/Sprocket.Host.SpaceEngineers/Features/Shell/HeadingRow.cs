@@ -9,7 +9,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>A screen's heading: each part's name, renamed in place where it can be or pressed to open what it names, with an arrow between parts.</summary>
+    /// <summary>A screen's heading: the names of its parts, with an arrow between them.</summary>
     public class HeadingRow : HStack
     {
         readonly Action<int> _renames;
@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         int _shape = -1;
 
-        /// <summary>A heading whose parts are renamed by <paramref name="renames" />, handed the part's place, and whose boxes take <paramref name="commit" /> on Enter, <paramref name="cancel" /> on Escape, and say each edit to <paramref name="edited" />.</summary>
+        /// <summary>A heading whose parts <paramref name="renames" /> renames, with boxes that take <paramref name="commit" /> on Enter, <paramref name="cancel" /> on Escape and report each edit to <paramref name="edited" />.</summary>
         public HeadingRow(Action<int> renames, ICommand commit, ICommand cancel, Action edited)
         {
             _renames = renames;
@@ -54,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 shown.Renames.CanExecute = part.CanRename && i != renaming;
                 shown.Plate.Command = part.CanRename || part.Opens == null ? shown.Renames : part.Opens;
 
-                // While a part is renamed, its plate says only why a name is refused. See Refuse.
+                // While a part is renamed, its plate's tip belongs to Refuse.
                 if (i != renaming)
                     shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename || part.Opens != null ? part.About : null);
 
@@ -65,7 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <inheritdoc />
-        /// <remarks>Always: a heading longer than the header is cut off rather than drawn over the header's controls.</remarks>
         protected override bool Clips => true;
 
         /// <summary>The box the part at <paramref name="index" /> is renamed in.</summary>
@@ -143,15 +142,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return shape;
         }
 
-        /// <summary>
-        /// Lays the row out again where the heading is another screen's, or the parts, or which of them have words before
-        /// or after, have changed.
-        /// </summary>
-        /// <remarks>
-        /// A page makes its heading's parts anew each time it lays its heading out, and only changes their words after, so
-        /// parts that are not the ones laid out are another heading, whatever its shape. An arrow joins two parts only where
-        /// the second has no words of its own to lead with.
-        /// </remarks>
+        /// <summary>Lays the row out again where the parts, or which of them have words before or after, have changed.</summary>
+        /// <remarks>A page makes new parts each time it lays its heading out, so parts other than those laid out are another heading.</remarks>
         void Build(List<HeadingPart> heading)
         {
             var shape = Shape(heading);
@@ -175,7 +167,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (i > 0 && !lead)
                     Children.Add(part.Join);
 
-                // The words leading a part come first, and its mark beside its name: "of", then the logic system's mark and name.
                 if (lead)
                     Children.Add(part.Lead);
 

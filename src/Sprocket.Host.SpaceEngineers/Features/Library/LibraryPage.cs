@@ -17,11 +17,7 @@ using Sprocket.Host.SpaceEngineers.Storage;
 namespace Sprocket.Host.SpaceEngineers.Features.Library
 {
     /// <summary>The library: the blueprints on this construct, the backups of constructs that lost their automation, and the blueprints the player keeps for every world.</summary>
-    /// <remarks>
-    /// A list beside the details of what is chosen from it. The list is made again whenever the screen is rebuilt, which
-    /// only something done on this page or a change to the program brings about. The elements it is drawn with are declared
-    /// in <c>LibraryPage.View.cs</c>.
-    /// </remarks>
+    /// <remarks>The list is made again only when the screen is rebuilt, by something done on this page or a change to the program.</remarks>
     public sealed partial class LibraryPage : EditorPage
     {
         const int OnConstruct = 0;
@@ -90,7 +86,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Lists the blueprints on this construct, the backups, and the blueprints in the library.</summary>
-        /// <remarks>What was chosen stays chosen where it is still listed; the first row is chosen where it is not.</remarks>
         void List()
         {
             var texts = Editor.Texts;
@@ -144,10 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// Lists the backups, where this machine keeps them: the logic systems kept of each construct as it lost its automation,
         /// under the construct's name, the latest loss first.
         /// </summary>
-        /// <remarks>
-        /// Drawn from what the index says of each, without reading a blueprint. The name is only a label of where a backup came
-        /// from, so backups under the same name are listed together whichever construct they came from.
-        /// </remarks>
+        /// <remarks>Drawn from what the index says of each, without reading a blueprint.</remarks>
         void ListBackups(Texts texts)
         {
             var backups = Editor.Backups;
@@ -160,7 +152,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var all = backups.All;
             while (_listed.Count < all.Count)
             {
-                // The name lost most lately leads; among those lost together, the one taken last.
                 Backup latest = null;
                 for (var i = 0; i < all.Count; i++)
                 {
@@ -177,7 +168,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     if (all[i].Construct != latest.Construct)
                         continue;
 
-                    // In order of loss, the latest first; among those lost together, as they were taken.
+                    // Latest loss first; those lost together keep the order they were taken in.
                     var at = _group.Count;
                     while (at > 0 && _group[at - 1].Lost < all[i].Lost)
                         at--;
@@ -336,10 +327,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>The details of a blueprint: whether it is on this construct, how it stands with the library, and what it holds.</summary>
-        /// <remarks>What it holds is the entry's own: the logic system here, the backup, or the blueprint in the library.</remarks>
         void DescribeBlueprint(Entry entry)
         {
-            // A backup's blueprint is read from its file as it is chosen, so the list is drawn without reading any.
+            // Read from its file only when chosen, so the list is drawn without reading any.
             if (entry.Backup != null && entry.Read == null && entry.Trouble.Length == 0 && Editor.Backups != null)
                 entry.Trouble = Editor.Backups.Open(entry.Backup, Editor.World.Values, out entry.Read);
 
@@ -352,13 +342,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var system = entry.Section == OnConstruct ? live : entry.Read;
             var free = Editor.Holder == null;
 
-            // Only where it is not on this construct already: it comes off from the home screen.
             _here.IsVisible = true;
             _add.IsVisible = live == null;
             _adds.CanExecute = free && system != null;
 
-            // A backup is kept in the library as it keeps it, and a logic system here as it is; a blueprint in the library is
-            // there already, so its row has no button between it and the library.
             var here = entry.Section == OnConstruct;
             var kept = here ? live : entry.Section == BackedUp ? entry.Read : null;
             var same = shelf != null && kept != null && volume != null && shelf.Holds(kept);
@@ -370,7 +357,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 : newer ? texts.SystemsUpdateFromLibraryAbout
                 : volume == null ? texts.SystemsMakeBlueprintAbout : texts.SystemsUpdateBlueprintAbout);
 
-            // Back the other way while the logic system has moved on from its blueprint, beside the button that would copy it over.
             _reset.IsVisible = here && live != null && volume != null && !same && !newer;
             _reset.Text = texts.LibraryReset;
             _reset.Tip = Tip.For(_reset.Tip, texts.LibraryResetAbout);
@@ -431,7 +417,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Puts the chosen blueprint on this construct as a logic system, with its first installation.</summary>
-        /// <remarks>As its backup keeps it where it is a backup's; as the library keeps it where it is not.</remarks>
         void Add()
         {
             var entry = _chosen;
@@ -472,8 +457,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (live == null)
                 return;
 
-            // Either update replaces something, so it asks first: the blueprint where the logic system is the newer, and the
-            // logic system where the blueprint is.
             if (!Editor.Holdings.Stored(live))
                 Run(CommandKind.Shelve, () => Editor.Holdings.Shelve(live));
             else if (Editor.Holdings.ChangedSince(live))
@@ -491,7 +474,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Puts a copy of the chosen blueprint on the construct, as a blueprint of its own, and opens it to be changed.</summary>
-        /// <remarks>Copied as the entry itself keeps it: the logic system here, the backup, or the blueprint in the library.</remarks>
         void Copy()
         {
             var entry = _chosen;

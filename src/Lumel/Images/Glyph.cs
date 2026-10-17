@@ -102,7 +102,7 @@ namespace Lumel.Images
         public Color Tint { get; set; }
 
         /// <summary>A character of the same font drawn around the symbol, centered on it and taking no room of its own, or null for none.</summary>
-        /// <remarks>Measured with the symbol, so it is given once and shown or hidden by <see cref="HaloTint" /> alone.</remarks>
+        /// <remarks>Changing it measures again, so it is given once and shown or hidden by <see cref="HaloTint" />.</remarks>
         public string Halo
         {
             get { return _halo; }
@@ -138,7 +138,7 @@ namespace Lumel.Images
         public Color HaloTint { get; set; }
 
         /// <summary>How much room the symbol wants, measured once per symbol, font and size.</summary>
-        /// <remarks>Held, because a measure re-runs whenever anything above it moves and measuring text is the dearest call the layout makes.</remarks>
+        /// <remarks>Held, because measuring text is the dearest call the layout makes.</remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             if (_haloSizedFor != _halo || _haloSizedAt != _haloSize)

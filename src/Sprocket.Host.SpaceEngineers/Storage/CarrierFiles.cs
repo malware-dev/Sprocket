@@ -6,9 +6,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>Files kept in the world's save, packed together as one text for the world's carrier to hold.</summary>
     /// <remarks>
-    /// The game saves only the storage keys a mod has claimed in advance, so every file shares the carrier's one key. The
-    /// text is a line saying what it is, then each file as a line <c>= name</c> followed by its lines; a line of a file
-    /// that starts with <c>=</c> is written with one more <c>=</c> in front, so no line of a file starts a file:
+    /// Persisted: a head line, then each file as a line <c>= name</c> followed by its lines, a line starting with <c>=</c>
+    /// written with one more <c>=</c> in front:
     /// <code>
     /// files 1
     /// = state
@@ -16,11 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// == a line that started with =
     /// = another
     /// </code>
-    /// <para>
-    /// The game holds the whole text from the moment the world loads, so the files are unpacked once, as it starts, and
-    /// packed again only for a save that follows a change. A text that is not these files is ignored, and the next save
-    /// writes the files over it.
-    /// </para>
+    /// Unpacked once as the world loads, and packed only for a save that follows a change.
     /// </remarks>
     public sealed class CarrierFiles : IFiles
     {
@@ -67,7 +62,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>Takes the files packed in <paramref name="text" />, answering what was wrong with it, or empty.</summary>
-        /// <remarks>Whole or not at all: where any of it will not read, no file is taken, and the files are marked changed so the next save writes them over it.</remarks>
+        /// <remarks>Where any of it will not read, no file is taken, and the files are marked changed so the next save writes over it.</remarks>
         public string Unpack(string text)
         {
             _files.Clear();

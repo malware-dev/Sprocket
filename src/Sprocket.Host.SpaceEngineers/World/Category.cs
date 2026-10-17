@@ -4,14 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// What a member of a block is about, which is how the organized view groups them.
     /// </summary>
-    /// <remarks>
-    /// One set for every block rather than one per kind, so a player who has learnt where a light's
-    /// colour sits knows where a sorter's is. A block shows only the categories it has anything in.
-    /// <para>
-    /// The order they are declared in is the order they are listed in, and <see cref="Other" /> is
-    /// last because it is where anything nobody has placed ends up.
-    /// </para>
-    /// </remarks>
+    /// <remarks>The order they are declared in is the order they are listed in.</remarks>
     public enum Category
     {
         /// <summary>Running or not, and what it costs to run.</summary>
@@ -62,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Talking to other constructs and to people.</summary>
         Signals,
 
-        /// <summary>What it looks like: colour, brightness, how it is drawn.</summary>
+        /// <summary>What it looks like: color, brightness, how it is drawn.</summary>
         Appearance,
 
         /// <summary>What it writes on itself.</summary>
@@ -81,11 +74,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// How the machine is set up to behave: what it does when nobody tells it, and what it was
         /// tuned to when it was built.
         /// </summary>
-        /// <remarks>
-        /// Low in the list because none of it belongs in a sequence twice. A landing gear is told to
-        /// lock, and locks by itself because somebody set autolock; a rotor is told to turn, and
-        /// turns with the torque it was built with. Neither is something an automation revisits.
-        /// </remarks>
         Behaviour,
 
         /// <summary>Who is using it now.</summary>

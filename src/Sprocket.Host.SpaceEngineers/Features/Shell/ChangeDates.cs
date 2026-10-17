@@ -19,7 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             _program = program;
 
-            // What each system says as the editor finds it, so only what changes from here on is dated.
             var systems = _program.Systems;
             for (var i = 0; i < systems.Count; i++)
                 _said[systems[i].Identity] = ProgramWriter.Said(systems[i]);
@@ -28,17 +27,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _program.Reshaped += () => _reshaped = true;
         }
 
-        /// <summary>
-        /// Dates each system whose words have changed since they were last read with the time now; a few comparisons where
-        /// nothing has, unless <paramref name="surely" /> asks for every system to be read.
-        /// </summary>
+        /// <summary>Dates with the time now each system whose words have changed, reading every system where <paramref name="surely" />.</summary>
         /// <remarks>
-        /// Asked on every tick, where the program saying it was edited, reshaped or given another system is what makes it
-        /// read anything; and surely at the end of every command and before the program or a blueprint is written out, so a
-        /// change made by a way that says nothing is dated by then. A system's words are read without its date, so
-        /// switching it, which is not something it says, dates nothing. Known by identity, so a program read again over this
-        /// one is compared with what it was. A system met for the first time is dated only where it has no date: one just
-        /// made.
+        /// Called every tick, costing a few comparisons where nothing changed; called surely at the end of every command and
+        /// before the program or a blueprint is written out.
         /// </remarks>
         public void Stamp(bool surely = false)
         {

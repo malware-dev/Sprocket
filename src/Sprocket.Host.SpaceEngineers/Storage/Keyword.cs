@@ -4,15 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <summary>
     /// One of the format's own words, as a number rather than as text.
     /// </summary>
-    /// <remarks>
-    /// A bare word is recognised while the text is being read, so a keyword never becomes a string at
-    /// all: no allocation to make it, and every later question about it is an integer comparison instead
-    /// of a character-by-character one. A step asks five of those - wait, now, after, once, onlyif - on
-    /// every line.
-    /// <para>
-    /// <see cref="None" /> is zero, so an identifier that is nobody's keyword is the default answer.
-    /// </para>
-    /// </remarks>
     public enum Keyword
     {
         /// <summary>No keyword: a word the format gives no meaning to.</summary>
@@ -73,10 +64,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>A run that was under way when the world was written out.</summary>
         Running,
 
-        /// <summary>Which step of it, in the same line.</summary>
+        /// <summary>Which step a saved run is at.</summary>
         Step,
 
-        /// <summary>Abandoning a run: a step, as a sequence or a trigger does it.</summary>
+        /// <summary>A step or trigger that abandons a run.</summary>
         Stop,
 
         /// <summary>A step calling an action on some blocks.</summary>

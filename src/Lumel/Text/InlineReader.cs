@@ -7,14 +7,11 @@ namespace Lumel.Text
 {
     /// <summary>Reads the words inside one block of markdown-lite into runs: strong, emphasis, code spans, images, links, escapes and line breaks.</summary>
     /// <remarks>
-    ///     Strong and emphasis follow CommonMark's delimiter runs: a run of <c>*</c> or <c>_</c> opens or
-    ///     closes by what stands either side of it, a closer takes the nearest opener of its own character,
-    ///     two on both sides make strong and one makes emphasis, and <c>_</c> inside a word is only a
-    ///     character.
+    ///     Strong and emphasis follow CommonMark's delimiter runs, and <c>_</c> inside a word is only a character.
     /// </remarks>
     public static class InlineReader
     {
-        /// <summary>The furthest an entity reference's semicolon can stand from its ampersand: a seven-digit number after <c>&amp;#</c>.</summary>
+        // The furthest an entity reference's semicolon can stand from its ampersand: a seven-digit number after "&#".
         const int Longest = 10;
 
         /// <summary>Adds the runs <paramref name="text" /> holds to <paramref name="runs" />.</summary>
@@ -206,11 +203,8 @@ namespace Lumel.Text
 
         /// <summary>Pairs closers with openers, and marks where each pair's span starts and ends.</summary>
         /// <remarks>
-        ///     CommonMark's own procedure, and linear in the number of delimiters: openers wait on a stack; a
-        ///     match drops every opener between the pair from it, since those can no longer match anything;
-        ///     and a search that finds nothing records how far down it looked, per kind of closer, so the
-        ///     next closer of that kind starts above it. A span is marked at its two ends rather than piece
-        ///     by piece, and <see cref="Emit" /> counts the depth as it passes.
+        ///     CommonMark's own procedure, linear in the number of delimiters. A span is marked at its two ends, and
+        ///     <see cref="Emit" /> counts the depth as it passes.
         /// </remarks>
         static void Match(List<Piece> pieces)
         {
@@ -523,8 +517,8 @@ namespace Lumel.Text
 
         /// <summary>Where <paramref name="closer" /> next stands from <paramref name="from" />, or -1 where another bracket or a line's end comes first; an escaped character is stepped over.</summary>
         /// <remarks>
-        ///     Stopping at the next bracket is what keeps reading linear: an image or a link left unclosed is given
-        ///     up at the next one rather than searched for to the end of the text, which a run of them would do for each.
+        ///     Stopping at the next bracket keeps reading linear: an unclosed image or link is given up there rather than
+        ///     searched for to the end of the text.
         /// </remarks>
         static int Bracket(string text, int from, char closer)
         {

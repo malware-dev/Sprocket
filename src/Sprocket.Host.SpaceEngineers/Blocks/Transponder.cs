@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A transponder: sending a signal on its channel, the channel, and whom it receives from, said in Sprocket's words.</summary>
-    /// <remarks>Its three buttons that pick whom it receives from are the value they set, and so is the setter written beside its channel.</remarks>
     public sealed class Transponder : Capability
     {
         /// <inheritdoc />

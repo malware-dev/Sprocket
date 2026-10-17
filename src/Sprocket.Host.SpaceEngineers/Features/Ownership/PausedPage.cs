@@ -9,10 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
     /// What a big owner meets while the automation is paused for its construct changing hands: why, how much it holds and cannot
     /// reach, and the three ways on.
     /// </summary>
-    /// <remarks>
-    /// In place of the home screen whenever the editor opens on paused automation, so nobody edits or resumes it without having
-    /// read it. The elements it is drawn with are declared in <c>PausedPage.View.cs</c>.
-    /// </remarks>
     public sealed partial class PausedPage : EditorPage
     {
         /// <summary>The page for the automation <paramref name="editor" /> shows.</summary>
@@ -27,7 +23,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
         public override string Help => Terms.ChangingHands;
 
         /// <inheritdoc />
-        /// <remarks>So its column can stand in the middle of the page rather than at the top of a scrolled list.</remarks>
         public override bool ScrollsItself => true;
 
         /// <summary>Builds nothing: what it says is made with the view.</summary>
@@ -36,10 +31,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
         }
 
         /// <summary>Says why it stopped and how much it holds and cannot reach, and gives each way on its command.</summary>
-        /// <remarks>
-        /// Counts rather than lists, so the screen is the same few lines on a ship of any size; the automation itself is read in
-        /// the editor, which leaving it paused opens.
-        /// </remarks>
         protected override void ViewCreated()
         {
             var texts = Editor.Texts;

@@ -10,11 +10,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>Text written over several lines: where it starts, in the form, and the whole of it on a page of its own.</summary>
-    /// <remarks>
-    /// A screen's text or a block's Custom Data runs to tens of thousands of characters, which a form has no room for. So the
-    /// form shows the first line that has anything on it, cut short where it does not fit, and Edit opens the page the text is
-    /// written on; the text comes back once, as that page is kept.
-    /// </remarks>
     public class LinesField : HStack, IField
     {
         readonly Label _start;

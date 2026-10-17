@@ -3,10 +3,7 @@ using System;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A length of time as the script writes it: in ticks, or in seconds of sixty ticks each.</summary>
-    /// <remarks>
-    /// The unit is kept because the script keeps it: a wait written <c>2s</c> is written back <c>2s</c>, and a sentence says
-    /// it in seconds. What runs is <see cref="Ticks" />, seconds counted as the nearest whole tick.
-    /// </remarks>
+    /// <remarks>The unit is kept as written: a wait written <c>2s</c> is written back <c>2s</c>.</remarks>
     public struct Duration : IEquatable<Duration>
     {
         /// <summary>How many ticks make a second, at the game's own rate.</summary>

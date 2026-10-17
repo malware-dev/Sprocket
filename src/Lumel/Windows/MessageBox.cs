@@ -8,9 +8,7 @@ namespace Lumel.Windows
 {
     /// <summary>A dialog that says something and offers up to three standard answers: Yes, No and Cancel, in that order across its foot, as the game's own message box does.</summary>
     /// <remarks>
-    ///     A Yes or No button is shown while it has a command, and a Cancel button while <see cref="Dialog.Cancel" /> has one
-    ///     and <see cref="ShowsCancel" /> is set; each says whatever its text is set to. Enter gives the <see cref="Default" />
-    ///     answer and Escape cancels, shown or not.
+    ///     A Cancel button is shown while <see cref="Dialog.Cancel" /> has a command and <see cref="ShowsCancel" /> is set.
     /// </remarks>
     public class MessageBox : Dialog
     {

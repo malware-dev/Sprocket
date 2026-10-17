@@ -4,8 +4,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI;
 
-// The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
-// way SignalAction does, because the Ingame namespaces collide with the mod-side ones.
+// Aliased because the game's Ingame namespaces collide with the mod-side ones.
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -34,13 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Reads the toolbars for what can start each sequence where something asked, and the first time.</summary>
         public void Look()
         {
-            // Only when something asks. Reading a toolbar is the expensive thing Sprocket does, and what
-            // it is read for is what a screen says about a sequence - so a screen asks when it opens,
-            // and can ask again when somebody suspects another player has wired something. Nothing is
-            // read on a timer, and nothing is read while nobody is looking.
-            //
-            // Firing does not depend on any of it: a slot invokes Sprocket's action itself and arrives
-            // carrying its key, so a button works whether or not anything has ever looked at it.
+            // Reading a toolbar is costly, so it is read only when a screen asks, and never on a timer. Firing does not
+            // depend on it: a slot invokes Sprocket's action itself, carrying its key.
             if (_world.TakeLook() || !_read)
             {
                 _read = true;
@@ -51,7 +45,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether the block this want names is arranged to start exactly this.
         /// </summary>
-        /// <remarks>Read off the slot itself: Sprocket's action carrying this want's key.</remarks>
         bool Wired(WantedWiring want)
         {
             GridEntity grid = _runner.Bindings.Entity(want.Reference);
@@ -101,9 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (!toolbar.TryGetItem(slot, out present))
                     continue;
 
-                // Sprocket's action counts only where it points here. One pointed at another Sprocket runs that one's
-                // program, and one pointed at a block that is gone runs nothing at all, so counting either would be this
-                // program reporting a button that answers somebody else - or nobody - as its own.
+                // Sprocket's action counts only where it points here: one pointed at another Sprocket runs that one's program.
                 if (!_buttons.Mine(present))
                     continue;
 
@@ -129,15 +120,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether enough of this construct answers what a sequence says it needs.
         /// </summary>
-        /// <remarks>
-        /// Nothing records which slot answers which declaration, so this is a count: three declared
-        /// triggers and two slots means one of them is unanswered, and which one is a question only the
-        /// person standing in front of it can settle.
-        /// </remarks>
         bool Answered(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
-            // Counted per key rather than per sequence: a button that stops this sequence names it
-            // by a different key from one that runs it, and one slot cannot answer for both.
+            // Counted per key: a button that stops this sequence holds a different key from one that runs it.
             _needed.Clear();
 
             var triggers = system.Triggers;
@@ -174,8 +159,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             _why.Clear();
             Claims();
 
-            // What the construct has to provide, counted. A sequence nothing answers is reported the
-            // same way one whose button was cleared is.
             for (var s = 0; s < _program.Systems.Count; s++)
             {
                 AutomationSystem system = _program.Systems[s];

@@ -6,10 +6,7 @@ using VRage.Game;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block's resource source being listened to as it runs out of what it gives and as it gets some back, until disposed.</summary>
-    /// <remarks>
-    /// The game raises it from the source as the store reaches nothing and as it rises from nothing: a tank's gas, a
-    /// generator's ice, an engine's fuel. Nothing between, so a store that is neither empty nor refilling costs nothing.
-    /// </remarks>
+    /// <remarks>The game raises it only as the store reaches nothing or rises from it, so a store in between costs nothing.</remarks>
     public sealed class ResourceListener : IDisposable
     {
         readonly MyResourceSourceComponent _source;

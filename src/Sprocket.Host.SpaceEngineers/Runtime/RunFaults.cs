@@ -43,11 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Why the last run ended before its last step, or none where it did not.
         /// </summary>
-        /// <remarks>
-        /// Kept after the run has stopped, because that is the only moment somebody can be told: the
-        /// sequence is no longer running and nothing is outstanding to be asked. Cleared when the
-        /// sequence next runs, so it says what happened last time and never what happened once.
-        /// </remarks>
+        /// <remarks>Kept after the run has stopped, and cleared when the sequence next runs.</remarks>
         public SequenceFault Quit
         {
             get { return _quit; }
@@ -90,10 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>What is known to be wrong with the run's sequence on the installation it runs on, or none.</summary>
-        /// <remarks>
-        /// Read, never worked out: what a run met, what an open editor saw, what the program said when it was built, and
-        /// what the blocks of a step being waited on said. The worst news first, because a line can only say one thing.
-        /// </remarks>
+        /// <remarks>Read, never worked out, and the worst news first.</remarks>
         public SequenceFault Fault
         {
             get
@@ -130,11 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Takes what the program says is wrong, now it has been built again, forgetting what the last run met.</summary>
-        /// <remarks>
-        /// The first check of a run the world remembered is of the same program it was last checked as, so what that check
-        /// found, and what the run met, still stand: a construct changed since is found by a run, at the step that needs it,
-        /// as it would have been had the world not been saved.
-        /// </remarks>
+        /// <remarks>The first check of a run the world remembered keeps what the run met.</remarks>
         public void Checked(SequenceFault found)
         {
             if (!_restored)

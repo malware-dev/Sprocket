@@ -21,6 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override ChangeKind Change => ChangeKind.AddInstallation;
 
+        /// <inheritdoc />
         /// <remarks>Puts nothing back the first time: it was made in its logic system, and this only records that.</remarks>
         public override void Apply(Automation program)
         {

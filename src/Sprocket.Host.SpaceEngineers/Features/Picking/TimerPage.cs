@@ -7,11 +7,6 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>How often a trigger on a timer fires, and what it then does, side by side.</summary>
-    /// <remarks>
-    /// The timer's own picker. A trigger on a block picks the block and what happens to it; this gives the rate in the panel a
-    /// length is given in everywhere, and the column saying what the trigger does is the same one, so it is chosen the same way
-    /// whichever kind of trigger it is.
-    /// </remarks>
     public sealed class TimerPage : EditorPage
     {
         readonly OutcomeColumn _aim;

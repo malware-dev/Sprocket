@@ -6,10 +6,7 @@ using VRageMath;
 namespace Lumel.Screens
 {
     /// <summary>One element shown on a <see cref="GameScreen" />, laid out across its room and handed its input through an <see cref="InputRoot" />.</summary>
-    /// <remarks>
-    ///     The plainest view a screen can show: it asks no questions, and Escape closes it. A press asks it to close through
-    ///     <see cref="Close" />, as a cross on it would.
-    /// </remarks>
+    /// <remarks>It asks no questions, and Escape closes it.</remarks>
     public class Stage : IScreenView
     {
         readonly Element _root;
@@ -30,7 +27,6 @@ namespace Lumel.Screens
         public InputRoot Input => _input;
 
         /// <inheritdoc />
-        /// <remarks>A stage shows no tips, so where the pointer rests between presses tells it nothing.</remarks>
         Vector2 IScreenView.Pointer
         {
             set { }
@@ -89,7 +85,6 @@ namespace Lumel.Screens
         }
 
         /// <inheritdoc />
-        /// <remarks>Moves the innermost scroll under the pointer that can move.</remarks>
         public void ScrollBy(Vector2 point, float amount)
         {
             var scrolls = _root.WheelAt(point);

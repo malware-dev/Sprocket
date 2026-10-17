@@ -12,16 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>
     /// The words a sentence reads as.
     /// </summary>
-    /// <remarks>
-    /// A slot says what it refers to and nothing about what it says. What it reads as is decided
-    /// here, out of phrases the blocks themselves supply: a door says "finishes opening", and this
-    /// decides that the sentence is "When the inner door finishes opening", in that order, with that
-    /// capital. Order and capitals are the parts no block could know and nothing can derive.
-    /// <para>
-    /// Static, because a sentence is worded from what it is handed and nothing else, and because the
-    /// views ask for a slot's words while laying out rather than through anything they were given.
-    /// </para>
-    /// </remarks>
     public static class SentenceText
     {
         /// <summary>The word a set is said with, on its step and wherever else it is said.</summary>
@@ -64,22 +54,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         const string ToWord = "to";
         const string IsWord = "is";
 
-        /// <summary>How many blocks a sentence names before it counts the rest.</summary>
         const int Said = 2;
 
-        /// <summary>What a test adding a value up over its blocks says first.</summary>
         const string SumWords = "the sum of";
 
-        /// <summary>What a test averaging a value over its blocks says first.</summary>
         const string AverageWords = "the average of";
 
         /// <summary>Every way a test can read its blocks, in the order they are offered.</summary>
         public static readonly IReadOnlyList<Quantifier> Readings = new[] { Quantifier.Any, Quantifier.All, Quantifier.Sum, Quantifier.Average };
 
-        /// <summary>How many characters of a text a sentence says before cutting it short.</summary>
         const int Quoted = 48;
 
-        /// <summary>What a text cut short ends with.</summary>
         const string Cut = "…";
 
 
@@ -99,9 +84,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (kind == TriggerKind.Every)
                 return "Every";
 
-            // A required trigger with slots names its block, so it reads like any other moment: how
-            // it reaches Sprocket is not what the sentence is about. Only one naming nothing has to
-            // say that out loud, because it has nothing else to show.
             return kind == TriggerKind.Signal && parts == 0
                 ? "When something on this construct starts it"
                 : "When";
@@ -109,12 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>The words between what starts a trigger and what it does.</summary>
-        /// <remarks>
-        /// As the program writes it: a comparison is followed by "then", "when any ext.closed on [ inner ] == on then
-        /// run 2", and a clock by the verb alone, "every 600t run 3". A trigger that does one plain thing
-        /// has no verb here, because that thing's own words follow; one that sets a value has "set",
-        /// because its value is said by name alone, as on its step.
-        /// </remarks>
         public static string Then(TriggerKind kind, bool stops, bool sequence, bool sets)
         {
             var clock = kind == TriggerKind.Every;
@@ -133,9 +109,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>What a slot of a trigger reads as.</summary>
-        /// <remarks>
-        /// A duration in a trigger is a rate, said in the unit the program writes it in.
-        /// </remarks>
         public static string InTrigger(GridWorld world, SentenceSlot slot)
         {
             var duration = slot as DurationSlot;
@@ -157,10 +130,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// What comes before a step's slots: "delay", "run", "stop", "set", "if", "otherwise if", "otherwise", the words of a wait for
         /// what is running, or nothing at all.
         /// </summary>
-        /// <remarks>
-        /// Ordinarily nothing. A step reads as "close the inner door" and the list being a list is
-        /// what says when it happens.
-        /// </remarks>
         public static string Lead(StepKind kind)
         {
             if (kind == StepKind.Run)
@@ -189,19 +158,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
 
         /// <summary>The word that joins one of a line's slots to what comes before it, or nothing.</summary>
-        /// <remarks>
-        /// A set reads as the program writes it: set a value on some blocks to something. Every other
-        /// line reads with its slots side by side. Worked out from the slots, so a step and a trigger
-        /// that does the same thing read the same.
-        /// </remarks>
         public static string Joining(IList<SentenceSlot> slots, int slot)
         {
             return Joining(slots, slot, false);
         }
 
         /// <summary>
-        /// The same, for a test where <paramref name="tests" /> says so, which reads its value as the program does: a value on
-        /// some blocks, then how it is compared, which says its own verb.
+        /// The word that joins one of a line's slots to what comes before it, or nothing, read as a test where
+        /// <paramref name="tests" /> says so.
         /// </summary>
         public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
         {
@@ -246,10 +210,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// <paramref name="said" /> as several subjects take it, its first word made plural: "finish closing", "are open".
         /// </summary>
-        /// <remarks>
-        /// A block's words are written for one block, and a list joined with "and" puts several before them. Only the
-        /// verb's own ending changes, so the rest of what the block says stays as it was written.
-        /// </remarks>
         public static string Plural(string said)
         {
             if (string.IsNullOrEmpty(said))
@@ -340,7 +300,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// The verb a step setting <paramref name="value" /> to <paramref name="arguments" /> reads with, where the value is a
         /// state of its blocks: "enable" for on and "disable" for off; empty for any other value or setting.
         /// </summary>
-        /// <remarks>"enable stockpiling on Tank" says what "set stockpiling on Tank to on" does, as the check reads "if Tank is stockpiling".</remarks>
         public static string Switching(EntityAction value, IList<Literal> arguments)
         {
             if (value == null || !value.IsStatus || value.Holds != ValueKind.Flag || arguments.Count != 1
@@ -354,9 +313,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         public static string Switched(string verb, string value, string blocks) => $"{verb} {value} {OnWord} {blocks}";
 
         /// <summary>A set as one line: "set charge mode on Standby Battery to recharge".</summary>
-        /// <remarks>
-        /// The words its step reads in, for where it is said as a line rather than drawn as slots.
-        /// </remarks>
         public static string Setting(string value, string blocks, string given)
         {
             return $"{SetWord} {value} {OnWord} {blocks} {ToWord} {given}";
@@ -366,8 +322,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>A test being picked, as far as it has got: "If Inner Door is open", "If power on Airlock Light is …".</summary>
         /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
         /// <param name="chosen">The state or the value chosen, in the words its list shows it in, or empty.</param>
-        /// <param name="state">Whether what is chosen is a state of the blocks' status, which reads as the blocks themselves.</param>
-        /// <param name="reads">How the blocks are read, as <see cref="Quantified" /> says it, or empty where there is one block: "If the sum of radius on the lights is …".</param>
+        /// <param name="state">Whether what is chosen is a state of the blocks' status.</param>
+        /// <param name="reads">How the blocks are read, as <see cref="Quantified" /> says it, or empty for one block.</param>
         /// <param name="opens">What the line opens with: "If" for a check, "When" for what starts something.</param>
         public static string Testing(string blocks, string chosen, bool state, string reads, string opens = "If")
         {
@@ -383,14 +339,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// A trigger or a step being picked, as far as it has got: "When Airlock Button …".
         /// </summary>
-        /// <remarks>
-        /// In the order and the words of the line it will become, with a part not chosen yet said as
-        /// <see cref="Empty" />, so the title of the picker reads as the row it is making.
-        /// </remarks>
         /// <param name="forEvents">Whether it is what starts something rather than what is done.</param>
         /// <param name="blocks">The blocks as <see cref="Entities(GridWorld, IList{long}, bool)" /> says them.</param>
         /// <param name="chosen">What is chosen, in the words its list shows it in, or empty.</param>
-        /// <param name="sets">Whether what is chosen sets a value, which reads "set it on the blocks".</param>
+        /// <param name="sets">Whether what is chosen sets a value.</param>
         public static string Picking(bool forEvents, string blocks, string chosen, bool sets)
         {
             if (chosen.Length == 0)
@@ -404,9 +356,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>What a slot of a step reads as.</summary>
-        /// <remarks>
-        /// A duration is said in the unit it was written in.
-        /// </remarks>
         public static string InStep(GridWorld world, SentenceSlot slot)
         {
             var duration = slot as DurationSlot;
@@ -457,10 +406,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// Names a selection, keeping real names visible for as long as they fit.
         /// </summary>
-        /// <remarks>
-        /// Collapsing straight to "4 blocks" would turn the thing somebody picked back into an
-        /// abstraction. Names are what keep a sequence about doors instead of about identifiers.
-        /// </remarks>
         public static string Entities(GridWorld world, IList<long> entityIds, bool requiresAll)
         {
             if (entityIds.Count == 0)
@@ -470,12 +415,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>
-        /// The same, for a sentence read straight off the model, where the parts are claims.
+        /// Names a selection given as claims, for a sentence read straight off the model.
         /// </summary>
-        /// <remarks>
-        /// A slot already holds blocks, because the editor resolved them when it built the screen. A
-        /// row and a heading are worded from the sequence itself, so they resolve here.
-        /// </remarks>
         public static string Named(Bindings bindings, IList<string> refs, bool requiresAll)
         {
             if (refs.Count == 0)
@@ -541,19 +482,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// The values an action was given, in the order it wanted them.
         /// </summary>
-        /// <remarks>
-        /// Spelled the way they are written down, so the line on the screen and the line in the
-        /// program say the same thing - and so somebody who types a value into this slot sees back
-        /// exactly what they typed.
-        /// </remarks>
         public static string Given(ArgumentsSlot slot)
         {
             if (slot.IsEmpty)
                 return Empty;
 
-            // What each field of it shows rather than each value it holds. The two part company
-            // wherever a field stands over several values or shows something other than the value
-            // itself: three numbers are one colour, and a number is the word it stands for.
+            // One per field rather than one per value: a color's three numbers are one field.
             var said = "";
             for (var i = 0; i < slot.Filled.Count; i++)
             {
@@ -568,8 +502,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>One value as a sentence says it, with the words its field puts around it.</summary>
         /// <remarks>
-        /// A line break in text reads as a slash, since a sentence is one line, and text longer than a sentence has room for is
-        /// cut short: a screen's text can run to a hundred thousand characters.
+        /// A line break reads as a slash, and long text is cut short: a screen's text can run to a hundred thousand
+        /// characters.
         /// </remarks>
         static string Around(IList<Field> fields, int at, string filled)
         {
@@ -647,8 +581,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (state != null)
                 return state.Moment == null ? Empty : state.Holds ? state.Moment.State : state.Moment.Unstate;
 
-            // A value is said by its name alone in its slot, because "set" is said before the slot and
-            // is not part of what pressing it changes.
+            // A value is said by name alone, since "set" stands before the slot.
             var action = slot as ActionSlot;
             if (action != null)
             {
@@ -675,8 +608,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 return sequence.Name.Length > 0 ? sequence.Name : $"sequence {sequence.Number}";
             }
 
-            // A slot kind core invented and nobody here has words for. Saying nothing would leave a
-            // gap that reads exactly like a slot waiting to be filled, which is a thing that happens.
+            // A slot kind with no words here; saying nothing would read as an empty slot.
             return $"({slot.GetType().Name})";
         }
 

@@ -32,7 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public const float ChipY = 6f;
 
         /// <summary>Inside anything a value is given in, down: a box, a switch, a choice.</summary>
-        /// <remarks>Shared, so that all of them are one height when their words are one size.</remarks>
         public const float FieldY = ChipY * 1.3f;
     }
 }

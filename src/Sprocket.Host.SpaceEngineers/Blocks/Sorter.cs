@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A conveyor sorter: whether it lets its list through or holds it back, and whether it pulls items.</summary>
-    /// <remarks>Setting the list itself is still to come.</remarks>
     public sealed class Sorter : Capability
     {
         /// <inheritdoc />

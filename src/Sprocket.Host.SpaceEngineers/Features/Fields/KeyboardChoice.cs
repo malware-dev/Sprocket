@@ -5,10 +5,6 @@ using VRage.Input;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>How the keyboard chooses among a value's words: an arrow steps to the next word, and a letter to the next word starting with it.</summary>
-    /// <remarks>
-    /// Words stop at either end under the arrows, so holding one comes to rest on the last; a letter goes round to the start,
-    /// so pressing it again walks every word it starts.
-    /// </remarks>
     public static class KeyboardChoice
     {
         /// <summary>How far <paramref name="key" /> steps through words: one on for right or down, one back for left or up, and none otherwise.</summary>
@@ -18,7 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>The word <paramref name="by" /> steps from <paramref name="now" />, or null where there is no step to take.</summary>
-        /// <remarks>A value holding none of the words steps to the first going on and to the last going back.</remarks>
         public static string Step(IList<string> words, string now, int by)
         {
             if (by == 0 || words.Count == 0)

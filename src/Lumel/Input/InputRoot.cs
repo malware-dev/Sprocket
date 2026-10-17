@@ -7,7 +7,7 @@ using VRageMath;
 namespace Lumel.Input
 {
     /// <summary>Where the pointer and the keyboard enter one tree of elements: what holds the keyboard, and what holds the pointer.</summary>
-    /// <remarks>The host turns the game's input into these calls; no element reads the game's input itself.</remarks>
+    /// <remarks>The host turns the game's input into these calls.</remarks>
     public sealed class InputRoot
     {
         readonly Element _root;

@@ -36,14 +36,13 @@ namespace Lumel.Drawing
             }
         }
 
-        /// <remarks>
-        ///     Unverified in the game: whether a scope is recorded into a buffered layer's queue or applied
-        ///     when that queue replays.
-        /// </remarks>
+        /// <inheritdoc />
         public void PushScissor(Rectangle pixels, MyScreenSpaceLayer layer)
         {
-            // Kept typed, because MyScissorScope is a struct and holding it as IDisposable would box one per push.
-            // Disposing a copy is safe: it reads its two fields and pops.
+            // Unverified in the game: whether a scope is recorded into a buffered layer's queue or applied when that
+            // queue replays.
+            // Kept typed: holding the struct scope as IDisposable would box one per push. Disposing a copy is safe, as
+            // it reads its two fields and pops.
             _scissors.Add(MyScreenSpace.UsingScissorRectanglePixels(pixels, layer));
         }
 
@@ -85,11 +84,7 @@ namespace Lumel.Drawing
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        ///     Read from the file the font's definition names, in the game's content or in the mod that
-        ///     declares it, and kept: the game holds the same number on its loaded font, where a mod may not
-        ///     read it. Once per font.
-        /// </remarks>
+        /// <remarks>Read from the font's file the first time each font is asked for, and kept.</remarks>
         public int LineUnits(string font)
         {
             var units = 0;

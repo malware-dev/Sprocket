@@ -4,10 +4,6 @@ using VRageMath;
 namespace Lumel.Controls
 {
     /// <summary>A button striped like a hazard marking, its words on a plate in the middle: one that is meant to stand out.</summary>
-    /// <remarks>
-    /// The stripes are drawn, not a texture, so the colors are properties like any other. The plate is the button's own
-    /// background, so it lights under the pointer and as it is pressed as its style says, like any other button.
-    /// </remarks>
     public class HazardButton : Button
     {
         /// <summary>The ground the stripes run across.</summary>

@@ -13,11 +13,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A color on one line: a swatch of it and its code, the picker hanging open under it when pressed.</summary>
-    /// <remarks>
-    /// One line, so a form asking for several colors beside other values reads as one form, each color under its own
-    /// label. The picker is a <see cref="ColorPicker" />, made once with the field and opened over the screen. A color left
-    /// empty shows its swatch's edge alone.
-    /// </remarks>
     public class ColorField : HStack, IField
     {
         readonly ColorPicker _picker;
@@ -39,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Children.Add(new Label { Style = Styles.ListWord }.As(out _code));
             Children.Add(ListField.Fold());
 
-            // Hung as every menu is; in a box of its own so it is as wide as the picker and no wider.
+            // The box of its own keeps the popup as wide as the picker.
             _popup = new Popup { Style = Styles.Menu, Anchor = this, Gap = 4f, Content = new HStack { Children = { _picker } } };
             Command = new Relay(() => _popup.Toggle());
             Shown();

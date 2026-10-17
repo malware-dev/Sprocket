@@ -5,19 +5,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>
     /// How the construct's own wiring reads: what presses it, and what it then does.
     /// </summary>
-    /// <remarks>
-    /// The same two halves a sequence's row has, so a list of Sprocket's triggers and a list of the
-    /// game's own read as one kind of thing. What differs is where the words come from: the game
-    /// names its action, and Sprocket translates it back into the word it would have used itself
-    /// where it knows one.
-    /// </remarks>
     public static class VanillaText
     {
-        /// <summary>What presses it: the panel, and which of its buttons.</summary>
-        /// <remarks>
-        /// Numbered from one, the way the terminal numbers them, because the slot's own index counts
-        /// from zero and nobody reading a panel thinks of a button nought.
-        /// </remarks>
+        /// <summary>What presses it: the panel, and which of its buttons, numbered from one as the terminal numbers them.</summary>
         public static string Pressed(GridWorld world, VanillaWiring.Entry entry)
         {
             GridEntity panel = world?.FindEntity(entry.PanelId);
@@ -29,11 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// What it does: Sprocket's own word for the action where it has one, and the game's otherwise.
         /// </summary>
-        /// <remarks>
-        /// A block Sprocket understands gives back "open the inner door", which reads like everything
-        /// else on the screen. Anything else is said in the game's own words rather than guessed at,
-        /// because a wrong translation of somebody's wiring is worse than an unfamiliar one.
-        /// </remarks>
         public static string Does(GridWorld world, VanillaWiring.Entry entry)
         {
             if (entry.GroupName.Length > 0)

@@ -5,12 +5,8 @@ namespace Lumel.Text
 {
     /// <summary>Text with named slots in it, <c>{name}</c>: read into a document once, or filled as plain text.</summary>
     /// <remarks>
-    ///     A whole sentence with a slot in it can be translated as one, which a sentence pieced together
-    ///     around a value cannot: another language may put the value first, last or in the middle.
-    ///     <para>
-    ///         A name is a letter or an underscore, then letters, digits and underscores; <c>{{</c> and
-    ///         <c>}}</c> are a brace. Anything else in braces is only text.
-    ///     </para>
+    ///     A name is a letter or an underscore, then letters, digits and underscores; <c>{{</c> and <c>}}</c> are a brace.
+    ///     Anything else in braces is only text.
     /// </remarks>
     public static class Template
     {
@@ -19,10 +15,7 @@ namespace Lumel.Text
 
         /// <summary>The document markdown-lite <paramref name="template" /> describes, each of its slots a run whose words are the argument of that name.</summary>
         /// <remarks>
-        ///     Read once, however often its arguments change: <see cref="RichText" /> puts them in as it lays
-        ///     the words out. While the markdown is read, each slot stands in as a word, because that is what a
-        ///     value is, and CommonMark decides whether stars open or close by whether a letter or punctuation
-        ///     stands beside them; so <c>**{name}**の</c> closes as <c>**Airlock**の</c> does.
+        ///     Read once, however often its arguments change: <see cref="RichText" /> puts them in as it lays the words out.
         /// </remarks>
         public static Document Read(string template)
         {

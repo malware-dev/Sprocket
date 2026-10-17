@@ -14,10 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         Button _new;
 
         /// <inheritdoc />
-        /// <remarks>
-        /// One list, the way a sequence lays out its steps: a heading, what is there, and the way to add more on the line
-        /// under it. Each logic system is its group, its installations under it.
-        /// </remarks>
         protected override Element CreateView()
         {
             return new VStack

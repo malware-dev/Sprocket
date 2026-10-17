@@ -5,9 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A warhead: armed or not, its countdown, and whether it is counting down.</summary>
     /// <remarks>
-    /// The game's own detonate is the one offered, since it does nothing unless the warhead is armed. At the end of a
-    /// countdown the game explodes it armed or not, and it counts its countdown setting down in place. Armed is a state of
-    /// the warhead, read and never set: the game's own pair of actions for its switch arm and disarm it.
+    /// The game's detonate does nothing unless the warhead is armed, but at the end of a countdown it explodes armed or
+    /// not.
     /// </remarks>
     public sealed class Warhead : Capability
     {

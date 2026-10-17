@@ -3,8 +3,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>One answer in a list of them: its words, what giving it does that somebody should know first, and whether it is the one already given.</summary>
-    /// <remarks>The elements it is drawn with are declared in <c>ChoiceRow.View.cs</c>, and nothing else is.</remarks>
+    /// <summary>One answer in a list of answers.</summary>
     public partial class ChoiceRow : HStack
     {
         /// <summary>An answer saying nothing yet, given by pressing it once it has a command.</summary>

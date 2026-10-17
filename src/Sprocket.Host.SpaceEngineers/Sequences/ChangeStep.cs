@@ -6,10 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// What a step points at and what it does, which are chosen on one trip and land together.
     /// </summary>
-    /// <remarks>
-    /// The await after the step follows what it now does: one is put in where it takes time to finish,
-    /// and the one there is taken out where it does not.
-    /// </remarks>
+    /// <remarks>Also puts in or takes out the await after the step, to match what it now does.</remarks>
     public sealed class ChangeStep : SequenceEdit
     {
         readonly int _index;

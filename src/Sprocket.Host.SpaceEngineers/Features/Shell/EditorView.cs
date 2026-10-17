@@ -17,23 +17,12 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>A <see cref="SprocketEditor" /> on the screen: the chrome around the page, the page's own view, and whatever hangs over them.</summary>
-    /// <remarks>
-    /// It decides nothing about what the editor does: the editor states what is on screen in <see cref="EditorScreen" />
-    /// and each page draws itself, and this decides how the chrome looks and where the pointer and the keyboard go.
-    /// <para>
-    /// <b>Nothing already on screen is allowed to move.</b> Controls that come and go keep their place whether or not they
-    /// are showing, the heading turns into its own edit box rather than summoning one, and a question about a control
-    /// hangs directly beneath it so that everything above the press stays exactly where the eye left it.
-    /// </para>
-    /// </remarks>
     public sealed partial class EditorView : IScreenView
     {
         /// <summary>How wide one of the game's own screens is, as a share of the safe area.</summary>
         /// <remarks>
-        /// Space Engineers sizes a GUI screen in normalized units where 1.0 is the safe GUI rectangle exactly, and its
-        /// terminal, which is the screen Sprocket is the closest thing to, is <c>new Vector2(1.0157f, 0.9172f)</c>. The
-        /// width here is 1.0 rather than 1.0157: that overhang exists because the game's screen background has soft edges
-        /// to hide, and Sprocket's has hard ones.
+        /// Transcribed from the game's terminal screen, 1.0157 by 0.9172 of the safe area; the width drops the overhang
+        /// that the game's soft-edged background needs.
         /// </remarks>
         public const float ScreenWidth = 1f;
 
@@ -41,10 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public const float ScreenHeight = 0.9172f;
 
         /// <summary>Lifts a symbol in the heading so its middle is level with the middle of the heading's capitals.</summary>
-        /// <remarks>
-        /// A symbol is centered in its room like any image, and the heading's capitals sit above the middle of their line,
-        /// where the face leaves room for accents. Measured in the game.
-        /// </remarks>
+        /// <remarks>Measured in the game.</remarks>
         public static readonly Thickness LevelWithCapitals = new Thickness(0f, -2.5f, 0f, 2.5f);
 
         readonly SprocketEditor _editor;
@@ -143,9 +129,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                                 {
                                     new Glyph { Symbol = Symbols.Left, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Padding = LevelWithCapitals, Command = new Relay(Back) }.As(out _back),
                                     _title,
-                                    // Quietest first, and Done or the close cross last: the row stands against the right edge, so a
-                                    // control's place depends only on what stands to its right, and the last cannot be moved by anything.
-                                    // Meant to stand out: it changes the whole world for everyone, and only an admin sees it.
+                                    // Quietest first, Done or the close cross last: the row stands against the right edge, so a
+                                    // control's place depends only on what stands to its right.
                                     new HazardButton { Style = Styles.Button, Command = new Relay(OpenAdmin) }.As(out _admin),
                                     new Glyph { Symbol = "?", Style = Styles.Help, Placement = FixedSize.Size(32f, 32f), Command = _helps }.As(out _help),
                                     new Glyph { Symbol = Symbols.Play, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f), Command = _runs }.As(out _run),
@@ -170,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                         Rows = { GridLength.Auto, GridLength.Flex(1f) },
                         Cells = { [0, 0] = _banner }
                     }.As(out _page),
-                    // Only while the screen has actions, which only developer mode gives it, so everybody else has the room.
+                    // Shown only while the screen has actions, which only developer mode gives it.
                     new VStack
                     {
                         IsVisible = false,
@@ -198,16 +183,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _input = new InputRoot(_root);
             _input.FocusChanged += Refocused;
 
-            // What a page opens over the screen or gives the keyboard to, it reaches through its editor.
             _editor.Input = _input;
             _editor.Windows = _windows;
         }
 
         /// <summary>Where the pointer is, in UI units. Somewhere outside the screen means there is not one.</summary>
-        /// <remarks>
-        /// A property the host sets rather than an argument to <see cref="Draw(IGraphics)" />, because a target without a
-        /// pointer - a text panel, a screenshot, a test - should not have to pass one.
-        /// </remarks>
         public Vector2 Pointer { get; set; }
 
         /// <summary>Where the pointer and the keyboard enter the screen.</summary>
@@ -216,7 +196,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether a question with answers is waiting, which owns Enter and Escape.</summary>
         public bool IsQuestioning => _windows.IsOpen(_dialog) || _windows.IsOpen(_confirm);
 
-        /// <summary>Whether the caret is drawn this frame. The blink belongs to whoever owns a clock.</summary>
+        /// <summary>Whether the caret is drawn this frame, set by whoever owns the blink's clock.</summary>
         public bool CaretVisible
         {
             set
@@ -228,10 +208,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Why the name in hand cannot be given as it stands, or empty when it can or none is.</summary>
-        /// <remarks>
-        /// About the <b>edit in hand</b> and not about the model: walking away from a box somebody is being told to fill in
-        /// would throw away their words without saying it had. Escape is the way out, and is never refused.
-        /// </remarks>
         string Blocked
         {
             get
@@ -239,7 +215,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 if (_renaming < 0)
                     return "";
 
-                // Says what to do rather than what is wrong: there is only one cure and it fits in three words.
                 var part = _renamed;
                 var text = _title.Box(_renaming).Text;
                 if (part.NameRequired && string.IsNullOrEmpty(text.Trim()))
@@ -250,7 +225,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether somebody has just asked to leave, answered once and then forgotten.</summary>
-        /// <remarks>Taken rather than read, so a host that forgets to ask does not close the screen on a press nobody remembers making.</remarks>
         public bool TakeClose()
         {
             var wanted = _wantsClose;
@@ -259,14 +233,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Brings the chrome into line with the screen, and puts the page's view on it where the page changed.</summary>
-        /// <remarks>What the screen says is written onto the controls only when its revision has moved.</remarks>
         public void Update()
         {
             var screen = _editor.Screen;
 
             Ask(screen);
 
-            // A screen that cannot be renamed while the box is open takes the box away with it.
             if (_renaming >= 0 && !screen.CanRename)
                 EndRename();
 
@@ -307,10 +279,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>A press beginning at <paramref name="point" />, the <paramref name="presses" />th in quick succession, with shift or ctrl held.</summary>
-        /// <remarks>
-        /// A press that closes a list hanging open is that and nothing more, a press outside a dialog does nothing, and
-        /// while the name in hand cannot be given only the box it is in answers.
-        /// </remarks>
         public void PointerDown(Vector2 point, int presses, bool shift, bool ctrl)
         {
             if (_windows.Dismiss(point))
@@ -323,7 +291,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (target == null && _windows.Modal != null)
                 return;
 
-            // What a question this press raises hangs under.
+            // A question this press raises hangs under the target.
             _raisedBy = target;
             _input.PointerDown(target, point, presses, shift, ctrl);
         }
@@ -341,11 +309,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Scrolls whatever is under <paramref name="point" /> by <paramref name="amount" />, if anything there can scroll.</summary>
-        /// <remarks>
-        /// While something hangs open, only what is open moves, for the same reason nothing behind it is pressed: a wheel that
-        /// reached through took the rows out from under a pointer that was on the list hanging over them. A floating window
-        /// hangs over nothing: the wheel scrolls what is in it where the pointer is on it, and the screen anywhere else.
-        /// </remarks>
         public void ScrollBy(Vector2 point, float amount)
         {
             if (_renaming >= 0)
@@ -376,7 +339,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>A key going down, answering whether anything took it.</summary>
-        /// <remarks>A question with answers takes Enter as the answer its page named, and nothing else is offered the key while one is up.</remarks>
         public bool Key(MyKeys key, bool shift, bool ctrl)
         {
             if (IsQuestioning)
@@ -392,12 +354,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Escape, answering whether the host should close the editor.</summary>
-        /// <remarks>
-        /// Escape is the key everybody already reads as "back", so it closes what is open over the page, a standing question
-        /// or else the window on top, and otherwise goes back; only the first page with nothing open closes. Holding the
-        /// keyboard is not being open: a box keeps what was typed in it, as pressing elsewhere does, and a name being typed
-        /// into the heading is given, since it is only the name shown so it can be typed into.
-        /// </remarks>
         public bool Escape()
         {
             if (IsQuestioning)
@@ -429,7 +385,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Takes the answer the page said Enter takes, and says whether there was one.</summary>
-        /// <remarks>Nothing where the page named none: a key that guesses an answer is worse than a key that does nothing.</remarks>
         public bool TakeDefault()
         {
             if (_windows.IsOpen(_dialog))
@@ -444,10 +399,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Puts the standing question away without answering it.</summary>
-        /// <remarks>
-        /// A third outcome rather than one of the answers: a page that asks has not moved yet, and its answers are what
-        /// move it, so dismissing already means "I did not mean to leave".
-        /// </remarks>
         public void Dismiss()
         {
             if (_windows.IsOpen(_dialog))
@@ -461,10 +412,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What a press or a hover at <paramref name="point" /> reaches, or null for nothing at all.</summary>
-        /// <remarks>
-        /// The windows first, top down, since each one owns what it covers and a modal one owns everything; then, while the
-        /// name in hand cannot be given, only the box it is in; then the screen.
-        /// </remarks>
         public Element Under(Vector2 point)
         {
             bool stopped;
@@ -493,7 +440,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Lights the one thing the pointer is resting on, puts out whatever was lit before, and takes up what it says.</summary>
-        /// <remarks>Found the same way a press finds what it acts on, so the thing that would be pressed is the thing that lights.</remarks>
         void Light()
         {
             var wanted = Under(Pointer);
@@ -516,10 +462,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Puts a note beside the pointer, if what it is resting on had anything to say.</summary>
-        /// <remarks>
-        /// Drawn last, over everything including a list somebody opened, whose rows it may well be describing. Below and to
-        /// the right, where the arrow is not covering what was just read, and flipped only where there is no room.
-        /// </remarks>
         void DrawTip(IGraphics g, RectangleF bounds)
         {
             if (_saying == null)
@@ -550,11 +492,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Opens the question the screen raised, or puts away the one it no longer asks.</summary>
-        /// <remarks>
-        /// Opened again where a different question has been raised, and not only where none was up: one question answered
-        /// by raising another would otherwise keep the first one's words. A question hanging under a control that a press
-        /// elsewhere has put away is dismissed, which is what that press meant.
-        /// </remarks>
         void Ask(EditorScreen screen)
         {
             if (!screen.HasQuestion)
@@ -587,7 +524,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
             }
 
-            // The first answer as Yes and the second as No; Escape puts it away without an answer, which has no button of its own.
             var yes = screen.Answers.Count > 0 ? screen.Answers[0] : null;
             var no = screen.Answers.Count > 1 ? screen.Answers[1] : null;
 
@@ -605,16 +541,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Puts the page on top on the screen, in the screen's scroller unless it scrolls itself.</summary>
-        /// <remarks>
-        /// Whether the heading has a line under it is settled here, once for the life of the page, because changing it
-        /// later would move the page under whoever is reading it.
-        /// </remarks>
         void Show(EditorScreen screen)
         {
             EndRename();
             _windows.Close(_confirm);
 
             _shownPage = _editor.Current;
+
+            // Set once for the life of the page: changing it later would move the page under whoever is reading it.
             _subtitle.IsVisible = !string.IsNullOrEmpty(screen.Subtitle);
             _seen = -1;
 
@@ -640,7 +574,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _subtitle.Text = screen.Subtitle;
 
-            // While the name in hand is one that cannot be given, the box says so, in its look and in its note.
             if (_renaming >= 0)
             {
                 var wrong = Blocked;
@@ -649,15 +582,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var texts = _editor.Texts;
 
-            // The first screen has nowhere to go back to, so it closes, with the cross at the far right where a close button stands.
             var closes = !screen.CanGoBack;
             _back.IsVisible = screen.CanGoBack;
             _back.Tip = Tip.For(_back.Tip, _back.IsVisible ? texts.ChromeBack : null);
             _close.IsVisible = closes;
             _close.Tip = Tip.For(_close.Tip, !closes ? null : texts.ChromeClose);
 
-            // On the home screen alone, which is where the whole world's automation starts from. Asked as the screen is
-            // dressed, which it is as the editor opens: creative tools are switched on and off with the editor put away.
+            // Asked as the screen is dressed, which is enough: creative tools are switched on and off with the editor put away.
             _admin.IsVisible = !screen.CanGoBack && _editor.MayAdminister;
             _admin.Text = texts.AdminButton;
             _help.IsVisible = screen.Help != null;
@@ -679,8 +610,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _libraries.CanExecute = screen.Library != null;
             _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.SystemsLoadAbout : null);
 
-            // One mark, two acts, and never both at once: a subject that is going is one to stop and one that is not is
-            // one to start.
             var doing = screen.Running ? screen.Stops : screen.Runs;
             _run.IsVisible = doing != null;
             _run.Symbol = screen.Running ? Symbols.Stop : Symbols.Play;
@@ -692,11 +621,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _deletes.CanExecute = screen.Deletes != null;
             _delete.Tip = Tip.For(_delete.Tip, screen.Deletes != null ? screen.DeleteAbout : screen.DeleteLocked);
 
-            // The words say the act and its reach, not what it is on - the heading directly above says that.
             _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
 
-            // Switched off is a warning, as it is on a row, and the bar holding the switch says it across the whole page.
             _head.Background = screen.HasSwitch && !screen.SwitchIsOn ? Palette.NoticeWash : Palette.Chrome;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
@@ -805,10 +732,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Gives the name in hand, where it can be given, and puts the box away.</summary>
-        /// <remarks>
-        /// A name that cannot be given leaves the box open rather than closing it and doing nothing: somebody who has just
-        /// emptied a name they are required to give is mid-thought.
-        /// </remarks>
         void CommitRename()
         {
             if (_renaming < 0 || Blocked.Length > 0)
@@ -848,7 +771,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Takes the keyboard leaving a name being typed as the press away it is, which gives the name.</summary>
-        /// <remarks>A name that cannot be given keeps the keyboard, because the box is already saying why.</remarks>
         void Refocused()
         {
             if (_renaming < 0)
@@ -886,10 +808,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The chrome has just written what the screen says onto its controls.</summary>
-        /// <remarks>
-        /// Without a body in anything packed for the game, where the call compiles to nothing. <c>EditorView.debug.cs</c>
-        /// counts the writes, so a test can hold an idle screen to none.
-        /// </remarks>
+        /// <remarks>Has no body in anything packed for the game, where the call compiles to nothing.</remarks>
         partial void Wrote();
     }
 }

@@ -8,28 +8,12 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// What only the game can say about a block: what it can be told to do, and what its slots hold.
     /// </summary>
-    /// <remarks>
-    /// The only record of which button runs which sequence lives in the game's toolbars, so this is
-    /// the surface that whole story rests on: find a block's toolbar, read what a slot holds, write a
-    /// slot, clear one. A block's own actions are here for the same reason - they are the game's to
-    /// declare, and a slot is written with one.
-    /// <para>
-    /// Said once, behind an interface, for two reasons. The game's conveniences for this reach past
-    /// <c>IMyToolbar</c> into its own concrete item classes, so nothing but the game can answer them -
-    /// the harness writes a slot and reads nothing back. And a toolbar is where the trigger work lands
-    /// next, which is easier against one surface than against calls spread over three files.
-    /// </para>
-    /// </remarks>
     public interface ISlots
     {
         /// <summary>
         /// The toolbar a block's own actions live on, or null where it has none.
         /// </summary>
-        /// <remarks>
-        /// Index 0 is the primary one, which for a button panel is the buttons. A block with no
-        /// toolbars does not carry the component at all, so failing to get one is the ordinary answer
-        /// rather than a fault.
-        /// </remarks>
+        /// <remarks>The game's toolbar 0, which for a button panel is the buttons.</remarks>
         IMyToolbar Of(IMyTerminalBlock block);
 
         /// <summary>A block's toolbar by its place in the game's own order, from 0, or null where it has no such toolbar.</summary>
@@ -57,11 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Everything this block declares it can be told to do, appended to <paramref name="into" />.
         /// </summary>
-        /// <remarks>
-        /// The whole of what Sprocket knows about most blocks. Asked once per block type rather than
-        /// per block - see <see cref="BlockKinds" /> - because a definition declares the same actions
-        /// whichever one of it is asked.
-        /// </remarks>
+        /// <remarks>Asked once per block type, not per block.</remarks>
         void Offered(IMyTerminalBlock block, List<Offer> into);
 
         /// <summary>Every value this block carries that can be told what to be, appended to <paramref name="into" />.</summary>
@@ -78,41 +58,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// One of the block's own actions or values made ready to be given, or null where it has no
         /// such thing or the value is not the kind it holds.
         /// </summary>
-        /// <remarks>
-        /// Asked once, when a program is bound; each value is built as the type in
-        /// <paramref name="types" /> where there is one, so giving the order does nothing else.
-        /// </remarks>
+        /// <remarks>Asked once, when a program is bound.</remarks>
         BlockOrder Prepare(IMyTerminalBlock block, string id, ReachKind form, IList<Literal> arguments,
             IList<Primitive> types);
 
         /// <summary>
         /// Performs one of the block's own actions, and answers whether there was one to perform.
         /// </summary>
-        /// <remarks>
-        /// The block is the authority on what it offers, so an id it does not have is answered with
-        /// no rather than an error: a saved sequence can outlive the vocabulary it was written
-        /// against, which is a thing to report calmly and not to throw over.
-        /// <para>
-        /// Turning each value into what the action wanted happens here, against the default it was
-        /// declared with, because that is the only place the game's own types are known at all.
-        /// </para>
-        /// </remarks>
+        /// <remarks>An id the block does not have answers false, and never throws.</remarks>
         bool Perform(IMyTerminalBlock block, string actionId, IList<Literal> arguments);
 
         /// <summary>
         /// Whether the block a slot names is still anywhere in the world.
         /// </summary>
-        /// <remarks>
-        /// A slot holds an id whether or not there is still a block behind it, and the difference
-        /// decides whether Sprocket may write over it: a slot naming a block that is gone is wiring
-        /// that nothing can honour, while one naming a live block is somebody's, even when that
-        /// somebody is another Sprocket.
-        /// <para>
-        /// The whole world rather than this construct, because a slot may legitimately name a block
-        /// on a grid that has since undocked - and taking that for gone would be Sprocket helping
-        /// itself to somebody else's button.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Looks through the whole world: a slot may name a block on a grid that has since undocked.</remarks>
         bool Exists(long entityId);
     }
 }

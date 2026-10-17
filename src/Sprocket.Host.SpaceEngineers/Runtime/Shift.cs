@@ -7,10 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// <summary>
     /// One thing on the world's rota: where it sits in the turn, and what is done when it comes round.
     /// </summary>
-    /// <remarks>
-    /// Made once by whatever owns it and moved between the rota's lists as often as its pace changes,
-    /// so being looked at costs no allocation however long a world runs.
-    /// </remarks>
+    /// <remarks>Made once and moved between the rota's lists, so being looked at allocates nothing.</remarks>
     public sealed class Shift
     {
         /// <summary>A shift at <paramref name="place" /> in the turn, doing <paramref name="due" /> when it comes round, remembering nothing.</summary>
@@ -36,7 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Kept = null;
         }
 
-        /// <summary>Where this sits in the turn. See <see cref="Rota.Join" />.</summary>
+        /// <summary>Where this sits in the turn, as <see cref="Rota.Join" /> takes it.</summary>
         public int Place { get; private set; }
 
         /// <summary>What is done when this comes round, told the tick it is being done on.</summary>

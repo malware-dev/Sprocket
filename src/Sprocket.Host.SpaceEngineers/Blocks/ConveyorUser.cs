@@ -3,11 +3,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A block that pulls what it needs and pushes what it makes along the conveyors by itself, unless it is told to leave
-    /// that to a player: assemblers, refineries, survival kits, collectors, drills, grinders, welders and stores.
-    /// </summary>
-    /// <remarks>Words for the game's own switch, which the terminal calls Use Conveyor System.</remarks>
+    /// <summary>A block with the game's Use Conveyor System switch: assemblers, refineries, survival kits, collectors, drills, grinders, welders and stores.</summary>
     public sealed class ConveyorUser : Capability
     {
         /// <summary>The game's id for the switch, and for the act that flips it.</summary>

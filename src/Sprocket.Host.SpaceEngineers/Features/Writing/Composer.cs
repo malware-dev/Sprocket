@@ -8,16 +8,11 @@ using Lumel.Text;
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
     /// <summary>Where rich text is written: its markup in a box, the way to see it as it will read, and the way to the guide to the marks it can use.</summary>
-    /// <remarks>
-    /// The box and its preview take turns in one room held to one height, so swapping them moves nothing under them. Whoever holds
-    /// it gives it its words through <see cref="Show" />, says what its guide button does through <see cref="Guides" />, and reads
-    /// what was written from <see cref="Text" />; the elements it is drawn with are declared in <c>Composer.View.cs</c>.
-    /// </remarks>
     public partial class Composer : VStack
     {
         /// <summary>A composer whose box and preview are <paramref name="high" /> tall, previewing in <paramref name="reads" />.</summary>
         /// <param name="high">How tall the box and the preview are.</param>
-        /// <param name="reads">The style the text is read in wherever it is shown, so the preview is what will be seen.</param>
+        /// <param name="reads">The style the text is read in.</param>
         public Composer(float high, IStyle reads)
         {
             CreateView(high, reads);

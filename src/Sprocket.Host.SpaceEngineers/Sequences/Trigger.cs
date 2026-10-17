@@ -4,11 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// Something that starts a step: runs or stops a sequence, or acts on some parts itself.
     /// </summary>
-    /// <remarks>
-    /// A trigger belongs to the system rather than to the sequence it runs, because a sequence is a
-    /// procedure and a procedure is not a reason for anything to happen. Two triggers may run one
-    /// sequence, which is what a trigger belonging to a sequence could never say.
-    /// </remarks>
     public abstract class Trigger
     {
         /// <summary>A trigger with nothing written about it yet.</summary>
@@ -33,12 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// Whether it stops that sequence rather than starting it.
         /// </summary>
-        /// <remarks>
-        /// The other thing a person wants a button for, and the one a sequence cannot do for itself:
-        /// a cycle half way through has no line in it that says "unless somebody says otherwise".
-        /// Stopping abandons what it was doing, which is what the switch already does - a button is
-        /// simply the reachable version of it.
-        /// </remarks>
         public bool Stops
         {
             get
@@ -52,10 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public Act Acts => Does as Act;
 
         /// <summary>Whether this is about <paramref name="sequence" />: runs or stops it, or is the trigger whose own act it runs.</summary>
-        /// <remarks>
-        /// A sequence of the system has a number, and a trigger names it by that. The runtime runs a trigger's own act as a
-        /// sequence with no number and that act for its one step, and that sequence is this trigger's alone.
-        /// </remarks>
         public bool IsAbout(Sequence sequence)
         {
             if (!sequence.IsAlone)
@@ -68,10 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// What somebody wrote about this trigger, in their own words, or empty.
         /// </summary>
-        /// <remarks>
-        /// A trigger has no name, so this is what a player setting the system up reads to know which of
-        /// their buttons it means: "the call button, by the inner door".
-        /// </remarks>
         public string Annotation { get; set; }
     }
 }

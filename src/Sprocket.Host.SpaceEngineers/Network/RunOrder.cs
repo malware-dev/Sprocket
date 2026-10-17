@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>The block that carries the Sprocket, by entity id.</summary>
         public long Block;
 
-        /// <summary>The system, by its identity, which is the one name that does not change.</summary>
+        /// <summary>The system, by its identity.</summary>
         public Guid System;
 
         /// <summary>Which one of the system, by number.</summary>

@@ -8,14 +8,10 @@ using MyLaserAntennaStatus = Sandbox.ModAPI.Ingame.MyLaserAntennaStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A laser antenna: how its link stands, the three edges of the link as signals, dropping it, and the members of its
-    /// terminal said in Sprocket's words.
-    /// </summary>
+    /// <summary>A laser antenna, read for how its link stands, with the link's three edges as signals and dropping it.</summary>
     /// <remarks>
-    /// The game raises the block's properties-changed event each time the link changes state, but not as the target falls
-    /// outside the antenna's turning limits, which reads as out of range. That can only happen while the antenna is doing
-    /// something, so the link is looked for on its cadence only while it is not idle.
+    /// The game raises no event as the target falls outside the antenna's turning limits, so the link is looked at on its
+    /// cadence while it is not idle.
     /// </remarks>
     public sealed class LaserAntenna : Capability
     {
@@ -35,7 +31,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>Starting to connect is the link leaving idle, and disconnecting is its leaving connected.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("link", "link", Link).Status().RuledOutBy(Idle)
@@ -51,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("PasteGpsCoords");
         }
 
-        /// <summary>Told as the link changes state, which the antenna raises as its properties changing.</summary>
+        /// <summary>Told as the link changes state.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var antenna = block as IMyLaserAntenna;

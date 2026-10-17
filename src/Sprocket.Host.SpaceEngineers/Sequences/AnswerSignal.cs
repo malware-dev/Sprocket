@@ -6,10 +6,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// Answers a signal part in one blockset with the buttons picked, taking the part where the system has none by that
     /// name, and does what was picked with it.
     /// </summary>
-    /// <remarks>
-    /// One edit, because picking a button is one answer: undoing it takes back the trigger it made and the part with it,
-    /// or puts back the buttons a part picked again had.
-    /// </remarks>
     public sealed class AnswerSignal : SystemEdit
     {
         readonly SystemEdit _made;

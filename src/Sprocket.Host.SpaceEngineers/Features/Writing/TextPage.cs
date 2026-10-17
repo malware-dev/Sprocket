@@ -6,12 +6,6 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 namespace Sprocket.Host.SpaceEngineers.Features.Writing
 {
     /// <summary>Text written over several lines on a page of its own: a screen's text or a block's Custom Data, which a form has no room for.</summary>
-    /// <remarks>
-    /// Opened from the field in a step's form, and gives what it holds back to that field once, on Done, rather than on every
-    /// key, since the text can run to a hundred thousand characters. Going back after a change asks whether to keep it, as
-    /// leaving the picker does. Held to what the block holds, with the count of characters beside the most it may be. The
-    /// box is declared in <c>TextPage.View.cs</c>.
-    /// </remarks>
     public sealed partial class TextPage : EditorPage
     {
         readonly string _title;
@@ -47,7 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         public string Counted => _count == null ? "" : _count.Text;
 
         /// <inheritdoc />
-        /// <remarks>Nothing on it follows the program; what it shows is what is typed.</remarks>
         public override void Build()
         {
         }

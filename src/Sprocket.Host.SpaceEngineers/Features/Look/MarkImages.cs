@@ -11,12 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
     /// The pictures Sprocket's screens find by locator: a kind's or a button's mark for <c>mark:&lt;name&gt;</c>, and what the
     /// catalog it is given finds for anything else.
     /// </summary>
-    /// <remarks>
-    /// A mark is the symbol the screens show beside a thing of its kind, or on a button, so a page of rich text can show it
-    /// beside a word that means that thing, or name the button by what it shows: <c>![signal](mark:signal)</c>,
-    /// <c>![](mark:play)</c>. Each mark is made once and kept. A name with no mark is no picture, and the image says its
-    /// words instead.
-    /// </remarks>
     public sealed class MarkImages : IImageCatalog
     {
         const string Prefix = "mark:";
@@ -69,8 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>One symbol, drawn in the color the screens draw marks in, three quarters the height of its line and centered in its room.</summary>
         sealed class Mark : IImageSource
         {
-            /// <summary>How tall the symbol is drawn, as a part of its line.</summary>
-            /// <remarks>Chosen by eye in the codex, Maltek Sans at 75%: a full line stood out over the letters beside it.</remarks>
+            // Chosen by eye against Maltek Sans in the codex.
             const float Height = 0.75f;
 
             readonly string _symbol;
@@ -86,14 +79,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             }
 
             /// <inheritdoc />
-            /// <remarks>As tall as its line and as wide as the symbol is drawn, so the space either side of it is a word's.</remarks>
             public Vector2 Size => new Vector2(Height, 1f);
 
             /// <inheritdoc />
-            /// <remarks>
-            /// Measured again only where the room is a new height, which is once for every size of text it stands in. Drawn
-            /// upright whatever its turn, since the screens draw text only upright.
-            /// </remarks>
+            /// <remarks>Measures the symbol again only when the room is a new height.</remarks>
             public void Draw(IGraphics g, RectangleF destination, Color tint, float rotation)
             {
                 var size = destination.Height * Height;

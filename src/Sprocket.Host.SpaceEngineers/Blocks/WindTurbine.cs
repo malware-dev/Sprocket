@@ -5,11 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A wind turbine, which takes no orders: read for the wind it catches and the power it gives.</summary>
-    /// <remarks>
-    /// The game's three shares of wind are 0 to 1, and read here as percentages: the wind where the turbine stands, how
-    /// clear of blocks and ground it is, and the two together. A turbine makes only what the grid draws, so its output
-    /// follows the load as much as the wind.
-    /// </remarks>
+    /// <remarks>The game's three shares of wind, 0 to 1, are read as percentages.</remarks>
     public sealed class WindTurbine : Capability
     {
         static readonly OwnValue Wind = OwnValue.Number<IMyWindTurbine>(turbine => turbine.Effectivity * 100.0);
@@ -38,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power);
         }
 
-        /// <summary>Told as the turbine's output changes, which it announces as the wind or its clearance moves what it can make.</summary>
+        /// <summary>Told as the turbine's output changes.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var turbine = block as IMyWindTurbine;

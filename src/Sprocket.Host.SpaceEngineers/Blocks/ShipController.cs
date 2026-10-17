@@ -6,15 +6,8 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// What every seat and remote control has: each slot of the pilot's hotbar, its target lock being gained and lost, and the
-    /// ship's speed.
-    /// </summary>
-    /// <remarks>
-    /// The game orders a ship controller's toolbars as the pilot's hotbar, the build toolbar and the target-lock toolbar. A
-    /// hotbar key runs its slot on the page the pilot has open; the target lock runs the first slot of every page when it is
-    /// gained and the second when it is lost. Nothing runs the build toolbar of itself, so it offers no signal.
-    /// </remarks>
+    /// <summary>What every seat and remote control has: each slot of the pilot's hotbar, its target lock gained and lost, and the ship's speed.</summary>
+    /// <remarks>The game runs the first slot of every page of the target-lock toolbar as a lock is gained and the second as it is lost.</remarks>
     public sealed class ShipController : Capability
     {
         const string Unheard = "The game raises no event when a ship's speed changes.";
@@ -29,11 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         /// <inheritdoc />
         /// <remarks>
-        /// The ship's speed is the same through any seat or remote control of it, in metres a second. Every ship controller
-        /// carries every seat's flight settings, and the game's terminal shows each only where its own test holds: the flight
-        /// settings where the block can control the ship, which a shower or a toilet cannot, the main cockpit on a cockpit
-        /// alone, a horizon anywhere but a cryo chamber, and target locking on a cockpit whose definition allows it. Each test
-        /// is transcribed from the game's ship controller.
+        /// The ship's speed is in meters per second. Each flight setting is offered where the game's terminal shows it, by tests
+        /// transcribed from the game's ship controller.
         /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {

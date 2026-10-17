@@ -8,20 +8,10 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A button panel: one signal for each button, which runs its own slot when it is pressed, and the label a person reads
-    /// on each button.
-    /// </summary>
+    /// <summary>A button panel, with one signal for each button and the label a person reads on each.</summary>
     /// <remarks>
-    /// There is no "was pressed" to sample - a press is a moment the game reports and then forgets - so the
-    /// slot runs Sprocket's own action, which is how the press arrives. The game runs the slot at the button's
-    /// own place in the toolbar, across pages where a panel has more buttons than a page has slots.
-    /// <para>
-    /// <b>The button's toolbar slot has to have something in it.</b> <c>MyButtonPanel.ActivateButton</c>
-    /// returns before raising anything when the slot is empty. Sprocket fills the slot of each button its
-    /// program listens to with <see cref="Features.Terminal.SignalAction" />, and <c>IsButtonAssigned</c> says
-    /// which buttons hold anything, so an empty one can be explained.
-    /// </para>
+    /// A button raises nothing while its toolbar slot is empty (<c>MyButtonPanel.ActivateButton</c>), so Sprocket fills the
+    /// slot of each button its program listens to.
     /// </remarks>
     public sealed class ButtonPanel : Capability
     {
@@ -42,12 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return block is IMyButtonPanel;
         }
 
-        /// <summary>"button 2 is pressed": the panel's buttons as one signal, the button chosen beside it, said by its number on a panel with one button as on a panel with several.</summary>
-        /// <remarks>
-        /// The same signal reads the same whatever panel it is on, so installations filled from different panels agree. The
-        /// terminal's own label box edits whichever button is picked in its list, so it is left to the terminal view, and a
-        /// step labels the button it names.
-        /// </remarks>
+        /// <summary>Describes the panel's buttons as one signal, "button 2 is pressed", with the button chosen beside it.</summary>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.Hiding("ButtonName")
@@ -66,8 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var labels = OwnAction.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
             {
-                // A function's button is held to the panel's when a program is checked; an action's is not, so a button the
-                // panel lacks is never handed to the game, which would keep a label for it.
+                // An action's button is not held to the panel's when a program is checked, and the game keeps a label for any button it is handed.
                 if (!Within(labelled, buttons))
                     return;
 
@@ -89,11 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Automation);
         }
 
-        /// <summary>Not wired where none of its buttons is, because an unwired button cannot report a press.</summary>
-        /// <remarks>
-        /// A panel's buttons raise nothing while their toolbar slots are empty, and Sprocket fills a slot only for a
-        /// button its program listens to.
-        /// </remarks>
+        /// <summary>Not wired where none of its buttons is.</summary>
         public override Status StatusOf(IMyTerminalBlock block)
         {
             var panel = block as IMyButtonPanel;
@@ -111,7 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>How many buttons a panel has.</summary>
-        /// <remarks>Its toolbar's slot count, which is the game's own answer to the same question.</remarks>
         static int Buttons(IMyTerminalBlock block)
         {
             IMyToolbar toolbar = Toolbars.Of(block);

@@ -6,10 +6,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A gravity generator, box or sphere: its pull set or reversed, and the size of its field.</summary>
-    /// <remarks>
-    /// The pull is the game's own value, in metres a second squared, and below 0 it pulls the other way. A box is sized
-    /// along its own width, height and depth and can be fitted to its whole grid; a sphere has a radius.
-    /// </remarks>
+    /// <remarks>The pull is in meters per second squared, and below 0 it pulls the other way.</remarks>
     public sealed class GravityGenerator : Capability
     {
         static readonly OwnAction Reverses = OwnAction.Of<IMyGravityGeneratorBase>(generator =>

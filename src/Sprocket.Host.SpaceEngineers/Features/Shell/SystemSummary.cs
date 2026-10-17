@@ -7,14 +7,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>
-    /// Words a system's name and what it is doing.
-    /// </summary>
-    /// <remarks>
-    /// Naming is worked out rather than demanded. Nothing is declared before it is used, so a
-    /// system exists the moment somebody builds something and has no name until they care to
-    /// give it one - and in the meantime it still has to be called something on screen.
-    /// </remarks>
+    /// <summary>The words for a system's name and what it is doing.</summary>
     public static class SystemSummary
     {
 
@@ -22,15 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// What to call this system: what the player called it, what its blocks suggest, or
         /// its number.
         /// </summary>
-        /// <remarks>
-        /// The suggestion is the leading words its blocks have in common. People prefix block
-        /// names constantly - Airlock Inner Door, Airlock Outer Door, Airlock Button - so the
-        /// common part is usually the name of the system, and using it costs nothing and
-        /// reads as having been understood rather than interrogated.
-        ///
-        /// Worked out when the screen is built, never on a tick: it walks names and splits
-        /// strings, which is not something to do sixty times a second.
-        /// </remarks>
+        /// <remarks>Called when a screen is built, never every tick: it walks names and splits strings.</remarks>
         public static string Describe(Texts texts, Bindings bindings, AutomationSystem system)
         {
             if (system.HasName)
@@ -47,7 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What an installation of a system is called.</summary>
-        /// <remarks>Every installation is named as it is made; one read from a program that names none is called by its place among them.</remarks>
         public static string DescribeInstance(Texts texts, Bindings bindings, AutomationSystem system,
             SystemInstance instance)
         {
@@ -63,7 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The name a new installation of <paramref name="system" /> is given: the first number free, counting on from the installations there are.</summary>
-        /// <remarks>Unrelated to the installation's own number, which only tells it from the others.</remarks>
         public static string NewInstanceName(Texts texts, AutomationSystem system)
         {
             var instances = system.Instances;
@@ -86,16 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return Template.Fill(named, "name", Describe(texts, bindings, system));
         }
 
-        /// <summary>
-        /// Whether anything in this system is doing something, on one of it or on any.
-        /// </summary>
-        /// <remarks>
-        /// The sequences belong to the system and run once for each one of it, so which one is asked
-        /// about is the whole question: the port airlock cycling is not the front one cycling, and a
-        /// row that said otherwise would be pointing at the wrong doors. A null instance asks about
-        /// any of them, which is the honest answer where the screen is showing the system rather than
-        /// one of it.
-        /// </remarks>
+        /// <summary>Whether any sequence of this system is running on <paramref name="instance" />, or on any installation where it is null.</summary>
         public static bool IsRunning(AutomationSystem system, AutomationRunner runner,
             SystemInstance instance)
         {
@@ -130,7 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The first of a system's sequences, or of its triggers' own acts, with something wrong with it on <paramref name="instance" />, and what, or null where none has.</summary>
-        /// <remarks>A lookup per run: what is wrong is found where it happens and kept by each run's runner.</remarks>
+        /// <remarks>Costs a lookup per run.</remarks>
         public static Sequence Failing(AutomationRunner runner, AutomationSystem system, SystemInstance instance,
             out SequenceFault fault)
         {
@@ -157,10 +131,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return null;
         }
 
-        /// <summary>
-        /// How many of a system's sequences have something wrong with them.
-        /// </summary>
-        /// <remarks>A lookup per sequence, as <see cref="Failing" /> is.</remarks>
+        /// <summary>How many of a system's sequences, and of its triggers' own acts, have something wrong with them.</summary>
+        /// <remarks>Costs a lookup per run.</remarks>
         public static int Problems(AutomationRunner runner, AutomationSystem system, SystemInstance instance)
         {
             var count = 0;
@@ -186,19 +158,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return count;
         }
 
-        /// <summary>
-        /// How many of a system's sequences have something to remark on rather than something broken.
-        /// </summary>
-        /// <remarks>
-        /// Not every warning. A system nobody has finished wiring says "nothing starts this yet"
-        /// about half its sequences, and a ship's screen marking that sends somebody looking for a
-        /// fault that is not there - which is why warnings went uncounted here to begin with.
-        /// <para>
-        /// What is counted is a warning about something that <em>happened</em>: a run that gave up
-        /// because another sequence took one of its blocks. Nobody can see that from the overview
-        /// otherwise, and it is the case where not saying is worse than saying too much.
-        /// </para>
-        /// </remarks>
+        /// <summary>How many of a system's sequences gave up a run because another sequence took one of its blocks.</summary>
         public static int Remarks(AutomationRunner runner, AutomationSystem system, SystemInstance instance)
         {
             var count = 0;
@@ -258,19 +218,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>
-        /// The words every name begins with, or empty.
-        /// </summary>
-        /// <remarks>
-        /// Whole words only. "Airlock Inner Door" and "Airlock Outer Door" share "Airlock",
-        /// not "Airlock " and certainly not "Airlock In" - a suggestion cut mid-word reads as
-        /// a bug rather than as help.
-        /// </remarks>
+        /// <summary>The whole words every name begins with, or empty.</summary>
         static string CommonPrefix(List<string> names)
         {
-            // One block says nothing about the system. Naming a system after its only block
-            // reads as a mistake - the system is not the button - and a number is honest
-            // where a guess would be wrong.
             if (!HasTwoDistinct(names))
                 return "";
 
@@ -291,8 +241,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     return "";
             }
 
-            // Sharing every word means the names are identical, which is the same as having
-            // one of them.
             if (shared == words.Length)
                 return "";
 

@@ -33,9 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What goes in a slot: which system, which one of it, which sequence.
         /// </summary>
         /// <remarks>
-        /// <b>The system is named by its identity</b>, because a number cannot say which system it means once
-        /// systems are exported, imported, or on constructs that join, and a name changes. So a button keeps
-        /// working through a rename. Built once, at bind, and read back verbatim.
+        /// Persisted in the slot and read back verbatim. The system is named by its identity, so a button keeps working through
+        /// a rename.
         /// </remarks>
         public static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
@@ -45,10 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What goes in a slot for a button that stops the sequence rather than starting it, where <paramref name="stops" /> says so.
         /// </summary>
-        /// <remarks>
-        /// The verb is on the end rather than the front, so the key that runs a sequence reads the same as the one that stops
-        /// it without its verb. A slot is never rewritten, so a key keeps the meaning it was written with.
-        /// </remarks>
+        /// <remarks>Persisted in the slot: a key keeps the meaning it was written with.</remarks>
         public static string KeyOf(AutomationSystem system, SystemInstance instance, Sequence sequence,
             bool stops)
         {
@@ -61,10 +57,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// slot and blocks of a signal written in place.
         /// </summary>
         /// <remarks>
-        /// By the part's name, because a trigger has no number and its part is what each instance answers. Renaming the part
-        /// changes what is wanted, and the slot is written again with the rest of the wiring. Marked <c>part:</c>, because a
-        /// part may be called anything, a sequence's number and <c>2/stop</c> among it, and <c>at:</c> for one written in
-        /// place, which is the slot and the blocks it is sent from.
+        /// Persisted in the slot. Marked <c>part:</c>, because a part may be called anything, <c>2/stop</c> among it, and
+        /// <c>at:</c> for a signal written in place.
         /// </remarks>
         public static string KeyOf(AutomationSystem system, SystemInstance instance, SignalTrigger trigger)
         {
@@ -85,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _runner.Prepare();
             }
 
-            // Said every time, because a press that does nothing is otherwise invisible: this says whether it arrived.
+            // Said on every press, so a press that does nothing still shows it arrived.
             Target target;
             if (!_byKey.TryGetValue(key, out target))
             {
@@ -104,11 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Rebuilds what the keys name, from the program.
         /// </summary>
-        /// <remarks>
-        /// Cleared rather than merged, so a deleted sequence stops answering. Runs with the rest of
-        /// the reconcile, on the same one-integer signal, because a sequence or one of a system
-        /// appears and disappears only by an edit to the program.
-        /// </remarks>
+        /// <remarks>Called with the rest of the reconcile, when the program's wiring changes.</remarks>
         public void Index()
         {
             _byKey.Clear();
@@ -144,11 +134,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Both names a sequence answers to: the one that runs it and the one that stops it.
         /// </summary>
-        /// <remarks>
-        /// Both always, rather than only the ones some trigger asks for, because a key is a name and
-        /// not a permission - a slot naming one is a slot somebody made, whatever the program has
-        /// since become.
-        /// </remarks>
         void Register(AutomationSystem system, SystemInstance instance, Sequence sequence)
         {
             var target = new Target();

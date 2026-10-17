@@ -6,14 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// Several of an action's parameters that are one thing to a person.
     /// </summary>
-    /// <remarks>
-    /// A colour the game takes as three numbers is one choice and three parameters. Written as a
-    /// group with the three inside it, so every parameter is still described exactly once and how
-    /// many are covered is plain to see rather than counted out in an attribute.
-    /// <para>
-    /// Public fields because the game's own serialiser reads it out of a file a mod ships.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Read by the game's XML serializer from a file a mod ships, so its names are a persisted format.</remarks>
     public sealed class ParameterGroup : ParameterPiece
     {
         /// <summary>What the parameters make up together, as the file names it: <c>color</c>, for one.</summary>

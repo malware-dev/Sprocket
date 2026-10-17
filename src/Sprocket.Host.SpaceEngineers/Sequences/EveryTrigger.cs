@@ -5,11 +5,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// "Every ___" - a recurring trigger.
     /// </summary>
-    /// <remarks>
-    /// This deliberately replaces the loop. There is no counter, no termination
-    /// condition and no iteration variable, so three of the concepts novices most
-    /// reliably form broken mental models around never come up.
-    /// </remarks>
     public sealed class EveryTrigger : Trigger
     {
         /// <summary>A trigger every <paramref name="intervalTicks" /> ticks.</summary>

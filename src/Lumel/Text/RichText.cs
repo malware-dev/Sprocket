@@ -10,14 +10,9 @@ namespace Lumel.Text
 {
     /// <summary>A document, wrapped to the room it is given: its headings, paragraphs, list items, rules, tables, quotes and images, each run set apart as its kind says.</summary>
     /// <remarks>
-    ///     Laid out when the document, its sizes or the room change, into pieces that each draw in one call;
-    ///     drawing measures nothing. Colors are read as it draws, so changing one lays out nothing. A document
-    ///     read by <see cref="Template.Read" /> has slots, which take their words from <see cref="Arguments" />:
-    ///     changing one lays the words out again and reads nothing again.
-    ///     <para>
-    ///         An image's locator is carried as written, as a link's target is: the graphics' <see cref="IGraphics.Images" />
-    ///         says what picture it leads to, and an image whose locator leads to none says its description instead.
-    ///     </para>
+    ///     Laid out only when the document, its sizes, its <see cref="Arguments" /> or the room change; drawing measures
+    ///     nothing, and changing a color lays out nothing. An image whose locator the graphics'
+    ///     <see cref="IGraphics.Images" /> cannot find says its description instead.
     /// </remarks>
     public class RichText : Element, IPadded, ITextual
     {
@@ -425,7 +420,6 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        /// <remarks>Follows the link the press began on, where it also ends on it.</remarks>
         public override void OnPointerUp(Vector2 point)
         {
             var pressed = _pressed;
@@ -436,7 +430,6 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        /// <remarks>Only a link, where links can be followed, so that a press anywhere else reaches what is beneath the text.</remarks>
         protected override bool Hits(Vector2 point)
         {
             return _follow == null ? base.Hits(point) : LinkAt(point) != null;
@@ -645,12 +638,8 @@ namespace Lumel.Text
 
         /// <summary>Lays a box out from line <paramref name="y" /> as the attributes it names ask, moving <paramref name="y" /> below it.</summary>
         /// <remarks>
-        ///     <c>left</c>, <c>center</c> and <c>right</c> set where its lines sit. Each other name the host gives a style
-        ///     sets what that style sets, a later name over an earlier one, and a name it gives none changes nothing. A bar
-        ///     sets the box in from its edge as a quote is set in; a fill reaches across the room behind it, with a little
-        ///     room above and below; a color is its plain words', strong, emphasized and linked words keeping theirs. Its
-        ///     color and alignment reach the boxes inside it, which is how a box inside a box and one box naming both come
-        ///     to the same.
+        ///     A later name's style wins over an earlier one's, and the box's color, face and alignment reach the boxes
+        ///     inside it.
         /// </remarks>
         void Box(IGraphics g, Block box, float left, float width, Alignment align, ref float y, ref float widest)
         {
@@ -721,11 +710,8 @@ namespace Lumel.Text
 
         /// <summary>Lays a table out from line <paramref name="y" />, a row at a time, moving <paramref name="y" /> below it.</summary>
         /// <remarks>
-        ///     Each column is as wide as its widest cell on one line, a gap of one indent apart. Starred columns
-        ///     share the room the others leave by their stars, whatever their cells hold, so their cells wrap to it;
-        ///     with none starred the table is only as wide as it needs. A table too wide for its room takes the width
-        ///     back from its widest columns, whose cells then wrap. A heading row is drawn in the heading color, with a
-        ///     rule under it. A table narrower than its room stands where <paramref name="align" /> says.
+        ///     Starred columns share the room the others leave by their stars. A table too wide for its room takes the width
+        ///     back from its widest columns, whose cells then wrap.
         /// </remarks>
         void Table(IGraphics g, Block table, float from, float width, Alignment align, ref float y, ref float widest)
         {
@@ -1000,10 +986,6 @@ namespace Lumel.Text
         }
 
         /// <summary>The face words of <paramref name="kind" /> are drawn in within a heading or a table's heading row.</summary>
-        /// <remarks>
-        ///     Without a heading face of its own, a heading is strong throughout, so its emphasized words take the face of
-        ///     words both strong and emphasized. Given one, the heading's plain words take it and the rest keep their own.
-        /// </remarks>
         string HeadingFaceOf(RunKind kind)
         {
             if (_headingFont == null)
@@ -1231,7 +1213,7 @@ namespace Lumel.Text
             /// <summary>How big the piece is drawn: an image's size, or the words' width and their line's height.</summary>
             public Vector2 Box;
 
-            /// <summary>The color plain words take in place of the text's own, as a quote's style gives it, or null.</summary>
+            /// <summary>The color plain words take in place of the text's own, as a box's style gives it, or null.</summary>
             public Color? Ink;
         }
 

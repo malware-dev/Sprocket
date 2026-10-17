@@ -5,11 +5,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A cryo chamber or bed a player sleeps and respawns in, which the game counts as a seat.</summary>
-    /// <remarks>
-    /// Being a seat, it keeps the ship's dampeners, handbrake and park, which act on the whole grid as from any seat. What
-    /// a pilot steers and aims with does nothing in a chamber nobody flies from, so it is not offered. The ship's speed is
-    /// every ship controller's - see <see cref="ShipController" />.
-    /// </remarks>
     public sealed class CryoChamber : Capability
     {
         static readonly OwnValue Sleeping = OwnValue.Flag(Reading.Of<IMyCryoChamber>(chamber => chamber.IsOccupied));
@@ -48,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("ControlThrusters", "ControlWheels", "ControlGyros", "TargetLocking", "HorizonIndicator");
         }
 
-        /// <summary>Told as somebody gets in or out, which the chamber announces.</summary>
+        /// <summary>Told as somebody gets in or out.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var chamber = block as IMyCryoChamber;

@@ -78,10 +78,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>Two bars: held where it is and passed over, until it is let go again.</summary>
         public const string Pause = "e";
 
-        /// <summary>A logic system's chip cut out of a square: a blueprint, the mould logic systems are made from.</summary>
+        /// <summary>A logic system's chip cut out of a square: a blueprint, the mold logic systems are made from.</summary>
         public const string Blueprint = "b";
 
-        /// <summary>A chip with its pins along two sides: a logic system, the working thing a blueprint is the mould of.</summary>
+        /// <summary>A chip with its pins along two sides: a logic system, the working thing a blueprint is the mold of.</summary>
         public const string LogicSystem = "y";
 
         /// <summary>The logic system's chip in front of a darker one: an installation, one of however many of a logic system.</summary>
@@ -125,10 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public const string HiddenHidden = "H";
 
         /// <summary>Every hue in order, red round to red.</summary>
-        /// <remarks>
-        ///     The game's own <c>Textures\GUI\HueScale.png</c>, which has no id a mod can use, so a material is
-        ///     declared over it in <c>Content/Data/TransparentMaterials.sbc</c>.
-        /// </remarks>
+        /// <remarks>The game's own <c>Textures\GUI\HueScale.png</c>, declared as a material in <c>Content/Data/TransparentMaterials.sbc</c>.</remarks>
         public static readonly MyStringId Hue = MyStringId.GetOrCompute("Sprocket_Hue");
 
         /// <summary>The outline lit round <paramref name="mark" />, or null for a mark that is never lit.</summary>

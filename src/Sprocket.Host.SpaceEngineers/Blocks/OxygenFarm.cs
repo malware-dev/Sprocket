@@ -31,7 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Looked("Shadow is worked out for the whole grid, which announces nothing as it falls.").In(Category.Gas);
         }
 
-        /// <summary>Told as the farm's output changes, which it works out every hundred ticks and announces when it moves.</summary>
+        /// <summary>Told as the farm's output changes, which it works out every hundred ticks.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return block is IMyOxygenFarm ? new Listening(block, told) : null;

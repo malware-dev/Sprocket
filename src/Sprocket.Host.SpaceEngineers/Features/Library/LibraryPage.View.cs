@@ -26,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         Label _second;
 
         /// <inheritdoc />
-        /// <remarks>The list, searched, beside the details of what is chosen from it.</remarks>
         protected override Element CreateView()
         {
             return new HStack

@@ -2,10 +2,6 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>One change to the program as a whole: a logic system or an installation made or taken out.</summary>
-    /// <remarks>
-    /// Walked back from the home screen, which is where these are made. A logic system taken out cannot hold the way back to
-    /// itself, so the program holds it.
-    /// </remarks>
     public abstract class ProgramEdit : Edit<Automation>
     {
         /// <summary>Where <paramref name="system" /> stands among the program's systems, or -1.</summary>
@@ -22,10 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         }
 
         /// <summary>Whether any installation of <paramref name="system" /> answers a signal slot with a toolbar slot another installation in <paramref name="program" /> answers now.</summary>
-        /// <remarks>
-        /// Asked before something taken out is put back: its buttons were let go of, and one taken since by something else
-        /// would end up claimed twice, which starts neither. A walk of the program's signal slots, with no toolbar read.
-        /// </remarks>
+        /// <remarks>Reads no toolbar: it walks the program's signal slots.</remarks>
         protected static bool Clashes(Automation program, AutomationSystem system)
         {
             var instances = system.Instances;

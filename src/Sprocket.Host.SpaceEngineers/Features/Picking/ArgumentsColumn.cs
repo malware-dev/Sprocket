@@ -25,8 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             Style = Styles.Column;
             Width = width;
 
-            // Headed as a stage is, with the line a stage keeps under its heading, so the first argument lines up with the
-            // boxes beside it.
+            // Headed as a stage is, so the first argument lines up with the boxes beside it.
             Children.Add(new VStack
             {
                 Spacing = 8f,

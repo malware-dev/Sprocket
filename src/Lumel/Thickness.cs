@@ -3,10 +3,6 @@ using System;
 namespace Lumel
 {
     /// <summary>Room on each side of something.</summary>
-    /// <remarks>
-    ///     Equality is written out because the inherited <c>ValueType.Equals</c> boxes, and for float fields
-    ///     compares them by reflection.
-    /// </remarks>
     public struct Thickness : IEquatable<Thickness>
     {
         /// <summary>Room on the left.</summary>

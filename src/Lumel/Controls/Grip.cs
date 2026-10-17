@@ -5,10 +5,6 @@ using VRageMath;
 namespace Lumel.Controls
 {
     /// <summary>The handle something is dragged by, such as a row or a window: six small squares, two across and three down.</summary>
-    /// <remarks>
-    ///     It takes the pointer itself while it can be carried, and says where it went on the screen: what it is the
-    ///     handle of moves with the pointer, so the grip's own layout is no place to measure the pointer from.
-    /// </remarks>
     public class Grip : Element
     {
         const int Across = 2;
@@ -36,7 +32,6 @@ namespace Lumel.Controls
         public Color Color { get; set; }
 
         /// <summary>The color of its squares while the pointer rests on it or carries it, or none to keep <see cref="Color" />.</summary>
-        /// <remarks>What tells a player it can be taken hold of, where a host cannot change its pointer to say so.</remarks>
         public Color HeldColor { get; set; }
 
         /// <summary>Whether it can be taken hold of now.</summary>

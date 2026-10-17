@@ -8,7 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
 {
     public sealed partial class PausedPage
     {
-        /// <summary>How wide the column it says everything in stands, centered on the page.</summary>
         const float Column = 640f;
 
         RichText _body;
@@ -19,7 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Ownership
         /// <inheritdoc />
         protected override Element CreateView()
         {
-            // Centered down the page by the room either side of it, which the two spacers share.
             return new VStack
             {
                 Align = Align.Fill,

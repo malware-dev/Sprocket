@@ -5,34 +5,13 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// Which category one of the game's own members belongs to, asked by its id.
     /// </summary>
     /// <remarks>
-    /// <b>By id rather than by block.</b> Space Engineers names a member the same way wherever it
-    /// appears - every functional block's switch is the same pair of ids, every light's colour the
-    /// same one - so one table covers every block that uses them, including blocks nobody has
-    /// written anything else about. A kind that means something different by a shared id says so
-    /// itself with <see cref="EntityKind.In" />, which is the capability's business rather than this
-    /// table's.
-    /// <para>
-    /// A switch rather than a dictionary: this is a constant, asked once per member while a block's
-    /// vocabulary is worked out, and a table of a few hundred strings that nothing ever writes to is
-    /// better spelled where it can be read than built at startup.
-    /// </para>
-    /// <para>
-    /// The ids are the game's own, transcribed. An id this does not know falls to
-    /// <see cref="Category.Other" />, which is a place in the list rather than a failure.
-    /// </para>
+    /// The ids are the game's own, transcribed. An id this does not know falls to <see cref="Category.Other" />.
     /// </remarks>
     public static class Categories
     {
         /// <summary>
         /// What the member with this id is about.
         /// </summary>
-        /// <remarks>
-        /// The game builds a great many ids out of a few: a slider called <c>Radius</c> also yields
-        /// <c>IncreaseRadius</c>, <c>DecreaseRadius</c>, <c>ResetRadius</c> and <c>SetRadius</c>, and
-        /// a switch called <c>Open</c> also yields <c>Open_On</c> and <c>Open_Off</c>. Those are cut
-        /// back to the stem and the stem is asked about, which is most of the coverage a table this
-        /// size gets.
-        /// </remarks>
         public static Category Of(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -40,13 +19,11 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             string plain = Plain(Stem(id));
 
-            // A few families are built one id per definition, so there is no list of them to hold:
-            // a targeting group per targeting-group definition, a message per slot on a broadcast
-            // controller, a switch per thing a safe zone forbids.
+            // The game builds these families one id per definition: a targeting group per targeting-group definition, a
+            // message per slot on a broadcast controller, a switch per thing a safe zone forbids.
             if (Starts(plain, "targetinggroup"))
                 return Category.Weapons;
-            // A safe zone spends most of its ids on one switch per thing it forbids - the game spells
-            // them with a Cb for checkbox - and the rest on the wall itself.
+            // The game spells a safe zone's switches with a Cb, for checkbox.
             if (Starts(plain, "safezone"))
             {
                 if (Ends(plain, "cb") || plain == "safezonecreate")
@@ -74,11 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether an id is the game's name for the member <paramref name="stem" /> names.
         /// </summary>
-        /// <remarks>
-        /// For the blocks that mean something of their own by a shared id. One member answers to
-        /// several spellings, so a block saying what its <c>Radius</c> is about has to catch
-        /// <c>IncreaseRadius</c> and <c>SetRadius</c> with it.
-        /// </remarks>
         public static bool Names(string id, string stem)
         {
             return !string.IsNullOrEmpty(id) && Plain(Stem(id)) == Plain(Stem(stem));
@@ -108,12 +80,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether the id names growing a part onto the machine rather than working the machine.
         /// </summary>
-        /// <remarks>
-        /// Read rather than listed, because a block offers more of these than it can use and the
-        /// list is not fixed: a rotor declares a head in three sizes and a hinge head besides, and
-        /// the game adds a spelling whenever it adds a part. What they have in common is the whole
-        /// of what they are - something added, and the thing added is a head or a top part.
-        /// </remarks>
         public static bool Builds(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -127,11 +93,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// The stem with nothing in it but lower-case letters and digits.
         /// </summary>
         /// <remarks>
-        /// One member reaches this table spelled several ways. A slider's own id keeps the spaces a
-        /// person reads - <c>Blink Interval</c>, <c>Speed Limit</c> - while the action that sets it
-        /// drops them, and the game is inconsistent about the first letter besides
-        /// (<c>useConveyor</c> against <c>UseConveyor</c>). Taking both out is what lets one entry
-        /// answer for all of them.
+        /// The game spells one member several ways: <c>Blink Interval</c> and <c>BlinkInterval</c>, <c>useConveyor</c> and
+        /// <c>UseConveyor</c>.
         /// </remarks>
         static string Plain(string stem)
         {

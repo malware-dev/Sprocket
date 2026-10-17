@@ -28,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 {
                     new RichText { Style = Styles.Description, IsVisible = false }.As(out _description),
 
-                    // What is wrong with the installation being filled, and the way to where it is mended.
                     new HStack
                     {
                         Spacing = 8f,
@@ -51,7 +50,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
                         }
                     },
-                    // Why the blocks cannot be changed now, said over them.
                     new Label { Style = Styles.Aside, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _locked),
                     new PartList { Spacing = 4f }.As(out _partList)
                 }

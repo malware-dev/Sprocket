@@ -11,9 +11,8 @@ namespace Lumel.Text
 {
     /// <summary>One line of editable text, with a caret and a selection, edited from the keyboard and the pointer.</summary>
     /// <remarks>
-    ///     The position of every boundary between characters is measured once each time the text or its font
-    ///     changes, and the caret, the selection and the pointer read those, so moving the caret or selecting
-    ///     measures nothing.
+    ///     Every boundary between characters is measured once each time the text or its font changes, so moving the
+    ///     caret or selecting measures nothing.
     /// </remarks>
     public class TextBox : Element, IPadded, ITextual
     {
@@ -153,7 +152,6 @@ namespace Lumel.Text
         protected override bool TakesPointer => true;
 
         /// <summary>Whether what is in the box sits against its right-hand end rather than its left.</summary>
-        /// <remarks>Said by the kind of box rather than set on one, so a box that holds a number cannot be left without it.</remarks>
         protected virtual bool Trails => false;
 
         /// <summary>Selects everything in the box, with the caret at the end.</summary>
@@ -335,7 +333,6 @@ namespace Lumel.Text
         }
 
         /// <inheritdoc />
-        /// <remarks>Always: text longer than the box moves along inside it.</remarks>
         protected override bool Clips => true;
 
         /// <summary>Room held clear between the edge and the text.</summary>

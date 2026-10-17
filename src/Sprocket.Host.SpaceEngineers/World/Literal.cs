@@ -6,16 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// A value written down in a program, carrying what kind of value it is.
     /// </summary>
-    /// <remarks>
-    /// An <see cref="EntityValue" /> is eight bytes and says nothing about itself, because a reading
-    /// always comes from a declared property and the declaration is what knows the kind. A value
-    /// somebody wrote into a step is written before anything is bound to it, and the block may not
-    /// even be present when the program is read. So this one carries its kind.
-    /// <para>
-    /// Text is a field rather than a slot in <see cref="Values" /> because a step's values belong to
-    /// the step. They are made when somebody writes a sequence and never on a tick.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Made when somebody writes a sequence, and never on a tick.</remarks>
     public struct Literal
     {
         Literal(ValueKind kind, EntityValue value, string text) : this()
@@ -80,11 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public double Real => BitConverter.Int64BitsToDouble(Value.Bits);
 
         /// <summary>What it is as a number, whether it was written whole or with a point, and nought for anything else.</summary>
-        /// <remarks>
-        /// A program writes "90" as a whole number and "90.5" as a real one, and somebody typing an
-        /// angle does not choose between them. <see cref="Real" /> reads the bits of a real number, and
-        /// read over a whole one it is not the number at all.
-        /// </remarks>
+        /// <remarks><see cref="Real" /> read over a whole number is not the number at all.</remarks>
         public double Number
         {
             get
@@ -111,12 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// How it reads to a person, and to anything that wanted text.
         /// </summary>
-        /// <remarks>
-        /// Invariant throughout, because it is not only what a sentence shows: the game's own actions
-        /// nearly all declare their values as text and parse them back, so this is what they are
-        /// handed. A number that read as <c>0,25</c> on a Norwegian machine would be a value that
-        /// worked on one ship and not on another.
-        /// </remarks>
+        /// <remarks>In the invariant culture: the game's own actions are handed this, and parse it back.</remarks>
         public string Said
         {
             get
@@ -140,11 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// This as the game will take it as <paramref name="type" />, or false where it cannot be one.
         /// </summary>
-        /// <remarks>
-        /// Within the language's rule - a value is the kind it was written as, and a whole number is
-        /// also a real one - and within what the type holds: 300 is no byte. A type nothing says is
-        /// anything.
-        /// </remarks>
+        /// <remarks>A whole number also fits a real type, and a value must be within what the type holds: 300 is no byte.</remarks>
         public bool Fits(Primitive type, out Literal became)
         {
             became = this;
@@ -228,10 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>This as <paramref name="kind" />, or false where it cannot be one.</summary>
-        /// <remarks>
-        /// The same kind is itself, a whole number is also a real one, and a name is also text, as a bare word where text is
-        /// taken. Nothing else becomes anything: a value is written as the kind it is.
-        /// </remarks>
+        /// <remarks>A whole number also becomes a real one, and a name also becomes text; every other kind only becomes itself.</remarks>
         public bool Becomes(ValueKind kind, out Literal became)
         {
             became = this;

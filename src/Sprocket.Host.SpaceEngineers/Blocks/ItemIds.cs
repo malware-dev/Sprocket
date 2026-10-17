@@ -1,25 +1,18 @@
 using System.Collections.Generic;
 using Sandbox.Definitions;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The game's items as a step or a test names one: the item's type and subtype, such as <c>Ingot/Iron</c>.</summary>
-    /// <remarks>
-    /// The spelling the language's own examples use, and the definition id without the game's prefix, as
-    /// <see cref="BlockKinds.Sort" /> spells a block.
-    /// </remarks>
+    /// <remarks>Spelled as the definition id without the game's prefix.</remarks>
     public static class ItemIds
     {
         const string GamePrefix = "MyObjectBuilder_";
 
         /// <summary>A field choosing one of the game's public items, named <paramref name="name" />, by the names the game shows them by.</summary>
-        /// <remarks>
-        /// Read from the definitions the game has loaded, which is every item a world can hold, mods' included. Where none
-        /// are loaded - the test harness - a box that takes any item written out.
-        /// </remarks>
+        /// <remarks>Where no definitions are loaded, as in the test harness, a box that takes any item written out.</remarks>
         public static Field Asked(string name)
         {
             var words = new List<string>();

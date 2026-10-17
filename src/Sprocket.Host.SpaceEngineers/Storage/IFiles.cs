@@ -1,10 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>Files in one folder, known by name, which a player can also open outside the game.</summary>
-    /// <remarks>
-    /// The game's mod storage offers no listing, so a file is found only by a name already known; a name holds no
-    /// folder.
-    /// </remarks>
+    /// <remarks>A file is found only by a name already known, and a name holds no folder.</remarks>
     public interface IFiles
     {
         /// <summary>Whether there is a file called <paramref name="name" />.</summary>

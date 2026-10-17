@@ -6,10 +6,7 @@ using VRageMath;
 namespace Lumel.Drawing
 {
     /// <summary>The screen the game gives a mod to draw on, in the game's own terms.</summary>
-    /// <remarks>
-    ///     The harness implements this to record a frame instead of drawing it. The game's scissor is a
-    ///     struct scope, so each implementation keeps its own stack of them.
-    /// </remarks>
+    /// <remarks>The game's scissor is a struct scope, so each implementation keeps its own stack of them.</remarks>
     public interface IScreenSpace
     {
         /// <summary>The area the game promises is on screen, in pixels.</summary>

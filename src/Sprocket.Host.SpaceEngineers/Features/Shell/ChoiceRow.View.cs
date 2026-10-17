@@ -28,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 {
                     new Label { Style = Styles.Name }.As(out _words),
 
-                    // Told as well as shown, and told before the answer is given rather than after.
                     new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _caution)
                 }
             });

@@ -5,7 +5,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A rectangle of one color, shown so that the color itself is the answer.</summary>
-    /// <remarks>The color is its <see cref="Element.Background" />, and its size its placement's.</remarks>
     public class Swatch : Element
     {
         /// <inheritdoc />

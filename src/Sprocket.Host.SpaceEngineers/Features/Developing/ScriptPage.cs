@@ -7,14 +7,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
 {
     /// <summary>What this construct's automation is saved as, written out, and edited by hand.</summary>
     /// <remarks>
-    /// Reached in developer mode, and from the notice about a program whose text has an error in it, which is mended here. The
-    /// script is what a program actually is on disk, so reading it is the shortest way to tell whether the editor built what its
-    /// screens claim, and editing it is the only way to mend a text that would not read.
-    /// <para>
-    /// <b>Written out afresh once a second, not on a tick,</b> and only while nobody has changed what the box shows. Saving walks
-    /// every system, sequence and step and builds a string of the lot, which is not a thing to do sixty times a second to
-    /// answer a question nobody asked. The listing it is drawn on is declared in <c>ScriptPage.View.cs</c>.
-    /// </para>
+    /// Written out again once a second, not every tick, and only while nobody has changed what the box shows, since saving
+    /// builds a string of the whole program.
     /// </remarks>
     public sealed partial class ScriptPage : EditorPage
     {
@@ -64,10 +58,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         }
 
         /// <summary>Fills the listing for the first time, and gives the button its words and its press.</summary>
-        /// <remarks>
-        /// Pressed as mending rather than as an edit, so a program that would not read asks nothing before its text is put in
-        /// its place.
-        /// </remarks>
         protected override void ViewCreated()
         {
             _apply.Text = Editor.Texts.ScriptApply;
@@ -123,7 +113,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
             _problem.Text = trouble;
             _problem.IsVisible = trouble.Length > 0;
 
-            // The words take the room the button does not, where there are any.
             _spacer.IsVisible = trouble.Length == 0;
         }
 

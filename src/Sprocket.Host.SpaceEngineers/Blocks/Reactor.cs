@@ -9,18 +9,14 @@ using MyItemType = VRage.Game.ModAPI.Ingame.MyItemType;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A reactor: read for its uranium and its output, and heard as it runs out of uranium.</summary>
-    /// <remarks>
-    /// Switched on and off like any block; what is its own is what it burns and what it gives. Its uranium is the one item
-    /// it holds, so it needs no option, and is named for its fuel.
-    /// </remarks>
     public sealed class Reactor : Capability
     {
         static readonly OwnValue Output = OwnValue.Number<IMyReactor>(reactor => reactor.CurrentOutput);
 
         static readonly OwnValue MostOut = OwnValue.Number<IMyReactor>(reactor => reactor.MaxOutput);
 
-        /// <summary>The uranium a reactor holds, made as the first reactor is described.</summary>
-        /// <remarks>Not before: the uranium ingot's type can be named only once the game has registered its types.</remarks>
+        // Made as the first reactor is described: the uranium ingot's type can be named only once the game has registered
+        // its types.
         OwnValue _fuel;
 
         /// <inheritdoc />
@@ -30,7 +26,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>Its maximum output is fixed by the block, so nothing need announce it.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             if (_fuel == null)
@@ -48,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("UseConveyor", false, "toggle automatic push and pull");
         }
 
-        /// <summary>Told as the reactor's inventory changes and as its output changes, both of which it announces.</summary>
+        /// <summary>Told as the reactor's inventory changes and as its output changes.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var reactor = block as IMyReactor;

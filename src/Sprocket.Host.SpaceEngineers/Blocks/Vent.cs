@@ -4,33 +4,17 @@ using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
 using SpaceEngineers.Game.ModAPI;
 
-// The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor and friends
-// are declared in both, and the mod-side ones are the ones with the events on them.
+// The status lives in the Ingame namespace, which cannot be imported whole: the vent's interface is declared in both,
+// and the mod-side one is the one with the events on it.
 using VentStatus = SpaceEngineers.Game.ModAPI.Ingame.VentStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// The air vent, which the terminal describes only as a switch and which the airlock is built around.
-    /// </summary>
+    /// <summary>The air vent, which the airlock is built around.</summary>
     /// <remarks>
-    /// The game's API gives it no events of any kind, so all of this is sampled, and a room that
-    /// empties and refills between two ticks is invisible. That bound was accepted knowingly; it is worth
-    /// remembering that the vent is the block it bites.
-    /// <para>
-    /// <b>Neither the full nor the empty reading reads the reported status, and that is deliberate.</b> The
-    /// game cannot answer either question with it: an airtight room never reports Depressurized, because
-    /// that value is reserved for a room that is not airtight or is not there, and it only reports
-    /// Pressurized once the level has reached exactly one. Both are raised with the game as a bug; neither
-    /// is waitable meanwhile.
-    /// </para>
-    /// <para>
-    /// So both come from the oxygen in the room, and the vent has to be working for the reading to mean
-    /// anything. That last part is what keeps a loading world safe: a vent with no power, or with no room
-    /// worked out yet, reports nothing left whatever the room actually holds. Anything Sprocket cannot read
-    /// is "not yet" and never "done" - a sequence held at a wait can be recovered from, and one that opened
-    /// a door on a room it could not read cannot.
-    /// </para>
+    /// The game gives a vent no events, so all of it is sampled, and a room that empties and refills between two ticks is
+    /// invisible. Anything that cannot be read is not yet, never done: a vent with no power, or no room worked out yet as
+    /// a world loads, reports nothing left whatever the room holds.
     /// </remarks>
     public sealed class Vent : Capability
     {
@@ -66,10 +50,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly string[] Rooms = { "filling", "full", "emptying", "empty", "stopped" };
 
-        // Full and empty as the readings above judge them, so a test of the room and a step that fills it agree; filling and
-        // emptying are the vent on its way, and stopped is a vent switched off, unpowered or broken. A room that is not
-        // airtight never fills, and stays filling. Written out rather than asking Air and Empty, which would read whether
-        // the vent works and its level once each on every look (BudgetTests.ALookedForMomentIsLookedAtOnItsCadence).
+        // Full and empty as the readings above judge them, so a test of the room and a step that fills it agree. A room that
+        // is not airtight never fills, and stays filling. Written out rather than asking Air and Empty, which would read
+        // whether the vent works and its level once each on every look (BudgetTests.ALookedForMomentIsLookedAtOnItsCadence).
         static readonly OwnValue Room = OwnValue.OneOf<IMyAirVent>(Rooms, (vent, seen) =>
         {
             if (!vent.IsWorking)
@@ -113,7 +96,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>Nothing to call off: a vent goes on with the air it was moving, and a room half emptied is no kind of stop.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("room-status", "room status", Room).Status().Looked(Unheard).In(Category.Air)
@@ -146,10 +128,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (vent == null)
                 return Status.None;
 
-            // What it cannot do comes before what it says it is doing, asked about the thing it is
-            // currently set to do. A vent that has stopped moving gas short of where it was going
-            // goes on reporting Pressurizing for as long as the world exists, so the game's own
-            // word for it is the one thing that never says so.
+            // What it cannot do comes first: a vent that has stopped moving gas short of where it was going goes on reporting
+            // Pressurizing for as long as the world exists.
             BlockTrouble stuck = Said(vent);
             if (stuck.Exists)
                 return Status.Of(stuck);
@@ -173,14 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 && (vent.Status == VentStatus.Pressurizing || vent.Status == VentStatus.Depressurizing);
         }
 
-        /// <summary>
-        /// What a room told to fill or empty does when it is stuck: hold, waiting until it gets there, or move on, carrying on
-        /// once the gas has nowhere to come from or go to. <paramref name="about" /> says which is which for the action.
-        /// </summary>
-        /// <remarks>
-        /// Full tanks are the common case, and an airlock waiting on them never lets anybody out. Holding is what the action
-        /// does anyway, so a sentence leaves it out, and says "or move on" where it moves on.
-        /// </remarks>
+        /// <summary>What a room told to fill or empty does when it is stuck, hold or move on; <paramref name="about" /> says which is which for the action.</summary>
         static Field Asked(string about)
         {
             var field = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { Literal.Of(MoveOn).Said, Literal.Of(Hold).Said });
@@ -192,33 +165,21 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return field;
         }
 
-        /// <summary>
-        /// Why the room will not finish what a step asked, or none while it might: what stands in its way, unless the step
-        /// moves on past it.
-        /// </summary>
+        /// <summary>Why the room will not finish what a step asked, or none while it might, unless the step moves on past it.</summary>
         static BlockTrouble Unless(BlockTrouble trouble, Stuck stuck, Cause passes)
         {
             return Passes(trouble, stuck, passes) ? BlockTrouble.None : trouble;
         }
 
-        /// <summary>
-        /// Whether <paramref name="trouble" /> is one a step told to move on lets pass: <paramref name="passes" />, which is
-        /// nothing to move the gas with.
-        /// </summary>
-        /// <remarks>A room that is not airtight never passes: carrying on would open it to the leak.</remarks>
+        /// <summary>Whether <paramref name="trouble" /> is <paramref name="passes" />, nothing to move the gas with, which a step told to move on lets pass.</summary>
+        /// <remarks>A room that is not airtight never passes.</remarks>
         static bool Passes(BlockTrouble trouble, Stuck stuck, Cause passes)
         {
             return stuck.MovesOn && trouble.Cause == passes;
         }
 
-        /// <summary>
-        /// Why the room will not finish what the vent is set to do, for a screen rather than for a step.
-        /// </summary>
-        /// <remarks>
-        /// Reads the gas without keeping a clock on it. Drawing a status must not move the timing
-        /// the runtime settles a step by, and it has no use for it: what is on screen is about this
-        /// moment and is drawn again a moment later.
-        /// </remarks>
+        /// <summary>Why the room will not finish what the vent is set to do, for a screen rather than for a step.</summary>
+        /// <remarks>Keeps no clock on the gas, so drawing a status leaves the timing a step is settled by as it is.</remarks>
         static BlockTrouble Said(IMyAirVent vent)
         {
             if (vent.Depressurize)
@@ -237,14 +198,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 : BlockTrouble.Waiting(Cause.VentNoOxygen);
         }
 
-        /// <summary>
-        /// Why the room will not empty, or null while it still might.
-        /// </summary>
-        /// <remarks>
-        /// Told to fill instead is its own answer and not a silence. Two sequences share one vent -
-        /// a cycle out and a cycle in - and the one that has been overruled is left waiting for a
-        /// state nothing is heading towards any more.
-        /// </remarks>
+        /// <summary>Why the room will not empty, or null while it still might.</summary>
         static BlockTrouble Emptying(IMyAirVent vent, ReaderMemory seen)
         {
             if (vent.GetOxygenLevel() <= Emptied)

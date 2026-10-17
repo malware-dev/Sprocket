@@ -4,13 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// What a block says is stopping it, and whether waiting will help.
     /// </summary>
-    /// <remarks>
-    /// Two answers rather than one, because the two demand opposite things of a sequence. A room
-    /// with no oxygen is worth waiting on: somebody reattaches a tank and the airlock finishes by
-    /// itself. A vent another sequence has just sent the other way is not, because nothing about
-    /// waiting makes the conflict go away and the step it is waiting for is no longer being
-    /// pursued by anything.
-    /// </remarks>
     public struct BlockTrouble
     {
         /// <summary>No trouble.</summary>

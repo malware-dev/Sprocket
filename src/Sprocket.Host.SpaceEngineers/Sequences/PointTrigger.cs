@@ -5,14 +5,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// What a trigger does: the sequence it runs or stops, or an act of its own.
     /// </summary>
-    /// <remarks>
-    /// The trigger itself is kept rather than replaced, because what starts it has not changed - and
-    /// the toolbar slot the construct holds names that trigger. Rebuilding it would claim the slot
-    /// again for something that is, to the player, the same button.
-    /// <para>
-    /// Answering "run a new sequence" makes one, so this carries it, and undoing takes it away again.
-    /// </para>
-    /// </remarks>
     public sealed class PointTrigger : SystemEdit
     {
         readonly Automation _program;
@@ -72,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <inheritdoc />
         public override void Apply(AutomationSystem system)
         {
-            // Already there the first time, and put back by this on the way forward again.
+            // The sequence is already there the first time; a redo puts it back.
             if (_made != null && system.FindSequence(_made.Number) == null)
                 _program.PutBack(system, _made, -1);
 

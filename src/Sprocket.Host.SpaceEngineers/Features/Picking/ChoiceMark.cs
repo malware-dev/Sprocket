@@ -6,10 +6,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>The mark at the head of something to choose: a ring for one of several, and a box for any number of them.</summary>
-    /// <remarks>
-    /// Round where exactly one holds at a time, which is what the shape says before anybody reads the words beside it, and
-    /// square where several may be collected, with a tick in it for each one taken.
-    /// </remarks>
     public class ChoiceMark : Glyph
     {
         const float Side = 16f;

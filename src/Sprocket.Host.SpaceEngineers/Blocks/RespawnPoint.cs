@@ -6,10 +6,6 @@ using SpaceEngineers.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block a player can respawn at: the medical room and the survival kit, each named on the respawn screen.</summary>
-    /// <remarks>
-    /// A survival kit is an assembler to the game, told apart by its type. The refill stations are medical rooms that respawn
-    /// nobody, and have no name to give.
-    /// </remarks>
     public sealed class RespawnPoint : Capability
     {
         /// <inheritdoc />

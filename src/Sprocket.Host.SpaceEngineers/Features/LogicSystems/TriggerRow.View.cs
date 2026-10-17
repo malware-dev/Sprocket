@@ -40,8 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _sentence),
 
-                    // Its own line under the sentence, because what is wrong and what the trigger says are two
-                    // readings, and losing one to show the other is how a diagnosis screen lies.
                     new Label { Style = Styles.Problem, Wraps = true }.As(out _problem)
                 }
             });

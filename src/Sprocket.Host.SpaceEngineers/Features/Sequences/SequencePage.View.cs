@@ -24,9 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     new SequenceBar().As(out _bar),
                     new StepList().As(out _steps),
 
-                    // The way to add a step and the reason there is none share one line, so locking changes what the
-                    // line says and not where anything stands. The reason is padded as the button is, so its words
-                    // start where its did, and the plus stands in the column the steps' grips do.
                     new HStack
                     {
                         Spacing = 8f,

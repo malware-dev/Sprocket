@@ -4,20 +4,15 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A safe zone block: whether its zone is up, what the zone allows, its shape, size and look, said in Sprocket's words.
-    /// </summary>
-    /// <remarks>
-    /// The game takes a change to what the zone allows, its shape or its size only while the zone is up. Active is a state of
-    /// the block, read and never set: the game's own pair of actions for its switch activate and deactivate the zone.
-    /// </remarks>
+    /// <summary>A safe zone block, read for whether its zone is up, what the zone allows, and its shape, size and look.</summary>
+    /// <remarks>The game takes a change to what the zone allows, its shape or its size only while the zone is up.</remarks>
     public sealed class SafeZone : Capability
     {
-        // The game's own id for each switch, and what Sprocket says it allows.
         const string Unheard = "No event of the block's is known to say when its zone goes up or down.";
 
         static readonly OwnValue Active = OwnValue.Flag(Reading.Of<IMySafeZoneBlock>(zone => zone.IsSafeZoneEnabled()));
 
+        // The game's own id for each switch, and what Sprocket says it allows.
         static readonly string[] Allows =
         {
             "SafeZoneDamageCb", "damage",

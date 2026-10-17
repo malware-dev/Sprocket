@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// What an <see cref="If" /> tests: a member on some blocks compared with a value, on any of them, on all, or on their
     /// sum.
     /// </summary>
-    /// <remarks>The member is one of the block's own values, or one of Sprocket's. It is read once, when the step is reached.</remarks>
+    /// <remarks>The member is read once, when the step is reached.</remarks>
     public sealed class Comparison
     {
         readonly List<string> _targets = new List<string>();

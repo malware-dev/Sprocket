@@ -5,13 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
     /// A Sprocket's program, and what it has switched off, as they stand after its latest change.
     /// </summary>
     /// <remarks>
-    /// Sent both ways. The holder sends the server its edits, and the server sends every client what
-    /// it wrote into the block, which is what a grid copied on that client carries.
-    /// <para>
-    /// The whole program rather than the change that made it, because the server rebuilds the
-    /// Sprocket from what it is told, carrying its runs across - so every way the editor has of
-    /// changing a program arrives the same way, and none of them needs a message of its own.
-    /// </para>
+    /// Sent both ways: the holder sends the server its edits, and the server sends every client what it wrote into the
+    /// block.
     /// </remarks>
     public struct ProgramChange
     {

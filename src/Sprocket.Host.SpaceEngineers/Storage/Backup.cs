@@ -3,10 +3,6 @@ using System;
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>The blueprint of one logic system a construct had when it lost its automation, and which construct that was.</summary>
-    /// <remarks>
-    /// What the index says of it; the blueprint itself stays in its file until somebody asks for it. Nothing ties it to a
-    /// construct still in the world: it is only ever put on one by hand.
-    /// </remarks>
     public sealed class Backup
     {
         /// <summary>The blueprint in <paramref name="file" /> of the logic system <paramref name="name" />, kept of the construct <paramref name="construct" />.</summary>

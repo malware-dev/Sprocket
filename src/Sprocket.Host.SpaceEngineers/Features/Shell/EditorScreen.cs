@@ -8,15 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     /// What the chrome around the page shows right now: the heading, the controls beside it, the way on at the foot, and
     /// any question standing over it all.
     /// </summary>
-    /// <remarks>
-    /// One screen at a time, with a back stack. That is a deliberate floor rather than a limitation: the editor has to
-    /// work wherever it is embedded, and a layout assuming room for a sidebar plus a detail pane plus a sequence list is an
-    /// assumption the smallest target cannot honor. The page draws its own view; this is only what is around it.
-    /// <para>
-    /// Written by the editor and read by the chrome, which asks <see cref="Revision" /> whether anything changed rather
-    /// than reading everything on every frame.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Read every frame by the chrome, which checks <see cref="Revision" /> before reading anything else.</remarks>
     public sealed class EditorScreen
     {
         readonly List<ChoiceEntry> _actions = new List<ChoiceEntry>();
@@ -58,22 +50,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>A number that differs from the last one read wherever anything here has changed since.</summary>
-        /// <remarks>The heading's parts count too, since a page rewrites their words on a cadence.</remarks>
+        /// <remarks>Changes to the heading's parts count too.</remarks>
         public int Revision => _revision;
 
         /// <summary>What this screen is called, in order, one part at a time.</summary>
-        /// <remarks>
-        /// Never empty: every screen has at least one part, and most have exactly one. A sequence has two because it is two
-        /// things - what starts it, and what it then does.
-        /// <para>
-        /// <b>There is deliberately no joined-up string of the whole thing here.</b> The whole reason this is a list is
-        /// that a heading has to show which part of it is somebody's to change, and an API that offers the easy wrong thing
-        /// gets the easy wrong thing.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Never empty.</remarks>
         public List<HeadingPart> Heading { get; private set; }
 
-        /// <summary>Context the title cannot carry - a count, a live status.</summary>
+        /// <summary>The line of context under the title, such as a count or a live status.</summary>
         public string Subtitle
         {
             get { return _subtitle; }
@@ -183,11 +167,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether this screen has a way back from what was done on it.</summary>
-        /// <remarks>
-        /// Separate from having anything to walk back right now, because the pair holds its place either way: arrows that
-        /// appeared with the first edit would shift the switch beside them out from under the pointer that had just made
-        /// it.
-        /// </remarks>
         public bool HasHistory
         {
             get { return _hasHistory; }
@@ -202,10 +181,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What undoing would undo, e.g. "deleting a trigger".</summary>
-        /// <remarks>
-        /// "Undo" alone asks somebody to remember what they last did, which is exactly what a person who has just made a
-        /// mistake is worst at.
-        /// </remarks>
         public string UndoText
         {
             get { return _undoText; }
@@ -241,7 +216,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>The words on the button at the right end of the header, or empty where the screen has none.</summary>
-        /// <remarks>Separate from going back, which always means exactly what it says: return to the screen before.</remarks>
         public string PrimaryText
         {
             get { return _primaryText; }
@@ -269,14 +243,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public IList<ChoiceEntry> Actions => _actions;
 
         /// <summary>A short question waiting to be answered, or empty.</summary>
-        /// <remarks>
-        /// Not a screen. A target draws this over whatever is already there and nothing about it moves - which is the
-        /// difference between "switch this on?" and "delete this forever?", and why the second one is a page of its own.
-        /// <para>
-        /// While one is up, a target must offer <see cref="Answers" /> and nothing else. A question somebody can walk
-        /// around is a question that gets answered by accident.
-        /// </para>
-        /// </remarks>
+        /// <remarks>While one is up, a target offers <see cref="Answers" /> and nothing else.</remarks>
         public string Question => _question;
 
         /// <summary>The words for the question's named slots, or null where it has none and is read as it is.</summary>
@@ -286,28 +253,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public bool HasQuestion => !string.IsNullOrEmpty(_question) || _answers.Count > 0;
 
         /// <summary>Whether the question belongs to whatever was pressed, rather than to the screen.</summary>
-        /// <remarks>
-        /// One hangs under the control it is about and reads as that control opening; the other sits in the middle and
-        /// reads as the screen asking. Which it is belongs to whoever raised it, because only they know what the answers
-        /// are about.
-        /// </remarks>
         public bool QuestionIsHere => _questionIsHere;
 
         /// <summary>How many questions have been raised, so a target can tell a new one from the same one.</summary>
-        /// <remarks>
-        /// A count rather than the words, because two questions can read the same and a target that compared text would
-        /// show the first one's answers under the second one's name.
-        /// </remarks>
         public int Asked { get; private set; }
 
         /// <summary>The ways to answer the question, in the order they should be offered.</summary>
         public IList<ChoiceEntry> Answers => _answers;
 
         /// <summary>The answer Enter takes, or null where it takes none.</summary>
-        /// <remarks>
-        /// The page's to say and not a target's to guess, and not always the first: the order answers read best in is not
-        /// the order of their safety.
-        /// </remarks>
         public ChoiceEntry Default => _default;
 
         /// <summary>Says <see cref="Heading" /> has been filled again, so that what its parts say from now on counts as a change here.</summary>

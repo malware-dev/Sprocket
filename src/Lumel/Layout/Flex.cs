@@ -9,8 +9,8 @@ namespace Lumel.Layout
         public static readonly Flex Grow = new Flex(1f, true);
 
         /// <summary>
-        /// The room a stack is arranged in beyond what its other children want, asking for none as it is measured: a stack sized
-        /// to its children keeps that size, and a spacer placed so pushes what follows it to the far end of a wider one.
+        /// The room a stack is arranged in beyond what its other children want, asking for none as it is measured, so a spacer
+        /// placed by it pushes what follows to the far end.
         /// </summary>
         public static readonly Flex Spare = new Flex(1f, false);
 

@@ -15,10 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// What a trigger is chosen to do, in the column beside what starts it: a single action, a new sequence, or a sequence the
     /// system has, to run or to stop.
     /// </summary>
-    /// <remarks>
-    /// One for every page a trigger is made or changed on, so what it does is chosen the same way wherever it is met. It opens
-    /// on what the trigger does already, and a new sequence where it does nothing yet, which is what a trigger usually does.
-    /// </remarks>
     public sealed class OutcomeColumn
     {
         const string One = "one";
@@ -94,10 +90,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public bool Straight { get; set; }
 
         /// <summary>The strip what the trigger does is chosen in, which the page the single action is chosen on goes on in.</summary>
-        /// <remarks>
-        /// So what a trigger does, and then the action it does, are one pick: the stages already answered stay where going back
-        /// finds them, and nothing is kept until the last page is done.
-        /// </remarks>
         public PickStrip Pick { get; set; }
 
         /// <summary>Which column the page the single action is chosen on opens on.</summary>
@@ -105,19 +97,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>What finishing the page the single action is chosen on does, as things stand now.</summary>
         /// <remarks>
-        /// Set again each time that page is gone on to, because what starts the trigger may have been changed on the way back,
-        /// and finishing carries whatever it is by then.
+        /// Set again each time that page is gone on to, since what starts the trigger may have changed on the way back.
         /// </remarks>
         public Action<PickAnswer> Finish { get; set; }
 
         /// <summary>Says what the trigger may do in <paramref name="stage" />.</summary>
-        /// <remarks>
-        /// Running and stopping are a choice about the rest, as any and all are about the blocks, so they are one switch over
-        /// the list rather than a second list. There is nothing new to stop, and a single action is done rather than stopped, so
-        /// stopping lists the sequences alone; and a system with none has nothing to stop. The two that make something come
-        /// first, and then under their own heading the sequences, which are as many as the system has and so go last, where
-        /// their number cannot push anything else out of sight.
-        /// </remarks>
         public void Fill(StageColumn stage)
         {
             var texts = _editor.Texts;
@@ -143,8 +127,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _runs.Tip = Tip.For(null, Stops ? texts.PickStopAbout : texts.PickRunAbout);
             }
 
-            // A single action is offered only in developer mode, or where the trigger does one already: whether a trigger needs
-            // one at all, rather than a sequence of one step, is open.
             var offersOne = !Stops && (_editor.DeveloperMode || Outcome == Outcome.One);
 
             _keys.Clear();
@@ -209,7 +191,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Takes what the row under <paramref name="key" /> offers; a single action goes straight on to the page it is chosen on.</summary>
-        /// <remarks>Anything else pressed twice in quick succession is taken and finished with, as Done would.</remarks>
         void Take(string key, int presses)
         {
             Action does;

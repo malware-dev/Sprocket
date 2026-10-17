@@ -11,11 +11,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>One live thing on one line: what it is, what it is doing, and when it last did anything.</summary>
-    /// <remarks>
-    ///     Whoever holds it sets what it shows and what each press does, then calls <see cref="Show" />, which works
-    ///     out its look in one pass. A press it is given no command for is hidden or cannot be pressed. Rows never
-    ///     nest more than one level deep, so one fixed indent serves every row.
-    /// </remarks>
     public class StatusRow : HStack
     {
         /// <summary>What goes before the words of anything that adds.</summary>
@@ -129,14 +124,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What deleting it does, or null where it cannot be deleted.</summary>
         public ICommand Deletes { get; set; }
 
-        /// <summary>How deep it stands under the row it belongs to: none, or one level, which says its name a size smaller.</summary>
+        /// <summary>How deep it stands under the row it belongs to: none, or one level.</summary>
         /// <remarks>Whatever holds it sets it in; a row is as wide as it is given.</remarks>
         public int Depth { get; set; }
 
         /// <summary>The symbol its light is drawn as, or null for the round light every row has.</summary>
         public string Mark { get; set; }
 
-        /// <summary>The symbol its bin is drawn as, or null for the bin: a minus where the row is taken off the list rather than destroyed.</summary>
+        /// <summary>The symbol its bin is drawn as, or null for the bin.</summary>
         public string BinMark { get; set; }
 
         /// <summary>What it is called.</summary>
@@ -193,10 +188,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Why it cannot be deleted now, said on its quiet bin; empty where nothing stands in the way.</summary>
         public string Locked { get; set; }
 
-        /// <summary>Why its switch cannot be pressed now, said on the switch, which shows its state dimmed; empty where nothing stands in the way.</summary>
+        /// <summary>Why its switch cannot be pressed now, said on the switch; empty where nothing stands in the way.</summary>
         public string SwitchLocked { get; set; }
 
-        /// <summary>What pressing its switch does, said on it, where a row says more than switching itself; null for the plain words.</summary>
+        /// <summary>What pressing its switch does, said on it, or null for the plain words.</summary>
         public string SwitchAbout { get; set; }
 
         /// <summary>What its button says.</summary>
@@ -232,15 +227,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Shows what it has been told, saying its fixed words in <paramref name="texts" />.</summary>
-        /// <remarks>Runs on every refresh of the list, so it writes what may have changed and joins no string that has not.</remarks>
+        /// <remarks>Runs on every refresh of the list, so it joins no string that has not changed.</remarks>
         public void Show(Texts texts)
         {
             _summary.Style = Depth > 0 ? Styles.InnerName : Styles.Name;
             _light.Symbol = Mark ?? Symbols.Disc;
             _light.Style = Mark == null ? Styles.Light : Styles.Marked;
 
-            // One height for every row, so no row moves the rows under it; one with nothing to say under its name has the
-            // name on its middle.
             Placement = ThingHeight;
 
             var pressable = Opens != null;
@@ -248,8 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             Tip = Tip.For(Tip, About, AboutArguments);
             var wrong = Problems > 0;
 
-            // Switched off is a warning, since a logic system is switched off to be changed. A row is off where its own switch is,
-            // or where the logic system above it is, which holds its switch.
+            // A row is off where its own switch is, or where the logic system above it holds its switch.
             var off = Flips != null && (!SwitchIsOn || !string.IsNullOrEmpty(SwitchLocked));
 
             Style = wrong
@@ -302,7 +294,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _problem.IsVisible = saying;
             _problem.Color = RemarkColors.Of(Level, Palette.Faint);
 
-            // A note is part of the line, so it has no flag; a warning's flag is amber and a problem's red.
             var marked = saying && Level != NoticeLevel.Info || Problems > 0 || Remarks > 0;
             var quietly = saying && Level != NoticeLevel.Info ? Level == NoticeLevel.Warning : Problems == 0;
 
@@ -318,7 +309,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.Tip = Tip.For(_switch.Tip,
                 !switches ? null : held ? SwitchLocked : SwitchAbout ?? Switching(texts, SwitchGovernsAll, SwitchIsOn));
 
-            // A row that may not be changed now keeps its copy and its bin, quiet, saying why.
             var locked = !string.IsNullOrEmpty(Locked);
             var copies = Copies != null;
             _duplicate.IsVisible = copies || locked && DuplicateText != null;

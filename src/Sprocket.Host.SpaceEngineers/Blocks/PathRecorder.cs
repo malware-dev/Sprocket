@@ -5,11 +5,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The AI path recorder: playing a path back and whether it plays, recording one, and what it shows.</summary>
-    /// <remarks>
-    /// The game's own on and off for playing is the order a sequence gives, and whether it plays is the game's answer, which
-    /// goes off by itself at the end of a path played once; so the order is offered as its two actions and its toggle, its
-    /// value is left out, and whether it plays is Sprocket's own.
-    /// </remarks>
     public sealed class PathRecorder : Capability
     {
         static readonly OwnValue Playing = OwnValue.Flag(Reading.Of<IMyPathRecorderBlock>(block =>
@@ -47,7 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ID_SHOW_POINTS_CHECKBOX", false, "toggle show selected points");
         }
 
-        /// <summary>Told as the recorder starts or stops playing, which its component says.</summary>
+        /// <summary>Told as the recorder starts or stops playing.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var recorder = block as IMyPathRecorderBlock;

@@ -9,15 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// A line of values as somebody typed it, read into the values they wrote.
     /// </summary>
     /// <remarks>
-    /// The same spellings the language uses, so what somebody types into a field is what their
-    /// program says afterwards: a whole number, a real, <c>on</c> and <c>off</c> for a flag,
-    /// <c>#FF8800</c> for a colour, and double quotes around text that holds a space.
-    /// <para>
-    /// Read here rather than through the lexer because this is one short line typed by a person, not
-    /// a document: the lexer works on a whole program and answers with statements, and what is
-    /// wanted is a handful of values with no structure around them. What it does share is the
-    /// spelling, which is the part that has to agree.
-    /// </para>
+    /// The spellings the language uses: a whole number, a real, <c>on</c> and <c>off</c> for a flag, <c>#FF8800</c> for a
+    /// color, and double quotes around text that holds a space.
     /// </remarks>
     public static class ValueLine
     {
@@ -38,8 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 if (said[at] == '"')
                 {
-                    // Quoted as a program quotes text, so its entities are read back as what they stand for: a line break
-                    // written as one comes back a break.
+                    // Quoted as a program quotes text, so its entities are read back as what they stand for.
                     var text = Quoted(said, ref at);
                     into.Add(Literal.Of(text.IndexOf('&') < 0 ? text : TextEntities.Read(new StringSegment(text))));
                     continue;
@@ -56,10 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Text between double quotes, with a doubled quote standing for one.
         /// </summary>
-        /// <remarks>
-        /// The language's own rule, and the reason it is the language's rule: no character changes
-        /// the meaning of the next one, so text holding a quote cannot come back as something else.
-        /// </remarks>
         static string Quoted(string said, ref int at)
         {
             at++;
@@ -90,11 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// One unquoted word, as whatever it spells.
         /// </summary>
-        /// <remarks>
-        /// A word that spells nothing else is text. Somebody typing the name of a mode into a field
-        /// meant the word, and refusing it would be Sprocket claiming to know what the action wanted
-        /// when the game has told it nothing at all.
-        /// </remarks>
+        /// <remarks>A word that spells nothing else is text.</remarks>
         static Literal Bare(string word)
         {
             if (word == "on")

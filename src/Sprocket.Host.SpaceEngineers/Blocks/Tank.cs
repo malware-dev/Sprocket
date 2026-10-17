@@ -9,16 +9,7 @@ using VRage.Game;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A gas tank, oxygen or hydrogen, which can stockpile and be waited on until it is full.
-    /// </summary>
-    /// <remarks>
-    /// The game lands a filling tank exactly on full and a draining one exactly on empty, so both are comparisons and need
-    /// no band.
-    /// <para>
-    /// Nothing to call off: a tank left stockpiling holds nobody in danger, and switching it off is a step of its own.
-    /// </para>
-    /// </remarks>
+    /// <summary>A gas tank, oxygen or hydrogen, which can stockpile and be waited on until it is full.</summary>
     public sealed class Tank : Capability
     {
         /// <summary>Stockpiling, which is Sprocket's own and waits until the tank is full unless told not to.</summary>
@@ -45,7 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>The level is named for the gas the tank holds, which its definition says.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var gas = Gas(block);
@@ -63,11 +53,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("Auto-Refill", false, "toggle refill bottles automatically");
         }
 
-        /// <summary>Told as the tank runs out of gas and as it gets some back, which its resource source raises.</summary>
-        /// <remarks>
-        /// Only that: the tank's own PropertiesChanged comes every tick its gas moves, and hearing it would look at a busy tank
-        /// on every tick.
-        /// </remarks>
+        /// <summary>Told as the tank runs out of gas and as it gets some back.</summary>
+        /// <remarks>Only that: the tank's own properties-changed event comes every tick its gas moves.</remarks>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return ResourceListener.Heard(block, told);
@@ -97,10 +84,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Busy while it fills on a stockpile, which is the one filling a step asks for.</summary>
-        /// <remarks>
-        /// A tank that is not stockpiling fills whenever there is gas to spare, so counting that would
-        /// light every tank on a ship with an oxygen generator.
-        /// </remarks>
         public override bool IsBusy(IMyTerminalBlock block)
         {
             var tank = block as IMyGasTank;
@@ -108,7 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>What a step's stockpile is asked: whether it waits until the tank is full.</summary>
-        /// <remarks>Waiting is what the action does anyway, so a sentence leaves it out, and says "without waiting" where it does not wait.</remarks>
         static Field Asked()
         {
             var field = Field.Among("wait until full", new[] { "until full", "without waiting" },
@@ -131,13 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return subtype != null && subtype.IndexOf("Hydrogen", StringComparison.Ordinal) >= 0 ? "hydrogen" : "oxygen";
         }
 
-        /// <summary>
-        /// Why this tank will not fill, or null while it might.
-        /// </summary>
-        /// <remarks>
-        /// Stockpile switched off is its own answer: whatever switched it has overruled the step, and
-        /// a tank that is not stockpiling hands its gas on as fast as it takes it in.
-        /// </remarks>
+        /// <summary>Why this tank will not fill, or null while it might.</summary>
         static BlockTrouble Why(IMyGasTank tank)
         {
             if (tank.FilledRatio >= 1.0)
@@ -173,13 +149,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return flow < 0f ? 0f : flow;
         }
 
-        /// <summary>
-        /// What the tank is being given of the gas it holds, or negative where it has no components to ask.
-        /// </summary>
-        /// <remarks>
-        /// What the resource distributor granted rather than what the tank asked for, so a construct
-        /// with nothing to give reads zero.
-        /// </remarks>
+        /// <summary>What the tank is being given of the gas it holds, or negative where it has no components to ask.</summary>
+        /// <remarks>Reads what the resource distributor granted, not what the tank asked for.</remarks>
         static float In(IMyGasTank tank, MyDefinitionId gas)
         {
             var sink = tank.Components.Get<MyResourceSinkComponent>();

@@ -1,11 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>The node a kind of block hangs under in the picker's list of kinds.</summary>
-    /// <remarks>
-    /// Keyed by the block's type in the game's ids, never its subtype, so a mod's block of a type hangs with the game's
-    /// own blocks of that type. Where several types are one thing to a player, such as a door and a sliding door, they
-    /// share one.
-    /// </remarks>
     public enum Family
     {
         /// <summary>Hangs under nothing: a type the game uses for unrelated blocks, or one not listed.</summary>

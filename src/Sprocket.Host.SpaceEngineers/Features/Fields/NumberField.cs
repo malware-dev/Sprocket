@@ -9,7 +9,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A number typed into a box as wide as every other number of the form, held to the kind of number its value is.</summary>
-    /// <remarks>Every number box of a form is one width, so the boxes start and end together.</remarks>
     public class NumberField : HStack, IField
     {
         /// <summary>How wide every number box of a form is.</summary>
@@ -24,10 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>An empty box <paramref name="wide" /> wide for what <paramref name="field" /> asks for, whose Enter carries out <paramref name="submit" />.</summary>
-        /// <remarks>
-        /// It shows what a person reads and is read as what is stored: a value the game holds as 0 to 1 is typed as a percent.
-        /// Its unit stands after it.
-        /// </remarks>
+        /// <remarks>The box shows the value as a person reads it and gives it as stored: a value the game holds as 0 to 1 is typed as a percent.</remarks>
         public NumberField(Field field, ICommand submit, float wide)
         {
             _field = field;

@@ -7,13 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// <summary>
     /// Runs everything, one tick at a time.
     /// </summary>
-    /// <remarks>
-    /// There is no build, no run and no stop. The system is always live, and edits
-    /// take effect on the next tick - a sequence added while the ship is working
-    /// simply begins working too. Removing the gap between writing something and
-    /// seeing it happen is what turns "what will this do?" into something the user
-    /// can answer by looking.
-    /// </remarks>
+    /// <remarks>Always live: an edit takes effect on the next tick.</remarks>
     public sealed class AutomationRunner
     {
         readonly Runners _runs;
@@ -43,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _runsRota = true;
         }
 
-        /// <summary>A runner on the world's rota, shared by every runner in it. See <see cref="Rota" />.</summary>
+        /// <summary>A runner on <paramref name="rota" />, the world's rota that every runner in it shares.</summary>
         public AutomationRunner(Automation automation, GridWorld world, Rota rota)
         {
             _automation = automation;
@@ -61,15 +55,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// The game's current frame, as last reported.
         /// </summary>
         /// <remarks>
-        /// Told rather than counted, and that distinction is load-bearing.
-        /// Space Engineers wakes a mod every frame, every ten, or every hundred - and
-        /// the slower two are not guaranteed to land on exact multiples, because when
-        /// they fire depends on what else is in the game's component list.
-        ///
-        /// A runner counting its own wake-ups would therefore be measuring "how often
-        /// I was woken", which is not time, and every duration in the system would
-        /// drift with server load. Taking the frame number means elapsed is
-        /// <c>now - then</c> and stays exact however irregularly the runner is woken.
+        /// Told rather than counted: Space Engineers wakes a mod every frame, every ten or every hundred, and the slower two
+        /// do not land on exact multiples.
         /// </remarks>
         public int CurrentTick { get; private set; }
 
@@ -79,20 +66,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// What the program's declarations currently point at.
         /// </summary>
-        /// <remarks>
-        /// Owned here because this is the one place that has both the program and the world and is
-        /// woken on a clock. Everything that needs to turn a name into a block reads it from here
-        /// rather than resolving for itself, so the resolving happens once per change rather than
-        /// once per asker.
-        /// </remarks>
         public Bindings Bindings
         {
             get
             {
-                // Checked on the way out rather than only on a tick, because the editor declares a
-                // block and reads the sentence back in the same breath - and waiting for the next
-                // frame would show it "something that's gone" for a block it just picked. Two
-                // integer comparisons, so asking costs nothing when nothing moved.
+                // Checked on every read as well as on a tick, so a block the editor just declared reads back found. Two
+                // integer comparisons where nothing moved.
                 Refreshed();
                 return _bindings;
             }
@@ -101,16 +80,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Whether the machine Sprocket runs on can run anything: its block powered and switched on.
         /// </summary>
-        /// <remarks>
-        /// Set by whatever owns the block, every tick. True by default, which is what a test and a
-        /// paper target have - neither has a block to be unpowered.
-        /// </remarks>
+        /// <remarks>Set by whatever owns the block, every tick; true by default.</remarks>
         public bool Live { get; set; }
 
         /// <summary>The fewest ticks between two runs of anything on a repeat, whatever the program asks for: a timer, a <c>when</c>'s look, a run's look at a step it waits on.</summary>
         /// <remarks>
-        /// Set by whatever owns the runner, from the world's fastest update; 1 by default, which holds nothing back. A change the
-        /// game announces and a timed wait are not on a repeat, and keep their own moment.
+        /// Set by whatever owns the runner, from the world's fastest update; 1 by default. A change the game announces and a
+        /// timed wait keep their own moment.
         /// </remarks>
         public int FastestUpdate { get; set; } = 1;
 
@@ -128,9 +104,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             Checking();
 
-            // The sequences are not visited here: each is on the rota for what it is doing, and the
-            // rota calls what is due. A world's rota is run by the session once every Sprocket in it
-            // has ticked, so every runner's bindings are current when its sequences are called.
+            // The rota calls each sequence that is due. A world's rota is run by the session once every Sprocket in it has
+            // ticked, so every runner's bindings are current when its sequences are called.
             if (_runsRota)
                 _rota.Run(tick);
         }
@@ -156,15 +131,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>How many times the program has been checked.</summary>
-        /// <remarks>Counted so it can be shown that a program nothing changes is checked once.</remarks>
         public int Checks { get; private set; }
 
         /// <summary>How many times an open editor's look has looked at the construct.</summary>
-        /// <remarks>Counted so it can be shown that an idle editor looks at nothing.</remarks>
         public int Looks { get; private set; }
 
         /// <summary>How many times the runners have been matched to the program.</summary>
-        /// <remarks>Counted so it can be shown that an ordinary tick matches nothing.</remarks>
         public int Reconciled { get; private set; }
 
         /// <summary>Counts up on the tick anything an open screen shows of the runs may have changed: a fault found or cleared, a run held or let go, a stop, a halt, the runners themselves.</summary>
@@ -186,12 +158,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Live state for a sequence on the first of its system, or null if never ticked.
         /// </summary>
-        /// <remarks>
-        /// The editor shows a system's sequences, not one particular one of it, so it is shown
-        /// the first. That is exactly right while a system has one, and a half-answer as soon
-        /// as it has two - a screen that has to say which one it is talking about is part of
-        /// the configurator work, not of this.
-        /// </remarks>
         public SequenceRunner Get(Sequence sequence)
         {
             var system = sequence.System;
@@ -231,8 +197,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Does what <paramref name="trigger" /> of <paramref name="system" /> does on <paramref name="instance" />, because what it watches for came round.</summary>
         /// <remarks>
-        /// A sequence switched off lets it go by, and one already running counts it as skipped; see
-        /// <see cref="SequenceRunner.Triggered" />. A stop is nothing happening where the sequence is not running.
+        /// A sequence switched off lets it go by, one already running counts it as skipped, and a stop does nothing where the
+        /// sequence is not running.
         /// </remarks>
         public void Fire(AutomationSystem system, Trigger trigger, SystemInstance instance)
         {
@@ -276,11 +242,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Starts a sequence on one particular one of its system.
         /// </summary>
-        /// <remarks>
-        /// Which is what a button on the port airlock means, as against a button on the front one.
-        /// The runners are already held per sequence and per one-of-a-system, so this is the same
-        /// lookup the editor makes, used to fire rather than to read.
-        /// </remarks>
         public void Call(Sequence sequence, SystemInstance instance, bool byHand = false)
         {
             var runner = Get(sequence, instance);
@@ -292,13 +253,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Abandons a run, as a button that stops a sequence does.
         /// </summary>
         /// <remarks>
-        /// What was started stays started: a door told to open goes on opening, because Sprocket
-        /// cannot un-invoke an action and pretending otherwise would be a promise the game does not
-        /// keep. What stops is the sequence's own progress through its steps.
-        /// <para>
-        /// Nothing is refused here. Stopping a sequence that is not running is nothing happening, and
-        /// a machine with no power is a machine whose sequences are held anyway.
-        /// </para>
+        /// What was started stays started: a door told to open goes on opening. Stopping a sequence that is not running does
+        /// nothing.
         /// </remarks>
         public void Halt(Sequence sequence, SystemInstance instance, StopCause by, int from)
         {
@@ -310,10 +266,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Keeps the set of runners matching the sequences and the ones of each system.
         /// </summary>
-        /// <remarks>
-        /// Done on the tick after the program says it gained or lost something, and on no other: the
-        /// program is what changes, so it is what says so. See <see cref="Automation.Reshaped" />.
-        /// </remarks>
+        /// <remarks>Done on the tick after the program says it gained or lost something, and on no other.</remarks>
         void Reconcile()
         {
             Reconciled++;
@@ -323,8 +276,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Matches the runners to the program where it gained or lost something, and checks it where it or its wiring changed; nothing otherwise.</summary>
         /// <remarks>
-        /// A flag and four integer comparisons. Asked on every tick, and by an editor about to show what is wrong, so a
-        /// screen built straight after an edit reads it checked.
+        /// Asked on every tick, and by an editor about to show what is wrong; a flag and four integer comparisons.
         /// </remarks>
         public void Checking()
         {
@@ -345,11 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>What the program says is wrong with each sequence, on every system and every blockset of a blueprint, with what cannot work switched off.</summary>
-        /// <remarks>
-        /// What a program can tell about itself without running, the way a compiler does: on the tick after it or its
-        /// wiring changes, and on no other. What the construct has become since is found by a run, at the step it matters,
-        /// and by an open editor for somebody looking.
-        /// </remarks>
+        /// <remarks>On the tick after the program or its wiring changes, and on no other.</remarks>
         void Check()
         {
             Checks++;
@@ -404,7 +352,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>Switches off the system, or each one of a blueprint's, where the program says a sequence of it cannot work.</summary>
-        /// <remarks>Faults only: a sequence nothing starts yet is not broken, and switching it off would make the step somebody is about to point at it fail for a second reason.</remarks>
+        /// <remarks>Faults only: a sequence nothing starts yet is left switched on.</remarks>
         void SwitchOffBroken(AutomationSystem system)
         {
             var instances = system.Uses;
@@ -443,7 +391,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances, and one runner for
         /// each trigger that acts itself, and retires the rest.
         /// </summary>
-        /// <remarks>Done with the check, when the program or its wiring has changed, and on no other tick: triggers come and go only by those.</remarks>
+        /// <remarks>Done with the check, when the program or its wiring has changed, and on no other tick.</remarks>
         void Match()
         {
             _watches.Begin();
@@ -481,8 +429,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Switches off what <paramref name="sequence" /> runs on, with why, where it is switched on.</summary>
         /// <remarks>
-        /// A logic system of its own as a whole, and one of a blueprint's alone, so the port airlock missing a door leaves
-        /// the front one working. Never switched back on here: starting a machine again is somebody's decision.
+        /// A logic system of its own as a whole, and one installation of a blueprint alone. Never switched back on here.
         /// </remarks>
         public void Faulted(Sequence sequence, SystemInstance instance, SequenceFault fault)
         {
@@ -515,11 +462,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Looks at the construct for each sequence, on every system and every blockset of a blueprint, for an open editor to show what is gone or may have been swapped.</summary>
         /// <remarks>
-        /// Only for somebody looking, and nothing is switched off here: a run finds the same at the step that needs it. Asked
-        /// as a screen opens, and while one is open on the tick the names are worked out again or the program is checked,
-        /// never on a tick of its own; it looks only where what the names point at, or the program, has changed since the
-        /// last look. What a block being waited on says about
-        /// finishing is the run's own to read, on its own looks, so an open editor leaves every run's timing as it was.
+        /// Asked as a screen opens, and while one is open on the tick the names are worked out again or the program is
+        /// checked, never on a tick of its own. Switches nothing off and leaves every run's timing as it was.
         /// </remarks>
         public void Look()
         {

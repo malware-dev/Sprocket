@@ -6,13 +6,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>How long ago something happened, in words.</summary>
     /// <remarks>
-    /// Asked on every tick for every visible sequence, so every answer is a string made once: the minutes are a table,
-    /// made again only when the language changes.
-    /// <para>
-    /// The seconds are derived from ticks at the nominal rate, so under heavy load they run slightly short of
-    /// wall-clock. Fine here, and it would not be elsewhere: this only ever has to answer "recently, or ages ago", and
-    /// nothing decides when to act from it.
-    /// </para>
+    /// Asked every tick for every visible sequence, so every answer is a string made once. Seconds count ticks at the
+    /// nominal rate, so under heavy load they run short of wall-clock.
     /// </remarks>
     public sealed class AgoText
     {
@@ -39,14 +34,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (seconds < 2)
                 return _texts.TimeJustNow;
 
-            // One answer for the whole first minute, rather than a new one every second. Counting
-            // seconds changes what every row says once a second for as long as a screen is open,
-            // and wakes everything downstream of it to be told a number nobody is reading - a
-            // construct with fifty sequences pays that fifty times a second, for ever.
-            //
-            // Nothing is lost with it. What second-level words were good for is saying that
-            // something has just happened, and the light on the row says that faster and without
-            // being read.
+            // One answer for the whole first minute: a count of seconds would change every open row
+            // once a second.
             if (seconds < 60)
                 return _texts.TimeUnderMinute;
             if (seconds < 120)

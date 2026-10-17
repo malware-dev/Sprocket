@@ -1,7 +1,6 @@
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What a block says is stopping it.</summary>
-    /// <remarks>Kept with a halt and worded where it is read, so every player reads it in their own language.</remarks>
     public enum Cause
     {
         /// <summary>Nothing.</summary>

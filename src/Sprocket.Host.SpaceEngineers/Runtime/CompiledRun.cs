@@ -32,7 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>How many times an act has been worked out.</summary>
-        /// <remarks>Counted so it can be shown that a run repeating what it asks works nothing out again.</remarks>
         public int Compilations { get; private set; }
 
         /// <summary>
@@ -40,11 +39,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// on has changed.
         /// </summary>
         /// <remarks>
-        /// <b>Every act a run does and waits on is asked for here, on the tick it happens.</b> So the
-        /// blocks, what each is told and the values it is handed are found once per change to the
-        /// program or to what its names point at, and a tick that repeats a step reads an array and does
-        /// the act. A block whose action takes a value as some other kind is left out: the step is
-        /// at fault, and the fault says so.
+        /// Asked on the tick every act happens; a tick that repeats a step reads an array. A block whose action takes a value
+        /// as some other kind is left out, and the fault says so.
         /// </remarks>
         public CompiledAct Compile(int step, Bindings bindings)
         {
@@ -98,7 +94,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return compiled;
         }
 
-        /// <summary>What the test at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests on has changed, as an act is.</summary>
+        /// <summary>What the test at <paramref name="step" /> comes to, worked out the first time it is asked after anything it rests on has changed.</summary>
         /// <remarks>A block that has no such member, or cannot compare it as the test does, is left out: the step is at fault, and the fault says so.</remarks>
         public CompiledTest Test(int step, Comparison test, Bindings bindings)
         {
@@ -196,9 +192,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// take them.
         /// </summary>
         /// <remarks>
-        /// Shared between the blocks of one act that do the same thing, which is every block of the
-        /// same kind: an airlock's two doors are handed one list, and one reading of it. A member of a type the host provides
-        /// receives the number <paramref name="facet" /> of its facet first, so its blocks share only as far as they share a facet.
+        /// Shared between the blocks of one act that do the same thing, and for a member of a type the host provides, only
+        /// as far as they share a facet.
         /// </remarks>
         static ActTarget Shared(CompiledAct compiled, EntityAction action, IList<Literal> given, int facet)
         {

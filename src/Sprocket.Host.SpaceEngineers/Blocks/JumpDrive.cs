@@ -8,13 +8,7 @@ using MyJumpDriveStatus = Sandbox.ModAPI.Ingame.MyJumpDriveStatus;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A jump drive: recharged and waited on until it can jump, its jump distance set, and read for its charge, its status and how far it reaches.</summary>
-    /// <remarks>
-    /// The game moves its charge on the server as it fills and says so, and lands it exactly on what a jump needs, so
-    /// charged is a comparison and needs no band.
-    /// <para>
-    /// Nothing to call off: a drive left recharging holds nobody in danger, and recharging is a value of its own.
-    /// </para>
-    /// </remarks>
+    /// <remarks>The game moves its charge on the server and lands it exactly on what a jump needs.</remarks>
     public sealed class JumpDrive : Capability
     {
         /// <summary>Recharging, which is Sprocket's own and may wait until the drive can jump.</summary>
@@ -55,16 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// Recharge names no game action: an entry of Sprocket's that names one half of a switch's pair hides the switch
-        /// itself, and recharging is listed. Capacity and the shortest jump are fixed by the block, so nothing need announce
-        /// them. The game's own jump asks a pilot to confirm it, which nobody does for a sequence, so it is hidden.
-        /// <para>
-        /// Jump distance is in kilometers, held by the drive between the shortest and the longest jump the ship can make,
-        /// which move with its mass and with how many drives it has, so only a distance below nothing is refused. The
-        /// game's own distance as a share of that reach, its setter, and the steps made out of it are hidden behind it.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Jump distance is in kilometers; only a distance below 0 is refused.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(Recharge, "recharge", Recharges, (string)null).Lasting().Asking(RechargeOptions.Asked())
@@ -81,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                     "IncreaseJumpDistance", "DecreaseJumpDistance");
         }
 
-        /// <summary>Told as the drive's charge moves, which it announces.</summary>
+        /// <summary>Told as the drive's charge moves.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var store = block as IMyStoredPowerRatio;
@@ -89,10 +74,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Why this drive will not charge, or none while it might.</summary>
-        /// <remarks>
-        /// Switched off, unpowered or damaged is said by the step being stalled. Recharging switched off is its own answer:
-        /// whatever switched it has overruled the step, and nothing is heading towards charged any more.
-        /// </remarks>
         static BlockTrouble Why(IMyJumpDrive drive)
         {
             if (Charged(drive) || drive.Recharge)

@@ -29,7 +29,7 @@ namespace Lumel.Drawing
         void PopClip();
 
         /// <summary>Draws and clips everything until the matching <see cref="PopTransform" /> moved and scaled by <paramref name="transform" /> about <paramref name="origin" />, inside whatever transform is already in effect.</summary>
-        /// <remarks>Text is not measured through it: measuring is layout, and a transform never reaches layout.</remarks>
+        /// <remarks>Text is not measured through it.</remarks>
         void PushTransform(RenderTransform transform, Vector2 origin);
 
         /// <summary>Drops the innermost transform and restores the one around it.</summary>

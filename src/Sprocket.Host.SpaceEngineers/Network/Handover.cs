@@ -13,14 +13,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
     /// time, with the program to edit, and a client asks for one and is answered.
     /// </summary>
     /// <remarks>
-    /// One editor at a time is what lets a client apply its own edits the moment it makes them. With
-    /// nobody else changing the same program, what it shows cannot be contradicted by the server, so
-    /// nothing has to be merged or taken back when the server catches up.
-    /// <para>
-    /// The same object on every machine. The server answers claims and keeps the leases, a client
-    /// claims and hears the answer, and a host editing its own world holds a lease the same way a
-    /// client does, so a client cannot edit what the host has open.
-    /// </para>
+    /// The same object on every machine: the server answers claims and keeps the leases, a client claims and hears the
+    /// answer, and a host editing its own world holds a lease as a client does.
     /// </remarks>
     public sealed class Handover
     {
@@ -67,8 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <param name="find">The Sprocket a block carries, by entity id, made where it has none; or null.</param>
         /// <param name="given">A claim answered: the block, the program and what is switched off.</param>
         /// <param name="refused">
-        /// A claim turned down: the block, who holds it or empty where nobody can have it, and the
-        /// program and what is switched off where somebody holds it, to look at.
+        /// A claim turned down: the block, who holds it or empty, and the program and switches where somebody holds it.
         /// </param>
         /// <param name="foreign">A claim turned down because the one who asked is none of the construct's big owners: the block.</param>
         /// <param name="changed">On the server, the holder's program and switches after a change of theirs.</param>
@@ -163,9 +156,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// now, where that differs from what was last sent.
         /// </summary>
         /// <remarks>
-        /// Compared as written, which is what makes it the committed changes and nothing else: a picker
-        /// half filled in changes nothing in the program until it is done, so nothing is sent for it.
-        /// The first send after a copy arrives is measured against what arrived.
+        /// Compared as written, so only committed changes are sent; the first send after a copy arrives is measured against
+        /// what arrived.
         /// </remarks>
         public void Keep(long block, SprocketUnit copy)
         {
@@ -217,7 +209,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// Tells every client what the server wrote into <paramref name="block" />, where that differs
         /// from what they were last told.
         /// </summary>
-        /// <remarks>On the server. See <see cref="ProgramChange" /> for why they need it.</remarks>
+        /// <remarks>On the server.</remarks>
         public void Tell(long block, string program, string switches)
         {
             Sent told;
@@ -249,10 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         }
 
         /// <summary>Takes back every Sprocket held by somebody <paramref name="connected" /> says has gone.</summary>
-        /// <remarks>
-        /// On the server. A holder who crashed or lost the connection never hands back, and what they
-        /// held would otherwise stay theirs until the server restarts.
-        /// </remarks>
+        /// <remarks>On the server.</remarks>
         public void Reclaim(Func<ulong, bool> connected)
         {
             if (_held.Count == 0)

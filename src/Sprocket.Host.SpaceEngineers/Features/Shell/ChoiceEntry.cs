@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What it says.</summary>
         public string Text { get; private set; }
 
-        /// <summary>Whether it is where somebody already is, as the listing's action is on the listing.</summary>
+        /// <summary>Whether it is where somebody already is.</summary>
         public bool IsCurrent { get; private set; }
 
         /// <summary>What choosing it does, or null where the editor refuses it.</summary>

@@ -15,22 +15,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
-    /// <summary>
-    /// The logic systems on this construct, each with its installations. The front door.
-    /// </summary>
-    /// <remarks>
-    /// Not a list of sequences. Nobody built a procedure - they built an airlock, and that is what they
-    /// came back to look at.
-    /// <para>
-    /// A logic system is written against slots, and each installation says which blocks fill them, from the moment it
-    /// is made: the logic and where it is installed are two things from the first minute, so a second installation is
-    /// one more row and nothing changes shape.
-    /// </para>
-    /// <para>
-    /// The elements it is drawn with are declared in <c>HomePage.View.cs</c>, and nothing else is; this
-    /// half is what it knows, what it says and what it does.
-    /// </para>
-    /// </remarks>
+    /// <summary>The logic systems on this construct, each with its installations.</summary>
     public sealed partial class HomePage : EditorPage
     {
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
@@ -48,15 +33,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>
         /// What the construct is called, with what this screen is about led in front of it.
         /// </summary>
-        /// <remarks>
-        /// The construct's own name, so the one screen somebody arrives on tells them where they have
-        /// arrived. A fixed heading reads the same on every Sprocket in the game, and "your ship" makes
-        /// two claims besides: not every construct is a ship, and on a server it is the faction's.
-        /// <para>
-        /// The lead is here because this is <b>not</b> an overview of the machine. It is the automation on
-        /// it, and a heading that was only a name would be promising the rest.
-        /// </para>
-        /// </remarks>
         public override string Title => Editor.World.Name;
 
         /// <inheritdoc />
@@ -68,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <inheritdoc />
         public override string Help => Terms.Home;
 
-        /// <summary>Not for a copy lent to look at, which changes nothing.</summary>
+        /// <summary>Whether a change to the construct can be walked back, which a copy lent to look at never can.</summary>
         public override bool CanUndo => Editor.Holder == null && Editor.CanUndoConstruct();
 
         /// <inheritdoc />
@@ -95,14 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <inheritdoc />
         public override ICommand Library => Editor.Act(CommandKind.LoadSystem, Editor.OpenLibrary);
 
-        /// <summary>
-        /// Reaching outside the automation to rename the machine itself, which is deliberate.
-        /// </summary>
-        /// <remarks>
-        /// It is the one thing on this screen that is not automation, and it is here because the name is
-        /// already here and being read. Somebody looking at a construct called "Large Grid 8321" and
-        /// wanting it called something else should not have to leave, find the terminal, and come back.
-        /// </remarks>
+        /// <summary>Whether the construct itself can be renamed here.</summary>
         public override bool CanRename => Editor.World.CanRename;
 
         /// <inheritdoc />
@@ -126,8 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         {
             base.Heading(parts);
 
-            // One sentence, so a translation can put words on either side of the name. The name is the
-            // heading's own, pressed to rename the grid, so the words are drawn around it.
+            // One sentence, so a translation can put words on either side of the name.
             const string slot = "{name}";
             var title = Editor.Texts.SystemsTitle;
             var at = title.IndexOf(slot, StringComparison.Ordinal);
@@ -140,7 +108,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <remarks>Called when the editor builds the screen: on arriving at the page, coming back to it, and a change of language.</remarks>
         public override void Build()
         {
-            // Arriving at the construct's own list is the moment somebody wants to know how everything on it stands.
             Editor.Runner.Look();
             Installed();
             Collect();
@@ -150,8 +117,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
         /// <summary>Brings the view up to what the systems are doing, and to what systems there are when that has changed.</summary>
         /// <remarks>
-        /// Every tick the page is showing. Collecting the systems and comparing their shape is a pass over a
-        /// short list; the rows write only what changed, and the problems are counted once a second.
+        /// Every tick the page is showing: a pass over a short list, the rows writing only what changed and the problems counted
+        /// once a second.
         /// </remarks>
         public override void Refresh()
         {
@@ -171,7 +138,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <summary>Gives a row the switch of one of the logic systems made from a blueprint, which stops that one and nothing else.</summary>
-        /// <remarks>It shows its own setting, and cannot be pressed while the blueprint is off - see <see cref="Live(StatusRow, AutomationSystem, SystemInstance, bool, bool, Texts)" />.</remarks>
         public void Switched(StatusRow row, AutomationSystem system, SystemInstance instance)
         {
             if (instance == null)
@@ -186,11 +152,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// <summary>
         /// Brings a logic system's row up to what it is doing now, and shows it where anything changed.
         /// </summary>
-        /// <remarks>
-        /// This logic system, not the blueprint: with two airlocks, the port one cycling is not the front one
-        /// cycling. The ground says it as well as the word, the same way a row leading to something broken is
-        /// washed rather than only marked.
-        /// </remarks>
         public void Live(StatusRow row, AutomationSystem system, SystemInstance instance, bool recount, bool shown,
             Texts texts)
         {
@@ -221,8 +182,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                     row.Parked = stopped.Length > 0;
                 }
 
-                // An installation's switch shows its own setting, and waits for the blueprint's while that is off, so
-                // switching the blueprint back on starts exactly the ones that were on. A plain system's is the system's.
+                // An installation's switch keeps its own setting while the blueprint is off, so switching the blueprint on starts
+                // exactly the ones that were on.
                 var installed = system.IsBlueprint;
                 var own = installed ? instance.Enabled : on;
                 var held = installed && !system.Enabled ? texts.RowSwitchBlueprintFirst : null;
@@ -302,7 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <summary>Puts a group in place for each logic system, and gives everything its words.</summary>
-        /// <remarks>Walks the systems' blocks for their names, which is why it runs only when the systems change or the page is come back to.</remarks>
+        /// <remarks>Walks the systems' blocks for their names, so it runs only when the systems change or the page is come back to.</remarks>
         void Arrange(Texts texts)
         {
             _new.Text = StatusRow.Plus + texts.SystemsNew;
@@ -331,7 +292,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         }
 
         /// <summary>Gives every logic system on the construct that lacks them its slots and a first installation.</summary>
-        /// <remarks>The editor shows only the one shape, so a logic system is given that shape when the construct's list sees it.</remarks>
         void Installed()
         {
             var systems = Editor.Program.Systems;

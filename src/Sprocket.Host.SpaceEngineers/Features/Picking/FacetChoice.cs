@@ -14,8 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// names they share, and a line saying what the chosen one is doing now.
     /// </summary>
     /// <remarks>
-    /// Shown under the chosen member's line in the picker, set in as the slots of a toolbar are, and sliding open as that line
-    /// is chosen. The drop box is made again only when the names change, which is when the blocks do.
+    /// The drop box is made again only when the names change.
     /// </remarks>
     public class FacetChoice : Reveal
     {

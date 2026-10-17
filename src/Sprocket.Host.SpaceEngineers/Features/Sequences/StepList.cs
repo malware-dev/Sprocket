@@ -10,20 +10,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     /// <summary>A sequence's steps, one row each, any of which can be carried by its grip to another place in the list.</summary>
-    /// <remarks>
-    /// A row that opens an if carries the rows of the if with it, as one block.
-    /// <para>
-    /// While a row is carried, the rows between where it came from and where it would land step aside by its height, so
-    /// the place it would take is visibly empty rather than imagined from where the pointer is. They slide rather than
-    /// jump, because a row appearing somewhere new reads as the list glitching rather than as the list answering. None
-    /// of it moves the layout: carrying only moves how the rows are drawn.
-    /// </para>
-    /// <para>
-    /// The spine down the indent for each if, which ties a branch's steps to the line opening it, is the list's to draw rather
-    /// than each row's, because it has to stay where the if is while the rows it runs past move. A carried row takes along only
-    /// the spines of what it carries, and is drawn over the rest.
-    /// </para>
-    /// </remarks>
+    /// <remarks>A row that opens an if carries the rows of the if with it, as one block.</remarks>
     public class StepList : VStack
     {
         readonly List<float> _wanted = new List<float>();
@@ -42,11 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Spacing = 8f;
         }
 
-        /// <summary>
-        /// Asked when a row is taken: the places it may land, each as how many of the rows it is not carrying would be above
-        /// it, in order; null where it may land anywhere.
-        /// </summary>
-        /// <remarks>The list opens only at those places, the nearest to where the row is carried, and the first and last of them hold beyond either end.</remarks>
+        /// <summary>Asked when a row is taken: the places it may land, each as how many rows not carried would be above it, or null for anywhere.</summary>
         public Func<int, IList<int>> Landings { get; set; }
 
         /// <summary>Whether a row is being carried.</summary>
@@ -56,10 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public Action<int, int> Moves { get; set; }
 
         /// <summary>Moves every row a little closer to where it should be drawn; the row being carried follows the pointer exactly.</summary>
-        /// <remarks>
-        /// For whoever holds the list to call on every frame, since sliding is done a frame at a time. Short and eased
-        /// out, because it is feedback rather than decoration; a list at rest moves nothing.
-        /// </remarks>
+        /// <remarks>Called every frame by whoever holds the list.</remarks>
         public void Slide()
         {
             for (var i = 0; i < Children.Count; i++)
@@ -82,10 +62,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Lays the rows out, and keeps each one drawn where a drop left it, to slide home from there.</summary>
-        /// <remarks>
-        /// A drop reorders the rows at once, but where the new order puts each one is only known once it has been laid
-        /// out, so a row's place on the screen is carried across that and its offset measured again from its new place.
-        /// </remarks>
         protected override void ArrangeContent(RectangleF bounds)
         {
             base.ArrangeContent(bounds);
@@ -201,8 +177,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (to == from)
                 return;
 
-            // Everything stays where the drag put it and the carried rows drop into the gap held for them, so the
-            // reorder that follows changes nothing anybody can see.
             var landing = Landing(from, to);
             for (var i = 0; i < Children.Count; i++)
             {
@@ -221,14 +195,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 moves(from, to);
         }
 
-        /// <summary>
-        /// Draws the spines of the rows standing in the list, or of the rows being carried: one down the indent of each if a row
-        /// stands in, from the row above to its next row where that stands as far in, and turning in at it where it does not.
-        /// </summary>
-        /// <remarks>
-        /// Drawn where each row is drawn, and on across any room between it and the row above, so a spine stays one line while
-        /// the rows slide. The carried rows draw only the spines inside the first of them, which is what they carry.
-        /// </remarks>
+        /// <summary>Draws the spines of the rows standing in the list, or of the rows being carried.</summary>
         void Spines(IGraphics g, bool carried)
         {
             var reach = Spacing * 0.5f;
@@ -287,7 +254,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 if (Carried(i))
                     continue;
 
-                // Counted among the rows not being carried, which is what the place it lands is counted in.
+                // Counted among the rows not carried, as landings are.
                 var among = i < _carrying ? i : i - _span - 1;
                 var shift = 0f;
                 if (_carrying < to && among >= _carrying && among < to)
@@ -301,10 +268,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         int LandingFor(float moved)
         {
-            // By the row, not by the pointer: somebody grabs a row wherever the grip is under their finger and then
-            // aims with the row, because that is what they can see moving. Counting the rows the carried one has passed
-            // gives the answer directly, and it is measured against where the rows were laid out rather than where they
-            // have slid to, since the sliding is a picture of this answer.
             var carried = Children[_carrying].Bounds;
             var middle = carried.Y + carried.Height * 0.5f + moved;
 
@@ -340,8 +303,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         float Landing(int from, int to)
         {
-            // Added up from the rows that will be above it, because the rows are not all one height: a wait is a shorter
-            // line than an action.
             var top = Children[0].Bounds.Y;
             var placed = 0;
 

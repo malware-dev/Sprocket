@@ -4,10 +4,7 @@ using VRageMath;
 namespace Lumel
 {
     /// <summary>How an element is drawn and pressed away from where layout put it: moved, and scaled about its top-left corner.</summary>
-    /// <remarks>
-    ///     The default is no transform at all. Equality is written out because the inherited
-    ///     <c>ValueType.Equals</c> boxes, and for float fields compares them by reflection.
-    /// </remarks>
+    /// <remarks>The default is no transform at all.</remarks>
     public struct RenderTransform : IEquatable<RenderTransform>
     {
         // The scale less one, so the default is a scale of one.

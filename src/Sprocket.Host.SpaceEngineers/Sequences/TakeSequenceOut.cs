@@ -3,10 +3,6 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Takes a sequence out of its logic system, with every trigger that runs it.</summary>
-    /// <remarks>
-    /// Both come back where they stood, the triggers in their places among the others, so taking it back reads as the
-    /// delete undone rather than as a second change.
-    /// </remarks>
     public sealed class TakeSequenceOut : SystemEdit
     {
         readonly Automation _program;

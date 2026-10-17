@@ -14,36 +14,13 @@ using IngameBlock = VRage.Game.ModAPI.Ingame.IMyCubeBlock;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
-    /// <summary>
-    /// The construct's automation on a panel: one line per system, and whether anything wants looking at.
-    /// </summary>
-    /// <remarks>
-    /// For a glance from across the bridge rather than for working in. The editor is where somebody
-    /// changes a rule; this says whether the ship is doing what they built, and it is deliberately
-    /// nothing a person can press.
-    /// <para>
-    /// <b>Cheap on purpose.</b> A surface script is asked to draw far more often than its news changes,
-    /// so the facts are worked out on <c>Update100</c> - a second and a half - and everything below is
-    /// one sprite per row. Working out a fault can send the host off to read a toolbar, which is the
-    /// same reason the editor's screens do it on a cadence.
-    /// </para>
-    /// </remarks>
-    /// <remarks>
-    /// The words are what a player picks from the list of apps a screen can show, and they are the
-    /// only part of this a person ever reads. They name what it shows rather than what wrote it: a
-    /// screen showing the state of the ship's automation is "Automation", and whose mod it is has
-    /// nothing to do with the choice being made.
-    /// </remarks>
+    /// <summary>The construct's automation on a panel: one line per system, and whether anything wants looking at.</summary>
+    /// <remarks>Its facts are worked out on <c>Update100</c>, a second and a half, and each row is one sprite.</remarks>
     [MyTextSurfaceScript(Id, "Automation")]
     public class StatusApp : MyTextSurfaceScriptBase
     {
-        /// <summary>
-        /// What the game calls this script, in a slot and in the list a player picks from.
-        /// </summary>
-        /// <remarks>
-        /// <b>Never change it.</b> A surface stores the script it was given by this name, so a new one
-        /// reads as a surface asking for a script that does not exist.
-        /// </remarks>
+        /// <summary>What the game calls this script, in a slot and in the list a player picks from.</summary>
+        /// <remarks>Never change it: a surface stores the script it was given by this name.</remarks>
         public const string Id = "Sprocket_Status";
 
         const float DesignHeight = 320f;
@@ -63,21 +40,10 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
         }
 
-        /// <summary>
-        /// A second and a half, which is slower than anything on here can change and be missed.
-        /// </summary>
-        /// <remarks>
-        /// A sequence firing is visible for longer than that in every case a glance is for: a door
-        /// takes seconds to move, and a rule that fired is still "running" while it does.
-        /// </remarks>
+        /// <summary>Every hundred ticks, a second and a half.</summary>
         public override ScriptUpdate NeedsUpdate => ScriptUpdate.Update100;
 
         /// <summary>The block, mod-side, which is what the session and the grid ask for.</summary>
-        /// <remarks>
-        /// The base hands out the Ingame face of it. The same object implements both, and every
-        /// other MalTek surface script narrows it here for the same reason: nothing below wants to
-        /// think about which of the two it is holding.
-        /// </remarks>
         public new IMyCubeBlock Block => (IMyCubeBlock)base.Block;
 
         /// <inheritdoc />
@@ -85,10 +51,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             base.Run();
 
-            // A surface script that throws takes the session with it, and a status panel is the last
-            // thing that should be able to end somebody's world. So it says what went wrong on the
-            // panel, where whoever is standing in front of it can read it out to me - and it says it
-            // here rather than on the next pass, which might throw in the same place and never arrive.
+            // A surface script that throws takes the session with it, so the error is drawn on the panel, here rather than on a
+            // next pass that might throw in the same place.
             try
             {
                 Draw();
@@ -100,25 +64,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
         }
 
-        /// <summary>
-        /// Takes the panel's own two colours, and fades one of them.
-        /// </summary>
-        /// <remarks>
-        /// <b>No settings, and nothing in Custom Data.</b> Every scripted surface already has a script
-        /// foreground and background the player sets in the terminal, so those <em>are</em> the colour
-        /// choice - asking again in Custom Data would be a second place to set one thing and a first
-        /// place for the two to disagree. Read on every draw, so moving a slider shows up without
-        /// anything having to notice that it moved.
-        /// <para>
-        /// The faded one is the foreground at low alpha rather than a blend towards the background, so
-        /// it stays right whatever ends up behind it.
-        /// </para>
-        /// <para>
-        /// <b>Running, problem and warning do not track the player.</b> Green means go, amber means look
-        /// and red means stop; a panel that hue-shifted those to match somebody's bridge would be saying
-        /// nothing at all. They are the editor's own three, so a glance and a look agree.
-        /// </para>
-        /// </remarks>
+        /// <summary>Takes the panel's own two colors, and fades one of them.</summary>
+        /// <remarks>Read on every draw, so a change in the terminal shows at once.</remarks>
         void Shades()
         {
             _ink = Surface.ScriptForegroundColor;
@@ -133,8 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             var block = Block as IMyTerminalBlock;
             var functional = Block as IMyFunctionalBlock;
 
-            // An unpowered or switched-off panel shows nothing, the way every other screen in the game
-            // does. Drawing a stale ship on a dead panel is the one reading nobody can correct.
+            // An unpowered or switched-off panel shows nothing, the way every other screen in the game does.
             if (functional != null && !functional.Enabled)
             {
                 Blank();
@@ -189,14 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return y + (10f * scale);
         }
 
-        /// <summary>
-        /// One line per system, and a line saying how many did not fit.
-        /// </summary>
-        /// <remarks>
-        /// Cut off rather than shrunk to fit. A panel that reduces its type until forty systems are
-        /// legible is a panel nobody can read from where they are standing, which is the only place
-        /// this is ever read from.
-        /// </remarks>
+        /// <summary>One line per system, and a line saying how many did not fit.</summary>
         void Systems(MySpriteDrawFrame frame, float left, float right, float y, float scale,
             float bottom)
         {
@@ -245,14 +184,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             Line(frame, Says(row, texts), right, y, scale * 0.8f, Lamp(row), TextAlignment.RIGHT);
         }
 
-        /// <summary>
-        /// What the row says on its right: the news, or what it is doing when there is none.
-        /// </summary>
-        /// <remarks>
-        /// Trouble outranks state, because a system that is broken and waiting is worth reading as
-        /// broken. The words are the editor's own - see <see cref="SequenceText" /> - so the two
-        /// screens cannot come to disagree about what a state is called.
-        /// </remarks>
+        /// <summary>What the row says on its right: the news, or what it is doing when there is none.</summary>
         string Says(StatusOverview.Row row, Texts texts)
         {
             if (row.Problems > 0)
@@ -284,7 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return row.Status == SequenceStatus.Off ? _quiet : _ink;
         }
 
-        /// <summary>The one line somebody actually reads from across the room.</summary>
+        /// <summary>Draws the line of totals at the foot of the panel.</summary>
         void Totals(MySpriteDrawFrame frame, float left, float right, Vector2 origin, Vector2 size,
             float scale)
         {

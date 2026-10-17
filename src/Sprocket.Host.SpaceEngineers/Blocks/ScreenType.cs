@@ -15,12 +15,7 @@ using IMyTextSurfaceProvider = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block's screen, the type this host provides as <c>ext.screen</c>: show text on it, set it up, read its settings.</summary>
-    /// <remarks>
-    /// Every block with screens has them, a text panel's one as a cockpit's four, so a slot of screens takes any of them, and
-    /// each block in it comes with which of its screens. The game's own settings act on whichever screen was picked last in
-    /// the terminal, so they are hidden here and read as members of the screen; each member receives its screen first,
-    /// counted from 1, ahead of the step's own values.
-    /// </remarks>
+    /// <remarks>Each member receives its screen first, counted from 1, ahead of the step's own values.</remarks>
     public sealed class ScreenType : HostType
     {
         /// <summary>The action that writes text on a screen.</summary>
@@ -54,7 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override string Function => "screen";
 
         /// <inheritdoc />
-        /// <remarks>A text panel sets its screen up with controls of its own, so the game does not count it among the generic ones.</remarks>
         public override bool Claims(IMyTerminalBlock block)
         {
             var screens = block as IMyTextSurfaceProvider;
@@ -70,7 +64,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>What its content reads, and the app by name where it runs one.</remarks>
         public override string Showing(IMyTerminalBlock block, int number)
         {
             var screens = block as IMyTextSurfaceProvider;
@@ -161,7 +154,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>What the game calls the app <paramref name="id" /> in its own lists, or the id where it names none.</summary>
-        /// <remarks>The game's list of apps holds the ones mods add as well, each with the name its terminal shows.</remarks>
         public static string AppName(string id)
         {
             var apps = MyTextSurfaceScriptFactory.Instance;
@@ -239,7 +231,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Where <paramref name="value" /> is among <paramref name="values" />, or the second where it is not there.</summary>
-        /// <remarks>A content type with no word here, such as the image content the game marks obsolete, reads as text and images, the second.</remarks>
         static int Position<T>(T[] values, T value)
         {
             var at = Array.IndexOf(values, value);
@@ -247,10 +238,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Writes <paramref name="shown" />'s text on its screen, whatever the screen is set to show.</summary>
-        /// <remarks>
-        /// The text alone: a screen set to show nothing or an app keeps that, so a mod drawing the text itself, rich text from
-        /// a screen's own text, is left to do so. Setting it to show text is "set up screen"'s to do.
-        /// </remarks>
+        /// <remarks>A screen set to show nothing or an app keeps that.</remarks>
         static void Show(IMyTextSurfaceProvider provider, Shown shown, ReaderMemory seen)
         {
             Surface(provider, shown.Which).WriteText(shown.Text);

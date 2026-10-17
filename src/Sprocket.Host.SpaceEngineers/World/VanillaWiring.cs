@@ -7,14 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// What a construct's own buttons do, which is nothing of Sprocket's.
     /// </summary>
-    /// <remarks>
-    /// The wiring somebody did by hand, with the game's own actions in toolbar slots: nothing of it is
-    /// in the program, so the slot is the record, and this is how it is read.
-    /// <para>
-    /// <b>Read when somebody asks, never on a tick.</b> Reading a toolbar is the dearest thing Sprocket
-    /// does, and what it is read for is a screen.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Read when a screen asks, never on a tick: reading a toolbar is the costliest thing Sprocket does.</remarks>
     public sealed class VanillaWiring
     {
         /// <summary>One slot that does something, and what it does.</summary>
@@ -44,10 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Looks at every toolbar on the construct and writes down what is in it.
         /// </summary>
-        /// <remarks>
-        /// Sprocket's own slots are left out. They are the program, which the screens already have,
-        /// and listing them here would show every sequence twice.
-        /// </remarks>
+        /// <remarks>Sprocket's own slots are left out.</remarks>
         public void Read(GridWorld world)
         {
             _entries.Clear();
@@ -71,8 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     if (held.Kind != MyToolbarItemKind.BlockAction
                         && held.Kind != MyToolbarItemKind.GroupAction)
                     {
-                        // A tool, a weapon, a paint colour. Not automation, and not something a list
-                        // of what the buttons do should claim to explain.
+                        // A tool, a weapon, a paint color: not automation.
                         continue;
                     }
 

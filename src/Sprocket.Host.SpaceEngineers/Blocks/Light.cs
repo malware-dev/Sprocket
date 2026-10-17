@@ -4,14 +4,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A light: the interior light, the spotlight and the rotating warning light, and the searchlight, each a sequence colors,
-    /// dims and makes blink.
-    /// </summary>
-    /// <remarks>
-    /// Every one of them is the block's own values in Sprocket's words. Blinking has no switch of its own: a blink interval
-    /// of 0 is a steady light, so the one value starts and stops a warning.
-    /// </remarks>
+    /// <summary>An interior light, spotlight, rotating warning light or searchlight, which a sequence colors, dims and makes blink.</summary>
     public sealed class Light : Capability
     {
         /// <inheritdoc />
@@ -21,11 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// Only an interior light has a falloff: a spotlight and a searchlight carry the value and do nothing with it, and their
-        /// own terminal hides it. Only the two rotating warning lights turn; every other spotlight carries a rotation speed it
-        /// hides as well.
-        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.Renaming("Color", true, "color")

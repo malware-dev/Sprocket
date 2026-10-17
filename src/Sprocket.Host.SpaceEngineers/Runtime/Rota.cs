@@ -6,19 +6,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// The world's timetable: everything the runtime looks at, and the tick each thing is looked at on.
     /// </summary>
     /// <remarks>
-    /// One for the whole world, shared by every Sprocket in it, and it does the calling: a tick visits
-    /// only what is due on it, so something with nothing going on costs nothing until its turn. Whatever
-    /// joins is given a place in the turn, handed out in order, and at a period of ten it is due on the
-    /// ticks that match its place - a tenth of everything on each tick rather than all of it on one.
-    /// <para>
-    /// The three periods are the three the game wakes a mod at. The game spreads its own the same way,
-    /// by block; this is the same thing by the piece of work, whose pace changes as it goes.
-    /// </para>
-    /// <para>
-    /// Every tick number is walked, from the last one run up to the one being run, so a frame counter
-    /// that jumps leaves nothing behind: a list skipped would be a turn lost for all of it, and a
-    /// deadline on the skipped tick would never be met.
-    /// </para>
+    /// One for the whole world, and a tick visits only what is due on it. The three periods are the three the game wakes
+    /// a mod at. Every tick number from the last one run is walked, so a frame counter that jumps leaves nothing behind.
     /// </remarks>
     public sealed class Rota
     {
@@ -43,9 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int _count;
 
         /// <summary>A place in the turn for something new.</summary>
-        /// <remarks>
-        /// In order rather than by a hash of a name, so the places fill evenly however few there are.
-        /// </remarks>
         public int Join()
         {
             var place = _next;
@@ -54,11 +40,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>How many shifts have been done, all told.</summary>
-        /// <remarks>Counted so what an idle world costs can be measured rather than guessed at.</remarks>
         public int Done { get; private set; }
 
         /// <summary>How many shifts are on the rota.</summary>
-        /// <remarks>Kept as shifts join and leave rather than counted, because the session asks it on every tick.</remarks>
+        /// <remarks>Kept as shifts join and leave, since the session asks it on every tick.</remarks>
         public int Count => _count;
 
         /// <summary>Looks at a shift once every period, on its place, until told otherwise.</summary>

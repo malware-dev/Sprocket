@@ -23,11 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// The script runs to its end inside the step, on the server, with the argument as given, as the game's own run
-        /// does; that run, which takes its argument from a toolbar slot, is left to the terminal view. A script that does not
-        /// run ends the run there.
-        /// </remarks>
+        /// <remarks>The script runs to its end inside the step, on the server.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(Run, "run", Runs, Asked()).In(Category.Automation)

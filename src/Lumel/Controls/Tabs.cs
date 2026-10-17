@@ -6,7 +6,7 @@ using Lumel.Layout;
 namespace Lumel.Controls
 {
     /// <summary>Pages in one place with a strip of headers above them, the page of the header pressed shown.</summary>
-    /// <remarks>The pages stand in a <see cref="Deck" />, so the control is as large as its largest page whichever shows.</remarks>
+    /// <remarks>The control is as large as its largest page, whichever shows.</remarks>
     public class Tabs : VStack
     {
         // Equal plates butted edge to edge, as the game draws the tabs across the top of its terminal.

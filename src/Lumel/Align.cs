@@ -4,10 +4,8 @@ namespace Lumel
 {
     /// <summary>Where an element sits in the room its holder gives it, on each axis.</summary>
     /// <remarks>
-    /// Read one axis at a time. An axis whose edges are named goes by them: one edge pins the element to it, both stretch
-    /// it between them. An axis with no edge named is centered where <see cref="Center" /> is set, and otherwise placed as
-    /// the holder places a child that says nothing. So <c>Left | Center</c> is left and centered down, and
-    /// <c>Center | Top | Bottom</c> is centered across and stretched down. A holder ignores the axis it stacks along.
+    /// Each axis is read alone: one named edge pins the element to it, both stretch it, and none centers it where
+    /// <see cref="Center" /> is set. A holder ignores the axis it stacks along.
     /// </remarks>
     [Flags]
     public enum Align

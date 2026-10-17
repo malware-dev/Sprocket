@@ -5,10 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {
     /// <summary>A term the codex explains: its page, whose first heading is its name, and the tooltip that says what it is.</summary>
     /// <remarks>
-    /// Its page is <c>&lt;id&gt;.md</c> and its tooltip <c>&lt;id&gt;.tldr.md</c>, both read from the pages the book holds. The page
-    /// is read again each time it is asked for, so a page being written shows as it now stands; the tooltip is read once and
-    /// kept until the language changes, since a link asks for it on every frame the pointer rests there. The name is the page's first heading of the first
-    /// level. A page that opens with it gives it up as its title; a page with something before it keeps it where it is.
+    /// Its page is <c>&lt;id&gt;.md</c>, read each time it is asked for, and its tooltip <c>&lt;id&gt;.tldr.md</c>, read once and
+    /// kept until <see cref="Reword" />.
     /// </remarks>
     public sealed class Term
     {
@@ -58,7 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         public string Summary => _summary ?? (_summary = Find($"{Id}.tldr.md").Trim());
 
         /// <summary>The note on a link to this term: what it is, and that pressing it reads more.</summary>
-        /// <remarks>Made once and kept, because a link's note is asked for on every frame the pointer rests on it.</remarks>
+        /// <remarks>Made once and kept, since a link asks for it on every frame the pointer rests on it.</remarks>
         public Tip Preview => _preview ?? (_preview = new Tip($"{Summary}\n\n*{_texts.CodexMore}*"));
 
         /// <summary>Lets go of the tooltip kept in the language that was spoken, so the next reading is in the one spoken now.</summary>

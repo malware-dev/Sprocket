@@ -6,11 +6,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>
     /// The things the sentence is about.
     /// </summary>
-    /// <remarks>
-    /// Ids rather than names. A name is read off the target's own world, and what to say about one
-    /// that is no longer there is the target's to phrase - so handing over names would be core
-    /// answering both questions on everybody's behalf.
-    /// </remarks>
     public sealed class EntitiesSlot : SentenceSlot
     {
         /// <summary>The part naming the blocks <paramref name="entities" />, all of them where <paramref name="requiresAll" /> and any one otherwise, opening the question it was answered with through <paramref name="opens" />.</summary>
@@ -26,12 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>
         /// Whether every one of them counts, or any one of them is enough.
         /// </summary>
-        /// <remarks>
-        /// Trigger sources fire on whichever happens first, so a target joining those with "and" would
-        /// state the opposite of what the sequence does. In English it also settles the agreement -
-        /// "the port door or the starboard door finishes" against "finish" - which is exactly the sort
-        /// of thing that differs by language and so cannot be decided here.
-        /// </remarks>
         public bool RequiresAll { get; private set; }
 
         /// <inheritdoc />

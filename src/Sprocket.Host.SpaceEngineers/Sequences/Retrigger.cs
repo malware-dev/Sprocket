@@ -4,15 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// What starts a trigger and what it does, changed by one answer.
     /// </summary>
-    /// <remarks>
-    /// One edit rather than two, because the picker that changes what starts a trigger says what it
-    /// does beside it, and one Done is one thing to walk back.
-    /// <para>
-    /// The second is about the trigger the first puts in place, so it can be walked forward only once
-    /// the first has been, and whether the pair can be is the first one's to say. Nothing outside the
-    /// editor can reach a trigger that is not in the system.
-    /// </para>
-    /// </remarks>
     public sealed class Retrigger : SystemEdit
     {
         readonly SystemEdit _start;

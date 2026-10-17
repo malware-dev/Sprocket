@@ -7,10 +7,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A solar panel, which takes no orders: read for the sunlight it catches and the power it gives.</summary>
-    /// <remarks>
-    /// A panel makes only what the grid draws, so its output follows the load as much as the sun; sunlight is what it could
-    /// make against its best, which is the reading for the sun.
-    /// </remarks>
     public sealed class SolarPanel : Capability
     {
         static readonly OwnValue Sunlight = OwnValue.Number<IMySolarPanel>((panel, seen) => Lit(panel, seen));
@@ -33,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("maximum-output", "maximum output", MostOut).Measured(" MW").Announced().In(Category.Power);
         }
 
-        /// <summary>Told as the panel's output changes, which it announces as the light it catches moves what it can make.</summary>
+        /// <summary>Told as the panel's output changes.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var panel = block as IMySolarPanel;
@@ -41,10 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>What <paramref name="panel" /> could make now against its best, from 0 to 100; none where nothing says its best.</summary>
-        /// <remarks>
-        /// Its best is the definition's, looked up on the first read and kept in <paramref name="seen" /> from then on, so a
-        /// read after that is one division.
-        /// </remarks>
+        /// <remarks>Its best is looked up on the first read and kept in <paramref name="seen" />, so later reads cost one division.</remarks>
         static double Lit(IMySolarPanel panel, ReaderMemory seen)
         {
             if (!seen.Seen)

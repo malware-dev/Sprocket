@@ -6,7 +6,6 @@ using MyItemType = VRage.Game.ModAPI.Ingame.MyItemType;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A gas generator, which turns ice into oxygen and hydrogen, and the irrigation system, which turns it into water.</summary>
-    /// <remarks>Nothing to call off: a generator goes on making gas while it has ice and somewhere to put it.</remarks>
     public sealed class GasGenerator : Capability
     {
         static readonly MyItemType Ice = MyItemType.MakeOre("Ice");
@@ -44,8 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("UseConveyor", false, "toggle automatic push and pull");
         }
 
-        /// <summary>Told as the generator runs out of ice and as it gets some back, which its resource source raises.</summary>
-        /// <remarks>Only that: its own PropertiesChanged comes every time it burns ice.</remarks>
+        /// <summary>Told as the generator runs out of ice and as it gets some back.</summary>
+        /// <remarks>Only that: its own properties-changed event comes every time it burns ice.</remarks>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return ResourceListener.Heard(block, told);

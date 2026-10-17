@@ -10,11 +10,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A value that is on or off, given with a switch saying them.</summary>
-    /// <remarks>
-    /// A switch because that is what on and off look like everywhere in this game; any other choice is a line of its words,
-    /// which has room for longer ones. Inside a row of its own, so it is as wide as its words rather than as wide as the form.
-    /// A double press finishes the form, as Done does.
-    /// </remarks>
     public class SwitchField : HStack, IField
     {
         readonly Switch _switch;
@@ -64,7 +59,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         public Element Keyboard => this;
 
         /// <inheritdoc />
-        /// <remarks>An arrow steps to the next word, stopping at either end.</remarks>
         public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             var by = KeyboardChoice.By(key);
@@ -79,7 +73,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        /// <remarks>A letter goes to the next word starting with it, round to the start.</remarks>
         public override void OnText(char c)
         {
             var word = KeyboardChoice.Letter(_words, _text, c);

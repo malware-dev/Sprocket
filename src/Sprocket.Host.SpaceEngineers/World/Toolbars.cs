@@ -9,15 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// How a toolbar is reached, said once.
     /// </summary>
-    /// <remarks>
-    /// One statement of how Sprocket's wiring is found, read and written, so the next change to that
-    /// answer is one edit rather than a hunt. What does the work is <see cref="ISlots" />.
-    /// <para>
-    /// <b>Static because the block vocabulary is.</b> A capability describing a button panel is
-    /// made with no instance to hand anything to, so a toolbar is found the same way. The game's own API is a static for the same reason, and this holds a reference to
-    /// an ordinary object rather than being one.
-    /// </para>
-    /// </remarks>
     public static class Toolbars
     {
         static ISlots _slots = new GameSlots();
@@ -25,12 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Puts something else behind every toolbar read and write.
         /// </summary>
-        /// <remarks>
-        /// For the harness, which answers these calls over toolbars it makes up. The game's own
-        /// conveniences cannot be answered by anything but the game - they reach past
-        /// <see cref="IMyToolbar" /> into its concrete item classes - so this is what lets a button
-        /// on a made-up rig be tested at all.
-        /// </remarks>
+        /// <remarks>For the harness, which answers these calls over toolbars it makes up.</remarks>
         public static void Use(ISlots slots)
         {
             _slots = slots ?? new GameSlots();
@@ -90,11 +76,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether a block has an action of the game's own by that name.
         /// </summary>
-        /// <remarks>
-        /// Asked before a slot is written with one, because the name Sprocket holds is data and the
-        /// block is the authority on what it offers. A subtype that does not have it costs a Sprocket
-        /// trigger rather than a slot that looks wired and does nothing.
-        /// </remarks>
         public static bool Offers(IMyTerminalBlock block, string actionId)
         {
             return block != null && !string.IsNullOrEmpty(actionId)

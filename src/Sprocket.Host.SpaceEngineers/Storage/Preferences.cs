@@ -5,14 +5,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>How the player likes Sprocket's screens to look, the same in every world and kept from one game to the next.</summary>
     /// <remarks>
-    /// Kept in a file of its own, apart from the settings a player writes by hand, because Sprocket writes this one each
-    /// time something in it changes:
+    /// Persisted, and written each time a preference changes:
     /// <code>
     /// [View]
     /// showHidden=true
     /// </code>
-    /// Read once, as the world starts. A file that will not read is said out loud, leaves every preference at its default,
-    /// and is never written over.
+    /// Read once, as the world starts; a file that will not read is never written over.
     /// </remarks>
     public sealed class Preferences
     {

@@ -4,11 +4,8 @@ using SpaceEngineers.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A parachute: how thick the air is, and the members of its terminal said in Sprocket's words.</summary>
-    /// <remarks>
-    /// Shaped like a door without being one, so the door does not claim it. Its open switch is the deploy request, which
-    /// reads open from the moment a deploy is asked for whether or not the canopy is out.
-    /// </remarks>
+    /// <summary>A parachute, read for how thick the air is.</summary>
+    /// <remarks>Its open switch reads open from the moment a deploy is asked for, canopy out or not.</remarks>
     public sealed class Parachute : Capability
     {
         const string Unheard = "A parachute raises nothing as the air around it changes.";

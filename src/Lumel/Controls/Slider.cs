@@ -6,7 +6,6 @@ using VRageMath;
 namespace Lumel.Controls
 {
     /// <summary>One amount between none and all of it, set by putting a grip where it goes along a track.</summary>
-    /// <remarks>The track takes the pointer itself: a press moves the grip there at once, and dragging carries it.</remarks>
     public class Slider : Element
     {
         const float Thick = 24f;
@@ -26,7 +25,6 @@ namespace Lumel.Controls
         public event Action Moved;
 
         /// <summary>Where the grip is, from none at the left to all at the right.</summary>
-        /// <remarks>Changes only what is drawn, so it invalidates nothing.</remarks>
         public float Fraction
         {
             get { return _fraction; }
@@ -43,7 +41,6 @@ namespace Lumel.Controls
         public Color GripColor { get; set; }
 
         /// <summary>How tall the track is drawn, centered down the slider, or zero for its whole height.</summary>
-        /// <remarks>A thin track reads as a line the grip slides along; a whole one shows a picture under the grip, as a hue does.</remarks>
         public float TrackHeight { get; set; }
 
         /// <inheritdoc />

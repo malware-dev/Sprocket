@@ -6,9 +6,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>What a check compares its value with, and how: the relation it asks first, then what it is compared with.</summary>
     /// <remarks>
-    /// The relation is asked as the first of a check's options and held as the first of its arguments, by a word of its own,
-    /// so the sentence says "is not closed" and the column that asks it is the one that asks what it is compared with.
-    /// Only a number is offered more than sameness.
+    /// The relation is held as the first of a check's arguments, by a word of its own.
     /// </remarks>
     public static class ComparisonQuestion
     {
@@ -103,7 +101,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// A flag's field in the words its signals say its two sides in, where they say both: "occupied" and "empty" rather
         /// than on and off.
         /// </summary>
-        /// <remarks>A status whose signals say nothing is said by its own name: "charging".</remarks>
         static Field Stated(Field field, EntityAction value, IList<EntityEvent> events)
         {
             string yes = null, no = null;

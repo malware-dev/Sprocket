@@ -7,10 +7,6 @@ using VRage.ObjectBuilders;
 namespace Sprocket.Host.SpaceEngineers.Features.Gravity
 {
     /// <summary>Sits on every box gravity generator, and adds the field's fitting buttons once the first one is properly alive.</summary>
-    /// <remarks>
-    /// A control added before the block type has fully spawned makes the type's own controls vanish, for the reason given on
-    /// <see cref="SprocketBlock" />; a game logic component's first update is the earliest point that is safe.
-    /// </remarks>
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_GravityGenerator), useEntityUpdate: false)]
     public class GravityBlock : MyGameLogicComponent
     {
@@ -23,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         /// <inheritdoc />
         public override void UpdateOnceBeforeFrame()
         {
-            // The buttons belong to a terminal, and a dedicated server has none.
+            // A dedicated server has no terminal to hold the buttons.
             if (MyAPIGateway.Utilities == null || MyAPIGateway.Utilities.IsDedicated)
                 return;
 

@@ -141,13 +141,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>What a test can read of the blocks, in the view now showing.</summary>
-        /// <remarks>
-        /// The values a step can set, and Sprocket's own besides, which a test reads whether or not a step could set them; how
-        /// each is compared is its options' to say. The organized view lists first each state the blocks' status can be in,
-        /// to be checked for as it is, then the other values under the headings the actions stand under, each in the order its
-        /// capability declares it; the terminal view lists the values the blocks declare, under the terminal's own names, by
-        /// those names.
-        /// </remarks>
         void Testable(List<long> selection, bool totals)
         {
             var actions = Vocabulary.ActionsOf(_editor.World, selection);
@@ -219,12 +212,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Everything the blocks offer, values first and each group in its own order.</summary>
-        /// <remarks>
-        /// The organized view keeps the order the blocks' capabilities declare their members in, which is a deliberate one:
-        /// open before close, the block's own before what every block shares. The terminal view is sorted by the terminal's
-        /// names, because a block hands its members out in the order its code happens to create them and a person reading
-        /// twenty of them is looking one up. The headings are not in here: a search matches only what somebody can choose.
-        /// </remarks>
         void Grouped(List<EntityAction> actions)
         {
             if (_editor.ShowsTerminal)
@@ -235,8 +222,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            // Sprocket's groups, in the order the categories are declared, so a player who has learnt where a light's color
-            // sits finds a sorter's in the same place.
+            // Sprocket's groups, in the order the categories are declared, so a member sits in the same place on every block.
             for (var group = 0; group <= (int)Category.Other; group++)
                 Listed(actions, group);
         }
@@ -260,7 +246,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>What the view now showing calls <paramref name="one" />: the block's own words in the terminal view, as-is, and Sprocket's in the organized one, in lower case.</summary>
-        /// <remarks>Values and actions are listed together in the organized view, so everything is said as something to do.</remarks>
         string Said(EntityAction one)
         {
             if (_editor.ShowsTerminal)
@@ -307,11 +292,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether the view now showing lists <paramref name="one" />.</summary>
-        /// <remarks>
-        /// The terminal view lists what the block declares, whether or not something has been offered in its place; the
-        /// organized view lists what is on offer and usable, whoever worded it. A value of
-        /// Sprocket's own is a step only where it can be set; a test lists it itself.
-        /// </remarks>
         bool Lists(EntityAction one)
         {
             if (one.Being != null && !one.Sets)

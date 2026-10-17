@@ -122,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The poller for <paramref name="trigger" />, at <paramref name="place" /> among its system's, on <paramref name="instance" />, made where there is none.</summary>
         /// <remarks>
         /// One just made takes up what the world remembers of it, and is handed whatever a copy was sent. Its place is written
-        /// again on every check, so what it remembers follows the trigger when one before it goes.
+        /// again on every check.
         /// </remarks>
         Poller Watching(AutomationSystem system, int place, Trigger trigger, SystemInstance instance)
         {
@@ -159,10 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Gives the poller for <paramref name="trigger" /> on <paramref name="instance" /> what a save remembered of it, now or
         /// as it is made.
         /// </summary>
-        /// <remarks>
-        /// State is read as a world loads, and the pollers are made on the first check after that. One held for a trigger
-        /// that never comes is never applied, and costs one entry.
-        /// </remarks>
+        /// <remarks>Held where the poller is not made yet, as it is not while a world loads.</remarks>
         public void Recall(Trigger trigger, SystemInstance instance, Action<Poller> recall)
         {
             var poller = Poller(trigger, instance);

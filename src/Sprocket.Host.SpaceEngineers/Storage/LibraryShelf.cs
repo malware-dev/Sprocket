@@ -9,13 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>The blueprints a player keeps for every world, each in a file of its own, and the index naming them.</summary>
     /// <remarks>
-    /// The index is a list of file names, one to a line; a line starting <c>#</c> is a comment, and a blank line is
-    /// nothing. A player adds a blueprint somebody gave them by putting its file beside the index and its name on a line
-    /// of its own. Each file holds one blueprint as <see cref="ProgramWriter.Blueprint(AutomationSystem, Guid)" /> writes it.
-    /// <para>
-    /// The index is edited line by line, so whatever a player wrote in it stays where they wrote it. A file is only ever
-    /// written where it read as a blueprint, or where the library made it.
-    /// </para>
+    /// Persisted: the index is a list of file names, one to a line; a line starting <c>#</c> is a comment, and a blank line
+    /// is nothing. Each file holds one blueprint as <see cref="ProgramWriter.Blueprint(AutomationSystem, Guid)" /> writes it.
     /// </remarks>
     public sealed class LibraryShelf
     {
@@ -25,13 +20,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
         const string Kind = ".cog";
 
-        /// <summary>What makes a line of the index name a folder.</summary>
         static readonly char[] Folders = { '\\', '/', ':' };
 
-        /// <summary>The characters the game refuses in a file name in mod storage.</summary>
         static readonly char[] Refused = { '\\', '/', '"', '<', '>', '|', ':', '*', '?' };
 
-        /// <summary>What a new index says, so a player opening it for the first time sees how it is used.</summary>
         static readonly string[] Explained =
         {
             "# Blueprints for the automation library: one file name a line, each file in this folder.",
@@ -77,10 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Puts the logic system <paramref name="blueprint" /> in the library as it is now, in place of the blueprint it is
         /// linked to, or as a new blueprint where it links to none here, and links it to the blueprint as it now is.
         /// </summary>
-        /// <remarks>
-        /// A file the library named after the blueprint is renamed with it; a file a player named keeps the name they gave
-        /// it.
-        /// </remarks>
+        /// <remarks>A file the library named after the blueprint is renamed with it; a file a player named keeps its name.</remarks>
         public LibraryEntry Keep(AutomationSystem blueprint)
         {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
@@ -120,7 +109,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Links <paramref name="system" />, where it links to no blueprint, to the blueprint here that has its identity, at that
         /// blueprint's version.
         /// </summary>
-        /// <remarks>A logic system with the identity of a stored blueprint was put on from it or made into it.</remarks>
         public void Link(AutomationSystem system)
         {
             if (system.HasOrigin || !system.IsBlueprint)
@@ -166,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 if (!_files.Has(Index))
                 {
-                    // Made at once, so the index is always there beside the blueprints for a player to add a line to.
+                    // Made at once, so a player always finds the index to add a line to.
                     _lines.AddRange(Explained);
                     WriteIndex();
                     return "";
@@ -283,6 +271,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var clean = new StringBuilder(name.Length);
             foreach (var character in name)
             {
+                // Refused holds the characters the game refuses in a file name in mod storage.
                 clean.Append(character < ' ' || Array.IndexOf(Refused, character) >= 0 ? '_' : character);
             }
 

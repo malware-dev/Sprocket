@@ -7,7 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A value typed into a box as wide as the form, for words; a number has a <see cref="NumberField" />.</summary>
+    /// <summary>A value in words, typed into a box as wide as the form.</summary>
     public class TypedField : HStack, IField
     {
         readonly TextBox _box;

@@ -13,9 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>A fillable part of a sentence, saying what it holds in pieces: each block it names with its icon, a member with its marks, and the words around them.</summary>
     /// <remarks>
-    /// The only thing on screen that changes what a sequence means, so nothing else may borrow this look. The line
-    /// under it is what distinguishes it from a row at a glance, and it is drawn rather than being a border because
-    /// a rectangle of color is all the game can be asked for.
+    /// The only thing on screen that changes what a sequence means, so nothing else may borrow this look.
     /// </remarks>
     public class SlotChip : HStack, ITextual
     {
@@ -194,8 +192,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         void Lay(Color? sample)
         {
-            // Each piece keeps the element it had where it is still the same kind, so saying new words over the
-            // same blocks makes nothing new.
+            // A piece keeps its element where the kind is unchanged, so new words over the same blocks allocate
+            // nothing.
             for (var i = 0; i < _said.Count; i++)
             {
                 var piece = _said[i];

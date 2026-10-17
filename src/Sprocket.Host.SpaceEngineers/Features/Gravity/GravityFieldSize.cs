@@ -5,11 +5,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Gravity
 {
     /// <summary>How big a gravity generator's field must be to cover a box of a grid's cells.</summary>
-    /// <remarks>
-    /// The field is a box centred on the generator and turned with it, sized along the generator's own right, up and back,
-    /// as the game's <c>MyGravityGenerator</c> draws it. A generator sits square on its grid, so reaching the eight corners
-    /// of the cells is reaching all of them.
-    /// </remarks>
+    /// <remarks>The size runs along the generator's own right, up and back, as the game's <c>MyGravityGenerator</c> sizes its field.</remarks>
     public static class GravityFieldSize
     {
         /// <summary>The field size that reaches every cell from <paramref name="min" /> to <paramref name="max" /> of <paramref name="generator" />'s own grid.</summary>
@@ -23,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         /// <summary>
         /// The field size that reaches every cell from <paramref name="min" /> to <paramref name="max" /> of a grid placed at
         /// <paramref name="grid" />, its cells <paramref name="cell" /> wide, for a generator placed at
-        /// <paramref name="generator" /> whose field is centred on <paramref name="centre" /> in its own space.
+        /// <paramref name="generator" /> whose field is centered on <paramref name="centre" /> in its own space.
         /// </summary>
         public static Vector3 Covering(MatrixD grid, float cell, Vector3I min, Vector3I max, MatrixD generator, Vector3 centre)
         {

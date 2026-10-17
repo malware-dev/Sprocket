@@ -22,7 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// The program <paramref name="program" /> written out with <paramref name="with" /> in the place of the system of its
         /// identity, that system's instances keeping their answers to every slot <paramref name="with" /> uses.
         /// </summary>
-        /// <remarks>For putting a newer copy of a system blueprint in the place of the one on the construct.</remarks>
         public static string Replacing(Automation program, Values values, AutomationSystem with)
         {
             return Save(program, values, with);
@@ -68,8 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             for (var i = 0; i < systems.Count; i++)
                 WriteSystem(pen, Written(systems[i], with), Written(systems[i], with).Identity, true, true, true);
 
-            // After every system, because an instance names the system it is one of and a reader
-            // should have met it by then.
+            // After every system, since an instance names the system it is one of.
             for (var i = 0; i < systems.Count; i++)
             {
                 var written = Written(systems[i], with);
@@ -88,7 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>The blueprint <paramref name="system" /> written out alone, as a player's library keeps it.</summary>
-        /// <remarks>A blueprint names nothing outside itself, so the system is the whole of it; its instances are the construct's.</remarks>
+        /// <remarks>The system alone, without its instances.</remarks>
         public static string Blueprint(AutomationSystem system)
         {
             return Blueprint(system, system.Identity);
@@ -139,10 +137,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// The variables something in <paramref name="program" /> names: in <paramref name="blocks" /> those holding a
         /// block, in <paramref name="triggers" /> those holding a trigger.
         /// </summary>
-        /// <remarks>
-        /// A system names variables in its steps and triggers; a blueprint names only its slots, and its instances name the
-        /// variables answering them. A signal variable names the block it is on.
-        /// </remarks>
         static void Used(Automation program, HashSet<string> blocks, HashSet<string> triggers)
         {
             var named = new List<string>();
@@ -208,12 +202,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// One of a declaration's keys, written as whatever sort of value it is.
         /// </summary>
-        /// <remarks>
-        /// The syntax carries the kind, so nothing here tags anything: a whole number reads back as a
-        /// whole number because that is what it looks like. Which is the point - this reader does not know what
-        /// a key means, only what it is, and the host that minted the list is the only thing that reads
-        /// it.
-        /// </remarks>
         static void WriteKey(ScriptWriter pen, Values values, EntityKey key)
         {
             if (key.Cells != null)
@@ -329,11 +317,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <c>required slot inner expects Door</c>: something the construct has to provide, or may leave out where it is
         /// <c>optional</c>.
         /// </summary>
-        /// <remarks>
-        /// <c>required</c> or <c>optional</c> heads it, so every line that starts with either word is something the ship
-        /// answers rather than something Sprocket does. What a slot for a block expects is written only when the author said
-        /// it; nothing means any block may fill it.
-        /// </remarks>
+        /// <remarks>What a slot for a block expects is written only where the author said it; nothing means any block.</remarks>
         static void WriteSlot(ScriptWriter pen, Part part)
         {
             if (part.Annotation.Length > 0)
@@ -369,11 +353,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Writes <paramref name="instance" /> of <paramref name="system" />; where <paramref name="replacing" />, it is an
         /// instance of another copy of the system, and keeps only its answers to the slots <paramref name="system" /> uses.
         /// </summary>
-        /// <remarks>
-        /// <c>instance 1 of "3f2a…" as 'Port airlock' { inner = [ door1 ] }</c>: one use of a system blueprint, on this
-        /// construct. It sits outside the blueprint rather than inside it, because the blueprint is what is shared and which
-        /// of somebody's blocks answer its slots is not.
-        /// </remarks>
+        /// <remarks>Written <c>instance 1 of "3f2a…" as 'Port airlock' { inner = [ door1 ] }</c>, outside the blueprint.</remarks>
         static void WriteInstance(ScriptWriter pen, Automation program, AutomationSystem system, SystemInstance instance, bool replacing)
         {
             pen.Blank();
@@ -417,11 +397,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Which parts <paramref name="instance" /> fills, in a settled order, leaving out a part nothing in the system uses and no installation
         /// holds blocks in.
         /// </summary>
-        /// <remarks>
-        /// Sorted, so a saved file does not churn between runs for no reason: a dictionary hands its
-        /// keys back in whatever order it likes, and a save that differs every time is one that gets
-        /// written every time and reads as a change in a diff.
-        /// </remarks>
         static List<string> Sorted(AutomationSystem system, SystemInstance instance, bool replacing)
         {
             var used = new List<string>();
@@ -627,10 +602,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// <c>whenever button then run 1</c>, <c>when all ext.status on [ inner ] == closed then run 2</c>, or <c>every 600t stop 3</c>.
         /// </summary>
-        /// <remarks>
-        /// A trigger says the step it does, written as a sequence writes it, because it belongs to the system rather than
-        /// to one sequence.
-        /// </remarks>
+        /// <remarks>The step it does is written as a sequence writes it.</remarks>
         static void WriteTrigger(ScriptWriter pen, Trigger trigger)
         {
             pen.Blank();

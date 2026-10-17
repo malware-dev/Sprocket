@@ -100,8 +100,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var index = _sequence.Steps.IndexOf(step);
 
-            // Handed what the step already holds, so the question that finishes this opens on those values rather than
-            // empty: changing which blocks a step acts on is not a reason to type its values again.
             _editor.Push(new PickPage(_editor, "Do something", false,
                 _editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
                 answer =>
@@ -137,11 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return Waited(index) || lasts && !Lasting(step);
         }
 
-        /// <summary>Asks what to affect, then what to do to it, and adds the step only once both are answered.</summary>
-        /// <remarks>
-        /// Blocks first, because somebody knows which block they mean but may not know what verbs exist: pointing at a
-        /// door and being told what a door can do is discovery, and every verb on the ship in one list is a wall.
-        /// </remarks>
+        /// <summary>Asks what to affect, then what to do to it, and adds the step once both are answered, with a wait after it where it takes time.</summary>
         public void AddAction(int at)
         {
             var origin = _editor.Depth;
@@ -160,8 +154,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     for (var i = 0; i < answer.Arguments.Count; i++)
                         step.Arguments.Add(answer.Arguments[i]);
 
-                    // With a wait for it after it where what it does takes time to finish, because a numbered list is
-                    // read as one thing after another; one edit, so one press takes the pair back.
                     _editor.Do(_sequence, Vocabulary.Lasts(_editor.World, answer.Targets, answer.Chosen, answer.Form)
                         ? new AddStep(ChangeKind.AddStep, at, step, new Await())
                         : new AddStep(ChangeKind.AddStep, at, step));
@@ -222,7 +214,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
         PickPage TestPage(Comparison test, OpeningColumn opens, Action<Comparison> chosen)
         {
-            // A sameness on a status opens on its state, chosen as it is listed; anything else on its value.
             var value = test?.Names(Vocabulary.ActionsFor(_editor.Runner.Bindings, _editor.Seen(_sequence.System, test.Targets)));
             var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
             return new PickPage(_editor, "Check something", false,
@@ -236,11 +227,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>
-        /// <remarks>
-        /// The picker asks for the blocks, the value, how it is compared and with what. A sum and a function's arguments are
-        /// kept from <paramref name="was" /> where the same value is picked again, so changing the blocks of a test written in
-        /// the script changes nothing else.
-        /// </remarks>
         Comparison Test(PickAnswer answer, Comparison was)
         {
             var test = new Comparison();
@@ -289,10 +275,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <summary>Asks which other sequence of the system to run, or to stop where <paramref name="stops" /> says so, and adds the step that does.</summary>
-        /// <remarks>
-        /// Running one comes with a wait for it after it, one edit, because a numbered list is read as one thing after another;
-        /// stopping one is done at once.
-        /// </remarks>
+        /// <remarks>A step that runs one comes with a wait after it, in the same edit.</remarks>
         public void AddRun(bool stops, int at)
         {
             var origin = _editor.Depth;

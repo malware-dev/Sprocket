@@ -23,22 +23,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Where in the script it starts.
         /// </summary>
-        /// <remarks>
-        /// A position rather than a line number, because a line number is only ever wanted when something
-        /// has gone wrong, and counting lines as the text is read would pay for it on every token of every
-        /// program that reads cleanly.
-        /// </remarks>
         public int At { get; private set; }
 
         /// <summary>
         /// The text of an identifier, a string, an annotation, or what is wrong with a <see cref="TokenKind.Bad" />.
         /// </summary>
-        /// <remarks>
-        /// Where it lies in the script, not a copy of it. A copy is made only if something asks for one.
-        /// </remarks>
+        /// <remarks>A segment of the script, copied only when something asks for a string.</remarks>
         public StringSegment Text { get; private set; }
 
-        /// <summary>An integer's value, or a colour's four bytes packed red-green-blue-alpha.</summary>
+        /// <summary>An integer's value, or a color's four bytes packed red-green-blue-alpha.</summary>
         public long Whole { get; private set; }
 
         /// <summary>A real number's value.</summary>

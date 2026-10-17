@@ -12,11 +12,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A color, given from the player's own colors, by hue, saturation and value, or by writing it.</summary>
-    /// <remarks>
-    /// Laid out as the game's own color picker is: sliders lettered H, S and V, only hue with a track drawn, and the written
-    /// color under them. Every way of giving it moves the others with it. The elements it is drawn with are declared in
-    /// <c>ColorPicker.View.cs</c>, and nothing else is.
-    /// </remarks>
     public partial class ColorPicker : VStack, IField
     {
         Hsv _color = Hsv.Of(0f, 0f, 1f);

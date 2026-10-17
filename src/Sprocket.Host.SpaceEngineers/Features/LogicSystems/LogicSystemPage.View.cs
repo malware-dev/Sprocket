@@ -41,8 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 Children =
                 {
-                    // For a blueprint, whose blocks every sentence below names, said before any of them: one of the
-                    // installations made from it.
                     new HStack
                     {
                         Spacing = 8f,
@@ -54,10 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _using),
 
-                    // Why Sprocket switched it off, said before anything it is about.
                     new Label { Style = Styles.Caution, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _halted),
 
-                    // Why nothing below can be changed, and how to change that, said before any of it.
                     new HStack
                     {
                         Spacing = 8f,
@@ -69,9 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         }
                     }.As(out _locked),
 
-                    // Named, because this screen holds two lists of different things and the rows in them read
-                    // alike: what is already here, then the ways to add more on the line under it, twice over -
-                    // the way a sequence lays out its steps.
                     new Label { Style = Styles.Heading }.As(out _triggersHeading),
                     new VStack { Spacing = 8f }.As(out _triggerList),
                     new VStack
@@ -92,9 +85,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newSequence) } } }
                     }.As(out _addSequence),
 
-                    // For a blueprint, the installation panel of the installation shown, laid out as the panel itself lays it
-                    // out: what the logic system does and what whoever fills it in needs to know, then the slots its
-                    // sentences name, each with that installation's blocks.
                     new Label { Style = Styles.NextHeading, IsVisible = false }.As(out _panelHeading),
                     new VStack
                     {

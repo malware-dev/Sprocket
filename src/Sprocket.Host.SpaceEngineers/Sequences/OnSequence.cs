@@ -2,11 +2,6 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A change to one of a logic system's sequences, carried on the logic system's own history.</summary>
-    /// <remarks>
-    /// Everything done to a logic system is one timeline, whichever of its screens it was done on, because a sequence's steps
-    /// name the logic system's slots and a pick reshapes them: two timelines touching the same things cannot be walked in a safe
-    /// order.
-    /// </remarks>
     public sealed class OnSequence : SystemEdit
     {
         readonly Edit<Sequence> _edit;

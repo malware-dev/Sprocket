@@ -12,10 +12,6 @@ using Lumel.Text;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>One slot of a blueprint: its name on the heading, what it is for, and the kinds of block it expects.</summary>
-    /// <remarks>
-    /// What is written here is what everyone filling an installation of the blueprint reads. The elements it is drawn with are
-    /// declared in <c>SlotPage.View.cs</c>.
-    /// </remarks>
     public sealed partial class SlotPage : EditorPage
     {
         readonly AutomationSystem _system;
@@ -96,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (wanted.Length == 0 || !AcceptsName(wanted) || wanted == _part.Id)
                 return;
 
-            // A slot nothing uses and no installation holds blocks in is not saved, so its name is free, and it goes.
+            // A slot that nothing uses and no installation holds blocks in is not saved, so dropping it frees the name.
             var other = _system.FindPart(wanted);
             if (other != null && other != _part)
                 _system.DropPart(other);
@@ -140,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Brings the view up to date, or goes back where a step back has taken the slot away.</summary>
         public override void Build()
         {
-            // A box just left is written first: the box filled below would otherwise put back what it replaced.
+            // Before Show, which would otherwise put back what the box replaced.
             Refocused();
             Show();
         }
@@ -199,10 +195,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>The type of block the slot expects, in its name, or that it takes any block.</summary>
-        /// <remarks>
-        /// One exact block is named as the game names it on this construct, and a type in a name of Sprocket's own. Either is said
-        /// as the slot writes it where there is no name for it: a block no block on the construct is, or a modded type.
-        /// </remarks>
         string Expected(Localization.Texts texts)
         {
             var expects = _part.Expects;
@@ -250,7 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Writes the box that holds the keyboard into the slot and lets the keyboard go, so what comes next starts from what was typed.</summary>
-        /// <remarks>Before a step back, so it takes back what was typed and the box then shows what the step leaves.</remarks>
+        /// <remarks>Called before a step back.</remarks>
         void Settle()
         {
             Written(_focused);

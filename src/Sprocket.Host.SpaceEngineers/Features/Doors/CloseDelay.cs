@@ -7,15 +7,10 @@ using VRage.Game.Components;
 namespace Sprocket.Host.SpaceEngineers.Features.Doors
 {
     /// <summary>How long a door stays open before it closes by itself: as the slider sets it, as it is written beside it, and as the door keeps it.</summary>
-    /// <remarks>
-    /// The slider follows the timer block's delay, a logarithmic scale counted in whole seconds as <c>MyTimerBlock</c> has
-    /// it, up to ten minutes and written as minutes and seconds. Its left end reaches below a second, and everything under
-    /// a second is off.
-    /// </remarks>
+    /// <remarks>The slider follows the timer block's delay as <c>MyTimerBlock</c> has it: a logarithmic scale in whole seconds.</remarks>
     public static class CloseDelay
     {
         /// <summary>The slider's left end, in seconds, which is off.</summary>
-        /// <remarks>Half a second, so the stretch of the slider that reads off is about as wide as the one that reads one second.</remarks>
         public const float Least = 0.5f;
 
         /// <summary>The longest delay, in seconds: ten minutes.</summary>
@@ -24,17 +19,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         /// <summary>How many of the game's ticks make a second.</summary>
         public const int TicksPerSecond = 60;
 
-        /// <summary>How far short of a whole second a slider value may fall and still count as it.</summary>
-        /// <remarks>The logarithmic scale lands its right end a fraction short of a whole number, as it lands the timer block's hour at 3599.9998.</remarks>
+        // The logarithmic scale lands its right end a fraction short of a whole number, as it lands the timer block's hour at 3599.9998.
         const float Slack = 0.001f;
 
-        /// <summary>
-        /// Where the delay sits in a door's mod storage.
-        /// </summary>
-        /// <remarks>
-        /// Claimed in <c>Content/Data/EntityComponents.sbc</c>, without which the game drops it at save, and never to change:
-        /// another key reads as every door in the world set to stay open.
-        /// </remarks>
+        // Persisted in a door's mod storage and claimed in Content/Data/EntityComponents.sbc, without which the game drops it at
+        // save; another key reads as every door in the world set to stay open.
         static readonly Guid Key = new Guid("687D4592-0806-46CF-9930-7739C4270632");
 
         /// <summary>The whole seconds a slider value stands for, between none and <see cref="Most" />; none is off.</summary>
@@ -85,8 +74,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
                 return;
             }
 
-            // Shared with every other mod on the block, so one already here is the one to use. Assigning a new one is what
-            // registers it with the block, which is what makes the game write it out at all.
+            // Shared with every other mod on the block. Assigning a new one registers it with the block, without which the game does
+            // not save it.
             if (storage == null)
             {
                 block.Storage = new MyModStorageComponent();

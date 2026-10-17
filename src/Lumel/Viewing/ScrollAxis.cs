@@ -3,8 +3,8 @@ namespace Lumel.Viewing
 {
     /// <summary>One axis of scrolling: how much there is, how much is on show, and where along it the view sits.</summary>
     /// <remarks>
-    ///     Answers are returned, never stored: the control assigns them through its own property, which is
-    ///     where the invalidation a move needs happens.
+    ///     An offset it works out is returned and not stored: the control assigns it through its own property, which
+    ///     invalidates.
     /// </remarks>
     public sealed class ScrollAxis
     {
@@ -16,8 +16,8 @@ namespace Lumel.Viewing
 
         /// <summary>How far along the content has been moved.</summary>
         /// <remarks>
-        ///     Not clamped when set, because it may be set before layout knows the other two; the control
-        ///     calls <see cref="Clamp" /> once they are known.
+        ///     Not clamped when set; the control calls <see cref="Clamp" /> once <see cref="Extent" /> and
+        ///     <see cref="Viewport" /> are known.
         /// </remarks>
         public float Offset { get; set; }
 

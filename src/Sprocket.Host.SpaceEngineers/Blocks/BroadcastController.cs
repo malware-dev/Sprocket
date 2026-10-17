@@ -9,14 +9,7 @@ using IMyChatBroadcastControllerComponent = Sandbox.ModAPI.Ingame.IMyChatBroadca
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A broadcast controller, which posts to the game chat from the construct: in a step's own words, one of its saved
-    /// messages, and the members of its terminal said in Sprocket's words.
-    /// </summary>
-    /// <remarks>
-    /// Everything it posts goes through its chat component, which sends only while the block works and spaces messages
-    /// out: one sent too soon waits, and the same text sent again while it waits goes once, with a count.
-    /// </remarks>
+    /// <summary>A broadcast controller, which posts a step's own words or one of its saved messages to the game chat.</summary>
     public sealed class BroadcastController : Capability
     {
         /// <summary>Posting a step's own words to chat, which is Sprocket's own.</summary>
@@ -25,7 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>Posting one of the messages saved in the controller's terminal, which is Sprocket's own.</summary>
         public const string SendSaved = "send-a-saved-message";
 
-        /// <summary>How many messages the controller's terminal saves, numbered from 1.</summary>
+        // The game's controller saves eight messages, numbered from 1.
         const int Saved = 8;
 
         static readonly OwnAction Says = OwnAction.Of<IMyBroadcastController, Words>(Words.Read,
@@ -35,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             (controller, numbered, seen) => Chat(controller).SendMessage(numbered.Index));
 
         /// <inheritdoc />
-        /// <remarks>Only one with the chat component, which is what every one of the game's has and what it posts through.</remarks>
         public override bool Claims(IMyTerminalBlock block)
         {
             IMyChatBroadcastControllerComponent chat;
@@ -43,10 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// The terminal's eight transmit actions are one action with the message's number, and its three buttons that pick
-        /// who hears it are the value they set.
-        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(Say, "say", Says, AskedText()).In(Category.Signals)
@@ -105,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <summary>The saved message a step sends.</summary>
         sealed class Numbered
         {
-            /// <summary>Where the message is among the component's, which counts from 0 where the terminal counts from 1.</summary>
+            /// <summary>The message's index, counted from 0 where the terminal counts from 1.</summary>
             public int Index;
 
             /// <summary>The message a step sending a saved one was given.</summary>

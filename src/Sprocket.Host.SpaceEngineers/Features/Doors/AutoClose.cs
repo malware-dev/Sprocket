@@ -9,12 +9,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Features.Doors
 {
     /// <summary>Every door's auto-close delay: set from the terminal on any machine, kept in the door, and carried out by the server.</summary>
-    /// <remarks>
-    /// The delay lives in the door's mod storage, which the game saves with the world and sends to a client with the grid,
-    /// and nothing after that: so a client's change goes to the server, and the server tells every client what the door
-    /// keeps now. The same object on every machine; only the server closes doors, holding a <see cref="DoorCloser" /> for each
-    /// door that has a delay and nothing for the rest.
-    /// </remarks>
+    /// <remarks>The same object on every machine; only the server closes doors.</remarks>
     public sealed class AutoClose : IDisposable
     {
         readonly Rota _rota;
@@ -51,10 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         }
 
         /// <summary>Sets <paramref name="door" />'s delay to <paramref name="seconds" />, as its terminal slider does on whichever machine it was moved.</summary>
-        /// <remarks>
-        /// A client keeps it in its own copy of the door at once, so the slider shows what was set, and asks the server, which
-        /// has the last word.
-        /// </remarks>
+        /// <remarks>On a client, keeps it in its own copy of the door at once and asks the server, which has the last word.</remarks>
         public void Set(IMyDoor door, int seconds)
         {
             seconds = CloseDelay.Clamped(seconds);

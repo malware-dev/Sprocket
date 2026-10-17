@@ -22,11 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The block behind this, for the few things that need the game's own object.</summary>
-        /// <remarks>
-        /// Almost nothing needs it: what a block reads and what it can be told to do are answered
-        /// here. Writing a toolbar is the exception, because a toolbar is the game's own structure and
-        /// there is nothing to say about it in any other terms.
-        /// </remarks>
         public IMyTerminalBlock Block => _block;
 
         /// <summary>The block's id in the game.</summary>
@@ -41,12 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Live state, for the player's own words.
         /// </summary>
-        /// <remarks>
-        /// What stops the block, where anything that knows it says something does, then what the first that knows it says
-        /// it is doing: "closing" beats "on" on a list of forty. Then four answers rather than two, because "off" and "no
-        /// power" are different problems and telling somebody the wrong one is worse than telling them nothing. Damage
-        /// comes first because a damaged block is not working for a reason no switch will fix.
-        /// </remarks>
         public Status Status
         {
             get
@@ -80,11 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether this block is doing something right now.
         /// </summary>
-        /// <remarks>
-        /// Not whether it works. A row in the ship list lights up on this, and answering it with "powered
-        /// and switched on" lit every row on the ship, which made the light mean nothing at all. Only
-        /// something that knows the block can say it is in motion, so a block nothing knows is never busy.
-        /// </remarks>
+        /// <remarks>A block no capability knows is never busy.</remarks>
         public bool IsActive
         {
             get
@@ -132,9 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Tells <paramref name="told" /> each time this block may have changed, until the answer is disposed; null where it says nothing.</summary>
-        /// <remarks>
-        /// Told as the block announces a change, by whatever knows it, and as Sprocket itself asks the block for anything.
-        /// </remarks>
+        /// <remarks>Told as the block announces a change, and as Sprocket itself asks the block for anything.</remarks>
         public IDisposable Listen(Action told)
         {
             List<IDisposable> listening = null;
@@ -159,7 +142,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Tells everything listening that Sprocket has asked the block for something.</summary>
-        /// <remarks>What Sprocket asks of a block is a change it need not wait for the block to announce.</remarks>
         public void Asked()
         {
             for (var i = 0; i < _hearing.Count; i++)
@@ -167,11 +149,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether a step asking this block for <paramref name="action" /> would be lost: it is waited for, and the block is switched off.</summary>
-        /// <remarks>
-        /// Only the switch, because a switch just thrown, by a step before this one, shows at once, where whether a block
-        /// is powered may not until the game next works it out. Anything a step does not wait for a block takes as ever,
-        /// and switching it on is one of those.
-        /// </remarks>
         public bool Refuses(EntityAction action)
         {
             return action.Lasts && IsSwitchedOff;
@@ -215,15 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Tells the block to do <paramref name="actionId" /> with <paramref name="arguments" />, <paramref name="form" /> saying which of the three ways the step reaches it.</summary>
-        /// <remarks>
-        /// <b>For the editor and the harness, never the runtime,</b> which compiles what a step does once and does that.
-        /// This finds it by name and works it out on every call.
-        /// <para>
-        /// Each is tried as what it is and nothing else. A value and the game's act that flips it share
-        /// an id, and one of Sprocket's own words may be spelled like one of the game's, so a step
-        /// that went looking for whatever answered to its id could find the wrong one.
-        /// </para>
-        /// </remarks>
+        /// <remarks>For the editor and the harness, never the runtime: it finds the action by name on every call.</remarks>
         public void Invoke(string actionId, IList<Literal> arguments, ReachKind form)
         {
             Perform(actionId, arguments, form);
@@ -255,7 +224,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         void Perform(string actionId, IList<Literal> arguments, ReachKind form)
         {
-            // The block's own members are named by the block's ids, so those go straight to the game.
             if (form == ReachKind.Value)
             {
                 if (arguments != null && arguments.Count > 0)
@@ -270,8 +238,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            // An id this block does not have is a sequence written against a vocabulary it no longer offers, and it does
-            // nothing rather than throwing - the same answer a reading gives.
+            // An id this block does not have does nothing, as a reading of one does.
             var entry = _kind.FindAction(actionId, ReachKind.Native);
             if (entry == null)
                 return;
@@ -280,7 +247,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (bound != null && bound.Acts)
                 bound.Do(_block, new ReaderMemory());
             else if (entry.GameActionId != null)
-                // One of Sprocket's own that is the game's act said another way.
                 Toolbars.Perform(_block, entry.GameActionId, arguments);
         }
 

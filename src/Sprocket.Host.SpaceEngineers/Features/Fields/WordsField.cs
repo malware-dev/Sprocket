@@ -12,12 +12,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A value that is one of a few words: a line of them, pressing the one wanted, where the line fits, and a list of them where it does not.</summary>
-    /// <remarks>
-    /// A line of words shows every answer at once, which a list hides until it is opened, so it is the line wherever there
-    /// is room for it. Which one shows is decided where the field is placed, the only point that knows how wide its room
-    /// is: it asks only for the list's width, so the line never widens a form it does not fit, and a form spans the room
-    /// beside the label to give it all there is. A double press on a word finishes the form with it, as Done does.
-    /// </remarks>
     public class WordsField : Container, IField
     {
         readonly List<string> _words = new List<string>();
@@ -48,7 +42,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _line.Children.Add(button);
             }
 
-            // The keyboard is this field's whichever form shows, so the list does not take it for itself.
             _list = new ListField(words) { Focusable = false };
             _list.Edited += Listed;
 
@@ -101,7 +94,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        /// <remarks>An arrow steps to the next word, stopping at either end, in either form.</remarks>
         public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             var by = KeyboardChoice.By(key);
@@ -116,7 +108,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <inheritdoc />
-        /// <remarks>A letter goes to the next word starting with it, round to the start.</remarks>
         public override void OnText(char c)
         {
             var word = KeyboardChoice.Letter(_words, _text, c);

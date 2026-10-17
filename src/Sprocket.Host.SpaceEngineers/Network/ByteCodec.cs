@@ -4,39 +4,33 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {
-    /// <summary>
-    ///     Utility class for reading and writing primitive types and vectors to/from byte arrays.
-    ///     Uses little-endian byte order and thread-safe buffer access for floating-point conversions.
-    /// </summary>
+    /// <summary>Primitive values and vectors written to and read from byte arrays, little-endian.</summary>
+    /// <remarks>Safe to call from any thread.</remarks>
     public static class ByteCodec
     {
         static readonly double[] DoubleBuffer = new double[1];
         static readonly float[] FloatBuffer = new float[1];
         static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, false);
-        static readonly char[] CharBuffer = new char[1024]; // Reusable buffer for StringBuilder char extraction
+        static readonly char[] CharBuffer = new char[1024];
 
-        /// <summary>
-        ///     Writes a 32-bit unsigned integer to the byte array using little-endian byte order.
-        /// </summary>
-        /// <param name="value">The <see cref="uint" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon return.</param>
+        /// <summary>Writes a 32-bit unsigned integer, little-endian.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 4.</param>
         public static void Write(uint value, byte[] data, ref int pos)
         {
-            // Get individual bytes (not through BitConverter to avoid endianness issues)
+            // Byte by byte rather than through BitConverter, so the order is little-endian on any machine.
             data[pos++] = (byte)(value & 0xFF);
             data[pos++] = (byte)((value >> 8) & 0xFF);
             data[pos++] = (byte)((value >> 16) & 0xFF);
             data[pos++] = (byte)((value >> 24) & 0xFF);
         }
 
-        /// <summary>
-        ///     Attempts to read a 32-bit unsigned integer from the byte array using little-endian byte order.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon success.</param>
-        /// <param name="value">The read value, or 0 if the read fails.</param>
-        /// <returns>True if at least 4 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a 32-bit unsigned integer, little-endian.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 4 on success.</param>
+        /// <param name="value">The value, or 0 on failure.</param>
+        /// <returns>Whether 4 bytes were there.</returns>
         public static bool TryReadUInt32(byte[] data, ref int pos, out uint value)
         {
             if (pos + 4 > data.Length)
@@ -50,30 +44,26 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a 32-bit signed integer to the byte array using little-endian byte order.
-        /// </summary>
-        /// <param name="value">The <see cref="int" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon return.</param>
+        /// <summary>Writes a 32-bit signed integer, little-endian.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 4.</param>
         public static void Write(int value, byte[] data, ref int pos)
         {
-            // Get individual bytes (not through BitConverter to avoid endianness issues)
+            // Byte by byte rather than through BitConverter, so the order is little-endian on any machine.
             data[pos++] = (byte)(value & 0xFF);
             data[pos++] = (byte)((value >> 8) & 0xFF);
             data[pos++] = (byte)((value >> 16) & 0xFF);
             data[pos++] = (byte)((value >> 24) & 0xFF);
         }
 
-        /// <summary>
-        ///     Writes a 64-bit signed integer to the byte array using little-endian byte order.
-        /// </summary>
-        /// <param name="value">The <see cref="long" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 8 upon return.</param>
+        /// <summary>Writes a 64-bit signed integer, little-endian.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 8.</param>
         public static void Write(long value, byte[] data, ref int pos)
         {
-            // Get individual bytes (not through BitConverter to avoid endianness issues)
+            // Byte by byte rather than through BitConverter, so the order is little-endian on any machine.
             data[pos++] = (byte)(value & 0xFF);
             data[pos++] = (byte)((value >> 8) & 0xFF);
             data[pos++] = (byte)((value >> 16) & 0xFF);
@@ -84,13 +74,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             data[pos++] = (byte)((value >> 56) & 0xFF);
         }
 
-        /// <summary>
-        ///     Attempts to read a 32-bit signed integer from the byte array using little-endian byte order.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon success.</param>
-        /// <param name="value">The read value, or 0 if the read fails.</param>
-        /// <returns>True if at least 4 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a 32-bit signed integer, little-endian.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 4 on success.</param>
+        /// <param name="value">The value, or 0 on failure.</param>
+        /// <returns>Whether 4 bytes were there.</returns>
         public static bool TryReadInt32(byte[] data, ref int pos, out int value)
         {
             if (pos + 4 > data.Length)
@@ -104,13 +92,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Attempts to read a 64-bit signed integer from the byte array using little-endian byte order.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 8 upon success.</param>
-        /// <param name="value">The read value, or 0 if the read fails.</param>
-        /// <returns>True if at least 8 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a 64-bit signed integer, little-endian.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 8 on success.</param>
+        /// <param name="value">The value, or 0 on failure.</param>
+        /// <returns>Whether 8 bytes were there.</returns>
         public static bool TryReadInt64(byte[] data, ref int pos, out long value)
         {
             if (pos + 8 > data.Length)
@@ -131,13 +117,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a 32-bit floating-point value to the byte array using little-endian byte order.
-        ///     Uses thread-safe buffer conversion.
-        /// </summary>
-        /// <param name="value">The <see cref="float" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon return.</param>
+        /// <summary>Writes a 32-bit float.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 4.</param>
         public static void Write(float value, byte[] data, ref int pos)
         {
             lock (FloatBuffer)
@@ -149,14 +132,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             pos += 4;
         }
 
-        /// <summary>
-        ///     Attempts to read a 32-bit floating-point value from the byte array using little-endian byte order.
-        ///     Uses thread-safe buffer conversion.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 upon success.</param>
-        /// <param name="value">The read value, or 0.0f if the read fails.</param>
-        /// <returns>True if at least 4 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a 32-bit float.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 4 on success.</param>
+        /// <param name="value">The value, or 0 on failure.</param>
+        /// <returns>Whether 4 bytes were there.</returns>
         public static bool TryReadFloat(byte[] data, ref int pos, out float value)
         {
             if (pos + 4 > data.Length)
@@ -175,13 +155,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a 64-bit floating-point value to the byte array using little-endian byte order.
-        ///     Uses thread-safe buffer conversion.
-        /// </summary>
-        /// <param name="value">The <see cref="double" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 8 upon return.</param>
+        /// <summary>Writes a 64-bit float.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 8.</param>
         public static void Write(double value, byte[] data, ref int pos)
         {
             lock (DoubleBuffer)
@@ -193,14 +170,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             pos += 8;
         }
 
-        /// <summary>
-        ///     Attempts to read a 64-bit floating-point value from the byte array using little-endian byte order.
-        ///     Uses thread-safe buffer conversion.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 8 upon success.</param>
-        /// <param name="value">The read value, or 0.0 if the read fails.</param>
-        /// <returns>True if at least 8 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a 64-bit float.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 8 on success.</param>
+        /// <param name="value">The value, or 0 on failure.</param>
+        /// <returns>Whether 8 bytes were there.</returns>
         public static bool TryReadDouble(byte[] data, ref int pos, out double value)
         {
             if (pos + 8 > data.Length)
@@ -219,13 +193,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a 3D vector with 32-bit floating-point components to the byte array.
-        ///     Each component (X, Y, Z) is written sequentially using <see cref="Write(float, byte[], ref int)" />.
-        /// </summary>
-        /// <param name="value">The <see cref="Vector3" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 12 upon return.</param>
+        /// <summary>Writes a vector of 32-bit floats, X, Y then Z.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 12.</param>
         public static void Write(Vector3 value, byte[] data, ref int pos)
         {
             Write(value.X, data, ref pos);
@@ -233,14 +204,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             Write(value.Z, data, ref pos);
         }
 
-        /// <summary>
-        ///     Attempts to read a 3D vector with 32-bit floating-point components from the byte array.
-        ///     Each component (X, Y, Z) is read sequentially using <see cref="TryReadFloat(byte[], ref int, out float)" />.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 12 upon success.</param>
-        /// <param name="value">The read vector, or <see cref="Vector3.Zero" /> if the read fails.</param>
-        /// <returns>True if at least 12 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a vector of 32-bit floats, X, Y then Z.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 12 on success.</param>
+        /// <param name="value">The vector, or <see cref="Vector3.Zero" /> on failure.</param>
+        /// <returns>Whether 12 bytes were there.</returns>
         public static bool TryReadVector3(byte[] data, ref int pos, out Vector3 value)
         {
             value = Vector3.Zero;
@@ -255,13 +223,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a 3D vector with 64-bit floating-point components to the byte array.
-        ///     Each component (X, Y, Z) is written sequentially using <see cref="Write(double, byte[], ref int)" />.
-        /// </summary>
-        /// <param name="value">The <see cref="Vector3D" /> value to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 24 upon return.</param>
+        /// <summary>Writes a vector of 64-bit floats, X, Y then Z.</summary>
+        /// <param name="value">The value.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 24.</param>
         public static void Write(Vector3D value, byte[] data, ref int pos)
         {
             Write(value.X, data, ref pos);
@@ -269,14 +234,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             Write(value.Z, data, ref pos);
         }
 
-        /// <summary>
-        ///     Attempts to read a 3D vector with 64-bit floating-point components from the byte array.
-        ///     Each component (X, Y, Z) is read sequentially using <see cref="TryReadDouble(byte[], ref int, out double)" />.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 24 upon success.</param>
-        /// <param name="value">The read vector, or <see cref="Vector3D.Zero" /> if the read fails.</param>
-        /// <returns>True if at least 24 bytes were available; false otherwise.</returns>
+        /// <summary>Reads a vector of 64-bit floats, X, Y then Z.</summary>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 24 on success.</param>
+        /// <param name="value">The vector, or <see cref="Vector3D.Zero" /> on failure.</param>
+        /// <returns>Whether 24 bytes were there.</returns>
         public static bool TryReadVector3D(byte[] data, ref int pos, out Vector3D value)
         {
             value = Vector3D.Zero;
@@ -291,14 +253,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a string from a <see cref="StringBuilder" /> to the byte array using UTF-8 encoding.
-        ///     The string is prefixed with a 32-bit length field (byte count). Avoids string allocation
-        ///     by extracting characters directly from the StringBuilder.
-        /// </summary>
-        /// <param name="value">The <see cref="StringBuilder" /> containing the string to write.</param>
-        /// <param name="data">The destination byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 + byte length upon return.</param>
+        /// <summary>Writes the text of a <see cref="StringBuilder" /> as UTF-8 after its length in bytes.</summary>
+        /// <remarks>Allocates nothing.</remarks>
+        /// <param name="value">The text.</param>
+        /// <param name="data">The destination.</param>
+        /// <param name="pos">Where to write; moved on by 4 and the byte length.</param>
         public static void WriteString(StringBuilder value, byte[] data, ref int pos)
         {
             if (value == null || value.Length == 0)
@@ -309,7 +268,6 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
             var charCount = value.Length;
 
-            // Calculate total UTF-8 byte count by processing in chunks
             var totalByteCount = 0;
             lock (CharBuffer)
             {
@@ -322,10 +280,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
                     offset += chunkSize;
                 }
 
-                // Write length prefix
                 Write(totalByteCount, data, ref pos);
 
-                // Write UTF-8 bytes directly by processing in chunks
                 offset = 0;
                 while (offset < charCount)
                 {
@@ -338,21 +294,17 @@ namespace Sprocket.Host.SpaceEngineers.Network
             }
         }
 
-        /// <summary>
-        ///     Attempts to read a string from the byte array into a <see cref="StringBuilder" /> using UTF-8 encoding.
-        ///     The string must be prefixed with a 32-bit length field (byte count). Avoids string allocation by
-        ///     decoding UTF-8 bytes into a char buffer and appending directly to the StringBuilder.
-        /// </summary>
-        /// <param name="data">The source byte array.</param>
-        /// <param name="pos">The starting position in <paramref name="data" />; incremented by 4 + byte length upon success.</param>
-        /// <param name="value">The <see cref="StringBuilder" /> to append the decoded string to.</param>
-        /// <returns>True if the string was successfully read; false otherwise.</returns>
+        /// <summary>Reads UTF-8 text after its length in bytes, appending it to a <see cref="StringBuilder" />.</summary>
+        /// <remarks>Allocates no string.</remarks>
+        /// <param name="data">The source.</param>
+        /// <param name="pos">Where to read; moved on by 4 and the byte length on success.</param>
+        /// <param name="value">Appended to.</param>
+        /// <returns>Whether the text was read.</returns>
         public static bool TryReadString(byte[] data, ref int pos, StringBuilder value)
         {
             if (value == null)
                 return false;
 
-            // Read length prefix
             int byteCount;
             if (!TryReadInt32(data, ref pos, out byteCount))
                 return false;
@@ -363,7 +315,6 @@ namespace Sprocket.Host.SpaceEngineers.Network
             if (byteCount == 0)
                 return true;
 
-            // Check bounds
             if (pos + byteCount > data.Length)
                 return false;
 
@@ -387,11 +338,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Writes a string to the byte array using UTF-8 encoding.
-        ///     The string is prefixed with a 32-bit length field (byte count).
-        ///     A null string is written as length -1.
-        /// </summary>
+        /// <summary>Writes a string as UTF-8 after its length in bytes, or -1 for null.</summary>
         public static void WriteString(string value, byte[] data, ref int pos)
         {
             if (value == null)
@@ -412,11 +359,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             pos += bytes.Length;
         }
 
-        /// <summary>
-        ///     Attempts to read a string from the byte array using UTF-8 encoding.
-        ///     The string must be prefixed with a 32-bit length field (byte count).
-        ///     A length of -1 indicates a null string.
-        /// </summary>
+        /// <summary>Reads a UTF-8 string after its length in bytes, null where the length is -1.</summary>
         public static bool TryReadString(byte[] data, ref int pos, out string value)
         {
             value = null;
@@ -441,9 +384,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return true;
         }
 
-        /// <summary>
-        ///     Returns the number of bytes needed to serialize a string (4 byte length prefix + UTF-8 bytes).
-        /// </summary>
+        /// <summary>How many bytes <paramref name="value" /> takes written: its 4-byte length and its UTF-8 bytes.</summary>
         public static int SizeOfString(string value)
         {
             if (value == null || value.Length == 0)

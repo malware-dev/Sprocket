@@ -4,17 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// A trigger started each time a signal is sent: <c>whenever button then run 1</c>, or a signal written in place,
     /// <c>whenever ext.'finishes-closing' on [ inner ] then run 2</c>.
     /// </summary>
-    /// <remarks>
-    /// A signal comes two ways, and which one is the block's business rather than the author's. A button, a timer, a
-    /// sensor and an event controller send theirs through a toolbar slot, so Sprocket puts its own action in the slot and
-    /// waits to be called, which is the game's own arrangement and not a second one beside it. A block's change, such as a
-    /// door finishing closing, is one Sprocket watches for itself, as the change in the value it is.
-    /// <para>
-    /// Named, its one source is the variable or signal slot that holds the signal. Written in place, the sources are the
-    /// blocks it is sent from, the member is <see cref="MomentTrigger.EventId" />, and a toolbar slot says where on their
-    /// toolbars it is sent from. With no sources it says only that something on the construct has to start this.
-    /// </para>
-    /// </remarks>
     public sealed class SignalTrigger : MomentTrigger
     {
         /// <summary>A trigger started by a signal, named by no slot or variable yet.</summary>

@@ -4,11 +4,7 @@ using Sandbox.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>A flag read off a block: whether a door is open, whether a room has air.</summary>
-    /// <remarks>
-    /// Declared once by what knows the block, and reached directly by whatever was compiled to read it, so a look is a
-    /// cast and a delegate call. What a moment watches, what an action waits for and what rules a moment out are all
-    /// one of these.
-    /// </remarks>
+    /// <remarks>Reached directly by whatever was compiled to read it, so a look is a cast and a delegate call.</remarks>
     public abstract class Reading
     {
         /// <summary>Whether this needs a <see cref="ReaderMemory" /> of its own for each block it reads.</summary>

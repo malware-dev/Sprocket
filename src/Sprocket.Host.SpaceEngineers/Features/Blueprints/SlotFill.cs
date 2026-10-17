@@ -8,11 +8,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>Asks, in the picker, which of the construct's blocks fill one of a blueprint's slots for one installation, and fills it with them.</summary>
-    /// <remarks>
-    /// Only blocks of the kinds the slot expects, where it says: a door's slot is offered doors. The blocks it holds now are
-    /// chosen already, so choosing is also seeing what is there, and the blocks the installation had for slots that were split
-    /// or merged are listed first.
-    /// </remarks>
     public sealed class SlotFill
     {
         readonly SprocketEditor _editor;
@@ -41,7 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             if (part.IsSignal)
             {
-                // A signal slot is a block and one of its toolbar slots, picked as a trigger's signal is.
                 var positions = chosen.Positions(part.Id);
                 var pressed = positions != null && positions.Count > 0 ? positions[0].EventId : "";
                 _editor.Push(new PickPage(_editor, part.Id, true, targets, pressed, ReachKind.Native,
@@ -53,7 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var type = HostTypes.Named(part.Holds);
             if (type != null)
             {
-                // A slot of screens is a step's own, picked as its step is: its member alone, and the screen under it.
                 var step = _system.ActingOn(part.Id);
                 _editor.Push(new PickPage(_editor, part.Id, targets, step == null ? "" : step.ActionId,
                     step == null ? ReachKind.Native : step.Form, _editor.Picks.Facet(_system, chosen, new[] { part.Id }),
@@ -81,7 +74,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Answers signal slot <paramref name="part" /> for <paramref name="chosen" /> with the signal <paramref name="answer" /> picked on each of its blocks, and goes back.</summary>
-        /// <remarks>Only a signal answers a signal slot; anything else picked leaves the picker open.</remarks>
         void Answered(Part part, SystemInstance chosen, PickAnswer answer)
         {
             if (ToolbarSlot.Of(answer.Chosen) == null)
@@ -95,10 +87,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back.</summary>
-        /// <remarks>
-        /// Asked about first where a button among them already starts something, and rewired as any edit is, because what a
-        /// trigger's button is may have been this slot.
-        /// </remarks>
         void Filled(Part part, SystemInstance chosen, IList<long> ids)
         {
             _editor.Claims.Filling(_system, part, chosen, ids, null, () =>
@@ -137,7 +125,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Lets go of the blocks set aside, in every installation of <paramref name="system" /> with every slot filled again.</summary>
-        /// <remarks>Run by the fill each time it is made, so making it again lets go of the same blocks.</remarks>
         static void Settle(AutomationSystem system)
         {
             var used = new List<string>();

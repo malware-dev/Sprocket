@@ -5,20 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// What Sprocket already knows about the game's own actions.
     /// </summary>
     /// <remarks>
-    /// The same thing a mod ships in a file, built here instead, for one reason: these have to be
-    /// read before anybody else's so that anybody else can override them, and a file of Sprocket's would
-    /// be read wherever the player happened to have put this mod in their list.
-    /// <para>
-    /// By action id and not by block, because these are the game's own words and mean the same
-    /// thing wherever they turn up. A mod that uses one of these ids for something else says so
-    /// against its own block, which is the stronger claim and wins - see <see cref="ParameterCatalog" />.
-    /// </para>
-    /// <para>
-    /// Most of what is here corrects a type. Nearly every one of the game's actions that takes values
-    /// declares each of them as text, and then refuses anything that is not a number: these are the
-    /// types their handlers accept, read from the game's own blocks. The hud text setters and the
-    /// programmable block's run take text and declare it, so they need nothing here.
-    /// </para>
+    /// Nearly every one of the game's actions that takes values declares each as text and refuses anything that is not a
+    /// number; the types here are the ones their handlers accept, read from the game's own blocks.
     /// </remarks>
     public static class KnownActions
     {
@@ -39,8 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var said = new Descriptions();
 
-            // A light's colour: three numbers to the game, one thing to a person. The group is what
-            // says so, and what an editor for a colour will be asked for by.
+            // The game takes a light's color as three numbers.
             said.Actions.Add(Action("SetColor", Colour()));
             said.Actions.Add(Action("SetColorMin", Colour()));
             said.Actions.Add(Action("SetColorMax", Colour()));
@@ -100,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             return group;
         }
 
-        /// <summary>One channel of a colour, which the game takes as a whole number from nought to 255.</summary>
+        /// <summary>One channel of a color, which the game takes as a whole number from nought to 255.</summary>
         static Parameter Channel(string name)
         {
             var channel = (Parameter)Parameter(name, Integer);

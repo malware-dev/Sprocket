@@ -4,10 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>What each category is headed on screen.</summary>
-    /// <remarks>
-    /// A plain noun for the heading over a group of rows, not a sentence: the rows underneath say
-    /// what they do, and a heading that explained itself would be read once and then be in the way.
-    /// </remarks>
     public static class CategoryText
     {
         /// <summary>What <paramref name="category" /> is headed, in the words <paramref name="texts" /> give.</summary>

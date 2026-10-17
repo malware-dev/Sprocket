@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ShowOnHUD", true, "show on HUD");
         }
 
-        /// <summary>Told as the block starts or stops working and as its Custom Data changes, which every block announces.</summary>
+        /// <summary>Told as the block starts or stops working and as its Custom Data changes.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return new Listening(block, told);

@@ -43,7 +43,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
                 var entry = new Button { Style = Entry(term, false), Text = term.Name, Command = new Relay(() => Go(term)) };
                 _entries.Add(entry);
 
-                // The terms of a section stand under its heading, in from it.
                 var indent = within && !term.Opens ? Styles.CodexIndent : 0f;
                 list.Children.Add(new HStack { Padding = new Thickness(indent, 0f, 0f, 0f), Children = { entry } });
             }

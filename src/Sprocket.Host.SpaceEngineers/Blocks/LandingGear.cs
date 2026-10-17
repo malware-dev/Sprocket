@@ -9,8 +9,7 @@ using LandingGearMode = SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>Landing gear and magnetic plates: whether they hold the ship, and the members of their terminal said in Sprocket's words.</summary>
-    /// <remarks>Lock and unlock are the game's own and take effect at once, so neither is waited for.</remarks>
+    /// <summary>Landing gear and magnetic plates, read for whether they hold the ship.</summary>
     public sealed class LandingGear : Capability
     {
         static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
@@ -40,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("EnableParking", false, "toggle used for parking");
         }
 
-        /// <summary>Told as the gear locks, unlocks, or comes into or out of reach of something to lock to, which it raises itself.</summary>
+        /// <summary>Told as the gear locks, unlocks, or comes into or out of reach of something to lock to.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var gear = block as IMyLandingGear;

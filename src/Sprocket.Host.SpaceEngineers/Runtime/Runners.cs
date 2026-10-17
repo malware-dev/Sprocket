@@ -47,11 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// What runs the act a trigger does itself: a sequence with no number and that act for its one step, or null
         /// where the trigger runs or stops a sequence instead.
         /// </summary>
-        /// <remarks>
-        /// The runtime's alone, and never in the system: the program says only that the trigger acts. Running the act as a
-        /// step is what has it worked out, checked, reported and switched off at fault exactly as a step of a sequence is.
-        /// Kept per trigger for the life of the program, and given the act again where the trigger was pointed at another.
-        /// </remarks>
+        /// <remarks>Kept per trigger for the life of the program.</remarks>
         public Sequence Alone(AutomationSystem system, Trigger trigger)
         {
             var act = trigger.Acts;
@@ -79,9 +75,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Puts a saved run back, as soon as there is a runner to put it in.
         /// </summary>
         /// <remarks>
-        /// Held rather than applied where the runner does not exist yet, which is the ordinary case:
-        /// state is read as a world loads, and the runners are made on the first tick after that. A
-        /// run held for a sequence that never appears is simply never applied, and costs one entry.
+        /// Held where the runner does not exist yet, as it does not while a world loads; the runners are made on the first
+        /// tick after.
         /// </remarks>
         public void Resume(Sequence sequence, SystemInstance instance, int step, bool waiting, int waitTicks, bool byHand)
         {
@@ -134,10 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Keeps the set of runners matching the sequences and the ones of each system.
         /// </summary>
-        /// <remarks>
-        /// Done on the tick after the program says it gained or lost something, and on no other: the
-        /// program is what changes, so it is what says so. See <see cref="Automation.Reshaped" />.
-        /// </remarks>
+        /// <remarks>Done on the tick after the program says it gained or lost something, and on no other.</remarks>
         public void Reconcile()
         {
             _live.Clear();
@@ -289,8 +281,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>The key of the runner for the own act of trigger <paramref name="trigger" /> of <paramref name="system" /> on <paramref name="instance" />, made where there is none.</summary>
         /// <remarks>
-        /// Remembered as a sequence numbered below nought, minus the trigger's place counted from one, which no sequence of the
-        /// system's is. The place is written again on every check, so it follows the trigger when one before it goes.
+        /// Remembered as a sequence numbered minus the trigger's place counted from one, which no sequence is; the place is
+        /// written again on every check.
         /// </remarks>
         long Acting(AutomationSystem system, int trigger, Sequence alone, SystemInstance instance)
         {

@@ -15,13 +15,8 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Features.Admin
 {
     /// <summary>The world's settings, for an admin to change: a tab for this world and one for every world, each setting a list of its choices.</summary>
-    /// <remarks>
-    /// Read top to bottom, each setting with what it does under its name and its choices under that. A change applies as it is
-    /// made. Under this world each rule's list starts with the default, which leaves the rule to every world.
-    /// </remarks>
     public sealed class AdminDialog : Dialog
     {
-        /// <summary>How wide the dialog stands.</summary>
         const float Wide = 600f;
 
         readonly SprocketEditor _editor;

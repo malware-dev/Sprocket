@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The length it says.</summary>
         public Duration Length { get; private set; }
 
-        /// <summary>Never. A duration always has a value, even if it is none.</summary>
+        /// <summary>False, since a duration always has a value.</summary>
         public override bool IsEmpty => false;
     }
 }

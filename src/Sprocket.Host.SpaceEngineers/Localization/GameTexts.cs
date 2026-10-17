@@ -5,12 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Localization
 {
     /// <summary>A mod's texts, loaded into the game's own table of texts and read back out of it.</summary>
     /// <remarks>
-    ///     <c>MyTexts.LoadTexts</c> reads every <c>MyTexts*.resx</c> under the folder with no culture in its
-    ///     name, then the ones named for the language's culture over them, then the ones named for its
-    ///     culture and subculture, each replacing what it repeats. A key a translation lacks therefore keeps
-    ///     its English, and the game draws a key from the table wherever it is given one, a terminal control's
-    ///     title among them. Whoever changes the language has to load again: the game does not reload a
-    ///     mod's texts itself.
+    /// <c>MyTexts.LoadTexts</c> lays the culture's <c>MyTexts*.resx</c> over the ones with no culture, so a key a translation
+    /// lacks keeps its English. The game does not reload a mod's texts itself, so a change of language needs another load.
     /// </remarks>
     public sealed class GameTexts : ITextSource
     {

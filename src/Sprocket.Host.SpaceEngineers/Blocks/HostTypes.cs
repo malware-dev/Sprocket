@@ -4,10 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>Every type this host provides, beside the language's own.</summary>
-    /// <remarks>
-    /// Static because a program is read and written with no world to ask, and each type holds nothing: the list is a constant,
-    /// as a keyword list is.
-    /// </remarks>
     public static class HostTypes
     {
         static readonly HostType[] Provided = { new ScreenType() };

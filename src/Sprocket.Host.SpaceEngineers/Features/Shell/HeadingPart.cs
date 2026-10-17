@@ -4,20 +4,7 @@ using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>
-    /// One piece of a screen's heading: some words, and whether they are somebody's to change.
-    /// </summary>
-    /// <remarks>
-    /// One string and one rename beside it is enough while a screen is about one thing. A sequence is
-    /// not: it is <i>when this happens</i> and <i>then this runs</i>, so a name replacing the whole line
-    /// would cost anybody who wanted a better word for what a sequence <b>does</b> the trigger that
-    /// starts it, recoverable only by typing the trigger into the name by hand.
-    /// <para>
-    /// So a heading is several of these, in order, and each one answers for itself whether it can be
-    /// renamed. Words between the parts are the target's, not core's - an arrow, a dot, a line break on
-    /// something narrow.
-    /// </para>
-    /// </remarks>
+    /// <summary>One piece of a screen's heading: some words, and whether they are somebody's to change.</summary>
     public sealed class HeadingPart
     {
         string _lead = "";
@@ -40,19 +27,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _text = text ?? "";
         }
 
-        /// <summary>
-        /// Words that come before this part and belong to it, or empty for none.
-        /// </summary>
-        /// <remarks>
-        /// <i>Automation for</i> <b>Hangar Bay Alpha</b> is one named thing with a phrase in front of
-        /// it, not two things. The phrase is core's because it says what the screen is about; the
-        /// name is somebody's to change and the phrase is not, so they cannot be the same part.
-        /// <para>
-        /// It also settles the punctuation. A target puts its own mark between parts - an arrow, a dot -
-        /// but only where the next part has no words of its own to lead with, because a connective and a
-        /// connective are one connective too many.
-        /// </para>
-        /// </remarks>
+        /// <summary>Words that come before this part and belong to it, or empty for none: the <i>Automation for</i> of <i>Automation for Hangar Bay Alpha</i>.</summary>
+        /// <remarks>A target puts its own mark between parts only where the next part has no lead.</remarks>
         public string Lead
         {
             get { return _lead; }
@@ -80,12 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { Set(ref _markAbout, value); }
         }
 
-        /// <summary>What this part reads as. Never empty.</summary>
-        /// <remarks>
-        /// The name where somebody gave one, and whatever the thing says about itself where they did not.
-        /// A part always has something to read, which is what makes naming optional rather than a step
-        /// somebody is quietly expected to complete.
-        /// </remarks>
+        /// <summary>What this part reads as: the name given, or what the thing says about itself, never empty.</summary>
         public string Text
         {
             get { return _text; }
@@ -93,11 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>What somebody actually typed, or empty where nobody has.</summary>
-        /// <remarks>
-        /// <b>Not the same as <see cref="Text" /> and the difference is load-bearing.</b> A target opens
-        /// its rename box on this; opening it on the text would hand somebody a generated sentence and
-        /// call it their name, which they then have to delete before they can answer.
-        /// </remarks>
+        /// <remarks>A target opens its rename box on this.</remarks>
         public string Name
         {
             get { return _name; }
@@ -112,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether a name can be given, asked before it is: false where something else already has it.</summary>
-        /// <remarks>Null where every name is taken. An empty name is <see cref="NameRequired" />'s business, not this.</remarks>
+        /// <remarks>Null where every name is accepted.</remarks>
         public Func<string, bool> Accepts
         {
             get { return _accepts; }
@@ -144,12 +111,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether an empty name is refused here, rather than handing the part back to what the thing says about itself.</summary>
-        /// <remarks>
-        /// Nearly everywhere an empty name means "go back to whatever this thing says about itself", which
-        /// is what makes naming optional. Where there is nothing for it to say, clearing the name has to be
-        /// refused instead - and a target has to be told which of the two it is, or it offers a commit that
-        /// core will silently ignore.
-        /// </remarks>
         public bool NameRequired
         {
             get { return _nameRequired; }

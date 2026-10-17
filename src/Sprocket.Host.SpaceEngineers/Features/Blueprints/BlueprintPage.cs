@@ -13,10 +13,6 @@ using Lumel.Text;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>A blueprint's installation panel: one installation's slots filled with its blocks.</summary>
-    /// <remarks>
-    /// Each slot says what it is for in the words its author gave it, and pressing its blocks chooses others. The elements it
-    /// is drawn with are declared in <c>BlueprintPage.View.cs</c>.
-    /// </remarks>
     public sealed partial class BlueprintPage : EditorPage
     {
         readonly AutomationSystem _system;
@@ -142,7 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             parts[0].Mark = Blockset == null ? Symbols.LogicSystem : Symbols.Installation;
             parts[0].MarkAbout = Blockset == null ? Editor.Texts.HeadingLogicSystem : Editor.Texts.HeadingInstallation;
 
-            // Pushed rather than swapped in, so Back comes back to the blocks being filled.
+            // Pushed, so Back returns to the blocks being filled.
             var from = new HeadingPart(_system.Name);
             from.Mark = Symbols.LogicSystem;
             from.MarkAbout = Editor.Texts.HeadingLogicSystem;
@@ -152,7 +148,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <inheritdoc />
-        /// <remarks>The installation is the second part, after the logic system it is of.</remarks>
         public override void RefreshHeading(List<HeadingPart> parts)
         {
             if (parts.Count < 2)
@@ -204,10 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Builds the screen again where how many installations there are or which is chosen has changed.</summary>
-        /// <remarks>
-        /// Every tick, and it walks nothing: the slots change only through the screens under it, which rebuild it on the way
-        /// back.
-        /// </remarks>
+        /// <remarks>Every tick, and walks nothing: the slots change only through the screens under it, which rebuild it on the way back.</remarks>
         public override void Refresh()
         {
             if (Shape(Editor.StandIn(_system)) != _shape)
@@ -260,7 +252,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Says what is wrong with the installation being filled, and offers the sequence at fault where that is where it is mended.</summary>
-        /// <remarks>Why Sprocket switched it off where it did, and otherwise what is wrong now.</remarks>
         void Troubled(SystemInstance chosen)
         {
             Sequence sequence = null;
@@ -289,8 +280,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _trouble.Text = said;
             _trouble.Style = mended ? Styles.Caution : Styles.Problem;
 
-            // A lost block that is back leaves only the switch; an empty slot is filled on this page, so there is nowhere
-            // else to go.
+            // An empty slot is filled on this page, so it opens no sequence.
             if (restored)
             {
                 _openTrouble.IsVisible = true;
@@ -358,7 +348,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
 
         /// <summary>A slot, with the blocks <paramref name="chosen" /> fills it with and a press on them that chooses others; false where no block fills it.</summary>
-        /// <remarks>A slot split or merged under it says so in place of its blocks, with the blocks set aside that its picker offers first.</remarks>
         bool Part(PartRow row, Part part, SystemInstance chosen)
         {
             row.Name = part.Id;
@@ -370,7 +359,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(CommandKind.FillPart, () => _fill.Ask(part, chosen));
 
-            // Any block lost, as the logic system says of its steps, though others still fill the slot.
             row.Problem = gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
 
             var changed = chosen != null && SlotMarks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;

@@ -6,16 +6,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// An append-only run of values, kept in fixed chunks rather than one growing array.
     /// </summary>
     /// <remarks>
-    /// <b>Measured, and it replaced a plain list that made things worse.</b> One list for every value in a
-    /// read crosses the runtime's large object threshold - 85,000 bytes - at a few thousand values, and
-    /// from there every doubling is a fresh large object that only a full collection reclaims. Reading a
-    /// program of six thousand statements started causing full collections where it had caused none, while
-    /// allocating less: it traded many cheap short-lived arrays for a few expensive long-lived ones. The
-    /// game's runtime has the same threshold.
-    /// <para>
-    /// So values go into chunks small enough never to be large objects, whatever a value grows into, and
-    /// a chunk is never copied: growing is adding another one. Finding a value is a shift and a mask.
-    /// </para>
+    /// Measured: one list crosses the runtime's large object threshold, 85,000 bytes, at a few thousand values, and a
+    /// program of six thousand statements then caused full collections. Each chunk stays below it and is never copied.
     /// </remarks>
     public sealed class ValueChunks
     {

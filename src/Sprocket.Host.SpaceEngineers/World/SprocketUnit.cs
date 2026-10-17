@@ -14,12 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// One Sprocket, on one construct: its world, its program, the runtime that runs it, and the editor.
     /// </summary>
-    /// <remarks>
-    /// The program and its runtime belong to the block, not to the screen: the session ticks them whether
-    /// or not anything is open, and the screen is only a way to look at them. Owned by the screen, a
-    /// sequence would run only while somebody was watching it, and an airlock is worth nothing on those
-    /// terms.
-    /// </remarks>
+    /// <remarks>The session ticks it whether or not a screen is open on it.</remarks>
     public sealed class SprocketUnit : IDisposable
     {
         IMyTerminalBlock _block;
@@ -57,10 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         SprocketEditor _editor;
 
         /// <summary>The Sprocket a block carries, reading its program out of the block and what it is doing out of <paramref name="memory" />.</summary>
-        /// <remarks>
-        /// <paramref name="rota" /> is the world's, shared by every Sprocket in it. See <see cref="Rota" />.
-        /// <paramref name="texts" /> are what its editor says, in the player's language.
-        /// </remarks>
+        /// <remarks><paramref name="rota" /> is the world's, shared by every Sprocket in it.</remarks>
         public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, ConstructMemory memory, Backups backups = null)
             : this(block, settings, rota, texts, false, BlockStorage.Stored(block, BlockStorage.ProgramKey), BlockStorage.Stored(block, BlockStorage.StateKey), memory)
         {
@@ -71,10 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// A copy of the Sprocket another machine keeps on <paramref name="block" />, made from what that
         /// machine wrote out, to be edited here.
         /// </summary>
-        /// <remarks>
-        /// On a rota of its own that nothing turns, so every sequence it holds waits forever and none of
-        /// them acts. The editor is the same editor, which is what lets a client edit as a host does.
-        /// </remarks>
+        /// <remarks>On a rota of its own that nothing turns, so none of its sequences acts.</remarks>
         public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, Texts texts, string program,
             string state)
         {
@@ -85,13 +74,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// This Sprocket built again from <paramref name="program" /> and <paramref name="switches" />,
         /// carrying on with whatever it was running.
         /// </summary>
-        /// <remarks>
-        /// What a client's edit becomes on the server. What it remembers is handed on whole, the way a save and a reload hands
-        /// it on: a sequence or trigger the edit took away is forgotten as the new one is checked.
-        /// <para>
-        /// This one is let go of: the caller puts the new one in its place and disposes of this.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Called on the server for a client's edit. The caller puts the new one in this one's place and disposes of this.</remarks>
         public SprocketUnit Rebuilt(string program, string switches, Settings settings, Rota rota)
         {
             var rebuilt = new SprocketUnit(_block, settings, rota, _texts, false, program, switches, _memory);
@@ -103,9 +86,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_editor != null)
                 rebuilt.Editor.Habits = _editor.Habits;
 
-            // What this one had wired goes with it, and what was picked and not written yet. A Sprocket that believed it had
-            // just been loaded would write no slot, and would read a button the client has just added - and nobody has wired
-            // yet - as one somebody cleared, and drop it.
+            // What this one had wired goes with it: a Sprocket that believed it had just been loaded would write no slot.
             rebuilt._buttons.Carry(_buttons);
             return rebuilt;
         }
@@ -127,16 +108,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
 
-            // The player's own name is only where a namespace starts; choosing another is theirs to do.
-            // What the game draws in front of it is not part of that name - see Player.Plain.
             _author = MyAPIGateway.Multiplayer == null ? null : Player.Plain(MyAPIGateway.Multiplayer.MyName);
 
             Load(program, state);
 
-            // Asked once and then listened for. Whether the construct's programmable blocks are working decides whether the
-            // automation runs at all, and it changes when the lights go out rather than on a tick - so asking them sixty times
-            // a second would be many questions for one answer that hardly ever moves. Released in Dispose, because a listener
-            // left on a block the game has let go of is a leak that holds the whole unit alive.
+            // Listened for rather than asked on every tick. Released in Dispose: a listener left on a block the game has let go
+            // of holds the whole unit alive.
             _hands = new Ownership(_world, _program, _runner);
             _holders = new HostBlocks(_world);
             _holders.Changed += Working;
@@ -170,7 +147,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The programmable block the automation is kept in: the construct's hero.</summary>
-        /// <remarks>Another programmable block on the construct takes over when this one is gone - see <see cref="Seek" />.</remarks>
         public IMyTerminalBlock Block => _block;
 
         /// <summary>What the construct's automation is doing, filed under the block that keeps it, which the world's save writes.</summary>
@@ -189,17 +165,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Whether the hero was last taken off the construct by itself, destroyed or ground down, rather than closed with its
         /// whole grid; where that left the automation <see cref="Lost" />, it is backed up.
         /// </summary>
-        /// <remarks>
-        /// A grid deleted whole, by a player in creative or by the server's cleanup, closes its blocks without removing any of
-        /// them, and what goes with it leaves no backup.
-        /// </remarks>
+        /// <remarks>The game closes the blocks of a grid deleted whole, in creative or by the server's cleanup, without removing any.</remarks>
         public bool Destroyed { get; private set; }
 
         /// <summary>Raised when the hero is removed from the construct or closed with its grid, from the game's own event; answered with <see cref="Rehome" />.</summary>
-        /// <remarks>
-        /// The grid is still changing when it is raised, so whatever answers it calls <see cref="Rehome" /> once the grid has
-        /// finished: the session through the game's own invoke on the game thread, the harness on its next tick.
-        /// </remarks>
+        /// <remarks>Raised while the grid is still changing, so whatever answers it calls <see cref="Rehome" /> once the grid has finished.</remarks>
         public event Action<SprocketUnit> HeroRemoved;
 
         /// <summary>Raised when programmable blocks leave or join the construct.</summary>
@@ -350,8 +320,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Runs its program for the game's frame <paramref name="frame" />, and keeps the toolbars it owns as it wants them.</summary>
         public void Tick(int frame)
         {
-            // A copy leaves the toolbars to the machine that keeps the Sprocket, which is the one that
-            // writes them and the one that knows whether they still hold what it wrote.
+            // A copy leaves the toolbars to the machine that keeps the Sprocket.
             if (!_copy)
                 Touch();
 
@@ -411,11 +380,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether this Sprocket's screen is open in front of somebody.</summary>
-        /// <remarks>
-        /// Set by the screen as it opens and closes. The editor has nothing to do while nobody is
-        /// looking, so it is ticked only while this holds; the program runs either way, and looks at
-        /// its blocks for the screen only while it holds.
-        /// </remarks>
+        /// <remarks>Set by the screen as it opens and closes. The editor is ticked only while it holds; the program runs either way.</remarks>
         public bool Showing
         {
             get { return _runner.Looking; }
@@ -425,10 +390,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Reads the program, and what is switched off, out of the text they were written as.
         /// </summary>
-        /// <remarks>
-        /// Nothing written is a Sprocket nobody has written a program on yet, which is an empty ship
-        /// rather than an error.
-        /// </remarks>
         void Load(string text, string state)
         {
             if (string.IsNullOrEmpty(text))
@@ -440,9 +401,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (warning.Length > 0)
                 GameLog.Say($"{Logged(_block)} has a program with a warning: {warning}");
 
-            // What is switched off, read after the program, because it names what the program
-            // declared. A construct that has nothing parked has nothing here at all. What runs and what the triggers read is
-            // the world's to remember where the automation runs; only a copy being edited is sent them, for show.
+            // Read after the program, because it names what the program declared. Only a copy being edited takes the runs
+            // from it, for show.
             if (!string.IsNullOrEmpty(state))
             {
                 var wrong = StateText.Load(state, _program, _copy ? _runner : null);
@@ -453,8 +413,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (trouble.Length == 0)
                 return;
 
-            // Logged here; the editor says it on its notice and shows the text on the script page, where it is mended.
-            // Nothing of the program was kept, and it is marked not to be saved over, which is what protects somebody's work.
+            // Nothing of the program was kept, and it is marked not to be saved over.
             GameLog.Say($"{Logged(_block)} has a program that would not read: {trouble}");
         }
 
@@ -473,8 +432,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Writes the program into the hero, so the world save carries it.
         /// </summary>
         /// <remarks>
-        /// Written whenever the program might have changed, and as the world saves, from the session's object builder: the
-        /// game asks for that before it writes the entities, and runs a session component's own save after it has.
+        /// Called whenever the program might have changed, and as the world saves from the session's object builder, which the
+        /// game asks for before it writes the entities.
         /// </remarks>
         public void Persist()
         {
@@ -491,9 +450,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (storage == null)
                 return;
 
-            // A failed load is failed, and nothing is written over it. What lifts that is the person
-            // answering the question their first edit raises - see SprocketEditor - so by the time
-            // anything reaches here the decision has been taken, one way or the other.
+            // Nothing is written over a failed load.
             if (!_program.Intact)
                 return;
 
@@ -503,16 +460,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             var program = ProgramWriter.Save(_program, _world.Values);
             var state = StateText.Save(_program, null, false);
             storage.SetValue(BlockStorage.ProgramKey, program);
-            // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
-            // is claimed in EntityComponents.sbc, without which it would work all session and vanish on save.
+            // Under a key of its own, apart from the program somebody shares; the key is claimed in EntityComponents.sbc.
             storage.SetValue(BlockStorage.StateKey, state);
         }
 
         /// <summary>Keeps a backup of the logic systems the library has no equal of, as this construct's automation is lost.</summary>
         /// <remarks>
-        /// A logic system whose blueprint in <paramref name="shelf" />, the one it is linked to, has its change date is left out,
-        /// since the library has it already; where that is every one, no backup is kept. Only the logic systems are kept: their
-        /// installations stay behind with their blocks.
+        /// Leaves out a logic system whose linked blueprint in <paramref name="shelf" /> has its change date, and keeps no backup
+        /// where that is every one.
         /// </remarks>
         public void BackUp(Backups backups, DateTime saved, LibraryShelf shelf)
         {
@@ -543,10 +498,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Runs a sequence by hand, or stops it, named the way another machine names it: the system by
         /// identity, and the one of it and the sequence by number.
         /// </summary>
-        /// <remarks>
-        /// What a client running something from its copy arrives as. Nothing happens where what it names
-        /// is not here, which is a change of the client's the server has not built yet.
-        /// </remarks>
+        /// <remarks>Called on the server for a client running something from its copy. Nothing happens where what it names is not here.</remarks>
         public void Order(Guid system, int instance, int sequence, bool stops)
         {
             AutomationSystem named = _program.FindSystem(system);
@@ -628,9 +580,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Moves into another programmable block on the construct where the hero has gone, answering whether it moved.
         /// </summary>
         /// <remarks>
-        /// Asked when the hero is removed or closed and as the world saves, never on a tick. The hero found again under its own
-        /// id is the same block brought back as a new object, which a grid splitting does; it is taken as it is. Otherwise the
-        /// first programmable block found becomes the hero, and where there is none the automation is lost.
+        /// Asked when the hero is removed or closed and as the world saves, never on a tick. A grid splitting in the game brings
+        /// the hero back under its own id as a new object.
         /// </remarks>
         bool Seek()
         {

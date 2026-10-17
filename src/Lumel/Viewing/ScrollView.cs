@@ -5,9 +5,6 @@ using VRageMath;
 namespace Lumel.Viewing
 {
     /// <summary>Shows as much of something taller than its room as fits, moved up and down by a thumb on a bar at its side.</summary>
-    /// <remarks>
-    /// The bar takes the pointer itself: a press on the thumb drags it, and a press on the track puts the thumb there first.
-    /// </remarks>
     public class ScrollView : ContentControl, IScrolls
     {
         readonly ScrollAxis _rail = new ScrollAxis { MinThumb = ScrollViewState.NeutralLeastThumb };
@@ -34,7 +31,6 @@ namespace Lumel.Viewing
         }
 
         /// <summary>Whether it asks only for the room its content needs, up to what it is given, rather than all it is given.</summary>
-        /// <remarks>For one hanging open, which is as tall as its content until that runs past the room there is.</remarks>
         public bool FitsContent
         {
             get { return _fits; }
@@ -163,7 +159,6 @@ namespace Lumel.Viewing
         }
 
         /// <inheritdoc />
-        /// <remarks>Always: what it holds runs past its edges.</remarks>
         protected override bool Clips => true;
 
         /// <summary>The content stretches across, and scrolls down from the top.</summary>

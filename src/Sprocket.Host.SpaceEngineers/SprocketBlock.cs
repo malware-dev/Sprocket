@@ -10,19 +10,10 @@ using Sprocket.Host.SpaceEngineers.Features.Terminal;
 namespace Sprocket.Host.SpaceEngineers
 {
     /// <summary>
-    /// Sits on every programmable block, and does two things once the block is properly alive.
+    /// The component on every programmable block that registers Sprocket's terminal controls and adopts a block carrying a program.
     /// </summary>
     /// <remarks>
-    /// The terminal button and the trigger action are registered from here rather than from the session,
-    /// because a control or an action added before the block type has fully spawned makes the vanilla
-    /// controls vanish - Name, On/Off, Custom Data - both from the panel and from the list other mods are
-    /// handed: the first addition creates the type's entry, and the game then takes the type as already
-    /// built. A game logic component's first update is the earliest point that is safe, and <c>Init</c> is
-    /// not late enough. See THDigi's terminal control examples.
-    ///
-    /// The second thing is why a Sprocket keeps running after a reload: a block carrying a program adopts
-    /// itself into the session on load, so an airlock works without anybody opening the editor to wake it.
-    /// A block with no program costs one dictionary lookup and is then left alone.
+    /// A block with no program costs one lookup on its first frame.
     /// </remarks>
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_MyProgrammableBlock), useEntityUpdate: false)]
     public class SprocketBlock : MyGameLogicComponent
@@ -39,6 +30,9 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Utilities == null)
                 return;
 
+            // A control or action added before the block type has fully spawned makes the vanilla
+            // controls vanish; the first update is the earliest safe point, Init is too early
+            // (THDigi's terminal control examples).
             var texts = SprocketSession.Texts;
             SignalAction.Register(texts);
 

@@ -4,7 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The AI task block: which task a drone has, and how it does it.</summary>
-    /// <remarks>Follow me and set player position act on the person who pressed them, and a sequence has none.</remarks>
     public sealed class BasicMission : Capability
     {
         /// <inheritdoc />

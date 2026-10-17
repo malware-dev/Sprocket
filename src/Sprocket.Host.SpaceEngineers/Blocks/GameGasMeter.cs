@@ -7,10 +7,7 @@ using VRage.Utils;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The gas a vent moves, as the game's resource components say it.</summary>
-    /// <remarks>
-    /// What the resource distributor granted rather than what the vent asked for, which is why a construct with no oxygen
-    /// reads as a vent moving nothing rather than one working for ever.
-    /// </remarks>
+    /// <remarks>Reads what the resource distributor granted, not what the vent asked for.</remarks>
     public sealed class GameGasMeter : IGasMeter
     {
         static readonly MyDefinitionId Oxygen =

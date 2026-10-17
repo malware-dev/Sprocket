@@ -3,20 +3,9 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// What starts a sequence: the blocks, the moment, and how it reaches Sprocket. One trip to the
-    /// picker, so one edit.
+    /// A change to what starts a sequence: the blocks, the moment, and how it reaches Sprocket.
     /// </summary>
-    /// <remarks>
-    /// The whole trigger rather than its fields, because one answer can change which sort it is: a
-    /// door means Sprocket watches for the moment, a button means the construct announces it. Both
-    /// objects are kept, so undo puts back the one that was there rather than rebuilding something
-    /// that reads the same.
-    /// <para>
-    /// Everything the trigger was for comes across: the sequence it runs, whether it stops that
-    /// sequence instead, and whatever was written about it. The question was only ever about what
-    /// starts it.
-    /// </para>
-    /// </remarks>
+    /// <remarks>The new trigger takes over what the old one does and what was written about it.</remarks>
     public sealed class ChangeTrigger : SystemEdit
     {
         readonly MomentTrigger _was;

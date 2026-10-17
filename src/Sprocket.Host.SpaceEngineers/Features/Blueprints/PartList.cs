@@ -8,7 +8,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>A blueprint's slots, one under the next, with every slot's name in one column as wide as the widest of them needs.</summary>
-    /// <remarks>A description counts towards the column's width up to <see cref="Widest" />, and wraps past it.</remarks>
     public class PartList : VStack
     {
         /// <summary>The widest the column gets.</summary>
@@ -18,10 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// Puts into <paramref name="into" /> the slots of <paramref name="system" /> that <paramref name="used" /> names, as they
         /// are listed: the block slots, then the signal slots, each in order of their names.
         /// </summary>
-        /// <remarks>
-        /// The order follows from the slots themselves, so it is the same however they were made, and a slot renamed moves to
-        /// its place.
-        /// </remarks>
         public static void Listed(AutomationSystem system, IList<string> used, List<Part> into)
         {
             into.Clear();

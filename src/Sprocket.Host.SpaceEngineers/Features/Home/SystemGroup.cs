@@ -13,7 +13,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Home
 {
     /// <summary>A logic system's heading on the home page, its installations, and the way to add another.</summary>
-    /// <remarks>The elements it is drawn with are declared in <c>SystemGroup.View.cs</c>, and nothing else is.</remarks>
     public partial class SystemGroup : VStack
     {
         readonly SprocketEditor _editor;
@@ -54,7 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _chooses = editor.Act(CommandKind.ChooseVersion, () => editor.Versions.AskChoose(system));
             _shelves = editor.Act(CommandKind.Shelve, delegate
             {
-                // Updating replaces the blueprint, so it asks first; making one shows it where it now is.
                 if (editor.Holdings.Stored(system))
                 {
                     editor.Holdings.AskUpdate(system);
@@ -83,16 +81,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Summary = _system.Name;
             _heading.About = texts.SystemsEditBlueprint;
 
-            // A logic system with a blueprint in the library is taken off the construct, with a minus; one without is deleted,
-            // with a bin, since this is its only copy. Its installations go with it either way.
             var stored = _editor.Holdings.Stored(_system);
             _heading.BinMark = stored ? Symbols.Minus : null;
             _heading.Deletes = stored ? _takesOff : _deletes;
             _heading.DeleteText = stored ? texts.LibraryTakeOff : texts.LibraryDeletes;
 
-            // The library's own button, here as well: the blueprint is the logic system's copy in the library, made the first
-            // time and brought up to date after. Where the blueprint was changed after the logic system, the logic system is
-            // brought up to date from it instead, and with the two the same there is nothing to offer.
             var shelf = _editor.Shelf;
             var newer = stored && !_editor.Holdings.ChangedSince(_system);
             _heading.Offers = shelf == null || stored && shelf.Holds(_system) ? null : newer ? _renews : _shelves;
@@ -100,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.ButtonAbout = !stored ? texts.SystemsMakeBlueprintAbout
                 : newer ? texts.SystemsUpdateFromLibraryAbout : texts.SystemsUpdateBlueprintAbout;
 
-            // Kept from here: a version comes or goes only with a change that arranges the group again.
+            // A version comes or goes only with a change that arranges the group again.
             _waiting = _editor.Versions.Rival(_system) != null;
             if (_waiting)
             {
@@ -116,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
 
             _rows.Show(_keys);
 
-            // A logic system keeps at least one installation, so the only one's bin says so rather than deleting it.
+            // A logic system keeps at least one installation.
             var only = instances.Count == 1;
             for (var n = 0; n < instances.Count; n++)
             {
@@ -149,7 +142,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         /// Marks the heading as the installations of the logic system are: broken where any is, warned where any is, running where
         /// any is; and its switch as the logic system's.
         /// </summary>
-        /// <remarks>Read from the rows below, which have just been brought up to date, so nothing is asked of the runner twice.</remarks>
+        /// <remarks>The rows must have just been brought up to date.</remarks>
         void Loudest(bool shown, Texts texts)
         {
             var problems = 0;

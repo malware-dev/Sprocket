@@ -4,10 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A store, a vending machine or a contract block: who may use it, whether the store is listed, and which item a vending machine shows.</summary>
-    /// <remarks>
-    /// Words for the game's own settings, and the vending machine's turning through its items, which the game passes on to
-    /// every player at the machine.
-    /// </remarks>
     public sealed class StoreBlock : Capability
     {
         /// <summary>The game's id for who may use the block, and for the act that flips it.</summary>

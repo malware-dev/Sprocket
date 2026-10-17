@@ -5,10 +5,6 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>What each installation of a blueprint still has to do about its slots, worked out from the slots and their blocks.</summary>
-    /// <remarks>
-    /// Nothing is stored: a slot an installation has not filled, while it holds blocks in slots nothing uses any more, was split
-    /// or merged under it, and those blocks are what it had for it.
-    /// </remarks>
     public static class SlotMarks
     {
         /// <summary>What <paramref name="instance" /> still has to do about <paramref name="part" />, of the slots <paramref name="used" />.</summary>
@@ -69,11 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Empties the slots nothing of <paramref name="used" /> names for every installation of <paramref name="system" /> that has no slot left to fill again.</summary>
-        /// <remarks>
-        /// Their blocks were kept to be offered back, and with every slot filled there is nothing left to offer them for. The
-        /// installation the slots were worked out through keeps its blocks in a slot split under another as well, so that slot
-        /// comes back whole where the split is undone, and lets go of them here too.
-        /// </remarks>
         public static void Settle(AutomationSystem system, IList<string> used)
         {
             var instances = system.Instances;

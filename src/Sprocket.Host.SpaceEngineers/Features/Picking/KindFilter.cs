@@ -142,7 +142,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether <paramref name="kind" /> is offered on its own: it is the one in force, or its name answers the box.</summary>
-        /// <remarks>The one in force is always offered, so what the line says is showing is always something the list says too.</remarks>
         bool Offered(EntityKind kind)
         {
             return kind.Id == _kind || EntityQuery.MatchesText(kind.DisplayName, _search);

@@ -12,14 +12,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>The stages of a pick as columns side by side, in the manner of a file browser's column view, and the arguments the last of them takes.</summary>
-    /// <remarks>
-    /// With every stage of a page in view, the blocks already picked stay beside what is happening to them, and changing an
-    /// earlier answer is a glance to the left. A pick asking more than a screen holds goes on in pages, one after another in
-    /// the same strip: the stages before the page showing were answered on an earlier one, and the fold at the left stands
-    /// for them and turns back to them; the one at the right turns on where something chosen has a page after it. A page
-    /// turning slides in from the side it comes from, and the way on is made room for a step at a time, so nothing appears
-    /// anywhere without having come from somewhere.
-    /// </remarks>
     public class PickStrip : HStack
     {
         /// <summary>How wide a column is on the first page of a pick.</summary>
@@ -171,11 +163,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Lays out the page showing: the way back where there is a page before it, its columns, the arguments, and the way on where there is a page after.</summary>
-        /// <remarks>
-        /// A page other than the one showing before is turned to. Going on, the page being left slides out to the left and the
-        /// column the new page follows on from folds into the way back as it goes; going back, the page coming back slides in
-        /// from the left and that column comes out of the way back, shown only as wide as it has grown.
-        /// </remarks>
         public void Show()
         {
             var was = _shownPage;
@@ -214,8 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Moves a page turning, or room being made for the way on, on by a tick.</summary>
         /// <remarks>
-        /// Every tick only while either is under way, which is a third of a second. A page turning moves how the strip is drawn
-        /// and resizes one panel; room being made resizes the last column and the way on.
+        /// Called every tick; it does work only while either is under way, a third of a second.
         /// </remarks>
         public void Tick()
         {
@@ -315,8 +301,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>Turns forward: the page being left slides out to the left, and <paramref name="folding" /> folds into the way back.</summary>
         /// <remarks>
-        /// The column folds as an empty panel. What was in it is answered, and a column's rows squeezed narrower on every tick
-        /// would be words wrapping and measured again all the way down.
+        /// The column folds as an empty panel, because squeezing its rows every tick would wrap and measure them all again.
         /// </remarks>
         void Fold(Element folding)
         {

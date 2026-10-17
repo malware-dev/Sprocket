@@ -5,15 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <summary>
     /// A word, the values after it, and the block under it if it has one.
     /// </summary>
-    /// <remarks>
-    /// The whole syntax tree is this one type.
-    /// <para>
-    /// It owns no values. They are a run of <see cref="ScriptValues.Values" />, which is what keeps a statement
-    /// to one object - see <see cref="ScriptValues" /> for the measurement behind that. Reading a value that is
-    /// not there answers empty rather than failing, so a reader asks for what a shape needs and says what
-    /// is missing itself.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Reading a value that is not there answers empty rather than failing.</remarks>
     public sealed class Statement
     {
         static readonly Statement[] Nothing = new Statement[0];
@@ -45,10 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// The format's word the statement starts with, or <see cref="Keyword.None" /> when it starts with an id.
         /// </summary>
-        /// <remarks>
-        /// A quoted head never has one: a name spelled like a keyword is written quoted, and read as the
-        /// name it is.
-        /// </remarks>
+        /// <remarks>A quoted head never has one.</remarks>
         public Keyword Key { get; private set; }
 
         /// <summary>The id the statement starts with, when it does not start with a keyword.</summary>
@@ -57,11 +46,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// What somebody wrote above it, or empty.
         /// </summary>
-        /// <remarks>
-        /// Data somebody typed and not a comment - it is part of the model and round-trips like a name,
-        /// which is why the format has no comments at all: text that belonged to nobody would be a parser
-        /// feature serving a workflow nobody is offered.
-        /// </remarks>
         public string Annotation { get; set; }
 
         /// <summary>Whether its line starts with <c>//</c>, which switches a step off.</summary>
@@ -92,10 +76,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Text at a position, empty when there is none.
         /// </summary>
-        /// <remarks>
-        /// Only double-quoted text. A name where text belongs reads as empty, the same as nothing at all:
-        /// the two are kept apart so that neither can ever stand in for the other.
-        /// </remarks>
+        /// <remarks>Only double-quoted text; a name where text belongs reads as empty.</remarks>
         public string Text(int index)
         {
             var value = ValueAt(index);
@@ -174,7 +155,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>The statement that starts at the value <paramref name="at" />: its word, and the values after it.</summary>
-        /// <remarks>How a trigger reads the step it does, which is written as a sequence writes it, after <c>then</c> or a clock's duration.</remarks>
         public Statement Rest(int at)
         {
             var value = ValueAt(at);
@@ -205,15 +185,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// The parts of a name at a position: two for <c>MalTek.Airlock</c>, one for a name written alone, and the member's
         /// for a member written on blocks.
         /// </summary>
-        /// <remarks>
-        /// A name written alone is answered as a run of one, so a reader asks one question whichever way a
-        /// name was written. None where there is no name there.
-        /// </remarks>
+        /// <remarks>None where there is no name there.</remarks>
         public ValueRange Parts(int index)
         {
-            // Bounded first. A name written alone is answered out of this statement's own run, so an
-            // index past the end would otherwise hand back a value belonging to the statement below -
-            // and a statement that stops early is exactly when a reader asks.
+            // Bounded first: a name written alone is answered from this statement's own run, and an index past its end
+            // would reach the statement below.
             if (index < 0 || index >= Count)
                 return new ValueRange();
 

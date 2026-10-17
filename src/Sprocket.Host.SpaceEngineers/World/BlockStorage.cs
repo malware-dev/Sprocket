@@ -12,13 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Where the program sits in the block's mod storage.
         /// </summary>
         /// <remarks>
-        /// Mod storage is shared with every other mod on the entity, so the key has to be Sprocket's and has to
-        /// never change: a new one would read as an empty Sprocket and quietly discard somebody's ship.
-        /// <para>
-        /// <b>It also has to be claimed in <c>Content/Data/EntityComponents.sbc</c>, and the two must
-        /// match.</b> The game writes out only the keys some mod has registered there and drops the rest
-        /// with a line in the log, so an unclaimed key works perfectly all session and vanishes on save.
-        /// </para>
+        /// Persisted: a new key would read every saved block as holding no program. Claimed in
+        /// <c>Content/Data/EntityComponents.sbc</c>, and the two must match: the game drops an unclaimed key at save.
         /// </remarks>
         public static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
@@ -28,10 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether this block already carries a program, without building anything to find out.
         /// </summary>
-        /// <remarks>
-        /// Asked of every programmable block in the world as it comes alive, so it has to be one lookup and
-        /// no allocation. A block that answers false is left entirely alone.
-        /// </remarks>
+        /// <remarks>Asked of every programmable block in the world as it comes alive, so it is one lookup and allocates nothing.</remarks>
         public static bool HasProgram(IMyTerminalBlock block)
         {
             MyModStorageComponentBase storage = block?.Storage;
@@ -54,9 +46,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Writes a program and its switches into a client's copy of a block, as the server wrote them.
         /// </summary>
         /// <remarks>
-        /// The game copies, pastes and blueprints a grid from the copy on the machine doing it, and it
-        /// does not carry a block's storage from the server to the clients. A client's copy of the block
-        /// holds what the server last sent here, so a grid a client copies takes its programs along.
+        /// The game copies, pastes and blueprints a grid from the copy on the machine doing it, and does not carry a block's
+        /// storage from the server to the clients.
         /// </remarks>
         public static void Store(IMyTerminalBlock block, string program, string switches)
         {
@@ -73,18 +64,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             MyModStorageComponentBase storage = block.Storage;
 
-            // Shared with every other mod on this block, so one may already be here - and if it is, it is
-            // the one to use rather than one to replace. Assigning it is what registers it with the
-            // block's component container, which is what makes the game write it out at all; the getter
-            // only answers once that has happened, so it is worth asking again rather than assuming.
+            // Shared with every other mod on this block. Assigning it registers it with the block's component container, which
+            // is what makes the game save it, and the getter answers only once that has happened.
             if (storage == null)
             {
                 block.Storage = new MyModStorageComponent();
                 storage = block.Storage;
             }
 
-            // Logged rather than thrown. This runs on the way out of a screen and from the world save,
-            // and taking the game down over it would cost far more than the program does.
+            // Logged rather than thrown: this runs on the way out of a screen and from the world save.
             if (storage == null)
                 GameLog.Say($"mod storage would not attach to {SprocketUnit.Logged(block)}; program not saved");
 

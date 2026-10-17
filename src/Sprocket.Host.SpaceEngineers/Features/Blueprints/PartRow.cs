@@ -14,12 +14,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>One slot of a blueprint: its name, what it says about itself, the blocks one installation fills it with, and what is still to do about it.</summary>
-    /// <remarks>
-    /// The blocks are a slot, the same chip a sentence fills: a slot is what a sentence names, and pressing it chooses what
-    /// fills it, which is what pressing a sentence's slot does too. An empty slot says so in the color an unfilled slot
-    /// does, because it is the same news. Whoever holds it sets what it shows and calls <see cref="Show" />; the elements
-    /// it is drawn with are declared in <c>PartRow.View.cs</c>.
-    /// </remarks>
     public partial class PartRow : HStack
     {
         readonly List<Mention> _pieces = new List<Mention>();
@@ -204,10 +198,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>Says the blocks, naming them as <paramref name="world" /> calls them, and for a signal slot the signals beside them.</summary>
-        /// <remarks>
-        /// The blocks and their signals are two parts, as they are in a trigger's row, so a slot and the trigger its signal
-        /// starts read alike. Walks the blocks for their names, so it is for whoever holds it to call only when they change.
-        /// </remarks>
+        /// <remarks>Walks the blocks for their names, so it is for calling only when they change.</remarks>
         public void Show(GridWorld world)
         {
             _pieces.Clear();

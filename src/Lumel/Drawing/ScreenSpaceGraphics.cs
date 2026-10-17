@@ -16,10 +16,7 @@ namespace Lumel.Drawing
     public sealed class ScreenSpaceGraphics : IGraphics
     {
         /// <summary>The height the game's own UI is designed at.</summary>
-        /// <remarks>
-        ///     Transcribed from <c>MyGuiManager</c>, whose HUD scale is the screen height over this and which a
-        ///     mod cannot read.
-        /// </remarks>
+        /// <remarks>Transcribed from <c>MyGuiManager</c>, whose HUD scale is the screen height over this.</remarks>
         public const float GameReferenceHeight = 1080f;
 
         /// <summary>Pass as the reference height to work in real window pixels, with nothing scaled.</summary>
@@ -28,8 +25,7 @@ namespace Lumel.Drawing
         /// <summary>How far below where it is told the game draws every glyph, in the font's own units.</summary>
         /// <remarks>
         ///     Transcribed from the game's <c>MyRenderGuiConstants.FONT_TOP_SIDE_BEARING</c>, which the renderer
-        ///     adds to every glyph whatever the font. Taken back off here, so a font's line sits where its
-        ///     own file puts it.
+        ///     adds to every glyph whatever the font.
         /// </remarks>
         public const float TopSideBearing = 3f * 23f / 18f;
 
@@ -43,8 +39,8 @@ namespace Lumel.Drawing
         readonly Dictionary<string, float> _lines = new Dictionary<string, float>();
         readonly Dictionary<string, float> _lifts = new Dictionary<string, float>();
 
-        // The fonts last drawn in, by reference, with their line and lift: a paragraph with bold and italic words switches
-        // font at every one of them, and each switch would otherwise hash the font's name twice, on every frame.
+        // The fonts last drawn in, by reference, with their line and lift: a paragraph switches font at every bold or
+        // italic word, and each switch would otherwise hash the font's name twice, every frame.
         readonly string[] _recentFonts = new string[RecentFonts];
         readonly float[] _recentLines = new float[RecentFonts];
         readonly float[] _recentLifts = new float[RecentFonts];
@@ -81,7 +77,7 @@ namespace Lumel.Drawing
         ///     resolves, at a scale set by the height a layout is written against.
         /// </summary>
         /// <remarks>
-        ///     The fill is a plain white transparent material. The game declares none a mod can use, so the mod
+        ///     <paramref name="fill" /> is a plain white material. The game declares none a mod can use, so the mod
         ///     declares its own over <c>Textures\GUI\Blank.dds</c>.
         /// </remarks>
         public ScreenSpaceGraphics(IScreenSpace screenSpace, MyScreenSpaceLayer layer, MyStringId fill, IImageCatalog images,
@@ -129,8 +125,8 @@ namespace Lumel.Drawing
         /// <inheritdoc />
         public void PushTransform(RenderTransform transform, Vector2 origin)
         {
-            // The one in force is held as a scale and a move, a point p landing at p * scale + move, and the
-            // ones around it kept flat in a list that is reused, because this is on a frame's drawing path.
+            // Held as a scale and a move, p landing at p * scale + move, with the ones around it kept flat in a reused
+            // list, because this runs on every frame's drawing path.
             _transforms.Add(new Vector3(_transformScale, _transformMove.X, _transformMove.Y));
 
             // The element's own transform, about its origin, as a scale and a move, and then the one around it.
@@ -270,10 +266,7 @@ namespace Lumel.Drawing
         }
 
         /// <summary>The scale that draws <paramref name="font" /> with lines <paramref name="size" /> tall.</summary>
-        /// <remarks>
-        ///     The line is measured, by the same call that measures every run, so a line is laid out at exactly the
-        ///     height its text measures. Measured once per font.
-        /// </remarks>
+        /// <remarks>Measured once per font.</remarks>
         float ScaleOf(string font, float size)
         {
             if (!ReferenceEquals(font, _lastFont))
@@ -319,9 +312,8 @@ namespace Lumel.Drawing
 
         /// <summary>The game's <see cref="TopSideBearing" /> for <paramref name="font" />, as a share of one of its lines.</summary>
         /// <remarks>
-        ///     A share of the line because the line is what a size is: the game scales the bearing and the line
-        ///     alike, so a run <c>size</c> tall is drawn <c>size</c> times this too low. Nothing for a font
-        ///     whose line cannot be read. Kept per font, since reading one opens its file.
+        ///     The game scales the bearing and the line alike, so a run <c>size</c> tall is drawn <c>size</c> times this
+        ///     too low. Kept per font, since reading one opens its file.
         /// </remarks>
         float Lift(string font)
         {
@@ -375,10 +367,7 @@ namespace Lumel.Drawing
         }
 
         /// <summary>Moves a rectangle from UI units into window pixels.</summary>
-        /// <remarks>
-        ///     Position and size are rounded apart, not the edges outward, so that the same size is the same
-        ///     number of pixels wherever it sits.
-        /// </remarks>
+        /// <remarks>Position and size are rounded apart, so the same size is the same number of pixels wherever it sits.</remarks>
         Rectangle ToPixels(RectangleF bounds)
         {
             // Not Math.Round, which rounds a half to the nearest even number.

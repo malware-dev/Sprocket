@@ -3,11 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A trigger added to a logic system, with what adding it took: a sequence made for it, a button taken, a slot answered.</summary>
-    /// <remarks>
-    /// One step, because it is one thing somebody did. What was settled on the way, while its blocks were picked, is made by the
-    /// time this is recorded: the first time it is applied, only the trigger is added; taking it back takes all of it back, and
-    /// making it again makes all of it again.
-    /// </remarks>
+    /// <remarks>Recorded once what was settled while its blocks were picked is already made, so the first apply adds only the trigger.</remarks>
     public sealed class AddTrigger : SystemEdit
     {
         readonly Automation _program;

@@ -25,24 +25,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// then asks first, and goes on, taking the button, only where that is the answer.
         /// </summary>
         /// <remarks>
-        /// A toolbar slot holds one thing. Two triggers on the same button and the same press are two claims on that one slot,
-        /// and the one written last silently wins, so it is asked before it happens rather than found afterwards on a row that
-        /// has gone quiet. Taking a button from another installation empties the signal slot that had it there, which then needs
-        /// another; taking it from a trigger in the same installation takes that trigger out and its slot over; either way the
-        /// button is written, whatever its slot holds by then.
-        /// <para>
-        /// Only where the construct is what announces the moment. Two sequences both watching the inner door close is an
-        /// ordinary way to build and costs nothing: Sprocket does that watching, and it can watch for two.
-        /// </para>
-        /// <para>
-        /// Its own trigger never counts, so settling on what was already there is not a clash with itself.
-        /// </para>
+        /// Asks only for a trigger the construct announces from a toolbar slot; a moment Sprocket watches goes straight on.
         /// </remarks>
         /// <param name="system">The logic system the trigger is in.</param>
         /// <param name="made">The trigger as it would be once done.</param>
         /// <param name="answer">What was picked, buttons and all.</param>
-        /// <param name="except">The trigger being changed, which never clashes with itself; null for a new one.</param>
-        /// <param name="then">What is done once it may be, given the trigger the button is taken from and the blockset it was in, or null where it takes none.</param>
+        /// <param name="except">The trigger being changed, or null for a new one.</param>
+        /// <param name="then">What is done once it may be, given what the button is taken from, or null.</param>
         /// <param name="otherwise">What is done where the answer is to leave the button as it is.</param>
         public void Unless(AutomationSystem system, MomentTrigger made, PickAnswer answer, Trigger except, Action<SlotOccupant> then,
             Action otherwise)
@@ -54,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            // A system's trigger is one variable, holding the first button picked, so no other is checked or written.
+            // A system's trigger holds only the first button picked.
             IList<long> panels = system.IsBlueprint || answer.Targets.Count <= 1 ? answer.Targets : new[] { answer.Targets[0] };
             var holder = Holding(panels, Pressed(answer), except, _editor.StandIn(system), null);
 
@@ -92,7 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>The first of the slots <paramref name="many" /> stands for on <paramref name="block" /> that holds nothing, or the first of them where every one holds something.</summary>
-        /// <remarks>Each trigger written to a timer takes a slot of its own, so two sequences started by one timer both run when it goes off.</remarks>
+        /// <remarks>Each trigger on a timer takes a slot of its own, so two sequences started by one timer both run.</remarks>
         static ToolbarSlot Free(GridEntity block, ToolbarSlot many)
         {
             IMyToolbar toolbar = Toolbars.Of(block.Block, many.Toolbar);
@@ -123,8 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// toolbar slots <paramref name="at" /> it is given.
         /// </summary>
         /// <remarks>
-        /// One question at a time. Taking a button empties the signal slot of the blockset that had it; nothing is taken until
-        /// every question is answered, and leaving any of them alone leaves the part as it was.
+        /// Nothing is taken until every question is answered, and leaving any of them alone leaves the part as it was.
         /// </remarks>
         public void Filling(AutomationSystem system, Part part, SystemInstance chosen, IList<long> blocks, IList<ToolbarSlot> at,
             Func<SystemEdit> fill, Action done)
@@ -149,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            // One step: the fill, and every button it takes from somewhere else.
+            // One edit: the fill, and every button it takes from somewhere else.
             var edit = fill();
             foreach (var occupant in taking)
             {
@@ -181,11 +169,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <paramref name="trigger" /> on <paramref name="instance" /> already answers, passing over what is in
         /// <paramref name="taking" />; or null where nothing does.
         /// </summary>
-        /// <remarks>
-        /// Compared as blocks and slots, through every one of every system: a toolbar slot belongs to a block, whichever part
-        /// of whichever system names it. A trigger of the program comes first, since it can be named; then a slot holding what
-        /// the program did not write, which is only read where no trigger has the slot.
-        /// </remarks>
         SlotOccupant Holding(IList<long> panels, IList<ToolbarSlot> at, Trigger trigger, SystemInstance instance, List<SlotOccupant> taking)
         {
             for (var p = 0; p < panels.Count && p < at.Count; p++)
@@ -316,10 +299,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether <paramref name="taken" /> is another trigger in the installation of <paramref name="system" /> being edited.</summary>
-        /// <remarks>
-        /// Then the button stays in the slot it is in: the trigger that had it gives that slot up and goes, and the trigger taking
-        /// the button takes the slot. Emptying the slot is for another installation, which goes on needing a button of its own.
-        /// </remarks>
         public bool Shares(SlotOccupant taken, AutomationSystem system)
         {
             return taken != null && taken.Trigger != null && system.IsBlueprint && taken.System == system && taken.Instance == _editor.StandIn(system);

@@ -6,7 +6,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>One answer to a choice about the picking itself, such as running a sequence or stopping it, headed by a ring.</summary>
-    /// <remarks>Round, never square: exactly one of these holds at a time, and that is what the shape says before anybody reads the words.</remarks>
     public class OptionRow : HStack
     {
         readonly ChoiceMark _mark;

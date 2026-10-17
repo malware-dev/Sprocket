@@ -3,10 +3,7 @@ using Sprocket.Host.SpaceEngineers.Network;
 namespace Sprocket.Host.SpaceEngineers.Features.Doors
 {
     /// <summary>A door's auto-close delay, as somebody set it in the terminal.</summary>
-    /// <remarks>
-    /// Sent both ways. A client sends the server what its player set, and the server sends every client what the door now
-    /// keeps, because a door's storage reaches a client only with the grid.
-    /// </remarks>
+    /// <remarks>Sent both ways: a client sends the server what its player set, and the server sends every client what the door keeps.</remarks>
     public struct CloseDelayUpdate
     {
         /// <summary>The door, by entity id.</summary>

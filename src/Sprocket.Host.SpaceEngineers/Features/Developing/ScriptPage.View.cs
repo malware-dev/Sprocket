@@ -14,11 +14,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         EditBox _listing;
 
         /// <summary>What is wrong with the text beside the button that applies it, over the script on a listing that fills the rest of the page and moves both ways.</summary>
-        /// <remarks>
-        /// Deliberately plain: the program's own text on the page's own ground, in a face whose characters are all one width,
-        /// because the indent of a step under its sequence only lines up that way. Numbered, because a listing is talked about
-        /// by line number: a reader says which line it could not read.
-        /// </remarks>
         protected override Element CreateView()
         {
             return new VStack

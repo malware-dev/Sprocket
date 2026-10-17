@@ -9,8 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>The logic systems kept of each construct as it lost its automation, each blueprint in a file of its own, and the index listing them.</summary>
     /// <remarks>
-    /// The index is an ini file with a section for each blueprint file, saying what the library lists of it, so the list is
-    /// drawn without reading a single blueprint:
+    /// Persisted: the index is an ini file with a section for each blueprint file:
     /// <code>
     /// [backup-1.cog]
     /// system=6f1c0f0e-3c2b-4e8a-9d0f-1a2b3c4d5e6f
@@ -18,11 +17,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// construct=Hangar Airlock
     /// lost=2026-10-02T14:30:00.0000000Z
     /// </code>
-    /// Each file holds one logic system as <see cref="ProgramWriter.Linked" /> writes it, read only when it is asked for.
-    /// <para>
-    /// Nothing is written until the index has been read, and nothing is written over an index that will not read: until
-    /// then backups are kept for the session alone.
-    /// </para>
+    /// Each file holds one logic system as <see cref="ProgramWriter.Linked" /> writes it. Nothing is written until <see cref="Read" />
+    /// has been called.
     /// </remarks>
     public sealed class Backups
     {
@@ -64,7 +60,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         bool Writes => _open && Intact;
 
         /// <summary>Reads the index, answering what was wrong with it, or empty.</summary>
-        /// <remarks>Whole or not at all: where any of it will not read, none of it is taken, and it is never written over.</remarks>
+        /// <remarks>Where any of it will not read, none of it is taken and it is never written over.</remarks>
         public string Read()
         {
             _all.Clear();
@@ -116,7 +112,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Keeps <paramref name="systems" />, the logic systems of the construct called <paramref name="construct" />, as it
         /// loses its automation at <paramref name="lost" />.
         /// </summary>
-        /// <remarks>Each loss is kept on its own, beside any backup taken before, of the same logic system or any other.</remarks>
         public void Take(string construct, DateTime lost, IList<AutomationSystem> systems)
         {
             for (var i = 0; i < systems.Count; i++)
@@ -155,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (!_all.Remove(backup) || !Writes)
                 return;
 
-            // The index first, so a file left behind by a delete that fails is one nothing lists.
+            // The index first, so a file a failed delete leaves behind is one nothing lists.
             WriteIndex();
             _files.Delete(backup.File);
         }

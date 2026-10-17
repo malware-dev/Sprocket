@@ -8,10 +8,6 @@ using VRage.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>Every gun, turret and launcher: firing it, what it is firing, how many rounds it has left, and what it feeds from.</summary>
-    /// <remarks>
-    /// The game's own on and off for firing is the order a sequence gives, and firing is whether shots are going out, a
-    /// turret's own aim included; so the order is offered as its two actions and its toggle, and its value is left out.
-    /// </remarks>
     public sealed class Weapon : Capability
     {
         const string Unshot = "A gun raises no event as it starts or stops shooting.";
@@ -52,10 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Told as a gun's rounds change: a shot, a reload or a change of ammunition, and magazines arriving in its inventory.</summary>
-        /// <remarks>
-        /// The gun's own event covers what it does with its rounds, and not magazines brought in through the conveyors, which
-        /// the inventory's contents event does. The gun's event comes on every shot, which is one look each.
-        /// </remarks>
+        /// <remarks>The gun's event comes on every shot, which is one look each.</remarks>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var gun = block as IMyGunObject<MyGunBase>;

@@ -4,10 +4,6 @@ using VRageMath;
 namespace Lumel.Windows
 {
     /// <summary>A window that stays open beside what it floats over, where the player has moved it.</summary>
-    /// <remarks>
-    ///     It keeps the place it was moved to, in UI units, and is put back on the screen whenever that place would leave any
-    ///     of it off: a remembered place outlives a change of screen, and a screen of another shape can be narrower.
-    /// </remarks>
     public class FloatingWindow : Window
     {
         /// <summary>Raised when a move by its <see cref="TitleBar" /> ends, with <see cref="Position" /> where it was left.</summary>
@@ -20,16 +16,11 @@ namespace Lumel.Windows
         public RectangleF Screen { get; set; }
 
         /// <summary>How much of the window always stays on the screen, across and down, in UI units: 96 unless set.</summary>
-        /// <remarks>
-        /// As a desktop window may be moved most of the way off its screen and never all of it, so what is left can be taken
-        /// hold of again.
-        /// </remarks>
         public float Kept { get; set; } = 96f;
 
         /// <inheritdoc />
         /// <remarks>
-        /// Where it was moved to, or where <see cref="Home" /> puts it, and then brought back far enough that <see cref="Kept" />
-        /// of it is on the screen. Its top never goes above the screen's, since the title bar it is moved by is at its top.
+        /// Brought back far enough that <see cref="Kept" /> of it is on the screen, and its top never above the screen's.
         /// </remarks>
         public override RectangleF Place(RectangleF area, Vector2 size)
         {

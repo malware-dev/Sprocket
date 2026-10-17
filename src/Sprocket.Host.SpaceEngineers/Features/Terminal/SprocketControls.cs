@@ -10,15 +10,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     /// <summary>
     /// The button on a programmable block that opens Sprocket, set apart by a separator on each side, and in developer mode the label on the block keeping the automation.
     /// </summary>
-    /// <remarks>
-    /// Controls are global per block type rather than per block, so this runs exactly once per mod load,
-    /// driven off the first programmable block to come alive. See <see cref="SprocketBlock" /> for why it
-    /// cannot be done any earlier than that.
-    /// <para>
-    /// Static because the controls are: one set per block type for the whole game, which the terminal
-    /// hands back through a callback that carries no state of the mod's. They die with the mod's load.
-    /// </para>
-    /// </remarks>
     public static class SprocketControls
     {
         const string CustomData = "CustomData";
@@ -41,8 +32,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 
             _done = true;
 
-            // Added like any control, so other mods that read a block's controls see these too; where
-            // they are shown is settled afterwards, in Arrange.
             _above = MyAPIGateway.TerminalControls
                 .CreateControl<IMyTerminalControlSeparator, IMyProgrammableBlock>("Sprocket_Above");
 
@@ -62,8 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_above);
             MyAPIGateway.TerminalControls.AddControl<IMyProgrammableBlock>(_open);
 
-            // Shown on the block whose storage holds the program, which is the hero on the server and, from what the
-            // server tells them, on every client's copy of the construct.
+            // Shown on the block whose storage holds the program: the hero on the server, and on a client as the server tells it.
             if (developer)
             {
                 _hero = MyAPIGateway.TerminalControls
@@ -82,9 +70,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
         /// programmable block is about to show.
         /// </summary>
         /// <remarks>
-        /// The terminal's <c>CustomControlGetter</c>, which hands over the list each time a block's
-        /// controls are about to be shown - see THDigi's terminal control examples. Only the list moves;
-        /// the controls stay as they were added. Where Custom Data is missing, the three go last.
+        /// Called as the terminal's <c>CustomControlGetter</c> each time a block's controls are about to be shown; see THDigi's
+        /// terminal control examples.
         /// </remarks>
         public static void Arrange(IMyTerminalBlock block, List<IMyTerminalControl> controls)
         {

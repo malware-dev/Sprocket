@@ -5,9 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A camera: whether somebody is looking through it, and how that view behaves.</summary>
     /// <remarks>
-    /// Looking through it is something a person does. Whether this machine's own player is looking is known only on that
-    /// player's machine, never on the server where sequences run; whether anybody is, the server knows, since the number
-    /// looking is shared with it.
+    /// The server knows whether anybody is looking through it; whether this machine's own player is looking is known only
+    /// on that player's machine.
     /// </remarks>
     public sealed class Camera : Capability
     {

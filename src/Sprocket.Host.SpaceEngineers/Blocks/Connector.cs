@@ -9,11 +9,8 @@ using MyShipConnectorStatus = Sandbox.ModAPI.Ingame.MyShipConnectorStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A connector: whether it holds a ship and which, and the members of its terminal said in Sprocket's words.</summary>
-    /// <remarks>
-    /// Lock and unlock are the game's own and take effect at once, so neither is waited for. The connector says its
-    /// properties changed every hundred ticks whether anything did or not, so that is no cue for anything here.
-    /// </remarks>
+    /// <summary>A connector, read for whether it holds a ship and which.</summary>
+    /// <remarks>The connector raises its properties-changed event every hundred ticks whether anything changed or not.</remarks>
     public sealed class Connector : Capability
     {
         static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
@@ -57,10 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("EnableParking", false, "toggle used for parking");
         }
 
-        /// <summary>
-        /// Told as the connector locks or unlocks, as another comes into or goes out of reach, and as it starts or stops
-        /// working, since one that is not working is never ready.
-        /// </summary>
+        /// <summary>Told as the connector locks or unlocks, as another comes into or goes out of reach, and as it starts or stops working.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var connector = block as IMyShipConnector;

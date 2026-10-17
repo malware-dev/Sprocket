@@ -25,7 +25,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Spacing = 8f,
                 Children =
                 {
-                    // Why nothing below can be changed, said before any of it.
                     new Label { Style = Styles.Aside, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _locked),
 
                     new Label { Style = Styles.Heading }.As(out _purposeHeading),
@@ -35,7 +34,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     new Label { Style = Styles.NextHeading }.As(out _expectsHeading),
                     new Label { Style = Styles.Phrase, Wraps = true }.As(out _expects),
 
-                    // Hidden: an empty optional slot can still stop its installation.
                     new Switch { Style = Styles.Switch, IsVisible = false }.As(out _required)
                 }
             };

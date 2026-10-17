@@ -3,11 +3,8 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A colour as hue, saturation and value.</summary>
-    /// <remarks>
-    ///     The conversions are the game's, from <c>VRageMath.ColorExtensions</c>, so a colour chosen here
-    ///     and one chosen in the game's painter land on the same bytes.
-    /// </remarks>
+    /// <summary>A color as hue, saturation and value.</summary>
+    /// <remarks>The conversions are the game's, from <c>VRageMath.ColorExtensions</c>.</remarks>
     public struct Hsv
     {
         Hsv(float hue, float saturation, float value) : this()
@@ -26,13 +23,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>How much light there is, from black at zero.</summary>
         public float Value { get; }
 
-        /// <summary>A colour from its three parts, each held to between zero and one.</summary>
+        /// <summary>A color from its three parts, each held to between zero and one.</summary>
         public static Hsv Of(float hue, float saturation, float value)
         {
             return new Hsv(Held(hue), Held(saturation), Held(value));
         }
 
-        /// <summary>A colour whose hue, saturation and value are <paramref name="said" />'s X, Y and Z.</summary>
+        /// <summary>A color whose hue, saturation and value are <paramref name="said" />'s X, Y and Z.</summary>
         public static Hsv Of(Vector3 said)
         {
             return Of(said.X, said.Y, said.Z);
@@ -44,36 +41,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return Of(colour.ColorToHSV());
         }
 
-        /// <summary>One of the colours a player paints with.</summary>
+        /// <summary>One of the colors a player paints with.</summary>
         /// <remarks>
-        ///     A build colour slot is an offset, not a colour: saturation and value run from minus one to one,
-        ///     with nought at the grey of unpainted armour. The game's own colour picker undoes it with
-        ///     <c>HSVOffsetToHSV</c>, as this does.
+        /// A build color slot is an offset whose saturation and value run from minus one to one, nought at the gray of unpainted
+        /// armor, which the game's color picker undoes with <c>HSVOffsetToHSV</c>.
         /// </remarks>
         public static Hsv Painted(Vector3 slot)
         {
             return Of(MyColorPickerConstants.HSVOffsetToHSV(slot));
         }
 
-        /// <summary>This colour at the hue <paramref name="hue" />, for a slider that owns one axis.</summary>
+        /// <summary>This color at the hue <paramref name="hue" />.</summary>
         public Hsv Hued(float hue)
         {
             return Of(hue, Saturation, Value);
         }
 
-        /// <summary>This colour at the saturation <paramref name="saturation" />.</summary>
+        /// <summary>This color at the saturation <paramref name="saturation" />.</summary>
         public Hsv Saturated(float saturation)
         {
             return Of(Hue, saturation, Value);
         }
 
-        /// <summary>This colour at the value <paramref name="value" />.</summary>
+        /// <summary>This color at the value <paramref name="value" />.</summary>
         public Hsv Valued(float value)
         {
             return Of(Hue, Saturation, value);
         }
 
-        /// <summary>This colour as red, green and blue, by the game's conversion.</summary>
+        /// <summary>This color as red, green and blue, by the game's conversion.</summary>
         public Color Colour => new Vector3(Hue, Saturation, Value).HSVtoColor();
 
         static float Held(float part)

@@ -19,8 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             Spacing = 16f;
 
-            // The light leads the state, because it is the same fact said faster: a green flash is what a sequence
-            // firing looks like from across the room.
             Children.Add(new HStack
             {
                 Spacing = 8f,

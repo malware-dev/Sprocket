@@ -8,7 +8,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>One block as it is shown wherever it is named: its icon, then its name.</summary>
-    /// <remarks>The icon is as tall as a line of the name, so it sizes with whatever style the name is given.</remarks>
     public class BlockName : HStack, ITextual
     {
         readonly Image _icon;

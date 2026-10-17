@@ -5,16 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// <summary>
     /// What is wrong with a sequence, and which line of it is wrong.
     /// </summary>
-    /// <remarks>
-    /// The problem alone was enough while it only had to be printed. Once a screen has to lead
-    /// somebody to the fix it has to say where as well, because "this affects something that isn't
-    /// here any more" in front of a nine-step sequence is an accusation without an address.
-    /// <para>
-    /// One fault, not all of them. A sequence with two broken steps is mended one step at a time,
-    /// and the second is still broken when the first is fixed, so it reports itself then. A line
-    /// that tried to say both would say neither well.
-    /// </para>
-    /// </remarks>
+    /// <remarks>One fault at a time: the next reports itself once the first is fixed.</remarks>
     public struct SequenceFault
     {
         /// <summary>What <see cref="Step" /> holds when the line at fault is the one that starts it.</summary>
@@ -37,11 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary><paramref name="problem" />, at the line <paramref name="step" />, with what the block at fault said is wrong in <paramref name="because" />.</summary>
-        /// <remarks>
-        /// Most problems are the same sentence every time they happen, and that sentence lives in
-        /// the wording. A block that cannot finish is not: only it knows why, and the reason is
-        /// worth more than the category.
-        /// </remarks>
         public SequenceFault(SequenceProblem problem, int step, BlockTrouble because) : this()
         {
             Problem = problem;
@@ -79,11 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Whether this is worth saying quietly rather than marking as broken.
         /// </summary>
-        /// <remarks>
-        /// Decided by what it is rather than by whoever is showing it, so every screen agrees about how
-        /// loud to be. A warning says its words and washes its row amber; what it does not do is read
-        /// as broken, add to what is counted as wrong, or get the sequence parked.
-        /// </remarks>
+        /// <remarks>A warning is not counted as wrong and never has the sequence parked.</remarks>
         public bool IsWarning => Problem == SequenceProblem.NothingStarts
             || Problem == SequenceProblem.Conflicted
             || Problem == SequenceProblem.NothingToAwait;
@@ -91,15 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Whether this is reason to switch the sequence off.
         /// </summary>
-        /// <remarks>
-        /// Not the same question as whether it is a fault, which is why it is asked separately.
-        /// Switching off somebody's automation is allowed in one case only: the sequence is already
-        /// not running and cannot mend itself, so there is nothing to interrupt and nothing to wait
-        /// for. A sequence held mid-run by the world - a vent with nowhere to put the air, a room
-        /// with no oxygen - fails both halves. It is running, so switching it off is exactly the
-        /// half-finished machine parking exists to prevent; and the world can mend it without
-        /// anybody editing anything, at which point it carries on by itself.
-        /// </remarks>
+        /// <remarks>A fault that holds a run mid-way, stuck or stalled, is no reason; the world may mend it.</remarks>
         public bool Parks => Exists && !IsWarning && Problem != SequenceProblem.Stuck && Problem != SequenceProblem.Stalled;
 
         /// <summary>Whether <paramref name="other" /> says the same thing at the same line.</summary>

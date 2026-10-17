@@ -3,7 +3,7 @@ using VRageMath;
 namespace Lumel.Windows
 {
     /// <summary>A window hanging from an element, on the side of it <see cref="Side" /> says, and closed by a press anywhere else.</summary>
-    /// <remarks>A press that closes it goes no further, so reaching past an open list is two presses rather than one that does two things.</remarks>
+    /// <remarks>A press that closes it goes no further.</remarks>
     public class Popup : Window
     {
         /// <summary>What it hangs from, or null to stand in the middle as any window does.</summary>

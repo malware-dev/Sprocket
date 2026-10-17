@@ -4,11 +4,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Fills one slot of one installation with blocks, and what that settles in the installations' other slots.</summary>
-    /// <remarks>
-    /// What filling a slot settles, such as blocks set aside that are no longer needed, is worked out by whoever fills it and
-    /// handed in, so it runs again the same way when the step is made again. Every installation's slots are noted before it
-    /// runs, so taking it back puts them all back as they were.
-    /// </remarks>
+    /// <remarks>What filling the slot settles is worked out by the caller and handed in, so a redo settles it the same way.</remarks>
     public sealed class FillSlot : SystemEdit, IInstallationEdit
     {
         readonly string _slot;

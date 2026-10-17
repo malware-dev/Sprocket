@@ -8,8 +8,7 @@ using VRage.Game.ModAPI;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.World;
 
-// Ingame cannot be imported whole - IMyTerminalBlock and friends are declared in both namespaces and
-// the mod-side ones are the ones with the events on them. Same reason as IBlockListener.
+// IMyTerminalBlock is declared in both the ModAPI and the Ingame namespace, so the Ingame one cannot be imported whole.
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Terminal
@@ -18,46 +17,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
     /// The action Sprocket puts into somebody else's block so that block can start a sequence.
     /// </summary>
     /// <remarks>
-    /// The mechanism every signal rests on. A button panel raises nothing at all unless its slot holds
-    /// an item, so Sprocket writes this action into the slot of each button its program listens to.
-    /// <para>
-    /// <b>Registered on every machine, and that is not an oversight.</b> A slot stores this action's
-    /// id as a string and each machine resolves it against its own terminal controls to draw the
-    /// slot. Register only where Sprocket runs - the server - and the server fires it correctly while
-    /// every client resolves nothing: the slot draws as unassigned and the panel's emissive shows the
-    /// unassigned colour. Working, and looking broken, on a mod whose interface is a button panel.
-    /// </para>
+    /// Registered on every machine: a slot stores this action's id, and a machine without the action draws the slot as
+    /// unassigned.
     /// </remarks>
     public static class SignalAction
     {
-        /// <summary>
-        /// Stored inside somebody's saved game, so it can never change.
-        /// </summary>
+        /// <summary>The action's id.</summary>
+        /// <remarks>Persisted in every slot that holds the action, in saved games.</remarks>
         public const string ActionId = "Sprocket_Trigger";
 
-        /// <summary>
-        /// Hidden from every list a player can assign from.
-        /// </summary>
+        /// <summary>The toolbar types the action is hidden from: every list a player can assign from.</summary>
         /// <remarks>
-        /// Sprocket places this itself, and every block in the game growing a Sprocket action would be
-        /// noise in a list people already find long.
-        /// <para>
-        /// <b>Hidden through <c>InvalidToolbarTypes</c> and never through <c>Enabled</c>.</b>
-        /// <c>GetActions</c> checks <c>IsEnabled</c> before it checks the toolbar type, so a false
-        /// <c>Enabled</c> filters the firing path as well as the display one and the slot would
-        /// neither draw nor fire. Writing is gated by <c>AllowedInToolbarType</c>, which never
-        /// consults this, so a fully hidden action can still be placed.
-        /// </para>
-        /// </remarks>
-        /// <remarks>
-        /// <b>Assigned, never appended to.</b> The property starts null and the game reads it only
-        /// if it is not - so <c>Add</c> on it is a null reference at registration, which takes the
-        /// session down before the world loads. Documented in THDigi's terminal control example.
+        /// Hidden through <c>InvalidToolbarTypes</c> and never through <c>Enabled</c>: <c>GetActions</c> checks <c>IsEnabled</c>
+        /// first, so a false <c>Enabled</c> stops the slot firing. The property starts null and is to be assigned, since
+        /// <c>Add</c> on it is a null reference at registration, as THDigi's terminal control example documents.
         /// </remarks>
         static List<MyToolbarType> EveryList()
         {
-            // Every type, button panels among them. In a local game a button panel's slot Sprocket wrote still shows and
-            // fires with it hidden there; on a dedicated server that is untested.
+            // Button panels included: in a local game a slot Sprocket wrote still shows and fires; untested on a dedicated server.
             return new List<MyToolbarType>
             {
                 MyToolbarType.Character, MyToolbarType.Ship,
@@ -81,9 +58,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 
         /// <summary>The argument that says which sequence of which system, ready to write into a slot.</summary>
         /// <remarks>
-        /// <b>One parameter, and its contents are opaque.</b> A parameter list's arity and types are
-        /// frozen by every slot in every saved world and a slot is never rewritten, so the key can
-        /// only grow inside the string.
+        /// One opaque string: every slot in every saved world freezes the parameter list's arity and types, so the key can only
+        /// grow inside the string.
         /// </remarks>
         public static List<TerminalActionParameter> Argument(string key)
         {
@@ -103,14 +79,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             IMyTerminalAction action = MyAPIGateway.TerminalControls.CreateAction<IMyProgrammableBlock>(ActionId);
             action.Name = new StringBuilder(texts.TerminalAction);
 
-            // Never rendered for a slot Sprocket labelled, and the fallback when it has not been.
+            // The fallback text for a slot Sprocket has not labelled.
             var slot = texts.TerminalOpen;
             action.Writer = delegate(IMyTerminalBlock _, StringBuilder text) { text.Append(slot); };
 
-            // The value fixes the parameter's type, and is what the action receives if it is ever run
-            // with none. A string, because what a slot carries is a key naming a sequence of a system
-            // rather than an index into anything - and an empty one resolves to nothing, which is the
-            // right answer to a slot nobody has configured.
+            // The value fixes the parameter's type, and is what the action receives when run with none; an empty key resolves to
+            // nothing.
             action.ParameterDefinitions.Add(TerminalActionParameter.Get(string.Empty));
             action.ActionWithParameters = Run;
 
@@ -119,26 +93,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             MyAPIGateway.TerminalControls.AddAction<IMyProgrammableBlock>(action);
         }
 
-        /// <summary>
-        /// A block somewhere fired one of Sprocket's triggers.
-        /// </summary>
-        /// <remarks>
-        /// Runs on the server, for free: the press is a server event and <c>Apply</c> never syncs, so
-        /// this lands on the machine Sprocket already lives on with nothing forwarded.
-        /// <para>
-        /// Which unit needs no encoding. The slot stores the entity id of the block the action runs
-        /// on, so a slot left behind by a replaced Sprocket block resolves to nothing and does not
-        /// fire.
-        /// </para>
-        /// </remarks>
+        /// <summary>Fires the key a slot carries on the Sprocket unit of <paramref name="block" />.</summary>
+        /// <remarks>Runs on the server: the press is a server event and <c>Apply</c> never syncs.</remarks>
         static void Run(IMyTerminalBlock block, ListReader<TerminalActionParameter> parameters)
         {
             if (block == null || parameters.Count == 0)
                 return;
 
-            // The value is boxed, and its type is whatever was written rather than what was
-            // declared - so a slot somebody edited by hand is a wrong type rather than a wrong key,
-            // and silence is the right answer to it.
+            // The value's type is whatever was written, not what was declared, so a slot edited by hand may hold another type.
             var key = parameters[0].Value as string;
             if (string.IsNullOrEmpty(key))
                 return;

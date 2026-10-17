@@ -5,12 +5,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A defensive combat block: fleeing, how it flees, and how it defends itself.</summary>
-    /// <remarks>
-    /// Flee is the one a programmable block may call, which flees only from a target the block has found; the game's
-    /// forced flee, offered to mods alone, flees from nothing and fails where it is to flee away from a target it has not
-    /// found. Starting and stopping fleeing is something the block does of its own accord, so it is offered as a pair of
-    /// signals beside the value.
-    /// </remarks>
     public sealed class DefensiveCombat : Capability
     {
         static readonly Reading Away = Reading.Of<IMyDefensiveCombatBlock>(block => block.IsFleeing);
@@ -50,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Measuring("EvasiveManeuverIntervalRange", " s");
         }
 
-        /// <summary>Told as the block starts or stops fleeing, which it says itself.</summary>
+        /// <summary>Told as the block starts or stops fleeing.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var defensive = block as IMyDefensiveCombatBlock;

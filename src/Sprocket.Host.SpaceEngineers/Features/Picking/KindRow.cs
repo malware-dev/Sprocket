@@ -9,10 +9,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>One kind of block in the list that narrows a column to it, with how many of that kind there are.</summary>
-    /// <remarks>
-    /// The count is a fact rather than a decoration: fourteen doors is a useful narrowing, one antenna is not. As wide as
-    /// what is written in it, because the list is a menu and a menu is as wide as its longest word.
-    /// </remarks>
     public class KindRow : HStack
     {
         readonly Label _name;
@@ -66,7 +62,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>As wide as its words and its count need, with the count pushed to the far end when it is given more.</summary>
-        /// <remarks>Measured twice: once for what it needs, and again held to that, so it shares any room it is given later.</remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
             var needs = base.MeasureContent(g, new Vector2(float.PositiveInfinity, available.Y));

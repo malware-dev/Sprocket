@@ -11,9 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     public sealed class SlotsFromPicks
     {
         readonly SprocketEditor _editor;
-        /// <summary>What the picks in a blueprint since the last edit do to its slots beyond the names they gave, in order, for the edit made next to carry.</summary>
         readonly List<Reslot> _picked = new List<Reslot>();
-        /// <summary>The names those picks gave, which count as named until their edit is made.</summary>
         readonly List<List<string>> _pickedNames = new List<List<string>>();
 
         /// <summary>The picks made in <paramref name="editor" />.</summary>
@@ -49,11 +47,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// Makes <paramref name="system" /> a system blueprint, with a first instance answering its slots with what it named;
         /// that instance, or the first of a blueprint already.
         /// </summary>
-        /// <remarks>
-        /// A system names the program's variables, and a blueprint its own slots: so each trigger it is started by becomes a
-        /// signal slot, called what the block is called now, and the blocks its steps and triggers name become slots by the
-        /// sets they name, as <see cref="SlotFinder" /> works them out. The first instance answers them with those variables.
-        /// </remarks>
         public SystemInstance Blueprinted(AutomationSystem system)
         {
             if (system.IsBlueprint)
@@ -94,7 +87,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     Slotted(moment.Sources, slots);
             }
 
-            // The blocks the steps and triggers name become slots as any picks do, the smallest sets first.
             Slots(system, first, null).Settle().Apply();
 
             _editor.Program.Edited();
@@ -117,21 +109,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// The names <paramref name="system" /> uses for these blocks: a system's variables, each block declared where the
         /// construct has not named it yet, or the slots a blueprint's stand-in fills with them.
         /// </summary>
-        /// <remarks>
-        /// Where picking a block turns into naming one. What a blueprint's sentence stores is a slot, and which block fills
-        /// it belongs to each instance - so the same sentence acts on the port airlock's door in one and the starboard's in
-        /// another.
-        /// </remarks>
         public List<string> Named(AutomationSystem system, IList<long> blocks)
         {
             return Named(system, blocks, null);
         }
 
         /// <summary>The names <paramref name="system" /> uses for <paramref name="blocks" />, picked in place of the names <paramref name="replacing" />, the list itself, where they replace one: a system's variables, or the slots a blueprint's stand-in fills with them.</summary>
-        /// <remarks>
-        /// In a blueprint the slots are worked out by <see cref="SlotFinder" />, and what that changes beyond the names given
-        /// back is kept for the edit made next, which carries it so taking the edit back takes it back too.
-        /// </remarks>
+        /// <remarks>In a blueprint, what the pick changes beyond the names given back is kept for the edit made next to carry.</remarks>
         public List<string> Named(AutomationSystem system, IList<long> blocks, IList<string> replacing)
         {
             var declared = new List<string>();
@@ -151,7 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (shown == null)
                 return declared;
 
-            // Worked out as though the picks before it in this command were made, and undone again, since their edits come later.
+            // Worked out with this command's earlier picks applied, then undone, since their edits come later.
             if (_picked.Count > 0 && _picked[0].System != system)
                 Unpicked(null);
 
@@ -175,10 +159,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <paramref name="replacing" /> where they replace a list: in a blueprint, a slot of that type of its own, filled in
         /// its stand-in with those blocks and the number each has that facet by.
         /// </summary>
-        /// <remarks>
-        /// Outside a blueprint there is no installation to keep which facet, so the blocks are named as any picks are. The slot
-        /// and every other change to the slots are kept for the edit made next, as <see cref="Named(AutomationSystem, IList{long}, IList{string})" /> keeps them.
-        /// </remarks>
+        /// <remarks>The slot and every other change to the slots are kept for the edit made next to carry.</remarks>
         public List<string> Named(AutomationSystem system, HostType type, string facet, IList<long> blocks, IList<string> replacing)
         {
             SystemInstance shown = system.IsBlueprint ? _editor.StandIn(system) : null;
@@ -233,7 +214,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// The name of the facet the slot among <paramref name="names" /> holding a type the host provides holds of the first
         /// block it holds, in the stand-in of <paramref name="system" />; empty where none holds one.
         /// </summary>
-        /// <remarks>What a step's picker opens on, so changing a step keeps the screen it acts on.</remarks>
         public string Facet(AutomationSystem system, IList<string> names)
         {
             return Facet(system, _editor.StandIn(system), names);

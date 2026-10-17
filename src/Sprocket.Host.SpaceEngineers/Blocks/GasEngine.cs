@@ -9,11 +9,6 @@ using VRage.Game.ObjectBuilders.Definitions;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A power producer that burns gas held in itself: the hydrogen engine, and any modded block built the same way.</summary>
-    /// <remarks>
-    /// The engine keeps its fuel where no interface shows it. Its resource source holds the fuel as the electricity it can
-    /// still give, and the definition says how much it holds when full. What the engine makes and how hard it works is
-    /// every power producer's, and not this.
-    /// </remarks>
     public sealed class GasEngine : Capability
     {
         static readonly MyDefinitionId Electricity =
@@ -26,7 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>The fuel is named by the definition, hydrogen in every engine the game has.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var definition = Definition(block);
@@ -38,14 +32,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Reading($"has no {fuel}", $"has {fuel}").Announced();
         }
 
-        /// <summary>Told as the engine runs out of fuel and as it gets some back, which its resource source raises.</summary>
+        /// <summary>Told as the engine runs out of fuel and as it gets some back.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return ResourceListener.Heard(block, told);
         }
 
         /// <summary>The fuel held, in percent of <paramref name="capacity" />, which is the definition's.</summary>
-        /// <remarks>One per kind, since the capacity is the definition's and read once.</remarks>
         static OwnValue Level(float capacity)
         {
             return OwnValue.Number<IMyPowerProducer>(engine =>

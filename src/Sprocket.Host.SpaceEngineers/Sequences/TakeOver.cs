@@ -5,14 +5,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// Does what was picked, and takes the button it was given out of the signal slot of the blockset that had it.
     /// </summary>
-    /// <remarks>
-    /// A toolbar slot holds one thing, so two triggers naming one button is a state the construct cannot be put into. The
-    /// person's answer decides it: the blockset that had the button is left needing another, the same state somebody
-    /// clearing that button in the game leaves behind, said on its row and mended by picking one.
-    /// <para>
-    /// One edit rather than two, because it is one answer to one question; undoing it puts the other blockset's slot back.
-    /// </para>
-    /// </remarks>
     public sealed class TakeOver : SystemEdit
     {
         readonly SystemEdit _made;

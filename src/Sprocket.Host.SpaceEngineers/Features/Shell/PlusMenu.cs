@@ -10,13 +10,8 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>The plus a place adds things with, given every choice it has, which shows as many as may be added now.</summary>
-    /// <remarks>
-    /// Where several may be added it shows its own words and hangs a menu of them beside itself; where one may, it shows that
-    /// one and adds it when pressed; where none may, it is hidden. So a place hands over every choice it ever has and never
-    /// counts them itself. The menu's entries are made when it opens, which is when somebody presses it, so a screen shown
-    /// every tick makes none.
-    /// </remarks>
+    /// <summary>The plus a place adds things with, offering those of its choices that may be added now.</summary>
+    /// <remarks>The menu's entries are made when somebody opens it, so a screen shown every tick makes none.</remarks>
     public class PlusMenu : Button
     {
         static readonly AddOption[] _none = Array.Empty<AddOption>();

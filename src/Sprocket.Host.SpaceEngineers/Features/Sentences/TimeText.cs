@@ -5,12 +5,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <summary>
     /// How long, and how long ago, in the units a person would say them in.
     /// </summary>
-    /// <remarks>
-    /// The runtime counts in ticks, and a second is sixty of them whatever the simulation's speed. A length the program
-    /// writes is the program's own, so it is said in the unit the program writes it in; how long ago is
-    /// <see cref="AgoText" />'s, in seconds and minutes, which is readability over precision and right for "recently, or ages
-    /// ago".
-    /// </remarks>
     public static class TimeText
     {
         /// <summary>A length of time in ticks.</summary>

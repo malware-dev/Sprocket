@@ -8,11 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// A class of entity and the whole vocabulary it brings with it - what can happen
     /// to it, what situations it can be in, and what it can be told to do.
     /// </summary>
-    /// <remarks>
-    /// The host owns this catalogue. Space Engineers builds kinds from real block types; a made-up
-    /// machine writes a handful by hand. Core never hardcodes a door or a light, which is what keeps
-    /// the editor driven by whatever machine it happens to be pointed at.
-    /// </remarks>
     public sealed class EntityKind
     {
         static readonly HostTypeFacet[] None = new HostTypeFacet[0];
@@ -46,16 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Names a picture of this kind, or empty for none.
         /// </summary>
-        /// <remarks>
-        /// Opaque to core, which never learns what a picture is or how one is drawn. It is a
-        /// word the host hands back to itself: Space Engineers has artwork for every block
-        /// type and will point this at it, another game will point it somewhere else, and a
-        /// host with no artwork at all leaves it empty.
-        ///
-        /// On the kind rather than the entity because that is where the game puts it. Every
-        /// interior light looks like an interior light; what tells two of them apart is the
-        /// name their owner gave them, which is a different thing and already handled.
-        /// </remarks>
         public string Icon { get; private set; }
 
         /// <summary>The node this kind hangs under in the list of kinds, or <see cref="World.Family.None" />.</summary>
@@ -81,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public IList<Capability> Capabilities => _capabilities;
 
         /// <summary>Says the game's toggle <paramref name="toggle" /> flips Sprocket's own switch <paramref name="value" />.</summary>
-        /// <remarks>A switch of the game's own is flipped by the toggle that shares its id, which needs no saying.</remarks>
+        /// <remarks>For Sprocket's own switches only: a switch of the game's own is flipped by the toggle that shares its id.</remarks>
         public EntityKind Flipping(string value, string toggle)
         {
             _flippers[value] = toggle;
@@ -153,7 +138,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Adds Sprocket's own value <paramref name="id" />, named <paramref name="named" />, read by <paramref name="being" />.</summary>
-        /// <remarks>Read, never set. What it is called in a list is what the field beside a test asks for.</remarks>
         public EntityKind WithValue(string id, string named, OwnValue being)
         {
             var value = new EntityAction(id, named, null).Reads(being, Asked(named, being));
@@ -188,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Holds what a step sets the value of Sprocket's own added last to between <paramref name="least" /> and
         /// <paramref name="most" />, each written as a number or empty for none.
         /// </summary>
-        /// <remarks>Only what the block itself takes, which is what a player could set it to; a test is not held to them.</remarks>
+        /// <remarks>A step is held to them, and a test is not.</remarks>
         public EntityKind Between(string least, string most)
         {
             if (_value == null)
@@ -262,10 +246,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Adds a signal, a moment the construct sends from the toolbar slot <paramref name="at" /> - see
         /// <see cref="EntityEvent.Answered" />.
         /// </summary>
-        /// <remarks>
-        /// No property, because there is nothing to read: what makes it happen is a slot on this
-        /// block's own toolbar, and what it runs is what that slot was given.
-        /// </remarks>
         public EntityKind WithSignal(Sequences.ToolbarSlot at, string text)
         {
             _events.Add(new EntityEvent(at, text));
@@ -277,7 +257,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Adds the toolbar <paramref name="toolbar" /> a person presses as one signal, read as <paramref name="text" />:
         /// <paramref name="pages" /> pages of <paramref name="slots" /> slots, the one chosen worded by <paramref name="says" />.
         /// </summary>
-        /// <remarks>See <see cref="EntityEvent.IsPressed" />.</remarks>
         public EntityKind WithPressed(int toolbar, string text, int pages, int slots, Func<Sequences.ToolbarSlot, string> says)
         {
             _events.Add(new EntityEvent(new Sequences.ToolbarSlot(toolbar, 0, 0), text, pages, slots, says));
@@ -356,16 +335,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Keeps the block's own members out of the list somebody chooses from, by the game's ids.
         /// </summary>
-        /// <remarks>
-        /// For what this kind says better elsewhere, and for what the game offers that no sequence
-        /// can use. A velocity to set makes the game's increase and decrease worse than useless, and
-        /// growing a rotor a head is building the machine rather than running it. Said as a set
-        /// because one entry standing in for one other is the rare case, not the rule.
-        /// <para>
-        /// The game's members are added last, so this is read once the list is complete rather than
-        /// applied where it is declared.
-        /// </para>
-        /// </remarks>
         public EntityKind Hiding(params string[] gameIds)
         {
             foreach (var gameId in gameIds)
@@ -375,10 +344,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Leaves out the settings the game's terminal never shows on this kind of block, by their ids.</summary>
-        /// <remarks>
-        /// A setting left out is in neither view: the terminal view lists what the game's terminal does. Each takes its value,
-        /// its toggle and the pair a checkbox adds with it.
-        /// </remarks>
+        /// <remarks>Each takes with it its value, its toggle and the pair a checkbox adds with it.</remarks>
         public EntityKind Lacking(params string[] settingIds)
         {
             foreach (var settingId in settingIds)
@@ -415,9 +381,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Names the action added last in a list of things to choose from, where a sentence says it
         /// differently.
         /// </summary>
-        /// <remarks>
-        /// A turn to an angle is "rotate to" in a list, and "rotate" in a sentence whose angle says "to".
-        /// </remarks>
         public EntityKind Listed(string words)
         {
             _actions[_actions.Count - 1].List(words);
@@ -442,11 +405,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Gives one of the block's own members Sprocket's word for it.
         /// </summary>
-        /// <remarks>
-        /// A rename and nothing more: the member keeps the block's id and is performed as the block's.
-        /// Taken up where the block's own members are read, so a block that does not declare it gets
-        /// nothing - see <c>BlockKinds</c>.
-        /// </remarks>
+        /// <remarks>The member keeps the block's id; a block that does not declare it gets nothing.</remarks>
         public EntityKind Renaming(string gameId, bool sets, string word)
         {
             _renamed.Add(new Alias(gameId, sets, word));
@@ -458,12 +417,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <paramref name="scale" /> times what the game holds, moving in <paramref name="step" /> as shown where that is more
         /// than 0, and shown no higher than <paramref name="most" /> where that is given.
         /// </summary>
-        /// <remarks>
-        /// The game gives a value's bounds and never its unit, so the unit is Sprocket's to say. The script keeps the game's
-        /// number; the scale is how a person reads it, a strength the game holds as 0 to 1 typed as a percent, and the step what
-        /// the game snaps it to, a screen's rotation to quarter turns. Taken up where the block's own members are read, as a
-        /// rename is.
-        /// </remarks>
+        /// <remarks>The script keeps the game's number; the scale and step are how a person reads and sets it.</remarks>
         public EntityKind Measuring(string gameId, string unit, double scale = 1, double step = 0, string most = null)
         {
             _measured.Add(new Measure(gameId, unit, scale, step, most));
@@ -493,10 +447,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Vouches for the block's own members <paramref name="gameIds" /> in the game's own words: values where <paramref name="sets" /> says so, actions otherwise.</summary>
-        /// <remarks>
-        /// What puts one of the block's own members in the organized view without a word of Sprocket's for it. Taken up where
-        /// the block's own members are read, as a rename is.
-        /// </remarks>
         public EntityKind Vetting(bool sets, params string[] gameIds)
         {
             foreach (var gameId in gameIds)
@@ -506,10 +456,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Says the block's own switches <paramref name="gameIds" /> are states of the block, which a check reads as the block itself.</summary>
-        /// <remarks>
-        /// The game's switch for what the block is or is doing, "Tank is stockpiling", rather than a setting of how it behaves,
-        /// "Suspension invert steering is on". Taken up where the block's own members are read, as a rename is.
-        /// </remarks>
         public EntityKind Stating(params string[] gameIds)
         {
             foreach (var gameId in gameIds)
@@ -612,11 +558,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The entry a step names, by its id and by whether it sets a value.</summary>
-        /// <remarks>
-        /// Both, because the id alone is not unique: a switch's value and the game's bare toggle for
-        /// it are both called <c>OnOff</c>, and a program tells them apart by writing one as a
-        /// <c>set</c>.
-        /// </remarks>
+        /// <remarks>The id alone is not unique: a switch's value and the game's toggle for it are both <c>OnOff</c>.</remarks>
         public EntityAction FindAction(string actionId, ReachKind form)
         {
             foreach (var action in _actions)

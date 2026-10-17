@@ -35,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return back && _system.Enabled;
         }
 
+        /// <inheritdoc />
         /// <remarks>Puts nothing back the first time: it was made in the program, and this only records that.</remarks>
         public override void Apply(Automation program)
         {

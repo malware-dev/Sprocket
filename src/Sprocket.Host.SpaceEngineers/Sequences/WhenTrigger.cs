@@ -8,11 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// A comparison Sprocket watches for itself, which fires as it comes to hold: "when all of these doors are closed",
     /// which the script writes <c>when all ext.status on [ doors ] == closed</c>.
     /// </summary>
-    /// <remarks>
-    /// The value's id is <see cref="MomentTrigger.EventId" /> and its blocks are <see cref="MomentTrigger.Sources" />, so
-    /// everything that resolves, renames or reads a trigger's blocks works on the base and never has to know which. A
-    /// signal is a <see cref="SignalTrigger" />.
-    /// </remarks>
     public sealed class WhenTrigger : MomentTrigger
     {
         readonly List<Literal> _arguments = new List<Literal>();
@@ -26,16 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// How the blocks are read: any one of them coming to hold the comparison, all of them, or their sum.
         /// </summary>
-        /// <remarks>
-        /// "Any" is the default because it is what people mean most of the time - any of these doors opening should turn
-        /// the lights on. "All" is a genuinely different sentence: "when tank A <em>and</em> tank B are empty" fires at the
-        /// moment the last of them empties, not when the first one does.
-        /// <para>
-        /// So "all" and "sum" are an edge on the whole condition rather than on any one block, which is why the runtime
-        /// tracks them separately instead of just requiring several edges at once - they would almost never land on the
-        /// same tick.
-        /// </para>
-        /// </remarks>
         public Quantifier Quantifier { get; set; }
 
         /// <summary>How the value is compared with <see cref="Value" />.</summary>
@@ -54,7 +39,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public int IntervalTicks => Interval.Ticks;
 
         /// <summary>The namespace the member is qualified by: <c>ext</c> for Sprocket's own, or empty for one of the block's.</summary>
-        /// <remarks>Kept as the program says it, so a member added by something this host does not have is never taken for one it does.</remarks>
         public string Provider { get; set; } = BlockKinds.Own;
 
         /// <summary>A copy of this trigger, to change one thing of as an edit; what it starts is the edit's to carry over.</summary>

@@ -7,15 +7,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Doors
 {
     /// <summary>The slider on a door that sets how long it stays open before it closes by itself.</summary>
-    /// <remarks>
-    /// Controls belong to one block type each, and the game ties <c>IMyDoor</c> to the plain door alone, so each family of
-    /// door is given a slider of its own, made once per mod load off the first door of that family to come alive; see
-    /// <see cref="DoorBlock" /> for why no earlier.
-    /// <para>
-    /// Static because the controls are: one set per block type for the whole game, which the terminal hands back through
-    /// a callback that carries no state of the mod's. They die with the mod's load.
-    /// </para>
-    /// </remarks>
     public static class DoorControls
     {
         /// <summary>The slider's id, which is the id of the value it sets.</summary>
@@ -47,10 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         }
 
         /// <summary>Moves the slider to stand under the door's open switch, in the list of controls a door is about to show.</summary>
-        /// <remarks>
-        /// The terminal's <c>CustomControlGetter</c>, as for the automation button. The slider is found by its id, being a
-        /// different control for each family of door. Where the switch is missing, it goes last.
-        /// </remarks>
+        /// <remarks>Called as the terminal's <c>CustomControlGetter</c>.</remarks>
         public static void Arrange(IMyTerminalBlock block, List<IMyTerminalControl> controls)
         {
             if (!(block is IMyDoor))
@@ -95,7 +83,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
         static class Made<TBlock>
         {
             /// <summary>Whether the slider has been made.</summary>
-            /// <remarks>One flag for each family of door is what this type is for, static for the reason the controls are.</remarks>
             // ReSharper disable once StaticMemberInGenericType
             public static bool Done;
         }

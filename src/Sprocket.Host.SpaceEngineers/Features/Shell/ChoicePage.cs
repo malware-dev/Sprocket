@@ -3,12 +3,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>A question answered by choosing one of a few answers, or by typing one where none of them will do.</summary>
-    /// <remarks>
-    /// Choosing returns at once. These lists are short by construction: they only ever hold what can actually be done,
-    /// so there is never an answer to offer, refuse or explain. The elements it is drawn with are declared in
-    /// <c>ChoicePage.View.cs</c>, and nothing else is; this half is what it asks and what each answer does.
-    /// </remarks>
+    /// <summary>A question answered by choosing one of a few answers.</summary>
     public sealed partial class ChoicePage : EditorPage
     {
         readonly string _title;
@@ -27,21 +22,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <inheritdoc />
         public override bool Asks => true;
 
-        /// <summary>What the question is about, which a choice page says for as long as it is up.</summary>
-        /// <remarks>
-        /// Set when the page is made and never after, because the header holds its size for the life of a screen: a
-        /// line that arrived later would take the whole screen down with it.
-        /// </remarks>
+        /// <summary>What the question is about, shown under the title for as long as the page is up.</summary>
         public override string Subtitle => Caption ?? "";
 
         /// <summary>Shown where the answers would be when there is nothing to choose from yet.</summary>
         public string EmptyText { get; set; }
 
         /// <summary>What the question is about, when the title cannot carry it.</summary>
-        /// <remarks>
-        /// "Delete this sequence?" is the question; which sequence is a whole sentence and belongs underneath it.
-        /// Naming the thing is the difference between a question somebody can answer and one they have to guess at.
-        /// </remarks>
+        /// <remarks>Set before the page is shown and never after: the header keeps its size for the life of a screen.</remarks>
         public string Caption { get; set; }
 
         /// <summary>The answers, in the order they are offered, for whoever reads them back.</summary>

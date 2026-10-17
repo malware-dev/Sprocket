@@ -5,10 +5,6 @@ using VRageMath;
 namespace Lumel.Windows
 {
     /// <summary>Something that floats over the screen in a window layer, holding one element and placed by the layer rather than by a container.</summary>
-    /// <remarks>
-    ///     A modal window takes all input for as long as it is open: nothing beneath it answers, and the layer
-    ///     paints <see cref="Backdrop" /> over everything beneath it first.
-    /// </remarks>
     public class Window : ContentControl
     {
         /// <summary>Raised when the layer it was open in takes it away, however it was closed.</summary>

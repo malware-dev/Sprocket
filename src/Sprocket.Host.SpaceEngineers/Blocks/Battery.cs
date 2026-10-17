@@ -8,16 +8,8 @@ using ChargeMode = Sandbox.ModAPI.Ingame.ChargeMode;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A battery: recharged and waited on until it is full, and read for how much it holds and how hard it is worked.
-    /// </summary>
-    /// <remarks>
-    /// The game moves its charge on once every hundred frames, says so, and lands it exactly on the battery's capacity
-    /// when it gets there, so full is a comparison and needs no band.
-    /// <para>
-    /// Nothing to call off: a battery left recharging holds nobody in danger, and its mode is a step of its own.
-    /// </para>
-    /// </remarks>
+    /// <summary>A battery, recharged and waited on until it is full, and read for how much it holds and how hard it is worked.</summary>
+    /// <remarks>The game moves its charge every hundred frames and lands it exactly on its capacity when full.</remarks>
     public sealed class Battery : Capability
     {
         /// <summary>Recharging, which is Sprocket's own and may wait until the battery is full.</summary>
@@ -58,10 +50,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// Capacity is fixed by the block, so nothing need announce it. The most it takes in and gives out are not: the game
-        /// sets both to nothing while the battery is full, empty or held to one direction.
-        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction(Recharge, "recharge", Recharges, "Recharge_On").Lasting().Asking(RechargeOptions.Asked())
@@ -112,10 +100,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Busy while it charges on a recharge, which is the one charging a step asks for.</summary>
-        /// <remarks>
-        /// A battery on auto charges whenever the grid has power to spare, so counting that would light
-        /// every battery on a ship with a solar panel.
-        /// </remarks>
         public override bool IsBusy(IMyTerminalBlock block)
         {
             var battery = block as IMyBatteryBlock;
@@ -123,13 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 && battery.CurrentInput > 0f;
         }
 
-        /// <summary>
-        /// Why this battery will not fill, or null while it might.
-        /// </summary>
-        /// <remarks>
-        /// Set to another mode is its own answer: whatever set it has overruled the step, and nothing
-        /// is heading towards full any more.
-        /// </remarks>
+        /// <summary>Why this battery will not fill, or null while it might.</summary>
         static BlockTrouble Why(IMyBatteryBlock battery)
         {
             if (Charged(battery))
@@ -145,13 +123,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Why a battery set to recharge is not charging, or null while it is.</summary>
-        /// <remarks>
-        /// Asked of the switch and the damage rather than of whether it is working, because the game
-        /// calls a battery with nothing left in it not working, and an empty battery is the one most
-        /// likely to be recharged.
-        /// </remarks>
         static BlockTrouble Filling(IMyBatteryBlock battery)
         {
+            // The switch and the damage, since the game calls an empty battery not working.
             if (!battery.Enabled)
                 return BlockTrouble.Waiting(Cause.BatteryOff);
 

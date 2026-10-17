@@ -7,13 +7,8 @@ namespace Lumel.Layout
 {
     /// <summary>Rows of a label and the field it names, side by side where both fit and the field under its label where they do not.</summary>
     /// <remarks>
-    /// Decided row by row from the width the form is given, so nothing in it runs past its edge: a long label or a wide field
-    /// moves its field onto a line of its own instead. Side by side, a field keeps to the right-hand edge, so the fields of a
-    /// form end together; under its label it starts at the left. A row can ask for two lines whatever the width, for text and
-    /// anything else that wants the whole width, or be one element across the whole width with no label at all.
-    /// <para>
-    /// A child's own alignment wins over either, and a fixed width from its placement is kept as long as there is room for it.
-    /// </para>
+    /// Side by side, a field keeps to the right-hand edge; under its label it starts at the left. A child's own alignment wins
+    /// over either, and a fixed width from its placement is kept as long as there is room for it.
     /// </remarks>
     public class Form : Container
     {

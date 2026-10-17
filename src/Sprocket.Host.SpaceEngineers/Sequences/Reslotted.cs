@@ -4,11 +4,6 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>An edit to a blueprint, together with what it does to the blueprint's slots, taken back as one.</summary>
-    /// <remarks>
-    /// The slots the picks for it bring about are worked out with the picks and handed in, in the order they were made; any
-    /// other edit has them worked out the first time it is made, from the lists as it leaves them. Either way they are kept, so
-    /// making the edit again after taking it back makes the same slots.
-    /// </remarks>
     public sealed class Reslotted<T> : Edit<T>
     {
         readonly Edit<T> _edit;

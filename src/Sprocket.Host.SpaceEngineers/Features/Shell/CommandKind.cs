@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>No press at all.</summary>
         None = 0,
 
-        // Screen furniture. One of each per screen.
+        // Screen furniture, one of each per screen.
         /// <summary>Going back a screen.</summary>
         Back,
 
@@ -29,13 +29,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Putting a program in place of one that would not read, once told what that costs.</summary>
         Resolve,
 
-        /// <summary>Switches a step off, or back on.</summary>
+        /// <summary>Switching a step off, or back on.</summary>
         SwitchStep,
 
-        /// <summary>Puts the program a text says in place of the one there, having read the text first.</summary>
+        /// <summary>Putting the program a text says in place of the one there, having read the text first.</summary>
         Mend,
 
-        // The list screens.
         /// <summary>Making a new logic system.</summary>
         NewSystem,
 
@@ -81,7 +80,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Making a new sequence.</summary>
         NewSequence,
 
-        // Triggers.
         /// <summary>Opening a trigger.</summary>
         OpenTrigger,
 
@@ -94,7 +92,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Copying a trigger.</summary>
         DuplicateTrigger,
 
-        // Changing hands.
         /// <summary>Starting paused automation again as it was.</summary>
         Resume,
 
@@ -107,14 +104,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Opening the resume screen again from the banner.</summary>
         ReviewPaused,
 
-        // A logic system's switch, and one of a blueprint's.
         /// <summary>Switching a logic system on or off.</summary>
         EnableSystem,
 
         /// <summary>Switching an installation on or off.</summary>
         EnableInstance,
 
-        // A sequence.
         /// <summary>Deleting a sequence.</summary>
         DeleteSequence,
 
@@ -166,7 +161,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Copying a step, right after it.</summary>
         DuplicateStep,
 
-        // Picking.
         /// <summary>Picking a block.</summary>
         PickEntity,
 
@@ -212,8 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Going back to the previous page of a list.</summary>
         PageBack,
 
-        // The library. Keeping a blueprint for every world and forgetting a lost construct change no program, so a copy
-        // lent to look at may do both.
+        // Shelve, Unshelve and ForgetBackup change no program, so a copy lent to look at may make them (Gate).
         /// <summary>Putting a blueprint in the library, or bringing it up to date there.</summary>
         Shelve,
 
@@ -235,11 +228,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Keeping one of two versions of a logic system, which changes the program.</summary>
         ChooseVersion,
 
-        // A list of answers.
         /// <summary>Picking one of a list of answers.</summary>
         Choice,
 
-        /// <summary>Tools for working on Sprocket itself. Only ever registered in developer mode.</summary>
+        /// <summary>Showing the tools for working on Sprocket itself, registered only in developer mode.</summary>
         ShowScript
     }
 }

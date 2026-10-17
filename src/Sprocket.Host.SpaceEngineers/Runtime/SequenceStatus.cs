@@ -2,10 +2,6 @@
 namespace Sprocket.Host.SpaceEngineers.Runtime
 {
     /// <summary>What a sequence is doing right now.</summary>
-    /// <remarks>
-    /// A fact rather than a sentence. Which of these it is, is core's to work out; what it reads as,
-    /// and whether it is worth saying at all, is the target's.
-    /// </remarks>
     public enum SequenceStatus
     {
         /// <summary>Switched off, so nothing will start it.</summary>

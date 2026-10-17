@@ -7,17 +7,13 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An emotion controller, which shows a face on the screens chosen in its terminal.</summary>
-    /// <remarks>
-    /// The game gives it one action per face and nothing else: which face is showing is readable nowhere, so a face is shown
-    /// and never checked. Which screens show it are list controls in its terminal, with nothing behind them a mod can reach.
-    /// </remarks>
     public sealed class EmotionController : Capability
     {
         /// <summary>Showing a chosen face, which is Sprocket's own and runs the game's action for that face.</summary>
         public const string ShowFace = "show-face";
 
-        /// <summary>The folder every face's texture is in, which is how the game tells a face's action from any other.</summary>
-        /// <remarks>From the game's emotion controller component, which makes one action for each such texture.</remarks>
+        // The folder every face's texture is in, which tells a face's action from any other: the game's emotion controller
+        // component makes one action for each such texture.
         const string Faces = @"\emotes\";
 
         static readonly OwnAction Shows = OwnAction.Of<IMyEmotionControllerBlock, Chosen>(Chosen.Read, Showed);
@@ -31,7 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>Each face's own action is show face with its face already chosen, so they are left to the terminal view.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var words = new List<string>();

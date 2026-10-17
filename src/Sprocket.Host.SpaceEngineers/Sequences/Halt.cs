@@ -4,10 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Why Sprocket switched off a logic system, or one of a blueprint's, that could not work, as it knew it then.</summary>
-    /// <remarks>
-    /// Kept until it is switched on again, because once the cause is mended or the block is gone the reason can no longer
-    /// be worked out from the construct.
-    /// </remarks>
     public sealed class Halt
     {
         /// <summary>A halt for <paramref name="problem" /> in sequence <paramref name="sequence" /> at <paramref name="step" />, naming the block at fault and what it said was wrong where it said anything.</summary>

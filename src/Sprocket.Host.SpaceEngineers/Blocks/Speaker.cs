@@ -8,17 +8,8 @@ using SpaceEngineers.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A sound block, which plays the sound a step chooses from the game's own list.
-    /// </summary>
-    /// <remarks>
-    /// Playing is not waited for. A dedicated server plays no sound at all and nothing tells a mod when
-    /// one has finished, so there is nothing to wait on, and nothing to say whether a sound is playing.
-    /// <para>
-    /// A jukebox is a sound block to the game too, and is not this: it plays a playlist, and a single sound outside it is
-    /// what its own terminal hides. See <see cref="Jukebox" />.
-    /// </para>
-    /// </remarks>
+    /// <summary>A sound block, which plays the sound a step chooses from the game's own list.</summary>
+    /// <remarks>A step playing a sound moves on at once: nothing tells a mod when a sound has finished.</remarks>
     public sealed class Speaker : Capability
     {
         /// <summary>Playing a chosen sound, which is Sprocket's own.</summary>
@@ -38,10 +29,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// The game's own play is kept out of the list: it plays whichever sound was left selected,
-        /// which is the one thing a step choosing its sound exists to avoid.
-        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             var words = new List<string>();
@@ -64,15 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Measuring("LoopableSlider", " s");
         }
 
-        /// <summary>
-        /// Every sound the block can play, by the names the terminal shows into <paramref name="words" /> and by id into
-        /// <paramref name="means" />.
-        /// </summary>
-        /// <remarks>
-        /// Every sound block has the same list, which is every public sound category the game has
-        /// loaded. Where none are loaded - the test harness - the block's own list of ids, each
-        /// named by itself.
-        /// </remarks>
+        /// <summary>Every sound the block can play, by the names the terminal shows into <paramref name="words" /> and by id into <paramref name="means" />.</summary>
         static void Sounds(IMyTerminalBlock block, List<string> words, List<string> means)
         {
             var definitions = MyDefinitionManager.Static;
@@ -102,11 +81,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>The sound the block holds ready, as one of <paramref name="sounds" /> by id, which a step can choose.</summary>
-        /// <remarks>
-        /// A look finds the selected sound among the ids, which is a pass over the list; it is made only where an <c>if</c>
-        /// reads the value or a <c>when</c> watches it, on its cadence. A sound the list does not hold, or none, is no
-        /// position among them, and is none of the names.
-        /// </remarks>
+        /// <remarks>A look is a pass over the list, made only where an <c>if</c> reads the value or a <c>when</c> watches it.</remarks>
         static OwnValue Holding(string[] sounds)
         {
             return OwnValue.OneOf<IMySoundBlock>(sounds, block => Array.IndexOf(sounds, block.SelectedSound))

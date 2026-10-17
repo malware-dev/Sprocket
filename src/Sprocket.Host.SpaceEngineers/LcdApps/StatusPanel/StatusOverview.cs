@@ -5,20 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
-    /// <summary>
-    /// What a construct's automation amounts to, one line per system.
-    /// </summary>
-    /// <remarks>
-    /// For a screen somebody glances at rather than works in: a row says what a system is doing right
-    /// now and whether it needs attention, and the totals say whether the whole construct does. Nothing
-    /// here is interactive, so nothing here is a command.
-    /// <para>
-    /// <b>Facts and existing words only.</b> The state of a row is a <see cref="SequenceStatus" />, the
-    /// same one a sequence carries in the editor, so the display says "running" and "switched off" in
-    /// the words the editor already uses - a glance and a look agree, and the coming pass over the words
-    /// has one place to change.
-    /// </para>
-    /// </remarks>
+    /// <summary>What a construct's automation amounts to, one line per system.</summary>
     public sealed class StatusOverview
     {
         /// <summary>One system, as a line.</summary>
@@ -36,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             /// <summary>How many of its sequences are broken.</summary>
             public int Problems;
 
-            /// <summary>How many are worth a remark rather than a mark.</summary>
+            /// <summary>How many of its sequences have a warning.</summary>
             public int Warnings;
 
             /// <summary>Whether the system's own switch is off, which outranks everything below it.</summary>
@@ -57,14 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>How many warnings the logic systems on the construct have between them.</summary>
         public int Warnings { get; private set; }
 
-        /// <summary>
-        /// Works out every row again.
-        /// </summary>
-        /// <remarks>
-        /// <b>Not for a frame.</b> A fault can send the host off to read a toolbar, so this belongs on
-        /// the same sort of cadence the editor's screens use - once a second or slower. A surface script
-        /// asking on <c>Update100</c> is well inside that.
-        /// </remarks>
+        /// <summary>Works out every row again.</summary>
+        /// <remarks>Not for every frame: a fault can send the host off to read a toolbar, so ask once a second or slower.</remarks>
         public void Fill(GridWorld world, Automation program, AutomationRunner runner)
         {
             Clear();
@@ -80,14 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             Warnings = 0;
         }
 
-        /// <summary>
-        /// Adds one Sprocket's systems to what is already here.
-        /// </summary>
-        /// <remarks>
-        /// A construct may carry more than one Sprocket, and a person looking at a panel wants the ship
-        /// rather than whichever block the panel happens to sit nearest. So the rows and the totals are
-        /// the construct's, and every Sprocket on it adds to them.
-        /// </remarks>
+        /// <summary>Adds one Sprocket's systems to what is already here.</summary>
         public void Include(GridWorld world, Automation program, AutomationRunner runner)
         {
             var systems = program.Systems;
@@ -152,14 +126,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return uses.Count > 0;
         }
 
-        /// <summary>
-        /// Whether one state is more worth showing than another.
-        /// </summary>
-        /// <remarks>
-        /// A system is a row, and a row says one thing. Something happening beats something waiting,
-        /// and anything at all beats a rule somebody parked - which is the least interesting fact about
-        /// a system where the others are running.
-        /// </remarks>
+        /// <summary>Whether one state is more worth showing than another.</summary>
         static bool Louder(SequenceStatus now, SequenceStatus than)
         {
             return Rank(now) > Rank(than);

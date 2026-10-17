@@ -4,10 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A gyroscope: taken from the pilot or handed back, and how strongly it turns the ship.</summary>
-    /// <remarks>
-    /// The terminal's yaw, pitch and roll are in the gyroscope's own axes, which turn the ship a different way for every way
-    /// a gyroscope is placed, and are left out.
-    /// </remarks>
     public sealed class Gyroscope : Capability
     {
         static readonly OwnAction Releases = OwnAction.Of<IMyGyro>(gyro => gyro.GyroOverride = false);
@@ -19,10 +15,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// Release does what the game's <c>Override_Off</c> does without naming it: an entry of Sprocket's that names one half
-        /// of a switch's pair hides the switch itself, and overridden is listed. The game's pair is hidden behind that value.
-        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithAction("release", "release", Releases, (string)null).In(Category.Flight)

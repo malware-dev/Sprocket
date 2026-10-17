@@ -18,9 +18,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// showing whether it holds anything, and a line saying what the chosen one holds.
     /// </summary>
     /// <remarks>
-    /// Shown under the toolbar's line in the picker, set in so it reads as part of that line, and sliding open as that line
-    /// is chosen. Made again only when the toolbar's shape changes; what the slots hold and which is chosen are painted
-    /// onto the same elements.
+    /// Made again only when the toolbar's shape changes; what the slots hold and which is chosen are painted onto the same
+    /// elements.
     /// </remarks>
     public class SlotStrip : Reveal
     {

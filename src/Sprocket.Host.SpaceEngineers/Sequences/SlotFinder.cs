@@ -5,24 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>Works out a blueprint's slots from the sets of blocks its steps and triggers name, as the installation shown fills them.</summary>
     /// <remarks>
-    /// The blocks a list names, in the installation shown, are a set. The same set is the same slot. A set that is exactly the
-    /// union of smaller sets other lists name has no slot of its own, and names the fewest of those slots that make it. Every
-    /// other set is a slot, and its blocks may fill other slots too. A slot that keeps its set keeps its name, its description
-    /// and every installation's blocks.
-    /// <para>
-    /// A slot nothing names any more stays, hidden, while another installation holds blocks in it: those are the blocks that
-    /// installation set aside, offered back when it fills the slots that took its place. One no other installation holds
-    /// blocks in is taken out.
-    /// </para>
-    /// <para>
-    /// A list naming a slot the installation shown has not filled is left as it is, since there is nothing to compare it by.
-    /// Signal slots are not worked out here: a trigger's signal slot is its own. Nor is a slot holding a type the host provides,
-    /// which is a step's own, made by <see cref="Hold" />, and taken out like any slot once nothing names it.
-    /// </para>
-    /// <para>
-    /// Asked once per edit in the editor, never on a tick. The sets are a few blocks each and a system names a few dozen, so
-    /// comparing every set with every other is cheap at that size.
-    /// </para>
+    /// Called once per edit in the editor, never on a tick: it compares every set with every other, which is cheap at the few
+    /// dozen sets a system names.
     /// </remarks>
     public sealed class SlotFinder
     {
@@ -56,11 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// one, with every other change to the slots that brings about in <paramref name="reslot" />; <paramref name="held" /> are
         /// lists picked before it whose edits have not been made yet, which count as named and are left as they are.
         /// </summary>
-        /// <remarks>
-        /// Where the list replaced named exactly one slot, nothing else names it, and the new blocks are of kinds it expects, that
-        /// slot keeps its name, its description and every other installation's blocks, and takes the new blocks in the
-        /// installation shown.
-        /// </remarks>
         public List<string> Pick(IList<string> blocks, IList<string> replacing, IList<List<string>> held, out Reslot reslot)
         {
             Gather(replacing);
@@ -83,11 +62,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// every other change to the slots that brings about in <paramref name="reslot" />; <paramref name="held" /> are as
         /// <see cref="Pick" /> has them.
         /// </summary>
-        /// <remarks>
-        /// Where the list replaced named exactly one slot of that type and nothing else names it, that slot keeps its name, its
-        /// description and every other installation's answer, and takes the new blocks and facets in the installation shown.
-        /// Otherwise the slot is a new one, called as a block slot of the same blocks would be.
-        /// </remarks>
         public List<string> Hold(string type, IList<string> blocks, IList<int> facets, IList<string> replacing, IList<List<string>> held,
             out Reslot reslot)
         {
@@ -274,7 +248,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// The one block slot <paramref name="replacing" /> names, where it names exactly one, nothing else names it, and every
         /// one of <paramref name="blocks" /> is of a kind it expects; null otherwise.
         /// </summary>
-        /// <remarks>Of a kind it expects, so every other installation's blocks in it are still blocks it is for.</remarks>
         Part Kept(IList<string> replacing, IList<string> blocks)
         {
             if (replacing == null)

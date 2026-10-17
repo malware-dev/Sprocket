@@ -5,11 +5,8 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    // How often the chrome writes onto its controls, kept for the tests that hold an idle screen to none, and how a script
-    // finds a thing by what it says.
-    //
-    // A .debug.cs file, so this is compiled into local builds only and never packed for the game, where the
-    // call to Wrote compiles to nothing.
+    // A .debug.cs file: compiled into local builds only and not packed for the game, where the call to Wrote
+    // compiles to nothing.
     public sealed partial class EditorView
     {
         int _wires;
@@ -17,14 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How many times the chrome has written what the screen says onto its controls.</summary>
         public int Wires => _wires;
 
-        /// <summary>
-        /// Where a press reaches the first thing on the screen saying <paramref name="text" />, with or without the plus an adder
-        /// is shown with; false where nothing does.
-        /// </summary>
-        /// <remarks>
-        /// The windows first, top down, then the screen, each in the order it is drawn. A thing counts only where a press at its
-        /// middle reaches it or what it is part of, so words hidden under a window or scrolled out of sight are passed over.
-        /// </remarks>
+        /// <summary>Where a press reaches the first thing on the screen saying <paramref name="text" />, with or without an adder's plus.</summary>
+        /// <remarks>Words hidden under a window or scrolled out of sight are passed over.</remarks>
         public bool Find(string text, out Vector2 at)
         {
             for (var i = _windows.Count - 1; i >= 0; i--)

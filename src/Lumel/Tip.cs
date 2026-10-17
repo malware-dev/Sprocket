@@ -3,11 +3,7 @@ using Lumel.Text;
 namespace Lumel
 {
     /// <summary>What an element says while the pointer rests on it: a document, and the words for its slots where it has them.</summary>
-    /// <remarks>
-    ///     Read once, when it is made, and drawn by the screen's one tooltip, which lays a changed argument
-    ///     out again without reading anything again. Made once and kept, like a style: a tip made afresh is
-    ///     a tip read afresh.
-    /// </remarks>
+    /// <remarks>The text is parsed when the tip is made, so a tip is made once and kept.</remarks>
     public class Tip
     {
         /// <summary>A tip read from <paramref name="markdown" />, in markdown-lite.</summary>
@@ -42,7 +38,7 @@ namespace Lumel
         public Arguments Arguments { get; }
 
         /// <summary>The tip saying <paramref name="markdown" />: <paramref name="current" /> where it already says just that, a new one otherwise, and null for nothing to say.</summary>
-        /// <remarks>For a view that says its tip on every refresh, so the words are read only when they change.</remarks>
+        /// <remarks>For a view that sets its tip on every refresh: the words are parsed only when they change.</remarks>
         public static Tip For(Tip current, string markdown)
         {
             if (string.IsNullOrEmpty(markdown))

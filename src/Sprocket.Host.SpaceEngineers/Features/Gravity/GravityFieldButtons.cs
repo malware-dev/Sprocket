@@ -12,22 +12,12 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Gravity
 {
     /// <summary>The two buttons on a box gravity generator that size its field: to every block of its grid, and to every pressurized room in it.</summary>
-    /// <remarks>
-    /// Controls are global per block type rather than per block, so this runs once per mod load, driven off the first
-    /// gravity generator to come alive; see <see cref="GravityBlock" /> for why no earlier.
-    /// <para>
-    /// Static because the controls are: one set per block type for the whole game, which the terminal hands back through
-    /// a callback that carries no state of the mod's. They die with the mod's load.
-    /// </para>
-    /// </remarks>
     public static class GravityFieldButtons
     {
         const string Depth = "Depth";
 
-        /// <summary>The most a fitted side may fall short of what was asked and still count as covering it, in metres.</summary>
         const float Slack = 0.01f;
 
-        /// <summary>How much more air than its surroundings a room must hold to count as pressurized, as a share of a full room.</summary>
         const float Air = 0.01f;
 
         static bool _done;
@@ -68,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         }
 
         /// <summary>Moves the two buttons to stand under the field's depth, in the list of controls a gravity generator is about to show.</summary>
-        /// <remarks>The terminal's <c>CustomControlGetter</c>, as for the automation button. Where the depth is missing, the two go last.</remarks>
+        /// <remarks>Called as the terminal's <c>CustomControlGetter</c>.</remarks>
         public static void Arrange(IMyTerminalBlock block, List<IMyTerminalControl> controls)
         {
             if (_extents == null || !(block is IMyGravityGenerator))
@@ -145,11 +135,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         }
 
         /// <summary>Whether <paramref name="room" />, on a grid of cells <paramref name="size" /> wide, holds more air than what surrounds the grid.</summary>
-        /// <remarks>
-        /// The game also counts as an airtight room every sealed pocket inside blocks, such as the inside of a run of conveyor
-        /// tube ducts, and those can reach to the ends of a ship. They hold no more air than the outside, so this leaves them
-        /// out, and leaves in a room built only of corridor blocks.
-        /// </remarks>
+        /// <remarks>The game also counts every sealed pocket inside blocks, such as a run of conveyor tubes, as an airtight room.</remarks>
         static bool Pressurized(IMyOxygenRoom room, float size)
         {
             return room.IsAirtight && room.OxygenLevel(size) > room.EnvironmentOxygen + Air;
@@ -159,7 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         /// Sizes <paramref name="generator" />'s field to the cells from <paramref name="min" /> to <paramref name="max" />; where the
         /// generator cannot reach that far, says by how much and shows both in the world.
         /// </summary>
-        /// <remarks>The game holds the field to the generator's own limits as it is set, so what it keeps is read back to tell.</remarks>
+        /// <remarks>The game holds the field to the generator's own limits as it is set.</remarks>
         static void Fit(IMyGravityGenerator generator, Vector3I min, Vector3I max, string title, Texts texts)
         {
             var grid = generator.CubeGrid;
@@ -183,14 +169,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
             Say(title, Template.Fill(Template.Fill(texts.TerminalFitShort, "needed", Metres(wanted)), "reached", Metres(kept)));
         }
 
-        /// <summary>A field size as a person reads it: width by height by depth, in metres.</summary>
+        /// <summary>A field size as a person reads it: width by height by depth, in meters.</summary>
         static string Metres(Vector3 size)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:0.#} × {1:0.#} × {2:0.#} m", size.X, size.Y, size.Z);
         }
 
         /// <summary>Tells the player <paramref name="what" />, under <paramref name="title" />.</summary>
-        /// <remarks>A window rather than the HUD's notifications: this answers a press in the terminal, and the HUD does not draw while the terminal is open.</remarks>
+        /// <remarks>The HUD does not draw while the terminal is open.</remarks>
         static void Say(string title, string what)
         {
             if (MyAPIGateway.Utilities != null)

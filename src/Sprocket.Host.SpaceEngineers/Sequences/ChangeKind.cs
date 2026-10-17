@@ -1,7 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What an edit did, as it is offered back after Undo and Redo.</summary>
-    /// <remarks>Also what a run of edits is folded by: typing a name is many edits of one kind, and one step back.</remarks>
+    /// <remarks>Consecutive edits of one kind fold into one step back.</remarks>
     public enum ChangeKind
     {
         /// <summary>Nothing.</summary>

@@ -14,9 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// <summary>One stage of a pick as a column: what it asks, whatever narrows it, and the things to choose from.</summary>
     /// <remarks>
     /// Its rows, kinds and options are the children of <see cref="Rows" />, <see cref="Kinds" /> and <see cref="Options" />,
-    /// kept by whoever fills the column. What is typed into a box that narrows it is the truth while it is being typed, so
-    /// the column is told what it narrows to only while nobody is typing there. The elements it is drawn with are declared in
-    /// <c>StageColumn.View.cs</c>, and nothing else is.
+    /// kept by whoever fills the column.
     /// </remarks>
     public partial class StageColumn : VStack
     {
@@ -139,7 +137,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>What putting every kind back does, or null while there is nothing to put back.</summary>
-        /// <remarks>Nothing to clear is no cross at all: a way out that does nothing is pressed twice before it is believed.</remarks>
         public ICommand ClearKind
         {
             get { return _kindClear.Command; }

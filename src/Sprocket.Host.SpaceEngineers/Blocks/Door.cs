@@ -8,14 +8,7 @@ using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// Doors, and everything shaped like one - sliding, airtight, hangar, and the advanced door.
-    /// </summary>
-    /// <remarks>
-    /// The terminal has one <c>Open</c> control, which is the switch a player throws rather than where the
-    /// door has got to. Sprocket needs the difference: "close the inner door" is finished when the door is
-    /// shut, not when the order was given.
-    /// </remarks>
+    /// <summary>A door, or a block shaped like one: sliding, airtight, hangar and the advanced door.</summary>
     public sealed class Door : Capability
     {
         static readonly Reading Opened = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Open);
@@ -40,14 +33,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// Nothing to call off: a door goes on to where it was going, and one stopped half way is a hole in a wall.
-        /// </remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            // Every door says when it is told to open; only a hangar door says when it is told to close. Any other door is
-            // looked at for starting to close only between starting to open and having closed, which it does say, and so
-            // is its status as a whole.
+            // Every door says when it is told to open; only a hangar door says when it is told to close, so any other door is
+            // looked at between starting to open and having closed.
             var hangar = block is IMyAirtightHangarDoor;
             kind.WithValue("status", "status", State).Status();
             Watched(kind, hangar);
@@ -63,8 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             Watched(kind, hangar);
 
-            // How far open changes only while the door moves, which it can only between starting to open and having
-            // closed; nothing is raised as it moves, so it is looked at on the when's cadence in between.
+            // How far open changes only while the door moves, which raises nothing, so it is looked at on the when's cadence
+            // between starting to open and having closed.
             kind.WithValue("how-far-open", "how far open", Ratio).Percent().RuledOutBy(Shut);
 
             kind.WithAction("open", "open", Opens, "Open_On").Lasting()
@@ -84,9 +73,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Why a door told to close is not getting there: something else has told it to open.</summary>
-        /// <remarks>A door's status follows the last order it was given, so opening or open means it was told to.</remarks>
         static BlockTrouble Opening(IMyDoor door)
         {
+            // A door's status follows the last order it was given.
             return door.Status == DoorStatus.Opening || door.Status == DoorStatus.Open
                 ? BlockTrouble.Fatal(Cause.DoorToldToOpen)
                 : BlockTrouble.None;
@@ -116,13 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return 3;
         }
 
-        /// <summary>Told when the door finishes opening or closing, which every door raises from its own update, as it is told to open, and, for a hangar door, as it is told to close.</summary>
-        /// <remarks>
-        /// Each family of door raises these itself, and a plain door may raise "closed" as a world loads with it shut; a
-        /// look finds nothing changed and nothing fires. A door's state-changed event comes as it is told to open and again
-        /// once it has closed, never as it is told to close; a hangar door's properties-changed event comes as it is told to
-        /// do either.
-        /// </remarks>
+        /// <summary>Told when the door finishes opening or closing, as it is told to open, and for a hangar door as it is told to close.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var door = block as IMyDoor;

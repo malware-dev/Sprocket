@@ -9,9 +9,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {
     /// <summary>Every term the codex explains, in the language the editor speaks.</summary>
     /// <remarks>
-    /// The terms, and their order, are the ids in the file <c>index</c> at the root of the mod's <c>Data\Codex</c>: one id a line,
-    /// where a line starting with <c>#</c> is a comment. Each term's page and tooltip are files in each language's folder, named
-    /// by its id. The index is read when the terms are first asked for, and again once the pages are read from somewhere else.
+    /// The terms and their order are the ids in the file <c>index</c> at the root of the mod's <c>Data\Codex</c>: one id a line,
+    /// a line starting with <c>#</c> a comment, and <c>&gt;</c> before the id of a term that begins a section.
     /// </remarks>
     public sealed class Terms
     {
@@ -47,10 +46,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
 
         const string Index = "index";
 
-        /// <summary>What a line of the index starts with where its term begins a section of the contents.</summary>
         const char Section = '>';
 
-        /// <summary>The terms a screen links to by name, which the index has to list.</summary>
         static readonly string[] Linked = { Home, LogicSystem, Installation, Sequence, InstallationPanel, Library, Picking };
 
         readonly Texts _texts;
@@ -75,7 +72,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         }
 
         /// <summary>What is wrong with the index, said in the game's log as it is read, or empty where nothing is.</summary>
-        /// <remarks>The build reports the rest: an id with no page, an id listed twice, and a page the index leaves out.</remarks>
         public string Trouble
         {
             get
@@ -100,10 +96,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         }
 
         /// <summary>Reads the index, where the pages have come to be read from somewhere it has not been read from yet.</summary>
-        /// <remarks>
-        /// A term the index lists twice is listed once; a term a screen links to and the index leaves out is said in the log, since
-        /// the screen's help then opens nothing.
-        /// </remarks>
         void Ready()
         {
             var pages = _texts.Book.Pages;

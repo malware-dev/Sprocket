@@ -33,12 +33,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing; whether they
         /// changed, so the automation is written again.
         /// </summary>
-        /// <remarks>
-        /// Sharing works both ways: an owner the automation had who may still use its block now is exactly the case where the new
-        /// owner could use it before, such as a faction mate handed a ship shared with the faction. A capture, or a hand-over to
-        /// somebody it was not shared with, pauses it until a big owner resumes it. Once paused it stays paused, whoever owns it
-        /// next, and remembers who it was taken from.
-        /// </remarks>
+        /// <remarks>Once paused it stays paused until a big owner resumes it, whoever owns it next.</remarks>
         public bool Owned(IMyTerminalBlock hero)
         {
             _changed = false;

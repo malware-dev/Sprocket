@@ -4,14 +4,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// A step that starts another sequence of the same system, or stops it.
     /// </summary>
-    /// <remarks>
-    /// By number, because that is what a sequence is. A script may name one instead - a person writing
-    /// one by hand has the name in front of them - and the reader turns that into the number.
-    /// <para>
-    /// It starts the sequence and carries on, and an <see cref="Await" /> below it waits for that sequence
-    /// to finish. A sequence that is already running is not started twice; it records the miss instead.
-    /// </para>
-    /// </remarks>
+    /// <remarks>A sequence that is already running is not started twice; the miss is recorded instead.</remarks>
     public sealed class Run : Step
     {
         /// <summary>A step that runs the sequence <paramref name="number" /> of the same system.</summary>
@@ -36,11 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// The name a script used instead of a number, until the system has been read.
         /// </summary>
-        /// <remarks>
-        /// A sequence may name one written below it, so a name cannot be turned into a number while
-        /// the system is still being read. Empty everywhere else, including in everything Sprocket
-        /// writes, because the writer writes the number.
-        /// </remarks>
+        /// <remarks>Empty once the system has been read; Sprocket always writes the number.</remarks>
         public string Named { get; set; }
     }
 }

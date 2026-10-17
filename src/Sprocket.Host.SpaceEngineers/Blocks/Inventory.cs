@@ -5,11 +5,8 @@ using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>A block with an inventory: how full it is and how heavy its load, and moving items, which is still to come.</summary>
-    /// <remarks>
-    /// How full and how heavy are read on a block with one inventory only. On a block with several, which one a reading
-    /// means is an option, and a value takes none.
-    /// </remarks>
+    /// <summary>A block with an inventory, read for how full it is and how heavy its load.</summary>
+    /// <remarks>How full and how heavy are read only on a block with one inventory.</remarks>
     public sealed class Inventory : Capability
     {
         static readonly OwnValue Fill = OwnValue.Number<IMyTerminalBlock>(block => block.GetInventory(0).VolumeFillFactor * 100d);
@@ -33,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithValue("inventory-mass", "inventory mass", Mass).Measured(" kg").In(Category.Stock).Announced();
         }
 
-        /// <summary>Told as anything goes into or out of the inventory, which every inventory announces.</summary>
+        /// <summary>Told as anything goes into or out of the inventory.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var inventory = block.InventoryCount == 1 ? block.GetInventory(0) : null;

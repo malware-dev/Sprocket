@@ -17,10 +17,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// Moves a run of lines as one.
         /// </summary>
-        /// <remarks>
-        /// A step and the await after it are one line as far as anybody looking at the screen is
-        /// concerned, so they travel together and come back together.
-        /// </remarks>
         public MoveStep(int from, int to, int count)
         {
             _from = from;

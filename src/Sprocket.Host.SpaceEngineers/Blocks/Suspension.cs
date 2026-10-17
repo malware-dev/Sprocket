@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("ShareInertiaTensor", false, "toggle share inertia tensor");
         }
 
-        /// <summary>Told as the wheel is attached or comes off, which every suspension raises.</summary>
+        /// <summary>Told as the wheel is attached or comes off.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var suspension = block as IMyMotorSuspension;

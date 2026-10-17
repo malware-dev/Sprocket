@@ -30,7 +30,6 @@ namespace Lumel.Viewing
         protected override bool Passes => _openness >= 1f;
 
         /// <inheritdoc />
-        /// <remarks>Always: what it holds is shown only as far as it has opened.</remarks>
         protected override bool Clips => true;
 
         /// <summary>The content stretches across, and down it stands on the bottom edge, where what is on show ends.</summary>

@@ -11,9 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>An angle, given by turning a dial or by typing it into the box beside it, the two kept in step.</summary>
     /// <remarks>
-    /// Nought is straight up and positive is clockwise, as the game turns a rotor. It counts on past a whole turn, to a whole
-    /// turn either way, because the game treats a rotor sent to minus ninety and one sent to two hundred and seventy as
-    /// different instructions. Up and down in the box turn it a notch at a time, since left and right move the caret.
+    /// Nought is straight up and positive is clockwise, as the game turns a rotor. It runs to a whole turn either way, because
+    /// the game treats a rotor sent to minus ninety and one sent to two hundred and seventy as different instructions.
     /// </remarks>
     public class AngleField : HStack, IField
     {

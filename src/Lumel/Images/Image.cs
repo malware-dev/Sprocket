@@ -6,9 +6,9 @@ namespace Lumel.Images
 {
     /// <summary>A picture, drawn across the whole of its bounds inside its padding.</summary>
     /// <remarks>
-    ///     Given a size both ways by its placement, it is that size. Given one side, it takes the other from the
-    ///     picture's shape. Given neither, it is as big as fits the room it is offered in that shape, or as big as
-    ///     the picture was made where the room is unbounded both ways.
+    ///     Given a size both ways by its placement, it is that size; given one side, it takes the other from the
+    ///     picture's shape. Given neither, it is as big as fits the room it is offered, or as big as the picture was
+    ///     made where the room is unbounded both ways.
     /// </remarks>
     public class Image : Element, IPadded
     {

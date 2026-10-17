@@ -5,15 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// Every value one read of a script produced.
     /// </summary>
     /// <remarks>
-    /// <b>Measured, and it is why this exists.</b> A list per statement was three heap objects per line -
-    /// the statement, its list, and the list's array, grown by copying - and on a large program that was
-    /// most of what a load allocated, enough that the collector ran inside the load and the cost per
-    /// statement stopped being flat. So a statement owns no values; it names a run of these.
-    /// <para>
-    /// Separate runs because a statement's values have to sit together, and so do a list's items and a
-    /// name's parts, and each is read while its statement's values are still being read. Lists do not hold
-    /// lists, which is the other half of keeping every run unbroken.
-    /// </para>
+    /// Measured: a list per statement was most of what a large program's load allocated, so a statement names a run of
+    /// these instead.
     /// </remarks>
     public sealed class ScriptValues
     {

@@ -3,17 +3,9 @@ using VRage.Game.ModAPI.Ingame.Utilities;
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>
-    /// Every bare word the format gives a meaning to, and how to recognise one without making a string.
+    /// Every bare word the format gives a meaning to, and how to recognize one without making a string.
     /// </summary>
-    /// <remarks>
-    /// <b>Nothing is reserved.</b> A host may well name an action <c>open</c>, and one may name it
-    /// <c>every</c>; the format keeps both by quoting the second, because a quoted word is never a
-    /// keyword. So the writer quotes around this list, and the reader only asks it about bare words.
-    /// <para>
-    /// These strings are persisted: every save ever written spells them this way, so changing one is a
-    /// change to what every existing file means.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Persisted: every save spells these words this way.</remarks>
     public static class Keywords
     {
         static readonly string[] Names =
@@ -37,16 +29,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Which keyword a stretch of text spells, or <see cref="Keyword.None" />, reading it where it lies.
         /// </summary>
-        /// <remarks>
-        /// On a segment rather than a substring, because making the substring is the cost being avoided: a
-        /// save is mostly these words, and each one would otherwise be an allocation thrown away as soon
-        /// as it had been compared.
-        /// </remarks>
+        /// <remarks>Allocates nothing.</remarks>
         public static Keyword Find(StringSegment word)
         {
-            // By length, measured: looking every bare word up in one list made the lexer 40% slower, because most
-            // bare words are no keyword at all. A name like entity123 has no keyword of its length and is turned
-            // away by one array read.
+            // By length, measured: one list for every bare word made the lexer 40% slower. A word with no keyword of its
+            // length is turned away by one array read.
             if (word.Length >= ByLength.Length)
                 return Keyword.None;
 
@@ -67,16 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Whether a word can be written as it is, or has to be quoted.
         /// </summary>
-        /// <remarks>
-        /// The same shape the reader accepts bare: a letter, then letters, digits and underscores.
-        /// Everything else is quoted mechanically, which covers the game's own oddities - properties called
-        /// <c>Blink Interval</c>, subtypes with spaces - without anybody choosing.
-        /// <para>
-        /// <b>A dash is not one of them, and that is about subtraction.</b> Were it a name character,
-        /// <c>a-1</c> would be one name and <c>a - 1</c> a subtraction, so the same text would mean two
-        /// different things depending on a space and the wrong reading would be the silent one.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Persisted: a bare word is a letter, then letters, digits and underscores, and no keyword.</remarks>
         public static bool Bare(string word)
         {
             return Shaped(word) && !Taken(word);

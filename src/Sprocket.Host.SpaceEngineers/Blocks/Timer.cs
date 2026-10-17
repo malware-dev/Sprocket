@@ -5,13 +5,8 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A timer block: its one signal, whether it is counting down, and the members of its terminal said in Sprocket's words.
-    /// </summary>
-    /// <remarks>
-    /// It goes off and the game runs every slot of its toolbar. It raises no event of its own, so whether it is counting
-    /// down is looked for.
-    /// </remarks>
+    /// <summary>A timer block, with its one signal and read for whether it is counting down.</summary>
+    /// <remarks>The game runs every slot of its toolbar as it goes off; it raises no event, so whether it is counting down is looked at.</remarks>
     public sealed class Timer : Capability
     {
         static readonly OwnValue Counting = OwnValue.Flag(Reading.Of<IMyTimerBlock>(timer => timer.IsCountingDown));

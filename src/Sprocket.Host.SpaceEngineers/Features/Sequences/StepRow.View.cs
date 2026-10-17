@@ -47,14 +47,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         LineSpacing = 8f,
                         Children =
                         {
-                            // Before its word, as it stands before a member's name: running another sequence lasts until it finishes.
                             new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, HaloSize = 20f * Sizes.Halo }
                                 .As(out _leadWaits),
                             new Label { Style = Styles.Phrase }.As(out _lead)
                         }
                     }.As(out _sentence),
 
-                    // Its own line under the step, as on every other line that says what is wrong with it.
                     new Label { Style = Styles.Problem, Wraps = true, IsVisible = false }.As(out _problem)
                 }
             });
@@ -62,7 +60,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Children.Add(new Glyph { Symbol = Symbols.Duplicate, Style = Styles.Icon, Placement = FixedSize.Size(32f, 32f) }.As(out _duplicate));
             Children.Add(new Glyph { Symbol = Symbols.Pause, Style = Styles.Holds, Placement = FixedSize.Size(32f, 32f) }.As(out _pause));
 
-            // The one control on the row that destroys something, so the one place that warns under the pointer.
             Children.Add(new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, Placement = FixedSize.Size(32f, 32f) }.As(out _delete));
         }
     }

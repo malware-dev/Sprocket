@@ -3,8 +3,7 @@ using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>One of the ways a place offers to add something: its words, what it says under the pointer, and what it does.</summary>
-    /// <remarks>Either it adds one thing when pressed, or it offers several, which a <see cref="PlusMenu" /> hangs open as a menu.</remarks>
+    /// <summary>One of the ways a place offers to add something.</summary>
     public struct AddOption
     {
         /// <summary>An adder saying <paramref name="text" />, explained by <paramref name="about" />, doing <paramref name="adds" />.</summary>
@@ -30,7 +29,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What it says, without the plus it is shown with.</summary>
         public string Text { get; private set; }
 
-        /// <summary>What it says with the plus, made once so a row shown every tick makes no text of its own.</summary>
+        /// <summary>What it says with the plus.</summary>
+        /// <remarks>Made once, so a row shown every tick allocates no text.</remarks>
         public string Shown { get; private set; }
 
         /// <summary>What it says under the pointer.</summary>

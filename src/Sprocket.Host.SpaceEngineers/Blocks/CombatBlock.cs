@@ -6,10 +6,6 @@ using VRage.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An offensive or defensive combat block: who it goes after, and whether it has found someone.</summary>
-    /// <remarks>
-    /// Finding and losing a target is something the block does of its own accord, so it is offered as a pair of signals
-    /// beside the value.
-    /// </remarks>
     public sealed class CombatBlock : Capability
     {
         static readonly Reading Found = Reading.Of<IMyTerminalBlock>(block =>

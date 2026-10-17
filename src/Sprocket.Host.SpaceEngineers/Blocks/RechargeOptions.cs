@@ -5,10 +5,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>What a step told a battery or a jump drive to recharge was given: whether it waits until the block is charged.</summary>
-    /// <remarks>
-    /// One option for both, because a battery and a jump drive recharge under the same word. Waiting is what recharging
-    /// does unless told otherwise, so a sentence leaves it out and says "and move on" where it moves on.
-    /// </remarks>
     public sealed class RechargeOptions
     {
         const string Wait = "wait";

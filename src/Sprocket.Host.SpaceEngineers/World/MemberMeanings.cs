@@ -8,18 +8,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// What a particular kind of block means by its own members, where reading the id is not enough.
     /// </summary>
-    /// <remarks>
-    /// <see cref="Categories" /> answers by id, which is what lets one table cover every block in the
-    /// game. It is a default and nothing more: the same word means a glow on a light and a reach on
-    /// an antenna, and a great many members are only placeable by somebody who knows what the block
-    /// is for. This is where that knowledge goes until the block gets a capability of its own.
-    /// <para>
-    /// <b>Hiding is the other half.</b> Three kinds of member have no business in a list of things a
-    /// sequence can do: one that needs somebody sitting in the block, one the game keeps for
-    /// compatibility and no longer honours, and one that is furniture for the terminal's own screen.
-    /// They stay in the terminal view, where they are what the block declares.
-    /// </para>
-    /// </remarks>
     public static class MemberMeanings
     {
         /// <summary>Gives the members of <paramref name="kind" />, which <paramref name="block" /> is of, their meanings, and hides those no sequence should be offered.</summary>
@@ -209,7 +197,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (block is IMyMedicalRoom)
             {
 
-                // Ownership moved to the faction system years ago; these two are what is left.
+                // The game keeps these two from before its faction system, and they set nothing a sequence wants.
                 Hide(kind, "TakeOwnership");
                 Hide(kind, "SetFaction");
             }
@@ -252,22 +240,19 @@ namespace Sprocket.Host.SpaceEngineers.World
                 HideToggle(kind, "ThrowOut");
             }
 
-            // Charge mode says all of these, one value and three words. Recharge On is left to Sprocket's
-            // recharge, which stands in for it by its id; the two toggles stay, renamed by the battery.
+            // Charge mode says all of these. Recharge_On is left to Sprocket's recharge, which stands in for it by its id.
             if (block is IMyBatteryBlock)
                 kind.Hiding("Recharge_Off", "Discharge_On", "Discharge_Off", "Auto");
 
-            // What starts a programmable block's own script. A step runs a script by running the block,
-            // and Sprocket's own toolbar action is the wiring of the thing.
+            // A step runs a script by running the block, and Sprocket's own toolbar action is the wiring.
             if (block is IMyProgrammableBlock)
                 kind.Hiding("RunWithDefaultArgument", SignalAction.ActionId);
         }
 
         /// <summary>Takes out the setters written by hand beside a value that says the same.</summary>
         /// <remarks>
-        /// Each was made by hand for its own block, so each is said here rather than read off its id -
-        /// from the game's own terminal data, one block at a time. A thruster's <c>SetOverride</c> is
-        /// not among them though it looks it: it takes a percentage, where the value takes newtons.
+        /// Transcribed from the game's own terminal data, one block at a time. A thruster's <c>SetOverride</c> takes a
+        /// percentage, where the value takes newtons, so it stays.
         /// </remarks>
         static void Setters(EntityKind kind, IMyTerminalBlock block)
         {
@@ -303,10 +288,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>What every block means by a word, where the table's answer is the wrong one.</summary>
-        /// <remarks>
-        /// An event controller is nothing but the setting up of a watcher, and a transponder's filter is who it
-        /// listens to, which is talking to other constructs.
-        /// </remarks>
         static void Everywhere(EntityKind kind, IMyTerminalBlock block)
         {
             In(kind, "Threshold", Category.Behaviour);
@@ -316,8 +297,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             In(kind, "ReceiveFrom", Category.Signals);
             Hide(kind, "SearchBox");
 
-            // Set once when the machine is built, so flipping it is nothing a sequence does. The value
-            // stays, to be set. The production blocks and the stores offer theirs, for a button that flips one.
+            // Set once when the machine is built, so flipping it is nothing a sequence does; the value stays, to be set.
             HideToggle(kind, "EnableParking");
             HideToggle(kind, "Auto-Refill");
             HideToggle(kind, "AutomaticallyPullBottles");
@@ -338,8 +318,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             Hide(kind, "ShowInTerminal");
             Hide(kind, "ShowInToolbarConfig");
 
-            // A sequence says which block it means by the block's name, so a sequence that renamed
-            // one would be cutting the ground from under itself and every other sequence besides.
+            // A sequence names its blocks by name, so renaming one is not offered.
             HideValue(kind, "Name");
 
             // On a broadcast controller CustomName is the name chat shows its messages as coming from, a setting of its
@@ -373,11 +352,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// A turret aims itself, so nearly all of it is what it does without being asked.
         /// </summary>
-        /// <remarks>
-        /// What is left under Weapons is what a sequence can actually say: shoot, shoot once, reload,
-        /// change ammunition. A turret controller has none of those, which is why it reads as a block
-        /// of settings with a weapon somewhere behind it.
-        /// </remarks>
         static void Turrets(EntityKind kind, IMyTerminalBlock block)
         {
             In(kind, "Range", Category.Behaviour);
@@ -431,11 +405,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Takes growing the machine a new part out of the list of what to tell it to do, where the block's capability has not brought it in.</summary>
-        /// <remarks>
-        /// A rotor offers to grow itself a head in three sizes and a hinge's head as well. Asked of the id rather than
-        /// listed, because the game has more spellings of it than a list would hold. One a capability gave a word of its
-        /// own is offered under that word.
-        /// </remarks>
         static void Building(EntityKind kind)
         {
             var actions = kind.Actions;
@@ -484,12 +453,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Takes the value the game named <paramref name="stem" /> out of the organized view.</summary>
-        /// <remarks>
-        /// A switch reaches the list three times - the pair that says which way, the act that flips
-        /// it, and the value it settles on - and the pair is two of those said better. The value is
-        /// the one that goes, because the act is the only one of the three a person cannot write out
-        /// of a pair of steps.
-        /// </remarks>
         static void HideValue(EntityKind kind, string stem)
         {
             var actions = kind.Actions;
@@ -502,10 +465,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Takes the game's act that flips a switch out of the organized view, and nothing else of it, where the block's capability has not brought it in.</summary>
-        /// <remarks>
-        /// By its exact id, because the switch's value and the act share it and the value stays. One a capability or a kind gave
-        /// a word of its own is offered under that word, as a tank's toggle stockpile.
-        /// </remarks>
+        /// <remarks>Matched by its exact id, which the switch's value shares.</remarks>
         static void HideToggle(EntityKind kind, string id)
         {
             string word;

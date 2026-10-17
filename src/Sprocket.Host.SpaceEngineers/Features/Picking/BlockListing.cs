@@ -56,15 +56,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// where <paramref name="showsHidden" />.
         /// </summary>
         /// <remarks>
-        /// Ticking a block narrows what can be said about it in the next stage and nothing else, so nobody watches the list of
-        /// their own blocks shrink underneath them. Narrowing is the one thing that can hide a row, and a picked block is
-        /// exempt: a tick nobody can find is a tick nobody can clear. A row stays on the list until the narrowing changes, so a
-        /// block kept only because it was picked is still there after somebody picks another in its place. Sorted by name,
-        /// because the order the world hands them over is whatever walking the grid produced.
-        /// <para>
-        /// A block hidden from toolbars is left out until the eye is opened, as the game's toolbar list leaves it out, unless
-        /// it is picked.
-        /// </para>
+        /// A picked block is always listed, and a row stays listed until the search or the kind changes.
         /// </remarks>
         public void Collect(List<long> selection, string search, string kind, Family family, bool showsHidden,
             Func<GridEntity, bool> fits, List<EntityKind> kinds)

@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
     /// <summary>Which wait on a sequence's screen covers which steps that take time, and the rows lit for what is under the pointer.</summary>
     public sealed class WaitCoverage
     {
-        // How long the ring around what is tied to what is under the pointer takes to brighten and fade again: a second.
+        // One brightening and fading of the ring: a second at 60 ticks a second.
         const int PulseTicks = 60;
 
         readonly Func<Step, bool> _lasts;
@@ -32,15 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return _hot < 0 ? Palette.None : Pulse(tick);
         }
 
-        /// <summary>
-        /// Works out which row waits for each step that takes time, and from which row each wait covers: every step that takes time
-        /// since the wait before, down to the wait.
-        /// </summary>
-        /// <remarks>
-        /// A step that takes time with no wait below it is covered by none, which is how the sequence leaves it to finish on its own.
-        /// A paused step is read as the run reads it, as though it were not there: a paused wait covers nothing and leaves its steps
-        /// to the next wait, and a paused step that takes time is not waited for.
-        /// </remarks>
+        /// <summary>Works out which wait covers each step that takes time, reading paused steps as the run reads them.</summary>
         public void Cover(List<object> keys, KeyedChildren<object, StepRow> rows)
         {
             _waiter.Clear();
@@ -79,17 +71,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
         }
 
-        /// <summary>
-        /// Lights what is tied to what is under the pointer, its own clock with it: on a wait, the clock marks of the steps it covers;
-        /// on a step, the clock of the wait covering it.
-        /// </summary>
-        /// <remarks>Asked every tick, as the pointer gives no word when it moves; it lights anything only when what is under it is another.</remarks>
+        /// <summary>Lights the rows tied to the row under the pointer.</summary>
+        /// <remarks>Called every tick; it changes rows only when the row under the pointer changes.</remarks>
         public void Light(List<object> keys, KeyedChildren<object, StepRow> rows, bool carrying)
         {
             var hot = -1;
             var onWait = false;
 
-            // Nothing is lit while a step is carried: the pointer passing over rows on its way is not pointing at them.
             for (var i = 0; !carrying && i < keys.Count && i < _waiter.Count; i++)
             {
                 var row = rows[keys[i]];

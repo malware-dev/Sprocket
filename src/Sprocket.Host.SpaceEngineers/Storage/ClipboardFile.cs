@@ -4,10 +4,7 @@ using Lumel.Input;
 namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>Copied text kept in a file, so a player can paste text in from outside the game and copy it back out.</summary>
-    /// <remarks>
-    /// The game gives a mod no way to the operating system's clipboard, so the file stands in for it. Read on every paste
-    /// and written on every copy, each of which a person does by hand.
-    /// </remarks>
+    /// <remarks>Read on every paste and written on every copy.</remarks>
     public sealed class ClipboardFile : IClipboard
     {
         const string File = "sprocket-clipboard.txt";

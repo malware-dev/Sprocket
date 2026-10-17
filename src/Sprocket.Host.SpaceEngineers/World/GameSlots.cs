@@ -19,11 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// The game's own toolbars.
     /// </summary>
     /// <remarks>
-    /// <b>A block does not implement <see cref="IMyToolbarProvider" />, it carries one.</b> So
-    /// <c>block as IMyToolbarProvider</c> compiles, returns null on every block in the game, and takes
-    /// every toolbar read and write quietly with it - nothing throws, buttons simply never wire up.
-    /// Sprocket had that cast written out in three places and got it wrong in all three when the API
-    /// moved the provider onto the component container.
+    /// A block carries its <see cref="IMyToolbarProvider" /> as a component: <c>block as IMyToolbarProvider</c> compiles,
+    /// and is null on every block in the game.
     /// </remarks>
     public sealed class GameSlots : ISlots
     {
@@ -116,11 +113,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether a block has an action of the game's own by that name.
         /// </summary>
-        /// <remarks>
-        /// The block is asked rather than a list being kept, because which actions a block offers
-        /// depends on its subtype and on what the game has done to it since - and a name that is
-        /// wrong here would write a slot that looks wired and does nothing.
-        /// </remarks>
         public bool Offers(IMyTerminalBlock block, string actionId)
         {
             return block != null && block.GetActionWithName(actionId) != null;
@@ -130,19 +122,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Every action the block declares, as the terminal would list them.
         /// </summary>
         /// <remarks>
-        /// The list is the game's to fill. A block with no actions at all is an ordinary answer - a
-        /// conveyor tube has none - and so is a name the game leaves empty, which is why the id goes
-        /// through as well and is what everything else holds.
-        /// <para>
-        /// <b>What the list holds is not what the terminal shows.</b> The game registers an action on
-        /// a type and then asks each block whether it is one the action is for: an advanced rotor and
-        /// a hinge are one type, and each declares the other's head. <c>IsEnabled</c> is the question
-        /// the terminal asks, and asking it here is what keeps Sprocket offering what the game does.
-        /// </para>
-        /// <para>
-        /// Asked of the block a kind is built from, so an answer that turns on what the block is
-        /// doing rather than on what it is would be fixed for the whole type at that moment.
-        /// </para>
+        /// The game registers an action on a type and the terminal asks each block <c>IsEnabled</c>: an advanced rotor and
+        /// a hinge are one type, and each declares the other's head.
         /// </remarks>
         public void Offered(IMyTerminalBlock block, List<Offer> into)
         {
@@ -167,11 +148,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Every value a block carries that can be told what to be.
         /// </summary>
-        /// <remarks>
-        /// The other half of <see cref="Offered" />, and the half that describes itself. A block
-        /// declares a handful of actions and carries far more values than that, and each value says
-        /// what it is called and what kind of thing it holds without anybody writing it down.
-        /// </remarks>
         public void Settable(IMyTerminalBlock block, List<Offer> into)
         {
             if (block == null)
@@ -200,20 +176,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Everything a value says it may be, where it says so.
         /// </summary>
         /// <remarks>
-        /// <b>The property and the control are the same object again.</b> A value chosen from a list
-        /// is a combo box on the terminal, and a combo box reports itself to a mod as a whole number
-        /// - so the number is all the value surface has, and the words are on the other face of it.
-        /// <para>
-        /// Each one arrives as the number the block is told and an interned id for the words, which
-        /// is the same shape a property's own title arrives in and is turned into a sentence the same
-        /// way. Both are kept, because they are not the same thing: the words are what somebody
-        /// reads and the number is what the program holds.
-        /// </para>
-        /// <para>
-        /// The list handed to the block is this one, cleared and refilled, because this runs once per
-        /// value per block kind while a world is being read. What comes out of it is copied into an
-        /// array the offer keeps, since the block is free to fill this one again.
-        /// </para>
+        /// The game's combo box reports itself to a mod as a whole number, with its words on the control. Runs once per value
+        /// per block kind while a world is read, so the list handed to the block is reused.
         /// </remarks>
         Offer Listed(ITerminalProperty property, Offer made)
         {
@@ -228,9 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
             catch (NullReferenceException)
             {
-                // Asked of a combo box that fills its list per block, this throws: the getter hands a
-                // mod a wrapper around the list-filler whether or not there is one, so there is nothing
-                // to test first.
+                // The game throws here for a combo box that fills its list per block, and offers nothing to test first.
                 return made.Unread();
             }
 
@@ -250,16 +212,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The least a numeric value will accept, or empty where the block says nothing useful.
         /// </summary>
-        /// <remarks>
-        /// The block's own limits, which is what the game's own dialog for setting one of these
-        /// puts a slider between. Nobody writes them down and they are right for each block: a
-        /// spotlight reaches further than a corner light and says so itself.
-        /// <para>
-        /// A property with no limits answers with the whole range its type can hold. Those are
-        /// passed over, because "between -340282350000000000000000000000000000000 and" is not a
-        /// thing to put beside a box.
-        /// </para>
-        /// </remarks>
+        /// <remarks>The game answers the whole range of a float for a property with no limits, which counts as saying nothing.</remarks>
         static string Least(IMyTerminalBlock block, ITerminalProperty property, ValueKind kind)
         {
             if (kind != ValueKind.Real)
@@ -292,18 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether the block has this value, which every value it declares is but a screen's own.
         /// </summary>
-        /// <remarks>
-        /// Every functional block carries the whole screen apparatus whether or not it has a screen -
-        /// what is shown, the font, its size and colour, the padding, the backgrounds - and a light
-        /// would otherwise offer a dozen values of which a handful are the light. So a screen's values
-        /// are the block's where it has a screen at all, which is a fact about the block rather than
-        /// about the moment: its script's colours count while it is showing text, and its font while it
-        /// is showing nothing.
-        /// <para>
-        /// The game's own actions on these values already follow the same test, so a block with no
-        /// screen has neither.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Every functional block in the game carries a screen's values, whether or not it has a screen.</remarks>
         static bool Has(ITerminalProperty property, IMyTerminalBlock block)
         {
             if (!Screen(property.Id))
@@ -338,12 +280,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What kind of value a property holds, and whether it is one Sprocket has.
         /// </summary>
-        /// <remarks>
-        /// The five type names the terminal reports are the five kinds the language has, which is
-        /// not a coincidence worth relying on: anything else a future block reports is passed over
-        /// rather than guessed at, because a value nobody can write is worse than one nobody is
-        /// offered.
-        /// </remarks>
         static bool Holds(ITerminalProperty property, out ValueKind kind)
         {
             kind = ValueKind.Text;
@@ -370,19 +306,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What the terminal calls a value, in the player's own language.
         /// </summary>
         /// <remarks>
-        /// <b>The property and the control are the same object.</b> What a block hands out as a
-        /// property is the control that draws it, so the title is reached by asking for the other
-        /// face of it - the same trick <see cref="Wants" /> uses to reach an action's parameters.
-        /// <para>
-        /// The title arrives as an interned id rather than as words, and reading it as a string
-        /// gives the key it was computed from. <c>MyTexts</c> is what turns that into the sentence
-        /// the player already read on the terminal screen.
-        /// </para>
-        /// <para>
-        /// Falls back to the id, which is not presentable - the interior light carries
-        /// <c>Blink Interval</c> with a space and <c>Blink Lenght</c> with the game's own
-        /// misspelling - but a name nobody can read beats a blank.
-        /// </para>
+        /// In the game a property is the control that draws it, whose title is an interned id <c>MyTexts</c> turns into words.
+        /// Falls back to the id.
         /// </remarks>
         static string Called(ITerminalProperty property)
         {
@@ -397,11 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// How many values an action has to be given.
         /// </summary>
-        /// <remarks>
-        /// <b>Not on the interface a block hands out.</b> The same object implements the one mods are
-        /// given for declaring actions of their own, and that is where the parameter list is, so it
-        /// is reached by asking for the other face of it.
-        /// </remarks>
+        /// <remarks>The game keeps the parameter list on <c>IMyTerminalAction</c>, which the same object implements.</remarks>
         static int Wants(ITerminalAction action)
         {
             var declared = action as IMyTerminalAction;
@@ -462,15 +383,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Tells one of a block's own values what to be.
         /// </summary>
-        /// <remarks>
-        /// Written as the kind the property says it holds, which a property declares honestly where
-        /// an action's declaration often says text and means a number.
-        /// <para>
-        /// A value written as the wrong kind is refused rather than guessed at. Turning a number
-        /// into the text of that number, or text into a number, would be Sprocket deciding what
-        /// somebody meant, and the answer would be silently wrong on a block nobody is watching.
-        /// </para>
-        /// </remarks>
+        /// <remarks>A value of another kind than the property holds is refused, and answers false.</remarks>
         public bool Set(IMyTerminalBlock block, string propertyId, Literal value)
         {
             var order = block == null ? null : Written(block, propertyId, value);
@@ -551,9 +464,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Whether the block's setter for the switch flips it whatever it is told, so it may be set only where it differs.</summary>
         /// <remarks>
-        /// A ship controller's handbrake and parking, from the game's own terminal controls: each setter asks the grid to
-        /// toggle. The state is the grid's, so reading first also sets it once however many seats of one grid a step names:
-        /// on the server the grid toggles at once, and the next seat reads it already set.
+        /// From the game's own terminal controls: a ship controller's handbrake and parking setters ask the grid to toggle, and
+        /// on the server the grid toggles at once.
         /// </remarks>
         static bool Flips(IMyTerminalBlock block, string propertyId)
         {
@@ -562,8 +474,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>One of a block's own values, read through the property the game hands out for it.</summary>
         /// <remarks>
-        /// The typed property is found once, when the test is compiled, and a look reads it. Text is compared where the block
-        /// keeps it, so a <c>when</c> on a text looks without building a string.
+        /// Made once, when the test is compiled. Text is compared where the block keeps it, so a <c>when</c> on a text looks
+        /// without building a string.
         /// </remarks>
         sealed class Property : Gauge
         {
@@ -719,10 +631,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// One of the block's text values.
         /// </summary>
-        /// <remarks>
-        /// A fresh builder every time it is given, because the block is handed the builder itself and
-        /// what it does with it afterwards is the block's business.
-        /// </remarks>
+        /// <remarks>Allocates a builder each time it is given: the block keeps the builder it is handed.</remarks>
         sealed class Texts : BlockOrder
         {
             readonly IMyTerminalBlock _block;
@@ -771,11 +680,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Hands the action as many values as it asked for, each as the type it takes where that is
         /// known.
         /// </summary>
-        /// <remarks>
-        /// As many as it declared, however many were written: a step left short hands on the
-        /// declared default for the rest, which is what the game does when a player fills in part
-        /// of a toolbar action's dialog.
-        /// </remarks>
+        /// <remarks>A step left short hands on the declared default for the rest, as the game does for a partly filled toolbar dialog.</remarks>
         static void Fill(ITerminalAction action, IList<Literal> arguments, IList<Primitive> types,
             List<TerminalActionParameter> into)
         {
@@ -802,14 +707,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// One value whose type nothing says, as the kind it was written as.
         /// </summary>
-        /// <remarks>
-        /// The action decides what to make of it.
-        /// <para>
-        /// A whole number goes as a 32-bit one where it fits, because that is what the game's own
-        /// handlers cast to - and a cast of a boxed 64-bit value to <c>int</c> throws, however
-        /// willing they say they are to accept one.
-        /// </para>
-        /// </remarks>
+        /// <remarks>A whole number goes as 32 bits where it fits: the game's own handlers cast to <c>int</c>, which throws on a boxed 64-bit value.</remarks>
         public static TerminalActionParameter Given(Literal given)
         {
             if (given.Kind == ValueKind.Flag)
@@ -825,8 +723,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     : TerminalActionParameter.Get(given.Whole);
             }
 
-            // Text, and a colour - which the game has no value of its own for, so it goes as the
-            // way it is written and whatever reads it parses it.
+            // The game has no parameter value for a color, so it goes as written.
             return TerminalActionParameter.Get(given.Said);
         }
     }

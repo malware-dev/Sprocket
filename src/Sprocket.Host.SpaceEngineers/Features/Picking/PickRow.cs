@@ -9,11 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>One thing that can be picked in a column: a block, something done to blocks, a rate, a sequence, or a heading over a group of them.</summary>
     /// <remarks>
-    /// Pressed, it says what was held down, as what that means rather than which key: this one alone, this one as well, or
-    /// everything from the last one taken to this. Where several are being collected the mark at its head collects one at a
-    /// time whatever is held. A heading and a thing listed only to be read about take no press at all, because a row that
-    /// answers the pointer and then does nothing is one somebody presses twice before believing it. Whoever holds it sets
-    /// what it shows and calls <see cref="Show" />; the elements it is drawn with are declared in <c>PickRow.View.cs</c>.
+    /// Whoever holds it sets what it shows and calls <see cref="Show" />.
     /// </remarks>
     public partial class PickRow : HStack
     {

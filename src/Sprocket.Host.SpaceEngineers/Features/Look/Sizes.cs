@@ -11,7 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public const float Column = 460f;
 
         /// <summary>The width of a dialog hanging over the screen.</summary>
-        /// <remarks>Not for a menu, which is as wide as its words.</remarks>
         public const float Popup = 512f;
 
         /// <summary>The box at the head of a row in a list of several things to choose between.</summary>

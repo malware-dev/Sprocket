@@ -28,11 +28,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// same as a <c>system blueprint</c>.
         /// </summary>
         /// <remarks>
-        /// Strict where it matters. A system is its identity, so one without a readable identity, or a second
-        /// with the same one, is trouble and not read; so is one with no name, which the editor never makes. A
-        /// second system with the same name loads, with a warning, because the name decides nothing but a
-        /// person still has to tell the two apart. Whether it is switched on is not here at all - that is
-        /// state, and <see cref="StateText" /> holds it.
+        /// A system with no readable identity, an identity already read, or no name is trouble and not read; a second system
+        /// with the same name loads with a warning.
         /// </remarks>
         public static void ReadSystem(Statement statement, Automation program, ScriptTrouble trouble)
         {
@@ -128,10 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// <c>last sequence 4</c>: the highest number the system has handed out, kept only as a failsafe.
         /// </summary>
-        /// <remarks>
-        /// Whichever is higher wins, this or the sequences in the block, so a sequence somebody added by hand
-        /// with a higher number is never undercut by a stale one.
-        /// </remarks>
+        /// <remarks>Whichever is higher wins, this or the highest sequence in the block.</remarks>
         static void LastSequence(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
         {
             var number = statement.ValueAt(at + 2);
@@ -367,8 +361,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <c>sequence 3 as 'Let me out' { … }</c>
         /// </summary>
         /// <remarks>
-        /// The number is what the sequence is, within its system, so one without a number or with a number its
-        /// system already has is trouble and not read. The name is optional.
+        /// One without a number, or with a number its system already has, is trouble and not read; the name is optional.
         /// </remarks>
         static void ReadSequence(Statement statement, AutomationSystem system, Automation program, ScriptTrouble trouble)
         {
@@ -434,10 +427,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <c>if … then { … }</c> and the <c>else if</c> and <c>else</c> after it, as the lines they are, answering where the
         /// last statement of it stands in <paramref name="body" />.
         /// </summary>
-        /// <remarks>
-        /// One line for the <c>if</c>, one for each <c>else</c>, the steps of every block between them, and an end, so the
-        /// sequence stays one list of lines and every branch ends somewhere.
-        /// </remarks>
         static int ReadIf(IList<Statement> body, int at, IList<Step> into, AutomationSystem system, Automation program,
             ScriptTrouble trouble)
         {
@@ -754,12 +743,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A duration as it was written, or false where it was no length of time that can be kept.
         /// </summary>
-        /// <remarks>
-        /// The text reads into a long and ticks are counted in an int, so the bound is the language's
-        /// as much as the reader's: <c>every 4294967296t</c> is not an interval, it is a number that
-        /// wraps onto one, and <c>every -600t</c> is not a rate at all. Seconds are held to the same
-        /// bound by the ticks they come to.
-        /// </remarks>
+        /// <remarks>Ticks are counted in an int, and seconds are held to the same bound by the ticks they come to.</remarks>
         static bool Lasting(Value value, long least, out Duration length)
         {
             length = default(Duration);
@@ -823,10 +807,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary><c>set Radius on [ light ] to 4.5</c>: one of the block's own values.</summary>
-        /// <remarks>
-        /// The value is taken by position rather than by what it looks like, so a flag written <c>on</c> is a value and
-        /// not mistaken for one of the language's own words.
-        /// </remarks>
+        /// <remarks>The value is taken by position, so a flag written <c>on</c> is a value.</remarks>
         static Step ReadSet(Statement statement, ScriptTrouble trouble)
         {
             var act = new Act("");
@@ -926,11 +907,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Matches what the system's <c>run</c> steps and triggers name, now the whole system is read.
         /// </summary>
-        /// <remarks>
-        /// Late, because a sequence may be named or numbered before it is written. Anything naming a
-        /// sequence the system has not got is trouble: it can never run, nothing else would say so, and
-        /// a number that is not there would take the runner down on the tick that reached it.
-        /// </remarks>
+        /// <remarks>Anything naming a sequence the system has not got is trouble.</remarks>
         static void Resolve(AutomationSystem system, Statement statement, ScriptTrouble trouble)
         {
             var sequences = system.Sequences;
@@ -1010,8 +987,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Checks a name <paramref name="system" /> uses: a block, or a trigger where <paramref name="trigger" /> says so.
         /// </summary>
         /// <remarks>
-        /// A system names the program's variables, which are written above it, so they are looked for at once. A system
-        /// blueprint names its own slots, which may be written below, so those are judged once the whole script is read.
+        /// A variable is looked for at once; a system blueprint's slot is judged once the whole script is read.
         /// </remarks>
         static void Uses(Statement statement, string name, AutomationSystem system, Automation program, bool trigger,
             ScriptTrouble trouble)

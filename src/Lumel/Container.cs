@@ -24,14 +24,12 @@ namespace Lumel
         protected override Thickness Inset => _padding;
 
         /// <summary>Where this places a child whose <see cref="Element.Align" /> leaves an axis to it, on every axis it does not stack along.</summary>
-        /// <remarks>Declared by every container, so a child that says nothing is placed by a rule this container chose.</remarks>
         protected abstract Align Aligns { get; }
 
         /// <summary>Where <paramref name="child" /> goes on one axis of the room from <paramref name="start" />, <paramref name="room" /> long.</summary>
         /// <remarks>
         /// <paramref name="given" /> is a length the child's placement fixes, or NaN; <paramref name="desired" /> is the length it
-        /// asked for. A fixed length is kept; otherwise a stretched child takes the room and any other takes what it asked for,
-        /// and a length of nothing, or more than the room, takes the room.
+        /// asked for.
         /// </remarks>
         protected void Span(Element child, bool across, float start, float room, float given, float desired, out float at,
             out float length)

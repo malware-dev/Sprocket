@@ -5,14 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// One value read out of a script.
     /// </summary>
     /// <remarks>
-    /// <b>A word is a string here, not a segment, and that is measured.</b> The token a word came from is
-    /// a segment, which is how a keyword is recognised without ever becoming text. But a value is stored,
-    /// tens of thousands of them in a large program, and a segment is three times the size of a string
-    /// reference while the model asks for every word as a string regardless. Keeping the segment made a
-    /// load up to 9% slower and allocated 14% more, and saved nothing.
-    /// <para>
-    /// A list value does not own its items; it names where they are - see <see cref="ScriptValues.Items" />.
-    /// </para>
+    /// A word is a string, measured: keeping the token's segment made a load up to 9% slower and allocate 14% more.
     /// </remarks>
     public struct Value
     {
@@ -33,11 +26,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>What it is written as.</summary>
         public ValueForm Form { get; private set; }
 
-        /// <summary>The text of a word, however it was written. Empty for anything that is not one.</summary>
+        /// <summary>The text of a word, however it was written, or empty for anything that is not one.</summary>
         public string Word { get; private set; }
 
         /// <summary>
-        /// An integer, a colour's four bytes packed red-green-blue-alpha, or where a list's items are.
+        /// An integer, a color's four bytes packed red-green-blue-alpha, or where a list's items are.
         /// </summary>
         public long Whole { get; private set; }
 
@@ -47,7 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>Which of the format's words it is, for a keyword.</summary>
         public Keyword Keyword { get; private set; }
 
-        /// <summary>Whether this is a name, bare or quoted. Text is not.</summary>
+        /// <summary>Whether this is a word, bare or quoted, rather than text.</summary>
         public bool IsWord => Form == ValueForm.Identifier || Form == ValueForm.Keyword;
 
         /// <summary>Where a list's items, or a name's parts, start in the reading.</summary>
@@ -85,13 +78,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             return ((long)from << 32) | (uint)count;
         }
 
-        /// <summary>Whether this is the bare keyword given. A quoted word never is.</summary>
+        /// <summary>Whether this is the bare keyword given, which a quoted word never is.</summary>
         public bool Says(Keyword keyword)
         {
             return Form == ValueForm.Keyword && Keyword == keyword;
         }
 
-        /// <summary>A number, whichever way it was written, because a script may say 60 or 60.0.</summary>
+        /// <summary>A number, whether it was written 60 or 60.0.</summary>
         public double Number()
         {
             if (Form == ValueForm.Integer)

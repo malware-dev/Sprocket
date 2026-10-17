@@ -16,20 +16,11 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A value that is one of more words than fit on a line: the word given, and a list of them all hanging under it when pressed.</summary>
-    /// <remarks>
-    /// While it holds the keyboard an arrow steps to the next word and a letter to the next word starting with it, round to
-    /// the start, so pressing one letter again walks every word it starts. Words stop at either end under the arrows, so
-    /// holding one comes to rest on the last.
-    /// <para>
-    /// A list longer than the room on either side of the line scrolls, and opens with the word given in view.
-    /// </para>
-    /// </remarks>
     public class ListField : HStack, IField
     {
         const float Mark = 12f;
 
-        /// <summary>Lifts the mark so its middle is level with the middle of the capitals of the word before it.</summary>
-        /// <remarks>Measured on the alignment page.</remarks>
+        // Measured on the alignment page.
         static readonly Thickness Level = new Thickness(0f, -0.5f, 0f, 0.5f);
 
         readonly List<string> _words = new List<string>();
@@ -48,7 +39,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Style = Styles.ListLine;
             Focusable = true;
 
-            // The word takes what the line has spare, so the mark stands at its end whichever word is given.
             Children.Add(new Label { Style = Styles.ListWord, Placement = Flex.Grow }.As(out _said));
             Children.Add(Fold());
 
@@ -74,7 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             }
 
             var scroll = new ScrollView { Style = Styles.ScrollView, FitsContent = true, Content = rows };
-            // Hung as every menu is, and never narrower than the line it drops from.
+            // Never narrower than the line it drops from.
             var list = new Popup { Style = Styles.Menu, Anchor = this, Flush = true, Content = scroll };
 
             Command = new Relay(delegate
@@ -85,7 +75,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                     return;
                 }
 
-                // The word it holds is marked as a menu marks the answer Enter takes.
                 var given = _words.IndexOf(_text);
                 for (var i = 0; i < _rows.Count; i++)
                 {
@@ -144,7 +133,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             foreach (var spelled in _spelled)
                 widest = Math.Max(widest, g.MeasureText(_said.Font, spelled, _said.FontSize).X);
 
-            // Exactly that, never the room it was offered: the word grows into whatever it is given when it is placed.
             size.X = widest + Spacing + Mark;
             return size;
         }

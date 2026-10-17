@@ -44,7 +44,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 }
             });
 
-            // Turned in at the way to add another, the last line the spine runs past.
             _spine.Ends = _another;
         }
     }

@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The identity the two share.</summary>
         public System.Guid Identity => _now.Identity;
 
+        /// <inheritdoc />
         /// <remarks>The first time, what is put in keeps the switch it was given; made again after being taken back, it comes back switched off.</remarks>
         public override void Apply(Automation program)
         {

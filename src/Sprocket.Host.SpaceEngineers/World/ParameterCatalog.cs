@@ -5,16 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// Everything anybody has said about the parameters of the game's own actions.
     /// </summary>
-    /// <remarks>
-    /// Filled from the files the loaded mods ship, in the order the game loads them, so the last
-    /// word wins - the rule the mods themselves follow and the one a player already knows from the
-    /// order of their list. This mod's own descriptions go in first and are therefore the ones
-    /// anybody may override.
-    /// <para>
-    /// Read once, as a world comes up. Nothing here is asked on a tick: what it answers is used
-    /// while a kind is built, which happens once per block type.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Read once, as a world comes up, and asked once per block type, never on a tick.</remarks>
     public sealed class ParameterCatalog
     {
         readonly Dictionary<string, Description> _byBlock = new Dictionary<string, Description>();
@@ -33,11 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Takes in one action's description.
         /// </summary>
-        /// <remarks>
-        /// Kept under the block where it names one, and never under the bare id as well, so a
-        /// description of one light's colour setter cannot answer for every block in the game that
-        /// happens to call something <c>SetColor</c>.
-        /// </remarks>
         public void Add(Description description, string mod)
         {
             if (description == null || string.IsNullOrEmpty(description.Id))
@@ -58,11 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What has been said about this action on this block, or null.
         /// </summary>
-        /// <remarks>
-        /// The exact claim first. A description naming the block is somebody who knew which block
-        /// they meant; one naming only the action is saying "wherever this turns up", which is the
-        /// weaker thing to say and loses to the stronger one.
-        /// </remarks>
+        /// <remarks>A description naming the block wins over one naming only the action.</remarks>
         public Description For(string blockId, string actionId)
         {
             if (string.IsNullOrEmpty(actionId))
@@ -79,14 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// The same, refused and reported where it does not account for every parameter.
+        /// What has been said about this action on this block, or null where nothing has or it does not account for every
+        /// parameter, which is reported.
         /// </summary>
-        /// <remarks>
-        /// A description that covers four parameters of a three-parameter action is one that has
-        /// fallen out of step with the block it is about - the action changed, or it was written
-        /// against a different block. Using half of it would put names against the wrong values,
-        /// which is worse than no names at all, so it is dropped and said out loud.
-        /// </remarks>
         public Description Fitting(string blockId, string actionId, int parameters)
         {
             Description found = For(blockId, actionId);

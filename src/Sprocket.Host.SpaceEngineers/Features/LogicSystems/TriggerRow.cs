@@ -13,12 +13,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     /// <summary>One trigger as the sentence it reads as: when it happens, then what it does, each part pressed to change it.</summary>
-    /// <remarks>
-    /// The same line a step of a sequence is drawn as, with the same chips, because it is the same act: words with
-    /// the parts somebody chose sitting in them, each one opening the question it was answered with. Whoever holds
-    /// it sets what it shows and calls <see cref="Show" />. The elements it is drawn with are declared in
-    /// <c>TriggerRow.View.cs</c>, and nothing else is.
-    /// </remarks>
     public partial class TriggerRow : HStack
     {
         readonly List<SlotChip> _starts = new List<SlotChip>();
@@ -54,10 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         public List<SentenceSlot> Does { get; }
 
         /// <summary>Whether what it watches for is true at this instant.</summary>
-        /// <remarks>
-        /// Idle while the signal reads true is not a contradiction. It is the difference between a moment and a
-        /// situation, shown rather than explained.
-        /// </remarks>
         public bool IsLiveNow { get; set; }
 
         /// <summary>What is wrong with it, or worth a word, in words, or empty.</summary>
@@ -100,7 +90,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 _starts[i].Tip = Tip.For(_starts[i].Tip, Starts[i].Opens == null ? Why() : Starting(texts, Starts[i]));
 
-                // A number watched reads as a check does: a value on some blocks, then how it compares.
                 if (!ReferenceEquals(_shown[i], Starts[i]))
                 {
                     var join = SentenceText.Joining(Starts, i, true);
@@ -116,8 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 _does[i].Texts = texts;
                 _does[i].Tip = Tip.For(_does[i].Tip, Does[i].Opens == null ? Why() : Doing(texts, Does[i]));
 
-                // Before the part is shown, which is what records it as shown: a join is worked out only for a
-                // part that has changed.
+                // Before Part, which records the part as shown.
                 if (!ReferenceEquals(_shown[Starts.Count + i], Does[i]))
                 {
                     var join = SentenceText.Joining(Does, i);
@@ -135,11 +123,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _problem.IsVisible = Problem.Length != 0;
             _problem.Color = RemarkColors.Of(Level, Palette.Faint);
 
-            // The same wash a broken row in a list gets, so arriving here from one arrives at something
-            // already recognised.
             Background = Problem.Length != 0 ? RemarkColors.Wash(Level) : Palette.None;
 
-            // Quiet rather than gone while it cannot be copied or deleted, saying why.
             _duplicate.Command = Copies;
             _duplicate.IsVisible = Copies != null || Locked.Length != 0;
             _duplicate.IsEnabled = Copies != null;

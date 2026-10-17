@@ -14,10 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Reads from the whole program <paramref name="text" /> only the system <paramref name="identity" /> and its instances
         /// into <paramref name="program" />, which does not hold that system, answering what was wrong, or empty.
         /// </summary>
-        /// <remarks>
-        /// For putting a system in the place of another of its identity: the rest of <paramref name="text" /> is what
-        /// <paramref name="program" /> holds already, and is checked by reading the whole of it first.
-        /// </remarks>
+        /// <remarks>The rest of <paramref name="text" /> is what <paramref name="program" /> holds already.</remarks>
         public static string ReadOne(string text, Guid identity, Automation program)
         {
             var parser = new Parser(text);
@@ -46,9 +43,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// wrong with it, or empty.
         /// </summary>
         /// <remarks>
-        /// Read into a program of its own first, because a text with an error in it is trusted in no part: where anything is
-        /// wrong, <paramref name="program" /> is left as it was. The text holds one system blueprint and nothing else, as
-        /// <see cref="ProgramWriter.Blueprint(AutomationSystem, Guid)" /> writes it.
+        /// The text holds one system blueprint and nothing else, as <see cref="ProgramWriter.Blueprint(AutomationSystem, Guid)" />
+        /// writes it. Where anything is wrong, <paramref name="program" /> is left as it was.
         /// </remarks>
         public static string AddBlueprint(string text, Automation program, Values values)
         {
@@ -114,10 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Reads a program back into an empty one, and answers what was wrong with it.
         /// </summary>
         /// <remarks>
-        /// An empty answer means everything that was written was read. Anything else leaves the program
-        /// empty, because a text with an error in it is trusted in no part, and is for the host to log or
-        /// show; the program itself carries the same news as <see cref="Automation.Intact" />, because the
-        /// decision it forces - do not save over this - is taken somewhere else entirely.
+        /// Where anything is wrong, the program is left empty and carries the same news as <see cref="Automation.Intact" />.
         /// </remarks>
         public static string Load(string saved, Automation program, Values values)
         {
@@ -130,9 +123,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// wrong.
         /// </summary>
         /// <remarks>
-        /// A warning is something that reads and runs but is probably a mistake, such as two systems with
-        /// the same name. It does not mark the program damaged. A program written for an earlier format finds what it
-        /// names on the blocks of <paramref name="world" />, where there is one, as it is upgraded.
+        /// A warning does not mark the program damaged. A program written for an earlier format is upgraded against the
+        /// blocks of <paramref name="world" />, where there is one.
         /// </remarks>
         public static string Load(string saved, Automation program, Values values, out string warning, GridWorld world = null)
         {
@@ -146,10 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var constructs = parser.Read();
             var trouble = new ScriptTrouble(saved, parser.Trouble);
 
-            // Turned away whole rather than read as far as it goes. A different version or draft is
-            // not a damaged program, it is one this build does not speak, so whatever happened to read
-            // would be read as something it does not mean. A header that would not parse says nothing
-            // about its version, so that is damage like any other.
+            // A different version or draft is refused whole; a header that will not parse is damage like any other.
             string refused = null;
             var header = constructs.Count > 0 && constructs[0].Key == Keyword.Sprocket ? constructs[0] : null;
             if (header == null && parser.Trouble.Length == 0)
@@ -222,11 +211,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Which draft of the format a program says it was written against, or none where it does not say.
         /// </summary>
-        /// <remarks>
-        /// A program with no <c>alpha</c> clause was written against a finished format, and this build
-        /// writes an unfinished one - so the absence is a number this build can never be, rather than a
-        /// reason to let it through.
-        /// </remarks>
         static int DraftOf(Statement statement)
         {
             var at = statement.Find(Keyword.Alpha);
@@ -414,10 +398,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// One use of a system blueprint, or nothing where it does not say which blueprint it is one of.
         /// </summary>
-        /// <remarks>
-        /// The system may be named by its identity or by its name, because a person writing one by hand
-        /// has the name in front of them and Sprocket always writes the identity.
-        /// </remarks>
+        /// <remarks>The system may be named by its identity or by its name.</remarks>
         static void ReadInstance(Statement statement, Automation program, ScriptTrouble trouble)
         {
             var number = statement.ValueAt(0);

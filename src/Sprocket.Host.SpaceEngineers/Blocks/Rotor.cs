@@ -14,21 +14,8 @@ using MyRotationDirection = Sandbox.ModAPI.Ingame.MyRotationDirection;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A rotor or a hinge: turned to an angle, and the members of its terminal said in Sprocket's words.
-    /// </summary>
-    /// <remarks>
-    /// Turning to an angle is the game's own: it puts a limit at the angle and runs the rotor at it,
-    /// so the rotor's limits are the game's to overwrite, and are. The rotor has arrived when it has
-    /// reached the limit it is running towards - the test the game itself makes to say a limit was
-    /// reached. Its angle, its limits and its speed are all the block's own, which the game saves, so
-    /// a turn under way survives a reload and is still known to be under way.
-    /// <para>
-    /// A hinge is a rotor that goes no further than its definition allows, a quarter turn either way,
-    /// and always the short way: it is asked for an angle and a speed, and not for a direction. Its lock
-    /// is its own, beside the rotor's.
-    /// </para>
-    /// </remarks>
+    /// <summary>A rotor or a hinge, turned to an angle.</summary>
+    /// <remarks>A turn under way survives a reload: its angle, limits and speed are the block's own, which the game saves.</remarks>
     public sealed class Rotor : Capability
     {
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
@@ -127,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Reading("is detached", "is attached");
         }
 
-        /// <summary>Told as the head is attached or detached, which every rotor and hinge raises.</summary>
+        /// <summary>Told as the head is attached or detached.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var rotor = block as IMyMotorStator;
@@ -145,10 +132,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// The game's actions that add a head to this kind of block, by size: normal, medium and small, each null where the
         /// block does not offer it.
         /// </summary>
-        /// <remarks>
-        /// The game offers medium and small heads on a large grid only, and medium only where the block's definition names
-        /// one; with no definition loaded, as in the test harness, it is offered.
-        /// </remarks>
         static string[] Heads(IMyTerminalBlock block, bool hinge)
         {
             var stem = hinge ? "Hinge" : "Rotor";
@@ -202,11 +185,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Whether the block's definition says it is a hinge rather than a rotor.</summary>
-        /// <remarks>
-        /// Asked of the definition because nothing else says: a rotor and a hinge are the same type
-        /// with the same terminal. Where no definitions are loaded - the test harness - by the subtype,
-        /// which names every hinge the game has.
-        /// </remarks>
         static bool Hinge(IMyTerminalBlock block)
         {
             var definition = Definition(block);
@@ -224,16 +202,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             return definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyMotorStatorDefinition;
         }
 
-        /// <summary>
-        /// How fast the block will turn, in revolutions a minute.
-        /// </summary>
-        /// <remarks>
-        /// The block's own, which differs between a rotor and a small one. A revolution a minute is
-        /// two pi radians a minute, which is where the sixty comes from.
-        /// </remarks>
+        /// <summary>How fast the block will turn at most, in revolutions a minute.</summary>
         static float Fastest(IMyTerminalBlock block)
         {
             var rotor = block as IMyMotorStator;
+            // A revolution a minute is two pi radians a minute, which is where the sixty comes from.
             return rotor == null ? 0f : rotor.MaxRotorAngularVelocity * 60f / (2f * (float)Math.PI);
         }
 
@@ -256,11 +229,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>How far round the block will go, which is the block's own to say.</summary>
-        /// <remarks>
-        /// A quarter turn either way for a hinge with no definition to say otherwise - the test harness -
-        /// which is what every hinge the game has is built to.
-        /// </remarks>
         static Field AskedAngle(IMyTerminalBlock block)
+        // Every hinge the game has is built to a quarter turn either way, which holds where no definition says otherwise.
         {
             var reach = Hinge(block) ? 90f : 360f;
             float least = -reach;
@@ -297,12 +267,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Whether the rotor has reached the limit it is running towards.</summary>
-        /// <remarks>
-        /// The game's own test for a limit reached, tolerance and all, on the rotor's own angle and
-        /// limits: a rotor held against a limit rests within a hair of it rather than on it, and the
-        /// game counts it there within a ten-thousandth of a radian. A rotor that is not running is
-        /// running towards nothing, and has arrived nowhere.
-        /// </remarks>
+        /// <remarks>The game's own test for a limit reached; a rotor that is not running has arrived nowhere.</remarks>
         static bool AtLimit(IMyMotorStator rotor)
         {
             var speed = rotor.TargetVelocityRPM;
@@ -331,20 +296,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Whether the rotor already stands at the angle, by the game's own test.</summary>
-        /// <remarks>
-        /// The game does nothing at all when told to turn to where a rotor already is: no limit, no
-        /// speed. A rotor not already pushing that way would then never read as arrived, and a sequence
-        /// that turns something to where it last left it is run every time an airlock cycles.
-        /// </remarks>
+        /// <remarks>The game does nothing when told to turn a rotor to where it already is.</remarks>
         static bool Already(IMyMotorStator rotor, float degrees)
         {
             return Math.Abs(degrees * (float)Math.PI / 180f - rotor.Angle) <= float.Epsilon;
         }
 
-        /// <summary>
-        /// Leaves the rotor as a finished turn to where it stands would: the limit at the angle, the
-        /// other one taken away, and the speed pushing against it.
-        /// </summary>
+        /// <summary>Leaves the rotor as a finished turn to where it stands would: the limit at the angle, the other taken away, and the speed pushing against it.</summary>
         static void Hold(IMyMotorStator rotor, MyRotationDirection way, float degrees, float speed)
         {
             var limit = degrees * (float)Math.PI / 180f;
@@ -362,29 +320,13 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
         }
 
-        /// <summary>
-        /// Stops the rotor where it stands.
-        /// </summary>
-        /// <remarks>
-        /// A rotor is the reason this exists. What it was told to do is to run at a speed until it
-        /// meets a limit, so a run that ends while it is turning would leave it turning - and the
-        /// sequence that was watching for a reason to stop it is exactly the one that has just
-        /// stopped. Its limits are left where the turn put them; the speed is what makes it move.
-        /// </remarks>
+        /// <summary>Stops the rotor where it stands.</summary>
         static void Stop(IMyMotorStator rotor)
         {
             rotor.TargetVelocityRPM = 0f;
         }
 
-        /// <summary>
-        /// Why the rotor is not getting to its angle, or nothing while it still might.
-        /// </summary>
-        /// <remarks>
-        /// In the order somebody would look: whether it can turn at all, then whether it was told to,
-        /// then whether something is holding it. A rotor whose speed has been taken away is the one
-        /// answer worth giving up on - it was set by the turn, so nought means something else has
-        /// been at it and nothing is heading for the angle any more.
-        /// </remarks>
+        /// <summary>Why the rotor is not getting to its angle, or nothing while it still might.</summary>
         static BlockTrouble Why(IMyMotorStator rotor, Turn turn, ReaderMemory seen)
         {
             if (AtLimit(rotor))
@@ -405,21 +347,15 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (rotor.TargetVelocityRPM == 0f)
                 return BlockTrouble.Fatal(Cause.RotorStopped);
 
-            // Waited through rather than given up on. Whatever is holding the rotor may be moved, and
-            // the rotor leaning on it meanwhile is no worse than the rotor stopped: measured in game,
-            // taking its speed away does not settle what the pushing does to a construct.
+            // Waited through rather than given up on: measured in game, taking its speed away does not settle what the
+            // pushing does to a construct.
             return RotorMotion.Turning(rotor, seen)
                 ? BlockTrouble.None
                 : BlockTrouble.Waiting(Cause.RotorHeld);
         }
 
-        /// <summary>
-        /// The ticks the turn should take: the way round it goes, at the speed it was given.
-        /// </summary>
-        /// <remarks>
-        /// A revolution a minute is six degrees a second, and the game runs sixty ticks to the second,
-        /// so a rotor turns a tenth of a degree a tick for every revolution a minute it is given.
-        /// </remarks>
+        /// <summary>The ticks the turn should take: the way round it goes, at the speed it was given.</summary>
+        /// <remarks>A revolution a minute is six degrees a second, and the game runs sixty ticks to the second.</remarks>
         static int Expected(IMyMotorStator rotor, Turn turn)
         {
             if (!turn.Given || turn.Speed <= 0)
@@ -490,10 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             public float Speed;
 
-            /// <summary>
-            /// The direction, angle and speed a step turning the rotor was given, in that order, or the angle
-            /// and speed a step turning a hinge was given, which goes the short way.
-            /// </summary>
+            /// <summary>The direction, angle and speed a step turning a rotor was given, or the angle and speed for a hinge, which goes the short way.</summary>
             public static Turn Read(IList<Literal> arguments, bool hinge)
             {
                 var turn = new Turn { Way = MyRotationDirection.AUTO };

@@ -3,11 +3,6 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>What a blueprint's slots become as the sets of blocks its steps and triggers name change, and how to take it back.</summary>
-    /// <remarks>
-    /// Worked out by <see cref="SlotFinder" /> and carried by the edit that brought it about, so taking the edit back puts every
-    /// slot, every installation's blocks in it and every name a step uses back as it was. Each part records what it replaced,
-    /// so undoing never has to work anything out again.
-    /// </remarks>
     public sealed class Reslot
     {
         readonly SystemInstance _shown;
@@ -72,8 +67,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>
         /// Adds to <paramref name="screens" /> the slots this makes, fills and drops, the installation shown where it fills any,
-        /// and the sequence or logic system a list it renames is on. The logic system's screen lists the slots, and a slot coming
-        /// or going there is the slot's change, not one made on that screen.
+        /// and the sequence or logic system a list it renames is on.
         /// </summary>
         public void Touches(IList<object> screens)
         {
@@ -210,7 +204,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// Whether the slots stand as this left them, where <paramref name="made" />, or as they were before it: its slots made
         /// or not, the lists it renamed saying what it left, and its slots dropped or not.
         /// </summary>
-        /// <remarks>What decides whether the step carrying it can still be walked; a walk of what it changed, and no more.</remarks>
         public bool Holds(bool made)
         {
             foreach (var part in _made)

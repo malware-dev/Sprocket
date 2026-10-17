@@ -8,12 +8,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Codex
 {
     /// <summary>The codex, read one term at a time in a window that floats over the screen and stays open while the editor is used.</summary>
-    /// <remarks>
-    /// It has a history of its own like a browser's: following a link or choosing a term from its contents moves forward and
-    /// drops whatever had been stepped back from, and its back and forward move through it. It first stands just outside the
-    /// editor's right edge where the screen has room for it there, and inside that edge where it has not; where it is moved
-    /// to is kept for as long as the block's editor is.
-    /// </remarks>
     public sealed partial class CodexWindow : FloatingWindow
     {
         const float Wide = 700f;
@@ -92,7 +86,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         }
 
         /// <inheritdoc />
-        /// <remarks>Beside the editor's right edge, outside it where the screen has the room and inside it where it has not.</remarks>
         protected override Vector2 Home(RectangleF area, Vector2 size)
         {
             var right = area.X + area.Width;

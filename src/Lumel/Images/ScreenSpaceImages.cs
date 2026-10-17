@@ -5,11 +5,7 @@ using VRage.Utils;
 namespace Lumel.Images
 {
     /// <summary>A resolver a host may use for the game's screen space, which reads every locator as a material name and keeps what it finds.</summary>
-    /// <remarks>
-    ///     A picture never changes while the game runs, so each locator is asked about once and its answer kept,
-    ///     unknown ones included. Whoever makes the resolver owns what it keeps: one made for a world is dropped
-    ///     with it.
-    /// </remarks>
+    /// <remarks>Each locator's answer is kept for the life of the resolver, unknown ones included.</remarks>
     public class ScreenSpaceImages : IImageCatalog
     {
         readonly IScreenSpace _screen;

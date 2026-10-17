@@ -5,13 +5,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block with a switch, which is every block that does anything.</summary>
-    /// <remarks>
-    /// Only a block with a switch gets the words for one. A cargo container has no on and off, and offering them would be
-    /// offering a sentence that cannot come true.
-    /// <para>
-    /// The switch is one value, set off, on, or flipped by the game's toggle.
-    /// </para>
-    /// </remarks>
     public sealed class Functional : Capability
     {
         static readonly Reading On = Reading.Of<IMyFunctionalBlock>(block => block.Enabled);
@@ -36,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("OnOff_On", "OnOff_Off");
         }
 
-        /// <summary>Told as the block is switched on or off, which every functional block announces.</summary>
+        /// <summary>Told as the block is switched on or off.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var functional = block as IMyFunctionalBlock;

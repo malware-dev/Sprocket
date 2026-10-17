@@ -8,10 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 {
     /// <summary>The upgrades that carry a program written in an earlier format into the one this build writes.</summary>
     /// <remarks>
-    /// An upgrade goes from one released format to the next and is never removed, since every program behind it reads
-    /// through it. A draft of the format on the way to a release gets one only where one is chosen; every other draft is
-    /// refused. Each runs on what the parser read, never on the text, so a name that happens to hold a keyword is left as
-    /// it is, and the program is written in the current format at its next save.
+    /// An upgrade is never removed, since every program behind it reads through it. The upgraded program is written in the
+    /// current format at its next save.
     /// </remarks>
     public static class FormatUpgrades
     {
@@ -29,19 +27,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         const string ThingsDetected = "things-detected";
         const string Detections = "detections";
 
-        /// <summary>
-        /// The members of a block's screens as alpha 15 programs persist them on a block with several, each with the name of
-        /// its screen first, which the slot holding the screen says since: show text and its text, set up screen and its
-        /// eleven settings, and each setting read alone.
-        /// </summary>
-        /// <remarks>A block with one screen took the same members without the name, which is why the count decides.</remarks>
+        // The members of a block's screens as alpha 15 programs persist them on a block with several, each taking the name of
+        // its screen first; a block with one screen took them without the name.
         static readonly string[] ScreenMembers =
         {
             ScreenType.ShowText, ScreenType.SetUp, "content", "text-color", "background-color", "font", "font-size", "alignment",
             "padding", "app-color", "app-background-color", "image-interval", "keep-aspect-ratio"
         };
 
-        /// <summary>How many values each of <see cref="ScreenMembers" /> took, its screen's name among them.</summary>
+        // How many values each of ScreenMembers took in alpha 15, its screen's name among them.
         static readonly int[] ScreenTook = { 2, 12, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
         /// <summary>Whether a program written for <paramref name="draft" /> of version <paramref name="version" /> is upgraded rather than refused.</summary>
@@ -55,9 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// screens its steps name found on the blocks of <paramref name="world" />.
         /// </summary>
         /// <remarks>
-        /// A screen is named in alpha 15 and held by its number since, and only a block says which number a name is. Where
-        /// there is no world, or a block has no screen of that name, the installation's slot of screens is left empty, which
-        /// is said as a slot to fill on the installation panel.
+        /// Where there is no world, or a block has no screen of that name, the installation's slot of screens is left empty.
         /// </remarks>
         /// <returns>What was upgraded, for the log, or empty where nothing needed it.</returns>
         public static string Apply(int draft, Automation program, GridWorld world)

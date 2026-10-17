@@ -1,9 +1,7 @@
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>One of a block's own values made ready to be read, found once and read as often as a test asks.</summary>
-    /// <remarks>
-    /// Made when a program is bound, as an <see cref="BlockOrder" /> is, so a look reads the block and looks nothing up by name.
-    /// </remarks>
+    /// <remarks>Made when a program is bound, so a look reads the block and looks nothing up by name.</remarks>
     public abstract class Gauge
     {
         /// <summary>The kind of value the block holds.</summary>

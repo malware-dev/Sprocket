@@ -1,17 +1,12 @@
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Runtime
 {
     /// <summary>
     /// What is true of a sequence right now, for every place one is listed.
     /// </summary>
-    /// <remarks>
-    /// Facts only. This works out which state a sequence is in and what is wrong with it; what those
-    /// read as belongs to <see cref="SequenceText" />, so the words for one thing live in one place.
-    /// </remarks>
     public static class SequenceSummary
     {
         /// <summary>Whether <paramref name="sequence" /> names the variable or slot <paramref name="name" />, in what starts it or in a step.</summary>
@@ -23,12 +18,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// The state to show for a sequence on a screen that is not about one of its system.
         /// </summary>
-        /// <remarks>
-        /// Whichever one of the system is going, and the first otherwise. A system's sequences belong
-        /// to the system and run once for each one of it, so a list of them is about none of them in
-        /// particular - and a row that only ever read the first would sit still while the port airlock
-        /// cycled.
-        /// </remarks>
+        /// <remarks>Whichever installation is running it, and the first otherwise.</remarks>
         public static SequenceRunner Live(AutomationRunner runner, Sequence sequence)
         {
             var system = sequence.System;
@@ -50,21 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// What is wrong with what starts this sequence, if anything.
         /// </summary>
         /// <remarks>
-        /// Two ways for nothing to start it. A trigger that is supposed to - a button whose slot was
-        /// cleared, or a moment the construct never answered - and no trigger at all, which is a fault
-        /// only once nothing calls it either. A sequence another one runs is an ordinary way to build,
-        /// and until <c>run</c> existed that possibility meant this case could not be judged.
-        /// <para>
-        /// An unfinished trigger is not unreachable either. Somebody half way through picking blocks
-        /// has a sequence that cannot fire yet, and saying so would be scolding them for not having
-        /// finished - unless they have already built steps, in which case a trigger with nothing in
-        /// it is a sequence that cannot run however it got that way.
-        /// </para>
-        /// <para>
-        /// One question to the host rather than one per source, for the rest. The host knows what it
-        /// arranged and for which sequence; core walking the sources and asking about each in turn was
-        /// both dearer and weaker, since it could only ask whether <i>something</i> was wired there.
-        /// </para>
+        /// No trigger at all is trouble only once nothing calls it either, and a trigger with nothing in it only once the
+        /// sequence has steps.
         /// </remarks>
         static SequenceFault StartTrouble(GridWorld world, Bindings bindings, Sequence sequence, SystemInstance through)
         {
@@ -114,8 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (moment == null)
                     continue;
 
-                // Nothing named and no moment either is a whole sentence: something on this ship
-                // starts this, and which is the host's to answer rather than a hole in the trigger.
+                // Nothing named and no moment either is a whole sentence, and which block starts it is the host's to answer.
                 if (moment.Sources.Count == 0 && string.IsNullOrEmpty(moment.EventId))
                     continue;
 
@@ -148,8 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
             }
 
-            // Nothing starts it at all, which is a warning rather than a fault - and nothing to say
-            // while it has no steps either, because somebody who has just made one has not finished.
+            // Nothing starts it at all: a warning rather than a fault, and nothing to say while it has no steps.
             if (starts == 0)
             {
                 return sequence.Steps.Count > 0 && !system.Called(sequence.Number)
@@ -175,9 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>What <paramref name="sequence" /> is doing, as <paramref name="state" /> says it runs and its switch allows.</summary>
         public static SequenceStatus Status(Sequence sequence, SequenceRunner state)
         {
-            // What is happening outranks what is allowed to happen. A parked sequence somebody has
-            // run by hand is running, and a screen saying "switched off" while its steps light up
-            // one after another would be the screen arguing with itself.
+            // What is happening outranks what is allowed: a switched-off sequence run by hand is running.
             if (state != null && state.IsRunning)
                 return state.IsWaiting ? SequenceStatus.RunningWaiting : SequenceStatus.Running;
 
@@ -201,11 +174,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>What the program says is wrong with a sequence on <paramref name="through" />, or none.</summary>
-        /// <remarks>
-        /// What can be told without running it: a slot left empty, a step its blocks do not offer or cannot be given its
-        /// values, one that does not wait for what it starts, and a trigger nothing can start. Asked when the program or its
-        /// wiring changes, and on no tick; what the construct has become since is found by a run, at the step it matters.
-        /// </remarks>
+        /// <remarks>Asked when the program or its wiring changes, and on no tick.</remarks>
         public static SequenceFault Checked(GridWorld world, Bindings bindings, Sequence sequence, SystemInstance through)
         {
             SequenceFault empty = Empty(sequence, through);
@@ -243,10 +212,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first await with nothing to wait for, no step since the await before it taking time, or none.</summary>
-        /// <remarks>
-        /// Each branch of an if starts from what was pending before the if, and after it whatever any way through may have left
-        /// pending is: an await is said to have nothing to wait for only where no way through gives it anything.
-        /// </remarks>
+        /// <remarks>An await after an if has nothing to wait for only where no way through the if gives it anything.</remarks>
         static SequenceFault Idle(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             var steps = sequence.Steps;
@@ -325,10 +291,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first block a sequence's steps name on <paramref name="through" /> that is gone, or may have been swapped for another, or none.</summary>
-        /// <remarks>
-        /// For an open editor to show before anything runs into it. A slot left empty is the program's to report, and one that
-        /// may be left empty is skipped.
-        /// </remarks>
+        /// <remarks>A slot left empty is skipped.</remarks>
         public static SequenceFault Looked(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             var system = sequence.System;
@@ -457,10 +420,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first step that has not been given a value its action or function needs, or none.</summary>
-        /// <remarks>
-        /// Asked of the action the blocks offer, because what is needed is the action's to declare and
-        /// a block may have been replaced by one that declares otherwise.
-        /// </remarks>
         static SequenceFault Unfilled(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)
@@ -506,10 +465,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first step given a value its action takes as another kind, or none.</summary>
-        /// <remarks>
-        /// Asked of each block's own action, as <see cref="Unfilled" /> is: what a value has to be is
-        /// the action's to declare.
-        /// </remarks>
         static SequenceFault Mistyped(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             var compared = new List<Literal>(1);
@@ -610,11 +565,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>The first step whose blocks do not offer what it does, or none.</summary>
-        /// <remarks>
-        /// Every block the step names has to offer it, because the step is one act done to all of
-        /// them. Asked of each block's own list rather than of a list built for the purpose, since
-        /// this is worked out every time a fault is.
-        /// </remarks>
+        /// <remarks>Every block the step names has to offer it.</remarks>
         static SequenceFault Unoffered(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             for (var i = 0; i < sequence.Steps.Count; i++)

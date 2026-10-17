@@ -6,10 +6,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A thruster: its override set, and read for how hard it pushes and how much of its thrust the air it is in leaves it.</summary>
-    /// <remarks>
-    /// In percent, so one number means the same on every size of thruster; the game's own thrust is in newtons, which
-    /// differ per size.
-    /// </remarks>
+    /// <remarks>Its readings are in percent, which mean the same on every size of thruster.</remarks>
     public sealed class Thruster : Capability
     {
         const string Unheard = "A thruster's thrust changes many times a second in flight, too often to listen to.";
@@ -33,12 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        /// Override is the game's own in percent, from 0, which is no override, to 100, as the game's own set override takes
-        /// it; its override in newtons and the steps made out of that are hidden behind it. Effectiveness only where the air
-        /// changes it, as on an atmospheric or an ion thruster; anything else is always at 100. Maximum thrust is fixed by
-        /// the block, so nothing need announce it.
-        /// </remarks>
+        /// <remarks>Override is in percent, from 0, which is no override, to 100.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue("override", "override", Override).Measured(" %").Announced().Between("0", "100").In(Category.Flight)
@@ -51,7 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Hiding("Override", "SetOverride", "IncreaseOverride", "DecreaseOverride");
         }
 
-        /// <summary>Told as the thruster's override changes, which it announces.</summary>
+        /// <summary>Told as the thruster's override changes.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var thruster = block as IMyThrust;
@@ -59,7 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Whether the air a thruster of <paramref name="block" />'s kind is in changes what it can push.</summary>
-        /// <remarks>Asked of the definition, which says how effective it is at either end of the air it works in.</remarks>
         static bool Aired(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;

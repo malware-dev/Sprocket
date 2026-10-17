@@ -13,10 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// The construct the editor was opened on, as Sprocket sees it.
     /// </summary>
-    /// <remarks>
-    /// Every block on it is a <see cref="GridEntity" /> of a kind described once per definition, by the
-    /// capabilities that claim it and by what the block itself declares - see <see cref="BlockKinds" />.
-    /// </remarks>
     public sealed class GridWorld : IDisposable
     {
         IMyTerminalBlock _anchor;
@@ -28,8 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         static ParameterCatalog Catalogue()
         {
-            // Sprocket's own descriptions go in first, so a mod may override them, which is the rule the mods
-            // themselves follow.
+            // Sprocket's own descriptions go in first, so a mod may override them.
             var catalogue = new ParameterCatalog();
             catalogue.Add(KnownActions.Descriptions(), "");
             ModActions.Read(catalogue);
@@ -67,44 +62,28 @@ namespace Sprocket.Host.SpaceEngineers.World
         public event Action HandsChanged;
 
         /// <summary>Raised from the grid's own event when the anchor is removed from the construct, in the middle of the grid changing.</summary>
-        /// <remarks>Whatever answers it waits until the grid has finished, before it reads the construct again - see <see cref="SprocketUnit" />.</remarks>
+        /// <remarks>Whatever answers it waits until the grid has finished before it reads the construct again.</remarks>
         public event Action AnchorRemoved;
 
         /// <summary>Raised from the anchor's own event as the game closes it, in the middle of whatever is closing it.</summary>
         /// <remarks>
-        /// A block removed by itself is closed too, after <see cref="AnchorRemoved" />. A grid deleted whole closes every block on
-        /// it and reports none of them removed, so this is all that is heard of it. Answered as that is.
+        /// A grid deleted whole closes every block on it and reports none of them removed, so this is all that is heard of
+        /// it.
         /// </remarks>
         public event Action AnchorClosed;
 
         /// <summary>Raised from a block's own event when one on the construct is renamed, by anybody.</summary>
-        /// <remarks>Everything that names a block on screen reads its current name, so what shows one says it again.</remarks>
         public event Action Renamed;
 
         /// <summary>
         /// Makes and reads the values this construct deals in, and the lists behind the wide ones.
         /// </summary>
-        /// <remarks>
-        /// One store, because a comparison meets a reading its entities produced and an operand declared
-        /// on one of their kinds, and a slot only means anything against the lists it was taken from.
-        /// Anything that fits in eight bytes needs none of this - see <see cref="EntityValue.Of(bool)" /> -
-        /// so this is only reached for to carry something wider, which today means text.
-        /// </remarks>
         public Values Values { get; } = new Values();
 
         /// <summary>
         /// Bumped by <see cref="Rebuild" />, which is the only place the set changes, and rebuilt first where the grid said it changed.
         /// </summary>
-        /// <remarks>
-        /// Read to decide whether anything that resolves names against the set must do it again, so a change the grid
-        /// reported has to count here before the set is next read, or a block ground off goes on resolving as present.
-        /// One flag read when nothing changed.
-        /// <para>
-        /// A rotor or piston head detaching, and a grid splitting or merging, take grids out of this construct or bring
-        /// them in without adding or removing a block; the construct's mechanical group says so, and so does each grid
-        /// that splits or merges, and both mark it stale.
-        /// </para>
-        /// </remarks>
+        /// <remarks>One flag read when nothing changed.</remarks>
         public int Revision
         {
             get
@@ -121,17 +100,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// every time it is asked for.
         /// </summary>
         /// <remarks>
-        /// Blocks get welded on and shot off while a program runs, so this cannot be read once and
-        /// kept. Walking every grid in the group on every access would be honest and far too expensive
-        /// on a server, so the grid's own <c>OnBlockAdded</c> and <c>OnBlockRemoved</c> mark it stale
-        /// instead. Same answer, paid for once per change rather than once per look.
-        /// <para>
-        /// <b>This construct only</b>: the grid the Sprocket unit sits on plus anything mechanically
-        /// connected to it by rotors, pistons and hinges. Connectors, landing gear and magplates are
-        /// docking rather than construction, so whatever is on the other side of one is somebody else's
-        /// machine and never appears here. That rule is what stops a rule's meaning from changing
-        /// underneath somebody when they dock, which in this game is routine rather than an edge case.
-        /// </para>
+        /// The grid the anchor sits on and what rotors, pistons and hinges join to it; never what is docked by a connector,
+        /// landing gear or magplate.
         /// </remarks>
         public IReadOnlyList<GridEntity> Entities
         {
@@ -145,10 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The players who own most of the construct's blocks, counted over every grid of it; empty where nobody owns any.</summary>
-        /// <remarks>
-        /// The game's big owners, taken over the whole construct rather than one grid, so a programmable block placed on a wing
-        /// makes nobody the owner of the construct's automation. Several where they tie.
-        /// </remarks>
+        /// <remarks>Several where they tie.</remarks>
         public IReadOnlyList<long> BigOwners
         {
             get
@@ -195,15 +162,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The construct's name, which in this game is the block's own grid's.
         /// </summary>
-        /// <remarks>
-        /// The grid the Sprocket sits on rather than any of the ones welded to it. A construct is several
-        /// grids joined by rotors and pistons and each of them has a name of its own, so there is no one
-        /// answer - but there is an obvious one, and it is the thing somebody opened the terminal on.
-        /// <para>
-        /// Never empty: Space Engineers names every grid, and a name the game made up reads no differently
-        /// from one nobody has got round to changing. There is no way to tell those apart and no reason to.
-        /// </para>
-        /// </remarks>
         public string Name
         {
             get
@@ -233,8 +191,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// of the game's own actions, or another Sprocket's.
         /// </summary>
         /// <remarks>
-        /// Read from the toolbar as it is now. This Sprocket's action counts as its own whatever key it carries, and so does one
-        /// pointed at a Sprocket that is gone, since nobody's program answers it.
+        /// This Sprocket's action counts as its own whatever key it carries, and so does one pointed at a Sprocket that is
+        /// gone.
         /// </remarks>
         public bool Foreign(IMyTerminalBlock panel, ToolbarSlot at)
         {
@@ -280,11 +238,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>One sequence on one of its system, as one number.</summary>
-        /// <remarks>
-        /// Each one of a system answers its triggers with its own blocks, so whether a sequence can be
-        /// started is a question about the pair: a button filled in the front airlock starts the front
-        /// airlock whether or not the port airlock has had its button given yet.
-        /// </remarks>
         public static long Start(int sequenceId, SystemInstance instance)
         {
             return ((long)sequenceId << 32) | (uint)(instance?.Number ?? 0);
@@ -299,10 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether something has asked to be looked at again since this was last called.</summary>
-        /// <remarks>
-        /// A flag the unit clears rather than an event, because the unit is already ticking and one
-        /// boolean read a frame is cheaper than anything that has to be subscribed to and unsubscribed.
-        /// </remarks>
+        /// <remarks>Read every frame, so it is a flag rather than an event.</remarks>
         public bool TakeLook()
         {
             var asked = _asked;
@@ -313,12 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The keys Sprocket writes for a block, in the order it wants them tried: its id, its path, its name.
         /// </summary>
-        /// <remarks>
-        /// The path is the one that survives a copy. Pasting or blueprinting a grid gives every block a
-        /// new id and keeps where each block stands on its grid, so a copy's blocks are found by the
-        /// path while the id finds nothing - see <see cref="Path" />. A name is last, because two blocks
-        /// can share one.
-        /// </remarks>
+        /// <remarks>Pasting or blueprinting a grid in the game gives every block a new id and keeps where each block stands on its grid.</remarks>
         public void Identify(GridEntity entity, List<EntityKey> keys)
         {
             keys.Clear();
@@ -335,10 +280,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Gives the first id among <paramref name="keys" /> the id of <paramref name="entity" />, leaving
         /// every key where the program put it.
         /// </summary>
-        /// <remarks>
-        /// For a block found by its path after its id found nothing, which is a copy's block: from the
-        /// next save on, its id finds it first, as it does an original's.
-        /// </remarks>
+        /// <remarks>For a block found by its path after its id found nothing.</remarks>
         public void Renumber(GridEntity entity, List<EntityKey> keys)
         {
             for (var i = 0; i < keys.Count; i++)
@@ -356,11 +298,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// mechanical joint crossed, then the block's own cell. Null where no joint leads there.
         /// </summary>
         /// <remarks>
-        /// A cell is a block's <c>Position</c>, its anchor on its own grid, which a paste or a blueprint
-        /// keeps. A joint crossed from its base leads to its top's grid, and from its top to its base's,
-        /// so a programmable block on a rotor head reaches the grid the rotor stands on as easily as
-        /// the other way round. Worked out by searching the joints, which happens when a block is
-        /// declared and never on a tick.
+        /// A cell is a block's <c>Position</c>, which a paste or a blueprint keeps. Searches every joint, so it is asked when a
+        /// block is declared and never on a tick.
         /// </remarks>
         Vector3I[] Path(GridEntity entity)
         {
@@ -369,8 +308,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (home == null || target == null)
                 return null;
 
-            // Breadth first, so the path is the shortest: each grid reached remembers the grid it was
-            // reached from and the cell of the joint crossed to get there.
+            // Breadth first, so the path is the shortest.
             var from = new Dictionary<IMyCubeGrid, IMyCubeGrid>();
             var through = new Dictionary<IMyCubeGrid, Vector3I>();
             var waiting = new Queue<IMyCubeGrid>();
@@ -442,11 +380,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// How many times a reference has been matched against the blocks here.
         /// </summary>
         /// <remarks>
-        /// <b>For measuring, and it is not idle curiosity.</b> Matching walks every key against every
-        /// block, and doing it per reference per tick inside the game's update loop is the failure
-        /// this design is shaped to avoid. The wrong version works perfectly and is invisible in every
-        /// screenshot, so the only honest proof is a count - which a test takes before and after six
-        /// hundred idle ticks.
+        /// For measuring: matching walks every key against every block, and must not run per reference per tick. A test
+        /// counts it over six hundred idle ticks.
         /// </remarks>
         public int Matched { get; private set; }
 
@@ -489,9 +424,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (name.Length == 0)
                 return null;
 
-            // Deliberately the first of several. Two blocks may share a name, and picking one is
-            // still better than losing the reference - it is a proposal either way, because a name
-            // is never the strongest key.
+            // The first of several: two blocks may share a name.
             foreach (var entity in _entities)
             {
                 if (entity.Name == name)
@@ -533,12 +466,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Rebuilds the block list from the mechanically connected grids.
         /// </summary>
-        /// <remarks>
-        /// <c>GridLinkTypeEnum.Mechanical</c> and not <c>Logical</c>, because that is exactly the rule
-        /// <see cref="Entities" /> states: rotors, pistons and hinges are this machine, and a connector
-        /// is somebody else's parked next to it. The game supplies the predicate, and only the right one
-        /// has to be picked.
-        /// </remarks>
         void Rebuild()
         {
             _stale = false;
@@ -669,11 +596,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The grid the construct is found from: the anchor's, or where the anchor is gone, one the construct had that is still there.</summary>
-        /// <remarks>
-        /// The anchor goes when the programmable block holding the automation is destroyed, and the construct is then found
-        /// again from what is left of it, so another programmable block can take the automation over. See
-        /// <see cref="SprocketUnit" />.
-        /// </remarks>
         IMyCubeGrid Home()
         {
             if (_anchor != null && !Closing(_anchor) && _anchor.CubeGrid != null && !Closing(_anchor.CubeGrid))
@@ -689,10 +611,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the game has closed <paramref name="entity" /> or is about to, either of which leaves it no part of the construct.</summary>
-        /// <remarks>
-        /// A grid deleted whole is marked first and closed later in the frame, and stays in its group until then, so a construct
-        /// read in between would still count it.
-        /// </remarks>
+        /// <remarks>The game marks a grid deleted whole first and closes it later in the frame, leaving it in its group until then.</remarks>
         static bool Closing(IMyEntity entity)
         {
             return entity.MarkedForClose || entity.Closed;
@@ -743,9 +662,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Listens to the mechanical group the construct's own grid is in, which says when a grid joins or leaves it.</summary>
         /// <remarks>
-        /// The game moves a grid from one group to another whenever a rotor, piston or hinge attaches or detaches, and when
-        /// grids split or merge, and each group it leaves or joins says so; none of those adds or removes a block. Followed
-        /// again on every rebuild, since the construct's own grid may be the one that moved.
+        /// The game moves a grid between groups as a rotor, piston or hinge attaches or detaches and as grids split or merge,
+        /// adding or removing no block. Called on every rebuild.
         /// </remarks>
         void Join(IMyGridGroupData group)
         {

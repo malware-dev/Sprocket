@@ -7,8 +7,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Game.ModAPI;
 
-// The Ingame one, which is where action arguments live. Aliased rather than imported whole, the
-// way SignalAction does, because the Ingame namespaces collide with the mod-side ones.
+// Aliased because the game's Ingame namespaces collide with the mod-side ones.
 using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.World
@@ -88,51 +87,20 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Wires a button the moment the program asks for one, and never touches it again.
         /// </summary>
-        /// <remarks>
-        /// Sprocket is told nothing about this: core says a sequence is started by a block, and this
-        /// side works out that a button panel needs a slot set for that to be true. The program's
-        /// revision is the whole signal, so an ordinary tick is one integer comparison, and reading a
-        /// toolbar is never on the tick path.
-        /// <para>
-        /// <b>Assignment happens once, where the block is bound, and then the game owns the slot.</b>
-        /// Sprocket's part afterwards is to answer when the action is invoked. Anything that kept
-        /// asserting what a slot should hold is Sprocket arguing with a player who can edit that slot
-        /// whenever they like - and losing the argument is the only acceptable outcome, so it is
-        /// better not to have it.
-        /// </para>
-        /// <para>
-        /// A diff rather than a sweep, because the interesting case is subtraction: somebody who picks
-        /// button 2 after button 1 leaves button 1 wired to something nothing references, which is a
-        /// button on their ship that does something they cannot see.
-        /// </para>
-        /// <para>
-        /// <b>A slot somebody else is using is left alone.</b> Overwriting it would configure Sprocket
-        /// by breaking their ship, which is worse than not working.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Called every tick: a tick with no change of wiring is one integer comparison, and reads no toolbar.</remarks>
         public void Reconcile()
         {
-            // Wiring, not Revision. Revision is about declarations moving; this is about somebody
-            // having said what a trigger is, which is the thing that has to be acted on - and which
-            // happens even when the trigger ends up identical to what it was.
             if (_program.Wiring == _reconciled)
                 return;
 
             _reconciled = _program.Wiring;
 
-            // Somebody has just said what a trigger is, so what is wired has changed under whatever a
-            // screen is showing - including by Sprocket writing a slot itself a moment ago. Read it
-            // again, or a sequence the player has just mended goes on being reported as unstartable
-            // and parked a second later.
             _world.LookAgain();
 
             _keys.Index();
             Wanted(_wanting);
 
-            // Nothing is written for a program that has just been loaded. Every button it asks for was
-            // wired by the session that built it and the game has owned those slots ever since; a slot
-            // that is empty now is somebody having cleared it by hand, which is an instruction and not
-            // a gap to fill.
+            // A program just loaded only mends: a slot of its that is empty now was cleared by hand, and stays empty.
             if (_adopted)
             {
                 Release();
@@ -144,8 +112,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 Mend();
             }
 
-            // Two lists swapped rather than one rebuilt, so comparing costs nothing. The previous set is all that is
-            // remembered about wiring: what a panel actually holds is the panel's business, and the game's.
+            // Two lists swapped rather than one rebuilt, so comparing costs nothing.
             List<WantedWiring> was = _wanted;
             _wanted = _wanting;
             _wanting = was;
@@ -158,14 +125,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Every button the program's triggers ask for, once per one of each system.
         /// </summary>
-        /// <remarks>
-        /// Per one of a system rather than per sequence, because a button belongs to one of them:
-        /// the panel by the front airlock starts the front airlock, and the panel by the port one
-        /// starts the port one. <see cref="SystemInstance.Resolve" /> is what turns the block
-        /// slots a sequence names into the blocks this particular one uses, and a slot nobody
-        /// filled resolves to what the system was built with - which is right for the first of
-        /// them and an honest failure for a later one.
-        /// </remarks>
         void Wanted(List<WantedWiring> into)
         {
             into.Clear();
@@ -187,11 +146,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The buttons one sequence asks for on one of its system.
         /// </summary>
-        /// <remarks>
-        /// Every trigger that runs the sequence, not the first of them. Two buttons starting one
-        /// sequence is the ordinary case - the one inside the airlock and the one outside - and a
-        /// slot is wanted for each, on its own panel.
-        /// </remarks>
         void WantedFor(List<WantedWiring> into, AutomationSystem system, SystemInstance instance,
             Sequence sequence)
         {
@@ -251,25 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Rewrites the slots that are Sprocket's and say nothing it understands.
         /// </summary>
-        /// <remarks>
-        /// The one exception to leaving a loaded program's slots alone, and it is not a loophole in
-        /// that rule - it is the rule's missing case. Three things a slot can be, and only one of them
-        /// is a person's decision:
-        /// <list type="bullet">
-        /// <item>empty, or holding somebody else's action - a person changed it, so it stands;</item>
-        /// <item>Sprocket's, with a key that resolves - working, so leave it;</item>
-        /// <item><b>Sprocket's, with a key that means nothing</b> - nobody typed that, and nobody could.</item>
-        /// </list>
-        /// The third can only be Sprocket's own writing gone stale: a key format that has changed
-        /// underneath it, or a payload of the wrong type entirely. Leaving it would leave somebody's
-        /// buttons permanently dead with no way back but re-picking each one, and calling that
-        /// "respecting their choice" would be dishonest about whose writing it is.
-        /// <para>
-        /// Which makes this the migration path for the key, once and for all. Change what a key looks
-        /// like and every slot in every saved world mends itself on the next load, with nothing to
-        /// version and nothing to ask anybody.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Called on the first pass after a load; every saved slot with a stale key mends then, so a key format can change without breaking saves.</remarks>
         void Mend()
         {
             foreach (var want in _wanting)
@@ -283,9 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                // One of Sprocket's that already says something this program can resolve is left alone.
-                // An orphan is rewritten whatever its key says, because the id is the broken part:
-                // the block it names is gone, so nothing it says can be honoured by anybody.
+                // An orphan is rewritten whatever its key says: the block it names is gone.
                 if (Mine(present) && Understood(toolbar, want.Slot))
                     continue;
 
@@ -304,11 +238,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether a slot of Sprocket's carries a key this program can resolve.</summary>
-        /// <remarks>
-        /// Read once per wanted button on the first pass after a load, never on a tick. A slot holds
-        /// whatever was written into it rather than what the action declares, so anything that is not
-        /// a key this program knows answers no - wrong type included.
-        /// </remarks>
+        /// <remarks>Read once per wanted button on the first pass after a load, never on a tick.</remarks>
         bool Understood(IMyToolbar toolbar, int slot)
         {
             _arguments.Clear();
@@ -326,10 +256,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Lets go of every button the program no longer asks for.
         /// </summary>
-        /// <remarks>
-        /// Only ever clears a slot Sprocket still holds. Somebody who re-pointed the slot themselves
-        /// has said what they want it to do, and taking it back would be Sprocket arguing with them.
-        /// </remarks>
         void Release()
         {
             foreach (var had in _wanted)
@@ -343,9 +269,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (toolbar == null || !toolbar.TryGetItem(had.Slot, out present)
                     || !Asked(toolbar, present, had))
                 {
-                    // Already empty, already somebody else's, or no longer what this want asked for.
-                    // None of those is Sprocket's to clear, and whoever changed it has said what they
-                    // wanted it to do.
                     continue;
                 }
 
@@ -385,10 +308,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Puts back in the slot <paramref name="had" /> let go of the player's own item it held before Sprocket took it, where there was one.</summary>
-        /// <remarks>
-        /// Remembered as taken back, so the same button taken over again, by a step made again, is taken again rather than
-        /// left as somebody's.
-        /// </remarks>
         void GiveBack(IMyToolbar toolbar, WantedWiring had)
         {
             var kept = Overwritten(had);
@@ -436,9 +355,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             foreach (var want in _wanting)
             {
-                // Only what is newly asked for. A button somebody cleared is no longer asked for at
-                // all - the trigger stopped naming it - so there is nothing here that could put one
-                // back, and picking it again is an honest new want.
                 if (Holds(_wanted, want))
                     continue;
 
@@ -449,7 +365,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
                 var filled = toolbar.TryGetItem(want.Slot, out present);
 
-                // Already exactly this.
                 if (filled && Asked(toolbar, present, want))
                     continue;
 
@@ -460,9 +375,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 }
                 else if (filled && !Mine(present) && !Orphaned(present))
                 {
-                    // Somebody's panel already does something. Overwriting it would configure
-                    // Sprocket by breaking their ship, which is worse than not working - and another
-                    // Sprocket holding it is somebody, whose program that button belongs to.
                     GameLog.Say($"slot {want.Slot} in use by {present.Kind} {present.ActionId}");
                     continue;
                 }
@@ -479,11 +391,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
-        /// <remarks>
-        /// Sprocket's own action is exactly this only when it carries this want's key. The action on
-        /// this block with any other key is this block's writing for something else - a program it has
-        /// replaced, or a sequence it no longer has - and is to be written over, not taken as done.
-        /// </remarks>
         public bool Asked(IMyToolbar toolbar, MyToolbarItemInfo present, WantedWiring want)
         {
             if (!Mine(present))
@@ -499,16 +406,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether a slot holds Sprocket's action pointed at <em>this</em> Sprocket.
         /// </summary>
-        /// <remarks>
-        /// The action's name alone is not enough, and answering with it was a real fault: cut the
-        /// programmable block and paste it back and the game gives it a new id, so every slot on the
-        /// construct names a block that is gone. Reading only the name, Sprocket found its own action
-        /// in each of them and reported every button as wired while none of them did anything.
-        /// <para>
-        /// The id it needs was in the slot the whole time, because Sprocket writes its own block into
-        /// the action it puts there.
-        /// </para>
-        /// </remarks>
         public bool Mine(MyToolbarItemInfo present)
         {
             return SignalAction.IsOurs(present) && present.BlockEntityId == _hero.EntityId;
@@ -517,16 +414,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Whether a slot holds Sprocket's action pointed at a block that is no longer there.
         /// </summary>
-        /// <remarks>
-        /// Wiring nothing can honour, and nobody decided on: the block it names is gone, so there is
-        /// no Sprocket left for that button to reach and no owner to argue with. It is adopted rather
-        /// than reported, which is what makes a programmable block survive being cut and pasted, or
-        /// ground down while another holds the same systems.
-        /// <para>
-        /// A live block is somebody's, even when that somebody is another Sprocket, and a slot that is
-        /// simply empty is somebody having cleared it - which is an instruction. Neither is touched.
-        /// </para>
-        /// </remarks>
         bool Orphaned(MyToolbarItemInfo present)
         {
             return SignalAction.IsOurs(present)
@@ -580,10 +467,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Writes every slot the program wants on <paramref name="panel" /> on the next pass, whatever the slot holds by then.</summary>
-        /// <remarks>
-        /// A person picking a button in the editor, after being asked about anything its slot already held. That pick is the
-        /// instruction a slot changed by hand waits for, so it is written even where Sprocket believes it already did.
-        /// </remarks>
+        /// <remarks>Called when a person picks a button in the editor, after being asked about anything its slot already held.</remarks>
         public void Wire(long panel)
         {
             if (!_asserted.Contains(panel))
@@ -597,21 +481,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Brings the toolbars into line with the program on the next tick, as though its wiring had changed.</summary>
-        /// <remarks>
-        /// For a button picked on a client's copy. The client's edit arrives as a program, and none arrives where the same
-        /// button was picked again, so nothing here changes to bring that pass about.
-        /// </remarks>
+        /// <remarks>Called for a button picked on a client's copy.</remarks>
         public void Revisit()
         {
             _reconciled = int.MinValue;
         }
 
         /// <summary>Writes the slots <see cref="Wire" /> asked for that do not hold what the program wants of them.</summary>
-        /// <remarks>
-        /// On the program's own pass, after it, so what is wanted is what the edit that picked the button left. A panel nothing
-        /// wants yet stays asked for until <see cref="Unwire" />: a trigger joins the program only once what it does is chosen,
-        /// some screens after its button.
-        /// </remarks>
+        /// <remarks>Called on the program's own pass, after it.</remarks>
         void Assert()
         {
             _answered.Clear();
@@ -657,7 +534,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<long> _asserted = new List<long>();
         readonly List<long> _answered = new List<long>();
 
-        /// <summary>The players' own items Sprocket wrote over because somebody took their button, kept for the life of the session to be given back.</summary>
+        // Kept for the life of the session.
         readonly List<Taken> _taken = new List<Taken>();
 
         /// <summary>A player's own item in a toolbar slot, as it was before Sprocket took the slot.</summary>
@@ -675,10 +552,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Names the button <paramref name="want" /> has just wired after the signal slot it answers.</summary>
-        /// <remarks>
-        /// Right after the slot is written, since the game names a button after any action put in its slot, Sprocket's
-        /// included; the game passes a button's name on to every player.
-        /// </remarks>
+        /// <remarks>Called right after the slot is written: the game names a button after any action put in its slot.</remarks>
         void Name(WantedWiring want)
         {
             if (string.IsNullOrEmpty(want.Name) || want.Toolbar != 1)

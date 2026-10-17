@@ -15,20 +15,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>The values something takes, one line each: what the value is, and where it is given.</summary>
-    /// <remarks>
-    /// A line each rather than side by side. Side by side reads as parts of one thing, and that is a claim about what the
-    /// values are for, which the game never says: an action declares how many it takes and nothing else. Each value's field
-    /// sits beside its label against the right-hand edge where both fit, and under the label where they do not, so nothing
-    /// runs past the form's edge; text always takes the whole width under its label, and a color stands alone.
-    /// <para>
-    /// Nothing is held against what is filled in until finishing is tried: <see cref="Judge" /> starts holding every field to
-    /// what it takes, until the form is given something else to ask.
-    /// </para>
-    /// <para>
-    /// A press on a part of it with no box of its own, such as a word or a color, gives the form the keyboard, and Enter
-    /// finishes it from anywhere in it that does not take Enter for itself, as it does in a box.
-    /// </para>
-    /// </remarks>
     public class FieldSet : Form
     {
         const int Few = 3;
@@ -78,10 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// What is given so far, as one answer: the values joined the way the language writes a list of them, quoted where a
         /// value holds a space or is text.
         /// </summary>
-        /// <remarks>
-        /// Only as far as the last value somebody gave. A value left alone is one not given, so the action is handed the
-        /// default it declared, where an empty one passed along would be an empty value and usually a worse one.
-        /// </remarks>
+        /// <remarks>Runs only as far as the last value given, so the action is handed its declared default for the rest.</remarks>
         public string Answer
         {
             get
@@ -90,8 +73,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 _texts.Clear();
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    // A field standing over several values becomes those values again, in the order its description
-                    // declared them: the other half of showing three numbers as one color.
                     if (_wanted[i].Edits == FieldEditor.Colour)
                     {
                         ColorChannels.Spell(Asked(i) ? _fields[i].Text : "", _wanted[i].Covers, _parts);
@@ -101,10 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                         continue;
                     }
 
-                    // What the program holds for the word chosen, which is not the word wherever a block shows one
-                    // thing and is told another. A field left empty is written as what it starts with, because a member
-                    // is given every argument.
-                    // One not asked for is left out, so what it sets is left as it is.
+                    // A member is given every argument, so an empty field is written as its default.
                     var text = Asked(i) ? _fields[i].Text : "";
                     if (string.IsNullOrEmpty(text) && Asked(i) && _wanted[i].Default != null)
                         text = _wanted[i].Default;
@@ -161,7 +139,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Whether a value has none, and nothing it starts with to stand in for it.</summary>
-        /// <remarks>A member is given every argument, so a value that cannot be written as its default has to be given.</remarks>
         public bool Missing
         {
             get
@@ -177,7 +154,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Whether every value holds something it takes, so there is nothing left to give.</summary>
-        /// <remarks>Never while the values only show what the block holds now: those are offered, and nobody has given them yet.</remarks>
+        /// <remarks>False while the values only show what the block holds now, offered and not yet given.</remarks>
         public bool Complete
         {
             get
@@ -219,8 +196,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <summary>Asks for <paramref name="fields" />, one line each, holding <paramref name="filled" /> or what each says is usual, its notes in <paramref name="texts" />.</summary>
         /// <remarks>
-        /// Made again whole, because it is asked only when what the values are for changes. <paramref name="colors" /> are
-        /// the player's own, offered on any color among them.
+        /// Makes every field again, so it is for calling only when what the values are for changes; <paramref name="colors" /> are
+        /// the player's own.
         /// </remarks>
         public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colors, Texts texts)
         {
@@ -243,7 +220,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
                 var said = i < filled.Count ? filled[i] ?? "" : "";
 
-                // A value somebody has not given yet starts at what it says is usual, where it says.
                 if (said.Length == 0 && !string.IsNullOrEmpty(_wanted[i].Default))
                     said = _wanted[i].Default;
 
@@ -330,14 +306,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             input.Focus(keyboard);
 
-            // With what is in it taken, so typing replaces it: somebody who moves to a value means to say something else.
             var box = keyboard as TextBox;
             if (box != null)
                 box.SelectAll();
         }
 
         /// <summary>What each value holds, as its field spells it, by the value it is: see <see cref="Key" />.</summary>
-        /// <remarks>By name, so what was given survives the values changing under it: a hinge picked beside a rotor takes the direction away and leaves the angle.</remarks>
         public void Spell(IDictionary<string, string> into)
         {
             for (var i = 0; i < _fields.Count; i++)
@@ -358,7 +332,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             Follow();
             for (var i = 0; i < _fields.Count; i++)
             {
-                // A value is seen once somebody has given it anything.
                 if (_fields[i].Text.Length > 0)
                     _seen[i] = true;
             }
@@ -419,7 +392,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             if (!string.IsNullOrEmpty(about))
                 element.Tip = Tip.For(element.Tip, about);
 
-            // A slider shows its range, so its bounds are said in its box's tip rather than its label.
             if (field is SliderField)
                 ((SliderField)field).Keyboard.Tip = Tip.For(((SliderField)field).Keyboard.Tip, _wanted[at].Takes(_language).Trim('(', ')'));
 
@@ -433,7 +405,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 return;
             }
 
-            // With no label, a bounded field still keeps to the right-hand edge, so the fields of a form end together.
             if (!color && !(field is TypedField) && !(field is LinesField) && !(field is SliderField) && !(field is WordsField))
                 element.Align = Align.Right;
 
@@ -462,7 +433,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>Why the value at <paramref name="at" /> will not do, or empty, where it is being held to anything at all.</summary>
-        /// <remarks>A value nobody has reached is not called wrong for being empty; it still holds the form back through <see cref="Missing" />.</remarks>
         string Refuses(int at)
         {
             if (!_judged)

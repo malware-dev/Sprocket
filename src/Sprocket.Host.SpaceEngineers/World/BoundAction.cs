@@ -3,10 +3,7 @@ using Sandbox.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>One of Sprocket's own actions as one step asks for it: its behavior, with the step's options already read.</summary>
-    /// <remarks>
-    /// Made when the step is compiled, once for every block of the step that does the same thing, so nothing a step was
-    /// given is read again while it runs. See <see cref="OwnAction.Bind" />.
-    /// </remarks>
+    /// <remarks>Made when the step is compiled, and never while it runs.</remarks>
     public abstract class BoundAction
     {
         /// <summary>Whether this does anything itself, rather than leaving the act to the game's own action.</summary>

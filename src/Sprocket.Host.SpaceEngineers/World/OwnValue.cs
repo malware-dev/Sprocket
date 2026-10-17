@@ -7,12 +7,6 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What one of Sprocket's own values reads off a block, and how a change in it is heard.</summary>
-    /// <remarks>
-    /// Declared once, beside the value, by what knows the block, as <see cref="OwnAction" /> is for an action, and never changed
-    /// after: how a change in it is heard belongs to the value a kind lists, <see cref="EntityAction.Announced" />. A function is a
-    /// value with options of its own: it reads them into a type of its own when a test is compiled, and is handed that
-    /// from then on. See <see cref="Gauge" />.
-    /// </remarks>
     public abstract class OwnValue
     {
         static readonly string[] None = Array.Empty<string>();
@@ -45,11 +39,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         public abstract Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, ReaderMemory seen);
 
         /// <summary>The flag that the value, read with no arguments, is <paramref name="becomes" />: on or off for a flag, a name for one of a list.</summary>
-        /// <remarks>What a signal that is a change in this value is a change of: a door finishing closing is its status coming to be closed.</remarks>
         public abstract Reading Is(Literal becomes);
 
         /// <summary>Says this is a function, given an argument for each of <paramref name="parameters" />.</summary>
-        /// <remarks>Part of making it, in the same initializer: an OwnValue is shared by every kind that lists it.</remarks>
+        /// <remarks>Called only in the initializer that makes it: an OwnValue is shared by every kind that lists it.</remarks>
         public OwnValue Taking(params Field[] parameters)
         {
             _parameters.AddRange(parameters);
@@ -57,7 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Says a person reads <paramref name="words" /> for the names, one each in order, where the program names things by id.</summary>
-        /// <remarks>Part of making it, as <see cref="Taking" /> is. A screen's app is written by the game's id, and read by the name the game shows for it.</remarks>
+        /// <remarks>Called only in the initializer that makes it.</remarks>
         public OwnValue Saying(IReadOnlyList<string> words)
         {
             _said = words;
@@ -68,7 +61,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Says a step can set this, by <paramref name="write" />, handed the value as the kind it is: on or off, a number,
         /// text, a color, and a one of a list as its position among the names.
         /// </summary>
-        /// <remarks>Part of making it, as <see cref="Taking" /> is. Only what a player could set at the block in the game.</remarks>
+        /// <remarks>Called only in the initializer that makes it.</remarks>
         public OwnValue Writing<T>(Action<T, Literal> write) where T : class
         {
             _write = (block, value) => write((T)block, value);
@@ -79,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What sets this on <paramref name="block" /> to <paramref name="value" />, made ready once; null where it cannot be
         /// set, or a one of a list is given none of its names.
         /// </summary>
-        /// <remarks>Made when a step is compiled, and given when it runs, which only calls the writer.</remarks>
+        /// <remarks>Asked when a step is compiled, and never while it runs.</remarks>
         public BlockOrder Order(IMyTerminalBlock block, Literal value)
         {
             if (_write == null || block == null)
@@ -114,7 +107,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What the first parameter <paramref name="given" /> arguments leave out is called; empty where nothing names it, and
         /// null where none is missing.
         /// </summary>
-        /// <remarks>A function is given an argument for every parameter it declares.</remarks>
         public string Missing(int given)
         {
             var covered = 0;
@@ -132,10 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What the first of <paramref name="arguments" /> it cannot take is called; empty where nothing names it or it is one
         /// too many, and null where it takes them all.
         /// </summary>
-        /// <remarks>
-        /// An argument is taken where it is the kind its field is for, one of the field's words where it lists some, and
-        /// within its bounds where it has them. Asked when a test is checked or compiled, never while it runs.
-        /// </remarks>
+        /// <remarks>Asked when a test is checked or compiled, and never while it runs.</remarks>
         public string Refused(IList<Literal> arguments)
         {
             var at = 0;
@@ -336,10 +325,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return new Measured<T, TOptions>(this, _options(arguments), block, seen);
             }
 
-            /// <remarks>
-            /// A one of a list is compared by its position among the names, worked out here, once. A name that is none of
-            /// them is a mistake in the declaration, and stops it.
-            /// </remarks>
             public override Reading Is(Literal becomes)
             {
                 var operand = becomes;
@@ -387,7 +372,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A value of a block read as it reads now, with the options one test gave it.</summary>
-        /// <remarks>The cast never fails: a test is compiled only against blocks of the kind that declared the value.</remarks>
         sealed class Measured<T, TOptions> : Gauge where T : class
         {
             readonly Typed<T, TOptions> _being;
@@ -403,7 +387,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _seen = seen;
             }
 
-            /// <remarks>A one of a list reads as its position, so a comparison on a tick compares whole numbers.</remarks>
             public override ValueKind Kind => _being.Kind == ValueKind.Name ? ValueKind.Integer : _being.Kind;
 
             public override Literal Read()

@@ -13,16 +13,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// One <see cref="EntityKind" /> per block definition, built the first time one of that block is seen.
     /// </summary>
-    /// <remarks>
-    /// Per definition rather than one kind for everything, because the ship list groups by kind and a list
-    /// where every row says "Block" is not a list anybody can use. It is also what makes asking the block
-    /// what it can do affordable: a definition declares the same actions whichever one of it is asked, so
-    /// the question is put once however many of them are on the ship.
-    /// </remarks>
     public sealed class BlockKinds
     {
         /// <summary>What Sprocket's own members and moments are qualified by: <c>ext.close</c>.</summary>
-        /// <remarks>Persisted in every program that uses one, so it cannot change without changing what those programs say.</remarks>
+        /// <remarks>Persisted in every program that uses one.</remarks>
         public const string Own = "ext";
 
         const string GamePrefix = "MyObjectBuilder_";
@@ -51,10 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ? block.BlockDefinition.SubtypeName
                 : block.DefinitionDisplayNameText;
 
-            // The block's own definition id doubles as its icon: the screen-space sprite API resolves
-            // one straight to that block's picture, so nothing has to be declared, extracted or shipped.
-            // It is the same string as the kind id, which is not a coincidence - both are "which block
-            // type is this".
+            // The definition id is also the icon: the game's screen-space sprite API resolves it to that block's picture.
             kind = new EntityKind(id, name).WithIcon(id).WithFamily(Families.Of(block.BlockDefinition.TypeIdString));
             Lineage(block.BlockDefinition.TypeId, Sort(id), kind.Lineage);
 
@@ -66,16 +57,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Describe(kind, block, _capabilities.Floor);
 
-            // What the block has of each type the host provides, a screen of each, with the members of each type.
             Describe(kind, block, HostTypes.All);
 
-            // And then everything the block says it can do, which is most of what Sprocket can offer
-            // about most blocks. Last, so the words chosen for a sentence come first where there are
-            // any: a door reads "open" above "Open/Closed".
+            // After the capabilities, so the words chosen for a sentence come first: a door reads "open" above "Open/Closed".
             Rest(kind, block);
 
-            // And last of all the values it carries, because an act reads better than telling a
-            // value what to be wherever there is one that does the same thing.
+            // After the actions, so an act is listed above a value that does the same thing.
             Values(kind, block);
             MemberMeanings.Settle(kind, block);
             Hide(kind);
@@ -127,10 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Adds every slot of every toolbar the block has as a signal, by where it is.</summary>
-        /// <remarks>
-        /// A signal is sent from a toolbar slot, whatever block it is on, so a block nothing knows about offers its slots all the same.
-        /// Asked once per block type, which has the same toolbars whichever block is asked.
-        /// </remarks>
+        /// <remarks>Asked once per block type.</remarks>
         static void Signals(EntityKind kind, IMyTerminalBlock block)
         {
             var toolbars = 0;
@@ -163,24 +147,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Adds everything the block declares and nothing has said better.
         /// </summary>
-        /// <remarks>
-        /// <b>The floor under the whole vocabulary.</b> Without it Sprocket can tell a piston nothing,
-        /// until somebody writes what a piston is - and it can tell a modded block nothing ever,
-        /// because nobody can write that for a block that does not exist yet. Asking
-        /// the block instead means every block in the game works, and so does every block anybody
-        /// adds to it afterwards.
-        /// <para>
-        /// The words are the game's own, which are written for a button in the terminal rather than
-        /// for the middle of a sentence. They are what the player has already read, which is worth
-        /// more than a guess at a better phrasing - and where a better one exists, a capability has
-        /// said it, and this one is still added but left out of the list somebody chooses from.
-        /// </para>
-        /// <para>
-        /// No state is claimed: an action here says nothing about what it is trying to bring about,
-        /// so nothing generic can be waited for or interlocked. That is a real limit and not an
-        /// oversight - see the capabilities, which are where that knowledge lives.
-        /// </para>
-        /// </remarks>
         void Rest(EntityKind kind, IMyTerminalBlock block)
         {
             _offered.Clear();
@@ -238,20 +204,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Adds every value the block carries that nothing else already covers.
         /// </summary>
-        /// <remarks>
-        /// The other half of the floor. Actions are the small hand-picked half of what a block can
-        /// do; the values are the large half, and they describe themselves - a name in the player's
-        /// own language, a kind, and the bounds the block itself will accept.
-        /// <para>
-        /// Not held to the rule that hides a bare toggle. That rule is about an <em>action</em> -
-        /// "toggle it" settles on a state whoever stored it could not see - and the explicit form
-        /// it pushes people towards is this one. A switch is offered as a value it can be set to.
-        /// </para>
-        /// <para>
-        /// A value is passed over only where another value already has that id, since a program
-        /// could not tell the two apart.
-        /// </para>
-        /// </remarks>
         void Values(EntityKind kind, IMyTerminalBlock block)
         {
             _offered.Clear();
@@ -295,12 +247,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Keeps a value out of reach where it is one of a listed few and the list could not be read.
         /// </summary>
-        /// <remarks>
-        /// Offered as its number it would be a box somebody types a number into with nothing saying
-        /// what the number means, and a wrong one declined in silence when the step runs. Pending
-        /// rather than unsupported, because a list the game will not hand over can often be found
-        /// another way - a camera list is the cameras on the ship - and nothing here knows which.
-        /// </remarks>
         static void Unread(EntityAction one, Offer offer)
         {
             if (offer.Unreadable)
@@ -310,36 +256,23 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What the form asks for one of a block's values, from what the block said about it.
         /// </summary>
-        /// <remarks>
-        /// The kind matters here and nowhere else. A switch takes two words and a slider takes a
-        /// number between two others, and a form told neither accepts whatever is typed - which the
-        /// block then refuses when the step runs, silently, because a value of the wrong kind is
-        /// simply not written.
-        /// </remarks>
         static Field Asks(Offer offer, string said)
         {
-            // What the block says it may be, where it says: a charge mode is Auto, Recharge or
-            // Discharge and the block is told a number, so the words and the values are two lists.
+            // A charge mode is Auto, Recharge or Discharge and the block is told a number, so the words and the values are two lists.
             if (offer.Choices != null && offer.Choices.Count > 0)
                 return Among(said, offer.Choices);
 
             if (offer.Sets == ValueKind.Flag)
             {
-                // The same thing with two of them, and the one case where each word is its own
-                // value: a flag is written on or off, which is what the block is told.
+                // Each word is its own value: the block is told on or off.
                 Field either = Field.OneOf(said, Literal.Of(true).Said, Literal.Of(false).Said);
                 either.Edits = FieldEditor.Chosen;
                 return either;
             }
 
-            // A colour says so itself, which nothing else here does. Where three parameters of an
-            // action are a colour only because somebody wrote that down, a value declared as one is
-            // one, so it gets the same control without anybody having to describe it.
             if (offer.Sets == ValueKind.Color)
                 return Field.Holding(said, FieldEditor.Colour, 1);
 
-            // What is typed is held to the kind the block says the value is, whatever its bounds look
-            // like: a real number takes a fraction and a whole one refuses it.
             var between = Field.Between(said, offer.Least, offer.Most);
             between.Entry = EntityAction.Entered(offer.Sets);
             return between;
@@ -365,30 +298,18 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// What anybody has said this action's parameters are, or null.
         /// </summary>
-        /// <remarks>
-        /// Asked with the kind's own id, which is the block's definition, so a description naming
-        /// one block answers for that block and no other - and anything claimed about the bare
-        /// action id is the fallback. Asked with the count as well, because a description that does
-        /// not account for every parameter is one that has fallen out of step with the block.
-        /// </remarks>
         Description Described(EntityKind kind, Offer offer)
         {
             return _catalogue?.Fitting(kind.Id, offer.Id, offer.Wants);
         }
 
         /// <summary>Marks what is left out of the list somebody chooses from.</summary>
-        /// <remarks>
-        /// An entry is left out where a capability's stands in for it, naming it as the game's own form of
-        /// what the capability's entry does - a door's open is the game's <c>Open_On</c> said better - and
-        /// where the kind names it outright. Runs once the list is complete, because the entry that stands
-        /// in and the one it stands in for are added at different times.
-        /// </remarks>
+        /// <remarks>Called once the kind's list is complete.</remarks>
         static void Hide(EntityKind kind)
         {
             var actions = kind.Actions;
 
-            // Values first, because whether a value is listed decides whether the actions the game
-            // made out of it are.
+            // Values first: whether a value is listed decides whether the actions the game made out of it are.
             for (var i = 0; i < actions.Count; i++)
             {
                 EntityAction one = actions[i];
@@ -408,10 +329,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Gives each switch the organized view lists a third choice, flip, where the game's toggle for it is listed beside it,
         /// and takes that toggle out of the organized view.
         /// </summary>
-        /// <remarks>
-        /// After everything has been hidden that is going to be, since only a switch that is listed can take its toggle's place,
-        /// and only a toggle that is listed has a place to give up. The toggle stays in the terminal view, as the game's own.
-        /// </remarks>
+        /// <remarks>Called after <see cref="Hide" />.</remarks>
         static void Flips(EntityKind kind)
         {
             var fields = new List<Field>();
@@ -446,18 +364,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether something else offered says what this one of the block's own actions says.</summary>
-        /// <remarks>
-        /// One of Sprocket's own entries that performs it, or a value the game made it out of. A
-        /// switch gets a pair that turns it each way and an act that flips it, and a slider a step up,
-        /// a step down and sometimes a reset; the value says what the pair and the steps say. The act
-        /// that flips a switch and the reset stay, being the two things a value cannot say: whichever
-        /// way it is not, and whatever the block starts at.
-        /// <para>
-        /// Decided by the ids alone. A value that is not itself listed stands in for nothing, so a
-        /// block that keeps a value out of the list keeps the actions made out of it. One that has
-        /// been given a word of its own is offered as that word, beside the value.
-        /// </para>
-        /// </remarks>
         static bool StoodIn(IList<EntityAction> actions, EntityAction one)
         {
             if (!one.Unaltered || one.Renamed)
@@ -480,11 +386,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether Sprocket's own entries turn this switch each way.</summary>
-        /// <remarks>
-        /// Then the value is the third way of saying the same thing: a door that reads open and close has no
-        /// use for an Open to be told true. A value the kind gives a word of its own is offered all the same,
-        /// as a vent's depressurizing is beside its pressurize and depressurize.
-        /// </remarks>
         static bool Turned(IList<EntityAction> actions, EntityAction value)
         {
             for (var i = 0; i < actions.Count; i++)
@@ -509,11 +410,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the action is the value's id with that in front, as a slider's steps are.</summary>
-        /// <remarks>
-        /// Only what the game's own controls make, which follows the value's id exactly. A setter
-        /// somebody wrote by hand beside a value is a different thing, and is said per block - see
-        /// <c>MemberMeanings</c>.
-        /// </remarks>
         static bool Steps(string gameActionId, string step, string propertyId)
         {
             return gameActionId.Length == step.Length + propertyId.Length
@@ -522,10 +418,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Whether the action is one half of the pair the game makes of that switch.</summary>
-        /// <remarks>
-        /// The game's convention, and the only thing tying the two together: a switch called
-        /// <c>X</c> is turned by <c>X_On</c> and <c>X_Off</c>.
-        /// </remarks>
+        /// <remarks>The game's convention: a switch called <c>X</c> is turned by <c>X_On</c> and <c>X_Off</c>.</remarks>
         static bool Turns(string gameActionId, string propertyId)
         {
             if (gameActionId == null || propertyId == null)
@@ -546,12 +439,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The sort of block a program writes: a definition id without the game's prefix.
         /// </summary>
-        /// <remarks>
-        /// <b>For a script and nothing else.</b> Everything in memory holds the definition id whole,
-        /// because that is what the game's own names are and what anything asking the game about a
-        /// block has to hand it. The prefix is the game's noise, it says nothing to a person, and the
-        /// language leaves it out - the same spelling a part's <c>expects</c> has always used.
-        /// </remarks>
+        /// <remarks>For a script only: everything in memory holds the definition id whole.</remarks>
         public static string Sort(string definition)
         {
             if (definition == null)
@@ -565,11 +453,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The definition id a sort means, which is <see cref="Sort" /> read backwards.
         /// </summary>
-        /// <remarks>
-        /// A definition id is a type and a subtype, so a sort with no <c>/</c> in it is not one: it is
-        /// a kind some other world invented, and it is left exactly as it was found. One that already
-        /// carries the prefix is left alone too, so a program saved with it still finds its blocks.
-        /// </remarks>
+        /// <remarks>A sort with no <c>/</c> in it, or one that already carries the prefix, comes back as it was given.</remarks>
         public static string Definition(string sort)
         {
             if (string.IsNullOrEmpty(sort) || sort.IndexOf('/') < 0)
@@ -582,10 +466,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Adds to <paramref name="into" /> the block <paramref name="exact" />, written as a slot writes it, then its type
         /// <paramref name="type" /> and each type the game builds that one on, nearest first, short of the terminal block.
         /// </summary>
-        /// <remarks>
-        /// Read from the game's own types, so a modded block built on one of the game's stands under it as the game's do. Once
-        /// for each kind, when it is first described.
-        /// </remarks>
+        /// <remarks>Called once for each kind, when it is first described.</remarks>
         static void Lineage(MyObjectBuilderType type, string exact, IList<string> into)
         {
             into.Add(exact);

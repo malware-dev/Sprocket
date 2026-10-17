@@ -9,17 +9,10 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
     /// <summary>A number between two bounds, set by a slider across the form with its box at the end, the two kept in step.</summary>
-    /// <remarks>
-    /// As the game's own terminal sets it. Where the top bound is many times the bottom one, the slider runs on a log scale, so
-    /// a beacon's 1 to 50000 can be set to 200 as easily as to 40000. The box is where it is typed exactly, and holds the value
-    /// to the bounds and the kind of number as any number box does.
-    /// </remarks>
     public class SliderField : HStack, IField
     {
-        // How many times the bottom bound the top one must be before the slider runs on a log scale.
         const double Wide = 100;
 
-        // How wide its box is: room for the number, the slider having the rest.
         const float Box = 96f;
 
         readonly NumberField _number;

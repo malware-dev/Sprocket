@@ -9,104 +9,12 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {
-    /// <summary>
-    ///     Represents a network message channel identified by a 16-bit channel identifier.
-    ///     Manages registration of struct-based data models with custom serialization delegates.
-    ///     Use static <see cref="Create(ushort)" /> methods to obtain a <see cref="Builder" />, then register
-    ///     model types and call <see cref="Builder.Build" /> to construct the channel.
-    ///     <para>
-    ///         <strong>Important:</strong> Use only a single shared channel per mod to avoid consuming multiple channel IDs.
-    ///         A single channel can handle multiple message types through the type registration system.
-    ///     </para>
-    /// </summary>
-    /// <example>
-    ///     <code>
-    /// // 1. Define your message struct
-    /// public struct PlayerActionMsg
-    /// {
-    ///     public int ActionType;
-    ///     public Vector3D Position;
-    ///     
-    ///     public static int SizeOf(ref PlayerActionMsg msg)
-    ///     {
-    ///         return sizeof(int) + sizeof(double) * 3;
-    ///     }
-    ///     
-    ///     public static int Read(byte[] data, ref int offset, out PlayerActionMsg msg)
-    ///     {
-    ///         var start = offset;
-    ///         msg = new PlayerActionMsg();
-    ///         ByteCodec.TryReadInt32(data, ref offset, out msg.ActionType);
-    ///         ByteCodec.TryReadVector3D(data, ref offset, out msg.Position);
-    ///         return offset - start;
-    ///     }
-    ///     
-    ///     public static int Write(ref PlayerActionMsg msg, byte[] data, ref int offset)
-    ///     {
-    ///         var start = offset;
-    ///         ByteCodec.Write(msg.ActionType, data, ref offset);
-    ///         ByteCodec.Write(msg.Position, data, ref offset);
-    ///         return offset - start;
-    ///     }
-    /// }
-    /// 
-    /// // 2. Create and configure the channel (typically in BeforeStart)
-    /// // Use your session component type to generate a channel ID with low collision probability
-    /// NetworkChannel _channel;
-    /// 
-    /// public override void BeforeStart()
-    /// {
-    ///     _channel = NetworkChannel.Create(GetType())
-    ///         .UsingModel&lt;PlayerActionMsg&gt;(PlayerActionMsg.SizeOf, PlayerActionMsg.Read, PlayerActionMsg.Write)
-    ///         .Build();
-    ///     
-    ///     // Server: Listen for messages from clients
-    ///     if (NetworkChannel.Network.IsServer)
-    ///     {
-    ///         _channel.ListenFor&lt;PlayerActionMsg&gt;(OnPlayerActionReceived);
-    ///     }
-    /// }
-    /// 
-    /// // 3. Handle received messages
-    /// void OnPlayerActionReceived(ushort channelId, PlayerActionMsg msg, ulong senderId, bool fromServer)
-    /// {
-    ///     // Process the action on the server
-    ///     MyLog.Default.Info($"Player {senderId} performed action {msg.ActionType} at {msg.Position}");
-    /// }
-    /// 
-    /// // 4. Send messages
-    /// public void PerformAction(int actionType)
-    /// {
-    ///     var msg = new PlayerActionMsg 
-    ///     { 
-    ///         ActionType = actionType, 
-    ///         Position = MyAPIGateway.Session.LocalHumanPlayer.Character.GetPosition() 
-    ///     };
-    ///     
-    ///     // Client to server
-    ///     _channel.SendToServer(msg, reliable: true);
-    ///     
-    ///     // Or broadcast to all players
-    ///     // _channel.Broadcast(msg, reliable: true, includingSelf: false);
-    ///     
-    ///     // Or send to specific player
-    ///     // _channel.Send(msg, recipientSteamId, reliable: true);
-    /// }
-    /// 
-    /// // 5. Clean up (typically in UnloadData)
-    /// protected override void UnloadData()
-    /// {
-    ///     _channel?.Dispose();
-    ///     _channel = null;
-    /// }
-    /// </code>
-    /// </example>
+    /// <summary>One network message channel, carrying every message type registered on it.</summary>
+    /// <remarks>A mod uses one channel for all its message types, so it takes one channel id.</remarks>
     public class NetworkChannel : IDisposable
     {
-        // Reserved internal type id marking a SendToNearby envelope (origin + radius + an inner,
-        // normal message). Handled in OnMessageReceived before normal dispatch. It only has to be
-        // distinct from real message type ids, which are FullName.GetHashCode() values - collision
-        // chance is ~1 in 4 billion.
+        // Marks a SendToNearby envelope: origin, radius, and an inner message. It only has to differ from real message type
+        // ids, which are FullName.GetHashCode() values.
         const int ProximityEnvelopeTypeId = 0x00C0FFEE;
 
         readonly ushort _channelId;
@@ -120,60 +28,39 @@ namespace Sprocket.Host.SpaceEngineers.Network
             Network.RegisterSecureMessageHandler(_channelId, OnMessageReceived);
         }
 
-        /// <summary>
-        ///     Gets or sets the network proxy used for multiplayer communication.
-        ///     Defaults to <see cref="DefaultNetwork" />. Can be replaced for testing or custom network implementations.
-        /// </summary>
-        /// <remarks>
-        ///     Static because the game hands a mod its network through the static
-        ///     <c>MyAPIGateway.Multiplayer</c>, so whatever stands in for it in a test has to be reachable the
-        ///     same way.
-        /// </remarks>
+        /// <summary>The network every channel sends through, the game's unless a test puts another in its place.</summary>
         public static INetworkProxy Network { get; set; } = new DefaultNetwork();
 
-        /// <summary>
-        ///     Disposes the network channel and unregisters the message handler from the multiplayer system.
-        /// </summary>
+        /// <summary>Unregisters the channel's message handler.</summary>
         public void Dispose()
         {
             Network.UnregisterSecureMessageHandler(_channelId, OnMessageReceived);
         }
 
-        /// <summary>
-        ///     Creates a new channel builder with a channel ID derived from the specified type's full name.
-        ///     The channel ID should avoid collisions with other loaded mods.
-        ///     Using a type from your mod works well if you have a proper namespace and unique type name.
-        ///     <strong>Recommended:</strong> Pass your session component type (e.g., <c>GetType()</c>) to reduce collision
-        ///     likelihood.
-        /// </summary>
-        /// <param name="type">The type whose full name will be used to generate the channel ID.</param>
-        /// <returns>A new <see cref="Builder" /> instance.</returns>
+        /// <summary>A builder for a channel whose id is drawn from the full name of <paramref name="type" />.</summary>
+        /// <remarks>The id must not collide with another loaded mod's.</remarks>
+        /// <param name="type">A type of the mod's own.</param>
+        /// <returns>The builder.</returns>
         public static Builder Create(Type type)
         {
             var channelId = (ushort)(type.FullName.GetHashCode() & 0xFFFF);
             return new Builder(channelId);
         }
 
-        /// <summary>
-        ///     Creates a new channel builder with a channel ID derived from the specified channel name.
-        ///     The channel ID should avoid collisions with other loaded mods.
-        ///     Only use this if the string is designed to be unique (e.g., includes your mod name or Steam Workshop ID).
-        /// </summary>
-        /// <param name="channelName">The channel name to use for generating the channel ID.</param>
-        /// <returns>A new <see cref="Builder" /> instance.</returns>
+        /// <summary>A builder for a channel whose id is drawn from <paramref name="channelName" />.</summary>
+        /// <remarks>The id must not collide with another loaded mod's.</remarks>
+        /// <param name="channelName">A name unique to the mod.</param>
+        /// <returns>The builder.</returns>
         public static Builder Create(string channelName)
         {
             var channelId = (ushort)(channelName.GetHashCode() & 0xFFFF);
             return new Builder(channelId);
         }
 
-        /// <summary>
-        ///     Creates a new channel builder with the specified channel ID.
-        ///     The channel ID should avoid collisions with other loaded mods.
-        ///     This variant is commonly used with the first bits of a mod's Steam Workshop ID to reduce collision likelihood.
-        /// </summary>
-        /// <param name="channelId">The 16-bit channel identifier to use.</param>
-        /// <returns>A new <see cref="Builder" /> instance.</returns>
+        /// <summary>A builder for the channel <paramref name="channelId" />.</summary>
+        /// <remarks>The id must not collide with another loaded mod's.</remarks>
+        /// <param name="channelId">The channel id.</param>
+        /// <returns>The builder.</returns>
         public static Builder Create(ushort channelId)
         {
             return new Builder(channelId);
@@ -205,10 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             dataModel.DidReceive(this, channelId, data, ref pos, senderId, fromServer);
         }
 
-        // Server-side unwrap of a SendToNearby envelope: read the origin/radius the sender attached,
-        // then forward the inner (normal) message to every player within range, minus the sender.
-        // Recipients get the plain inner message, so their ListenFor handlers fire as usual - no
-        // envelope leaks past the server. Clients never receive envelopes, so this no-ops off-server.
+        // On the server only: forwards the inner message of a SendToNearby envelope to every player in range but the sender.
         void OnProximityEnvelope(ushort channelId, byte[] data, ref int pos, ulong senderId)
         {
             Vector3D origin;
@@ -226,9 +110,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             RelayToNearby(channelId, inner, origin, radius, reliableFlag != 0, senderId);
         }
 
-        // Forwards already-serialized message bytes to every player within radius of origin, skipping
-        // excludeSteamId. Server-side only - it needs every player's position. Off-server (no
-        // MyAPIGateway.Players) it no-ops.
+        // On the server only, since it needs every player's position; does nothing where MyAPIGateway.Players is null.
         void RelayToNearby(ushort channelId, byte[] inner, Vector3D origin, double radius, bool reliable, ulong excludeSteamId)
         {
             if (MyAPIGateway.Players == null) return;
@@ -243,22 +125,15 @@ namespace Sprocket.Host.SpaceEngineers.Network
             }
         }
 
-        /// <summary>
-        ///     Broadcasts a message of type <typeparamref name="T" /> to every player within
-        ///     <paramref name="radius" /> metres of <paramref name="origin" /> (the sender excluded).
-        ///     Like the other senders this is "just another way to send data"; the server is the relay
-        ///     hub (clients can't address each other), so from a client the message round-trips through
-        ///     the server, which forwards it to the in-range recipients. On a host the forward is
-        ///     direct. Recipients receive the plain message and their <see cref="ListenFor{T}" />
-        ///     handlers fire as normal.
-        /// </summary>
-        /// <typeparam name="T">The struct data model type to send.</typeparam>
-        /// <param name="model">The message data to send.</param>
-        /// <param name="origin">World position the radius is measured from (e.g. the broadcasting block).</param>
-        /// <param name="radius">Maximum distance in metres a recipient may be from <paramref name="origin" />.</param>
-        /// <param name="reliable">If true, ensures delivery; if false, allows packet loss.</param>
-        /// <param name="includingSelf">If true, also delivers to the sender; if false (default), excludes it.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the type is not registered on this channel.</exception>
+        /// <summary>Sends a message to every player within <paramref name="radius" /> meters of <paramref name="origin" />.</summary>
+        /// <remarks>From a client the message goes by way of the server; recipients receive the plain message.</remarks>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="model">The message.</param>
+        /// <param name="origin">Where the radius is measured from.</param>
+        /// <param name="radius">How far a recipient may be, in meters.</param>
+        /// <param name="reliable">Whether delivery is ensured.</param>
+        /// <param name="includingSelf">Whether the sender receives it too.</param>
+        /// <exception cref="InvalidOperationException">The type is not registered on this channel.</exception>
         public void SendToNearby<T>(T model, Vector3D origin, double radius, bool reliable, bool includingSelf = false) where T : struct
         {
             var type = typeof(T);
@@ -313,13 +188,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             return p?.SteamUserId ?? 0UL;
         }
 
-        /// <summary>
-        ///     Registers a handler to be invoked when a message of type <typeparamref name="T" /> is received on this channel.
-        ///     The type must have been previously registered with <see cref="Builder.UsingModel{TModel}" />.
-        /// </summary>
-        /// <typeparam name="T">The struct data model type to listen for.</typeparam>
-        /// <param name="handler">The callback to invoke when a message is received.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the type is not registered on this channel.</exception>
+        /// <summary>Registers a handler for messages of type <typeparamref name="T" /> on this channel.</summary>
+        /// <remarks>The type must be registered with <see cref="Builder.UsingModel{TModel}" />.</remarks>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="handler">What is called for each message.</param>
+        /// <exception cref="InvalidOperationException">The type is not registered on this channel.</exception>
         public void ListenFor<T>(DataModelReceivedFn<T> handler) where T : struct
         {
             var type = typeof(T);
@@ -333,13 +206,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
             typedDataModel.AddListener(handler);
         }
 
-        /// <summary>
-        ///     Unregisters a handler that was previously registered with <see cref="ListenFor{T}" />.
-        ///     The handler will no longer be invoked when messages of type <typeparamref name="T" /> are received.
-        /// </summary>
-        /// <typeparam name="T">The struct data model type to stop listening for.</typeparam>
-        /// <param name="handler">The callback to unregister.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the type is not registered on this channel.</exception>
+        /// <summary>Unregisters a handler registered with <see cref="ListenFor{T}" />.</summary>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="handler">The handler registered.</param>
+        /// <exception cref="InvalidOperationException">The type is not registered on this channel.</exception>
         public void StopListeningFor<T>(DataModelReceivedFn<T> handler) where T : struct
         {
             var type = typeof(T);
@@ -353,15 +223,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
             typedDataModel.RemoveListener(handler);
         }
 
-        /// <summary>
-        ///     Sends a message of type <typeparamref name="T" /> to the specified recipient.
-        ///     The type must have been previously registered with <see cref="Builder.UsingModel{TModel}" />.
-        /// </summary>
-        /// <typeparam name="T">The struct data model type to send.</typeparam>
-        /// <param name="model">The message data to send (passed by reference to avoid copying).</param>
-        /// <param name="recipientId">The Steam ID of the recipient player.</param>
-        /// <param name="reliable">If true, ensures delivery; if false, allows packet loss for better performance.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the type is not registered on this channel.</exception>
+        /// <summary>Sends a message to one player.</summary>
+        /// <remarks>The type must be registered with <see cref="Builder.UsingModel{TModel}" />.</remarks>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="model">The message.</param>
+        /// <param name="recipientId">The recipient's Steam ID.</param>
+        /// <param name="reliable">Whether delivery is ensured.</param>
+        /// <exception cref="InvalidOperationException">The type is not registered on this channel.</exception>
         public void Send<T>(T model, ulong recipientId, bool reliable) where T : struct
         {
             var type = typeof(T);
@@ -375,15 +243,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
             typedDataModel.Send(_channelId, ref model, recipientId, reliable);
         }
 
-        /// <summary>
-        ///     Broadcasts a message of type <typeparamref name="T" /> to all other players (excludes the sender).
-        ///     The type must have been previously registered with <see cref="Builder.UsingModel{TModel}" />.
-        /// </summary>
-        /// <typeparam name="T">The struct data model type to broadcast.</typeparam>
-        /// <param name="model">The message data to send (passed by reference to avoid copying).</param>
-        /// <param name="reliable">If true, ensures delivery; if false, allows packet loss for better performance.</param>
-        /// <param name="includingSelf">If true, also sends the message to the sender; if false, excludes the sender.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the type is not registered on this channel.</exception>
+        /// <summary>Sends a message to every other player.</summary>
+        /// <remarks>The type must be registered with <see cref="Builder.UsingModel{TModel}" />.</remarks>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="model">The message.</param>
+        /// <param name="reliable">Whether delivery is ensured.</param>
+        /// <param name="includingSelf">Whether the sender receives it too.</param>
+        /// <exception cref="InvalidOperationException">The type is not registered on this channel.</exception>
         public void Broadcast<T>(T model, bool reliable, bool includingSelf = false) where T : struct
         {
             var type = typeof(T);
@@ -397,14 +263,12 @@ namespace Sprocket.Host.SpaceEngineers.Network
             typedDataModel.Send(_channelId, ref model, 0UL, reliable, includingSelf);
         }
 
-        /// <summary>
-        ///     Sends a message of type <typeparamref name="T" /> to the server.
-        ///     The type must have been previously registered with <see cref="Builder.UsingModel{TModel}" />.
-        /// </summary>
-        /// <typeparam name="T">The struct data model type to send.</typeparam>
-        /// <param name="model">The message data to send (passed by reference to avoid copying).</param>
-        /// <param name="reliable">If true, ensures delivery; if false, allows packet loss for better performance.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the type is not registered on this channel.</exception>
+        /// <summary>Sends a message to the server.</summary>
+        /// <remarks>The type must be registered with <see cref="Builder.UsingModel{TModel}" />.</remarks>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="model">The message.</param>
+        /// <param name="reliable">Whether delivery is ensured.</param>
+        /// <exception cref="InvalidOperationException">The type is not registered on this channel.</exception>
         public void SendToServer<T>(T model, bool reliable) where T : struct
         {
             var type = typeof(T);
@@ -418,77 +282,43 @@ namespace Sprocket.Host.SpaceEngineers.Network
             typedDataModel.Send(_channelId, ref model, ulong.MaxValue, reliable);
         }
 
-        /// <summary>
-        ///     Default implementation of <see cref="INetworkProxy" /> that uses the Space Engineers Multiplayer API.
-        ///     Provides access to server/client status and message handler registration.
-        /// </summary>
+        /// <summary>The game's multiplayer API as an <see cref="INetworkProxy" />.</summary>
         public class DefaultNetwork : INetworkProxy
         {
-            /// <summary>
-            ///     True when running as a dedicated/headless server instance.
-            /// </summary>
+            /// <inheritdoc />
             public bool IsHeadlessServer => MyAPIGateway.Utilities.IsDedicated;
 
-            /// <summary>
-            ///     True when this process is acting as the multiplayer server.
-            /// </summary>
+            /// <inheritdoc />
             public bool IsServer => MyAPIGateway.Multiplayer.IsServer;
 
-            /// <summary>
-            ///     True when this process is a multiplayer client (not a dedicated server).
-            ///     A hosted multiplayer server is both a server and a client.
-            /// </summary>
+            /// <inheritdoc />
             public bool IsClient => !MyAPIGateway.Utilities.IsDedicated;
 
-            /// <summary>
-            ///     Registers a secure message handler for the specified channel ID.
-            /// </summary>
-            /// <param name="id">The channel identifier.</param>
-            /// <param name="messageHandler">The callback to invoke when messages are received on this channel.</param>
+            /// <inheritdoc />
             public void RegisterSecureMessageHandler(ushort id, Action<ushort, byte[], ulong, bool> messageHandler)
             {
                 MyAPIGateway.Multiplayer.RegisterSecureMessageHandler(id, messageHandler);
             }
 
-            /// <summary>
-            ///     Unregisters a previously registered secure message handler for the specified channel ID.
-            /// </summary>
-            /// <param name="id">The channel identifier.</param>
-            /// <param name="messageHandler">The callback to unregister.</param>
+            /// <inheritdoc />
             public void UnregisterSecureMessageHandler(ushort id, Action<ushort, byte[], ulong, bool> messageHandler)
             {
                 MyAPIGateway.Multiplayer.UnregisterSecureMessageHandler(id, messageHandler);
             }
 
-            /// <summary>
-            ///     Sends a message to the specified recipient.
-            /// </summary>
-            /// <param name="channelId">The channel identifier.</param>
-            /// <param name="data">The message data to send.</param>
-            /// <param name="recipientId">The Steam ID of the recipient player.</param>
-            /// <param name="reliable">If true, ensures delivery; if false, allows packet loss for better performance.</param>
+            /// <inheritdoc />
             public void SendMessageTo(ushort channelId, byte[] data, ulong recipientId, bool reliable)
             {
                 MyAPIGateway.Multiplayer.SendMessageTo(channelId, data, recipientId, reliable);
             }
 
-            /// <summary>
-            ///     Broadcasts a message to all other players (excludes the sender).
-            /// </summary>
-            /// <param name="channelId">The channel identifier.</param>
-            /// <param name="data">The message data to send.</param>
-            /// <param name="reliable">If true, ensures delivery; if false, allows packet loss for better performance.</param>
+            /// <inheritdoc />
             public void SendMessageToOthers(ushort channelId, byte[] data, bool reliable)
             {
                 MyAPIGateway.Multiplayer.SendMessageToOthers(channelId, data, reliable);
             }
 
-            /// <summary>
-            ///     Sends a message to the server.
-            /// </summary>
-            /// <param name="channelId">The channel identifier.</param>
-            /// <param name="data">The message data to send.</param>
-            /// <param name="reliable">If true, ensures delivery; if false, allows packet loss for better performance.</param>
+            /// <inheritdoc />
             public void SendMessageToServer(ushort channelId, byte[] data, bool reliable)
             {
                 MyAPIGateway.Multiplayer.SendMessageToServer(channelId, data, reliable);
@@ -542,14 +372,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 _handlers.Remove(handler);
             }
 
-            // Serialized size of the [typeId][payload] "inner" message - what a recipient dispatches.
+            // The size of the [typeId][payload] inner message a recipient dispatches.
             public int InnerSize(ref TModel model)
             {
                 return _sizeOfFn(ref model) + 4;
             }
 
-            // Writes the [typeId][payload] "inner" message into data at offset. Used by SendToNearby
-            // to build the relayable bytes without the channel's send buffer.
+            // Writes the [typeId][payload] inner message into data, outside the channel's send buffer.
             public void WriteInner(ref TModel model, byte[] data, ref int offset)
             {
                 ByteCodec.Write(TypeId, data, ref offset);
@@ -571,9 +400,6 @@ namespace Sprocket.Host.SpaceEngineers.Network
                     {
                         case 0UL:
                             Network.SendMessageToOthers(channelId, _buffer, reliable);
-                            // If includingSelf is true, then:
-                            // If this is the server, send to the server.
-                            // Otherwise find the local client player and send to them.
                             if (includingSelf)
                             {
                                 if (Network.IsServer)
@@ -597,19 +423,14 @@ namespace Sprocket.Host.SpaceEngineers.Network
             }
         }
 
-        /// <summary>
-        ///     Fluent builder for registering struct-based data models and creating a <see cref="NetworkChannel" />.
-        ///     Models are registered with custom serialization delegates for size calculation, reading, and writing.
-        /// </summary>
+        /// <summary>Registers the message types of a <see cref="NetworkChannel" /> and builds it.</summary>
         public struct Builder
         {
             readonly ushort _channelId;
             readonly Dictionary<int, IDataModelInfo> _registeredTypes;
 
-            /// <summary>
-            ///     Initializes a new <see cref="Builder" /> for the specified channel identifier.
-            /// </summary>
-            /// <param name="channelId">The 16-bit channel identifier to use when the channel is built.</param>
+            /// <summary>A builder for the channel <paramref name="channelId" />.</summary>
+            /// <param name="channelId">The channel id.</param>
             public Builder(ushort channelId)
             {
                 _channelId = channelId;
@@ -622,17 +443,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 _registeredTypes = registeredTypes;
             }
 
-            /// <summary>
-            ///     Registers a struct-based model type with custom serialization delegates.
-            /// </summary>
-            /// <typeparam name="TModel">The struct data model type to register.</typeparam>
-            /// <param name="sizeOfFn">Delegate that calculates the serialized size in bytes for a given model instance.</param>
-            /// <param name="readFn">Delegate that deserializes bytes into a model instance.</param>
-            /// <param name="writeFn">Delegate that serializes a model instance into bytes.</param>
-            /// <returns>A new <see cref="Builder" /> instance with the model registered (fluent API).</returns>
-            /// <exception cref="InvalidOperationException">
-            ///     Thrown if the type conflicts with another registered type or is already registered on this channel.
-            /// </exception>
+            /// <summary>Registers the message type <typeparamref name="TModel" /> with how it is measured, read and written.</summary>
+            /// <typeparam name="TModel">The message type.</typeparam>
+            /// <param name="sizeOfFn">How many bytes a message takes.</param>
+            /// <param name="readFn">What reads a message.</param>
+            /// <param name="writeFn">What writes a message.</param>
+            /// <returns>The builder, with the type registered.</returns>
+            /// <exception cref="InvalidOperationException">The type is registered already, or its id is another type's.</exception>
             public Builder UsingModel<TModel>(SizeOfDataModelFn<TModel> sizeOfFn, ReadDataModelFn<TModel> readFn, WriteDataModelFn<TModel> writeFn) where TModel : struct
             {
                 var type = typeof(TModel);
@@ -650,14 +467,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return new Builder(_channelId, _registeredTypes);
             }
 
-            /// <summary>
-            ///     Validates the builder state and returns a configured <see cref="NetworkChannel" /> instance.
-            /// </summary>
-            /// <returns>A constructed <see cref="NetworkChannel" />.</returns>
-            /// <exception cref="InvalidOperationException">
-            ///     Thrown when the builder was not properly initialized, the channel ID is
-            ///     zero, or no types were registered.
-            /// </exception>
+            /// <summary>The channel, with every type registered on the builder.</summary>
+            /// <returns>The channel.</returns>
+            /// <exception cref="InvalidOperationException">The id is zero, the builder was not made by a constructor, or no type is registered.</exception>
             public NetworkChannel Build()
             {
                 if (_channelId == 0)

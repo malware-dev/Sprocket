@@ -51,7 +51,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// Puts the blueprint <paramref name="volume" /> from the library on the construct as a logic system of its own, linked
         /// to it, with its first installation, answering what was wrong, or empty.
         /// </summary>
-        /// <remarks>Refused where a logic system made from it is here already: another of the same is another installation of that one.</remarks>
+        /// <remarks>Refused where a logic system made from it is here already.</remarks>
         public string PutOn(LibraryEntry volume)
         {
             if (_editor.Program.MadeFrom(volume.Identity) != null)
@@ -98,10 +98,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// Puts a copy of the logic system written as <paramref name="text" /> on the construct, as a logic system of its own with
         /// its first installation, answering it; or null, with what was wrong in <paramref name="trouble" />.
         /// </summary>
-        /// <remarks>
-        /// A blueprint of its own because it has an identity of its own: changing either never touches the other. It is named
-        /// with the first number no blueprint here or in the library has, and is by whoever made the copy.
-        /// </remarks>
         public AutomationSystem Copy(string text, out string trouble)
         {
             var trial = new Automation();
@@ -161,11 +157,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         }
 
         /// <summary>Asks before taking the logic system <paramref name="system" /> off the construct; keeping it is the answer Enter takes.</summary>
-        /// <remarks>
-        /// Nothing is lost either way, but a press that landed on the wrong minus should not cost the work of putting it back.
-        /// Where the logic system was changed after its blueprint in the library, a second question asks whether the blueprint
-        /// is brought up to date; otherwise the blueprint is left as it is, unasked.
-        /// </remarks>
         public void AskTakeOff(AutomationSystem system)
         {
             _editor.Stamp(true);
@@ -272,11 +263,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// Puts the blueprint <paramref name="system" /> is linked to in its place, its installations keeping their blocks in
         /// every slot the blueprint still uses, offered back as <paramref name="change" />, answering what was wrong, or empty.
         /// </summary>
-        /// <remarks>
-        /// It keeps its own identity, so its buttons go on naming it, and is linked to the blueprint as it now is. Its runs end,
-        /// as they do when a logic system goes, and each installation stays switched as it was. The whole program as it would
-        /// stand is read first, because a text with an error in it is trusted in no part.
-        /// </remarks>
+        /// <remarks>Its runs end, and each installation stays switched as it was.</remarks>
         public string Renew(AutomationSystem system, ChangeKind change)
         {
             var volume = Stored(system) ? _editor.Shelf.Find(system.Origin) : null;
@@ -323,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     instances[i].Enabled = was.Enabled;
             }
 
-            // Said as it is, so its date stays the library's and nothing reads it as changed since.
+            // Keeps its date the library's, so nothing reads it as changed since.
             _dates.Know(fresh);
 
             _editor.Do(new ReplaceSystem(system, fresh, change));
@@ -342,7 +329,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         /// Takes the logic system <paramref name="system" />, whose blueprint is in the library, off the construct with its
         /// installations, bringing the blueprint up to date first where <paramref name="update" /> says so.
         /// </summary>
-        /// <remarks>One with no blueprint in the library is deleted instead, by <see cref="SprocketEditor.DeleteSystem" />: taking it off would lose it.</remarks>
+        /// <remarks>Only for a logic system whose blueprint is in the library; one without is deleted with <see cref="SprocketEditor.DeleteSystem" />.</remarks>
         public void TakeOff(AutomationSystem system, bool update)
         {
             if (!Stored(system))

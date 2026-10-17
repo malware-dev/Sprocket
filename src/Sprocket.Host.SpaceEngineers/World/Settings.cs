@@ -10,28 +10,17 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// What Sprocket is asked to do differently, at two levels: every world, and this world, which wins.
     /// </summary>
     /// <remarks>
-    /// Every world is kept in the global file, the same for every world the machine running it opens: on a dedicated server,
-    /// every world that server hosts. This world is kept in the world's own file. A setting this world leaves follows every
-    /// world, and one every world leaves takes the built-in default.
-    /// <para>
-    /// <b>Ini rather than the XML the definitions use.</b> Absent and off are different things here - a world saying nothing
-    /// has to leave what every world says standing - and a deserialised <c>bool</c> cannot tell them apart.
-    /// <c>MyIniValue.TryGetBoolean</c> can.
-    /// </para>
-    /// <para>
-    /// <b>Read once, as a world comes up, on the machine that runs it,</b> and changed afterwards only by an admin, through the
-    /// game. The server decides: a client in multiplayer reads no file of its own, and takes the server's settings, both levels
-    /// written as one text, with every Sprocket it is lent or shown and after every change.
-    /// </para>
+    /// Read once, as a world comes up, on the machine that runs it. A client in multiplayer reads no file of its own, and takes
+    /// the server's settings.
     /// </remarks>
     public sealed class Settings
     {
         const string File = "sprocket.ini";
 
-        /// <summary>Where each file keeps its settings.</summary>
+        // Persisted: the section each file keeps its settings in.
         const string Section = "Sprocket";
 
-        /// <summary>Where the text a client is sent keeps each level.</summary>
+        // The sections the text a client is sent keeps each level in.
         const string Everywhere = "Every world";
 
         const string Here = "This world";
@@ -46,10 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// Said outright, as every world's, for a host that has its own way of being told.
         /// </summary>
-        /// <remarks>
-        /// The harness has no mod storage to read and wants to drive the answers anyway, so it says what it wants rather than going
-        /// through <see cref="Read" />.
-        /// </remarks>
+        /// <remarks>For the harness, which has no mod storage to read.</remarks>
         public Settings(bool developerMode, int fastestUpdate = 1)
             : this(new SettingsLayer(developerMode, fastestUpdate), SettingsLayer.Empty)
         {
@@ -91,8 +77,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var asked = From(Text(true), Text(false));
 
-            // Only when it is on. A line every world load saying everything is as it ships is the
-            // noise that gets a log stopped being read, and on is the state worth being reminded of.
             if (asked.DeveloperMode)
                 GameLog.Say("developer mode is on");
 
@@ -193,10 +177,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// One text read, or null where it is empty or malformed.
         /// </summary>
-        /// <remarks>
-        /// A file somebody typed is not to be trusted to be a file. One that will not parse is said out loud, with the line, and
-        /// then ignored: losing what one file said is a poor outcome and refusing to load a world over a stray bracket is a worse one.
-        /// </remarks>
         static MyIni Parse(string text, string which)
         {
             if (string.IsNullOrEmpty(text))

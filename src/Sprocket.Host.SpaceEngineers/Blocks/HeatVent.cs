@@ -5,10 +5,6 @@ using SpaceEngineers.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A heat vent: a glow that shades between two colors as the grid's power use rises, automated like a light.</summary>
-    /// <remarks>
-    /// The glow it is drawing now is not offered: the game never writes its power level, and overwrites its current color
-    /// from the two each time it updates the glow.
-    /// </remarks>
     public sealed class HeatVent : Capability
     {
         /// <inheritdoc />

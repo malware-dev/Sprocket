@@ -12,10 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// Takes out one or more lines as one edit.
         /// </summary>
-        /// <remarks>
-        /// A step and the await after it go together, because they arrived together and an await left
-        /// behind would wait for nothing.
-        /// </remarks>
         public RemoveStep(int index, params Step[] steps) : this(ChangeKind.RemoveStep, index, steps)
         {
         }

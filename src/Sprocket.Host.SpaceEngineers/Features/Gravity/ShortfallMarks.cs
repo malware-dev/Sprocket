@@ -9,16 +9,10 @@ using VRageRender;
 namespace Sprocket.Host.SpaceEngineers.Features.Gravity
 {
     /// <summary>The boxes a field that fell short of its fit is shown with, for half a minute: what it has to cover, and how far it reaches.</summary>
-    /// <remarks>
-    /// Each box follows its grid, so a ship that moves keeps them where they belong. Drawn in the game's own gizmo lines, red
-    /// for what must be covered and white for the field, as the game's block builder draws its own boxes.
-    /// </remarks>
     public sealed class ShortfallMarks
     {
-        /// <summary>How long a fit's boxes stay, in seconds: long enough to close the terminal and look.</summary>
         const double Shown = 30.0;
 
-        /// <summary>How thick the lines are drawn, in metres.</summary>
         const float Line = 0.1f;
 
         static readonly MyStringId Needed = MyStringId.GetOrCompute("GizmoDrawLineRed");
@@ -43,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Gravity
         }
 
         /// <summary>Draws every box still to be shown at <paramref name="now" />, and lets go of the rest.</summary>
-        /// <remarks>Every frame, because a box in the world is drawn for one frame at a time; with nothing to show it costs a count.</remarks>
+        /// <remarks>Called every frame; with nothing to show it costs a count.</remarks>
         public void Draw(TimeSpan now)
         {
             if (_marks.Count == 0)

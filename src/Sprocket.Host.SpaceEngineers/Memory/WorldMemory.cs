@@ -4,10 +4,7 @@ using ProtoBuf;
 namespace Sprocket.Host.SpaceEngineers.Memory
 {
     /// <summary>Everything a world remembers of Sprocket beyond the programs: every construct's runtime state, every player's settings and every door's coming close.</summary>
-    /// <remarks>
-    /// Written whole as the world saves and read whole as it loads, by the game's binary serialization. A member's number is a
-    /// stored format: never reused, never given another type.
-    /// </remarks>
+    /// <remarks>A member's number is a stored format: never reused, never given another type.</remarks>
     [ProtoContract]
     public sealed class WorldMemory
     {

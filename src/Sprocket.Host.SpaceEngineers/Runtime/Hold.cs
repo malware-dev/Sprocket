@@ -5,15 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// A wait being looked at: when it began, and how long it was expected to take.
     /// </summary>
     /// <remarks>
-    /// How often it is looked at follows from how much time it should have left: the slowest period
-    /// that fits into that at least twice, so a wait tightens as it closes in and the last few ticks
-    /// are looked at one by one.
-    /// <para>
-    /// Past its time it slows down again rather than staying on every tick. Being late means the
-    /// estimate was wrong - a door is blocked, a rotor has stalled - and something that may never
-    /// arrive must not be looked at sixty times a second for as long as it does not. The slowest
-    /// period that fits twice into how late it is, and never faster than ten.
-    /// </para>
+    /// Looked at more often as its time closes in, down to every tick; past its time it slows again, never faster than
+    /// every ten ticks.
     /// </remarks>
     public struct Hold
     {

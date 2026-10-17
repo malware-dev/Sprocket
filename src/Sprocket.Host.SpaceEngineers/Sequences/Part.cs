@@ -5,11 +5,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// Something a system needs a construct to provide, and what may answer it.
     /// </summary>
-    /// <remarks>
-    /// The parts are the system's vocabulary: its sequences act on <c>inner</c>, and which block that
-    /// is on a given ship is one of that system's business. A part nothing acts on is left out when the
-    /// program is written, and so is every instance's answer to it.
-    /// </remarks>
+    /// <remarks>A part nothing acts on is left out when the program is written, and so is every instance's answer to it.</remarks>
     public sealed class Part
     {
         /// <summary>A required slot called <paramref name="id" />, expecting any block.</summary>
@@ -33,26 +29,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// The id of the type the host provides that this part holds, as a part expecting it names it, <c>ext.screen</c>; or
         /// empty for a part holding blocks or a signal.
         /// </summary>
-        /// <remarks>A part holding a host type is answered by one thing of that type on each of its blocks: a screen of each.</remarks>
         public string Holds { get; set; } = "";
 
         /// <summary>
         /// The type of block that may fill this part, or empty for any block.
         /// </summary>
         /// <remarks>
-        /// A type id as the game writes it with the <c>MyObjectBuilder_</c> prefix dropped, which takes that type and every type
-        /// the game builds on it, so <c>LightingBlock</c> takes interior lights and spotlights alike; or a <c>Type/Subtype</c>
-        /// where the author meant one exact block.
+        /// A game type id without its <c>MyObjectBuilder_</c> prefix, taking every type the game builds on it; or a
+        /// <c>Type/Subtype</c> for one exact block.
         /// </remarks>
         public string Expects { get; set; }
 
         /// <summary>
         /// What somebody wrote about this part, in their own words, or empty; never its name.
         /// </summary>
-        /// <remarks>
-        /// Data somebody typed, not a comment: it is what a player setting the system up reads to know
-        /// which of their blocks to point at, so it is part of the model and round-trips like a name.
-        /// </remarks>
         public string Annotation { get; set; }
 
         /// <summary>Whether a block whose kind stands in <paramref name="lineage" />, nearest first as a kind's lineage has it, may fill this part.</summary>
@@ -74,7 +64,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// The nearest type every one of <paramref name="lineages" /> stands in, each nearest first as a kind's lineage has it, or
         /// empty for any block where they share none; one with nothing in it, a block no longer there, says nothing.
         /// </summary>
-        /// <remarks>A type and never one exact block, so a slot made from blocks takes blocks of another size or style too.</remarks>
         public static string Nearest(IList<IList<string>> lineages)
         {
             IList<string> first = null;

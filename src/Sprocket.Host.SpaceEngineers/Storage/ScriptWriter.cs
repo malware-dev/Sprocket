@@ -9,11 +9,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <summary>
     /// Writes script text: statements, blocks, lists and annotations.
     /// </summary>
-    /// <remarks>
-    /// It holds the indent and the separators so that nothing writing a program has to think about
-    /// either. Quoting is mechanical here too - see <see cref="Keywords.Bare" /> - because a writer
-    /// that decides per call is a writer that gets one call wrong.
-    /// </remarks>
     public sealed class ScriptWriter
     {
         const string Indent = "    ";
@@ -21,7 +16,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         readonly StringBuilder _text = new StringBuilder();
         int _depth;
 
-        /// <summary>How many lists are open, a list being able to hold one.</summary>
         int _lists;
 
         bool _first;
@@ -34,12 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A blank line, unless one would be the first thing inside a block or in the file.
         /// </summary>
-        /// <remarks>
-        /// Spacing is for somebody reading the file, so it is a rule here rather than a decision at
-        /// every call site. A leading blank line inside a block reads as a gap where nothing is
-        /// missing, and one after an annotation would break the annotation off what it belongs to -
-        /// which is a parse error, so the writer must not be able to produce it.
-        /// </remarks>
         public void Blank()
         {
             if (!_fresh)
@@ -49,11 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Text somebody typed, above the statement it belongs to. Nothing when it is empty.
         /// </summary>
-        /// <remarks>
-        /// One hash line per line of it, and a bare hash for an empty one, which is how a paragraph
-        /// break survives without a blank line breaking the attachment. Empty first and last lines are
-        /// dropped, the same trim the reader does, so that writing what was read gives the same text.
-        /// </remarks>
+        /// <remarks>Persisted: one hash line per line, a bare hash for an empty one; empty first and last lines are dropped.</remarks>
         public void Note(string annotation)
         {
             if (string.IsNullOrEmpty(annotation))
@@ -74,8 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (to < 0 || to > end)
                     to = end;
 
-                // A line kept its carriage return when the text was split on newlines alone, and it
-                // would come back one character shorter, so it never gets written.
+                // A carriage return left by splitting on newlines alone is never written, since it would not read back.
                 var stop = to > from && annotation[to - 1] == '\r' ? to - 1 : to;
 
                 Pad();
@@ -111,10 +94,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Starts a statement whose first word is an id rather than a keyword.
         /// </summary>
-        /// <remarks>
-        /// An instance's <c>inner = [ door1 ]</c> is headed by the part it fills, and a part named after one of the
-        /// format's words is quoted like any other collision.
-        /// </remarks>
         public ScriptWriter Head(string id)
         {
             Pad();
@@ -134,11 +113,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// One of the format's own words, written bare.
         /// </summary>
-        /// <remarks>
-        /// Separate from <see cref="Word" />, which would quote it for being a keyword. That is the
-        /// whole distinction the format rests on - bare is the language speaking, quoted is data - so
-        /// it is two methods rather than one that has to guess which it was handed.
-        /// </remarks>
         public ScriptWriter Says(Keyword keyword)
         {
             Space();
@@ -247,10 +221,6 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// A real, written so it reads back as the same double.
         /// </summary>
-        /// <remarks>
-        /// The round-trip format rather than a fixed number of decimals, which is the one thing this
-        /// format exists not to lose. It is why the reader has to accept <c>1E-05</c>.
-        /// </remarks>
         public ScriptWriter Real(double value)
         {
             Space();
@@ -363,7 +333,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _first = false;
         }
 
-        /// <summary>How a name in parts is spelt, exactly as the writer spells it.</summary>
+        /// <summary>How a name in parts is spelled, exactly as the writer spells it.</summary>
         public static string Spelling(string space, string name)
         {
             var spelt = new StringBuilder();
@@ -401,12 +371,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Something in quotes, escaping only its own quote, by doubling it.
         /// </summary>
-        /// <remarks>
-        /// A statement ends at the end of its line, so a line break is never written as one. In text it is written as
-        /// <c>&amp;br;</c>, which reads back as the break (see <see cref="TextEntities" />). In a name it folds to a space:
-        /// <see cref="Sequences.NameRules" /> is where that rule belongs and it keeps names to one line, so this is the guard
-        /// rather than the rule: the writer must not be able to produce a broken save whatever reaches it.
-        /// </remarks>
+        /// <remarks>Persisted: a line break is written as <c>&amp;br;</c> in text and as a space in a name.</remarks>
         static void Quote(StringBuilder into, string value, char quote)
         {
             into.Append(quote);

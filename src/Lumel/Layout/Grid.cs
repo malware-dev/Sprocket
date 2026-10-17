@@ -6,7 +6,7 @@ using VRageMath;
 namespace Lumel.Layout
 {
     /// <summary>Elements in cells of rows and columns, each track sized outright, by its largest cell, or by a share of what is left.</summary>
-    /// <remarks>One element to a cell, stretched across it and centred down it.</remarks>
+    /// <remarks>One element to a cell, stretched across it and centered down it.</remarks>
     public class Grid : Container
     {
         readonly List<Cell> _cells = new List<Cell>();

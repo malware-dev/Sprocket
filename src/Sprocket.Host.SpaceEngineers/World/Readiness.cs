@@ -2,10 +2,7 @@
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>Whether a member can be made into a step, and where it cannot, which of two reasons.</summary>
-    /// <remarks>
-    /// A member that cannot is still listed in the terminal view, so that somebody looking for it finds it and learns why,
-    /// rather than concluding the block does not have it.
-    /// </remarks>
+    /// <remarks>A member that cannot is still listed in the terminal view.</remarks>
     public enum Readiness
     {
         /// <summary>Offered, and usable.</summary>

@@ -8,28 +8,19 @@ using VRage.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>Where the world's save keeps Sprocket's files: an entity of the mod's own, saved with the world and tied to no block.</summary>
-    /// <remarks>
-    /// A plain entity, which the game saves into the sector and so into every backup of the world, sends to no client and
-    /// leaves out of its cleanup; it sits at the origin with no model, no physics and no place in the spatial index. Only
-    /// the server has one. It exists because world storage does not reach the game's backups of a world; where that
-    /// changes, this is the one type to replace.
-    /// </remarks>
+    /// <remarks>Only the server has one, and the game sends it to no client.</remarks>
     public sealed class Carrier
     {
         /// <summary>
         /// Where the files sit in the entity's mod storage.
         /// </summary>
         /// <remarks>
-        /// Claimed in <c>Content/Data/EntityComponents.sbc</c>, without which the game drops it at save, and never to change:
-        /// another key reads as a world with no files.
+        /// Persisted, and claimed in <c>Content/Data/EntityComponents.sbc</c>, without which the game drops it at save: another
+        /// key reads as a world with no files.
         /// </remarks>
         public static readonly Guid Key = new Guid("24B4675F-1A0D-410A-8044-BFD7124C8588");
 
-        /// <summary>The world variable that holds the carrier's entity id.</summary>
-        /// <remarks>
-        /// One number, so its going to every client that joins costs nothing; the files stay in the carrier, which reaches
-        /// no client. Never to change: another name leaves every world's carrier unfound.
-        /// </remarks>
+        // Persisted: another name leaves every world's carrier unfound. Sent to every client that joins.
         const string Variable = "sprocket.carrier";
 
         readonly IMyEntity _entity;
@@ -38,8 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             _entity = entity;
 
-            // Not saved by the game, so set on every carrier as it is made or found. A preview is never made ready to send
-            // to clients, which a plain entity is not sent to anyway; it guards against that changing.
+            // Not saved by the game, so set on every carrier as it is made or found. The game sends a preview to no client.
             var plain = entity as MyEntity;
             if (plain != null)
                 plain.IsPreview = true;
@@ -62,10 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The world's carrier: the entity the world's variable names, where it holds the files' key, or null for a world with no files yet.</summary>
-        /// <remarks>
-        /// A saved world loads its own variables, but a new one starts with those of the world the game ran before it, so the
-        /// id can name nothing or another world's entity; the key is what is trusted.
-        /// </remarks>
+        /// <remarks>A new world starts with the variables of the world the game ran before it, so the key is what is trusted.</remarks>
         public static Carrier Find()
         {
             string said;
@@ -89,8 +76,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             entity.Storage[Key] = "";
             MyAPIGateway.Entities.AddEntity(entity);
 
-            // As text, the one kind of variable the save takes without question. Made during a save, it still lands in it: the
-            // save holds the live variables and writes them out once it has been built.
+            // As text, the one kind of variable the save takes without question. Set during a save, it still lands in it: the
+            // game writes the live variables out once the save has been built.
             MyAPIGateway.Utilities.SetVariable(Variable, entity.EntityId.ToString(CultureInfo.InvariantCulture));
             return new Carrier(entity);
         }

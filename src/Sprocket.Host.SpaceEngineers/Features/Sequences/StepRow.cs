@@ -17,20 +17,15 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     /// <summary>One step of a sequence as the line it reads as: its number, a lead-in, then the parts that complete it.</summary>
-    /// <remarks>
-    /// A step and the wait for it to finish are one row, moved and deleted together. Whoever holds it sets what it
-    /// shows and calls <see cref="Show" />; the words are worked out only for a part that has changed, because this
-    /// runs every tick. The elements it is drawn with are declared in <c>StepRow.View.cs</c>, and nothing else is.
-    /// </remarks>
     public partial class StepRow : HStack
     {
         const float Indent = 32f;
         const float SpineIn = 6f;
 
-        // Half the room the list leaves between its rows, so the spines of two rows meet in the middle of it.
+        // Half the room the list leaves between its rows, so the spines of two rows meet.
         const float Reach = 4f;
 
-        // How far left of the line the spine joining lit lines runs, in the room the number leaves, and so how far it turns in.
+        // How far left of the sentence the spine joining lit lines runs, and so how far it turns in.
         const float JoinOut = 10f;
 
         readonly List<Label> _joins = new List<Label>();
@@ -59,7 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>How many rows after it are carried with it: the rest of the if, for the row that opens one.</summary>
         public int Carries { get; set; }
 
-        /// <summary>The pluses it offers to add to the sequence with, after its sentence, each holding every choice it has: the end of a branch, the row closing an if, an otherwise.</summary>
+        /// <summary>The pluses it offers after its sentence to add to the sequence with.</summary>
         public List<AddOption> Adds { get; }
 
         /// <summary>What sort of step it is, which is what its line opens with.</summary>
@@ -78,7 +73,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public string Locked { get; set; } = "";
 
 
-        /// <summary>Whether the clock of its wait is lit, tied to the step under the pointer: its underhang's, or its own where it is a wait row.</summary>
+        /// <summary>Whether the clock of its wait is lit.</summary>
         public bool ClockLit { get; set; }
 
         /// <summary>Whether the clock marks of its sentence are lit, tied to the wait under the pointer.</summary>
@@ -97,7 +92,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public bool JoinLast { get; set; }
 
         /// <summary>Whether the pointer is on the step: its grip or any part of its sentence.</summary>
-        /// <remarks>Asked every tick, as the pointer gives no word when it moves; a handful of flags on the row, nothing measured.</remarks>
+        /// <remarks>Asked every tick; reads a handful of flags, nothing measured.</remarks>
         public bool Hot
         {
             get
@@ -130,7 +125,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>What is wrong with the step, said under it where <see cref="HasProblem" />.</summary>
         public string Problem { get; set; } = "";
 
-        /// <summary>How much what is on this step matters: a problem washes it red, a warning amber, a note not at all.</summary>
+        /// <summary>How much <see cref="Problem" /> matters: a problem, a warning or a note.</summary>
         public NoticeLevel Level { get; set; } = NoticeLevel.Problem;
 
         /// <summary>Whether the row is being carried to another place.</summary>
@@ -143,6 +138,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public float SpineAt => Bounds.Y + Bounds.Height * 0.5f;
 
         /// <summary>Shows what it has been told, naming blocks as <paramref name="world" /> calls them and saying its fixed words in <paramref name="texts" />.</summary>
+        /// <remarks>Runs every tick, so it words only a part that has changed.</remarks>
         public void Show(GridWorld world, Texts texts)
         {
             if (_numbered != Number)
@@ -166,7 +162,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _leadWaits.IsVisible = Kind == StepKind.Run || Kind == StepKind.Await;
             }
 
-            // A paused step waits for nothing, so its mark is quieter and is never lit.
             _leadWaits.Style = IsOff ? Styles.WaitsPaused : Styles.Waits;
             _leadWaits.HaloTint = !IsOff && (MarksLit || Kind == StepKind.Await && ClockLit) ? Glow : Palette.None;
             foreach (var chip in _chips)
@@ -174,14 +169,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             _sentence.Tip = Tip.For(_sentence.Tip, Kind == StepKind.Run ? texts.MemberWaits : Kind == StepKind.Await ? texts.SequenceAwaitRow : null);
 
-            // The row closing an if and the end of a branch are where things are added, and are nothing that can be moved,
-            // paused or deleted; a branch's own line moves, pauses and switches with its if.
             var adds = Kind == StepKind.End || Kind == StepKind.Adds;
             var branch = adds || Kind == StepKind.OtherwiseIf || Kind == StepKind.Otherwise;
             _pause.IsVisible = !branch;
             _delete.IsVisible = !adds;
 
-            // What a drag carries is what a copy holds, so the lines that stay with their if have none.
             _duplicate.IsVisible = !branch || Kind == StepKind.OtherwiseIf;
 
             if (_chips.Count != Slots.Count || _adders.Count != Adds.Count)
@@ -197,7 +189,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Part(i, Slots[i], world);
             }
 
-            // A paused step reads as quieter than one that runs, and every part of it can still be pressed and changed.
             var words = IsOff ? Styles.PausedPhrase : Styles.Phrase;
             var parts = IsOff ? Styles.PausedSlot : Styles.Slot;
             _lead.Style = words;
@@ -208,9 +199,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _chips[i].Paused = IsOff;
             }
 
-            // Quiet rather than gone, so a locked row is the same row with nothing on it to press. An otherwise if is carried to
-            // another place in its if; the rest of an if's own lines stay with it, so they have no grip to show, and keep the room
-            // one takes so their words line up with the rest.
             var fixedInPlace = branch && Kind != StepKind.OtherwiseIf;
             _grip.Color = fixedInPlace ? Palette.None : _grip.CanCarry ? Palette.Faint : Palette.Dim;
             _grip.Tip = Tip.For(_grip.Tip, _grip.CanCarry ? texts.SequenceDragStep : Why());
@@ -221,14 +209,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _delete.IsEnabled = Deletes != null;
             _delete.Tip = Tip.For(_delete.Tip, Deletes != null ? texts.SequenceDeleteStep : Why());
 
-            // As quiet as the bin while the step runs, and lit while it is paused, which is the one time it has anything to say.
             _pause.Style = IsOff ? Styles.Held : Styles.Holds;
             _pause.Command = Pauses;
             _pause.IsEnabled = Pauses != null;
             _pause.Tip = Tip.For(_pause.Tip, Pauses == null ? Why() : IsOff ? texts.SequenceUnpauseStep : texts.SequencePauseStep);
 
-            // Broken outranks being the current step, which the two can only be at once for the instant between a
-            // block going away and the run abandoning the step that named it.
             Background = IsCarried
                 ? Palette.SlotFill
                 : HasProblem && Level != NoticeLevel.Info
@@ -239,11 +224,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         }
 
         /// <inheritdoc />
-        /// <remarks>A wait row has nothing to press, and still lights what it waits for under the pointer.</remarks>
         protected override bool TakesPointer => Kind == StepKind.Await;
 
         /// <summary>Where the spine of the if <paramref name="level" /> ifs out from the sequence runs down its indent.</summary>
-        /// <remarks>The ifs' spines are the list's to draw, since they run past rows that move while one is carried; see <see cref="StepList" />.</remarks>
         public float SpineX(int level)
         {
             return _sentence.Bounds.X + level * Indent + SpineIn;
@@ -259,10 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         }
 
-        /// <summary>
-        /// Draws this row's stretch of the spine joining lit lines, turning in at what is lit on it, through the room either side of
-        /// the row where it runs on; a row scrolled out of view leaves the spine running off the edge towards it.
-        /// </summary>
+        /// <summary>Draws this row's stretch of the spine joining lit lines, turning in at what is lit on it.</summary>
         void Join(IGraphics g, float top, float bottom)
         {
             var x = _sentence.Bounds.X - JoinOut;

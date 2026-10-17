@@ -5,16 +5,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// Says, in the game's own log, what was made of what somebody wrote.
     /// </summary>
-    /// <remarks>
-    /// A description Sprocket cannot use is worse than no description: the mod author sees their
-    /// names missing from a screen and has nothing to go on, and the player sees a form that asks
-    /// for three numbers when it could have asked for a colour. So every one that is refused says
-    /// which mod it came from and what was wrong with it.
-    /// <para>
-    /// The log rather than the screen, because it is a mistake in a file somebody ships and not a
-    /// thing a player can mend. It happens once as a world comes up.
-    /// </para>
-    /// </remarks>
     public static partial class GameLog
     {
         const string Ours = "[Sprocket] ";
@@ -35,10 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>Every line as it is said, for a local build to keep.</summary>
-        /// <remarks>
-        /// Without a body in anything packed for the game, where the call compiles to nothing. The
-        /// harness has no game log, so <c>GameLog.debug.cs</c> gives it one that keeps what was said.
-        /// </remarks>
+        /// <remarks>Has no body in anything packed for the game, where the call compiles to nothing.</remarks>
         static partial void Heard(string what);
     }
 }

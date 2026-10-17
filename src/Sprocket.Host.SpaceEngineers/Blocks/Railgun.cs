@@ -7,11 +7,6 @@ using VRage.Game.ModAPI.Interfaces;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A launcher with a capacitor, which is a railgun: how charged it is, how long until it is, and when it is.</summary>
-    /// <remarks>
-    /// Only the railguns of the reloading launchers carry a capacitor, so the block is asked for one rather than claimed by
-    /// its interface. Charged is a flag the capacitor says turns each way; it also says so as a world loads and as a full
-    /// railgun is switched back on, which a look finds unchanged.
-    /// </remarks>
     public sealed class Railgun : Capability
     {
         const string Uncounted = "A capacitor says when it is charged and when it is not, and nothing as its charge moves.";
@@ -22,14 +17,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         readonly OwnValue _charging;
 
-        /// <summary>
-        /// The type the game keeps a capacitor under among a block's components, learned from the first one found; null until
-        /// then.
-        /// </summary>
-        /// <remarks>
-        /// The component's own type is not one a mod may name, so the first capacitor is found by walking the components,
-        /// which allocates; every one after is found by its type, which does not. The game keeps it under its own type.
-        /// </remarks>
+        // Learned from the first capacitor found by walking the components, which allocates; every later lookup by this
+        // type does not. The component's own type is one a mod may not name.
         Type _capacitor;
 
         /// <summary>A railgun's values, each reading the block's capacitor.</summary>

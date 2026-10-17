@@ -7,19 +7,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     /// Narrows a list of entities by free text and kind.
     /// </summary>
     /// <remarks>
-    /// A real construct has hundreds of blocks, so every list that can contain
-    /// entities has to be searchable - the ship browser and the slot pickers alike.
-    /// This lives in core so all of them narrow identically: a target that invented
-    /// its own matching would quietly behave differently from the others.
-    ///
-    /// Matching is deliberately forgiving. Someone hunting for a door types "door",
-    /// not a prefix, and case is never their problem. Each word typed is looked for anywhere,
-    /// but in the order typed, so "airl 1" finds "Airlock 1", "Airlock 10" and "Airlock Door 1",
-    /// and leaves out "1 Airlock".
+    /// Each word typed is looked for anywhere, ignoring case, in the order typed: "airl 1" finds "Airlock 10" and
+    /// "Airlock Door 1", and leaves out "1 Airlock".
     /// </remarks>
     public static class EntityQuery
     {
-        /// <summary>Whether a plain label matches a search, just as forgivingly.</summary>
+        /// <summary>Whether a plain label holds every word of a search, in order and ignoring case.</summary>
         public static bool MatchesText(string text, string search)
         {
             return string.IsNullOrEmpty(search) || EveryWord(search, text);
@@ -49,8 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>
-        /// The distinct kinds present among the candidates, so the kind filter offers
-        /// only what is actually on this construct rather than a fixed catalogue.
+        /// The distinct kinds present among the candidates, added to the result.
         /// </summary>
         public static void KindsPresent(IList<GridEntity> candidates, List<EntityKind> result)
         {
@@ -77,8 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// the one before it.
         /// </summary>
         /// <remarks>
-        /// Asked of every block on every keystroke, so the words are walked where they stand in the search rather than split
-        /// out of it, which would make a string for each.
+        /// Asked of every block on every keystroke, so the words are walked in place rather than split out as strings.
         /// </remarks>
         static bool EveryWord(string search, string text)
         {
@@ -112,8 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// at or after <paramref name="after" />; -1 where it does not.
         /// </summary>
         /// <remarks>
-        /// Written out rather than using string.IndexOf with a relation enum, which is one of the overloads that is easy to lose
-        /// on an older target framework.
+        /// Written out because string.IndexOf with a comparison enum is an overload an older target framework may lack.
         /// </remarks>
         static int IndexIgnoreCase(string haystack, int after, string needle, int from, int length)
         {

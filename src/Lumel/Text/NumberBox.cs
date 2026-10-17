@@ -9,11 +9,6 @@ using VRageMath;
 namespace Lumel.Text
 {
     /// <summary>A box that holds a number: set against its right-hand end, as wide as the widest number it expects, taking only what can become a number, and stepped by up and down.</summary>
-    /// <remarks>
-    ///     Numbers are read from the right, so a column of them lines up on its units and a number being typed grows the way a
-    ///     number grows. The width is the widest number expected rather than what is in the box, so the box holds still while
-    ///     it is typed into; a wider number moves along inside it.
-    /// </remarks>
     public class NumberBox : TextBox
     {
         readonly StringBuilder _measuring = new StringBuilder(16);
@@ -68,7 +63,7 @@ namespace Lumel.Text
         protected override bool Trails => true;
 
         /// <inheritdoc />
-        /// <remarks>Up and down move the number a step, since left and right move the caret.</remarks>
+        /// <remarks>Up and down move the number a step.</remarks>
         public override bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             if (!ctrl && (key == MyKeys.Up || key == MyKeys.Down))
@@ -81,7 +76,6 @@ namespace Lumel.Text
         }
 
         /// <summary>Moves the number <paramref name="by" /> steps on from the step nearest what is typed, within its bounds, as an edit.</summary>
-        /// <remarks>From the nearest step, so a number typed between two lands on one rather than staying as far off them.</remarks>
         public void StepBy(int by)
         {
             double number;

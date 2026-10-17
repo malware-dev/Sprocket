@@ -6,19 +6,13 @@ namespace Lumel.Viewing
 {
     /// <summary>Scales its content to fill its room as nearly as it can without spilling out, keeping its shape.</summary>
     /// <remarks>
-    ///     The content is laid out as if it had all the room it could want, so text keeps the lines it was written with and
-    ///     nothing wraps, and one scale then meets the nearer side of the room. It is laid out again across the whole room
-    ///     at that scale, which every line already fits, so whatever it centers or sets at its right edge lines up with the
-    ///     room's. None of it happens unless the content or the room changes. A room that is unbounded either way gives
-    ///     nothing to fit, and the content is drawn at its own size.
-    ///     <para>
-    ///         The scale is the content's <see cref="Element.RenderTransform" />, which this sets: whatever finds what lies
-    ///         under a point sees through it as through any other.
-    ///     </para>
+    ///     The content is laid out without wrapping, and in a room unbounded either way it is drawn at its own size. The
+    ///     scale is the content's <see cref="Element.RenderTransform" />, which this sets.
     /// </remarks>
     public class Viewbox : ContentControl
     {
-        /// <summary>How much wider than its widest part the content is laid out again, so that part keeps its line whatever rounding its width went through.</summary>
+        // How much wider than its widest part the content is laid out again, so that part keeps its line whatever rounding
+        // its width went through.
         const float Slack = 0.5f;
 
         bool _grows = true;

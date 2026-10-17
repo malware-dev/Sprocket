@@ -9,11 +9,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>A notice as a banner that slides in, can be opened for the rest of it, and slides out when it is done.</summary>
-    /// <remarks>
-    ///     Its height is animated both ways, so nothing below it jumps under the pointer. The slide is stepped
-    ///     from the tick it is handed, so it takes the same time whatever the game's update rate is doing.
-    /// </remarks>
+    /// <summary>A notice as a banner that slides in, opens for the rest of its text, and slides out.</summary>
     public class Banner : Reveal
     {
         const float Frames = 12f;
@@ -82,7 +78,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Shows <paramref name="notice" />, or slides away where there is none, moved along to <paramref name="tick" />.</summary>
-        /// <remarks>Called every frame; costs a handful of comparisons once the slide has settled, because the controls it writes to change nothing when told what they already hold.</remarks>
+        /// <remarks>Called every frame; costs a handful of comparisons once the slide has settled.</remarks>
         public void Show(Notice notice, int tick)
         {
             _notice = notice;
@@ -95,7 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Slide(tick);
 
-            // Out of the layout and the drawing altogether once there is nothing to say and nothing left to slide.
             if (notice == null && Shut)
                 IsVisible = false;
         }
@@ -124,7 +119,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _chevron.Tint = ink;
             _chevron.IsVisible = notice.Expands != null;
 
-            // Reached only once the slide has finished, because a reveal answers nothing while it moves.
             _expands.CanExecute = notice.Expands != null;
 
             var offers = notice.Offers != null;
@@ -134,7 +128,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Moves the banner towards where it should be, by however many ticks have passed.</summary>
-        /// <remarks>Costs one comparison a tick once it is there: a reveal invalidates only when its openness changes.</remarks>
+        /// <remarks>Costs one comparison a tick once the banner has settled.</remarks>
         void Slide(int tick)
         {
             var since = _stepped < 0 ? 1 : tick - _stepped;

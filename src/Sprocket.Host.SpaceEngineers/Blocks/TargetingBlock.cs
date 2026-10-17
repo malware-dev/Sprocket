@@ -7,11 +7,7 @@ using VRage.Game.ModAPI.Interfaces;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// What aims itself at a target, a turret or a turret controller: whether it has a target and is on it, who it shoots at,
-    /// and whether a person is at its controls.
-    /// </summary>
-    /// <remarks>The turret and the controller say the same things through two interfaces of the game's that share nothing.</remarks>
+    /// <summary>A turret or a turret controller, read for its target, who it shoots at and whether a person is at its controls.</summary>
     public sealed class TargetingBlock : Capability
     {
         const string Unaimed = "The game raises no event as a turret finds a target, loses one or comes to bear on it.";
@@ -73,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
         }
 
-        /// <summary>Told as a person takes or gives up its controls, which the game says of anything a person can control.</summary>
+        /// <summary>Told as a person takes or gives up its controls.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var controlled = block as IMyControllableEntity;

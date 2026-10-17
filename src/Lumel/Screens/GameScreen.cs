@@ -10,14 +10,7 @@ using IMyInput = VRage.ModAPI.IMyInput;
 namespace Lumel.Screens
 {
     /// <summary>A screen the game owns, showing an <see cref="IScreenView" /> and handing it the pointer, the wheel and the keys.</summary>
-    /// <remarks>
-    ///     The screen owns its input, so nothing blacklists controls, nothing fights the camera, and the pointer is simply a
-    ///     pointer. None of the work a thing drawn over live gameplay would need is here.
-    ///     <para>
-    ///         A kind of screen with more to do as it opens and closes derives from this, and calls the base where it
-    ///         overrides <see cref="OnOpened" />.
-    ///     </para>
-    /// </remarks>
+    /// <remarks>A derived screen calls the base where it overrides <see cref="OnOpened" />.</remarks>
     public class GameScreen : MyModScreen
     {
         const int DoubleClickFrames = 20;
@@ -59,19 +52,17 @@ namespace Lumel.Screens
             _screen = screen;
             _size = size;
 
-            // BelowHud because that is where a mod screen's own content goes. The scissor is pushed onto whatever layer this
-            // names, so the two must agree or clipping silently does nothing.
+            // BelowHud is where a mod screen's own content goes. The scissor is pushed onto this layer, so the two must agree
+            // or clipping silently does nothing.
             _graphics = new ScreenSpaceGraphics(screen, MyScreenSpaceLayer.BelowHud, fill, images);
 
-            // Off, and the view draws its own cross instead. The game lays its controls down before it calls the mod, so the
-            // first opaque thing this screen paints buries the button while leaving it live: an invisible way out that still
-            // works is a corner that shuts the screen for no visible reason.
+            // Off, and the view draws its own cross instead: the game lays its controls down before it calls the mod, so the
+            // first opaque thing this screen paints buries the button while leaving it live.
             CloseButtonEnabled = false;
             CloseOnEscape = true;
             EnabledBackgroundFade = true;
 
-            // The game draws the cursor, so the view does not. A screen has a real cursor and hands it over, where something
-            // drawn during play has to add up the mouse's movement itself.
+            // The game draws the cursor, so the view does not.
             DrawMouseCursor = true;
 
             // Nothing drawn here is multiplied by the transition's alpha, so a fade would draw the screen fully opaque part way
@@ -133,7 +124,7 @@ namespace Lumel.Screens
             {
                 _view.PointerUp(_pointer);
 
-                // Straight out, and deliberately not down the road Escape takes: the view's cross is the quick exit.
+                // Closed directly, past the view's Escape handling: the view's cross is the quick exit.
                 if (_view.TakeClose())
                     Close();
             }
@@ -158,10 +149,6 @@ namespace Lumel.Screens
         }
 
         /// <summary>Sends the keyboard where the view says it belongs.</summary>
-        /// <remarks>
-        ///     A question with answers has no box, so Enter is the whole of what it wants. Otherwise the keys go to whatever
-        ///     holds the keyboard.
-        /// </remarks>
         void Type()
         {
             if (_view.IsQuestioning)
@@ -178,9 +165,8 @@ namespace Lumel.Screens
 
         /// <summary>Where the screen is, in UI units.</summary>
         /// <remarks>
-        ///     <c>Position</c> is the center of the screen in the game's normalized GUI units and <c>Size</c> is normalized too,
-        ///     while everything laid out is in UI units against the safe area. Read every frame, because a resolution or UI
-        ///     scale change moves it.
+        ///     <c>Position</c> is the center of the screen and <c>Size</c> its size, both in the game's normalized GUI units.
+        ///     Read every frame, because a resolution or UI scale change moves it.
         /// </remarks>
         RectangleF Bounds()
         {
@@ -238,10 +224,7 @@ namespace Lumel.Screens
         }
 
         /// <summary>How many presses in quick succession the one going down now is, counted where the button goes down.</summary>
-        /// <remarks>
-        ///     Counted here rather than asked of the game, which reports double clicks only for its own controls. Slack as well
-        ///     as time, because a double click that moved half the screen was two separate presses that happened to be quick.
-        /// </remarks>
+        /// <remarks>Counted here because the game reports double clicks only for its own controls.</remarks>
         int Presses()
         {
             var now = Now();

@@ -13,7 +13,6 @@ namespace Lumel
     public abstract partial class Element
     {
         /// <summary>Room along an axis that stands for no limit at all, as a scroll gives its content.</summary>
-        /// <remarks>Finite, because a stack subtracts from what it was offered as it goes.</remarks>
         public const float Unbounded = 1000000f;
 
         Action<Element, IPlacement> _admit;
@@ -43,10 +42,7 @@ namespace Lumel
         public Element Parent => _parent;
 
         /// <summary>Where this opens windows: the layer of the window it is in, or the layer over the screen it is on.</summary>
-        /// <remarks>
-        /// Found by climbing to the top of the tree this is in, which is an open window or the screen a layer covers, so
-        /// nothing that opens a window has to be handed the layer. Null while this is loose, or in a window that is closed.
-        /// </remarks>
+        /// <remarks>Null while this is loose, or in a window that is closed.</remarks>
         public WindowLayer Windows
         {
             get
@@ -181,14 +177,12 @@ namespace Lumel
         public bool Focusable { get; set; }
 
         /// <summary>Whether this holds the keyboard right now.</summary>
-        /// <remarks>Kept by <see cref="OnFocus" /> and <see cref="OnBlur" />, which the <see cref="InputRoot" /> this sits under calls.</remarks>
         public bool IsFocused => _focused;
 
         /// <summary>How this looks, applied onto its own properties now and again whenever its state changes.</summary>
         /// <remarks>
-        ///     A style writes only what it sets. A property it sets and a place sets as well is kept only until a change
-        ///     of state applies the style again; one it leaves alone stays as the place set it. Replacing the style
-        ///     takes back what the old one set first.
+        ///     A style writes only what it sets, and writes it again on every change of state, over any value set in
+        ///     code. Replacing the style takes back what the old one set first.
         /// </remarks>
         public IStyle Style
         {
@@ -274,7 +268,7 @@ namespace Lumel
         /// <summary>Says this needs measuring again, and everything above it with it.</summary>
         /// <remarks>
         ///     A property that changes how big this wants to be calls this; one that only changes where it
-        ///     sits calls <see cref="InvalidateArrange" />; a colour calls neither.
+        ///     sits calls <see cref="InvalidateArrange" />; a color calls neither.
         /// </remarks>
         public void InvalidateMeasure()
         {
@@ -359,7 +353,6 @@ namespace Lumel
         ///     Draws the background, then the content, with the clip in place if one was asked for, all under the render
         ///     transform.
         /// </summary>
-        /// <remarks>Not virtual, so that no subclass can get between a push and its pop.</remarks>
         public void Draw(IGraphics g)
         {
             if (_hidden)
@@ -377,7 +370,6 @@ namespace Lumel
         }
 
         /// <summary>Where <paramref name="point" />, as drawn, lies in the layout this was placed by.</summary>
-        /// <remarks>The reverse of <see cref="RenderTransform" />, so a press lands on what is drawn under it.</remarks>
         public Vector2 Local(Vector2 point)
         {
             return _transform.IsIdentity ? point : _transform.Undo(point, new Vector2(Bounds.X, Bounds.Y));
@@ -417,10 +409,6 @@ namespace Lumel
         }
 
         /// <summary>The element a press or a hover at <paramref name="point" /> reaches, or null for none.</summary>
-        /// <remarks>
-        ///     An unclipped element asks its children even when it does not hold the point, because a child
-        ///     moved by its <see cref="RenderTransform" /> is drawn outside its parent and can be pressed there.
-        /// </remarks>
         public Element Under(Vector2 point)
         {
             if (_hidden)
@@ -442,11 +430,7 @@ namespace Lumel
         }
 
         /// <summary>The deepest element at <paramref name="point" /> with something to say, or null.</summary>
-        /// <remarks>
-        ///     Separate from <see cref="Under" />, because what a press reaches and what the pointer is resting on
-        ///     are different questions: a light inside a row says what it means while a press on it opens the row.
-        ///     Input transparency does not hide a tip.
-        /// </remarks>
+        /// <remarks>Input transparency does not hide a tip.</remarks>
         public Element SayingAt(Vector2 point)
         {
             if (_hidden)
@@ -467,10 +451,6 @@ namespace Lumel
         }
 
         /// <summary>What a wheel turned at <paramref name="point" /> moves: the innermost scroll that holds the point and can move, or null.</summary>
-        /// <remarks>
-        ///     Separate from <see cref="Under" />, because a wheel moves a list wherever the pointer is on it, where a press
-        ///     reaches only what takes one: the words of a page take no press, and the page is still what the wheel turns.
-        /// </remarks>
         public IScrolls WheelAt(Vector2 point)
         {
             if (_hidden)
@@ -492,7 +472,7 @@ namespace Lumel
         }
 
         /// <summary>What this says while the pointer rests on it at <paramref name="point" />: its <see cref="Tip" />, unless it says something different in different places.</summary>
-        /// <remarks>Asked while the pointer rests on this, so whatever an override hands back is made once and kept, as a tip always is.</remarks>
+        /// <remarks>Asked again and again while the pointer rests on this, so an override hands back a tip made once and kept.</remarks>
         public virtual Tip TipAt(Vector2 point)
         {
             return Tip;
@@ -620,7 +600,6 @@ namespace Lumel
         }
 
         /// <summary>Offered a key while this holds the keyboard, answering whether it took it.</summary>
-        /// <remarks>A key not taken goes to the <see cref="InputRoot" />, which moves focus on Tab and lets go of it on Escape.</remarks>
         public virtual bool OnKey(InputRoot input, MyKeys key, bool shift, bool ctrl)
         {
             return false;

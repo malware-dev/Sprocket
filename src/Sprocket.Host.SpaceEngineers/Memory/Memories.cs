@@ -5,14 +5,8 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 {
     /// <summary>What the world remembers of Sprocket while it runs: Sprocket's clock, each player's settings, and each construct's state and door's coming close until it is claimed.</summary>
     /// <remarks>
-    /// <b>Sprocket keeps a clock of its own.</b> The game's frame counter starts again from nought with every session, so a
-    /// tick remembered across a save would mean another moment after the load. Sprocket's clock is the game's frame carried
-    /// on from where the world was saved, so every tick it remembers still means the same moment, and a reload passes
-    /// unnoticed.
-    /// <para>
-    /// Read whole as the world loads and written whole as it saves. A memory that will not read is said out loud and ignored:
-    /// the world carries on from a fresh one, which the next save writes over it.
-    /// </para>
+    /// Every tick kept is on Sprocket's clock, the game's frame carried on from where the world was saved, since the game's
+    /// frame counter starts from nought each session. Read whole as the world loads and written whole as it saves.
     /// </remarks>
     public sealed class Memories
     {
@@ -115,7 +109,7 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// What the world keeps now, on the game's <paramref name="frame" />: every live construct's state, every door's coming
         /// close, and what nothing has claimed yet.
         /// </summary>
-        /// <remarks>Once a save. What nothing claimed is kept too, so a construct whose automation is not built yet loses nothing.</remarks>
+        /// <remarks>Called once a save.</remarks>
         public string Write(int frame, IList<ConstructMemory> constructs, IList<DoorMemory> doors)
         {
             var memory = new WorldMemory { Clock = Now(frame) };

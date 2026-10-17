@@ -5,10 +5,8 @@ namespace Lumel.Layout
 {
     /// <summary>The children of one container, one for each key, kept from one showing to the next.</summary>
     /// <remarks>
-    ///     A key already shown keeps its element, and only an element out of place is moved, so a list that gains
-    ///     or loses one entry adds or removes one child: every other one keeps what it holds, the pointer resting
-    ///     on it and a press under way included, and nothing is made again. The container's children are this
-    ///     one's alone to change.
+    ///     A key already shown keeps its element, with the pointer resting on it and any press under way. The
+    ///     container's children are this one's alone to change.
     /// </remarks>
     public sealed class KeyedChildren<TKey, TElement> where TElement : Element
     {

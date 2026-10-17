@@ -7,10 +7,6 @@ using VRageMath;
 namespace Lumel.Text
 {
     /// <summary>A run of text, on one line or on as many as it needs.</summary>
-    /// <remarks>
-    ///     Keeps a <c>StringBuilder</c> beside the string, because <c>MeasureText</c> measures from one
-    ///     without allocating.
-    /// </remarks>
     public class Label : Element, IPadded, ITextual
     {
         const float SampleWide = 44f;
@@ -107,7 +103,7 @@ namespace Lumel.Text
             }
         }
 
-        /// <summary>The colour the words are drawn in.</summary>
+        /// <summary>The color the words are drawn in.</summary>
         public Color Color { get; set; }
 
         /// <summary>Whether a run too wide for its room continues on the next line.</summary>
@@ -147,7 +143,7 @@ namespace Lumel.Text
         /// <summary>Whether the words sit in the middle of the room they were given.</summary>
         public bool Centres { get; set; }
 
-        /// <summary>A colour to show instead of the words, or nothing to show the words.</summary>
+        /// <summary>A color to show instead of the words, or nothing to show the words.</summary>
         public Color? Sample
         {
             get { return _sample; }
@@ -207,10 +203,7 @@ namespace Lumel.Text
         }
 
         /// <summary>The width of one unwrapped run, kept between measures.</summary>
-        /// <remarks>
-        ///     Kept because a measure re-runs whenever anything above it changes size, and measuring text is
-        ///     the dearest call the layout makes.
-        /// </remarks>
+        /// <remarks>Kept, because measuring text is the dearest call the layout makes.</remarks>
         float Flat(IGraphics g)
         {
             if (!_flatDirty && _flatAt == FontSize && _flatIn == Font)
@@ -254,7 +247,7 @@ namespace Lumel.Text
             }
         }
 
-        /// <summary>Where a line starts, which is the left edge unless this is centring.</summary>
+        /// <summary>Where a line starts, which is the left edge unless this is centering.</summary>
         float Left(IGraphics g, string line)
         {
             if (!Centres)
@@ -309,9 +302,8 @@ namespace Lumel.Text
 
         /// <summary>Breaks the text from <paramref name="start" /> to <paramref name="end" />, which holds no newline, into lines no wider than <paramref name="width" />.</summary>
         /// <remarks>
-        ///     Each line is the furthest word end that fits, found by halving: a few measures a line, where
-        ///     trying one word after another took one a word. A word too wide for any line has one to itself,
-        ///     and an empty paragraph is an empty line.
+        ///     Each line is the furthest word end that fits, found by halving, so a line costs a few measures rather than
+        ///     one a word. A word too wide for any line has one to itself.
         /// </remarks>
         void Paragraph(IGraphics g, int start, int end, float width, ref float widest)
         {

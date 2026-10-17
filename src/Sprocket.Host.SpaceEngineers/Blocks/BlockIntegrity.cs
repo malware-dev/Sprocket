@@ -43,10 +43,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>A block's grid being listened to for that block, until disposed.</summary>
-        /// <remarks>
-        /// One subscription per block watched, so every hit or weld on a grid calls each watched block on it once, which
-        /// compares one reference and returns. Moved to the grid the block is on as it changes grid, as a split moves it.
-        /// </remarks>
+        /// <remarks>Every hit or weld on a grid calls each watched block on it once, at the cost of one reference comparison.</remarks>
         sealed class Listening : IDisposable
         {
             readonly IMyTerminalBlock _block;

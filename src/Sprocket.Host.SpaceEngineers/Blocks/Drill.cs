@@ -4,10 +4,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A ship drill, which mines while it is switched on: whether it is drilling, and whether it mines or only clears terrain.</summary>
-    /// <remarks>
-    /// The drill's own switch runs it, so the words every switch has are its start and stop. The mode is one of two, read
-    /// and set through the game's own Terrain Clearing Mode, whose toggle flips it.
-    /// </remarks>
     public sealed class Drill : Capability
     {
         const string Unheard = "A drill raises nothing as a pilot takes it up or its mode changes.";

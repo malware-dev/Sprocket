@@ -4,15 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// One of the things a value may be: what it is called, and what the program holds for it.
     /// </summary>
-    /// <remarks>
-    /// Two different things, and that is the whole point of this type. The terminal shows a charge
-    /// mode as Auto, Recharge or Discharge and the block is told a number, so a form that wrote down
-    /// what somebody read would be writing something the block will not take.
-    /// <para>
-    /// Both are text, because what the program holds is text by the time it gets here: the number is
-    /// the block's business and the spelling of it is the language's.
-    /// </para>
-    /// </remarks>
     public struct Choice
     {
         /// <summary>The choice said as <paramref name="word" />, meaning <paramref name="means" />.</summary>

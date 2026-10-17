@@ -4,26 +4,9 @@ namespace Sprocket.Host.SpaceEngineers.World
     /// <summary>
     /// Which relations mean anything against which readings, and what they answer.
     /// </summary>
-    /// <remarks>
-    /// The table is core's because it is a property of the type system rather than of any game:
-    /// below is meaningless on a colour in Space Engineers and in anything else. A host declares what
-    /// sort of reading a property gives; core says what may be asked of it.
-    /// <para>
-    /// <see cref="Suits" /> saying no is an answer rather than an absence. It is what lets a target
-    /// explain why a relation is not on offer instead of silently showing a shorter list.
-    /// </para>
-    /// <para>
-    /// This is the comparison half. Arithmetic is a second axis and does not exist yet; when it does,
-    /// which operators apply to which kinds has to answer for both.
-    /// </para>
-    /// </remarks>
     public static class Relations
     {
         /// <summary>Whether a relation means anything against a reading of this sort.</summary>
-        /// <remarks>
-        /// Everything can be equal to something. Only a number can be above it - a colour has no
-        /// ordering, and asking for one is a question worth refusing rather than answering.
-        /// </remarks>
         public static bool Suits(Relation relation, ValueKind kind)
         {
             if (relation == Relation.Is || relation == Relation.IsNot)
@@ -36,9 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Measures a reading against an operand of the same kind.
         /// </summary>
         /// <remarks>
-        /// Two whole numbers are compared as whole numbers. Anything else numeric falls back to
-        /// doubles, which is the best available - but two integers must never go that way, because
-        /// past 2^53 a double cannot tell two ids apart and would call them equal.
+        /// Two whole numbers are compared as whole numbers, never as doubles: past 2^53 a double cannot tell two ids
+        /// apart.
         /// </remarks>
         public static bool Holds(
             Values values, ValueKind kind, EntityValue reading, Relation relation, EntityValue operand)
@@ -49,8 +31,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     string.Equals(values.AsText(kind, reading), values.AsText(kind, operand)), relation);
             }
 
-            // Only equality means anything on a colour, and falling through to a numeric compare would
-            // answer an ordering rather than refusing it.
+            // Only sameness means anything on a color.
             if (kind == ValueKind.Color)
                 return Same(reading.Bits == operand.Bits, relation);
 
@@ -66,8 +47,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// Measures a reading against an operand, each carrying its own kind.
         /// </summary>
         /// <remarks>
-        /// Two whole numbers are compared as whole numbers and any other two numbers as reals, so an integer stands for a
-        /// real. A flag, a colour and text answer only sameness, and two of different kinds are never the same.
+        /// Two whole numbers are compared as whole numbers and any other two numbers as reals. A flag, a color and text answer
+        /// only sameness, and two of different kinds are never the same.
         /// </remarks>
         public static bool Holds(Literal reading, Relation relation, Literal operand)
         {
@@ -121,12 +102,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>
         /// The answer to a relation that can only tell sameness apart from difference.
         /// </summary>
-        /// <remarks>
-        /// An ordering asked of something with no ordering answers false rather than throwing.
-        /// <see cref="Suits" /> is where that combination is refused; by the time a reading is being
-        /// measured, refusing again would only turn a question nobody should have asked into a crash
-        /// in the middle of somebody's airlock.
-        /// </remarks>
+        /// <remarks>An ordering asked of something with no ordering answers false, and never throws.</remarks>
         static bool Same(bool same, Relation relation)
         {
             if (relation == Relation.Is)

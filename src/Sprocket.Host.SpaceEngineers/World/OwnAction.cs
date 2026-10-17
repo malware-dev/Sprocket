@@ -5,11 +5,6 @@ using Sandbox.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.World
 {
     /// <summary>What one of Sprocket's own actions does to a block, what it waits for, and how it finishes.</summary>
-    /// <remarks>
-    /// Declared once, beside the action, by what knows the block. Each action has options of its own, and what they mean
-    /// is the action's alone: it reads them into a type of its own when a step is compiled, and is handed that from then
-    /// on. See <see cref="Bind" />.
-    /// </remarks>
     public abstract class OwnAction
     {
         /// <summary>What the action waits for, or null where it is done the moment it is told.</summary>
@@ -85,7 +80,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>An action with the options one step gave it.</summary>
-        /// <remarks>The cast in each of these never fails: a step is compiled only against blocks of the kind that declared it.</remarks>
         sealed class Given<T, TOptions> : BoundAction where T : class
         {
             readonly Typed<T, TOptions> _doing;

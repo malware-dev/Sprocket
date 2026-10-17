@@ -12,9 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     /// <summary>A length being given in a panel, hung from the part of a sentence it is the length of whenever that part is on a screen.</summary>
     /// <remarks>
-    /// The page's whether or not it hangs anywhere, so the editor gives a length the same way without a screen. It is answered
-    /// once, as it closes: Done or Enter answers with what the panel says, and Escape or a press anywhere else answers that
-    /// it was put away, as every popup is. Done is drawn as the button Enter presses.
+    /// Answered once, as it closes: Done or Enter answers with what the panel says, and Escape or a press anywhere else
+    /// answers that it was put away.
     /// </remarks>
     public class LengthQuestion
     {
@@ -89,7 +88,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Puts the panel away and answers with what it says, or that it was put away where <paramref name="cancelled" />.</summary>
-        /// <remarks>Once, however it closes: putting the window away comes back here and finds it answered.</remarks>
+        /// <remarks>Answers once, however often it is called.</remarks>
         public void Finish(bool cancelled)
         {
             if (_done)

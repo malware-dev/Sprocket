@@ -3,30 +3,7 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
-    /// <summary>
-    /// The way back for one kind of thing: what was done to each one, and what was taken back from it, walked from any of the
-    /// screens it is shown on.
-    /// </summary>
-    /// <remarks>
-    /// One per thing undo is about: a logic system, whose history holds everything done to it on any of its screens, and the
-    /// construct, whose history holds the logic systems and installations made, put on and taken out.
-    /// <para>
-    /// Each change keeps the screens it touched - a sequence, a slot, an installation, the logic system itself, as
-    /// <see cref="Edit{T}.Touches" /> says - and undo pressed on a screen takes back the last change that touched it, the way
-    /// each file in an editor has its own undo. One list underneath all of them, in the order things were done, so what is
-    /// taken back is always exactly what was there: a change that touched the screen and others too goes back with every later
-    /// change on any of those others, as one step, and comes back with them the same way.
-    /// </para>
-    /// <para>
-    /// Here rather than on the model, because it is a fact about somebody's editing session and not about the program. A
-    /// system that is exported, shared or saved should carry what it is, never how its author got there.
-    /// </para>
-    /// <para>
-    /// Kept per thing and across navigation, so backing out to look at something else and coming back does not silently
-    /// throw the safety net away. Keyed by the thing itself rather than by an id, because a stack is only of any interest
-    /// while what it is about still exists, or may be brought back.
-    /// </para>
-    /// </remarks>
+    /// <summary>The undo and redo history of each thing of one kind, walked from any of the screens it is shown on.</summary>
     public sealed class History<T> where T : class
     {
         const int Depth = 100;
@@ -40,12 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly List<int> _groups = new List<int>();
         Entry _target;
 
-        /// <summary>Makes a change and remembers how to take it back. False where it changed nothing.</summary>
-        /// <remarks>
-        /// Applying and recording are one call so they cannot come apart: an edit applied without being recorded is a hole in
-        /// the way back, and one recorded without being applied is worse. What it touched is asked once it is made, when
-        /// everything it brings about with it has been worked out.
-        /// </remarks>
+        /// <summary>Makes a change and records how to take it back, returning false where it changed nothing.</summary>
         public bool Did(T subject, Edit<T> edit)
         {
             if (!edit.Changes)
@@ -56,7 +28,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var entry = new Entry(edit);
             edit.Touches(subject, entry.Screens);
 
-            // A new change is a new branch for every screen it touched, and for whatever taken back leaned on what goes.
             Branch(subject, entry.Screens);
 
             var stack = Stack(_done, subject);
@@ -124,7 +95,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (!CanUndo(subject, screen))
                 return null;
 
-            // Latest first, the walk being in the order the changes were made.
             var done = _done[subject];
             for (var i = _walk.Count - 1; i >= 0; i--)
             {
@@ -142,10 +112,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Puts back the last thing undone on <paramref name="screen" />, with whatever was taken back that it leans on, and
         /// says which it was, or null where there is none, or it waits for a switch.
         /// </summary>
-        /// <remarks>
-        /// The same <c>Apply</c> the original edit ran, not a third code path. An edit that could be applied, reversed, and
-        /// then not applied again the same way would be a stranger bug than either half alone.
-        /// </remarks>
         public Edit<T> Redo(T subject, object screen)
         {
             if (!CanRedo(subject, screen))
@@ -175,7 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Takes <paramref name="edit" /> back and forgets it, where it is the last change made to <paramref name="subject" />; false where it is not.</summary>
-        /// <remarks>For something made a moment ago and left without anything done to it: leaving it is a cancel, not a step to walk.</remarks>
+        /// <remarks>For something just made and left untouched, where leaving it is a cancel.</remarks>
         public bool Withdraw(T subject, Edit<T> edit)
         {
             List<Entry> stack;
@@ -205,10 +171,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Whether there is a change on <paramref name="screen" /> to take back, leaving in the walk that change and every later
         /// one going back with it, in the order they were made.
         /// </summary>
-        /// <remarks>
-        /// Every later change that touched a screen one already in the walk touched goes too, so nothing left standing was made
-        /// over something taken away. Asked every tick through the words on the arrows, so it allocates nothing.
-        /// </remarks>
+        /// <remarks>Asked every tick through the words on the arrows, so it allocates nothing.</remarks>
         bool Back(T subject, object screen)
         {
             _walk.Clear();
@@ -242,10 +205,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// Whether there is a change taken back on <paramref name="screen" /> to make again, leaving in the walk it and every
         /// change taken back after it that it leans on, in the order they were first made.
         /// </summary>
-        /// <remarks>
-        /// What was taken back later was made earlier, so a later group sharing a screen with the walk comes back first. The
-        /// indices of the groups walked are kept in <see cref="_groups" />, in the order they were taken back.
-        /// </remarks>
         bool Forward(T subject, object screen)
         {
             _walk.Clear();
@@ -321,7 +280,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _reach.Clear();
             Join(screens, _reach);
 
-            // Last taken back first: a group taken back before one that goes leans on it where they share a screen.
             for (var g = undone.Count - 1; g >= 0; g--)
             {
                 if (!Shares(undone[g], _reach))
@@ -334,25 +292,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
-        /// <summary>
-        /// Drops what can no longer be walked back, from the top down.
-        /// </summary>
-        /// <remarks>
-        /// The program is not the editor's alone - see <see cref="Edit{T}.Undoable" /> for the case this exists for. Asked
-        /// before anything is read as well as before anything is done, so the arrows never name a change that would not
-        /// happen, and a press never quietly does nothing.
-        /// <para>
-        /// Only from the top, because nothing below is reachable until what is above it has gone, and it is asked the moment
-        /// it becomes so. Both ways are asked at once: a change from outside can invalidate a step back and the step forward
-        /// that was waiting under it, and they are separate stacks. Of what was taken back together, only the first is asked:
-        /// each after it is made over the ones before, which are not there to ask about until they are made again.
-        /// </para>
-        /// <para>
-        /// A screen asks this every tick, through the words on its arrows, so what an edit does to answer has to be cheap: a
-        /// walk of the triggers a system has and a comparison of what one names. Nothing here reads a toolbar or builds a
-        /// string.
-        /// </para>
-        /// </remarks>
+        /// <summary>Drops what can no longer be walked back or forward, from the top down.</summary>
+        /// <remarks>Asked every tick through the words on the arrows, so an edit's answer must be cheap and build no string.</remarks>
         void Settle(T subject)
         {
             List<Entry> done;

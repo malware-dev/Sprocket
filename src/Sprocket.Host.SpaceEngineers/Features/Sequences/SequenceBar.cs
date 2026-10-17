@@ -5,12 +5,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
-    /// <summary>What a sequence is doing: whether it just ran, its state or what is wrong with it, when it last ran, and what was skipped.</summary>
-    /// <remarks>
-    /// The tools that act on the whole sequence, run or stop, undo, redo, delete and its switch, are in the screen's header.
-    /// Whoever holds this sets what it shows and calls <see cref="Show" />. The elements it is drawn with are declared in
-    /// <c>SequenceBar.View.cs</c>, and nothing else is.
-    /// </remarks>
+    /// <summary>The line saying what a sequence is doing, when it last ran, and what was skipped.</summary>
     public partial class SequenceBar : HStack
     {
         /// <summary>A line saying nothing yet, filled in by setting what it shows and calling <see cref="Show" />.</summary>
@@ -42,10 +37,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public string Skipped { get; set; }
 
         /// <summary>Shows what it has been told.</summary>
-        /// <remarks>Runs on every refresh of the page, and sets only what it is told.</remarks>
+        /// <remarks>Runs on every refresh of the page.</remarks>
         public void Show(Texts texts)
         {
-            // One of the two, never both and never neither, so the line is the same height whatever is happening.
             var wrong = Problem.Length != 0;
             _status.IsVisible = !wrong;
             _status.Text = Status;

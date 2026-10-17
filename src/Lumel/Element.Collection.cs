@@ -7,7 +7,6 @@ namespace Lumel
     public abstract partial class Element
     {
         /// <summary>The children of one element.</summary>
-        /// <remarks>Nested, so that it alone can set a child's parent and an element's children.</remarks>
         public sealed class Collection : IEnumerable<Element>
         {
             readonly List<Element> _items = new List<Element>();

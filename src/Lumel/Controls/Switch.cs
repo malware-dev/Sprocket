@@ -6,11 +6,8 @@ namespace Lumel.Controls
 {
     /// <summary>An on/off switch: a thumb at one end, and the word for the state it is in beside it.</summary>
     /// <remarks>
-    ///     The thumb is at the right when on and at the left when off, as tall as the room inside the switch
-    ///     and as wide as it is tall. The body is the element's own <see cref="Element.Background" />, the room
-    ///     round the thumb and the word its <see cref="Padding" />. The switch is as wide as the longer
-    ///     of its two words needs, whichever it is showing, so it keeps its size when switched and a longer
-    ///     word in another language widens it rather than spilling out of it.
+    ///     The body is the element's own <see cref="Element.Background" />, and the room round the thumb and the word
+    ///     its <see cref="Padding" />.
     /// </remarks>
     public class Switch : Element, IPadded, ITextual
     {
@@ -148,13 +145,10 @@ namespace Lumel.Controls
         }
 
         /// <inheritdoc />
-        /// <remarks>
-        ///     Each word is centred here, from the width its measure already found, rather than by the label as it
-        ///     draws: a label centring itself measures its words the first time it draws them, and a switch draws
-        ///     one of its words for the first time on the frame it is flipped.
-        /// </remarks>
         protected override void ArrangeContent(RectangleF bounds)
         {
+            // Centered here from the measured width: a label centering itself measures on its first draw, which for a
+            // switch's other word is the frame it is flipped.
             var thumb = bounds.Height;
             var room = bounds.Width - thumb;
             Centre(_on, bounds.X, room, bounds);

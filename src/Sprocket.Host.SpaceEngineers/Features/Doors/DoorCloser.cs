@@ -2,22 +2,12 @@ using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Runtime;
 
-// The statuses live in the Ingame namespaces, which cannot be imported whole: IMyDoor is declared in both, and the
-// mod-side one is the one with the events on it.
+// IMyDoor is declared in both the ModAPI and the Ingame namespace, so the Ingame one cannot be imported whole.
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Doors
 {
     /// <summary>Closes one door a set time after it finishes opening.</summary>
-    /// <remarks>
-    /// The count starts when the door is fully open, which every family of door announces with <c>OnDoorOpened</c>. Every
-    /// door also raises <c>DoorStateChanged</c> as it is told to open and as it finishes closing, and either one ends the
-    /// count: a door closed by hand is left alone, and a door opened again counts afresh once it is open.
-    /// <para>
-    /// A plain door that is damaged raises <c>OnDoorOpened</c> on every tick it stands open, so an opening that arrives
-    /// while the count is running leaves it as it is.
-    /// </para>
-    /// </remarks>
     public sealed class DoorCloser : IDisposable
     {
         readonly IMyDoor _door;
@@ -81,6 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Doors
 
         void Opened(IMyDoor door)
         {
+            // A damaged plain door raises OnDoorOpened on every tick it stands open.
             if (!_shift.Listed)
                 _rota.At(_shift, _now() + _ticks);
         }

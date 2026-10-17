@@ -11,20 +11,7 @@ using PistonStatus = Sandbox.ModAPI.Ingame.PistonStatus;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A piston: extended, retracted or moved to a position, and the members of its terminal said in
-    /// Sprocket's words.
-    /// </summary>
-    /// <remarks>
-    /// Moving to a position is the game's own: it puts a limit at the position and runs the piston at
-    /// it, so the piston's limits are the game's to overwrite, and are. It has arrived when it has
-    /// reached the limit it is running towards. Extending and retracting run it to whichever limit it
-    /// already has, and are finished when the piston says it is out or in.
-    /// <para>
-    /// A stop that leaves a machine moving is not a stop, so calling off any of the three stops the
-    /// piston where it stands.
-    /// </para>
-    /// </remarks>
+    /// <summary>A piston, extended, retracted or moved to a position.</summary>
     public sealed class Piston : Capability
     {
         /// <summary>Moving to a position, which is Sprocket's own and waits until it gets there.</summary>
@@ -52,7 +39,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly Reading Arrived = Reading.Of<IMyPistonBase>(AtLimit);
 
-        // Extending and retracting are the game's own, performed as its.
         static readonly OwnAction Extends = OwnAction.Of<IMyPistonBase>(null, Out,
             piston => Why(piston, piston.Status == PistonStatus.Extended, 1), Stop, Outwards);
 
@@ -103,7 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Reading("is retracted", "is not retracted");
         }
 
-        /// <summary>Told as the piston reaches either end of its travel, which it raises from its own update.</summary>
+        /// <summary>Told as the piston reaches either end of its travel.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var piston = block as IMyPistonBase;
@@ -221,32 +207,20 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Leaves the piston as a finished move to where it stands would: the limit at the position, and
         /// the speed pushing against it.
         /// </summary>
-        /// <remarks>
-        /// The game does nothing at all when told to move to where a piston already is, so a piston not
-        /// already pushing that way would never read as arrived - and a sequence that moves something to
-        /// where it last left it is run every time it cycles.
-        /// </remarks>
+        /// <remarks>The game does nothing when told to move a piston to where it already is.</remarks>
         static void Hold(IMyPistonBase piston, float position, float speed)
         {
             piston.MaxLimit = position;
             piston.Velocity = speed;
         }
 
-        /// <summary>Stops the piston where it stands, since a stop that leaves a machine moving is not a stop.</summary>
+        /// <summary>Stops the piston where it stands.</summary>
         static void Stop(IMyPistonBase piston)
         {
             piston.Velocity = 0f;
         }
 
-        /// <summary>
-        /// Why the piston is not getting where it was sent, or nothing while it still might: <paramref name="arrived" /> where
-        /// it is there, and heading out where <paramref name="sense" /> is positive, in where negative, and either way at nought.
-        /// </summary>
-        /// <remarks>
-        /// Whether it can move at all, then whether it is still heading the right way. Its speed was set
-        /// by what sent it, so a speed of nought or the wrong way round means something else has been at
-        /// it and nothing is heading there any more.
-        /// </remarks>
+        /// <summary>Why the piston is not getting where it was sent, or none while it might; <paramref name="sense" /> is positive outward and negative inward.</summary>
         static BlockTrouble Why(IMyPistonBase piston, bool arrived, int sense)
         {
             if (arrived)
@@ -271,7 +245,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>The ticks extending should take: the distance to its upper limit, at the speed it goes.</summary>
-        /// <remarks>Its speed is in metres a second, and the game runs sixty ticks to the second.</remarks>
+        /// <remarks>Its speed is in meters per second, and the game runs sixty ticks to the second.</remarks>
         static int Outwards(IMyPistonBase piston)
         {
             return Ticks(piston.MaxLimit - piston.CurrentPosition, Math.Abs(piston.Velocity));

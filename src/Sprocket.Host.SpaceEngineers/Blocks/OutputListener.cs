@@ -4,10 +4,7 @@ using Sandbox.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A power producer being listened to for a change in its output, until disposed.</summary>
-    /// <remarks>
-    /// The game raises its output event from the main thread whenever the power the block gives, or the most it could
-    /// give, moves.
-    /// </remarks>
+    /// <remarks>The game raises the output event on the main thread whenever the power given, or the most it could give, moves.</remarks>
     public sealed class OutputListener : IDisposable
     {
         readonly IMyPowerProducer _producer;

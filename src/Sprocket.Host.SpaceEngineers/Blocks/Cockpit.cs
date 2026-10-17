@@ -4,18 +4,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
-    /// <summary>
-    /// A cockpit or a seat: it knows when somebody sits down or gets up and who that is, holds the flight switches a docking
-    /// or landing sequence sets, and reads the ship's gravity and mass.
-    /// </summary>
-    /// <remarks>
-    /// A cryo chamber is a cockpit to the game, and is not this: it is judged on its own. Its hotbar and target lock are the
-    /// signals and the speed every ship controller has - see <see cref="ShipController" />.
-    /// <para>
-    /// The handbrake and parking switches belong to the grid, and the game's setter for each flips it whatever it is told,
-    /// so the terminal floor reads them before it sets them - see <c>GameSlots</c>.
-    /// </para>
-    /// </remarks>
+    /// <summary>A cockpit or a seat, which reports who sits down or gets up, holds the flight switches and reads the ship's gravity and mass.</summary>
     public sealed class Cockpit : Capability
     {
         /// <summary>Whether somebody sits in it, which is Sprocket's own.</summary>
@@ -23,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         const string Unheard = "The game raises no event when this changes.";
 
-        /// <summary>One g in metres a second squared, as the game's gravity system counts it.</summary>
+        // One g in meters per second squared, as the game's gravity system counts it.
         const double G = 9.81;
 
         static readonly Reading Sat = Reading.Of<IMyCockpit>(cockpit => cockpit.IsOccupied);
@@ -47,7 +36,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <inheritdoc />
-        /// <remarks>Only an enclosed cockpit has air of its own, and only it is offered its oxygen level.</remarks>
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
             kind.WithValue(Occupied, "occupied", Seated).Status().Announced()
@@ -84,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .Renaming("HorizonIndicator", false, "toggle show horizon and altitude");
         }
 
-        /// <summary>Told as somebody sits down or gets up, which every cockpit announces, on getting up, dying or the seat being lost alike.</summary>
+        /// <summary>Told as somebody sits down or gets up, dies there or loses the seat.</summary>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var cockpit = block as IMyCockpit;

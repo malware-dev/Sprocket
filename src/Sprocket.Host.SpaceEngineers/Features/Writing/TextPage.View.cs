@@ -11,10 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         EditBox _box;
 
         /// <summary>How many characters it holds, at the right, over a box that fills the rest of the page and moves both ways.</summary>
-        /// <remarks>
-        /// The box the script is written in: a face whose characters are all one width, so text laid out in columns lines up as it
-        /// is typed, and numbered lines, so a line can be found again in a long text.
-        /// </remarks>
         protected override Element CreateView()
         {
             return new VStack

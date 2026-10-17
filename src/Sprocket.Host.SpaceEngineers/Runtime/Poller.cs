@@ -10,30 +10,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// Watches one <c>when</c> or <c>every</c> of a system on one of its instances, and does its step when it fires.
     /// </summary>
     /// <remarks>
-    /// On the rota at its own cadence, so a moment looked for every half second costs a look every half second and nothing
-    /// between. The step is done by the runner of the whole program, which knows what a step reaches.
-    /// <para>
-    /// <b>Still looked at while the machine has no power,</b> and nothing done. An edge compares a look with the one
-    /// before it, so a door opened during a blackout must not read as having just opened when the lights come back.
-    /// </para>
-    /// <para>
-    /// <b>A moment every watched block announces is looked for when it is announced,</b> on the tick after, with a look
-    /// every hundred ticks in case an announcement never comes; how often the program asked for is set aside. What is
-    /// announced only prompts the look, which reads the blocks as ever.
-    /// </para>
-    /// <para>
-    /// <b>So is a moment ruled out on every watched block,</b> one the block does not announce but which cannot happen
-    /// while a reading it does announce holds: a door cannot start closing while it is shut. Once a block is out of that
-    /// reading, the moment is looked for on its cadence until the block is back in it. See
-    /// <see cref="EntityEvent.RuledOutBy" />.
-    /// </para>
+    /// On the rota at its own cadence, and still looked at while the machine has no power, with nothing done. A moment
+    /// every watched block announces, or rules out, is looked for on the tick after it is announced, and every hundred
+    /// ticks in case an announcement never comes.
     /// </remarks>
     public sealed class Poller
     {
-        /// <summary>How often a moment is looked for where the program leaves it out: <c>10t</c>.</summary>
         const int Default = Rota.Ten;
 
-        /// <summary>How often an announced moment is looked for all the same, in case an announcement never comes.</summary>
         const int Backstop = Rota.Hundred;
 
         readonly AutomationSystem _system;
@@ -43,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Rota _rota;
         readonly Shift _shift;
 
-        /// <summary>Everything it remembers, kept in what the world saves, so a reload carries it on as if nothing happened.</summary>
+        // Kept in what the world saves.
         readonly WatchMemory _memory;
 
         readonly List<string> _watched = new List<string>();
@@ -243,9 +227,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </summary>
         /// <remarks>
         /// Done again only where the blocks the names point at, or the program, have changed since, so a look reads arrays
-        /// and asks nothing by name. What it read of a block at its last look is kept across, by the block's name, and let
-        /// go of for any block it no longer watches. What each block was remembered by is taken up from what the world kept
-        /// the first time after a load, and let go of every time after, since the blocks may be other blocks.
+        /// and asks nothing by name.
         /// </remarks>
         void Compile()
         {
@@ -382,8 +364,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (now)
                     anyTrue = true;
 
-                // No previous look means the trigger has only just come into existence, and an edge needs two.
-                // Firing on the first look would set every trigger off the moment it was made.
+                // An edge needs two looks, so a trigger never fires on its first.
                 if (_reads[i].Known && !_reads[i].Held && now)
                     fired++;
 
@@ -410,11 +391,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Fires when the comparison comes to hold on the last of the blocks, and not again until it stops holding on one of
         /// them.
         /// </summary>
-        /// <remarks>
-        /// Watching for several separate edges on the same tick would almost never fire, because the blocks reach their
-        /// state at different moments. What the sentence means is "the moment they are all there", so that is what is
-        /// watched: one edge, on the whole condition.
-        /// </remarks>
         bool SampleWhenAll()
         {
             var all = _entities.Length > 0;
@@ -496,9 +472,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <remarks>
-        /// Measured in the game's ticks rather than in looks. The next time falls due from when the last one did, not from
-        /// when it was noticed, so a clock noticed a few ticks late runs late by the same few ticks every time rather than
-        /// drifting further each time.
+        /// Measured in the game's ticks; the next time falls due from when the last one did, so a clock noticed late does not
+        /// drift.
         /// </remarks>
         bool SampleEvery(EveryTrigger every)
         {

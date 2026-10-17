@@ -5,10 +5,6 @@ using VRageMath;
 namespace Lumel.Controls
 {
     /// <summary>An angle shown and set as a needle on a dial: marks round the edge, and the needle from the middle.</summary>
-    /// <remarks>
-    /// Nought is straight up and positive is clockwise. The needle follows how far the pointer moves round rather than where
-    /// it is, so going round twice counts twice, up to <see cref="Most" /> either way.
-    /// </remarks>
     public class Dial : Element
     {
         const float Across = 96f;

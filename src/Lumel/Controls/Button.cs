@@ -6,7 +6,6 @@ using VRageMath;
 namespace Lumel.Controls
 {
     /// <summary>Words to press, on a fill of their own.</summary>
-    /// <remarks>Pressed as one thing: a press anywhere on it, its words included, reaches the button.</remarks>
     public class Button : Element, IPadded, ITextual
     {
         Thickness _padding;

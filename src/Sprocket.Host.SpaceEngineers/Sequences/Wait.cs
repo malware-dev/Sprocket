@@ -4,10 +4,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     /// <summary>
     /// A step that spends time and does nothing else.
     /// </summary>
-    /// <remarks>
-    /// For the things nothing can report the end of - a beacon flashing, a vent that has no signal
-    /// worth waiting on - and for a deliberate pause between two acts.
-    /// </remarks>
     public sealed class Wait : Step
     {
         /// <summary>A wait of <paramref name="ticks" /> ticks, or none for fewer than none.</summary>

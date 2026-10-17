@@ -13,20 +13,13 @@ namespace Lumel.Text
 {
     /// <summary>A long piece of text, line by line, in a window that moves both ways, edited or only read.</summary>
     /// <remarks>
-    /// It takes the pointer itself: a press on a thumb drags that thumb and a press on a track puts the thumb there first.
-    /// Read only, a press on the text drags the text about; edited, it places the caret and a drag selects. How far there
-    /// is to go sideways is the widest line seen so far, so the sideways thumb settles as the text is explored.
-    /// <para>
-    /// Nothing is measured to draw a frame beyond the lines coming into view. Where the caret, the other end of the
-    /// selection and a pressed line fall between characters is measured in the measure pass, for those lines only, so a
-    /// press or a move from one line to another is settled there rather than where it happens.
-    /// </para>
+    /// Read only, a press on the text drags it about; edited, it places the caret and a drag selects. Drawing a frame
+    /// measures only the lines coming into view.
     /// </remarks>
     public class EditBox : Element, IPadded, IScrolls
     {
         const float CaretWidth = 2f;
 
-        /// <summary>How many edits can be taken back.</summary>
         const int Remembered = 200;
 
         static readonly string[] Endings = { "\r\n", "\n", "\r" };
@@ -585,8 +578,8 @@ namespace Lumel.Text
 
         /// <summary>Takes all the room it is given.</summary>
         /// <remarks>
-        /// Works out how tall the text stands and how wide the numbers are here, because arranging has no font to ask, and
-        /// settles where a press or a move to another line lands, measuring the lines the caret and the selection are on.
+        /// Works out the text's height, the numbers' width and where a press lands here, because arranging has no font to
+        /// ask.
         /// </remarks>
         protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
         {
@@ -603,7 +596,6 @@ namespace Lumel.Text
         }
 
         /// <summary>Fits both rails to the room and holds each offset to its rail, then brings the caret into view where it moved.</summary>
-        /// <remarks>Room for the bars is kept even with nothing to scroll, so the text does not move when it starts to.</remarks>
         protected override void ArrangeContent(RectangleF bounds)
         {
             _down.Extent = _tall;
@@ -1249,10 +1241,9 @@ namespace Lumel.Text
 
         /// <summary>Measures a line coming into view or changed since, and reaches further where it is the longest yet.</summary>
         /// <remarks>
-        /// Measures while drawing on purpose: it is asked only about lines that were not on show last frame or have been
-        /// edited, and measuring the whole text up front was timed at 11ms for five hundred lines and 221ms for ten thousand,
-        /// against a frame of under 17. The reach goes straight onto the rail without invalidating, because only the thumb is
-        /// drawn from it, after this.
+        /// Measures while drawing, only lines not on show last frame or edited since: measuring the whole text up front was
+        /// timed at 11ms for five hundred lines and 221ms for ten thousand, against a frame of under 17. The reach goes onto
+        /// the rail without invalidating, because only the thumb is drawn from it, after this.
         /// </remarks>
         void Widen(IGraphics g, int line)
         {

@@ -10,33 +10,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <summary>
     /// Writes down what is switched off and what is part way through running, and reads it back.
     /// </summary>
-    /// <remarks>
-    /// A program says what a construct automates. What is switched off right now is not that, and
-    /// neither is a cycle half finished: both are state, they change while nobody is editing
-    /// anything, and neither must travel when somebody copies a system out of one file into another.
-    /// <para>
-    /// So it is a document of its own, written beside the program in the same language. What is off
-    /// is listed, and everything not named is on, which makes an empty document the ordinary case
-    /// and a lost one harmless - a construct that loses this one comes back with everything switched
-    /// on and nothing running.
-    /// </para>
-    /// </remarks>
+    /// <remarks>Persisted: what is off is listed, and everything not named is on.</remarks>
     public static class StateText
     {
-        /// <summary>What ends the line of a run started by hand, which may run where its sequence is switched off.</summary>
-        /// <remarks>Persisted, and a phrase rather than a keyword, so it reserves no word in a script.</remarks>
+        // Persisted.
         const string ByHand = "by hand";
 
-        /// <summary>What heads the line naming the big owners the automation was last confirmed for.</summary>
-        /// <remarks>Persisted. A name rather than a keyword, so it reserves no word in a script.</remarks>
+        // Persisted.
         const string Owned = "owned";
 
-        /// <summary>What heads the line naming who the automation belonged to when it paused, present only while it is paused.</summary>
-        /// <remarks>Persisted. A name rather than a keyword, so it reserves no word in a script.</remarks>
+        // Persisted, and present only while the automation is paused.
         const string Paused = "paused";
 
-        /// <summary>What heads a line naming a logic system and the version waiting beside it.</summary>
-        /// <remarks>Sent to a copy being edited only. A name rather than a keyword, so it reserves no word in a script.</remarks>
+        // Sent only to a copy being edited.
         const string Versions = "versions";
 
         /// <summary>
@@ -44,9 +30,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <paramref name="players" /> says.
         /// </summary>
         /// <remarks>
-        /// A null runner writes the switches alone, which is what a caller with no runtime has. Who it belongs to, and the
-        /// versions waiting, go only to a copy being edited: what a block keeps travels with every copy of the construct,
-        /// which starts as nobody's.
+        /// A null runner writes the switches alone. Who it belongs to, and the versions waiting, belong only in a copy being
+        /// edited.
         /// </remarks>
         public static string Save(Automation program, AutomationRunner runner, bool players = true)
         {
@@ -113,10 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// What is running, and nothing about what is switched off.
         /// </summary>
-        /// <remarks>
-        /// For carrying the runs across when the program is rebuilt from somebody else's switches: a
-        /// client editing a Sprocket says what is off, and the server alone knows what is running.
-        /// </remarks>
+        /// <remarks>For a program rebuilt from a client's switches; the server alone knows what is running.</remarks>
         public static string Running(Automation program, AutomationRunner runner)
         {
             var pen = new ScriptWriter();
@@ -135,16 +117,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// What each <c>when</c> and <c>every</c> remembers, one line per trigger on each one of its system.
         /// </summary>
         /// <remarks>
-        /// A <c>when</c> fires on a change, which needs what it read at its last look; without it, a door that opened while
-        /// the world was being written would be read as open all along. Written as what each block read, by the name the
-        /// program gives it, or as whether all of them were there:
+        /// Persisted: a <c>when</c> as what each block read, or whether all of them held; an <c>every</c> as how long since it
+        /// last fell due; a trigger by its place in its system:
         /// <code>
         /// when "3f2a…" trigger 1 'Inner Door' on 'Outer Door' off
         /// when "3f2a…" instance 2 trigger 3 all on
         /// every "3f2a…" trigger 2 wait 120t
         /// </code>
-        /// An <c>every</c> is written as how long since it last fell due, so it keeps its beat rather than starting a whole
-        /// interval again. A trigger is counted by its place in its system, which reading the program keeps.
         /// </remarks>
         static void Watches(ScriptWriter pen, AutomationRunner runner, AutomationSystem system, string identity)
         {
@@ -213,8 +192,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Gives one <c>when</c> or <c>every</c> back what it remembered when the save caught it.
         /// </summary>
         /// <remarks>
-        /// Dropped rather than reported where what it names has gone, or is no longer that kind of trigger, the same as a run:
-        /// a program edited between saving and loading leaves those behind. A malformed line is reported.
+        /// Dropped where what it names has gone or is no longer that kind of trigger; a malformed line is reported.
         /// </remarks>
         static void Watch(Statement line, Automation program, AutomationRunner runner, ScriptTrouble trouble)
         {
@@ -307,14 +285,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// What is part way through, one line per run.
         /// </summary>
         /// <remarks>
-        /// Per one of the system and per sequence, because that is what runs: the port airlock being
-        /// half way through cycling says nothing about the front one.
-        /// <para>
-        /// The step, and what is holding it there: <c>await</c> for a step waiting on the doors it
-        /// started, <c>wait</c> and a count for one spending time. Nothing else is written down. What
-        /// was invoked before the save has either arrived by the time the world loads or has not, and
-        /// asking the doors is the only answer worth having.
-        /// </para>
+        /// Persisted: per instance and per sequence, the step and what holds it there, <c>await</c>, or <c>wait</c> and a count.
         /// </remarks>
         static void Runs(ScriptWriter pen, AutomationRunner runner, AutomationSystem system, string identity)
         {
@@ -353,14 +324,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// Switches off whatever the document names, and answers what could not be read.
         /// </summary>
         /// <remarks>
-        /// A line naming something that is no longer there is dropped rather than reported: a system
-        /// somebody deleted is exactly the case this has to survive, and being noisy about it would
-        /// mark a program damaged for having been edited.
-        /// <para>
-        /// Anything that genuinely would not read marks the program damaged, which is what stops the
-        /// next save writing over it. The switches moved out of the program; the promise that a
-        /// half-read load is never written back moved with them.
-        /// </para>
+        /// A line naming something no longer there is dropped; anything that will not read marks the program damaged.
         /// </remarks>
         public static string Load(string saved, Automation program, AutomationRunner runner)
         {
@@ -458,16 +422,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>
         /// Puts one run back where the save caught it.
         /// </summary>
-        /// <remarks>
-        /// Dropped rather than reported where what it names has gone, the same as a switch: a system
-        /// deleted between saving and loading is the case this has to survive. A malformed line is
-        /// reported, because that is a file nobody should be written over.
-        /// <para>
-        /// The runner is asked to resume rather than told to run. It refuses a step that is no longer
-        /// there and a sequence that may not run, which is what a program edited in the meantime
-        /// leaves behind.
-        /// </para>
-        /// </remarks>
+        /// <remarks>Dropped where what it names has gone; a malformed line is reported.</remarks>
         static void Resume(Statement line, Automation program, AutomationRunner runner, ScriptTrouble trouble)
         {
             Guid identity;
@@ -542,8 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 : 0;
         }
 
-        /// <summary>What the reason Sprocket switched something off is written as.</summary>
-        /// <remarks>Persisted: a spelling here cannot change without every saved reason being forgotten.</remarks>
+        // Persisted: a spelling here cannot change without every saved reason being forgotten.
         static readonly string[] Reasons =
         {
             "unstartable", "source gone", "block gone", "gate gone", "unoffered", "unfilled", "mistyped", "adrift",
@@ -558,8 +512,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             SequenceProblem.Unable, SequenceProblem.MissingFacet
         };
 
-        /// <summary>What a block's trouble is written as, beside <see cref="Troubles" />.</summary>
-        /// <remarks>Persisted: a spelling here cannot change without every saved trouble being forgotten.</remarks>
+        // Persisted: a spelling here cannot change without every saved trouble being forgotten.
         static readonly string[] Spelled =
         {
             "vent nowhere", "vent leaking", "vent no oxygen", "vent told to fill", "vent told to empty",

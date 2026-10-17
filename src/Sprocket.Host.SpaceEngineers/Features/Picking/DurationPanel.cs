@@ -19,13 +19,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     {
         const double SecondsStep = 0.5;
         const int TicksStep = 10;
-        // The widest number in either unit, kept in both so the panel holds its size as the unit changes: seconds' six digits
-        // and a point outmeasure ticks' six digits.
+        // The widest number in either unit, so the panel holds its size as the unit changes.
         const string Widest = "0000.00";
         const string SecondsFormat = "0.##";
         const int CostlyTicks = 10;
 
-        // How wide each length to pick is, the same in both units, so the two rows of seven line up: room for "0.5 s".
+        // The same in both units, so the two rows of seven line up: room for "0.5 s".
         const float PickWidth = 68f;
 
         static readonly double[] SecondsPicks = { 0.5, 1, 2, 5, 10, 30, 60 };
@@ -117,8 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // One over the other, so the panel is as wide as the wider of the two rows whichever unit shows.
             Children.Add(new Deck { Children = { _secondsPicks, _ticksPicks } }.As(out _picks));
 
-            // Last, and as tall as a button, its words in the middle, so a Done the holder lays over its right end sits on its line:
-            // six above and below the twenty its words take make a button's thirty-two.
+            // As tall as a button, so a Done the holder lays over its right end sits on its line: 6 + 20 + 6 = 32.
             Children.Add(new Label { Style = Styles.Aside, Padding = new Thickness(0f, 6f) }.As(out _other));
 
             _box.Edited += Show;

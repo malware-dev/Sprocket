@@ -3,10 +3,7 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>A variable holding a signal: the one sent from a slot on the toolbars of the blocks other variables hold.</summary>
-    /// <remarks>
-    /// What answers <c>whenever</c> in a system, which names the construct's own signals the way it names its blocks. Written
-    /// <c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>, and sent from any of the blocks named.
-    /// </remarks>
+    /// <remarks>Written <c>let button = ext.toolbar(1, 1, 4) on [ panel1 ]</c>.</remarks>
     public sealed class SignalRef
     {
         readonly List<string> _blocks = new List<string>();

@@ -36,26 +36,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
 
         /// <summary>How far to lift a symbol that stands on a line of the game's text, as a fraction of it.</summary>
         /// <remarks>
-        ///     The game sets its letters slightly high in their line, so a symbol centred in its own sits low
-        ///     beside them. Measured in the game: a symbol beside the heading sat nine pixels below the middle
-        ///     of its capitals on a 3840-wide screen, four and a half units. Only the game can check this; the
-        ///     simulator places glyphs by its own rule, and a recorded frame cannot see it.
-        ///     <para>
-        ///         Not for a symbol centered in a row of its own, which lands on the row's middle unaided, measured to
-        ///         within two pixels.
-        ///     </para>
+        /// Measured in the game: a symbol beside the heading sat nine pixels below the middle of its capitals on a 3840-wide
+        /// screen, four and a half units.
         /// </remarks>
         public const float SymbolLift = 0.123f;
 
         /// <summary>The fixed-width face for anything read as a listing rather than as prose.</summary>
         /// <remarks>
-        /// Fixed width, so a column of line numbers and a column of indentation line up. Cut to the
-        /// same line height and baseline as the game's own faces, so a line of it stands exactly as
-        /// tall as a line anywhere else and any of the sizes above apply to it unchanged.
-        /// <para>
-        /// A subtype out of the definition registry, the same way <c>Symbols.Font</c> is, declared by
-        /// the Maltek Mono mod this one requires.
-        /// </para>
+        /// Cut to the same line height and baseline as the game's own faces; a subtype declared by the Maltek Mono mod this one
+        /// requires.
         /// </remarks>
         public const string Mono = "MaltekMono";
 
@@ -76,10 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public const string SansBoldItalic = "MaltekSansBoldItalic";
 
         /// <summary>The game's own face in bold, for strong words.</summary>
-        /// <remarks>
-        /// Cut from the game's own outline in exactly the layout of its face, so a bold word stands where the same word
-        /// would. A subtype declared by the Space Engineers Font Styles mod.
-        /// </remarks>
+        /// <remarks>Cut in exactly the layout of the game's face; a subtype declared by the Space Engineers Font Styles mod.</remarks>
         public const string Bold = "SpaceEngineersBold";
 
         /// <summary>The game's own face in italic, for emphasized words.</summary>

@@ -6,13 +6,6 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A remote control's autopilot: flying its route, whether it flies, where it is heading, and how.</summary>
-    /// <remarks>
-    /// What a remote control shares with every seat, its hotbar and the ship's speed, is the ship controller's; the flight
-    /// switches it shares with a cockpit are vouched for here in the game's own words.
-    /// The game's own on and off for the autopilot is the order a sequence gives, and whether it flies is the game's answer,
-    /// which goes off by itself at the end of a one-way route; so the order is offered as its two actions and its toggle,
-    /// its value is left out, and whether it flies is Sprocket's own.
-    /// </remarks>
     public sealed class RemoteControl : Capability
     {
         // Read from the game's code: the autopilot switching is a synced value of its component, and only some of the ways

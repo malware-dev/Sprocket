@@ -15,12 +15,6 @@ using MyProductionItem = Sandbox.ModAPI.Ingame.MyProductionItem;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An assembler or a refinery: what it makes, whether it is making it, and what its two inventories hold.</summary>
-    /// <remarks>
-    /// A refinery builds its own queue from the ore it holds, so ordering it to make something does nothing; it offers
-    /// what it is doing and what it holds, and says refining where an assembler says producing. A survival kit is an
-    /// assembler to the game, and takes only the assembler's terminal words here: its own vocabulary is a life support
-    /// block's.
-    /// </remarks>
     public sealed class Production : Capability
     {
         const string Kit = "MyObjectBuilder_SurvivalKit";
@@ -110,10 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Told as the block starts or stops producing, gets stuck or works again, or its inventories change; on an assembler also as its progress, state or mode changes.</summary>
-        /// <remarks>
-        /// The inventories say so on the server only, which is where Sprocket runs a program. Switching the block on and off
-        /// is told by what every switch is - see <see cref="Functional" />.
-        /// </remarks>
+        /// <remarks>The inventories announce their changes on the server only.</remarks>
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             var production = block as IMyProductionBlock;
@@ -168,11 +159,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// Adds to <paramref name="words" /> and <paramref name="means" /> each item <paramref name="assembler" /> can make,
         /// and to <paramref name="blueprints" /> the blueprint that makes it.
         /// </summary>
-        /// <remarks>
-        /// Only a blueprint that makes one of one item, so an order for a number of an item is that number of the blueprint.
-        /// Where two blueprints make the same item, the first the game lists. Where no definitions are loaded - the test
-        /// harness - nothing, and the item is a box that takes any item written out.
-        /// </remarks>
         static void Blueprints(IMyAssembler assembler, IList<string> words, IList<string> means,
             IDictionary<string, MyDefinitionId> blueprints)
         {
@@ -196,7 +182,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
         }
 
-        /// <summary>Whether an assembler of <paramref name="block" />'s definition can be set to take apart; where nothing has been loaded to say - the test harness - it can, as the game's own default.</summary>
+        /// <summary>Whether an assembler of <paramref name="block" />'s definition can be set to take apart, or true where no definitions are loaded, as the game's own default.</summary>
         static bool TakesApart(IMyTerminalBlock block)
         {
             var definitions = MyDefinitionManager.Static;

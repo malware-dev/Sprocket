@@ -7,17 +7,13 @@ using VRage.Game.ObjectBuilders.Definitions;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block that draws electricity from its grid: how much it uses, asks for and can take, and how much of that it gets.</summary>
-    /// <remarks>
-    /// Not a power producer: a battery takes electricity to charge, and what it takes and gives belongs to it. Read from the
-    /// block's resource sink, which every block that draws electricity has.
-    /// </remarks>
     public sealed class PowerConsumer : Capability
     {
         const string Busy = "What a block uses changes as often as every tick, faster than any when looks.";
 
         const string Unheard = "The game raises no event as the most a block can draw changes.";
 
-        /// <summary>The game's resource id for electricity, transcribed from its resource distributor.</summary>
+        // The game's resource id for electricity, transcribed from its resource distributor.
         static readonly MyDefinitionId Electricity = new MyDefinitionId(typeof(MyObjectBuilder_GasProperties), "Electricity");
 
         static readonly OwnValue Use = OwnValue.Number<IMyTerminalBlock>(block => block.ResourceSink.CurrentInputByType(Electricity));
