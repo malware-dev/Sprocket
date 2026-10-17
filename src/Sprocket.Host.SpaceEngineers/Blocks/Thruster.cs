@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A thruster: its override set, and read for how hard it pushes and how much of its thrust the air it is in leaves it.</summary>
     /// <remarks>Its readings are in percent, which mean the same on every size of thruster.</remarks>
-    public sealed class Thruster : Capability
+    public sealed partial class Thruster : Capability
     {
         const string Unheard = "A thruster's thrust changes many times a second in flight, too often to listen to.";
 
@@ -57,32 +57,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var definition = definitions?.GetCubeBlockDefinition(block.BlockDefinition) as MyThrustDefinition;
 
             return definition != null && definition.EffectivenessAtMinInfluence != definition.EffectivenessAtMaxInfluence;
-        }
-
-        /// <summary>A thruster being listened to for a change in its override, until disposed.</summary>
-        /// <remarks>The game raises it on every machine as the override's synced value changes.</remarks>
-        sealed class Overriding : IDisposable
-        {
-            readonly IMyThrust _thruster;
-            readonly Action _told;
-
-            public Overriding(IMyThrust thruster, Action told)
-            {
-                _thruster = thruster;
-                _told = told;
-                _thruster.ThrustOverrideChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _thruster.ThrustOverrideChanged -= Changed;
-            }
-
-            void Changed(IMyThrust thruster, float newtons)
-            {
-                _told();
-            }
         }
     }
 }

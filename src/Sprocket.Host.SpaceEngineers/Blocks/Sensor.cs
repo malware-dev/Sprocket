@@ -15,7 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// The game runs the first slot of every page as it starts detecting and the second as it stops; nothing tells of a
     /// change in the count.
     /// </remarks>
-    public sealed class Sensor : Capability
+    public sealed partial class Sensor : Capability
     {
         static readonly OwnValue Detecting = OwnValue.Flag(Reading.Of<IMySensorBlock>(sensor => sensor.IsActive));
 
@@ -91,31 +91,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var count = _detected.Count;
             _detected.Clear();
             return count;
-        }
-
-        /// <summary>A sensor being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMySensorBlock _sensor;
-            readonly Action _told;
-
-            public Listening(IMySensorBlock sensor, Action told)
-            {
-                _sensor = sensor;
-                _told = told;
-                _sensor.StateChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _sensor.StateChanged -= Changed;
-            }
-
-            void Changed(bool detecting)
-            {
-                _told();
-            }
         }
     }
 }

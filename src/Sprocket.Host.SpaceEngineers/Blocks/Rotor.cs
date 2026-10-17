@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A rotor or a hinge, turned to an angle.</summary>
     /// <remarks>A turn under way survives a reload: its angle, limits and speed are the block's own, which the game saves.</remarks>
-    public sealed class Rotor : Capability
+    public sealed partial class Rotor : Capability
     {
         /// <summary>Turning to an angle, which is Sprocket's own and waits until it gets there.</summary>
         public const string RotateTo = "rotate-to";
@@ -65,7 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var hinge = Hinge(block);
             var locks = hinge ? "HingeLock" : "RotorLock";
 
-            var turns = OwnAction.Of<IMyMotorStator, Turn>(given => Turn.Read(given, hinge), Turned, Arrived, null, Why,
+            var turns = OwnAction.Of<IMyMotorStator, RotorTurn>(given => RotorTurn.Read(given, hinge), Turned, Arrived, null, Why,
                 Stop, Expected);
 
             if (hinge)
@@ -282,7 +282,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Sets the rotor turning to the angle, and starts watching whether it is held.</summary>
-        static void Turned(IMyMotorStator rotor, Turn turn, ReaderMemory seen)
+        static void Turned(IMyMotorStator rotor, RotorTurn turn, ReaderMemory seen)
         {
             if (!turn.Given)
                 return;
@@ -327,7 +327,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Why the rotor is not getting to its angle, or nothing while it still might.</summary>
-        static BlockTrouble Why(IMyMotorStator rotor, Turn turn, ReaderMemory seen)
+        static BlockTrouble Why(IMyMotorStator rotor, RotorTurn turn, ReaderMemory seen)
         {
             if (AtLimit(rotor))
                 return BlockTrouble.None;
@@ -356,7 +356,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         /// <summary>The ticks the turn should take: the way round it goes, at the speed it was given.</summary>
         /// <remarks>A revolution a minute is six degrees a second, and the game runs sixty ticks to the second.</remarks>
-        static int Expected(IMyMotorStator rotor, Turn turn)
+        static int Expected(IMyMotorStator rotor, RotorTurn turn)
         {
             if (!turn.Given || turn.Speed <= 0)
                 return GridEntity.Unestimated;
@@ -387,62 +387,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var wrapped = degrees % 360f;
             return wrapped < 0 ? wrapped + 360f : wrapped;
-        }
-
-        /// <summary>A rotor being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyMotorStator _rotor;
-            readonly Action _told;
-
-            public Listening(IMyMotorStator rotor, Action told)
-            {
-                _rotor = rotor;
-                _told = told;
-                _rotor.OnAttachedChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _rotor.OnAttachedChanged -= Changed;
-            }
-
-            void Changed(IMyMechanicalConnectionBlock block)
-            {
-                _told();
-            }
-        }
-
-        /// <summary>Where a step told the rotor to turn to, which way, and how fast.</summary>
-        sealed class Turn
-        {
-            /// <summary>Whether the step gave all of it; a step that did not turns nothing.</summary>
-            public bool Given;
-
-            public MyRotationDirection Way;
-
-            public float Angle;
-
-            public float Speed;
-
-            /// <summary>The direction, angle and speed a step turning a rotor was given, or the angle and speed for a hinge, which goes the short way.</summary>
-            public static Turn Read(IList<Literal> arguments, bool hinge)
-            {
-                var turn = new Turn { Way = MyRotationDirection.AUTO };
-
-                var at = hinge ? 0 : 1;
-                if (arguments == null || arguments.Count < at + 2)
-                    return turn;
-
-                if (!hinge)
-                    turn.Way = (MyRotationDirection)arguments[0].Whole;
-
-                turn.Angle = (float)arguments[at].Real;
-                turn.Speed = (float)Math.Abs(arguments[at + 1].Real);
-                turn.Given = true;
-                return turn;
-            }
         }
     }
 }

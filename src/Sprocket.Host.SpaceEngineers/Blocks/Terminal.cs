@@ -1,12 +1,11 @@
 using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>What every block in the terminal has: whether it works, its Custom Data, and its mark on the HUD.</summary>
-    public sealed class Terminal : Capability
+    public sealed partial class Terminal : Capability
     {
         const string Unheard = "The game raises no event as a block stops being hacked.";
 
@@ -49,38 +48,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return new Listening(block, told);
-        }
-
-        /// <summary>A block being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyTerminalBlock _block;
-            readonly Action _told;
-
-            public Listening(IMyTerminalBlock block, Action told)
-            {
-                _block = block;
-                _told = told;
-                _block.IsWorkingChanged += Turned;
-                _block.CustomDataChanged += Written;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _block.IsWorkingChanged -= Turned;
-                _block.CustomDataChanged -= Written;
-            }
-
-            void Turned(IMyCubeBlock block)
-            {
-                _told();
-            }
-
-            void Written(IMyTerminalBlock block)
-            {
-                _told();
-            }
         }
     }
 }

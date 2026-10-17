@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The AI path recorder: playing a path back and whether it plays, recording one, and what it shows.</summary>
-    public sealed class PathRecorder : Capability
+    public sealed partial class PathRecorder : Capability
     {
         static readonly OwnValue Playing = OwnValue.Flag(Reading.Of<IMyPathRecorderBlock>(block =>
         {
@@ -51,31 +51,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return null;
 
             return new Listening(component, told);
-        }
-
-        /// <summary>A recorder being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyPathRecorderComponent _recorder;
-            readonly Action _told;
-
-            public Listening(IMyPathRecorderComponent recorder, Action told)
-            {
-                _recorder = recorder;
-                _told = told;
-                _recorder.IsPlayingChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _recorder.IsPlayingChanged -= Changed;
-            }
-
-            void Changed(IMyPathRecorderComponent recorder)
-            {
-                _told();
-            }
         }
     }
 }

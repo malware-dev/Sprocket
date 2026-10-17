@@ -21,7 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         // The group a check's status values stand in, first, past every category's.
         const int Statuses = (int)Category.Other + 1;
 
-        static readonly SaidOrder ByDeclared = new SaidOrder();
+        static readonly TerminalNameOrder ByDeclared = new TerminalNameOrder();
 
         readonly SprocketEditor _editor;
         readonly bool _forEvents;
@@ -323,16 +323,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return group == Values ? _editor.Texts.PickValues : _editor.Texts.PickToolbarActions;
 
             return group == Statuses ? _editor.Texts.PickStatus : CategoryText.Of(_editor.Texts, (Category)group);
-        }
-
-        /// <summary>Members in the order of the terminal's names for them.</summary>
-        sealed class SaidOrder : IComparer<EntityAction>
-        {
-            public int Compare(EntityAction left, EntityAction right)
-            {
-                return string.Compare(left == null ? "" : left.Declared, right == null ? "" : right.Declared,
-                    StringComparison.OrdinalIgnoreCase);
-            }
         }
     }
 }

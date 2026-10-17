@@ -8,7 +8,7 @@ using VRage.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>Every gun, turret and launcher: firing it, what it is firing, how many rounds it has left, and what it feeds from.</summary>
-    public sealed class Weapon : Capability
+    public sealed partial class Weapon : Capability
     {
         const string Unshot = "A gun raises no event as it starts or stops shooting.";
 
@@ -56,42 +56,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return null;
 
             return new Listening(gun.GunBase, block.GetInventory(0) as MyInventoryBase, told);
-        }
-
-        /// <summary>A gun being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly MyGunBase _gun;
-            readonly MyInventoryBase _inventory;
-            readonly Action _told;
-
-            public Listening(MyGunBase gun, MyInventoryBase inventory, Action told)
-            {
-                _gun = gun;
-                _inventory = inventory;
-                _told = told;
-                _gun.OnAmmoAmountChanged += Fired;
-                if (_inventory != null)
-                    _inventory.ContentsChanged += Stocked;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _gun.OnAmmoAmountChanged -= Fired;
-                if (_inventory != null)
-                    _inventory.ContentsChanged -= Stocked;
-            }
-
-            void Fired()
-            {
-                _told();
-            }
-
-            void Stocked(MyInventoryBase inventory)
-            {
-                _told();
-            }
         }
     }
 }

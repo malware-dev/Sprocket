@@ -1,0 +1,48 @@
+using System.Text;
+using Lumel.Drawing;
+using Lumel.Images;
+using VRageMath;
+
+namespace Sprocket.Host.SpaceEngineers.Features.Look
+{
+    /// <summary>One symbol, drawn in the color the screens draw marks in, three quarters the height of its line and centered in its room.</summary>
+    public sealed class MarkImage : IImageSource
+    {
+        // Chosen by eye against Maltek Sans in the codex.
+        const float Height = 0.75f;
+
+        readonly string _symbol;
+        readonly StringBuilder _measuring;
+
+        Vector2 _measured;
+        float _measuredAt = -1f;
+
+        /// <summary>The mark <paramref name="symbol" />.</summary>
+        public MarkImage(string symbol)
+        {
+            _symbol = symbol;
+            _measuring = new StringBuilder(symbol);
+        }
+
+        /// <inheritdoc />
+        public Vector2 Size => new Vector2(Height, 1f);
+
+        /// <inheritdoc />
+        /// <remarks>Measures the symbol again only when the room is a new height.</remarks>
+        public void Draw(IGraphics g, RectangleF destination, Color tint, float rotation)
+        {
+            var size = destination.Height * Height;
+            if (size != _measuredAt)
+            {
+                _measuredAt = size;
+                _measured = g.MeasureText(Symbols.Font, _measuring, size);
+            }
+
+            var ink = Palette.Muted;
+            var color = new Color(ink.R * tint.R / 255, ink.G * tint.G / 255, ink.B * tint.B / 255, ink.A * tint.A / 255);
+            g.DrawText(Symbols.Font, _symbol, new Vector2(
+                destination.X + (destination.Width - _measured.X) * 0.5f,
+                destination.Y + (destination.Height - _measured.Y) * 0.5f), size, color);
+        }
+    }
+}

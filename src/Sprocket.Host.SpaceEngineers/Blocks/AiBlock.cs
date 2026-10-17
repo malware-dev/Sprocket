@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An AI block, flight, task, combat or path, which starts and stops its AI and reads whether it runs.</summary>
-    public sealed class AiBlock : Capability
+    public sealed partial class AiBlock : Capability
     {
         static readonly OwnValue Running = OwnValue.Flag(Reading.Of<IMyTerminalBlock>(block =>
         {
@@ -35,26 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var ai = block.Components.Get<MyAiBlockComponent>();
             return ai == null ? null : new Listening(ai, told);
-        }
-
-        /// <summary>An AI component being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly MyAiBlockComponent _ai;
-            readonly Action _told;
-
-            public Listening(MyAiBlockComponent ai, Action told)
-            {
-                _ai = ai;
-                _told = told;
-                _ai.OnActivatedChanged += told;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _ai.OnActivatedChanged -= _told;
-            }
         }
     }
 }

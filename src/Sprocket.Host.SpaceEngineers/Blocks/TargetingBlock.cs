@@ -2,13 +2,12 @@ using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
 using SpaceEngineers.Game.ModAPI;
-using VRage.Game.ModAPI;
 using VRage.Game.ModAPI.Interfaces;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A turret or a turret controller, read for its target, who it shoots at and whether a person is at its controls.</summary>
-    public sealed class TargetingBlock : Capability
+    public sealed partial class TargetingBlock : Capability
     {
         const string Unaimed = "The game raises no event as a turret finds a target, loses one or comes to bear on it.";
 
@@ -77,33 +76,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 return null;
 
             return new Listening(controlled.ControllerInfo, told);
-        }
-
-        /// <summary>A block's controls being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyControllerInfo _controls;
-            readonly Action _told;
-
-            public Listening(IMyControllerInfo controls, Action told)
-            {
-                _controls = controls;
-                _told = told;
-                _controls.ControlAcquired += Changed;
-                _controls.ControlReleased += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _controls.ControlAcquired -= Changed;
-                _controls.ControlReleased -= Changed;
-            }
-
-            void Changed(IMyEntityController controller)
-            {
-                _told();
-            }
         }
     }
 }

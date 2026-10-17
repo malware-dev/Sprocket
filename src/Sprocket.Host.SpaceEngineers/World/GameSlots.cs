@@ -399,7 +399,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             ITerminalProperty property = block?.GetProperty(propertyId);
             ValueKind kind;
-            return property != null && Holds(property, out kind) ? new Property(block, property, kind) : null;
+            return property != null && Holds(property, out kind) ? new GameProperty(block, property, kind) : null;
         }
 
         /// <inheritdoc />
@@ -417,11 +417,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return null;
 
             if (arguments == null || arguments.Count == 0)
-                return new Performed(block, action, null);
+                return new GameActionOrder(block, action, null);
 
             var given = new List<TerminalActionParameter>();
             Fill(action, arguments, types, given);
-            return new Performed(block, action, given);
+            return new GameActionOrder(block, action, given);
         }
 
         /// <summary>A value made ready to be written as the type the property holds, or null where it is not that kind.</summary>
@@ -438,24 +438,24 @@ namespace Sprocket.Host.SpaceEngineers.World
                         return null;
 
                     return Flips(block, propertyId)
-                        ? (BlockOrder)new Switches(block, property.AsBool(), value.Flag)
-                        : new Writes<bool>(block, property.AsBool(), value.Flag);
+                        ? (BlockOrder)new GameSwitchOrder(block, property.AsBool(), value.Flag)
+                        : new GameValueOrder<bool>(block, property.AsBool(), value.Flag);
                 case "Single":
                     return value.Kind == ValueKind.Real
-                        ? new Writes<float>(block, property.AsFloat(), (float)value.Real)
+                        ? new GameValueOrder<float>(block, property.AsFloat(), (float)value.Real)
                         : null;
                 case "Int64":
                     return value.Kind == ValueKind.Integer
-                        ? new Writes<long>(block, property.As<long>(), value.Whole)
+                        ? new GameValueOrder<long>(block, property.As<long>(), value.Whole)
                         : null;
                 case "Color":
                     return value.Kind == ValueKind.Color
-                        ? new Writes<Color>(block, property.AsColor(),
+                        ? new GameValueOrder<Color>(block, property.AsColor(),
                             new Color(value.Red, value.Green, value.Blue, value.Alpha))
                         : null;
                 case "StringBuilder":
                     return value.Kind == ValueKind.Text
-                        ? new Texts(block, property.As<StringBuilder>(), value.Text)
+                        ? new GameTextOrder(block, property.As<StringBuilder>(), value.Text)
                         : null;
             }
 
@@ -470,186 +470,6 @@ namespace Sprocket.Host.SpaceEngineers.World
         static bool Flips(IMyTerminalBlock block, string propertyId)
         {
             return block is IMyShipController && (propertyId == "HandBrake" || propertyId == "Park");
-        }
-
-        /// <summary>One of a block's own values, read through the property the game hands out for it.</summary>
-        /// <remarks>
-        /// Made once, when the test is compiled. Text is compared where the block keeps it, so a <c>when</c> on a text looks
-        /// without building a string.
-        /// </remarks>
-        sealed class Property : Gauge
-        {
-            readonly IMyTerminalBlock _block;
-            readonly ValueKind _kind;
-            readonly ITerminalProperty<bool> _flag;
-            readonly ITerminalProperty<float> _real;
-            readonly ITerminalProperty<long> _whole;
-            readonly ITerminalProperty<Color> _color;
-            readonly ITerminalProperty<StringBuilder> _text;
-
-            public Property(IMyTerminalBlock block, ITerminalProperty property, ValueKind kind)
-            {
-                _block = block;
-                _kind = kind;
-                switch (kind)
-                {
-                    case ValueKind.Flag:
-                        _flag = property.AsBool();
-                        break;
-                    case ValueKind.Real:
-                        _real = property.AsFloat();
-                        break;
-                    case ValueKind.Integer:
-                        _whole = property.As<long>();
-                        break;
-                    case ValueKind.Color:
-                        _color = property.AsColor();
-                        break;
-                    default:
-                        _text = property.As<StringBuilder>();
-                        break;
-                }
-            }
-
-            public override ValueKind Kind => _kind;
-
-            public override Literal Read()
-            {
-                switch (_kind)
-                {
-                    case ValueKind.Flag:
-                        return Literal.Of(_flag.GetValue(_block));
-                    case ValueKind.Real:
-                        return Literal.Of(_real.GetValue(_block));
-                    case ValueKind.Integer:
-                        return Literal.Of(_whole.GetValue(_block));
-                    case ValueKind.Color:
-                        var color = _color.GetValue(_block);
-                        return Literal.Colour(color.R, color.G, color.B, color.A);
-                }
-
-                return Literal.Of(_text.GetValue(_block).ToString());
-            }
-
-            /// <remarks>A real is compared in the single the block keeps it as, so 0.1 written matches the 0.1 it holds.</remarks>
-            public override bool Holds(Relation relation, Literal operand)
-            {
-                if (_kind == ValueKind.Real)
-                    return Relations.Holds(Read(), relation, Literal.Of((float)operand.Number));
-
-                if (_kind == ValueKind.Text && (relation == Relation.Is || relation == Relation.IsNot))
-                    return Same(_text.GetValue(_block), operand.Text) == (relation == Relation.Is);
-
-                return base.Holds(relation, operand);
-            }
-
-            static bool Same(StringBuilder held, string text)
-            {
-                if (held == null)
-                    return text.Length == 0;
-
-                if (held.Length != text.Length)
-                    return false;
-
-                for (var i = 0; i < text.Length; i++)
-                {
-                    if (held[i] != text[i])
-                        return false;
-                }
-
-                return true;
-            }
-        }
-
-        /// <summary>One of the block's actions, with its values already the types it takes.</summary>
-        sealed class Performed : BlockOrder
-        {
-            readonly IMyTerminalBlock _block;
-            readonly ITerminalAction _action;
-            readonly List<TerminalActionParameter> _given;
-
-            public Performed(IMyTerminalBlock block, ITerminalAction action, List<TerminalActionParameter> given)
-            {
-                _block = block;
-                _action = action;
-                _given = given;
-            }
-
-            /// <inheritdoc />
-            public override void Give()
-            {
-                if (_given == null)
-                    _action.Apply(_block);
-                else
-                    _action.Apply(_block, new ListReader<TerminalActionParameter>(_given));
-            }
-        }
-
-        /// <summary>One of the block's values, already the type it holds.</summary>
-        sealed class Writes<T> : BlockOrder
-        {
-            readonly IMyTerminalBlock _block;
-            readonly ITerminalProperty<T> _property;
-            readonly T _value;
-
-            public Writes(IMyTerminalBlock block, ITerminalProperty<T> property, T value)
-            {
-                _block = block;
-                _property = property;
-                _value = value;
-            }
-
-            /// <inheritdoc />
-            public override void Give()
-            {
-                _property.SetValue(_block, _value);
-            }
-        }
-
-        /// <summary>One of the block's switches whose setter flips it, told only where it does not already read as asked.</summary>
-        sealed class Switches : BlockOrder
-        {
-            readonly IMyTerminalBlock _block;
-            readonly ITerminalProperty<bool> _property;
-            readonly bool _value;
-
-            public Switches(IMyTerminalBlock block, ITerminalProperty<bool> property, bool value)
-            {
-                _block = block;
-                _property = property;
-                _value = value;
-            }
-
-            /// <inheritdoc />
-            public override void Give()
-            {
-                if (_property.GetValue(_block) != _value)
-                    _property.SetValue(_block, _value);
-            }
-        }
-
-        /// <summary>
-        /// One of the block's text values.
-        /// </summary>
-        /// <remarks>Allocates a builder each time it is given: the block keeps the builder it is handed.</remarks>
-        sealed class Texts : BlockOrder
-        {
-            readonly IMyTerminalBlock _block;
-            readonly ITerminalProperty<StringBuilder> _property;
-            readonly string _text;
-
-            public Texts(IMyTerminalBlock block, ITerminalProperty<StringBuilder> property, string text)
-            {
-                _block = block;
-                _property = property;
-                _text = text;
-            }
-
-            /// <inheritdoc />
-            public override void Give()
-            {
-                _property.SetValue(_block, new StringBuilder(_text));
-            }
         }
 
         /// <inheritdoc />

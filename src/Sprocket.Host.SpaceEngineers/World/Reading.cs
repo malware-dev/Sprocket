@@ -17,49 +17,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>A reading of a <typeparamref name="T" />.</summary>
         public static Reading Of<T>(Func<T, bool> reads) where T : class
         {
-            return new Plain<T>(reads);
+            return new PlainReading<T>(reads);
         }
 
         /// <summary>A reading of a <typeparamref name="T" /> that remembers between looks.</summary>
         public static Reading Remembering<T>(Func<T, ReaderMemory, bool> reads) where T : class
         {
-            return new Kept<T>(reads);
-        }
-
-        /// <summary>A reading that needs nothing remembered.</summary>
-        sealed class Plain<T> : Reading where T : class
-        {
-            readonly Func<T, bool> _reads;
-
-            public Plain(Func<T, bool> reads)
-            {
-                _reads = reads;
-            }
-
-            public override bool Remembers => false;
-
-            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
-            {
-                return _reads((T)block);
-            }
-        }
-
-        /// <summary>A reading that remembers between looks.</summary>
-        sealed class Kept<T> : Reading where T : class
-        {
-            readonly Func<T, ReaderMemory, bool> _reads;
-
-            public Kept(Func<T, ReaderMemory, bool> reads)
-            {
-                _reads = reads;
-            }
-
-            public override bool Remembers => true;
-
-            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
-            {
-                return _reads((T)block, seen);
-            }
+            return new KeptReading<T>(reads);
         }
     }
 }

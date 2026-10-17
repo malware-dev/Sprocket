@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Globalization;
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
@@ -49,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var slots = toolbar.SlotCount;
             kind.WithPressed(1, "button is pressed", pages, slots, at => $"button {((at.Page - 1) * slots + at.Slot)} is pressed");
 
-            var labels = OwnAction.Of<IMyButtonPanel, Labelled>(Labelled.Read, (panel, labelled, seen) =>
+            var labels = OwnAction.Of<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read, (panel, labelled, seen) =>
             {
                 // An action's button is not held to the panel's when a program is checked, and the game keeps a label for any button it is handed.
                 if (!Within(labelled, buttons))
@@ -65,10 +64,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             label.Entry = FieldInput.Text;
 
             kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
-                .WithValue(LabelOf, "label of button", OwnValue.Text<IMyButtonPanel, Labelled>(Labelled.Read,
+                .WithValue(LabelOf, "label of button", OwnValue.Text<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
                     (panel, labelled, seen) => panel.GetButtonName(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Screen)
-                .WithValue(Assigned, "button has an action", OwnValue.Flag<IMyButtonPanel, Labelled>(Labelled.Read,
+                .WithValue(Assigned, "button has an action", OwnValue.Flag<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
                     (panel, labelled, seen) => panel.IsButtonAssigned(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Automation);
         }
@@ -107,34 +106,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Whether the button a member was given is one of the panel's <paramref name="buttons" />.</summary>
-        static bool Within(Labelled labelled, int buttons)
+        static bool Within(ButtonLabel labelled, int buttons)
         {
             return labelled.Button >= 0 && labelled.Button < buttons;
-        }
-
-        /// <summary>The button a member was given, counted from 0 as the game counts it, and the label where one was given.</summary>
-        sealed class Labelled
-        {
-            /// <summary>The button, counted from 0, or -1 where none was given.</summary>
-            public int Button = -1;
-
-            /// <summary>The label, or empty to give the button back the game's own.</summary>
-            public string Text = "";
-
-            /// <summary>What a member taking a button, and perhaps a label, was given.</summary>
-            public static Labelled Read(IList<Literal> arguments)
-            {
-                var labelled = new Labelled();
-                if (arguments == null || arguments.Count == 0 || arguments[0].Kind != ValueKind.Integer
-                    || arguments[0].Whole < 1 || arguments[0].Whole > int.MaxValue)
-                    return labelled;
-
-                labelled.Button = (int)arguments[0].Whole - 1;
-                if (arguments.Count > 1)
-                    labelled.Text = arguments[1].Text ?? "";
-
-                return labelled;
-            }
         }
     }
 }

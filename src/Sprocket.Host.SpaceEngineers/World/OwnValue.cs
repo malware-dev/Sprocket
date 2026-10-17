@@ -87,7 +87,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 value = Literal.Of(at);
             }
 
-            return new Setting(_write, block, value);
+            return new OwnValueSetting(_write, block, value);
         }
 
         /// <summary>Where <paramref name="name" /> stands among the names, or -1 where it is none of them.</summary>
@@ -158,55 +158,55 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>A flag of Sprocket's own, read by <paramref name="flag" />.</summary>
         public static OwnValue Flag(Reading flag)
         {
-            return new Flagged(flag);
+            return new FlagOwnValue(flag);
         }
 
         /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them.</summary>
         public static OwnValue OneOf<T>(string[] names, Func<T, int> position) where T : class
         {
-            return new Typed<T, object>(ValueKind.Name, names, false, Nothing,
+            return new TypedOwnValue<T, object>(ValueKind.Name, names, false, Nothing,
                 (block, options, seen) => Literal.Of(position(block)));
         }
 
         /// <summary>One of <paramref name="names" />, read off a <typeparamref name="T" /> as a position among them, remembering between looks.</summary>
         public static OwnValue OneOf<T>(string[] names, Func<T, ReaderMemory, int> position) where T : class
         {
-            return new Typed<T, object>(ValueKind.Name, names, true, Nothing,
+            return new TypedOwnValue<T, object>(ValueKind.Name, names, true, Nothing,
                 (block, options, seen) => Literal.Of(position(block, seen)));
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />.</summary>
         public static OwnValue Number<T>(Func<T, double> number) where T : class
         {
-            return new Typed<T, object>(ValueKind.Real, None, false, Nothing,
+            return new TypedOwnValue<T, object>(ValueKind.Real, None, false, Nothing,
                 (block, options, seen) => Literal.Of(number(block)));
         }
 
         /// <summary>A real number read off a <typeparamref name="T" />, remembering between looks.</summary>
         public static OwnValue Number<T>(Func<T, ReaderMemory, double> number) where T : class
         {
-            return new Typed<T, object>(ValueKind.Real, None, true, Nothing,
+            return new TypedOwnValue<T, object>(ValueKind.Real, None, true, Nothing,
                 (block, options, seen) => Literal.Of(number(block, seen)));
         }
 
         /// <summary>A whole number read off a <typeparamref name="T" />.</summary>
         public static OwnValue Whole<T>(Func<T, long> whole) where T : class
         {
-            return new Typed<T, object>(ValueKind.Integer, None, false, Nothing,
+            return new TypedOwnValue<T, object>(ValueKind.Integer, None, false, Nothing,
                 (block, options, seen) => Literal.Of(whole(block)));
         }
 
         /// <summary>Text read off a <typeparamref name="T" />.</summary>
         public static OwnValue Text<T>(Func<T, string> text) where T : class
         {
-            return new Typed<T, object>(ValueKind.Text, None, false, Nothing,
+            return new TypedOwnValue<T, object>(ValueKind.Text, None, false, Nothing,
                 (block, options, seen) => Literal.Of(text(block) ?? ""));
         }
 
         /// <summary>A color read off a <typeparamref name="T" />.</summary>
         public static OwnValue Color<T>(Func<T, Color> color) where T : class
         {
-            return new Typed<T, object>(ValueKind.Color, None, false, Nothing, (block, options, seen) =>
+            return new TypedOwnValue<T, object>(ValueKind.Color, None, false, Nothing, (block, options, seen) =>
             {
                 var read = color(block);
                 return Literal.Colour(read.R, read.G, read.B, read.A);
@@ -217,7 +217,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static OwnValue Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, double> number)
             where T : class
         {
-            return new Typed<T, TOptions>(ValueKind.Real, None, true, options,
+            return new TypedOwnValue<T, TOptions>(ValueKind.Real, None, true, options,
                 (block, given, seen) => Literal.Of(number(block, given, seen)));
         }
 
@@ -225,7 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static OwnValue OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
             Func<T, TOptions, ReaderMemory, int> position) where T : class
         {
-            return new Typed<T, TOptions>(ValueKind.Name, names, true, options,
+            return new TypedOwnValue<T, TOptions>(ValueKind.Name, names, true, options,
                 (block, given, seen) => Literal.Of(position(block, given, seen)));
         }
 
@@ -233,7 +233,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static OwnValue Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, Color> color)
             where T : class
         {
-            return new Typed<T, TOptions>(ValueKind.Color, None, true, options, (block, given, seen) =>
+            return new TypedOwnValue<T, TOptions>(ValueKind.Color, None, true, options, (block, given, seen) =>
             {
                 var read = color(block, given, seen);
                 return Literal.Colour(read.R, read.G, read.B, read.A);
@@ -244,7 +244,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static OwnValue Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, bool> flag)
             where T : class
         {
-            return new Typed<T, TOptions>(ValueKind.Flag, None, true, options,
+            return new TypedOwnValue<T, TOptions>(ValueKind.Flag, None, true, options,
                 (block, given, seen) => Literal.Of(flag(block, given, seen)));
         }
 
@@ -252,7 +252,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static OwnValue Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, long> whole)
             where T : class
         {
-            return new Typed<T, TOptions>(ValueKind.Integer, None, true, options,
+            return new TypedOwnValue<T, TOptions>(ValueKind.Integer, None, true, options,
                 (block, given, seen) => Literal.Of(whole(block, given, seen)));
         }
 
@@ -260,201 +260,13 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static OwnValue Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, string> text)
             where T : class
         {
-            return new Typed<T, TOptions>(ValueKind.Text, None, true, options,
+            return new TypedOwnValue<T, TOptions>(ValueKind.Text, None, true, options,
                 (block, given, seen) => Literal.Of(text(block, given, seen) ?? ""));
         }
 
         static object Nothing(IList<Literal> arguments)
         {
             return null;
-        }
-
-        /// <summary>A flag read by a <see cref="Reading" />.</summary>
-        sealed class Flagged : OwnValue
-        {
-            readonly Reading _flag;
-
-            public Flagged(Reading flag)
-            {
-                _flag = flag;
-            }
-
-            public override ValueKind Kind => ValueKind.Flag;
-
-            public override IReadOnlyList<string> Names => None;
-
-            public override bool Remembers => _flag.Remembers;
-
-            public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, ReaderMemory seen)
-            {
-                return new FlagGauge(_flag, block, seen);
-            }
-
-            public override Reading Is(Literal becomes)
-            {
-                return becomes.Flag ? _flag : new Not(_flag);
-            }
-        }
-
-        /// <summary>A value read off a <typeparamref name="T" />, with options read into a <typeparamref name="TOptions" />.</summary>
-        sealed class Typed<T, TOptions> : OwnValue where T : class
-        {
-            readonly ValueKind _kind;
-            readonly string[] _names;
-            readonly Func<IList<Literal>, TOptions> _options;
-            readonly Func<T, TOptions, ReaderMemory, Literal> _read;
-
-            public Typed(ValueKind kind, string[] names, bool remembers, Func<IList<Literal>, TOptions> options,
-                Func<T, TOptions, ReaderMemory, Literal> read)
-            {
-                _kind = kind;
-                _names = names;
-                Remembers = remembers;
-                _options = options;
-                _read = read;
-            }
-
-            public override ValueKind Kind => _kind;
-
-            public override IReadOnlyList<string> Names => _names;
-
-            public override bool Remembers { get; }
-
-            public override Gauge Gauge(IMyTerminalBlock block, IList<Literal> arguments, ReaderMemory seen)
-            {
-                return new Measured<T, TOptions>(this, _options(arguments), block, seen);
-            }
-
-            public override Reading Is(Literal becomes)
-            {
-                var operand = becomes;
-                if (_kind == ValueKind.Name)
-                {
-                    var at = Array.IndexOf(_names, becomes.Text);
-                    if (at < 0)
-                        throw new ArgumentException($"'{becomes.Text}' is none of {string.Join(", ", _names)}.");
-
-                    operand = Literal.Of(at);
-                }
-
-                return new Equal<T, TOptions>(this, operand);
-            }
-
-            public Literal Read(T block, TOptions options, ReaderMemory seen)
-            {
-                return _read(block, options, seen);
-            }
-
-            public TOptions Options(IList<Literal> arguments)
-            {
-                return _options(arguments);
-            }
-        }
-
-        /// <summary>One block told what this is to be, by one step.</summary>
-        sealed class Setting : BlockOrder
-        {
-            readonly Action<IMyTerminalBlock, Literal> _write;
-            readonly IMyTerminalBlock _block;
-            readonly Literal _value;
-
-            public Setting(Action<IMyTerminalBlock, Literal> write, IMyTerminalBlock block, Literal value)
-            {
-                _write = write;
-                _block = block;
-                _value = value;
-            }
-
-            public override void Give()
-            {
-                _write(_block, _value);
-            }
-        }
-
-        /// <summary>A value of a block read as it reads now, with the options one test gave it.</summary>
-        sealed class Measured<T, TOptions> : Gauge where T : class
-        {
-            readonly Typed<T, TOptions> _being;
-            readonly TOptions _options;
-            readonly T _block;
-            readonly ReaderMemory _seen;
-
-            public Measured(Typed<T, TOptions> being, TOptions options, IMyTerminalBlock block, ReaderMemory seen)
-            {
-                _being = being;
-                _options = options;
-                _block = (T)block;
-                _seen = seen;
-            }
-
-            public override ValueKind Kind => _being.Kind == ValueKind.Name ? ValueKind.Integer : _being.Kind;
-
-            public override Literal Read()
-            {
-                return _being.Read(_block, _options, _seen);
-            }
-        }
-
-        /// <summary>A flag of a block read as it reads now.</summary>
-        sealed class FlagGauge : Gauge
-        {
-            readonly Reading _flag;
-            readonly IMyTerminalBlock _block;
-            readonly ReaderMemory _seen;
-
-            public FlagGauge(Reading flag, IMyTerminalBlock block, ReaderMemory seen)
-            {
-                _flag = flag;
-                _block = block;
-                _seen = seen;
-            }
-
-            public override ValueKind Kind => ValueKind.Flag;
-
-            public override Literal Read()
-            {
-                return Literal.Of(_flag.Holds(_block, _seen));
-            }
-        }
-
-        /// <summary>Whether a value read with no options is one thing, as a flag.</summary>
-        sealed class Equal<T, TOptions> : Reading where T : class
-        {
-            readonly Typed<T, TOptions> _being;
-            readonly TOptions _options;
-            readonly Literal _operand;
-
-            public Equal(Typed<T, TOptions> being, Literal operand)
-            {
-                _being = being;
-                _options = being.Options(Array.Empty<Literal>());
-                _operand = operand;
-            }
-
-            public override bool Remembers => _being.Remembers;
-
-            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
-            {
-                return Relations.Holds(_being.Read((T)block, _options, seen), Relation.Is, _operand);
-            }
-        }
-
-        /// <summary>A flag read the other way round.</summary>
-        sealed class Not : Reading
-        {
-            readonly Reading _flag;
-
-            public Not(Reading flag)
-            {
-                _flag = flag;
-            }
-
-            public override bool Remembers => _flag.Remembers;
-
-            public override bool Holds(IMyTerminalBlock block, ReaderMemory seen)
-            {
-                return !_flag.Holds(block, seen);
-            }
         }
     }
 }

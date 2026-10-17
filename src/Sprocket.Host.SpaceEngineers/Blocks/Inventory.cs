@@ -1,13 +1,12 @@
 using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.Game.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block with an inventory, read for how full it is and how heavy its load.</summary>
     /// <remarks>How full and how heavy are read only on a block with one inventory.</remarks>
-    public sealed class Inventory : Capability
+    public sealed partial class Inventory : Capability
     {
         static readonly OwnValue Fill = OwnValue.Number<IMyTerminalBlock>(block => block.GetInventory(0).VolumeFillFactor * 100d);
 
@@ -35,31 +34,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var inventory = block.InventoryCount == 1 ? block.GetInventory(0) : null;
             return inventory == null ? null : new Listening(inventory, told);
-        }
-
-        /// <summary>An inventory being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyInventory _inventory;
-            readonly Action _told;
-
-            public Listening(IMyInventory inventory, Action told)
-            {
-                _inventory = inventory;
-                _told = told;
-                _inventory.OnVolumeChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _inventory.OnVolumeChanged -= Changed;
-            }
-
-            void Changed(IMyInventory inventory, float before, float after)
-            {
-                _told();
-            }
         }
     }
 }

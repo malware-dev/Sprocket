@@ -10,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A battery, recharged and waited on until it is full, and read for how much it holds and how hard it is worked.</summary>
     /// <remarks>The game moves its charge every hundred frames and lands it exactly on its capacity when full.</remarks>
-    public sealed class Battery : Capability
+    public sealed partial class Battery : Capability
     {
         /// <summary>Recharging, which is Sprocket's own and may wait until the battery is full.</summary>
         public const string Recharge = "recharge";
@@ -140,26 +140,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static bool Charged(IMyBatteryBlock battery)
         {
             return battery.MaxStoredPower > 0f && battery.CurrentStoredPower >= battery.MaxStoredPower;
-        }
-
-        /// <summary>A battery's charge and output being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly ChargeListener _charge;
-            readonly OutputListener _output;
-
-            public Listening(ChargeListener charge, OutputListener output)
-            {
-                _charge = charge;
-                _output = output;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _charge.Dispose();
-                _output.Dispose();
-            }
         }
     }
 }

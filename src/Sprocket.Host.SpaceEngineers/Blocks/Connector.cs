@@ -1,7 +1,6 @@
 using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.Game.ModAPI;
 
 // The status lives in the Ingame namespace, which cannot be imported whole: IMyShipConnector is declared in both, and the
 // mod-side one is the one with the events on it.
@@ -11,7 +10,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A connector, read for whether it holds a ship and which.</summary>
     /// <remarks>The connector raises its properties-changed event every hundred ticks whether anything changed or not.</remarks>
-    public sealed class Connector : Capability
+    public sealed partial class Connector : Capability
     {
         static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
 
@@ -84,42 +83,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             var other = connector.OtherConnector;
             var grid = other?.CubeGrid;
             return grid == null ? "" : grid.CustomName;
-        }
-
-        /// <summary>A connector being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyShipConnector _connector;
-            readonly Action _told;
-
-            public Listening(IMyShipConnector connector, Action told)
-            {
-                _connector = connector;
-                _told = told;
-                _connector.IsConnectedChanged += Changed;
-                _connector.AttachFinished += Changed;
-                _connector.DetachFinished += Changed;
-                _connector.IsWorkingChanged += Working;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _connector.IsConnectedChanged -= Changed;
-                _connector.AttachFinished -= Changed;
-                _connector.DetachFinished -= Changed;
-                _connector.IsWorkingChanged -= Working;
-            }
-
-            void Changed(IMyShipConnector connector)
-            {
-                _told();
-            }
-
-            void Working(IMyCubeBlock block)
-            {
-                _told();
-            }
         }
     }
 }

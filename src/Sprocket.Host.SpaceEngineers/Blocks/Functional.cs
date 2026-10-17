@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A block with a switch, which is every block that does anything.</summary>
-    public sealed class Functional : Capability
+    public sealed partial class Functional : Capability
     {
         static readonly Reading On = Reading.Of<IMyFunctionalBlock>(block => block.Enabled);
 
@@ -34,31 +34,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var functional = block as IMyFunctionalBlock;
             return functional == null ? null : new Listening(functional, told);
-        }
-
-        /// <summary>A switch being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyFunctionalBlock _block;
-            readonly Action _told;
-
-            public Listening(IMyFunctionalBlock block, Action told)
-            {
-                _block = block;
-                _told = told;
-                _block.EnabledChanged += Switched;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _block.EnabledChanged -= Switched;
-            }
-
-            void Switched(IMyTerminalBlock block)
-            {
-                _told();
-            }
         }
     }
 }

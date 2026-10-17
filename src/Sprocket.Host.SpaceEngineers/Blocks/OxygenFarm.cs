@@ -6,7 +6,7 @@ using SpaceEngineers.Game.ModAPI;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An oxygen farm, which makes oxygen from sunlight.</summary>
-    public sealed class OxygenFarm : Capability
+    public sealed partial class OxygenFarm : Capability
     {
         // The game gives the output as a fraction of the farm's best; every share Sprocket says is in percent.
         static readonly OwnValue Effectiveness = OwnValue.Number<IMyOxygenFarm>(farm => farm.GetOutput() * 100.0);
@@ -35,31 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         public override IDisposable Listen(IMyTerminalBlock block, Action told)
         {
             return block is IMyOxygenFarm ? new Listening(block, told) : null;
-        }
-
-        /// <summary>A farm being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyTerminalBlock _farm;
-            readonly Action _told;
-
-            public Listening(IMyTerminalBlock farm, Action told)
-            {
-                _farm = farm;
-                _told = told;
-                _farm.PropertiesChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _farm.PropertiesChanged -= Changed;
-            }
-
-            void Changed(IMyTerminalBlock block)
-            {
-                _told();
-            }
         }
     }
 }

@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A remote control's autopilot: flying its route, whether it flies, where it is heading, and how.</summary>
-    public sealed class RemoteControl : Capability
+    public sealed partial class RemoteControl : Capability
     {
         // Read from the game's code: the autopilot switching is a synced value of its component, and only some of the ways
         // it switches raise the block's properties-changed event.
@@ -53,26 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var autopilot = block.Components.Get<MyAutopilotComponent>();
             return autopilot == null ? null : new Listening(autopilot, told);
-        }
-
-        /// <summary>An autopilot being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly MyAutopilotComponent _autopilot;
-            readonly Action _told;
-
-            public Listening(MyAutopilotComponent autopilot, Action told)
-            {
-                _autopilot = autopilot;
-                _told = told;
-                _autopilot.OnCurrentWaypointIndexChanged += told;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _autopilot.OnCurrentWaypointIndexChanged -= _told;
-            }
         }
     }
 }

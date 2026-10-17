@@ -7,7 +7,7 @@ namespace Lumel.Layout
 {
     /// <summary>Elements in cells of rows and columns, each track sized outright, by its largest cell, or by a share of what is left.</summary>
     /// <remarks>One element to a cell, stretched across it and centered down it.</remarks>
-    public class Grid : Container
+    public partial class Grid : Container
     {
         readonly List<Cell> _cells = new List<Cell>();
         readonly Collection _children;
@@ -366,45 +366,6 @@ namespace Lumel.Layout
         static float Given(float size, float otherwise)
         {
             return float.IsNaN(size) ? otherwise : size;
-        }
-
-        /// <summary>Where one element sits, and what its placement says about its size.</summary>
-        sealed class Cell
-        {
-            public readonly int Column;
-            public readonly int Columns;
-            public readonly Element Element;
-            public readonly int Row;
-            public readonly int Rows;
-            public float Height = float.NaN;
-            public float Width = float.NaN;
-
-            public Cell(Element element, int row, int column, int rows, int columns)
-            {
-                Element = element;
-                Row = row;
-                Column = column;
-                Rows = rows;
-                Columns = columns;
-            }
-
-            public bool Covers(int row, int column)
-            {
-                return row >= Row && row < Row + Rows && column >= Column && column < Column + Columns;
-            }
-
-            public bool Overlaps(Cell other)
-            {
-                return Row < other.Row + other.Rows && other.Row < Row + Rows
-                    && Column < other.Column + other.Columns && other.Column < Column + Columns;
-            }
-
-            public void Resolve(IPlacement placement)
-            {
-                var sized = placement as ISized;
-                Width = sized?.Width ?? float.NaN;
-                Height = sized?.Height ?? float.NaN;
-            }
         }
     }
 }

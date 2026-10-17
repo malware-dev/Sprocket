@@ -1,7 +1,6 @@
 using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.Game.ModAPI;
 
 // The item type lives in the Ingame namespace, which cannot be imported whole: IMyInventory is declared in both.
 using MyItemType = VRage.Game.ModAPI.Ingame.MyItemType;
@@ -9,7 +8,7 @@ using MyItemType = VRage.Game.ModAPI.Ingame.MyItemType;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A reactor: read for its uranium and its output, and heard as it runs out of uranium.</summary>
-    public sealed class Reactor : Capability
+    public sealed partial class Reactor : Capability
     {
         static readonly OwnValue Output = OwnValue.Number<IMyReactor>(reactor => reactor.CurrentOutput);
 
@@ -56,34 +55,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var inventory = reactor.GetInventory(0);
             return inventory == null ? 0.0 : (double)inventory.GetItemAmount(uranium);
-        }
-
-        /// <summary>A reactor's inventory and output being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyInventory _inventory;
-            readonly Action _told;
-            readonly OutputListener _output;
-
-            public Listening(IMyInventory inventory, IMyPowerProducer reactor, Action told)
-            {
-                _inventory = inventory;
-                _told = told;
-                _inventory.OnVolumeChanged += Changed;
-                _output = new OutputListener(reactor, told);
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _inventory.OnVolumeChanged -= Changed;
-                _output.Dispose();
-            }
-
-            void Changed(IMyInventory inventory, float before, float after)
-            {
-                _told();
-            }
         }
     }
 }

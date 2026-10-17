@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A wheel suspension: the members of its terminal said in Sprocket's words, where the wheel is turned, and whether it has a wheel.</summary>
-    public sealed class Suspension : Capability
+    public sealed partial class Suspension : Capability
     {
         const string Steered = "A suspension raises nothing as its wheel turns.";
 
@@ -70,31 +70,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var suspension = block as IMyMotorSuspension;
             return suspension == null ? null : new Listening(suspension, told);
-        }
-
-        /// <summary>A suspension being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyMotorSuspension _suspension;
-            readonly Action _told;
-
-            public Listening(IMyMotorSuspension suspension, Action told)
-            {
-                _suspension = suspension;
-                _told = told;
-                _suspension.OnAttachedChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _suspension.OnAttachedChanged -= Changed;
-            }
-
-            void Changed(IMyMechanicalConnectionBlock block)
-            {
-                _told();
-            }
         }
     }
 }

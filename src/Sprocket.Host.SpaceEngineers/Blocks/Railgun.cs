@@ -7,7 +7,7 @@ using VRage.Game.ModAPI.Interfaces;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A launcher with a capacitor, which is a railgun: how charged it is, how long until it is, and when it is.</summary>
-    public sealed class Railgun : Capability
+    public sealed partial class Railgun : Capability
     {
         const string Uncounted = "A capacitor says when it is charged and when it is not, and nothing as its charge moves.";
 
@@ -92,33 +92,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             return null;
-        }
-
-        /// <summary>A capacitor being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyEntityCapacitorComponent _capacitor;
-            readonly Action _told;
-
-            public Listening(IMyEntityCapacitorComponent capacitor, Action told)
-            {
-                _capacitor = capacitor;
-                _told = told;
-                _capacitor.OnCharged += Changed;
-                _capacitor.OnNotCharged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _capacitor.OnCharged -= Changed;
-                _capacitor.OnNotCharged -= Changed;
-            }
-
-            void Changed(IMyEntityCapacitorComponent capacitor)
-            {
-                _told();
-            }
         }
     }
 }

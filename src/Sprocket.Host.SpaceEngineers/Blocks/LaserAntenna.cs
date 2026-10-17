@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// The game raises no event as the target falls outside the antenna's turning limits, so the link is looked at on its
     /// cadence while it is not idle.
     /// </remarks>
-    public sealed class LaserAntenna : Capability
+    public sealed partial class LaserAntenna : Capability
     {
         static readonly string[] Links = { "idle", "turning", "searching", "connecting", "connected", "out-of-range" };
 
@@ -71,31 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             return 5;
-        }
-
-        /// <summary>A laser antenna being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyLaserAntenna _antenna;
-            readonly Action _told;
-
-            public Listening(IMyLaserAntenna antenna, Action told)
-            {
-                _antenna = antenna;
-                _told = told;
-                _antenna.PropertiesChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _antenna.PropertiesChanged -= Changed;
-            }
-
-            void Changed(IMyTerminalBlock block)
-            {
-                _told();
-            }
         }
     }
 }

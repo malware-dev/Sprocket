@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -12,7 +11,7 @@ using PistonStatus = Sandbox.ModAPI.Ingame.PistonStatus;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A piston, extended, retracted or moved to a position.</summary>
-    public sealed class Piston : Capability
+    public sealed partial class Piston : Capability
     {
         /// <summary>Moving to a position, which is Sprocket's own and waits until it gets there.</summary>
         public const string MoveTo = "move-to";
@@ -45,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static readonly OwnAction Retracts = OwnAction.Of<IMyPistonBase>(null, In,
             piston => Why(piston, piston.Status == PistonStatus.Retracted, -1), Stop, Inwards);
 
-        static readonly OwnAction Moves = OwnAction.Of<IMyPistonBase, Move>(Move.Read, Moved, Arrived, null,
+        static readonly OwnAction Moves = OwnAction.Of<IMyPistonBase, PistonMove>(PistonMove.Read, Moved, Arrived, null,
             (piston, move, seen) => Why(piston, AtLimit(piston), 0), Stop, Expected);
 
         /// <inheritdoc />
@@ -192,7 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Moves the piston to the position a step gave it.</summary>
-        static void Moved(IMyPistonBase piston, Move move, ReaderMemory seen)
+        static void Moved(IMyPistonBase piston, PistonMove move, ReaderMemory seen)
         {
             if (!move.Given)
                 return;
@@ -258,7 +257,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>The ticks the move should take: the distance it has to go, at the speed it was given.</summary>
-        static int Expected(IMyPistonBase piston, Move move)
+        static int Expected(IMyPistonBase piston, PistonMove move)
         {
             if (!move.Given)
                 return GridEntity.Unestimated;
@@ -269,55 +268,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static int Ticks(float distance, float speed)
         {
             return speed <= 0f ? GridEntity.Unestimated : (int)Math.Ceiling(Math.Max(0f, distance) / speed * 60f);
-        }
-
-        /// <summary>A piston being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyPistonBase _piston;
-            readonly Action _told;
-
-            public Listening(IMyPistonBase piston, Action told)
-            {
-                _piston = piston;
-                _told = told;
-                _piston.LimitReached += Reached;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _piston.LimitReached -= Reached;
-            }
-
-            void Reached(bool upper)
-            {
-                _told();
-            }
-        }
-
-        /// <summary>Where a step told the piston to move to, and how fast.</summary>
-        sealed class Move
-        {
-            /// <summary>Whether the step gave both; a step that did not moves nothing.</summary>
-            public bool Given;
-
-            public float Position;
-
-            public float Speed;
-
-            /// <summary>The position and speed a step moving the piston was given, in that order.</summary>
-            public static Move Read(IList<Literal> arguments)
-            {
-                var move = new Move();
-                if (arguments == null || arguments.Count < 2)
-                    return move;
-
-                move.Position = (float)arguments[0].Real;
-                move.Speed = (float)Math.Abs(arguments[1].Real);
-                move.Given = true;
-                return move;
-            }
         }
     }
 }

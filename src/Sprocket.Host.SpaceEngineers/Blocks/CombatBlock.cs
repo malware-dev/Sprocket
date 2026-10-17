@@ -1,12 +1,11 @@
 using System;
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.World;
-using VRage.ModAPI;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An offensive or defensive combat block: who it goes after, and whether it has found someone.</summary>
-    public sealed class CombatBlock : Capability
+    public sealed partial class CombatBlock : Capability
     {
         static readonly Reading Found = Reading.Of<IMyTerminalBlock>(block =>
         {
@@ -54,31 +53,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             var defensive = block as IMyDefensiveCombatBlock;
             return defensive?.SearchEnemyComponent;
-        }
-
-        /// <summary>A search being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMySearchEnemyComponent _search;
-            readonly Action _told;
-
-            public Listening(IMySearchEnemyComponent search, Action told)
-            {
-                _search = search;
-                _told = told;
-                _search.TargetChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _search.TargetChanged -= Changed;
-            }
-
-            void Changed(IMyEntity was, IMyEntity now, bool locked)
-            {
-                _told();
-            }
         }
     }
 }

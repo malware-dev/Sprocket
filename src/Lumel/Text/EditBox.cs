@@ -16,7 +16,7 @@ namespace Lumel.Text
     /// Read only, a press on the text drags it about; edited, it places the caret and a drag selects. Drawing a frame
     /// measures only the lines coming into view.
     /// </remarks>
-    public class EditBox : Element, IPadded, IScrolls
+    public partial class EditBox : Element, IPadded, IScrolls
     {
         const float CaretWidth = 2f;
 
@@ -1296,29 +1296,6 @@ namespace Lumel.Text
             Word,
             Line,
             Across
-        }
-
-        /// <summary>A place between two characters: a line, and how far into it.</summary>
-        struct Spot : IEquatable<Spot>
-        {
-            public readonly int Line;
-            public readonly int Column;
-
-            public Spot(int line, int column)
-            {
-                Line = line;
-                Column = column;
-            }
-
-            public bool Before(Spot other)
-            {
-                return Line < other.Line || (Line == other.Line && Column < other.Column);
-            }
-
-            public bool Equals(Spot other)
-            {
-                return Line == other.Line && Column == other.Column;
-            }
         }
 
         /// <summary>One edit, kept so it can be taken back and made again.</summary>

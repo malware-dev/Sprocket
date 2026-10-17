@@ -74,6 +74,8 @@ Each rule is absolute unless it names its exception.
 - One type per file, named for the type, whatever its access level.
 - A type is nested only when it is a small data type used by its owner alone. Anything with
   behavior of its own gets its own file.
+- A nested type that must stay private to protect its owner's state goes in a partial file of its
+  owner, named Owner.Nested.cs.
 - Folders are named for a capability (`Sequences/`, `Storage/`). Never by kind (`Models/`, `Views/`,
   `Helpers/`, `Utils/`, `Managers/`, `Common/`, `Shared/`, `Misc/`).
 - A type used by several capabilities moves up a level.

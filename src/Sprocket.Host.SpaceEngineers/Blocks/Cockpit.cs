@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A cockpit or a seat, which reports who sits down or gets up, holds the flight switches and reads the ship's gravity and mass.</summary>
-    public sealed class Cockpit : Capability
+    public sealed partial class Cockpit : Capability
     {
         /// <summary>Whether somebody sits in it, which is Sprocket's own.</summary>
         public const string Occupied = "occupied";
@@ -77,31 +77,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var cockpit = block as IMyCockpit;
             return cockpit == null ? null : new Listening(cockpit, told);
-        }
-
-        /// <summary>A seat being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyCockpit _cockpit;
-            readonly Action _told;
-
-            public Listening(IMyCockpit cockpit, Action told)
-            {
-                _cockpit = cockpit;
-                _told = told;
-                _cockpit.IsOccupiedChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _cockpit.IsOccupiedChanged -= Changed;
-            }
-
-            void Changed(IMyCockpit cockpit)
-            {
-                _told();
-            }
         }
     }
 }

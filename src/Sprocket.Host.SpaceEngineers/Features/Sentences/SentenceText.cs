@@ -75,7 +75,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>Something the sentence names that is no longer on the construct.</summary>
         public const string Missing = "a lost block";
 
-        static readonly NameOrder ByName = new NameOrder();
+        /// <summary>Blocks in the order a person reads their names.</summary>
+        public static readonly NameOrder ByName = new NameOrder();
 
 
         /// <summary>The word a trigger's line opens with, for a trigger of <paramref name="kind" /> started by <paramref name="parts" /> parts.</summary>
@@ -447,7 +448,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 order[i] = i;
 
             if (order.Length > 1)
-                Array.Sort(order, new PlaceOrder(entities));
+                Array.Sort(order, new BlockPlaceOrder(entities));
 
             return order;
         }
@@ -610,23 +611,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
             // A slot kind with no words here; saying nothing would read as an empty slot.
             return $"({slot.GetType().Name})";
-        }
-
-        /// <summary>Places in a list of blocks, by the blocks in them; two blocks that are both gone keep the order they were picked in.</summary>
-        sealed class PlaceOrder : IComparer<int>
-        {
-            readonly List<GridEntity> _entities;
-
-            public PlaceOrder(List<GridEntity> entities)
-            {
-                _entities = entities;
-            }
-
-            public int Compare(int x, int y)
-            {
-                var byBlock = ByName.Compare(_entities[x], _entities[y]);
-                return byBlock != 0 ? byBlock : x.CompareTo(y);
-            }
         }
 
         /// <summary><paramref name="text" /> with its first letter a capital, to start a sentence with.</summary>

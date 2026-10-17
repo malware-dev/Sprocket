@@ -10,7 +10,7 @@ using LandingGearMode = SpaceEngineers.Game.ModAPI.Ingame.LandingGearMode;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>Landing gear and magnetic plates, read for whether they hold the ship.</summary>
-    public sealed class LandingGear : Capability
+    public sealed partial class LandingGear : Capability
     {
         static readonly string[] Statuses = { "unlocked", "ready-to-lock", "locked" };
 
@@ -58,31 +58,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             }
 
             return 0;
-        }
-
-        /// <summary>A landing gear being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyLandingGear _gear;
-            readonly Action _told;
-
-            public Listening(IMyLandingGear gear, Action told)
-            {
-                _gear = gear;
-                _told = told;
-                _gear.LockModeChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _gear.LockModeChanged -= Changed;
-            }
-
-            void Changed(IMyLandingGear gear, LandingGearMode was)
-            {
-                _told();
-            }
         }
     }
 }

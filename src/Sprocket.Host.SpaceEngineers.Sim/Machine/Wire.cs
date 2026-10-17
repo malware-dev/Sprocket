@@ -115,7 +115,7 @@ public sealed class Wire : INetworkProxy
     /// <summary>Puts the game's own network back behind the channel, and the gateway that was there before.</summary>
     public void Uninstall()
     {
-        NetworkChannel.Network = new NetworkChannel.DefaultNetwork();
+        NetworkChannel.Network = new GameNetwork();
         MyAPIGateway.Multiplayer = _was;
     }
 

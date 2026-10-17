@@ -5,7 +5,7 @@ using Sprocket.Host.SpaceEngineers.World;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>A defensive combat block: fleeing, how it flees, and how it defends itself.</summary>
-    public sealed class DefensiveCombat : Capability
+    public sealed partial class DefensiveCombat : Capability
     {
         static readonly Reading Away = Reading.Of<IMyDefensiveCombatBlock>(block => block.IsFleeing);
 
@@ -49,31 +49,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         {
             var defensive = block as IMyDefensiveCombatBlock;
             return defensive == null ? null : new Listening(defensive, told);
-        }
-
-        /// <summary>A defensive block being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyDefensiveCombatBlock _block;
-            readonly Action _told;
-
-            public Listening(IMyDefensiveCombatBlock block, Action told)
-            {
-                _block = block;
-                _told = told;
-                _block.IsFleeingChanged += Changed;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _block.IsFleeingChanged -= Changed;
-            }
-
-            void Changed(IMyDefensiveCombatBlock block, bool fleeing)
-            {
-                _told();
-            }
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>One network message channel, carrying every message type registered on it.</summary>
     /// <remarks>A mod uses one channel for all its message types, so it takes one channel id.</remarks>
-    public class NetworkChannel : IDisposable
+    public partial class NetworkChannel : IDisposable
     {
         // Marks a SendToNearby envelope: origin, radius, and an inner message. It only has to differ from real message type
         // ids, which are FullName.GetHashCode() values.
@@ -19,9 +19,9 @@ namespace Sprocket.Host.SpaceEngineers.Network
 
         readonly ushort _channelId;
 
-        readonly Dictionary<int, IDataModelInfo> _dataModels;
+        readonly Dictionary<int, IMessageModel> _dataModels;
 
-        NetworkChannel(ushort channelId, Dictionary<int, IDataModelInfo> dataModels)
+        NetworkChannel(ushort channelId, Dictionary<int, IMessageModel> dataModels)
         {
             _dataModels = dataModels;
             _channelId = channelId;
@@ -29,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
         }
 
         /// <summary>The network every channel sends through, the game's unless a test puts another in its place.</summary>
-        public static INetworkProxy Network { get; set; } = new DefaultNetwork();
+        public static INetworkProxy Network { get; set; } = new GameNetwork();
 
         /// <summary>Unregisters the channel's message handler.</summary>
         public void Dispose()
@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
             }
 
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
             {
                 MyLog.Default.Warning($"NetworkChannel received message for unregistered type ID {typeId} on channel {_channelId}.");
@@ -138,10 +138,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var type = typeof(T);
             var typeId = type.FullName.GetHashCode();
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
                 throw new InvalidOperationException($"Type {type.FullName} is not registered on this channel.");
-            var typed = dataModel as DataModelInfo<T>;
+            var typed = dataModel as MessageModel<T>;
             if (typed == null)
                 throw new InvalidOperationException($"Type {type.FullName} has an invalid data model info.");
 
@@ -197,10 +197,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var type = typeof(T);
             var typeId = type.FullName.GetHashCode();
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
                 throw new InvalidOperationException($"Type {type.FullName} is not registered on this channel.");
-            var typedDataModel = dataModel as DataModelInfo<T>;
+            var typedDataModel = dataModel as MessageModel<T>;
             if (typedDataModel == null)
                 throw new InvalidOperationException($"Type {type.FullName} has an invalid data model info.");
             typedDataModel.AddListener(handler);
@@ -214,10 +214,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var type = typeof(T);
             var typeId = type.FullName.GetHashCode();
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
                 throw new InvalidOperationException($"Type {type.FullName} is not registered on this channel.");
-            var typedDataModel = dataModel as DataModelInfo<T>;
+            var typedDataModel = dataModel as MessageModel<T>;
             if (typedDataModel == null)
                 throw new InvalidOperationException($"Type {type.FullName} has an invalid data model info.");
             typedDataModel.RemoveListener(handler);
@@ -234,10 +234,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var type = typeof(T);
             var typeId = type.FullName.GetHashCode();
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
                 throw new InvalidOperationException($"Type {type.FullName} is not registered on this channel.");
-            var typedDataModel = dataModel as DataModelInfo<T>;
+            var typedDataModel = dataModel as MessageModel<T>;
             if (typedDataModel == null)
                 throw new InvalidOperationException($"Type {type.FullName} has an invalid data model info.");
             typedDataModel.Send(_channelId, ref model, recipientId, reliable);
@@ -254,10 +254,10 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var type = typeof(T);
             var typeId = type.FullName.GetHashCode();
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
                 throw new InvalidOperationException($"Type {type.FullName} is not registered on this channel.");
-            var typedDataModel = dataModel as DataModelInfo<T>;
+            var typedDataModel = dataModel as MessageModel<T>;
             if (typedDataModel == null)
                 throw new InvalidOperationException($"Type {type.FullName} has an invalid data model info.");
             typedDataModel.Send(_channelId, ref model, 0UL, reliable, includingSelf);
@@ -273,213 +273,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var type = typeof(T);
             var typeId = type.FullName.GetHashCode();
-            IDataModelInfo dataModel;
+            IMessageModel dataModel;
             if (!_dataModels.TryGetValue(typeId, out dataModel))
                 throw new InvalidOperationException($"Type {type.FullName} is not registered on this channel.");
-            var typedDataModel = dataModel as DataModelInfo<T>;
+            var typedDataModel = dataModel as MessageModel<T>;
             if (typedDataModel == null)
                 throw new InvalidOperationException($"Type {type.FullName} has an invalid data model info.");
             typedDataModel.Send(_channelId, ref model, ulong.MaxValue, reliable);
-        }
-
-        /// <summary>The game's multiplayer API as an <see cref="INetworkProxy" />.</summary>
-        public class DefaultNetwork : INetworkProxy
-        {
-            /// <inheritdoc />
-            public bool IsHeadlessServer => MyAPIGateway.Utilities.IsDedicated;
-
-            /// <inheritdoc />
-            public bool IsServer => MyAPIGateway.Multiplayer.IsServer;
-
-            /// <inheritdoc />
-            public bool IsClient => !MyAPIGateway.Utilities.IsDedicated;
-
-            /// <inheritdoc />
-            public void RegisterSecureMessageHandler(ushort id, Action<ushort, byte[], ulong, bool> messageHandler)
-            {
-                MyAPIGateway.Multiplayer.RegisterSecureMessageHandler(id, messageHandler);
-            }
-
-            /// <inheritdoc />
-            public void UnregisterSecureMessageHandler(ushort id, Action<ushort, byte[], ulong, bool> messageHandler)
-            {
-                MyAPIGateway.Multiplayer.UnregisterSecureMessageHandler(id, messageHandler);
-            }
-
-            /// <inheritdoc />
-            public void SendMessageTo(ushort channelId, byte[] data, ulong recipientId, bool reliable)
-            {
-                MyAPIGateway.Multiplayer.SendMessageTo(channelId, data, recipientId, reliable);
-            }
-
-            /// <inheritdoc />
-            public void SendMessageToOthers(ushort channelId, byte[] data, bool reliable)
-            {
-                MyAPIGateway.Multiplayer.SendMessageToOthers(channelId, data, reliable);
-            }
-
-            /// <inheritdoc />
-            public void SendMessageToServer(ushort channelId, byte[] data, bool reliable)
-            {
-                MyAPIGateway.Multiplayer.SendMessageToServer(channelId, data, reliable);
-            }
-        }
-
-        interface IDataModelInfo
-        {
-            int TypeId { get; }
-            Type Type { get; }
-
-            void DidReceive(NetworkChannel network, ushort channelId, byte[] data, ref int offset, ulong senderId, bool fromServer);
-        }
-
-        class DataModelInfo<TModel> : IDataModelInfo where TModel : struct
-        {
-            readonly object _bufferLock = new object();
-            readonly List<DataModelReceivedFn<TModel>> _handlers;
-            readonly ReadDataModelFn<TModel> _readFn;
-            readonly SizeOfDataModelFn<TModel> _sizeOfFn;
-            readonly WriteDataModelFn<TModel> _writeFn;
-            byte[] _buffer;
-
-            public DataModelInfo(Type type, SizeOfDataModelFn<TModel> sizeOfFn, ReadDataModelFn<TModel> readFn, WriteDataModelFn<TModel> writeFn)
-            {
-                Type = type;
-                TypeId = type.FullName.GetHashCode();
-                _sizeOfFn = sizeOfFn;
-                _readFn = readFn;
-                _writeFn = writeFn;
-                _handlers = new List<DataModelReceivedFn<TModel>>();
-            }
-
-            public int TypeId { get; }
-            public Type Type { get; }
-
-            public void DidReceive(NetworkChannel network, ushort channelId, byte[] data, ref int offset, ulong senderId, bool fromServer)
-            {
-                TModel msg;
-                _readFn(data, ref offset, out msg);
-                foreach (var handler in _handlers) handler(channelId, msg, senderId, fromServer);
-            }
-
-            public void AddListener(DataModelReceivedFn<TModel> handler)
-            {
-                _handlers.Add(handler);
-            }
-
-            public void RemoveListener(DataModelReceivedFn<TModel> handler)
-            {
-                _handlers.Remove(handler);
-            }
-
-            // The size of the [typeId][payload] inner message a recipient dispatches.
-            public int InnerSize(ref TModel model)
-            {
-                return _sizeOfFn(ref model) + 4;
-            }
-
-            // Writes the [typeId][payload] inner message into data, outside the channel's send buffer.
-            public void WriteInner(ref TModel model, byte[] data, ref int offset)
-            {
-                ByteCodec.Write(TypeId, data, ref offset);
-                _writeFn(ref model, data, ref offset);
-            }
-
-            public void Send(ushort channelId, ref TModel model, ulong recipientId, bool reliable, bool includingSelf = false)
-            {
-                lock (_bufferLock)
-                {
-                    var size = _sizeOfFn(ref model) + 4;
-                    if (_buffer == null || _buffer.Length < size)
-                        _buffer = new byte[size];
-                    var offset = 0;
-                    ByteCodec.Write(TypeId, _buffer, ref offset);
-                    _writeFn(ref model, _buffer, ref offset);
-
-                    switch (recipientId)
-                    {
-                        case 0UL:
-                            Network.SendMessageToOthers(channelId, _buffer, reliable);
-                            if (includingSelf)
-                            {
-                                if (Network.IsServer)
-                                    Network.SendMessageToServer(channelId, _buffer, reliable);
-                                else if (MyAPIGateway.Session.LocalHumanPlayer != null)
-                                {
-                                    var localPlayerId = MyAPIGateway.Session.LocalHumanPlayer.SteamUserId;
-                                    Network.SendMessageTo(channelId, _buffer, localPlayerId, reliable);
-                                }
-                            }
-
-                            break;
-                        case ulong.MaxValue:
-                            Network.SendMessageToServer(channelId, _buffer, reliable);
-                            break;
-                        default:
-                            Network.SendMessageTo(channelId, _buffer, recipientId, reliable);
-                            break;
-                    }
-                }
-            }
-        }
-
-        /// <summary>Registers the message types of a <see cref="NetworkChannel" /> and builds it.</summary>
-        public struct Builder
-        {
-            readonly ushort _channelId;
-            readonly Dictionary<int, IDataModelInfo> _registeredTypes;
-
-            /// <summary>A builder for the channel <paramref name="channelId" />.</summary>
-            /// <param name="channelId">The channel id.</param>
-            public Builder(ushort channelId)
-            {
-                _channelId = channelId;
-                _registeredTypes = new Dictionary<int, IDataModelInfo>();
-            }
-
-            Builder(ushort channelId, Dictionary<int, IDataModelInfo> registeredTypes)
-            {
-                _channelId = channelId;
-                _registeredTypes = registeredTypes;
-            }
-
-            /// <summary>Registers the message type <typeparamref name="TModel" /> with how it is measured, read and written.</summary>
-            /// <typeparam name="TModel">The message type.</typeparam>
-            /// <param name="sizeOfFn">How many bytes a message takes.</param>
-            /// <param name="readFn">What reads a message.</param>
-            /// <param name="writeFn">What writes a message.</param>
-            /// <returns>The builder, with the type registered.</returns>
-            /// <exception cref="InvalidOperationException">The type is registered already, or its id is another type's.</exception>
-            public Builder UsingModel<TModel>(SizeOfDataModelFn<TModel> sizeOfFn, ReadDataModelFn<TModel> readFn, WriteDataModelFn<TModel> writeFn) where TModel : struct
-            {
-                var type = typeof(TModel);
-                var typeId = type.FullName.GetHashCode();
-                IDataModelInfo existingType;
-                if (_registeredTypes.TryGetValue(typeId, out existingType))
-                {
-                    if (existingType.Type != type)
-                        throw new InvalidOperationException($"Type ID conflict: {type.FullName} and {existingType.Type.FullName} have the same type ID {typeId}.");
-                    throw new InvalidOperationException($"Type {type.FullName} is already registered on this channel.");
-                }
-
-                var dataModelInfo = new DataModelInfo<TModel>(type, sizeOfFn, readFn, writeFn);
-                _registeredTypes.Add(typeId, dataModelInfo);
-                return new Builder(_channelId, _registeredTypes);
-            }
-
-            /// <summary>The channel, with every type registered on the builder.</summary>
-            /// <returns>The channel.</returns>
-            /// <exception cref="InvalidOperationException">The id is zero, the builder was not made by a constructor, or no type is registered.</exception>
-            public NetworkChannel Build()
-            {
-                if (_channelId == 0)
-                    throw new InvalidOperationException("Channel ID cannot be zero.");
-                if (_registeredTypes == null)
-                    throw new InvalidOperationException("This builder was not properly initialized.");
-                if (_registeredTypes.Count == 0)
-                    throw new InvalidOperationException("No types registered for this channel.");
-                return new NetworkChannel(_channelId, _registeredTypes);
-            }
         }
     }
 }

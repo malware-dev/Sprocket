@@ -5,7 +5,6 @@ using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game;
-using VRage.Game.ModAPI;
 
 // These live in the Ingame namespace, which cannot be imported whole: IMyAssembler and friends are declared in both, and
 // the mod-side ones are the ones with the events on them.
@@ -15,7 +14,7 @@ using MyProductionItem = Sandbox.ModAPI.Ingame.MyProductionItem;
 namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>An assembler or a refinery: what it makes, whether it is making it, and what its two inventories hold.</summary>
-    public sealed class Production : Capability
+    public sealed partial class Production : Capability
     {
         const string Kit = "MyObjectBuilder_SurvivalKit";
 
@@ -131,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             amount.Needed = true;
             amount.Default = "1";
 
-            var makes = OwnAction.Of<IMyAssembler, Order>(given => Order.Read(given, blueprints),
+            var makes = OwnAction.Of<IMyAssembler, ProductionOrder>(given => ProductionOrder.Read(given, blueprints),
                 (made, order, seen) =>
                 {
                     if (order.Known)
@@ -224,104 +223,6 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         static bool IsKit(IMyTerminalBlock block)
         {
             return block.BlockDefinition.TypeIdString == Kit;
-        }
-
-        /// <summary>What a step ordering an assembler to make something was given.</summary>
-        sealed class Order
-        {
-            /// <summary>The blueprint that makes the item, where it is one the assembler can make.</summary>
-            public MyDefinitionId Blueprint;
-
-            /// <summary>How many.</summary>
-            public long Amount;
-
-            /// <summary>Whether the item is one the assembler can make.</summary>
-            public bool Known;
-
-            /// <summary>The order a step's arguments make, against the blueprints the assembler can use.</summary>
-            public static Order Read(IList<Literal> arguments, IDictionary<string, MyDefinitionId> blueprints)
-            {
-                var order = new Order();
-                if (arguments == null || arguments.Count < 2)
-                    return order;
-
-                order.Known = blueprints.TryGetValue(arguments[0].Text ?? "", out order.Blueprint);
-                order.Amount = arguments[1].Whole;
-                return order;
-            }
-        }
-
-        /// <summary>A production block being listened to, until disposed.</summary>
-        sealed class Listening : IDisposable
-        {
-            readonly IMyProductionBlock _block;
-            readonly IMyAssembler _assembler;
-            readonly IMyInventory _input;
-            readonly IMyInventory _output;
-            readonly Action _told;
-
-            public Listening(IMyProductionBlock block, Action told)
-            {
-                _block = block;
-                _assembler = block as IMyAssembler;
-                _input = block.InputInventory;
-                _output = block.OutputInventory;
-                _told = told;
-
-                _block.StartedProducing += Changed;
-                _block.StoppedProducing += Changed;
-                _block.IsWorkingChanged += Worked;
-                if (_input != null)
-                    _input.OnVolumeChanged += Filled;
-                if (_output != null)
-                    _output.OnVolumeChanged += Filled;
-
-                if (_assembler == null)
-                    return;
-
-                _assembler.CurrentProgressChanged += Assembled;
-                _assembler.CurrentStateChanged += Assembled;
-                _assembler.CurrentModeChanged += Assembled;
-            }
-
-            /// <inheritdoc />
-            public void Dispose()
-            {
-                _block.StartedProducing -= Changed;
-                _block.StoppedProducing -= Changed;
-                _block.IsWorkingChanged -= Worked;
-                if (_input != null)
-                    _input.OnVolumeChanged -= Filled;
-                if (_output != null)
-                    _output.OnVolumeChanged -= Filled;
-
-                if (_assembler == null)
-                    return;
-
-                _assembler.CurrentProgressChanged -= Assembled;
-                _assembler.CurrentStateChanged -= Assembled;
-                _assembler.CurrentModeChanged -= Assembled;
-            }
-
-            void Changed()
-            {
-                _told();
-            }
-
-            void Worked(IMyCubeBlock block)
-            {
-                _told();
-            }
-
-            void Filled(IMyInventory inventory, float before, float after)
-            {
-                _told();
-            }
-
-            void Assembled(IMyAssembler assembler)
-            {
-                _told();
-            }
         }
     }
 }
