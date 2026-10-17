@@ -73,6 +73,7 @@ namespace Lumel.Input
             if (target == null)
                 return false;
 
+            target.Presses = presses;
             target.OnPointerDown(target.FromScreen(point), presses, shift, ctrl);
             return true;
         }

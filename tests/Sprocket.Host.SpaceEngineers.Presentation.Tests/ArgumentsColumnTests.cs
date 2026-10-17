@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -127,6 +128,28 @@ public class ArgumentsColumnTests
 
         Assert.Equal("Radius on Airlock Light", screen.Ended);
         Assert.True(screen.Scene.IsFilling, "the caret did not go to the field");
+    }
+
+    /// <summary>A double press on one of a line of words finishes as Done does, with that word.</summary>
+    [Fact]
+    public void ADoublePressOnAWordFinishesWithIt()
+    {
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 press step "
+            + "press task").Split(' '));
+        var door = screen.Editor.World.Entities.First(entity => entity.Name == "Airlock Inner Door");
+        var speed = 0;
+        door.Kind.WithValue("speed", "speed",
+                Being.OneOf<Sandbox.ModAPI.IMyTerminalBlock>(new[] { "low", "middle", "high" }, _ => speed)
+                    .Writing<Sandbox.ModAPI.IMyTerminalBlock>((_, given) => speed = (int)given.Whole))
+            .Looked("A test value.");
+        screen.Editor.PressBlock("Airlock Inner Door");
+        screen.Editor.PressChoice("speed");
+        screen.Run(2);
+        DoubleOn(screen, "high");
+
+        Assert.Equal("Sequence 1", screen.Ended);
+        var act = Assert.IsType<Act>(screen.Editor.Program.Sequences[0].Steps[0]);
+        Assert.Equal(Literal.Name("high"), Assert.Single(act.Arguments));
     }
 
     /// <summary>

@@ -16,7 +16,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// A line of words shows every answer at once, which a list hides until it is opened, so it is the line wherever there
     /// is room for it. Which one shows is decided where the field is placed, the only point that knows how wide its room
     /// is: it asks only for the list's width, so the line never widens a form it does not fit, and a form spans the room
-    /// beside the label to give it all there is.
+    /// beside the label to give it all there is. A double press on a word finishes the form with it, as Done does.
     /// </remarks>
     public class WordsField : Container, IField
     {
@@ -24,13 +24,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         readonly List<Button> _buttons = new List<Button>();
         readonly HStack _line;
         readonly ListField _list;
+        readonly ICommand _submit;
 
         string _text = "";
         bool _folded;
 
-        /// <summary>One button for each of <paramref name="words" />, and the list of them, none of them given yet.</summary>
-        public WordsField(IList<string> words)
+        /// <summary>One button for each of <paramref name="words" />, and the list of them, none given yet; a double press carries out <paramref name="submit" />.</summary>
+        public WordsField(IList<string> words, ICommand submit)
         {
+            _submit = submit;
             Focusable = true;
             Align = Align.Fill;
 
@@ -40,7 +42,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 var word = words[i];
                 _words.Add(word);
 
-                var button = new Button { Style = Styles.Word, Text = word, Command = new Relay(() => Give(word)) };
+                var button = new Button { Style = Styles.Word, Text = word };
+                button.Command = new Relay(() => Pressed(button, word));
                 _buttons.Add(button);
                 _line.Children.Add(button);
             }
@@ -159,6 +162,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         {
             Text = _list.Text;
             Raise();
+        }
+
+        void Pressed(Button button, string word)
+        {
+            Give(word);
+            if (button.Presses > 1)
+                _submit.Execute();
         }
 
         void Give(string word)

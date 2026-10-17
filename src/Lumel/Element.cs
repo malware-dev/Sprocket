@@ -149,6 +149,9 @@ namespace Lumel
             }
         }
 
+        /// <summary>How many presses in quick succession the last press on this was.</summary>
+        public int Presses { get; set; }
+
         /// <summary>What using this does, or null for nothing.</summary>
         /// <remarks>Carried out when a press begun on this is released on it, while it is enabled.</remarks>
         public ICommand Command

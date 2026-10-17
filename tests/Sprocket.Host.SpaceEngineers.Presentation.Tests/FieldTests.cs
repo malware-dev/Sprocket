@@ -174,6 +174,28 @@ public class FieldTests
         Assert.IsType<WordsField>(form.Fields[1]);
     }
 
+    /// <summary>A double press on a switch finishes the form with the word its first press gave, rather than flipping back.</summary>
+    [Fact]
+    public void ADoublePressOnASwitchFinishes()
+    {
+        var flag = Field.OneOf("keep aspect ratio", Literal.Of(true).Said, Literal.Of(false).Said);
+        flag.Edits = Editor.Chosen;
+        var form = new FieldSet();
+        form.Show(new[] { flag }, new string[0], new Hsv[0], new Texts());
+        var finished = 0;
+        form.Submitted += () => finished++;
+        var flip = form.Within().OfType<Lumel.Controls.Switch>().Single();
+
+        flip.Presses = 1;
+        flip.Command!.Execute();
+        var given = form.Answer;
+        flip.Presses = 2;
+        flip.Command!.Execute();
+
+        Assert.Equal(1, finished);
+        Assert.Equal(given, form.Answer);
+    }
+
     /// <summary>Nothing is held against what is typed until finishing is tried.</summary>
     [Fact]
     public void NothingIsRefusedBeforeFinishingIsTried()

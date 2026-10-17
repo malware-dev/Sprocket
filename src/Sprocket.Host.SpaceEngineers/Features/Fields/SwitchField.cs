@@ -13,19 +13,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
     /// <remarks>
     /// A switch because that is what on and off look like everywhere in this game; any other choice is a line of its words,
     /// which has room for longer ones. Inside a row of its own, so it is as wide as its words rather than as wide as the form.
+    /// A double press finishes the form, as Done does.
     /// </remarks>
     public class SwitchField : HStack, IField
     {
         readonly Switch _switch;
+        readonly ICommand _submit;
         readonly string _on;
         readonly string _off;
         readonly List<string> _words = new List<string>();
 
         string _text = "";
 
-        /// <summary>A switch between <paramref name="on" /> and <paramref name="off" />, given neither yet.</summary>
-        public SwitchField(string on, string off)
+        /// <summary>A switch between <paramref name="on" /> and <paramref name="off" />, given neither yet; a double press carries out <paramref name="submit" />.</summary>
+        public SwitchField(string on, string off, ICommand submit)
         {
+            _submit = submit;
             _on = on;
             _off = off;
             _words.Add(on);
@@ -87,6 +90,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Gives the other word, or the first where neither has been given.</summary>
         void Flip()
         {
+            if (_switch.Presses > 1)
+            {
+                _submit.Execute();
+                return;
+            }
+
             Give(_text == _on ? _off : _on);
         }
 

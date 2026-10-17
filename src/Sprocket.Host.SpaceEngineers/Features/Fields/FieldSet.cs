@@ -394,10 +394,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
             var words = field.Edits == Editor.Chosen ? field.Words : null;
             if (field.IsOnOff)
-                return new SwitchField(field.Words[0], field.Words[1]);
+                return new SwitchField(field.Words[0], field.Words[1], _submit);
 
             if (words != null && words.Count > 0 && words.Count <= Few)
-                return new WordsField(words);
+                return new WordsField(words, _submit);
 
             if (words != null && words.Count > Few)
                 return new ListField(words);
