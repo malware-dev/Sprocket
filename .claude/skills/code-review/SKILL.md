@@ -64,6 +64,19 @@ The page is mended in the same change, in both languages, by the `writing` skill
 A function added without its page goes unnoticed: `Update from library` reached the screens and no page
 mentioned it until a reader test happened to ask how a construct gets a newer blueprint.
 
+## Weigh every type the diff touches
+
+A diff shows the hundred lines that changed, never the three thousand around them, so a type that grows
+a little at a time passes every review that reads only the diff. SprocketEditor reached 3,691 lines that
+way.
+
+**Report the size of every type the diff touches**, in lines and public members, whether or not the diff
+made it bigger.
+
+**Then apply the split rule to each one**: do its members fall into groups that touch disjoint sets of
+fields? Size is the prompt and the field groups are the test. A large type that is one thing is reported
+with why; one that is several is a finding, even where the diff added none of its bulk.
+
 ## Read the diff
 
 Every added comment, against the rule that a comment says what the code **is**:
@@ -90,6 +103,15 @@ while**", rows that deepened until "it cost something **to come back**", a headi
 ship" **for a long time**. All three read as sense, and all three describe a shape the reader cannot
 see. A hit that quotes words on a screen - naming a heading rather than addressing the reader -
 stays.
+
+**Read every summary alone.** A summary is read on its own, in a tooltip or a generated page, so it says
+in full what its member is. A summary that leans on a sibling ("The same, for..."), one that defines its
+type by what it is not, and two summaries on one member are all findings. A summary carried to a new
+type is read again there: "this one", "the row's" and "this reader" name a place it no longer is.
+
+```
+git diff -U0 | grep "^+" | grep -E "/// <summary>(The same|Likewise|As above)"
+```
 
 **Grep the added lines for state that outlives a call**, which is the rule hardest to see by reading:
 
