@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;

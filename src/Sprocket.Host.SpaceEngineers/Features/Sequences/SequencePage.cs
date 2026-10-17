@@ -2,7 +2,6 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -10,7 +9,6 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
-using VRageMath;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -20,47 +18,38 @@ using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
-    /// <summary>One sequence: what it is doing, its steps, and the ways to add another.</summary>
+    /// <summary>The screen of one sequence: what it is doing, its steps, and the ways to add a step.</summary>
     /// <remarks>
     /// The live state here is the reason this is more than an editor: watching a sequence fire, sit on step three and
     /// skip a re-trigger saves somebody from running the program in their head. Locked, it is the same page with
     /// nothing to press: every grip, part, bin and arrow stays where it stands and goes quiet, and the line the adders
-    /// stand on says why instead. The elements it is drawn with are declared in <c>SequencePage.View.cs</c>, and
-    /// nothing else is; this half is what it knows, what it says and what it does.
+    /// stand on says why instead. The elements it is drawn with are declared in <c>SequencePage.View.cs</c>.
     /// </remarks>
     public sealed partial class SequencePage : EditorPage
     {
         const int JustRanTicks = 10;
-        // How long the ring around what is tied to what is under the pointer takes to brighten and fade again: a second.
-        const int PulseTicks = 60;
 
         readonly Sequence _sequence;
         readonly List<object> _keys = new List<object>();
         readonly List<int> _shown = new List<int>();
         Dictionary<Step, object> _ends = new Dictionary<Step, object>();
 
+        readonly Account _account;
+        readonly Stepwork _stepwork;
+        readonly Ties _ties;
         int _wiring = -1;
-        int _busy;
-        int _off;
-        string _skips = "";
-        string _calledOff;
-        Stopper _stoppedBy;
-        int _stoppedAt;
-        int _stoppedFrom;
         string _madeName;
         int _madeEdits;
         Keyed<object, StepRow> _rows;
-        readonly List<int> _waiter = new List<int>();
-        readonly List<int> _covered = new List<int>();
-        readonly List<bool> _lasting = new List<bool>();
-        int _hot = -1;
-        bool _hotWait;
         LengthQuestion _length;
 
         /// <summary>The page of <paramref name="sequence" />, in the editor <paramref name="editor" />.</summary>
         public SequencePage(SprocketEditor editor, Sequence sequence) : base(editor)
         {
             _sequence = sequence;
+            _account = new Account(sequence);
+            _stepwork = new Stepwork(editor, sequence);
+            _ties = new Ties(_stepwork.Lasting);
         }
 
         /// <summary>The id of the sequence the page shows.</summary>
@@ -69,7 +58,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>The panel a wait's length is being given in, or null while none is open.</summary>
         public DurationPanel Lengths => _length != null && _length.IsOpen ? _length.Panel : null;
 
-        /// <summary>A named sequence is called by its name, and an unnamed one by its number.</summary>
+        /// <summary>What the sequence is called: its name, or its number where it has none.</summary>
         /// <remarks>
         /// No subtitle. What the sequence is doing belongs beside the switch that changes it, and what starts it is a row
         /// on its system's screen: a sequence three triggers start has no one line to say so.
@@ -82,7 +71,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string Help => Terms.Sequence;
 
-        /// <summary>The switch is its system's, which is also what keeps the sequence from being changed while it may run.</summary>
+        /// <summary>Whether the screen has a switch: the logic system's, which also keeps the sequence from being changed while it may run.</summary>
         public override bool CanSwitch => _sequence.System != null;
 
         /// <inheritdoc />
@@ -101,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
         }
 
-        /// <summary>Runs it by hand, whatever the switch says.</summary>
+        /// <summary>The command that runs the sequence by hand, whatever the switch says.</summary>
         /// <remarks>
         /// Somebody working on a system switches it off so its triggers leave it alone, which is exactly when they want to
         /// see a sequence work.
@@ -120,10 +109,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string DeleteAbout => Editor.Texts.SequenceDelete;
 
-        /// <summary>The way back of the logic system the sequence is in: the last thing done to it, on any of its screens.</summary>
+        /// <summary>Always true: the screen walks back the changes to the sequence's logic system, the last thing done to it on any of its screens.</summary>
         public override bool HasHistory => true;
 
-        /// <summary>A step is walked back under the rule it was made under, which each step says for itself.</summary>
+        /// <summary>Whether a change to the sequence's logic system can be taken back from this screen, while nobody else holds the editor.</summary>
         public override bool CanUndo => Editor.Holder == null && Editor.CanUndo(_sequence.System, _sequence);
 
         /// <inheritdoc />
@@ -138,7 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>The sequence just made is as it was made: its name, and nothing done in the program since.</summary>
         public override bool Untouched => _sequence.Name == _madeName && Editor.Program.Edits == _madeEdits;
 
-        /// <summary>A sequence arrives already named, "Sequence 3", the way a block does, so renaming is always overtyping.</summary>
+        /// <summary>The name renaming overtypes: a sequence arrives already named, "Sequence 3", the way a block does.</summary>
         public override string CustomName => _sequence.Name ?? "";
 
         /// <inheritdoc />
@@ -147,7 +136,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.SequenceNameAbout;
 
-        /// <summary>A sequence has to be called something, because the name is what identifies it.</summary>
+        /// <summary>Always true: a sequence has to be called something, as its name is what identifies it.</summary>
         public override bool NameRequired => true;
 
         /// <summary>Whether the sequence may be changed now: not while its system is switched on, and not while somebody else holds the editor.</summary>
@@ -216,7 +205,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             Editor.Redo(_sequence.System, _sequence);
         }
 
-        /// <summary>One part: what this sequence is called, the name where there is one and what it does where there is not.</summary>
+        /// <summary>Puts the screen's heading in <paramref name="parts" />: one part, what the sequence is called.</summary>
         /// <remarks>What starts it is not here: a sequence may be started from several places, and its system already lists them.</remarks>
         public override void Heading(List<HeadingPart> parts)
         {
@@ -292,17 +281,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var tick = Editor.CurrentTick;
 
             var status = SequenceSummary.Status(_sequence, state);
-            _bar.Status = status == SequenceStatus.Stopped ? CalledOff(texts, state) : SequenceText.Status(texts, status);
+            _bar.Status = status == SequenceStatus.Stopped ? _account.CalledOff(texts, state) : SequenceText.Status(texts, status);
             _bar.JustRan = state != null && state.LastFiredTick >= 0 && tick - state.LastFiredTick < JustRanTicks;
             _bar.LastRun = Editor.Ago.Said(SequenceSummary.TicksSinceRun(state, tick));
-            _bar.Skipped = Skips(texts, state?.SkippedCount ?? 0, state?.RefusedCount ?? 0);
+            _bar.Skipped = _account.Skips(texts, state?.SkippedCount ?? 0, state?.RefusedCount ?? 0);
 
             if (recount)
                 Mark();
 
             // The ring around what is tied to what is under the pointer pulses while there is one.
-            Light();
-            var glow = _hot < 0 ? Palette.None : Pulse(tick);
+            _ties.Light(_keys, _rows, _steps.IsCarrying);
+            var glow = _ties.Glow(tick);
 
             // A row is lit while the sequence is anywhere inside it, so a step stays lit while the wait after it is what
             // is being waited on.
@@ -350,7 +339,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _wiring = Editor.Program.Wiring;
 
             // Joined again after anything that builds the page, a change of language among them.
-            _busy = -1;
+            _account.Forget();
 
             // Everything that changes what the sequence does waits until its system is switched off: the commands are not
             // made, so there is nothing to press by accident, and the page keeps its shape either way.
@@ -423,12 +412,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Carries = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
                 row.Slots.Clear();
                 Word(row, step);
-                row.Deletes = closes ? null : Changes(Cmd.DeleteStep, () => Remove(index));
+                row.Deletes = closes ? null : Changes(Cmd.DeleteStep, () => _stepwork.Remove(index));
                 row.Copies = closes || branch && Kind(step) != StepKind.OtherwiseIf
                     ? null
-                    : Changes(Cmd.DuplicateStep, () => Duplicate(index));
+                    : Changes(Cmd.DuplicateStep, () => _stepwork.Duplicate(index));
                 row.IsOff = step.IsOff || index <= offTo;
-                row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, () => SwitchStep(index));
+                row.Pauses = branch || closes ? null : Changes(Cmd.SwitchStep, () => _stepwork.SwitchStep(index));
                 row.Grip.CanCarry = editable && !closes && (!branch || Kind(step) == StepKind.OtherwiseIf);
                 Branches(row, texts, step, index);
                 row.Locked = locked;
@@ -437,151 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     depth++;
             }
 
-            Covers();
-        }
-
-        /// <summary>
-        /// Works out which row waits for each step that takes time, and from which row each wait covers: every step that takes time
-        /// since the wait before, down to the wait.
-        /// </summary>
-        /// <remarks>
-        /// A step that takes time with no wait below it is covered by none, which is how the sequence leaves it to finish on its own.
-        /// A paused step is read as the run reads it, as though it were not there: a paused wait covers nothing and leaves its steps
-        /// to the next wait, and a paused step that takes time is not waited for.
-        /// </remarks>
-        void Covers()
-        {
-            _waiter.Clear();
-            _covered.Clear();
-            _lasting.Clear();
-            for (var i = 0; i < _keys.Count; i++)
-            {
-                _waiter.Add(-1);
-                _covered.Add(-1);
-                var step = _keys[i] as Step;
-                _lasting.Add(step != null && Lasting(step) && !_rows[_keys[i]].IsOff);
-            }
-
-            _hot = -1;
-            var open = -1;
-            for (var i = 0; i < _keys.Count; i++)
-            {
-                if (!(_keys[i] is Step))
-                    continue;
-
-                if (_lasting[i] && open < 0)
-                    open = i;
-
-                // A paused wait is read as though it were not there, its steps going to the next.
-                if (!(_keys[i] is Await) || _rows[_keys[i]].IsOff || open < 0)
-                    continue;
-
-                _covered[i] = open;
-                for (var j = open; j <= i; j++)
-                {
-                    if (_lasting[j] || j == i)
-                        _waiter[j] = i;
-                }
-
-                open = -1;
-            }
-        }
-
-        /// <summary>
-        /// Lights what is tied to what is under the pointer, its own clock with it: on a wait, the clock marks of the steps it covers;
-        /// on a step, the clock of the wait covering it.
-        /// </summary>
-        /// <remarks>Asked every tick, as the pointer gives no word when it moves; it lights anything only when what is under it is another.</remarks>
-        void Light()
-        {
-            var hot = -1;
-            var onWait = false;
-
-            // Nothing is lit while a step is carried: the pointer passing over rows on its way is not pointing at them.
-            for (var i = 0; !_steps.IsCarrying && i < _keys.Count && i < _waiter.Count; i++)
-            {
-                var row = _rows[_keys[i]];
-                if (row.Kind == StepKind.Await && row.IsHot)
-                {
-                    hot = i;
-                    onWait = true;
-                    break;
-                }
-
-                if (hot < 0 && row.Hot)
-                    hot = i;
-            }
-
-            if (hot == _hot && onWait == _hotWait)
-                return;
-
-            _hot = hot;
-            _hotWait = onWait;
-
-            var waiter = hot < 0 ? -1 : onWait ? _covered[hot] >= 0 ? hot : -1 : _waiter[hot];
-            for (var i = 0; i < _waiter.Count; i++)
-            {
-                var row = _rows[_keys[i]];
-                var tied = waiter >= 0 && _waiter[i] == waiter && _lasting[i];
-                row.MarksLit = onWait ? tied : waiter >= 0 && i == hot;
-                row.ClockLit = i == waiter;
-            }
-
-            Join();
-        }
-
-        /// <summary>Runs the spine joining lit lines from the first of them to the last.</summary>
-        void Join()
-        {
-            var first = -1;
-            var last = -1;
-            for (var i = 0; i < _waiter.Count; i++)
-            {
-                var row = _rows[_keys[i]];
-                if (!row.MarksLit && !row.ClockLit)
-                    continue;
-
-                if (first < 0)
-                    first = i;
-
-                last = i;
-            }
-
-            for (var i = 0; i < _waiter.Count; i++)
-            {
-                var row = _rows[_keys[i]];
-                row.Joins = first >= 0 && i >= first && i <= last;
-                row.JoinFirst = i == first;
-                row.JoinLast = i == last;
-            }
-        }
-
-        /// <summary>The ring's color at <paramref name="tick" />, brightening and fading once a second.</summary>
-        static Color Pulse(int tick)
-        {
-            var phase = tick % PulseTicks * MathHelper.TwoPi / PulseTicks;
-            return Palette.Link * (0.6f - 0.4f * (float)Math.Cos(phase));
-        }
-
-        /// <summary>Whether <paramref name="step" /> starts something that takes time: running another sequence, or an action that lasts.</summary>
-        bool Lasting(Step step)
-        {
-            var run = step as Run;
-            if (run != null)
-                return !run.Stops;
-
-            var act = step as Act;
-            if (act == null || act.Sets)
-                return false;
-
-            var chosen = act.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, act.Targets)));
-            return chosen != null && chosen.Lasts;
-        }
-
-        /// <summary>Whether a wait follows the step at <paramref name="index" />.</summary>
-        bool Waited(int index)
-        {
-            return index + 1 < _sequence.Steps.Count && _sequence.Steps[index + 1] is Await;
+            _ties.Cover(_keys, _rows);
         }
 
         /// <summary>Makes <paramref name="row" /> the end of a branch: the ways to add a step to it, at the line <paramref name="at" /> the branch ends before.</summary>
@@ -608,7 +453,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var kinds = new List<Adder>
             {
-                new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, () => AddAction(at))),
+                new Adder(texts.SequenceDoSomething, texts.SequenceDoSomethingAbout, Changes(Cmd.AddAction, () => _stepwork.AddAction(at))),
                 new Adder(SentenceText.WaitWord, texts.SequenceWaitAbout, Changes(Cmd.AddWait, () => AddWait(at)))
             };
 
@@ -616,9 +461,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             kinds.Add(new Adder(SentenceText.AwaitWords, texts.SequenceAwaitAbout,
                 Changes(Cmd.AddAwait, () => Editor.Do(_sequence, new AddStep(Change.AddStep, at, new Await())))));
 
-            kinds.Add(new Adder(SentenceText.RunWord, texts.SequenceRunAbout, Changes(Cmd.AddRun, () => AddRun(false, at))));
-            kinds.Add(new Adder(SentenceText.StopWord, texts.SequenceStopAbout, Changes(Cmd.AddStop, () => AddRun(true, at))));
-            kinds.Add(new Adder(SentenceText.IfWord, texts.SequenceIfAbout, Changes(Cmd.AddIf, () => AddIf(at))));
+            kinds.Add(new Adder(SentenceText.RunWord, texts.SequenceRunAbout, Changes(Cmd.AddRun, () => _stepwork.AddRun(false, at))));
+            kinds.Add(new Adder(SentenceText.StopWord, texts.SequenceStopAbout, Changes(Cmd.AddStop, () => _stepwork.AddRun(true, at))));
+            kinds.Add(new Adder(SentenceText.IfWord, texts.SequenceIfAbout, Changes(Cmd.AddIf, () => _stepwork.AddIf(at))));
             return kinds;
         }
 
@@ -634,16 +479,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var ends = _sequence.Otherwise(_sequence.OpenOf(index)) < 0;
                 row.Adds.Add(new Adder(texts.SequenceBranch, texts.SequenceBranchAbout, new[]
                 {
-                    new Adder(SentenceText.OtherwiseIfWords, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, () => AddBranch(index))),
+                    new Adder(SentenceText.OtherwiseIfWords, texts.SequenceOtherwiseIfAbout, Changes(Cmd.AddBranch, () => _stepwork.AddBranch(index))),
                     new Adder(SentenceText.OtherwiseWord, texts.SequenceOtherwiseAbout,
-                        ends ? Changes(Cmd.AddBranch, () => AddLast(index)) : null)
+                        ends ? Changes(Cmd.AddBranch, () => _stepwork.AddLast(index)) : null)
                 }));
             }
             else if (Kind(step) == StepKind.Otherwise)
             {
                 row.Adds.Add(new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, new[]
                 {
-                    new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, () => GiveTest(step)))
+                    new Adder(SentenceText.IfWord, texts.SequenceOtherwiseTestAbout, Changes(Cmd.AddBranch, () => _stepwork.GiveTest(step)))
                 }));
             }
         }
@@ -703,49 +548,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
         }
 
-        /// <summary>What stopped the last run and where, in one line.</summary>
-        /// <remarks>Asked every tick while it is the status, so the line is joined again only when the stop it says is another.</remarks>
-        string CalledOff(Texts texts, SequenceRunner state)
-        {
-            if (state.StoppedBy == _stoppedBy && state.StoppedAt == _stoppedAt && state.StoppedFrom == _stoppedFrom
-                && _calledOff != null)
-            {
-                return _calledOff;
-            }
-
-            _stoppedBy = state.StoppedBy;
-            _stoppedAt = state.StoppedAt;
-            _stoppedFrom = state.StoppedFrom;
-            _calledOff = SequenceText.CalledOff(texts, _sequence, state);
-            return _calledOff;
-        }
-
-        /// <summary>What was asked for and did not happen, and why not, in one line when both happened.</summary>
-        /// <remarks>Asked every tick, so the line is joined again only when a count has changed.</remarks>
-        string Skips(Texts texts, int busy, int off)
-        {
-            if (busy == _busy && off == _off)
-                return _skips;
-
-            _busy = busy;
-            _off = off;
-
-            var missed = busy.ToString(CultureInfo.InvariantCulture);
-            var refused = off.ToString(CultureInfo.InvariantCulture);
-            if (busy == 0 && off == 0)
-                _skips = "";
-            else if (busy == 0)
-                _skips = off == 1 ? texts.SequenceSkippedOffOne : Template.Fill(texts.SequenceSkippedOff, "off", refused);
-            else if (off == 0)
-                _skips = busy == 1 ? texts.SequenceSkippedBusyOne : Template.Fill(texts.SequenceSkippedBusy, "busy", missed);
-            else
-                _skips = busy == 1
-                    ? Template.Fill(texts.SequenceSkippedBothOne, "off", refused)
-                    : Template.Fill(Template.Fill(texts.SequenceSkippedBoth, "busy", missed), "off", refused);
-
-            return _skips;
-        }
-
         /// <summary>A command made only while the sequence may be changed, and null while it may not.</summary>
         ICommand Changes(Cmd kind, Action action)
         {
@@ -777,7 +579,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 // Opened on the list that made it, to run or stop another.
                 var called = _sequence.System?.FindSequence(run.Number);
                 row.Slots.Add(new SequenceSlot(run.Number, called == null ? "" : called.Name,
-                    Changes(Cmd.StepSlot, () => ChangeRun(run))));
+                    Changes(Cmd.StepSlot, () => _stepwork.ChangeRun(run))));
                 return;
             }
 
@@ -794,12 +596,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (verb.Length != 0)
             {
                 row.Kind = StepKind.Enable;
-                row.Slots.Add(ArgumentsSlot.Switching(verb, Changes(Cmd.StepSlot, () => EditStep(act, Opening.Arguments))));
+                row.Slots.Add(ArgumentsSlot.Switching(verb, Changes(Cmd.StepSlot, () => _stepwork.EditStep(act, Opening.Arguments))));
             }
 
-            row.Slots.Add(new ActionSlot(chosen, Changes(Cmd.StepSlot, () => EditStep(act, Opening.What))));
+            row.Slots.Add(new ActionSlot(chosen, Changes(Cmd.StepSlot, () => _stepwork.EditStep(act, Opening.What))));
             row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), true,
-                Changes(Cmd.StepSlot, () => EditStep(act, Opening.Blocks))));
+                Changes(Cmd.StepSlot, () => _stepwork.EditStep(act, Opening.Blocks))));
             if (verb.Length != 0)
                 return;
 
@@ -810,7 +612,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var fields = new List<Field>();
             chosen.Fields(fields);
-            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, () => EditStep(act, Opening.Arguments)),
+            var given = new ArgumentsSlot(act.Arguments, fields, Changes(Cmd.StepSlot, () => _stepwork.EditStep(act, Opening.Arguments)),
                 act.Sets ? Given.NewValue : Given.Options);
             if (!given.Quiet)
                 row.Slots.Add(given);
@@ -834,15 +636,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 var said = SentenceText.Quantified(test.Quantifier);
                 var numeric = value != null && (value.Holds == ValueKind.Integer || value.Holds == ValueKind.Real);
                 row.Slots.Add(new ArgumentsSlot(new[] { Literal.Name(said) }, new[] { Field.Among("reading", new[] { said }, new[] { said }) },
-                    Changes(Cmd.StepSlot, () => Quantify(step, test, numeric)), Given.Read));
+                    Changes(Cmd.StepSlot, () => _stepwork.Quantify(step, test, numeric)), Given.Read));
             }
 
             // A value on some blocks, as a set step and the script say it; a status is the blocks themselves.
             if (value == null || !value.IsStatus)
-                row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, () => EditTest(step, test, Opening.What))));
+                row.Slots.Add(new ActionSlot(value, Changes(Cmd.StepSlot, () => _stepwork.EditTest(step, test, Opening.What))));
 
             row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
-                Changes(Cmd.StepSlot, () => EditTest(step, test, Opening.Blocks))));
+                Changes(Cmd.StepSlot, () => _stepwork.EditTest(step, test, Opening.Blocks))));
 
             if (value == null)
                 return;
@@ -852,59 +654,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var fields = Comparing.Fields(value, Vocabulary.EventsFor(bindings, seen));
             var plural = test.Quantifier == Quantifier.All && blocks.Count > 1;
             row.Slots.Add(new ArgumentsSlot(new[] { Comparing.Of(test.Relation) }, fields.GetRange(0, 1),
-                Changes(Cmd.StepSlot, () => Relate(step, test, fields[0], plural)), Given.Compared, plural));
+                Changes(Cmd.StepSlot, () => _stepwork.Relate(step, test, fields[0], plural)), Given.Compared, plural));
             row.Slots.Add(new ArgumentsSlot(new[] { test.Value }, fields.GetRange(1, fields.Count - 1),
-                Changes(Cmd.StepSlot, () => EditTest(step, test, Opening.Arguments)), Given.Checked));
-        }
-
-        /// <summary>Offers the comparisons <paramref name="relation" /> takes in a menu under the part pressed, the one <paramref name="test" /> makes marked, and changes the test to the one chosen as one edit.</summary>
-        void Relate(Step step, Comparison test, Field relation, bool plural)
-        {
-            Editor.AskHere("");
-            for (var i = 0; i < relation.Words.Count; i++)
-            {
-                var related = Comparing.Read(Literal.Name(relation.Means[i]));
-                var said = plural ? SentenceText.Plural(relation.Words[i]) : relation.Words[i];
-                Editor.Answer(said, delegate
-                {
-                    if (related == test.Relation)
-                        return;
-
-                    var now = test.Copy();
-                    now.Relation = related;
-                    Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
-                }, related == test.Relation);
-            }
-        }
-
-        /// <summary>
-        /// Offers the ways <paramref name="test" /> can read its blocks in a menu under the part pressed, in the sentence's own
-        /// words, the one it reads them by marked, and changes it to the one chosen as one edit; a sum and an average only of
-        /// what is <paramref name="numeric" />.
-        /// </summary>
-        void Quantify(Step step, Comparison test, bool numeric)
-        {
-            Editor.AskHere("");
-            for (var i = 0; i < SentenceText.Readings.Count; i++)
-            {
-                var reading = SentenceText.Readings[i];
-                if (numeric || reading == Quantifier.Any || reading == Quantifier.All)
-                    Quantifying(step, test, reading);
-            }
-        }
-
-        /// <summary>One answer of <see cref="Quantify" />: reading the blocks by <paramref name="quantifier" />.</summary>
-        void Quantifying(Step step, Comparison test, Quantifier quantifier)
-        {
-            Editor.Answer(SentenceText.Quantified(quantifier), () =>
-            {
-                if (quantifier == test.Quantifier)
-                    return;
-
-                var now = test.Copy();
-                now.Quantifier = quantifier;
-                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
-            }, quantifier == test.Quantifier);
+                Changes(Cmd.StepSlot, () => _stepwork.EditTest(step, test, Opening.Arguments)), Given.Checked));
         }
 
         static StepKind Kind(Step step)
@@ -933,256 +685,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return StepKind.Do;
         }
 
-        /// <summary>Opens a step's picker on the column <paramref name="opens" /> says, the part that was pressed.</summary>
-        void EditStep(Act step, Opening opens)
-        {
-            var index = _sequence.Steps.IndexOf(step);
-
-            // Handed what the step already holds, so the question that finishes this opens on those values rather than
-            // empty: changing which blocks a step acts on is not a reason to type its values again.
-            Editor.Push(new PickPage(Editor, "Do something", false,
-                Editor.Blocks(_sequence.System, step.Targets), step.ActionId, step.Form,
-                answer =>
-                {
-                    var named = Named(answer, step.Targets);
-                    var lasts = Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form);
-                    Editor.Do(_sequence,
-                        new ChangeStep(index, step, named, answer.Chosen,
-                            answer.Form, Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form),
-                            answer.Arguments, Awaited(index, step, lasts)));
-                    Editor.Pop();
-                }, arguments: step.Arguments, opens: opens, facet: Editor.Picks.Facet(_sequence.System, step.Targets)));
-        }
-
-        /// <summary>
-        /// The names the step answered by <paramref name="answer" /> acts on, in place of <paramref name="replacing" /> where it
-        /// replaces a list: a slot of the facet chosen, where what it does is a member of a type the host provides.
-        /// </summary>
-        List<string> Named(PickAnswer answer, IList<string> replacing)
-        {
-            var type = answer.Facet.Length == 0 ? null : Vocabulary.TypeOf(Editor.World, answer.Targets, answer.Chosen);
-            return type == null
-                ? Editor.Picks.Named(_sequence.System, answer.Targets, replacing)
-                : Editor.Picks.Named(_sequence.System, type, answer.Facet, answer.Targets, replacing);
-        }
-
-        /// <summary>
-        /// Whether the step at <paramref name="index" />, changed to something that <paramref name="lasts" /> or not, is followed by a
-        /// wait: the one it has, kept, and one for a step that comes to take time as a new one would have.
-        /// </summary>
-        bool Awaited(int index, Act step, bool lasts)
-        {
-            return Waited(index) || lasts && !Lasting(step);
-        }
-
-        /// <summary>Asks what to affect, then what to do to it, and adds the step only once both are answered.</summary>
-        /// <remarks>
-        /// Blocks first, because somebody knows which block they mean but may not know what verbs exist: pointing at a
-        /// door and being told what a door can do is discovery, and every verb on the ship in one list is a wall.
-        /// </remarks>
-        void AddAction(int at)
-        {
-            var origin = Editor.Depth;
-
-            Editor.Push(new PickPage(Editor, "Do something", false,
-                new List<long>(), "", Nature.Native,
-                answer =>
-                {
-                    var step = new Act(answer.Chosen);
-                    step.Form = answer.Form;
-                    step.Provider = Vocabulary.Provider(Editor.World, answer.Targets, answer.Chosen, answer.Form);
-                    var named = Named(answer, null);
-                    foreach (var target in named)
-                        step.Targets.Add(target);
-
-                    for (var i = 0; i < answer.Arguments.Count; i++)
-                        step.Arguments.Add(answer.Arguments[i]);
-
-                    // With a wait for it after it where what it does takes time to finish, because a numbered list is
-                    // read as one thing after another; one edit, so one press takes the pair back.
-                    Editor.Do(_sequence, Vocabulary.Lasts(Editor.World, answer.Targets, answer.Chosen, answer.Form)
-                        ? new AddStep(Change.AddStep, at, step, new Await())
-                        : new AddStep(Change.AddStep, at, step));
-                    Editor.UnwindTo(origin);
-                }));
-        }
-
-        /// <summary>Asks what to check, and adds an if that checks it, with nothing in it yet, at the line <paramref name="at" />.</summary>
-        void AddIf(int at)
-        {
-            var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, test =>
-            {
-                Editor.Do(_sequence, new AddStep(Change.AddIf, at, new If(test), new EndIf()));
-                Editor.UnwindTo(origin);
-            }));
-        }
-
-        /// <summary>Asks what to check, and adds an otherwise if checking it to the if closed at <paramref name="end" />: last, or above its otherwise, which comes last.</summary>
-        void AddBranch(int end)
-        {
-            var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, test =>
-            {
-                var last = _sequence.Otherwise(_sequence.OpenOf(end));
-                Editor.Do(_sequence, new AddStep(Change.AddBranch, last < 0 ? end : last, new Else(test)));
-                Editor.UnwindTo(origin);
-            }));
-        }
-
-        /// <summary>Asks what to check, and makes the otherwise <paramref name="step" /> an otherwise if checking it, where it stands.</summary>
-        void GiveTest(Step step)
-        {
-            var origin = Editor.Depth;
-            Editor.Push(TestPage(null, Opening.Blocks, test =>
-            {
-                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), null, test));
-                Editor.UnwindTo(origin);
-            }));
-        }
-
-        /// <summary>Adds an otherwise to the if closed at <paramref name="end" />, as its last branch.</summary>
-        void AddLast(int end)
-        {
-            Editor.Do(_sequence, new AddStep(Change.AddBranch, end, new Else(null)));
-        }
-
-        /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed.</summary>
-        void EditTest(Step step, Comparison test, Opening opens)
-        {
-            Editor.Push(TestPage(test, opens, now =>
-            {
-                Editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
-                Editor.Pop();
-            }));
-        }
-
-        /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>
-        PickPage TestPage(Comparison test, Opening opens, Action<Comparison> chosen)
-        {
-            // A sameness on a status opens on its state, chosen as it is listed; anything else on its value.
-            var value = test?.Names(Vocabulary.ActionsFor(Editor.Runner.Bindings, Editor.Seen(_sequence.System, test.Targets)));
-            var stated = value != null && value.IsStatus && (test.Relation == Relation.Is || test.Relation == Relation.IsNot);
-            return new PickPage(Editor, "Check something", false,
-                test == null ? new List<long>() : Editor.Blocks(_sequence.System, test.Targets),
-                test == null ? "" : stated ? Comparing.Id(test.MemberId, test.Value.Said) : test.MemberId,
-                stated ? Nature.Native : Nature.Value,
-                answer => chosen(Test(answer, test)),
-                true, test?.Quantifier ?? Quantifier.Any,
-                test == null ? null : stated ? new[] { Comparing.Of(test.Relation) } : new[] { Comparing.Of(test.Relation), test.Value },
-                opens, forTests: true, facet: test == null ? "" : Editor.Picks.Facet(_sequence.System, test.Targets));
-        }
-
-        /// <summary>The test a pick for one comes to, changing <paramref name="was" /> where there was one.</summary>
-        /// <remarks>
-        /// The picker asks for the blocks, the value, how it is compared and with what. A sum and a function's arguments are
-        /// kept from <paramref name="was" /> where the same value is picked again, so changing the blocks of a test written in
-        /// the script changes nothing else.
-        /// </remarks>
-        Comparison Test(PickAnswer answer, Comparison was)
-        {
-            var test = new Comparison();
-            test.Quantifier = answer.Quantifier;
-            var named = Named(answer, was?.Targets);
-            foreach (var target in named)
-                test.Targets.Add(target);
-
-            // Read off the blocks picked, since a slot made for them is not filled until the edit is done.
-            string id, state;
-            var stated = Comparing.Split(answer.Chosen, out id, out state);
-            var value = Valued(Vocabulary.ActionsOf(Editor.World, answer.Targets), id);
-            var given = answer.Arguments;
-            test.MemberId = id;
-            test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";
-            test.Relation = given != null && given.Count > 0 ? Comparing.Read(given[0]) : Relation.Is;
-            test.Value = stated ? Stated(state) : given != null && given.Count > 1 ? given[1] : Literal.Of(true);
-            if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)
-                return test;
-
-            for (var i = 0; i < was.Arguments.Count; i++)
-                test.Arguments.Add(was.Arguments[i]);
-
-            return test;
-        }
-
-        /// <summary>The state a choice checking a status names, as the program holds it: on or off for a switch, a name otherwise.</summary>
-        static Literal Stated(string state)
-        {
-            if (state == Literal.Of(true).Said)
-                return Literal.Of(true);
-
-            return state == Literal.Of(false).Said ? Literal.Of(false) : Literal.Name(state);
-        }
-
-        /// <summary>The value called <paramref name="id" /> among <paramref name="actions" />, or null where there is none.</summary>
-        static EntityAction Valued(IList<EntityAction> actions, string id)
-        {
-            for (var i = 0; i < actions.Count; i++)
-            {
-                if (actions[i].Id == id && actions[i].Form == Nature.Value)
-                    return actions[i];
-            }
-
-            return null;
-        }
-
         /// <summary>Adds a wait of a second at <paramref name="at" />, in the player's unit, and opens the panel its length is given in.</summary>
         void AddWait(int at)
         {
             var wait = new Wait(Editor.NewLength);
             Editor.Do(_sequence, new AddStep(Change.AddWait, at, wait));
             Open(wait, true);
-        }
-
-        /// <summary>Asks which other sequence of the system to run, or to stop where <paramref name="stops" /> says so, and adds the step that does.</summary>
-        /// <remarks>
-        /// Running one comes with a wait for it after it, one edit, because a numbered list is read as one thing after another;
-        /// stopping one is done at once.
-        /// </remarks>
-        void AddRun(bool stops, int at)
-        {
-            var origin = Editor.Depth;
-            Editor.Push(RunPage(stops, 0, number =>
-            {
-                Editor.Do(_sequence, stops
-                    ? new AddStep(Change.AddStep, at, new Run(number, true))
-                    : new AddStep(Change.AddStep, at, new Run(number), new Await()));
-                Editor.UnwindTo(origin);
-            }));
-        }
-
-        /// <summary>Asks again which sequence <paramref name="step" /> runs or stops, on the list that made it.</summary>
-        void ChangeRun(Run step)
-        {
-            var origin = Editor.Depth;
-            Editor.Push(RunPage(step.Stops, step.Number, number =>
-            {
-                Editor.Do(_sequence, new SetRun(_sequence.Steps.IndexOf(step), step.Number, number));
-                Editor.UnwindTo(origin);
-            }));
-        }
-
-        /// <summary>The system's other sequences, to run or to stop, with <paramref name="current" /> marked where it is one; <paramref name="chosen" /> is given the one chosen.</summary>
-        ChoicePage RunPage(bool stops, int current, Action<int> chosen)
-        {
-            var texts = Editor.Texts;
-            var page = new ChoicePage(Editor, stops ? texts.SequenceStopQuestion : texts.SequenceRunQuestion)
-            {
-                EmptyText = stops ? texts.SequenceStopNone : texts.SequenceRunNone
-            };
-
-            var sequences = _sequence.System.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-            {
-                var other = sequences[i];
-                if (other == _sequence)
-                    continue;
-
-                page.Add(SequenceText.Called(texts, other), other.Number == current, () => chosen(other.Number));
-                page.MarkLast(Symbols.Sequence);
-            }
-
-            return page;
         }
 
         /// <summary>Opens the panel the length of <paramref name="wait" /> is given in, hung from its chip once the chip is on a screen.</summary>
@@ -1197,108 +705,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 _length.Finish(false);
 
             _length = new LengthQuestion(Editor, wait.Length, false, () => LengthChip(wait),
-                (length, cancelled) => Closed(wait, length, added, cancelled));
+                (length, cancelled) => _stepwork.Closed(wait, length, added, cancelled));
             _length.Hang();
-        }
-
-        /// <summary>Gives <paramref name="wait" /> the <paramref name="length" /> its panel closed on, or leaves it as it was where it was <paramref name="cancelled" />.</summary>
-        void Closed(Wait wait, Duration? length, bool added, bool cancelled)
-        {
-            var index = _sequence.Steps.IndexOf(wait);
-            if (index < 0)
-                return;
-
-            if (added && cancelled)
-            {
-                Editor.Withdraw(_sequence);
-                return;
-            }
-
-            if (cancelled || !length.HasValue || length.Value == wait.Length)
-                return;
-
-            if (added && Editor.Withdraw(_sequence))
-                Editor.Do(_sequence, new AddStep(Change.AddWait, index, new Wait(length.Value)));
-            else
-                Editor.Do(_sequence, new SetWait(index, wait.Length, length.Value));
-        }
-
-        /// <summary>Deletes the row's step; an if, or a branch of one, asks first whether the steps in it go too.</summary>
-        void Remove(int index)
-        {
-            var step = _sequence.Steps[index];
-            if (!(step is Branch))
-            {
-                RemoveStep(index);
-                return;
-            }
-
-            var whole = step is If;
-            var texts = Editor.Texts;
-            Editor.AskHere(whole ? texts.SequenceRemoveIf : texts.SequenceRemoveBranch);
-            Editor.Answer(texts.SequenceKeepSteps, () => Unwrap(index, whole));
-            Editor.Answer(texts.SequenceDeleteSteps, () => Cut(index, whole));
-            Editor.Answer(texts.ButtonLeaveAlone, () => { }, true);
-        }
-
-        /// <summary>Puts a copy of the row's step right after it: whatever a drag would carry, an if with every step in it, a branch with its own.</summary>
-        void Duplicate(int index)
-        {
-            var steps = _sequence.Steps;
-            int end;
-            if (steps[index] is If)
-                end = _sequence.EndOf(index) + 1;
-            else if (steps[index] is Else)
-                end = _sequence.BranchAfter(index);
-            else
-                end = index + 1;
-
-            var copies = new List<Step>();
-            for (var i = index; i < end; i++)
-                copies.Add(Automation.Copied(steps[i]));
-
-            Editor.Do(_sequence, new AddStep(Change.CopyStep, end, copies.ToArray()));
-        }
-
-        void RemoveStep(int index)
-        {
-            Editor.Do(_sequence, new RemoveStep(index, _sequence.Steps[index]));
-        }
-
-        /// <summary>
-        /// Takes out the if at <paramref name="index" /> where <paramref name="whole" /> says so, its own lines only, or the branch
-        /// line there, keeping every step that was in it where it stands.
-        /// </summary>
-        /// <remarks>A branch's steps join the branch before it.</remarks>
-        void Unwrap(int index, bool whole)
-        {
-            var lines = whole ? _sequence.Branches(index) : new List<int> { index };
-            if (whole)
-                lines.Add(_sequence.EndOf(index));
-
-            var steps = new List<Step>();
-            foreach (var line in lines)
-                steps.Add(_sequence.Steps[line]);
-
-            Editor.Do(_sequence, new Unwrap(whole ? Change.Unwrap : Change.RemoveBranch, lines, steps));
-        }
-
-        /// <summary>Deletes the if at <paramref name="index" /> where <paramref name="whole" /> says so, or the branch there, with every step in it.</summary>
-        void Cut(int index, bool whole)
-        {
-            var end = whole ? _sequence.EndOf(index) + 1 : _sequence.BranchAfter(index);
-
-            var going = new List<Step>();
-            for (var i = index; i < end && i < _sequence.Steps.Count; i++)
-                going.Add(_sequence.Steps[i]);
-
-            Editor.Do(_sequence, new RemoveStep(whole ? Change.RemoveIf : Change.RemoveBranch, index, going.ToArray()));
-        }
-
-        /// <summary>Pauses the row's step, or lets it go again.</summary>
-        void SwitchStep(int index)
-        {
-            Editor.Do(_sequence, new SwitchStep(index, 1, !_sequence.Steps[index].IsOff));
         }
 
         /// <summary>

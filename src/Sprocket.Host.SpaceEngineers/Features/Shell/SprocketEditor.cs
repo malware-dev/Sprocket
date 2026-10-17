@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -23,8 +22,6 @@ using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Localization;
-using VRage.Game.ModAPI;
-using Run = Sprocket.Host.SpaceEngineers.Sequences.Run;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {

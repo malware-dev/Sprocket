@@ -287,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return null;
         }
 
-        /// <summary>Counts up whenever what <see cref="Missing" /> answers may have changed, so a reader asks again only then.</summary>
+        /// <summary>Counts up whenever what <see cref="Lost" /> answers may have changed, so a reader asks again only then.</summary>
         public int MissingStamp => _missingStamp;
 
         /// <summary>Says a poller now finds a block it watches gone, or back, or the pollers themselves changed.</summary>

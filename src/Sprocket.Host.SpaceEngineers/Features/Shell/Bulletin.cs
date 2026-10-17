@@ -1,6 +1,5 @@
 using Lumel.Input;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Ownership;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell

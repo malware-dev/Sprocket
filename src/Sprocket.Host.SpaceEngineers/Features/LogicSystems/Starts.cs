@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Lumel.Text;
-using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
