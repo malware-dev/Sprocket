@@ -96,6 +96,8 @@ graphics, and it is the only way to prove a cleanup changed nothing visible.
 --dump                                     the current frame as readable text
 --content                                  what the game's own assets say
 --profile                                  how long saving and loading a program takes, worst cases included
+--blueprint <scenario> [folder]            a game test scenario written as a blueprint (the test-scenarios skill)
+--checks <scenario> [first]                its game-only checks, as rows for the Testing artifact
 ```
 
 **`--profile` is the parser's guard, and it only means anything in Release** (`-c Release`). Loading a

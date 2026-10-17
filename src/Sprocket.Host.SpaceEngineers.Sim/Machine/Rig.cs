@@ -367,6 +367,12 @@ public sealed class Rig
         return Weld(new Door(id, name, Type<MyObjectBuilder_Door>(), "LargeBlockDoor", "Door"));
     }
 
+    /// <summary>A door of the game's subtype <paramref name="subtype" />, named.</summary>
+    public Door Door(long id, string name, string subtype)
+    {
+        return Weld(new Door(id, name, Type<MyObjectBuilder_Door>(), subtype, "Door"));
+    }
+
     /// <summary>A hangar door, named, with the game's own type behind it, which announces starting to move either way.</summary>
     public Door HangarDoor(long id, string name)
     {
@@ -589,6 +595,12 @@ public sealed class Rig
     public TextScreen TextPanel(long id, string name)
     {
         return Weld(new TextScreen(id, name, Type<MyObjectBuilder_TextPanel>(), "LargeTextPanel", "Text Panel"));
+    }
+
+    /// <summary>A text panel of the game's subtype <paramref name="subtype" />, named.</summary>
+    public TextScreen TextPanel(long id, string name, string subtype)
+    {
+        return Weld(new TextScreen(id, name, Type<MyObjectBuilder_TextPanel>(), subtype, "Text Panel"));
     }
 
     /// <summary>A camera, named, nobody looking.</summary>

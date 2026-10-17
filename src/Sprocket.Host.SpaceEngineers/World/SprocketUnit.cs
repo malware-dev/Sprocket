@@ -44,7 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </remarks>
         public static readonly Guid ProgramKey = new Guid("9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7");
 
-        static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
+        /// <summary>The key of the switches beside the program.</summary>
+        public static readonly Guid StateKey = new Guid("C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3");
 
 
         IMyTerminalBlock _block;

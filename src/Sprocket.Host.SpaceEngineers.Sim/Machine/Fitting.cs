@@ -65,6 +65,9 @@ public abstract class Fitting
     /// <summary>The block's id.</summary>
     public long Id { get; private set; }
 
+    /// <summary>The block's type and subtype.</summary>
+    public SerializableDefinitionId Definition => _definition;
+
     /// <summary>The block's name, raising <c>CustomNameChanged</c> as it changes, as the game does.</summary>
     public string Name
     {

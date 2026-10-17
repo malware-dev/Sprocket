@@ -6,6 +6,7 @@ using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Sim.Content;
 using Sprocket.Sim.Measuring;
 using Sprocket.Sim.Saves;
+using Sprocket.Sim.Scenarios;
 using Sprocket.Sim.Shell;
 using Sprocket.Sim.Simulation;
 
@@ -59,6 +60,20 @@ namespace Sprocket.Sim
             if (args.Length > 0 && args[0] == "--content")
             {
                 Console.Write(ContentReport.Render());
+                return;
+            }
+
+            // A scenario written out for the game: --blueprint <name> [folder], into the folder or the one SPROCKET_BLUEPRINTS names;
+            // --checks <name> [first], its checks as rows for the Testing artifact, numbered from first.
+            if (args.Length > 1 && args[0] == "--blueprint")
+            {
+                Console.WriteLine(Export.Blueprint(args[1], args.Length > 2 ? args[2] : null));
+                return;
+            }
+
+            if (args.Length > 1 && args[0] == "--checks")
+            {
+                Console.Write(Export.Checks(args[1], args.Length > 2 ? int.Parse(args[2], CultureInfo.InvariantCulture) : 1));
                 return;
             }
 
