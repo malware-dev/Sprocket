@@ -72,7 +72,7 @@ public class ResumeTests
         public string Reload(string program, string state)
         {
             Program = new Automation();
-            Trouble = ProgramText.Load(program, Program, World.Values);
+            Trouble = Reader.Load(program, Program, World.Values);
             Runner = new AutomationRunner(Program, World);
             return StateText.Load(state, Program, Runner);
         }
@@ -155,7 +155,7 @@ public class ResumeTests
         Assert.Contains("Inner Door:close", a.Log);
         Assert.DoesNotContain("Outer Door:open", a.Log);
 
-        var program = ProgramText.Save(a.Program, a.World.Values);
+        var program = Scribe.Save(a.Program, a.World.Values);
         var state = StateText.Save(a.Program, a.Runner);
 
         Assert.Equal("", a.Reload(program, state));
@@ -184,7 +184,7 @@ public class ResumeTests
 
         var state = StateText.Save(a.Program, a.Runner);
         Assert.Contains("\"by hand\"", state);
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
 
         a.Tick(300);
@@ -218,7 +218,7 @@ public class ResumeTests
         Assert.DoesNotContain("Outer Door:open", a.Log);
 
         var state = StateText.Save(a.Program, a.Runner);
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
         a.Tick(600);
 
@@ -244,7 +244,7 @@ public class ResumeTests
         Assert.Contains("when", state);
 
         a.Outer.ForceOpen();
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
         a.Tick(30);
 
@@ -269,7 +269,7 @@ public class ResumeTests
 
         var state = StateText.Save(a.Program, a.Runner);
         Assert.Contains("'Outer Door' on 'Inner Door' off", state);
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
     }
 
     /// <summary>An <c>every</c> keeps its beat across a reload rather than waiting a whole interval again.</summary>
@@ -288,7 +288,7 @@ public class ResumeTests
         var state = StateText.Save(a.Program, a.Runner);
         Assert.Contains("every", state);
 
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
         a.Log.Clear();
         a.Tick(300);
 
@@ -316,7 +316,7 @@ public class ResumeTests
         Assert.InRange(left, 450, 599);
 
         var state = StateText.Save(a.Program, a.Runner);
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
         a.Tick();
 
         Assert.Equal(left, a.State.WaitTicks + 1);
@@ -344,7 +344,7 @@ public class ResumeTests
         var trimmed = a.Program.Sequences[0];
         trimmed.Steps.Clear();
 
-        Assert.Equal("", a.Reload(ProgramText.Save(a.Program, a.World.Values), state));
+        Assert.Equal("", a.Reload(Scribe.Save(a.Program, a.World.Values), state));
         a.Tick(20);
 
         Assert.False(a.State.IsRunning);

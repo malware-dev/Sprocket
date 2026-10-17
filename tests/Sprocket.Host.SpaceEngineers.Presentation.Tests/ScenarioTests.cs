@@ -107,7 +107,7 @@ public class ScenarioTests
 
         var program = blueprint.Descendants("item").Single(item => (string)item.Element("Key") == Locker.ProgramKey.ToString("D"));
         var read = new Automation();
-        Assert.Equal("", ProgramText.Load((string)program.Element("Value")!, read, built.Sim.World.Values));
+        Assert.Equal("", Reader.Load((string)program.Element("Value")!, read, built.Sim.World.Values));
 
         Assert.NotEmpty(read.Refs);
         foreach (var declared in read.Refs)

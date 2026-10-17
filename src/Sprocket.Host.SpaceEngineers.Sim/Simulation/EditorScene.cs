@@ -102,7 +102,7 @@ namespace Sprocket.Sim.Simulation
         /// </remarks>
         public string Load(string program)
         {
-            var trouble = ProgramText.Load(program, _ship.Editor.Program, _ship.World.Values);
+            var trouble = Reader.Load(program, _ship.Editor.Program, _ship.World.Values);
 
             // The editor built its screen from an empty program, so it has to be told: in the game
             // the program is read before the editor exists and this is the moment that stands in.

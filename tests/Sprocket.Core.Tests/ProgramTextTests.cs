@@ -19,7 +19,7 @@ public class ProgramTextTests
 {
     static readonly Values Store = new Values();
 
-    static string Save(Automation program) => ProgramText.Save(program, Store);
+    static string Save(Automation program) => Scribe.Save(program, Store);
 
     /// <summary>Declares a block called <paramref name="name" />, which is what a program names.</summary>
     static void Block(Automation program, string name) =>
@@ -28,7 +28,7 @@ public class ProgramTextTests
     /// <summary>Loads, and refuses anything this file writes that does not read back cleanly.</summary>
     static void Load(string text, Automation program)
     {
-        Assert.Equal("", ProgramText.Load(text, program, Store));
+        Assert.Equal("", Reader.Load(text, program, Store));
     }
 
     /// <summary>

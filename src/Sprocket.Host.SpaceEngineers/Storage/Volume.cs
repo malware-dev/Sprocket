@@ -44,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>When the blueprint was last changed, as its own text says, or null where it says nothing.</summary>
         public DateTime? Changed { get; private set; }
 
-        /// <summary>The blueprint, as <c>ProgramText.Blueprint</c> writes it.</summary>
+        /// <summary>The blueprint, as <c>Scribe.Blueprint</c> writes it.</summary>
         public string Text { get; private set; }
 
         /// <summary>Whether the file gave a blueprint, and why not where it did not.</summary>

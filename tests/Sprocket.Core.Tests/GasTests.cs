@@ -161,9 +161,9 @@ public class GasTests
         stockpile.Targets.Add(automation.Declare(ship.World, ship.Entity(tank.Id)).Name);
         sequence.Steps.Add(stockpile);
 
-        var saved = ProgramText.Save(automation, ship.World.Values);
+        var saved = Scribe.Save(automation, ship.World.Values);
         Assert.Contains("call ext.stockpile(off) on [ ", saved);
-        Assert.Equal("", ProgramText.Load(saved, new Automation(), ship.World.Values));
+        Assert.Equal("", Reader.Load(saved, new Automation(), ship.World.Values));
     }
 
     /// <summary>A tank's stockpiling is a state of the tank, which a check reads as the tank itself.</summary>

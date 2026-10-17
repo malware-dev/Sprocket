@@ -265,7 +265,7 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         Light(screen);
-        var text = Storage.ProgramText.Save(editor.Program, editor.World.Values);
+        var text = Storage.Scribe.Save(editor.Program, editor.World.Values);
 
         Assert.Equal("", editor.Apply(text));
         editor.GoToRoot();

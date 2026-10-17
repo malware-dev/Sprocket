@@ -72,7 +72,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         void Choose(AutomationSystem here, AutomationSystem waiting, ConflictMemory conflict, AutomationSystem keep)
         {
             var scratch = new Automation();
-            if (ProgramText.Load(ProgramText.Save(_editor.Program, _editor.World.Values), scratch, _editor.World.Values).Length > 0)
+            if (Reader.Load(Scribe.Save(_editor.Program, _editor.World.Values), scratch, _editor.World.Values).Length > 0)
                 return;
 
             var kept = scratch.FindSystem(keep.Identity);
@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             scratch.RemoveSystem(dropped);
             kept.Identity = here.Identity;
-            var text = ProgramText.Save(scratch, _editor.World.Values);
+            var text = Scribe.Save(scratch, _editor.World.Values);
 
             _editor.Stamp(true);
             var at = 0;
@@ -90,7 +90,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 at++;
 
             _editor.Program.RemoveSystem(here);
-            var trouble = ProgramText.ReadOne(text, here.Identity, _editor.Program);
+            var trouble = Reader.ReadOne(text, here.Identity, _editor.Program);
             var chosen = _editor.Program.FindSystem(here.Identity);
             if (chosen != null)
                 _editor.Program.RemoveSystem(chosen);

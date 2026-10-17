@@ -226,16 +226,16 @@ public class ScreensTests
         var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
         var values = new Values();
 
-        var text = ProgramText.Save(program, values);
+        var text = Scribe.Save(program, values);
         Assert.Contains("slot status expects ext.screen", text);
         Assert.Contains("status = [ ext.screen(2) on [ ", text);
 
         var read = new Automation();
-        Assert.Equal("", ProgramText.Load(text, read, values));
+        Assert.Equal("", Reader.Load(text, read, values));
         var system = read.Systems[0];
         Assert.Equal(HostTypes.All[0].Id, system.FindPart("status")!.Holds);
         Assert.Equal(new[] { 2 }, system.Instances[0].Facets("status"));
-        Assert.Equal(text, ProgramText.Save(read, values));
+        Assert.Equal(text, Scribe.Save(read, values));
     }
 
     /// <summary>A slot can expect only a type the host provides; anything else qualified is refused, saying so.</summary>
@@ -245,8 +245,8 @@ public class ScreensTests
         var (ship, board) = Built();
         var (program, _, _, _) = Slotted(ship, board, 2, ScreenType.ShowText, Literal.Of("Docked"));
         var values = new Values();
-        var text = ProgramText.Save(program, values).Replace("expects ext.screen", "expects ext.window");
+        var text = Scribe.Save(program, values).Replace("expects ext.screen", "expects ext.window");
 
-        Assert.Contains("no type 'ext.window' the host provides", ProgramText.Load(text, new Automation(), values));
+        Assert.Contains("no type 'ext.window' the host provides", Reader.Load(text, new Automation(), values));
     }
 }

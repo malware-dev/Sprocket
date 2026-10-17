@@ -7,7 +7,7 @@ outlives every build.
 
 | What | Where | Written | By |
 |---|---|---|---|
-| A construct's program | The mod storage of its programmable block, the unit's hero, under `Locker.ProgramKey` | When the program may have changed, and as the world saves | `World/SprocketUnit.cs`, `Storage/ProgramText.cs` |
+| A construct's program | The mod storage of its programmable block, the unit's hero, under `Locker.ProgramKey` | When the program may have changed, and as the world saves | `World/SprocketUnit.cs`, `Storage/Scribe.cs`, `Storage/Reader.cs` |
 | What is switched off, and why | The same block, under `Locker.StateKey` | With the program | `Storage/StateText.cs` |
 | What the world remembers while it runs: Sprocket's clock, every run and every watch, owners, pauses, players' settings, doors' close times | A file named `state` among Sprocket's files for the world, kept on the carrier | As the world saves, on the server, where anything changed | `Memory/`, `World/Carrier.cs` |
 | A door's auto-close delay | The door's mod storage, under `CloseDelay.Key` | When it is set | `Features/Doors/CloseDelay.cs` |
@@ -24,14 +24,14 @@ file after an `=` line (`Storage/CarrierFiles.cs`), read whole or not at all.
 
 ## The program, as text
 
-A program is stored as a script in Sprocket's language ([Language](Language.md)), written by `ProgramText.Save` and
-read by its `Load` through the `Lexer` and `Parser` in `Storage/`. Its first line says which format wrote it:
+A program is stored as a script in Sprocket's language ([Language](Language.md)), written by `Scribe.Save` and
+read by `Reader.Load` through the `Lexer` and `Parser` in `Storage/`. Its first line says which format wrote it:
 
 ```
 sprocket 1 alpha 16
 ```
 
-`ProgramText.Version` and `ProgramText.Draft` hold the numbers this build writes.
+`Format.Version` and `Format.Draft` hold the numbers this build writes.
 
 A text that fails to read is read as nothing. The program is marked not intact and kept as the text it was, and
 nothing writes over it: the block keeps the text until a person deals with it. A text from a format this build
@@ -50,7 +50,7 @@ it reads through it.
 
 Changing what the text says:
 
-1. Raise `ProgramText.Draft`.
+1. Raise `Format.Draft`.
 2. Where programs in the old draft are to carry forward, add it to `Upgrades.From` and its changes to `Upgrades.Apply`.
 3. Update `docs/Language.md` in the same change: it is the language's spec.
 4. Test it: `UpgradeTests` reads an old text and checks what it became and that it is written in the current format;

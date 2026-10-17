@@ -33,7 +33,7 @@ public class StateStepTests
         sim.Machine.Weld(new Tank(40, "Tank", new MyObjectBuilderType(typeof(MyObjectBuilder_OxygenTank)), "SmallHydrogenTank",
             "Small Hydrogen Tank"));
         sim.Tick();
-        Assert.Equal("", Storage.ProgramText.Load(Program, sim.Editor.Program, sim.World.Values));
+        Assert.Equal("", Storage.Reader.Load(Program, sim.Editor.Program, sim.World.Values));
         sim.Editor.Invalidate();
         sim.Tick();
         var sequence = sim.Editor.Program.Systems[0].Sequences[0];

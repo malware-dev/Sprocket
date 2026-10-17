@@ -69,7 +69,7 @@ public class UpgradeTests
         ship.Tick();
         var program = new Automation();
 
-        Assert.Equal("", ProgramText.Load(Screened("Back"), program, ship.World.Values, out _, ship.World));
+        Assert.Equal("", Reader.Load(Screened("Back"), program, ship.World.Values, out _, ship.World));
 
         var system = program.Systems[0];
         var show = (Act)system.Sequences[0].Steps[0];
@@ -87,16 +87,16 @@ public class UpgradeTests
         ship.Rig.Weld(new Billboard(1, "Billboard"));
         ship.Tick();
         var program = new Automation();
-        ProgramText.Load(Screened("Back"), program, ship.World.Values, out _, ship.World);
+        Reader.Load(Screened("Back"), program, ship.World.Values, out _, ship.World);
 
-        var written = ProgramText.Save(program, ship.World.Values);
+        var written = Scribe.Save(program, ship.World.Values);
 
         Assert.Contains("expects ext.screen", written);
         Assert.Contains("ext.screen(2) on [ board ]", written);
         Assert.DoesNotContain("\"Back\"", written);
         var again = new Automation();
-        Assert.Equal("", ProgramText.Load(written, again, ship.World.Values));
-        Assert.Equal(written, ProgramText.Save(again, ship.World.Values));
+        Assert.Equal("", Reader.Load(written, again, ship.World.Values));
+        Assert.Equal(written, Scribe.Save(again, ship.World.Values));
     }
 
     /// <summary>Show text with its text alone is a block with one screen's, which named no screen, and is left as it is.</summary>
@@ -106,7 +106,7 @@ public class UpgradeTests
         var text = Screened("Back").Replace("ext.'show-text'(\"Back\", \"Docked\")", "ext.'show-text'(\"Docked\")");
         var program = new Automation();
 
-        Assert.Equal("", ProgramText.Load(text, program, new Values()));
+        Assert.Equal("", Reader.Load(text, program, new Values()));
 
         var show = (Act)program.Systems[0].Sequences[0].Steps[0];
         Assert.Equal(new[] { "status" }, show.Targets);
@@ -124,7 +124,7 @@ public class UpgradeTests
             "ext.'set-up-screen'(\"Back\", \"text and images\", #FF0000, \"\", \"\", 2.5, \"\", \"\", \"\", \"\", \"\", \"\")");
         var program = new Automation();
 
-        Assert.Equal("", ProgramText.Load(text, program, ship.World.Values, out _, ship.World));
+        Assert.Equal("", Reader.Load(text, program, ship.World.Values, out _, ship.World));
 
         var setUp = (Act)program.Systems[0].Sequences[0].Steps[0];
         Assert.Equal(12, setUp.Arguments.Count);
@@ -142,7 +142,7 @@ public class UpgradeTests
         ship.Tick();
         var program = new Automation();
 
-        Assert.Equal("", ProgramText.Load(Screened("Side"), program, ship.World.Values, out _, ship.World));
+        Assert.Equal("", Reader.Load(Screened("Side"), program, ship.World.Values, out _, ship.World));
 
         var system = program.Systems[0];
         var slot = ((Act)system.Sequences[0].Steps[0]).Targets[0];
@@ -154,7 +154,7 @@ public class UpgradeTests
     [Fact]
     public void AnAlpha15ThingsDetectedIsDetections()
     {
-        Assert.Equal("", ProgramText.Lone(ThingsDetected, new Values(), out var read));
+        Assert.Equal("", Reader.Lone(ThingsDetected, new Values(), out var read));
 
         Assert.Equal("detections", ((If)read!.Sequences[0].Steps[0]).Test.MemberId);
         Assert.Equal("detections", ((WhenTrigger)read.Triggers[0]).EventId);
@@ -164,7 +164,7 @@ public class UpgradeTests
     [Fact]
     public void AnAlpha14SwitchSetsPower()
     {
-        Assert.Equal("", ProgramText.Lone(Switching, new Values(), out var read));
+        Assert.Equal("", Reader.Lone(Switching, new Values(), out var read));
 
         var steps = read!.Sequences[0].Steps;
         Power((Act)steps[0], true);
@@ -176,32 +176,32 @@ public class UpgradeTests
     [Fact]
     public void AnAlpha14SwitchedOnIsPower()
     {
-        Assert.Equal("", ProgramText.Lone(SwitchedOn, new Values(), out var read));
+        Assert.Equal("", Reader.Lone(SwitchedOn, new Values(), out var read));
 
         var steps = read!.Sequences[0].Steps;
         Assert.Equal("power", ((Act)steps[0]).ActionId);
         Assert.Equal("power", ((If)steps[1]).Test.MemberId);
         Assert.Equal("power", ((WhenTrigger)read.Triggers[0]).EventId);
 
-        var written = ProgramText.Blueprint(read);
+        var written = Scribe.Blueprint(read);
         Assert.DoesNotContain("switched-on", written);
-        Assert.Equal("", ProgramText.Lone(written, new Values(), out var again));
-        Assert.Equal(written, ProgramText.Blueprint(again!));
+        Assert.Equal("", Reader.Lone(written, new Values(), out var again));
+        Assert.Equal(written, Scribe.Blueprint(again!));
     }
 
     /// <summary>What was upgraded is written in the current format, and reads back the same.</summary>
     [Fact]
     public void AnUpgradedProgramIsWrittenInTheCurrentFormat()
     {
-        ProgramText.Lone(Switching, new Values(), out var read);
+        Reader.Lone(Switching, new Values(), out var read);
 
-        var written = ProgramText.Blueprint(read!);
+        var written = Scribe.Blueprint(read!);
 
         Assert.StartsWith("sprocket 1 alpha 16", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
-        Assert.Equal("", ProgramText.Lone(written, new Values(), out var again));
-        Assert.Equal(written, ProgramText.Blueprint(again!));
+        Assert.Equal("", Reader.Lone(written, new Values(), out var again));
+        Assert.Equal(written, Scribe.Blueprint(again!));
     }
 
     /// <summary>A name that happens to be one of the old ids is a name, and is left as it is.</summary>
@@ -210,7 +210,7 @@ public class UpgradeTests
     {
         var text = Switching.Replace("slot lamp", "slot 'on'").Replace("[ lamp ]", "[ 'on' ]");
 
-        Assert.Equal("", ProgramText.Lone(text, new Values(), out var read));
+        Assert.Equal("", Reader.Lone(text, new Values(), out var read));
 
         Assert.Equal("on", ((Act)read!.Sequences[0].Steps[0]).Targets[0]);
     }
@@ -225,7 +225,7 @@ public class UpgradeTests
     {
         var text = Switching.Replace("sprocket 1 alpha 14", header);
 
-        Assert.NotEqual("", ProgramText.Lone(text, new Values(), out var read));
+        Assert.NotEqual("", Reader.Lone(text, new Values(), out var read));
         Assert.Null(read);
     }
 

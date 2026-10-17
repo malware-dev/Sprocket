@@ -435,7 +435,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             string warning;
-            var trouble = ProgramText.Load(text, _program, _world.Values, out warning, _world);
+            var trouble = Reader.Load(text, _program, _world.Values, out warning, _world);
 
             if (warning.Length > 0)
                 Told.Say($"{Logged(_block)} has a program with a warning: {warning}");
@@ -500,7 +500,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_editor != null)
                 _editor.Stamp(true);
 
-            var program = ProgramText.Save(_program, _world.Values);
+            var program = Scribe.Save(_program, _world.Values);
             var state = StateText.Save(_program, null, false);
             storage.SetValue(Locker.ProgramKey, program);
             // What is switched off is kept under a key of its own, apart from the program somebody shares. The key
@@ -579,7 +579,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (_editor != null)
                 _editor.Stamp(true);
 
-            program = ProgramText.Save(_program, _world.Values);
+            program = Scribe.Save(_program, _world.Values);
             state = StateText.Save(_program, _runner);
         }
 

@@ -60,10 +60,10 @@ public static class StorageReport
     {
         var values = new Values();
         var program = shape.Build(values);
-        var text = ProgramText.Save(program, values);
+        var text = Scribe.Save(program, values);
         Readable(text);
 
-        var save = Time(() => ProgramText.Save(program, values));
+        var save = Time(() => Scribe.Save(program, values));
         var load = Time(() => Read(text));
         var lex = Time(() => Tokens(text));
         var parse = Time(() => new Parser(text).Read());
@@ -108,7 +108,7 @@ public static class StorageReport
         {
             var values = new Values();
             var shape = new Shape(systems * 8, systems, 3, 10, 8, 3);
-            var text = ProgramText.Save(shape.Build(values), values);
+            var text = Scribe.Save(shape.Build(values), values);
             Readable(text);
 
             var load = Time(() => Read(text));
@@ -136,7 +136,7 @@ public static class StorageReport
     {
         var values = new Values();
         var program = new Shape(200, 20, 5, 20, 10, 3).Build(values);
-        var whole = ProgramText.Save(program, values);
+        var whole = Scribe.Save(program, values);
         var hurt = whole.Replace("] wait", "] wait [").Replace("sequence 1 on", "sequence 1 on \"");
 
         report.AppendLine("A 200-declaration program with every step and sequence line broken: "
@@ -147,14 +147,14 @@ public static class StorageReport
     /// <summary>Refuses a shape that does not read, because a load that fails is timing the failure.</summary>
     static void Readable(string text)
     {
-        var trouble = ProgramText.Load(text, new Automation(), new Values());
+        var trouble = Reader.Load(text, new Automation(), new Values());
         if (trouble.Length > 0)
             throw new InvalidOperationException("The measured program does not read: " + trouble);
     }
 
     static void Read(string text)
     {
-        ProgramText.Load(text, new Automation(), new Values());
+        Reader.Load(text, new Automation(), new Values());
     }
 
     /// <summary>The lexer on its own, so the parser's share of a load can be told from the reader's.</summary>

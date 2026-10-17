@@ -67,7 +67,7 @@ public class WhatItHoldsTests
     public void AnIfHoldsTheValueItChecksFor()
     {
         var rig = Simulation.Fresh();
-        Assert.Equal("", Storage.ProgramText.Load(Program, rig.Editor.Program, rig.World.Values));
+        Assert.Equal("", Storage.Reader.Load(Program, rig.Editor.Program, rig.World.Values));
         rig.Editor.Invalidate();
         rig.Tick();
         var system = rig.Editor.Program.Systems[0];

@@ -924,7 +924,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public string Apply(string text)
         {
             var trial = new Automation();
-            var trouble = ProgramText.Load(text, trial, _world.Values);
+            var trouble = Reader.Load(text, trial, _world.Values);
             if (trouble.Length > 0)
                 return trouble;
 
@@ -940,7 +940,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _program.Discard();
             string warning;
-            ProgramText.Load(text, _program, _world.Values, out warning, _world);
+            Reader.Load(text, _program, _world.Values, out warning, _world);
             StateText.Load(switches, _program, _runner);
 
             _gate.Told = true;

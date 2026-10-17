@@ -283,7 +283,7 @@ public class IfRunTests
 
         var state = StateText.Save(a.Program, a.Runner);
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load(ProgramText.Save(a.Program, a.Rig.Values), program, a.Rig.Values));
+        Assert.Equal("", Reader.Load(Scribe.Save(a.Program, a.Rig.Values), program, a.Rig.Values));
         a.Runner = new AutomationRunner(program, a.Rig.World);
         Assert.Equal("", StateText.Load(state, program, a.Runner));
         a.Log.Clear();

@@ -462,7 +462,7 @@ public class UndoTests
         return program;
     }
 
-    static string Written(Automation program) => ProgramText.Save(program, new Values());
+    static string Written(Automation program) => Scribe.Save(program, new Values());
 
     /// <summary>A logic system taken out and put back is the same system, where it stood, and the program reads as it did.</summary>
     [Fact]

@@ -146,7 +146,7 @@ public class PathTests
     static void Load(Simulation sim, string keys)
     {
         var program = "sprocket 1 alpha 16\n\nlet door1 = block 'Door/LargeBlockDoor' " + keys + "\n";
-        Assert.Equal("", Storage.ProgramText.Load(program, sim.Editor.Program, sim.World.Values));
+        Assert.Equal("", Storage.Reader.Load(program, sim.Editor.Program, sim.World.Values));
     }
 
     static EntityRef Declared(Simulation sim, Fitting fitting)

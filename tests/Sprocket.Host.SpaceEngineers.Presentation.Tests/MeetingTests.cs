@@ -290,7 +290,7 @@ public class MeetingTests
     static Automation Read(Simulation sim, string program, string switches = "")
     {
         var read = new Automation();
-        Assert.Equal("", ProgramText.Load(program, read, sim.World.Values));
+        Assert.Equal("", Reader.Load(program, read, sim.World.Values));
         StateText.Load(switches, read, null);
         return read;
     }

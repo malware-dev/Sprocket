@@ -110,8 +110,8 @@ public class VocabularyTests
             + "}\n";
 
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load(written, program, new Values()));
-        Assert.Equal(written, ProgramText.Save(program, new Values()));
+        Assert.Equal("", Reader.Load(written, program, new Values()));
+        Assert.Equal(written, Scribe.Save(program, new Values()));
 
         var when = (WhenTrigger)program.Systems[0].Triggers[4];
         Assert.Equal(Quantifier.Sum, when.Quantifier);
@@ -128,11 +128,11 @@ public class VocabularyTests
     public void AComparisonReadsWhateverItsSpacing(string line)
     {
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 16\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
+        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\nlet light = block 'InteriorLight/SmallLight' [ 2 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Lamp {\n    sequence 1 {\n        " + line + "\n        }\n    }\n}\n",
             program, new Values()));
 
-        Assert.Contains("        if any Radius on [ light ] >= 4 then {\n", ProgramText.Save(program, new Values()));
+        Assert.Contains("        if any Radius on [ light ] >= 4 then {\n", Scribe.Save(program, new Values()));
     }
 
     /// <summary>Each comparison holds where the block's value stands that way to what it is compared with.</summary>
@@ -376,7 +376,7 @@ public class VocabularyTests
 
         ship.Start();
         Assert.Contains("    sequence 1 {\n        set ext.level on [ 'Left Lamp' ] to 3\n",
-            ProgramText.Save(ship.Program, new Values()));
+            Scribe.Save(ship.Program, new Values()));
 
         ship.Runner.Call(cycle, cycle.System.First);
         ship.Tick();
@@ -457,8 +457,8 @@ public class VocabularyTests
             + "}\n";
 
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load(written, program, new Values()));
-        Assert.Equal(written, ProgramText.Save(program, new Values()));
+        Assert.Equal("", Reader.Load(written, program, new Values()));
+        Assert.Equal(written, Scribe.Save(program, new Values()));
         var set = Assert.IsType<Act>(program.Systems[0].Sequences[0].Steps[0]);
         Assert.Equal(BlockKinds.Own, set.Provider);
         Assert.Equal(Nature.Value, set.Form);
@@ -673,7 +673,7 @@ public class VocabularyTests
     public void ASignalWrittenInPlaceIsAnsweredOnItsBlocks()
     {
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 16\n\n"
+        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n\n"
             + "system \"" + Identity + "\" as MalTek.Bell {\n    whenever ext.toolbar(1, 2, 3) on [ panel2 ] then run 1\n\n"
@@ -736,7 +736,7 @@ public class VocabularyTests
     public void ASignalOnTwoBlocksIsAnsweredOnBoth()
     {
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 16\n\n"
+        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n"
@@ -756,7 +756,7 @@ public class VocabularyTests
     public void ASignalPickedOnOneBlockIsNotOneOnSeveral()
     {
         var program = new Automation();
-        Assert.Equal("", ProgramText.Load("sprocket 1 alpha 16\n\n"
+        Assert.Equal("", Reader.Load("sprocket 1 alpha 16\n\n"
             + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 3 ]\n"
             + "let panel2 = block 'ButtonPanel/ButtonPanelLarge' [ 4 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n\n",
@@ -781,14 +781,14 @@ public class VocabularyTests
             + "    whenever bell then run 1\n\n    sequence 1 {\n    }\n}\n\n";
 
         var whole = new Automation();
-        Assert.Equal("", ProgramText.Load(head + "instance 1 of MalTek.Bell {\n    bell = [ button ]\n}\n", whole, new Values()));
-        Assert.Contains("    bell = [ button ]\n", ProgramText.Save(whole, new Values()));
+        Assert.Equal("", Reader.Load(head + "instance 1 of MalTek.Bell {\n    bell = [ button ]\n}\n", whole, new Values()));
+        Assert.Contains("    bell = [ button ]\n", Scribe.Save(whole, new Values()));
 
         var part = new Automation();
-        Assert.Equal("", ProgramText.Load(head.Replace("let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
+        Assert.Equal("", Reader.Load(head.Replace("let button = ext.toolbar(1, 1, 4) on [ panel1, panel2 ]\n", "")
             + "instance 1 of MalTek.Bell {\n    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n}\n", part, new Values()));
         part.Restore(new SignalRef("button", new[] { "panel1", "panel2" }, new ToolbarSlot(1, 1, 4)));
 
-        Assert.Contains("    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n", ProgramText.Save(part, new Values()));
+        Assert.Contains("    bell = [ ext.toolbar(1, 1, 4) on [ panel1 ] ]\n", Scribe.Save(part, new Values()));
     }
 }

@@ -44,7 +44,7 @@ public class LibraryTests
 
         Assert.Equal("", read.Open(read.All[1], new Values(), out var opened));
         Assert.Equal(airlock.Identity, opened!.Identity);
-        Assert.Equal(ProgramText.Blueprint(airlock), folder.Files["backup-2.cog"]);
+        Assert.Equal(Scribe.Blueprint(airlock), folder.Files["backup-2.cog"]);
     }
 
     /// <summary>An index that will not read gives no backups, says what was wrong, and is never written over.</summary>
@@ -322,7 +322,7 @@ public class LibraryTests
 
         var volume = Assert.Single(rig.Shelf.All);
         Assert.NotEqual(lost.Identity, volume.Identity);
-        Assert.Equal(ProgramText.Blueprint(lost, volume.Identity), volume.Text);
+        Assert.Equal(Scribe.Blueprint(lost, volume.Identity), volume.Text);
         Assert.Empty(rig.Editor.Program.Systems);
     }
 
@@ -369,7 +369,7 @@ public class LibraryTests
     {
         var rig = WithLost(out var lost, out var page, (sim, system) =>
         {
-            sim.Folder.Write("sprocket-bp-Airlock.cog", ProgramText.Blueprint(system));
+            sim.Folder.Write("sprocket-bp-Airlock.cog", Scribe.Blueprint(system));
             sim.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n");
             Assert.Equal("", sim.Shelf.Read());
         });
@@ -529,7 +529,7 @@ public class LibraryTests
     public void MakingABlueprintOpensTheLibraryAtIt()
     {
         var rig = Blueprinted();
-        var copy = rig.Editor.Holdings.Copy(ProgramText.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
+        var copy = rig.Editor.Holdings.Copy(Scribe.Blueprint(rig.Editor.Program.Systems[0]), out var trouble);
         Assert.True(copy != null, trouble);
         rig.Editor.GoToRoot();
         rig.Tick();
@@ -656,7 +656,7 @@ public class LibraryTests
         Assert.Equal(Saved, blueprint.OriginChanged);
 
         Assert.Equal("sprocket-bp-Airlock.cog\n", rig.Folder.Files["sprocket-bp.index"]);
-        Assert.Equal(ProgramText.Blueprint(blueprint, blueprint.Origin), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
+        Assert.Equal(Scribe.Blueprint(blueprint, blueprint.Origin), rig.Folder.Files["sprocket-bp-Airlock.cog"]);
 
         var read = new Shelf(rig.Folder, delegate { });
         Assert.Equal("", read.Read());
@@ -717,7 +717,7 @@ public class LibraryTests
     {
         var rig = Blueprinted();
         var blueprint = rig.Editor.Program.Systems[0];
-        rig.Folder.Write("stoopid.doot", ProgramText.Blueprint(blueprint));
+        rig.Folder.Write("stoopid.doot", Scribe.Blueprint(blueprint));
         rig.Folder.Write("sprocket-bp.index", "# from a friend\r\n\r\n  stoopid.doot  \r\n");
         Assert.Equal("", rig.Shelf.Read());
 
@@ -818,7 +818,7 @@ public class LibraryTests
         var rig = Blueprinted();
         var system = rig.Editor.Program.Systems[0];
         system.Changed = Saved;
-        rig.Folder.Write("sprocket-bp-Airlock.cog", ProgramText.Blueprint(system));
+        rig.Folder.Write("sprocket-bp-Airlock.cog", Scribe.Blueprint(system));
         rig.Folder.Write("sprocket-bp.index", "sprocket-bp-Airlock.cog\n");
         Assert.Equal("", rig.Shelf.Read());
         Assert.False(system.HasOrigin);
@@ -1021,7 +1021,7 @@ public class LibraryTests
         var blueprint = rig.Editor.Program.Systems[0];
         rig.Shelf.Keep(blueprint);
 
-        var copy = rig.Editor.Holdings.Copy(ProgramText.Blueprint(blueprint), out var trouble);
+        var copy = rig.Editor.Holdings.Copy(Scribe.Blueprint(blueprint), out var trouble);
 
         Assert.Equal("", trouble);
         Assert.NotNull(copy);
@@ -1030,7 +1030,7 @@ public class LibraryTests
         Assert.True(copy.IsBlueprint);
         Assert.Equal("Installation 1", Assert.Single(copy.Instances).Name);
         Assert.Equal(2, blueprint.Instances.Count);
-        Assert.Equal("Airlock 3", rig.Editor.Holdings.Copy(ProgramText.Blueprint(blueprint), out trouble)!.Name);
+        Assert.Equal("Airlock 3", rig.Editor.Holdings.Copy(Scribe.Blueprint(blueprint), out trouble)!.Name);
     }
 
     /// <summary>A construct with no automation leaves no backup.</summary>

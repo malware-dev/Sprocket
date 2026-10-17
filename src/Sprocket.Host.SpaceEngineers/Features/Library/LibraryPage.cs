@@ -231,7 +231,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 if (volume.State == VolumeState.Read)
                 {
                     var trial = new Automation();
-                    entry.Trouble = ProgramText.Load(volume.Text, trial, Editor.World.Values);
+                    entry.Trouble = Reader.Load(volume.Text, trial, Editor.World.Values);
                     if (entry.Trouble.Length == 0)
                         entry.Read = trial.FindSystem(volume.Identity);
                 }
@@ -554,7 +554,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             }
 
             var system = entry.Section == BackedUp ? entry.Read : Live(entry);
-            return system == null ? null : ProgramText.Blueprint(system);
+            return system == null ? null : Scribe.Blueprint(system);
         }
 
         /// <summary>Who made <paramref name="system" /> and when it last changed, as far as either is known.</summary>

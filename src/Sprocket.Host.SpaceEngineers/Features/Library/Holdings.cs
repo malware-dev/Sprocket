@@ -58,14 +58,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 return _editor.Texts.LibraryOnAlready;
 
             AutomationSystem system;
-            var trouble = ProgramText.Lone(volume.Text, _editor.World.Values, out system);
+            var trouble = Reader.Lone(volume.Text, _editor.World.Values, out system);
             if (trouble.Length > 0)
                 return trouble;
 
             system.Identity = Guid.NewGuid();
             system.Origin = volume.Identity;
             system.OriginChanged = volume.Changed;
-            return PutOn(ProgramText.Linked(system), system.Identity);
+            return PutOn(Scribe.Linked(system), system.Identity);
         }
 
         /// <summary>
@@ -78,12 +78,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (_editor.Shelf != null)
                 _editor.Shelf.Link(backed);
 
-            return PutOn(ProgramText.Linked(backed), backed.Identity);
+            return PutOn(Scribe.Linked(backed), backed.Identity);
         }
 
         string PutOn(string text, Guid identity)
         {
-            var trouble = ProgramText.AddBlueprint(text, _editor.Program, _editor.World.Values);
+            var trouble = Reader.AddBlueprint(text, _editor.Program, _editor.World.Values);
             if (trouble.Length > 0)
                 return trouble;
 
@@ -105,7 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         public AutomationSystem Copy(string text, out string trouble)
         {
             var trial = new Automation();
-            trouble = ProgramText.Load(text, trial, _editor.World.Values);
+            trouble = Reader.Load(text, trial, _editor.World.Values);
             if (trouble.Length > 0)
                 return null;
 
@@ -122,7 +122,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (_editor.Author.Length > 0)
                 copy.Namespace = _editor.Author;
 
-            trouble = ProgramText.AddBlueprint(ProgramText.Blueprint(copy), _editor.Program, _editor.World.Values);
+            trouble = Reader.AddBlueprint(Scribe.Blueprint(copy), _editor.Program, _editor.World.Values);
             if (trouble.Length > 0)
                 return null;
 
@@ -284,7 +284,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 return "";
 
             AutomationSystem copy;
-            var trouble = ProgramText.Lone(volume.Text, _editor.World.Values, out copy);
+            var trouble = Reader.Lone(volume.Text, _editor.World.Values, out copy);
             if (trouble.Length > 0)
                 return trouble;
 
@@ -292,8 +292,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             copy.Origin = volume.Identity;
             copy.OriginChanged = volume.Changed;
 
-            var text = ProgramText.Replacing(_editor.Program, _editor.World.Values, copy);
-            trouble = ProgramText.Load(text, new Automation(), _editor.World.Values);
+            var text = Scribe.Replacing(_editor.Program, _editor.World.Values, copy);
+            trouble = Reader.Load(text, new Automation(), _editor.World.Values);
             if (trouble.Length > 0)
                 return trouble;
 
@@ -305,7 +305,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                 at++;
 
             _editor.Program.RemoveSystem(system);
-            trouble = ProgramText.ReadOne(text, system.Identity, _editor.Program);
+            trouble = Reader.ReadOne(text, system.Identity, _editor.Program);
             var fresh = _editor.Program.FindSystem(system.Identity);
             if (fresh != null)
                 _editor.Program.RemoveSystem(fresh);

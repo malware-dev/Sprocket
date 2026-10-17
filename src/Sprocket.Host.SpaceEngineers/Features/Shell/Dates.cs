@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // What each system says as the editor finds it, so only what changes from here on is dated.
             var systems = _program.Systems;
             for (var i = 0; i < systems.Count; i++)
-                _said[systems[i].Identity] = ProgramText.Said(systems[i]);
+                _said[systems[i].Identity] = Scribe.Said(systems[i]);
 
             _saidEdits = _program.Edits;
             _program.Reshaped += () => _reshaped = true;
@@ -52,7 +52,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var systems = _program.Systems;
             for (var i = 0; i < systems.Count; i++)
             {
-                var said = ProgramText.Said(systems[i]);
+                var said = Scribe.Said(systems[i]);
                 string was;
                 if (_said.TryGetValue(systems[i].Identity, out was) ? was != said : !systems[i].Changed.HasValue)
                     systems[i].Changed = now;
@@ -77,7 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Takes what <paramref name="system" /> says now as what it said, so nothing reads it as changed since.</summary>
         public void Know(AutomationSystem system)
         {
-            _said[system.Identity] = ProgramText.Said(system);
+            _said[system.Identity] = Scribe.Said(system);
         }
     }
 }

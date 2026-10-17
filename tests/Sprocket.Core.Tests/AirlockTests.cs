@@ -169,11 +169,11 @@ public class AirlockTests
         var a = Build();
         ((Act)a.LetMeOut.Steps[2]).Arguments[0] = Literal.Of(Blocks.Vent.MoveOn);
 
-        var saved = ProgramText.Save(a.Automation, a.World.Values);
+        var saved = Scribe.Save(a.Automation, a.World.Values);
         Assert.Contains("call ext.depressurize(1) on [ ", saved);
 
         var after = new Automation();
-        Assert.Equal("", ProgramText.Load(saved, after, a.World.Values));
+        Assert.Equal("", Reader.Load(saved, after, a.World.Values));
         var told = Assert.IsType<Act>(after.Sequences[0].Steps[2]);
         Assert.Equal(Blocks.Vent.MoveOn, Assert.Single(told.Arguments).Whole);
     }

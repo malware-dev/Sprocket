@@ -87,7 +87,7 @@ public class BlueprintTestTests
     static Simulation Opened(out Sequence sequence)
     {
         var rig = Simulation.Fresh();
-        Assert.Equal("", Storage.ProgramText.Load(Program, rig.Editor.Program, rig.World.Values));
+        Assert.Equal("", Storage.Reader.Load(Program, rig.Editor.Program, rig.World.Values));
         rig.Editor.Invalidate();
         rig.Tick();
 

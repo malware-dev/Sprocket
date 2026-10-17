@@ -25,14 +25,14 @@ namespace Sprocket.Host.SpaceEngineers.World
             foreach (var system in other.Program.Systems)
             {
                 var here = program.FindSystem(system.Identity);
-                if (here != null && ProgramText.Said(here) == ProgramText.Said(system))
+                if (here != null && Scribe.Said(here) == Scribe.Said(system))
                 {
                     Bring(system, here, other, program, kept.World);
                     continue;
                 }
 
                 var identity = here == null ? system.Identity : Guid.NewGuid();
-                var trouble = ProgramText.AddBlueprint(ProgramText.Blueprint(system, identity), program, values);
+                var trouble = Reader.AddBlueprint(Scribe.Blueprint(system, identity), program, values);
                 var arrived = program.FindSystem(identity);
                 if (trouble.Length > 0 || arrived == null)
                 {
@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
 
             switches = StateText.Save(program, null, false);
-            return ProgramText.Save(program, values);
+            return Scribe.Save(program, values);
         }
 
         /// <summary>The program <paramref name="unit" /> keeps after its construct parted from <paramref name="away" />.</summary>
@@ -79,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Rekey(program, unit.World);
             switches = StateText.Save(program, null, false);
-            return ProgramText.Save(program, unit.World.Values);
+            return Scribe.Save(program, unit.World.Values);
         }
 
         /// <summary>Adds a copy of <paramref name="instance" /> to <paramref name="into" />, unless an identical installation is there already.</summary>
@@ -155,7 +155,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             unit.Written(out text, out state);
 
             var program = new Automation();
-            ProgramText.Load(text, program, unit.World.Values);
+            Reader.Load(text, program, unit.World.Values);
             StateText.Load(StateText.Save(unit.Program, null, false), program, null);
             return program;
         }

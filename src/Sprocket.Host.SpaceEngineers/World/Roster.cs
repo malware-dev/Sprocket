@@ -257,7 +257,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             var program = Meeting.Join(kept, other, conflicts, out switches);
 
             // Both stay as they are where the joined program will not read.
-            var trouble = ProgramText.Load(program, new Automation(), kept.World.Values);
+            var trouble = Reader.Load(program, new Automation(), kept.World.Values);
             if (trouble.Length > 0)
             {
                 Told.Say($"the automation of {other.Block.CustomName} could not join that of {kept.Block.CustomName}: {trouble}");

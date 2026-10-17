@@ -246,14 +246,14 @@ public class StateTests
         program.Systems[0].Halt = new Halt(SequenceProblem.NeverTriggered, 1, -1, Host.SpaceEngineers.World.Trouble.None, null);
         program.Systems[0].Instances[0].Enabled = false;
 
-        var text = ProgramText.Save(program, new Values());
+        var text = Scribe.Save(program, new Values());
 
         Assert.DoesNotContain(" is on", text);
         Assert.DoesNotContain(" is off", text);
 
         // And a program read without its switches is a construct with everything running.
         var after = new Automation();
-        Assert.Equal("", ProgramText.Load(text, after, new Values()));
+        Assert.Equal("", Reader.Load(text, after, new Values()));
         Assert.True(after.Systems[0].Enabled);
         Assert.Null(after.Systems[0].Halt);
         Assert.True(after.Systems[0].Instances[0].Enabled);

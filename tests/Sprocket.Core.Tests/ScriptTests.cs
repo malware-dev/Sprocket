@@ -33,9 +33,9 @@ public class ScriptTests
 
     static readonly Values Store = new Values();
 
-    static string Save(Automation program) => ProgramText.Save(program, Store);
+    static string Save(Automation program) => Scribe.Save(program, Store);
 
-    static string Load(string text, Automation program) => ProgramText.Load(text, program, Store);
+    static string Load(string text, Automation program) => Reader.Load(text, program, Store);
 
     /// <summary>The same three doors before a system blueprint, so the blueprint's instances may answer with them.</summary>
     const string DoorsBlueprint = Version + Doors + "\nsystem blueprint \"" + Identity + "\" as ";
@@ -436,7 +436,7 @@ public class ScriptTests
         var text = Save(program);
         Assert.Contains("required slot spare", text);
         Assert.Contains("spare = [ door2 ]", text);
-        Assert.DoesNotContain("spare", ProgramText.Blueprint(system));
+        Assert.DoesNotContain("spare", Scribe.Blueprint(system));
     }
 
     /// <summary>
@@ -1112,7 +1112,7 @@ public class ScriptTests
     {
         var after = new Automation();
         string warning;
-        var trouble = ProgramText.Load(
+        var trouble = Reader.Load(
             Head + "MalTek.Airlock {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock {\n}\n",
             after, Store, out warning);
 
@@ -1216,8 +1216,8 @@ public class ScriptTests
         Assert.Equal("", Load(Blueprint + "MalTek.Airlock from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {\n}\n", after));
 
         var system = after.Systems[0];
-        Assert.DoesNotContain(" from ", ProgramText.Blueprint(system));
-        Assert.Contains(" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {", ProgramText.Linked(system));
+        Assert.DoesNotContain(" from ", Scribe.Blueprint(system));
+        Assert.Contains(" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {", Scribe.Linked(system));
     }
 
     /// <summary>A <c>from</c> that does not name a blueprint by its GUID, gives a version that is no time, comes twice, or heads a plain system, is trouble.</summary>
@@ -1436,12 +1436,12 @@ public class ScriptTests
         program.Restore(declared);
         Uses(program, "thing");
 
-        var text = ProgramText.Save(program, values);
+        var text = Scribe.Save(program, values);
         Assert.Contains("[ 74857693847562934, 0.25, 1E-05, \"Airlock Inner Door\", on, #FF8800CC ]", text);
 
         var read = new Values();
         var after = new Automation();
-        Assert.Equal("", ProgramText.Load(text, after, read));
+        Assert.Equal("", Reader.Load(text, after, read));
 
         var keys = after.Refs[0].Keys;
         Assert.Equal(6, keys.Count);

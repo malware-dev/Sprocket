@@ -177,7 +177,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public Pen Signal(IList<string> blocks, ToolbarSlot at)
         {
             Space();
-            Spell(_text, BlockKinds.Own, ProgramText.Toolbar);
+            Spell(_text, BlockKinds.Own, Format.Toolbar);
             _text.Append('(')
                 .Append(at.Toolbar.ToString(CultureInfo.InvariantCulture)).Append(", ")
                 .Append(at.Page.ToString(CultureInfo.InvariantCulture)).Append(", ")

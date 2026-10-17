@@ -113,7 +113,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         string Written()
         {
             var program = Editor.Program;
-            return program.Unread.Length > 0 ? program.Unread : ProgramText.Save(program, Editor.World.Values);
+            return program.Unread.Length > 0 ? program.Unread : Scribe.Save(program, Editor.World.Values);
         }
 
         /// <summary>Says what is wrong with the text, in the reader's own words.</summary>
@@ -130,7 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Developing
         /// <summary>Selects the line what is wrong names, in view and ready to be typed over, where it names one.</summary>
         void Point()
         {
-            var line = ProgramText.LineOf(Trouble);
+            var line = Reader.LineOf(Trouble);
             if (line < 1)
                 return;
 

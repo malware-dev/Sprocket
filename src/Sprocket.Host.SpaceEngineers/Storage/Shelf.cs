@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     /// <remarks>
     /// The index is a list of file names, one to a line; a line starting <c>#</c> is a comment, and a blank line is
     /// nothing. A player adds a blueprint somebody gave them by putting its file beside the index and its name on a line
-    /// of its own. Each file holds one blueprint as <see cref="ProgramText.Blueprint(AutomationSystem, Guid)" /> writes it.
+    /// of its own. Each file holds one blueprint as <see cref="Scribe.Blueprint(AutomationSystem, Guid)" /> writes it.
     /// <para>
     /// The index is edited line by line, so whatever a player wrote in it stays where they wrote it. A file is only ever
     /// written where it read as a blueprint, or where the library made it.
@@ -85,7 +85,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
             var identity = had?.Identity ?? Guid.NewGuid();
-            var text = ProgramText.Blueprint(blueprint, identity);
+            var text = Scribe.Blueprint(blueprint, identity);
             if (had == null)
             {
                 had = new Volume(Free(blueprint.Name), identity, blueprint.Namespace, blueprint.Name, blueprint.Changed, text);
@@ -150,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         public bool Holds(AutomationSystem blueprint)
         {
             var had = blueprint.HasOrigin ? Find(blueprint.Origin) : null;
-            return had != null && had.Text == ProgramText.Blueprint(blueprint, had.Identity);
+            return had != null && had.Text == Scribe.Blueprint(blueprint, had.Identity);
         }
 
         /// <summary>Reads the index and every file it names, answering what was wrong with any of them, or empty.</summary>
@@ -221,7 +221,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             AutomationSystem read;
-            var trouble = ProgramText.Lone(text, _values, out read);
+            var trouble = Reader.Lone(text, _values, out read);
             if (trouble.Length > 0)
                 return new Volume(name, VolumeState.Unreadable, trouble);
 
