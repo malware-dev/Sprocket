@@ -51,10 +51,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             return MyToolbarItemInfo.BlockAction(block, ActionId, caption);
         }
 
-        // The world's action, offered to every block while the world is loaded. Static because the game's getter is one
-        // event for the whole process and the action is the same for every block; made as a world loads and let go as it
-        // unloads, since the game compiles the mod again for every world and a handler left from the last would offer an
-        // action of the code that went with it.
+        // The world's action, offered to every block while the world is loaded. Static because the action is one for every
+        // block and the game calls the getter's handler and the action's own without a Sprocket to hand; made as a world
+        // loads and let go as it unloads.
         static IMyTerminalAction _action;
 
         /// <summary>Whether the toolbar item <paramref name="info" /> is this action.</summary>
