@@ -24,6 +24,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int _checkedWiring = -1;
         int _checkedUnstarted = -1;
         int _checkedStarts = -1;
+        int _matchedSwitches = -1;
         int _lookedBindings = -1;
         int _lookedEdits = -1;
         int _lookedRunners = -1;
@@ -274,9 +275,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _runs.Reconcile();
         }
 
-        /// <summary>Matches the runners to the program where it gained or lost something, and checks it where it or its wiring changed; nothing otherwise.</summary>
+        /// <summary>Matches the runners to the program where it gained or lost something, checks it where it or its wiring changed, and matches what is watched where a switch was flipped; nothing otherwise.</summary>
         /// <remarks>
-        /// Asked on every tick, and by an editor about to show what is wrong; a flag and four integer comparisons.
+        /// Asked on every tick, and by an editor about to show what is wrong; a flag and five integer comparisons.
         /// </remarks>
         public void Checking()
         {
@@ -293,6 +294,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 || _automation.Starts != _checkedStarts)
             {
                 Check();
+            }
+            else if (_automation.Switches != _matchedSwitches)
+            {
+                // A switch alone changes what is watched, never what is wrong, so what a run met stands.
+                Match();
             }
         }
 
@@ -388,12 +394,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         }
 
         /// <summary>
-        /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances, and one runner for
-        /// each trigger that acts itself, and retires the rest.
+        /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances that may run, and one
+        /// runner for each trigger that acts itself, and retires the rest.
         /// </summary>
-        /// <remarks>Done with the check, when the program or its wiring has changed, and on no other tick.</remarks>
+        /// <remarks>Done with the check, when the program or its wiring has changed, and alone when a switch is flipped.</remarks>
         void Match()
         {
+            _matchedSwitches = _automation.Switches;
             _watches.Begin();
             _runs.Begin();
 
@@ -414,8 +421,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     for (var n = 0; n < instances.Count; n++)
                     {
-                        // An installation waiting to be filled in has nothing watched, so it costs no look until it is.
-                        if (watched && !SequenceSummary.Waits(system, trigger, alone, instances[n]))
+                        // Switched off, or waiting to be filled in, it has nothing watched, so it costs no look until it may run.
+                        if (watched && system.Enabled && instances[n].Enabled && !SequenceSummary.Waits(system, trigger, alone, instances[n]))
                             _watches.Keep(system, t, trigger, instances[n]);
 
                         if (alone != null)

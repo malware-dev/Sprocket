@@ -44,7 +44,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (value)
                     Halt = null;
 
+                var switched = value != _enabled;
                 _enabled = value;
+
+                if (switched && _system != null && _system.Switched != null)
+                    _system.Switched();
             }
         }
 

@@ -446,4 +446,56 @@ public class InstanceTests
         Assert.True(port.Enabled);
         Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
     }
+
+    /// <summary>A switched-off installation, or logic system, has nothing watched for it, and is watched again once switched on.</summary>
+    [Fact]
+    public void WhatIsSwitchedOffIsWatchedOnlyOnceSwitchedOn()
+    {
+        var ship = Build();
+        var cycle = ship.Program.Sequences[0];
+        var every = new EveryTrigger(1000) { Does = new Run(cycle.Number) };
+        ship.Airlock.AddTrigger(every);
+        var port = ship.Airlock.AddInstance();
+        Fit(ship, port);
+        ship.Program.Edited();
+        ship.Tick(2);
+        Assert.NotNull(ship.Runner.Watches.Poller(every, port));
+
+        port.Enabled = false;
+        ship.Tick();
+        Assert.Null(ship.Runner.Watches.Poller(every, port));
+        Assert.NotNull(ship.Runner.Watches.Poller(every, Front(ship)));
+
+        port.Enabled = true;
+        ship.Tick();
+        Assert.NotNull(ship.Runner.Watches.Poller(every, port));
+
+        ship.Airlock.Enabled = false;
+        ship.Tick();
+        Assert.Null(ship.Runner.Watches.Poller(every, port));
+        Assert.Null(ship.Runner.Watches.Poller(every, Front(ship)));
+
+        ship.Airlock.Enabled = true;
+        ship.Tick();
+        Assert.NotNull(ship.Runner.Watches.Poller(every, port));
+        Assert.NotNull(ship.Runner.Watches.Poller(every, Front(ship)));
+    }
+
+    /// <summary>A block a trigger watches, lost while its logic system is switched off, is said by an open screen's look.</summary>
+    [Fact]
+    public void AWatchedBlockLostWhileSwitchedOffIsSaid()
+    {
+        var ship = Build();
+        var cycle = ship.Program.Sequences[0];
+        ship.Airlock.Enabled = false;
+        ship.Tick(2);
+
+        ship.Rig.Grind(1);
+        ship.Tick();
+        ship.Runner.Look();
+
+        var fault = SequenceSummary.Fault(ship.Runner.Get(cycle, Front(ship)));
+        Assert.Equal(SequenceProblem.MissingSource, fault.Problem);
+        Assert.Equal(SequenceFault.Trigger, fault.Step);
+    }
 }

@@ -97,11 +97,11 @@ public class SwitchTests
     }
 
     /// <summary>
-    /// A sequence in a system switched off reads its trigger and starts nothing.
+    /// A sequence in a system switched off starts nothing, and fires on a change once switched on again.
     /// </summary>
     /// <remarks>
-    /// Sampled anyway, which is what makes switching it on again safe: an edge is a change since the
-    /// last reading, so a sequence that slept through one would fire on the next thing it noticed.
+    /// Switched off, nothing is watched or remembered for it, so switching it on starts from a fresh look on the next
+    /// tick, with no old reading to fire on.
     /// </remarks>
     [Fact]
     public void ASystemSwitchedOffStartsNothing()
@@ -121,6 +121,7 @@ public class SwitchTests
         ship.World.Invoke(ship.Seen(ship.Inner), "close");
         ship.Tick(90);
         ship.Airlock.Enabled = true;
+        ship.Tick();
 
         ship.Inner.ForceOpen();
         ship.Tick(Rota.Ten);

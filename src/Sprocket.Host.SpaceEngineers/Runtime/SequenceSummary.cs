@@ -290,40 +290,68 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return false;
         }
 
-        /// <summary>The first block a sequence's steps name on <paramref name="through" /> that is gone, or may have been swapped for another, or none.</summary>
+        /// <summary>The first block that what starts a sequence watches, and then its steps name, on <paramref name="through" /> that is gone, or may have been swapped for another, or none.</summary>
         /// <remarks>A slot left empty is skipped.</remarks>
         public static SequenceFault Looked(Bindings bindings, Sequence sequence, SystemInstance through)
         {
             var system = sequence.System;
             var adrift = SequenceFault.None;
 
+            // What a trigger watches is otherwise said only by its poller, which a switched-off system has none of.
+            var triggers = system == null ? null : system.Triggers;
+            for (var i = 0; triggers != null && i < triggers.Count; i++)
+            {
+                var moment = triggers[i] as MomentTrigger;
+                if (moment == null || !moment.IsAbout(sequence))
+                    continue;
+
+                var lost = Lost(bindings, system, through, moment.Sources, SequenceProblem.MissingSource, SequenceFault.Trigger, ref adrift);
+                if (lost.Exists)
+                    return lost;
+            }
+
             for (var i = 0; i < sequence.Steps.Count; i++)
             {
                 var step = sequence.Steps[i];
-                var lost = step is Act ? SequenceProblem.MissingTarget : SequenceProblem.MissingGate;
-                for (var s = 0; s < step.Targets.Count; s++)
-                {
-                    var slot = step.Targets[s];
-                    var part = system?.FindPart(slot);
-                    var filled = through?.FilledWith(slot);
-                    if (part != null && through != null && (filled == null || filled.Count == 0))
-                        continue;
-
-                    var count = filled?.Count ?? 1;
-                    for (var n = 0; n < count; n++)
-                    {
-                        var name = filled == null ? slot : filled[n];
-                        var points = bindings.State(name);
-                        if (points == RefState.Lost && (part == null || !part.Optional))
-                            return new SequenceFault(lost, i, BlockTrouble.None, name);
-                        if (points == RefState.Adrift && !adrift.Exists)
-                            adrift = new SequenceFault(SequenceProblem.Adrift, i, BlockTrouble.None, name);
-                    }
-                }
+                var problem = step is Act ? SequenceProblem.MissingTarget : SequenceProblem.MissingGate;
+                var lost = Lost(bindings, system, through, step.Targets, problem, i, ref adrift);
+                if (lost.Exists)
+                    return lost;
             }
 
             // Only once nothing is outright missing, because being gone is the worse news and a line can only say one thing.
             return adrift;
+        }
+
+        /// <summary>
+        /// The first block <paramref name="slots" /> come to on <paramref name="through" /> that is gone, said as
+        /// <paramref name="problem" /> at <paramref name="step" />, or none; the first that may have been swapped is kept in
+        /// <paramref name="adrift" /> where it holds none yet.
+        /// </summary>
+        static SequenceFault Lost(Bindings bindings, AutomationSystem system, SystemInstance through, IList<string> slots,
+            SequenceProblem problem, int step, ref SequenceFault adrift)
+        {
+            for (var s = 0; s < slots.Count; s++)
+            {
+                var slot = slots[s];
+                var part = system?.FindPart(slot);
+                var filled = through?.FilledWith(slot);
+                if (part != null && through != null && (filled == null || filled.Count == 0))
+                    continue;
+
+                var count = filled?.Count ?? 1;
+                for (var n = 0; n < count; n++)
+                {
+                    var name = filled == null ? slot : filled[n];
+                    var points = bindings.State(name);
+                    if (points == RefState.Lost && (part == null || !part.Optional))
+                        return new SequenceFault(problem, step, BlockTrouble.None, name);
+                    if (points == RefState.Adrift && !adrift.Exists)
+                        adrift = new SequenceFault(SequenceProblem.Adrift, step, BlockTrouble.None, name);
+                }
+            }
+
+            return SequenceFault.None;
         }
 
         /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs or <paramref name="alone" />, waits for a slot <paramref name="through" /> leaves empty.</summary>

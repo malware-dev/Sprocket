@@ -131,9 +131,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Bumped whenever a system is switched on, which is when what it does is checked again for the start it is given.</summary>
         public int Starts { get; private set; }
 
+        /// <summary>Bumped whenever a system or one of its installations is switched on or off, which is when what is watched for it is matched again.</summary>
+        public int Switches { get; private set; }
+
         void Start()
         {
             Starts++;
+        }
+
+        void Switch()
+        {
+            Switches++;
         }
 
         void Reshape()
@@ -355,6 +363,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var system = new AutomationSystem(_nextSystemId++, Guid.NewGuid());
             system.Reshaped = Reshape;
             system.Started = Start;
+            system.Switched = Switch;
             system.Name = FreeName(numbered);
             _systems.Add(system);
             return system;
@@ -386,6 +395,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var system = new AutomationSystem(_nextSystemId++, identity);
             system.Reshaped = Reshape;
             system.Started = Start;
+            system.Switched = Switch;
             system.Namespace = space ?? "";
             system.Name = name ?? "";
             _systems.Add(system);
@@ -664,6 +674,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             system.Reshaped = null;
             system.Started = null;
+            system.Switched = null;
             Reshape();
             Wiring++;
             return true;
@@ -686,6 +697,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             system.Reshaped = Reshape;
             system.Started = Start;
+            system.Switched = Switch;
             Reshape();
             Wiring++;
         }

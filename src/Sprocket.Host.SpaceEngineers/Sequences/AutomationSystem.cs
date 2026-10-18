@@ -25,6 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Told whenever the system is switched on.</summary>
         public Action Started;
 
+        /// <summary>Told whenever the system, or one of its installations, is switched on or off.</summary>
+        public Action Switched;
+
         void Reshape()
         {
             if (Reshaped != null)
@@ -60,10 +63,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 }
 
                 var started = value && !_enabled;
+                var switched = value != _enabled;
                 _enabled = value;
 
                 if (started && Started != null)
                     Started();
+
+                if (switched && Switched != null)
+                    Switched();
             }
         }
 
