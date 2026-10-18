@@ -14,10 +14,12 @@ using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 {
     /// <summary>
-    /// The action Sprocket puts into somebody else's block so that block can start a sequence.
+    /// The action Sprocket puts into a block's toolbar, on that same block, so pressing the slot starts a sequence.
     /// </summary>
     /// <remarks>
-    /// Registered on every machine: a slot stores this action's id, and a machine without the action draws the slot as
+    /// Offered on every block, on every machine, through the game's action getter rather than registered per type: a type
+    /// copies the actions of the types it derives from once, when it is first used, so an action registered on a base later
+    /// never reaches the types already loaded. A slot stores this action's id, and a machine without it draws the slot as
     /// unassigned.
     /// </remarks>
     public static class SignalAction
@@ -42,15 +44,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             };
         }
 
-        // The game keeps custom terminal actions for the life of the process, across world loads, so the action is
-        // registered once per process; an instance would register it again with every load.
-        static bool _registered;
-
-        /// <summary>What a slot points at: this block, and this trigger of it.</summary>
-        public static MyToolbarItemInfo Slot(long sprocketBlockId)
+        /// <summary>What a slot of <paramref name="block" />'s toolbar holds: this action, on that block, with <paramref name="caption" /> under its icon.</summary>
+        /// <remarks>A null caption leaves the action's own text under the icon.</remarks>
+        public static MyToolbarItemInfo Slot(long block, string caption)
         {
-            return MyToolbarItemInfo.BlockAction(sprocketBlockId, ActionId);
+            return MyToolbarItemInfo.BlockAction(block, ActionId, caption);
         }
+
+        // The world's action, offered to every block while the world is loaded. Static because the game's getter is one
+        // event for the whole process and the action is the same for every block; made as a world loads and let go as it
+        // unloads, since the game compiles the mod again for every world and a handler left from the last would offer an
+        // action of the code that went with it.
+        static IMyTerminalAction _action;
 
         /// <summary>Whether the toolbar item <paramref name="info" /> is this action.</summary>
         public static bool IsOurs(MyToolbarItemInfo info)
@@ -70,20 +75,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             return arguments;
         }
 
-        /// <summary>Makes the action once, in <paramref name="texts" />, which the game keeps for the session.</summary>
-        public static void Register(Texts texts)
+        /// <summary>Makes the action, in <paramref name="texts" />, and offers it to every block until <see cref="End" />.</summary>
+        /// <remarks>Called as a world loads. Making it touches no type's list of actions, so it is safe before any block exists.</remarks>
+        public static void Begin(Texts texts)
         {
-            if (_registered)
+            if (_action != null || MyAPIGateway.TerminalControls == null)
                 return;
 
-            _registered = true;
-
-            IMyTerminalAction action = MyAPIGateway.TerminalControls.CreateAction<IMyProgrammableBlock>(ActionId);
+            IMyTerminalAction action = MyAPIGateway.TerminalControls.CreateAction<IMyTerminalBlock>(ActionId);
             action.Name = new StringBuilder(texts.TerminalAction);
 
-            // The fallback text for a slot Sprocket has not labelled.
-            var slot = texts.TerminalOpen;
-            action.Writer = delegate(IMyTerminalBlock _, StringBuilder text) { text.Append(slot); };
+            // The fallback text for a slot Sprocket has not labelled, in the language the texts are in when it is drawn.
+            action.Writer = delegate(IMyTerminalBlock _, StringBuilder text) { text.Append(texts.TerminalOpen); };
 
             // The value fixes the parameter's type, and is what the action receives when run with none; an empty key resolves to
             // nothing.
@@ -92,10 +95,33 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
 
             action.InvalidToolbarTypes = EveryList();
 
-            MyAPIGateway.TerminalControls.AddAction<IMyProgrammableBlock>(action);
+            _action = action;
+            MyAPIGateway.TerminalControls.CustomActionGetter += Offer;
         }
 
-        /// <summary>Fires the key a slot carries on the Sprocket unit of <paramref name="block" />.</summary>
+        /// <summary>Stops offering the action, as the world unloads.</summary>
+        public static void End()
+        {
+            if (_action == null)
+                return;
+
+            if (MyAPIGateway.TerminalControls != null)
+                MyAPIGateway.TerminalControls.CustomActionGetter -= Offer;
+
+            _action = null;
+        }
+
+        /// <summary>Adds the action to the actions the game gathered for <paramref name="block" />.</summary>
+        /// <remarks>
+        /// Asked whenever the game gathers a block's actions: for each toolbar slot on screen every frame, and as a slot is
+        /// pressed. One add of the one action, and nothing else.
+        /// </remarks>
+        static void Offer(IMyTerminalBlock block, List<IMyTerminalAction> actions)
+        {
+            actions.Add(_action);
+        }
+
+        /// <summary>Fires the key a slot carries on the Sprocket of the construct <paramref name="block" />, the pressed block, is on.</summary>
         /// <remarks>Runs on the server: the press is a server event and <c>Apply</c> never syncs.</remarks>
         static void Run(IMyTerminalBlock block, ListReader<TerminalActionParameter> parameters)
         {
@@ -107,7 +133,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Terminal
             if (string.IsNullOrEmpty(key))
                 return;
 
-            SprocketUnit unit = SprocketSession.UnitOf(block);
+            SprocketUnit unit = SprocketSession.On(block);
             if (unit != null)
                 unit.Fire(key);
         }

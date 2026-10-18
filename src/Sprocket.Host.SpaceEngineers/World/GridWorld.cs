@@ -191,8 +191,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// of the game's own actions, or another Sprocket's.
         /// </summary>
         /// <remarks>
-        /// This Sprocket's action counts as its own whatever key it carries, and so does one pointed at a Sprocket that is
-        /// gone.
+        /// This Sprocket's action counts as its own whatever key it carries: on the panel itself, as it is written, naming this
+        /// Sprocket, as a slot an older build wrote does, or naming a Sprocket that is gone.
         /// </remarks>
         public bool Foreign(IMyTerminalBlock panel, ToolbarSlot at)
         {
@@ -203,7 +203,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return false;
 
             if (SignalAction.IsOurs(present))
-                return _anchor != null && present.BlockEntityId != _anchor.EntityId && Toolbars.Exists(present.BlockEntityId);
+            {
+                return _anchor != null && present.BlockEntityId != panel.EntityId && present.BlockEntityId != _anchor.EntityId
+                    && Toolbars.Exists(present.BlockEntityId);
+            }
 
             return true;
         }

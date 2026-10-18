@@ -81,12 +81,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 GridEntity grid = _world.Entities[i];
                 for (var t = 1; Toolbars.Of(grid.Block, t) != null; t++)
-                    Claims(Toolbars.Of(grid.Block, t));
+                    Claims(Toolbars.Of(grid.Block, t), grid.Block.EntityId);
             }
         }
 
-        /// <summary>Counts what each slot of <paramref name="toolbar" /> holds that answers this program.</summary>
-        void Claims(IMyToolbar toolbar)
+        /// <summary>Counts what each slot of <paramref name="toolbar" />, of <paramref name="block" />, holds that answers this program.</summary>
+        void Claims(IMyToolbar toolbar, long block)
         {
             for (var slot = 0; slot < toolbar.ItemCount; slot++)
             {
@@ -95,7 +95,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
 
                 // Sprocket's action counts only where it points here: one pointed at another Sprocket runs that one's program.
-                if (!_buttons.Mine(present))
+                if (!_buttons.Mine(present, block))
                     continue;
 
                 _arguments.Clear();
@@ -240,13 +240,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (!toolbar.TryGetItem(slot, out present))
                 return new UnansweredButton(block, Unwired.Cleared);
 
-            return new UnansweredButton(block, KeyIn(toolbar, slot, present) == wanted ? Unwired.Unknown : Unwired.Taken);
+            return new UnansweredButton(block, KeyIn(toolbar, slot, present, _buttons.PanelId(reference)) == wanted ? Unwired.Unknown : Unwired.Taken);
         }
 
-        /// <summary>The key a slot holds where it holds this Sprocket's action, or null.</summary>
-        string KeyIn(IMyToolbar toolbar, int slot, MyToolbarItemInfo present)
+        /// <summary>The key a slot of <paramref name="panel" />'s toolbar holds where it holds this Sprocket's action, or null.</summary>
+        string KeyIn(IMyToolbar toolbar, int slot, MyToolbarItemInfo present, long panel)
         {
-            if (!_buttons.Mine(present))
+            if (!_buttons.Mine(present, panel))
                 return null;
 
             _arguments.Clear();

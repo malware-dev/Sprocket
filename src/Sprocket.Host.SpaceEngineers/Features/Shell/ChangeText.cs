@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case ChangeKind.AddStep: return texts.ChangeAddStep;
                 case ChangeKind.AddWait: return texts.ChangeAddWait;
                 case ChangeKind.DescribeSlot: return texts.ChangeDescribeSlot;
+                case ChangeKind.ShortenSlot: return texts.ChangeShortenSlot;
                 case ChangeKind.AddIf: return texts.ChangeAddIf;
                 case ChangeKind.AddBranch: return texts.ChangeAddBranch;
                 case ChangeKind.RemoveIf: return texts.ChangeRemoveIf;

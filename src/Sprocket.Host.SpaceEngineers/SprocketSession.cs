@@ -117,10 +117,11 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
         public static bool DeveloperMode => _current != null && _current.Asked.DeveloperMode;
 
-        /// <summary>The unit a block carries, or null; never creates one.</summary>
-        public static SprocketUnit UnitOf(IMyTerminalBlock block)
+        /// <summary>The Sprocket of the construct <paramref name="block" /> is on, or null; never creates one.</summary>
+        /// <remarks>Asked when a slot is pressed, never on a tick.</remarks>
+        public static SprocketUnit On(IMyTerminalBlock block)
         {
-            return _current == null ? null : _current._roster.Kept(block);
+            return _current == null || block == null ? null : _current._roster.On(block);
         }
 
         /// <summary>Whether this machine is the one running programs.</summary>
@@ -259,6 +260,9 @@ namespace Sprocket.Host.SpaceEngineers
             };
 
             Speak();
+
+            // On every machine: a server presses slots, and a client draws them.
+            SignalAction.Begin(_texts);
 
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
                 Settled, written => Rule(Settings.Of(written)));
@@ -783,6 +787,8 @@ namespace Sprocket.Host.SpaceEngineers
                 MyAPIGateway.TerminalControls.CustomControlGetter -= GravityFieldButtons.Arrange;
                 MyAPIGateway.TerminalControls.CustomControlGetter -= DoorControls.Arrange;
             }
+
+            SignalAction.End();
 
             if (_gameTexts != null && MyAPIGateway.Gui != null)
                 MyAPIGateway.Gui.GuiControlRemoved -= Closed;

@@ -164,7 +164,7 @@ public class ScenarioTests
         {
             var data = Assert.Single(panel.Element("Toolbar")!.Element("Slots")!.Elements("Slot")).Element("Data")!;
             Assert.Equal(SignalAction.ActionId, (string)data.Element("Action"));
-            Assert.Equal(built.Sim.Unit.Block.EntityId, (long)data.Element("BlockEntityId")!);
+            Assert.Equal((long)panel.Element("EntityId")!, (long)data.Element("BlockEntityId")!);
         }
     }
 }

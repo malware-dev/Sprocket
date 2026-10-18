@@ -69,6 +69,28 @@ public class BlueprintWritingTests
         Assert.Equal("The button that cycles it.", editor.Slot().About.Text);
     }
 
+    /// <summary>A short name typed into a signal slot's box is the slot's once the box is left, and undo takes it back.</summary>
+    [Fact]
+    public void AShortNameTypedIsKeptAndUndone()
+    {
+        var screen = OnTheSlot();
+        var editor = screen.Editor;
+        var part = Assert.Single(editor.Program.Systems[0].Parts);
+        Assert.True(part.IsSignal);
+        Assert.True(editor.Slot().Short.IsVisible);
+
+        editor.Input.Focus(editor.Slot().Short);
+        screen.Do("type", "Cycle").Run(1);
+        editor.Input.Focus(null);
+        screen.Run(5);
+        Assert.Equal("Cycle", part.Short);
+
+        editor.Screen.Undo!.Execute();
+        screen.Run(5);
+        Assert.Equal("", part.Short);
+        Assert.Equal("", editor.Slot().Short.Text);
+    }
+
     /// <summary>A slot may take the name of one nothing uses and no installation holds blocks in, which is not saved and goes.</summary>
     [Fact]
     public void ANameHeldByASlotNothingUsesIsFree()

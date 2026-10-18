@@ -1782,6 +1782,22 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>adding a delay</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a wait step to a sequence.</comment>
   </data>
+  <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
+    <value>changing a slot's short name</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a signal slot's short name, written on its slot's screen.</comment>
+  </data>
+  <data name="Sprocket.Slot.Short" xml:space="preserve">
+    <value>Short name</value>
+    <comment>Heading of the short name box on a slot's screen, shown only for a slot that expects a signal: the box holds the few words each button and toolbar slot answering the slot shows.</comment>
+  </data>
+  <data name="Sprocket.Slot.ShortHint" xml:space="preserve">
+    <value>What its buttons say.</value>
+    <comment>Placeholder in the empty short name box on a signal slot's screen, under the Short name heading.</comment>
+  </data>
+  <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
+    <value>The few words on each button and toolbar slot that answers this slot. Left empty, they say the slot's name.</value>
+    <comment>Tooltip on the short name box on a signal slot's screen, under the Short name heading.</comment>
+  </data>
   <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
     <value>describing a slot</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is a change to a slot's description, written on its slot's screen.</comment>

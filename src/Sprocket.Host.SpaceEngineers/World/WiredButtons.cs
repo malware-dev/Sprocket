@@ -12,7 +12,7 @@ using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
-    /// <summary>The toolbar slots a construct's automation writes: wired the moment the program asks for a button, let go of when it stops asking, and mended where Sprocket's own writing has gone stale.</summary>
+    /// <summary>The toolbar slots a construct's automation writes, each on the block whose toolbar it is: wired the moment the program asks for a button, let go of when it stops asking, and mended where Sprocket's own writing has gone stale.</summary>
     public sealed class WiredButtons
     {
         readonly GridWorld _world;
@@ -28,7 +28,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>
         /// The slots <paramref name="program" /> writes on <paramref name="world" />, run by <paramref name="runner" />, holding
-        /// the keys of <paramref name="keys" />, each naming <paramref name="hero" />, the block the automation is kept in.
+        /// the keys of <paramref name="keys" />, kept in <paramref name="hero" />.
         /// </summary>
         public WiredButtons(GridWorld world, Automation program, AutomationRunner runner, SlotKeys keys, IMyTerminalBlock hero)
         {
@@ -105,6 +105,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 Release();
                 Take();
+                Relabel();
             }
             else
             {
@@ -183,9 +184,16 @@ namespace Sprocket.Host.SpaceEngineers.World
                 want.Key = needed.Acts != null ? SlotKeys.KeyOf(system, instance, needed) : SlotKeys.KeyOf(system, instance, sequence, needed.Stops);
                 want.Reference = blocks[i];
                 want.Start = GridWorld.Start(sequence.Id, instance);
-                want.Name = needed.IsWritten ? null : needed.Part;
+                want.Name = needed.IsWritten ? null : Shown(system, needed.Part);
                 into.Add(want);
             }
+        }
+
+        /// <summary>What a toolbar slot answering the signal slot <paramref name="part" /> of <paramref name="system" /> says: its short name, or its name.</summary>
+        static string Shown(AutomationSystem system, string part)
+        {
+            var slot = system.FindPart(part);
+            return slot != null && slot.Short.Length > 0 ? slot.Short : part;
         }
 
         readonly List<string> _answering = new List<string>();
@@ -214,16 +222,16 @@ namespace Sprocket.Host.SpaceEngineers.World
                 MyToolbarItemInfo present;
 
                 if (toolbar == null || !toolbar.TryGetItem(want.Slot, out present)
-                    || (!Mine(present) && !Orphaned(present) && !Handed(present)))
+                    || (!Mine(present, want.PanelId) && !Orphaned(present) && !Handed(present)))
                 {
                     continue;
                 }
 
                 // An orphan is rewritten whatever its key says: the block it names is gone.
-                if (Mine(present) && Understood(toolbar, want.Slot))
+                if (Mine(present, want.PanelId) && Understood(toolbar, want.Slot))
                     continue;
 
-                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_hero.EntityId),
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(want.PanelId, want.Name),
                         SignalAction.Argument(want.Key)))
                 {
                     GameLog.Say($"the write was refused mending slot {want.Slot}");
@@ -373,13 +381,13 @@ namespace Sprocket.Host.SpaceEngineers.World
                 {
                     Keep(toolbar, want, present);
                 }
-                else if (filled && !Mine(present) && !Orphaned(present))
+                else if (filled && !Mine(present, want.PanelId) && !Orphaned(present))
                 {
                     GameLog.Say($"slot {want.Slot} in use by {present.Kind} {present.ActionId}");
                     continue;
                 }
 
-                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_hero.EntityId), SignalAction.Argument(want.Key)))
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(want.PanelId, want.Name), SignalAction.Argument(want.Key)))
                 {
                     GameLog.Say($"the write was refused for slot {want.Slot}");
                     continue;
@@ -390,10 +398,40 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>Writes again each slot it holds whose short name changed, so its caption and its button say the new one.</summary>
+        void Relabel()
+        {
+            foreach (var want in _wanting)
+            {
+                var had = -1;
+                for (var i = 0; i < _wanted.Count && had < 0; i++)
+                {
+                    if (_wanted[i].Same(want))
+                        had = i;
+                }
+
+                if (had < 0 || string.Equals(_wanted[had].Name, want.Name, StringComparison.Ordinal))
+                    continue;
+
+                IMyToolbar toolbar = ToolbarOf(want);
+                MyToolbarItemInfo present;
+                if (toolbar == null || !toolbar.TryGetItem(want.Slot, out present) || !Asked(toolbar, present, want))
+                    continue;
+
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(want.PanelId, want.Name), SignalAction.Argument(want.Key)))
+                {
+                    GameLog.Say($"the write was refused naming slot {want.Slot}");
+                    continue;
+                }
+
+                Name(want);
+            }
+        }
+
         /// <summary>Whether a slot already holds exactly what a want asks for.</summary>
         public bool Asked(IMyToolbar toolbar, MyToolbarItemInfo present, WantedWiring want)
         {
-            if (!Mine(present))
+            if (!Mine(present, want.PanelId))
                 return false;
 
             _arguments.Clear();
@@ -404,11 +442,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>
-        /// Whether a slot holds Sprocket's action pointed at <em>this</em> Sprocket.
+        /// Whether a slot of <paramref name="panel" />'s toolbar holds Sprocket's action for <em>this</em> Sprocket: on the
+        /// panel itself, as it is written, or naming the block the automation is kept in, as a slot an older build wrote does.
         /// </summary>
-        public bool Mine(MyToolbarItemInfo present)
+        public bool Mine(MyToolbarItemInfo present, long panel)
         {
-            return SignalAction.IsOurs(present) && present.BlockEntityId == _hero.EntityId;
+            return SignalAction.IsOurs(present) && (present.BlockEntityId == panel || present.BlockEntityId == _hero.EntityId);
         }
 
         /// <summary>
@@ -434,7 +473,8 @@ namespace Sprocket.Host.SpaceEngineers.World
             _reconciled = int.MinValue;
         }
 
-        long PanelId(string reference)
+        /// <summary>The block the variable <paramref name="reference" /> names, by its entity id, or 0.</summary>
+        public long PanelId(string reference)
         {
             GridEntity grid = _runner.Bindings.Entity(reference);
             return grid == null ? 0 : grid.Block.EntityId;
@@ -509,10 +549,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (filled && Asked(toolbar, present, want))
                     continue;
 
-                if (filled && !Mine(present) && !Orphaned(present))
+                if (filled && !Mine(present, want.PanelId) && !Orphaned(present))
                     Keep(toolbar, want, present);
 
-                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(_hero.EntityId), SignalAction.Argument(want.Key)))
+                if (!Toolbars.Write(toolbar, want.Slot, SignalAction.Slot(want.PanelId, want.Name), SignalAction.Argument(want.Key)))
                 {
                     GameLog.Say($"the write was refused for slot {want.Slot}");
                     continue;

@@ -30,11 +30,9 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Utilities == null)
                 return;
 
-            // A control or action added before the block type has fully spawned makes the vanilla
-            // controls vanish; the first update is the earliest safe point, Init is too early
-            // (THDigi's terminal control examples).
+            // A control added before the block type has fully spawned makes the vanilla controls vanish; the first update is
+            // the earliest safe point, Init is too early (THDigi's terminal control examples).
             var texts = SprocketSession.Texts;
-            SignalAction.Register(texts);
 
             // The button belongs to a terminal, and a dedicated server has none.
             if (!MyAPIGateway.Utilities.IsDedicated)

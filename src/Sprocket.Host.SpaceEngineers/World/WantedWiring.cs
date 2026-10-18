@@ -25,7 +25,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Which sequence on which one of its system, so reachability is reported for each one.</summary>
         public long Start;
 
-        /// <summary>The name of the signal slot the toolbar slot answers, which a button wired to it is named; null for a trigger written in the script.</summary>
+        /// <summary>
+        /// The signal slot's short name, or its name where it has none: a button panel's button is named so, and the caption
+        /// under a toolbar slot's icon says it; null for a trigger written in the script.
+        /// </summary>
         public string Name;
 
         /// <summary>Whether <paramref name="other" /> asks for the same key in the same slot of the same toolbar.</summary>

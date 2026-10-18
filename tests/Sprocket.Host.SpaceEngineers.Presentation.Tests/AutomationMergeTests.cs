@@ -1,5 +1,6 @@
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -7,6 +8,7 @@ using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using Xunit;
+using TerminalActionParameter = Sandbox.ModAPI.Ingame.TerminalActionParameter;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
@@ -136,9 +138,55 @@ public class AutomationMergeTests
         Assert.Contains("Airlock Inner Door:open", sim.Machine.Log);
     }
 
-    /// <summary>A half that parted takes over its buttons, which still name the block its automation came from, though that block is live on the other half.</summary>
+    /// <summary>A button names itself, so a half that parted answers its buttons as they are, with nothing rewritten.</summary>
     [Fact]
-    public void APartedHalfTakesOverItsButtons()
+    public void APartedHalfAnswersItsButtonsAsTheyAre()
+    {
+        var (rig, sim, rotor, spare, button) = Arm();
+        Assert.True(button.Toolbar.TryGetItem(0, out var item));
+        Assert.Equal(button.Block.EntityId, item.BlockEntityId);
+
+        rig.Detach(rotor);
+        sim.Tick();
+        string written;
+        sim.Unit.Written(out written, out _);
+        BlockStorage.Store(spare.Block, written, "");
+        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
+        half.TakeOver(sim.Unit.Block.EntityId);
+        half.Begin(sim.Now);
+        half.Tick(sim.Now + 1);
+
+        Assert.True(button.Toolbar.TryGetItem(0, out item));
+        Assert.Equal(button.Block.EntityId, item.BlockEntityId);
+    }
+
+    /// <summary>
+    /// A slot naming the block the automation is kept in, as an older build wrote it, still runs,
+    /// and is Sprocket's own as it is, so the pass that mends leaves it.
+    /// </summary>
+    [Fact]
+    public void ASlotNamingTheAutomationsBlockRunsAndIsLeftAsItIs()
+    {
+        var (_, sim, _, _, button) = Arm();
+        Assert.True(button.Toolbar.TryGetItem(0, out var item));
+        var key = new List<TerminalActionParameter>();
+        button.Toolbar.Parameters(0, key);
+        Assert.True(Toolbars.Write(button.Toolbar, 0, SignalAction.Slot(sim.Unit.Block.EntityId, null), key));
+
+        sim.Machine.Forget();
+        sim.Press("Arm Button");
+        for (var i = 0; i < 120; i++)
+            sim.Tick();
+        Assert.Contains("Arm Door:open", sim.Machine.Log);
+
+        sim.Unit.TakeOver(0);
+        sim.Tick();
+        Assert.True(button.Toolbar.TryGetItem(0, out item));
+        Assert.Equal(sim.Unit.Block.EntityId, item.BlockEntityId);
+    }
+
+    /// <summary>An arm on a rotor with a button that opens its door, its spare programmable block on the rotor's head.</summary>
+    static (Rig rig, Simulation sim, Rotor rotor, Programmable spare, Panel button) Arm()
     {
         var rig = Rig.Demo();
         var rotor = rig.Rotor(50, "Arm Rotor");
@@ -159,21 +207,7 @@ public class AutomationMergeTests
         sim.Editor.PressPrimary();
         sim.Editor.SwitchOn();
         sim.Tick();
-        Assert.True(button.Toolbar.TryGetItem(0, out var item));
-        Assert.Equal(sim.Unit.Block.EntityId, item.BlockEntityId);
-
-        rig.Detach(rotor);
-        sim.Tick();
-        string written;
-        sim.Unit.Written(out written, out _);
-        BlockStorage.Store(spare.Block, written, "");
-        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
-        half.TakeOver(sim.Unit.Block.EntityId);
-        half.Begin(sim.Now);
-        half.Tick(sim.Now + 1);
-
-        Assert.True(button.Toolbar.TryGetItem(0, out item));
-        Assert.Equal(spare.Block.EntityId, item.BlockEntityId);
+        return (rig, sim, rotor, spare, button);
     }
 
     /// <summary>A construct parting leaves each half a copy holding the installations on its own half, and one split across both on both.</summary>

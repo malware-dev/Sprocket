@@ -310,22 +310,21 @@ public sealed class Simulation
     }
 
     /// <summary>
-    /// A slot of Sprocket's being invoked, on the block it names.
+    /// A slot of Sprocket's being invoked, on the block it names: the Sprocket of that block's construct runs the key.
     /// </summary>
     /// <remarks>
-    /// The game runs a toolbar action on a block, so a slot naming a block that is not here reaches
-    /// nobody - and one naming a different Sprocket reaches that one's program, not this one. Both
-    /// are what a construct looks like after somebody cut and pasted the block Sprocket runs in.
+    /// The game runs a toolbar action on a block, so a slot naming a block that is not here reaches nobody, as the
+    /// action does in the game through <see cref="Roster.On" />.
     /// </remarks>
     void Fire(long block, string key)
     {
-        foreach (var unit in _roster.All)
+        foreach (var fitting in _rig.InWorld)
         {
-            if (unit.Block.EntityId == block)
-            {
-                unit.Fire(key);
-                return;
-            }
+            if (fitting.Block.EntityId != block)
+                continue;
+
+            _roster.On(fitting.Block)?.Fire(key);
+            return;
         }
     }
 

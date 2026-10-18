@@ -949,10 +949,11 @@ public class RigTests
 
         built.Save();
 
-        // Sprocket's own action, on a block that is alive and is not the Sprocket opening this
-        // construct - which is what a slot written by the other holder of these systems looks like.
+        // Sprocket's own action, naming a block that is alive and is neither the slot's own block nor the Sprocket opening
+        // this construct - which is what a slot written by the other holder of these systems looks like.
         string wired = store.GetValue(Wiring.Key);
-        store.SetValue(Wiring.Key, wired.Replace(" 100 ", " 2 "));
+        store.SetValue(Wiring.Key, System.Text.RegularExpressions.Regex.Replace(wired, @"^(\d+ \d+ )\d+( " + SignalAction.ActionId + ")",
+            "${1}2$2", System.Text.RegularExpressions.RegexOptions.Multiline));
 
         Simulation pasted = Simulation.Pasted(store);
         for (var i = 0; i < 120; i++)

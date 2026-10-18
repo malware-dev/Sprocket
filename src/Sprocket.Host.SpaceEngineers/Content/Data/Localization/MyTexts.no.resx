@@ -1353,6 +1353,18 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Change.AddWait" xml:space="preserve">
     <value>tillegg av en forsinkelse</value>
   </data>
+  <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
+    <value>endring av en plass sitt korte navn</value>
+  </data>
+  <data name="Sprocket.Slot.Short" xml:space="preserve">
+    <value>Kort navn</value>
+  </data>
+  <data name="Sprocket.Slot.ShortHint" xml:space="preserve">
+    <value>Hva knappene sier.</value>
+  </data>
+  <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
+    <value>De få ordene på hver knapp og verktøylinjeplass som svarer på denne plassen. Står den tom, viser de plassens navn.</value>
+  </data>
   <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
     <value>beskrivelse av en plass</value>
   </data>

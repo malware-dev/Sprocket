@@ -70,6 +70,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Describing a slot.</summary>
         DescribeSlot,
 
+        /// <summary>Giving a signal slot its short name.</summary>
+        ShortenSlot,
+
         /// <summary>Adding an if.</summary>
         AddIf,
 

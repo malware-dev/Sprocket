@@ -8,6 +8,8 @@ Hver blokk med en verktøylinje kan sende signaler fra den, som et knappepanel n
 
 Signalet når ![](mark:logic-system)&nbsp;[logikksystemet](logic-system) gjennom en ![](mark:signal)&nbsp;[signalplass](slot), som holder blokken og verktøylinjeplassen. Å fylle signalplassen setter opp den verktøylinjeplassen for deg. Der verktøylinjeplassen allerede gjorde noe annet og du tar den over, gir angre den tilbake, så lenge ingenting annet er lagt der siden.
 
+Hver verktøylinjeplass som settes opp slik, viser det korte navnet til signalplassen, de få ordene du skriver under `Kort navn` på siden til plassen. En knapp på et knappepanel får det som navn, og en verktøylinjeplass viser så mye av det som får plass under ikonet. Står det tomt, viser de navnet til plassen. Som resten av plassen kan det korte navnet bare endres mens logikksystemet er slått av.
+
 Tømmer noen verktøylinjeplassen eller gir den en annen jobb, slutter signalet å komme. Fyll signalplassen på nytt for å sette den opp igjen.
 
 ## Fra en endring i blokken

@@ -73,6 +73,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>The box what the slot is for is written in.</summary>
         public Composer About => _composer;
 
+        /// <summary>The box a signal slot's short name is written in.</summary>
+        public TextBox Short => _short;
+
         /// <summary>The switch that says whether the slot may be left without a block, on for required.</summary>
         public Switch Required => _required;
 
@@ -183,6 +186,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _purpose.IsVisible = !editable && _part.Annotation.Length > 0;
             _purpose.Markdown = _part.Annotation;
 
+            // The few words its buttons say, for a slot answered by toolbar slots.
+            _shortHeading.IsVisible = _part.IsSignal;
+            _shortHeading.Text = texts.SlotShort.ToUpperInvariant();
+            _short.IsVisible = _part.IsSignal && editable;
+            _short.Hint = texts.SlotShortHint;
+            _short.Tip = Tip.For(_short.Tip, texts.SlotShortAbout);
+            if (!_short.IsFocused)
+                _short.Text = _part.Short;
+
+            _shownShort.IsVisible = _part.IsSignal && !editable;
+            _shownShort.Text = _part.Short.Length > 0 ? _part.Short : _part.Id;
+
             _expectsHeading.Text = texts.SlotExpects.ToUpperInvariant();
             _expects.Text = Expected(texts);
 
@@ -251,14 +266,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Editor.Input.Focus(null);
         }
 
-        /// <summary>Writes what was typed in <paramref name="box" /> into the slot, where it is this page's box.</summary>
+        /// <summary>Writes what was typed in <paramref name="box" /> into the slot, where it is one of this page's boxes.</summary>
         /// <remarks>Only once the keyboard has left it, so a description being typed is one step back rather than one a letter.</remarks>
         void Written(Element box)
         {
-            if (box == null || _composer == null || box != _composer.Box || !Editable)
+            if (box == null || _composer == null || !Editable)
                 return;
 
-            Editor.Do(_system, new AnnotatePart(_part, _composer.Text, ChangeKind.DescribeSlot));
+            if (box == _composer.Box)
+                Editor.Do(_system, new AnnotatePart(_part, _composer.Text, ChangeKind.DescribeSlot));
+            else if (box == _short)
+                Editor.Do(_system, new ShortenPart(_part, _short.Text.Trim()));
         }
     }
 }

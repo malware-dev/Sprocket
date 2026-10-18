@@ -84,6 +84,30 @@ public class ButtonWiringTests
         Assert.Equal(sim.Editor.Parts()[0].Name, port.Label(0));
     }
 
+    /// <summary>
+    /// A signal slot's short name, where it has one, names the button and is the caption under the toolbar slot's icon; a
+    /// change of it writes the slot again.
+    /// </summary>
+    [Fact]
+    public void AButtonIsNamedAfterItsSlotsShortName()
+    {
+        var sim = Blueprinted();
+        var port = PanelNamed(sim, "Port Button");
+        FillWith(sim, "Port Button");
+        var part = sim.Editor.Program.Systems[0].FindPart(sim.Editor.Parts()[0].Name)!;
+        Assert.True(port.Toolbar.TryGetItem(0, out var item));
+        Assert.Equal(part.Id, item.Label);
+
+        part.Short = "Call";
+        sim.Editor.Program.Rewire();
+        Tick(sim);
+
+        Assert.Equal("Call", port.Label(0));
+        Assert.True(port.Toolbar.TryGetItem(0, out item));
+        Assert.Equal("Call", item.Label);
+        Assert.Equal(port.Id, item.BlockEntityId);
+    }
+
     /// <summary>A button whose slot holds the game's own action is asked about; left alone nothing changes, and taken it is written over.</summary>
     [Fact]
     public void AButtonDoingSomethingElseIsAskedAbout()
