@@ -2,7 +2,7 @@
 
 A [construct](construct)'s automation belongs to its owners: the engineers who own the most blocks on it, counted over all its grids, and all of them where there's a tie. Only they can open it. An unowned construct opens for anyone. When a ship is captured or handed over, its automation changes hands with it.
 
-The automation can use the blocks its owners may use, which are the ones they own and the ones shared with their faction or with everyone. Any other block reads as lost, as a destroyed block does, and comes back by itself once it's shared.
+The automation can use the blocks its owners may use, which are the ones they own and the ones shared with their faction or with everyone. Any other block reads as lost, as a destroyed block does, and comes back by itself once it's shared. That counts for the programmable blocks the automation is kept in too: the ones its owners can't use keep none of it, and when the last one they can use is lost, so is the automation.
 
 ## When the construct changes hands
 

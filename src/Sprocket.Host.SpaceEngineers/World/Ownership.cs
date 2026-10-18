@@ -42,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (Same(owners, now))
                 return false;
 
+            GameLog.Say($"{_world.Name} belongs to {Players(now)}, after {Players(owners)}");
             if (!_program.Paused && !Shared(hero, owners, now))
             {
                 GameLog.Say($"{_world.Name} changed hands outside sharing, and its automation is paused");
@@ -78,6 +79,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             var owners = _world.BigOwners;
             return owners.Count == 0 || Among(owners, player);
+        }
+
+        /// <summary>The identities of <paramref name="players" />, for the log; "nobody" where there are none.</summary>
+        static string Players(IReadOnlyList<long> players)
+        {
+            return players.Count == 0 ? "nobody" : string.Join(", ", players);
         }
 
         /// <summary>Whether <paramref name="player" /> is among <paramref name="players" />.</summary>

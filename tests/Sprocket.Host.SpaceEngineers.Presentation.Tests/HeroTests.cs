@@ -9,6 +9,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>The automation outlives the programmable block it is kept in, while the construct has another.</summary>
 public class HeroTests
 {
+    const long Anna = 144115188075855873;
+    const long Pirates = 144115188075855896;
+
     /// <summary>The hero ground off, another programmable block keeps the automation, and the button goes on working.</summary>
     [Fact]
     public void GrindingTheHeroMovesTheAutomation()
@@ -42,6 +45,57 @@ public class HeroTests
         rig.Tick();
 
         Assert.True(rig.Unit.Lost);
+    }
+
+    /// <summary>The hero given to somebody the big owners share nothing with is out of their reach, and another programmable block keeps the automation.</summary>
+    [Fact]
+    public void TheHeroOutOfReachMovesTheAutomation()
+    {
+        Simulation rig = Wired();
+        Programmable spare = rig.Machine.Programmable(200, "Spare");
+        Owned(rig, Anna);
+
+        rig.Machine.Sprocket.Owner = Pirates;
+        rig.Tick();
+        rig.Tick();
+
+        Assert.Same(spare.Block, rig.Unit.Block);
+        Assert.False(rig.Unit.Lost);
+        Assert.False(rig.Editor.Program.Paused);
+    }
+
+    /// <summary>The hero out of the big owners' reach with no other programmable block, the automation is lost.</summary>
+    [Fact]
+    public void TheLastProgrammableBlockOutOfReachLosesTheAutomation()
+    {
+        Simulation rig = Wired();
+        Owned(rig, Anna);
+
+        rig.Machine.Sprocket.Owner = Pirates;
+        rig.Tick();
+        rig.Tick();
+
+        Assert.True(rig.Unit.Lost);
+    }
+
+    /// <summary>The block that kept the automation before it went out of reach holds none of it after a reload.</summary>
+    [Fact]
+    public void TheHeroOutOfReachKeepsNoAutomation()
+    {
+        Simulation rig = Simulation.On(Store.Nowhere());
+        rig.Editor.NewButtonSystem("Airlock");
+        rig.Tick();
+        rig.Machine.Programmable(200, "Spare");
+        Owned(rig, Anna);
+        rig.Machine.Sprocket.Owner = Pirates;
+        rig.Tick();
+        rig.Tick();
+
+        rig.Reload();
+        rig.Tick();
+
+        Assert.Equal(1, rig.Roster.Count);
+        Assert.False(BlockStorage.HasProgram(rig.Machine.Sprocket.Block), "the block out of reach still keeps the automation");
     }
 
     /// <summary>The construct's grid deleted whole, the automation goes with it.</summary>
@@ -161,6 +215,14 @@ public class HeroTests
     }
 
     /// <summary>An airlock whose button runs a sequence that opens the inner door, switched on.</summary>
+    /// <summary>Hands every block on the construct to <paramref name="player" />, shared with nobody, and lets the change land.</summary>
+    static void Owned(Simulation rig, long player)
+    {
+        rig.Machine.Own(player);
+        rig.Tick();
+        rig.Tick();
+    }
+
     static Simulation Wired()
     {
         Simulation rig = Simulation.Fresh();

@@ -2,7 +2,7 @@
 
 Automasjonen til en [konstruksjon](construct) tilhører eierne: ingeniørene som eier flest blokker på den, talt over alle rutenettene, og alle av dem ved uavgjort. Bare de kan åpne den. En konstruksjon uten eier åpnes av hvem som helst. Når et skip kapres eller overleveres, skifter automasjonen eier med det.
 
-Automasjonen kan bruke blokkene eierne har lov til å bruke, altså de de eier og de som er delt med fraksjonen deres eller med alle. Alle andre blokker regnes som tapt, slik en ødelagt blokk gjør, og kommer tilbake av seg selv når de deles.
+Automasjonen kan bruke blokkene eierne har lov til å bruke, altså de de eier og de som er delt med fraksjonen deres eller med alle. Alle andre blokker regnes som tapt, slik en ødelagt blokk gjør, og kommer tilbake av seg selv når de deles. Det gjelder også de programmerbare blokkene automasjonen holdes i: de eierne ikke kan bruke, holder ingenting av den, og når den siste de kan bruke går tapt, gjør automasjonen det også.
 
 ## Når konstruksjonen skifter eier
 

@@ -59,6 +59,17 @@ namespace Sprocket.Host.SpaceEngineers.World
             storage.SetValue(StateKey, switches);
         }
 
+        /// <summary>Takes the program and its switches out of <paramref name="block" />, leaving it none of the automation.</summary>
+        public static void Clear(IMyTerminalBlock block)
+        {
+            MyModStorageComponentBase storage = block.Storage;
+            if (storage == null)
+                return;
+
+            storage.RemoveValue(ProgramKey);
+            storage.RemoveValue(StateKey);
+        }
+
         /// <summary>The storage on a block, attached where it has none yet; or null, which is logged.</summary>
         public static MyModStorageComponentBase Attached(IMyTerminalBlock block)
         {

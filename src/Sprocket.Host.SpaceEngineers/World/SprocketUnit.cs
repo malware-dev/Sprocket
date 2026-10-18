@@ -348,8 +348,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
         void Touch()
         {
-            if (_hands.Due && _hands.Owned(_block))
-                Persist();
+            if (_hands.Due)
+            {
+                var owned = _hands.Owned(_block);
+
+                // A hero none of the big owners may use is out of their reach, and gone from the construct as one ground off is.
+                if (_world.FindEntity(_block.EntityId) == null)
+                    Removed();
+                else if (owned)
+                    Persist();
+            }
 
             _buttons.Reconcile();
             _reach.Look();
@@ -613,6 +621,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             GameLog.Say($"{Logged(_block)} is gone, and its construct has no programmable block left to keep the automation");
             Lost = true;
+            Leave(_block);
             return false;
         }
 
@@ -620,6 +629,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         void Move(IMyTerminalBlock block)
         {
             GameLog.Say($"{Logged(_block)} is gone; {Logged(block)} keeps the automation now");
+
+            if (block.EntityId != _block.EntityId)
+                Leave(_block);
 
             _block = block;
             _memory.Keeper = block.EntityId;
@@ -629,6 +641,13 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             // The construct's buttons still name the block that is gone, so the next pass mends them as it does after a load.
             _buttons.Rehomed(block);
+        }
+
+        /// <summary>Clears the automation out of <paramref name="block" />, the keeper it has left, where the block is still in the world.</summary>
+        static void Leave(IMyTerminalBlock block)
+        {
+            if (!block.MarkedForClose && !block.Closed)
+                BlockStorage.Clear(block);
         }
 
         /// <inheritdoc />

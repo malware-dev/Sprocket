@@ -524,7 +524,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 if (_byId.ContainsKey(block.EntityId))
                     continue;
 
-                if (block != _anchor && !Shared(block))
+                if (!Shared(block))
                 {
                     _unshared.Add(block.CustomName);
                     continue;
