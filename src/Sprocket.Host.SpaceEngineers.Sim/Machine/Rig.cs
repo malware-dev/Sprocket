@@ -6,6 +6,7 @@ using Sprocket.Sim.Fakes;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
+using VRage.Utils;
 using VRage.ObjectBuilders;
 
 namespace Sprocket.Sim.Machine;
@@ -672,6 +673,9 @@ public sealed class Rig
 
         // And every reading of a vent's gas, over this rig's own vents.
         VentFlow.Use(new RigGas(this));
+
+        // The game's log, as the game makes it at start. This one is never opened, so it takes every line and keeps none.
+        MyLog.Default ??= new MyLog();
 
         MyAPIGateway.GridGroups = Pretend.To<IMyGridGroups>()
             .Does("GetGroup", arguments =>

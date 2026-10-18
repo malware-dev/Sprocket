@@ -75,19 +75,24 @@ namespace Sprocket.DoorAutoClose
 
             if (door == null)
             {
-                MyLog.Default.WriteLine($"[Door Auto-Close] player {sender} set auto-close on door {closing.Door}, which is not here");
+                Say($"player {sender} set auto-close on door {closing.Door}, which is not here");
                 return;
             }
 
             var identity = MyAPIGateway.Players == null ? 0L : MyAPIGateway.Players.TryGetIdentityId(sender);
             if (identity == 0L || !door.HasPlayerAccess(identity))
             {
-                MyLog.Default.WriteLine(
-                    $"[Door Auto-Close] player {sender} set auto-close on {door.CustomName}, and was ignored: they may not change it");
+                Say($"player {sender} set auto-close on {door.CustomName}, and was ignored: they may not change it");
                 return;
             }
 
             Keep(door, closing.Seconds);
+        }
+
+        /// <summary>Writes <paramref name="what" /> to the game's log and a dedicated server's console.</summary>
+        static void Say(string what)
+        {
+            MyLog.Default.WriteLineAndConsole("[Door Auto-Close] " + what);
         }
     }
 }
