@@ -55,7 +55,10 @@ public class SlotTypeTests
         Assert.False(new Part("exact") { Expects = spot[0] }.Fits(Kind(sim, "Airlock Light").Lineage));
     }
 
-    /// <summary>The slot's page names the one type it expects, in Sprocket's own word for a type and the game's for one block.</summary>
+    /// <summary>
+    /// A signal slot takes any signal and its page says so; a block slot's page names the one type it expects, in Sprocket's
+    /// own word for a type and the game's for one block.
+    /// </summary>
     [Fact]
     public void TheSlotPageNamesTheType()
     {
@@ -69,7 +72,15 @@ public class SlotTypeTests
         editor.OpenBlueprintSystem(0);
         screen.Run(5);
         var part = Assert.Single(editor.Program.Systems[0].Parts);
-        Assert.Equal("ButtonPanel", part.Expects);
+        Assert.Equal("", part.Expects);
+        editor.OpenSlot(part.Id);
+        screen.Run(5);
+        Assert.Contains(editor.Texts.SlotAnySignal, Said(editor));
+
+        editor.Back();
+        screen.Run(5);
+        part.IsSignal = false;
+        part.Expects = "ButtonPanel";
         editor.OpenSlot(part.Id);
         screen.Run(5);
         Assert.Contains(editor.Texts.TypeButtonPanel, Said(editor));

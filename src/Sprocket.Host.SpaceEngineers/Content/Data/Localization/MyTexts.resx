@@ -228,6 +228,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Any block</value>
     <comment>On a slot's page, under the heading for the kinds of block the slot takes, when the slot takes any kind of block.</comment>
   </data>
+  <data name="Sprocket.Slot.AnySignal" xml:space="preserve">
+    <value>Any signal</value>
+    <comment>On a signal slot's page, under the heading for what the slot takes: a signal slot takes a signal from any block that can send one.</comment>
+  </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Name this slot and say what it is for.</value>
     <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>
@@ -1791,11 +1795,11 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Heading of the short name box on a slot's screen, shown only for a slot that expects a signal: the box holds the few words each button and toolbar slot answering the slot shows.</comment>
   </data>
   <data name="Sprocket.Slot.ShortHint" xml:space="preserve">
-    <value>What its buttons say.</value>
+    <value>Button or toolbar label</value>
     <comment>Placeholder in the empty short name box on a signal slot's screen, under the Short name heading.</comment>
   </data>
   <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
-    <value>The few words on each button and toolbar slot that answers this slot. Left empty, they say the slot's name.</value>
+    <value>The label shown on each button and toolbar slot that sends this signal. Left empty, they show the slot's name.</value>
     <comment>Tooltip on the short name box on a signal slot's screen, under the Short name heading.</comment>
   </data>
   <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">

@@ -174,6 +174,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Slot.AnyBlock" xml:space="preserve">
     <value>Hvilken som helst blokk</value>
   </data>
+  <data name="Sprocket.Slot.AnySignal" xml:space="preserve">
+    <value>Hvilket som helst signal</value>
+  </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Gi plassen et navn, og si hva den er til.</value>
   </data>
@@ -1360,10 +1363,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Kort navn</value>
   </data>
   <data name="Sprocket.Slot.ShortHint" xml:space="preserve">
-    <value>Hva knappene sier.</value>
+    <value>Etikett på knapp eller verktøylinje</value>
   </data>
   <data name="Sprocket.Slot.ShortAbout" xml:space="preserve">
-    <value>De få ordene på hver knapp og verktøylinjeplass som svarer på denne plassen. Står den tom, viser de plassens navn.</value>
+    <value>Etiketten som vises på hver knapp og verktøylinjeplass som sender dette signalet. Står den tom, viser de plassens navn.</value>
   </data>
   <data name="Sprocket.Change.DescribeSlot" xml:space="preserve">
     <value>beskrivelse av en plass</value>

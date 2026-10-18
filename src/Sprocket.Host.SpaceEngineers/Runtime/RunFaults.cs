@@ -126,11 +126,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <remarks>The first check of a run the world remembered keeps what the run met.</remarks>
         public void Checked(SequenceFault found)
         {
+            Found = found;
             if (!_restored)
-            {
-                Found = found;
                 Met(SequenceFault.None);
-            }
 
             _restored = false;
         }

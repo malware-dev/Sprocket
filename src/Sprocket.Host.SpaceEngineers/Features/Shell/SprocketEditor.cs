@@ -1107,7 +1107,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             return chosen ?? system.First;
         }
 
-        /// <summary>Gives <paramref name="system" /> slots and a first installation where it has none: a logic system keeps at least one.</summary>
+        /// <summary>
+        /// Gives <paramref name="system" /> slots and a first installation where it has none, switched off to be filled in: a
+        /// logic system keeps at least one.
+        /// </summary>
         public void Installed(AutomationSystem system)
         {
             if (system == null)
@@ -1123,7 +1126,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return;
 
             var name = SystemSummary.NewInstanceName(Texts, system);
-            system.AddInstance().Name = name;
+            SystemInstance made = system.AddInstance();
+            made.Name = name;
+            made.Enabled = false;
             _program.Edited();
             _program.Rewire();
         }

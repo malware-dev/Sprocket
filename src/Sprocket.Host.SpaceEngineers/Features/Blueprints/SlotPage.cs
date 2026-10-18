@@ -209,9 +209,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 : null;
         }
 
-        /// <summary>The type of block the slot expects, in its name, or that it takes any block.</summary>
+        /// <summary>The type of block the slot expects, in its name, that it takes any block, or for a signal slot any signal.</summary>
         string Expected(Localization.Texts texts)
         {
+            if (_part.IsSignal)
+                return texts.SlotAnySignal;
+
             var expects = _part.Expects;
             if (expects.Length == 0)
                 return texts.SlotAnyBlock;

@@ -179,7 +179,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (instance == null)
                 return null;
 
-            return new AnswerSignal(then, system, instance, required.Part, Part.Nearest(new[] { first.Kind.Lineage }), declared, at);
+            return new AnswerSignal(then, system, instance, required.Part, declared, at);
         }
 
         /// <summary>The first block <paramref name="answer" /> picked, or null, with each picked block's declared name and toolbar slot added to the lists.</summary>
@@ -417,7 +417,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var part = new Part(FreeSlotName(system));
             part.IsSignal = true;
-            part.Expects = Expected(system, signal);
 
             _editor.Picks.Make(system, shown, part);
 
@@ -443,44 +442,5 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>The nearest type every slot <paramref name="trigger" /> starts from expects, or empty for any block.</summary>
-        string Expected(AutomationSystem system, MomentTrigger trigger)
-        {
-            var lineages = new List<IList<string>>();
-            for (var i = 0; i < trigger.Sources.Count; i++)
-            {
-                var part = system.FindPart(trigger.Sources[i]);
-                if (part == null)
-                    continue;
-
-                if (part.Expects.Length == 0)
-                    return "";
-
-                lineages.Add(Lineage(part.Expects));
-            }
-
-            return Part.Nearest(lineages);
-        }
-
-        /// <summary>The type <paramref name="type" /> and each type the game builds it on, nearest first.</summary>
-        IList<string> Lineage(string type)
-        {
-            var entities = _editor.World.Entities;
-            for (var i = 0; i < entities.Count; i++)
-            {
-                var lineage = entities[i].Kind.Lineage;
-                var at = lineage.IndexOf(type);
-                if (at >= 0)
-                {
-                    var from = new List<string>();
-                    for (var k = at; k < lineage.Count; k++)
-                        from.Add(lineage[k]);
-
-                    return from;
-                }
-            }
-
-            return new List<string> { type };
-        }
     }
 }

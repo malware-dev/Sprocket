@@ -11,7 +11,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly SystemEdit _made;
         readonly SystemInstance _instance;
         readonly string _name;
-        readonly string _type;
         readonly List<string> _had;
         readonly List<ToolbarSlot> _hadAt;
         readonly List<string> _now;
@@ -23,16 +22,15 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>
         /// Answers part <paramref name="name" /> of <paramref name="instance" /> with <paramref name="now" /> at
-        /// <paramref name="nowAt" />, a new part expecting <paramref name="type" /> where there is none, then does
-        /// <paramref name="made" /> where there is one.
+        /// <paramref name="nowAt" />, a new signal part where there is none, then does <paramref name="made" /> where there is
+        /// one.
         /// </summary>
-        public AnswerSignal(SystemEdit made, AutomationSystem system, SystemInstance instance, string name, string type,
+        public AnswerSignal(SystemEdit made, AutomationSystem system, SystemInstance instance, string name,
             IList<string> now, IList<ToolbarSlot> nowAt)
         {
             _made = made;
             _instance = instance;
             _name = name;
-            _type = type ?? "";
             _part = system.FindPart(name);
             _fresh = _part == null;
             _had = CopyOf(instance.FilledWith(name) ?? new List<string>());
@@ -68,7 +66,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 _part = system.PartFor(_name);
                 _part.IsSignal = true;
-                _part.Expects = _type;
             }
             else if (_partAt >= 0)
             {

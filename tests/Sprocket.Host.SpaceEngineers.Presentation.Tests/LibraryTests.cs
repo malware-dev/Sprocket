@@ -257,7 +257,10 @@ public class LibraryTests
         Assert.DoesNotContain(file, rig.WorldFolder.Files["backups.ini"]);
     }
 
-    /// <summary>A lost construct's logic system put on this construct arrives as it was kept, with one installation whose slots are empty.</summary>
+    /// <summary>
+    /// A lost construct's logic system put on this construct arrives as it was kept, with one installation whose slots are
+    /// empty, switched off until they are filled.
+    /// </summary>
     [Fact]
     public void ALostConstructsLogicSystemIsPutOnWithOneEmptyInstallation()
     {
@@ -270,7 +273,9 @@ public class LibraryTests
         var arrived = Assert.Single(rig.Editor.Program.Systems);
         Assert.Equal(lost.Identity, arrived.Identity);
         Assert.Equal(lost.Parts.Select(p => p.Id), arrived.Parts.Select(p => p.Id));
-        Assert.Empty(Assert.Single(arrived.Instances).Filled);
+        var installation = Assert.Single(arrived.Instances);
+        Assert.Empty(installation.Filled);
+        Assert.False(installation.Enabled);
     }
 
     /// <summary>
@@ -781,7 +786,10 @@ public class LibraryTests
         Assert.Equal("[shields]", rig.Folder.Files["DefenseShields.cfg"]);
     }
 
-    /// <summary>A blueprint put on a construct from the library arrives as it was kept, as a logic system with its first installation, and only once.</summary>
+    /// <summary>
+    /// A blueprint put on a construct from the library arrives as it was kept, as a logic system with its first installation,
+    /// switched off until its slots are filled, and only once.
+    /// </summary>
     [Fact]
     public void ABlueprintFromTheLibraryArrivesWithItsFirstInstallation()
     {
@@ -804,6 +812,7 @@ public class LibraryTests
         Assert.Equal(volume.Identity, arrived.Origin);
         Assert.Equal(volume.Changed, arrived.OriginChanged);
         Assert.Equal("Installation 1", Assert.Single(arrived.Instances).Name);
+        Assert.False(arrived.Instances[0].Enabled);
         Assert.Equal(blueprint.Parts.Select(p => p.Id), arrived.Parts.Select(p => p.Id));
         Assert.Equal(blueprint.Sequences.Count, arrived.Sequences.Count);
 

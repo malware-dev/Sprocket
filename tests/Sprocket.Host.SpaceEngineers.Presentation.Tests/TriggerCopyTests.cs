@@ -26,7 +26,7 @@ public class TriggerCopyTests
 
         var slot = system.FindPart(copy.Part)!;
         Assert.True(slot.IsSignal);
-        Assert.Equal(system.FindPart(original.Part)!.Expects, slot.Expects);
+        Assert.Equal("", slot.Expects);
         Assert.True(system.First!.FilledWith(slot.Id) is not { Count: > 0 }, "the copy's slot came filled");
 
         var line = sim.Editor.Triggers()[1];
