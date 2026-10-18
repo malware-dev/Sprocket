@@ -379,7 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>Starts the sequence by name, from another sequence, a trigger or a button.</summary>
         /// <remarks>
         /// Refused, and counted, where the machine has no power, or where the sequence is switched off and the call is not
-        /// by hand.
+        /// by hand, or where a slot it needs is empty.
         /// </remarks>
         public void Call(Bindings bindings, int tick, bool live = true,
             bool byHand = false)
@@ -394,8 +394,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
             }
 
-            // The switch is not refused to a run by hand.
-            if (!CanRun && !byHand)
+            // The switch is not refused to a run by hand; an empty slot is, as nothing can fill it mid-run.
+            if ((!CanRun && !byHand) || _faults.Found.Waits)
             {
                 RefusedCount++;
                 return;
@@ -419,14 +419,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// Starts the sequence because its trigger fired, where it may run and is not already running.
         /// </summary>
         /// <remarks>
-        /// A switched-off sequence lets its own trigger go by uncounted; one already running counts it as skipped.
+        /// A switched-off sequence, or one waiting for a slot to be filled, lets its own trigger go by uncounted; one already
+        /// running counts it as skipped.
         /// </remarks>
         public void Triggered(Bindings bindings, int tick)
         {
             _bindings = bindings;
             _memory.Looked = tick;
 
-            if (!CanRun)
+            if (!CanRun || _faults.Found.Waits)
                 return;
 
             if (IsRunning)

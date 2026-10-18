@@ -405,4 +405,45 @@ public class InstanceTests
         Assert.Equal("Installation 2", name);
         Assert.Equal(5, added.Number);
     }
+
+    /// <summary>
+    /// An installation with a slot left empty stays switched on, watches nothing and starts nothing, and runs once the slot is
+    /// filled.
+    /// </summary>
+    [Fact]
+    public void AnInstallationWithAnEmptySlotWaitsUntilItIsFilled()
+    {
+        var ship = Build();
+        var cycle = ship.Program.Sequences[0];
+        var every = new EveryTrigger(1000) { Does = new Run(cycle.Number) };
+        ship.Airlock.AddTrigger(every);
+        ship.Airlock.PartFor(ship.Ref(2));
+        Front(ship).Fill(ship.Ref(2), new[] { ship.Ref(2) });
+        var port = ship.Airlock.AddInstance();
+        ship.Program.Edited();
+        ship.Tick(2);
+
+        Assert.True(port.Enabled);
+        Assert.Null(port.Halt);
+        Assert.Equal(SequenceProblem.EmptySlot, SequenceSummary.Fault(ship.Runner.Get(cycle, port)).Problem);
+        Assert.Null(ship.Runner.Watches.Poller(every, port));
+        Assert.NotNull(ship.Runner.Watches.Poller(every, Front(ship)));
+
+        ship.Start(port);
+        Assert.Equal(1, ship.Runner.Get(cycle, port).RefusedCount);
+        Assert.False(ship.Runner.Get(cycle, port).IsRunning);
+
+        Fit(ship, port);
+        ship.Program.Edited();
+        Door(ship, "Port Inner").ForceOpen();
+        ship.Tick(2);
+        ship.Rig.Rig.Forget();
+
+        Assert.NotNull(ship.Runner.Watches.Poller(every, port));
+        ship.Start(port);
+        ship.Tick(3);
+
+        Assert.True(port.Enabled);
+        Assert.Contains("Port Inner:close", ship.Rig.Rig.Log);
+    }
 }

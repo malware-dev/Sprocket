@@ -1128,12 +1128,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _program.Rewire();
         }
 
-        /// <summary>Adds another installation of <paramref name="system" />, named by the first number free, and shows the system through it.</summary>
+        /// <summary>Adds another installation of <paramref name="system" />, named by the first number free and switched off to be filled in, and shows the system through it.</summary>
         public SystemInstance Another(AutomationSystem system)
         {
             var name = SystemSummary.NewInstanceName(Texts, system);
             SystemInstance made = system.AddInstance();
             made.Name = name;
+            made.Enabled = false;
             Do(new MakeInstallation(system, made));
             Choose(system, made);
             return made;

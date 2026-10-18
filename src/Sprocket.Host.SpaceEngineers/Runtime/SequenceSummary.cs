@@ -326,6 +326,15 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return adrift;
         }
 
+        /// <summary>Whether what <paramref name="trigger" /> starts, the sequence it runs or <paramref name="alone" />, waits for a slot <paramref name="through" /> leaves empty.</summary>
+        /// <remarks>Asked when the program is checked, and on no tick.</remarks>
+        public static bool Waits(AutomationSystem system, Trigger trigger, Sequence alone, SystemInstance through)
+        {
+            var run = trigger.Does as Run;
+            var started = run != null ? system.FindSequence(run.Number) : alone;
+            return started != null && Empty(started, through).Exists;
+        }
+
         /// <summary>The first slot, of what starts it and then what its steps act on, that <paramref name="through" /> leaves empty and may not, or none.</summary>
         static SequenceFault Empty(Sequence sequence, SystemInstance through)
         {

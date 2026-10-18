@@ -73,8 +73,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>
         /// Whether this is reason to switch the sequence off.
         /// </summary>
-        /// <remarks>A fault that holds a run mid-way, stuck or stalled, is no reason; the world may mend it.</remarks>
-        public bool Parks => Exists && !IsWarning && Problem != SequenceProblem.Stuck && Problem != SequenceProblem.Stalled;
+        /// <remarks>A fault that holds a run mid-way, stuck or stalled, is no reason; the world may mend it. Neither is one that waits.</remarks>
+        public bool Parks => Exists && !IsWarning && !Waits && Problem != SequenceProblem.Stuck && Problem != SequenceProblem.Stalled;
+
+        /// <summary>Whether the sequence starts nothing until its installation is filled in, an empty slot, rather than being switched off.</summary>
+        public bool Waits => Problem == SequenceProblem.EmptySlot;
 
         /// <summary>Whether <paramref name="other" /> says the same thing at the same line.</summary>
         public bool Same(SequenceFault other)

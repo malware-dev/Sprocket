@@ -1353,8 +1353,8 @@ public class LibraryTests
         sim.Editor.AddInstallation(0);
         sim.Tick();
 
-        // Something done to it, switched off, so it stays when the panel is left.
-        sim.Editor.Program.Systems[0].Instances[sim.Editor.Program.Systems[0].Instances.Count - 1].Enabled = false;
+        // Something done to it, renamed, so it stays when the panel is left.
+        sim.Editor.Program.Systems[0].Instances[sim.Editor.Program.Systems[0].Instances.Count - 1].Name = "Port airlock";
         sim.Editor.GoToRoot();
         sim.Tick();
 

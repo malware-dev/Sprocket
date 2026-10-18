@@ -66,9 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <summary>The blockset just made is as it was made: its name, its switch, and not one slot filled.</summary>
         public override bool Untouched =>
-            // Switched off by Sprocket for its empty slots is not somebody touching it.
-            _made != null && _made.Name == _madeName && (_made.Enabled == _madeOn || _made.Halt != null)
-            && _made.IsEmpty;
+            _made != null && _made.Name == _madeName && _made.Enabled == _madeOn && _made.IsEmpty;
 
         /// <inheritdoc />
         public override string NameAbout => Editor.Texts.BlueprintNameAbout;
@@ -276,12 +274,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 empty = fault.Problem == Runtime.SequenceProblem.EmptySlot;
             }
 
+            // Switched off with nothing wrong, as a new installation is made to be filled in, it is offered its switch here.
+            var filled = chosen != null && !chosen.Enabled && chosen.Halt == null && _system.Enabled && said.Length == 0;
+            if (filled)
+            {
+                said = Editor.Texts.BlueprintFilled;
+                mended = true;
+            }
+
             _troubled.IsVisible = said.Length > 0;
             _trouble.Text = said;
             _trouble.Style = mended ? Styles.Caution : Styles.Problem;
 
             // An empty slot is filled on this page, so it opens no sequence.
-            if (restored)
+            if (restored || filled)
             {
                 _openTrouble.IsVisible = true;
                 _openTrouble.Text = Editor.Texts.BlueprintSwitchOn;

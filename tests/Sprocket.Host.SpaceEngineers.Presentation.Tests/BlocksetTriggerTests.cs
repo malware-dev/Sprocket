@@ -1,4 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Sim.Machine;
 using Xunit;
@@ -26,9 +27,9 @@ public class BlocksetTriggerTests
         Assert.False(sim.World.CanStart(sequence, system.Instances[1]));
     }
 
-    /// <summary>A blockset made with its slots empty is switched off alone as the program is checked, saying which slot.</summary>
+    /// <summary>A blockset made with its slots empty is switched off alone with no reason recorded, saying which slot is empty.</summary>
     [Fact]
-    public void ABlocksetWithAnEmptySlotIsSwitchedOffAlone()
+    public void ABlocksetWithAnEmptySlotSaysWhichSlot()
     {
         var sim = TwoBlocksets();
         var system = sim.Editor.Program.Systems.Single();
@@ -40,8 +41,11 @@ public class BlocksetTriggerTests
         Assert.True(system.Enabled);
         Assert.True(system.Instances[0].Enabled);
         Assert.False(system.Instances[1].Enabled);
-        Assert.Equal(SequenceProblem.EmptySlot, system.Instances[1].Halt!.Problem);
-        Assert.EndsWith("slot was empty.", SequenceText.Stopped(new Texts(), system.Instances[1].Halt, system, false));
+        Assert.Null(system.Instances[1].Halt);
+
+        var sequence = SystemSummary.Failing(sim.Editor.Runner, system, system.Instances[1], out var fault);
+        Assert.Equal(SequenceProblem.EmptySlot, fault.Problem);
+        Assert.EndsWith("Fill it on the installation panel.", SequenceText.Failing(new Texts(), fault, sequence!));
     }
 
     /// <summary>

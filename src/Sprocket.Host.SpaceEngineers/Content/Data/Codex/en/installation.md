@@ -6,6 +6,8 @@ Every logic system has at least one installation. Add more with `+ installation`
 
 ## Its switch
 
-Each installation has a switch of its own, so one airlock can be switched off while the others keep working. New installations start switched on, and one deleted and brought back with undo comes back switched off.
+Each installation has a switch of its own, so one airlock can be switched off while the others keep working. A new one starts switched off, since an installation's slots can be filled only while it is off. Once every slot it needs has a block, its installation panel says `Every slot is filled.` with `Switch on` beside it. One deleted and brought back with undo comes back switched off too.
+
+An installation that is switched on with an empty slot it needs starts nothing, and says which slot is empty on its installation panel and under its row on the home screen. It stays switched on, and runs once the slot is filled.
 
 The logic system's switch outranks theirs. Switching it off stops every installation, and switching it on again starts only those whose own switch is on.

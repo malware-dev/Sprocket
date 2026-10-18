@@ -414,7 +414,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                     for (var n = 0; n < instances.Count; n++)
                     {
-                        if (watched)
+                        // An installation waiting to be filled in has nothing watched, so it costs no look until it is.
+                        if (watched && !SequenceSummary.Waits(system, trigger, alone, instances[n]))
                             _watches.Keep(system, t, trigger, instances[n]);
 
                         if (alone != null)
@@ -429,12 +430,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>Switches off what <paramref name="sequence" /> runs on, with why, where it is switched on.</summary>
         /// <remarks>
-        /// A logic system of its own as a whole, and one installation of a blueprint alone. Never switched back on here.
+        /// A logic system of its own as a whole, and one installation of a blueprint alone. Never switched back on here. A
+        /// fault that waits for a slot to be filled switches nothing off.
         /// </remarks>
         public void Faulted(Sequence sequence, SystemInstance instance, SequenceFault fault)
         {
             var system = sequence.System;
-            if (system == null || !system.Enabled)
+            if (system == null || !system.Enabled || fault.Waits)
                 return;
 
             // A slot or an option is named as it is; a block by the name it goes by.

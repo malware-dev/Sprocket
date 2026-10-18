@@ -414,8 +414,8 @@ public class EditorTests
         Assert.Equal(2, system.Instances.Count);
         Assert.Equal("Installation 2", system.Instances[1].Name);
 
-        // Something done to it, switched off, so it stays when the panel is left.
-        ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = false;
+        // Something done to it, switched on, so it stays when the panel is left.
+        ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = true;
         ship.Tick();
 
         editor.GoToRoot();
@@ -512,8 +512,8 @@ public class EditorTests
         Assert.Equal("Installation 2", editor.Blueprint().Title);
         Assert.Empty(editor.Parts()[0].Blocks);
 
-        // Something done to it, switched off, so it stays when the panel is left.
-        ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = false;
+        // Something done to it, switched on, so it stays when the panel is left.
+        ship.Automation.Systems[0].Instances[ship.Automation.Systems[0].Instances.Count - 1].Enabled = true;
         ship.Tick();
 
         // Through the new one, the trigger names nothing yet.
