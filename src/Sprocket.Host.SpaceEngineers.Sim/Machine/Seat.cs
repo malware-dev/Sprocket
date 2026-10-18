@@ -45,7 +45,8 @@ public sealed class Seat : Fitting
             .Gives("OxygenCapacity", () => air)
             .Gives("OxygenFilledRatio", () => Air)
             .Does("GetShipSpeed", () => Speed)
-            .Does("GetNaturalGravity", () => Gravity)
+            .Does("GetNaturalGravity", () => Natural)
+            .Does("GetArtificialGravity", () => Artificial)
             .Does("CalculateShipMass", () => new MyShipMass(Mass, Mass, Mass))
             .Answers("add_IsOccupiedChanged", invocation =>
             {
@@ -66,7 +67,10 @@ public sealed class Seat : Fitting
     public double Speed { get; set; }
 
     /// <summary>The pull of a planet on the ship, in metres a second squared.</summary>
-    public Vector3D Gravity { get; set; }
+    public Vector3D Natural { get; set; }
+
+    /// <summary>The pull of gravity generators on the ship, in metres a second squared.</summary>
+    public Vector3D Artificial { get; set; }
 
     /// <summary>What the ship weighs, cargo included, in kilograms.</summary>
     public float Mass { get; set; }

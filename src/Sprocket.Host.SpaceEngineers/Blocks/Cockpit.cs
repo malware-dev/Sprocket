@@ -25,7 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
         static readonly OwnValue Air = OwnValue.Number<IMyCockpit>(cockpit => cockpit.OxygenFilledRatio * 100.0);
 
-        static readonly OwnValue Gravity = OwnValue.Number<IMyCockpit>(cockpit => cockpit.GetNaturalGravity().Length() / G);
+        static readonly OwnValue Natural = OwnValue.Number<IMyCockpit>(cockpit => cockpit.GetNaturalGravity().Length() / G);
+
+        static readonly OwnValue Artificial = OwnValue.Number<IMyCockpit>(cockpit => cockpit.GetArtificialGravity().Length() / G);
 
         static readonly OwnValue Mass = OwnValue.Number<IMyCockpit>(cockpit => cockpit.CalculateShipMass().TotalMass);
 
@@ -50,7 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             if (cockpit != null && cockpit.OxygenCapacity > 0f)
                 kind.WithValue("oxygen-level", "oxygen level", Air).Percent().Looked(Unheard).In(Category.LifeSupport);
 
-            kind.WithValue("gravity", "gravity", Gravity).Measured(" g").Looked(Unheard).In(Category.Detection)
+            kind.WithValue("natural-gravity", "natural gravity", Natural).Measured(" g").Looked(Unheard).In(Category.Detection)
+                .WithValue("artificial-gravity", "artificial gravity", Artificial).Measured(" g").Looked(Unheard).In(Category.Detection)
                 .WithValue("ship-mass", "ship mass", Mass).Measured(" kg").Looked(Unheard).In(Category.State)
                 .Renaming("HandBrake", true, "handbrake")
                 .Renaming("HandBrake", false, "toggle handbrake")

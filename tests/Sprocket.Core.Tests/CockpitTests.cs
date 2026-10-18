@@ -88,11 +88,13 @@ public class CockpitTests
         var ship = new Rigged();
         var seat = ship.Rig.Cockpit(1, "Cockpit");
         seat.Speed = 12.5;
-        seat.Gravity = new Vector3D(0, -9.81 / 2, 0);
+        seat.Natural = new Vector3D(0, -9.81 / 2, 0);
+        seat.Artificial = new Vector3D(0, 0, 9.81 * 2);
         seat.Mass = 40000f;
 
         Assert.Equal(12.5, Ran.Read(ship, seat, "speed").Real, 3);
-        Assert.Equal(0.5, Ran.Read(ship, seat, "gravity").Real, 3);
+        Assert.Equal(0.5, Ran.Read(ship, seat, "natural-gravity").Real, 3);
+        Assert.Equal(2.0, Ran.Read(ship, seat, "artificial-gravity").Real, 3);
         Assert.Equal(40000.0, Ran.Read(ship, seat, "ship-mass").Real, 3);
     }
 
@@ -121,7 +123,7 @@ public class CockpitTests
         seat.Offering("Control", "Control");
         var kind = ship.Entity(seat.Id).Kind;
 
-        foreach (var id in new[] { "occupied", "occupant-name", "under-control", "oxygen-level", "gravity", "ship-mass", "speed" })
+        foreach (var id in new[] { "occupied", "occupant-name", "under-control", "oxygen-level", "natural-gravity", "artificial-gravity", "ship-mass", "speed" })
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
 
         foreach (var id in switches)
