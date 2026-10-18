@@ -488,8 +488,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>The toolbar a want is on.</summary>
+        /// <remarks>
+        /// Found through the name the want was made from, one lookup; the construct's blocks are walked only where that name
+        /// has come to stand for another block since, as a want let go of may.
+        /// </remarks>
         public IMyToolbar ToolbarOf(WantedWiring want)
         {
+            GridEntity named = _runner.Bindings.Entity(want.Reference);
+            if (named != null && named.Block.EntityId == want.PanelId)
+                return ToolbarOfBlock(named.Block, want.Toolbar);
+
             for (var i = 0; i < _world.Entities.Count; i++)
             {
                 GridEntity grid = _world.Entities[i];
