@@ -10,4 +10,4 @@ Hver installasjon har sin egen bryter, så én luftsluse kan slås av mens de an
 
 En installasjon som er slått på og har en tom plass den trenger, starter ingenting, og sier hvilken plass som er tom, på installasjonspanelet og under raden sin på startskjermen. Den forblir slått på, og kjører når plassen er fylt.
 
-Bryteren til logikksystemet står over deres. Slår du den av, stopper hver installasjon, og slår du den på igjen, starter bare de der bryteren deres er på.
+Bryteren til logikksystemet står over deres. Slår du den av, stopper hver installasjon, og slår du den på igjen, starter bare de der bryteren deres er på. Slår du en av dem på, glemmes hvert problem den meldte, og de letes etter på nytt.

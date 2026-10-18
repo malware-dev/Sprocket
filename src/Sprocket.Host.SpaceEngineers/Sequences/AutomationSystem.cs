@@ -22,7 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Told whenever a sequence or an instance of this system comes or goes.</summary>
         public Action Reshaped;
 
-        /// <summary>Told whenever the system is switched on.</summary>
+        /// <summary>Told whenever the system, or one of its installations, is switched on.</summary>
         public Action Started;
 
         /// <summary>Told whenever the system, or one of its installations, is switched on or off.</summary>

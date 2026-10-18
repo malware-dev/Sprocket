@@ -302,11 +302,24 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
         }
 
+        /// <summary>Gives <paramref name="runner" /> what the check <paramref name="found" />, forgetting all it knew where <paramref name="afresh" />.</summary>
+        static void Checked(SequenceRunner runner, SequenceFault found, bool afresh)
+        {
+            if (afresh)
+                runner.Faults.Afresh(found);
+            else
+                runner.Faults.Checked(found);
+        }
+
         /// <summary>What the program says is wrong with each sequence, on every system and every blockset of a blueprint, with what cannot work switched off.</summary>
-        /// <remarks>On the tick after the program or its wiring changes, and on no other.</remarks>
+        /// <remarks>
+        /// On the tick after the program or its wiring changes, and on no other. After something was switched on, every problem
+        /// is forgotten first, so that what is still wrong is found again.
+        /// </remarks>
         void Check()
         {
             Checks++;
+            var afresh = _checkedStarts >= 0 && _automation.Starts != _checkedStarts;
             _checkedEdits = _automation.Edits;
             _checkedWiring = _automation.Wiring;
             _checkedUnstarted = _world.Unstarted;
@@ -329,7 +342,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     {
                         var runner = Get(sequences[q], instances[n]);
                         if (runner != null)
-                            runner.Faults.Checked(SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]));
+                            Checked(runner, SequenceSummary.Checked(_world, Bindings, sequences[q], instances[n]), afresh);
                     }
 
                     for (var t = 0; t < triggers.Count; t++)
@@ -337,7 +350,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         var alone = Alone(system, triggers[t]);
                         var runner = alone == null ? null : Get(alone, instances[n]);
                         if (runner != null)
-                            runner.Faults.Checked(SequenceSummary.Checked(_world, Bindings, alone, instances[n]));
+                            Checked(runner, SequenceSummary.Checked(_world, Bindings, alone, instances[n]), afresh);
                     }
                 }
 

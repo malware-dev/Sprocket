@@ -133,6 +133,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _restored = false;
         }
 
+        /// <summary>
+        /// Forgets every problem known, as a logic system or installation switched on starts afresh, and takes
+        /// <paramref name="found" />, what the program says is wrong now.
+        /// </summary>
+        public void Afresh(SequenceFault found)
+        {
+            _restored = false;
+            Found = found;
+            Quit = SequenceFault.None;
+            Looked = SequenceFault.None;
+            Hold(SequenceFault.None);
+            Met(SequenceFault.None);
+        }
+
         /// <summary>Keeps what the run met.</summary>
         public void Met(SequenceFault fault)
         {

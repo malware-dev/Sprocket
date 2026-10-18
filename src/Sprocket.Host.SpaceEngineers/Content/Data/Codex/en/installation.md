@@ -10,4 +10,4 @@ Each installation has a switch of its own, so one airlock can be switched off wh
 
 An installation that is switched on with an empty slot it needs starts nothing, and says which slot is empty on its installation panel and under its row on the home screen. It stays switched on, and runs once the slot is filled.
 
-The logic system's switch outranks theirs. Switching it off stops every installation, and switching it on again starts only those whose own switch is on.
+The logic system's switch outranks theirs. Switching it off stops every installation, and switching it on again starts only those whose own switch is on. Switching either on forgets every problem it reported and looks for them again.

@@ -39,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>
         /// Whether this one may run, independently of the others.
         /// </summary>
+        /// <remarks>Switching it on while its system is on starts it afresh, as switching the system on does.</remarks>
         public bool Enabled
         {
             get { return _enabled; }
@@ -47,8 +48,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (value)
                     Halt = null;
 
+                var started = value && !_enabled;
                 var switched = value != _enabled;
                 _enabled = value;
+
+                if (started && _system != null && _system.Enabled && _system.Started != null)
+                    _system.Started();
 
                 if (switched && _system != null && _system.Switched != null)
                     _system.Switched();

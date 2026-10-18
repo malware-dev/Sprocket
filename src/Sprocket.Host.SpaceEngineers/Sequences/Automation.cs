@@ -131,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </summary>
         public event Action Reshaped;
 
-        /// <summary>Bumped whenever a system is switched on, which is when what it does is checked again for the start it is given.</summary>
+        /// <summary>Bumped whenever a system or one of its installations is switched on, which is when every problem is forgotten and found again.</summary>
         public int Starts { get; private set; }
 
         /// <summary>Bumped whenever a system or one of its installations is switched on or off, which is when what is watched for it is matched again.</summary>
