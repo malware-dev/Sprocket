@@ -13,26 +13,55 @@ host gives it.
 ## The shape of a file
 
 ```
-file        := version entry*
-entry       := annotation? statement
-statement   := head (value | keyword | operator)* newline
-             | head (value | keyword | operator)* block
-block       := "{" newline entry* "}" newline
-annotation  := ("#" (" " line)? newline)+
+file         := version entry*
+entry        := annotation? statement
+statement    := head (value | keyword | operator)* newline
+              | head (value | keyword | operator)* block
+block        := newline? "{" newline entry* "}" newline
+annotation   := description attributes? | attributes
+description  := ("#" (" " line)? newline)+
+attributes   := ("#@" " " identifier ":" " " value newline)+
 ```
 
 After the version, a file holds variables, systems, system blueprints and instances. A variable comes
 before anything that uses it, and an instance comes after the system blueprint it is one of; the rest
 may come in any order.
 
-A newline ends a statement. There are no continuations: no semicolons, no line joining.
+A newline ends a statement. There are no continuations: no semicolons, no line joining. The one
+exception is a system's header, whose clauses each stand on a line of their own.
+
+A `{` may stand on a line of its own, under the statement it opens.
 
 A head is a bare or quoted name, or one of the language's words. Keywords are contextual, and a
 quoted name is never a keyword, so an action called `every` is written `'every'`.
 
 Names and keywords are matched exactly, case included: `Run` and `run` are different words.
 
-An annotation describes the statement below it. An annotation with nothing under it is an error.
+## Annotations
+
+```
+# The call button, by the airlock's inner door.
+#
+# Pressing it cycles the airlock from whichever side is open.
+#@ short: "Call"
+optional slot button expects signal
+```
+
+An annotation is attached directly to the statement below it. It always belongs to a statement and
+cannot stand on its own.
+
+An annotation has a description and attributes, in that fixed order: the description always comes
+first. Neither is required.
+
+### The description
+
+The description describes the statement to a person.
+
+### Attributes
+
+An attribute is additional data attached to the statement. Hosts may add data they need this way, or
+let users add their own. Its value may be of any of the language's types, `#@ count: 14` as well as
+`#@ short: "Call"`. An attribute is unique per statement: the same name cannot appear twice.
 
 ## Values
 
@@ -184,21 +213,28 @@ them. A system blueprint is also what is exported, imported and shared.
 Everything said of a system below holds for a system blueprint, except where it says otherwise.
 
 ```
-system "<guid>" as <namespace>.<name> [changed "<iso>"] [last sequence <n>] {
+system "<guid>" as <namespace>.<name>
+[changed "<iso>"]
+{
     <triggers, watchers and clocks>
     <sequences>
 }
 
-system blueprint "<guid>" as <namespace>.<name> [changed "<iso>"] [last sequence <n>] [from "<guid>" "<iso>"] {
+system blueprint "<guid>" as <namespace>.<name>
+[changed "<iso>"]
+[from blueprint "<guid>" "<iso>"]
+{
     <slots>
     <triggers, watchers and clocks>
     <sequences>
 }
 ```
 
+Each clause of the header stands on a line of its own.
+
 The GUID is the system's identity, made with it and never changed.
 
-`from` names the stored blueprint a system blueprint was made from, by that blueprint's GUID, and the
+`from blueprint` names the stored blueprint a system blueprint was made from, by that blueprint's GUID, and the
 version of it, by its `changed`, that it was made from or last brought up to date with. It is
 metadata, and has no effect on what the program does. A blueprint as it is stored carries none.
 
@@ -209,12 +245,7 @@ name.
 edited, and tells two versions of a system apart. It is written as quoted ISO 8601 in any of its
 spellings: `"2026-09-14T19:02:11Z"`. A time with no zone is UTC.
 
-`last sequence <n>` is editing metadata, and has no effect on what the program does. It is the
-highest sequence number the system has handed out. Where both it and the sequences are present, the
-higher wins. A sequence added to the system is numbered one past it, so a deleted number is never
-handed out again, and it is worth writing only where it is higher than every sequence in the system.
-
-`changed`, `last sequence` and `from` may come in any order, each at most once.
+`changed` and `from blueprint` may come in either order, each at most once.
 
 ### Slots
 
@@ -321,7 +352,7 @@ sequence <n> [as '<name>'] {
 }
 ```
 
-A sequence is its number within its system, one past the last the system handed out. The number
+A sequence is its number within its system. The number
 survives export, import and renaming.
 
 The name is optional, and is a name rather than text.

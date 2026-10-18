@@ -161,6 +161,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 Header(header, trouble);
                 program.Annotation = header.Annotation;
+                program.Attributes = ScriptAttributes.Unused(header);
 
                 // Before anything is read, so the readers know only the form this build writes.
                 if (DraftOf(header) != ScriptFormat.Draft)
@@ -278,6 +279,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 var signal = new SignalRef(name.Word, blocks, at);
                 signal.Annotation = statement.Annotation;
+                signal.Attributes = ScriptAttributes.Unused(statement);
                 program.Restore(signal);
                 return;
             }
@@ -293,6 +295,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var declared = new EntityRef(name.Word, BlockKinds.Definition(statement.Word(3)));
             declared.Annotation = statement.Annotation;
+            declared.Attributes = ScriptAttributes.Unused(statement);
             var keys = statement.Items(4);
             for (var i = 0; i < keys.Count; i++)
                 ReadKey(values, keys[i], declared.Keys, statement, trouble);
@@ -452,6 +455,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var instance = system.Restore((int)number.Whole, name);
             instance.Annotation = statement.Annotation;
+            instance.Attributes = ScriptAttributes.Unused(statement);
 
             var body = statement.Body;
             for (var i = 0; i < body.Count; i++)
@@ -486,6 +490,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 }
 
                 instance.Note(inner.Head, inner.Annotation);
+                instance.Keep(inner.Head, ScriptAttributes.Unused(inner));
 
                 if (part.IsSignal)
                 {

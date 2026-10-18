@@ -123,6 +123,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         void Constructs(List<Statement> into, bool nested)
         {
             var note = "";
+            List<ScriptAttribute> attributes = null;
             while (true)
             {
                 if (_token.Kind == TokenKind.End)
@@ -130,7 +131,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     if (nested)
                         Fail("missing '}'.");
 
-                    Orphan(note);
+                    Orphan(note, attributes);
                     return;
                 }
 
@@ -143,7 +144,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                         continue;
                     }
 
-                    Orphan(note);
+                    Orphan(note, attributes);
                     Step();
                     EndOfLine();
                     return;
@@ -152,14 +153,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (_token.Kind == TokenKind.Newline)
                 {
                     // A blank line separates constructs, and is what makes an annotation an orphan.
-                    Orphan(note);
+                    Orphan(note, attributes);
                     note = "";
+                    attributes = null;
                     Step();
                     continue;
                 }
 
                 if (_token.Kind == TokenKind.Annotation)
                 {
+                    if (attributes != null)
+                    {
+                        Fail("unexpected annotation line after an attribute; the description comes before the attributes.");
+                        Recover();
+                        continue;
+                    }
+
                     var line = _token.Text.ToString();
                     note = note.Length == 0 ? line : $"{note}\n{line}";
                     Step();
@@ -167,10 +176,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     continue;
                 }
 
+                if (_token.Kind == TokenKind.Attribute)
+                {
+                    if (attributes == null)
+                        attributes = new List<ScriptAttribute>();
+
+                    Attribute(attributes);
+                    continue;
+                }
+
                 if (_token.Kind == TokenKind.Bad)
                 {
                     Recover();
                     note = "";
+                    attributes = null;
                     continue;
                 }
 
@@ -180,7 +199,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     Step();
 
                 var statement = One(note);
+                if (statement != null && attributes != null)
+                    statement.Attributes = attributes;
+
                 note = "";
+                attributes = null;
                 if (statement == null)
                     continue;
 
@@ -190,12 +213,72 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Annotation text with nothing to belong to.
+        /// Annotation text, or attributes, with nothing to belong to.
         /// </summary>
-        void Orphan(string note)
+        void Orphan(string note, List<ScriptAttribute> attributes)
         {
-            if (note.Length > 0)
+            if (note.Length > 0 || attributes != null)
                 Fail("expected a statement under the annotation.");
+        }
+
+        /// <summary>Reads one attribute line, <c>#@ name: value</c>, into <paramref name="into" />, and the end of its line.</summary>
+        void Attribute(List<ScriptAttribute> into)
+        {
+            Step();
+            if (_token.Kind == TokenKind.Keyword)
+            {
+                Fail($"unexpected '{Keywords.Name(_token.Keyword)}' as an attribute's name; a name spelled like a keyword is quoted.");
+                Recover();
+                return;
+            }
+
+            if (_token.Kind != TokenKind.Identifier)
+            {
+                Fail("expected an attribute's name after '#@ '.");
+                Recover();
+                return;
+            }
+
+            var name = _token.Text.ToString();
+            Step();
+            if (_token.Kind != TokenKind.Colon)
+            {
+                Fail($"expected ':' after the attribute {name}.");
+                Recover();
+                return;
+            }
+
+            Step();
+            if (!Valuish())
+            {
+                Fail($"expected a value for the attribute {name}.");
+                Recover();
+                return;
+            }
+
+            var failures = _failures;
+            var start = _token.At;
+            var value = Next();
+            if (_failures > failures)
+            {
+                Recover();
+                return;
+            }
+
+            var written = _lexer.Script.Substring(start, _token.At - start).TrimEnd();
+
+            foreach (var had in into)
+            {
+                if (had.Name == name)
+                {
+                    Fail($"the attribute {name} is given twice.");
+                    Recover();
+                    return;
+                }
+            }
+
+            into.Add(new ScriptAttribute(name, value, written));
+            EndOfLine();
         }
 
         Statement One(string note)
@@ -216,25 +299,18 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var from = values.Count;
 
             Step();
+            Values(values);
 
-            while (true)
+            // A system's header goes on with a line for each of its clauses.
+            List<int> lines = null;
+            while (key == Keyword.System && _failures == failures && _token.Kind == TokenKind.Newline && Clause(Peek()))
             {
-                if (_token.Kind == TokenKind.Comma)
-                {
-                    Fail("unexpected ','.");
-                    break;
-                }
+                Step();
+                if (lines == null)
+                    lines = new List<int>();
 
-                if (_token.Kind == TokenKind.Off)
-                {
-                    Fail("unexpected '//'; it only starts a line.");
-                    break;
-                }
-
-                if (!Valuish())
-                    break;
-
-                values.Add(Next());
+                lines.Add(values.Count - from);
+                Values(values);
             }
 
             // A line that went wrong makes no statement, so it is judged once, by its trouble.
@@ -244,9 +320,15 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 return null;
             }
 
+            // A '{' may stand on a line of its own under the statement it opens.
+            if (_token.Kind == TokenKind.Newline && Peek().Kind == TokenKind.BlockOpen)
+                Step();
+
             var body = _token.Kind == TokenKind.BlockOpen ? new List<Statement>() : null;
             var count = values.Count - from;
             var statement = new Statement(_reading, at, key, head, from, count, body);
+            if (lines != null)
+                statement.Lines = lines;
 
             statement.Annotation = Trim(note);
 
@@ -266,6 +348,36 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             EndOfLine();
             Constructs(body, true);
             return statement;
+        }
+
+        /// <summary>Reads the values of one line into <paramref name="values" />, up to what is no value.</summary>
+        void Values(ValueChunks values)
+        {
+            while (true)
+            {
+                if (_token.Kind == TokenKind.Comma)
+                {
+                    Fail("unexpected ','.");
+                    return;
+                }
+
+                if (_token.Kind == TokenKind.Off)
+                {
+                    Fail("unexpected '//'; it only starts a line.");
+                    return;
+                }
+
+                if (!Valuish())
+                    return;
+
+                values.Add(Next());
+            }
+        }
+
+        /// <summary>Whether <paramref name="token" /> starts a line of a system's header: <c>changed</c> or <c>from</c>.</summary>
+        static bool Clause(Token token)
+        {
+            return token.Kind == TokenKind.Keyword && (token.Keyword == Keyword.Changed || token.Keyword == Keyword.From);
         }
 
         bool Valuish()

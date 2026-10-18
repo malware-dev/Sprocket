@@ -33,6 +33,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What somebody wrote above it, or empty.</summary>
         public string Annotation { get; set; } = "";
 
+        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
+        public KeptAttributes Attributes { get; set; }
+
         /// <summary>
         /// Whether this one may run, independently of the others.
         /// </summary>
@@ -62,6 +65,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly Dictionary<string, List<int>> _facets = new Dictionary<string, List<int>>();
 
         readonly Dictionary<string, string> _notes = new Dictionary<string, string>();
+        readonly Dictionary<string, KeptAttributes> _kept = new Dictionary<string, KeptAttributes>();
 
         /// <summary>The slots it fills.</summary>
         public IEnumerable<string> Filled => _fills.Keys;
@@ -148,6 +152,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _positions.Remove(slot);
             _facets.Remove(slot);
             _notes.Remove(slot);
+            _kept.Remove(slot);
         }
 
         /// <summary>What somebody wrote above how <paramref name="slot" /> is answered, or empty.</summary>
@@ -166,6 +171,22 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _notes[slot] = annotation;
         }
 
+        /// <summary>The attributes written above how <paramref name="slot" /> is answered that Sprocket does not use, or null.</summary>
+        public KeptAttributes KeptOn(string slot)
+        {
+            KeptAttributes kept;
+            return _kept.TryGetValue(slot, out kept) ? kept : null;
+        }
+
+        /// <summary>Keeps <paramref name="kept" /> as the attributes written above how <paramref name="slot" /> is answered.</summary>
+        public void Keep(string slot, KeptAttributes kept)
+        {
+            if (kept == null)
+                _kept.Remove(slot);
+            else
+                _kept[slot] = kept;
+        }
+
         /// <summary>Moves what fills slot <paramref name="was" /> to the slot's new name, <paramref name="now" />.</summary>
         public void RenameSlot(string was, string now)
         {
@@ -181,6 +202,13 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             {
                 _notes.Remove(was);
                 _notes[now] = note;
+            }
+
+            KeptAttributes kept;
+            if (_kept.TryGetValue(was, out kept))
+            {
+                _kept.Remove(was);
+                _kept[now] = kept;
             }
 
             List<int> facets;

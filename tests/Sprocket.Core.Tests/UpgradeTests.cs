@@ -197,11 +197,36 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 16", written);
+        Assert.StartsWith("sprocket 1 alpha 17", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
         Assert.Equal(written, ProgramWriter.Blueprint(again!));
+    }
+
+    /// <summary>
+    /// An alpha 16 header on one line, with <c>last sequence</c> and <c>from</c>, reads as alpha 17: the number an attribute,
+    /// <c>from blueprint</c>, and each clause on a line of its own.
+    /// </summary>
+    [Fact]
+    public void AnAlpha16HeaderIsUpgraded()
+    {
+        const string text = "sprocket 1 alpha 16\n\n"
+            + "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Lamp changed \"2026-09-14T19:02:11Z\" last sequence 4"
+            + " from \"9d0f1a2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b\" \"2026-09-10T08:00:00Z\" {\n"
+            + "    required slot lamp expects InteriorLight\n\n"
+            + "    sequence 1 as Flash {\n"
+            + "        wait 60t\n"
+            + "    }\n"
+            + "}\n";
+
+        Assert.Equal("", ProgramReader.Lone(text, new Values(), out var read));
+
+        Assert.Equal(4, read!.LastSequenceNumber);
+        Assert.Equal(new Guid("9d0f1a2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b"), read.Origin);
+        Assert.Contains("#@ lastSequence: 4\nsystem blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Lamp\n"
+            + "changed \"2026-09-14T19:02:11Z\"\nfrom blueprint \"9d0f1a2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b\" \"2026-09-10T08:00:00Z\"\n{\n",
+            ProgramWriter.Linked(read));
     }
 
     /// <summary>A name that happens to be one of the old ids is a name, and is left as it is.</summary>
@@ -218,7 +243,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 17")]
+    [InlineData("sprocket 1 alpha 18")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)

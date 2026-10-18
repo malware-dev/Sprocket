@@ -251,11 +251,11 @@ public class DragTests
         string.Join(", ", editor.StepRows()
             .Select(s => ((ActionSlot)s.Slots[0]).Action.Text));
 
-    const string WithAnIf = "sprocket 1 alpha 16\n\n"
+    const string WithAnIf = "sprocket 1 alpha 17\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "let door2 = block 'Door/LargeBlockDoor' [ 3 ]\n"
         + "\n"
-        + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock {\n"
+        + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n"
         + "    sequence 1 {\n"
         + "        call ext.close on [ door1 ]\n"
         + "        if all ext.status on [ door1 ] == closed then {\n"

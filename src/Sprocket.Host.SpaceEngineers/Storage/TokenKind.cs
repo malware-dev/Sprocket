@@ -41,6 +41,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>One line of text somebody typed, without its <c>#</c>.</summary>
         Annotation,
 
+        /// <summary><c>#@</c> and its space, which open an attribute line: a name, a colon, and one value.</summary>
+        Attribute,
+
+        /// <summary><c>:</c>, between an attribute's name and its value.</summary>
+        Colon,
+
         /// <summary><c>{</c></summary>
         BlockOpen,
 

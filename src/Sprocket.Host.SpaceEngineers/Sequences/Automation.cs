@@ -52,6 +52,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>What somebody wrote above the program's first line, or empty.</summary>
         public string Annotation { get; set; } = "";
 
+        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
+        public KeptAttributes Attributes { get; set; }
+
         /// <summary>What the construct's automation is doing, which the world keeps apart from the program; one of its own until a Sprocket hands over the construct's.</summary>
         public ConstructMemory Memory { get; set; } = new ConstructMemory();
 

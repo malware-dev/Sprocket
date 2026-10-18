@@ -22,6 +22,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Whether a construct may leave this part unfilled.</summary>
         public bool Optional { get; set; }
 
+        /// <summary>For a signal slot, the few words shown with each toolbar slot that answers it, or empty for its name.</summary>
+        public string Short { get; set; } = "";
+
         /// <summary>Whether this part is a trigger, answered by toolbar slots on its blocks rather than by the blocks alone.</summary>
         public bool IsSignal { get; set; }
 
@@ -44,6 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// What somebody wrote about this part, in their own words, or empty; never its name.
         /// </summary>
         public string Annotation { get; set; }
+
+        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
+        public KeptAttributes Attributes { get; set; }
 
         /// <summary>Whether a block whose kind stands in <paramref name="lineage" />, nearest first as a kind's lineage has it, may fill this part.</summary>
         public bool Fits(IList<string> lineage)

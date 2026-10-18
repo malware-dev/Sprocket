@@ -73,6 +73,34 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _fresh = false;
         }
 
+        /// <summary>An attribute line above the statement to come, <c>#@ name: value</c>, its value already written as <paramref name="written" />.</summary>
+        public void Attribute(string name, string written)
+        {
+            Pad();
+            _text.Append("#@ ");
+            Write(name);
+            _text.Append(": ").Append(written).Append('\n');
+            _fresh = false;
+        }
+
+        /// <summary>An attribute line holding <paramref name="text" />, quoted as text always is.</summary>
+        public void AttributeText(string name, string text)
+        {
+            var value = new StringBuilder();
+            Quote(value, text, '"');
+            Attribute(name, value.ToString());
+        }
+
+        /// <summary>Every attribute of <paramref name="kept" />, written back as they were, or nothing where it is null.</summary>
+        public void Attributes(KeptAttributes kept)
+        {
+            if (kept == null)
+                return;
+
+            for (var i = 0; i < kept.Count; i++)
+                Attribute(kept.Name(i), kept.Written(i));
+        }
+
         /// <summary>Starts a statement with one of the format's own words.</summary>
         public ScriptWriter Start(Keyword keyword)
         {
@@ -287,6 +315,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             _text.Append(" {\n");
             _depth++;
             _fresh = true;
+        }
+
+        /// <summary>Ends a statement and opens its block on a line of its own, as a system's header is written.</summary>
+        public void BodyBelow()
+        {
+            _text.Append('\n');
+            Pad();
+            _text.Append("{\n");
+            _depth++;
+            _fresh = true;
+        }
+
+        /// <summary>Goes on with the statement on a line of its own, starting with <paramref name="keyword" />, as a system's header clauses are written.</summary>
+        public ScriptWriter Line(Keyword keyword)
+        {
+            _text.Append('\n');
+            Pad();
+            _text.Append(Keywords.Name(keyword));
+            return this;
         }
 
         /// <summary>Closes a block.</summary>

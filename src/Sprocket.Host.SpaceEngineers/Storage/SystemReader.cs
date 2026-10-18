@@ -64,33 +64,43 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
+            system.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.LastSequence);
             system.IsBlueprint = blueprint;
+            LastSequence(statement, system, trouble);
 
-            // The metadata clauses, in any order and each at most once.
+            // The header's clauses, each on a line of its own, in either order and each at most once.
             var at = first + 3;
             var changed = false;
-            var last = false;
             var from = false;
             while (at < statement.Count)
             {
-                if (statement.Says(at, Keyword.Changed) && !changed)
+                var clause = statement.Says(at, Keyword.Changed) && !changed || statement.Says(at, Keyword.From) && !from && blueprint;
+                if (!clause)
+                {
+                    ScriptQuotes.Ends(statement, at, trouble);
+                    break;
+                }
+
+                if (!statement.Lines.Contains(at))
+                {
+                    trouble.Say(statement, $"expected '{Keywords.Name(statement.ValueAt(at).Keyword)}' on a line of its own under the system's header.");
+                    break;
+                }
+
+                if (statement.Says(at, Keyword.Changed))
                 {
                     system.Changed = Time(statement, at + 1, "'changed'", trouble);
                     changed = true;
                     at += 2;
                 }
-                else if (statement.Says(at, Keyword.From) && !from && blueprint)
+                else
                 {
                     at = From(statement, at, system, trouble);
                     from = true;
                 }
-                else if (statement.Says(at, Keyword.Last) && !last)
-                {
-                    LastSequence(statement, at, system, trouble);
-                    last = true;
-                    at += 3;
-                }
-                else
+
+                // A clause takes its line to the end.
+                if (at < statement.Count && !statement.Lines.Contains(at))
                 {
                     ScriptQuotes.Ends(statement, at, trouble);
                     break;
@@ -123,16 +133,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// <c>last sequence 4</c>: the highest number the system has handed out, kept only as a failsafe.
+        /// <c>#@ lastSequence: 4</c>: the highest number Sprocket has handed out in the system, so a deleted sequence's number
+        /// is never handed out again.
         /// </summary>
         /// <remarks>Whichever is higher wins, this or the highest sequence in the block.</remarks>
-        static void LastSequence(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
+        static void LastSequence(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
-            var number = statement.ValueAt(at + 2);
-            if (!statement.Says(at + 1, Keyword.Sequence) || number.Form != ValueForm.Integer || number.Whole < 1
-                || number.Whole > int.MaxValue)
+            ScriptAttribute attribute;
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.LastSequence, out attribute))
+                return;
+
+            var number = attribute.Value;
+            if (number.Form != ValueForm.Integer || number.Whole < 1 || number.Whole > int.MaxValue)
             {
-                trouble.Say(statement, "expected last sequence <number>.");
+                trouble.Say(statement, $"expected a whole number above 0 for the attribute {ScriptAttributes.LastSequence}.");
                 return;
             }
 
@@ -140,26 +154,32 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// Reads <c>from "&lt;guid&gt;" ["&lt;iso&gt;"]</c> at <paramref name="at" /> into the link of <paramref name="system" />,
-        /// answering where the next clause starts.
+        /// Reads <c>from blueprint "&lt;guid&gt;" ["&lt;iso&gt;"]</c> at <paramref name="at" /> into the link of
+        /// <paramref name="system" />, answering where the next clause starts.
         /// </summary>
         static int From(Statement statement, int at, AutomationSystem system, ScriptTrouble trouble)
         {
-            Guid origin;
-            if (!Guid.TryParseExact(statement.Text(at + 1), "D", out origin) || origin == Guid.Empty)
+            if (!statement.Says(at + 1, Keyword.Blueprint))
             {
-                trouble.Say(statement, "expected the identity of the blueprint after 'from', a quoted GUID.");
-                return at + 2;
+                trouble.Say(statement, "expected 'blueprint' after 'from'.");
+                return statement.Count;
+            }
+
+            Guid origin;
+            if (!Guid.TryParseExact(statement.Text(at + 2), "D", out origin) || origin == Guid.Empty)
+            {
+                trouble.Say(statement, "expected the identity of the blueprint after 'from blueprint', a quoted GUID.");
+                return statement.Count;
             }
 
             system.Origin = origin;
 
-            // The version is the quoted text after it; a word there is the next clause.
-            if (statement.ValueAt(at + 2).Form != ValueForm.Text)
-                return at + 2;
+            // The version is the quoted text after it.
+            if (statement.ValueAt(at + 3).Form != ValueForm.Text)
+                return at + 3;
 
-            system.OriginChanged = Time(statement, at + 2, "the blueprint's identity", trouble);
-            return at + 3;
+            system.OriginChanged = Time(statement, at + 3, "the blueprint's identity", trouble);
+            return at + 4;
         }
 
         /// <summary>The ISO 8601 time at <paramref name="at" />, or null, with trouble naming it as the time after <paramref name="after" />.</summary>
@@ -172,6 +192,22 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             trouble.Say(statement, $"expected an ISO 8601 time after {after}, like \"2026-09-14T19:02:11Z\".");
             return null;
+        }
+
+        /// <summary><c>#@ short: "Call"</c> on a slot: the few words shown with each toolbar slot that answers it, text.</summary>
+        static void Short(Statement statement, Part part, ScriptTrouble trouble)
+        {
+            ScriptAttribute attribute;
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.Short, out attribute))
+                return;
+
+            if (attribute.Value.Form != ValueForm.Text)
+            {
+                trouble.Say(statement, $"expected text for the attribute {ScriptAttributes.Short}.");
+                return;
+            }
+
+            part.Short = attribute.Value.Word;
         }
 
         static void ReadSlot(Statement statement, AutomationSystem system, ScriptTrouble trouble)
@@ -198,6 +234,8 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var part = system.PartFor(name.Word);
             part.Annotation = statement.Annotation;
+            part.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Short);
+            Short(statement, part, trouble);
             part.Optional = optional;
 
             if (!statement.Says(2, Keyword.Expects))
@@ -380,6 +418,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var sequence = program.Restore(system, (int)number.Whole, null);
             sequence.Annotation = statement.Annotation;
+            sequence.Attributes = ScriptAttributes.Unused(statement);
 
             var at = 1;
             if (statement.Says(1, Keyword.As))
@@ -434,6 +473,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var opens = new If(Tested(statement, 0, system, program, trouble) ?? new Comparison());
             opens.IsOff = statement.IsOff;
             opens.Annotation = statement.Annotation;
+            opens.Attributes = ScriptAttributes.Unused(statement);
             into.Add(opens);
             Blocked(statement, into, system, program, trouble);
 
@@ -457,6 +497,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
                 var other = new Else(test);
                 other.Annotation = branch.Annotation;
+                other.Attributes = ScriptAttributes.Unused(branch);
                 into.Add(other);
                 Blocked(branch, into, system, program, trouble);
             }
@@ -550,6 +591,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             trigger.Annotation = statement.Annotation;
+            trigger.Attributes = ScriptAttributes.Unused(statement);
             system.AddTrigger(trigger);
         }
 
@@ -875,6 +917,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static Step Noted(Step step, Statement statement)
         {
             step.Annotation = statement.Annotation;
+            step.Attributes = ScriptAttributes.Unused(statement);
             return step;
         }
 

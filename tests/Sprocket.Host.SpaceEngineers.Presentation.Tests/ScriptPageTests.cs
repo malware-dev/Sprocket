@@ -142,7 +142,7 @@ public class ScriptPageTests
         screen.Run(1);
 
         var page = Assert.IsType<ScriptPage>(screen.Editor.Current);
-        screen.Editor.Scripted(page.Listing.Text.Replace(".Airlock ", ".Hangar "));
+        screen.Editor.Scripted(page.Listing.Text.Replace(".Airlock\n", ".Hangar\n"));
         Assert.True(screen.Shows("Apply"), "the script page has no Apply button");
         Press(screen, "Apply");
         screen.Run(1);
@@ -151,7 +151,7 @@ public class ScriptPageTests
         Assert.Equal("Hangar", now.Name);
         Assert.Equal(identity, now.Identity);
         Assert.False(now.Enabled);
-        Assert.Contains(".Hangar ", page.Listing.Text);
+        Assert.Contains(".Hangar\n", page.Listing.Text);
     }
 
     /// <summary>A script edited into something with an error in it changes nothing, and says what is wrong.</summary>

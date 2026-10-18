@@ -18,7 +18,7 @@ public class ScriptTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Version = "sprocket 1 alpha 16\n\n";
+    const string Version = "sprocket 1 alpha 17\n\n";
 
     const string Head = Version + "system \"" + Identity + "\" as ";
 
@@ -115,7 +115,7 @@ public class ScriptTests
 
     /// <summary>A system closing <c>door1</c>, written as the writer writes it, so a variable written above it is kept.</summary>
 
-    const string Using = "system \"" + Identity + "\" as Airlock {\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
+    const string Using = "system \"" + Identity + "\" as Airlock\n{\n    sequence 1 {\n        call ext.close on [ door1 ]\n    }\n}\n";
 
     /// <summary>Gives <paramref name="program" /> a system that closes <paramref name="name" />, since a variable nothing names is not written.</summary>
     static void Uses(Automation program, string name)
@@ -155,14 +155,14 @@ public class ScriptTests
     public void AProgramReadsAsAScript()
     {
         Assert.Equal(
-            "sprocket 1 alpha 16\n" +
+            "sprocket 1 alpha 17\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934, \"Airlock Inner Door\" ]\n" +
             "\n" +
             "# Cycles an airlock.\n" +
             "#\n" +
             "# Nothing opens on both sides at once.\n" +
-            "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock changed \"2026-09-14T19:02:11Z\" {\n" +
+            "system blueprint \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\nchanged \"2026-09-14T19:02:11Z\"\n{\n" +
             "    # The door onto the ship.\n" +
             "    required slot inner expects Door\n" +
             "\n" +
@@ -216,13 +216,13 @@ public class ScriptTests
         system.AddTrigger(pressed);
 
         const string written =
-            "sprocket 1 alpha 16\n" +
+            "sprocket 1 alpha 17\n" +
             "\n" +
             "let inner = block 'Door/LargeBlockDoor' [ 74857693847562934 ]\n" +
             "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 74857693847562937 ]\n" +
             "let button = ext.toolbar(1, 1, 4) on [ panel1 ]\n" +
             "\n" +
-            "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock {\n" +
+            "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as MalTek.Airlock\n{\n" +
             "    whenever button then run 1\n" +
             "\n" +
             "    sequence 1 {\n" +
@@ -245,7 +245,7 @@ public class ScriptTests
     public void ASystemIsItsIdentityCalledByANamespaceAndName()
     {
         var text = Save(SystemCalled("MalTek Inc.", "Airlock System"));
-        Assert.Contains("system \"" + Identity + "\" as 'MalTek Inc.'.'Airlock System' {", text);
+        Assert.Contains("system \"" + Identity + "\" as 'MalTek Inc.'.'Airlock System'\n{", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
@@ -257,9 +257,9 @@ public class ScriptTests
     /// A system with no identity, or one that is not a GUID, is trouble and is not read.
     /// </summary>
     [Theory]
-    [InlineData("sprocket 1 alpha 16\n\nsystem Airlock {\n}\n")]
-    [InlineData("sprocket 1 alpha 16\n\nsystem \"airlock\" as Airlock {\n}\n")]
-    [InlineData("sprocket 1 alpha 16\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 17\n\nsystem Airlock {\n}\n")]
+    [InlineData("sprocket 1 alpha 17\n\nsystem \"airlock\" as Airlock\n{\n}\n")]
+    [InlineData("sprocket 1 alpha 17\n\nsystem \"00000000-0000-0000-0000-000000000000\" as Airlock\n{\n}\n")]
     public void ASystemWithoutAnIdentityIsTrouble(string text)
     {
         var after = new Automation();
@@ -704,7 +704,7 @@ public class ScriptTests
 
         var after = new Automation();
         Assert.Equal("", Load(Version + written + "\n"
-            + "system blueprint \"" + Identity + "\" as MalTek.Airlock {\n    optional slot button expects signal\n\n"
+            + "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n    optional slot button expects signal\n\n"
             + "    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n\n"
             + "instance 1 of MalTek.Airlock {\n    button = [ ext.toolbar(1, 1, 4) on [ panel1 ], ext.toolbar(1, 2, 3) on [ panel2 ], halt ]\n}\n", after));
 
@@ -734,7 +734,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(Version + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\nlet halt = ext.toolbar(1, 1, 2) on [ panel1 ]\n\n"
-            + "system blueprint \"" + Identity + "\" as MalTek.Airlock {\n    required slot inner\n    optional slot button expects signal\n\n"
+            + "system blueprint \"" + Identity + "\" as MalTek.Airlock\n{\n    required slot inner\n    optional slot button expects signal\n\n"
             + "    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n\ninstance 1 of MalTek.Airlock {\n    " + line + "\n}\n", after));
         Assert.False(after.Intact);
     }
@@ -746,7 +746,7 @@ public class ScriptTests
         var after = new Automation();
         Assert.Equal("", Load(Version + "let panel1 = block 'ButtonPanel/ButtonPanelLarge' [ 1 ]\n"
             + "let button = ext.toolbar(1, 1, 4) on [ panel1 ]\n\n"
-            + "system \"" + Identity + "\" as MalTek.Airlock {\n    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n", after));
+            + "system \"" + Identity + "\" as MalTek.Airlock\n{\n    whenever button then run 1\n\n    sequence 1 {\n    }\n}\n", after));
 
         var started = Assert.IsType<SignalTrigger>(Assert.Single(after.Systems[0].Triggers));
         Assert.Equal("button", started.Part);
@@ -765,7 +765,7 @@ public class ScriptTests
     public void ATriggerVariableThatIsNoneIsTrouble(string lets, string trigger)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load(Version + lets + "\nsystem \"" + Identity + "\" as MalTek.Airlock {\n" + trigger
+        Assert.NotEqual("", Load(Version + lets + "\nsystem \"" + Identity + "\" as MalTek.Airlock\n{\n" + trigger
             + "\n    sequence 1 {\n    }\n}\n", after));
         Assert.False(after.Intact);
     }
@@ -923,7 +923,7 @@ public class ScriptTests
 
         var after = new Automation();
         Assert.NotEqual("", Load(
-            Head + "\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock {\n}\n", after));
+            Head + "\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock\n{\n}\n", after));
 
         Assert.False(after.Intact);
         Assert.Empty(after.Systems);
@@ -1019,7 +1019,7 @@ public class ScriptTests
         Assert.True(after.Systems[0].Is("MalTek Inc.", "Airlock"));
 
         // Written back tight, because the writer has one spelling for a name.
-        Assert.Contains(" as 'MalTek Inc.'.Airlock {", Save(after));
+        Assert.Contains(" as 'MalTek Inc.'.Airlock\n{", Save(after));
     }
 
     /// <summary>
@@ -1032,8 +1032,8 @@ public class ScriptTests
     [Fact]
     public void TwoDifferentNamesNeverSpellTheSame()
     {
-        Assert.Contains(" as 'a.b'.c {", Save(SystemCalled("a.b", "c")));
-        Assert.Contains(" as a.'b.c' {", Save(SystemCalled("a", "b.c")));
+        Assert.Contains(" as 'a.b'.c\n{", Save(SystemCalled("a.b", "c")));
+        Assert.Contains(" as a.'b.c'\n{", Save(SystemCalled("a", "b.c")));
     }
 
     /// <summary>
@@ -1096,7 +1096,7 @@ public class ScriptTests
     public void TwoSystemsWithTheSameIdentityAreTrouble()
     {
         var after = new Automation();
-        var trouble = Load(Head + "MalTek.Airlock {\n}\n\nsystem \"" + Identity + "\" as MalTek.Hangar {\n}\n",
+        var trouble = Load(Head + "MalTek.Airlock {\n}\n\nsystem \"" + Identity + "\" as MalTek.Hangar\n{\n}\n",
             after);
 
         Assert.NotEqual("", trouble);
@@ -1113,7 +1113,7 @@ public class ScriptTests
         var after = new Automation();
         string warning;
         var trouble = ProgramReader.Load(
-            Head + "MalTek.Airlock {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock {\n}\n",
+            Head + "MalTek.Airlock {\n}\n\nsystem \"9b1d0e7a-4c2f-4a8e-b3d5-6f7a8c9e0d12\" as MalTek.Airlock\n{\n}\n",
             after, Store, out warning);
 
         Assert.Equal("", trouble);
@@ -1140,72 +1140,68 @@ public class ScriptTests
     public void AChangedTimeIsIsoAndComesBackAsUtc()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "Airlock changed \"2026-09-14T21:02:11+02:00\" {\n}\n",
-            after));
-        Assert.Contains(" as Airlock changed \"2026-09-14T19:02:11Z\" {", Save(after));
+        Assert.Equal("", Load(Head + "Airlock\nchanged \"2026-09-14T21:02:11+02:00\"\n{\n}\n", after));
+        Assert.Contains(" as Airlock\nchanged \"2026-09-14T19:02:11Z\"\n{", Save(after));
 
         var local = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock changed \"14/09/2026\" {\n}\n", local));
+        Assert.NotEqual("", Load(Head + "Airlock\nchanged \"14/09/2026\"\n{\n}\n", local));
         Assert.False(local.Intact);
     }
 
-    /// <summary>A system's <c>changed</c> and <c>last sequence</c> may come in either order, each at most once.</summary>
-    [Theory]
-    [InlineData("changed \"2026-09-14T19:02:11Z\" last sequence 4")]
-    [InlineData("last sequence 4 changed \"2026-09-14T19:02:11Z\"")]
-    public void ASystemsMetadataComesInEitherOrder(string said)
+    /// <summary>Each clause of a system's header stands on a line of its own; one on the header's own line is trouble.</summary>
+    [Fact]
+    public void AHeaderClauseStandsOnALineOfItsOwn()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "Airlock " + said + " {\n}\n", after));
-
-        Assert.Equal(new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc), after.Systems[0].Changed);
-        Assert.Equal(4, after.Systems[0].LastSequenceNumber);
-
-        // Written back in the writer's own order.
-        Assert.Contains(" as Airlock changed \"2026-09-14T19:02:11Z\" last sequence 4 {", Save(after));
-    }
-
-    /// <summary>Either of them said twice is trouble.</summary>
-    [Theory]
-    [InlineData("changed \"2026-09-14T19:02:11Z\" changed \"2026-09-15T19:02:11Z\"")]
-    [InlineData("last sequence 4 changed \"2026-09-14T19:02:11Z\" last sequence 5")]
-    public void ASystemsMetadataSaidTwiceIsTrouble(string said)
-    {
-        var after = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock " + said + " {\n}\n", after));
+        var trouble = Load(Head + "Airlock changed \"2026-09-14T19:02:11Z\" {\n}\n", after);
+        Assert.Contains("expected 'changed' on a line of its own under the system's header.", trouble);
         Assert.False(after.Intact);
     }
 
-    /// <summary>
-    /// A system blueprint's <c>from</c> names the blueprint it was made from and the version of it, may come before or after
-    /// <c>changed</c>, and is written last.
-    /// </summary>
-    [Theory]
-    [InlineData("changed \"2026-09-14T19:02:11Z\" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\"")]
-    [InlineData("from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" changed \"2026-09-14T19:02:11Z\"")]
-    public void ABlueprintsFromNamesWhatItWasMadeFrom(string said)
+    /// <summary>A clause takes its line to the end: anything after it on that line is trouble.</summary>
+    [Fact]
+    public void AHeaderClauseTakesItsLineToTheEnd()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Blueprint + "MalTek.Airlock " + said + " {\n}\n", after));
+        Assert.NotEqual("", Load(Head + "Airlock\nchanged \"2026-09-14T19:02:11Z\" Airlock\n{\n}\n", after));
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>A system blueprint's <c>changed</c> and <c>from blueprint</c> may come in either order, and are written back in the writer's.</summary>
+    [Theory]
+    [InlineData("changed \"2026-09-14T19:02:11Z\"\nfrom blueprint \"" + Origin + "\" \"2026-09-10T08:00:00Z\"")]
+    [InlineData("from blueprint \"" + Origin + "\" \"2026-09-10T08:00:00Z\"\nchanged \"2026-09-14T19:02:11Z\"")]
+    public void ABlueprintsClausesComeInEitherOrder(string said)
+    {
+        var after = new Automation();
+        Assert.Equal("", Load(Blueprint + "MalTek.Airlock\n" + said + "\n{\n}\n", after));
 
         var system = after.Systems[0];
         Assert.Equal(new Guid(Origin), system.Origin);
         Assert.Equal(new DateTime(2026, 9, 10, 8, 0, 0, DateTimeKind.Utc), system.OriginChanged);
         Assert.Equal(new DateTime(2026, 9, 14, 19, 2, 11, DateTimeKind.Utc), system.Changed);
-        Assert.Contains(" as MalTek.Airlock changed \"2026-09-14T19:02:11Z\" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {",
+        Assert.Contains(" as MalTek.Airlock\nchanged \"2026-09-14T19:02:11Z\"\nfrom blueprint \"" + Origin + "\" \"2026-09-10T08:00:00Z\"\n{",
             Save(after));
     }
 
-    /// <summary>A <c>from</c> without the version names the blueprint alone.</summary>
+    /// <summary>A clause said twice is trouble.</summary>
+    [Fact]
+    public void AHeaderClauseSaidTwiceIsTrouble()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(Head + "Airlock\nchanged \"2026-09-14T19:02:11Z\"\nchanged \"2026-09-15T19:02:11Z\"\n{\n}\n", after));
+        Assert.False(after.Intact);
+    }
+
+    /// <summary>A <c>from blueprint</c> without the version names the blueprint alone.</summary>
     [Fact]
     public void AFromWithoutItsVersionNamesTheBlueprint()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Blueprint + "MalTek.Airlock from \"" + Origin + "\" last sequence 4 {\n}\n", after));
+        Assert.Equal("", Load(Blueprint + "MalTek.Airlock\nfrom blueprint \"" + Origin + "\"\n{\n}\n", after));
 
         Assert.Equal(new Guid(Origin), after.Systems[0].Origin);
         Assert.Null(after.Systems[0].OriginChanged);
-        Assert.Equal(4, after.Systems[0].LastSequenceNumber);
     }
 
     /// <summary>A blueprint as the library keeps it carries no <c>from</c>; a logic system written alone with its link does.</summary>
@@ -1213,20 +1209,24 @@ public class ScriptTests
     public void ABlueprintAsStoredCarriesNoFrom()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Blueprint + "MalTek.Airlock from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {\n}\n", after));
+        Assert.Equal("", Load(Blueprint + "MalTek.Airlock\nfrom blueprint \"" + Origin + "\" \"2026-09-10T08:00:00Z\"\n{\n}\n", after));
 
         var system = after.Systems[0];
-        Assert.DoesNotContain(" from ", ProgramWriter.Blueprint(system));
-        Assert.Contains(" from \"" + Origin + "\" \"2026-09-10T08:00:00Z\" {", ProgramWriter.Linked(system));
+        Assert.DoesNotContain("from", ProgramWriter.Blueprint(system));
+        Assert.Contains("\nfrom blueprint \"" + Origin + "\" \"2026-09-10T08:00:00Z\"\n{", ProgramWriter.Linked(system));
     }
 
-    /// <summary>A <c>from</c> that does not name a blueprint by its GUID, gives a version that is no time, comes twice, or heads a plain system, is trouble.</summary>
+    /// <summary>
+    /// A <c>from</c> that does not say <c>blueprint</c>, does not name one by its GUID, gives a version that is no time, comes
+    /// twice, or heads a plain system, is trouble.
+    /// </summary>
     [Theory]
-    [InlineData(Blueprint + "MalTek.Airlock from {\n}\n")]
-    [InlineData(Blueprint + "MalTek.Airlock from \"not a guid\" {\n}\n")]
-    [InlineData(Blueprint + "MalTek.Airlock from \"" + Origin + "\" \"14/09/2026\" {\n}\n")]
-    [InlineData(Blueprint + "MalTek.Airlock from \"" + Origin + "\" from \"" + Origin + "\" {\n}\n")]
-    [InlineData(Head + "Airlock from \"" + Origin + "\" {\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock\nfrom\n{\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock\nfrom \"" + Origin + "\"\n{\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock\nfrom blueprint \"not a guid\"\n{\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock\nfrom blueprint \"" + Origin + "\" \"14/09/2026\"\n{\n}\n")]
+    [InlineData(Blueprint + "MalTek.Airlock\nfrom blueprint \"" + Origin + "\"\nfrom blueprint \"" + Origin + "\"\n{\n}\n")]
+    [InlineData(Head + "Airlock\nfrom blueprint \"" + Origin + "\"\n{\n}\n")]
     public void AFromThatNamesNoBlueprintIsTrouble(string text)
     {
         var after = new Automation();
@@ -1235,7 +1235,7 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// The last sequence number is written only when the highest has been deleted, as a failsafe.
+    /// The last sequence number is written only when the highest has been deleted, as an attribute of the system.
     /// </summary>
     /// <remarks>
     /// Without it, the next sequence made after a reload would take the deleted one's number, and a button
@@ -1248,11 +1248,11 @@ public class ScriptTests
         var system = program.Systems[0];
         program.AddSequence(system);
         var two = program.AddSequence(system);
-        Assert.DoesNotContain("last", Save(program));
+        Assert.DoesNotContain(ScriptAttributes.LastSequence, Save(program));
 
         program.RemoveSequence(two);
         var text = Save(program);
-        Assert.Contains(" as Airlock last sequence 2 {", text);
+        Assert.Contains("#@ lastSequence: 2\nsystem \"" + Identity + "\" as Airlock", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));
@@ -1260,26 +1260,37 @@ public class ScriptTests
     }
 
     /// <summary>
-    /// A sequence in the block with a higher number than the failsafe wins over it.
+    /// A sequence in the block with a higher number than the last one handed out wins over it.
     /// </summary>
     [Fact]
     public void ASequenceHigherThanTheLastNumberWins()
     {
         var after = new Automation();
-        Assert.Equal("", Load(Head + "Airlock last sequence 3 {\n    sequence 7 {\n    }\n}\n", after));
+        Assert.Equal("", Load(Version + "#@ lastSequence: 3\nsystem \"" + Identity + "\" as Airlock\n{\n    sequence 7 {\n    }\n}\n", after));
 
         Assert.Equal(7, after.Systems[0].LastSequenceNumber);
-        Assert.DoesNotContain("last", Save(after));
+        Assert.DoesNotContain(ScriptAttributes.LastSequence, Save(after));
     }
 
+    /// <summary>A <c>lastSequence</c> that is no whole number above 0 is trouble.</summary>
     [Theory]
-    [InlineData("last 4")]
-    [InlineData("last sequence")]
-    [InlineData("last sequence \"4\"")]
-    public void ALastSequenceThatDoesNotSayANumberIsTrouble(string part)
+    [InlineData("\"4\"")]
+    [InlineData("0")]
+    [InlineData("4.5")]
+    public void ALastSequenceThatIsNoWholeNumberIsTrouble(string value)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load(Head + "Airlock " + part + " {\n}\n", after));
+        var trouble = Load(Version + "#@ lastSequence: " + value + "\nsystem \"" + Identity + "\" as Airlock\n{\n}\n", after);
+        Assert.Contains("for the attribute lastSequence.", trouble);
+        Assert.False(after.Intact);
+    }
+
+    /// <summary><c>last sequence</c> in a system's header is the form before alpha 17, and is trouble in a program written for it.</summary>
+    [Fact]
+    public void ALastSequenceInTheHeaderIsTrouble()
+    {
+        var after = new Automation();
+        Assert.NotEqual("", Load(Head + "Airlock last sequence 4\n{\n}\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1333,7 +1344,7 @@ public class ScriptTests
     [Fact]
     public void APathAmongABlocksKeysComesBackAsWritten()
     {
-        const string written = "sprocket 1 alpha 16\n\nlet door1 = block 'Door/LargeBlockDoor' "
+        const string written = "sprocket 1 alpha 17\n\nlet door1 = block 'Door/LargeBlockDoor' "
             + "[ 74857693847562934, [ (0 2 -1), (3 0 0) ], \"Hangar Door\" ]\n\n"
             + Using;
 
@@ -1354,7 +1365,7 @@ public class ScriptTests
     public void AListThatIsNotCellsIsTrouble(string key)
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 1 alpha 16\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 17\n\nlet door1 = block 'Door/LargeBlockDoor' [ 7, " + key + " ]\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1363,7 +1374,7 @@ public class ScriptTests
     {
         var after = new Automation();
         Assert.NotEqual("", Load(
-            "sprocket 1 alpha 16\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
+            "sprocket 1 alpha 17\n\nlet door1 = block 'Door/LargeBlockDoor' [ 74857693847562934, (3 0 -2) ]\n", after));
 
         Assert.False(after.Intact);
     }
@@ -1403,7 +1414,7 @@ public class ScriptTests
         sequence.Name = "Mal's \"other\" sequence";
 
         var text = Save(program);
-        Assert.Contains(" as 'Mal''s \"big\" airlock' {", text);
+        Assert.Contains(" as 'Mal''s \"big\" airlock'\n{", text);
         Assert.Contains("sequence 1 as 'Mal''s \"other\" sequence' {", text);
 
         var after = new Automation();
@@ -1499,7 +1510,7 @@ public class ScriptTests
     public void AnAnnotationWithNothingUnderItIsTrouble()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("sprocket 1 alpha 16\n\n# about nothing at all\n", after));
+        Assert.NotEqual("", Load("sprocket 1 alpha 17\n\n# about nothing at all\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1514,7 +1525,7 @@ public class ScriptTests
     public void ASaveFromAnotherVersionIsTurnedAwayAndNotWrittenBack()
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 16", "sprocket 2"), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 17", "sprocket 2"), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -1538,7 +1549,7 @@ public class ScriptTests
     public void ASaveFromAnotherDraftOfTheFormatIsRefused(string head)
     {
         var after = new Automation();
-        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 16", head), after);
+        var trouble = Load(Save(Airlock()).Replace("sprocket 1 alpha 17", head), after);
 
         Assert.NotEqual("", trouble);
         Assert.False(after.Intact);
@@ -1550,7 +1561,7 @@ public class ScriptTests
     public void SomethingThatIsNotAProgramIsNotReadAsOne()
     {
         var after = new Automation();
-        Assert.NotEqual("", Load("system \"" + Identity + "\" as Airlock {\n}\n", after));
+        Assert.NotEqual("", Load("system \"" + Identity + "\" as Airlock\n{\n}\n", after));
         Assert.False(after.Intact);
     }
 
@@ -1585,7 +1596,7 @@ public class ScriptTests
     public void ANameHoldingADashIsQuoted()
     {
         var text = Save(SystemCalled("Mal-Tek", "Air-lock"));
-        Assert.Contains("as 'Mal-Tek'.'Air-lock' {", text);
+        Assert.Contains("as 'Mal-Tek'.'Air-lock'\n{", text);
 
         var after = new Automation();
         Assert.Equal("", Load(text, after));

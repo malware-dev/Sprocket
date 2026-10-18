@@ -48,6 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case '(': return One(TokenKind.VectorOpen);
                 case ')': return One(TokenKind.VectorClose);
                 case ',': return One(TokenKind.Comma);
+                case ':': return One(TokenKind.Colon);
                 case '.': return One(TokenKind.Dot);
                 case '=': return Equality();
                 case '!': return Different();
@@ -156,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>
-        /// An annotation line, or a color, told apart by one character of lookahead.
+        /// An annotation line, an attribute's opening, or a color, told apart by one character of lookahead.
         /// </summary>
         Token Hash()
         {
@@ -165,6 +166,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             if (!_ptr.IsOutOfBounds() && Hex(_ptr.Char) >= 0)
                 return Colour(start);
+
+            if (!_ptr.IsOutOfBounds() && _ptr.Char == '@')
+            {
+                _ptr++;
+                if (_ptr.IsOutOfBounds() || _ptr.Char != ' ')
+                    return Bad(start, "expected '#@ ' and an attribute's name after '#@'.");
+
+                _ptr++;
+                return new Token(TokenKind.Attribute, start.Index);
+            }
 
             if (!_ptr.IsEndOfLine() && _ptr.Char != ' ')
                 return Bad(start, "expected '# ' and an annotation, or a color, after '#'.");

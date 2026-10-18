@@ -15,9 +15,9 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// </summary>
 public class WhatItHoldsTests
 {
-    const string Program = "sprocket 1 alpha 16\n\n"
+    const string Program = "sprocket 1 alpha 17\n\n"
                            + "let 'Airlock Inner Door' = block 'Door/LargeBlockDoor' [ 2, [ (2 0 0) ], \"Airlock Inner Door\" ]\n\n"
-                           + "system blueprint \"61da898f-e0f5-4b57-8c81-3194c3357d4e\" as Malware.'Airlock System' changed \"2026-10-07T20:49:07Z\" {\n"
+                           + "system blueprint \"61da898f-e0f5-4b57-8c81-3194c3357d4e\" as Malware.'Airlock System'\nchanged \"2026-10-07T20:49:07Z\"\n{\n"
                            + "    required slot 'Inner Door' expects Door\n\n"
                            + "    sequence 1 as Cycle {\n"
                            + "        if any 'how-far-open' on [ 'Inner Door' ] == 50 then {\n"

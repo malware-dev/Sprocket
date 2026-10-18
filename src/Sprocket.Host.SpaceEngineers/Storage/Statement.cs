@@ -10,6 +10,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
     {
         static readonly Statement[] Nothing = new Statement[0];
 
+        static readonly ScriptAttribute[] NoAttributes = new ScriptAttribute[0];
+
+        static readonly int[] NoLines = new int[0];
+
         readonly ScriptValues _reading;
         readonly int _from;
         readonly List<Statement> _body;
@@ -47,6 +51,13 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// What somebody wrote above it, or empty.
         /// </summary>
         public string Annotation { get; set; }
+
+        /// <summary>The attributes written above it, in the order they were written; none where it has none.</summary>
+        public IList<ScriptAttribute> Attributes { get; set; } = NoAttributes;
+
+        /// <summary>Where each line it goes on with starts, as the position of that line's first value; none for a statement on one line.</summary>
+        /// <remarks>Only a system's header goes on, with a line for each of its clauses.</remarks>
+        public IList<int> Lines { get; set; } = NoLines;
 
         /// <summary>Whether its line starts with <c>//</c>, which switches a step off.</summary>
         public bool IsOff { get; set; }
@@ -162,6 +173,27 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             var head = key == Keyword.None && value.IsWord ? value.Word : "";
             var from = at < 0 ? Count : at + 1 > Count ? Count : at + 1;
             return new Statement(_reading, At, key, head, _from + from, Count - from, null);
+        }
+
+        /// <summary>
+        /// This statement written with <paramref name="values" /> in place of its own, going on at <paramref name="lines" />,
+        /// with <paramref name="attributes" /> above it: its head, annotation and block kept.
+        /// </summary>
+        /// <remarks>For an upgrade carrying a statement written in an earlier form into the current one, before it is read.</remarks>
+        public Statement With(IList<Value> values, IList<int> lines, IList<ScriptAttribute> attributes)
+        {
+            var all = _reading.Values;
+            var from = all.Count;
+            foreach (var value in values)
+                all.Add(value);
+
+            return new Statement(_reading, At, Key, Head, from, values.Count, _body)
+            {
+                Annotation = Annotation,
+                IsOff = IsOff,
+                Lines = lines,
+                Attributes = attributes
+            };
         }
 
         /// <summary>The items of a list at a position, or none where there is no list there.</summary>

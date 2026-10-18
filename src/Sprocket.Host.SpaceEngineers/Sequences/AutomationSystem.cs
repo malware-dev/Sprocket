@@ -129,6 +129,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// </summary>
         public string Annotation { get; set; }
 
+        /// <summary>The attributes written above it that Sprocket does not use, kept as written, or null where there are none.</summary>
+        public KeptAttributes Attributes { get; set; }
+
         /// <summary>Its sequences, in the order they were made.</summary>
         public IReadOnlyList<Sequence> Sequences => _sequences;
 

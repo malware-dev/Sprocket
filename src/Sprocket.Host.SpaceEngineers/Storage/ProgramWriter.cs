@@ -32,6 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             var pen = new ScriptWriter();
             pen.Note(program.Annotation);
+            pen.Attributes(program.Attributes);
             pen.Start(Keyword.Sprocket).Whole(ScriptFormat.Version).Says(Keyword.Alpha).Whole(ScriptFormat.Draft);
             pen.End();
 
@@ -188,6 +189,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static void WriteRef(ScriptWriter pen, Values values, EntityRef declared)
         {
             pen.Note(declared.Annotation);
+            pen.Attributes(declared.Attributes);
             pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Says(Keyword.Block).Word(BlockKinds.Sort(declared.KindId));
             pen.OpenList();
 
@@ -253,6 +255,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         static void WriteSignalRef(ScriptWriter pen, SignalRef declared)
         {
             pen.Note(declared.Annotation);
+            pen.Attributes(declared.Attributes);
             pen.Start(Keyword.Let).Word(declared.Name).Says(Keyword.Equals).Signal(declared.Blocks, declared.At);
             pen.End();
         }
@@ -266,6 +269,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             pen.Blank();
             pen.Note(system.Annotation);
+
+            // Sprocket's own: the highest number it has handed out, worth writing only where it is higher than every sequence.
+            if (system.LastSequenceNumber > system.HighestSequenceNumber())
+                pen.Attribute(ScriptAttributes.LastSequence, system.LastSequenceNumber.ToString(CultureInfo.InvariantCulture));
+
+            pen.Attributes(system.Attributes);
             pen.Start(Keyword.System);
             if (system.IsBlueprint)
                 pen.Says(Keyword.Blueprint);
@@ -273,23 +282,16 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Text(identity.ToString("D")).Says(Keyword.As).Qualified(system.Namespace, system.Name);
 
             if (dated && system.Changed.HasValue)
-            {
-                pen.Says(Keyword.Changed)
-                    .Text(system.Changed.Value.ToString(ScriptFormat.Time, CultureInfo.InvariantCulture));
-            }
+                pen.Line(Keyword.Changed).Text(system.Changed.Value.ToString(ScriptFormat.Time, CultureInfo.InvariantCulture));
 
-            if (system.LastSequenceNumber > system.HighestSequenceNumber())
-                pen.Says(Keyword.Last).Says(Keyword.Sequence).Whole(system.LastSequenceNumber);
-
-            // Last, so the date before it is read as the system's own and the one after it as the blueprint's.
             if (linked && system.HasOrigin)
             {
-                pen.Says(Keyword.From).Text(system.Origin.ToString("D"));
+                pen.Line(Keyword.From).Says(Keyword.Blueprint).Text(system.Origin.ToString("D"));
                 if (system.OriginChanged.HasValue)
                     pen.Text(system.OriginChanged.Value.ToString(ScriptFormat.Time, CultureInfo.InvariantCulture));
             }
 
-            pen.Body();
+            pen.BodyBelow();
 
             // The slots before what uses them, so a reader meets the vocabulary before the answers.
             var used = new List<string>();
@@ -324,6 +326,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Blank();
 
             pen.Note(part.Annotation);
+            if (part.Short.Length > 0)
+                pen.AttributeText(ScriptAttributes.Short, part.Short);
+
+            pen.Attributes(part.Attributes);
             pen.Start(part.Optional ? Keyword.Optional : Keyword.Required).Says(Keyword.Slot).Word(part.Id);
 
             if (part.IsSignal)
@@ -358,6 +364,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             pen.Blank();
             pen.Note(instance.Annotation);
+            pen.Attributes(instance.Attributes);
             pen.Start(Keyword.Instance).Whole(instance.Number)
                 .Says(Keyword.Of).Text(system.Identity.ToString("D"));
 
@@ -375,6 +382,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             foreach (var part in parts)
             {
                 pen.Note(instance.NoteOn(part));
+                pen.Attributes(instance.KeptOn(part));
                 pen.Head(part).Says(Keyword.Equals);
 
                 var positions = instance.Positions(part);
@@ -493,6 +501,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             pen.Blank();
             pen.Note(sequence.Annotation);
+            pen.Attributes(sequence.Attributes);
             pen.Start(Keyword.Sequence).Whole(sequence.Number);
             if (sequence.HasName)
                 pen.Says(Keyword.As).Word(sequence.Name);
@@ -524,6 +533,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Blank();
 
             pen.Note(step.Annotation);
+            pen.Attributes(step.Attributes);
             pen.Start(Keyword.If, step.IsOff);
             WriteTest(pen, step.Test);
             pen.Body();
@@ -534,6 +544,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             pen.Shut();
             pen.Note(step.Annotation);
+            pen.Attributes(step.Attributes);
             pen.Start(Keyword.Else);
             if (step.Test != null)
             {
@@ -607,6 +618,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         {
             pen.Blank();
             pen.Note(trigger.Annotation);
+            pen.Attributes(trigger.Attributes);
 
             var needed = trigger as SignalTrigger;
             if (needed != null)
@@ -673,6 +685,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Blank();
 
             pen.Note(step.Annotation);
+            pen.Attributes(step.Attributes);
             pen.Start(Head(step), step.IsOff);
             Rest(pen, step);
             pen.End();
