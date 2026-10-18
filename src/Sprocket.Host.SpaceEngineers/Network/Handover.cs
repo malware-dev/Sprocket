@@ -5,6 +5,7 @@ using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {

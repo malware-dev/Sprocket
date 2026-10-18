@@ -1,6 +1,6 @@
 using Sandbox.ModAPI;
 using SpaceEngineers.Game.ModAPI;
-using Sprocket.Host.SpaceEngineers.Features.Gravity;
+using Sprocket.Gravity;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Blocks

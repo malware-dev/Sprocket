@@ -1,4 +1,4 @@
-using Sprocket.Host.SpaceEngineers.Features.Gravity;
+using Sprocket.Gravity;
 using VRageMath;
 using Xunit;
 

@@ -5,15 +5,21 @@
     <Project Path="src/SpaceEngineers.FontStyles/SpaceEngineers.FontStyles.csproj" />
     <Project Path="src/Maltek.Symbols/Maltek.Symbols.csproj" />
     <Project Path="src/RichTextPanels/RichTextPanels.csproj" />
+    <Project Path="src/Sprocket.DoorAutoClose/Sprocket.DoorAutoClose.csproj" />
+    <Project Path="src/Sprocket.GravityFit/Sprocket.GravityFit.csproj" />
+    <Project Path="src/Sprocket.MultiRename/Sprocket.MultiRename.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers/Sprocket.Host.SpaceEngineers.csproj" />
     <Project Path="src/Sprocket.Host.SpaceEngineers.Sim/Sprocket.Host.SpaceEngineers.Sim.csproj" />
     <Project Path="src/Sprocket.Localization.Generator/Sprocket.Localization.Generator.csproj" />
     <Project Path="src/Sprocket.Standards/Sprocket.Standards.csproj" />
     <Project Path="src/Lumel/Lumel.shproj" />
+    <Project Path="src/Sprocket.Network/Sprocket.Network.shproj" />
+    <Project Path="src/Sprocket.Gravity/Sprocket.Gravity.shproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sprocket.Benchmarks/Sprocket.Benchmarks.csproj" />
     <Project Path="tests/Sprocket.Core.Tests/Sprocket.Core.Tests.csproj" />
+    <Project Path="tests/Sprocket.DoorAutoClose.Tests/Sprocket.DoorAutoClose.Tests.csproj" />
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Tests/Sprocket.Host.SpaceEngineers.Tests.csproj" />
     <Project Path="tests/Sprocket.Host.SpaceEngineers.Presentation.Tests/Sprocket.Host.SpaceEngineers.Presentation.Tests.csproj" />
     <Project Path="tests/Sprocket.Localization.Generator.Tests/Sprocket.Localization.Generator.Tests.csproj" />

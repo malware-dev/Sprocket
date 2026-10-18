@@ -1,4 +1,3 @@
-using Sprocket.Host.SpaceEngineers.Features.Doors;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
@@ -225,8 +224,9 @@ public class MechanicsTests
     }
 
     /// <summary>
-    /// A door vouches for its own open, close and readings and for the members of its terminal it keeps, and for none of
-    /// the game's pair its own open and close stand in for, nor the switch's value they say.
+    /// A door vouches for its own open, close and readings, for the members of its terminal it keeps, and for the
+    /// auto-close delay the Door Auto-Close mod adds; for none of the game's pair its own open and close stand in for, nor
+    /// the switch's value they say.
     /// </summary>
     [Theory]
     [InlineData(false)]
@@ -240,12 +240,11 @@ public class MechanicsTests
         door.Carrying("Open", "Open", ValueKind.Flag)
             .Carrying("AnyoneCanUse", "Anyone can use", ValueKind.Flag)
             .Offering("AnyoneCanUse", "Anyone can use On/Off")
-            .Carrying(DoorControls.Id, "Close automatically after", ValueKind.Real, "0", "600");
+            .Carrying("Sprocket_AutoClose", "Auto-close", ValueKind.Real, "0", "600");
 
         var kind = rig.Entity(door.Id).Kind;
         Vetted(kind, ReachKind.Native, "open", "close");
-        Vetted(kind, ReachKind.Value, "status", "how-far-open", "AnyoneCanUse");
-        Unvetted(kind, ReachKind.Value, DoorControls.Id);
+        Vetted(kind, ReachKind.Value, "status", "how-far-open", "AnyoneCanUse", "Sprocket_AutoClose");
         Vetted(kind, ReachKind.Action, "Open", "AnyoneCanUse");
 
         Unvetted(kind, ReachKind.Action, "Open_On", "Open_Off");

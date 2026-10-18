@@ -1,3 +1,4 @@
+using Sprocket.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>A client asking for the buttons of a panel somebody has just picked to be written, whatever their slots hold.</summary>

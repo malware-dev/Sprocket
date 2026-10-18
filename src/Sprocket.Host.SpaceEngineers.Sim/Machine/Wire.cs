@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Network;
+using Sprocket.Network;
 using Sprocket.Sim.Fakes;
 using VRage.Game.ModAPI;
 

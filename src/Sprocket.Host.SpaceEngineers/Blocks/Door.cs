@@ -11,6 +11,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
     /// <summary>A door, or a block shaped like one: sliding, airtight, hangar and the advanced door.</summary>
     public sealed partial class Door : Capability
     {
+        // The delay slider the Door Auto-Close mod adds to every door, there only where that mod is loaded.
+        const string AutoClose = "Sprocket_AutoClose";
+
         static readonly Reading Opened = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Open);
 
         static readonly Reading Shut = Reading.Of<IMyDoor>(door => door.Status == DoorStatus.Closed);
@@ -60,7 +63,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
                 .WithAction("close", "close", Closes, "Open_Off").Lasting()
                 .Renaming("Open", false, "reverse")
                 .Renaming("AnyoneCanUse", true, "anyone can use")
-                .Renaming("AnyoneCanUse", false, "toggle anyone can use");
+                .Renaming("AnyoneCanUse", false, "toggle anyone can use")
+                .Renaming(AutoClose, true, "auto-close delay")
+                .Measuring(AutoClose, " s");
         }
 
         /// <summary>Says how what was added last is heard: announced on a hangar door, and on any other ruled out while it is shut.</summary>

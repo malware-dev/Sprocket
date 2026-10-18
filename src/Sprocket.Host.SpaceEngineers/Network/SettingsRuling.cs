@@ -1,3 +1,4 @@
+using Sprocket.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>The world's settings, written as one text: proposed by an admin's client to the server, and told by the server to every client.</summary>

@@ -13,9 +13,8 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
-using Sprocket.Host.SpaceEngineers.Features.Gravity;
-using Sprocket.Host.SpaceEngineers.Features.Doors;
 using Lumel.Text;
+using Sprocket.Network;
 
 namespace Sprocket.Host.SpaceEngineers
 {
@@ -42,8 +41,6 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly List<ConstructMemory> _remembered = new List<ConstructMemory>();
 
-        readonly List<DoorMemory> _closing = new List<DoorMemory>();
-
         Carrier _carrier;
 
         bool _carries;
@@ -52,13 +49,9 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly Preferences _preferences = new Preferences(new GlobalFiles(), GameLog.Say);
 
-        readonly ShortfallMarks _marks = new ShortfallMarks();
-
         readonly Rota _rota = new Rota();
 
         Roster _roster;
-
-        AutoClose _doors;
 
         SprocketScreen _screen;
         long _open;
@@ -108,12 +101,6 @@ namespace Sprocket.Host.SpaceEngineers
         /// <summary>What the mod says, in the player's language, or null before the session has loaded.</summary>
         public static Texts Texts => _current?._texts;
 
-        /// <summary>The field boxes a gravity generator's fit is showing, or null outside a session.</summary>
-        public static ShortfallMarks Marks => _current?._marks;
-
-        /// <summary>Every door's auto-close delay, or null outside a session.</summary>
-        public static AutoClose Doors => _current?._doors;
-
         /// <summary>Whether the player asked for the developer tools, read once a world has loaded.</summary>
         public static bool DeveloperMode => _current != null && _current.Asked.DeveloperMode;
 
@@ -157,8 +144,6 @@ namespace Sprocket.Host.SpaceEngineers
             // MyAPIGateway.TerminalControls does not exist yet in LoadData. Subscribing adds nothing to
             // the block type, so it is safe before any programmable block has come alive.
             MyAPIGateway.TerminalControls.CustomControlGetter += SprocketControls.Arrange;
-            MyAPIGateway.TerminalControls.CustomControlGetter += GravityFieldButtons.Arrange;
-            MyAPIGateway.TerminalControls.CustomControlGetter += DoorControls.Arrange;
 
             if (IsServer)
             {
@@ -266,10 +251,8 @@ namespace Sprocket.Host.SpaceEngineers
 
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
                 Settled, written => Rule(Settings.Of(written)));
-            _doors = new AutoClose(_rota, Frame, _memories.Closing);
-            _channel = AutoClose.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
+            _channel = Handover.Carry(NetworkChannel.Create(GetType())).Build();
             _handover.Listen(_channel);
-            _doors.Listen(_channel);
 
             GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"
@@ -652,13 +635,6 @@ namespace Sprocket.Host.SpaceEngineers
             _screen.Open();
         }
 
-        /// <summary>Draws the boxes a gravity generator's fit is showing, while there are any.</summary>
-        public override void Draw()
-        {
-            if (MyAPIGateway.Session != null)
-                _marks.Draw(MyAPIGateway.Session.ElapsedPlayTime);
-        }
-
         /// <inheritdoc />
         public override void UpdateAfterSimulation()
         {
@@ -756,13 +732,8 @@ namespace Sprocket.Host.SpaceEngineers
                     _remembered.Add(unit.Memory);
             }
 
-            _closing.Clear();
-            if (_doors != null)
-                _doors.Remember(_closing);
-
-            _carried.Write(Memories.File, _memories.Write(GameFrame(), _remembered, _closing));
+            _carried.Write(Memories.File, _memories.Write(GameFrame(), _remembered));
             _remembered.Clear();
-            _closing.Clear();
         }
 
         /// <summary>Packs the carrier's files into the world's carrier where they changed, making it where the world has none yet.</summary>
@@ -784,8 +755,6 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.TerminalControls != null)
             {
                 MyAPIGateway.TerminalControls.CustomControlGetter -= SprocketControls.Arrange;
-                MyAPIGateway.TerminalControls.CustomControlGetter -= GravityFieldButtons.Arrange;
-                MyAPIGateway.TerminalControls.CustomControlGetter -= DoorControls.Arrange;
             }
 
             SignalAction.End();
@@ -810,9 +779,6 @@ namespace Sprocket.Host.SpaceEngineers
             if (_roster != null)
                 _roster.Dispose();
 
-            if (_doors != null)
-                _doors.Dispose();
-
             if (_channel != null)
                 _channel.Dispose();
 
@@ -823,7 +789,6 @@ namespace Sprocket.Host.SpaceEngineers
             _rested = null;
             _channel = null;
             _handover = null;
-            _doors = null;
             _settings = null;
             _current = null;
         }

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <EntityComponents>
+        <!--
+        Claims the keys a door keeps its auto-close delay under, and what was left of a coming close when the world
+        was saved, in the mod storage on the door.
+
+        MyModStorageComponent.Serialize writes only the keys some mod has claimed here; anything else is dropped at
+        save with a line in the log saying "not claimed".
+
+        The first GUID must match CloseDelay.Key exactly and the second CloseDue.Key, and neither must ever change.
+        A different first one reads as every door in the world set to stay open.
+        -->
+        <EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
+            <Id>
+                <TypeId>ModStorageComponent</TypeId>
+                <SubtypeId>SprocketDoorAutoClose</SubtypeId>
+            </Id>
+            <RegisteredStorageGuids>
+                <guid>687D4592-0806-46CF-9930-7739C4270632</guid>
+                <guid>D57CD7DB-E906-4874-B671-38DF6ED56E98</guid>
+            </RegisteredStorageGuids>
+        </EntityComponent>
+    </EntityComponents>
+</Definitions>

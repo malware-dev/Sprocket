@@ -46,6 +46,20 @@ public class DeadTests
         Assert.Equal(["Door.Forgotten()", "Door.Count", "Panel"], Reported(code));
     }
 
+    /// <summary>What a shared project declares is left alone, since each mod that builds it in uses only part of it.</summary>
+    [Fact]
+    public void ASharedProjectIsLeftAlone()
+    {
+        const string code = """
+            namespace Lumel.Text { public class Unused { public void Alone() { } } }
+            namespace Sprocket.Network { public class Unused { public void Alone() { } } }
+            namespace Sprocket.Gravity { public class Unused { public void Alone() { } } }
+            namespace Sprocket.Networking { public class Unused { public void Alone() { } } }
+            """;
+
+        Assert.Equal(["Unused"], Reported(code));
+    }
+
     /// <summary>A type nothing names is reported once, and its members with it.</summary>
     [Fact]
     public void ATypeNothingNamesIsReportedOnce()

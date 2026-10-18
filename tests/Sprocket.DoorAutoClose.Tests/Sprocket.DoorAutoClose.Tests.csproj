@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\build\Sprocket.GameReferences.props" />
+
+    <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <!-- xunit v3 test projects are executables. -->
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Sprocket.DoorAutoClose.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+        <PackageReference Include="xunit.v3" Version="3.2.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0" />
+    </ItemGroup>
+
+    <!--
+        The harness's doors, and the mod they are tested against. Both mods build in the network channel, so the door
+        mod's comes in under an alias of its own.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Sprocket.Host.SpaceEngineers.Sim\Sprocket.Host.SpaceEngineers.Sim.csproj" />
+        <ProjectReference Include="..\..\src\Sprocket.DoorAutoClose\Sprocket.DoorAutoClose.csproj" Aliases="DoorMod" />
+    </ItemGroup>
+</Project>

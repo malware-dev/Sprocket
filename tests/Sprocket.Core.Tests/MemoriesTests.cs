@@ -19,7 +19,7 @@ public class MemoriesTests
         Assert.Empty(memories.Claim(42).Runs);
         Assert.Equal(100, memories.Now(100));
 
-        var written = memories.Write(100, new List<ConstructMemory>(), new List<DoorMemory>());
+        var written = memories.Write(100, new List<ConstructMemory>());
         Assert.NotEqual("this is no state", written);
         Assert.Equal(100, new ProtoBinary().Unpack(written).Clock);
     }

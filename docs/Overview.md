@@ -39,6 +39,11 @@ that shows it.
 | Project | What it is |
 |---|---|
 | `src/Lumel` | The user interface framework: elements, layout, controls, text, drawing. A shared project, compiled into each mod that uses it, and it knows nothing of Sprocket, so any mod can use it as it is |
+| `src/Sprocket.Network` | A shared project: one network channel per mod, carrying every message type registered on it, and the codec that packs them. Sprocket and Door Auto-Close build it in |
+| `src/Sprocket.Gravity` | A shared project: how big a gravity generator's field must be to cover part of its grid. Sprocket and Gravity Field Fit build it in |
+| `src/Sprocket.DoorAutoClose` | A mod of its own, Door Auto-Close: the slider on every door that closes it a set time after it finishes opening |
+| `src/Sprocket.MultiRename` | A mod of its own, Multi-Rename: the game's own Name box renames several selected blocks at once |
+| `src/Sprocket.GravityFit` | A mod of its own, Gravity Field Fit: the buttons on a box gravity generator that size its field to its grid or to its pressurized rooms |
 | `src/Sprocket.Host.SpaceEngineers.Sim` | The simulator: runs the real mod outside the game, over blocks it makes up, and draws its screens to pictures. The tests and every check of what a screen looks like go through it |
 | `src/Sprocket.Localization.Generator` | A source generator that writes the mod's `Texts` class from `MyTexts.resx` at build time, and reports every text that cannot be said and every fault in the codex |
 | `src/Sprocket.Standards` | Analyzers holding the mod to two of its rules: nothing is `internal` (STD001), and nothing goes unused (STD002) |
@@ -58,6 +63,7 @@ that shows it.
 | `tests/Sprocket.Core.Tests` | The model, the runtime, storage and the blocks, run through the simulator, below the screens |
 | `tests/Sprocket.Host.SpaceEngineers.Tests` | The mod tested on its own, outside the simulator: a player's settings |
 | `tests/Sprocket.Host.SpaceEngineers.Presentation.Tests` | The screens: each test presses and reads by name, as a player would |
+| `tests/Sprocket.DoorAutoClose.Tests` | Door Auto-Close, over the simulator's doors |
 | `tests/Sprocket.Localization.Generator.Tests` | The generator, run as the compiler runs it |
 | `tests/Sprocket.Standards.Tests` | The analyzers |
 | `tests/Sprocket.Wiki.Tests` | The wiki tool |

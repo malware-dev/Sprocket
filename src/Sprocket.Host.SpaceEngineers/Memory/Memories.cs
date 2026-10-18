@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Memory
 {
-    /// <summary>What the world remembers of Sprocket while it runs: Sprocket's clock, each player's settings, and each construct's state and door's coming close until it is claimed.</summary>
+    /// <summary>What the world remembers of Sprocket while it runs: Sprocket's clock, each player's settings, and each construct's state until it is claimed.</summary>
     /// <remarks>
     /// Every tick kept is on Sprocket's clock, the game's frame carried on from where the world was saved, since the game's
     /// frame counter starts from nought each session. Read whole as the world loads and written whole as it saves.
@@ -18,7 +18,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 
         readonly Dictionary<long, PlayerMemory> _players = new Dictionary<long, PlayerMemory>();
 
-        readonly Dictionary<long, int> _closing = new Dictionary<long, int>();
 
         int _offset;
 
@@ -42,7 +41,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         {
             _unclaimed.Clear();
             _players.Clear();
-            _closing.Clear();
             _offset = 0;
             Trouble = "";
             if (string.IsNullOrEmpty(packed))
@@ -65,20 +63,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
 
             foreach (var player in memory.Players)
                 _players[player.Player] = player;
-
-            foreach (var door in memory.Doors)
-                _closing[door.Door] = door.Due;
-        }
-
-        /// <summary>The tick <paramref name="door" /> was to close on when the world was saved, given up to whoever claims it; -1 where none was coming.</summary>
-        public int Closing(long door)
-        {
-            int due;
-            if (!_closing.TryGetValue(door, out due))
-                return -1;
-
-            _closing.Remove(door);
-            return due;
         }
 
         /// <summary>The settings of the player with <paramref name="identity" />, made the first time they are asked for.</summary>
@@ -106,11 +90,11 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         }
 
         /// <summary>
-        /// What the world keeps now, on the game's <paramref name="frame" />: every live construct's state, every door's coming
-        /// close, and what nothing has claimed yet.
+        /// What the world keeps now, on the game's <paramref name="frame" />: every live construct's state, and what nothing has
+        /// claimed yet.
         /// </summary>
         /// <remarks>Called once a save.</remarks>
-        public string Write(int frame, IList<ConstructMemory> constructs, IList<DoorMemory> doors)
+        public string Write(int frame, IList<ConstructMemory> constructs)
         {
             var memory = new WorldMemory { Clock = Now(frame) };
             memory.Constructs.AddRange(constructs);
@@ -118,10 +102,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
                 memory.Constructs.Add(unclaimed);
 
             memory.Players.AddRange(_players.Values);
-
-            memory.Doors.AddRange(doors);
-            foreach (var closing in _closing)
-                memory.Doors.Add(new DoorMemory { Door = closing.Key, Due = closing.Value });
 
             return _binary.Pack(memory);
         }

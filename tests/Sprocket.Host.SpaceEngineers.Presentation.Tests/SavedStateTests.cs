@@ -35,7 +35,6 @@ public class SavedStateTests : IDisposable
         construct.Runs.Add(new RunMemory { System = Airlock, Sequence = 1, Step = 3 });
         world.Constructs.Add(construct);
         world.Players.Add(new PlayerMemory { Player = 7, Ticks = true });
-        world.Doors.Add(new DoorMemory { Door = 99, Due = 900 });
         Sector(world);
 
         var said = SavedState.Render(_folder);
@@ -45,7 +44,6 @@ public class SavedStateTests : IDisposable
         Assert.Contains("System: " + Airlock + "\n", said);
         Assert.Contains("Step: 3\n", said);
         Assert.Contains("Ticks: True\n", said);
-        Assert.Contains("Due: 900\n", said);
     }
 
     /// <summary>A world Sprocket has saved nothing in says so.</summary>

@@ -1,5 +1,5 @@
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Network;
+using Sprocket.Network;
 using Sprocket.Sim.Machine;
 using Xunit;
 

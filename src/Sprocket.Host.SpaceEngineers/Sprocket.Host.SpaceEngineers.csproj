@@ -64,4 +64,6 @@
     <None Remove="thumb.png" />
   </ItemGroup>
   <Import Project="..\Lumel\Lumel.projitems" Label="Shared" />
+  <Import Project="..\Sprocket.Network\Sprocket.Network.projitems" Label="Shared" />
+  <Import Project="..\Sprocket.Gravity\Sprocket.Gravity.projitems" Label="Shared" />
 </Project>

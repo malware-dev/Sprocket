@@ -3,18 +3,17 @@
     <EntityComponents>
         <!--
         Claims the keys Sprocket keeps a construct's program under, in the mod storage on the block the
-        program belongs to, the key Sprocket's files for the world are kept under, on the carrier, and the key a
-        door keeps its auto-close delay under.
+        program belongs to, and the key Sprocket's files for the world are kept under, on the carrier.
 
         WITHOUT THIS THE PROGRAM IS SILENTLY THROWN AWAY. MyModStorageComponent.Serialize walks the keys
         it holds and writes only the ones some mod has claimed here; everything else is dropped with a
         line in the log saying "not claimed". So the program is written, works for the whole session,
         survives being read back - and is gone the moment the world is saved and loaded.
 
-        The first GUID must match Locker.ProgramKey exactly, the second Locker.StateKey, the
-        third Carrier.Key and the fourth CloseDelay.Key, and none must ever change. A different one reads as
-        a Sprocket nobody has written a program on yet, which discards somebody's ship without saying so, as
-        a world that remembers nothing, or as every door set to stay open.
+        The first GUID must match Locker.ProgramKey exactly, the second Locker.StateKey and the
+        third Carrier.Key, and none must ever change. A different one reads as a Sprocket nobody has
+        written a program on yet, which discards somebody's ship without saying so, or as a world that
+        remembers nothing.
         -->
         <EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
             <Id>
@@ -25,7 +24,6 @@
                 <guid>9F1E4A2C-7D53-4B18-9C6E-2A0D5F3B81E7</guid>
                 <guid>C4B7D2F6-1A85-4E39-8D07-6B92F5C1E4A3</guid>
                 <guid>24B4675F-1A0D-410A-8044-BFD7124C8588</guid>
-                <guid>687D4592-0806-46CF-9930-7739C4270632</guid>
             </RegisteredStorageGuids>
         </EntityComponent>
     </EntityComponents>

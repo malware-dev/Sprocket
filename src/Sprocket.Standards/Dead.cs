@@ -18,12 +18,16 @@ namespace Sprocket.Standards
     ///     <para>
     ///         Left out: what overrides, implements or is declared virtual or abstract, constructors and operators, which are
     ///         reached without being named, anything carrying an attribute or inside a type that does, generated code, the
-    ///         <c>.debug.cs</c> files the harness alone compiles, and Lumel, a framework other mods use as well.
+    ///         <c>.debug.cs</c> files the harness alone compiles, and the shared projects other mods build in as well: Lumel,
+    ///         Sprocket.Network and Sprocket.Gravity.
     ///     </para>
     /// </remarks>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class Dead : DiagnosticAnalyzer
     {
+        // The namespaces of the shared projects, which every mod that builds one in uses only part of.
+        static readonly string[] Shared = { "Lumel", "Sprocket.Network", "Sprocket.Gravity" };
+
         /// <inheritdoc />
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rules.Dead);
 
@@ -145,7 +149,7 @@ namespace Sprocket.Standards
                 return false;
 
             var space = symbol.ContainingNamespace == null ? "" : symbol.ContainingNamespace.ToDisplayString();
-            if (space == "Lumel" || space.StartsWith("Lumel.", StringComparison.Ordinal))
+            if (Shared.Any(name => space == name || space.StartsWith(name + ".", StringComparison.Ordinal)))
                 return false;
 
             for (var owner = symbol; owner != null; owner = owner.ContainingType)

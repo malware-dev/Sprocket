@@ -1,3 +1,4 @@
+using Sprocket.Network;
 namespace Sprocket.Host.SpaceEngineers.Network
 {
     /// <summary>A client handing back a Sprocket it was editing, so somebody else may.</summary>

@@ -16,6 +16,11 @@ The general rules are in **csharp-standards**. These hold only here.
 - `src/Lumel` is the UI framework, a shared project compiled into the mod's assembly. It names nothing
   of Sprocket. A control, layout or drawing primitive with nothing of Sprocket in it goes in Lumel, with
   its colors and sizes as properties. `Features/Look` holds Sprocket's palette, sizes and styles.
+- `src/Sprocket.Network` (the network channel and its codec) and `src/Sprocket.Gravity` (a gravity field's size) are
+  shared projects too, built into Sprocket and into the small mods that need them.
+- `src/Sprocket.DoorAutoClose`, `src/Sprocket.GravityFit` and `src/Sprocket.MultiRename` are small mods of their
+  own, split out of Sprocket, whose names do not say Sprocket. Each has its own session, its own texts and storage
+  keys where it has any, and calls the game directly where Sprocket has machinery of its own.
 - Lumel controls (anything deriving from `Element`) are never `sealed`. A user control derives from the
   layout it needs; there is no `UserControl` base.
 - `src/Sprocket.Host.SpaceEngineers.Sim` is the harness: it references the mod and drives it over

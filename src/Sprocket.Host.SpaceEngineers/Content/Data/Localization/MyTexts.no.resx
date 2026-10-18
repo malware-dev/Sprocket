@@ -1518,35 +1518,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automasjonen i denne blokken kan ikke redigeres.</value>
   </data>
-  <data name="Sprocket.Terminal.FitExtents" xml:space="preserve">
-    <value>Tilpass etter utstrekning</value>
-  </data>
-  <data name="Sprocket.Terminal.FitExtentsAbout" xml:space="preserve">
-    <value>Gi feltet størrelsen som dekker hver blokk i dette rutenettet.</value>
-  </data>
-  <data name="Sprocket.Terminal.FitInterior" xml:space="preserve">
-    <value>Tilpass etter lufttrykk</value>
-  </data>
-  <data name="Sprocket.Terminal.FitInteriorAbout" xml:space="preserve">
-    <value>Gi feltet størrelsen som dekker hvert trykksatte rom i dette rutenettet. Krever at trykksetting er slått på i verdens innstillinger.</value>
-  </data>
-  <data name="Sprocket.Terminal.FitNoRooms" xml:space="preserve">
-    <value>Dette rutenettet har ingen trykksatte rom, så feltet er som det var.</value>
-  </data>
-  <data name="Sprocket.Terminal.FitShort" xml:space="preserve">
-    <value>Feltet er så stort som denne generatoren tillater, og strekker likevel ikke til. Det trenger {needed} og når {reached}.
-
-I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor langt det når.</value>
-  </data>
-  <data name="Sprocket.Terminal.AutoClose" xml:space="preserve">
-    <value>Autolukking</value>
-  </data>
-  <data name="Sprocket.Terminal.AutoCloseAbout" xml:space="preserve">
-    <value>Lukker døren av seg selv så lenge etter at den er ferdig med å åpne seg. Helt til venstre er av.</value>
-  </data>
-  <data name="Sprocket.Terminal.AutoCloseOff" xml:space="preserve">
-    <value>Av</value>
-  </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Endret {time}</value>
   </data>

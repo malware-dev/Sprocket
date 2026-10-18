@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Norwegian (bokmål). Translates MyTexts.resx, where each text's note says what it is and what its slots
+    hold. Whatever is left out here is said in English.
+-->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Sprocket.AutoClose.Slider" xml:space="preserve">
+    <value>Autolukking</value>
+  </data>
+  <data name="Sprocket.AutoClose.SliderAbout" xml:space="preserve">
+    <value>Lukker døren av seg selv så lenge etter at den er ferdig med å åpne seg. Helt til venstre er av.</value>
+  </data>
+  <data name="Sprocket.AutoClose.Off" xml:space="preserve">
+    <value>Av</value>
+  </data>
+</root>

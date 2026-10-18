@@ -1,3 +1,4 @@
+using Sprocket.Network;
 
 namespace Sprocket.Host.SpaceEngineers.Network
 {

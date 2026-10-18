@@ -9,8 +9,7 @@ outlives every build.
 |---|---|---|---|
 | A construct's program | The mod storage of its programmable block, the unit's hero, under `BlockStorage.ProgramKey` | When the program may have changed, and as the world saves | `World/SprocketUnit.cs`, `Storage/Scribe.cs`, `Storage/Reader.cs` |
 | What is switched off, and why | The same block, under `BlockStorage.StateKey` | With the program | `Storage/StateText.cs` |
-| What the world remembers while it runs: Sprocket's clock, every run and every watch, owners, pauses, players' settings, doors' close times | A file named `state` among Sprocket's files for the world, kept on the carrier | As the world saves, on the server, where anything changed | `Memory/`, `World/Carrier.cs` |
-| A door's auto-close delay | The door's mod storage, under `CloseDelay.Key` | When it is set | `Features/Doors/CloseDelay.cs` |
+| What the world remembers while it runs: Sprocket's clock, every run and every watch, owners, pauses, players' settings | A file named `state` among Sprocket's files for the world, kept on the carrier | As the world saves, on the server, where anything changed | `Memory/`, `World/Carrier.cs` |
 | The library | The game's Storage folder on the player's own computer: `sprocket-bp.index`, and a `sprocket-bp-*.cog` for each blueprint | When a blueprint is kept | `Storage/Shelf.cs` |
 | Backups | Beside the world's save: `backups.ini`, and a `backup-N.cog` for each | When a construct's automation is lost to damage | `Storage/Backups.cs` |
 | The world's settings | `sprocket.ini`, in the game's Storage folder and in the world's | When an admin changes them | `World/Settings.cs` |
@@ -63,7 +62,7 @@ Changing what the text says:
 ## What the world remembers
 
 `Memory/` is the world's memory: protobuf, through the game's own serializer, as base 64 (`Memory/GameBinary.cs`).
-`WorldMemory` is the root, holding the clock, the constructs, the players and the doors.
+`WorldMemory` is the root, holding the clock, the constructs and the players. Its member 4 is retired.
 
 **A member's number is the format.** The memory carries no version: a `ProtoMember` number, once used, is never used
 again and never given another type, and a member dropped leaves its number unused. Reasons and causes are stored as the
@@ -83,11 +82,11 @@ clipboard belong to each player's own computer.
 
 Each of these is written into saves, and a change reads an old world as empty or wrong, often without a word:
 
-- **The storage keys**: `BlockStorage.ProgramKey` and `StateKey`, `Carrier.Key` and `CloseDelay.Key`. Each is also
-  claimed in `Content/Data/EntityComponents.sbc`, without which the game drops it from the save.
+- **The storage keys**: `BlockStorage.ProgramKey` and `StateKey`, and `Carrier.Key`. Each is also claimed in
+  `Content/Data/EntityComponents.sbc`, without which the game drops it from the save.
 - **The world variable** naming the carrier, `sprocket.carrier`.
-- **Ids written into the game's own data**: the toolbar action `Sprocket_Trigger`, the LCD app `Sprocket_Status`, and
-  the door control `Sprocket_AutoClose`.
+- **Ids written into the game's own data**: the toolbar action `Sprocket_Trigger` and the LCD app `Sprocket_Status`.
+  A program also names `Sprocket_AutoClose`, the delay slider Door Auto-Close adds to every door.
 - **Every word of the program text**: the keywords (`Storage/Keywords.cs`), `ext`, `toolbar`, and `s` for seconds,
   each changing only with an upgrade.
 - **The words of `StateText`**, such as `by hand`, `owned` and `paused`.

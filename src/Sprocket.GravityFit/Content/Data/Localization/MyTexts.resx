@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Every text the mod says, in English, which is the language the others are translated from.
+
+    A text is plain, and a newline in it breaks the line. A name in braces, {name}, is filled in by the
+    mod; keep it as it is, wherever the sentence needs it.
+
+    A translation is a copy of this file named for its language, such as MyTexts.no.resx, holding the
+    texts it translates. Whatever it leaves out is said in English.
+-->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Sprocket.GravityFit.Extents" xml:space="preserve">
+    <value>Autofit by extents</value>
+    <comment>A button in a gravity generator's terminal that sizes its field to cover every block of its grid. Also the title of the message box that button can show.</comment>
+  </data>
+  <data name="Sprocket.GravityFit.ExtentsAbout" xml:space="preserve">
+    <value>Size the field to cover every block of this grid.</value>
+    <comment>The tooltip on the button in a gravity generator's terminal that sizes its field to cover every block of its grid.</comment>
+  </data>
+  <data name="Sprocket.GravityFit.Interior" xml:space="preserve">
+    <value>Autofit by air pressure</value>
+    <comment>A button in a gravity generator's terminal that sizes its field to cover every pressurized room of its grid. Also the title of the message boxes that button can show.</comment>
+  </data>
+  <data name="Sprocket.GravityFit.InteriorAbout" xml:space="preserve">
+    <value>Size the field to cover every pressurized room of this grid. Needs pressurization on in the world's settings.</value>
+    <comment>The tooltip on the button in a gravity generator's terminal that sizes its field to cover every pressurized room of its grid. The button is greyed out where the world has pressurization off.</comment>
+  </data>
+  <data name="Sprocket.GravityFit.NoRooms" xml:space="preserve">
+    <value>This grid has no pressurized rooms, so the field is left as it was.</value>
+    <comment>A message box shown after the button in a gravity generator's terminal that fits the field to the pressurized rooms is pressed, where the grid has no pressurized rooms.</comment>
+  </data>
+  <data name="Sprocket.GravityFit.Short" xml:space="preserve">
+    <value>The field is as large as this generator allows, and still falls short. It needs {needed} and reaches {reached}.
+
+For half a minute, a red box shows what it has to cover, and a white box how far it reaches.</value>
+    <comment>A message box shown after either autofit button in a gravity generator's terminal is pressed, where the field needed is larger than the generator can make. {needed} and {reached} are sizes, width by height by depth in meters.</comment>
+  </data>
+</root>

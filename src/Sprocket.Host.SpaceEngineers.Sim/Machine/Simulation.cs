@@ -276,7 +276,7 @@ public sealed class Simulation
                 remembered.Add(unit.Memory);
         }
 
-        _worldFolder.Write(Memories.File, _memories.Write(_frame, remembered, new List<DoorMemory>()));
+        _worldFolder.Write(Memories.File, _memories.Write(_frame, remembered));
     }
 
     /// <summary>

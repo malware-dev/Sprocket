@@ -3,8 +3,8 @@ using ProtoBuf;
 
 namespace Sprocket.Host.SpaceEngineers.Memory
 {
-    /// <summary>Everything a world remembers of Sprocket beyond the programs: every construct's runtime state, every player's settings and every door's coming close.</summary>
-    /// <remarks>A member's number is a stored format: never reused, never given another type.</remarks>
+    /// <summary>Everything a world remembers of Sprocket beyond the programs: every construct's runtime state, and every player's settings.</summary>
+    /// <remarks>A member's number is a stored format: never reused, never given another type. Number 4 is retired.</remarks>
     [ProtoContract]
     public sealed class WorldMemory
     {
@@ -19,9 +19,5 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>Each player's settings.</summary>
         [ProtoMember(3)]
         public List<PlayerMemory> Players { get; set; } = new List<PlayerMemory>();
-
-        /// <summary>Each door whose close was coming.</summary>
-        [ProtoMember(4)]
-        public List<DoorMemory> Doors { get; set; } = new List<DoorMemory>();
     }
 }

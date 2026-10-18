@@ -2002,44 +2002,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>This block's automation cannot be edited.</value>
     <comment>A message box over the terminal when the button in a programmable block's terminal that opens the automation editor is pressed and the server turns the request down.</comment>
   </data>
-  <data name="Sprocket.Terminal.FitExtents" xml:space="preserve">
-    <value>Autofit by extents</value>
-    <comment>A button in a gravity generator's terminal that sizes its field to cover every block of its grid. Also the title of the message box that button can show.</comment>
-  </data>
-  <data name="Sprocket.Terminal.FitExtentsAbout" xml:space="preserve">
-    <value>Size the field to cover every block of this grid.</value>
-    <comment>The tooltip on the button in a gravity generator's terminal that sizes its field to cover every block of its grid.</comment>
-  </data>
-  <data name="Sprocket.Terminal.FitInterior" xml:space="preserve">
-    <value>Autofit by air pressure</value>
-    <comment>A button in a gravity generator's terminal that sizes its field to cover every pressurized room of its grid. Also the title of the message boxes that button can show.</comment>
-  </data>
-  <data name="Sprocket.Terminal.FitInteriorAbout" xml:space="preserve">
-    <value>Size the field to cover every pressurized room of this grid. Needs pressurization on in the world's settings.</value>
-    <comment>The tooltip on the button in a gravity generator's terminal that sizes its field to cover every pressurized room of its grid. The button is greyed out where the world has pressurization off.</comment>
-  </data>
-  <data name="Sprocket.Terminal.FitNoRooms" xml:space="preserve">
-    <value>This grid has no pressurized rooms, so the field is left as it was.</value>
-    <comment>A message box shown after the button in a gravity generator's terminal that fits the field to the pressurized rooms is pressed, where the grid has no pressurized rooms.</comment>
-  </data>
-  <data name="Sprocket.Terminal.FitShort" xml:space="preserve">
-    <value>The field is as large as this generator allows, and still falls short. It needs {needed} and reaches {reached}.
-
-For half a minute, a red box shows what it has to cover, and a white box how far it reaches.</value>
-    <comment>A message box shown after either autofit button in a gravity generator's terminal is pressed, where the field needed is larger than the generator can make. {needed} and {reached} are sizes, width by height by depth in meters.</comment>
-  </data>
-  <data name="Sprocket.Terminal.AutoClose" xml:space="preserve">
-    <value>Auto-close</value>
-    <comment>The name of a slider in a door's terminal that sets how long the door stays open before it closes by itself.</comment>
-  </data>
-  <data name="Sprocket.Terminal.AutoCloseAbout" xml:space="preserve">
-    <value>Closes the door by itself this long after it finishes opening. All the way to the left is off.</value>
-    <comment>The tooltip on the slider in a door's terminal that sets how long the door stays open before it closes by itself.</comment>
-  </data>
-  <data name="Sprocket.Terminal.AutoCloseOff" xml:space="preserve">
-    <value>Off</value>
-    <comment>The value shown beside the slider in a door's terminal that sets how long the door stays open, when it is all the way to the left and the door never closes by itself.</comment>
-  </data>
   <data name="Sprocket.Library.Saved" xml:space="preserve">
     <value>Changed {time}</value>
     <comment>In the library, the line under a blueprint's row in the section of blueprints kept in storage, for a blueprint the player made. {time} is the date and time the blueprint last changed.</comment>
