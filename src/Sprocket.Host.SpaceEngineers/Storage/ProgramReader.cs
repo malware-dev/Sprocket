@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.Storage.Upgrades;
 using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Storage
@@ -160,6 +161,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             {
                 Header(header, trouble);
                 program.Annotation = header.Annotation;
+
+                // Before anything is read, so the readers know only the form this build writes.
+                if (DraftOf(header) != ScriptFormat.Draft)
+                    FormatUpgrades.Statements(DraftOf(header), constructs);
             }
 
             for (var i = 0; i < constructs.Count; i++)
@@ -186,7 +191,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
             else if (header != null && DraftOf(header) != ScriptFormat.Draft)
             {
-                var upgraded = FormatUpgrades.Apply(DraftOf(header), program, world);
+                var upgraded = FormatUpgrades.Program(DraftOf(header), program, world);
                 if (upgraded.Length > 0)
                     GameLog.Say($"upgraded a program from {upgraded}");
             }

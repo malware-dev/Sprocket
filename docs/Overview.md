@@ -107,5 +107,5 @@ position invalidates the layout; a color changes nothing else.
 and every hundred, and spreads machines built alike across the ticks. Nothing keeps a clock of its own.
 
 **Saves outlive builds.** A program is stored as text in the world, and a format it was written in earlier loads
-through an upgrade in `Storage/Upgrades.cs`, where one is written for it, rather than being misread. What the text says
+through the changes in `Storage/Upgrades/` that arrived after it, rather than being misread. What the text says
 changes only together with an upgrade for it. [Saves and storage](Saves.md) has the rest.

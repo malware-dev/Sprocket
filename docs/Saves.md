@@ -39,19 +39,23 @@ neither writes nor upgrades is refused the same way, and marked incompatible.
 
 ## Changing the format
 
-**What the text says changes only together with an upgrade for it.** `Storage/Upgrades.cs` names the formats it
-carries forward, and turns what the parser read in an older one into the current model: the upgrade runs on the
-model, never on the text, so a name that happens to hold a keyword is left as it is. The program is written in the
-current format at its next save.
+**What the text says changes only together with an upgrade for it.** Each change to the format is one class in
+`Storage/Upgrades/`, a `FormatChange`, saying the draft it arrived in. It has two hooks, either left empty where the
+change needs none: `Statements` rewrites the statements the parser read, before anything reads them, so the readers know
+only the form this build writes; `Program` carries the read model across, with the world's blocks where the change needs
+them. A name that happens to hold a keyword is left as it is, since neither hook works on the text. The program is
+written in the current format at its next save.
 
-Every format so far is an alpha draft. A draft is upgraded only where an upgrade is chosen for it, named in
-`FormatUpgrades.From`; any other draft is refused rather than misread. An upgrade between released formats is kept for good, since every program behind
-it reads through it.
+`FormatUpgrades` keeps each version's changes in the order they arrived. A program runs every change that arrived after
+the draft it was written for, in that order, so a program from any draft since `FormatUpgrades.Oldest` reaches the
+current one. Testers come and go during development, and a world may skip any number of drafts. A finished version
+counts as after all of its drafts; once the next version is released, its list of changes is the upgrade between the two,
+as it stands. A change is never removed, since every program behind it reads through it.
 
 Changing what the text says:
 
 1. Raise `ScriptFormat.Draft`.
-2. Where programs in the old draft are to carry forward, add it to `FormatUpgrades.From` and its changes to `FormatUpgrades.Apply`.
+2. Add a `FormatChange` arriving in the new draft, and put it last in its version's list in `FormatUpgrades`.
 3. Update `docs/Language.md` in the same change: it is the language's spec.
 4. Test it: `UpgradeTests` reads an old text and checks what it became and that it is written in the current format;
    `ScriptTests` and `ProgramTextTests` read and write programs whole.
