@@ -9,6 +9,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using VRage.Game.GUI.TextPanel;
+using VRage.Utils;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using IngameSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 using IngameSurfaces = Sandbox.ModAPI.Ingame.IMyTextSurfaceProvider;
@@ -35,7 +36,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _unit = unit;
             _opened = opened;
             _closed = closed;
-            unit.Editor.Input.Clipboard = new ClipboardFile(new GlobalFiles(), GameLog.Say, unit.Editor.Pasted);
+            unit.Editor.Input.Clipboard = new ClipboardFile(new GlobalFiles(), GameLog.Say, unit.Editor.Pasted, MyClipboardHelper.SetClipboard);
         }
 
         /// <inheritdoc />

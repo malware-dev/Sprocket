@@ -2665,7 +2665,7 @@ For half a minute, a red box shows what it has to cover, and a white box how far
     <comment>A row in the picker's list of kinds of block, which narrows the blocks on offer, shown when the construct has two or more kinds of warhead; those kinds are listed under it, and choosing it offers the blocks of all of them. It covers warheads in every size.</comment>
   </data>
   <data name="Sprocket.Writing.PasteNote" xml:space="preserve">
-    <value>The game gives mods no access to the clipboard, so text copied outside the game, or in the game's own text boxes, can't be pasted here. To bring text in, put it in sprocket-clipboard.txt in the game's Storage folder, then paste.</value>
+    <value>The game doesn't let mods read the clipboard, so text copied outside the game, or in the game's own text boxes, can't be pasted here. To bring text in, put it in sprocket-clipboard.txt in the game's Storage folder, then paste. What you copy here does reach the clipboard.</value>
     <comment>A note that pops up under a text box in the editor the first time anything is pasted while the editor is open. The file name sprocket-clipboard.txt is the real one and is not translated.</comment>
   </data>
   <data name="Sprocket.Admin.Button" xml:space="preserve">

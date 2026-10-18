@@ -2016,7 +2016,7 @@ I et halvt minutt viser en rød boks hva det må dekke, og en hvit boks hvor lan
     <value>Stridshode</value>
   </data>
   <data name="Sprocket.Writing.PasteNote" xml:space="preserve">
-    <value>Spillet gir ikke mods tilgang til utklippstavlen, så tekst kopiert utenfor spillet, eller i spillets egne tekstbokser, kan ikke limes inn her. For å få tekst inn, legg den i sprocket-clipboard.txt i Storage-mappa til spillet, og lim inn.</value>
+    <value>Spillet lar ikke mods lese utklippstavlen, så tekst kopiert utenfor spillet, eller i spillets egne tekstbokser, kan ikke limes inn her. For å hente inn tekst, legg den i sprocket-clipboard.txt i spillets Storage-mappe, og lim så inn. Det du kopierer her, havner på utklippstavlen.</value>
   </data>
   <data name="Sprocket.Admin.Button" xml:space="preserve">
     <value>Admin</value>

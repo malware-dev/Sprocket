@@ -21,6 +21,24 @@ public class ClipboardFileTests
         Assert.Equal("pasted\r\nfrom outside", clipboard.Get());
     }
 
+    /// <summary>A copy also reaches the computer's own clipboard, and one it refuses is said while the file is still written.</summary>
+    [Fact]
+    public void ACopyAlsoReachesTheComputersClipboard()
+    {
+        var folder = new Folder();
+        string? given = null;
+        var clipboard = new ClipboardFile(folder, delegate { }, null, text => given = text);
+
+        clipboard.Set("copied");
+        Assert.Equal("copied", given);
+
+        var said = "";
+        var refusing = new ClipboardFile(folder, text => said = text, null, delegate { throw new InvalidOperationException("busy"); });
+        refusing.Set("again");
+        Assert.Equal("again", folder.Files["sprocket-clipboard.txt"]);
+        Assert.Contains("the clipboard will not take the copy", said);
+    }
+
     /// <summary>With no file, a paste gives nothing.</summary>
     [Fact]
     public void WithNoFileAPasteGivesNothing()
