@@ -81,6 +81,9 @@ public sealed class Rig
     /// <summary>Which faction each player is in, for every block on the construct.</summary>
     public Factions Factions { get; } = new Factions();
 
+    /// <summary>The players using every terminal as admins, for every block on the construct.</summary>
+    public HashSet<long> Admins { get; } = new HashSet<long>();
+
     /// <summary>Hands every block on the construct to <paramref name="identity" />, shared as <paramref name="share" /> says, as the game's transfer of a whole ship does.</summary>
     public void Own(long identity, Sharing share = Sharing.Nobody)
     {
@@ -170,6 +173,7 @@ public sealed class Rig
     public T Weld<T>(T fitting) where T : Fitting
     {
         fitting.Factions = Factions;
+        fitting.Admins = Admins;
         return _welding.Weld(fitting);
     }
 

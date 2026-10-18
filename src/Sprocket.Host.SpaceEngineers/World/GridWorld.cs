@@ -583,7 +583,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _bigOwners.Sort();
         }
 
-        /// <summary>Whether any of the big owners may use <paramref name="block" />, as the game's own access test answers it; every block where nobody owns the construct.</summary>
+        /// <summary>Whether <paramref name="block" /> is shared with any of the big owners; every block where nobody owns the construct.</summary>
         bool Shared(IMyTerminalBlock block)
         {
             if (_bigOwners.Count == 0)
@@ -591,7 +591,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             foreach (var owner in _bigOwners)
             {
-                if (block.HasPlayerAccess(owner))
+                if (Access.Shared(block, owner))
                     return true;
             }
 

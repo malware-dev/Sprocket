@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Fakes;
 using Sandbox.ModAPI;
+using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.Components.Interfaces;
 using VRage.Game.ModAPI;
@@ -160,6 +161,9 @@ public abstract class Fitting
     /// <summary>Which faction each player is in, which the rig hands every block it welds; null for none.</summary>
     public Factions? Factions { get; set; }
 
+    /// <summary>The players using every terminal as admins, whom the game's own access test lets in to any block; null for none.</summary>
+    public HashSet<long>? Admins { get; set; }
+
     /// <summary>What the grid does when the block changes hands, which the grid installs as it welds the block.</summary>
     public Action? Owning { get; set; }
 
@@ -173,6 +177,17 @@ public abstract class Fitting
             return true;
 
         return Share == Sharing.Faction && Factions != null && Factions.Same(_owner, identity);
+    }
+
+    /// <summary>How the player <paramref name="identity" /> stands to the block's owner, by its owner and share setting.</summary>
+    public MyRelationsBetweenPlayerAndBlock Relation(long identity)
+    {
+        if (_owner == 0)
+            return MyRelationsBetweenPlayerAndBlock.NoOwnership;
+        if (identity == _owner)
+            return MyRelationsBetweenPlayerAndBlock.Owner;
+
+        return Lets(identity) ? MyRelationsBetweenPlayerAndBlock.FactionShare : MyRelationsBetweenPlayerAndBlock.Enemies;
     }
 
     readonly List<Action<IMyCubeBlock>> _watching = new List<Action<IMyCubeBlock>>();
@@ -292,7 +307,8 @@ public abstract class Fitting
             .Does("remove_CustomDataChanged", args => { _writing.Remove((Action<IMyTerminalBlock>)args[0]); })
             .Gives("Position", () => Cell ?? Vector3I.Zero)
             .Gives("OwnerId", () => Owner)
-            .Does("HasPlayerAccess", args => Lets((long)args[0]))
+            .Does("HasPlayerAccess", args => Lets((long)args[0]) || (Admins != null && Admins.Contains((long)args[0])))
+            .Does("GetUserRelationToOwner", args => Relation((long)args[0]))
             .Gives("Storage", () => Storage)
             .Takes("Storage", value => Storage = (MyModStorageComponentBase)value)
             .Gives("Components", () => container);

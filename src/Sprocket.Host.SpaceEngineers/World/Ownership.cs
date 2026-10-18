@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             foreach (var owner in before)
             {
-                if (Among(now, owner) || hero.HasPlayerAccess(owner))
+                if (Among(now, owner) || Access.Shared(hero, owner))
                     return true;
             }
 

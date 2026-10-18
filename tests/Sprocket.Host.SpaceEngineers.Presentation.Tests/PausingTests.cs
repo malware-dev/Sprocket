@@ -48,6 +48,20 @@ public class PausingTests
         Assert.False(sim.Runner.Live);
     }
 
+    /// <summary>A ship taken from an admin using every terminal pauses as from anybody, as that use is no sharing.</summary>
+    [Fact]
+    public void ACaptureFromAnAdminPausesIt()
+    {
+        var sim = Airlock(out _);
+        sim.Machine.Admins.Add(Anna);
+        Owned(sim, Anna, Sharing.Nobody);
+
+        Owned(sim, Bert, Sharing.Nobody);
+
+        Assert.True(sim.Editor.Program.Paused);
+        Assert.Equal(new[] { Anna }, sim.Editor.Program.PausedFrom);
+    }
+
     /// <summary>A construct nobody owned becoming somebody's is no change of hands.</summary>
     [Fact]
     public void FirstOwnershipPausesNothing()
