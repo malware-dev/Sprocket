@@ -132,10 +132,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     : SequenceFault.None;
             }
 
-            if (world.CanStart(sequence, through))
+            if (world.Unstartable.CanStart(sequence, through))
                 return SequenceFault.None;
 
-            var why = world.Why(sequence, through);
+            var why = world.Unstartable.Why(sequence, through);
             return why == null ? SequenceFault.Unstarted(Unwired.Unknown, null) : SequenceFault.Unstarted(why.Why, why.Block);
         }
 

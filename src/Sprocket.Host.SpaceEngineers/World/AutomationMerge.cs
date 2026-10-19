@@ -139,7 +139,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                     continue;
                 }
 
-                world.Identify(found, fresh);
+                world.Keys.Identify(found, fresh);
                 var place = fresh.FindIndex(key => key.Cells != null);
                 if (place < 0)
                     keys.RemoveAt(at);
@@ -268,7 +268,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         static GridEntity Find(EntityRef declared, GridWorld world)
         {
             int matched;
-            var found = world.Match(declared.Keys, out matched);
+            var found = world.Keys.Match(declared.Keys, out matched);
             return found != null && (declared.KindId.Length == 0 || found.Kind.Id == declared.KindId) ? found : null;
         }
     }

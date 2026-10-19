@@ -106,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var declared = refs[i];
 
                 int matched;
-                var found = world.Match(declared.Keys, out matched);
+                var found = world.Keys.Match(declared.Keys, out matched);
 
                 // The kind refuses what a key found rather than finding anything: a name landing on a light where a door
                 // was declared is a miss.
@@ -129,7 +129,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var sure = matched == 0 || key.Cells != null || key.Kind == ValueKind.Integer;
                 _states[declared.Name] = sure ? RefState.Bound : RefState.Adrift;
                 if (key.Cells != null)
-                    world.Renumber(found, declared.Keys);
+                    world.Keys.Renumber(found, declared.Keys);
             }
 
             for (var i = 0; i < signals.Count; i++)

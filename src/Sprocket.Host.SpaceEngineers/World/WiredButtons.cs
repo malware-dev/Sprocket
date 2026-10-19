@@ -183,7 +183,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 want.Slot = slot;
                 want.Key = needed.Acts != null ? SlotKeys.KeyOf(system, instance, needed) : SlotKeys.KeyOf(system, instance, sequence, needed.Stops);
                 want.Reference = blocks[i];
-                want.Start = GridWorld.Start(sequence.Id, instance);
+                want.Start = UnstartableSequences.Key(sequence.Id, instance);
                 want.Name = needed.IsWritten ? null : Shown(system, needed.Part);
                 into.Add(want);
             }

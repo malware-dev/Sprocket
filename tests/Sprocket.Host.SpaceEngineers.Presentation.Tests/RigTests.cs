@@ -599,7 +599,7 @@ public class RigTests
         for (var i = 0; i < 5; i++)
             rig.Tick();
 
-        Assert.True(rig.World.CanStart(sequence, sequence.System.First), "nothing can start the sequence both buttons were given");
+        Assert.True(rig.World.Unstartable.CanStart(sequence, sequence.System.First), "nothing can start the sequence both buttons were given");
 
         rig.Press("Inside Button");
         rig.Tick();
@@ -679,8 +679,8 @@ public class RigTests
             rig.Tick();
 
         Assert.Equal(filled, Pressed.By(rig.Editor.Program, sequence.System, trigger.Part));
-        Assert.False(rig.World.CanStart(sequence, sequence.System.First));
-        Assert.Equal(Unwired.Taken, rig.World.Why(sequence, sequence.System.First)!.Why);
+        Assert.False(rig.World.Unstartable.CanStart(sequence, sequence.System.First));
+        Assert.Equal(Unwired.Taken, rig.World.Unstartable.Why(sequence, sequence.System.First)!.Why);
     }
 
     /// <summary>
@@ -858,7 +858,7 @@ public class RigTests
         Sequence had = rig.Editor.Program.Sequences[0];
         Sequence took = rig.Editor.Program.Sequences[1];
 
-        Assert.True(rig.World.CanStart(took, took.System.First), "the trigger that took the button cannot start");
+        Assert.True(rig.World.Unstartable.CanStart(took, took.System.First), "the trigger that took the button cannot start");
 
         var left = Assert.Single(rig.Editor.Program.Systems[0].Triggers);
         Assert.True(left.IsAbout(took), "the trigger that lost the button is still there");
@@ -907,7 +907,7 @@ public class RigTests
         // Still says what starts it, and the construct agrees that something does.
         var pressed = Assert.IsType<SignalTrigger>(sequence.Trigger);
         Assert.Single(pressed.Sources);
-        Assert.True(pasted.World.CanStart(sequence, sequence.System.First), "the trigger was reported as unstartable");
+        Assert.True(pasted.World.Unstartable.CanStart(sequence, sequence.System.First), "the trigger was reported as unstartable");
 
         // And the button does it, which is the half that was being reported without being true.
         pasted.Press("Airlock Button");
@@ -960,7 +960,7 @@ public class RigTests
             pasted.Tick();
 
         Sequence sequence = pasted.Editor.Program.Sequences[0];
-        Assert.False(pasted.World.CanStart(sequence, sequence.System.First), "it claimed a button somebody else holds");
+        Assert.False(pasted.World.Unstartable.CanStart(sequence, sequence.System.First), "it claimed a button somebody else holds");
 
         // And it says whose button, and why.
         var fault = SequenceSummary.Fault(pasted.Runner.Get(sequence, sequence.System.First));

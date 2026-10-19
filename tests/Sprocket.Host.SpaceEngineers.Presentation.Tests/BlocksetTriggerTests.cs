@@ -23,8 +23,8 @@ public class BlocksetTriggerTests
         // The second has nothing in the button's slot, so there, and only there, nothing can start it.
         var system = sim.Editor.Program.Systems.Single();
         var sequence = system.Sequences.Last();
-        Assert.True(sim.World.CanStart(sequence, system.Instances[0]));
-        Assert.False(sim.World.CanStart(sequence, system.Instances[1]));
+        Assert.True(sim.World.Unstartable.CanStart(sequence, system.Instances[0]));
+        Assert.False(sim.World.Unstartable.CanStart(sequence, system.Instances[1]));
     }
 
     /// <summary>A blockset made with its slots empty is switched off alone with no reason recorded, saying which slot is empty.</summary>

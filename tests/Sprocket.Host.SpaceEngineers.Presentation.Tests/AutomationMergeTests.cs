@@ -345,7 +345,7 @@ public class AutomationMergeTests
             if (declared == null)
                 continue;
 
-            var found = world.Match(declared.Keys, out _);
+            var found = world.Keys.Match(declared.Keys, out _);
             if (found != null)
                 called.Add(found.Name);
         }

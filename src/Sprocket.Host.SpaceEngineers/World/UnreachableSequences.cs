@@ -172,7 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                         if (Answered(system, instances[n], sequence))
                             continue;
 
-                        var start = GridWorld.Start(sequence.Id, instances[n]);
+                        var start = UnstartableSequences.Key(sequence.Id, instances[n]);
                         if (_unstartable.Contains(start))
                             continue;
 
@@ -199,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _why[want.Start] = Unanswer(_buttons.ToolbarOf(want), want.Slot, want.Key, want.Reference);
             }
 
-            _world.Unstartable(_unstartable, _why);
+            _world.Unstartable.Tell(_unstartable, _why);
         }
 
         /// <summary>Whose button leaves <paramref name="sequence" /> unstarted on <paramref name="instance" />, and what its slot holds instead.</summary>

@@ -175,14 +175,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             foreach (var entityRef in _refs)
             {
                 int matched;
-                var found = world.Match(entityRef.Keys, out matched);
+                var found = world.Keys.Match(entityRef.Keys, out matched);
                 if (found != null && found.Id == entity.Id && entityRef.KindId == entity.Kind.Id)
                     return entityRef;
             }
 
             var called = NameRules.Clean(entity.Name);
             var declared = new EntityRef(Free(called.Length > 0 ? called : entity.Kind.DisplayName), entity.Kind.Id);
-            world.Identify(entity, declared.Keys);
+            world.Keys.Identify(entity, declared.Keys);
             return Restore(declared);
         }
 

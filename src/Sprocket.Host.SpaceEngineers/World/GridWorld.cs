@@ -5,7 +5,6 @@ using Sprocket.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
-using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.World
 {
@@ -55,6 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public GridWorld(IMyTerminalBlock anchor, BlockKinds kinds)
         {
             _kinds = kinds;
+            Keys = new BlockKeys(this);
             Follow(anchor);
         }
 
@@ -167,6 +167,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
+        /// <summary>The grid the anchor stands on, or null where it has none.</summary>
+        public IMyCubeGrid Grid => _anchor?.CubeGrid;
+
+        /// <summary>The keys the program finds the construct's blocks again by, written and matched.</summary>
+        public BlockKeys Keys { get; }
+
+        /// <summary>Which sequences nothing on the construct can start, and why.</summary>
+        public UnstartableSequences Unstartable { get; } = new UnstartableSequences();
+
         /// <summary>Whether there is a grid to rename.</summary>
         public bool CanRename => _anchor != null && _anchor.CubeGrid != null;
 
@@ -177,10 +186,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (grid != null)
                 grid.CustomName = name;
         }
-
-        readonly HashSet<long> _unstartable = new HashSet<long>();
-
-        readonly Dictionary<long, UnansweredButton> _why = new Dictionary<long, UnansweredButton>();
 
         /// <summary>
         /// Whether toolbar slot <paramref name="at" /> of <paramref name="panel" /> holds something this program did not write: any
@@ -207,41 +212,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             return true;
         }
 
-        /// <summary>How many times what nothing can start has been told again, so what reads it knows to read it again.</summary>
-        public int Unstarted { get; private set; }
-
-        /// <summary>Which sequences nothing can start on which one of their system, each as <see cref="Start" /> gives it, and why, where that is known.</summary>
-        public void Unstartable(List<long> starts, Dictionary<long, UnansweredButton> why)
-        {
-            Unstarted++;
-            _unstartable.Clear();
-            foreach (var start in starts)
-                _unstartable.Add(start);
-
-            _why.Clear();
-            foreach (var pair in why)
-                _why[pair.Key] = pair.Value;
-        }
-
-        /// <summary>Why nothing can start <paramref name="sequence" /> on <paramref name="instance" />, or null where that is not known.</summary>
-        public UnansweredButton Why(Sequence sequence, SystemInstance instance)
-        {
-            UnansweredButton why;
-            return _why.TryGetValue(Start(sequence.Id, instance), out why) ? why : null;
-        }
-
-        /// <summary>Whether anything on the construct can start <paramref name="sequence" /> on <paramref name="instance" />.</summary>
-        public bool CanStart(Sequence sequence, SystemInstance instance)
-        {
-            return _unstartable.Count == 0 || !_unstartable.Contains(Start(sequence.Id, instance));
-        }
-
-        /// <summary>One sequence on one of its system, as one number.</summary>
-        public static long Start(int sequenceId, SystemInstance instance)
-        {
-            return ((long)sequenceId << 32) | (uint)(instance?.Number ?? 0);
-        }
-
         bool _asked;
 
         /// <summary>Asks for the construct to be looked at again on the next tick.</summary>
@@ -257,180 +227,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             var asked = _asked;
             _asked = false;
             return asked;
-        }
-
-        /// <summary>
-        /// The keys Sprocket writes for a block, in the order it wants them tried: its id, its path, its name.
-        /// </summary>
-        /// <remarks>Pasting or blueprinting a grid in the game gives every block a new id and keeps where each block stands on its grid.</remarks>
-        public void Identify(GridEntity entity, List<EntityKey> keys)
-        {
-            keys.Clear();
-            keys.Add(new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id)));
-
-            Vector3I[] path = Path(entity);
-            if (path != null)
-                keys.Add(new EntityKey(path));
-
-            keys.Add(new EntityKey(ValueKind.Text, Values.Text(entity.Name)));
-        }
-
-        /// <summary>
-        /// Gives the first id among <paramref name="keys" /> the id of <paramref name="entity" />, leaving
-        /// every key where the program put it.
-        /// </summary>
-        /// <remarks>For a block found by its path after its id found nothing.</remarks>
-        public void Renumber(GridEntity entity, List<EntityKey> keys)
-        {
-            for (var i = 0; i < keys.Count; i++)
-            {
-                if (keys[i].Cells != null || keys[i].Kind != ValueKind.Integer)
-                    continue;
-
-                keys[i] = new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id));
-                return;
-            }
-        }
-
-        /// <summary>
-        /// How to reach <paramref name="entity" /> from the anchor's own grid: the cell of each
-        /// mechanical joint crossed, then the block's own cell. Null where no joint leads there.
-        /// </summary>
-        /// <remarks>
-        /// A cell is a block's <c>Position</c>, which a paste or a blueprint keeps. Searches every joint, so it is asked when a
-        /// block is declared and never on a tick.
-        /// </remarks>
-        Vector3I[] Path(GridEntity entity)
-        {
-            IMyCubeGrid home = _anchor?.CubeGrid;
-            IMyCubeGrid target = entity.Block.CubeGrid;
-            if (home == null || target == null)
-                return null;
-
-            // Breadth first, so the path is the shortest.
-            var from = new Dictionary<IMyCubeGrid, IMyCubeGrid>();
-            var through = new Dictionary<IMyCubeGrid, Vector3I>();
-            var waiting = new Queue<IMyCubeGrid>();
-            var blocks = new List<IMySlimBlock>();
-            from[home] = null;
-            waiting.Enqueue(home);
-
-            while (waiting.Count > 0 && !from.ContainsKey(target))
-            {
-                IMyCubeGrid grid = waiting.Dequeue();
-                blocks.Clear();
-                grid.GetBlocks(blocks);
-
-                foreach (var slim in blocks)
-                {
-                    IMyCubeGrid next = Across(slim.FatBlock);
-                    if (next == null || from.ContainsKey(next))
-                        continue;
-
-                    from[next] = grid;
-                    through[next] = slim.FatBlock.Position;
-                    waiting.Enqueue(next);
-                }
-            }
-
-            if (!from.ContainsKey(target))
-                return null;
-
-            var cells = new List<Vector3I> { entity.Block.Position };
-            for (IMyCubeGrid grid = target; from[grid] != null; grid = from[grid])
-                cells.Insert(0, through[grid]);
-
-            return cells.ToArray();
-        }
-
-        /// <summary>
-        /// The block a path of cells leads to from the anchor's own grid, or null where any step of it
-        /// finds no joint or no block.
-        /// </summary>
-        GridEntity Walk(Vector3I[] cells)
-        {
-            IMyCubeGrid grid = _anchor?.CubeGrid;
-            for (var i = 0; grid != null && i < cells.Length - 1; i++)
-            {
-                IMySlimBlock joint = grid.GetCubeBlock(cells[i]);
-                grid = joint == null ? null : Across(joint.FatBlock);
-            }
-
-            IMySlimBlock found = grid?.GetCubeBlock(cells[cells.Length - 1]);
-            var block = found?.FatBlock as IMyTerminalBlock;
-            return block == null ? null : FindEntity(block.EntityId);
-        }
-
-        /// <summary>
-        /// The grid on the other side of <paramref name="block" />, where it is one end of a mechanical
-        /// joint with something attached; otherwise null.
-        /// </summary>
-        static IMyCubeGrid Across(IMyCubeBlock block)
-        {
-            var bottom = block as IMyMechanicalConnectionBlock;
-            if (bottom != null)
-                return bottom.TopGrid;
-
-            var top = block as IMyAttachableTopBlock;
-            return top == null || top.Base == null ? null : top.Base.CubeGrid;
-        }
-
-        /// <summary>
-        /// How many times a reference has been matched against the blocks here.
-        /// </summary>
-        /// <remarks>
-        /// For measuring: matching walks every key against every block, and must not run per reference per tick. A test
-        /// counts it over six hundred idle ticks.
-        /// </remarks>
-        public int Matched { get; private set; }
-
-        /// <summary>The block the first of <paramref name="keys" /> that finds one finds, with which key it was in <paramref name="matched" />, or null where none does.</summary>
-        public GridEntity Match(IList<EntityKey> keys, out int matched)
-        {
-            Matched++;
-
-            for (var i = 0; i < keys.Count; i++)
-            {
-                var found = Matching(keys[i]);
-                if (found == null)
-                    continue;
-
-                matched = i;
-                return found;
-            }
-
-            matched = -1;
-            return null;
-        }
-
-        GridEntity Matching(EntityKey key)
-        {
-            if (key.Cells != null)
-                return key.Cells.Length == 0 ? null : Walk(key.Cells);
-
-            if (key.Kind == ValueKind.Integer)
-            {
-                long id;
-                Values.TryInteger(key.Kind, key.Value, out id);
-                return FindEntity(id);
-            }
-
-            if (key.Kind != ValueKind.Text)
-                return null;
-
-            string name;
-            Values.TryText(key.Kind, key.Value, out name);
-            if (name.Length == 0)
-                return null;
-
-            // The first of several: two blocks may share a name.
-            foreach (var entity in _entities)
-            {
-                if (entity.Name == name)
-                    return entity;
-            }
-
-            return null;
         }
 
         /// <summary>The block <paramref name="entityId" />, or null where it is not on the construct.</summary>

@@ -184,12 +184,12 @@ public class RefTests
         var bindings = new Bindings();
         bindings.Refresh(_ship.World, program);
 
-        var settled = _ship.World.Matched;
+        var settled = _ship.World.Keys.Matched;
 
         for (var tick = 0; tick < 600; tick++)
             bindings.Refresh(_ship.World, program);
 
-        Assert.Equal(settled, _ship.World.Matched);
+        Assert.Equal(settled, _ship.World.Keys.Matched);
     }
 
     /// <summary>Welding something on is what makes it look again, once.</summary>
@@ -201,15 +201,15 @@ public class RefTests
 
         var bindings = new Bindings();
         bindings.Refresh(_ship.World, program);
-        var settled = _ship.World.Matched;
+        var settled = _ship.World.Keys.Matched;
 
         Add(2, "Outer Door");
 
         bindings.Refresh(_ship.World, program);
-        Assert.Equal(settled + 1, _ship.World.Matched);
+        Assert.Equal(settled + 1, _ship.World.Keys.Matched);
 
         bindings.Refresh(_ship.World, program);
-        Assert.Equal(settled + 1, _ship.World.Matched);
+        Assert.Equal(settled + 1, _ship.World.Keys.Matched);
     }
 
     /// <summary>A block no name reaches, welded on, leaves what the names point at as it was, so nothing worked out against them is worked out again.</summary>
@@ -276,7 +276,7 @@ public class RefTests
     EntityRef Declare(string name, GridEntity entity)
     {
         var declared = new EntityRef(name, entity.Kind.Id);
-        _ship.World.Identify(entity, declared.Keys);
+        _ship.World.Keys.Identify(entity, declared.Keys);
         return declared;
     }
 

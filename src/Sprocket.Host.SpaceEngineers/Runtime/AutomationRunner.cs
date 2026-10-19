@@ -290,7 +290,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _checkedEdits = -1;
             }
 
-            if (_automation.Edits != _checkedEdits || _automation.Wiring != _checkedWiring || _world.Unstarted != _checkedUnstarted
+            if (_automation.Edits != _checkedEdits || _automation.Wiring != _checkedWiring || _world.Unstartable.Told != _checkedUnstarted
                 || _automation.Starts != _checkedStarts)
             {
                 Check();
@@ -322,7 +322,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var afresh = _checkedStarts >= 0 && _automation.Starts != _checkedStarts;
             _checkedEdits = _automation.Edits;
             _checkedWiring = _automation.Wiring;
-            _checkedUnstarted = _world.Unstarted;
+            _checkedUnstarted = _world.Unstartable.Told;
             _checkedStarts = _automation.Starts;
 
             Match();

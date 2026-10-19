@@ -179,17 +179,17 @@ sealed class Rigged
         if (!_unstartable.Contains(start))
             _unstartable.Add(start);
 
-        World.Unstartable(_unstartable, _unarranged);
+        World.Unstartable.Tell(_unstartable, _unarranged);
     }
 
     public void CanStart(Sequence sequence)
     {
         _unstartable.Remove(Start(sequence));
-        World.Unstartable(_unstartable, _unarranged);
+        World.Unstartable.Tell(_unstartable, _unarranged);
     }
 
     /// <summary>The sequence on the one of its system the editor shows first.</summary>
-    static long Start(Sequence sequence) => GridWorld.Start(sequence.Id, sequence.System?.First);
+    static long Start(Sequence sequence) => UnstartableSequences.Key(sequence.Id, sequence.System?.First);
 
     readonly List<long> _unstartable = new List<long>();
 
