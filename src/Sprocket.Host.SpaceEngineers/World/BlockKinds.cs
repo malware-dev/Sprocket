@@ -22,14 +22,29 @@ namespace Sprocket.Host.SpaceEngineers.World
         const string GamePrefix = "MyObjectBuilder_";
 
         readonly Dictionary<string, EntityKind> _kinds = new Dictionary<string, EntityKind>();
-        readonly ParameterCatalog _catalogue;
-        readonly Capabilities _capabilities;
+        readonly ParameterCatalog _catalogue = Catalogue();
+        readonly Capabilities _capabilities = new Capabilities();
 
-        /// <summary>The kinds of block, described from <paramref name="capabilities" /> and what <paramref name="catalogue" /> says of each block's actions.</summary>
-        public BlockKinds(ParameterCatalog catalogue, Capabilities capabilities)
+        /// <summary>
+        /// The kinds of block in a world, described from Sprocket's capabilities and what Sprocket and every mod loaded say
+        /// of each block's actions.
+        /// </summary>
+        /// <remarks>
+        /// One for the world, which every construct in it shares: each mod's folder is read once, and each type of block
+        /// described once, however many constructs there are.
+        /// </remarks>
+        public BlockKinds()
         {
-            _catalogue = catalogue;
-            _capabilities = capabilities;
+        }
+
+        /// <summary>What Sprocket and then every mod loaded say of the actions blocks have.</summary>
+        static ParameterCatalog Catalogue()
+        {
+            // Sprocket's own descriptions go in first, so a mod may override them.
+            var catalogue = new ParameterCatalog();
+            catalogue.Add(KnownActions.Descriptions(), "");
+            ModActions.Read(catalogue);
+            return catalogue;
         }
 
         /// <summary>The kind of <paramref name="block" />, described the first time a block of that type is asked about and kept.</summary>

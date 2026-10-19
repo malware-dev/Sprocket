@@ -72,6 +72,7 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 --dump                                     the current frame as readable text
 --content                                  what the game's own assets say
 --profile                                  save and load cost per program size
+--runtime                                  the runtime's cost per tick, per block change and per save
 --blueprint <scenario> [folder]            a game test scenario as a blueprint (test-scenarios skill)
 --checks <scenario> [first]                its game-only checks, as Testing rows
 ```

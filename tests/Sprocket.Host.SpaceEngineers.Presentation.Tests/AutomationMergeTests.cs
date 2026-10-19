@@ -151,7 +151,7 @@ public class AutomationMergeTests
         string written;
         sim.Unit.Written(out written, out _);
         BlockStorage.Store(spare.Block, written, "");
-        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
+        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Kinds, sim.Texts, new ConstructMemory());
         half.TakeOver(sim.Unit.Block.EntityId);
         half.Begin(sim.Now);
         half.Tick(sim.Now + 1);
@@ -242,7 +242,7 @@ public class AutomationMergeTests
         string written;
         sim.Unit.Written(out written, out _);
         BlockStorage.Store(spare.Block, written, "");
-        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
+        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Kinds, sim.Texts, new ConstructMemory());
 
         var onHead = Read(sim, AutomationMerge.Part(half, sim.World, out _));
         var onBase = Read(sim, AutomationMerge.Part(sim.Unit, half.World, out _));
@@ -271,7 +271,7 @@ public class AutomationMergeTests
         string written;
         sim.Unit.Written(out written, out _);
         BlockStorage.Store(spare.Block, written, "");
-        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
+        var half = new SprocketUnit(spare.Block, new Settings(developerMode: false), new Rota(), sim.Kinds, sim.Texts, new ConstructMemory());
 
         Assert.Empty(Read(sim, AutomationMerge.Part(half, sim.World, out _)).Systems);
         Assert.Single(Read(sim, AutomationMerge.Part(sim.Unit, half.World, out _)).Systems);
@@ -299,7 +299,7 @@ public class AutomationMergeTests
         string program;
         sim.Unit.Written(out program, out _);
         BlockStorage.Store(block.Block, program, StateText.Save(sim.Unit.Program, null, false));
-        return new SprocketUnit(block.Block, new Settings(developerMode: false), new Rota(), sim.Texts, new ConstructMemory());
+        return new SprocketUnit(block.Block, new Settings(developerMode: false), new Rota(), sim.Kinds, sim.Texts, new ConstructMemory());
     }
 
     /// <summary>

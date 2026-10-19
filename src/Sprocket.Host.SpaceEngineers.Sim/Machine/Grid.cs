@@ -25,6 +25,9 @@ public sealed class Grid
     /// <summary>The tops of mechanical joints standing on this grid, which are blocks but not terminal ones.</summary>
     readonly List<IMySlimBlock> _tops = new List<IMySlimBlock>();
 
+    /// <summary>The blocks laid on this grid that have no terminal, as armor has none.</summary>
+    readonly List<IMySlimBlock> _armor = new List<IMySlimBlock>();
+
     /// <summary>The next cell handed to a block welded without one, along one row.</summary>
     int _next;
 
@@ -174,6 +177,35 @@ public sealed class Grid
             .Done());
     }
 
+    /// <summary>Lays a block with no terminal on this grid, as armor is, and hands back what the game would hand the mod for it.</summary>
+    /// <remarks>The game reports it added as it reports every block, and gives it no fat block.</remarks>
+    public IMySlimBlock Armor()
+    {
+        IMyCubeGrid grid = Block;
+        var armor = Pretend.To<IMySlimBlock>()
+            .Gives("FatBlock", () => null)
+            .Gives("CubeGrid", () => grid)
+            .Done();
+
+        _armor.Add(armor);
+        if (_added != null)
+            _added(armor);
+
+        return armor;
+    }
+
+    /// <summary>Grinds <paramref name="armor" /> off this grid, which the game reports removed.</summary>
+    public bool Strip(IMySlimBlock armor)
+    {
+        if (!_armor.Remove(armor))
+            return false;
+
+        if (_removed != null)
+            _removed(armor);
+
+        return true;
+    }
+
     object Blocks(object[] arguments)
     {
         var into = (List<IMySlimBlock>)arguments[0];
@@ -181,6 +213,9 @@ public sealed class Grid
             into.Add(_slim[fitting]);
 
         foreach (var block in _tops)
+            into.Add(block);
+
+        foreach (var block in _armor)
             into.Add(block);
 
         return null;

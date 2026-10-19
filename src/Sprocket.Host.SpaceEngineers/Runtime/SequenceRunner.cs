@@ -39,24 +39,26 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _memory = memory;
             _workings = new CompiledRun(sequence, instance, owner, memory);
 
-            var kept = memory.Busy != null && memory.Sampling != null;
+            var kept = memory.Busy != null;
             if (!kept)
             {
-                var place = _rota.Join();
-                memory.Sampling = new ShiftMemory { Place = place };
-                memory.Busy = new ShiftMemory { Place = place };
+                memory.Busy = new ShiftMemory { Place = _rota.Join() };
                 memory.ConflictsAt = -Conflicts;
             }
 
-            _sampling = new Shift(memory.Sampling, Sample);
             _busy = new Shift(memory.Busy, Continued);
             _faults = new RunFaults(sequence, instance, owner, memory, kept);
 
             if (!kept)
                 return;
 
-            _rota.Restore(_sampling);
             _rota.Restore(_busy);
+            if (!IsRunning || _busy.Listed)
+                return;
+
+            // Nothing in a session leaves a run going with nothing to move it; only what was written down can.
+            GameLog.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
+            _rota.At(_busy, int.MinValue);
         }
 
         /// <summary>What it remembers, which the world's save writes.</summary>
@@ -144,8 +146,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly AutomationRunner _owner;
         readonly Rota _rota;
 
-        readonly Shift _sampling;
-
         readonly Shift _busy;
 
 
@@ -212,7 +212,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (_memory.WaitUntil < 0)
                     return _memory.WaitTicks;
 
-                var left = _memory.WaitUntil - _memory.Looked;
+                // From the runner's clock, since nothing looks at a run between the start of a wait and its end.
+                var left = _memory.WaitUntil - _owner.CurrentTick;
                 return left > 0 ? left : 0;
             }
         }
@@ -258,32 +259,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             private set { _memory.Refused = value; }
         }
 
-        /// <summary>
-        /// Keeps an eye on a run: done every ten ticks while one is under way.
-        /// </summary>
+        /// <summary>Stops the run where what it runs on has just been switched off, unless it was started by hand.</summary>
         /// <remarks>
-        /// Nothing moves on while the machine Sprocket runs on is unpowered or switched off, and what was running is kept
-        /// rather than stopped.
+        /// Told on the tick a switch is flipped, and on no other. Nothing moves on while the machine Sprocket runs on is
+        /// unpowered or switched off, and what was running is kept rather than stopped; the run's own next look stops it
+        /// once the machine is back.
         /// </remarks>
-        void Sample(int tick)
+        public void Switched()
         {
-            Enter(tick);
-
-            if (_owner.Live)
-            {
-                // A switched-off sequence stops its run, unless the run was started by hand.
-                if (!CanRun && !_memory.ByHand)
-                {
-                    if (IsRunning)
-                        Interrupt(StopCause.Switch, 0);
-                }
-                else if (IsRunning)
-                {
-                    Rescue(tick);
-                }
-            }
-
-            Pace();
+            if (IsRunning && _owner.Live && !CanRun && !_memory.ByHand)
+                Interrupt(StopCause.Switch, 0);
         }
 
         /// <summary>Takes the run a step further: done when what it is waiting on is due.</summary>
@@ -344,35 +329,11 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _rota.At(_busy, _memory.Looked + 1);
         }
 
-        /// <summary>
-        /// A run that is going on with nothing on the rota to move it, put back on.
-        /// </summary>
-        /// <remarks>Said in the log when it happens.</remarks>
-        void Rescue(int tick)
-        {
-            if (_busy.Listed)
-                return;
-
-            GameLog.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
-            _rota.At(_busy, tick);
-        }
-
-        /// <summary>Watches a run every ten ticks while there is one, and leaves the rota while there is not.</summary>
-        void Pace()
-        {
-            if (IsRunning)
-                _rota.Every(_sampling, Rota.Ten);
-            else
-                _rota.Leave(_sampling);
-        }
-
         /// <summary>Takes this sequence off the rota for good, when it or its Sprocket no longer exists, leaving what it remembers as it was.</summary>
         /// <remarks>What it remembers may be another runner's now, as where a client's edit builds the Sprocket again, so letting go of the rota must not change it.</remarks>
         public void Retire()
         {
-            _sampling.Forget();
             _busy.Forget();
-            _rota.Leave(_sampling);
             _rota.Leave(_busy);
         }
 
@@ -494,7 +455,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // Looked at on the first tick the rota runs: the world has only just loaded, and what the
             // run is waiting for is answered by the blocks as they are then.
             _rota.At(_busy, int.MinValue);
-            Pace();
         }
 
         /// <summary>
@@ -538,7 +498,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             Release();
             _memory.Started.Clear();
             _rota.Leave(_busy);
-            _rota.Leave(_sampling);
         }
 
         /// <summary>Tells every block still being waited on to call off what was started on it.</summary>
@@ -618,7 +577,6 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             EnterStep();
             Advance();
             Schedule();
-            Pace();
         }
 
         void EnterStep()

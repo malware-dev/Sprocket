@@ -108,10 +108,6 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         [ProtoMember(26, IsRequired = true)]
         public int ConflictsAt { get; set; }
 
-        /// <summary>Where it is looked at every ten ticks while it runs, on the rota.</summary>
-        [ProtoMember(27)]
-        public ShiftMemory Sampling { get; set; }
-
         /// <summary>Where its next step is looked at, on the rota.</summary>
         [ProtoMember(28)]
         public ShiftMemory Busy { get; set; }

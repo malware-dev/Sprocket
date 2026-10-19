@@ -35,6 +35,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         readonly bool _copy;
 
+        readonly BlockKinds _kinds;
+
         readonly GridWorld _world;
         readonly Automation _program = new Automation();
         readonly AutomationRunner _runner;
@@ -52,22 +54,25 @@ namespace Sprocket.Host.SpaceEngineers.World
         SprocketEditor _editor;
 
         /// <summary>The Sprocket a block carries, reading its program out of the block and what it is doing out of <paramref name="memory" />.</summary>
-        /// <remarks><paramref name="rota" /> is the world's, shared by every Sprocket in it.</remarks>
-        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, ConstructMemory memory, Backups backups = null)
-            : this(block, settings, rota, texts, false, BlockStorage.Stored(block, BlockStorage.ProgramKey), BlockStorage.Stored(block, BlockStorage.StateKey), memory)
+        /// <remarks><paramref name="rota" /> and <paramref name="kinds" /> are the world's, shared by every Sprocket in it.</remarks>
+        public SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, ConstructMemory memory,
+            Backups backups = null)
+            : this(block, settings, rota, kinds, texts, false, BlockStorage.Stored(block, BlockStorage.ProgramKey),
+                BlockStorage.Stored(block, BlockStorage.StateKey), memory)
         {
             _backups = backups;
         }
 
         /// <summary>
         /// A copy of the Sprocket another machine keeps on <paramref name="block" />, made from what that
-        /// machine wrote out, to be edited here.
+        /// machine wrote out, to be edited here, its blocks of the world's <paramref name="kinds" />.
         /// </summary>
         /// <remarks>On a rota of its own that nothing turns, so none of its sequences acts.</remarks>
-        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, Texts texts, string program,
+        public static SprocketUnit Copy(IMyTerminalBlock block, Settings settings, BlockKinds kinds, Texts texts, string program,
             string state)
         {
-            return new SprocketUnit(block, settings, new Rota(), texts, true, program, state, new ConstructMemory { Keeper = block.EntityId });
+            return new SprocketUnit(block, settings, new Rota(), kinds, texts, true, program, state,
+                new ConstructMemory { Keeper = block.EntityId });
         }
 
         /// <summary>
@@ -77,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>Called on the server for a client's edit. The caller puts the new one in this one's place and disposes of this.</remarks>
         public SprocketUnit Rebuilt(string program, string switches, Settings settings, Rota rota)
         {
-            var rebuilt = new SprocketUnit(_block, settings, rota, _texts, false, program, switches, _memory);
+            var rebuilt = new SprocketUnit(_block, settings, rota, _kinds, _texts, false, program, switches, _memory);
             rebuilt._backups = _backups;
             rebuilt._shelf = _shelf;
             rebuilt._preferences = _preferences;
@@ -91,14 +96,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             return rebuilt;
         }
 
-        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, Texts texts, bool copy, string program,
+        SprocketUnit(IMyTerminalBlock block, Settings settings, Rota rota, BlockKinds kinds, Texts texts, bool copy, string program,
             string state, ConstructMemory memory)
         {
             _block = block;
             _memory = memory;
             _program.Memory = memory;
             _copy = copy;
-            _world = new GridWorld(block);
+            _kinds = kinds;
+            _world = new GridWorld(block, kinds);
             _runner = new AutomationRunner(_program, _world, rota);
             _runner.FastestUpdate = settings?.FastestUpdate ?? 1;
             _keys = new SlotKeys(_program, _runner);

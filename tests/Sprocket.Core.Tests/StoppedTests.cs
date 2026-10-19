@@ -124,6 +124,43 @@ public class StoppedTests
         Assert.Equal(SequenceStatus.Stopped, a.Status);
     }
 
+    /// <summary>A run is stopped on the tick its logic system is switched off, however long it was to wait before it was next looked at.</summary>
+    [Fact]
+    public void ASwitchOffStopsTheRunAtOnce()
+    {
+        var a = new Airlock();
+        a.Cycle.Steps.Insert(0, new Wait(6000));
+        a.Runner.Call(a.Cycle, a.Cycle.System.First);
+        a.Tick(5);
+        Assert.True(a.State.IsWaiting);
+
+        a.Cycle.System.Enabled = false;
+        a.Tick();
+
+        Assert.False(a.State.IsRunning);
+        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
+    }
+
+    /// <summary>A run switched off while the machine has no power is kept until the power is back, and stopped then.</summary>
+    [Fact]
+    public void ASwitchOffWithoutPowerWaitsForThePower()
+    {
+        var a = new Airlock();
+        a.Runner.Call(a.Cycle, a.Cycle.System.First);
+        a.Tick(5);
+        a.Runner.Live = false;
+
+        a.Cycle.System.Enabled = false;
+        a.Tick(50);
+        Assert.True(a.State.IsRunning);
+
+        a.Runner.Live = true;
+        a.Tick(20);
+
+        Assert.False(a.State.IsRunning);
+        Assert.Equal(StopCause.Switch, a.State.StoppedBy);
+    }
+
     /// <summary>An installation switched off part way through is said the same way.</summary>
     [Fact]
     public void AnInstallationSwitchedOffPartWayIsSaid()

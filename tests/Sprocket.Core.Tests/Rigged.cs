@@ -23,7 +23,7 @@ sealed class Rigged
         // while a test runs. That is why these tests do not run in parallel - see Serially.cs.
         Rig.Install();
 
-        World = new GridWorld(Rig.Sprocket.Block);
+        World = new GridWorld(Rig.Sprocket.Block, new BlockKinds());
     }
 
     public Rig Rig { get; private set; }

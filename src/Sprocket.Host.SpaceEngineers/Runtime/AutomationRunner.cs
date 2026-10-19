@@ -408,7 +408,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
         /// <summary>
         /// Keeps one poller for each <c>when</c> and <c>every</c> of each system on each of its instances that may run, and one
-        /// runner for each trigger that acts itself, and retires the rest.
+        /// runner for each trigger that acts itself, and retires the rest; and stops each run of what is switched off.
         /// </summary>
         /// <remarks>Done with the check, when the program or its wiring has changed, and alone when a switch is flipped.</remarks>
         void Match()
@@ -446,6 +446,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             _watches.Sweep();
             _runs.Sweep();
+
+            // A run of what was just switched off stops on the tick of the switch.
+            _runs.Switched();
         }
 
         /// <summary>Switches off what <paramref name="sequence" /> runs on, with why, where it is switched on.</summary>

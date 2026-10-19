@@ -57,6 +57,13 @@ namespace Sprocket.Sim
                 return;
             }
 
+            // What the runtime costs a world per tick, apart from the rest of the profile because it takes minutes.
+            if (args.Length > 0 && args[0] == "--runtime")
+            {
+                Console.Write(RuntimeReport.Render());
+                return;
+            }
+
             if (args.Length > 0 && args[0] == "--content")
             {
                 Console.Write(ContentReport.Render());

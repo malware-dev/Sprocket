@@ -192,9 +192,29 @@ public class RefTests
         Assert.Equal(settled, _ship.World.Matched);
     }
 
-    /// <summary>Welding something on is what makes it look again.</summary>
+    /// <summary>Welding something on is what makes it look again, once.</summary>
     [Fact]
     public void ABlockArrivingMakesItResolveOnce()
+    {
+        var program = new Automation();
+        program.Declare(_ship.World, Add(1, "Inner Door"));
+
+        var bindings = new Bindings();
+        bindings.Refresh(_ship.World, program);
+        var settled = _ship.World.Matched;
+
+        Add(2, "Outer Door");
+
+        bindings.Refresh(_ship.World, program);
+        Assert.Equal(settled + 1, _ship.World.Matched);
+
+        bindings.Refresh(_ship.World, program);
+        Assert.Equal(settled + 1, _ship.World.Matched);
+    }
+
+    /// <summary>A block no name reaches, welded on, leaves what the names point at as it was, so nothing worked out against them is worked out again.</summary>
+    [Fact]
+    public void ABlockNoNameReachesLeavesTheRevision()
     {
         var program = new Automation();
         program.Declare(_ship.World, Add(1, "Inner Door"));
@@ -205,12 +225,28 @@ public class RefTests
 
         Add(2, "Outer Door");
 
-        bindings.Refresh(_ship.World, program);
-        Assert.NotEqual(settled, bindings.Revision);
+        Assert.False(bindings.Refresh(_ship.World, program));
+        Assert.Equal(settled, bindings.Revision);
+    }
 
-        var after = bindings.Revision;
+    /// <summary>A block a lost name finds again, welded on, moves the revision.</summary>
+    [Fact]
+    public void ABlockALostNameFindsMovesTheRevision()
+    {
+        var program = new Automation();
+        var name = program.Declare(_ship.World, Add(1, "Inner Door")).Name;
+        _ship.Grind(1);
+
+        var bindings = new Bindings();
         bindings.Refresh(_ship.World, program);
-        Assert.Equal(after, bindings.Revision);
+        Assert.Null(bindings.Entity(name));
+        var settled = bindings.Revision;
+
+        Add(3, "Inner Door");
+
+        Assert.True(bindings.Refresh(_ship.World, program));
+        Assert.NotEqual(settled, bindings.Revision);
+        Assert.NotNull(bindings.Entity(name));
     }
 
     /// <summary>And so is declaring something, which is the other half of the chain.</summary>

@@ -242,6 +242,22 @@ public sealed class Rig
             _grids[i].Grind(fitting);
     }
 
+    /// <summary>Lays a block of armor, which has no terminal, where the next block would be welded.</summary>
+    public IMySlimBlock Armor()
+    {
+        return _welding.Armor();
+    }
+
+    /// <summary>Grinds <paramref name="armor" /> off whichever grid it was laid on.</summary>
+    public void Strip(IMySlimBlock armor)
+    {
+        foreach (var grid in _grids)
+        {
+            if (grid.Strip(armor))
+                return;
+        }
+    }
+
     /// <summary>Deletes the grid <paramref name="grid" /> whole, which leaves the construct without it.</summary>
     public void Delete(IMyCubeGrid grid)
     {

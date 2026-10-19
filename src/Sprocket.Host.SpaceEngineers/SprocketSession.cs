@@ -51,6 +51,9 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly Rota _rota = new Rota();
 
+        // The kinds of block every construct in the world shares.
+        BlockKinds _kinds;
+
         Roster _roster;
 
         SprocketScreen _screen;
@@ -231,8 +234,11 @@ namespace Sprocket.Host.SpaceEngineers
             // block components reach it only through this static.
             _current = this;
 
+            // Made here rather than with the session, since the mods they are read from are known only once the world loads.
+            _kinds = new BlockKinds();
+
             // Made before Speak, which rewords every Sprocket.
-            _roster = new Roster(() => Asked, _rota, _texts, _memories, _backups, Frame, Later)
+            _roster = new Roster(() => Asked, _rota, _kinds, _texts, _memories, _backups, Frame, Later)
             {
                 Shelf = _shelf,
                 Spreading = Spread,
@@ -327,7 +333,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             // A copy's undo history holds only while nobody else has changed the program since it was handed back.
             var again = _rested != null && _restedOf == id && _restedProgram == program;
-            var copy = again ? _rested : SprocketUnit.Copy(block, Asked, _texts, program, state);
+            var copy = again ? _rested : SprocketUnit.Copy(block, Asked, _kinds, _texts, program, state);
             if (!again && _rested != null)
                 _rested.Dispose();
 
@@ -516,7 +522,7 @@ namespace Sprocket.Host.SpaceEngineers
                 _copy.Dispose();
 
             long id = block.EntityId;
-            var copy = SprocketUnit.Copy(block, Asked, _texts, program, state);
+            var copy = SprocketUnit.Copy(block, Asked, _kinds, _texts, program, state);
             copy.Editor.Habits = HabitsFor(id);
             copy.Editor.Holder = holder;
             _copy = copy;

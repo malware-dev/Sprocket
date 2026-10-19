@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sandbox.ModAPI;
-using Sprocket.Host.SpaceEngineers.Blocks;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
 using VRageMath;
@@ -16,44 +15,46 @@ namespace Sprocket.Host.SpaceEngineers.World
     public sealed class GridWorld : IDisposable
     {
         IMyTerminalBlock _anchor;
-        readonly ParameterCatalog _catalogue = Catalogue();
 
         readonly BlockKinds _kinds;
 
-        readonly Capabilities _capabilities = new Capabilities();
-
-        static ParameterCatalog Catalogue()
-        {
-            // Sprocket's own descriptions go in first, so a mod may override them.
-            var catalogue = new ParameterCatalog();
-            catalogue.Add(KnownActions.Descriptions(), "");
-            ModActions.Read(catalogue);
-            return catalogue;
-        }
-
         readonly List<GridEntity> _entities = new List<GridEntity>();
-        readonly Dictionary<long, GridEntity> _byId = new Dictionary<long, GridEntity>();
+        Dictionary<long, GridEntity> _byId = new Dictionary<long, GridEntity>();
+
+        // The entities of the read before, while a rebuild keeps those whose blocks are still there.
+        Dictionary<long, GridEntity> _keptById = new Dictionary<long, GridEntity>();
+
+        // The blocks welded on and taken off since the last read, in the order the grid said so.
+        readonly List<Change> _changes = new List<Change>();
 
         readonly List<IMyCubeGrid> _grids = new List<IMyCubeGrid>();
         readonly List<IMyCubeGrid> _watched = new List<IMyCubeGrid>();
         IMyGridGroupData _group;
         readonly List<IMySlimBlock> _slim = new List<IMySlimBlock>();
-        readonly List<IMyTerminalBlock> _found = new List<IMyTerminalBlock>();
-        readonly List<IMyTerminalBlock> _named = new List<IMyTerminalBlock>();
+        // Every terminal block on the construct, shared with the big owners or not, each with its id, read once.
+        readonly List<Found> _found = new List<Found>();
+        readonly Dictionary<long, IMyTerminalBlock> _named = new Dictionary<long, IMyTerminalBlock>();
+        readonly List<long> _unheard = new List<long>();
         readonly HashSet<long> _seen = new HashSet<long>();
         readonly Dictionary<long, int> _counted = new Dictionary<long, int>();
+        readonly Dictionary<long, long> _ownerOf = new Dictionary<long, long>();
         readonly List<long> _bigOwners = new List<long>();
+        readonly List<long> _owners = new List<long>();
+        readonly HashSet<long> _unsharedIds = new HashSet<long>();
         readonly List<string> _unshared = new List<string>();
         readonly List<string> _wasUnshared = new List<string>();
         readonly List<string> _returned = new List<string>();
 
         bool _stale = true;
+
+        // Whether who owns or may use the blocks may have changed since the last read, which the next one looks at again.
+        bool _reshared;
         int _revision;
 
-        /// <summary>The construct <paramref name="anchor" /> is on, read when it is first asked about.</summary>
-        public GridWorld(IMyTerminalBlock anchor)
+        /// <summary>The construct <paramref name="anchor" /> is on, its blocks of the world's <paramref name="kinds" />, read when it is first asked about.</summary>
+        public GridWorld(IMyTerminalBlock anchor, BlockKinds kinds)
         {
-            _kinds = new BlockKinds(_catalogue, _capabilities);
+            _kinds = kinds;
             Follow(anchor);
         }
 
@@ -88,8 +89,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                if (_stale)
-                    Rebuild();
+                Current();
 
                 return _revision;
             }
@@ -107,8 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                if (_stale)
-                    Rebuild();
+                Current();
 
                 return _entities;
             }
@@ -120,8 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                if (_stale)
-                    Rebuild();
+                Current();
 
                 return _bigOwners;
             }
@@ -132,8 +130,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                if (_stale)
-                    Rebuild();
+                Current();
 
                 return _unshared;
             }
@@ -144,8 +141,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             get
             {
-                if (_stale)
-                    Rebuild();
+                Current();
 
                 return _returned;
             }
@@ -154,7 +150,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Has the construct read again, as what is shared with whom may have changed: a faction joined, left or at peace.</summary>
         public void Reshare()
         {
-            _stale = true;
+            _reshared = true;
             if (HandsChanged != null)
                 HandsChanged();
         }
@@ -440,8 +436,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The block <paramref name="entityId" />, or null where it is not on the construct.</summary>
         public GridEntity FindEntity(long entityId)
         {
-            if (_stale)
-                Rebuild();
+            Current();
 
             GridEntity entity;
             return _byId.TryGetValue(entityId, out entity) ? entity : null;
@@ -466,18 +461,52 @@ namespace Sprocket.Host.SpaceEngineers.World
                 entity.Invoke(actionId, arguments, form);
         }
 
+        /// <summary>Brings the block list up to date: read again whole where the construct itself changed, or by the blocks welded on and taken off since.</summary>
+        /// <remarks>One flag and one count read when nothing changed.</remarks>
+        void Current()
+        {
+            if (_stale)
+            {
+                Rebuild();
+                return;
+            }
+
+            if (_changes.Count > 0)
+                Apply();
+
+            // Where Apply read the construct again whole, that has answered this too.
+            if (_reshared)
+                Reown();
+        }
+
         /// <summary>
         /// Rebuilds the block list from the mechanically connected grids.
         /// </summary>
+        /// <remarks>
+        /// A block still there keeps the entity it had, so what was worked out against it stands. Asked when a grid joins or
+        /// leaves the construct, and when what is shared with whom may have changed; a block welded on or taken off is
+        /// <see cref="Apply" />'s.
+        /// </remarks>
         void Rebuild()
         {
             _stale = false;
+            _reshared = false;
+            _changes.Clear();
             _revision++;
-            _entities.Clear();
+
+            // Swapped rather than copied, so the entities of the last read are there to be kept.
+            var kept = _keptById;
+            _keptById = _byId;
+            _byId = kept;
             _byId.Clear();
+            _entities.Clear();
+
             IMyCubeGrid home = Home();
             if (home == null || MyAPIGateway.GridGroups == null)
+            {
+                _keptById.Clear();
                 return;
+            }
 
             _grids.Clear();
             MyAPIGateway.GridGroups.GetGroup(home, GridLinkTypeEnum.Mechanical, _grids);
@@ -488,6 +517,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _found.Clear();
             _seen.Clear();
             _counted.Clear();
+            _ownerOf.Clear();
             foreach (var grid in _grids)
             {
                 _slim.Clear();
@@ -496,17 +526,15 @@ namespace Sprocket.Host.SpaceEngineers.World
                 foreach (var slim in _slim)
                 {
                     IMyTerminalBlock block = slim.FatBlock as IMyTerminalBlock;
-                    if (block == null || !_seen.Add(block.EntityId))
+                    if (block == null)
                         continue;
 
-                    _found.Add(block);
-                    var owner = block.OwnerId;
-                    if (owner == 0)
+                    var id = block.EntityId;
+                    if (!_seen.Add(id))
                         continue;
 
-                    int count;
-                    _counted.TryGetValue(owner, out count);
-                    _counted[owner] = count + 1;
+                    _found.Add(new Found { Id = id, Block = block });
+                    Count(id, block);
                 }
             }
 
@@ -515,44 +543,259 @@ namespace Sprocket.Host.SpaceEngineers.World
             _wasUnshared.Clear();
             _wasUnshared.AddRange(_unshared);
             _unshared.Clear();
+            _unsharedIds.Clear();
             _returned.Clear();
 
             // A block none of the big owners may use is no part of their automation, and reads as gone; the next read after
             // its sharing changes finds it again.
-            foreach (var block in _found)
+            foreach (var found in _found)
+                Admit(found.Id, found.Block);
+
+            _keptById.Clear();
+            Hear();
+        }
+
+        /// <summary>
+        /// Takes in the blocks welded on and taken off since the last read, one by one, where the construct's big owners stay
+        /// who they were; reads the construct again whole where they do not, since who may use every block may have changed.
+        /// </summary>
+        /// <remarks>Asked on the read after a block is welded on or taken off, and costs what those blocks do, whatever the construct's size.</remarks>
+        void Apply()
+        {
+            _owners.Clear();
+            _owners.AddRange(_bigOwners);
+
+            for (var i = 0; i < _changes.Count; i++)
             {
-                if (_byId.ContainsKey(block.EntityId))
+                var block = _changes[i].Block;
+                var id = block.EntityId;
+                if (_changes[i].Added)
+                {
+                    if (Closing(block) || !_seen.Add(id))
+                        continue;
+
+                    _found.Add(new Found { Id = id, Block = block });
+                    Count(id, block);
+                    Hear(id, block);
+                }
+                else if (_seen.Remove(id))
+                {
+                    _found.RemoveAt(_found.FindIndex(found => found.Id == id));
+                    Uncount(id);
+                    Unhear(id);
+                }
+            }
+
+            Crown();
+            if (!Same(_owners, _bigOwners))
+            {
+                _stale = true;
+                Rebuild();
+                return;
+            }
+
+            _revision++;
+            _wasUnshared.Clear();
+            _wasUnshared.AddRange(_unshared);
+            _returned.Clear();
+            for (var i = 0; i < _changes.Count; i++)
+            {
+                var block = _changes[i].Block;
+                var id = block.EntityId;
+                if (_changes[i].Added)
+                {
+                    if (_seen.Contains(id) && !_byId.ContainsKey(id) && !_unsharedIds.Contains(id))
+                        Admit(id, block);
+                }
+                else
+                {
+                    Expel(id, block);
+                }
+            }
+
+            _changes.Clear();
+        }
+
+        /// <summary>
+        /// Counts every block to its owner again and asks again whether the big owners may use it, taking in and letting go of
+        /// the blocks whose answer changed; the construct reads as changed only where any did, or the big owners did.
+        /// </summary>
+        /// <remarks>
+        /// Asked on the read after the grid says a block changed hands, which it says after any block's owner or sharing
+        /// changes and after any block comes to work or stops, so in a fight. Reads the blocks already found, and asks no
+        /// grid for its blocks; a block whose sharing changed with its owner unchanged is found only by asking each.
+        /// </remarks>
+        void Reown()
+        {
+            _reshared = false;
+            _owners.Clear();
+            _owners.AddRange(_bigOwners);
+            foreach (var found in _found)
+            {
+                long was;
+                _ownerOf.TryGetValue(found.Id, out was);
+                if (found.Block.OwnerId == was)
                     continue;
 
-                if (!Shared(block))
+                Uncount(found.Id);
+                Count(found.Id, found.Block);
+            }
+
+            Crown();
+            var changed = !Same(_owners, _bigOwners);
+
+            _wasUnshared.Clear();
+            _wasUnshared.AddRange(_unshared);
+            _returned.Clear();
+            foreach (var found in _found)
+            {
+                var shared = Shared(found.Block);
+                if (shared == _byId.ContainsKey(found.Id))
+                    continue;
+
+                changed = true;
+                if (shared)
                 {
-                    _unshared.Add(block.CustomName);
+                    _unsharedIds.Remove(found.Id);
+                    _unshared.Remove(found.Block.CustomName);
+                    Admit(found.Id, found.Block);
                     continue;
                 }
 
-                if (_wasUnshared.Contains(block.CustomName))
-                    _returned.Add(block.CustomName);
-
-                GridEntity entity = new GridEntity(block, _kinds.For(block));
-                _byId.Add(block.EntityId, entity);
-                _entities.Add(entity);
+                Expel(found.Id, found.Block);
+                _unshared.Add(found.Block.CustomName);
+                _unsharedIds.Add(found.Id);
             }
 
-            Hear(_found);
+            if (changed)
+                _revision++;
         }
 
-        /// <summary>Listens for <paramref name="blocks" /> being renamed, and for no others.</summary>
-        void Hear(List<IMyTerminalBlock> blocks)
+        /// <summary>Takes <paramref name="block" />, <paramref name="id" />, in as one of the construct's, or as a block the big owners may not use.</summary>
+        void Admit(long id, IMyTerminalBlock block)
         {
-            foreach (var block in _named)
-                block.CustomNameChanged -= OnRenamed;
+            if (_byId.ContainsKey(id))
+                return;
 
-            _named.Clear();
-            foreach (var block in blocks)
+            if (!Shared(block))
             {
-                block.CustomNameChanged += OnRenamed;
-                _named.Add(block);
+                _unshared.Add(block.CustomName);
+                _unsharedIds.Add(id);
+                return;
             }
+
+            _unsharedIds.Remove(id);
+            if (_wasUnshared.Count > 0 && _wasUnshared.Contains(block.CustomName))
+                _returned.Add(block.CustomName);
+
+            GridEntity entity;
+            if (!_keptById.TryGetValue(id, out entity) || entity.Block != block)
+                entity = new GridEntity(block, _kinds.For(block));
+
+            _byId.Add(id, entity);
+            _entities.Add(entity);
+        }
+
+        /// <summary>Lets <paramref name="block" />, <paramref name="id" />, taken off the construct, go.</summary>
+        void Expel(long id, IMyTerminalBlock block)
+        {
+            GridEntity entity;
+            if (_byId.TryGetValue(id, out entity))
+            {
+                _byId.Remove(id);
+                _entities.Remove(entity);
+                return;
+            }
+
+            if (_unsharedIds.Remove(id))
+                _unshared.Remove(block.CustomName);
+        }
+
+        /// <summary>Counts <paramref name="block" />, <paramref name="id" />, to its owner, remembering whose it was counted to.</summary>
+        void Count(long id, IMyTerminalBlock block)
+        {
+            var owner = block.OwnerId;
+            if (owner == 0)
+                return;
+
+            int count;
+            _counted.TryGetValue(owner, out count);
+            _counted[owner] = count + 1;
+            _ownerOf[id] = owner;
+        }
+
+        /// <summary>Takes the block <paramref name="id" /> off the count of whoever it was counted to.</summary>
+        void Uncount(long id)
+        {
+            long owner;
+            if (!_ownerOf.TryGetValue(id, out owner))
+                return;
+
+            _ownerOf.Remove(id);
+            var count = _counted[owner] - 1;
+            if (count > 0)
+                _counted[owner] = count;
+            else
+                _counted.Remove(owner);
+        }
+
+        /// <summary>Whether <paramref name="one" /> and <paramref name="other" /> hold the same players in the same order.</summary>
+        static bool Same(List<long> one, List<long> other)
+        {
+            if (one.Count != other.Count)
+                return false;
+
+            for (var i = 0; i < one.Count; i++)
+            {
+                if (one[i] != other[i])
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>Listens for the blocks found being renamed, and for no others: a block it already listens to is left as it is.</summary>
+        void Hear()
+        {
+            _unheard.Clear();
+            foreach (KeyValuePair<long, IMyTerminalBlock> named in _named)
+            {
+                if (!_seen.Contains(named.Key))
+                    _unheard.Add(named.Key);
+            }
+
+            foreach (var id in _unheard)
+                Unhear(id);
+
+            foreach (var found in _found)
+                Hear(found.Id, found.Block);
+        }
+
+        /// <summary>Listens for <paramref name="block" />, <paramref name="id" />, being renamed, in place of any block it listened to under that id.</summary>
+        void Hear(long id, IMyTerminalBlock block)
+        {
+            IMyTerminalBlock heard;
+            if (_named.TryGetValue(id, out heard))
+            {
+                if (heard == block)
+                    return;
+
+                heard.CustomNameChanged -= OnRenamed;
+            }
+
+            block.CustomNameChanged += OnRenamed;
+            _named[id] = block;
+        }
+
+        /// <summary>Stops listening for the block <paramref name="id" /> being renamed.</summary>
+        void Unhear(long id)
+        {
+            IMyTerminalBlock heard;
+            if (!_named.TryGetValue(id, out heard))
+                return;
+
+            heard.CustomNameChanged -= OnRenamed;
+            _named.Remove(id);
         }
 
         void OnRenamed(IMyTerminalBlock block)
@@ -711,14 +954,48 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         void OnBlocksChanged(IMySlimBlock block)
         {
-            _stale = true;
+            Changed(block, true);
         }
 
         void OnBlockRemoved(IMySlimBlock block)
         {
-            _stale = true;
-            if (block.FatBlock != null && block.FatBlock == _anchor && AnchorRemoved != null)
-                AnchorRemoved();
+            // The construct is found from the anchor's grid, so losing it reads the construct again whole.
+            if (block.FatBlock != null && block.FatBlock == _anchor)
+            {
+                _stale = true;
+                if (AnchorRemoved != null)
+                    AnchorRemoved();
+
+                return;
+            }
+
+            Changed(block, false);
+        }
+
+        /// <summary>Keeps <paramref name="slim" />, welded on or taken off as <paramref name="added" /> says, for the next read.</summary>
+        /// <remarks>
+        /// A block with no terminal, armor and the like, is no part of what the construct reads, and is let go by here: it is
+        /// most of what a grid gains and loses. A grid split by losing one says so itself.
+        /// </remarks>
+        void Changed(IMySlimBlock slim, bool added)
+        {
+            var block = slim.FatBlock as IMyTerminalBlock;
+            if (block != null)
+                _changes.Add(new Change { Block = block, Added = added });
+        }
+
+        /// <summary>A block welded on or taken off, waiting for the next read.</summary>
+        struct Change
+        {
+            public IMyTerminalBlock Block;
+            public bool Added;
+        }
+
+        /// <summary>A terminal block on the construct, with its id, read as it was found.</summary>
+        struct Found
+        {
+            public long Id;
+            public IMyTerminalBlock Block;
         }
 
         void OnAnchorClosed(IMyEntity anchor)
@@ -733,7 +1010,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Watch(new List<IMyCubeGrid>());
             Join(null);
-            Hear(new List<IMyTerminalBlock>());
+            foreach (var heard in _named.Values)
+                heard.CustomNameChanged -= OnRenamed;
+
+            _named.Clear();
+            _changes.Clear();
             Follow(null);
         }
     }

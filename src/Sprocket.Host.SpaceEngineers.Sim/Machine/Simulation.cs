@@ -39,6 +39,8 @@ public sealed class Simulation
 
     Rota _rota = new Rota();
 
+    BlockKinds _kinds = new BlockKinds();
+
     readonly Folder _folder = new Folder();
 
     readonly Folder _worldFolder = new Folder();
@@ -142,7 +144,7 @@ public sealed class Simulation
     {
         // Said outright rather than read: the harness has no mod storage. A test that wants the
         // developer tools sets Editor.DeveloperMode on the way past.
-        _roster = new Roster(() => _settings, _rota, _texts, _memories, _backups, () => Now, _later.Add) { Shelf = _shelf };
+        _roster = new Roster(() => _settings, _rota, _kinds, _texts, _memories, _backups, () => Now, _later.Add) { Shelf = _shelf };
         _unit = _roster.Adopt(_rig.Sprocket.Block);
         Dress(_unit);
 
@@ -180,6 +182,7 @@ public sealed class Simulation
         _roster.Dispose();
         _later.Clear();
         _rota = new Rota();
+        _kinds = new BlockKinds();
         _frame = 0;
         _memories.Read(_worldFolder.Has(Memories.File) ? _worldFolder.Read(Memories.File) : null, _frame);
         Adopt();
@@ -206,6 +209,9 @@ public sealed class Simulation
 
     /// <summary>Every Sprocket there is.</summary>
     public Roster Roster => _roster;
+
+    /// <summary>The kinds of block every construct in the harness's world shares, as the session's are in the game.</summary>
+    public BlockKinds Kinds => _kinds;
 
     /// <summary>The world's backups, which the library lists.</summary>
     public Backups Backups => _backups;

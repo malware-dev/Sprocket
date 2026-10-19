@@ -1,6 +1,7 @@
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Sim.Fakes;
 using Xunit;
 using DoorStatus = Sandbox.ModAPI.Ingame.DoorStatus;
 
@@ -130,14 +131,14 @@ public class RotaTests
         ship.Tick();
         runner.Tick(++frame);
 
-        // A sequence at rest is on no shift. A run has two: the watch on it, and its next step.
+        // A sequence at rest is on no shift. A run has one: its next step.
         var idle = runner.Rota.Count;
         runner.Call(sequence);
         var state = runner.Get(sequence)!;
 
         while (state.IsRunning && frame < 2000)
         {
-            Assert.Equal(idle + 2, runner.Rota.Count);
+            Assert.Equal(idle + 1, runner.Rota.Count);
             ship.Tick();
             runner.Tick(++frame);
         }
@@ -456,6 +457,51 @@ public class RotaTests
         var share = (total + 999) / 1000;
         Assert.InRange(most, 1, 2 * share);
         Assert.All(runners, runner => Assert.Equal(1, runner.Reconciled));
+    }
+
+    /// <summary>
+    /// A world whose watches ask the game nothing allocates nothing on a tick: three programs of ten clocks that do not come
+    /// round while it is measured, turned for ten seconds.
+    /// </summary>
+    /// <remarks>Nothing here calls the game, so every byte counted is the runtime's own.</remarks>
+    [Fact]
+    public void AnIdleWorldAllocatesNothing()
+    {
+        var ship = new Rigged();
+        var lamp = ship.Light(1, "Lamp");
+        var rota = new Rota();
+        var runners = new List<AutomationRunner>();
+
+        for (var sprocket = 0; sprocket < 3; sprocket++)
+        {
+            var automation = new Automation();
+            var lit = automation.Declare(ship.World, ship.Entity(lamp.Id)).Name;
+            for (var i = 0; i < 10; i++)
+                Then(automation.AddSequence(new EveryTrigger(60000)), Given.Power(true, lit));
+
+            runners.Add(new AutomationRunner(automation, ship.World, rota));
+        }
+
+        var frame = 0;
+        for (; frame < 2 * Rota.Hundred; frame++)
+        {
+            foreach (var runner in runners)
+                runner.Tick(frame);
+            rota.Run(frame);
+        }
+
+        var asked = Pretend.Asked;
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        for (var end = frame + 10 * Rota.Hundred; frame < end; frame++)
+        {
+            for (var i = 0; i < runners.Count; i++)
+                runners[i].Tick(frame);
+            rota.Run(frame);
+        }
+
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+        Assert.Equal(asked, Pretend.Asked);
+        Assert.Equal(0, allocated);
     }
 
     static void Then(Sequence sequence, string actionId, string target)

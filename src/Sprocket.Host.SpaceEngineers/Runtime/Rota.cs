@@ -149,9 +149,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         void Turn(int tick)
         {
             _due.Clear();
-            _due.AddRange(_each);
-            _due.AddRange(_tens[Place(tick, Ten)]);
-            _due.AddRange(_hundreds[Place(tick, Hundred)]);
+            Gather(_each);
+            Gather(_tens[Place(tick, Ten)]);
+            Gather(_hundreds[Place(tick, Hundred)]);
 
             foreach (var shift in _due)
             {
@@ -172,6 +172,14 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             }
 
             _due.Clear();
+        }
+
+        /// <summary>Adds every shift of <paramref name="list" /> to those due.</summary>
+        /// <remarks>One by one: the framework the game runs copies a list added whole through an array of its own, on every tick.</remarks>
+        void Gather(List<Shift> list)
+        {
+            for (var i = 0; i < list.Count; i++)
+                _due.Add(list[i]);
         }
 
         void Put(Shift shift, List<Shift> list)

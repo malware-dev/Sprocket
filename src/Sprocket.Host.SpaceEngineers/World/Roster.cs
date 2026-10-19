@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly List<KeyValuePair<long, SprocketUnit>> _saving = new List<KeyValuePair<long, SprocketUnit>>();
         readonly Func<Settings> _settings;
         readonly Rota _rota;
+        readonly BlockKinds _kinds;
         readonly Texts _texts;
         readonly Memories _memories;
         readonly Backups _backups;
@@ -24,11 +25,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Action<Action> _later;
 
         /// <summary>An empty roster; <paramref name="later" /> runs what must wait for the game to finish its current event.</summary>
-        public Roster(Func<Settings> settings, Rota rota, Texts texts, Memories memories, Backups backups, Func<int> frame,
+        public Roster(Func<Settings> settings, Rota rota, BlockKinds kinds, Texts texts, Memories memories, Backups backups, Func<int> frame,
             Action<Action> later)
         {
             _settings = settings;
             _rota = rota;
+            _kinds = kinds;
             _texts = texts;
             _memories = memories;
             _backups = backups;
@@ -102,7 +104,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (unit != null && (unit.Block == block || !BlockStorage.HasProgram(block)))
                 return unit;
 
-            SprocketUnit arrived = new SprocketUnit(block, _settings(), _rota, _texts, _memories.Claim(block.EntityId), _backups);
+            SprocketUnit arrived = new SprocketUnit(block, _settings(), _rota, _kinds, _texts, _memories.Claim(block.EntityId), _backups);
             arrived.Begin(_frame());
             if (unit != null)
                 return Join(unit, arrived) ?? unit;

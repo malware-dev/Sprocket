@@ -259,6 +259,16 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 _alone.Remove(gone);
         }
 
+        /// <summary>Tells every runner a switch was flipped, so a run of what is switched off now stops; the sequences' first.</summary>
+        public void Switched()
+        {
+            foreach (var runner in _runners.Values)
+                runner.Switched();
+
+            foreach (var runner in _acting.Values)
+                runner.Switched();
+        }
+
         /// <summary>Takes every runner off the rota, the sequences' first.</summary>
         public void Retire()
         {

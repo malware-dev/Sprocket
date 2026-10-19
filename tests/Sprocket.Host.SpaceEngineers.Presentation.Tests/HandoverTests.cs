@@ -529,7 +529,7 @@ public class HandoverTests : IDisposable
         SprocketUnit copy = null!;
         _wire.As(anna, () =>
         {
-            copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Texts, heard.Program, heard.State);
+            copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, heard.Program, heard.State);
             hers.Kept(_block, copy);
         });
 
@@ -652,7 +652,7 @@ public class HandoverTests : IDisposable
         var his = Client(bert, new Heard());
         _wire.As(bert, () =>
         {
-            var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Texts, "", "");
+            var copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, "", "");
             copy.Editor.NewSystem("Mine");
             his.Keep(_block, copy);
         });
@@ -908,7 +908,7 @@ public class HandoverTests : IDisposable
         _sim.Unit.Written(out program, out state);
         var anna = _wire.Client("Anna");
         SprocketUnit copy = null!;
-        _wire.As(anna, () => copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Texts, program, state));
+        _wire.As(anna, () => copy = SprocketUnit.Copy(_sim.Machine.Sprocket.Block, null, _sim.Kinds, _sim.Texts, program, state));
 
         Assert.Single(copy.Editor.Program.Systems);
         Assert.Equal("Anna", copy.Editor.Author);

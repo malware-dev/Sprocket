@@ -11,30 +11,54 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     {
         static readonly SignalRef[] NoSignals = new SignalRef[0];
 
-        readonly Dictionary<string, GridEntity> _bound = new Dictionary<string, GridEntity>();
-        readonly Dictionary<string, RefState> _states = new Dictionary<string, RefState>();
+        Dictionary<string, GridEntity> _bound = new Dictionary<string, GridEntity>();
+        Dictionary<string, RefState> _states = new Dictionary<string, RefState>();
+
+        // What these came to before the blocks last changed, held while they are worked out again to be compared.
+        Dictionary<string, GridEntity> _wasBound = new Dictionary<string, GridEntity>();
+        Dictionary<string, RefState> _wasStates = new Dictionary<string, RefState>();
 
         int _world = -1;
         int _program = -1;
 
         /// <summary>
-        /// Bumped whenever these were worked out again, so a reader can cache off it.
+        /// Bumped whenever these were worked out again and may have come out differently, so a reader can cache off it.
         /// </summary>
         /// <remarks>Anything that resolves a name on every tick holds what it found and compares this instead.</remarks>
         public int Revision { get; private set; }
 
         /// <summary>
-        /// Works these out again only if something has changed since last time, and says whether it did.
+        /// Works these out again only if something has changed since last time, and says whether what they came to did.
         /// </summary>
-        /// <remarks>Called on every tick; two integer comparisons where nothing has changed.</remarks>
+        /// <remarks>
+        /// Called on every tick; two integer comparisons where nothing has changed. Where only the blocks changed, as one is
+        /// welded on that no name reaches, every name finding what it found before leaves <see cref="Revision" /> as it was.
+        /// </remarks>
         public bool Refresh(GridWorld world, Automation program)
         {
             if (world.Revision == _world && program.Revision == _program)
                 return false;
 
+            var reprogrammed = program.Revision != _program;
             _world = world.Revision;
             _program = program.Revision;
-            Resolve(world, program.Refs, program.SignalRefs);
+            if (reprogrammed || Revision == 0)
+            {
+                Resolve(world, program.Refs, program.SignalRefs);
+                return true;
+            }
+
+            var bound = _wasBound;
+            _wasBound = _bound;
+            _bound = bound;
+            var states = _wasStates;
+            _wasStates = _states;
+            _states = states;
+            Work(world, program.Refs, program.SignalRefs);
+            if (Same(_bound, _wasBound) && Same(_states, _wasStates))
+                return false;
+
+            Revision++;
             return true;
         }
 
@@ -51,6 +75,29 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void Resolve(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<SignalRef> signals)
         {
             Revision++;
+            Work(world, refs, signals);
+        }
+
+        /// <summary>Whether <paramref name="one" /> and <paramref name="other" /> hold the same names, each to the same answer.</summary>
+        static bool Same<T>(Dictionary<string, T> one, Dictionary<string, T> other)
+        {
+            if (one.Count != other.Count)
+                return false;
+
+            var equal = EqualityComparer<T>.Default;
+            foreach (KeyValuePair<string, T> pair in one)
+            {
+                T was;
+                if (!other.TryGetValue(pair.Key, out was) || !equal.Equals(was, pair.Value))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>Works out what every declaration and signal variable points at, into the maps these answer from.</summary>
+        void Work(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<SignalRef> signals)
+        {
             _bound.Clear();
             _states.Clear();
 
