@@ -42,20 +42,14 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>The panel's background color.</summary>
         public Color Ground { get; private set; }
 
-        /// <summary>How far the cards are shown, from 0, faded into the background, to 1.</summary>
-        public float Fade { get; set; } = 1f;
+        /// <summary>How far the page shown has slid in, from 0, where the page before it is still in place, to 1.</summary>
+        public float Slid { get; set; } = 1f;
 
         /// <summary>How far a newly arrived installation's mark is lit toward the text color, from 0 to 1.</summary>
         public float Pulse { get; set; }
 
         /// <summary>The installations that newly want looking at, whose marks pulse.</summary>
         public List<StatusItem> Fresh { get; } = new List<StatusItem>();
-
-        /// <summary><paramref name="color" /> as a card shows it, faded as far as <see cref="Fade" /> says.</summary>
-        public Color Card(Color color)
-        {
-            return Fade >= 1f ? color : Color.Lerp(Ground, color, Fade);
-        }
 
         /// <summary>Whether <paramref name="item" /> newly wants looking at.</summary>
         public bool IsFresh(StatusItem item)

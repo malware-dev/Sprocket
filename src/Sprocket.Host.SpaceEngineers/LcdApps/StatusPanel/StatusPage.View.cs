@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
+using Lumel.Viewing;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
@@ -16,15 +17,16 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         StatusTally _warnings;
         Grid _middle;
         StatusCalm _calm;
-        HStack _columns;
-        VStack _first;
-        VStack _second;
+        Slide _slide;
+        StatusColumns _leaving;
+        StatusColumns _coming;
         HStack _dots;
         Label _pageOf;
 
         /// <summary>
-        /// Makes the top line, the middle, which holds the calm screen a little above its middle or the columns of cards over
-        /// its whole height, and the foot, which holds the page dots or which page this is.
+        /// Makes the top line, the middle, which holds the calm screen a little above its middle or the pages of cards over
+        /// its whole height, the one before sliding out as the next slides in, and the foot, which holds the page dots or
+        /// which page this is.
         /// </summary>
         void CreateView()
         {
@@ -51,13 +53,10 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 }
             }.As(out _middle));
 
-            _columns = new HStack
+            _slide = new Slide
             {
-                Children =
-                {
-                    new VStack { Align = Align.Tall, Placement = Flex.Grow }.As(out _first),
-                    new VStack { Align = Align.Tall, Placement = Flex.Grow }.As(out _second)
-                }
+                Leaving = new StatusColumns().As(out _leaving),
+                Coming = new StatusColumns().As(out _coming)
             };
 
             Children.Add(new HStack { Align = Align.Center }.As(out _dots));

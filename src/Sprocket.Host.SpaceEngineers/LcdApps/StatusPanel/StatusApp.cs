@@ -38,8 +38,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
         const int Turn = 3;
 
-        /// <summary>How long a page turn takes, in ticks: the cards fade out over half of it and the next page in over the rest.</summary>
-        const int Fading = 20;
+        /// <summary>How long a page turn takes, in ticks: the page slides out to the left as the next slides in from the right.</summary>
+        const int Sliding = 24;
 
         /// <summary>How long a newly arrived installation's mark pulses, in ticks, and how long one pulse takes.</summary>
         const int Pulsing = 180;
@@ -52,8 +52,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         readonly List<StatusItem> _seen = new List<StatusItem>();
         bool _seenHeard;
         bool _moving;
+        bool _laid;
         int _from;
-        int _fadeAt = -1;
+        int _slideAt = -1;
         int _pulseAt = -1;
 
         ConstructStatus _status;
@@ -158,12 +159,16 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 _ground = ground;
                 _padding = Surface.TextPadding;
 
+                // Anything else that changes during a slide ends it, since the page it slides from is laid out no more.
+                if (!turned)
+                    _slideAt = -1;
+
                 // Where somebody is near enough to see it move, the loop draws the turn and the pulse, frame by frame.
                 if ((turned || fresh) && Near())
                 {
                     var now = SprocketSession.Tick;
                     if (turned)
-                        _fadeAt = now;
+                        _slideAt = now;
                     if (fresh)
                         _pulseAt = now;
 
@@ -171,8 +176,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                     SprocketSession.Animate(this);
                 }
 
+                _laid = false;
                 if (!_moving)
-                    Lay(turn);
+                    Lay(_turn);
             }
 
             if (!_moving)
@@ -183,29 +189,40 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public bool Frame(List<MySprite> output, int tick)
         {
             var look = _picture.Look;
-            var shown = _turn;
-            look.Fade = 1f;
-            if (_fadeAt >= 0 && tick - _fadeAt < Fading)
+            look.Slid = 1f;
+            if (_slideAt >= 0 && tick - _slideAt < Sliding)
             {
-                var half = Fading / 2f;
-                var into = tick - _fadeAt;
-                shown = into < half ? _from : _turn;
-                look.Fade = into < half ? 1f - into / half : (into - half) / half;
+                // Eased at both ends, so the page starts off gently and settles rather than stopping dead.
+                var into = (tick - _slideAt) / (float)Sliding;
+                look.Slid = into * into * (3f - 2f * into);
             }
             else
-                _fadeAt = -1;
+                _slideAt = -1;
 
-            look.Pulse = 0f;
+            // The pulse colors the mark as it is laid out, so a pulsing frame is laid out again, and so is the one after it ends.
+            var lay = !_laid;
             if (_pulseAt >= 0 && tick - _pulseAt < Pulsing)
+            {
                 look.Pulse = 0.5f - 0.5f * (float)Math.Cos(2.0 * Math.PI * (tick - _pulseAt) / Pulse);
-            else
+                lay = true;
+            }
+            else if (_pulseAt >= 0)
             {
                 _pulseAt = -1;
+                look.Pulse = 0f;
                 look.Fresh.Clear();
+                lay = true;
             }
 
-            _moving = _fadeAt >= 0 || _pulseAt >= 0;
-            Lay(shown);
+            _moving = _slideAt >= 0 || _pulseAt >= 0;
+            if (lay)
+                Lay(_slideAt >= 0 ? _from : _turn);
+            else
+            {
+                _graphics.Begin();
+                _picture.Redraw(_graphics);
+            }
+
             output.AddRange(_sprites);
 
             // The game draws the panel's own frame again whenever its texture is made afresh, so it is handed the last one.
@@ -215,11 +232,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return _moving;
         }
 
-        /// <summary>Lays the status out showing the page <paramref name="turn" /> places in.</summary>
-        void Lay(int turn)
+        /// <summary>Lays the status out showing the page the app is on, with the page <paramref name="from" /> places in beside it to slide from.</summary>
+        void Lay(int from)
         {
             _graphics.Begin();
-            _picture.Draw(_graphics, _status, SprocketSession.Texts, _ink, _ground, _padding, Metres(), turn);
+            _picture.Draw(_graphics, _status, SprocketSession.Texts, _ink, _ground, _padding, Metres(), _turn, from);
+            _laid = true;
         }
 
         /// <summary>Hands the game the frame last laid out.</summary>

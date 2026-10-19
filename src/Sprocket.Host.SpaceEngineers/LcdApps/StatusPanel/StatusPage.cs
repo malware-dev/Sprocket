@@ -28,8 +28,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>How many pages the screen last laid out takes turns between.</summary>
         public int Pages { get; private set; } = 1;
 
-        /// <summary>Lays <paramref name="status" /> out in <paramref name="look" /> on a screen <paramref name="room" /> big, kept <paramref name="inset" /> pixels in from its edges, showing the page <paramref name="turn" /> places in.</summary>
-        public void Lay(IGraphics graphics, StatusLook look, ConstructStatus status, Vector2 room, float inset, int turn)
+        /// <summary>
+        /// Lays <paramref name="status" /> out in <paramref name="look" /> on a screen <paramref name="room" /> big, kept
+        /// <paramref name="inset" /> pixels in from its edges, showing the page <paramref name="turn" /> places in, with the
+        /// page <paramref name="from" /> places in beside it to slide from where the two differ.
+        /// </summary>
+        public void Lay(IGraphics graphics, StatusLook look, ConstructStatus status, Vector2 room, float inset, int turn, int from)
         {
             var size = look.Size;
             var wide = room.X - inset * 2f;
@@ -45,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
             var under = high - size.Icon - Spacing;
             if (status.Heard && status.Troubled)
-                Troubled(graphics, look, status, under - Spacing - size.Small, wide, turn);
+                Troubled(graphics, look, status, under - Spacing - size.Small, wide, inset, turn, from);
             else if (status.Heard)
             {
                 // The top line goes last, where the calm screen does not fit under it even at its smallest.
@@ -79,16 +83,18 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 && size.Icon + size.Between * 2f + look.Width(graphics, _heading.Text, size.Small) + look.Width(graphics, status.Construct, size.Small) <= wide;
         }
 
-        /// <summary>The page <paramref name="turn" /> places in, of as many whole cards as fit <paramref name="high" />, each in an equal share of its column.</summary>
-        void Troubled(IGraphics graphics, StatusLook look, ConstructStatus status, float high, float wide, int turn)
+        /// <summary>
+        /// The page <paramref name="turn" /> places in, of as many whole cards as fit <paramref name="high" />, each in an
+        /// equal share of its column, with the page <paramref name="from" /> places in beside it where the two differ, far
+        /// enough apart that each leaves the screen past <paramref name="inset" /> as the other fills it.
+        /// </summary>
+        void Troubled(IGraphics graphics, StatusLook look, ConstructStatus status, float high, float wide, float inset, int turn, int from)
         {
             var size = look.Size;
             var items = status.Items;
             var two = wide >= high * 1.6f && wide / size.Body >= 24f;
             var column = two ? (wide - size.Big) / 2f : wide;
             var columns = two ? 2 : 1;
-            _columns.Spacing = size.Big;
-            _second.IsVisible = two;
 
             while (_cards.Count < items.Count)
                 _cards.Add(new StatusCard());
@@ -120,28 +126,37 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
 
             Pages = _pages.Count;
-            var at = (turn % Pages + Pages) % Pages;
-            var to = at + 1 < Pages ? _pages[at + 1] : items.Count;
+            var at = Page(turn);
+            var before = Page(from);
 
-            _first.Children.Clear();
-            _second.Children.Clear();
-            filled = 0f;
-            var into = _first;
-            for (var i = _pages[at]; i < to; i++)
-            {
-                var tall = StatusLook.Tall(graphics, _cards[i].Body, column);
-                if (two && into == _first && filled > 0f && filled + tall * 2f > high)
-                {
-                    into = _second;
-                    filled = 0f;
-                }
+            _leaving.Empty();
+            _coming.Empty();
+            _coming.Fill(graphics, _cards, _pages[at], End(at, items.Count), two, size.Big, column, high);
+            _leaving.IsVisible = before != at;
+            if (_leaving.IsVisible)
+                _leaving.Fill(graphics, _cards, _pages[before], End(before, items.Count), two, size.Big, column, high);
 
-                filled += filled > 0f ? tall * 2f : tall;
-                into.Children.Add(_cards[i]);
-            }
-
-            Middle(_columns, true);
+            _slide.Travel = wide + inset;
+            Middle(_slide, true);
             Dots(look, at, wide);
+        }
+
+        /// <summary>Shows the pages as far slid as <paramref name="progress" /> says, from 0, the page before in place, to 1, the page shown.</summary>
+        public void Slid(float progress)
+        {
+            _slide.Progress = progress;
+        }
+
+        /// <summary>Which page <paramref name="turn" /> places in.</summary>
+        int Page(int turn)
+        {
+            return (turn % Pages + Pages) % Pages;
+        }
+
+        /// <summary>Where the page <paramref name="at" /> ends, of <paramref name="count" /> cards.</summary>
+        int End(int at, int count)
+        {
+            return at + 1 < Pages ? _pages[at + 1] : count;
         }
 
         /// <summary>A dot for each page, the one at <paramref name="at" /> filled, or which it is in words where they do not fit <paramref name="wide" />.</summary>

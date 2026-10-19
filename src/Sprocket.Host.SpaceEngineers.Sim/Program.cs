@@ -122,7 +122,7 @@ namespace Sprocket.Sim
                             {
                                 var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
                                 graphics.Begin();
-                                new StatusPicture().Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 0);
+                                new StatusPicture().Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 0, 0);
                             });
                             Console.WriteLine(path);
                         }
@@ -154,8 +154,46 @@ namespace Sprocket.Sim
                             {
                                 var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
                                 graphics.Begin();
-                                picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, shown);
+                                picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, shown, shown);
                             });
+                            Console.WriteLine(path);
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            // The automation panel turning from its first page to its second, a quarter, half and three quarters of the way, on
+            // every screen of the reference set that has a second page: --slides <folder> [zoom], into <scene>/<screen>-25.png and on.
+            if (args.Length > 1 && args[0] == "--slides")
+            {
+                var zoom = args.Length > 2 ? int.Parse(args[2], CultureInfo.InvariantCulture) : 1;
+                foreach (var scene in StatusScenes.Names)
+                {
+                    var status = StatusScenes.Make(scene, out var texts);
+                    Directory.CreateDirectory(Path.Combine(args[1], scene));
+                    foreach (ScreenShape shape in ScreenShape.Reference)
+                    {
+                        // How many pages a screen has is known once it is laid out, so a screen with one loses its first picture.
+                        var picture = new StatusPicture();
+                        foreach (var slid in new[] { 25, 50, 75 })
+                        {
+                            var face = new Face(shape.Name) { Shape = shape };
+                            var path = Path.Combine(args[1], scene, shape.Name + "-" + slid.ToString(CultureInfo.InvariantCulture) + ".png");
+                            FaceShot.Save(path, face, zoom, () =>
+                            {
+                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+                                graphics.Begin();
+                                picture.Look.Slid = slid / 100f;
+                                picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 1, 0);
+                            });
+                            if (picture.Pages < 2)
+                            {
+                                File.Delete(path);
+                                break;
+                            }
+
                             Console.WriteLine(path);
                         }
                     }

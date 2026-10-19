@@ -122,20 +122,66 @@ public class StatusPictureTests
         }
     }
 
-    /// <summary>Cards faded right out are drawn in the background's color, the top line still in its own.</summary>
+    /// <summary>Halfway through a turn both pages are drawn, the one before moved left and the next right, the top line where it was.</summary>
     [Fact]
-    public void AFadedCardIsDrawnIntoTheBackground()
+    public void HalfwayThroughATurnBothPagesAreDrawnSideBySide()
     {
         var status = StatusScenes.Make("trouble", out var texts);
-        var face = Face(ScreenShape.Reference[0]);
+        var face = Face(ScreenShape.Reference.First(shape => shape.Name == "programmable-block-automatons"));
         var picture = new StatusPicture();
-        picture.Look.Fade = 0f;
-
         Draw(picture, face, status, texts, 0);
+        Assert.True(picture.Pages > 1, "the scene needs a second page");
+        var first = Words(face);
+        Draw(picture, face, status, texts, 1);
+        var second = Words(face);
 
-        var words = face.Sprites.Where(sprite => sprite.Type == SpriteType.TEXT && sprite.FontId != Symbols.Font).ToList();
-        Assert.Contains(words, sprite => sprite.Color == face.Background);
-        Assert.Contains(words, sprite => sprite.Data == texts.PanelHeading && sprite.Color != face.Background);
+        picture.Look.Slid = 0.5f;
+        Draw(picture, face, status, texts, 1, 0);
+        var sliding = Words(face);
+        var width = face.Surface.SurfaceSize.X;
+
+        Assert.Equal(first[texts.PanelHeading], sliding[texts.PanelHeading]);
+        foreach (var word in first.Keys.Except(second.Keys))
+            Assert.True(sliding[word].X < first[word].X - width / 4f, "\"" + word + "\" from the page before is not moved left");
+        foreach (var word in second.Keys.Except(first.Keys))
+            Assert.True(sliding[word].X > second[word].X + width / 4f, "\"" + word + "\" from the next page is not moved right");
+    }
+
+    /// <summary>A sliding page drawn again is drawn as a fresh layout of it would be.</summary>
+    [Fact]
+    public void ASlidingPageDrawnAgainIsDrawnAsLaidOut()
+    {
+        var status = StatusScenes.Make("trouble", out var texts);
+        var face = Face(ScreenShape.Reference.First(shape => shape.Name == "programmable-block-automatons"));
+        var picture = new StatusPicture();
+        picture.Look.Slid = 0.3f;
+        Draw(picture, face, status, texts, 1, 0);
+        picture.Look.Slid = 0.7f;
+        Draw(picture, face, status, texts, 1, 0);
+        var laid = face.Sprites.ToList();
+
+        picture.Look.Slid = 0.3f;
+        Draw(picture, face, status, texts, 1, 0);
+        face.Sprites.Clear();
+        var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+        graphics.Begin();
+        picture.Look.Slid = 0.7f;
+        picture.Redraw(graphics);
+
+        Assert.Equal(laid, face.Sprites);
+    }
+
+    /// <summary>Where each text on the screen starts, by what it says.</summary>
+    static Dictionary<string, Vector2> Words(Face face)
+    {
+        var words = new Dictionary<string, Vector2>();
+        foreach (var sprite in face.Sprites)
+        {
+            if (sprite.Type == SpriteType.TEXT && sprite.Data != null && !words.ContainsKey(sprite.Data))
+                words.Add(sprite.Data, sprite.Position ?? Vector2.Zero);
+        }
+
+        return words;
     }
 
     /// <summary>A newly arrived installation's mark is lit toward the text color as it pulses.</summary>
@@ -155,10 +201,15 @@ public class StatusPictureTests
 
     static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn)
     {
+        Draw(picture, face, status, texts, turn, turn);
+    }
+
+    static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn, int from)
+    {
         face.Sprites.Clear();
         var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
         graphics.Begin();
-        picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, face.Shape.Metres, turn);
+        picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, face.Shape.Metres, turn, from);
     }
 
     /// <summary>A screen of <paramref name="shape" /> measuring with the harness's stand-in widths and the mod's own faces.</summary>
