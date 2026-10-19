@@ -145,6 +145,24 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         void Switch()
         {
             Switches++;
+            Change();
+        }
+
+        /// <summary>Raised whenever what the program says, or what is switched off, may have changed: every edit, wiring, declaration and switch.</summary>
+        /// <remarks>Raised in the middle of the change, so whatever answers it waits until the change is done.</remarks>
+        public event Action Changed;
+
+        /// <summary>Says a declaration's keys were brought up to date with the block they find, which changes what the program says and nothing it does.</summary>
+        public void Rekeyed()
+        {
+            Change();
+        }
+
+        void Change()
+        {
+            var changed = Changed;
+            if (changed != null)
+                changed();
         }
 
         void Reshape()
@@ -158,12 +176,14 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         public void Rewire()
         {
             Wiring++;
+            Change();
         }
 
         /// <summary>Says that the program has been changed, and anything worked out from it is stale.</summary>
         public void Edited()
         {
             Edits++;
+            Change();
         }
 
         /// <summary>
@@ -194,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _refsByName.Add(declared.Name, declared);
 
             Revision++;
-            Wiring++;
+            Rewire();
             return declared;
         }
 
@@ -219,7 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 _signalRefsByName.Add(declared.Name, declared);
 
             Revision++;
-            Wiring++;
+            Rewire();
             return declared;
         }
 
@@ -497,7 +517,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 system.AddTrigger(trigger);
             }
 
-            Wiring++;
+            Rewire();
             return sequence;
         }
 
@@ -649,7 +669,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                     system.DropTriggersFor(sequence.Number);
             }
 
-            Wiring++;
+            Rewire();
         }
 
         /// <summary>Empties it of every system and every block it declared.</summary>
@@ -679,7 +699,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             system.Started = null;
             system.Switched = null;
             Reshape();
-            Wiring++;
+            Rewire();
             return true;
         }
 
@@ -702,7 +722,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             system.Started = Start;
             system.Switched = Switch;
             Reshape();
-            Wiring++;
+            Rewire();
         }
 
         /// <summary>Puts a removed sequence back into <paramref name="system" />, where it stood among its sequences, <paramref name="at" />, as the sequence it was.</summary>
@@ -713,7 +733,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             _sequences.Add(sequence);
             system.PutBack(sequence, at);
-            Wiring++;
+            Rewire();
         }
 
         /// <summary>The sequence numbered <paramref name="id" />, or null where there is none.</summary>

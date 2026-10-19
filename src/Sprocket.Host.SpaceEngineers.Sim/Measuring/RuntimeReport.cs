@@ -139,7 +139,7 @@ public static class RuntimeReport
 
             allocated = Allocated();
             saved.Start();
-            sim.Roster.Persist();
+            sim.Roster.Flush();
             saved.Stop();
             savedBytes += Allocated() - allocated;
 

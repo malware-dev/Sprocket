@@ -118,6 +118,10 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             Load(program, state);
 
+            // After the load, so reading the program is no change to it. A copy writes nothing.
+            if (!copy)
+                _program.Changed += Edited;
+
             // Listened for rather than asked on every tick. Released in Dispose: a listener left on a block the game has let go
             // of holds the whole unit alive.
             _hands = new Ownership(_world, _program, _runner);
@@ -129,6 +133,16 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world.AnchorRemoved += Removed;
             _world.AnchorClosed += Closed;
             _world.Renamed += Renamed;
+        }
+
+        /// <summary>Raised when what the hero would hold changes: the program or what is switched off, from the program's own event.</summary>
+        /// <remarks>Raised in the middle of the change, so whatever writes the hero waits until it is done.</remarks>
+        public event Action<SprocketUnit> Changed;
+
+        void Edited()
+        {
+            if (Changed != null)
+                Changed(this);
         }
 
         /// <summary>Whether any of the construct's programmable blocks working changed, which decides whether the automation runs.</summary>
@@ -356,13 +370,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             if (_hands.Due)
             {
-                var owned = _hands.Owned(_block);
+                _hands.Owned(_block);
 
                 // A hero none of the big owners may use is out of their reach, and gone from the construct as one ground off is.
                 if (_world.FindEntity(_block.EntityId) == null)
                     Removed();
-                else if (owned)
-                    Persist();
             }
 
             _buttons.Reconcile();
@@ -659,6 +671,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <inheritdoc />
         public void Dispose()
         {
+            _program.Changed -= Edited;
             _holders.Release();
 
             _world.AnchorRemoved -= Removed;

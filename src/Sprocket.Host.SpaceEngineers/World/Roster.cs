@@ -14,7 +14,10 @@ namespace Sprocket.Host.SpaceEngineers.World
     {
         readonly Dictionary<long, SprocketUnit> _units = new Dictionary<long, SprocketUnit>();
         readonly Dictionary<long, long> _moved = new Dictionary<long, long>();
-        readonly List<KeyValuePair<long, SprocketUnit>> _saving = new List<KeyValuePair<long, SprocketUnit>>();
+        readonly List<SprocketUnit> _saving = new List<SprocketUnit>();
+
+        // The Sprockets whose program or switches changed and are not written into their hero yet.
+        readonly HashSet<SprocketUnit> _unwritten = new HashSet<SprocketUnit>();
         readonly Func<Settings> _settings;
         readonly Rota _rota;
         readonly BlockKinds _kinds;
@@ -151,22 +154,36 @@ namespace Sprocket.Host.SpaceEngineers.World
                 unit.Value.Show(frame);
         }
 
-        /// <summary>Writes every one into its hero, as the world saves.</summary>
-        public void Persist()
+        /// <summary>Writes into its hero, now, every one whose change is still waiting to be written, as the world saves.</summary>
+        /// <remarks>Everything else is in its hero already, since each is written as it changes.</remarks>
+        public void Flush()
         {
-            // A copy of the list, since writing one may file it again.
             _saving.Clear();
-            _saving.AddRange(_units);
-            foreach (var filed in _saving)
-            {
-                SprocketUnit unit = filed.Value;
-                unit.Persist();
-                File(filed.Key, unit);
-                if (!unit.Lost)
-                    Spread(unit);
-            }
+            _saving.AddRange(_unwritten);
+            foreach (var unit in _saving)
+                Write(unit);
 
             _saving.Clear();
+        }
+
+        /// <summary>A Sprocket's program or switches changed: it is written into its hero once the change is done.</summary>
+        void Changed(SprocketUnit unit)
+        {
+            if (_unwritten.Add(unit))
+                _later(() => Write(unit));
+        }
+
+        /// <summary>Writes <paramref name="unit" /> into its hero and tells the clients, where it is still waiting to be.</summary>
+        void Write(SprocketUnit unit)
+        {
+            if (!_unwritten.Remove(unit))
+                return;
+
+            var was = unit.Block.EntityId;
+            unit.Persist();
+            File(Key(was), unit);
+            if (!unit.Lost)
+                Spread(unit);
         }
 
         /// <inheritdoc />
@@ -182,6 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             unit.HeroRemoved += Removed;
             unit.Gathered += Gathered;
+            unit.Changed += Changed;
         }
 
         void Removed(SprocketUnit unit)
@@ -312,6 +330,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (Dropped != null)
                 Dropped(unit);
 
+            _unwritten.Remove(unit);
             unit.Dispose();
         }
 

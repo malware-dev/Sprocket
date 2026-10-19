@@ -112,6 +112,13 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
   gives a deadline, `Leave` takes it off. A wait is a deadline; `Hold` decides how often it looks.
 - Elapsed time is `now - then` against the game's frame. Nothing counts its own wake-ups.
 
+## Writing the block
+
+- A construct's program and switches are written into its programmable block as they change: `Automation.Changed`
+  marks the unit, and the roster writes it once the change is done and tells the clients. The game reads a block's
+  storage whenever it writes the block out, for a blueprint, a copy or a save, on whichever machine is writing.
+- The world save writes only what is still waiting. What the runs are doing goes into the carrier at the save.
+
 ## Watching blocks
 
 - A block's members are actions, values, functions and signals. A value is a state; a function is a

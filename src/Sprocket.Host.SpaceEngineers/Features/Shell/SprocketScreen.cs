@@ -59,13 +59,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             MyVisualScriptLogicProvider.ShowHud(shown, 0);
         }
 
-        /// <summary>Writes the program back to the block on the way out.</summary>
+        /// <summary>Gives the heads-up display back, and offers the status app to the block, on the way out.</summary>
         protected override void OnClosed(bool isUnloading)
         {
             _unit.Showing = false;
             Hud(true);
-
-            _unit.Persist();
 
             if (!isUnloading)
                 Offer();

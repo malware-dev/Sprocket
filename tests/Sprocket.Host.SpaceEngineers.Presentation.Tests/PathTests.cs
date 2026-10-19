@@ -55,6 +55,33 @@ public class PathTests
         Assert.Equal(copy.Id, id);
     }
 
+    /// <summary>A copy's new id is written into the programmable block as it is taken, so the program there finds the copy by its id.</summary>
+    [Fact]
+    public void ACopysNewIdIsWrittenIntoTheBlock()
+    {
+        var rig = new Rig();
+        Door door = rig.Door(2, "Airlock Inner Door");
+        rig.Panel(3, "Airlock Button");
+        var sim = Simulation.On(rig);
+        sim.Tick();
+        var editor = sim.Editor;
+        editor.NewButtonSystem("Doors");
+        sim.Tick();
+        sim.Tick();
+        editor.PressAdd("task");
+        editor.PressBlock(door.Name);
+        editor.PressChoice("close");
+        editor.PressPrimary();
+        sim.Tick();
+        Assert.Contains("[ 2, ", BlockStorage.Stored(rig.Sprocket.Block, BlockStorage.ProgramKey));
+
+        Copied(rig, door, 7);
+        sim.Tick();
+        sim.Tick();
+
+        Assert.Contains("[ 7, ", BlockStorage.Stored(rig.Sprocket.Block, BlockStorage.ProgramKey));
+    }
+
     /// <summary>A block on a rotor's head is found through the rotor, and so is a copy of it.</summary>
     [Fact]
     public void ABlockOnARotorsHeadIsFoundThroughTheRotor()

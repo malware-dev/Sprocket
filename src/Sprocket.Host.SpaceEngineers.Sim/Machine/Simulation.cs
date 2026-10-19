@@ -273,7 +273,7 @@ public sealed class Simulation
     /// <summary>Writes the program, the wiring and what the world remembers out now, whatever the clock says.</summary>
     public void Save()
     {
-        _roster.Persist();
+        _roster.Flush();
         _store.SetValue(Wiring.Key, Wiring.Save(_rig));
         var remembered = new List<ConstructMemory>();
         foreach (var unit in _roster.All)

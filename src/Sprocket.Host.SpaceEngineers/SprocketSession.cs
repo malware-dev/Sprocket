@@ -712,14 +712,14 @@ namespace Sprocket.Host.SpaceEngineers
 
 
 
-        /// <summary>Writes every program into its hero as the world saves, before the entities are written out.</summary>
+        /// <summary>Writes into its hero every program whose change is still waiting, and what every Sprocket is doing into the carrier, as the world saves.</summary>
         /// <remarks>
         /// The game asks for this before writing the entities and runs <c>SaveData</c> after, so this is the last moment a
-        /// block's storage reaches the save. Costs a string per Sprocket.
+        /// block's storage reaches the save. Every other program is in its hero already, written as it changed.
         /// </remarks>
         public override MyObjectBuilder_SessionComponent GetObjectBuilder()
         {
-            _roster.Persist();
+            _roster.Flush();
             Remember();
             Carry();
             return base.GetObjectBuilder();

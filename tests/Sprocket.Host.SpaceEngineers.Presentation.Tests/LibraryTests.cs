@@ -1228,6 +1228,8 @@ public class LibraryTests
         var system = Assert.Single(screen.Editor.Program.Systems);
         Assert.True(screen.Editor.Shelf!.Holds(system), "making the blueprint stored nothing");
 
+        // Making the blueprint is written into the block a tick later; the change below comes after that.
+        screen.Run(1);
         system.Name = "Airlock Mk II";
         system.Changed = DateTime.UtcNow.AddMinutes(1);
         screen.Editor.Invalidate();

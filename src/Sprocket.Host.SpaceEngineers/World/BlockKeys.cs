@@ -43,19 +43,25 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>
         /// Gives the first id among <paramref name="keys" /> the id of <paramref name="entity" />, leaving
-        /// every key where the program put it.
+        /// every key where the program put it, and answers whether that changed it.
         /// </summary>
         /// <remarks>For a block found by its path after its id found nothing.</remarks>
-        public void Renumber(GridEntity entity, List<EntityKey> keys)
+        public bool Renumber(GridEntity entity, List<EntityKey> keys)
         {
             for (var i = 0; i < keys.Count; i++)
             {
                 if (keys[i].Cells != null || keys[i].Kind != ValueKind.Integer)
                     continue;
 
+                long had;
+                if (_world.Values.TryInteger(keys[i].Kind, keys[i].Value, out had) && had == entity.Id)
+                    return false;
+
                 keys[i] = new EntityKey(ValueKind.Integer, EntityValue.Of(entity.Id));
-                return;
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>The block the first of <paramref name="keys" /> that finds one finds, with which key it was in <paramref name="matched" />, or null where none does.</summary>

@@ -44,7 +44,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _program = program.Revision;
             if (reprogrammed || Revision == 0)
             {
-                Resolve(world, program.Refs, program.SignalRefs);
+                Revision++;
+                if (Work(world, program.Refs, program.SignalRefs))
+                    program.Rekeyed();
+
                 return true;
             }
 
@@ -54,7 +57,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             var states = _wasStates;
             _wasStates = _states;
             _states = states;
-            Work(world, program.Refs, program.SignalRefs);
+            if (Work(world, program.Refs, program.SignalRefs))
+                program.Rekeyed();
+
             if (Same(_bound, _wasBound) && Same(_states, _wasStates))
                 return false;
 
@@ -95,11 +100,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return true;
         }
 
-        /// <summary>Works out what every declaration and signal variable points at, into the maps these answer from.</summary>
-        void Work(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<SignalRef> signals)
+        /// <summary>Works out what every declaration and signal variable points at, into the maps these answer from, and answers whether it brought any key up to date.</summary>
+        bool Work(GridWorld world, IReadOnlyList<EntityRef> refs, IReadOnlyList<SignalRef> signals)
         {
             _bound.Clear();
             _states.Clear();
+            var rekeyed = false;
 
             for (var i = 0; i < refs.Count; i++)
             {
@@ -128,8 +134,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 var key = declared.Keys[matched];
                 var sure = matched == 0 || key.Cells != null || key.Kind == ValueKind.Integer;
                 _states[declared.Name] = sure ? RefState.Bound : RefState.Adrift;
-                if (key.Cells != null)
-                    world.Keys.Renumber(found, declared.Keys);
+                if (key.Cells != null && world.Keys.Renumber(found, declared.Keys))
+                    rekeyed = true;
             }
 
             for (var i = 0; i < signals.Count; i++)
@@ -149,6 +155,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
                 _states[signals[i].Name] = state;
             }
+
+            return rekeyed;
         }
 
         /// <summary>

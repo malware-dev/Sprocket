@@ -30,17 +30,16 @@ namespace Sprocket.Host.SpaceEngineers.World
         public List<string> Returned => _returned;
 
         /// <summary>
-        /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing; whether they
-        /// changed, so the automation is written again.
+        /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing.
         /// </summary>
         /// <remarks>Once paused it stays paused until a big owner resumes it, whoever owns it next.</remarks>
-        public bool Owned(IMyTerminalBlock hero)
+        public void Owned(IMyTerminalBlock hero)
         {
             _changed = false;
             var now = _world.BigOwners;
             var owners = _program.Owners;
             if (Same(owners, now))
-                return false;
+                return;
 
             GameLog.Say($"{_world.Name} belongs to {Players(now)}, after {Players(owners)}");
             if (!_program.Paused && !Shared(hero, owners, now))
@@ -55,8 +54,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             owners.Clear();
             for (var i = 0; i < now.Count; i++)
                 owners.Add(now[i]);
-
-            return true;
         }
 
         /// <summary>Whether <paramref name="before" />, the owners the automation had, holds one who is among <paramref name="now" /> or may still use <paramref name="hero" />.</summary>

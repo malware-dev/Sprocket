@@ -25,6 +25,7 @@ namespace Sprocket.Sim.Machine;
 public sealed class Store : MyModStorageComponentBase
 {
     readonly Dictionary<Guid, string> _held = new Dictionary<Guid, string>();
+    readonly Dictionary<Guid, int> _writes = new Dictionary<Guid, int>();
     readonly string _folder;
     readonly string _construct;
 
@@ -34,6 +35,7 @@ public sealed class Store : MyModStorageComponentBase
         _construct = "";
     }
 
+    /// <summary>Storage for the construct called <paramref name="construct" />, kept in a file per key.</summary>
     public Store(string construct)
     {
         _construct = construct;
@@ -57,6 +59,13 @@ public sealed class Store : MyModStorageComponentBase
         return new Store();
     }
 
+    /// <summary>How many times <paramref name="key" /> has been written, for a test that says when the block is written.</summary>
+    public int Writes(Guid key)
+    {
+        int writes;
+        return _writes.TryGetValue(key, out writes) ? writes : 0;
+    }
+
     /// <summary>Where this is being kept, for the line at the bottom of the window.</summary>
     public string Where => _folder.Length == 0 ? "nowhere - nothing is being saved" : _folder;
 
@@ -71,6 +80,9 @@ public sealed class Store : MyModStorageComponentBase
     public override void SetValue(Guid key, string value)
     {
         _held[key] = value;
+        int writes;
+        _writes.TryGetValue(key, out writes);
+        _writes[key] = writes + 1;
         Wrote(key, value);
     }
 
