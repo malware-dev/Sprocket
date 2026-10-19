@@ -66,6 +66,25 @@ public class AdminTests
         Assert.Equal(100, screen.Scene.Ship.Settings.FastestUpdate);
     }
 
+    /// <summary>The debug log is switched on and off like the other rules, and the world's runs write to it from the moment it is on until it is off.</summary>
+    [Fact]
+    public void TheDebugLogIsSwitchedOnAndOff()
+    {
+        var screen = Opened(new Settings(SettingsLayer.Empty, SettingsLayer.Empty));
+        Assert.False(screen.Shows("World rules"));
+        Assert.Null(screen.Scene.Ship.Runner.Log);
+
+        // Developer mode given outright first, so the one default left saying off is the debug log's.
+        Choose(screen, "Default (off)", "Off");
+        Choose(screen, "Default (off)", "On");
+        Assert.True(screen.Scene.Ship.Settings.World.DebugLog);
+        Assert.NotNull(screen.Scene.Ship.Runner.Log);
+
+        Choose(screen, "On", "Default (off)");
+        Assert.Null(screen.Scene.Ship.Settings.World.DebugLog);
+        Assert.Null(screen.Scene.Ship.Runner.Log);
+    }
+
     /// <summary>The default under this world gives the setting back to every world.</summary>
     [Fact]
     public void TheDefaultLeavesItToEveryWorld()

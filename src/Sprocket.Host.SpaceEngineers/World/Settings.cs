@@ -54,8 +54,14 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <remarks>One of 1, 10 and 100. What a server that cannot afford something done on every tick sets, and every program on it is held to.</remarks>
         public int FastestUpdate => World.FastestUpdate ?? DefaultFastestUpdate;
 
+        /// <summary>Whether every run writes what it does to the game's log, for finding out why one went wrong; off unless somebody asked for it.</summary>
+        public bool DebugLog => World.DebugLog ?? DefaultDebugLog;
+
         /// <summary>Whether developer mode is on in a world that leaves it: what every world says, or off.</summary>
         public bool DefaultDeveloperMode => Global.DeveloperMode ?? false;
+
+        /// <summary>Whether the debug log is on in a world that leaves it: what every world says, or off.</summary>
+        public bool DefaultDebugLog => Global.DebugLog ?? false;
 
         /// <summary>The fastest update of a world that leaves it: what every world says, or every tick.</summary>
         public int DefaultFastestUpdate => Global.FastestUpdate ?? 1;
@@ -79,6 +85,9 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             if (asked.DeveloperMode)
                 GameLog.Say("developer mode is on");
+
+            if (asked.DebugLog)
+                GameLog.Say("the debug log is on");
 
             return asked;
         }

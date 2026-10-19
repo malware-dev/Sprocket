@@ -691,6 +691,38 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.End();
         }
 
+        /// <summary><c>call open on [ door ]</c>: one step as its line of script, without its note or its attributes, for a log to name it by.</summary>
+        /// <remarks>An if or an otherwise-if is its test, and the end of an if its closing brace.</remarks>
+        public static string Line(Step step)
+        {
+            var pen = new ScriptWriter();
+            var opens = step as If;
+            var branch = step as Else;
+            if (opens != null)
+            {
+                pen.Start(Keyword.If, step.IsOff);
+                WriteTest(pen, opens.Test);
+            }
+            else if (branch != null)
+            {
+                pen.Start(Keyword.Else);
+                if (branch.Test != null)
+                {
+                    pen.Says(Keyword.If);
+                    WriteTest(pen, branch.Test);
+                }
+            }
+            else if (step is EndIf)
+                return "}";
+            else
+            {
+                pen.Start(Head(step), step.IsOff);
+                Rest(pen, step);
+            }
+
+            return pen.ToString().Trim();
+        }
+
         /// <summary>The word a step starts with.</summary>
         static Keyword Head(Step step)
         {

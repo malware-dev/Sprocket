@@ -3,7 +3,7 @@ using Sprocket.Wiki.Reading;
 
 namespace Sprocket.Wiki;
 
-/// <summary>Writes the project's GitHub wiki from the codex: <c>dotnet run --project tools/Sprocket.Wiki -- &lt;wiki folder&gt;</c>.</summary>
+/// <summary>Writes the project's GitHub wiki from the codex and docs/wiki: <c>dotnet run --project tools/Sprocket.Wiki -- &lt;wiki folder&gt;</c>.</summary>
 public static class Program
 {
     /// <summary>Writes the wiki into the folder named by the one argument, a clone of the wiki's repository or an empty folder.</summary>
@@ -30,8 +30,8 @@ public static class Program
             var catalog = new Catalog(glyphs, Path.Combine(repository, "art", "thumbnail", "sprocket-mark.png"));
 
             var folder = Path.GetFullPath(args[0]);
-            new Site(codex, catalog).Write(folder);
-            Console.WriteLine("wrote " + codex.Terms.Count + " pages into " + folder);
+            new Site(codex, catalog, Path.Combine(repository, "docs", "wiki")).Write(folder);
+            Console.WriteLine("wrote the codex's " + codex.Terms.Count + " pages and the wiki's own into " + folder);
             return 0;
         }
         catch (InvalidDataException e)

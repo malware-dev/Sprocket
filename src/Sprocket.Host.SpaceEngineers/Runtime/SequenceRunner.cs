@@ -417,13 +417,22 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!live)
             {
                 RefusedCount++;
+                _owner.Log?.Refused(this, tick, RunRefusal.Unpowered);
                 return;
             }
 
             // The switch is not refused to a run by hand; an empty slot is, as nothing can fill it mid-run.
-            if ((!CanRun && !byHand) || _faults.Found.Waits)
+            if (!CanRun && !byHand)
             {
                 RefusedCount++;
+                _owner.Log?.Refused(this, tick, RunRefusal.Off);
+                return;
+            }
+
+            if (_faults.Found.Waits)
+            {
+                RefusedCount++;
+                _owner.Log?.Refused(this, tick, RunRefusal.EmptySlot);
                 return;
             }
 
@@ -431,11 +440,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             {
                 SkippedCount++;
                 LastSkippedTick = tick;
+                _owner.Log?.Refused(this, tick, RunRefusal.Busy);
                 return;
             }
 
             _memory.ByHand = byHand;
-            Start(tick);
+            Start(tick, byHand ? RunStart.Hand : RunStart.Call);
         }
 
         /// <summary>Whether the run under way was started by hand, which lets it run where its sequence is switched off.</summary>
@@ -454,17 +464,21 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _memory.Looked = tick;
 
             if (!CanRun || _faults.Found.Waits)
+            {
+                _owner.Log?.Refused(this, tick, CanRun ? RunRefusal.EmptySlot : RunRefusal.Off);
                 return;
+            }
 
             if (IsRunning)
             {
                 SkippedCount++;
                 LastSkippedTick = tick;
+                _owner.Log?.Refused(this, tick, RunRefusal.Busy);
                 return;
             }
 
             _memory.ByHand = false;
-            Start(tick);
+            Start(tick, RunStart.Trigger);
         }
 
         /// <summary>
@@ -520,6 +534,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             // Looked at on the first tick the rota runs: the world has only just loaded, and what the
             // run is waiting for is answered by the blocks as they are then.
             _rota.At(_busy, int.MinValue);
+            _owner.Log?.Resumed(this, _owner.CurrentTick, step);
         }
 
         /// <summary>
@@ -544,6 +559,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (!running)
                 return;
 
+            _owner.Log?.Stopped(this, _owner.CurrentTick, at, by, sequence);
             StoppedBy = by;
             StoppedAt = at;
             StoppedFrom = sequence;
@@ -627,8 +643,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _workings.Listed(_workings.Compile(step, _bindings));
         }
 
-        void Start(int tick)
+        void Start(int tick, RunStart how)
         {
+            _owner.Log?.Started(this, tick, how);
             LastFiredTick = tick;
             FiredCount++;
             IsRunning = true;
@@ -651,6 +668,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (_memory.Step < 0 || _memory.Step >= _sequence.Steps.Count)
                 return;
 
+            _owner.Log?.Entered(this, _owner.CurrentTick, _memory.Step);
             var wait = _sequence.Steps[_memory.Step] as Wait;
             if (wait != null)
                 _memory.WaitTicks = wait.Ticks;
@@ -700,6 +718,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     }
 
                     Execute(_memory.Step);
+                    if (needed != null)
+                        _owner.Log?.Acted(this, _memory.Looked, _memory.Step, needed);
 
                     // Refused on the spot: the run ends here and says which block.
                     var refused = Refused(_memory.Step);
@@ -786,6 +806,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                             _memory.HoldSince = _memory.Looked;
                             _memory.HoldExpected = Expected();
                             _memory.Holding = true;
+                            _owner.Log?.Holding(this, _memory.Looked, _memory.Step, _memory);
                         }
 
                         // A block sent the other way by something else ends the run where it stands. Looked for once a
@@ -795,6 +816,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         {
                             Stop();
                             _faults.Quit = quit;
+                            _owner.Log?.Faulted(this, _memory.Looked, quit);
                             return;
                         }
 
@@ -802,6 +824,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                         return;
                     }
 
+                    _owner.Log?.Held(this, _memory.Looked, _memory.Step, _memory.Holding ? _memory.HoldSince : _memory.Looked);
                     Release();
                     _memory.Started.Clear();
                     _memory.Holding = false;
@@ -812,9 +835,12 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 }
 
                 if (_memory.WaitUntil < 0)
+                {
                     // A tick of the game's, so a wait lasts as long as it says however often the runner is woken. Pinned
                     // when the step is first reached, since a run resumed from a save is entered before it knows the tick.
                     _memory.WaitUntil = _memory.Looked + _memory.WaitTicks;
+                    _owner.Log?.Waiting(this, _memory.Looked, _memory.Step, _memory.WaitUntil);
+                }
 
                 if (_memory.Looked < _memory.WaitUntil)
                 {
@@ -826,6 +852,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 Step();
             }
 
+            _owner.Log?.Finished(this, _memory.Looked);
             Finish();
         }
 
@@ -856,7 +883,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     return false;
                 }
 
-                if (Holds(tested, test))
+                var holds = Holds(tested, test);
+                _owner.Log?.Tested(this, _memory.Looked, at, tested, holds);
+                if (holds)
                 {
                     Go(at + 1);
                     return true;
@@ -946,6 +975,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             Stop();
             _faults.Met(fault);
+            _owner.Log?.Faulted(this, _memory.Looked, fault);
             _owner.Faulted(_sequence, _instance, fault);
         }
 

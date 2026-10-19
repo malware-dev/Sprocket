@@ -16,6 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.World
             return Relations.Holds(Read(), relation, operand);
         }
 
+        /// <summary>What the block holds now as a person reads it, a value that is one of a list by its name.</summary>
+        public virtual string Said()
+        {
+            return Read().Said;
+        }
+
         /// <summary>What the block holds now as a number, for a sum; 0 for a value that is no number.</summary>
         public double Number()
         {

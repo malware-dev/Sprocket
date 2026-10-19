@@ -65,7 +65,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 Spacing = 16f,
                 Children =
                 {
-                    new Label { Style = Styles.Heading, Text = texts.AdminRules },
                     Setting(texts.AdminFastest, texts.AdminFastestAbout, Choose(texts, world,
                         new[] { texts.AdminEveryTick, texts.AdminEveryTen, texts.AdminEveryHundred },
                         new[] { texts.AdminDefaultEveryTick, texts.AdminDefaultEveryTen, texts.AdminDefaultEveryHundred },
@@ -75,9 +74,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                     Setting(texts.AdminDeveloper, texts.AdminDeveloperAbout, Choose(texts, world,
                         new[] { texts.AdminOn, texts.AdminOff },
                         new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
-                        layer => layer.DeveloperMode.HasValue ? Developer(layer.DeveloperMode.Value) : -1,
-                        settings => Developer(settings.DefaultDeveloperMode),
-                        (layer, at) => layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0)))
+                        layer => layer.DeveloperMode.HasValue ? Switch(layer.DeveloperMode.Value) : -1,
+                        settings => Switch(settings.DefaultDeveloperMode),
+                        (layer, at) => layer.WithDeveloperMode(at < 0 ? (bool?)null : at == 0))),
+                    Setting(texts.AdminDebugLog, texts.AdminDebugLogAbout, Choose(texts, world,
+                        new[] { texts.AdminOn, texts.AdminOff },
+                        new[] { texts.AdminDefaultOn, texts.AdminDefaultOff },
+                        layer => layer.DebugLog.HasValue ? Switch(layer.DebugLog.Value) : -1,
+                        settings => Switch(settings.DefaultDebugLog),
+                        (layer, at) => layer.WithDebugLog(at < 0 ? (bool?)null : at == 0)))
                 }
             };
         }
@@ -137,8 +142,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             }
         }
 
-        /// <summary>Where developer mode being <paramref name="on" /> stands among its words: on, then off.</summary>
-        static int Developer(bool on)
+        /// <summary>Where a switch being <paramref name="on" /> stands among its words: on, then off.</summary>
+        static int Switch(bool on)
         {
             return on ? 0 : 1;
         }

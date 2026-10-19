@@ -4,7 +4,7 @@ using Sprocket.Wiki.Writing;
 
 namespace Sprocket.Wiki;
 
-/// <summary>The project's GitHub wiki, written whole from the codex.</summary>
+/// <summary>The project's GitHub wiki, written whole from the codex and the pages written for the wiki alone.</summary>
 public sealed class Site
 {
     /// <summary>The page GitHub opens a wiki at.</summary>
@@ -13,13 +13,24 @@ public sealed class Site
     readonly Codex _codex;
     readonly Catalog _catalog;
     readonly Page _page;
+    readonly string _own;
 
     /// <summary>The wiki for <paramref name="codex" />, its pictures found in <paramref name="catalog" />.</summary>
-    public Site(Codex codex, Catalog catalog)
+    public Site(Codex codex, Catalog catalog) : this(codex, catalog, null)
+    {
+    }
+
+    /// <summary>
+    /// The wiki for <paramref name="codex" />, its pictures found in <paramref name="catalog" />, with the pages in
+    /// <paramref name="own" />, or none where it is null: pages for the wiki alone, which the game never shows.
+    /// </summary>
+    /// <remarks>Each of those is GitHub markdown, copied as it is, and named for its file.</remarks>
+    public Site(Codex codex, Catalog catalog, string own)
     {
         _codex = codex;
         _catalog = catalog;
         _page = new Page(new Inline(codex, catalog));
+        _own = own;
     }
 
     /// <summary>The name of <paramref name="term" />'s page in the wiki, which GitHub shows as its title with each hyphen a space.</summary>
@@ -51,11 +62,25 @@ public sealed class Site
             }
         }
 
+        var own = new List<string>();
+        if (_own != null && Directory.Exists(_own))
+        {
+            foreach (var file in Directory.GetFiles(_own, "*.md").OrderBy(name => name, StringComparer.Ordinal))
+            {
+                var name = Path.GetFileName(file);
+                if (pages.Keys.Any(page => string.Equals(page, name, StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidDataException(name + " is a page of the codex as well as one of the wiki's own");
+
+                pages.Add(name, File.ReadAllText(file));
+                own.Add(Path.GetFileNameWithoutExtension(name));
+            }
+        }
+
         Clear(folder);
         foreach (var page in pages)
             File.WriteAllText(Path.Combine(folder, page.Key), page.Value);
 
-        File.WriteAllText(Path.Combine(folder, Sidebar.File), Sidebar.Of(_codex));
+        File.WriteAllText(Path.Combine(folder, Sidebar.File), Sidebar.Of(_codex, own));
         _catalog.Write(folder);
     }
 

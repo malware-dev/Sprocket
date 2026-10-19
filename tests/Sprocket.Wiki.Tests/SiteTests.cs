@@ -52,6 +52,45 @@ public class SiteTests
         }
     }
 
+    /// <summary>The wiki's own pages are copied as they are and listed after the codex in the sidebar, each named for its file.</summary>
+    [Fact]
+    public void TheWikisOwnPagesAreWrittenAndListed()
+    {
+        var folder = Given.Folder();
+        try
+        {
+            new Site(Given.Codex, Given.Catalog(), Path.Combine(Given.Repository, "docs", "wiki")).Write(folder);
+
+            Assert.Equal(File.ReadAllText(Path.Combine(Given.Repository, "docs", "wiki", "Settings.md")), File.ReadAllText(Path.Combine(folder, "Settings.md")));
+            var sidebar = File.ReadAllText(Path.Combine(folder, "_Sidebar.md"));
+            Assert.EndsWith("**[Settings](Settings)**\n", sidebar);
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    /// <summary>A page of the wiki's own named as a page of the codex stops the wiki being written, rather than one losing to the other.</summary>
+    [Fact]
+    public void AnOwnPageNamedAsATermStops()
+    {
+        var folder = Given.Folder();
+        var own = Given.Folder();
+        try
+        {
+            File.WriteAllText(Path.Combine(own, "home.md"), "Mine.");
+
+            var stopped = Assert.Throws<InvalidDataException>(() => new Site(Given.Codex, Given.Catalog(), own).Write(folder));
+            Assert.Contains("home.md", stopped.Message);
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+            Directory.Delete(own, true);
+        }
+    }
+
     /// <summary>A folder holding anything but a wiki is left as it is, so a mistyped folder is never emptied.</summary>
     [Fact]
     public void AFolderThatIsNoWikiIsLeftAlone()

@@ -2646,10 +2646,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Changes apply at once to everyone on this world.</value>
     <comment>The line under the title of the admin settings dialog.</comment>
   </data>
-  <data name="Sprocket.Admin.Rules" xml:space="preserve">
-    <value>World rules</value>
-    <comment>In the admin settings, the heading over the world rules on both tabs.</comment>
-  </data>
   <data name="Sprocket.Admin.Fastest" xml:space="preserve">
     <value>Fastest update</value>
     <comment>In the admin settings, the name of the setting that caps how often timers and block checks repeat, on both tabs.</comment>
@@ -2677,6 +2673,14 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Admin.DeveloperAbout" xml:space="preserve">
     <value>Show each automation's script as text you can edit, and add extra tools to screens. Meant for testing and making content.</value>
     <comment>In the admin settings, the line under the name of the developer mode setting.</comment>
+  </data>
+  <data name="Sprocket.Admin.DebugLog" xml:space="preserve">
+    <value>Debug log</value>
+    <comment>In the admin settings, the name of the debug log setting, on both tabs.</comment>
+  </data>
+  <data name="Sprocket.Admin.DebugLogAbout" xml:space="preserve">
+    <value>Write each step every automation takes to the game's log, for finding out why something went wrong.</value>
+    <comment>In the admin settings, the line under the name of the debug log setting.</comment>
   </data>
   <data name="Sprocket.Admin.Close" xml:space="preserve">
     <value>Close</value>

@@ -11,6 +11,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         const string Fastest = "fastestUpdate";
 
+        const string Debug = "debugLog";
+
         /// <summary>A level saying nothing.</summary>
         public static readonly SettingsLayer Empty = new SettingsLayer(null, null);
 
@@ -18,10 +20,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         public static readonly int[] Updates = { 1, 10, 100 };
 
         /// <summary>A level giving the values that are not null, and leaving the rest to the level below.</summary>
-        public SettingsLayer(bool? developerMode, int? fastestUpdate)
+        public SettingsLayer(bool? developerMode, int? fastestUpdate, bool? debugLog = null)
         {
             DeveloperMode = developerMode;
             FastestUpdate = fastestUpdate.HasValue ? Nearest(fastestUpdate.Value) : (int?)null;
+            DebugLog = debugLog;
         }
 
         /// <summary>Whether the developer tools are on, or null where this level leaves it.</summary>
@@ -30,22 +33,31 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>The fewest ticks between two runs of anything on a repeat, one of 1, 10 and 100, or null where this level leaves it.</summary>
         public int? FastestUpdate { get; }
 
+        /// <summary>Whether every run writes what it does to the game's log, or null where this level leaves it.</summary>
+        public bool? DebugLog { get; }
+
         /// <summary>This level with developer mode given as <paramref name="on" />, or left where it is null.</summary>
         public SettingsLayer WithDeveloperMode(bool? on)
         {
-            return new SettingsLayer(on, FastestUpdate);
+            return new SettingsLayer(on, FastestUpdate, DebugLog);
         }
 
         /// <summary>This level with the fastest update given as <paramref name="ticks" />, or left where it is null.</summary>
         public SettingsLayer WithFastestUpdate(int? ticks)
         {
-            return new SettingsLayer(DeveloperMode, ticks);
+            return new SettingsLayer(DeveloperMode, ticks, DebugLog);
+        }
+
+        /// <summary>This level with the debug log given as <paramref name="on" />, or left where it is null.</summary>
+        public SettingsLayer WithDebugLog(bool? on)
+        {
+            return new SettingsLayer(DeveloperMode, FastestUpdate, on);
         }
 
         /// <summary>Whether this level says the same as <paramref name="other" /> about every setting.</summary>
         public bool Same(SettingsLayer other)
         {
-            return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate;
+            return other != null && DeveloperMode == other.DeveloperMode && FastestUpdate == other.FastestUpdate && DebugLog == other.DebugLog;
         }
 
         /// <summary>The one of 1, 10 and 100 nearest <paramref name="ticks" />, the smaller where two are as near.</summary>
@@ -82,7 +94,10 @@ namespace Sprocket.Host.SpaceEngineers.World
                     GameLog.Say($"{where} gives {Fastest} as {ticks}, which is not 1, 10 or 100; it is taken as {fastestUpdate}");
             }
 
-            return new SettingsLayer(developerMode, fastestUpdate);
+            bool debug;
+            bool? debugLog = ini.Get(section, Debug).TryGetBoolean(out debug) ? debug : (bool?)null;
+
+            return new SettingsLayer(developerMode, fastestUpdate, debugLog);
         }
 
         /// <summary>Writes this level into <paramref name="section" /> of <paramref name="ini" />: each value it gives, and none for each it leaves.</summary>
@@ -97,6 +112,11 @@ namespace Sprocket.Host.SpaceEngineers.World
                 ini.Set(section, Fastest, FastestUpdate.Value);
             else
                 ini.Delete(section, Fastest);
+
+            if (DebugLog.HasValue)
+                ini.Set(section, Debug, DebugLog.Value);
+            else
+                ini.Delete(section, Debug);
         }
     }
 }

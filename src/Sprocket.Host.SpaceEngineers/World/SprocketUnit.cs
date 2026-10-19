@@ -107,6 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _world = new GridWorld(block, kinds);
             _runner = new AutomationRunner(_program, _world, rota);
             _runner.FastestUpdate = settings?.FastestUpdate ?? 1;
+            Logged(settings != null && settings.DebugLog);
             _keys = new SlotKeys(_program, _runner);
             _buttons = new WiredButtons(_world, _program, _runner, _keys, block);
             _reach = new UnreachableSequences(_world, _program, _runner, _buttons);
@@ -266,11 +267,21 @@ namespace Sprocket.Host.SpaceEngineers.World
         public void Apply(Settings settings)
         {
             _runner.FastestUpdate = settings.FastestUpdate;
+            Logged(settings.DebugLog);
             _developerMode = settings.DeveloperMode;
             if (_editor == null)
                 return;
 
             _editor.DeveloperMode = _developerMode;
+        }
+
+        /// <summary>Gives the runner a log of what its runs do where <paramref name="on" />, keeping the one it has, and takes it away otherwise.</summary>
+        void Logged(bool on)
+        {
+            if (!on)
+                _runner.Log = null;
+            else if (_runner.Log == null)
+                _runner.Log = new RunLog(GameLog.Say, () => _block.CubeGrid?.CustomName ?? "");
         }
 
         /// <summary>The settings in this world of the player at the screen, which the editor is given.</summary>

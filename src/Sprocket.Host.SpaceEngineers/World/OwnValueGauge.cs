@@ -27,5 +27,17 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             return _being.Read(_block, _options, _seen);
         }
+
+        /// <inheritdoc />
+        /// <remarks>A value that is one of a list is held as its place in the list, and said as the name there.</remarks>
+        public override string Said()
+        {
+            var read = Read();
+            if (_being.Kind != ValueKind.Name)
+                return read.Said;
+
+            var at = read.Whole;
+            return at >= 0 && at < _being.Names.Count ? _being.Names[(int)at] : read.Said;
+        }
     }
 }

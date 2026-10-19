@@ -2001,9 +2001,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Admin.Line" xml:space="preserve">
     <value>Endringer gjelder med én gang for alle i denne verdenen.</value>
   </data>
-  <data name="Sprocket.Admin.Rules" xml:space="preserve">
-    <value>Regler for verdenen</value>
-  </data>
   <data name="Sprocket.Admin.Fastest" xml:space="preserve">
     <value>Raskeste oppdatering</value>
   </data>
@@ -2024,6 +2021,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Admin.DeveloperAbout" xml:space="preserve">
     <value>Vis skriptet til hver automasjon som tekst du kan redigere, og legg til ekstra verktøy på skjermene. Ment for testing og for å lage innhold.</value>
+  </data>
+  <data name="Sprocket.Admin.DebugLog" xml:space="preserve">
+    <value>Feilsøkingslogg</value>
+  </data>
+  <data name="Sprocket.Admin.DebugLogAbout" xml:space="preserve">
+    <value>Skriv hvert steg hver automasjon tar til spillets logg, for å finne ut hvorfor noe gikk galt.</value>
   </data>
   <data name="Sprocket.Admin.Close" xml:space="preserve">
     <value>Lukk</value>

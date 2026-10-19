@@ -30,6 +30,19 @@ public class SettingsTests
         Assert.False(Settings.Of(new Settings(false).Written()).DeveloperMode);
     }
 
+    /// <summary>The debug log is off unless a file says otherwise, the world's file winning, and it is handed to a client as it is.</summary>
+    [Fact]
+    public void TheDebugLogIsOffUnlessSaid()
+    {
+        Assert.False(Settings.From(null, null).DebugLog);
+        Assert.True(Settings.From("[Sprocket]\ndebugLog=true\n", null).DebugLog);
+        Assert.False(Settings.From("[Sprocket]\ndebugLog=true\n", "[Sprocket]\ndebugLog=false\n").DebugLog);
+
+        var written = new Settings(SettingsLayer.Empty, new SettingsLayer(null, null, true));
+        Assert.True(Settings.Of(written.Written()).DebugLog);
+        Assert.True(Settings.Of(written.Written()).World.Same(written.World));
+    }
+
     /// <summary>Each level keeps what it says apart, so a world leaving a setting can be told from one giving the same value.</summary>
     [Fact]
     public void EachLevelKeepsWhatItSays()

@@ -91,6 +91,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public int FastestUpdate { get; set; } = 1;
 
+        /// <summary>Where every run of this program writes what it does, or null, which is what the world's debug log being off means.</summary>
+        /// <remarks>Set by whatever owns the runner, from the world's settings. Each place a run would write a line costs it one null check while this is null.</remarks>
+        public RunLog Log { get; set; }
+
         /// <summary>Whether a screen is open on this construct, which is who <see cref="Look" /> is for.</summary>
         /// <remarks>Set by the screen as it opens and closes.</remarks>
         public bool Looking { get; set; }
@@ -203,6 +207,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// </remarks>
         public void Fire(AutomationSystem system, Trigger trigger, SystemInstance instance)
         {
+            Log?.Fired(system, trigger, instance, CurrentTick);
             var run = trigger.Does as Run;
             if (run != null)
             {
