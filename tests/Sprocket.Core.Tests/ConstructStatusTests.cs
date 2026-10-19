@@ -136,8 +136,8 @@ public class ConstructStatusTests
         Assert.Equal(StatusLevel.Problem, status.Items[0].Level);
         Assert.Equal(1, status.Problems);
         Assert.Equal(0, status.Normal);
-        Assert.Contains(status.Items, item => item.System == hangar);
-        Assert.Contains(status.Items, item => item.System == airlock);
+        Assert.Contains(status.Items, item => item.Logic == hangar.Name);
+        Assert.Contains(status.Items, item => item.Logic == airlock.Name);
     }
 
     /// <summary>An installation of a blueprint is named on its own, and one switched off comes after it.</summary>
@@ -158,9 +158,10 @@ public class ConstructStatusTests
         var status = Look(ship);
 
         Assert.Equal(2, status.Items.Count);
-        Assert.Same(airlock.Instances[0], status.Items[0].Instance);
+        Assert.True(status.Items[0].Blueprint);
+        Assert.Equal(1, status.Items[0].Position);
         Assert.Equal(StatusLevel.Warning, status.Items[0].Level);
-        Assert.Same(airlock.Instances[1], status.Items[1].Instance);
+        Assert.Equal(2, status.Items[1].Position);
         Assert.Equal(StatusLevel.Off, status.Items[1].Level);
     }
 
@@ -179,7 +180,9 @@ public class ConstructStatusTests
 
         Assert.Single(status.Items);
         Assert.Equal(StatusLevel.Problem, status.Items[0].Level);
-        Assert.Same(airlock.Halt, status.Items[0].Halt);
+        Assert.True(status.Items[0].Halted);
+        Assert.Equal(SequenceProblem.MissingTarget, status.Items[0].Fault.Problem);
+        Assert.Equal("Outer Door", status.Items[0].Fault.Which);
         Assert.Equal(1, status.Problems);
     }
 
@@ -220,9 +223,9 @@ public class ConstructStatusTests
         Look(ship, status, 20);
 
         Assert.Equal(2, status.Items.Count);
-        Assert.Same(hangar, status.Items[0].System);
+        Assert.Equal("Hangar", status.Items[0].Logic);
         Assert.Equal(20, status.Items[0].Since);
-        Assert.Same(airlock, status.Items[1].System);
+        Assert.Equal("Airlock", status.Items[1].Logic);
         Assert.Equal(10, status.Items[1].Since);
     }
 

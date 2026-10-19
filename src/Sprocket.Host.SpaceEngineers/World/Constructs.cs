@@ -1,0 +1,75 @@
+using System.Collections.Generic;
+using Sandbox.ModAPI;
+using VRage.Game.ModAPI;
+
+namespace Sprocket.Host.SpaceEngineers.World
+{
+    /// <summary>The constructs of the world, each the grids joined by mechanical blocks, and the Sprockets on each.</summary>
+    public sealed class Constructs
+    {
+        readonly Roster _roster;
+        readonly List<IMyCubeGrid> _group = new List<IMyCubeGrid>();
+
+        /// <summary>The constructs of a world whose Sprockets <paramref name="roster" /> holds.</summary>
+        public Constructs(Roster roster)
+        {
+            _roster = roster;
+        }
+
+        /// <summary>Fills <paramref name="into" /> with every Sprocket mechanically connected to <paramref name="grid" />.</summary>
+        /// <remarks>Allocates nothing.</remarks>
+        public void Members(IMyCubeGrid grid, List<SprocketUnit> into)
+        {
+            into.Clear();
+            if (grid == null || MyAPIGateway.GridGroups == null)
+                return;
+
+            _group.Clear();
+            MyAPIGateway.GridGroups.GetGroup(grid, GridLinkTypeEnum.Mechanical, _group);
+
+            foreach (SprocketUnit unit in _roster.All)
+            {
+                IMyTerminalBlock owner = unit.Block;
+                if (owner == null || owner.CubeGrid == null)
+                    continue;
+
+                if (_group.Contains(owner.CubeGrid))
+                    into.Add(unit);
+            }
+        }
+
+        /// <summary>
+        /// The grid that stands for the construct <paramref name="grid" /> is part of: the oldest of its grids, the one with the
+        /// lowest entity id, which every machine finds the same; or null.
+        /// </summary>
+        public IMyCubeGrid Founding(IMyCubeGrid grid)
+        {
+            if (grid == null || MyAPIGateway.GridGroups == null)
+                return grid;
+
+            _group.Clear();
+            MyAPIGateway.GridGroups.GetGroup(grid, GridLinkTypeEnum.Mechanical, _group);
+
+            var founding = grid;
+            foreach (var member in _group)
+            {
+                if (member.EntityId < founding.EntityId)
+                    founding = member;
+            }
+
+            return founding;
+        }
+
+        /// <summary>Fills <paramref name="into" /> with the Sprockets of the construct whose founding grid is <paramref name="construct" />, and answers its name; or null where the grid is gone.</summary>
+        public string Of(long construct, List<SprocketUnit> into)
+        {
+            into.Clear();
+            var grid = MyAPIGateway.Entities?.GetEntityById(construct) as IMyCubeGrid;
+            if (grid == null)
+                return null;
+
+            Members(grid, into);
+            return grid.CustomName ?? "";
+        }
+    }
+}

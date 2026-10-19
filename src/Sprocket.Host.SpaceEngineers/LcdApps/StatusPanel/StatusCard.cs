@@ -4,6 +4,7 @@ using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Sequences;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
@@ -70,18 +71,18 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>What the installation is called: its own name where it is one of a blueprint's, and its logic system's otherwise.</summary>
         static string Title(Texts texts, StatusItem item)
         {
-            if (item.System == null)
+            if (item.Level == StatusLevel.Paused)
                 return texts.PausedHeading;
 
-            return item.Instance == null
-                ? SystemSummary.Describe(texts, item.Bindings, item.System)
-                : SystemSummary.DescribeInstance(texts, item.Bindings, item.System, item.Instance);
+            return item.Blueprint
+                ? SystemSummary.DescribeInstance(texts, item.Installation, item.Position)
+                : SystemSummary.Describe(texts, item.Logic, item.Number);
         }
 
         /// <summary>The logic system an installation of a blueprint belongs to, or nothing where its title already names it.</summary>
         static string Over(Texts texts, StatusItem item)
         {
-            return item.System == null || item.Instance == null ? "" : SystemSummary.Describe(texts, item.Bindings, item.System);
+            return item.Blueprint ? SystemSummary.Describe(texts, item.Logic, item.Number) : "";
         }
 
         /// <summary>What is wrong with the installation, naming the step and the block where they are known.</summary>
@@ -93,10 +94,11 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             if (item.Level == StatusLevel.Off)
                 return texts.PanelSwitchedOff;
 
-            if (item.Halt != null)
-                return SequenceText.Stopped(texts, item.Halt, item.System, false);
+            var fault = item.Fault;
+            if (item.Halted)
+                return SequenceText.Stopped(texts, new Halt(fault.Problem, 0, fault.Step, fault.Because, fault.Which), item.Sequence, item.Row, false);
 
-            return SequenceText.Failing(texts, item.Fault, item.Sequence);
+            return SequenceText.Failing(texts, fault, item.Sequence, item.Alone, item.Row);
         }
     }
 }

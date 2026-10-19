@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -78,7 +79,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 
             if (program.Paused)
             {
-                Found(new StatusItem { Level = StatusLevel.Paused, Bindings = runner.Bindings });
+                Found(new StatusItem { Level = StatusLevel.Paused, Logic = "", Installation = "", Sequence = "", Fault = SequenceFault.None });
                 _troubled += program.Systems.Count;
                 return;
             }
@@ -88,6 +89,22 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 if (Look(runner, system))
                     _troubled++;
             }
+        }
+
+        /// <summary>The installations that want looking at as a list of their own, for a report to a client.</summary>
+        public StatusItem[] Copy()
+        {
+            return _items.ToArray();
+        }
+
+        /// <summary>Takes what the server says of the construct called <paramref name="construct" />: <paramref name="systems" /> logic systems, <paramref name="normal" /> of them normal, and <paramref name="items" />.</summary>
+        public void Hear(string construct, int systems, int normal, StatusItem[] items)
+        {
+            _found.Clear();
+            _found.AddRange(items);
+            _systems = systems;
+            _troubled = systems - normal;
+            End(construct);
         }
 
         /// <summary>Ends the look begun, for the construct called <paramref name="construct" />.</summary>
@@ -113,15 +130,16 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>Adds an item for each installation of <paramref name="system" /> that wants looking at, and answers whether any did.</summary>
         bool Look(AutomationRunner runner, AutomationSystem system)
         {
+            var named = SystemSummary.Named(runner.Bindings, system);
             if (system.Halt != null)
             {
-                Found(new StatusItem { Level = StatusLevel.Problem, System = system, Halt = system.Halt, Bindings = runner.Bindings });
+                Found(Halted(Item(StatusLevel.Problem, system, named, null), system, system.Halt));
                 return true;
             }
 
             if (!system.Enabled)
             {
-                Found(new StatusItem { Level = StatusLevel.Off, System = system, Bindings = runner.Bindings });
+                Found(Item(StatusLevel.Off, system, named, null));
                 return true;
             }
 
@@ -131,14 +149,14 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 var instance = system.IsBlueprint ? use : null;
                 if (use.Halt != null)
                 {
-                    Found(new StatusItem { Level = StatusLevel.Problem, System = system, Instance = instance, Halt = use.Halt, Bindings = runner.Bindings });
+                    Found(Halted(Item(StatusLevel.Problem, system, named, instance), system, use.Halt));
                     any = true;
                     continue;
                 }
 
                 if (!use.Enabled)
                 {
-                    Found(new StatusItem { Level = StatusLevel.Off, System = system, Instance = instance, Bindings = runner.Bindings });
+                    Found(Item(StatusLevel.Off, system, named, instance));
                     any = true;
                     continue;
                 }
@@ -151,19 +169,43 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 if (failing == null)
                     continue;
 
-                Found(new StatusItem
-                {
-                    Level = fault.IsWarning ? StatusLevel.Warning : StatusLevel.Problem,
-                    System = system,
-                    Instance = instance,
-                    Sequence = failing,
-                    Fault = fault,
-                    Bindings = runner.Bindings
-                });
+                var item = Item(fault.IsWarning ? StatusLevel.Warning : StatusLevel.Problem, system, named, instance);
+                item.Fault = fault;
+                item.Sequence = failing.HasName ? failing.Name : "";
+                item.Alone = failing.IsAlone;
+                item.Row = SequenceText.Row(failing, fault.Step);
+                Found(item);
                 any = true;
             }
 
             return any;
+        }
+
+        /// <summary>An item at <paramref name="level" /> naming <paramref name="system" />, called <paramref name="named" />, and <paramref name="instance" /> where it is one of a blueprint's.</summary>
+        static StatusItem Item(StatusLevel level, AutomationSystem system, string named, SystemInstance instance)
+        {
+            return new StatusItem
+            {
+                Level = level,
+                Logic = named,
+                Number = system.Id,
+                Blueprint = instance != null,
+                Installation = instance != null && instance.HasName ? instance.Name : "",
+                Position = instance == null ? 0 : SystemSummary.Position(system, instance),
+                Sequence = "",
+                Fault = SequenceFault.None
+            };
+        }
+
+        /// <summary><paramref name="item" />, switched off because it could not work, as <paramref name="halt" /> recorded it.</summary>
+        static StatusItem Halted(StatusItem item, AutomationSystem system, Halt halt)
+        {
+            var sequence = system.FindSequence(halt.Sequence);
+            item.Halted = true;
+            item.Fault = new SequenceFault(halt.Problem, halt.Step, halt.Because, halt.Block);
+            item.Sequence = sequence != null && sequence.HasName ? sequence.Name : "";
+            item.Row = SequenceText.Row(sequence, halt.Step);
+            return item;
         }
 
         /// <summary>The first of a system's sequences, or of its triggers' own acts, with a warning on <paramref name="use" />, and what, or null.</summary>

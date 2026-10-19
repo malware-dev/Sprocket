@@ -18,32 +18,49 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <remarks>Called when a screen is built, never every tick: it walks names and splits strings.</remarks>
         public static string Describe(Texts texts, Bindings bindings, AutomationSystem system)
         {
+            return Describe(texts, Named(bindings, system), system.Id);
+        }
+
+        /// <summary>What to call a system named <paramref name="named" />, as <see cref="Named" /> gives it, and numbered <paramref name="number" />.</summary>
+        public static string Describe(Texts texts, string named, int number)
+        {
+            return named.Length > 0 ? named : Template.Fill(texts.SystemsNumbered, "number", number.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>What the player called this system, or what its blocks suggest, or empty where neither says anything.</summary>
+        /// <remarks>Walks names and splits strings, so it is asked when something changes, never every tick.</remarks>
+        public static string Named(Bindings bindings, AutomationSystem system)
+        {
             if (system.HasName)
                 return system.Name;
 
             var names = new List<string>();
             CollectEntityNames(bindings, system, names);
-
-            var common = CommonPrefix(names);
-            if (common.Length > 0)
-                return common;
-
-            return Template.Fill(texts.SystemsNumbered, "number", system.Id.ToString());
+            return CommonPrefix(names);
         }
 
         /// <summary>What an installation of a system is called.</summary>
         public static string DescribeInstance(Texts texts, Bindings bindings, AutomationSystem system,
             SystemInstance instance)
         {
-            if (instance.HasName)
-                return instance.Name;
+            return DescribeInstance(texts, instance.HasName ? instance.Name : "", Position(system, instance));
+        }
 
+        /// <summary>What an installation called <paramref name="named" />, or with no name where it is empty, and listed <paramref name="position" />th is called.</summary>
+        public static string DescribeInstance(Texts texts, string named, int position)
+        {
+            return named.Length > 0 ? named : Template.Fill(texts.SystemsInstance, "number", position.ToString(CultureInfo.InvariantCulture));
+        }
+
+        /// <summary>Where <paramref name="instance" /> stands among <paramref name="system" />'s installations, from 1.</summary>
+        public static int Position(AutomationSystem system, SystemInstance instance)
+        {
             var at = 0;
             var instances = system.Instances;
             while (at < instances.Count && instances[at] != instance)
                 at++;
 
-            return Template.Fill(texts.SystemsInstance, "number", (at + 1).ToString(CultureInfo.InvariantCulture));
+            return at + 1;
         }
 
         /// <summary>The name a new installation of <paramref name="system" /> is given: the first number free, counting on from the installations there are.</summary>

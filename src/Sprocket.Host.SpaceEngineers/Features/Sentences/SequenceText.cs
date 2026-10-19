@@ -185,18 +185,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>What is wrong with <paramref name="sequence" /> and where, for a line about the whole of its logic system.</summary>
         public static string Failing(Texts texts, SequenceFault fault, Sequence sequence)
         {
+            return Failing(texts, fault, sequence.HasName ? sequence.Name : "", sequence.IsAlone, Row(sequence, fault.Step));
+        }
+
+        /// <summary>
+        /// What is wrong and where, for a line about the whole of a logic system: in the sequence called
+        /// <paramref name="sequence" />, or one with no name where it is empty, at the step whose row is <paramref name="row" />,
+        /// or none where it is 0, or in a trigger's own act where <paramref name="alone" />.
+        /// </summary>
+        public static string Failing(Texts texts, SequenceFault fault, string sequence, bool alone, int row)
+        {
             // A trigger's own act has no steps to count, and no name.
-            var problem = Problem(texts, fault, sequence);
-            if (sequence.IsAlone)
+            var problem = Problem(texts, fault, null);
+            if (alone)
                 return problem;
 
-            var row = Row(sequence, fault.Step);
             var step = row.ToString(CultureInfo.InvariantCulture);
-            if (sequence.HasName)
+            if (!string.IsNullOrEmpty(sequence))
             {
                 return row > 0
-                    ? Fill(texts.ProblemAtNamedStep, "step", step, "problem", problem, "sequence", sequence.Name)
-                    : Fill(texts.ProblemInSequence, "problem", problem, "sequence", sequence.Name);
+                    ? Fill(texts.ProblemAtNamedStep, "step", step, "problem", problem, "sequence", sequence)
+                    : Fill(texts.ProblemInSequence, "problem", problem, "sequence", sequence);
             }
 
             return row > 0 ? Fill(texts.ProblemAtStep, "step", step, "problem", problem) : problem;
@@ -230,11 +239,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>Why Sprocket switched off <paramref name="system" />, or one of it, as <paramref name="halt" /> recorded it, and that a lost block is back where <paramref name="restored" />.</summary>
         public static string Stopped(Texts texts, Halt halt, AutomationSystem system, bool restored)
         {
+            var sequence = halt == null ? null : system?.FindSequence(halt.Sequence);
+            return Stopped(texts, halt, sequence != null && sequence.HasName ? sequence.Name : "", halt == null ? 0 : Row(sequence, halt.Step),
+                restored);
+        }
+
+        /// <summary>
+        /// Why Sprocket switched a logic system off, or one of it, as <paramref name="halt" /> recorded it: in the sequence
+        /// called <paramref name="sequence" />, or one with no name where it is empty, at the step whose row is
+        /// <paramref name="row" />, or none where it is 0, and that a lost block is back where <paramref name="restored" />.
+        /// </summary>
+        public static string Stopped(Texts texts, Halt halt, string sequence, int row, bool restored)
+        {
             if (halt == null || halt.Problem == SequenceProblem.None)
                 return texts.StoppedUnknown;
 
-            var sequence = system?.FindSequence(halt.Sequence);
-            var row = Row(sequence, halt.Step);
             var step = row.ToString(CultureInfo.InvariantCulture);
             var reason = restored && Lost(halt)
                 ? Template.Fill(texts.StoppedBlockRestored, "block", halt.Block)
@@ -242,12 +261,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                     ? TroubleText.Of(texts, halt.Because, halt.Block)
                     : Because(texts, halt.Problem, halt.Block);
 
-            if (sequence == null || !sequence.HasName)
+            if (string.IsNullOrEmpty(sequence))
                 return row > 0 ? Fill(texts.StoppedAtStep, "step", step, "reason", reason) : Template.Fill(texts.StoppedPlain, "reason", reason);
 
             return row > 0
-                ? Fill(texts.StoppedAtStepOf, "step", step, "reason", reason, "sequence", sequence.Name)
-                : Fill(texts.StoppedIn, "reason", reason, "sequence", sequence.Name);
+                ? Fill(texts.StoppedAtStepOf, "step", step, "reason", reason, "sequence", sequence)
+                : Fill(texts.StoppedIn, "reason", reason, "sequence", sequence);
         }
 
         static string Because(Texts texts, SequenceProblem problem, string block)
@@ -308,7 +327,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <remarks>
         /// Counted as the sequence's screen numbers its rows, where the line closing an if has no number.
         /// </remarks>
-        static int Row(Sequence sequence, int step)
+        public static int Row(Sequence sequence, int step)
         {
             if (sequence == null || step < 0 || step >= sequence.Steps.Count)
                 return 0;

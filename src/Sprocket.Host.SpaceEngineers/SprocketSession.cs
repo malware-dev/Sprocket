@@ -5,6 +5,7 @@ using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Storage;
@@ -65,6 +66,10 @@ namespace Sprocket.Host.SpaceEngineers
 
         Handover _handover;
 
+        StatusWatch _watch;
+
+        Constructs _constructs;
+
         SprocketUnit _copy;
 
         long _copyOf;
@@ -87,7 +92,6 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly List<IMyPlayer> _players = new List<IMyPlayer>();
 
-        readonly List<IMyCubeGrid> _group = new List<IMyCubeGrid>();
 
         Settings _settings;
 
@@ -122,23 +126,38 @@ namespace Sprocket.Host.SpaceEngineers
         public static void OnConstruct(IMyCubeBlock block, List<SprocketUnit> into)
         {
             into.Clear();
+            if (_current != null)
+                _current._constructs.Members(block?.CubeGrid, into);
+        }
 
-            IMyCubeGrid grid = block?.CubeGrid;
-            if (_current == null || grid == null || MyAPIGateway.GridGroups == null)
-                return;
+        /// <summary>
+        /// The construct <paramref name="block" /> is on, by the entity id of the grid that stands for it: the oldest of its
+        /// grids, the one with the lowest id, which every machine finds the same; or 0 where it is on none.
+        /// </summary>
+        public static long Construct(IMyCubeBlock block)
+        {
+            var grid = _current?._constructs.Founding(block?.CubeGrid);
+            return grid == null ? 0 : grid.EntityId;
+        }
 
-            _current._group.Clear();
-            MyAPIGateway.GridGroups.GetGroup(grid, GridLinkTypeEnum.Mechanical, _current._group);
+        /// <summary>What the construct <paramref name="block" /> is on is called: the name of the grid that stands for it.</summary>
+        public static string ConstructName(IMyCubeBlock block)
+        {
+            return _current?._constructs.Founding(block?.CubeGrid)?.CustomName ?? "";
+        }
 
-            foreach (SprocketUnit unit in _current._roster.All)
-            {
-                IMyTerminalBlock owner = unit.Block;
-                if (owner == null || owner.CubeGrid == null)
-                    continue;
+        /// <summary>How the server last said the automation of <paramref name="construct" /> stands, for a panel that redraws itself with <paramref name="panel" /> when it says more.</summary>
+        /// <remarks>On a client, every time the panel is drawn.</remarks>
+        public static ConstructStatus Watch(long construct, Action panel)
+        {
+            return _current == null ? new ConstructStatus() : _current._watch.Watch(construct, panel);
+        }
 
-                if (_current._group.Contains(owner.CubeGrid))
-                    into.Add(unit);
-            }
+        /// <summary>Stops <paramref name="panel" /> being drawn again for <paramref name="construct" />.</summary>
+        public static void Unwatch(long construct, Action panel)
+        {
+            if (_current != null)
+                _current._watch.Unwatch(construct, panel);
         }
 
         /// <summary>Puts the automation button where a programmable block's controls are shown.</summary>
@@ -257,8 +276,11 @@ namespace Sprocket.Host.SpaceEngineers
 
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
                 Settled, written => Rule(Settings.Of(written)));
-            _channel = Handover.Carry(NetworkChannel.Create(GetType())).Build();
+            _constructs = new Constructs(_roster);
+            _watch = new StatusWatch(_rota, Frame, _constructs.Of, Connected);
+            _channel = StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);
+            _watch.Listen(_channel);
 
             GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"

@@ -19,7 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
     /// <remarks>
     /// The game runs it only while somebody can see the screen. It looks at the automation every hundred ticks, a second
     /// and a half, works it out again only when the automation has changed, and lays the screen out again only when what it
-    /// shows, the screen's size or its colors have changed. Every other run hands the game the frame it already has.
+    /// shows, the screen's size or its colors have changed. Every other run hands the game the frame it already has. On a
+    /// client the automation runs on the server, so the panel watches what the server says of it instead.
     /// </remarks>
     [MyTextSurfaceScript(Id, "Automation")]
     public class StatusApp : MyTextSurfaceScriptBase
@@ -28,18 +29,20 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <remarks>Never change it: a surface stores the script it was given by this name.</remarks>
         public const string Id = "Sprocket_Status";
 
-        readonly ConstructStatus _status = new ConstructStatus();
+        readonly StatusSource _source = new StatusSource();
         readonly StatusPicture _picture = new StatusPicture();
         readonly List<SprocketUnit> _found = new List<SprocketUnit>();
-        readonly List<SprocketUnit> _looked = new List<SprocketUnit>();
         readonly List<MySprite> _sprites = new List<MySprite>();
         readonly SpriteGraphics _graphics;
+        readonly Action _heard;
 
         const int Turn = 3;
 
+        ConstructStatus _status;
+        ConstructStatus _drawnOf;
+        long _watching;
         int _ran;
         int _turn;
-        long _stamp = -1;
         int _drawn = -1;
         Vector2 _size;
         Color _ink;
@@ -52,6 +55,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             : base(surface, block, size)
         {
             _graphics = new SpriteGraphics(surface, _sprites, new PanelPictures());
+            _status = _source.Status;
+            _heard = Heard;
         }
 
         /// <summary>Every hundred ticks, a second and a half.</summary>
@@ -65,12 +70,31 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         {
             base.Run();
             _ran++;
+            Safely(true);
+        }
 
-            // A surface script that throws takes the session with it, so the error is drawn on the panel, here rather than on a
-            // next pass that might throw in the same place.
+        /// <inheritdoc />
+        /// <remarks>The game makes an app when a screen is given it and is done with it when another is, which ends its watch.</remarks>
+        public override void Dispose()
+        {
+            base.Dispose();
+            if (_watching != 0)
+                SprocketSession.Unwatch(_watching, _heard);
+        }
+
+        /// <summary>The status this panel watches arriving from the server, which it draws at once rather than at its next turn.</summary>
+        void Heard()
+        {
+            Safely(false);
+        }
+
+        /// <summary>Draws the panel, looking at the automation again where <paramref name="look" />.</summary>
+        /// <remarks>A surface script that throws takes the session with it, so the error is drawn on the panel instead.</remarks>
+        void Safely(bool look)
+        {
             try
             {
-                Draw();
+                Draw(look);
             }
             catch (Exception wrong)
             {
@@ -79,7 +103,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
         }
 
-        void Draw()
+        void Draw(bool look)
         {
             // An unpowered or switched-off panel shows nothing, the way every other screen in the game does.
             var functional = Block as IMyFunctionalBlock;
@@ -90,16 +114,18 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
                 return;
             }
 
-            Look();
+            if (look)
+                Look();
 
             // A page at a time where there are several, each for three runs, five seconds.
             var turn = _picture.Pages > 1 ? _ran / Turn : 0;
             var ink = Surface.ScriptForegroundColor;
             var ground = Surface.ScriptBackgroundColor;
-            if (_blank || _status.Revision != _drawn || turn != _turn || Surface.SurfaceSize != _size || ink != _ink || ground != _ground
+            if (_blank || _status != _drawnOf || _status.Revision != _drawn || turn != _turn || Surface.SurfaceSize != _size || ink != _ink || ground != _ground
                 || Surface.TextPadding != _padding)
             {
                 _blank = false;
+                _drawnOf = _status;
                 _drawn = _status.Revision;
                 _turn = turn;
                 _size = Surface.SurfaceSize;
@@ -129,60 +155,23 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             return grid.GridSize * Math.Max(cells.X, Math.Max(cells.Y, cells.Z));
         }
 
-        /// <summary>Works out how the construct's automation stands, where anything about it has changed since it was last looked at.</summary>
+        /// <summary>Works out how the construct's automation stands where it runs here, and watches what the server says of it on a client.</summary>
         void Look()
         {
-            var name = (Block as IMyTerminalBlock)?.CubeGrid?.CustomName ?? "";
-            if (!SprocketSession.Runs)
+            if (SprocketSession.Runs)
             {
-                _status.Unheard(name);
+                SprocketSession.OnConstruct(Block, _found);
+                _source.Look(_found, SprocketSession.ConstructName(Block), _ran);
+                _status = _source.Status;
                 return;
             }
 
-            SprocketSession.OnConstruct(Block, _found);
-            var stamp = Stamp();
-            if (stamp == _stamp && Same() && name == _status.Construct)
-                return;
+            var construct = SprocketSession.Construct(Block);
+            if (construct != _watching && _watching != 0)
+                SprocketSession.Unwatch(_watching, _heard);
 
-            _stamp = stamp;
-            _looked.Clear();
-            _looked.AddRange(_found);
-
-            _status.Begin(_ran);
-            foreach (SprocketUnit unit in _found)
-                _status.Include(unit.Program, unit.Runner);
-
-            _status.End(name);
-        }
-
-        /// <summary>A number that grows whenever anything the status is worked out from changes, since every count in it only grows.</summary>
-        long Stamp()
-        {
-            long stamp = 0;
-            foreach (SprocketUnit unit in _found)
-            {
-                var program = unit.Program;
-                var runner = unit.Runner;
-                stamp += program.Revision + program.Wiring + program.Edits + program.Starts + program.Switches + runner.Revision
-                    + runner.Bindings.Revision + program.PausedFrom.Count;
-            }
-
-            return stamp;
-        }
-
-        /// <summary>Whether the automation found on the construct is what was there when it was last looked at.</summary>
-        bool Same()
-        {
-            if (_found.Count != _looked.Count)
-                return false;
-
-            for (var i = 0; i < _found.Count; i++)
-            {
-                if (_found[i] != _looked[i])
-                    return false;
-            }
-
-            return true;
+            _watching = construct;
+            _status = construct == 0 ? _source.Status : SprocketSession.Watch(construct, _heard);
         }
 
         void Blank()
