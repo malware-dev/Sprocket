@@ -1,0 +1,248 @@
+using System.Collections.Generic;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Runtime;
+using Sprocket.Host.SpaceEngineers.Sequences;
+
+namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
+{
+    /// <summary>What a construct's automation amounts to on the status panel: the installations that want looking at, switched-off ones included, and how many logic systems it holds.</summary>
+    /// <remarks>
+    /// The installations are kept most wanting first: problems, then warnings, then what was paused, then what a player
+    /// switched off, and the newest first within each.
+    /// </remarks>
+    public sealed class ConstructStatus
+    {
+        List<StatusItem> _items = new List<StatusItem>();
+        List<StatusItem> _found = new List<StatusItem>();
+        int _now;
+        int _systems;
+        int _troubled;
+
+        /// <summary>Whether whoever runs the construct's automation has said how it stands.</summary>
+        public bool Heard { get; private set; }
+
+        /// <summary>What the construct is called, as its grid's name says.</summary>
+        public string Construct { get; private set; } = "";
+
+        /// <summary>How many logic systems the construct holds.</summary>
+        public int Systems { get; private set; }
+
+        /// <summary>How many of them need no looking at and are switched on.</summary>
+        public int Normal { get; private set; }
+
+        /// <summary>How many installations have a problem.</summary>
+        public int Problems { get; private set; }
+
+        /// <summary>How many installations want looking at for anything short of a problem: a warning, a pause, or being switched off.</summary>
+        public int Warnings { get; private set; }
+
+        /// <summary>Whether any installation wants looking at, a switched-off one included.</summary>
+        public bool Troubled => _items.Count > 0;
+
+        /// <summary>The installations that want looking at, then those switched off, most wanting first.</summary>
+        public IReadOnlyList<StatusItem> Items => _items;
+
+        /// <summary>Bumped whenever anything here changes, so a panel draws itself again only then.</summary>
+        public int Revision { get; private set; }
+
+        /// <summary>Says nothing has been heard of the automation on <paramref name="construct" /> yet.</summary>
+        public void Unheard(string construct)
+        {
+            if (!Heard && Construct == construct)
+                return;
+
+            Heard = false;
+            Construct = construct ?? "";
+            Systems = 0;
+            Normal = 0;
+            Problems = 0;
+            Warnings = 0;
+            _items.Clear();
+            Revision++;
+        }
+
+        /// <summary>Starts working out how the construct's automation stands at tick <paramref name="now" />, each program on it to be included and the look ended.</summary>
+        public void Begin(int now)
+        {
+            _found.Clear();
+            _now = now;
+            _systems = 0;
+            _troubled = 0;
+        }
+
+        /// <summary>Adds what <paramref name="program" />, run by <paramref name="runner" />, amounts to.</summary>
+        /// <remarks>Costs a lookup per sequence on each installation, so it is asked only when the automation has changed.</remarks>
+        public void Include(Automation program, AutomationRunner runner)
+        {
+            _systems += program.Systems.Count;
+
+            if (program.Paused)
+            {
+                Found(new StatusItem { Level = StatusLevel.Paused, Bindings = runner.Bindings });
+                _troubled += program.Systems.Count;
+                return;
+            }
+
+            foreach (AutomationSystem system in program.Systems)
+            {
+                if (Look(runner, system))
+                    _troubled++;
+            }
+        }
+
+        /// <summary>Ends the look begun, for the construct called <paramref name="construct" />.</summary>
+        public void End(string construct)
+        {
+            construct = construct ?? "";
+            var changed = !Heard || Construct != construct || Systems != _systems || Normal != _systems - _troubled || !Alike();
+
+            Heard = true;
+            Construct = construct;
+            Systems = _systems;
+            Normal = _systems - _troubled;
+
+            var kept = _items;
+            _items = _found;
+            _found = kept;
+            Count();
+
+            if (changed)
+                Revision++;
+        }
+
+        /// <summary>Adds an item for each installation of <paramref name="system" /> that wants looking at, and answers whether any did.</summary>
+        bool Look(AutomationRunner runner, AutomationSystem system)
+        {
+            if (system.Halt != null)
+            {
+                Found(new StatusItem { Level = StatusLevel.Problem, System = system, Halt = system.Halt, Bindings = runner.Bindings });
+                return true;
+            }
+
+            if (!system.Enabled)
+            {
+                Found(new StatusItem { Level = StatusLevel.Off, System = system, Bindings = runner.Bindings });
+                return true;
+            }
+
+            var any = false;
+            foreach (SystemInstance use in system.Uses)
+            {
+                var instance = system.IsBlueprint ? use : null;
+                if (use.Halt != null)
+                {
+                    Found(new StatusItem { Level = StatusLevel.Problem, System = system, Instance = instance, Halt = use.Halt, Bindings = runner.Bindings });
+                    any = true;
+                    continue;
+                }
+
+                if (!use.Enabled)
+                {
+                    Found(new StatusItem { Level = StatusLevel.Off, System = system, Instance = instance, Bindings = runner.Bindings });
+                    any = true;
+                    continue;
+                }
+
+                SequenceFault fault;
+                var failing = SystemSummary.Failing(runner, system, use, out fault);
+                if (failing == null)
+                    failing = Warned(runner, system, use, out fault);
+
+                if (failing == null)
+                    continue;
+
+                Found(new StatusItem
+                {
+                    Level = fault.IsWarning ? StatusLevel.Warning : StatusLevel.Problem,
+                    System = system,
+                    Instance = instance,
+                    Sequence = failing,
+                    Fault = fault,
+                    Bindings = runner.Bindings
+                });
+                any = true;
+            }
+
+            return any;
+        }
+
+        /// <summary>The first of a system's sequences, or of its triggers' own acts, with a warning on <paramref name="use" />, and what, or null.</summary>
+        static Sequence Warned(AutomationRunner runner, AutomationSystem system, SystemInstance use, out SequenceFault fault)
+        {
+            foreach (Sequence sequence in system.Sequences)
+            {
+                fault = SequenceSummary.Fault(runner.Get(sequence, use));
+                if (fault.Exists)
+                    return sequence;
+            }
+
+            foreach (Trigger trigger in system.Triggers)
+            {
+                var alone = runner.Alone(system, trigger);
+                fault = alone == null ? SequenceFault.None : SequenceSummary.Fault(runner.Get(alone, use));
+                if (fault.Exists)
+                    return alone;
+            }
+
+            fault = SequenceFault.None;
+            return null;
+        }
+
+        /// <summary>Puts <paramref name="item" /> in its place among those found, keeping the tick it was first seen.</summary>
+        void Found(StatusItem item)
+        {
+            item.Since = _now;
+            foreach (StatusItem was in _items)
+            {
+                if (was.Same(item))
+                {
+                    item.Since = was.Since;
+                    break;
+                }
+            }
+
+            var at = 0;
+            while (at < _found.Count && Before(_found[at], item))
+                at++;
+
+            _found.Insert(at, item);
+        }
+
+        /// <summary>Whether <paramref name="first" /> is shown before <paramref name="then" />: by level, then the newer first, then in program order.</summary>
+        static bool Before(StatusItem first, StatusItem then)
+        {
+            if (first.Level != then.Level)
+                return first.Level < then.Level;
+
+            return first.Since >= then.Since;
+        }
+
+        /// <summary>Whether what was found is what was there, item for item.</summary>
+        bool Alike()
+        {
+            if (_found.Count != _items.Count)
+                return false;
+
+            for (var i = 0; i < _found.Count; i++)
+            {
+                if (!_found[i].Same(_items[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        void Count()
+        {
+            Problems = 0;
+            Warnings = 0;
+            foreach (StatusItem item in _items)
+            {
+                if (item.Level == StatusLevel.Problem)
+                    Problems++;
+                else
+                    Warnings++;
+            }
+        }
+    }
+}

@@ -2406,4 +2406,28 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Slot.More" xml:space="preserve">
     <value>og {count} til</value>
   </data>
+  <data name="Sprocket.Panel.AllNormal" xml:space="preserve">
+    <value>Alle systemer i orden</value>
+  </data>
+  <data name="Sprocket.Panel.Nothing" xml:space="preserve">
+    <value>Denne konstruksjonen har ingen automasjon.</value>
+  </data>
+  <data name="Sprocket.Panel.Systems" xml:space="preserve">
+    <value>{count} logikksystemer</value>
+  </data>
+  <data name="Sprocket.Panel.SystemsOne" xml:space="preserve">
+    <value>1 logikksystem</value>
+  </data>
+  <data name="Sprocket.Panel.Failed" xml:space="preserve">
+    <value>Denne skjermen kunne ikke tegnes: {reason}</value>
+  </data>
+  <data name="Sprocket.Panel.Heading" xml:space="preserve">
+    <value>Sprocket</value>
+  </data>
+  <data name="Sprocket.Panel.SwitchedOff" xml:space="preserve">
+    <value>Slått av</value>
+  </data>
+  <data name="Sprocket.Panel.Page" xml:space="preserve">
+    <value>{at} av {count}</value>
+  </data>
 </root>

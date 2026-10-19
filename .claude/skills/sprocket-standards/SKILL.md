@@ -1,6 +1,6 @@
 ---
 name: sprocket-standards
-description: What is true of code in the Sprocket repository and would be wrong anywhere else - its projects and where code goes, the C# 6 ceiling, building and deploying, the simulator and reference suite as guards, transcribed values, drawing invalidation, the rota, how block changes are watched, and how Sprocket reports to a person. Load alongside csharp-standards for any code in this repository.
+description: What is true of code in the Sprocket repository and would be wrong anywhere else - its projects and where code goes, the C# 6 ceiling, building and deploying, the simulator and reference suite as guards, transcribed values, where views and styles go, drawing invalidation, the rota, how block changes are watched, and how Sprocket reports to a person. Load alongside csharp-standards for any code in this repository.
 ---
 
 The general rules are in **csharp-standards**. These hold only here.
@@ -73,6 +73,8 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 --content                                  what the game's own assets say
 --profile                                  save and load cost per program size
 --runtime                                  the runtime's cost per tick, per block change and per save
+--faces <folder> [zoom]                    the automation panel in each scene on every reference screen shape, a picture per page
+--colors <folder> [zoom]                   the automation panel in a set of app colors, troubled and calm
 --blueprint <scenario> [folder]            a game test scenario as a blueprint (test-scenarios skill)
 --checks <scenario> [first]                its game-only checks, as Testing rows
 ```
@@ -103,6 +105,11 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 - A property that changes a size or position calls `Element.InvalidateMeasure` or
   `InvalidateArrange`. A color change calls neither.
 - A change to a property setter checks which of the three it is.
+
+## Views
+
+- Every view, screen, control and style is built by the **lumel** skill's rules; load it for any UI code.
+- Sprocket's styles, palette, sizes and symbols are in `Features/Look`: `Styles`, `Palette`, `TextSizes`, `Symbols`.
 
 ## The rota
 

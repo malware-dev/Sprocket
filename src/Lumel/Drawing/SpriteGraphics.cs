@@ -1,14 +1,12 @@
 using System.Collections.Generic;
 using System.Text;
-using Lumel;
-using Lumel.Drawing;
 using Lumel.Images;
 using VRage.Game.GUI.TextPanel;
 using VRage.Utils;
 using VRageMath;
 using IMyTextSurface = Sandbox.ModAPI.Ingame.IMyTextSurface;
 
-namespace RichTextPanels
+namespace Lumel.Drawing
 {
     /// <summary>Lumel's drawing, written down as a text panel's sprites to be drawn as one frame.</summary>
     /// <remarks>

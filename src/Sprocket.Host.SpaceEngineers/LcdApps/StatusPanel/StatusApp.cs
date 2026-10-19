@@ -1,21 +1,26 @@
 using System;
 using System.Collections.Generic;
-using Sprocket.Host.SpaceEngineers.World;
+using Lumel.Drawing;
+using Lumel.Images;
+using Lumel.Text;
 using Sandbox.Game.GameSystems.TextSurfaceScripts;
 using Sandbox.ModAPI;
+using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.World;
+using VRage.Game;
 using VRage.Game.GUI.TextPanel;
 using VRage.Game.ModAPI;
 using VRageMath;
-using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Features.Sentences;
-using Sprocket.Host.SpaceEngineers.Localization;
-using Sprocket.Host.SpaceEngineers.Runtime;
 using IngameBlock = VRage.Game.ModAPI.Ingame.IMyCubeBlock;
 
 namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
-    /// <summary>The construct's automation on a panel: one line per system, and whether anything wants looking at.</summary>
-    /// <remarks>Its facts are worked out on <c>Update100</c>, a second and a half, and each row is one sprite.</remarks>
+    /// <summary>The construct's automation on a screen: the installations that want looking at, one at a time, or that all is normal.</summary>
+    /// <remarks>
+    /// The game runs it only while somebody can see the screen. It looks at the automation every hundred ticks, a second
+    /// and a half, works it out again only when the automation has changed, and lays the screen out again only when what it
+    /// shows, the screen's size or its colors have changed. Every other run hands the game the frame it already has.
+    /// </remarks>
     [MyTextSurfaceScript(Id, "Automation")]
     public class StatusApp : MyTextSurfaceScriptBase
     {
@@ -23,21 +28,30 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <remarks>Never change it: a surface stores the script it was given by this name.</remarks>
         public const string Id = "Sprocket_Status";
 
-        const float DesignHeight = 320f;
-
-        const byte Faint = 110;
-
-        readonly StatusOverview _overview = new StatusOverview();
+        readonly ConstructStatus _status = new ConstructStatus();
+        readonly StatusPicture _picture = new StatusPicture();
         readonly List<SprocketUnit> _found = new List<SprocketUnit>();
+        readonly List<SprocketUnit> _looked = new List<SprocketUnit>();
+        readonly List<MySprite> _sprites = new List<MySprite>();
+        readonly SpriteGraphics _graphics;
 
+        const int Turn = 3;
+
+        int _ran;
+        int _turn;
+        long _stamp = -1;
+        int _drawn = -1;
+        Vector2 _size;
         Color _ink;
         Color _ground;
-        Color _quiet;
+        float _padding;
+        bool _blank;
 
         /// <summary>The status panel drawn on <paramref name="surface" /> of <paramref name="block" />, <paramref name="size" /> big.</summary>
         public StatusApp(IMyTextSurface surface, IngameBlock block, Vector2 size)
             : base(surface, block, size)
         {
+            _graphics = new SpriteGraphics(surface, _sprites, new PanelPictures());
         }
 
         /// <summary>Every hundred ticks, a second and a half.</summary>
@@ -50,6 +64,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public override void Run()
         {
             base.Run();
+            _ran++;
 
             // A surface script that throws takes the session with it, so the error is drawn on the panel, here rather than on a
             // next pass that might throw in the same place.
@@ -59,243 +74,148 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
             catch (Exception wrong)
             {
-                Shades();
+                _drawn = -1;
                 Trouble(wrong.Message);
             }
         }
 
-        /// <summary>Takes the panel's own two colors, and fades one of them.</summary>
-        /// <remarks>Read on every draw, so a change in the terminal shows at once.</remarks>
-        void Shades()
-        {
-            _ink = Surface.ScriptForegroundColor;
-            _ground = Surface.ScriptBackgroundColor;
-            _quiet = new Color(_ink.R, _ink.G, _ink.B, Faint);
-        }
-
         void Draw()
         {
-            Shades();
-
-            var block = Block as IMyTerminalBlock;
-            var functional = Block as IMyFunctionalBlock;
-
             // An unpowered or switched-off panel shows nothing, the way every other screen in the game does.
-            if (functional != null && !functional.Enabled)
+            var functional = Block as IMyFunctionalBlock;
+            var texts = SprocketSession.Texts;
+            if ((functional != null && !functional.Enabled) || texts == null)
             {
                 Blank();
                 return;
             }
 
-            SprocketSession.OnConstruct(Block, _found);
+            Look();
+
+            // A page at a time where there are several, each for three runs, five seconds.
+            var turn = _picture.Pages > 1 ? _ran / Turn : 0;
+            var ink = Surface.ScriptForegroundColor;
+            var ground = Surface.ScriptBackgroundColor;
+            if (_blank || _status.Revision != _drawn || turn != _turn || Surface.SurfaceSize != _size || ink != _ink || ground != _ground
+                || Surface.TextPadding != _padding)
+            {
+                _blank = false;
+                _drawn = _status.Revision;
+                _turn = turn;
+                _size = Surface.SurfaceSize;
+                _ink = ink;
+                _ground = ground;
+                _padding = Surface.TextPadding;
+
+                _graphics.Begin();
+                _picture.Draw(_graphics, _status, texts, ink, ground, _padding, Metres(), turn);
+            }
 
             using (MySpriteDrawFrame frame = Surface.DrawFrame())
             {
-                var size = Surface.SurfaceSize;
-                var scale = size.Y / DesignHeight;
-                var inset = new Vector2(
-                    (float)Math.Round(size.X * Surface.TextPadding / 100f) + (8f * scale),
-                    (float)Math.Round(size.Y * Surface.TextPadding / 100f) + (6f * scale));
-
-                var origin = (Surface.TextureSize - size) / 2f;
-                var left = origin.X + inset.X;
-                var right = origin.X + size.X - inset.X;
-                var y = origin.Y + inset.Y;
-
-                Ground(frame);
-
-                y = Heading(frame, block, left, right, y, scale);
-
-                if (_found.Count == 0)
-                {
-                    Line(frame, SprocketSession.Runs
-                        ? "No Sprocket on this construct."
-                        : "Sprocket runs on the server.", left, y, scale * 0.8f, _quiet);
-                    return;
-                }
-
-                Systems(frame, left, right, y, scale, origin.Y + size.Y - (46f * scale));
-                Totals(frame, left, right, origin, size, scale);
+                foreach (MySprite sprite in _sprites)
+                    frame.Add(sprite);
             }
         }
 
-        float Heading(MySpriteDrawFrame frame, IMyTerminalBlock block, float left, float right, float y,
-            float scale)
+        /// <summary>How long the screen's long side is, in metres: the block's longest side, as near as the panel can know it.</summary>
+        float Metres()
         {
-            Line(frame, "SPROCKET", left, y, scale * 0.9f, _ink);
+            var grid = Block.CubeGrid;
+            if (grid == null)
+                return 0f;
 
-            IMyCubeGrid grid = block?.CubeGrid;
-            if (grid != null)
-                Line(frame, grid.CustomName, right, y, scale * 0.9f, _quiet, TextAlignment.RIGHT);
-
-            y += 30f * scale;
-            frame.Add(Fill(new Vector2((left + right) / 2f, y), new Vector2(right - left, scale),
-                _quiet));
-
-            return y + (10f * scale);
+            var cells = Block.Max - Block.Min + Vector3I.One;
+            return grid.GridSize * Math.Max(cells.X, Math.Max(cells.Y, cells.Z));
         }
 
-        /// <summary>One line per system, and a line saying how many did not fit.</summary>
-        void Systems(MySpriteDrawFrame frame, float left, float right, float y, float scale,
-            float bottom)
+        /// <summary>Works out how the construct's automation stands, where anything about it has changed since it was last looked at.</summary>
+        void Look()
         {
-            // Every Sprocket on the construct into one picture, before any of it is drawn, so the line
-            // that says how many did not fit can count them.
-            _overview.Clear();
-            foreach (SprocketUnit unit in _found)
+            var name = (Block as IMyTerminalBlock)?.CubeGrid?.CustomName ?? "";
+            if (!SprocketSession.Runs)
             {
-                _overview.Include(unit.World, unit.Editor.Program, unit.Runner);
-            }
-
-            var rows = _overview.Rows;
-            var texts = _found[0].Editor.Texts;
-            if (rows.Count == 0)
-            {
-                Line(frame, "Nothing built yet.", left, y, scale * 0.8f, _quiet);
+                _status.Unheard(name);
                 return;
             }
 
-            var height = 26f * scale;
-            for (var i = 0; i < rows.Count; i++)
-            {
-                if (y + height > bottom)
-                {
-                    Line(frame, $"and {(rows.Count - i)} more", left, y, scale * 0.7f,
-                        _quiet);
-                    return;
-                }
+            SprocketSession.OnConstruct(Block, _found);
+            var stamp = Stamp();
+            if (stamp == _stamp && Same() && name == _status.Construct)
+                return;
 
-                Row(frame, rows[i], texts, left, right, y, scale);
-                y += height;
-            }
+            _stamp = stamp;
+            _looked.Clear();
+            _looked.AddRange(_found);
+
+            _status.Begin(_ran);
+            foreach (SprocketUnit unit in _found)
+                _status.Include(unit.Program, unit.Runner);
+
+            _status.End(name);
         }
 
-        void Row(MySpriteDrawFrame frame, StatusOverview.Row row, Texts texts, float left, float right, float y, float scale)
+        /// <summary>A number that grows whenever anything the status is worked out from changes, since every count in it only grows.</summary>
+        long Stamp()
         {
-            var lamp = 10f * scale;
-            frame.Add(Fill(new Vector2(left + (lamp / 2f), y + (9f * scale)),
-                new Vector2(lamp, lamp), Lamp(row)));
-
-            var name = string.IsNullOrEmpty(row.Name) ? "Unnamed" : row.Name;
-            if (row.Instances > 1)
-                name = $"{name}  x{row.Instances}";
-
-            Line(frame, name, left + (lamp * 2f), y, scale * 0.8f, _ink);
-            Line(frame, Says(row, texts), right, y, scale * 0.8f, Lamp(row), TextAlignment.RIGHT);
-        }
-
-        /// <summary>What the row says on its right: the news, or what it is doing when there is none.</summary>
-        string Says(StatusOverview.Row row, Texts texts)
-        {
-            if (row.Problems > 0)
-                return row.Problems == 1 ? "1 problem" : $"{row.Problems} problems";
-
-            if (row.Parked)
-                return SequenceText.Status(texts, SequenceStatus.Off);
-
-            if (row.Warnings > 0)
-                return row.Warnings == 1 ? "1 warning" : $"{row.Warnings} warnings";
-
-            return SequenceText.Status(texts, row.Status);
-        }
-
-        Color Lamp(StatusOverview.Row row)
-        {
-            if (row.Problems > 0)
-                return Palette.Problem;
-
-            if (row.Parked)
-                return _quiet;
-
-            if (row.Warnings > 0)
-                return Palette.Notice;
-
-            if (row.Status == SequenceStatus.Running || row.Status == SequenceStatus.RunningWaiting)
-                return Palette.Live;
-
-            return row.Status == SequenceStatus.Off ? _quiet : _ink;
-        }
-
-        /// <summary>Draws the line of totals at the foot of the panel.</summary>
-        void Totals(MySpriteDrawFrame frame, float left, float right, Vector2 origin, Vector2 size,
-            float scale)
-        {
-            var y = origin.Y + size.Y - (34f * scale);
-
-            frame.Add(Fill(new Vector2((left + right) / 2f, y), new Vector2(right - left, scale),
-                _quiet));
-
-            y += 8f * scale;
-
-            Color colour;
-            string news;
-            if (_overview.Problems > 0)
+            long stamp = 0;
+            foreach (SprocketUnit unit in _found)
             {
-                news = _overview.Problems == 1 ? "1 problem" : $"{_overview.Problems} problems";
-                colour = Palette.Problem;
-            }
-            else if (_overview.Warnings > 0)
-            {
-                news = _overview.Warnings == 1 ? "1 warning" : $"{_overview.Warnings} warnings";
-                colour = Palette.Notice;
-            }
-            else
-            {
-                news = "all clear";
-                colour = _quiet;
+                var program = unit.Program;
+                var runner = unit.Runner;
+                stamp += program.Revision + program.Wiring + program.Edits + program.Starts + program.Switches + runner.Revision
+                    + runner.Bindings.Revision + program.PausedFrom.Count;
             }
 
-            Line(frame, news, left, y, scale * 0.8f, colour);
-            Line(frame, _overview.Running == 0 ? "nothing running" : $"{_overview.Running} running",
-                right, y, scale * 0.8f, _ink, TextAlignment.RIGHT);
+            return stamp;
         }
 
-        void Line(MySpriteDrawFrame frame, string text, float x, float y, float scale, Color colour,
-            TextAlignment alignment = TextAlignment.LEFT)
+        /// <summary>Whether the automation found on the construct is what was there when it was last looked at.</summary>
+        bool Same()
         {
-            MySprite sprite = MySprite.CreateText(text ?? "", "White", colour, scale, alignment);
-            sprite.Position = new Vector2(x, y);
-            frame.Add(sprite);
-        }
+            if (_found.Count != _looked.Count)
+                return false;
 
-        static MySprite Fill(Vector2 at, Vector2 size, Color colour)
-        {
-            MySprite sprite = MySprite.CreateSprite("SquareSimple", at, size);
-            sprite.Color = colour;
-            return sprite;
+            for (var i = 0; i < _found.Count; i++)
+            {
+                if (_found[i] != _looked[i])
+                    return false;
+            }
+
+            return true;
         }
 
         void Blank()
         {
+            _blank = true;
             using (MySpriteDrawFrame frame = Surface.DrawFrame())
-                Ground(frame);
+                frame.Add(Fill(Surface.SurfaceSize, Surface.ScriptBackgroundColor));
         }
 
         void Trouble(string said)
         {
             using (MySpriteDrawFrame frame = Surface.DrawFrame())
             {
-                Vector2 size = Ground(frame);
-                var scale = size.Y / DesignHeight;
+                var size = Surface.SurfaceSize;
                 var origin = (Surface.TextureSize - size) / 2f;
+                var scale = Math.Max(0.5f, size.Y / 640f);
+                var texts = SprocketSession.Texts;
 
-                Line(frame, "Sprocket could not draw this:", origin.X + (10f * scale),
-                    origin.Y + (10f * scale), scale * 0.8f, Palette.Problem);
-                Line(frame, said ?? "", origin.X + (10f * scale), origin.Y + (36f * scale),
-                    scale * 0.6f, _quiet);
+                frame.Add(Fill(size, Surface.ScriptBackgroundColor));
+                var line = MySprite.CreateText(texts == null ? said ?? "" : Template.Fill(texts.PanelFailed, "reason", said ?? ""),
+                    MyFontEnum.White, Palette.Problem, scale, TextAlignment.LEFT);
+                line.Position = origin + new Vector2(10f, 10f);
+                frame.Add(line);
             }
         }
 
-        /// <summary>Paints the panel, and answers the size everything else is laid out against.</summary>
-        Vector2 Ground(MySpriteDrawFrame frame)
+        /// <summary>A square of <paramref name="color" /> over the whole face.</summary>
+        MySprite Fill(Vector2 size, Color color)
         {
-            var size = Surface.SurfaceSize;
             var origin = (Surface.TextureSize - size) / 2f;
-
-            frame.Add(Fill(new Vector2(origin.X + (size.X / 2f), origin.Y + (size.Y / 2f)),
-                size, _ground));
-
-            return size;
+            var sprite = MySprite.CreateSprite("SquareSimple", origin + size / 2f, size);
+            sprite.Color = color;
+            return sprite;
         }
     }
 }

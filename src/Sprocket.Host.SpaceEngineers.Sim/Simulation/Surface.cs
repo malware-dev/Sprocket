@@ -152,6 +152,9 @@ namespace Sprocket.Sim.Simulation
         /// <summary>Draws one frame. Handed the same graphics object the mod would hand its UI.</summary>
         public event Action<ScreenSpaceGraphics> Frame;
 
+        /// <summary>The game's screen a frame draws to, for drawing that does not go through Lumel: a text panel's sprites.</summary>
+        public IScreenSpace Screen => _device;
+
         /// <summary>Whether the numbers text is laid out against are the game's own.</summary>
         public bool MetricsAreExact => _exact != null;
 

@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using System.Text;
+using Lumel.Drawing;
+using Sandbox.Game.GameSystems.TextSurfaceScripts;
+using Sprocket.Sim.Content;
 using Sprocket.Sim.Fakes;
 using VRage.Game.GUI.TextPanel;
 using VRageMath;
@@ -13,6 +17,7 @@ public sealed class Face
     public Face(string name)
     {
         Surface = Pretend.To<IMyTextSurface>()
+            .Also<Sandbox.ModAPI.IMyTextSurface>()
             .Gives("DisplayName", () => name)
             .Does("GetFonts", _ => null!)
             .Does("WriteText", arguments =>
@@ -31,7 +36,31 @@ public sealed class Face
             .Takes("FontColor", value => FontColor = (Color)value)
             .Gives("Alignment", () => Alignment)
             .Takes("Alignment", value => Alignment = (TextAlignment)value)
+            .Gives("TextureSize", () => (Vector2)Shape.TextureSize)
+            .Gives("SurfaceSize", () => Shape.SurfaceSize)
+            .Gives("TextPadding", () => Padding)
+            .Gives("ScriptForegroundColor", () => Foreground)
+            .Gives("ScriptBackgroundColor", () => Background)
+            .Does("DrawFrame", () => new MySpriteDrawFrame(frame =>
+            {
+                Sprites.Clear();
+                frame.AddToList(Sprites);
+            }))
+            .Does("MeasureStringInPixels", arguments => Measure(arguments[0].ToString(), (string)arguments[1], (float)arguments[2]))
             .Done();
+    }
+
+    /// <summary>The screen whose fonts measure text drawn here, which a picture of this one sets; a panel measures at its scale alone.</summary>
+    public IScreenSpace? Measuring { get; set; }
+
+    Vector2 Measure(string text, string font, float scale)
+    {
+        if (Measuring == null)
+            throw new System.NotSupportedException("the harness has no fonts to measure " + font + " with on this screen");
+
+        // The game's screen scales text by its height against the HUD's reference height, which a panel's text is not.
+        var unscaled = scale * ScreenSpaceGraphics.GameReferenceHeight / Measuring.SafeArea.Height;
+        return Measuring.MeasureText(font, new StringBuilder(text), unscaled);
     }
 
     /// <summary>The screen as the game hands it to a mod.</summary>
@@ -57,4 +86,19 @@ public sealed class Face
 
     /// <summary>Where its text sits across it.</summary>
     public TextAlignment Alignment { get; set; }
+
+    /// <summary>Its shape, which says how big its texture is and how much of it the face shows; a square LCD panel's unless set.</summary>
+    public ScreenShape Shape { get; set; } = new ScreenShape("lcd-panel", 512, 1, 1, 2.5f);
+
+    /// <summary>How far in from its edges text sits, in hundredths of its size, as its text settings say.</summary>
+    public float Padding { get; set; } = 2f;
+
+    /// <summary>The color an app draws in, as its app settings say.</summary>
+    public Color Foreground { get; set; } = MyTextSurfaceScriptBase.DEFAULT_FONT_COLOR;
+
+    /// <summary>The color behind an app, as its app settings say.</summary>
+    public Color Background { get; set; } = MyTextSurfaceScriptBase.DEFAULT_BACKGROUND_COLOR;
+
+    /// <summary>The sprites of the last frame an app drew on it, in the order they were added.</summary>
+    public List<MySprite> Sprites { get; } = [];
 }

@@ -14,7 +14,7 @@ the block through wherever they are known; keep a short fallback rather than rem
 **Never "Sprocket" on screen, and nothing outside the world.** No server, admin, mod or configuration. A
 limit is the device's capacity ("This block holds 20 sequences in a system"), and the feature is
 "automation", the terminal button's word. Mal: "we will avoid using the name in-game"; the reason is to
-keep a rename possible. Exceptions are his to grant (the logo is one), and table-talk is the one kind he set.
+keep a rename possible. Exceptions are his to grant (the logo is one, and so is the automation panel's heading beside its icon, Mal, 2026-10-19), and table-talk is the one kind he set.
 
 **Table-talk** (Mal's word) is a text about the game itself rather than the world: a limit the game puts on mods, a
 file on the player's computer, a member the automation cannot set yet. It may say "the game" and "mods"; it never says

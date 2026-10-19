@@ -1,9 +1,13 @@
 using System.IO;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Lumel.Drawing;
+using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Content;
+using Sprocket.Sim.Machine;
 using Sprocket.Sim.Measuring;
 using Sprocket.Sim.Saves;
 using Sprocket.Sim.Scenarios;
@@ -95,6 +99,68 @@ namespace Sprocket.Sim
             if (args.Length > 2 && args[0] == "--suite")
             {
                 Console.Write(Suite.Run(args[1], args[2]));
+                return;
+            }
+
+            // The automation panel's troubled and calm screens in each of a set of app colors, on the two large programmable
+            // blocks and the corner LCD: --colors <folder> [zoom], into <colors>/<scene>-<screen>.png.
+            if (args.Length > 1 && args[0] == "--colors")
+            {
+                var zoom = args.Length > 2 ? int.Parse(args[2], CultureInfo.InvariantCulture) : 1;
+                foreach (var colors in PanelColors.All)
+                {
+                    Directory.CreateDirectory(Path.Combine(args[1], colors.Key));
+                    foreach (var scene in new[] { "trouble", "all-normal" })
+                    {
+                        var status = StatusScenes.Make(scene, out var texts);
+                        foreach (var screen in new[] { "programmable-block", "programmable-block-automatons", "corner-lcd" })
+                        {
+                            var shape = ScreenShape.Reference.First(one => one.Name == screen);
+                            var face = new Face(shape.Name) { Shape = shape, Foreground = colors.Value[0], Background = colors.Value[1] };
+                            var path = Path.Combine(args[1], colors.Key, scene + "-" + screen + ".png");
+                            FaceShot.Save(path, face, zoom, () =>
+                            {
+                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+                                graphics.Begin();
+                                new StatusPicture().Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, 0);
+                            });
+                            Console.WriteLine(path);
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            // The automation panel in each of its scenes on every screen of the reference set, a picture of each page it takes
+            // turns between, its pixels zoomed: --faces <folder> [zoom], into <scene>/<screen>.png, then <screen>-2.png and on.
+            if (args.Length > 1 && args[0] == "--faces")
+            {
+                var zoom = args.Length > 2 ? int.Parse(args[2], CultureInfo.InvariantCulture) : 1;
+                foreach (var scene in StatusScenes.Names)
+                {
+                    var status = StatusScenes.Make(scene, out var texts);
+                    Directory.CreateDirectory(Path.Combine(args[1], scene));
+                    foreach (ScreenShape shape in ScreenShape.Reference)
+                    {
+                        var picture = new StatusPicture();
+                        for (var turn = 0; turn < picture.Pages; turn++)
+                        {
+                            var face = new Face(shape.Name) { Shape = shape };
+                            var name = turn == 0 ? shape.Name : shape.Name + "-" + (turn + 1).ToString(CultureInfo.InvariantCulture);
+                            var path = Path.Combine(args[1], scene, name + ".png");
+                            var shown = turn;
+                            FaceShot.Save(path, face, zoom, () =>
+                            {
+                                var graphics = new SpriteGraphics(face.Surface, face.Sprites, null);
+                                graphics.Begin();
+                                picture.Draw(graphics, status, texts, face.Foreground, face.Background, face.Padding, shape.Metres, shown);
+                            });
+                            Console.WriteLine(path);
+                        }
+                    }
+                }
+
                 return;
             }
 

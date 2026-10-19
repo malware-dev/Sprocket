@@ -3186,4 +3186,36 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>and {count} more</value>
     <comment>After what a toolbar slot holds on the first of several blocks picked, in the line under a toolbar's slots in the picker, where it holds something on others too; {count} is how many others, from 1.</comment>
   </data>
+  <data name="Sprocket.Panel.AllNormal" xml:space="preserve">
+    <value>All systems nominal</value>
+    <comment>Large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", and beside the check on a corner screen, shown when every logic system on the construct is switched on and nothing wants looking at.</comment>
+  </data>
+  <data name="Sprocket.Panel.Nothing" xml:space="preserve">
+    <value>This construct has no automation.</value>
+    <comment>Line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation", shown when the construct it is on holds no logic system.</comment>
+  </data>
+  <data name="Sprocket.Panel.Systems" xml:space="preserve">
+    <value>{count} logic systems</value>
+    <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation" when nothing wants looking at, saying how many logic systems the construct holds; {count} is the number, from 2.</comment>
+  </data>
+  <data name="Sprocket.Panel.SystemsOne" xml:space="preserve">
+    <value>1 logic system</value>
+    <comment>Small line under the large line in the middle of the automation panel, the app a text panel or cockpit screen offers as "Automation" when nothing wants looking at, when the construct holds exactly one logic system.</comment>
+  </data>
+  <data name="Sprocket.Panel.Failed" xml:space="preserve">
+    <value>This screen could not be drawn: {reason}</value>
+    <comment>Shown on the automation panel, the app a text panel or cockpit screen offers as "Automation" when drawing it failed; {reason} is the error, in English.</comment>
+  </data>
+  <data name="Sprocket.Panel.Heading" xml:space="preserve">
+    <value>Sprocket</value>
+    <comment>Small heading at the top left of the automation panel, the app a text panel or cockpit screen offers as "Automation", beside the icon, on every screen it shows. The name of the mod, shown here by exception, and kept as it is in every language.</comment>
+  </data>
+  <data name="Sprocket.Panel.SwitchedOff" xml:space="preserve">
+    <value>Switched off</value>
+    <comment>Line under the name of a logic system or installation a player switched off, on the automation panel, the app a text panel or cockpit screen offers as "Automation", when it is shown in turn with those that want looking at.</comment>
+  </data>
+  <data name="Sprocket.Panel.Page" xml:space="preserve">
+    <value>{at} of {count}</value>
+    <comment>At the bottom of the automation panel, the app a text panel or cockpit screen offers as "Automation", while it shows the installations that want looking at a page at a time and there are too many pages for a dot each; {at} is which page is shown, {count} how many there are.</comment>
+  </data>
 </root>

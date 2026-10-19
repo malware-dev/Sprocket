@@ -8,10 +8,10 @@ diff finds what only somebody holding the standards can. Neither substitutes for
 inspection has caught a mutating call on a `readonly` struct that silently disabled a cadence, and
 the read has caught a whole mechanism built beside the one that already existed.
 
-Load **csharp-standards** and **sprocket-standards** first. This is how to apply them to a diff, not
-a second copy of them.
+Load **csharp-standards** and **sprocket-standards** first, and **lumel** where the diff touches any UI code. This
+is how to apply them to a diff, not a second copy of them.
 
-**The job is to hold the change to every rule in both, not to the list below.** The diff passes only
+**The job is to hold the change to every rule in them, not to the list below.** The diff passes only
 where nothing in it breaks a standard: what a comment may say, what may be static, one type per file,
 folders by capability, documentation, names, what a repeating path may do, and the questions to be
 answered before changing anything. The sections that follow are the traps this repository falls into

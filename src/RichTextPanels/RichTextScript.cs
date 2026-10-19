@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Lumel;
+using Lumel.Drawing;
+using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Lumel.Viewing;

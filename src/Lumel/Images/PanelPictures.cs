@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using Lumel.Images;
 using Sandbox.ModAPI;
 using VRage.Utils;
 
-namespace RichTextPanels
+namespace Lumel.Images
 {
     /// <summary>The pictures a text panel can draw, found by sprite name and kept once found.</summary>
     /// <remarks>Each name is asked about once, unknown ones included; one panel's app owns its catalog, which goes with it.</remarks>

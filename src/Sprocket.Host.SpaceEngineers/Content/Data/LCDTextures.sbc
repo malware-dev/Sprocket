@@ -12,5 +12,14 @@
             <TexturePath>Textures\Models\Sprocket_Mark.dds</TexturePath>
             <SpritePath>Textures\Sprites\Sprocket_Mark.dds</SpritePath>
         </LCDTextureDefinition>
+        <!-- The icon, which the automation panel draws by its top line. It is no image of a panel's own to pick. -->
+        <LCDTextureDefinition>
+            <Id>
+                <TypeId>LCDTextureDefinition</TypeId>
+                <SubtypeId>Sprocket_Icon</SubtypeId>
+            </Id>
+            <Selectable>false</Selectable>
+            <SpritePath>Textures\Sprites\Sprocket_Icon.dds</SpritePath>
+        </LCDTextureDefinition>
     </LCDTextures>
 </Definitions>

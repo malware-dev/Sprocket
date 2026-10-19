@@ -28,6 +28,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The quietest thing that still carries a word: a count, a "ran 4s ago", a kind under a name.</summary>
         public const float Tiny = 18.5f;
 
+        /// <summary>How far below the top of a line of the game's text its capitals start, as a fraction of the line.</summary>
+        /// <remarks>Read from the game's font page, <c>Fonts/white/FontDataPA</c>: an H's ink starts eight units into a line 37 tall.</remarks>
+        public const float CapTop = 0.22f;
+
+        /// <summary>How far down a line of the game's text its baseline sits, as a fraction of the line.</summary>
+        /// <remarks>The game's font file, <c>Fonts/white/FontDataPA.xml</c>: a base of 30 in a line 37 tall.</remarks>
+        public const float Baseline = 0.81f;
+
         /// <summary>A symbol standing beside a line of text.</summary>
         public const float Symbol = 36.48f;
 
