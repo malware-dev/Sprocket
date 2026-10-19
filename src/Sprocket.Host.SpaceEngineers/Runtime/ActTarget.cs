@@ -28,6 +28,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The order made ready where the game does it.</summary>
         public BlockOrder Order;
 
+        /// <summary>Whether the block is listened to for getting where the action leads, which it announces.</summary>
+        public bool Heard;
+
         /// <summary>What is remembered of the block, kept in what the world saves while its act is waited on.</summary>
         public ActMemory Kept;
 

@@ -59,6 +59,15 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Whether the block announces getting to the state this action leads to, so a step waiting on it is looked at then.</summary>
+        public bool ArrivalAnnounced { get; private set; }
+
+        /// <summary>Says the block announces getting to the state this action leads to.</summary>
+        public void AnnounceArrival()
+        {
+            ArrivalAnnounced = true;
+        }
+
         /// <summary>Stable identifier, referenced by saved sequences.</summary>
         public string Id { get; private set; }
 

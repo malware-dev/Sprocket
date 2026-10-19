@@ -126,6 +126,9 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
     cadence only while a block is outside that reading.
   - `Looked(reason)`: the cadence through the rota, where neither event exists.
 - An event first. A look only where the game has no event, and only while the change is possible.
+- A lasting action whose block says when it gets there is declared with `LastingAnnounced()`: doors and pistons. A step
+  waiting only on such blocks listens to them, with a backstop every hundred ticks; any other lasting action is looked
+  at on the hold's pace.
 - The game's terminal actions are never wrapped or replaced. What Sprocket asks of a block prompts a
   look by itself (`GridEntity.Invoke`).
 

@@ -37,7 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _owner = owner;
             _rota = owner.Rota;
             _memory = memory;
-            _workings = new CompiledRun(sequence, instance, owner, memory);
+            _workings = new CompiledRun(sequence, instance, owner, memory, Heard);
 
             var kept = memory.Busy != null;
             if (!kept)
@@ -53,12 +53,33 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 return;
 
             _rota.Restore(_busy);
+
+            // A run held for blocks that say when they get there listens to them from the first tick after the world loads,
+            // whenever its own next look falls.
+            if (IsRunning && _memory.Holding)
+            {
+                _listen = new Shift(0, Listen);
+                _rota.At(_listen, int.MinValue);
+            }
+
             if (!IsRunning || _busy.Listed)
                 return;
 
             // Nothing in a session leaves a run going with nothing to move it; only what was written down can.
             GameLog.Say($"A run of \"{_sequence.Name}\" had nothing on the rota to move it, and was put back.");
             _rota.At(_busy, int.MinValue);
+        }
+
+        /// <summary>Works out the acts the run is held for, which listens to every block among them that says when it gets there.</summary>
+        /// <remarks>Once, on the first tick after a run is taken up from what the world remembered; looks at nothing and moves nothing on.</remarks>
+        void Listen(int tick)
+        {
+            _bindings = _owner.Current;
+            foreach (var step in _memory.Outstanding)
+            {
+                if (((Act)_sequence.Steps[step]).HasAction)
+                    _workings.Compile(step, _bindings);
+            }
         }
 
         /// <summary>What it remembers, which the world's save writes.</summary>
@@ -147,6 +168,9 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly Rota _rota;
 
         readonly Shift _busy;
+
+        // Once, after a held run is taken up from what the world remembered; null otherwise.
+        readonly Shift _listen;
 
 
         /// <summary>
@@ -314,6 +338,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
 
             if (_memory.Holding)
             {
+                // Every block says when it gets there, so it is looked at then, and once in a hundred ticks in case it never says.
+                if (Announced())
+                {
+                    _rota.Every(_busy, Rota.Hundred);
+                    return;
+                }
+
                 // Looking at the blocks again and again until they have finished is a repeat, so the world's fastest update holds it.
                 var period = new Hold(_memory.HoldSince, _memory.HoldExpected).Period(_memory.Looked);
                 _rota.Every(_busy, Math.Max(period, _owner.FastestUpdate));
@@ -335,6 +366,40 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         {
             _busy.Forget();
             _rota.Leave(_busy);
+            if (_listen != null)
+                _rota.Leave(_listen);
+
+            _workings.Deafen();
+        }
+
+        /// <summary>Whether everything the run is held for is a block listened to for getting where it was told, and no sequence it started.</summary>
+        /// <remarks>Reads what is worked out already, and asks the blocks nothing.</remarks>
+        bool Announced()
+        {
+            if (_memory.Started.Count > 0)
+                return false;
+
+            foreach (var step in _memory.Outstanding)
+            {
+                if (!((Act)_sequence.Steps[step]).HasAction)
+                    continue;
+
+                var compiled = _workings.Compile(step, _bindings);
+                foreach (var acted in compiled.Acts)
+                {
+                    if (acted.Action.Until != null && !acted.Heard)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>A block the run listens to says it may have got where it was told: a run held for it is looked at on the next tick.</summary>
+        void Heard()
+        {
+            if (IsRunning && _memory.Holding)
+                _rota.At(_busy, _owner.CurrentTick + 1);
         }
 
         /// <summary>Starts the sequence by name, from another sequence, a trigger or a button.</summary>

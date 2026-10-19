@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Memory;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -13,6 +14,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly AutomationRunner _owner;
         readonly RunMemory _memory;
         readonly List<string> _actedOn = new List<string>();
+        readonly Action _heard;
+        readonly List<IDisposable> _listening = new List<IDisposable>();
         CompiledAct[] _steps = new CompiledAct[0];
         CompiledTest[] _tests = new CompiledTest[0];
         int _boundAt = -1;
@@ -22,13 +25,18 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         // block waited on, and every later one lets it go.
         int _generation;
 
-        /// <summary>The workings of <paramref name="sequence" /> running for <paramref name="instance" />, owned by <paramref name="owner" />, remembering what is waited on in <paramref name="memory" />.</summary>
-        public CompiledRun(Sequence sequence, SystemInstance instance, AutomationRunner owner, RunMemory memory)
+        /// <summary>
+        /// The workings of <paramref name="sequence" /> running for <paramref name="instance" />, owned by <paramref name="owner" />,
+        /// remembering what is waited on in <paramref name="memory" />, and telling <paramref name="heard" /> when a block that
+        /// announces getting where it was told may have.
+        /// </summary>
+        public CompiledRun(Sequence sequence, SystemInstance instance, AutomationRunner owner, RunMemory memory, Action heard)
         {
             _sequence = sequence;
             _instance = instance;
             _owner = owner;
             _memory = memory;
+            _heard = heard;
         }
 
         /// <summary>How many times an act has been worked out.</summary>
@@ -83,7 +91,8 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Arguments = shared.Arguments,
                     Bound = shared.Bound,
                     Order = entity.Prepare(action, shared.Bound, shared.Arguments),
-                    Kept = Kept(step, compiled.Acts.Count, action.Doing != null)
+                    Kept = Kept(step, compiled.Acts.Count, action.Doing != null),
+                    Heard = action.ArrivalAnnounced && Listen(entity)
                 });
             }
 
@@ -136,6 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (bound == _boundAt && edited == _editedAt)
                 return;
 
+            Deafen();
             var count = _sequence.Steps.Count;
             _steps = new CompiledAct[count];
             _tests = new CompiledTest[count];
@@ -218,6 +228,26 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         int FacetOf(IList<string> targets, string block)
         {
             return _instance == null ? 0 : _instance.FacetOf(targets, block);
+        }
+
+        /// <summary>Listens to <paramref name="entity" />, which announces getting where it was told, and answers whether it can.</summary>
+        bool Listen(GridEntity entity)
+        {
+            var listening = entity.Listen(_heard);
+            if (listening == null)
+                return false;
+
+            _listening.Add(listening);
+            return true;
+        }
+
+        /// <summary>Stops listening to every block what is worked out listens to.</summary>
+        public void Deafen()
+        {
+            foreach (var listening in _listening)
+                listening.Dispose();
+
+            _listening.Clear();
         }
 
         /// <summary>Has every block of the acts waited on forget what it said it was done with, reading only what is worked out already.</summary>

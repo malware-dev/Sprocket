@@ -186,12 +186,9 @@ public class RotaTests
             Assert.NotEqual(Rota.Each, hold.Period(tick));
     }
 
-    /// <summary>
-    /// A door that has shut is noticed on the sequence's own tick in the turn, and the next step
-    /// follows then - within the ten ticks, and not before its place comes round.
-    /// </summary>
+    /// <summary>A door that has shut says so, and the next step follows on the tick after.</summary>
     [Fact]
-    public void AHeldStepMovesOnWhenItsPlaceComesRound()
+    public void AHeldStepMovesOnTheTickAfterItsDoorShuts()
     {
         var ship = new Rigged();
         var automation = new Automation();
@@ -227,8 +224,34 @@ public class RotaTests
         }
 
         Assert.True(shut > 0, "the door never shut");
-        Assert.Equal(0, frame % Rota.Ten);
-        Assert.InRange(frame - shut, 0, Rota.Ten - 1);
+        Assert.InRange(frame - shut, 0, 1);
+    }
+
+    /// <summary>A run held for a door that never gets there is looked at once in a hundred ticks, as the door would say when it did.</summary>
+    [Fact]
+    public void AHeldDoorIsLookedAtOnlyAsItsBackstop()
+    {
+        var ship = new Rigged();
+        var automation = new Automation();
+        var door = ship.Door(1, "Door");
+        door.ForceOpen();
+
+        var sequence = automation.AddSequence((Trigger)null!);
+        Then(sequence, "close", automation.Declare(ship.World, ship.Entity(door.Id)).Name);
+
+        var runner = new AutomationRunner(automation, ship.World);
+        var frame = 0;
+        runner.Tick(++frame);
+        runner.Call(sequence);
+        runner.Tick(++frame);
+        Assert.True(runner.Get(sequence)!.IsWaiting);
+
+        // The rig is not ticked, so the door never moves and never says anything.
+        var before = runner.Rota.Done;
+        for (var i = 0; i < 10 * Rota.Hundred; i++)
+            runner.Tick(++frame);
+
+        Assert.InRange(runner.Rota.Done - before, 10, 11);
     }
 
     /// <summary>

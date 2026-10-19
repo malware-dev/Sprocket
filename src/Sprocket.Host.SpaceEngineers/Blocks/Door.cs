@@ -59,8 +59,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             // between starting to open and having closed.
             kind.WithValue("how-far-open", "how far open", Ratio).Percent().RuledOutBy(Shut);
 
-            kind.WithAction("open", "open", Opens, "Open_On").Lasting()
-                .WithAction("close", "close", Closes, "Open_Off").Lasting()
+            kind.WithAction("open", "open", Opens, "Open_On").LastingAnnounced()
+                .WithAction("close", "close", Closes, "Open_Off").LastingAnnounced()
                 .Renaming("Open", false, "reverse")
                 .Renaming("AnyoneCanUse", true, "anyone can use")
                 .Renaming("AnyoneCanUse", false, "toggle anyone can use")

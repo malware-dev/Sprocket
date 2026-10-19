@@ -56,9 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         /// <inheritdoc />
         public override void Describe(EntityKind kind, IMyTerminalBlock block)
         {
-            kind.WithAction(Extend, "extend", Extends, "Extend").Lasting().In(Category.Movement)
-                .WithAction(Retract, "retract", Retracts, "Retract").Lasting().In(Category.Movement)
-                .WithAction(MoveTo, "move", Moves, AskedPosition(block), AskedSpeed(block)).Lasting().Listed("move to")
+            kind.WithAction(Extend, "extend", Extends, "Extend").LastingAnnounced().In(Category.Movement)
+                .WithAction(Retract, "retract", Retracts, "Retract").LastingAnnounced().In(Category.Movement)
+                .WithAction(MoveTo, "move", Moves, AskedPosition(block), AskedSpeed(block)).LastingAnnounced().Listed("move to")
                 .In(Category.Movement)
                 .Hiding("SetAndMove", "ResetVelocity")
                 .Renaming("Reverse", false, "reverse")

@@ -402,6 +402,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says that reaching the state of the action added last takes time, and that the block announces getting there - see <see cref="Capability.Listen" />.</summary>
+        public EntityKind LastingAnnounced()
+        {
+            _actions[_actions.Count - 1].Lasting().AnnounceArrival();
+            return this;
+        }
+
         /// <summary>
         /// Gives one of the block's own members Sprocket's word for it.
         /// </summary>
