@@ -20,6 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         readonly StatusBar _bar = new StatusBar();
         bool _short;
 
+        /// <summary>The size, colors, words and motion the next <see cref="Draw" /> lays out in.</summary>
+        public StatusLook Look => _look;
+
         /// <summary>How many pages the screen last laid out takes turns between.</summary>
         public int Pages => _short ? 1 : _page.Pages;
 

@@ -5,6 +5,7 @@ using Sandbox.ModAPI;
 using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
+using Sprocket.Host.SpaceEngineers.LcdApps;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Host.SpaceEngineers.Network;
 using Sprocket.Host.SpaceEngineers.Memory;
@@ -14,6 +15,7 @@ using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Terminal;
+using Lumel.Drawing;
 using Lumel.Text;
 using Sprocket.Network;
 
@@ -69,6 +71,8 @@ namespace Sprocket.Host.SpaceEngineers
         StatusWatch _watch;
 
         Constructs _constructs;
+
+        ScreenMotion _motion;
 
         SprocketUnit _copy;
 
@@ -158,6 +162,22 @@ namespace Sprocket.Host.SpaceEngineers
         {
             if (_current != null)
                 _current._watch.Unwatch(construct, panel);
+        }
+
+        /// <summary>The tick Sprocket's clock is on, which a screen's motion is timed by.</summary>
+        public static int Tick => _current == null ? 0 : _current.Frame();
+
+        /// <summary>Draws <paramref name="surface" /> every other tick while something on it moves.</summary>
+        /// <remarks>On a client, for as long as the motion lasts; the loop is on the rota only while a screen moves.</remarks>
+        public static void Animate(ILiveSurface surface)
+        {
+            _current?._motion.Animate(surface);
+        }
+
+        /// <summary>Stops drawing <paramref name="surface" /> however much moves on it, as when its app is done with.</summary>
+        public static void Still(ILiveSurface surface)
+        {
+            _current?._motion.Still(surface);
         }
 
         /// <summary>Puts the automation button where a programmable block's controls are shown.</summary>
@@ -277,6 +297,7 @@ namespace Sprocket.Host.SpaceEngineers
             _handover = new Handover(Found, Given, Refused, Foreign, Changed, Stored, Player, () => Asked.Written(),
                 Settled, written => Rule(Settings.Of(written)));
             _constructs = new Constructs(_roster);
+            _motion = new ScreenMotion(_rota);
             _watch = new StatusWatch(_rota, Frame, _constructs.Of, Connected);
             _channel = StatusWatch.Carry(Handover.Carry(NetworkChannel.Create(GetType()))).Build();
             _handover.Listen(_channel);

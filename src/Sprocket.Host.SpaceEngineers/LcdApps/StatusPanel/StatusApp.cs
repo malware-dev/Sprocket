@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
     /// client the automation runs on the server, so the panel watches what the server says of it instead.
     /// </remarks>
     [MyTextSurfaceScript(Id, "Automation")]
-    public class StatusApp : MyTextSurfaceScriptBase
+    public class StatusApp : MyTextSurfaceScriptBase, ILiveSurface
     {
         /// <summary>What the game calls this script, in a slot and in the list a player picks from.</summary>
         /// <remarks>Never change it: a surface stores the script it was given by this name.</remarks>
@@ -37,6 +37,24 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         readonly Action _heard;
 
         const int Turn = 3;
+
+        /// <summary>How long a page turn takes, in ticks: the cards fade out over half of it and the next page in over the rest.</summary>
+        const int Fading = 20;
+
+        /// <summary>How long a newly arrived installation's mark pulses, in ticks, and how long one pulse takes.</summary>
+        const int Pulsing = 180;
+
+        const int Pulse = 45;
+
+        /// <summary>How many of its own long sides away a screen may be seen from for its motion to be worth drawing.</summary>
+        const float Seen = 10f;
+
+        readonly List<StatusItem> _seen = new List<StatusItem>();
+        bool _seenHeard;
+        bool _moving;
+        int _from;
+        int _fadeAt = -1;
+        int _pulseAt = -1;
 
         ConstructStatus _status;
         ConstructStatus _drawnOf;
@@ -66,6 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public new IMyCubeBlock Block => (IMyCubeBlock)base.Block;
 
         /// <inheritdoc />
+        IngameBlock ILiveSurface.Block => base.Block;
+
+        /// <inheritdoc />
         public override void Run()
         {
             base.Run();
@@ -78,6 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         public override void Dispose()
         {
             base.Dispose();
+            SprocketSession.Still(this);
             if (_watching != 0)
                 SprocketSession.Unwatch(_watching, _heard);
         }
@@ -124,24 +146,130 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             if (_blank || _status != _drawnOf || _status.Revision != _drawn || turn != _turn || Surface.SurfaceSize != _size || ink != _ink || ground != _ground
                 || Surface.TextPadding != _padding)
             {
+                var turned = !_blank && _status == _drawnOf && turn != _turn;
+                var fresh = Freshen();
                 _blank = false;
                 _drawnOf = _status;
                 _drawn = _status.Revision;
+                _from = _turn;
                 _turn = turn;
                 _size = Surface.SurfaceSize;
                 _ink = ink;
                 _ground = ground;
                 _padding = Surface.TextPadding;
 
-                _graphics.Begin();
-                _picture.Draw(_graphics, _status, texts, ink, ground, _padding, Metres(), turn);
+                // Where somebody is near enough to see it move, the loop draws the turn and the pulse, frame by frame.
+                if ((turned || fresh) && Near())
+                {
+                    var now = SprocketSession.Tick;
+                    if (turned)
+                        _fadeAt = now;
+                    if (fresh)
+                        _pulseAt = now;
+
+                    _moving = true;
+                    SprocketSession.Animate(this);
+                }
+
+                if (!_moving)
+                    Lay(turn);
             }
 
+            if (!_moving)
+                Hand();
+        }
+
+        /// <inheritdoc />
+        public bool Frame(List<MySprite> output, int tick)
+        {
+            var look = _picture.Look;
+            var shown = _turn;
+            look.Fade = 1f;
+            if (_fadeAt >= 0 && tick - _fadeAt < Fading)
+            {
+                var half = Fading / 2f;
+                var into = tick - _fadeAt;
+                shown = into < half ? _from : _turn;
+                look.Fade = into < half ? 1f - into / half : (into - half) / half;
+            }
+            else
+                _fadeAt = -1;
+
+            look.Pulse = 0f;
+            if (_pulseAt >= 0 && tick - _pulseAt < Pulsing)
+                look.Pulse = 0.5f - 0.5f * (float)Math.Cos(2.0 * Math.PI * (tick - _pulseAt) / Pulse);
+            else
+            {
+                _pulseAt = -1;
+                look.Fresh.Clear();
+            }
+
+            _moving = _fadeAt >= 0 || _pulseAt >= 0;
+            Lay(shown);
+            output.AddRange(_sprites);
+
+            // The game draws the panel's own frame again whenever its texture is made afresh, so it is handed the last one.
+            if (!_moving)
+                Hand();
+
+            return _moving;
+        }
+
+        /// <summary>Lays the status out showing the page <paramref name="turn" /> places in.</summary>
+        void Lay(int turn)
+        {
+            _graphics.Begin();
+            _picture.Draw(_graphics, _status, SprocketSession.Texts, _ink, _ground, _padding, Metres(), turn);
+        }
+
+        /// <summary>Hands the game the frame last laid out.</summary>
+        void Hand()
+        {
             using (MySpriteDrawFrame frame = Surface.DrawFrame())
             {
                 foreach (MySprite sprite in _sprites)
                     frame.Add(sprite);
             }
+        }
+
+        /// <summary>Notes which installations newly want looking at, for their marks to pulse, and answers whether any do.</summary>
+        bool Freshen()
+        {
+            var fresh = _picture.Look.Fresh;
+            var any = false;
+            if (_status.Heard && _seenHeard)
+            {
+                foreach (var item in _status.Items)
+                {
+                    var known = false;
+                    foreach (var seen in _seen)
+                        known |= seen.Same(item);
+
+                    if (!known)
+                    {
+                        fresh.Add(item);
+                        any = true;
+                    }
+                }
+            }
+
+            _seen.Clear();
+            foreach (var item in _status.Items)
+                _seen.Add(item);
+
+            _seenHeard = _status.Heard;
+            return any;
+        }
+
+        /// <summary>Whether the camera is near enough the screen for its motion to be seen: within <see cref="Seen" /> of its long sides.</summary>
+        bool Near()
+        {
+            var camera = MyAPIGateway.Session?.Camera;
+            if (camera == null)
+                return false;
+
+            var reach = Seen * Metres();
+            return Vector3D.DistanceSquared(camera.Position, Block.GetPosition()) <= reach * reach;
         }
 
         /// <summary>How long the screen's long side is, in metres: the block's longest side, as near as the panel can know it.</summary>

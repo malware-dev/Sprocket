@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Text;
 using Lumel.Drawing;
@@ -121,6 +120,37 @@ public class StatusPictureTests
             if (sprite.FontId != Symbols.Font)
                 Assert.True(line >= StatusLook.Smallest - 0.5f, where + ": \"" + sprite.Data + "\" is " + line + " pixels tall");
         }
+    }
+
+    /// <summary>Cards faded right out are drawn in the background's color, the top line still in its own.</summary>
+    [Fact]
+    public void AFadedCardIsDrawnIntoTheBackground()
+    {
+        var status = StatusScenes.Make("trouble", out var texts);
+        var face = Face(ScreenShape.Reference[0]);
+        var picture = new StatusPicture();
+        picture.Look.Fade = 0f;
+
+        Draw(picture, face, status, texts, 0);
+
+        var words = face.Sprites.Where(sprite => sprite.Type == SpriteType.TEXT && sprite.FontId != Symbols.Font).ToList();
+        Assert.Contains(words, sprite => sprite.Color == face.Background);
+        Assert.Contains(words, sprite => sprite.Data == texts.PanelHeading && sprite.Color != face.Background);
+    }
+
+    /// <summary>A newly arrived installation's mark is lit toward the text color as it pulses.</summary>
+    [Fact]
+    public void AFreshMarkIsLitAsItPulses()
+    {
+        var status = StatusScenes.Make("trouble", out var texts);
+        var face = Face(ScreenShape.Reference[0]);
+        var picture = new StatusPicture();
+        picture.Look.Fresh.Add(status.Items[0]);
+        picture.Look.Pulse = 1f;
+
+        Draw(picture, face, status, texts, 0);
+
+        Assert.Contains(face.Sprites, sprite => sprite.Data == Symbols.Close && sprite.Color == face.Foreground);
     }
 
     static void Draw(StatusPicture picture, Face face, ConstructStatus status, Localization.Texts texts, int turn)
