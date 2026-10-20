@@ -15,11 +15,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// <remarks>
     /// The only thing on screen that changes what a sequence means, so nothing else may borrow this look.
     /// </remarks>
-    public class SlotChip : HStack, ITextual
+    public class SlotChip : Stacking, ITextual
     {
         const float UnderlineThickness = 2f;
 
         readonly List<Mention> _said = new List<Mention>();
+        readonly bool _across;
 
         bool _empty;
         Color _glow;
@@ -28,9 +29,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         float _fontSize = TextState.NeutralFontSize;
         Color _color = Color.White;
 
-        /// <summary>An empty part, pressable where it is given a command, in the look every part of a sentence has.</summary>
-        public SlotChip()
+        /// <summary>An empty part, pressable where it is given a command, in the look every part of a sentence has, its pieces in a line across.</summary>
+        public SlotChip() : this(true)
         {
+        }
+
+        /// <summary>
+        /// An empty part, pressable where it is given a command, in the look every part of a sentence has, its pieces in a line
+        /// across where <paramref name="piecesAcross" /> is set and one under the other otherwise, words standing at the right.
+        /// </summary>
+        public SlotChip(bool piecesAcross) : base(piecesAcross)
+        {
+            _across = piecesAcross;
             Style = Styles.Slot;
         }
 
@@ -224,6 +234,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
                 var words = (Label)Children[i];
                 words.Text = piece.Text;
+                words.Align = _across ? Align.Default : Align.Right;
                 words.Sample = _said.Count == 1 ? sample : null;
                 words.SampleEdge = Palette.Line;
             }

@@ -275,7 +275,21 @@ namespace Sprocket.Sim
                 if (admin)
                     from += 1;
 
-                string ended = Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer, admin);
+                // Blocks welded onto the demo ship before the script starts, a kind and a name each: with panel "Hangar Button".
+                Rig with = null;
+                for (var id = 900L; args.Length > from + 2 && args[from] == "with"; id++)
+                {
+                    with = with ?? Rig.Demo();
+                    Weld(with, id, args[from + 1], args[from + 2]);
+                    from += 3;
+                }
+
+                if (with != null && holding != null)
+                    throw new ArgumentException("--shot takes 'holding' or 'with', not both: a held program names the demo ship's blocks.");
+
+                string ended = with != null
+                    ? Shot.Save(args[1], width, height, Script.Parse(args, from), EditorScene.On(with), culture, developer, admin)
+                    : Shot.Save(args[1], width, height, Script.Parse(args, from), holding, culture, developer, admin);
                 Console.WriteLine("wrote " + args[1] + "   " + width + "x" + height);
                 Console.WriteLine("ended on: " + ended);
                 return;
@@ -365,6 +379,20 @@ namespace Sprocket.Sim
             return given == null
                 ? Lumel.Text.Alignment.Left
                 : (Lumel.Text.Alignment)Enum.Parse(typeof(Lumel.Text.Alignment), given.Substring(6), true);
+        }
+
+        /// <summary>Welds a block of <paramref name="kind" />, a panel, a light or a door, onto <paramref name="rig" /> as <paramref name="id" />, named <paramref name="name" />.</summary>
+        /// <exception cref="ArgumentException">The kind is none of the three.</exception>
+        static void Weld(Rig rig, long id, string kind, string name)
+        {
+            if (kind == "panel")
+                rig.Panel(id, name);
+            else if (kind == "light")
+                rig.Light(id, name);
+            else if (kind == "door")
+                rig.Door(id, name);
+            else
+                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light or a door.");
         }
 
         /// <summary>Whether a word begins a script step rather than naming a file.</summary>

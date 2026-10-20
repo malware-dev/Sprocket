@@ -16,8 +16,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     /// <summary>One slot of a blueprint: its name, what it says about itself, the blocks one installation fills it with, and what is still to do about it.</summary>
     public partial class PartRow : HStack
     {
+        /// <summary>How many lines a slot's blocks take at most, the last saying how many more there are where they do not fit.</summary>
+        public const int MostListed = 8;
+
         readonly List<Mention> _pieces = new List<Mention>();
         readonly List<Mention> _signalPieces = new List<Mention>();
+        readonly HashSet<string> _said = new HashSet<string>();
 
         float _wide = PartList.Widest;
         string _opensAbout;
@@ -58,10 +62,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>What pressing the slot's name does, which is opening it to be named and described, or null where it cannot be.</summary>
+        /// <remarks>Drawn as a button while it opens something, and as the name alone where it does not.</remarks>
         public ICommand Opens
         {
-            get { return _column.Command; }
-            set { _column.Command = value; }
+            get { return _name.Command; }
+            set
+            {
+                _name.Command = value;
+                _name.Style = value != null ? Styles.SlotName : Styles.SlotNameStill;
+            }
         }
 
         /// <summary>What pressing the slot's name does, said where the pointer rests on it; null for nothing.</summary>
@@ -71,7 +80,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _opensAbout = value;
-                _column.Tip = Tip.For(_column.Tip, value);
+                _name.Tip = Tip.For(_name.Tip, value);
             }
         }
 
@@ -197,22 +206,27 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _signals.IsVisible = false;
         }
 
-        /// <summary>Says the blocks, naming them as <paramref name="world" /> calls them, and for a signal slot the signals beside them.</summary>
+        /// <summary>Says the blocks one under the other, naming them as <paramref name="world" /> calls them, and for a signal slot beside them each signal they send, once.</summary>
         /// <remarks>Walks the blocks for their names, so it is for calling only when they change.</remarks>
         public void Show(GridWorld world)
         {
             _pieces.Clear();
-            SentenceText.Entities(world, Blocks, Signals.Count == 0, _pieces);
+            SentenceText.Listed(world, Blocks, Signals.Count == 0, MostListed, _pieces);
             _blocks.Say(_pieces);
             _blocks.IsEmpty = Blocks.Count == 0;
 
             _signalPieces.Clear();
-            for (var i = 0; i < Signals.Count; i++)
+            _said.Clear();
+            foreach (var signal in Signals)
             {
-                if (i > 0)
+                var slot = new EventSlot(signal, null);
+                if (!_said.Add(SentenceText.InTrigger(world, slot)))
+                    continue;
+
+                if (_signalPieces.Count > 0)
                     _signalPieces.Add(new Mention(", ", null));
 
-                SentenceText.InTrigger(world, new EventSlot(Signals[i], null), _signalPieces);
+                SentenceText.InTrigger(world, slot, _signalPieces);
             }
 
             _signals.Say(_signalPieces);

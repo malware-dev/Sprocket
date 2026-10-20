@@ -110,6 +110,9 @@ dotnet run --project src/Sprocket.Host.SpaceEngineers.Sim
 
 - Every view, screen, control and style is built by the **lumel** skill's rules; load it for any UI code.
 - Sprocket's styles, palette, sizes and symbols are in `Features/Look`: `Styles`, `Palette`, `TextSizes`, `Symbols`.
+- The slot look, `Styles.Slot` on a `SlotChip` (a filled panel with a line along its bottom), marks a part of a
+  sentence whose choice changes what a sequence does: a step's blocks and values, a trigger's signal, the blocks that
+  fill a slot. Nothing else wears it. Anything else a person presses is a button in one of the button styles.
 
 ## The rota
 

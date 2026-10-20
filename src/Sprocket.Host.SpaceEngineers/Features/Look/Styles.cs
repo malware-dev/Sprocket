@@ -537,6 +537,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Color = Palette.Dim }
         };
 
+        /// <summary>A slot's name on the installation panel where pressing it opens the slot to be named and described: the game's button, in a name's size.</summary>
+        /// <remarks>Padded as a block chip beside it is, so the name stands level with the first block.</remarks>
+        public static readonly ButtonStyle SlotName = new ButtonStyle(Button)
+        {
+            Base = { FontSize = 24f }
+        };
+
+        /// <summary>A slot's name on the installation panel where pressing it opens nothing: the words alone, where the button's would stand.</summary>
+        public static readonly ButtonStyle SlotNameStill = new ButtonStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Padding = new Thickness(16f, 8f) }
+        };
+
         /// <summary>The header of one page of several, as the game draws the tabs across its terminal, the page showing on the lightest plate.</summary>
         public static readonly TabStyle Tab = new TabStyle
         {

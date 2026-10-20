@@ -1,4 +1,5 @@
 using Lumel;
+using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
@@ -11,7 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     {
         VStack _column;
         Glyph _mark;
-        Label _name;
+        Button _name;
         RichText _about;
         SlotChip _blocks;
         SlotChip _signals;
@@ -28,7 +29,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Children.Add(new VStack
             {
                 Spacing = 4f,
-                Style = Styles.Plate,
+                Align = Align.Top,
                 Placement = FixedSize.Wide(PartList.Widest),
                 Children =
                 {
@@ -38,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Children =
                         {
                             new Glyph { Style = Styles.Waits }.As(out _mark),
-                            new Label { Style = Styles.Name }.As(out _name)
+                            new Button { Style = Styles.SlotNameStill }.As(out _name)
                         }
                     },
                     new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about)
@@ -48,6 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Children.Add(new VStack
             {
                 Spacing = 4f,
+                Align = Align.Top,
                 Children =
                 {
                     new HStack
@@ -55,8 +57,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 20f,
                         Children =
                         {
-                            new SlotChip().As(out _blocks),
-                            new SlotChip { IsVisible = false }.As(out _signals),
+                            new SlotChip(false) { Spacing = 4f }.As(out _blocks),
+                            new SlotChip { IsVisible = false, Align = Align.Top }.As(out _signals),
                             new Label { Style = Styles.Problem, IsVisible = false }.As(out _problem)
                         }
                     },

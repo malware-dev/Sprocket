@@ -403,6 +403,31 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 into.Add(new Mention($"{joiner}{(entityIds.Count - 2)} more", null));
         }
 
+        /// <summary>
+        /// Names a selection as one piece a block, each with its icon, in the order <see cref="Entities(GridWorld, IList{long}, bool, List{Mention})" />
+        /// names them: all of them where there are no more than <paramref name="most" />, and otherwise all but one of that many and
+        /// a last piece saying how many more, joined as a sentence joins them.
+        /// </summary>
+        public static void Listed(GridWorld world, IList<long> entityIds, bool requiresAll, int most, List<Mention> into)
+        {
+            if (entityIds.Count == 0)
+            {
+                into.Add(new Mention(Empty, null));
+                return;
+            }
+
+            var named = entityIds.Count > most ? most - 1 : entityIds.Count;
+            var entities = Found(world, entityIds);
+            var order = InOrder(entities);
+            for (var i = 0; i < named; i++)
+            {
+                var entity = entities[order[i]];
+                into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
+            }
+
+            if (named < entityIds.Count)
+                into.Add(new Mention($"{(requiresAll ? "and" : "or")} {entityIds.Count - named} more", null));
+        }
 
         /// <summary>
         /// Names a selection, keeping real names visible for as long as they fit.
