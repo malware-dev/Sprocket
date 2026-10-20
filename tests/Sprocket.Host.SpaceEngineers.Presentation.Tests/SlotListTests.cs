@@ -132,6 +132,39 @@ public class SlotListTests
         Assert.Same(Styles.SlotNameStill, still.Style);
     }
 
+    /// <summary>A signal slot with a short name says it after its name, in brackets; one without says its name alone.</summary>
+    [Fact]
+    public void ASignalSlotsShortNameFollowsItsName()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.Back();
+        screen.Run(2);
+        screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
+        screen.Run(2);
+
+        var row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
+        var label = row.Within().OfType<Lumel.Controls.Button>().First();
+        Assert.Equal(row.Name, label.Text);
+
+        var name = row.Name;
+        screen.Editor.OpenSlot(name);
+        screen.Run(2);
+        var page = (SlotPage)screen.Editor.Current!;
+        Assert.Equal(512, page.Short.Longest);
+        screen.Editor.Input!.Focus(page.Short);
+        page.Short.Insert("Call");
+        screen.Run(2);
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+        screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
+        screen.Run(2);
+
+        row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
+        Assert.Equal(name + " (Call)", row.Within().OfType<Lumel.Controls.Button>().First().Text);
+    }
+
     /// <summary>The line saying how many more there are is said in the player's language.</summary>
     [Fact]
     public void HowManyMoreIsSaidInThePlayersLanguage()

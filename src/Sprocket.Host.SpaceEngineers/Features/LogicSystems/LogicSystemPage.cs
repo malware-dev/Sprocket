@@ -408,9 +408,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Word(_triggerRows[trigger], trigger);
 
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
-            _newSequence.Tip = Tip.For(_newSequence.Tip, texts.SystemNewSequenceAbout);
-
             _newSequence.Command = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system));
+            _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? texts.SystemNewSequenceAbout : Locked());
 
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0;
@@ -499,10 +498,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 var row = _slotRows[part];
 
                 row.Name = part.Id;
+                row.Short = part.IsSignal ? part.Short : "";
                 row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
                 row.Described = part.Annotation;
                 row.Opens = Changes(CommandKind.OpenSlot, () => Editor.Push(new SlotPage(Editor, _system, part)));
                 row.OpensAbout = Editable ? texts.SlotOpenAbout : Locked();
+                row.FillsLocked = Locked();
                 row.Fills = Changes(CommandKind.FillPart, () => _fill.Ask(part, shown));
                 row.Marks = Marked(texts, part, shown);
                 row.Take(Editor.Runner.Bindings, shown.FilledWith(part.Id), part.IsSignal ? shown.Positions(part.Id) : null);

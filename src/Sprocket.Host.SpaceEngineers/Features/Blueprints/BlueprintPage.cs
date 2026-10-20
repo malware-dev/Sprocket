@@ -357,6 +357,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         bool Part(PartRow row, Part part, SystemInstance chosen)
         {
             row.Name = part.Id;
+            row.Short = part.IsSignal ? part.Short : "";
             row.Mark = part.IsSignal ? Symbols.Signal : Symbols.Block;
             row.Described = part.Annotation;
 

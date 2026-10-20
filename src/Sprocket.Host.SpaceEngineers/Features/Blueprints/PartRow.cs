@@ -26,6 +26,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly List<Mention> _signalPieces = new List<Mention>();
         readonly HashSet<string> _said = new HashSet<string>();
         readonly Texts _texts;
+        string _id = "";
+        string _short = "";
 
         float _wide = PartList.Widest;
         string _opensAbout;
@@ -43,8 +45,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>What the slot is called.</summary>
         public string Name
         {
-            get { return _name.Text; }
-            set { _name.Text = value; }
+            get { return _id; }
+            set
+            {
+                _id = value ?? "";
+                Label();
+            }
+        }
+
+        /// <summary>The few words a signal slot's buttons and toolbar slots show, said after its name in brackets; empty for none.</summary>
+        public string Short
+        {
+            get { return _short; }
+            set
+            {
+                _short = value ?? "";
+                Label();
+            }
         }
 
         /// <summary>The mark of what kind of slot it is: the block, or the signal.</summary>
@@ -153,6 +170,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>For a signal slot, the signals its blocks send that answer it, such as "button 2 is pressed"; none for any other slot.</summary>
         public List<EntityEvent> Signals { get; }
 
+        /// <summary>Why the blocks cannot be changed, said over them while <see cref="Fills" /> is null; empty for nothing to say.</summary>
+        /// <remarks>Set before <see cref="Fills" />, which says it.</remarks>
+        public string FillsLocked { get; set; } = "";
+
         /// <summary>What pressing the blocks does, which is choosing others, or null where they cannot be changed.</summary>
         public ICommand Fills
         {
@@ -161,10 +182,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _blocks.Command = value;
                 _signals.Command = value;
-                var about = value != null ? _texts.PartFillsAbout : null;
+                var about = value != null ? _texts.PartFillsAbout : FillsLocked;
                 _blocks.Tip = Tip.For(_blocks.Tip, about);
                 _signals.Tip = Tip.For(_signals.Tip, about);
             }
+        }
+
+        /// <summary>Says the slot's name, and its short name after it in brackets where it has one.</summary>
+        void Label()
+        {
+            _name.Text = _short.Length == 0 ? _id : $"{_id} ({_short})";
         }
 
         /// <summary>How wide the slot's name and description would stand in <paramref name="available" />.</summary>

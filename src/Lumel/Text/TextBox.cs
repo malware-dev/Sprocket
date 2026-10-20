@@ -101,6 +101,13 @@ namespace Lumel.Text
         /// <summary>What to show while the box is empty.</summary>
         public string Hint { get; set; }
 
+        /// <summary>How many characters typing and pasting may bring it to, or zero for no limit.</summary>
+        /// <remarks>Held to as it is edited; text set whole is taken as it is.</remarks>
+        public int Longest { get; set; }
+
+        /// <summary>How many more characters it takes, as many as wanted where it has no limit.</summary>
+        int Room => Longest > 0 ? Math.Max(0, Longest - _text.Length) : int.MaxValue;
+
         /// <summary>The color <see cref="Hint" /> is drawn in.</summary>
         public Color HintColor { get; set; }
 
@@ -181,6 +188,15 @@ namespace Lumel.Text
 
             Hold();
             DeleteSelection();
+            if (words.Length > Room)
+                words = words.Substring(0, Room);
+
+            if (words.Length == 0)
+            {
+                OnEdited();
+                return;
+            }
+
             _text.Insert(_caret, words);
             Rewritten();
             Place(_caret + words.Length, _caret + words.Length);
@@ -326,6 +342,12 @@ namespace Lumel.Text
 
             Hold();
             DeleteSelection();
+            if (Room == 0)
+            {
+                OnEdited();
+                return;
+            }
+
             _text.Insert(_caret, c);
             Rewritten();
             Place(_caret + 1, _caret + 1);

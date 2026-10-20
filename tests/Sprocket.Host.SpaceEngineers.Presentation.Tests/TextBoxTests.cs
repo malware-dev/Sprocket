@@ -70,6 +70,22 @@ public class TextBoxTests
         Assert.Equal("Air!", box.Text);
     }
 
+    /// <summary>A box with a limit takes as much of what is put in as fits, and no typing once it is full.</summary>
+    [Fact]
+    public void ABoxHoldsToItsLimit()
+    {
+        var (box, _, input) = Laid("Air");
+        box.Longest = 7;
+
+        input.Focus(box);
+        input.Key(MyKeys.End, false, false);
+        box.Insert("lockdoor");
+        Assert.Equal("Airlock", box.Text);
+
+        input.Text('!');
+        Assert.Equal("Airlock", box.Text);
+    }
+
     /// <summary>What is cut can be pasted back, through the root's clipboard.</summary>
     [Fact]
     public void CutAndPasteGoThroughTheClipboard()

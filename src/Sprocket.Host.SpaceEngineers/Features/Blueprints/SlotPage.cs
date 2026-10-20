@@ -21,6 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         Element _focused;
 
+        /// <summary>How long a short name may be: the most the game's own text boxes in the terminal take.</summary>
+        const int ShortLongest = 512;
+
+        // How many of the steps back on the history were made here since the page opened, which going back may take back.
+        int _made;
+
         /// <summary>The page of the slot <paramref name="part" /> of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public SlotPage(SprocketEditor editor, AutomationSystem system, Part part) : base(editor)
         {
@@ -100,7 +106,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (other != null && other != _part)
                 _system.DropPart(other);
 
-            Editor.Do(_system, new RenamePart(_part, wanted));
+            Make(new RenamePart(_part, wanted));
         }
 
         /// <summary>Whether no other slot that is used, or that an installation holds blocks in, has <paramref name="name" />.</summary>
@@ -114,12 +120,40 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return !_used.Contains(other.Id) && !Held(other);
         }
 
-        /// <summary>Writes what is still being typed into the slot before going.</summary>
+        /// <summary>
+        /// Writes what is still being typed into the slot, and where anything was changed here asks whether to keep it, as a
+        /// picker does: keeping goes back with the changes, discarding takes every one of them back first.
+        /// </summary>
         public override bool Leaving()
         {
             Written(_focused);
             _focused = null;
-            return true;
+            if (_made == 0)
+                return true;
+
+            Editor.Ask(Editor.Texts.PickKeepQuestion);
+            Editor.Answer(Editor.Texts.PickKeepThem, delegate
+            {
+                _made = 0;
+                Editor.Pop();
+            }, true);
+            Editor.Answer(Editor.Texts.PickDiscardThem, delegate
+            {
+                for (; _made > 0; _made--)
+                    Editor.Undo(_system, _part);
+
+                Editor.Pop();
+            });
+            return false;
+        }
+
+        /// <summary>Keeps every change made here, what is still being typed included, and finishes.</summary>
+        public override void Primary()
+        {
+            Written(_focused);
+            _focused = null;
+            _made = 0;
+            base.Primary();
         }
 
         /// <inheritdoc />
@@ -127,6 +161,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             Settle();
             Editor.Undo(_system, _part);
+            if (_made > 0)
+                _made--;
         }
 
         /// <inheritdoc />
@@ -134,6 +170,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             Settle();
             Editor.Redo(_system, _part);
+            _made++;
         }
 
         /// <summary>Brings the view up to date, or goes back where a step back has taken the slot away.</summary>
@@ -205,7 +242,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _required.IsOn = !_part.Optional;
             _required.Tip = Tip.For(_required.Tip, texts.BlueprintRequiredAbout);
             _required.Command = editable
-                ? Editor.Act(CommandKind.MakeOptional, () => Editor.Do(_system, new SetOptional(_part, !_part.Optional)))
+                ? Editor.Act(CommandKind.MakeOptional, () => Make(new SetOptional(_part, !_part.Optional)))
                 : null;
         }
 
@@ -276,10 +313,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (box == null || _composer == null || !Editable)
                 return;
 
-            if (box == _composer.Box)
-                Editor.Do(_system, new AnnotatePart(_part, _composer.Text, ChangeKind.DescribeSlot));
-            else if (box == _short)
-                Editor.Do(_system, new ShortenPart(_part, _short.Text.Trim()));
+            if (box == _composer.Box && _composer.Text != (_part.Annotation ?? ""))
+                Make(new AnnotatePart(_part, _composer.Text, ChangeKind.DescribeSlot));
+            else if (box == _short && _short.Text.Trim() != _part.Short)
+                Make(new ShortenPart(_part, _short.Text.Trim()));
+        }
+
+        /// <summary>Makes <paramref name="change" /> to the slot as one step back, counted among those going back may take back.</summary>
+        void Make(SystemEdit change)
+        {
+            Editor.Do(_system, change);
+            _made++;
         }
     }
 }

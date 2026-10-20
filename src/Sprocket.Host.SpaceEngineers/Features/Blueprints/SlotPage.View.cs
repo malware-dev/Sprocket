@@ -35,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _purpose),
 
                     new Label { Style = Styles.NextHeading, IsVisible = false }.As(out _shortHeading),
-                    new TextBox { Style = Styles.Search, Focusable = true, IsVisible = false, Placement = FixedSize.Wide(460f) }.As(out _short),
+                    new TextBox { Style = Styles.Search, Focusable = true, IsVisible = false, Longest = ShortLongest, Placement = FixedSize.Wide(460f) }.As(out _short),
                     new Label { Style = Styles.Phrase, IsVisible = false }.As(out _shownShort),
 
                     new Label { Style = Styles.NextHeading }.As(out _expectsHeading),

@@ -109,6 +109,46 @@ public class SystemSwitchTests
         Assert.All(sim.Editor.Triggers()[0].Within().OfType<SlotChip>(), chip => Assert.DoesNotContain("The system must be turned off in order to make changes safely.", chip.Tip?.Text ?? ""));
     }
 
+    /// <summary>Switched on, every button and part of a sentence that cannot be pressed, on each of the logic system's tabs, says why.</summary>
+    [Fact]
+    public void NothingLockedIsSilentOnAnyTab()
+    {
+        var sim = Simulation.Fresh();
+        sim.Editor.NewButtonSystem("Airlock");
+        sim.Editor.PressAdd("task");
+        sim.Editor.PressBlock("Airlock Light");
+        sim.Editor.PressChoice("power");
+        sim.Editor.PressPrimary();
+        sim.Tick();
+        sim.Editor.Back();
+        sim.Tick();
+        sim.Editor.SwitchOn();
+        sim.Tick();
+
+        var texts = sim.Editor.Texts;
+        foreach (var tab in new[] { texts.SystemTriggers, texts.SystemSequences, texts.SystemState, texts.SystemInstallationPanel })
+        {
+            sim.Editor.PressTab(tab);
+            sim.Tick();
+            var silent = sim.Editor.Current!.View.Within()
+                .Where(element => (element is Lumel.Controls.Button || element is SlotChip) && element.Command == null && Shown(element) && element.Tip == null)
+                .ToList();
+            Assert.True(silent.Count == 0, $"{tab}: {silent.Count} locked without saying why");
+        }
+    }
+
+    /// <summary>Whether <paramref name="element" /> and everything it stands in is shown.</summary>
+    static bool Shown(Lumel.Element element)
+    {
+        for (var at = element; at != null; at = at.Parent)
+        {
+            if (!at.IsVisible)
+                return false;
+        }
+
+        return true;
+    }
+
     /// <summary>Switching a blueprint off asks first, naming each logic system it stops; keeping them running changes nothing.</summary>
     [Fact]
     public void SwitchingABlueprintOffAsksFirst()

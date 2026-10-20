@@ -140,6 +140,8 @@ public class MarkTests
         screen.Run(5);
         editor.Back();
         screen.Run(5);
+        editor.PressChoice(editor.Texts.PickKeepThem);
+        screen.Run(5);
 
         Assert.Equal(new[] { "Aft Door", "Airlock Inner Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
 
@@ -147,6 +149,43 @@ public class MarkTests
         screen.Run(5);
 
         Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
+    }
+
+    /// <summary>Going back from a slot's page after changing it asks whether to keep the changes, and discarding takes them all back.</summary>
+    [Fact]
+    public void DiscardingASlotsChangesTakesThemBack()
+    {
+        var screen = Slots();
+        var editor = screen.Editor;
+
+        editor.OpenSlot("Airlock Outer Door");
+        screen.Run(5);
+        editor.Screen.Heading[0].Renames!("Aft Door");
+        screen.Run(5);
+        editor.Back();
+        screen.Run(5);
+        editor.PressChoice(editor.Texts.PickDiscardThem);
+        screen.Run(5);
+
+        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
+    }
+
+    /// <summary>Done on a slot's page keeps its changes without asking.</summary>
+    [Fact]
+    public void DoneKeepsASlotsChanges()
+    {
+        var screen = Slots();
+        var editor = screen.Editor;
+
+        editor.OpenSlot("Airlock Outer Door");
+        screen.Run(5);
+        editor.Screen.Heading[0].Renames!("Aft Door");
+        screen.Run(5);
+        editor.PressPrimary();
+        screen.Run(5);
+
+        Assert.False(screen.Scene.IsQuestioning, "Done asked whether to keep the changes");
+        Assert.Equal(new[] { "Aft Door", "Airlock Inner Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>The row of the what column offering <paramref name="text" />.</summary>
