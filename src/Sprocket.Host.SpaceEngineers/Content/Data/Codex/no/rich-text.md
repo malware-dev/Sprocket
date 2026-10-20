@@ -1,6 +1,6 @@
 # Formatert tekst
 
-Formatert tekst er vanlig tekst med noen få tegn skrevet inn, hentet fra Markdown, som gjør den om til overskrifter, lister, tabeller og fete eller kursive ord. Denne siden viser hvert tegn, og hva det gir.
+Formatert tekst er vanlig tekst med noen få merker skrevet inn, hentet fra Markdown, som gjør den om til overskrifter, lister, tabeller og fete eller kursive ord. Denne siden viser hvert merke, og hva det gir.
 
 ## Fet, kursiv og kode
 
@@ -73,7 +73,7 @@ Hangar 2
 | Luftsluse | 1 |
 | Hangar | 4 |
 
-Den andre linja sier hvordan hver kolonne står: `:--` til venstre, `:-:` midtstilt, `--:` til høyre.
+Den andre linja sier hvordan hver kolonne justeres: `:--` til venstre, `:-:` midtstilt, `--:` til høyre.
 
 For å utelate overskriften starter du tabellen med en rad tomme celler:
 

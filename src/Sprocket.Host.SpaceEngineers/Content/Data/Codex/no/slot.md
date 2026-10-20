@@ -3,10 +3,10 @@
 For at ett ![](mark:logic-system)&nbsp;[logikksystem](logic-system) skal kunne kjøre hver luftsluse på et skip, kan ikke [stegene](step) og [utløserne](trigger) dets nevne dørene til én luftsluse. De nevner plasser i stedet: navngitte steder som *den indre døra*, som hver ![](mark:installation)&nbsp;[installasjon](installation) fyller med sine egne blokker.
 
 - En ![](mark:block)&nbsp;**blokkplass** holder blokkene et steg virker på eller en utløser følger med på, som en dør, eller alle lysene i luftslusen.
-- En ![](mark:signal)&nbsp;**signalplass** holder en blokk og verktøylinjeplassen på den som sender [signalet](signal), som et knappepanel og en av knappene.
-- En ![](mark:block)&nbsp;**skjermplass** holder blokker og hvilken av skjermene til hver blokk, for et steg eller et [hvis](if) som virker på en skjerm. Et tekstpanel har én skjerm, en cockpit eller en reklametavle flere.
+- En ![](mark:signal)&nbsp;**signalplass** holder en blokk og verktøylinjeplassen på den som sender [signalet](signal), som et button panel og en av knappene.
+- En ![](mark:block)&nbsp;**skjermplass** holder blokker og hvilken av skjermene til hver blokk, for et steg eller et [hvis](if) som virker på en skjerm. Et LCD panel har én skjerm, en cockpit eller en reklametavle flere.
 
-Blokkene du velger, fyller plassene til `Valgt installasjon`. Hver andre installasjon fyller dem på sitt eget [installasjonspanel](installation-panel).
+Blokkene du velger, fyller plassene til `Valgt installasjon`. Alle de andre installasjonene fyller dem på sitt eget [installasjonspanel](installation-panel).
 
 ## Hvordan plasser lages
 
@@ -20,7 +20,7 @@ En plass med én blokk får navnet til blokken, og en med flere blir nummerert.
 
 En skjermplass er unntaket fra gruppene: hvert steg eller hvis som virker på en skjerm, har en egen, navngitt på samme måte. Velger du andre blokker eller en annen skjerm for steget, beholder det plassen sin, og valgene til de andre installasjonene. En skjermplass som ingen bruker lenger, forsvinner, som andre plasser.
 
-En plass tar én type blokk: den nærmeste typen alle blokkene i den deler, etter spillets egne typer. Ett innelys, eller flere, lager en plass for `Innelys`. Et innelys og en lyskaster lager en plass for `Lys`, som tar begge. Et lys og en dør lager en for `Blokk som slås av og på`, og blokker som ikke deler noe nærmere, lager en plass som tar hvilken som helst blokk. Siden til plassen viser typen under `Forventer`.
+En plass tar én type blokk: den nærmeste typen alle blokkene i den deler, etter spillets egne typer. Ett interiørlys, eller flere, lager en plass for `Interiørlys`. Et interiørlys og et søkelys lager en plass for `Lys`, som tar begge. Et lys og en dør lager en for `Blokk som slås av og på`, og blokker som ikke deler noe nærmere, lager en plass som tar hvilken som helst blokk. Siden til plassen viser typen under `Forventer`.
 
 Fordi en plass tar en type framfor én bestemt blokk, tar en plass laget av en stor dør også små dører, og en ![](mark:blueprint)&nbsp;[plantegning](blueprint) laget på et stort rutenett kan installeres på et lite.
 

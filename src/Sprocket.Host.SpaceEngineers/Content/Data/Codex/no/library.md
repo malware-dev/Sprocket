@@ -1,6 +1,6 @@
 # Bibliotek
 
-Biblioteket er der du tar vare på ![](mark:blueprint)&nbsp;[plantegningene](blueprint) dine og styrer ![](mark:logic-system)&nbsp;[logikksystemene](logic-system) som er laget av dem. Åpne det med `Bibliotek` på [startskjermen](home). Det lister tre grupper:
+Biblioteket er der du tar vare på ![](mark:blueprint)&nbsp;[plantegningene](blueprint) dine og styrer ![](mark:logic-system)&nbsp;[logikksystemene](logic-system) som er laget av dem. Åpne det med `Bibliotek` på [startskjermen](home). Det viser tre grupper:
 
 - `På konstruksjonene dine`: denne [konstruksjonen](construct), med hvert logikksystem på den.
 - `Sikkerhetskopier`: logikksystemer som er tatt vare på fra konstruksjoner som mistet automasjonen sin.
@@ -20,17 +20,17 @@ Velg en rad for å se hvem som lagde den, når den sist ble endret og hva den er
 
 ## Sette en på en konstruksjon
 
-`Legg til på denne konstruksjonen` setter logikksystemet til plantegningen her, med én ![](mark:installation)&nbsp;[installasjon](installation) å fylle. Det tilbys bare mens ingen logikksystem fra den plantegningen står på konstruksjonen, for en andre luftsluse er en andre installasjon av det ene logikksystemet, aldri en andre kopi av det.
+`Legg til på denne konstruksjonen` setter logikksystemet til plantegningen her, med én ![](mark:installation)&nbsp;[installasjon](installation) å fylle. Det tilbys bare mens det ikke står noe logikksystem fra den plantegningen på konstruksjonen, for en andre luftsluse er en andre installasjon av det ene logikksystemet, aldri en andre kopi av det.
 
 `Lag en kopi` setter et nytt logikksystem på denne konstruksjonen, kopiert fra raden du valgte, og åpner det så du kan endre det. Kopien har ingen tilknytning til det den ble kopiert fra, og får en egen plantegning først når du trykker `Lag plantegning`. Slik bygger du noe nytt av noe som virker, som en hangardør av en luftsluse.
 
 ## Slette
 
-Å slette en plantegning fra lageret er for godt, men logikksystemene som allerede er laget av den, fortsetter å kjøre, og `Lag plantegning` lager en ny plantegning av hvilket som helst av dem.
+Å slette en plantegning fra lageret er endelig, men logikksystemene som allerede er laget av den, fortsetter å kjøre, og `Lag plantegning` lager en ny plantegning av hvilket som helst av dem.
 
 ## Sikkerhetskopier
 
-Når en konstruksjon mister den siste programmerbare blokken sin, tas logikksystemene dens vare på under `Sikkerhetskopier`, oppført under navnet til konstruksjonen med den nyeste først. Et logikksystem biblioteket allerede har, uendret siden plantegningen sist ble oppdatert, overlates til den plantegningen.
+Når en konstruksjon mister sin siste programmable block, tas logikksystemene dens vare på under `Sikkerhetskopier`, oppført under navnet til konstruksjonen med den nyeste først. Et logikksystem biblioteket allerede har, uendret siden plantegningen sist ble oppdatert, overlates til den plantegningen.
 
 En sikkerhetskopi virker som en plantegning: `Legg til på denne konstruksjonen` setter den på denne konstruksjonen slik den er, og `Lag plantegning` gjør den om til en plantegning, enten som en oppdatering av den den kom fra, hvis den fortsatt ligger i lageret, eller som en ny. Installasjonene dens ble igjen hos konstruksjonen den kom fra, så den kommer med én ny installasjon å fylle.
 

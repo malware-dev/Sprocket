@@ -1,6 +1,6 @@
 # Forsinkelse
 
-En forsinkelse er et [steg](step) som holder ![](mark:sequence)&nbsp;[sekvensen](sequence) sin i en fastsatt tid, i sekunder eller [tikk](tick).
+En forsinkelse er et [steg](step) som holder igjen ![](mark:sequence)&nbsp;[sekvensen](sequence) sin en fastsatt tid, i sekunder eller [tikk](tick).
 
 Bruk en for å gi en blokk tid som sekvensen ikke kan følge med på, som en lyd som spilles til den er slutt, eller for å legge inn en pause, som å la lyset i luftslusen være rødt noen sekunder etter at den ytre døra åpnet seg.
 

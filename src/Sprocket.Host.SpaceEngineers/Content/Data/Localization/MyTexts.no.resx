@@ -21,7 +21,7 @@
     <value>Tilbake</value>
   </data>
   <data name="Sprocket.Chrome.Close" xml:space="preserve">
-    <value>Lukk redigeringen</value>
+    <value>Lukk editoren</value>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
     <value>Angre {action}</value>
@@ -63,19 +63,19 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slå av denne installasjonen og stopp kjørende sekvenser.</value>
   </data>
   <data name="Sprocket.Row.SwitchSystemOn" xml:space="preserve">
-    <value>Slå på dette logikksystemet, og lås det mot endringer.</value>
+    <value>Slå på dette logikksystemet og lås det for endringer.</value>
   </data>
   <data name="Sprocket.Row.SwitchSystemOff" xml:space="preserve">
-    <value>Slå av dette logikksystemet, stopp sekvensene i det og lås det opp for endringer.</value>
+    <value>Slå av dette logikksystemet, slik at sekvensene stopper og det låses opp for endringer.</value>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOn" xml:space="preserve">
-    <value>Slå på hver installasjon av dette logikksystemet</value>
+    <value>Slå på alle installasjonene av dette logikksystemet</value>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintFirst" xml:space="preserve">
     <value>Logikksystemet må slås på først.</value>
   </data>
   <data name="Sprocket.Row.SwitchBlueprintOff" xml:space="preserve">
-    <value>Slå av hver installasjon av dette logikksystemet</value>
+    <value>Slå av alle installasjonene av dette logikksystemet</value>
   </data>
 
   <data name="Sprocket.Systems.Title" xml:space="preserve">
@@ -212,10 +212,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
 
   <data name="Sprocket.Delete.Keep" xml:space="preserve">
-    <value>Behold det</value>
+    <value>Behold den</value>
   </data>
   <data name="Sprocket.Delete.Confirm" xml:space="preserve">
-    <value>Slett det</value>
+    <value>Slett den</value>
   </data>
   <data name="Sprocket.Delete.Final" xml:space="preserve">
     <value>Dette er permanent.</value>
@@ -225,7 +225,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Navnet på dette logikksystemet.</value>
   </data>
   <data name="Sprocket.System.Delete" xml:space="preserve">
-    <value>Slett dette logikksystemet og alle installasjoner</value>
+    <value>Slett dette logikksystemet og alle installasjonene av det</value>
   </data>
   <data name="Sprocket.System.DeleteInstallation" xml:space="preserve">
     <value>Slett denne installasjonen</value>
@@ -240,7 +240,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Utløsere</value>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Utfør en oppgave når en blokk sender et signal eller når en ønsket tilstand.</value>
+    <value>Utfør en oppgave når en blokk sender et signal eller kommer i en ønsket tilstand.</value>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
     <value>Gjenta en oppgave med et fast intervall.</value>
@@ -295,10 +295,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Hver knapp starter én utløser, så velg en ny knapp for denne kopien.</value>
   </data>
   <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
-    <value>Velg blokken som utløser denne utløseren.</value>
+    <value>Velg blokken som får denne utløseren til å utløses.</value>
   </data>
   <data name="Sprocket.Trigger.WhatAbout" xml:space="preserve">
-    <value>Velg hva blokken må gjøre for å utløse denne utløseren.</value>
+    <value>Velg hva blokken må gjøre for at denne utløseren skal utløses.</value>
   </data>
   <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
     <value>Velg hva denne utløseren gjør.</value>
@@ -326,7 +326,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Legg til et steg her.</value>
   </data>
   <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
-    <value>Utsett neste steg en fastsatt tid.</value>
+    <value>Utsett neste steg med en fast tid.</value>
   </data>
   <data name="Sprocket.Sequence.Held" xml:space="preserve">
     <value>Kan bare leses mens {holder} redigerer den.</value>
@@ -374,10 +374,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>På pause: sekvensen hopper over dette steget. Trykk for å gjenoppta det.</value>
   </data>
   <data name="Sprocket.Sequence.SkippedBusyOne" xml:space="preserve">
-    <value>1 start gått glipp av mens den kjørte</value>
+    <value>1 start tapt mens den kjørte</value>
   </data>
   <data name="Sprocket.Sequence.SkippedBusy" xml:space="preserve">
-    <value>{busy} starter gått glipp av mens den kjørte</value>
+    <value>{busy} starter tapt mens den kjørte</value>
   </data>
   <data name="Sprocket.Sequence.SkippedOffOne" xml:space="preserve">
     <value>1 start avvist mens den var slått av</value>
@@ -386,10 +386,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>{off} starter avvist mens den var slått av</value>
   </data>
   <data name="Sprocket.Sequence.SkippedBothOne" xml:space="preserve">
-    <value>1 start gått glipp av mens den kjørte, {off} avvist mens den var slått av</value>
+    <value>1 start tapt mens den kjørte, {off} avvist mens den var slått av</value>
   </data>
   <data name="Sprocket.Sequence.SkippedBoth" xml:space="preserve">
-    <value>{busy} starter gått glipp av mens den kjørte, {off} avvist mens den var slått av</value>
+    <value>{busy} starter tapt mens den kjørte, {off} avvist mens den var slått av</value>
   </data>
   <data name="Sprocket.Sequence.WaitTypedAbout" xml:space="preserve">
     <value>60 tikk er ett sekund.</value>
@@ -451,7 +451,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Knapp {button} på **{block}** gjør allerede noe annet.</value>
   </data>
   <data name="Sprocket.Button.TakeOver" xml:space="preserve">
-    <value>Ta den over</value>
+    <value>Overta den</value>
   </data>
   <data name="Sprocket.Button.LeaveAlone" xml:space="preserve">
     <value>La den være</value>
@@ -521,7 +521,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Hva som skal sjekkes</value>
   </data>
   <data name="Sprocket.Pick.NothingChecked" xml:space="preserve">
-    <value>De valgte blokkene har ingenting felles som kan sjekkes.</value>
+    <value>De valgte blokkene har ingenting til felles som kan sjekkes.</value>
   </data>
   <data name="Sprocket.Pick.NoBlocksChecked" xml:space="preserve">
     <value>Ingen blokk på denne konstruksjonen har en verdi eller tilstand å sjekke.</value>
@@ -536,10 +536,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Hva som skal gjøres</value>
   </data>
   <data name="Sprocket.Pick.NothingHappens" xml:space="preserve">
-    <value>De blokkene har ingenting til felles som kan skje med dem.</value>
+    <value>Disse blokkene har ingenting til felles som kan skje med dem.</value>
   </data>
   <data name="Sprocket.Pick.NothingDone" xml:space="preserve">
-    <value>De blokkene har ingenting til felles som kan gjøres med dem.</value>
+    <value>Disse blokkene har ingenting til felles som kan gjøres med dem.</value>
   </data>
   <data name="Sprocket.Pick.WhatItDoes" xml:space="preserve">
     <value>Hva den gjør</value>
@@ -560,7 +560,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Filtrert til tall, for summering.</value>
   </data>
   <data name="Sprocket.Pick.Status" xml:space="preserve">
-    <value>Tilstand</value>
+    <value>Status</value>
   </data>
   <data name="Sprocket.Pick.Values" xml:space="preserve">
     <value>Verdier</value>
@@ -575,7 +575,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Terminal</value>
   </data>
   <data name="Sprocket.Pick.TerminalNote" xml:space="preserve">
-    <value>Alt disse blokkene tilbyr i terminalen, under terminalens egne navn. Å bruke dem er ditt eget valg. Den ordnede listen viser dem som er kjent for å virke med automasjonen.</value>
+    <value>Alt disse blokkene tilbyr i terminalen, under terminalens egne navn. Du bruker dem på eget ansvar. Den ordnede listen viser dem som er kjent for å virke med automasjonen.</value>
   </data>
   <data name="Sprocket.Pick.Shared" xml:space="preserve">
     <value>Viser bare det de valgte blokkene har felles</value>
@@ -590,16 +590,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>flytting av gjenstander</value>
   </data>
   <data name="Sprocket.Plan.SorterList" xml:space="preserve">
-    <value>å sette sortererens liste</value>
+    <value>innstilling av listen i en conveyor sorter</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
     <value>Dette tar tid å fullføre. Sekvensen kan vente på det, eller gå rett videre mens det pågår.</value>
   </data>
   <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
-    <value>Start sekvensen valgt under</value>
+    <value>Start sekvensen som er valgt nedenfor</value>
   </data>
   <data name="Sprocket.Pick.StopAbout" xml:space="preserve">
-    <value>Stopp sekvensen valgt under</value>
+    <value>Stopp sekvensen som er valgt nedenfor</value>
   </data>
   <data name="Sprocket.Pick.SingleAction" xml:space="preserve">
     <value>En oppgave på blokker…</value>
@@ -682,7 +682,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>{count} av {most} tegn</value>
   </data>
   <data name="Sprocket.Writing.Markup" xml:space="preserve">
-    <value>Markering</value>
+    <value>Formatering</value>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
     <value>Vis veiledningen for formatering av tekst.</value>
@@ -712,7 +712,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Metning bortover, lysstyrke oppover.</value>
   </data>
   <data name="Sprocket.Color.CodeAbout" xml:space="preserve">
-    <value>Skriv inn en farge som #RRGGBB, eller #RRGGBBAA for å ta med gjennomsiktigheten.</value>
+    <value>Skriv inn en farge som #RRGGBB, eller #RRGGBBAA for å ta med opasiteten.</value>
   </data>
 
   <data name="Sprocket.Blueprint.Required" xml:space="preserve">
@@ -754,7 +754,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slå av logikksystemet **{name}**?</value>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffStops" xml:space="preserve">
-    <value>Dette stopper hver installasjon av den på denne konstruksjonen:</value>
+    <value>Dette stopper alle installasjonene av det på denne konstruksjonen:</value>
   </data>
 
   <data name="Sprocket.Dialog.More" xml:space="preserve">
@@ -768,7 +768,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slå dem av</value>
   </data>
   <data name="Sprocket.Blueprint.SwitchOffRunning" xml:space="preserve">
-    <value>Alt som kjører nå stopper der det er.</value>
+    <value>Alt som kjører nå, stopper der det er.</value>
   </data>
 
   <data name="Sprocket.Prompt.Continue" xml:space="preserve">
@@ -790,16 +790,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>stoppet</value>
   </data>
   <data name="Sprocket.Sequence.StoppedBySequence" xml:space="preserve">
-    <value>stoppet ved steg {step} av {sequence}</value>
+    <value>stoppet av {sequence} ved steg {step}</value>
   </data>
   <data name="Sprocket.Sequence.StoppedByTrigger" xml:space="preserve">
-    <value>stoppet ved steg {step} av en utløser</value>
+    <value>stoppet av en utløser ved steg {step}</value>
   </data>
   <data name="Sprocket.Sequence.StoppedBySwitch" xml:space="preserve">
     <value>stoppet ved steg {step} da den ble slått av</value>
   </data>
   <data name="Sprocket.Sequence.StoppedByHand" xml:space="preserve">
-    <value>stoppet ved steg {step} for hånd</value>
+    <value>stoppet manuelt ved steg {step}</value>
   </data>
   <data name="Sprocket.Sequence.RunNow" xml:space="preserve">
     <value>Kjør denne sekvensen manuelt nå</value>
@@ -844,7 +844,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Denne utløseren mangler hva {block} må gjøre.</value>
   </data>
   <data name="Sprocket.Problem.NeverTriggered" xml:space="preserve">
-    <value>Denne utløseren kan ikke utløses, av en ukjent grunn.</value>
+    <value>Denne utløseren kan ikke utløses, av ukjent grunn.</value>
   </data>
   <data name="Sprocket.Problem.ButtonChanged" xml:space="preserve">
     <value>Knappen på {block} ble endret i verktøylinja.</value>
@@ -853,22 +853,22 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Knappen på {block} er ikke satt opp for denne utløseren ennå.</value>
   </data>
   <data name="Sprocket.Problem.SourceLost" xml:space="preserve">
-    <value>{block}, som denne utløseren fulgte med på, gikk tapt.</value>
+    <value>{block}, som denne utløseren følger med på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.BlockLost" xml:space="preserve">
     <value>{block} gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.MissingSource" xml:space="preserve">
-    <value>En blokk denne utløseren fulgte med på, gikk tapt.</value>
+    <value>En blokk denne utløseren følger med på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.MissingTarget" xml:space="preserve">
-    <value>En blokk dette steget virker på gikk tapt.</value>
+    <value>En blokk dette steget virker på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.NothingStarts" xml:space="preserve">
     <value>Denne sekvensen har ingen utløser, og ingen sekvens kjører den.</value>
   </data>
   <data name="Sprocket.Problem.MissingGate" xml:space="preserve">
-    <value>En blokk dette steget sjekker gikk tapt.</value>
+    <value>En blokk dette steget sjekker, gikk tapt.</value>
   </data>
   <data name="Sprocket.Problem.Unoffered" xml:space="preserve">
     <value>Dette steget gjør noe blokkene ikke lenger tilbyr. Erstatt dette steget.</value>
@@ -895,7 +895,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Dette steget kjører en sekvens som kjører denne sekvensen igjen. Fjern en av de to.</value>
   </data>
   <data name="Sprocket.Problem.Unable" xml:space="preserve">
-    <value>En blokk dette steget virker på er slått av. Slå den på først.</value>
+    <value>En blokk dette steget virker på, er slått av. Slå den på først.</value>
   </data>
   <data name="Sprocket.Problem.Stalled" xml:space="preserve">
     <value>Venter på at en blokk skal virke igjen.</value>
@@ -919,7 +919,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>plassen {slot} var tom.</value>
   </data>
   <data name="Sprocket.Stopped.ButtonFailed" xml:space="preserve">
-    <value>knappen på {block} kunne ikke utløse utløseren.</value>
+    <value>knappen på {block} kunne ikke sette i gang utløseren.</value>
   </data>
   <data name="Sprocket.Stopped.BlockGone" xml:space="preserve">
     <value>{block} gikk tapt.</value>
@@ -931,16 +931,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>{block} kan ha blitt byttet ut.</value>
   </data>
   <data name="Sprocket.Stopped.NeverTriggered" xml:space="preserve">
-    <value>utløseren kunne ikke utløses, av en ukjent grunn.</value>
+    <value>utløseren kunne ikke utløses, av ukjent grunn.</value>
   </data>
   <data name="Sprocket.Stopped.MissingSource" xml:space="preserve">
-    <value>en blokk utløseren fulgte med på, gikk tapt.</value>
+    <value>en blokk utløseren følger med på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.MissingTarget" xml:space="preserve">
-    <value>en blokk den virker på gikk tapt.</value>
+    <value>en blokk det virker på, gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.MissingGate" xml:space="preserve">
-    <value>en blokk den sjekker gikk tapt.</value>
+    <value>en blokk det sjekker, gikk tapt.</value>
   </data>
   <data name="Sprocket.Stopped.Unoffered" xml:space="preserve">
     <value>blokkene tilbød ikke lenger handlingen.</value>
@@ -967,7 +967,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>{block} var slått av.</value>
   </data>
   <data name="Sprocket.Stopped.Unable" xml:space="preserve">
-    <value>en blokk den virker på var slått av.</value>
+    <value>en blokk det virker på, var slått av.</value>
   </data>
   <data name="Sprocket.Stopped.Adrift" xml:space="preserve">
     <value>en blokk kan ha blitt byttet ut.</value>
@@ -1051,7 +1051,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>stoppet fordi noe annet slo av opplading</value>
   </data>
   <data name="Sprocket.Trouble.ScriptNotRun" xml:space="preserve">
-    <value>kjørte ikke - intet skript, et skript som ikke kompilerte, eller et som allerede kjører</value>
+    <value>kjørte ikke - ikke noe skript, et skript som ikke lot seg kompilere, eller et som allerede kjører</value>
   </data>
   <data name="Sprocket.Trouble.DoorToldToOpen" xml:space="preserve">
     <value>sluttet å lukke seg fordi noe annet åpnet den</value>
@@ -1138,7 +1138,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>ikke støttet</value>
   </data>
   <data name="Sprocket.Category.Power" xml:space="preserve">
-    <value>Kraft</value>
+    <value>Strøm</value>
   </data>
   <data name="Sprocket.Category.Movement" xml:space="preserve">
     <value>Bevegelse</value>
@@ -1213,10 +1213,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Annet</value>
   </data>
   <data name="Sprocket.Rate.EveryTickCost" xml:space="preserve">
-    <value>Seksti ganger i sekundet er kostbart; bare verdt det der ingenting langsommere holder.</value>
+    <value>Seksti ganger i sekundet er krevende; bare verdt det der ingenting langsommere holder.</value>
   </data>
   <data name="Sprocket.Rate.FastCost" xml:space="preserve">
-    <value>Seks ganger i sekundet er fortsatt kostbart; prøv noe langsommere først.</value>
+    <value>Seks ganger i sekundet er fortsatt krevende; prøv noe langsommere først.</value>
   </data>
   <data name="Sprocket.Wait.Shorter" xml:space="preserve">
     <value>Kortere</value>
@@ -1231,7 +1231,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>tikk</value>
   </data>
   <data name="Sprocket.Wait.TickAbout" xml:space="preserve">
-    <value>Et tikk er det minste steget i tid, seksti på et sekund.</value>
+    <value>Et tikk er det minste tidssteget, seksti i sekundet.</value>
   </data>
   <data name="Sprocket.Wait.AsSecond" xml:space="preserve">
     <value>= 1 sekund</value>
@@ -1354,31 +1354,31 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>endring av hvor ofte den kjører</value>
   </data>
   <data name="Sprocket.Change.Optional" xml:space="preserve">
-    <value>endring av en plass til valgfri</value>
+    <value>endre en plass til valgfri</value>
   </data>
   <data name="Sprocket.Change.Required" xml:space="preserve">
-    <value>endring av en plass til påkrevd</value>
+    <value>endre en plass til påkrevd</value>
   </data>
   <data name="Sprocket.Change.Wait" xml:space="preserve">
     <value>endring av en forsinkelse</value>
   </data>
   <data name="Sprocket.Change.PauseStep" xml:space="preserve">
-    <value>avslåing av et steg</value>
+    <value>pause på et steg</value>
   </data>
   <data name="Sprocket.Change.ResumeStep" xml:space="preserve">
-    <value>påslåing av et steg</value>
+    <value>gjenopptaking av et steg</value>
   </data>
   <data name="Sprocket.Change.TakeOver" xml:space="preserve">
     <value>overtakelse av en knapp</value>
   </data>
   <data name="Sprocket.Change.AddStep" xml:space="preserve">
-    <value>tillegg av et steg</value>
+    <value>innsetting av et steg</value>
   </data>
   <data name="Sprocket.Change.AddWait" xml:space="preserve">
-    <value>tillegg av en forsinkelse</value>
+    <value>innsetting av en forsinkelse</value>
   </data>
   <data name="Sprocket.Change.ShortenSlot" xml:space="preserve">
-    <value>endring av en plass sitt korte navn</value>
+    <value>endring av kortnavnet til en plass</value>
   </data>
   <data name="Sprocket.Slot.Short" xml:space="preserve">
     <value>Kort navn</value>
@@ -1393,16 +1393,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>beskrivelse av en plass</value>
   </data>
   <data name="Sprocket.Change.AddIf" xml:space="preserve">
-    <value>tillegg av et hvis</value>
+    <value>innsetting av et hvis-steg</value>
   </data>
   <data name="Sprocket.Change.AddBranch" xml:space="preserve">
-    <value>tillegg av en gren</value>
+    <value>innsetting av en gren</value>
   </data>
   <data name="Sprocket.Change.RemoveIf" xml:space="preserve">
-    <value>sletting av et hvis</value>
+    <value>sletting av et hvis-steg</value>
   </data>
   <data name="Sprocket.Change.Unwrap" xml:space="preserve">
-    <value>fjerning av et hvis</value>
+    <value>fjerning av et hvis-steg</value>
   </data>
   <data name="Sprocket.Change.RemoveBranch" xml:space="preserve">
     <value>sletting av en gren</value>
@@ -1432,7 +1432,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>oppretting av en utløser</value>
   </data>
   <data name="Sprocket.Change.PutOnSystem" xml:space="preserve">
-    <value>innlegging av et logikksystem fra biblioteket</value>
+    <value>henting av et logikksystem fra biblioteket</value>
   </data>
   <data name="Sprocket.Change.CopyBlueprint" xml:space="preserve">
     <value>kopiering av en plantegning</value>
@@ -1465,10 +1465,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>sletting av en installasjon</value>
   </data>
   <data name="Sprocket.Change.AddSystem" xml:space="preserve">
-    <value>tillegg av et logikksystem</value>
+    <value>oppretting av et logikksystem</value>
   </data>
   <data name="Sprocket.Change.AddInstallation" xml:space="preserve">
-    <value>tillegg av en installasjon</value>
+    <value>oppretting av en installasjon</value>
   </data>
   <data name="Sprocket.Systems.Default" xml:space="preserve">
     <value>Logikksystem {number}</value>
@@ -1477,10 +1477,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Automasjon</value>
   </data>
   <data name="Sprocket.Terminal.OpenAbout" xml:space="preserve">
-    <value>Åpne automasjonsredigereren.</value>
+    <value>Åpne automasjonseditoren.</value>
   </data>
   <data name="Sprocket.Terminal.Hero" xml:space="preserve">
-    <value>Holder automasjonen</value>
+    <value>Har automasjonen</value>
   </data>
   <data name="Sprocket.Terminal.Action" xml:space="preserve">
     <value>Automasjonssignal</value>
@@ -1489,7 +1489,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Satt på pause</value>
   </data>
   <data name="Sprocket.Paused.Why" xml:space="preserve">
-    <value>{construct} gikk fra {before} til {now}, så automasjonen er satt på pause til du fortsetter den.</value>
+    <value>{construct} gikk over fra {before} til {now}, så automasjonen er satt på pause til du gjenopptar den.</value>
   </data>
   <data name="Sprocket.Paused.Someone" xml:space="preserve">
     <value>noen andre</value>
@@ -1519,13 +1519,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>{count} er innenfor rekkevidde igjen.</value>
   </data>
   <data name="Sprocket.Paused.Resume" xml:space="preserve">
-    <value>Fortsett</value>
+    <value>Gjenoppta</value>
   </data>
   <data name="Sprocket.Paused.Leave" xml:space="preserve">
     <value>La den stå på pause</value>
   </data>
   <data name="Sprocket.Paused.RemoveAll" xml:space="preserve">
-    <value>Fjern alt</value>
+    <value>Fjern alle</value>
   </data>
   <data name="Sprocket.Paused.RemoveQuestion" xml:space="preserve">
     <value>Fjerne alle {count} logikksystemene på {construct}?</value>
@@ -1597,7 +1597,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Legg til denne plantegningen på denne konstruksjonen som et logikksystem, med den første installasjonen.</value>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
-    <value>Ta dette logikksystemet og installasjonene av denne konstruksjonen.</value>
+    <value>Ta dette logikksystemet og installasjonene av det bort fra denne konstruksjonen.</value>
   </data>
   <data name="Sprocket.Library.Same" xml:space="preserve">
     <value>Plantegningen i biblioteket er den samme som dette logikksystemet.</value>
@@ -1642,16 +1642,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slett dette logikksystemet, med installasjonene. Det har ingen plantegning i biblioteket, så dette er den eneste kopien.</value>
   </data>
   <data name="Sprocket.Library.TakeOffQuestion" xml:space="preserve">
-    <value>Ta dette logikksystemet av denne konstruksjonen?</value>
+    <value>Ta dette logikksystemet bort fra denne konstruksjonen?</value>
   </data>
   <data name="Sprocket.Library.TakeOffKept" xml:space="preserve">
-    <value>Installasjonene går med det. Plantegningen blir værende i biblioteket.</value>
+    <value>Installasjonene følger med. Plantegningen blir værende i biblioteket.</value>
   </data>
   <data name="Sprocket.Library.TakeOffChanged" xml:space="preserve">
     <value>**{named}** er endret etter plantegningen i biblioteket. Skal plantegningen også oppdateres?</value>
   </data>
   <data name="Sprocket.Library.TakeOffGoes" xml:space="preserve">
-    <value>Installasjonene går med det.</value>
+    <value>Installasjonene følger med.</value>
   </data>
   <data name="Sprocket.Library.TakeOffUpdate" xml:space="preserve">
     <value>Oppdater plantegningen</value>
@@ -1660,10 +1660,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>La plantegningen være</value>
   </data>
   <data name="Sprocket.Library.TakeOffKeep" xml:space="preserve">
-    <value>Behold den</value>
+    <value>Behold det</value>
   </data>
   <data name="Sprocket.Library.TakeOffConfirm" xml:space="preserve">
-    <value>Ta den av</value>
+    <value>Ta det bort</value>
   </data>
   <data name="Sprocket.Library.RenewQuestion" xml:space="preserve">
     <value>Oppdatere dette logikksystemet fra biblioteket?</value>
@@ -1711,7 +1711,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Ta vare på denne sikkerhetskopien i biblioteket?</value>
   </data>
   <data name="Sprocket.Library.KeepBackupLinked" xml:space="preserve">
-    <value>Biblioteket har plantegningen den ble laget fra. Oppdatere den plantegningen fra den, eller ta vare på den som en ny plantegning?</value>
+    <value>Biblioteket har plantegningen denne ble laget fra. Vil du oppdatere den plantegningen, eller ta vare på sikkerhetskopien som en ny plantegning?</value>
   </data>
   <data name="Sprocket.Library.KeepBackupUpdate" xml:space="preserve">
     <value>Oppdater plantegningen</value>
@@ -1738,7 +1738,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Kjør stegene under bare hvis en betingelse er oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
-    <value>Sjekk en annen betingelse når ingen over var oppfylt.</value>
+    <value>Sjekk en annen betingelse når ingen av dem over er oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseAbout" xml:space="preserve">
     <value>Kjør dette når ingen av betingelsene over er oppfylt.</value>
@@ -1747,7 +1747,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>gren</value>
   </data>
   <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
-    <value>Legg til en gren i dette hvis-et.</value>
+    <value>Legg til en gren i dette hvis-steget.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
     <value>Legg til en betingelse for denne grenen.</value>
@@ -1756,7 +1756,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Velg betingelsen som må være oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.RemoveIf" xml:space="preserve">
-    <value>Slette dette hvis?</value>
+    <value>Slette dette hvis-steget?</value>
   </data>
   <data name="Sprocket.Sequence.RemoveBranch" xml:space="preserve">
     <value>Slette denne grenen?</value>
@@ -1825,7 +1825,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>AI-blokk</value>
   </data>
   <data name="Sprocket.Family.Projector" xml:space="preserve">
-    <value>Projektor</value>
+    <value>Projector</value>
   </data>
   <data name="Sprocket.Family.Thruster" xml:space="preserve">
     <value>Thruster</value>
@@ -1843,16 +1843,16 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Kryokammer og seng</value>
   </data>
   <data name="Sprocket.Family.RemoteControl" xml:space="preserve">
-    <value>Fjernkontroll</value>
+    <value>Fjernstyring</value>
   </data>
   <data name="Sprocket.Family.AirVent" xml:space="preserve">
     <value>Luftventil</value>
   </data>
   <data name="Sprocket.Family.Connector" xml:space="preserve">
-    <value>Kobling</value>
+    <value>Kontakt</value>
   </data>
   <data name="Sprocket.Family.MergeBlock" xml:space="preserve">
-    <value>Sammenføyningsblokk</value>
+    <value>Merge block</value>
   </data>
   <data name="Sprocket.Family.LandingGear" xml:space="preserve">
     <value>Landingsstell og magnetplate</value>
@@ -1864,7 +1864,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Hjuloppheng</value>
   </data>
   <data name="Sprocket.Family.Assembler" xml:space="preserve">
-    <value>Montør</value>
+    <value>Monterer</value>
   </data>
   <data name="Sprocket.Family.Refinery" xml:space="preserve">
     <value>Raffineri</value>
@@ -1873,10 +1873,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Overlevelsessett</value>
   </data>
   <data name="Sprocket.Family.GasGenerator" xml:space="preserve">
-    <value>O2/H2-generator</value>
+    <value>Oksygengenerator</value>
   </data>
   <data name="Sprocket.Family.OxygenFarm" xml:space="preserve">
-    <value>Oksygenfarm</value>
+    <value>Oxygen farm</value>
   </data>
   <data name="Sprocket.Family.HydrogenEngine" xml:space="preserve">
     <value>Hydrogenmotor</value>
@@ -1885,43 +1885,43 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Reaktor</value>
   </data>
   <data name="Sprocket.Family.SolarPanel" xml:space="preserve">
-    <value>Solcellepanel</value>
+    <value>Solpanel</value>
   </data>
   <data name="Sprocket.Family.WindTurbine" xml:space="preserve">
     <value>Vindturbin</value>
   </data>
   <data name="Sprocket.Family.Sorter" xml:space="preserve">
-    <value>Transportørsorterer</value>
+    <value>Conveyor sorter</value>
   </data>
   <data name="Sprocket.Family.Drill" xml:space="preserve">
-    <value>Bor</value>
+    <value>Drill</value>
   </data>
   <data name="Sprocket.Family.Welder" xml:space="preserve">
-    <value>Sveiser</value>
+    <value>Sveiseapparat</value>
   </data>
   <data name="Sprocket.Family.Grinder" xml:space="preserve">
-    <value>Kutter</value>
+    <value>Sliper</value>
   </data>
   <data name="Sprocket.Family.ButtonPanel" xml:space="preserve">
-    <value>Knappepanel</value>
+    <value>Button panel</value>
   </data>
   <data name="Sprocket.Family.Timer" xml:space="preserve">
-    <value>Tidsurblokk</value>
+    <value>Timerblokk</value>
   </data>
   <data name="Sprocket.Family.Sensor" xml:space="preserve">
     <value>Sensor</value>
   </data>
   <data name="Sprocket.Family.ProgrammableBlock" xml:space="preserve">
-    <value>Programmerbar blokk</value>
+    <value>Programmable block</value>
   </data>
   <data name="Sprocket.Family.Antenna" xml:space="preserve">
     <value>Antenne</value>
   </data>
   <data name="Sprocket.Family.LaserAntenna" xml:space="preserve">
-    <value>Laserantenne</value>
+    <value>Laser antenna</value>
   </data>
   <data name="Sprocket.Family.Beacon" xml:space="preserve">
-    <value>Fyr</value>
+    <value>Signallys</value>
   </data>
   <data name="Sprocket.Family.Camera" xml:space="preserve">
     <value>Kamera</value>
@@ -1945,7 +1945,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Oppgraderingsmodul</value>
   </data>
   <data name="Sprocket.Family.Decoy" xml:space="preserve">
-    <value>Lokkedue</value>
+    <value>Decoy</value>
   </data>
   <data name="Sprocket.Family.SoundBlock" xml:space="preserve">
     <value>Lydblokk</value>
@@ -2062,7 +2062,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Alle verdener</value>
   </data>
   <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
-    <value>Standardverdiene, brukt av alle verdener som ikke setter en verdi selv. På en dedikert server gjelder de alle verdener serveren kjører. I enspiller eller et spill du er vert for, gjelder de alle verdenene dine.</value>
+    <value>Standardverdiene, brukt av alle verdener som ikke setter en verdi selv. På en dedikert server gjelder de alle verdener serveren kjører. I enspillermodus eller et spill du er vert for, gjelder de alle verdenene dine.</value>
   </data>
   <data name="Sprocket.Admin.On" xml:space="preserve">
     <value>På</value>
@@ -2092,7 +2092,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Vent til alle ![](mark:awaited) oppgavene som er startet over, er ferdige.</value>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
-    <value>![](mark:awaited)-oppgavene som er startet over, tilbake til forrige slike steg, kjører samtidig. Sekvensen venter her til alle oppgavene er ferdige.</value>
+    <value>![](mark:awaited)-oppgavene som er startet over, helt tilbake til forrige venting på ventende oppgaver, kjører samtidig. Sekvensen venter her til alle oppgavene er ferdige.</value>
   </data>
   <data name="Sprocket.Problem.NothingToAwait" xml:space="preserve">
     <value>Her er det ingen ventende oppgaver å vente på, fordi ingen steg over tar tid.</value>
@@ -2113,7 +2113,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Luftventil</value>
   </data>
   <data name="Sprocket.Type.Assembler" xml:space="preserve">
-    <value>Montør</value>
+    <value>Monterer</value>
   </data>
   <data name="Sprocket.Type.BasicMissionBlock" xml:space="preserve">
     <value>AI-blokk for enkle oppdrag</value>
@@ -2122,13 +2122,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Batteri</value>
   </data>
   <data name="Sprocket.Type.Beacon" xml:space="preserve">
-    <value>Fyr</value>
+    <value>Signallys</value>
   </data>
   <data name="Sprocket.Type.BroadcastController" xml:space="preserve">
     <value>Kringkastingskontroller</value>
   </data>
   <data name="Sprocket.Type.ButtonPanel" xml:space="preserve">
-    <value>Knappepanel</value>
+    <value>Button panel</value>
   </data>
   <data name="Sprocket.Type.CameraBlock" xml:space="preserve">
     <value>Kamera</value>
@@ -2146,19 +2146,19 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Kontraktblokk</value>
   </data>
   <data name="Sprocket.Type.ControlPanel" xml:space="preserve">
-    <value>Kontrollpanel</value>
+    <value>Control panel</value>
   </data>
   <data name="Sprocket.Type.ConveyorSorter" xml:space="preserve">
-    <value>Transportørsorterer</value>
+    <value>Conveyor sorter</value>
   </data>
   <data name="Sprocket.Type.ConveyorTurretBase" xml:space="preserve">
-    <value>Gatling- eller missiltårn</value>
+    <value>Gatling turret eller missiltårn</value>
   </data>
   <data name="Sprocket.Type.CryoChamber" xml:space="preserve">
     <value>Kryokammer eller seng</value>
   </data>
   <data name="Sprocket.Type.Decoy" xml:space="preserve">
-    <value>Lokkedue</value>
+    <value>Decoy</value>
   </data>
   <data name="Sprocket.Type.DefensiveCombatBlock" xml:space="preserve">
     <value>Defensiv AI-blokk</value>
@@ -2170,7 +2170,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Dør eller fallskjerm</value>
   </data>
   <data name="Sprocket.Type.Drill" xml:space="preserve">
-    <value>Bor</value>
+    <value>Drill</value>
   </data>
   <data name="Sprocket.Type.EmotionControllerBlock" xml:space="preserve">
     <value>Følelseskontroller</value>
@@ -2203,7 +2203,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Gravitasjonsgenerator</value>
   </data>
   <data name="Sprocket.Type.GravityGeneratorSphere" xml:space="preserve">
-    <value>Sfærisk gravitasjonsgenerator</value>
+    <value>Kuleformet gravitasjonsgenerator</value>
   </data>
   <data name="Sprocket.Type.Gyro" xml:space="preserve">
     <value>Gyroskop</value>
@@ -2215,7 +2215,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Hydrogenmotor</value>
   </data>
   <data name="Sprocket.Type.InteriorLight" xml:space="preserve">
-    <value>Innelys</value>
+    <value>Interiørlys</value>
   </data>
   <data name="Sprocket.Type.InteriorTurret" xml:space="preserve">
     <value>Innendørstårn</value>
@@ -2230,13 +2230,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Landingsstell eller magnetplate</value>
   </data>
   <data name="Sprocket.Type.LargeGatlingTurret" xml:space="preserve">
-    <value>Gatlingtårn</value>
+    <value>Gatling turret</value>
   </data>
   <data name="Sprocket.Type.LargeMissileTurret" xml:space="preserve">
     <value>Missiltårn</value>
   </data>
   <data name="Sprocket.Type.LaserAntenna" xml:space="preserve">
-    <value>Laserantenne</value>
+    <value>Laser antenna</value>
   </data>
   <data name="Sprocket.Type.LCDPanelsBlock" xml:space="preserve">
     <value>Blokk med skjermer</value>
@@ -2251,7 +2251,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Sykestue</value>
   </data>
   <data name="Sprocket.Type.MergeBlock" xml:space="preserve">
-    <value>Sammenføyningsblokk</value>
+    <value>Merge block</value>
   </data>
   <data name="Sprocket.Type.MotorAdvancedStator" xml:space="preserve">
     <value>Avansert rotor eller hengsel</value>
@@ -2266,7 +2266,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Hjuloppheng</value>
   </data>
   <data name="Sprocket.Type.MyProgrammableBlock" xml:space="preserve">
-    <value>Programmerbar blokk</value>
+    <value>Programmable block</value>
   </data>
   <data name="Sprocket.Type.OffensiveCombatBlock" xml:space="preserve">
     <value>Offensiv AI-blokk</value>
@@ -2275,10 +2275,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Malmdetektor</value>
   </data>
   <data name="Sprocket.Type.OxygenFarm" xml:space="preserve">
-    <value>Oksygenfarm</value>
+    <value>Oxygen farm</value>
   </data>
   <data name="Sprocket.Type.OxygenGenerator" xml:space="preserve">
-    <value>O2/H2-generator</value>
+    <value>Oksygengenerator</value>
   </data>
   <data name="Sprocket.Type.OxygenTank" xml:space="preserve">
     <value>Oksygen- eller hydrogentank</value>
@@ -2293,13 +2293,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Stempel</value>
   </data>
   <data name="Sprocket.Type.ProductionBlock" xml:space="preserve">
-    <value>Montør eller raffineri</value>
+    <value>Monterer eller raffineri</value>
   </data>
   <data name="Sprocket.Type.Projector" xml:space="preserve">
-    <value>Projektor</value>
+    <value>Projector</value>
   </data>
   <data name="Sprocket.Type.ProjectorBase" xml:space="preserve">
-    <value>Projektor</value>
+    <value>Projector</value>
   </data>
   <data name="Sprocket.Type.RadioAntenna" xml:space="preserve">
     <value>Antenne</value>
@@ -2308,13 +2308,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Reaktor</value>
   </data>
   <data name="Sprocket.Type.ReflectorLight" xml:space="preserve">
-    <value>Lyskaster</value>
+    <value>Søkelys</value>
   </data>
   <data name="Sprocket.Type.Refinery" xml:space="preserve">
     <value>Raffineri</value>
   </data>
   <data name="Sprocket.Type.RemoteControl" xml:space="preserve">
-    <value>Fjernkontroll</value>
+    <value>Fjernstyring</value>
   </data>
   <data name="Sprocket.Type.SafeZoneBlock" xml:space="preserve">
     <value>Sikker sone</value>
@@ -2326,31 +2326,31 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Sensor</value>
   </data>
   <data name="Sprocket.Type.ShipConnector" xml:space="preserve">
-    <value>Kobling</value>
+    <value>Kontakt</value>
   </data>
   <data name="Sprocket.Type.ShipController" xml:space="preserve">
-    <value>Cockpit, sete eller fjernkontroll</value>
+    <value>Cockpit, sete eller fjernstyring</value>
   </data>
   <data name="Sprocket.Type.ShipGrinder" xml:space="preserve">
-    <value>Kutter</value>
+    <value>Sliper</value>
   </data>
   <data name="Sprocket.Type.ShipToolBase" xml:space="preserve">
-    <value>Sveiser eller kutter</value>
+    <value>Sveiseapparat eller sliper</value>
   </data>
   <data name="Sprocket.Type.ShipWelder" xml:space="preserve">
-    <value>Sveiser</value>
+    <value>Sveiseapparat</value>
   </data>
   <data name="Sprocket.Type.SmallGatlingGun" xml:space="preserve">
-    <value>Gatlingkanon</value>
+    <value>Gatling gun</value>
   </data>
   <data name="Sprocket.Type.SmallMissileLauncher" xml:space="preserve">
     <value>Rakettkaster</value>
   </data>
   <data name="Sprocket.Type.SmallMissileLauncherReload" xml:space="preserve">
-    <value>Omladbar rakettkaster</value>
+    <value>Reloadable rocket launcher</value>
   </data>
   <data name="Sprocket.Type.SolarPanel" xml:space="preserve">
-    <value>Solcellepanel</value>
+    <value>Solpanel</value>
   </data>
   <data name="Sprocket.Type.SoundBlock" xml:space="preserve">
     <value>Lydblokk eller jukeboks</value>
@@ -2368,13 +2368,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Måldukke</value>
   </data>
   <data name="Sprocket.Type.TextPanel" xml:space="preserve">
-    <value>LCD-panel</value>
+    <value>LCD panel</value>
   </data>
   <data name="Sprocket.Type.Thrust" xml:space="preserve">
     <value>Thruster</value>
   </data>
   <data name="Sprocket.Type.TimerBlock" xml:space="preserve">
-    <value>Tidsurblokk</value>
+    <value>Timerblokk</value>
   </data>
   <data name="Sprocket.Type.TransponderBlock" xml:space="preserve">
     <value>Transponder</value>
@@ -2404,7 +2404,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Vindturbin</value>
   </data>
   <data name="Sprocket.Undo.Also" xml:space="preserve">
-    <value>Tar også tilbake det som er endret siden på {screens}.</value>
+    <value>Tar også tilbake det som er endret siden da på {screens}.</value>
   </data>
   <data name="Sprocket.Slot.Page" xml:space="preserve">
     <value>side</value>

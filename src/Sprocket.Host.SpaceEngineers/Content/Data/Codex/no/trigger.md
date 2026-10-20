@@ -11,8 +11,8 @@ En utløser kan utløses av hvilken som helst av disse:
 
 ## Hver installasjon for seg
 
-Hver ![](mark:installation)&nbsp;[installasjon](installation) har utløserne til logikksystemet for seg selv. Et signal starter en utløser bare for installasjonen der [plassen](slot) holder blokken som sendte det, så knappen til babord luftsluse sluser babord luftsluse og lar styrbord være.
+Hver ![](mark:installation)&nbsp;[installasjon](installation) har utløserne til logikksystemet for seg selv. Et signal starter en utløser bare for installasjonen der [plassen](slot) holder blokken som sendte det, så knappen til luftslusen på babord side sluser den luftslusen og lar den på styrbord side være.
 
 ## Kopiere en utløser
 
-En verktøylinjeplass kan bare starte én utløser, så en kopi av en utløser som startes fra en, kommer med en tom plass for seg, som hver installasjon fyller på sitt [installasjonspanel](installation-panel). Enhver annen utløser kopieres hel.
+En verktøylinjeplass kan bare starte én utløser, så en kopi av en utløser som startes fra en verktøylinjeplass, får en egen tom plass, som hver installasjon fyller på sitt [installasjonspanel](installation-panel). Enhver annen utløser kopieres i sin helhet.

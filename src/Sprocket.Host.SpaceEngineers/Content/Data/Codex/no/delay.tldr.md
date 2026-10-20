@@ -1,1 +1,1 @@
-En **forsinkelse** er et steg som holder sekvensen sin i en fastsatt tid.
+En **forsinkelse** er et steg som holder igjen sekvensen sin en fastsatt tid.

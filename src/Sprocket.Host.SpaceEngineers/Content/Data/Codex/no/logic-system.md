@@ -1,6 +1,6 @@
 # Logikksystem
 
-Et logikksystem er automasjonen for én maskin, som en luftsluse eller en heis, med alle jobbene som hører til å drive den maskinen. Det virker innenfor [konstruksjonen](construct) det står på, og når ikke utenfor den. En oversikt over alle logikksystemene på konstruksjonen din finner du på [startskjermen](home), som du kommer til ved å finne en programmerbar blokk i terminalen og trykke `Automasjon`-knappen på den.
+Et logikksystem er automasjonen for én maskin, som en luftsluse eller en heis, med alle jobbene som hører til å drive den maskinen. Det virker innenfor [konstruksjonen](construct) det står på, og når ikke utenfor den. En oversikt over alle logikksystemene på konstruksjonen din finner du på [startskjermen](home), som du kommer til ved å finne en programmable block i terminalen og trykke `Automasjon`-knappen på den.
 
 Et logikksystem består av disse delene:
 
@@ -14,7 +14,7 @@ Jobben holdes atskilt fra blokkene, så ett logikksystem kan kjøre hver luftslu
 
 Et logikksystem kan bare endres mens det er slått av, så en halvferdig sekvens aldri starter ved et uhell. Nye logikksystemer lages slått av. Bryteren står på overskriften til logikksystemet på startskjermen, og øverst til høyre på logikksystemets egen skjerm.
 
-Slår du det av, slutter utløserne å utløses, og alle sekvenser som kjører, avbrytes, bortsett fra de som er startet for hånd.
+Slår du det av, slutter utløserne å utløses, og alle sekvenser som kjører, avbrytes, bortsett fra de som er startet manuelt.
 
 ![](mark:delete)&nbsp;sletter med én gang; angre henter tilbake det den tok.
 
@@ -32,7 +32,7 @@ Navnet til en plass hører til hele logikksystemet, så et nytt navn på en plas
 
 Fanen `Installasjonspanel` på logikksystemets skjerm viser det alle som installerer dette logikksystemet, ser på sitt eget [panel](installation-panel): en beskrivelse, så plassene.
 
-For å hjelpe folk å forstå hva logikksystemet er til, eller bare for å minne deg selv på det, kan du skrive en beskrivelse. Den som får plantegningen din, har aldri sett konstruksjonen din, så beskrivelsen og plassene er alt de har å gå på. Beskrivelsen skrives mens logikksystemet er av, og kan inneholde [rik tekst](rich-text).
+For å hjelpe folk å forstå hva logikksystemet er til, eller bare for å minne deg selv på det, kan du skrive en beskrivelse. Den som får plantegningen din, har aldri sett konstruksjonen din, så beskrivelsen og plassene er alt de har å gå på. Beskrivelsen skrives mens logikksystemet er av, og kan inneholde [formatert tekst](rich-text).
 
 Hvert sett med blokker du velger for et steg eller en utløser, blir en [plass](slot). En plass med én blokk får navnet til blokken, og en med flere blir nummerert. En ![](mark:block)&nbsp;**blokkplass**, som *den indre døra*, holder blokkene en sekvens virker på eller følger med på. En ![](mark:signal)&nbsp;**signalplass**, som *knappen*, holder en blokk og verktøylinjeplassen på den som sender [signalet](signal).
 
