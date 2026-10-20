@@ -546,6 +546,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             EndRename();
             _windows.Close(_confirm);
 
+            // Each page keeps how far down it was read, so coming back from a page opened from it finds the place again.
+            if (_shownPage != null && !_shownPage.ScrollsItself)
+                _shownPage.Scrolled = _scroll.Scrolled;
+
             _shownPage = _editor.Current;
 
             // Set once for the life of the page: changing it later would move the page under whoever is reading it.
@@ -564,6 +568,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _body.Children.Add(drawn);
             _page.Cells[1, 0] = _scroll;
+            _scroll.Scrolled = _shownPage.Scrolled;
         }
 
         /// <summary>Writes what the screen says onto the chrome: the heading, the words and states beside it, what each control does, and the way on.</summary>

@@ -141,6 +141,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>What was last typed into the block search of a picker opened from this screen, kept while the screen is open.</summary>
         public string Search { get; set; } = "";
 
+        /// <summary>How far down the screen's scroller stood when the page was last left, given back when it is shown again.</summary>
+        public float Scrolled { get; set; }
+
         /// <summary>Opens the codex at the entry <see cref="Help" /> names.</summary>
         public virtual void ShowHelp()
         {
