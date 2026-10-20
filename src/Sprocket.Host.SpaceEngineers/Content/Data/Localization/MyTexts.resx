@@ -606,6 +606,22 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Leave it alone</value>
     <comment>Answer that changes nothing, in several question dialogs: when a picked button is already in use, when deleting an if or a branch of one on a sequence's screen, and before removing every logic system from the Paused screen. It is the answer Enter takes.</comment>
   </data>
+  <data name="Sprocket.Part.RunsAbout" xml:space="preserve">
+    <value>Select which sequence this step runs.</value>
+    <comment>Tooltip on the sequence a run step names, on a sequence's screen, such as Cycle Out in "run Cycle Out". Pressing it opens the list of sequences to choose another.</comment>
+  </data>
+  <data name="Sprocket.Part.StopsAbout" xml:space="preserve">
+    <value>Select which sequence this step stops.</value>
+    <comment>Tooltip on the sequence a stop step names, on a sequence's screen, such as Cycle Out in "stop Cycle Out". Pressing it opens the list of sequences to choose another.</comment>
+  </data>
+  <data name="Sprocket.Part.WatchedAbout" xml:space="preserve">
+    <value>Select which value this trigger watches.</value>
+    <comment>Tooltip on the value a trigger on a number watches, on a logic system's screen, such as power in "when any power of Battery &lt; 20". Pressing it opens the trigger's picker on the value.</comment>
+  </data>
+  <data name="Sprocket.Part.FillsAbout" xml:space="preserve">
+    <value>Select what fills this slot.</value>
+    <comment>Tooltip on a slot's blocks, and on the signal beside them, on an installation panel. Pressing either opens the picker the slot is filled with.</comment>
+  </data>
   <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
     <value>Blocks this step acts on:</value>
     <comment>First line of the tooltip on the blocks of a step or an if on a sequence's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>

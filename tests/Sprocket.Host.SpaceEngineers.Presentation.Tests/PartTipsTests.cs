@@ -37,6 +37,24 @@ public class PartTipsTests
         Assert.DoesNotContain(screen.Editor.Texts.SequenceBlocksAbout, tip);
     }
 
+    /// <summary>A slot's blocks on the installation panel say that pressing them chooses what fills the slot.</summary>
+    [Fact]
+    public void AnInstallationPanelsBlocksSayWhatPressingDoes()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.Back();
+        screen.Run(2);
+        screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
+        screen.Run(2);
+
+        var row = screen.Editor.Current!.View.Within().OfType<Features.Blueprints.PartRow>().First();
+        var chips = row.Within().OfType<SlotChip>().Where(chip => chip.IsVisible).ToArray();
+        Assert.NotEmpty(chips);
+        Assert.All(chips, chip => Assert.Equal(screen.Editor.Texts.PartFillsAbout, chip.Tip?.Text));
+    }
+
     /// <summary>A delay's tooltip gives its length in the unit it is not written in.</summary>
     [Fact]
     public void ALengthSaysItselfInTheOtherUnit()

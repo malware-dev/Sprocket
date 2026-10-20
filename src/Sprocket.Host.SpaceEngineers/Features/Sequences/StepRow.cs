@@ -185,7 +185,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < Slots.Count; i++)
             {
                 _chips[i].Texts = texts;
-                var press = Slots[i].Opens == null ? Why() : About(texts, Slots[i]);
+                var press = Slots[i].Opens == null ? Why() : About(texts, Kind, Slots[i]);
                 _chips[i].Tip = Tip.For(_chips[i].Tip, PartTips.Of(texts, world, Slots[i], texts.PartStepBlocks, press));
                 Part(i, Slots[i], world);
             }
@@ -263,9 +263,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             return Locked.Length == 0 ? null : Locked;
         }
 
-        /// <summary>What pressing <paramref name="part" /> does, or null where it goes without saying.</summary>
-        static string About(Texts texts, SentenceSlot part)
+        /// <summary>What pressing <paramref name="part" />, of a step of <paramref name="kind" />, does, or null where it goes without saying.</summary>
+        static string About(Texts texts, StepKind kind, SentenceSlot part)
         {
+            if (part is SequenceSlot)
+                return kind == StepKind.Stop ? texts.PartStopsAbout : texts.PartRunsAbout;
+
             if (part is ActionSlot)
                 return texts.SequenceActionAbout;
 

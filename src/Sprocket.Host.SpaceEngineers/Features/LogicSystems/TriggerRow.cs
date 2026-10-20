@@ -147,6 +147,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (part is DurationSlot)
                 return texts.TriggerRateAbout;
 
+            if (part is ActionSlot)
+                return texts.PartWatchedAbout;
+
+            var given = part as ArgumentsSlot;
+            if (given != null)
+                return given.About(texts);
+
             return part is EventSlot ? texts.TriggerWhatAbout : null;
         }
 

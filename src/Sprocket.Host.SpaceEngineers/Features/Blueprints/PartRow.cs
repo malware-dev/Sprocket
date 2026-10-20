@@ -161,6 +161,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             {
                 _blocks.Command = value;
                 _signals.Command = value;
+                var about = value != null ? _texts.PartFillsAbout : null;
+                _blocks.Tip = Tip.For(_blocks.Tip, about);
+                _signals.Tip = Tip.For(_signals.Tip, about);
             }
         }
 

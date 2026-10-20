@@ -463,6 +463,18 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>La den være</value>
   </data>
 
+  <data name="Sprocket.Part.RunsAbout" xml:space="preserve">
+    <value>Velg hvilken sekvens dette steget kjører.</value>
+  </data>
+  <data name="Sprocket.Part.StopsAbout" xml:space="preserve">
+    <value>Velg hvilken sekvens dette steget stopper.</value>
+  </data>
+  <data name="Sprocket.Part.WatchedAbout" xml:space="preserve">
+    <value>Velg hvilken verdi denne utløseren følger med på.</value>
+  </data>
+  <data name="Sprocket.Part.FillsAbout" xml:space="preserve">
+    <value>Velg hva som fyller denne plassen.</value>
+  </data>
   <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
     <value>Blokker dette steget virker på:</value>
   </data>

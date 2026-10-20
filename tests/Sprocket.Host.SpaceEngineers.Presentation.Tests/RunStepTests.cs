@@ -147,6 +147,27 @@ public class RunStepTests
     }
 
     /// <summary>A system with two sequences, switched off so they can be edited, with the first one's screen open.</summary>
+    /// <summary>The sequence a run step names says that pressing it chooses the sequence the step runs, and a stop step's the one it stops.</summary>
+    [Fact]
+    public void TheSequenceNamedSaysWhatPressingItDoes()
+    {
+        var rig = Two(out _, out _);
+        rig.Editor.PressAdd(SentenceText.RunWord);
+        rig.Tick();
+        rig.Editor.PressChoice("Cycle Out");
+        rig.Tick();
+        rig.Editor.PressAdd(SentenceText.StopWord);
+        rig.Tick();
+        rig.Editor.PressChoice("Cycle Out");
+        rig.Tick();
+
+        var tips = rig.Editor.StepRows()
+            .SelectMany(row => row.Slots.OfType<SequenceSlot>().Select(part => row.ChipOf(part)!.Tip?.Text))
+            .ToArray();
+        Assert.Contains(rig.Editor.Texts.PartRunsAbout, tips);
+        Assert.Contains(rig.Editor.Texts.PartStopsAbout, tips);
+    }
+
     static Simulation Two(out Sequence first, out Sequence second)
     {
         var rig = Simulation.Fresh();
