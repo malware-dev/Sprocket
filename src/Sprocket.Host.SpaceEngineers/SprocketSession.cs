@@ -94,6 +94,9 @@ namespace Sprocket.Host.SpaceEngineers
 
         Interval _reclaiming = new Interval(Reclaiming);
 
+        // While the world's debug log is on, on the machine that runs the world; null otherwise.
+        TickTiming _timing;
+
         readonly List<IMyPlayer> _players = new List<IMyPlayer>();
 
 
@@ -306,6 +309,13 @@ namespace Sprocket.Host.SpaceEngineers
             GameLog.Say(IsServer
                 ? "this machine runs the Sprockets"
                 : "this machine is a client; the Sprockets run on the server");
+            Timed(Asked);
+        }
+
+        /// <summary>Times every tick where <paramref name="settings" /> has the debug log on and this machine runs the world, and stops timing otherwise.</summary>
+        void Timed(Settings settings)
+        {
+            _timing = IsServer && settings.DebugLog ? _timing ?? new TickTiming(GameLog.Say) : null;
         }
 
         /// <summary>Loads the mod's texts in the player's language, and listens for the language to change.</summary>
@@ -479,6 +489,7 @@ namespace Sprocket.Host.SpaceEngineers
             var was = Asked;
             _settings = next;
             next.Keep(was);
+            Timed(next);
             foreach (var unit in _roster.All)
                 unit.Apply(next);
         }
@@ -690,8 +701,20 @@ namespace Sprocket.Host.SpaceEngineers
             if (MyAPIGateway.Session == null)
                 return;
 
-            int frame = Frame();
+            if (_timing == null)
+            {
+                Update(Frame());
+                return;
+            }
 
+            _timing.Begin();
+            Update(Frame());
+            _timing.End(_roster.Count);
+        }
+
+        /// <summary>Everything Sprocket does on the tick <paramref name="frame" />.</summary>
+        void Update(int frame)
+        {
             // A copy with a holder is only being looked at, and sends nothing.
             if (_copy != null)
             {

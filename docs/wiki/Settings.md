@@ -16,6 +16,12 @@ Sprocket has three settings.
 [Sprocket] tick 51234, "Mining Barge", "Airlock" on installation 1, sequence 1 "Cycle": step 3 failed: Unable, "Port Outer Door"
 ```
 
+Every ten seconds it also writes how long Sprocket's own work took per tick, on average and at worst:
+
+```
+[Sprocket] last 600 ticks: 3.2 µs a tick on average, worst 41.0 µs, 12 constructs with automation
+```
+
 In multiplayer the automation runs on the server, so these lines are in the server's log, not the players'. When it's off it costs nothing you could measure.
 
 ## Changing them in game
