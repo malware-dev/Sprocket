@@ -10,5 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Where the codex's window was last moved to, in UI units, or null where it has not been moved.</summary>
         public VRageMath.Vector2? CodexAt;
+
+        /// <summary>Which tab each logic system's screen was last left on, by the logic system's id, for the screen to open on again.</summary>
+        public readonly System.Collections.Generic.Dictionary<int, int> Tabs = new System.Collections.Generic.Dictionary<int, int>();
     }
 }

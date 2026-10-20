@@ -35,10 +35,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
             Cancel = close;
             Accept = close;
 
-            var tabs = new Tabs { HeaderStyle = Styles.Tab, CurrentStyle = Styles.TabCurrent };
-            tabs.Add(texts.AdminThisWorld, Page(texts, true), Tip.For(null, texts.AdminThisWorldAbout));
-            tabs.Add(texts.AdminEveryWorld, Page(texts, false), Tip.For(null, texts.AdminEveryWorldAbout));
-
             Content = new VStack
             {
                 Spacing = 16f,
@@ -46,7 +42,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                 {
                     new Label { Style = Styles.Phrase, Text = texts.AdminTitle },
                     new Label { Style = Styles.Detail, Wraps = true, Text = texts.AdminLine },
-                    tabs,
+                    new TabView
+                    {
+                        HeaderStyle = Styles.Tab,
+                        Tabs =
+                        {
+                            new Tab { Header = texts.AdminThisWorld, Tip = Tip.For(null, texts.AdminThisWorldAbout), Content = Page(texts, true) },
+                            new Tab { Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.AdminEveryWorldAbout), Content = Page(texts, false) }
+                        }
+                    },
                     new Button { Style = Styles.Primary, Text = texts.AdminClose, Align = Align.Right, Command = close }
                 }
             };

@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>Text written over several lines is shown in a form by where it starts, and written whole on a page of its own.</summary>
 public class TextPageTests
 {
-    const string CustomData = "60 196 type Airlock enter press \"+ sequence\" press \"+ step\" press task press \"Airlock Light\" press \"custom data\"";
+    const string CustomData = "60 196 type Airlock enter press Sequences press \"+ sequence\" press \"+ step\" press task press \"Airlock Light\" press \"custom data\"";
 
     /// <summary>Typing and pasting stop at the most a box may hold, and taking an edit back counts its characters back.</summary>
     [Fact]

@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
+using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
@@ -260,6 +261,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
             _slotRows = new KeyedChildren<Part, PartRow>(_slotList.Children, delegate { return new PartRow(); });
 
+            int shown;
+            if (Editor.Habits.Tabs.TryGetValue(_system.Id, out shown))
+                _tabs.Current = shown;
+
+            _tabs.Switched += at => Editor.Habits.Tabs[_system.Id] = at;
+
             Show(true);
         }
 
@@ -283,6 +290,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (recount)
                 Stopped(through);
 
+            var triggered = NoticeLevel.Info;
+            var sequenced = NoticeLevel.Info;
             for (var i = 0; i < _triggers.Count; i++)
             {
                 var row = _triggerRows[_triggers[i]];
@@ -305,6 +314,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                     }
                 }
 
+                if (row.Problem.Length > 0)
+                    triggered = Worse(triggered, row.Level);
+
                 row.Show(Editor.World, texts);
             }
 
@@ -320,8 +332,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (recount)
                     Mark(texts, row, Fault(sequence, through), sequence);
 
+                if (!string.IsNullOrEmpty(row.Problem))
+                    sequenced = Worse(sequenced, row.Level);
+
                 row.Show(texts);
             }
+
+            Flag(_triggersMark, triggered);
+            Flag(_sequencesMark, sequenced);
 
             if (_rate != null)
                 _rate.Hang();
@@ -366,8 +384,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             ArrangeUsing(texts);
             ArrangeLock();
 
-            _triggersHeading.Text = texts.SystemTriggers.ToUpperInvariant();
-            _triggersHeading.Style = _system.IsBlueprint ? Styles.NextHeading : Styles.Heading;
+            _triggersTab.Header = texts.SystemTriggers;
+            _sequencesTab.Header = texts.SystemSequences;
+            _stateTab.Header = texts.SystemState;
+            _panelTab.Header = texts.SystemInstallationPanel;
+            _noState.Text = texts.SystemNoState;
             _addTrigger.Show(new AddOption(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
             {
                 new AddOption(SentenceText.WhenWord, texts.SystemWhenAbout,
@@ -386,7 +407,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             foreach (var trigger in _triggers)
                 Word(_triggerRows[trigger], trigger);
 
-            _sequencesHeading.Text = texts.SystemSequences.ToUpperInvariant();
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
             _newSequence.Tip = Tip.For(_newSequence.Tip, texts.SystemNewSequenceAbout);
 
@@ -411,8 +431,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             ArrangeSlots(texts);
 
-            _panelHeading.Text = texts.SystemInstallationPanel.ToUpperInvariant();
-            _panelHeading.IsVisible = _describing.IsVisible || _slotsHeading.IsVisible;
+            _noPanel.IsVisible = !_describing.IsVisible && !_slotsHeading.IsVisible;
+            _noPanel.Text = texts.SystemNoPanel;
+        }
+
+        /// <summary>Shows <paramref name="mark" /> in the color of <paramref name="level" />, or hides it where nothing on its tab is more than a note.</summary>
+        static void Flag(Glyph mark, NoticeLevel level)
+        {
+            mark.IsVisible = level != NoticeLevel.Info;
+            mark.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
+        }
+
+        /// <summary>The graver of <paramref name="one" /> and <paramref name="other" />: a problem over a warning over a note, as the levels are ordered.</summary>
+        static NoticeLevel Worse(NoticeLevel one, NoticeLevel other)
+        {
+            return other > one ? other : one;
         }
 
         /// <summary>Shows a blueprint's description, in its box while it may be changed, leaving alone a box being typed in.</summary>

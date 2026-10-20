@@ -231,7 +231,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slett denne installasjonen</value>
   </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
-    <value>Installasjon</value>
+    <value>Valgt installasjon</value>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
     <value>Velg installasjonen denne skjermen arbeider på. Blokkene dens fyller plassene i stegene nedenfor, og blokker valgt her havner i plassene dens.</value>
@@ -262,6 +262,15 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.System.NoSequences" xml:space="preserve">
     <value>Ingen sekvenser ennå.</value>
+  </data>
+  <data name="Sprocket.System.State" xml:space="preserve">
+    <value>Tilstand</value>
+  </data>
+  <data name="Sprocket.System.NoState" xml:space="preserve">
+    <value>Ingenting her ennå.</value>
+  </data>
+  <data name="Sprocket.System.NoPanel" xml:space="preserve">
+    <value>Bare et logikksystem laget som plantegning har et installasjonspanel.</value>
   </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
     <value>Kopier denne sekvensen. Kopien starter avslått og uten utløsere.</value>

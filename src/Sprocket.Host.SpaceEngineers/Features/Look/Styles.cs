@@ -287,7 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A heading within a section, a size down from the section's own, over the part of it that it names.</summary>
         public static readonly TextStyle SubHeading = new TextStyle(Heading)
         {
-            Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
+            Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 0f) }
         };
 
         /// <summary>A section's name following other content, with room above it so it reads as the start of what comes after.</summary>
@@ -473,6 +473,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Font = Symbols.Font, FontSize = 20f }
         };
 
+        /// <summary>The mark after a tab's words saying something on its page wants looking at, whose color the view sets from how much it matters.</summary>
+        public static readonly GlyphStyle TabMark = new GlyphStyle(Flag)
+        {
+            Base = { FontSize = 16f, Padding = new Thickness(8f, 0f, 0f, 0f) }
+        };
+
         /// <summary>The chevron that opens a banner, whose color the view sets from the banner's.</summary>
         public static readonly GlyphStyle Chevron = new GlyphStyle(Flag);
 
@@ -531,8 +537,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Disabled = { Color = Palette.Dim }
         };
 
-        /// <summary>One page of several to look at, as the game draws the tabs across its terminal.</summary>
-        public static readonly ButtonStyle Tab = new ButtonStyle
+        /// <summary>The header of one page of several, as the game draws the tabs across its terminal, the page showing on the lightest plate.</summary>
+        public static readonly TabStyle Tab = new TabStyle
         {
             Base =
             {
@@ -543,14 +549,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
                 Edge = Palette.Line,
                 Padding = new Thickness(8f, 8f)
             },
-            Hot = { Background = Palette.PanelHot, Color = Palette.Ink }
-        };
-
-        /// <summary>The page that is showing, the lightest plate as the game has it.</summary>
-        public static readonly ButtonStyle TabCurrent = new ButtonStyle(Tab)
-        {
-            Base = { Background = Palette.Line },
-            Hot = { Background = Palette.Line }
+            Hot = { Background = Palette.PanelHot, Color = Palette.Ink },
+            Current = { Background = Palette.Line, Color = Palette.Ink }
         };
 
         /// <summary>The button that finishes a screen or answers a dialog as Enter would, grayed while there is nothing to finish.</summary>

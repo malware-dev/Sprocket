@@ -8,7 +8,7 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>A step is added through one plus that hangs a menu of every kind of step, at the end of a sequence and of each branch.</summary>
 public class StepMenuTests
 {
-    const string Kinds = "press \"logic system\" type Airlock enter press Airlock press sequence enter";
+    const string Kinds = "press \"logic system\" type Airlock enter press Airlock press Sequences press sequence enter";
 
     /// <summary>The plus at the end of a sequence hangs the five kinds of step from itself, and nothing else is offered there.</summary>
     [Fact]

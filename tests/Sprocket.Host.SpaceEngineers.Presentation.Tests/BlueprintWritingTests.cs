@@ -240,7 +240,7 @@ public class BlueprintWritingTests
     {
         var screen = OnTheSystem();
         var editor = screen.Editor;
-        Guides(screen, editor.Current!.View);
+        Guides(screen, editor.PressTab(editor.Texts.SystemInstallationPanel));
 
         editor.OpenSlot("Airlock Button");
         screen.Run(5);

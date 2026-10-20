@@ -20,7 +20,7 @@
 
 home
 system        press "+ logic system" type Airlock enter
-sequence      press "+ logic system" type Airlock enter press "+ sequence" press "+ step" press task press "Airlock Inner Door" press open press Done
-picker        press "+ logic system" type Airlock enter press "+ sequence" press "+ step" press task type Standby press "Standby Battery" press "Terminal ›" press "Charge Mode"
+sequence      press "+ logic system" type Airlock enter press Sequences press "+ sequence" press "+ step" press task press "Airlock Inner Door" press open press Done
+picker        press "+ logic system" type Airlock enter press Sequences press "+ sequence" press "+ step" press task type Standby press "Standby Battery" press "Terminal ›" press "Charge Mode"
 library       press Library
 codex         press ?

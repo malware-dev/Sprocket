@@ -82,7 +82,7 @@ namespace Sprocket.Sim.Driving
         public static List<PartRow> SystemSlots(this SprocketEditor editor)
         {
             var page = LogicSystem(editor);
-            _ = page.View;
+            PressTab(editor, editor.Texts.SystemInstallationPanel);
             return page.Slots.OfType<PartRow>().ToList();
         }
 
@@ -395,7 +395,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The rows of a logic system's sequences, as its page draws them, in the order they stand.</summary>
         /// <remarks>Positional because the screen is: a test reading a screen is allowed to know what is on it.</remarks>
         public static List<StatusRow> Rows(this SprocketEditor editor) =>
-            Within(LogicSystem(editor).View).OfType<StatusRow>().ToList();
+            Within(PressTab(editor, editor.Texts.SystemSequences)).OfType<StatusRow>().ToList();
 
         /// <summary>The blockset whose blocks a blueprint's logic system screen names, as its list says.</summary>
         /// <remarks>The list at the top of the page, above every trigger's sentence.</remarks>
@@ -404,7 +404,7 @@ namespace Sprocket.Sim.Driving
 
         /// <summary>The sentences of what starts things, as the rows the logic system's page draws them in.</summary>
         public static List<TriggerRow> Triggers(this SprocketEditor editor) =>
-            Within(LogicSystem(editor).View).OfType<TriggerRow>().ToList();
+            Within(PressTab(editor, editor.Texts.SystemTriggers)).OfType<TriggerRow>().ToList();
 
         /// <summary>
         /// What a trigger's row reads as, joined the way a target draws it.
@@ -508,7 +508,8 @@ namespace Sprocket.Sim.Driving
             var view = editor.Current.View
                        ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
 
-            foreach (var element in Within(view))
+            // Looked for on every tab of the screen, as somebody would go to the tab it is on.
+            foreach (var element in Within(view).Concat(OtherTabs(view).SelectMany(Within)))
             {
                 var menu = element as PlusMenu;
                 if (menu != null)
@@ -659,6 +660,28 @@ namespace Sprocket.Sim.Driving
         }
 
         /// <summary>The page of the logic system the editor is on.</summary>
+        /// <summary>Presses the tab saying <paramref name="header" /> on the logic system's page where another is showing, and answers the page.</summary>
+        public static Element PressTab(this SprocketEditor editor, string header)
+        {
+            var view = LogicSystem(editor).View;
+            var tab = Within(view).OfType<Tab>().FirstOrDefault(each => each.Header == header)
+                      ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' has no tab saying '{header}'.");
+            if (!tab.IsCurrent)
+                tab.Command!.Execute();
+
+            return view;
+        }
+
+        /// <summary>The page of each tab in <paramref name="view" /> that is not showing, each pressed in turn as it is asked for.</summary>
+        static IEnumerable<Element> OtherTabs(Element view)
+        {
+            foreach (var tab in Within(view).OfType<Tab>().Where(each => !each.IsCurrent).ToList())
+            {
+                tab.Command!.Execute();
+                yield return view;
+            }
+        }
+
         static LogicSystemPage LogicSystem(SprocketEditor editor) =>
             editor.Current as LogicSystemPage ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a logic system's page.");
 

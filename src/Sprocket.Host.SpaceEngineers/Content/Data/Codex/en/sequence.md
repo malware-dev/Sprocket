@@ -6,7 +6,7 @@ A sequence is a list of [steps](step) that a ![](mark:logic-system)&nbsp;[logic 
 
 While the logic system is switched on, a [trigger](trigger) starts a sequence, for example when the airlock's button is pressed.
 
-To try a sequence while you build it, run it by hand with ![](mark:play)&nbsp;on its row. A run by hand works even while the logic system is switched off, and uses the installation selected under `Installation`.
+To try a sequence while you build it, run it by hand with ![](mark:play)&nbsp;on its row. A run by hand works even while the logic system is switched off, and uses the `Selected installation`.
 
 An installation runs a sequence only once at a time, so a trigger that fires while it's still running is missed, and the sequence's screen counts how many.
 

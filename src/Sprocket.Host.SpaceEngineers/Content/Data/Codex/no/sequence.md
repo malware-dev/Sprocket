@@ -6,7 +6,7 @@ En sekvens er en liste med [steg](step) som et ![](mark:logic-system)&nbsp;[logi
 
 Mens logikksystemet er slått på, starter en [utløser](trigger) en sekvens, for eksempel når knappen til luftslusen trykkes.
 
-For å prøve en sekvens mens du bygger den, kjører du den for hånd med ![](mark:play)&nbsp;på raden. En kjøring for hånd virker selv om logikksystemet er slått av, og bruker installasjonen som er valgt under `Installasjon`.
+For å prøve en sekvens mens du bygger den, kjører du den for hånd med ![](mark:play)&nbsp;på raden. En kjøring for hånd virker selv om logikksystemet er slått av, og bruker `Valgt installasjon`.
 
 En installasjon kjører en sekvens bare én gang om gangen, så sekvensen går glipp av en utløser som utløses mens den fortsatt kjører, og skjermen dens teller hvor mange.
 

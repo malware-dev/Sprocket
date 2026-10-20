@@ -6,7 +6,7 @@ For at ett ![](mark:logic-system)&nbsp;[logikksystem](logic-system) skal kunne k
 - En ![](mark:signal)&nbsp;**signalplass** holder en blokk og verktøylinjeplassen på den som sender [signalet](signal), som et knappepanel og en av knappene.
 - En ![](mark:block)&nbsp;**skjermplass** holder blokker og hvilken av skjermene til hver blokk, for et steg eller et [hvis](if) som virker på en skjerm. Et tekstpanel har én skjerm, en cockpit eller en reklametavle flere.
 
-Blokkene du velger, fyller plassene til installasjonen som er valgt under `Installasjon`. Hver andre installasjon fyller dem på sitt eget [installasjonspanel](installation-panel).
+Blokkene du velger, fyller plassene til `Valgt installasjon`. Hver andre installasjon fyller dem på sitt eget [installasjonspanel](installation-panel).
 
 ## Hvordan plasser lages
 

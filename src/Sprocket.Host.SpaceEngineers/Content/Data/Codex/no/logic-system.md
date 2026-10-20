@@ -30,13 +30,13 @@ Navnet til en plass hører til hele logikksystemet, så et nytt navn på en plas
 
 ## Installasjonspanelet
 
-Under sekvensene står det alle som installerer dette logikksystemet, ser på sitt eget [panel](installation-panel): en beskrivelse, så plassene.
+Fanen `Installasjonspanel` på logikksystemets skjerm viser det alle som installerer dette logikksystemet, ser på sitt eget [panel](installation-panel): en beskrivelse, så plassene.
 
 For å hjelpe folk å forstå hva logikksystemet er til, eller bare for å minne deg selv på det, kan du skrive en beskrivelse. Den som får plantegningen din, har aldri sett konstruksjonen din, så beskrivelsen og plassene er alt de har å gå på. Beskrivelsen skrives mens logikksystemet er av, og kan inneholde [rik tekst](rich-text).
 
 Hvert sett med blokker du velger for et steg eller en utløser, blir en [plass](slot). En plass med én blokk får navnet til blokken, og en med flere blir nummerert. En ![](mark:block)&nbsp;**blokkplass**, som *den indre døra*, holder blokkene en sekvens virker på eller følger med på. En ![](mark:signal)&nbsp;**signalplass**, som *knappen*, holder en blokk og verktøylinjeplassen på den som sender [signalet](signal).
 
-Når du har mer enn én installasjon, velger `Installasjon`-listen øverst på skjermen den du jobber med: blokkene og signalene dens vises i utløserne og sekvensene, og mens du endrer logikksystemet ditt, oppdateres denne valgte installasjonen direkte.
+Når du har mer enn én installasjon, velger `Valgt installasjon`-listen øverst på skjermen den du jobber med: blokkene og signalene dens vises i utløserne og sekvensene, og mens du endrer logikksystemet ditt, oppdateres denne valgte installasjonen direkte.
 
 ## Mer enn én luftsluse
 

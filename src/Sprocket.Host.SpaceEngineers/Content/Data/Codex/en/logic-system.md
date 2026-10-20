@@ -30,13 +30,13 @@ A slot's name belongs to the whole logic system, so renaming a slot is undone on
 
 ## The installation panel
 
-Below the sequences is what everyone installing this logic system sees on their own [panel](installation-panel): a description, then the slots.
+The `Installation panel` tab on the logic system's screen shows what everyone installing this logic system sees on their own [panel](installation-panel): a description, then the slots.
 
 To help people understand what your logic system is for, or just to remind yourself, consider writing a description. Whoever receives your blueprint has never seen your construct, so the description and the slots are all they have to go on. The description is written while the logic system is off, and can hold [rich text](rich-text).
 
 Each set of blocks you select for a step or a trigger becomes a [slot](slot). A slot of one block takes that block's name; a slot of several is numbered. A ![](mark:block)&nbsp;**block slot**, like *the inner door*, holds the blocks a sequence acts on or watches. A ![](mark:signal)&nbsp;**signal slot**, like *the button*, holds a block and the toolbar slot on it that sends the [signal](signal).
 
-When you have more than one installation, the `Installation` list at the top of the screen selects the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
+When you have more than one installation, the `Selected installation` list at the top of the screen picks the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
 
 ## More than one airlock
 

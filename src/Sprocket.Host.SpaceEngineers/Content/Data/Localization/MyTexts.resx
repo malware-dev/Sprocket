@@ -303,7 +303,7 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Tooltip on the bin of an installation's row on the home screen, which deletes that installation.</comment>
   </data>
   <data name="Sprocket.System.Using" xml:space="preserve">
-    <value>Installation</value>
+    <value>Selected installation</value>
     <comment>Words at the top of the screen of a logic system made as a blueprint, leading a list of its installations. The installation chosen in that list is the one whose blocks fill the slots named in every sentence on the screen.</comment>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
@@ -345,6 +345,18 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.System.NoSequences" xml:space="preserve">
     <value>No sequences yet.</value>
     <comment>Shown on a logic system's screen in place of the list of sequences while the logic system has none.</comment>
+  </data>
+  <data name="Sprocket.System.State" xml:space="preserve">
+    <value>State</value>
+    <comment>The name of the tab on a logic system's screen for what the logic system keeps between runs.</comment>
+  </data>
+  <data name="Sprocket.System.NoState" xml:space="preserve">
+    <value>Nothing here yet.</value>
+    <comment>Shown on the State tab of a logic system's screen while the logic system keeps nothing.</comment>
+  </data>
+  <data name="Sprocket.System.NoPanel" xml:space="preserve">
+    <value>Only a logic system made as a blueprint has an installation panel.</value>
+    <comment>Shown on the Installation panel tab of a logic system's screen when the logic system is not a blueprint.</comment>
   </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
     <value>Copy this sequence. The copy starts switched off and without triggers.</value>

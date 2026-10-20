@@ -6,7 +6,7 @@ For one ![](mark:logic-system)&nbsp;[logic system](logic-system) to run every ai
 - A ![](mark:signal)&nbsp;**signal slot** holds a block and the toolbar slot on it that sends the [signal](signal), like a button panel and one of its buttons.
 - A ![](mark:block)&nbsp;**slot of screens** holds blocks and which of each block's screens, for a step or an [if](if) that acts on a screen. A text panel has one screen, a cockpit or a billboard several.
 
-The blocks you select fill the slots for the installation selected under `Installation`. Every other installation fills them on its own [installation panel](installation-panel).
+The blocks you select fill the slots for the `Selected installation`. Every other installation fills them on its own [installation panel](installation-panel).
 
 ## How slots are made
 

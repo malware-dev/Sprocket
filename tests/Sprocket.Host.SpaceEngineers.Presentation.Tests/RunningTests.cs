@@ -43,6 +43,7 @@ public class RunningTests
         var screen = WithOneRunning();
 
         Assert.True(screen.Editor.Rows()[0].Running);
+        screen.Run(1);
         Assert.True(Washed(screen, Palette.LiveWash), "a running sequence's row has no ground");
     }
 
