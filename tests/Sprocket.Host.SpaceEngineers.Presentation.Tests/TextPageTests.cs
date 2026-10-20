@@ -57,6 +57,27 @@ public class TextPageTests
         Assert.Contains("[Sprocket]&br;cycle=12", screen.Editor.Pick().Arguments!.Form.Answer);
     }
 
+    /// <summary>Text written after Done refused it empty clears the refusal as it comes back, and Done then finishes with it.</summary>
+    [Fact]
+    public void TextWrittenAfterARefusalIsTaken()
+    {
+        var screen = Screen.Fresh(CustomData.Split(' '));
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+        Assert.True(screen.Shows("Custom data is missing."), "an empty value was not refused");
+
+        screen.Do("press", "Edit", "tick", "2");
+        ((TextPage)screen.Editor.Current!).Box!.Insert("cycle=12");
+        screen.Do("press", "Done", "tick", "2");
+
+        Assert.IsType<PickPage>(screen.Editor.Current);
+        Assert.False(screen.Shows("Custom data is missing."), "the refusal stayed after the text came back");
+
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+        Assert.IsNotType<PickPage>(screen.Editor.Current);
+    }
+
     /// <summary>Going back from the page after changing the text asks whether to keep it, and discarding leaves the step as it was.</summary>
     [Fact]
     public void GoingBackAfterAChangeAsksWhetherToKeepIt()

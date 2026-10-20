@@ -45,13 +45,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Writing
         {
         }
 
-        /// <summary>Keeps the text and goes back to the form.</summary>
+        /// <summary>Goes back to the form and keeps the text there.</summary>
+        /// <remarks>Back first, so the form hears the text while its own page is the one showing, as it does any other change.</remarks>
         public override void Primary()
         {
-            if (_box != null)
-                _keep(_box.Text);
-
+            var text = _box != null ? _box.Text : null;
             Editor.Pop();
+
+            if (text != null)
+                _keep(text);
         }
 
         /// <summary>Asks whether to keep the text, where it has changed; both answers go back.</summary>
