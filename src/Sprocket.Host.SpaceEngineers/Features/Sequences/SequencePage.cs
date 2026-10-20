@@ -551,7 +551,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             row.Slots.Add(new ActionSlot(chosen, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.What))));
-            row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), true,
+            row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), act.Targets, true,
                 Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Blocks))));
             if (verb.Length != 0)
                 return;
@@ -586,7 +586,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (value == null || !value.IsStatus)
                 row.Slots.Add(new ActionSlot(value, Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.What))));
 
-            row.Slots.Add(new EntitiesSlot(blocks, test.Quantifier != Quantifier.Any,
+            row.Slots.Add(new EntitiesSlot(blocks, test.Targets, test.Quantifier != Quantifier.Any,
                 Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks))));
 
             if (value == null)

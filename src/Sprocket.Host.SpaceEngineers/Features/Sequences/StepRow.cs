@@ -185,7 +185,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             for (var i = 0; i < Slots.Count; i++)
             {
                 _chips[i].Texts = texts;
-                _chips[i].Tip = Tip.For(_chips[i].Tip, Slots[i].Opens == null ? Why() : About(texts, Slots[i]));
+                var press = Slots[i].Opens == null ? Why() : About(texts, Slots[i]);
+                _chips[i].Tip = Tip.For(_chips[i].Tip, PartTips.Of(texts, world, Slots[i], texts.PartStepBlocks, press));
                 Part(i, Slots[i], world);
             }
 

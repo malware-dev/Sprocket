@@ -736,7 +736,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             {
                 var all = watching != null && watching.Quantifier != Quantifier.Any;
                 var blocks = Editor.Blocks(_system, moment.Sources);
-                row.Starts.Add(new EntitiesSlot(blocks, all, Starts(trigger, OpeningColumn.Blocks)));
+                row.Starts.Add(new EntitiesSlot(blocks, moment.Sources, all, Starts(trigger, OpeningColumn.Blocks)));
                 row.Starts.Add(new EventSlot(Happening(moment), Starts(trigger, OpeningColumn.What), all && blocks.Count > 1));
             }
 
@@ -773,7 +773,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
 
             row.Starts.Add(new ActionSlot(value, Starts(when, OpeningColumn.What)));
-            row.Starts.Add(new EntitiesSlot(blocks, when.Quantifier != Quantifier.Any, Starts(when, OpeningColumn.Blocks)));
+            row.Starts.Add(new EntitiesSlot(blocks, when.Sources, when.Quantifier != Quantifier.Any, Starts(when, OpeningColumn.Blocks)));
             if (value == null)
                 return;
 
@@ -851,7 +851,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, OpeningColumn.Arguments)));
 
             row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
-            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), true, Does(trigger, OpeningColumn.Blocks)));
+            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), act.Targets, true, Does(trigger, OpeningColumn.Blocks)));
             if (verb.Length != 0)
                 return;
 

@@ -463,6 +463,21 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>La den være</value>
   </data>
 
+  <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
+    <value>Blokker dette steget virker på:</value>
+  </data>
+  <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
+    <value>Blokker som får denne utløseren til å utløses:</value>
+  </data>
+  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
+    <value>Blokker denne utløseren virker på:</value>
+  </data>
+  <data name="Sprocket.Part.FromSlot" xml:space="preserve">
+    <value>Fra plassen {slots}.</value>
+  </data>
+  <data name="Sprocket.Part.FromSlots" xml:space="preserve">
+    <value>Fra plassene {slots}.</value>
+  </data>
   <data name="Sprocket.Pick.OnGrid" xml:space="preserve">
     <value>{kind} på {grid}</value>
   </data>

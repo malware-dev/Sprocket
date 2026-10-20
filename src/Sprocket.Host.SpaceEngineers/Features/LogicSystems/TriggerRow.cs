@@ -88,7 +88,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             for (var i = 0; i < Starts.Count; i++)
             {
-                _starts[i].Tip = Tip.For(_starts[i].Tip, Starts[i].Opens == null ? Why() : Starting(texts, Starts[i]));
+                var press = Starts[i].Opens == null ? Why() : Starting(texts, Starts[i]);
+                _starts[i].Tip = Tip.For(_starts[i].Tip, PartTips.Of(texts, world, Starts[i], texts.PartTriggerBlocks, press));
 
                 if (!ReferenceEquals(_shown[i], Starts[i]))
                 {
@@ -103,7 +104,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             for (var i = 0; i < Does.Count; i++)
             {
                 _does[i].Texts = texts;
-                _does[i].Tip = Tip.For(_does[i].Tip, Does[i].Opens == null ? Why() : Doing(texts, Does[i]));
+                var press = Does[i].Opens == null ? Why() : Doing(texts, Does[i]);
+                _does[i].Tip = Tip.For(_does[i].Tip, PartTips.Of(texts, world, Does[i], texts.PartTriggerTargets, press));
 
                 // Before Part, which records the part as shown.
                 if (!ReferenceEquals(_shown[Starts.Count + i], Does[i]))

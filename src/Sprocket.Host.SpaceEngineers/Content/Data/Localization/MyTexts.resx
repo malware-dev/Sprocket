@@ -606,6 +606,26 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Leave it alone</value>
     <comment>Answer that changes nothing, in several question dialogs: when a picked button is already in use, when deleting an if or a branch of one on a sequence's screen, and before removing every logic system from the Paused screen. It is the answer Enter takes.</comment>
   </data>
+  <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
+    <value>Blocks this step acts on:</value>
+    <comment>First line of the tooltip on the blocks of a step or an if on a sequence's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
+  </data>
+  <data name="Sprocket.Part.TriggerBlocks" xml:space="preserve">
+    <value>Blocks that fire this trigger:</value>
+    <comment>First line of the tooltip on the blocks a trigger watches, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
+  </data>
+  <data name="Sprocket.Part.TriggerTargets" xml:space="preserve">
+    <value>Blocks this trigger acts on:</value>
+    <comment>First line of the tooltip on the blocks a trigger's own action acts on, on a logic system's screen, once it holds blocks, under the slot they come from; a list of them follows.</comment>
+  </data>
+  <data name="Sprocket.Part.FromSlot" xml:space="preserve">
+    <value>From the slot {slots}.</value>
+    <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks: the slot of the logic system the blocks fill. {slots} is the slot's name, in bold.</comment>
+  </data>
+  <data name="Sprocket.Part.FromSlots" xml:space="preserve">
+    <value>From the slots {slots}.</value>
+    <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks, where they come from more than one slot. {slots} is the slots' names, in bold, separated by commas.</comment>
+  </data>
   <data name="Sprocket.Pick.OnGrid" xml:space="preserve">
     <value>{kind} on {grid}</value>
     <comment>Under a block's name in the picker's list of blocks, for a block on a grid of the construct other than the one the programmable block is on, such as a rotor's head. {kind} is the kind of block, such as "Interior Light"; {grid} is the name the grid has in the game.</comment>
@@ -1636,19 +1656,19 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Wait.AsSecond" xml:space="preserve">
     <value>= 1 second</value>
-    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in ticks and comes to exactly one second.</comment>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in ticks and comes to exactly one second. Also the first line of the tooltip on a wait step's length or a timer's rate in a sentence.</comment>
   </data>
   <data name="Sprocket.Wait.AsSeconds" xml:space="preserve">
     <value>= {count} seconds</value>
-    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in ticks; {count} is the same length in seconds.</comment>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in ticks; {count} is the same length in seconds. Also the first line of the tooltip on a wait step's length or a timer's rate in a sentence.</comment>
   </data>
   <data name="Sprocket.Wait.AsTick" xml:space="preserve">
     <value>= 1 tick</value>
-    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in seconds and comes to exactly one tick.</comment>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in seconds and comes to exactly one tick. Also the first line of the tooltip on a wait step's length or a timer's rate in a sentence.</comment>
   </data>
   <data name="Sprocket.Wait.AsTicks" xml:space="preserve">
     <value>= {count} ticks</value>
-    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in seconds; {count} is the same length in ticks.</comment>
+    <comment>In the length panel (opened by pressing a wait step's length on a sequence's screen or a timer trigger's rate on a logic system's screen, and part of the picker for a timer trigger): the line beneath the number while the length is given in seconds; {count} is the same length in ticks. Also the first line of the tooltip on a wait step's length or a timer's rate in a sentence.</comment>
   </data>
   <data name="Sprocket.Wait.PickSeconds" xml:space="preserve">
     <value>{count} s</value>

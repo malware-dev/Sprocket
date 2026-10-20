@@ -1,4 +1,6 @@
 using System.Globalization;
+using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Localization;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
@@ -7,6 +9,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// </summary>
     public static class TimeText
     {
+        /// <summary>How many seconds are shown of a length, at most.</summary>
+        const string SecondsFormat = "0.##";
+
+        /// <summary><paramref name="length" /> in the unit it is not written in, as <paramref name="texts" /> word it: "= 80 ticks" for a length written in seconds.</summary>
+        public static string Other(Texts texts, SpaceEngineers.Sequences.Duration length)
+        {
+            if (length.InSeconds)
+                return length.Ticks == 1 ? texts.WaitAsTick : Template.Fill(texts.WaitAsTicks, "count", length.Ticks.ToString(CultureInfo.InvariantCulture));
+
+            var seconds = (double)length.Ticks / SpaceEngineers.Sequences.Duration.PerSecond;
+            return seconds == 1 ? texts.WaitAsSecond : Template.Fill(texts.WaitAsSeconds, "count", seconds.ToString(SecondsFormat, CultureInfo.InvariantCulture));
+        }
+
         /// <summary>A length of time in ticks.</summary>
         public static string Duration(int ticks)
         {

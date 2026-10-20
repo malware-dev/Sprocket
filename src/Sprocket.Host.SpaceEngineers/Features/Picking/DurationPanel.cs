@@ -7,6 +7,7 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using VRage.Input;
@@ -240,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void Show()
         {
             var length = Length;
-            _other.Text = length.HasValue ? Other(length.Value) : "";
+            _other.Text = length.HasValue ? TimeText.Other(_texts, length.Value) : "";
 
             var costly = _cautions && length.HasValue && length.Value.Ticks <= CostlyTicks;
             _caution.IsVisible = costly;
@@ -253,16 +254,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var given = length.HasValue && (_inSeconds ? length.Value.Seconds == SecondsPicks[i] : length.Value.Ticks == TicksPicks[i]);
                 ((Button)picks.Children[i]).Style = given ? Styles.WordChosen : Styles.Word;
             }
-        }
-
-        /// <summary><paramref name="length" /> in the unit it is not written in.</summary>
-        string Other(Duration length)
-        {
-            if (length.InSeconds)
-                return length.Ticks == 1 ? _texts.WaitAsTick : Template.Fill(_texts.WaitAsTicks, "count", Said(length.Ticks));
-
-            var seconds = (double)length.Ticks / Duration.PerSecond;
-            return seconds == 1 ? _texts.WaitAsSecond : Template.Fill(_texts.WaitAsSeconds, "count", Said(seconds));
         }
 
         static string Said(double number)
