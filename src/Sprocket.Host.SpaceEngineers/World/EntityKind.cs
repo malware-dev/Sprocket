@@ -127,10 +127,10 @@ namespace Sprocket.Host.SpaceEngineers.World
         public EntityKind WithChange(string id, string text, string value, Literal becomes)
         {
             var changed = FindAction(value, ReachKind.Value);
-            if (changed == null || changed.Being == null)
+            if (changed == null || changed.OwnValue == null)
                 throw new ArgumentException($"The signal {id} is a change in {value}, which is no value of Sprocket's own declared before it.");
 
-            var signal = new EntityEvent(id, changed.Being.Is(becomes), SignalEdge.Rising, text);
+            var signal = new EntityEvent(id, changed.OwnValue.Is(becomes), SignalEdge.Rising, text);
             signal.Changes(value, becomes);
             _events.Add(signal);
             _value = null;

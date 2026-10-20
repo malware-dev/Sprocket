@@ -70,11 +70,11 @@ public class SoundTests
         var speaker = ship.Speaker(1, "Speaker");
         var selected = ship.Entity(speaker.Id).Kind.FindAction(Blocks.Speaker.Selected, ReachKind.Value)!;
 
-        Assert.Equal(new[] { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" }, selected.Being!.Names);
-        Assert.False(selected.Being.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
+        Assert.Equal(new[] { "SoundBlockAlert1", "SoundBlockAlert2", "SoundBlockLightsOn" }, selected.OwnValue!.Names);
+        Assert.False(selected.OwnValue.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
 
         speaker.Selected = "SoundBlockAlert2";
-        Assert.True(selected.Being.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
+        Assert.True(selected.OwnValue.Is(Literal.Name("SoundBlockAlert2")).Holds(speaker.Block, null!));
         Assert.Equal(Literal.Of(1L), Ran.Read(ship, speaker, Blocks.Speaker.Selected));
     }
 

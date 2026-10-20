@@ -241,7 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var value = Valued(Vocabulary.ActionsOf(_editor.World, answer.Targets), id);
             var given = answer.Arguments;
             test.MemberId = id;
-            test.Provider = value != null && value.Being != null ? BlockKinds.Own : "";
+            test.Provider = value != null && value.OwnValue != null ? BlockKinds.Own : "";
             test.Relation = given != null && given.Count > 0 ? ComparisonQuestion.Read(given[0]) : Relation.Is;
             test.Value = stated ? Stated(state) : given != null && given.Count > 1 ? given[1] : Literal.Of(true);
             if (was == null || was.MemberId != test.MemberId || was.Provider != test.Provider)

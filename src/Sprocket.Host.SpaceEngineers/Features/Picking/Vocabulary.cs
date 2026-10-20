@@ -392,10 +392,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 if (value == null)
                     continue;
 
-                var being = value.Being;
-                var gauge = being == null
+                var own = value.OwnValue;
+                var gauge = own == null
                     ? entity.Gauge(value)
-                    : !being.Remembers && being.Missing(0) == null ? being.Gauge(entity.Block, NoArguments, null) : null;
+                    : !own.Remembers && own.Missing(0) == null ? own.Gauge(entity.Block, NoArguments, null) : null;
                 if (gauge != null)
                     return gauge.Read();
             }

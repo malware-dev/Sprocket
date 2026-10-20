@@ -66,7 +66,7 @@ public class SensingTests
     static Literal Read(GridEntity entity, string id)
     {
         var value = entity.Kind.FindAction(id, ReachKind.Value)!;
-        return value.Being.Gauge(entity.Block, new Literal[0], new ReaderMemory()).Read();
+        return value.OwnValue.Gauge(entity.Block, new Literal[0], new ReaderMemory()).Read();
     }
 
     /// <summary>
@@ -702,6 +702,6 @@ public class SensingTests
     static string Said(GridEntity entity, string id)
     {
         var value = entity.Kind.FindAction(id, ReachKind.Value)!;
-        return value.Being.Names[(int)Read(entity, id).Whole];
+        return value.OwnValue.Names[(int)Read(entity, id).Whole];
     }
 }

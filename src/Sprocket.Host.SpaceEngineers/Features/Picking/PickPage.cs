@@ -813,7 +813,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             foreach (var action in actions)
             {
-                if (action.Id == id && (action.Sets || action.Being != null))
+                if (action.Id == id && (action.Sets || action.OwnValue != null))
                     return action;
             }
 

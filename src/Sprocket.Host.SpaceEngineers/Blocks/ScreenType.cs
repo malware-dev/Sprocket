@@ -111,9 +111,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         }
 
         /// <summary>Adds a reading of one screen's setting, called <paramref name="said" />.</summary>
-        void Value(EntityKind kind, string said, OwnValue being)
+        void Value(EntityKind kind, string said, OwnValue own)
         {
-            kind.WithValue(said.Replace(' ', '-'), said, being).Looked(Unheard).In(Category.Screen).Of(this);
+            kind.WithValue(said.Replace(' ', '-'), said, own).Looked(Unheard).In(Category.Screen).Of(this);
         }
 
         /// <summary>The names of the block's screens, as the game names them, or numbered where it names none.</summary>

@@ -91,7 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     Arguments = shared.Arguments,
                     Bound = shared.Bound,
                     Order = entity.Prepare(action, shared.Bound, shared.Arguments),
-                    Kept = Kept(step, compiled.Acts.Count, action.Doing != null),
+                    Kept = Kept(step, compiled.Acts.Count, action.OwnAction != null),
                     Heard = action.ArrivalAnnounced && Listen(entity)
                 });
             }
@@ -220,7 +220,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             return new ActTarget
             {
                 Arguments = converted,
-                Bound = action.Doing?.Bind(action.Type == null ? converted : HostType.Arguments(facet, converted))
+                Bound = action.OwnAction?.Bind(action.Type == null ? converted : HostType.Arguments(facet, converted))
             };
         }
 

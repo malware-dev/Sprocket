@@ -62,7 +62,7 @@ public class ScreenBlockTests
         panel.App = "TSS_Weather";
 
         Assert.Equal("DOCKED", Ran.Read(ship, panel, TextPanel.Shown).Text);
-        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, ReachKind.Value)!.Being!;
+        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, ReachKind.Value)!.OwnValue!;
         Assert.Equal(new[] { "TSS_ClockAnalog", "TSS_Weather" }, app.Names);
         Assert.True(app.Is(Literal.Name("TSS_Weather")).Holds(panel.Block, null!));
     }

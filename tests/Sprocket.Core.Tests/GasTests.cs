@@ -327,8 +327,8 @@ public class GasTests
     static Literal Read(Rigged ship, Fitting fitting, string id)
     {
         var entity = ship.Entity(fitting.Id);
-        var being = entity.Kind.FindAction(id, ReachKind.Value)!.Being!;
-        return being.Gauge(entity.Block, new Literal[0], being.Remembers ? new ReaderMemory() : null).Read();
+        var own = entity.Kind.FindAction(id, ReachKind.Value)!.OwnValue!;
+        return own.Gauge(entity.Block, new Literal[0], own.Remembers ? new ReaderMemory() : null).Read();
     }
 
     /// <summary>How many frames after <paramref name="change" /> a trigger on <paramref name="fitting" /> switched the lamp on.</summary>

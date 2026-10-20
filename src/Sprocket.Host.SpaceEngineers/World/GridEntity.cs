@@ -167,8 +167,8 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public BlockOrder Prepare(EntityAction action, BoundAction bound, IList<Literal> arguments)
         {
-            if (action.Being != null)
-                return arguments == null || arguments.Count == 0 ? null : action.Being.Order(_block, arguments[0]);
+            if (action.OwnValue != null)
+                return arguments == null || arguments.Count == 0 ? null : action.OwnValue.Order(_block, arguments[0]);
 
             if (action.Form != ReachKind.Native)
                 return Toolbars.Prepare(_block, action.Id, action.Form, arguments, action.Primitives);
@@ -219,7 +219,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         BoundAction Bind(string actionId, IList<Literal> arguments)
         {
             var action = _kind.FindAction(actionId, ReachKind.Native);
-            return action == null || action.Doing == null ? null : action.Doing.Bind(arguments ?? new Literal[0]);
+            return action == null || action.OwnAction == null ? null : action.OwnAction.Bind(arguments ?? new Literal[0]);
         }
 
         void Perform(string actionId, IList<Literal> arguments, ReachKind form)
@@ -243,7 +243,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             if (entry == null)
                 return;
 
-            var bound = entry.Doing?.Bind(arguments ?? new Literal[0]);
+            var bound = entry.OwnAction?.Bind(arguments ?? new Literal[0]);
             if (bound != null && bound.Acts)
                 bound.Do(_block, new ReaderMemory());
             else if (entry.GameActionId != null)

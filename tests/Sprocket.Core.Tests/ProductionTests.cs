@@ -311,7 +311,7 @@ public class ProductionTests
                  })
         {
             var own = kind.FindAction(value, ReachKind.Value);
-            Assert.True(own?.Being != null, value);
+            Assert.True(own?.OwnValue != null, value);
             Assert.True(own.Announced || own.LookedBecause.Length > 0, value);
         }
 
@@ -343,7 +343,7 @@ public class ProductionTests
 
             foreach (var value in kind.Actions)
             {
-                if (value.Being != null && !value.Announced && value.RuledOutBy == null && value.LookedBecause.Length == 0)
+                if (value.OwnValue != null && !value.Announced && value.RuledOutBy == null && value.LookedBecause.Length == 0)
                     unsaid.Add(kind.Id + " " + value.Id);
             }
         }
@@ -434,7 +434,7 @@ public class ProductionTests
         assembler.Enabled = on;
 
         var value = ship.Rig.Entity(assembler.Id).Kind.FindAction("stuck", ReachKind.Value)!;
-        Assert.Equal(Literal.Of(stuck), value.Being.Gauge(assembler.Block, new Literal[0], null).Read());
+        Assert.Equal(Literal.Of(stuck), value.OwnValue.Gauge(assembler.Block, new Literal[0], null).Read());
     }
 
     /// <summary>How full an inventory is reads as a percentage, as fill does everywhere in the game's terminal.</summary>
@@ -446,7 +446,7 @@ public class ProductionTests
         assembler.InputFill = 0.4f;
 
         var fill = ship.Rig.Entity(assembler.Id).Kind.FindAction("input-fill", ReachKind.Value)!;
-        Assert.Equal(40.0, fill.Being.Gauge(assembler.Block, new Literal[0], null).Read().Real, 3);
+        Assert.Equal(40.0, fill.OwnValue.Gauge(assembler.Block, new Literal[0], null).Read().Real, 3);
     }
 
     // The amount of one item in a production block's inventory waits for after the beta, with the value it tests.
@@ -495,10 +495,10 @@ public class ProductionTests
         var drill = ship.Weld(new Bore(1, "Drill"));
         var mode = ship.Rig.Entity(drill.Id).Kind.FindAction("mode", ReachKind.Value)!;
 
-        Assert.Equal(new[] { "mining", "clearing-terrain" }, mode.Being.Names);
-        Assert.Equal(Literal.Of(0L), mode.Being.Gauge(drill.Block, new Literal[0], null).Read());
+        Assert.Equal(new[] { "mining", "clearing-terrain" }, mode.OwnValue.Names);
+        Assert.Equal(Literal.Of(0L), mode.OwnValue.Gauge(drill.Block, new Literal[0], null).Read());
         drill.Clearing = true;
-        Assert.Equal(Literal.Of(1L), mode.Being.Gauge(drill.Block, new Literal[0], null).Read());
+        Assert.Equal(Literal.Of(1L), mode.OwnValue.Gauge(drill.Block, new Literal[0], null).Read());
     }
 
     /// <summary>Who may use a store is offered with its toggle, in Sprocket's words; another block's toggle stays out of the list.</summary>

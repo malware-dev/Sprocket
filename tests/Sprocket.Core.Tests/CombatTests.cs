@@ -202,7 +202,7 @@ public class CombatTests
 
         var armed = kind.FindAction("armed", ReachKind.Value)!;
         Assert.True(armed.IsStatus);
-        Assert.NotNull(armed.Being);
+        Assert.NotNull(armed.OwnValue);
         Assert.True(kind.FindAction("Safety", ReachKind.Value)!.Hidden);
         Assert.Equal("arm", Listed(kind, "Safety_On").Text);
         Assert.Equal("disarm", Listed(kind, "Safety_Off").Text);

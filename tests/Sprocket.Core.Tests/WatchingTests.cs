@@ -39,7 +39,7 @@ public class WatchingTests
 
             foreach (var value in kind.Actions)
             {
-                if (value.Being != null && !value.Announced && value.RuledOutBy == null && value.LookedBecause.Length == 0)
+                if (value.OwnValue != null && !value.Announced && value.RuledOutBy == null && value.LookedBecause.Length == 0)
                     unsaid.Add(kind.Id + " " + value.Id);
             }
         }

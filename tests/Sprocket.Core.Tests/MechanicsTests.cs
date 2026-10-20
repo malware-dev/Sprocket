@@ -75,10 +75,10 @@ public class MechanicsTests
         public Literal Read(string member, Fitting block)
         {
             var kind = Rig.Entity(block.Id).Kind.FindAction(member, ReachKind.Value)!;
-            var operand = kind.Being!.Kind == ValueKind.Name ? Literal.Name(kind.Being.Names[0]) : Literal.Of(0.0);
-            if (kind.Being.Kind == ValueKind.Flag)
+            var operand = kind.OwnValue!.Kind == ValueKind.Name ? Literal.Name(kind.OwnValue.Names[0]) : Literal.Of(0.0);
+            if (kind.OwnValue.Kind == ValueKind.Flag)
                 operand = Literal.Of(true);
-            else if (kind.Being.Kind == ValueKind.Text)
+            else if (kind.OwnValue.Kind == ValueKind.Text)
                 operand = Literal.Of("");
 
             var probe = Probe.Of(Rig.Entity(block.Id), BlockKinds.Own, member, new Literal[0], Quantifier.Any, Relation.Is, operand)!;

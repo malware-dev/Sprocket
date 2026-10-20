@@ -119,7 +119,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     var actions = Vocabulary.ActionsOf(_editor.World, selection);
                     foreach (var action in actions)
                     {
-                        if (!action.IsStatus && (action.Being != null || (action.Sets && Lists(action))) && Number(action))
+                        if (!action.IsStatus && (action.OwnValue != null || (action.Sets && Lists(action))) && Number(action))
                             Read(action, Values);
                     }
                 }
@@ -169,7 +169,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 foreach (var one in actions)
                 {
-                    if (!one.IsStatus && (one.Being != null || (one.Sets && Lists(one))) && (int)one.Category == group
+                    if (!one.IsStatus && (one.OwnValue != null || (one.Sets && Lists(one))) && (int)one.Category == group
                         && (!sums || Number(one)))
                         Read(one, group);
                 }
@@ -294,7 +294,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Whether the view now showing lists <paramref name="one" />.</summary>
         bool Lists(EntityAction one)
         {
-            if (one.Being != null && !one.Sets)
+            if (one.OwnValue != null && !one.Sets)
                 return false;
 
             if (_editor.ShowsTerminal)

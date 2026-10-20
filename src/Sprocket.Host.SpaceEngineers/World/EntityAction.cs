@@ -106,15 +106,15 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// What this does as one of Sprocket's own, what it waits for and how it finishes; null for one of the game's own
         /// members, which the game performs.
         /// </summary>
-        public OwnAction Doing { get; private set; }
+        public OwnAction OwnAction { get; private set; }
 
         /// <summary>What it waits for, or null where it is done the moment it is told.</summary>
-        public Reading Until => Doing?.Until;
+        public Reading Until => OwnAction?.Until;
 
         /// <summary>Gives it what it does as one of Sprocket's own.</summary>
-        public EntityAction Performing(OwnAction doing)
+        public EntityAction Performing(OwnAction own)
         {
-            Doing = doing;
+            OwnAction = own;
             return this;
         }
 
@@ -129,11 +129,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string GamePropertyId { get; private set; }
 
         /// <summary>Whether this is a value a step can write, which a program says with <c>set</c>: one of the block's own, or of Sprocket's own that can be set.</summary>
-        public bool Sets => GamePropertyId != null || (Being != null && Being.Settable);
+        public bool Sets => GamePropertyId != null || (OwnValue != null && OwnValue.Settable);
 
         /// <summary>What this reads as one of Sprocket's own values, or null for anything else.</summary>
         /// <remarks>Written in a program qualified by its namespace.</remarks>
-        public OwnValue Being { get; private set; }
+        public OwnValue OwnValue { get; private set; }
 
         /// <summary>Whether the block says when this value of Sprocket's own may have changed, so it is looked at then rather than only on a cadence.</summary>
         public bool Announced { get; private set; }
@@ -145,7 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         public string LookedBecause { get; private set; } = "";
 
         /// <summary>Which of the three ways a step reaches this one.</summary>
-        public ReachKind Form => Sets || Being != null ? ReachKind.Value : Unaltered ? ReachKind.Action : ReachKind.Native;
+        public ReachKind Form => Sets || OwnValue != null ? ReachKind.Value : Unaltered ? ReachKind.Action : ReachKind.Native;
 
         /// <summary>Whether this stands as the game declared it, in the game's own words.</summary>
         public bool Unaltered { get; set; }
@@ -264,11 +264,11 @@ namespace Sprocket.Host.SpaceEngineers.World
             LookedBecause = reason;
         }
 
-        /// <summary>Makes this one of Sprocket's own values, read by <paramref name="being" /> and shown by <paramref name="field" />.</summary>
-        public EntityAction Reads(OwnValue being, Field field)
+        /// <summary>Makes this one of Sprocket's own values, read by <paramref name="own" /> and shown by <paramref name="field" />.</summary>
+        public EntityAction Reads(OwnValue own, Field field)
         {
-            Being = being;
-            _holds = being.Kind;
+            OwnValue = own;
+            _holds = own.Kind;
             _writes = field;
             Wants = 1;
             return this;
@@ -435,14 +435,14 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return false;
 
             Literal became;
-            if (GamePropertyId != null || Being != null)
+            if (GamePropertyId != null || OwnValue != null)
             {
                 for (var i = 0; i < given.Count; i++)
                 {
                     if (!given[i].Becomes(_holds, out became))
                         return false;
 
-                    if (_holds == ValueKind.Name && Being != null && Being.Position(became.Text) < 0)
+                    if (_holds == ValueKind.Name && OwnValue != null && OwnValue.Position(became.Text) < 0)
                         return false;
 
                     if (into != null)
@@ -509,7 +509,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var i = 0; i < actions.Count; i++)
             {
                 var action = actions[i];
-                if (action.Id == id && action.Form == ReachKind.Value && (action.Being != null) == own)
+                if (action.Id == id && action.Form == ReachKind.Value && (action.OwnValue != null) == own)
                     return action;
             }
 
@@ -644,7 +644,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
             }
 
-            if (GamePropertyId != null || Being != null)
+            if (GamePropertyId != null || OwnValue != null)
             {
                 into.Add(_writes);
                 return;

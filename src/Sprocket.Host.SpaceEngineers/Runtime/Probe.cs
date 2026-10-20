@@ -75,17 +75,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (written == null)
                 return null;
 
-            var being = written.Being;
-            if (being == null ? arguments.Count > 0 : being.Missing(arguments.Count) != null || being.Refused(arguments) != null)
+            var own = written.OwnValue;
+            if (own == null ? arguments.Count > 0 : own.Missing(arguments.Count) != null || own.Refused(arguments) != null)
                 return null;
 
             Literal operand;
             if (!written.Compares(value, out operand))
                 return null;
 
-            var kind = being?.Kind ?? ValueKind.Flag;
+            var kind = own?.Kind ?? ValueKind.Flag;
             Gauge gauge;
-            if (being == null)
+            if (own == null)
             {
                 gauge = entity.Gauge(written);
                 if (gauge == null)
@@ -96,10 +96,10 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             else
             {
                 var given = written.Type == null ? arguments : HostType.Arguments(facet, arguments);
-                gauge = being.Gauge(entity.Block, given, being.Remembers ? Remembered(kept, true, clock) : null);
+                gauge = own.Gauge(entity.Block, given, own.Remembers ? Remembered(kept, true, clock) : null);
                 if (kind == ValueKind.Name)
                 {
-                    var at = being.Position(operand.Text);
+                    var at = own.Position(operand.Text);
                     if (at < 0)
                         return null;
 
@@ -116,7 +116,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             if (totals)
                 operand = value;
 
-            return new Probe(entity, gauge, relation, operand, null, being == null ? null : written, kept, clock);
+            return new Probe(entity, gauge, relation, operand, null, own == null ? null : written, kept, clock);
         }
 
         /// <summary>

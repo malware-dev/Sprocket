@@ -56,6 +56,6 @@ static class Ran
     public static Literal Read(Rigged ship, Fitting fitting, string id, params Literal[] arguments)
     {
         var value = ship.Entity(fitting.Id).Kind.FindAction(id, ReachKind.Value)!;
-        return value.Being!.Gauge(fitting.Block, arguments, new ReaderMemory()).Read();
+        return value.OwnValue!.Gauge(fitting.Block, arguments, new ReaderMemory()).Read();
     }
 }

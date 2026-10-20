@@ -53,7 +53,7 @@ public class PowerTests
                  })
         {
             var value = kind.FindAction(id, ReachKind.Value)!;
-            Assert.NotNull(value.Being);
+            Assert.NotNull(value.OwnValue);
             Assert.False(value.Sets);
             Assert.Equal(Category.Power, value.Category);
         }
@@ -337,7 +337,7 @@ public class PowerTests
     static double Read(Rigged ship, Fitting fitting, string id)
     {
         var value = ship.Entity(fitting.Id).Kind.FindAction(id, ReachKind.Value)!;
-        return value.Being!.Gauge(fitting.Block, new Literal[0], new ReaderMemory()).Read().Number;
+        return value.OwnValue!.Gauge(fitting.Block, new Literal[0], new ReaderMemory()).Read().Number;
     }
 
     /// <summary>Runs a recharge given <paramref name="wait" /> on the battery, and counts the frames until the step after its await runs.</summary>

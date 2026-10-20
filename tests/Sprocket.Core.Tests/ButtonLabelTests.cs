@@ -33,7 +33,7 @@ public class ButtonLabelTests
         Ran.Step(ship, panel, ButtonPanel.Label, Literal.Of(5L), Literal.Of("Open"));
 
         Assert.DoesNotContain(ship.Rig.Log, line => line.StartsWith("Panel:label"));
-        var label = ship.Entity(panel.Id).Kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.Being!;
+        var label = ship.Entity(panel.Id).Kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.OwnValue!;
         Assert.Equal("button", label.Refused(new[] { Literal.Of(5L) }));
         Assert.Equal("button", label.Refused(new[] { Literal.Of(0L) }));
         Assert.Null(label.Refused(new[] { Literal.Of(4L) }));
@@ -60,10 +60,10 @@ public class ButtonLabelTests
         var ship = new Rigged();
         var kind = ship.Entity(ship.Panel(1, "Panel", 4).Id).Kind;
 
-        var label = Assert.Single(kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.Being!.Parameters);
+        var label = Assert.Single(kind.FindAction(ButtonPanel.LabelOf, ReachKind.Value)!.OwnValue!.Parameters);
         Assert.Equal("button", label.Name);
         Assert.Equal("4", label.Most);
-        Assert.Single(kind.FindAction(ButtonPanel.Assigned, ReachKind.Value)!.Being!.Parameters);
+        Assert.Single(kind.FindAction(ButtonPanel.Assigned, ReachKind.Value)!.OwnValue!.Parameters);
     }
 
     /// <summary>

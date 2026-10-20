@@ -469,7 +469,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     {
                         GridEntity entity = bindings.Entity(source);
                         var value = entity == null ? null : test.Names(entity.Kind.Actions);
-                        var left = value == null || value.Being == null ? null : value.Being.Missing(test.Arguments.Count);
+                        var left = value == null || value.OwnValue == null ? null : value.OwnValue.Missing(test.Arguments.Count);
                         if (left != null)
                             return new SequenceFault(SequenceProblem.Unfilled, i, BlockTrouble.None, left);
                     }
@@ -556,7 +556,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                 if (value != null && !value.Takes(compared))
                     return false;
 
-                if (value != null && value.Being != null && value.Being.Refused(test.Arguments) != null)
+                if (value != null && value.OwnValue != null && value.OwnValue.Refused(test.Arguments) != null)
                     return false;
 
                 var offered = value != null;
