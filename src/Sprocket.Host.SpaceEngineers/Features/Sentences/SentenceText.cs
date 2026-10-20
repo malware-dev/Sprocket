@@ -405,15 +405,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
         /// <summary>
         /// Names a selection as one piece a block, each with its icon, in the order <see cref="Entities(GridWorld, IList{long}, bool, List{Mention})" />
-        /// names them: all of them where there are no more than <paramref name="most" />, and otherwise all but one of that many and
-        /// a last piece saying how many more, joined as a sentence joins them.
+        /// names them: all of them where there are no more than <paramref name="most" />, and otherwise all but one of that many;
+        /// answers how many it left out, for a last line the caller words.
         /// </summary>
-        public static void Listed(GridWorld world, IList<long> entityIds, bool requiresAll, int most, List<Mention> into)
+        public static int Listed(GridWorld world, IList<long> entityIds, int most, List<Mention> into)
         {
             if (entityIds.Count == 0)
             {
                 into.Add(new Mention(Empty, null));
-                return;
+                return 0;
             }
 
             var named = entityIds.Count > most ? most - 1 : entityIds.Count;
@@ -425,8 +425,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 into.Add(entity == null ? new Mention(Missing, null) : new Mention(entity.Name, entity.Kind.Icon));
             }
 
-            if (named < entityIds.Count)
-                into.Add(new Mention($"{(requiresAll ? "and" : "or")} {entityIds.Count - named} more", null));
+            return entityIds.Count - named;
         }
 
         /// <summary>

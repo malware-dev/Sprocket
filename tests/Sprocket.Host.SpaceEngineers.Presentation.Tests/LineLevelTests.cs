@@ -53,7 +53,7 @@ public class LineLevelTests
     [InlineData(NoticeLevel.Info)]
     public void ASlotLineSaysEachLevel(NoticeLevel level)
     {
-        var row = new PartRow { Problem = Said, Level = level };
+        var row = new PartRow(new Localization.Texts()) { Problem = Said, Level = level };
 
         Assert.Equal(Ink(level, Palette.Faint), Words(row).Color);
     }

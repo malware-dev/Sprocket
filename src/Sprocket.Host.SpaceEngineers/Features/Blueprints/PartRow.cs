@@ -1,14 +1,17 @@
 using System.Collections.Generic;
+using System.Globalization;
 using Lumel;
 using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Layout;
+using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
 using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
@@ -22,14 +25,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly List<Mention> _pieces = new List<Mention>();
         readonly List<Mention> _signalPieces = new List<Mention>();
         readonly HashSet<string> _said = new HashSet<string>();
+        readonly Texts _texts;
 
         float _wide = PartList.Widest;
         string _opensAbout;
         NoticeLevel _level = NoticeLevel.Problem;
 
-        /// <summary>A slot saying nothing yet.</summary>
-        public PartRow()
+        /// <summary>A slot saying nothing yet, its words in <paramref name="texts" />.</summary>
+        public PartRow(Texts texts)
         {
+            _texts = texts;
             Blocks = new List<long>();
             Signals = new List<EntityEvent>();
             CreateView();
@@ -211,7 +216,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public void Show(GridWorld world)
         {
             _pieces.Clear();
-            SentenceText.Listed(world, Blocks, Signals.Count == 0, MostListed, _pieces);
+            var more = SentenceText.Listed(world, Blocks, MostListed, _pieces);
+            if (more > 0)
+            {
+                var words = Signals.Count == 0 ? _texts.SlotAndMore : _texts.SlotOrMore;
+                _pieces.Add(new Mention(Template.Fill(words, "count", more.ToString(CultureInfo.InvariantCulture)), null));
+            }
+
             _blocks.Say(_pieces);
             _blocks.IsEmpty = Blocks.Count == 0;
 

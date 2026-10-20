@@ -213,7 +213,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Keeps the rows by slot, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _partRows = new KeyedChildren<Part, PartRow>(_partList.Children, delegate { return new PartRow(); });
+            _partRows = new KeyedChildren<Part, PartRow>(_partList.Children, delegate { return new PartRow(Editor.Texts); });
             Show();
         }
 

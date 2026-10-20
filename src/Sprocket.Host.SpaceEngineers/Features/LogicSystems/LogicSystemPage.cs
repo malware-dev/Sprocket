@@ -259,7 +259,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             _triggerRows = new KeyedChildren<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
             _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
-            _slotRows = new KeyedChildren<Part, PartRow>(_slotList.Children, delegate { return new PartRow(); });
+            _slotRows = new KeyedChildren<Part, PartRow>(_slotList.Children, delegate { return new PartRow(Editor.Texts); });
 
             int shown;
             if (Editor.Habits.Tabs.TryGetValue(_system.Id, out shown))

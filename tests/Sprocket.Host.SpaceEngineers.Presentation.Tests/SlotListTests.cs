@@ -131,4 +131,15 @@ public class SlotListTests
         Assert.Null(still.Command);
         Assert.Same(Styles.SlotNameStill, still.Style);
     }
+
+    /// <summary>The line saying how many more there are is said in the player's language.</summary>
+    [Fact]
+    public void HowManyMoreIsSaidInThePlayersLanguage()
+    {
+        var screen = WithLamps(PartRow.MostListed + 4);
+        screen.Scene.Speak("no");
+        screen.Run(2);
+
+        Assert.Equal("og 5 til", Lines(screen).Last());
+    }
 }

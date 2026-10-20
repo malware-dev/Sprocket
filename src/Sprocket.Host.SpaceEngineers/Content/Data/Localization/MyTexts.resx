@@ -236,6 +236,14 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Name this slot and say what it is for.</value>
     <comment>Tooltip on a slot's name in the slots list on a logic system's screen, while the logic system can be changed. Pressing the name opens the slot's page, where it is named and described.</comment>
   </data>
+  <data name="Sprocket.Slot.AndMore" xml:space="preserve">
+    <value>and {count} more</value>
+    <comment>The last line of a slot's blocks on an installation panel, where the slot holds more blocks than its lines show, every one of them taking part. {count} is how many more there are, never less than two.</comment>
+  </data>
+  <data name="Sprocket.Slot.OrMore" xml:space="preserve">
+    <value>or {count} more</value>
+    <comment>The last line of a signal slot's blocks on an installation panel, where the slot holds more blocks than its lines show, any one of them starting it. {count} is how many more there are, never less than two.</comment>
+  </data>
   <data name="Sprocket.Slot.SetAsideNote" xml:space="preserve">
     <value>Set aside</value>
     <comment>In the picker, under a block's name in place of its kind, for a block listed first because the installation had it for a slot that was since split or merged.</comment>

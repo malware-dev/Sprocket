@@ -180,6 +180,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
     <value>Gi plassen et navn, og si hva den er til.</value>
   </data>
+  <data name="Sprocket.Slot.AndMore" xml:space="preserve">
+    <value>og {count} til</value>
+  </data>
+  <data name="Sprocket.Slot.OrMore" xml:space="preserve">
+    <value>eller {count} til</value>
+  </data>
   <data name="Sprocket.Slot.SetAsideNote" xml:space="preserve">
     <value>Lagt til side</value>
   </data>
