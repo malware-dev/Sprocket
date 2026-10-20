@@ -275,13 +275,15 @@ namespace Sprocket.Sim
                 if (admin)
                     from += 1;
 
-                // Blocks welded onto the demo ship before the script starts, a kind and a name each: with panel "Hangar Button".
+                // Blocks welded onto the demo ship before the script starts, a kind and a name each, on a rotor's head where
+                // one is named: with rotor "Arm Rotor" with light "Arm Light" on "Arm Rotor".
                 Rig with = null;
                 for (var id = 900L; args.Length > from + 2 && args[from] == "with"; id++)
                 {
                     with = with ?? Rig.Demo();
-                    Weld(with, id, args[from + 1], args[from + 2]);
-                    from += 3;
+                    var on = args.Length > from + 4 && args[from + 3] == "on" ? args[from + 4] : null;
+                    Weld(with, id, args[from + 1], args[from + 2], on);
+                    from += on == null ? 3 : 5;
                 }
 
                 if (with != null && holding != null)
@@ -381,18 +383,36 @@ namespace Sprocket.Sim
                 : (Lumel.Text.Alignment)Enum.Parse(typeof(Lumel.Text.Alignment), given.Substring(6), true);
         }
 
-        /// <summary>Welds a block of <paramref name="kind" />, a panel, a light or a door, onto <paramref name="rig" /> as <paramref name="id" />, named <paramref name="name" />.</summary>
-        /// <exception cref="ArgumentException">The kind is none of the three.</exception>
-        static void Weld(Rig rig, long id, string kind, string name)
+        /// <summary>
+        /// Welds a block of <paramref name="kind" />, a panel, a light, a door or a rotor, onto <paramref name="rig" /> as
+        /// <paramref name="id" />, named <paramref name="name" />, on the head of the rotor named <paramref name="on" />, or on
+        /// the ship itself for null.
+        /// </summary>
+        /// <exception cref="ArgumentException">The kind is none of the four, or no rotor is named <paramref name="on" />.</exception>
+        static void Weld(Rig rig, long id, string kind, string name, string on)
         {
-            if (kind == "panel")
+            if (on != null)
+            {
+                var rotor = rig.Fitted.OfType<Rotor>().FirstOrDefault(fitting => fitting.Name == on);
+                if (rotor == null)
+                    throw new ArgumentException($"--shot has no rotor called '{on}' to weld '{name}' on.");
+
+                rig.OnHeadOf(rotor);
+                Weld(rig, id, kind, name, null);
+                rig.OnBase();
+                return;
+            }
+
+            if (kind == "rotor")
+                rig.Rotor(id, name);
+            else if (kind == "panel")
                 rig.Panel(id, name);
             else if (kind == "light")
                 rig.Light(id, name);
             else if (kind == "door")
                 rig.Door(id, name);
             else
-                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light or a door.");
+                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light, a door or a rotor.");
         }
 
         /// <summary>Whether a word begins a script step rather than naming a file.</summary>

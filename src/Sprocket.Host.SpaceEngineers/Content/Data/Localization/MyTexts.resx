@@ -606,6 +606,10 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Leave it alone</value>
     <comment>Answer that changes nothing, in several question dialogs: when a picked button is already in use, when deleting an if or a branch of one on a sequence's screen, and before removing every logic system from the Paused screen. It is the answer Enter takes.</comment>
   </data>
+  <data name="Sprocket.Pick.OnGrid" xml:space="preserve">
+    <value>{kind} on {grid}</value>
+    <comment>Under a block's name in the picker's list of blocks, for a block on a grid of the construct other than the one the programmable block is on, such as a rotor's head. {kind} is the kind of block, such as "Interior Light"; {grid} is the name the grid has in the game.</comment>
+  </data>
   <data name="Sprocket.Pick.Search" xml:space="preserve">
     <value>Search</value>
     <comment>Hint in a search box that narrows a list by typing: in the picker's columns, in the picker's list of kinds of block, and in the library.</comment>

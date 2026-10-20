@@ -878,7 +878,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 string note;
                 row.Text = entity.Name;
-                row.Secondary = _listing.Ahead.TryGetValue(entity.Id, out note) ? note : entity.Kind.DisplayName;
+                row.Secondary = _listing.Ahead.TryGetValue(entity.Id, out note) ? note : Kind(entity);
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;
@@ -887,6 +887,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _blocks.ShowEmpty();
+        }
+
+        /// <summary>The kind of <paramref name="entity" />, and the grid it is on where that is not the programmable block's own.</summary>
+        string Kind(GridEntity entity)
+        {
+            var home = Editor.World.Grid;
+            var grid = entity.Block.CubeGrid;
+            if (home == null || grid == null || grid == home)
+                return entity.Kind.DisplayName;
+
+            return Template.Fill(Template.Fill(Editor.Texts.PickOnGrid, "kind", entity.Kind.DisplayName), "grid", grid.CustomName);
         }
 
         void FillFilters()

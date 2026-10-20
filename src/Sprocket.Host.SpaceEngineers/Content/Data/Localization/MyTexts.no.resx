@@ -463,6 +463,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>La den være</value>
   </data>
 
+  <data name="Sprocket.Pick.OnGrid" xml:space="preserve">
+    <value>{kind} på {grid}</value>
+  </data>
   <data name="Sprocket.Pick.Search" xml:space="preserve">
     <value>Søk</value>
   </data>
