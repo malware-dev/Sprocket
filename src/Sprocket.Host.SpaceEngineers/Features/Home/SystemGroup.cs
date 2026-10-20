@@ -7,6 +7,7 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -34,6 +35,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly ICommand _chooses;
 
         bool _waiting;
+        string _installationsWord = "";
+        bool _linksTerm = true;
 
         /// <summary>The group of <paramref name="system" /> on <paramref name="page" />, pressing through <paramref name="editor" />.</summary>
         public SystemGroup(SprocketEditor editor, HomePage page, AutomationSystem system)
@@ -123,9 +126,48 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Locked = only ? texts.SystemsKeepsOne : "";
             }
 
-            _installations.Markdown = Terms.Link(texts.SystemsInstallations.ToUpperInvariant(), Terms.Installation);
+            _installationsWord = texts.SystemsInstallations.ToUpperInvariant();
+            HeadInstallations();
             _another.Text = StatusRow.Plus + texts.SystemsAddAnother;
             _another.Tip = Tip.For(_another.Tip, texts.SystemsAddAnotherAbout, _named);
+        }
+
+        /// <summary>Whether the heading over the installations links to the codex's page on them: only the first shown on the screen does, as a page links a term once.</summary>
+        public bool LinksTerm
+        {
+            get { return _linksTerm; }
+            set
+            {
+                if (_linksTerm == value)
+                    return;
+
+                _linksTerm = value;
+                HeadInstallations();
+            }
+        }
+
+        /// <summary>Gives the heading over the installations its words, a link to the codex where <see cref="LinksTerm" /> says so.</summary>
+        void HeadInstallations()
+        {
+            _installations.Markdown = _linksTerm ? Terms.Link(_installationsWord, Terms.Installation) : Markdown.Escape(_installationsWord);
+        }
+
+        /// <summary>
+        /// Shows the group where the logic system's name or an installation's holds <paramref name="words" />, as every search box
+        /// matches them: every installation where the logic system's name does, and otherwise only those whose own names do.
+        /// </summary>
+        public void Narrow(string words)
+        {
+            var named = EntityQuery.MatchesText(_system.Name, words);
+            var any = false;
+            foreach (var instance in _system.Instances)
+            {
+                var row = _rows[instance];
+                row.IsVisible = named || EntityQuery.MatchesText(row.Summary, words);
+                any |= row.IsVisible;
+            }
+
+            IsVisible = named || any;
         }
 
         /// <summary>Brings each row up to what its installation is doing now, and the heading up to the loudest of them.</summary>

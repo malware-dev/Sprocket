@@ -21,7 +21,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         readonly List<AutomationSystem> _systems = new List<AutomationSystem>();
         readonly List<string> _used = new List<string>();
 
+        /// <summary>How wide the search box is, at the right end of the heading.</summary>
+        const float SearchWide = 320f;
+
         int _shape;
+
+        string _searched = "";
 
         KeyedChildren<AutomationSystem, SystemGroup> _groups;
 
@@ -29,6 +34,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
         public HomePage(SprocketEditor editor) : base(editor)
         {
         }
+
+        /// <summary>The box the logic systems and installations are searched in, where the view has been made.</summary>
+        public TextBox SearchBox => _search;
 
         /// <summary>
         /// What the construct is called, with what this screen is about led in front of it.
@@ -240,6 +248,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _new.Command = Editor.Act(CommandKind.NewSystem, Make);
             _groups = new KeyedChildren<AutomationSystem, SystemGroup>(_list.Children, system => new SystemGroup(Editor, this, system));
             Editor.Codex.Wire(_heading, Editor.OpenCodex);
+            _search.Text = _searched;
+            _search.Edited += delegate
+            {
+                _searched = _search.Text;
+                Narrow();
+            };
 
             Show(true);
         }
@@ -274,9 +288,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
             _heading.Markdown = Terms.Link(texts.SystemsHeading.ToUpperInvariant(), Terms.LogicSystem);
             _empty.IsVisible = _systems.Count == 0;
             _empty.Text = texts.SystemsEmpty;
+            _search.Hint = texts.PickSearch;
+            // The search, and the room under it, only where there is something to search.
+            _search.IsVisible = _systems.Count != 0;
+            _headingLine.Padding = new Thickness(0f, 0f, 0f, _search.IsVisible ? 16f : 0f);
 
             foreach (var system in _systems)
                 _groups[system].Arrange(texts);
+
+            Narrow();
+        }
+
+        /// <summary>Shows only the logic systems and installations whose name holds the words typed in the search box, as every search box matches them, the first group shown linking its heading to the codex.</summary>
+        void Narrow()
+        {
+            var linked = false;
+            foreach (var system in _systems)
+            {
+                var group = _groups[system];
+                group.Narrow(_searched);
+                group.LinksTerm = group.IsVisible && !linked;
+                linked |= group.IsVisible;
+            }
         }
 
         /// <summary>Makes a logic system, numbered, with its first installation, and opens it with its name in hand to be given.</summary>

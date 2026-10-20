@@ -26,7 +26,7 @@ Unfortunately the mod API prevents actual direct sharing through, say, the works
 
 ## Getting Started
 
-Find any programmable block in the terminal and press `Automation`. That opens the home screen of its construct, where every logic system on it is listed. From there, the [simple airlock](simple-airlock) takes you through your first one, step by step.
+Find any programmable block in the terminal and press `Automation`. That opens the home screen of its construct, where every logic system on it is listed, with a search box that narrows the list to the logic systems and installations whose names hold what you type. From there, the [simple airlock](simple-airlock) takes you through your first one, step by step.
 
 ## Recommended Reading
 

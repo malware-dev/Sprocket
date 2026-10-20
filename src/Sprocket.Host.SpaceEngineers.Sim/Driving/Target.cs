@@ -153,6 +153,9 @@ namespace Sprocket.Sim.Driving
         /// <summary>Types <paramref name="words" /> over whatever is in the library's search box, as a keyboard would.</summary>
         public static void Search(this LibraryPage page, string words) => Retype(page.SearchBox, words);
 
+        /// <summary>Types <paramref name="words" /> over whatever is in the home screen's search box, as a keyboard would.</summary>
+        public static void Search(this HomePage page, string words) => Retype(page.SearchBox, words);
+
         /// <summary>Types <paramref name="words" /> over whatever is in the box that narrows a column's kinds, as a keyboard would.</summary>
         public static void SearchKinds(this StageColumn column, string words) => Retype(column.KindNarrow, words);
 
