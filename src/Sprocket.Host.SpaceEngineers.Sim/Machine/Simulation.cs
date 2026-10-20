@@ -49,7 +49,6 @@ public sealed class Simulation
 
     readonly Memories _memories = new Memories(new ProtoBinary());
 
-    readonly Preferences _preferences;
 
     readonly LibraryShelf _shelf;
 
@@ -110,8 +109,6 @@ public sealed class Simulation
         _shelf = new LibraryShelf(_folder, delegate { });
         _backups = new Backups(_worldFolder);
         _backups.Read();
-        _preferences = new Preferences(_folder, delegate { });
-        _preferences.Read();
         _saidBefore = GameLog.Lines.Count;
         _texts.Book.Pages = new CodexFiles(CodexFiles.Beside, "");
 
@@ -160,7 +157,6 @@ public sealed class Simulation
     {
         unit.Showing = true;
         unit.Shelf = _shelf;
-        unit.Preferences = _preferences;
         unit.Viewer = _memories.Player(Viewer);
         unit.Administers = () => Admin;
         unit.WorldSettings = () => _settings;
@@ -215,9 +211,6 @@ public sealed class Simulation
 
     /// <summary>The world's backups, which the library lists.</summary>
     public Backups Backups => _backups;
-
-    /// <summary>How the player likes the screens to look, kept in <see cref="Folder" /> as the game keeps it.</summary>
-    public Preferences Preferences => _preferences;
 
     /// <summary>The player's library, kept in memory for as long as the harness runs.</summary>
     public LibraryShelf Shelf => _shelf;

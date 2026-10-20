@@ -87,7 +87,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         ListField _reads;
         ICommand _clearKind;
         ICommand _toggleHidden;
-        bool _showsHidden;
         ICommand _organized;
         ICommand _terminal;
         ICommand _finish;
@@ -313,16 +312,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Whether the blocks hidden from toolbars are listed: the eye open.</summary>
-        /// <remarks>The player's own, the same in every picker, where the machine keeps preferences; this picker's alone where it does not.</remarks>
+        /// <remarks>The player's own setting in this world, the same in every picker.</remarks>
         bool ShowsHidden
         {
-            get { return Editor.Preferences?.ShowsHidden ?? _showsHidden; }
+            get { return Editor.Viewer.ShowsHidden; }
             set
             {
-                if (Editor.Preferences != null)
-                    Editor.Preferences.ShowsHidden = value;
-                else
-                    _showsHidden = value;
+                if (Editor.Viewer.ShowsHidden == value)
+                    return;
+
+                Editor.Viewer.ShowsHidden = value;
+                if (Editor.Preferred != null)
+                    Editor.Preferred();
             }
         }
 
@@ -770,7 +771,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             var made = _strip.Arguments == null;
-            var arguments = _strip.Restate(shown, Chosen(), fields, Filled, colors);
+            var arguments = _strip.Restate(shown, Chosen(), fields, Filled, new ColorOffer(colors, Editor.Viewer, Editor.Preferred));
             if (_offering)
                 arguments.Form.Offer();
             if (made)

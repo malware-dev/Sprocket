@@ -28,6 +28,15 @@ namespace Sprocket.Host.SpaceEngineers.Network
         /// <summary>Whether the one who asked gives lengths of time in ticks, by their settings in this world.</summary>
         public bool Ticks;
 
+        /// <summary>Which way the one who asked gives a color, as the place of its tab, by their settings in this world.</summary>
+        public int ColorTab;
+
+        /// <summary>Whether the pickers of the one who asked list the blocks hidden from toolbars, by their settings in this world.</summary>
+        public bool ShowsHidden;
+
+        /// <summary>The colors the one who asked last chose, as their codes separated by spaces, by their settings in this world.</summary>
+        public string RecentColors;
+
         /// <summary>The settings the server runs the world by, written as one text, which the client takes as its own.</summary>
         public string Settings;
 
@@ -35,7 +44,8 @@ namespace Sprocket.Host.SpaceEngineers.Network
         public static int SizeOf(ref EditGrant grant)
         {
             return sizeof(long) + sizeof(int) + ByteCodec.SizeOfString(grant.Holder)
-                + ByteCodec.SizeOfString(grant.Program) + ByteCodec.SizeOfString(grant.State) + ByteCodec.SizeOfString(grant.Settings);
+                + ByteCodec.SizeOfString(grant.Program) + ByteCodec.SizeOfString(grant.State) + ByteCodec.SizeOfString(grant.Settings)
+                + ByteCodec.SizeOfString(grant.RecentColors);
         }
 
         /// <summary>Writes <paramref name="grant" /> at <paramref name="offset" />, and answers how many bytes it took.</summary>
@@ -43,11 +53,12 @@ namespace Sprocket.Host.SpaceEngineers.Network
         {
             var start = offset;
             ByteCodec.Write(grant.Block, data, ref offset);
-            ByteCodec.Write((grant.Given ? 1 : 0) | (grant.Foreign ? 2 : 0) | (grant.Ticks ? 4 : 0), data, ref offset);
+            ByteCodec.Write((grant.Given ? 1 : 0) | (grant.Foreign ? 2 : 0) | (grant.Ticks ? 4 : 0) | (grant.ShowsHidden ? 16 : 0) | ((grant.ColorTab & 0xFF) << 8), data, ref offset);
             ByteCodec.WriteString(grant.Holder, data, ref offset);
             ByteCodec.WriteString(grant.Program, data, ref offset);
             ByteCodec.WriteString(grant.State, data, ref offset);
             ByteCodec.WriteString(grant.Settings, data, ref offset);
+            ByteCodec.WriteString(grant.RecentColors, data, ref offset);
             return offset - start;
         }
 
@@ -63,11 +74,14 @@ namespace Sprocket.Host.SpaceEngineers.Network
             grant.Given = (given & 1) != 0;
             grant.Foreign = (given & 2) != 0;
             grant.Ticks = (given & 4) != 0;
+            grant.ColorTab = (given >> 8) & 0xFF;
+            grant.ShowsHidden = (given & 16) != 0;
 
             ByteCodec.TryReadString(data, ref offset, out grant.Holder);
             ByteCodec.TryReadString(data, ref offset, out grant.Program);
             ByteCodec.TryReadString(data, ref offset, out grant.State);
             ByteCodec.TryReadString(data, ref offset, out grant.Settings);
+            ByteCodec.TryReadString(data, ref offset, out grant.RecentColors);
             return offset - start;
         }
     }

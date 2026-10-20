@@ -138,7 +138,7 @@ public class FieldTests
     public void AValueWithNoNameIsRefusedByItsNumber()
     {
         var form = new FieldSet();
-        form.Show(new[] { Field.Unnamed(), Field.Between("", "0", "255") }, new string[0], new Hsv[0], new Texts());
+        form.Show(new[] { Field.Unnamed(), Field.Between("", "0", "255") }, new string[0], new ColorOffer(new Hsv[0], null, null), new Texts());
 
         form.Fields[1].Text = "900";
         form.Judge();
@@ -153,7 +153,7 @@ public class FieldTests
         var about = Field.Among("when stuck", new[] { "move on", "hold" }, new[] { "1", "0" });
         about.About = "**Hold** waits.";
         var form = new FieldSet();
-        form.Show(new[] { about, Field.Called("speed") }, new string[0], new Hsv[0], new Texts());
+        form.Show(new[] { about, Field.Called("speed") }, new string[0], new ColorOffer(new Hsv[0], null, null), new Texts());
 
         Assert.NotNull(((Element)form.Fields[0]).Tip);
         Assert.Null(((Element)form.Fields[1]).Tip);
@@ -168,7 +168,7 @@ public class FieldTests
         flag.Edits = FieldEditor.Chosen;
         var named = Field.Among("mode", new[] { "Keep the current direction", "Turn round at the end" }, new[] { "0", "1" });
         var form = new FieldSet();
-        form.Show(new[] { flag, named }, new string[0], new Hsv[0], new Texts());
+        form.Show(new[] { flag, named }, new string[0], new ColorOffer(new Hsv[0], null, null), new Texts());
 
         Assert.IsType<SwitchField>(form.Fields[0]);
         Assert.IsType<WordsField>(form.Fields[1]);
@@ -181,7 +181,7 @@ public class FieldTests
         var flag = Field.OneOf("keep aspect ratio", Literal.Of(true).Said, Literal.Of(false).Said);
         flag.Edits = FieldEditor.Chosen;
         var form = new FieldSet();
-        form.Show(new[] { flag }, new string[0], new Hsv[0], new Texts());
+        form.Show(new[] { flag }, new string[0], new ColorOffer(new Hsv[0], null, null), new Texts());
         var finished = 0;
         form.Submitted += () => finished++;
         var flip = form.Within().OfType<Lumel.Controls.Switch>().Single();
@@ -215,7 +215,7 @@ public class FieldTests
             Field.Between("Red", "0", "255"),
             Field.Between("Green", "0", "255"),
             Field.Between("Blue", "0", "255")
-        }, new string[0], new Hsv[0], new Texts());
+        }, new string[0], new ColorOffer(new Hsv[0], null, null), new Texts());
 
         return form;
     }

@@ -491,7 +491,7 @@ public class HandoverTests : IDisposable
             .Done();
         try
         {
-            _wire.As(anna, () => annas.Prefer(true));
+            _wire.As(anna, () => annas.Prefer(new PlayerMemory { Ticks = true }));
             _wire.Settle();
         }
         finally
@@ -501,6 +501,40 @@ public class HandoverTests : IDisposable
 
         Assert.True(_atServer.Player(Anna).Ticks);
         Assert.False(_atServer.Player(Bert).Ticks);
+    }
+
+    /// <summary>The colors a client's player chooses travel with their other settings: kept by the server, and lent back with a Sprocket.</summary>
+    [Fact]
+    public void AClientsColorsAreKeptOnTheServerAndLentBack()
+    {
+        var anna = _wire.Client("Anna");
+        var heard = new Heard();
+        var annas = Client(anna, heard);
+        var mine = new PlayerMemory { ColorTab = 2 };
+        mine.RecentColors.Add("#FF8800");
+        mine.RecentColors.Add("#20C0FF");
+        MyAPIGateway.Players = Pretend.To<IMyPlayerCollection>()
+            .Does("TryGetIdentityId", _ => Anna)
+            .Done();
+        try
+        {
+            _wire.As(anna, () => annas.Prefer(mine));
+            _wire.Settle();
+            Assert.Equal(2, _atServer.Player(Anna).ColorTab);
+            Assert.Equal(new[] { "#FF8800", "#20C0FF" }, _atServer.Player(Anna).RecentColors.ToArray());
+            Assert.Empty(_atServer.Player(Bert).RecentColors);
+
+            _wire.As(anna, () => annas.Ask(_block, "Anna"));
+            _wire.Settle();
+        }
+        finally
+        {
+            MyAPIGateway.Players = null;
+        }
+
+        var lent = Assert.Single(heard.Players.Values);
+        Assert.Equal(2, lent.ColorTab);
+        Assert.Equal(new[] { "#FF8800", "#20C0FF" }, lent.RecentColors.ToArray());
     }
 
     [Fact]

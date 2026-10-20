@@ -918,6 +918,22 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>Brightness</value>
     <comment>Tooltip on the V slider of the color picker in the picker's values column.</comment>
   </data>
+  <data name="Sprocket.Color.Red" xml:space="preserve">
+    <value>Red</value>
+    <comment>Tooltip on the R slider of the color picker's RGB tab in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Green" xml:space="preserve">
+    <value>Green</value>
+    <comment>Tooltip on the G slider of the color picker's RGB tab in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.Blue" xml:space="preserve">
+    <value>Blue</value>
+    <comment>Tooltip on the B slider of the color picker's RGB tab in the picker's values column.</comment>
+  </data>
+  <data name="Sprocket.Color.PlaneAbout" xml:space="preserve">
+    <value>Saturation across, brightness up.</value>
+    <comment>Tooltip on the square of the color picker where saturation and brightness are chosen together.</comment>
+  </data>
   <data name="Sprocket.Color.CodeAbout" xml:space="preserve">
     <value>Enter a color as #RRGGBB, or #RRGGBBAA to include its opacity.</value>
     <comment>Tooltip on the box under the sliders of the color picker, in the picker's values column, where a color code is typed.</comment>

@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
-using Lumel.Text;
 using Lumel.Windows;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
@@ -12,31 +11,60 @@ using VRageMath;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Fields
 {
-    /// <summary>A color on one line: a swatch of it and its code, the picker hanging open under it when pressed.</summary>
+    /// <summary>A color on one line, shown as the color itself, the picker hanging open under it when pressed.</summary>
+    /// <remarks>
+    /// As wide whatever the color, so the line never changes width. The picker gives the field its color when Done is pressed
+    /// in it, or Enter; put away any other way, it gives nothing, and the field goes on showing the color it held.
+    /// </remarks>
     public class ColorField : HStack, IField
     {
+        /// <summary>How wide the color is shown.</summary>
+        const float SwatchWide = 96f;
+
         readonly ColorPicker _picker;
         readonly Swatch _swatch;
-        readonly Label _code;
         readonly Popup _popup;
+        string _text = "";
 
-        /// <summary>A field holding no color, its picker offering the player's <paramref name="colors" />, Enter in it carrying out <paramref name="submit" />, its notes in <paramref name="texts" />.</summary>
-        public ColorField(IList<Hsv> colors, ICommand submit, Texts texts)
+        /// <summary>A field holding no color, its picker offering what <paramref name="offer" /> holds, its notes in <paramref name="texts" />.</summary>
+        public ColorField(ColorOffer offer, Texts texts)
         {
             Spacing = 8f;
             Style = Styles.ListLine;
             Focusable = true;
 
-            _picker = new ColorPicker(colors, submit, texts) { Placement = FixedSize.Wide(420f) };
-            _picker.Edited += Changed;
+            var done = new Relay(Done);
+            _picker = new ColorPicker(offer, done, texts) { Placement = FixedSize.Wide(ColorPicker.Wide) };
 
-            Children.Add(new Swatch { Edge = Palette.Line, Placement = FixedSize.Size(28f, 20f) }.As(out _swatch));
-            Children.Add(new Label { Style = Styles.ListWord }.As(out _code));
+            Children.Add(new Swatch { Edge = Palette.Line, Placement = FixedSize.Size(SwatchWide, 20f) }.As(out _swatch));
             Children.Add(ListField.Fold());
 
-            // The box of its own keeps the popup as wide as the picker.
-            _popup = new Popup { Style = Styles.Menu, Anchor = this, Gap = 4f, Content = new HStack { Children = { _picker } } };
-            Command = new Relay(() => _popup.Toggle());
+            _popup = new Popup
+            {
+                Style = Styles.Menu,
+                Anchor = this,
+                Gap = 4f,
+                // The box of its own keeps the popup as wide as the picker.
+                Content = new VStack
+                {
+                    Spacing = 8f,
+                    Children =
+                    {
+                        new HStack { Children = { _picker } },
+                        new Button { Style = Styles.Primary, Text = texts.ChromeDone, Align = Align.Right, Command = done }
+                    }
+                }
+            };
+            Command = new Relay(() =>
+            {
+                if (!_popup.IsOpen)
+                {
+                    _picker.Text = _text;
+                    _picker.Recall();
+                }
+
+                _popup.Toggle();
+            });
             Shown();
         }
 
@@ -46,10 +74,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <inheritdoc />
         public string Text
         {
-            get { return _picker.Text; }
+            get { return _text; }
             set
             {
-                _picker.Text = value;
+                _text = value ?? "";
                 Shown();
             }
         }
@@ -73,8 +101,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>Whether the picker is hanging open.</summary>
         public bool IsOpen => _popup.IsOpen;
 
-        void Changed()
+        /// <summary>Takes the color the picker holds as the field's, puts it first among the colors chosen last where it is new, and puts the picker away.</summary>
+        void Done()
         {
+            var given = _picker.Text;
+            _popup.Close();
+            if (given == _text)
+                return;
+
+            _picker.Remember();
+            _text = given;
             Shown();
 
             var edited = Edited;
@@ -82,15 +118,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 edited();
         }
 
-        /// <summary>Shows the color it holds, its swatch filled and its code beside it, or the swatch's edge alone where none is.</summary>
+        /// <summary>Shows the color it holds, its swatch filled and its code under the pointer, or the swatch's edge alone where none is.</summary>
         void Shown()
         {
-            _code.Text = _picker.Text;
-            _code.IsVisible = _picker.Text.Length > 0;
+            Tip = Tip.For(Tip, _text.Length > 0 ? _text : null);
 
             Color color;
             byte alpha;
-            _swatch.Background = ColorChannels.Colour(_picker.Text, out color, out alpha) ? color : Palette.None;
+            _swatch.Background = ColorChannels.Colour(_text, out color, out alpha) ? color : Palette.None;
         }
     }
 }

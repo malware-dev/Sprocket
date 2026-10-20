@@ -199,7 +199,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// Makes every field again, so it is for calling only when what the values are for changes; <paramref name="colors" /> are
         /// the player's own.
         /// </remarks>
-        public void Show(IList<Field> fields, IList<string> filled, IList<Hsv> colors, Texts texts)
+        public void Show(IList<Field> fields, IList<string> filled, ColorOffer colors, Texts texts)
         {
             _language = texts;
             Rows.Clear();
@@ -344,10 +344,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         }
 
         /// <summary>The field a value is given in: a switch for on or off, a line of words for a few others, a list for more, a mixer, a dial, a box of several lines, a slider for a bounded number, a number's box, or a box.</summary>
-        IField Make(Field field, IList<Hsv> colors, Texts texts)
+        IField Make(Field field, ColorOffer colors, Texts texts)
         {
             if (field.Edits == FieldEditor.Colour)
-                return new ColorField(colors, _submit, texts);
+                return new ColorField(colors, texts);
 
             if (field.Edits == FieldEditor.Angle)
                 return new AngleField(field.Least, field.Most, _submit);

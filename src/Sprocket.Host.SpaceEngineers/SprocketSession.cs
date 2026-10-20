@@ -50,7 +50,6 @@ namespace Sprocket.Host.SpaceEngineers
 
         readonly LibraryShelf _shelf = new LibraryShelf(new GlobalFiles(), GameLog.Say);
 
-        readonly Preferences _preferences = new Preferences(new GlobalFiles(), GameLog.Say);
 
         readonly Rota _rota = new Rota();
 
@@ -201,10 +200,7 @@ namespace Sprocket.Host.SpaceEngineers
                 MyAPIGateway.Session.Factions.FactionStateChanged += Refactioned;
 
             if (MyAPIGateway.Utilities != null && !MyAPIGateway.Utilities.IsDedicated)
-            {
                 FindShelf();
-                _preferences.Read();
-            }
         }
 
         /// <summary>The name the game knows the player <paramref name="identity" /> by, online or not; empty where it knows none.</summary>
@@ -671,11 +667,10 @@ namespace Sprocket.Host.SpaceEngineers
         void Show(IMyTerminalBlock block, SprocketUnit unit, Action closed)
         {
             unit.Shelf = _shelf;
-            unit.Preferences = _preferences;
             unit.Editor.PlayerName = Named;
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
             unit.Viewer = Player(player);
-            unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine.Ticks));
+            unit.Editor.Preferred = IsServer ? null : (Action)(() => _handover.Prefer(_mine));
             unit.Administers = Administers;
             unit.WorldSettings = () => Asked;
             unit.ChangeSettings = ChangeSettings;

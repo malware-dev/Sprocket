@@ -124,7 +124,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// </summary>
         /// <remarks>What was given for what was chosen before is kept, so choosing it again gives it back.</remarks>
         /// <returns>The column the arguments are asked for in.</returns>
-        public ArgumentsColumn Restate(string chosen, string named, IList<Field> fields, IList<string> filled, IList<Hsv> colors)
+        public ArgumentsColumn Restate(string chosen, string named, IList<Field> fields, IList<string> filled, ColorOffer colors)
         {
             if (_arguments == null)
             {

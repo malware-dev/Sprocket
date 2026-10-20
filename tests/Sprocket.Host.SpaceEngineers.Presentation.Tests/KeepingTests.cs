@@ -69,7 +69,7 @@ public class KeepingTests
         screen.Editor.PressStepSlot(0, 1);
         screen.Run(2);
 
-        Assert.True(screen.Shows("#FF8800"), "the picker opened on no colour");
+        Assert.Equal("#FF8800", screen.Editor.Pick().Arguments!.Form.Fields[0].Text);
     }
 
     /// <summary>A double press on other blocks that offer the step's action finishes at once, keeping the value.</summary>

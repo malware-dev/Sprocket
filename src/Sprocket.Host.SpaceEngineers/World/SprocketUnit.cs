@@ -23,7 +23,6 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         LibraryShelf _shelf;
 
-        Preferences _preferences;
 
         PlayerMemory _viewer;
 
@@ -85,7 +84,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             var rebuilt = new SprocketUnit(_block, settings, rota, _kinds, _texts, false, program, switches, _memory);
             rebuilt._backups = _backups;
             rebuilt._shelf = _shelf;
-            rebuilt._preferences = _preferences;
             rebuilt._viewer = _viewer;
             rebuilt.Showing = Showing;
             if (_editor != null)
@@ -215,18 +213,6 @@ namespace Sprocket.Host.SpaceEngineers.World
             }
         }
 
-        /// <summary>How the player likes the screens to look, which the editor is given; null on a machine that keeps none.</summary>
-        public Preferences Preferences
-        {
-            get { return _preferences; }
-            set
-            {
-                _preferences = value;
-                if (_editor != null)
-                    _editor.Preferences = value;
-            }
-        }
-
         /// <summary>Whether the player at the screen may change the world's settings now, which the editor is given.</summary>
         public Func<bool> Administers
         {
@@ -307,7 +293,6 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor = new SprocketEditor(_world, _program, _runner, _texts);
                 _editor.Backups = _backups;
                 _editor.Shelf = _shelf;
-                _editor.Preferences = _preferences;
                 _editor.Viewer = _viewer;
                 _editor.Administers = _administers;
                 _editor.WorldSettings = _worldSettings;

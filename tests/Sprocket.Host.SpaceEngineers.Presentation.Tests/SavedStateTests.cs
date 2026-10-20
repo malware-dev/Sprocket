@@ -34,7 +34,9 @@ public class SavedStateTests : IDisposable
         var construct = new ConstructMemory { Keeper = 42 };
         construct.Runs.Add(new RunMemory { System = Airlock, Sequence = 1, Step = 3 });
         world.Constructs.Add(construct);
-        world.Players.Add(new PlayerMemory { Player = 7, Ticks = true });
+        var player = new PlayerMemory { Player = 7, Ticks = true, ColorTab = 2, ShowsHidden = true };
+        player.RecentColors.Add("#FF8800");
+        world.Players.Add(player);
         Sector(world);
 
         var said = SavedState.Render(_folder);
@@ -44,6 +46,9 @@ public class SavedStateTests : IDisposable
         Assert.Contains("System: " + Airlock + "\n", said);
         Assert.Contains("Step: 3\n", said);
         Assert.Contains("Ticks: True\n", said);
+        Assert.Contains("ColorTab: 2\n", said);
+        Assert.Contains("ShowsHidden: True\n", said);
+        Assert.Contains("#FF8800", said);
     }
 
     /// <summary>A world Sprocket has saved nothing in says so.</summary>

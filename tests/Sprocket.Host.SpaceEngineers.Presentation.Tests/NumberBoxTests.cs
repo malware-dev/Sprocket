@@ -120,7 +120,7 @@ public class NumberBoxTests
             Field.Between("speed", "0", "5"),
             new Field { Name = "count", Entry = FieldInput.Whole },
             Field.Called("label")
-        }, new[] { "", "", "" }, new Hsv[0], new Texts());
+        }, new[] { "", "", "" }, new ColorOffer(new Hsv[0], null, null), new Texts());
 
         Assert.IsType<NumberBox>(form.Fields[0].Keyboard);
         Assert.IsType<NumberBox>(form.Fields[1].Keyboard);

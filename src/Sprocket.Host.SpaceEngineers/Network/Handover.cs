@@ -99,7 +99,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 .UsingModel<RunOrder>(RunOrder.SizeOf, RunOrder.Read, RunOrder.Write)
                 .UsingModel<WiringRequest>(WiringRequest.SizeOf, WiringRequest.Read, WiringRequest.Write)
                 .UsingModel<UnwiringRequest>(UnwiringRequest.SizeOf, UnwiringRequest.Read, UnwiringRequest.Write)
-                .UsingModel<TimeUnitPreference>(TimeUnitPreference.SizeOf, TimeUnitPreference.Read, TimeUnitPreference.Write)
+                .UsingModel<PlayerPreference>(PlayerPreference.SizeOf, PlayerPreference.Read, PlayerPreference.Write)
                 .UsingModel<SettingsRuling>(SettingsRuling.SizeOf, SettingsRuling.Read, SettingsRuling.Write);
         }
 
@@ -114,7 +114,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.ListenFor<RunOrder>(Ordered);
             _channel.ListenFor<WiringRequest>(Wired);
             _channel.ListenFor<UnwiringRequest>(Unwired);
-            _channel.ListenFor<TimeUnitPreference>(Preferred);
+            _channel.ListenFor<PlayerPreference>(Preferred);
             _channel.ListenFor<SettingsRuling>(Ruled);
         }
 
@@ -125,10 +125,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
             _channel.SendToServer(new EditClaim { Block = block, Name = name ?? "" }, true);
         }
 
-        /// <summary>Tells the server this client's player gives lengths of time in ticks where <paramref name="ticks" /> says, or in seconds.</summary>
-        public void Prefer(bool ticks)
+        /// <summary>Tells the server this client's player's settings in this world, as <paramref name="mine" /> holds them now.</summary>
+        public void Prefer(PlayerMemory mine)
         {
-            _channel.SendToServer(new TimeUnitPreference { Ticks = ticks }, true);
+            _channel.SendToServer(new PlayerPreference
+            {
+                Ticks = mine.Ticks, ColorTab = mine.ColorTab, ShowsHidden = mine.ShowsHidden, RecentColors = string.Join(" ", mine.RecentColors)
+            }, true);
         }
 
         /// <summary>Proposes <paramref name="settings" />, written as one text, to the server, which takes them where this client's player is an admin.</summary>
@@ -283,8 +286,13 @@ namespace Sprocket.Host.SpaceEngineers.Network
             var identity = Identity(sender);
             var grant = new EditGrant
             {
-                Block = lent, Holder = "", Program = "", State = "", Ticks = _player(identity).Ticks, Settings = _settings()
+                Block = lent, Holder = "", Program = "", State = "", Settings = _settings()
             };
+            var asker = _player(identity);
+            grant.Ticks = asker.Ticks;
+            grant.ColorTab = asker.ColorTab;
+            grant.ShowsHidden = asker.ShowsHidden;
+            grant.RecentColors = string.Join(" ", asker.RecentColors);
 
             // Only a big owner opens the automation, whoever holds it.
             if (unit != null && !unit.Owns(identity))
@@ -320,7 +328,7 @@ namespace Sprocket.Host.SpaceEngineers.Network
                 return;
 
             var me = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
-            _player(me).Ticks = grant.Ticks;
+            Kept(_player(me), grant.Ticks, grant.ColorTab, grant.ShowsHidden, grant.RecentColors);
             _settled(grant.Settings);
 
             if (grant.Foreign)
@@ -342,12 +350,22 @@ namespace Sprocket.Host.SpaceEngineers.Network
             }
         }
 
-        void Preferred(ushort channel, TimeUnitPreference preference, ulong sender, bool fromServer)
+        void Preferred(ushort channel, PlayerPreference preference, ulong sender, bool fromServer)
         {
             if (!NetworkChannel.Network.IsServer)
                 return;
 
-            _player(Identity(sender)).Ticks = preference.Ticks;
+            Kept(_player(Identity(sender)), preference.Ticks, preference.ColorTab, preference.ShowsHidden, preference.RecentColors);
+        }
+
+        /// <summary>Gives <paramref name="player" /> the settings said, the colors as their codes separated by spaces.</summary>
+        static void Kept(PlayerMemory player, bool ticks, int colorTab, bool hidden, string recent)
+        {
+            player.Ticks = ticks;
+            player.ColorTab = colorTab;
+            player.ShowsHidden = hidden;
+            player.RecentColors.Clear();
+            player.RecentColors.AddRange((recent ?? "").Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
         }
 
         /// <summary>

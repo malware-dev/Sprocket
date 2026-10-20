@@ -699,6 +699,18 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Color.Brightness" xml:space="preserve">
     <value>Lysstyrke</value>
   </data>
+  <data name="Sprocket.Color.Red" xml:space="preserve">
+    <value>Rød</value>
+  </data>
+  <data name="Sprocket.Color.Green" xml:space="preserve">
+    <value>Grønn</value>
+  </data>
+  <data name="Sprocket.Color.Blue" xml:space="preserve">
+    <value>Blå</value>
+  </data>
+  <data name="Sprocket.Color.PlaneAbout" xml:space="preserve">
+    <value>Metning bortover, lysstyrke oppover.</value>
+  </data>
   <data name="Sprocket.Color.CodeAbout" xml:space="preserve">
     <value>Skriv inn en farge som #RRGGBB, eller #RRGGBBAA for å ta med gjennomsiktigheten.</value>
   </data>

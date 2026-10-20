@@ -124,10 +124,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <remarks>Drawn on the open eye's frame, so one replaces the other without the toolbar moving.</remarks>
         public const string HiddenHidden = "H";
 
-        /// <summary>Every hue in order, red round to red.</summary>
-        /// <remarks>The game's own <c>Textures\GUI\HueScale.png</c>, declared as a material in <c>Content/Data/TransparentMaterials.sbc</c>.</remarks>
-        public static readonly MyStringId Hue = MyStringId.GetOrCompute("Sprocket_Hue");
-
         /// <summary>The outline lit round <paramref name="mark" />, or null for a mark that is never lit.</summary>
         public static string OutlineOf(string mark)
         {

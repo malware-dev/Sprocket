@@ -29,7 +29,7 @@ public class ChoosingKeysTests
     static FieldSet Form(out InputRoot input, params Field[] fields)
     {
         var form = new FieldSet();
-        form.Show(fields, new[] { "", "", "" }, new Hsv[0], new Texts());
+        form.Show(fields, new[] { "", "", "" }, new ColorOffer(new Hsv[0], null, null), new Texts());
 
         input = new InputRoot(form);
         form.Take(input);

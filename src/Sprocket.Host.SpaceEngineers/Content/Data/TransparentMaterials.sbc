@@ -37,34 +37,6 @@
             </UVSize>
         </TransparentMaterial>
 
-        <!-- The hue of every colour, left to right, red round to red. The game's own, drawn by its colour
-             picker and its wardrobe; declaring a material over it is the only way a mod can reach it, the
-             same as the blank above. It is a PNG rather than a DDS, which is unusual for a material. -->
-        <TransparentMaterial>
-            <Id>
-                <TypeId>TransparentMaterialDefinition</TypeId>
-                <SubtypeId>Sprocket_Hue</SubtypeId>
-            </Id>
-            <AlphaMistingEnable>false</AlphaMistingEnable>
-            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
-            <AlphaSaturation>1</AlphaSaturation>
-            <Emissivity>0</Emissivity>
-            <IgnoreDepth>false</IgnoreDepth>
-            <NeedSort>false</NeedSort>
-            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
-            <Texture>Textures\GUI\HueScale.png</Texture>
-            <Reflectivity>0</Reflectivity>
-            <UseAtlas>false</UseAtlas>
-            <UVOffset>
-                <X>0</X>
-                <Y>0</Y>
-            </UVOffset>
-            <UVSize>
-                <X>1</X>
-                <Y>1</Y>
-            </UVSize>
-        </TransparentMaterial>
-
         <!-- The logo, which the codex's home page opens with. The sprite twin of the LCD image, premultiplied. -->
         <TransparentMaterial>
             <Id>
@@ -132,6 +104,84 @@
             <NeedSort>false</NeedSort>
             <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
             <Texture>Textures\Sprites\Sprocket_Shadow.dds</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
+        <!-- Every hue, red at the top round to red at the bottom: the color picker's strip of hues. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Hues</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\Sprites\Sprocket_Hues.dds</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
+        <!-- White, solid at the left and gone at the right: laid over a fill of one hue, saturation across. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Pale</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\Sprites\Sprocket_Pale.dds</Texture>
+            <Reflectivity>0</Reflectivity>
+            <UseAtlas>false</UseAtlas>
+            <UVOffset>
+                <X>0</X>
+                <Y>0</Y>
+            </UVOffset>
+            <UVSize>
+                <X>1</X>
+                <Y>1</Y>
+            </UVSize>
+        </TransparentMaterial>
+
+        <!-- Black, gone at the top and solid at the bottom: laid over the pale fade, value up. -->
+        <TransparentMaterial>
+            <Id>
+                <TypeId>TransparentMaterialDefinition</TypeId>
+                <SubtypeId>Sprocket_Dark</SubtypeId>
+            </Id>
+            <AlphaMistingEnable>false</AlphaMistingEnable>
+            <CanBeAffectedByOtherLights>false</CanBeAffectedByOtherLights>
+            <AlphaSaturation>1</AlphaSaturation>
+            <Emissivity>0</Emissivity>
+            <IgnoreDepth>false</IgnoreDepth>
+            <NeedSort>false</NeedSort>
+            <SoftParticleDistanceScale>0</SoftParticleDistanceScale>
+            <Texture>Textures\Sprites\Sprocket_Dark.dds</Texture>
             <Reflectivity>0</Reflectivity>
             <UseAtlas>false</UseAtlas>
             <UVOffset>

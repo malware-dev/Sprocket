@@ -1,6 +1,5 @@
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Look;
-using Sprocket.Host.SpaceEngineers.Storage;
 using Sprocket.Sim.Machine;
 using Xunit;
 
@@ -101,38 +100,16 @@ public class HiddenBlocksTests
         Assert.True(Lists(screen, "Airlock Vent"), "the next picker does not list the hidden block");
     }
 
-    /// <summary>The eye's state is written as the player's preferences, and read back as it was written.</summary>
+    /// <summary>The eye's state is the player's own setting in this world, kept with the world.</summary>
     [Fact]
-    public void TheEyeIsKeptBetweenGames()
+    public void TheEyeIsThePlayersSettingInTheWorld()
     {
-        var folder = new Folder();
-        var written = new Preferences(folder, delegate { });
-        written.Read();
-        Assert.False(written.ShowsHidden);
-        Assert.Empty(folder.Files);
+        var screen = WithAHiddenVent(Rig.Demo());
+        Assert.False(screen.Editor.Viewer.ShowsHidden);
 
-        written.ShowsHidden = true;
+        screen.Do("press", Symbols.HiddenHidden).Run(2);
 
-        var read = new Preferences(folder, delegate { });
-        read.Read();
-        Assert.True(read.ShowsHidden);
-    }
-
-    /// <summary>Preferences that will not read leave the eye shut, say so, and are never written over.</summary>
-    [Fact]
-    public void PreferencesThatWillNotReadAreLeftAlone()
-    {
-        var folder = new Folder();
-        folder.Write("sprocket-view.ini", "[View\nshowHidden=true\n");
-        var said = new List<string>();
-        var preferences = new Preferences(folder, said.Add);
-
-        preferences.Read();
-        Assert.False(preferences.ShowsHidden);
-        Assert.Single(said);
-
-        preferences.ShowsHidden = true;
-        Assert.Equal("[View\nshowHidden=true\n", folder.Files["sprocket-view.ini"]);
+        Assert.True(screen.Editor.Viewer.ShowsHidden);
     }
 
     /// <summary>The eye is drawn shut, and open once pressed.</summary>

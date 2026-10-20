@@ -9,11 +9,10 @@ outlives every build.
 |---|---|---|---|
 | A construct's program | The mod storage of its programmable block, the unit's hero, under `BlockStorage.ProgramKey` | When the program may have changed, and as the world saves | `World/SprocketUnit.cs`, `Storage/Scribe.cs`, `Storage/Reader.cs` |
 | What is switched off, and why | The same block, under `BlockStorage.StateKey` | With the program | `Storage/StateText.cs` |
-| What the world remembers while it runs: Sprocket's clock, every run and every watch, owners, pauses, players' settings | A file named `state` among Sprocket's files for the world, kept on the carrier | As the world saves, on the server, where anything changed | `Memory/`, `World/Carrier.cs` |
+| What the world remembers while it runs: Sprocket's clock, every run and every watch, owners, pauses, each player's settings (lengths in ticks or seconds, the pickers' eye, how colors are given and the colors last chosen) | A file named `state` among Sprocket's files for the world, kept on the carrier | As the world saves, on the server, where anything changed | `Memory/`, `World/Carrier.cs` |
 | The library | The game's Storage folder on the player's own computer: `sprocket-bp.index`, and a `sprocket-bp-*.cog` for each blueprint | When a blueprint is kept | `Storage/Shelf.cs` |
 | Backups | Beside the world's save: `backups.ini`, and a `backup-N.cog` for each | When a construct's automation is lost to damage | `Storage/Backups.cs` |
 | The world's settings | `sprocket.ini`, in the game's Storage folder and in the world's | When an admin changes them | `World/Settings.cs` |
-| A player's view preferences | `sprocket-view.ini` in the game's Storage folder | When one changes | `Storage/Preferences.cs` |
 | The clipboard | `sprocket-clipboard.txt` in the game's Storage folder | On every copy | `Storage/ClipboardFile.cs` |
 
 **The carrier** (`World/Carrier.cs`) is an entity of Sprocket's own, saved with the world and tied to no block: no
