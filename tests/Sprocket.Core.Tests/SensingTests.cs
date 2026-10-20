@@ -172,7 +172,8 @@ public class SensingTests
 
     /// <summary>
     /// Nothing of an event controller's own is vetted: no capability of a particular block knows it, its terminal's members
-    /// stay in the game's words, and its toolbar's slots are signals named by where they are, as on any block nothing knows.
+    /// stay in the game's words, and its toolbar is one signal of the game's own, its slot chosen beside it, as on any block
+    /// nothing knows.
     /// </summary>
     [Fact]
     public void NothingOfAnEventControllersOwnIsVetted()
@@ -192,9 +193,13 @@ public class SensingTests
         var floor = new Capabilities().Floor.Select(known => known.GetType()).ToList();
         Assert.All(kind.Capabilities, known => Assert.Contains(known.GetType(), floor));
 
-        Assert.Equal("toolbar slot 1 runs", kind.FindEvent("toolbar-1-1-1")!.Text);
-        Assert.Equal("toolbar slot 2 runs", kind.FindEvent("toolbar-1-1-2")!.Text);
-        Assert.DoesNotContain(kind.Events, signal => signal.Id == "toolbar-1-0-1" || signal.Id == "toolbar-1-0-2");
+        var toolbar = Assert.Single(kind.Events, signal => signal.IsPressed);
+        Assert.True(toolbar.IsPressed);
+        Assert.False(toolbar.Vetted);
+        Assert.Equal("runs a toolbar slot", toolbar.Text);
+        var second = toolbar.At(new ToolbarSlot(1, 1, 2));
+        Assert.Equal("runs toolbar slot 2", second.Text);
+        Assert.False(second.Vetted);
 
         NotVetted(kind, ReachKind.Value, "ANDCheckbox", "Threshold");
         NotVetted(kind, ReachKind.Action, "ANDCheckbox", "ANDCheckbox_On", "IncreaseThreshold");

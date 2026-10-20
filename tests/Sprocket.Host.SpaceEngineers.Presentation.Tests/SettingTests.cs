@@ -186,7 +186,7 @@ public class SettingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Standby Battery");
-        screen.Editor.Pick().Stages.Single(s => s.Views.Count > 0).PressView("Terminal");
+        screen.Editor.Pick().Stages.Last(s => s.Views.Count > 0).PressView("Terminal");
         screen.Editor.PressChoice("Charge Mode");
         screen.Editor.Typed("1");
         screen.Run(2);

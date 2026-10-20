@@ -122,9 +122,9 @@ public class CheckViewTests
         Assert.Equal("if power on Airlock Outer Door is on", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, null));
     }
 
-    /// <summary>The signals that start a trigger are one list, with no link to another view.</summary>
+    /// <summary>What can start a trigger has the two views every list of members has: the organized one lists what Sprocket vouches for, and the terminal view leaves it out.</summary>
     [Fact]
-    public void ASignalHasOneList()
+    public void WhatHappensHasBothViews()
     {
         var rig = Airlock();
         rig.Editor.Push(new LogicSystemPage(rig.Editor, rig.Editor.Program.Systems[0]));
@@ -134,7 +134,37 @@ public class CheckViewTests
         rig.Editor.PressBlock("Airlock Outer Door");
         rig.Tick();
 
-        Assert.All(rig.Editor.Pick().Stages, stage => Assert.Empty(stage.Views));
+        var what = rig.Editor.Pick().Stages.Single(stage => stage.Views.Count > 0);
+        Assert.Contains(what.Entries(), entry => entry.Text == "finishes opening");
+
+        what.PressView("Terminal");
+        rig.Tick();
+        Assert.DoesNotContain(rig.Editor.Pick().Stages.SelectMany(stage => stage.Entries()), entry => entry.Text == "finishes opening");
+        rig.Editor.Pick().Stages.Single(stage => stage.Views.Count > 0).PressView("Organized");
+    }
+
+    /// <summary>A toolbar nothing knows the slots of, such as a vent's, is one signal of the terminal view, never of the organized one.</summary>
+    [Fact]
+    public void AToolbarNothingKnowsIsInTheTerminalViewAlone()
+    {
+        var rig = Airlock();
+        rig.Editor.Push(new LogicSystemPage(rig.Editor, rig.Editor.Program.Systems[0]));
+        rig.Tick();
+        rig.Editor.PressStart(SentenceText.WhenWord);
+        rig.Tick();
+        rig.Editor.PressBlock("Airlock Vent");
+        rig.Tick();
+
+        var what = rig.Editor.Pick().Stages.Single(stage => stage.Views.Count > 0);
+        Assert.Contains(what.Entries(), entry => entry.Text == "finishes filling");
+        Assert.DoesNotContain(what.Entries(), entry => entry.Text.Contains("toolbar"));
+
+        what.PressView("Terminal");
+        rig.Tick();
+        var entries = rig.Editor.Pick().Stages.SelectMany(stage => stage.Entries()).Where(entry => !entry.IsHeading).ToList();
+        Assert.Single(entries, entry => entry.Text == "runs a toolbar slot");
+        Assert.DoesNotContain(entries, entry => entry.Text == "finishes filling");
+        rig.Editor.Pick().Stages.Single(stage => stage.Views.Count > 0).PressView("Organized");
     }
 
     /// <summary>

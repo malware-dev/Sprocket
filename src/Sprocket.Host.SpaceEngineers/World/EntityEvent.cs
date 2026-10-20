@@ -84,6 +84,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>How many slots each of <see cref="Pages" /> has.</summary>
         public int Slots { get; private set; }
 
+        /// <summary>Whether this is something Sprocket vouches for, which is what the organized view lists; the terminal view lists the rest.</summary>
+        public bool Vetted { get; private set; } = true;
+
         /// <summary>Whether this is a toolbar a person presses, its page and slot chosen beside it.</summary>
         public bool IsPressed => Pages > 0;
 
@@ -104,7 +107,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             EntityEvent one;
             if (!_slots.TryGetValue(id, out one))
             {
-                one = new EntityEvent(slot, _says(slot));
+                one = new EntityEvent(slot, _says(slot)) { Vetted = Vetted };
                 _slots.Add(id, one);
             }
 
@@ -127,6 +130,12 @@ namespace Sprocket.Host.SpaceEngineers.World
         {
             Value = value;
             Becomes = becomes;
+        }
+
+        /// <summary>Says this is the game's own, which Sprocket does not vouch for.</summary>
+        public void Unvouch()
+        {
+            Vetted = false;
         }
 
         /// <summary>Says the block announces this.</summary>

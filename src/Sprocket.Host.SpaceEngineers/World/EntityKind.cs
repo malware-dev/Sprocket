@@ -264,6 +264,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             return this;
         }
 
+        /// <summary>Says the moment added last is the game's own, which Sprocket does not vouch for, so the terminal view alone lists it.</summary>
+        public EntityKind Unvouched()
+        {
+            _events[_events.Count - 1].Unvouch();
+            return this;
+        }
+
         /// <summary>Adds one of the block's own actions, <paramref name="gameActionId" />, as <paramref name="id" /> said as <paramref name="text" />.</summary>
         public EntityKind WithAction(string id, string text, string gameActionId)
         {

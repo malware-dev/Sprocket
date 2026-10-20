@@ -128,7 +128,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             return false;
         }
 
-        /// <summary>Adds every slot of every toolbar the block has as a signal, by where it is.</summary>
+        /// <summary>
+        /// Adds each toolbar the block has as one signal, its page and slot chosen beside it, as the terminal view alone lists
+        /// it: nothing knows what the block runs its slots for.
+        /// </summary>
         /// <remarks>Asked once per block type.</remarks>
         static void Signals(EntityKind kind, IMyTerminalBlock block)
         {
@@ -139,24 +142,19 @@ namespace Sprocket.Host.SpaceEngineers.World
             for (var t = 1; t <= toolbars; t++)
             {
                 IMyToolbar toolbar = Toolbars.Of(block, t);
-                for (var p = 1; p <= toolbar.PageCount; p++)
-                {
-                    for (var s = 1; s <= toolbar.SlotCount; s++)
-                    {
-                        var at = new ToolbarSlot(t, p, s);
-                        kind.WithSignal(at, Placed(at, toolbars, toolbar.PageCount));
-                    }
-                }
+                var pages = toolbar.PageCount;
+                var named = toolbars > 1 ? $"runs a slot of toolbar {t}" : "runs a toolbar slot";
+                kind.WithPressed(t, named, pages, toolbar.SlotCount, at => Placed(at, toolbars, pages)).Unvouched();
             }
         }
 
-        /// <summary>A signal named by where its slot is, saying no more of the place than the block has to tell apart.</summary>
+        /// <summary>A toolbar slot the block runs, named by where it is, saying no more of the place than the block has to tell apart.</summary>
         static string Placed(ToolbarSlot at, int toolbars, int pages)
         {
             if (toolbars > 1)
-                return $"toolbar {at.Toolbar}, page {at.Page}, slot {at.Slot} runs";
+                return $"runs toolbar {at.Toolbar}, page {at.Page}, slot {at.Slot}";
 
-            return pages > 1 ? $"toolbar page {at.Page}, slot {at.Slot} runs" : $"toolbar slot {at.Slot} runs";
+            return pages > 1 ? $"runs toolbar page {at.Page}, slot {at.Slot}" : $"runs toolbar slot {at.Slot}";
         }
 
         /// <summary>

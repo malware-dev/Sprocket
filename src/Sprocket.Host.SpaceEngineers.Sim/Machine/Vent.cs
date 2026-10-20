@@ -22,6 +22,10 @@ public sealed class Vent : Fitting
     public Vent(long id, string name, MyObjectBuilderType type, string subtype, string display)
         : base(id, name, type, subtype, display)
     {
+        // The game's vent has a toolbar of its own: ten pages of two slots, the first run as the room fills, the second as
+        // it empties.
+        Toolbar = new Toolbar(2, 10);
+
         Fit(Pretend.To<IMyAirVent>()
             .Gives("Status", () => Status)
             .Gives("CanPressurize", () => !Leaking)

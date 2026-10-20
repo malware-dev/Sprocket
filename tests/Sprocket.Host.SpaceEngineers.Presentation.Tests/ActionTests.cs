@@ -551,6 +551,23 @@ public class ActionTests
         Assert.False(screen.Shows("1 "), "the step says the number instead of the word");
     }
 
+    /// <summary>A step made from the terminal view opens on that view again, its member chosen, whichever view was showing.</summary>
+    [Fact]
+    public void AStepMadeInTheTerminalViewIsEditedThere()
+    {
+        var screen = Screen.Fresh(("60 196 type Airlock enter press trigger press when 200 384 560 340 1394 72 "
+            + "press step press task 150 203 type Standby 200 360 press \"Terminal ›\" press \"Charge Mode\" 1247 201 enter").Split(' '));
+        var editor = screen.Editor;
+        Assert.IsType<Act>(editor.Program.Sequences[0].Steps[0]);
+
+        editor.ShowsTerminal = false;
+        editor.PressStepSlot(0, 0);
+        screen.Run(2);
+
+        Assert.True(editor.ShowsTerminal, "the picker did not open on the view that lists the step's member");
+        Assert.Contains(editor.Pick().Stages.SelectMany(stage => stage.Entries()), entry => entry.Text == "Charge Mode" && entry.IsChosen);
+    }
+
     /// <summary>
     /// More choices than a row can hold fold into a box that opens a list.
     /// </summary>

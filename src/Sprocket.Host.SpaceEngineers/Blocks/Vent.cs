@@ -12,8 +12,9 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 {
     /// <summary>The air vent, which the airlock is built around.</summary>
     /// <remarks>
-    /// The game gives a vent no events, so all of it is sampled, and a room that empties and refills between two ticks is
-    /// invisible. Anything that cannot be read is not yet, never done: a vent with no power, or no room worked out yet as
+    /// The game raises no event a vent's room can be heard by, so all of it is sampled, and a room that empties and refills
+    /// between two ticks is invisible. The vent's toolbar, whose two slots the game runs as the room fills and as it empties,
+    /// is the game's own and stays in the terminal view. Anything that cannot be read is not yet, never done: a vent with no power, or no room worked out yet as
     /// a world loads, reports nothing left whatever the room holds.
     /// </remarks>
     public sealed class Vent : Capability

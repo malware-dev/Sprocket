@@ -70,6 +70,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         string _whatSearch = "";
         bool _goesOn;
         bool _straight;
+
+        // Whether the column has been shown in the view that lists what the page was opened on, which it is once.
+        bool _viewFound;
         string _entered;
         string _shown;
         bool _openedArguments;
@@ -572,9 +575,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         void MakeWhat()
         {
-            // Two views of what is done to a block or checked of one; what happens to one has Sprocket's wording alone.
+            // Two views of what is done to a block, checked of one or happens to one: what Sprocket vouches for, and the rest.
             // The angle marks point the way each link goes; the words alone are translated.
-            var views = _forEvents ? null : new[] { $"‹ {Editor.Texts.PickToOrganized}", $"{Editor.Texts.PickToTerminal} ›" };
+            var views = new[] { $"‹ {Editor.Texts.PickToOrganized}", $"{Editor.Texts.PickToTerminal} ›" };
 
             _what = new StageColumn(_strip.Width, true, views, Editor.Texts);
             _what.Title = _forTests ? Editor.Texts.PickWhatToCheck : _forEvents ? Editor.Texts.PickWhatHappens : Editor.Texts.PickWhatToDo;
@@ -1021,12 +1024,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void FillWhat()
         {
             _offers.Fill(_selection, Totals, _memberOnly ? _arrivedChosen : null);
+            FindView();
 
             var texts = Editor.Texts;
             var note = "";
             if (_forTests || _forEvents)
             {
-                note = _forTests && Editor.ShowsTerminal ? texts.PickTerminalNote : "";
+                note = Editor.ShowsTerminal ? texts.PickTerminalNote : "";
                 var totals = _quantifier == Quantifier.Sum ? texts.PickSumNote : _quantifier == Quantifier.Average ? texts.PickAverageNote : "";
                 if (totals.Length > 0)
                     note = note.Length == 0 ? totals : $"{note} {totals}";
@@ -1162,6 +1166,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _what.ShowEmpty();
+        }
+
+        /// <summary>
+        /// Shows, the first time the column is filled, the view that lists what the page was opened on, so whatever made a
+        /// choice edits it; the view showing stays where it lists it, or where neither does.
+        /// </summary>
+        void FindView()
+        {
+            if (_viewFound)
+                return;
+
+            _viewFound = true;
+            if (_chosen.Length == 0 || _offers.At(_chosen, _chosenForm) >= 0)
+                return;
+
+            Editor.ShowsTerminal = !Editor.ShowsTerminal;
+            _offers.Fill(_selection, Totals, _memberOnly ? _arrivedChosen : null);
+            if (_offers.At(_chosen, _chosenForm) >= 0)
+                return;
+
+            Editor.ShowsTerminal = !Editor.ShowsTerminal;
+            _offers.Fill(_selection, Totals, _memberOnly ? _arrivedChosen : null);
         }
 
         void Show(bool terminal)

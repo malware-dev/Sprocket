@@ -98,7 +98,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var events = totals ? new List<EntityEvent>() : Vocabulary.EventsOf(_editor.World, selection);
                 foreach (var entityEvent in events)
                 {
-                    if (_signalsOnly && !entityEvent.Answered)
+                    if (_signalsOnly && !entityEvent.Answered || entityEvent.Vetted == _editor.ShowsTerminal)
                         continue;
 
                     _names.Add(entityEvent.Text);

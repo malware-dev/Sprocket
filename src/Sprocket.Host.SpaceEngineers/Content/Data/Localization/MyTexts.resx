@@ -796,15 +796,15 @@ Lights green when it runs, and red when something in it needs mending.</value>
   </data>
   <data name="Sprocket.Pick.ToOrganized" xml:space="preserve">
     <value>Organized</value>
-    <comment>Link at the end of the heading of the picker's column of what can be done to the chosen blocks, shown while the column lists them the way the game's terminal does; pressing it goes back to the organized list. An angle mark is drawn before it, pointing the way the link goes.</comment>
+    <comment>Link at the end of the heading of the picker's column of what can be done to the chosen blocks, checked of them or happens to them, shown while the column lists them the way the game's terminal does; pressing it goes back to the organized list. An angle mark is drawn before it, pointing the way the link goes.</comment>
   </data>
   <data name="Sprocket.Pick.ToTerminal" xml:space="preserve">
     <value>Terminal</value>
-    <comment>Link at the end of the heading of the picker's column of what can be done to the chosen blocks, shown while the column shows the organized list; pressing it lists everything the blocks offer in the game's terminal, under the game's own names. An angle mark is drawn after it, pointing the way the link goes.</comment>
+    <comment>Link at the end of the heading of the picker's column of what can be done to the chosen blocks, checked of them or happens to them, shown while the column shows the organized list; pressing it lists everything the blocks offer in the game's terminal, under the game's own names. An angle mark is drawn after it, pointing the way the link goes.</comment>
   </data>
   <data name="Sprocket.Pick.TerminalNote" xml:space="preserve">
     <value>Everything these blocks offer in the terminal, under the terminal's own names. Using them is your own call. The organized list holds the ones known to work with the automation.</value>
-    <comment>Banner at the top of the picker's column of what can be done to the chosen blocks, shown for as long as the column lists them the way the game's terminal does.</comment>
+    <comment>Banner at the top of the picker's column of what can be done to the chosen blocks, checked of them or happens to them, shown for as long as the column lists them the way the game's terminal does.</comment>
   </data>
   <data name="Sprocket.Pick.Shared" xml:space="preserve">
     <value>Showing only what the picked blocks share</value>
