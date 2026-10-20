@@ -10,45 +10,21 @@ A logic system consists of the following parts:
 
 The job is kept apart from the blocks, so one logic system can run every airlock on the ship. The [simple airlock](simple-airlock) builds one from the start.
 
+## Its screen
+
+Under its heading, a logic system's screen has the `Selected installation` list. When you have more than one installation, it picks the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
+
+Below the list are four tabs: `Triggers`, `Sequences`, `State` and `Installation panel`, where you design the [installation panel](installation-panel) every installation is filled in on.
+
+A tab whose page holds a problem or a warning carries a mark in the color of the problem or the warning. Each logic system's screen opens on the tab you last left it on, until the world is loaded again.
+
 ## Switch off before you change it
 
 A logic system can only be changed while it's switched off, so a half-built sequence never starts by accident. New logic systems are made switched off. The switch sits on the logic system's heading on the home screen, and at the top right of its own screen.
 
 Switching it off stops its triggers from firing, and aborts any running sequences, apart from those started by hand.
 
-![](mark:delete)&nbsp;deletes at once; undo brings back what it took.
-
-## Undo
-
-Each screen keeps its own ![](mark:undo)&nbsp;undo and ![](mark:redo)&nbsp;redo: each sequence, each slot's page, the installation panel, and the logic system's own screen. Undo takes back the last change made on the screen you're on.
-
-Some changes reach several screens. Selecting blocks for a step changes the sequence and makes or fills the slots for those blocks, and adding a trigger can make the sequence it runs. Such a change can be undone on any screen it reached.
-
-Undo always works. Where a later change on another screen rests on what it takes back, undo takes that change back with it, in one step, and its tooltip names those screens. Redo brings them back together.
-
-A slot's name belongs to the whole logic system, so renaming a slot is undone on the slot's page or on the logic system's screen. A step brought back by undo names the slot by its current name.
-
-## The installation panel
-
-The `Installation panel` tab on the logic system's screen shows what everyone installing this logic system sees on their own [panel](installation-panel): a description, then the slots.
-
-To help people understand what your logic system is for, or just to remind yourself, consider writing a description. Whoever receives your blueprint has never seen your construct, so the description and the slots are all they have to go on. The description is written while the logic system is off, and can hold [rich text](rich-text).
-
-Each set of blocks you select for a step or a trigger becomes a [slot](slot). A slot of one block takes that block's name; a slot of several is numbered. A ![](mark:block)&nbsp;**block slot**, like *the inner door*, holds the blocks a sequence acts on or watches. A ![](mark:signal)&nbsp;**signal slot**, like *the button*, holds a block and the toolbar slot on it that sends the [signal](signal).
-
-When you have more than one installation, the `Selected installation` list at the top of the screen picks the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
-
-## More than one airlock
-
-On the home screen, press `+ installation` under the logic system and fill its slots with the second airlock's blocks. Both airlocks then run the same sequences on their own blocks, and a change to a sequence reaches both.
-
-## When something goes wrong
-
-The home screen will tell you when something goes wrong with a logic system. If a sequence can't carry on, for example because a block was lost or a slot is empty, that installation switches off and its row says why:
-
-*Stopped at step 1 of Cycle Out: Airlock Inner Door was lost.*
-
-Put right what it names, then switch the installation on again.
+![](mark:delete)&nbsp;deletes at once; ![](mark:undo)&nbsp;[undo](undo) brings back what it took.
 
 ## Blueprints
 

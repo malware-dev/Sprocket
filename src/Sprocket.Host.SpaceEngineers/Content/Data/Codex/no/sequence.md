@@ -26,7 +26,7 @@ Hold pekeren over et `wait for pending tasks` for å se hvilke steg det venter p
 
 ## Når en kjøring går galt
 
-En kjøring **mislykkes** når et steg ikke kan gjøres i det hele tatt, for eksempel fordi blokken gikk tapt. Den installasjonen slås av, de andre fortsetter å kjøre, og [startskjermen](home) sier hvilket steg som mislyktes og hvorfor. Rett opp det den nevner, og slå installasjonen på igjen. En blokk som gikk tapt, eller en tom [plass](slot), fylles på [installasjonspanelet](installation-panel).
+En kjøring **mislykkes** når et steg ikke kan gjøres i det hele tatt, for eksempel fordi blokken gikk tapt. Den installasjonen slås av, de andre fortsetter å kjøre, og [startskjermen](home) sier hvilket steg som mislyktes og hvorfor. Rett opp det den nevner, og slå installasjonen på igjen. En blokk som gikk tapt, erstattes i [plassen](slot) sin på [installasjonspanelet](installation-panel).
 
 Et steg **venter** når blokken sitter fast, som en rotor som holdes, eller en ventil uten sted å gjøre av lufta. Det venter og sier hvorfor, og fortsetter av seg selv når veien er ryddet. For å gi opp i stedet stopper du kjøringen.
 

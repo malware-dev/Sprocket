@@ -6,7 +6,7 @@ Et signal er det en blokk sender for å få en [utløser](trigger) til å utløs
 
 Hver blokk med en verktøylinje kan sende signaler fra den, som et button panel når en knapp trykkes, eller en sensor når den oppdager noe. Hver verktøylinjeplass sender sitt eget signal, så én blokk kan få flere utløsere til å utløses. Du velger plassen i [signalvelgeren](selector).
 
-Signalet når ![](mark:logic-system)&nbsp;[logikksystemet](logic-system) gjennom en ![](mark:signal)&nbsp;[signalplass](slot), som holder blokken og verktøylinjeplassen. Å fylle signalplassen setter opp den verktøylinjeplassen for deg. Der verktøylinjeplassen allerede gjorde noe annet og du tar den over, gir angre den tilbake, så lenge ingenting annet er lagt der siden.
+Signalet når ![](mark:logic-system)&nbsp;[logikksystemet](logic-system) gjennom en ![](mark:signal)&nbsp;[signalplass](slot), som holder blokken og verktøylinjeplassen. Å fylle signalplassen setter opp den verktøylinjeplassen for deg. Der verktøylinjeplassen allerede gjorde noe annet og du tar den over, gir ![](mark:undo)&nbsp;[angre](undo) den tilbake, så lenge ingenting annet er lagt der siden.
 
 Hver verktøylinjeplass som settes opp slik, viser det korte navnet til signalplassen, de få ordene du skriver under `Kort navn` på siden til plassen. En knapp på et button panel får det som navn, og en verktøylinjeplass viser så mye av det som får plass under ikonet. Står det tomt, viser de navnet til plassen. Som resten av plassen kan det korte navnet bare endres mens logikksystemet er slått av.
 

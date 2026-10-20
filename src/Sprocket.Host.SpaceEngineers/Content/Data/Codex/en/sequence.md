@@ -26,7 +26,7 @@ Rest the pointer on a wait for pending tasks to see which steps it waits for, or
 
 ## When a run goes wrong
 
-A run **fails** when a step can't be done at all, for example because its block was lost. That installation switches off, the others keep running, and the [home screen](home) says which step failed and why. Put right what it names, and switch the installation on again. A lost block or an empty [slot](slot) is filled on the [installation panel](installation-panel).
+A run **fails** when a step can't be done at all, for example because its block was lost. That installation switches off, the others keep running, and the [home screen](home) says which step failed and why. Put right what it names, and switch the installation on again. A lost block is replaced in its [slot](slot) on the [installation panel](installation-panel).
 
 A step **holds** when its block is stuck, like a rotor that is held or a vent with nowhere to put the air. It waits and says why, and carries on by itself once the way is clear. To give up instead, stop the run.
 
