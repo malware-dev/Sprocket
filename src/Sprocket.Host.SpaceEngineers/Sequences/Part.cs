@@ -25,6 +25,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>For a signal slot, the few words shown with each toolbar slot that answers it, or empty for its name.</summary>
         public string Short { get; set; } = "";
 
+        /// <summary>The category of its system the slot is shown under on the installation panel, or empty for none.</summary>
+        public string Category { get; set; } = "";
+
         /// <summary>Whether this part is a trigger, answered by toolbar slots on its blocks rather than by the blocks alone.</summary>
         public bool IsSignal { get; set; }
 

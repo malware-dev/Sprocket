@@ -33,12 +33,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         readonly List<string> _called = new List<string>();
         readonly List<Part> _parts = new List<Part>();
+        readonly List<object> _slotKeys = new List<object>();
         readonly List<string> _used = new List<string>();
         readonly List<string> _marks = new List<string>();
         readonly SlotFill _fill;
+        readonly SlotArranger _arranger;
 
         int _wiring = -1;
-        int _quiet;
         Element _focused;
         ListField _blocksets;
         string _madeName;
@@ -47,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         KeyedChildren<Trigger, TriggerRow> _triggerRows;
         KeyedChildren<Sequence, StatusRow> _sequenceRows;
-        KeyedChildren<Part, PartRow> _slotRows;
+        KeyedChildren<object, Element> _slotRows;
         LengthQuestion _rate;
 
         /// <summary>The page of <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
@@ -55,8 +56,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             _system = system;
             _fill = new SlotFill(editor, system);
+            _arranger = new SlotArranger(editor, system);
 
-            _quiet = editor.Program.Wiring;
         }
 
         /// <inheritdoc />
@@ -168,33 +169,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The blueprint's slots, one row each, with the shown installation's blocks for each.</summary>
         public Element.Collection Slots => _slotList.Children;
 
-        /// <summary>Offers to switch a changed system on, on the way out.</summary>
+        /// <summary>Writes the description being typed, and asks whether to keep what was changed here, on the way out.</summary>
         public override bool Leaving()
         {
             Written(_focused);
             _focused = null;
-
-            if (_system.Enabled || Editor.Program.Wiring == _quiet || !HasSteps() || Editor.Versions.Rival(_system) != null)
-                return true;
-
-            var arguments = new Arguments();
-            arguments.Set("name", _system.Name);
-            Editor.Ask(Editor.Texts.SystemSwitchOnQuestion, arguments);
-
-            Editor.Answer(Editor.Texts.SystemSwitchItOn, delegate
-            {
-                _quiet = Editor.Program.Wiring;
-                Editor.SwitchSystem(_system, true);
-                Editor.Pop();
-            });
-
-            Editor.Answer(Editor.Texts.SystemLeaveItOff, delegate
-            {
-                _quiet = Editor.Program.Wiring;
-                Editor.Pop();
-            }, true);
-
-            return false;
+            return base.Leaving();
         }
 
         /// <inheritdoc />
@@ -259,7 +239,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             _triggerRows = new KeyedChildren<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
             _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
-            _slotRows = new KeyedChildren<Part, PartRow>(_slotList.Children, delegate { return new PartRow(Editor.Texts); });
+            _slotRows = new KeyedChildren<object, Element>(_slotList.Children, SlotRow);
+            _slotList.Landings = index => SlotArranger.Landings(_slotKeys, index);
+            _slotList.Moves = (from, to) =>
+            {
+                var move = Editor.Act(CommandKind.MoveSlot, () => _arranger.Move(_slotKeys, from, to));
+                if (move != null)
+                    move.Execute();
+            };
 
             int shown;
             if (Editor.Habits.Tabs.TryGetValue(_system.Id, out shown))
@@ -340,6 +327,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             Flag(_triggersMark, triggered);
             Flag(_sequencesMark, sequenced);
+
+            // A handful of rows, each still unless one is carried or has just landed.
+            _slotList.Slide();
 
             if (_rate != null)
                 _rate.Hang();
@@ -482,20 +472,35 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var shown = _system.IsBlueprint ? Editor.StandIn(_system) : null;
 
             _parts.Clear();
+            _slotKeys.Clear();
             _system.Acted(_used);
             if (shown != null)
-                PartList.Listed(_system, _used, _parts);
+                PartList.Listed(_system, _used, _parts, _slotKeys, true);
 
             _slotsHeading.IsVisible = _parts.Count > 0;
             _slotList.IsVisible = _parts.Count > 0;
             _slotsHeading.Text = texts.BlueprintParts.ToUpperInvariant();
-            _slotRows.Show(_parts);
+            _addCategory.IsVisible = _parts.Count > 0 && Editable;
+            _newCategory.Text = StatusRow.Plus + texts.CategoryAdd;
+            _newCategory.Command = Changes(CommandKind.AddCategory, () => _arranger.Add(Editor.Texts));
+            _newCategory.Tip = Tip.For(_newCategory.Tip, texts.CategoryAddAbout);
+            _slotRows.Show(_slotKeys);
             if (shown == null)
                 return;
 
+            for (var i = 0; i < _slotKeys.Count; i++)
+            {
+                var category = _slotKeys[i] as string;
+                if (category != null)
+                    ArrangeCategory(texts, (CategoryRow)_slotRows[category], category, SlotArranger.Carries(_slotKeys, i));
+            }
+
             foreach (var part in _parts)
             {
-                var row = _slotRows[part];
+                var row = (PartRow)_slotRows[part];
+                row.Arranged = true;
+                row.Indented = _system.Categories.Contains(part.Category);
+                row.Grips(Editable, Editable ? texts.SlotDrag : Locked());
 
                 row.Name = part.Id;
                 row.Short = part.IsSignal ? part.Short : "";
@@ -513,6 +518,41 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 else
                     row.Say(SentenceText.Empty, !part.Optional);
             }
+        }
+
+        /// <summary>A row for <paramref name="key" /> of the installation panel: a slot's, or a category's, whose box hands the keyboard back on Enter and on Escape puts the name back first.</summary>
+        Element SlotRow(object key)
+        {
+            if (key is Part)
+                return new PartRow(Editor.Texts);
+
+            var row = new CategoryRow();
+            row.Box.Submit = new Relay(delegate { Editor.Input?.Focus(null); });
+            row.Box.Cancel = new Relay(delegate
+            {
+                row.Box.Text = row.Name;
+                Editor.Input?.Focus(null);
+            });
+            return row;
+        }
+
+        /// <summary>Shows the category <paramref name="name" /> over the <paramref name="carries" /> slots under it, renamed, removed and carried while the system may be changed.</summary>
+        void ArrangeCategory(Texts texts, CategoryRow row, string name, int carries)
+        {
+            var editable = Editable;
+
+            row.Name = name;
+            row.Carries = carries;
+            row.Arranged = true;
+            row.Grips(editable, editable ? texts.CategoryDrag : Locked());
+            row.Renames = Changes(CommandKind.RenameCategory, delegate
+            {
+                row.Rename();
+                Editor.Input?.Focus(row.Box);
+            });
+            row.RenamesAbout = editable ? texts.CategoryRenameAbout : Locked();
+            row.Removes = Changes(CommandKind.RemoveCategory, () => _arranger.Remove(name));
+            row.RemovesAbout = editable ? texts.CategoryRemove : Locked();
         }
 
         /// <summary>What the installations other than <paramref name="shown" /> still have to do about <paramref name="part" />, or null where nothing.</summary>
@@ -558,13 +598,28 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Editor.Input.Focus(null);
         }
 
-        /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is the description's box.</summary>
+        /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is the description's box or a category's name.</summary>
         void Written(Element box)
         {
-            if (box == null || _composer == null || box != _composer.Box || !Editable)
+            if (box == null || _composer == null || !Editable)
                 return;
 
-            Editor.Do(_system, new AnnotateSystem(_system.Annotation, _composer.Text));
+            if (box == _composer.Box)
+            {
+                Editor.Do(_system, new AnnotateSystem(_system.Annotation, _composer.Text));
+                return;
+            }
+
+            foreach (var child in _slotList.Children)
+            {
+                var row = child as CategoryRow;
+                if (row == null || row.Box != box)
+                    continue;
+
+                row.Renamed();
+                _arranger.Rename(row.Name, row.Box.Text);
+                return;
+            }
         }
 
         /// <summary>Hides the ways to add something while the system may run, and says why in their place.</summary>
@@ -606,19 +661,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         ICommand Changes(CommandKind kind, Action action)
         {
             return Editable ? Editor.Act(kind, action) : null;
-        }
-
-        /// <summary>Whether any sequence in the system has anything to do.</summary>
-        bool HasSteps()
-        {
-            var sequences = _system.Sequences;
-            for (var i = 0; i < sequences.Count; i++)
-            {
-                if (sequences[i].Steps.Count > 0)
-                    return true;
-            }
-
-            return false;
         }
 
         /// <summary>Says, for a blueprint, whose blocks the sentences name, as a list of the installations made from it.</summary>

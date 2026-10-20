@@ -17,7 +17,7 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 {
     /// <summary>One step of a sequence as the line it reads as: its number, a lead-in, then the parts that complete it.</summary>
-    public partial class StepRow : HStack
+    public partial class StepRow : HStack, ICarried
     {
         const float Indent = 32f;
         const float SpineIn = 6f;

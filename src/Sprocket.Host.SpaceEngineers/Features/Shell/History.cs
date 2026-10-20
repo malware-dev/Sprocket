@@ -17,15 +17,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         readonly List<int> _groups = new List<int>();
         Entry _target;
 
-        /// <summary>Makes a change and records how to take it back, returning false where it changed nothing.</summary>
-        public bool Did(T subject, Edit<T> edit)
+        /// <summary>Makes a change and records how to take it back, and that the screen numbered <paramref name="maker" /> made it; false where it changed nothing.</summary>
+        public bool Did(T subject, Edit<T> edit, int maker)
         {
             if (!edit.Changes)
                 return false;
 
             edit.Apply(subject);
 
-            var entry = new Entry(edit);
+            var entry = new Entry(edit) { Maker = maker };
             edit.Touches(subject, entry.Screens);
 
             Branch(subject, entry.Screens);
@@ -151,6 +151,64 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             stack.RemoveAt(stack.Count - 1);
             edit.Undo(subject);
             return true;
+        }
+
+        /// <summary>Whether a change the screen numbered <paramref name="maker" /> made still stands, in anything, and could be taken back now: not one waiting for a switch.</summary>
+        public bool MadeBy(int maker)
+        {
+            foreach (var pair in _done)
+            {
+                foreach (var entry in pair.Value)
+                {
+                    if (entry.Maker == maker && !entry.Edit.Held(pair.Key, true))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>Has the changes the screen numbered <paramref name="maker" /> made stand as made by none, so nothing takes them back as its own.</summary>
+        public void Disown(int maker)
+        {
+            foreach (var done in _done.Values)
+            {
+                foreach (var entry in done)
+                {
+                    if (entry.Maker == maker)
+                        entry.Maker = 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Takes back and forgets every change the screen numbered <paramref name="maker" /> made that still stands, the last
+        /// first, leaving the changes other screens made after them; one that no longer fits what is there, or waits for a
+        /// switch, stays, and so does every one made before it. Each change taken back is added to <paramref name="discarded" />.
+        /// </summary>
+        public void Discard(int maker, IList<Edit<T>> discarded)
+        {
+            foreach (var pair in _done)
+            {
+                var done = pair.Value;
+                var any = false;
+                for (var i = done.Count - 1; i >= 0; i--)
+                {
+                    if (done[i].Maker != maker)
+                        continue;
+
+                    if (!done[i].Edit.Undoable(pair.Key) || done[i].Edit.Held(pair.Key, true))
+                        break;
+
+                    done[i].Edit.Undo(pair.Key);
+                    discarded.Add(done[i].Edit);
+                    done.RemoveAt(i);
+                    any = true;
+                }
+
+                if (any)
+                    Reassert(pair.Key);
+            }
         }
 
         /// <summary>Forgets everything done to <paramref name="subject" />.</summary>
@@ -376,6 +434,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             public Edit<T> Edit { get; }
 
             public List<object> Screens { get; } = new List<object>();
+
+            /// <summary>The number of the screen that made the change and answers for it on leaving, or 0 where it is kept.</summary>
+            public int Maker { get; set; }
         }
     }
 }

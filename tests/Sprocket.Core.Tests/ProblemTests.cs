@@ -462,6 +462,7 @@ public class ProblemTests
         ship.Editor.PressChoice("close");
         ship.Editor.PressPrimary();
 
+        ship.Editor.SwitchSystem(ship.Automation.Systems[0], true);
         ship.Editor.GoToRoot();
         ship.Sequence = ship.Automation.Sequences[0];
 

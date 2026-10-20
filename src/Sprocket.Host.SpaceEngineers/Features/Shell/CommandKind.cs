@@ -155,6 +155,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Moving a step to another place in its sequence.</summary>
         MoveStep,
 
+        /// <summary>Moving a slot, or a category with its slots, to another place on the installation panel.</summary>
+        MoveSlot,
+
+        /// <summary>Adding a category of slots to the installation panel.</summary>
+        AddCategory,
+
+        /// <summary>Renaming a category of slots.</summary>
+        RenameCategory,
+
+        /// <summary>Removing a category of slots, which leaves its slots under none.</summary>
+        RemoveCategory,
+
         /// <summary>Deleting a step.</summary>
         DeleteStep,
 

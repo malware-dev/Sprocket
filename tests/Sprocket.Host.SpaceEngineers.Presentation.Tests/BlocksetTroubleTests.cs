@@ -202,6 +202,7 @@ public class BlocksetTroubleTests
         sim.Editor.PressChoice("close");
         sim.Editor.PressPrimary();
         sim.Editor.GoToRoot();
+        sim.Editor.SwitchSystem(sim.Editor.Program.Systems.Single(), true);
         sim.Tick();
 
         var system = sim.Editor.Program.Systems.Single();

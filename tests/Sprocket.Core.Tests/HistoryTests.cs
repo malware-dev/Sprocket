@@ -13,8 +13,8 @@ public class HistoryTests
     {
         var made = new List<string>();
         var history = new History<List<string>>();
-        history.Did(made, new Mark("one", "A"));
-        history.Did(made, new Mark("two", "B"));
+        history.Did(made, new Mark("one", "A"), 0);
+        history.Did(made, new Mark("two", "B"), 0);
 
         Assert.NotNull(history.Undo(made, "A"));
 
@@ -32,9 +32,9 @@ public class HistoryTests
     {
         var made = new List<string>();
         var history = new History<List<string>>();
-        history.Did(made, new Mark("pick", "A", "B"));
-        history.Did(made, new Mark("describe", "B"));
-        history.Did(made, new Mark("elsewhere", "C"));
+        history.Did(made, new Mark("pick", "A", "B"), 0);
+        history.Did(made, new Mark("describe", "B"), 0);
+        history.Did(made, new Mark("elsewhere", "C"), 0);
 
         var also = new List<object>();
         history.Also(made, "A", true, also);
@@ -54,12 +54,12 @@ public class HistoryTests
     {
         var made = new List<string>();
         var history = new History<List<string>>();
-        history.Did(made, new Mark("one", "A"));
-        history.Did(made, new Mark("two", "B"));
+        history.Did(made, new Mark("one", "A"), 0);
+        history.Did(made, new Mark("two", "B"), 0);
         history.Undo(made, "A");
         history.Undo(made, "B");
 
-        history.Did(made, new Mark("three", "A"));
+        history.Did(made, new Mark("three", "A"), 0);
 
         Assert.False(history.CanRedo(made, "A"));
         Assert.True(history.CanRedo(made, "B"));
@@ -72,8 +72,8 @@ public class HistoryTests
         var made = new List<string>();
         var history = new History<List<string>>();
         var standing = new Mark("rename", "S");
-        history.Did(made, new Mark("step", "A"));
-        history.Did(made, standing);
+        history.Did(made, new Mark("step", "A"), 0);
+        history.Did(made, standing, 0);
 
         history.Undo(made, "A");
 

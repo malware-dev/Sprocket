@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Drawing;
 using Lumel.Input;
 using Lumel.Layout;
@@ -17,7 +18,7 @@ using VRageMath;
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>One slot of a blueprint: its name, what it says about itself, the blocks one installation fills it with, and what is still to do about it.</summary>
-    public partial class PartRow : HStack
+    public partial class PartRow : HStack, ICarried
     {
         /// <summary>How many lines a slot's blocks take at most, the last saying how many more there are where they do not fit.</summary>
         public const int MostListed = 8;
@@ -163,6 +164,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 _column.Placement = FixedSize.Wide(value);
             }
         }
+
+        /// <summary>How far a slot under a category stands in from the category's name.</summary>
+        public const float Indent = 32f;
+
+        /// <summary>Whether the slot stands under a category, in from its name; its blocks stay in line with every other slot's.</summary>
+        public bool Indented
+        {
+            set { _column.Padding = new Thickness(value ? Indent : 0f, 0f, 0f, 0f); }
+        }
+
+        /// <summary>Whether its place can be changed at all: where it can, it shows a grip.</summary>
+        public bool Arranged
+        {
+            set { _grip.IsVisible = value; }
+        }
+
+        /// <summary>Lets the grip be taken where <paramref name="can" />, dimmed where not, saying <paramref name="about" /> where the pointer rests on it.</summary>
+        public void Grips(bool can, string about)
+        {
+            _grip.CanCarry = can;
+            _grip.Color = can ? Palette.Faint : Palette.Dim;
+            _grip.Tip = Tip.For(_grip.Tip, about);
+        }
+
+        /// <inheritdoc />
+        public Grip Grip => _grip;
+
+        /// <inheritdoc />
+        public bool IsCarried { get; set; }
+
+        /// <summary>None: a slot goes alone.</summary>
+        public int Carries => 0;
 
         /// <summary>The blocks the installation fills the slot with, by entity id; none where it is empty.</summary>
         public List<long> Blocks { get; }

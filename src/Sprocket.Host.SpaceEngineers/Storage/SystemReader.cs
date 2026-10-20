@@ -64,9 +64,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var system = program.Restore(identity, space, called);
             system.Annotation = statement.Annotation;
-            system.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.LastSequence);
+            system.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.LastSequence, ScriptAttributes.Categories);
             system.IsBlueprint = blueprint;
             LastSequence(statement, system, trouble);
+            Categories(statement, system, trouble);
 
             // The header's clauses, each on a line of its own, in either order and each at most once.
             var at = first + 3;
@@ -153,6 +154,32 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             system.Used((int)number.Whole);
         }
 
+        /// <summary><c>#@ categories: [ "Doors", "Lights" ]</c> on a system: the categories its slots are shown under, each named once.</summary>
+        static void Categories(Statement statement, AutomationSystem system, ScriptTrouble trouble)
+        {
+            ScriptAttribute attribute;
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.Categories, out attribute))
+                return;
+
+            if (attribute.Value.Form != ValueForm.List)
+            {
+                trouble.Say(statement, $"expected a list of text for the attribute {ScriptAttributes.Categories}.");
+                return;
+            }
+
+            var items = statement.Within(attribute.Value);
+            for (var i = 0; i < items.Count; i++)
+            {
+                var name = items[i];
+                if (name.Form != ValueForm.Text || name.Word.Trim().Length == 0)
+                    trouble.Say(statement, $"expected a category's name as text in the attribute {ScriptAttributes.Categories}.");
+                else if (system.Categories.Contains(name.Word))
+                    trouble.Say(statement, $"category \"{name.Word}\" is named twice in the attribute {ScriptAttributes.Categories}.");
+                else
+                    system.Categories.Add(name.Word);
+            }
+        }
+
         /// <summary>
         /// Reads <c>from blueprint "&lt;guid&gt;" ["&lt;iso&gt;"]</c> at <paramref name="at" /> into the link of
         /// <paramref name="system" />, answering where the next clause starts.
@@ -210,6 +237,28 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             part.Short = attribute.Value.Word;
         }
 
+        /// <summary><c>#@ category: "Doors"</c> on a slot: the category of its system it is shown under, text.</summary>
+        static void Category(Statement statement, AutomationSystem system, Part part, ScriptTrouble trouble)
+        {
+            ScriptAttribute attribute;
+            if (!ScriptAttributes.Find(statement, ScriptAttributes.Category, out attribute))
+                return;
+
+            if (attribute.Value.Form != ValueForm.Text)
+            {
+                trouble.Say(statement, $"expected text for the attribute {ScriptAttributes.Category}.");
+                return;
+            }
+
+            if (!system.Categories.Contains(attribute.Value.Word))
+            {
+                trouble.Say(statement, $"category \"{attribute.Value.Word}\" is not among the system's {ScriptAttributes.Categories}.");
+                return;
+            }
+
+            part.Category = attribute.Value.Word;
+        }
+
         static void ReadSlot(Statement statement, AutomationSystem system, ScriptTrouble trouble)
         {
             var optional = statement.Key == Keyword.Optional;
@@ -234,8 +283,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
 
             var part = system.PartFor(name.Word);
             part.Annotation = statement.Annotation;
-            part.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Short);
+            part.Attributes = ScriptAttributes.Unused(statement, ScriptAttributes.Short, ScriptAttributes.Category);
             Short(statement, part, trouble);
+            Category(statement, system, part, trouble);
             part.Optional = optional;
 
             if (!statement.Says(2, Keyword.Expects))

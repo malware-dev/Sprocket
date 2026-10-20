@@ -59,6 +59,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case ChangeKind.UpdateFromLibrary: return texts.ChangeUpdateFromLibrary;
                 case ChangeKind.ResetToBlueprint: return texts.ChangeResetToBlueprint;
                 case ChangeKind.ChooseVersion: return texts.ChangeChooseVersion;
+                case ChangeKind.MoveSlot: return texts.ChangeMoveSlot;
+                case ChangeKind.MoveCategory: return texts.ChangeMoveCategory;
+                case ChangeKind.AddCategory: return texts.ChangeAddCategory;
+                case ChangeKind.RenameCategory: return texts.ChangeRenameCategory;
+                case ChangeKind.RemoveCategory: return texts.ChangeRemoveCategory;
                 default: return "";
             }
         }

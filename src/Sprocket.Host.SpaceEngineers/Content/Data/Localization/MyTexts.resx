@@ -1018,18 +1018,6 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <value>{name} must be turned off in order to be edited safely.</value>
     <comment>Line shown while a logic system is switched on, in place of the buttons that change it, on the logic system's screen, a sequence's screen and a blueprint slot's screen; also the tooltip on the dimmed bin in the editor's heading bar on a sequence's screen. {name} is filled with the logic system's name, except on the installation panel, where the line shows while the installation is on and {name} is the installation's name.</comment>
   </data>
-  <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
-    <value>Switch **{name}** on?</value>
-    <comment>Question dialog asked on leaving a logic system's screen when the logic system was changed and is still switched off. {name} is filled with the logic system's name.</comment>
-  </data>
-  <data name="Sprocket.System.SwitchItOn" xml:space="preserve">
-    <value>Switch it on</value>
-    <comment>Answer in the question dialog asked on leaving a changed logic system that is still switched off; it switches the logic system on.</comment>
-  </data>
-  <data name="Sprocket.System.LeaveItOff" xml:space="preserve">
-    <value>Leave it off</value>
-    <comment>Answer in the question dialog asked on leaving a changed logic system that is still switched off; it leaves the logic system switched off, and is the answer the Enter key gives.</comment>
-  </data>
   <data name="Sprocket.Blueprint.SwitchOffQuestion" xml:space="preserve">
     <value>Switch off the **{name}** logic system?</value>
     <comment>First line of a question dialog asked when the switch of a logic system that has installations is turned off. {name} is the logic system's name.</comment>
@@ -3297,5 +3285,53 @@ Lights green when it runs, and red when something in it needs mending.</value>
   <data name="Sprocket.Panel.Page" xml:space="preserve">
     <value>{at} of {count}</value>
     <comment>At the bottom of the automation panel, the app a text panel or cockpit screen offers as "Automation", while it shows the installations that want looking at a page at a time and there are too many pages for a dot each; {at} is which page is shown, {count} how many there are.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
+    <value>moving a slot</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a slot to another place on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
+    <value>moving a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is dragging a category of slots, with its slots, to another place on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.AddCategory" xml:space="preserve">
+    <value>adding a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a category of slots on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.RenameCategory" xml:space="preserve">
+    <value>renaming a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is renaming a category of slots on the logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
+    <value>removing a category</value>
+    <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a category of slots on the logic system's Installation panel tab, which leaves its slots under no category.</comment>
+  </data>
+  <data name="Sprocket.Category.Add" xml:space="preserve">
+    <value>category</value>
+    <comment>Button under the slots on a logic system's Installation panel tab, after a plus sign meaning add, that adds a category to put slots under. Shown only while the logic system is off.</comment>
+  </data>
+  <data name="Sprocket.Category.AddAbout" xml:space="preserve">
+    <value>Adds a category, which slots can be dragged into to group them on the installation panel.</value>
+    <comment>Tooltip on the + Category button under the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Category.Default" xml:space="preserve">
+    <value>Category {number}</value>
+    <comment>The name a new category of slots is given on a logic system's Installation panel tab. {number} is filled with the first number no category is using, counting on from the categories there are.</comment>
+  </data>
+  <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
+    <value>Renames the category.</value>
+    <comment>Tooltip on a category's name, a heading among the slots on a logic system's Installation panel tab. Pressing it lets the name be typed.</comment>
+  </data>
+  <data name="Sprocket.Category.Remove" xml:space="preserve">
+    <value>Removes the category. Its slots stay, under no category.</value>
+    <comment>Tooltip on the bin beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Category.Drag" xml:space="preserve">
+    <value>Drag to move the category with its slots.</value>
+    <comment>Tooltip on the grip beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Slot.Drag" xml:space="preserve">
+    <value>Drag to move the slot, into a category or out of one.</value>
+    <comment>Tooltip on the grip beside a slot's name on a logic system's Installation panel tab.</comment>
   </data>
 </root>

@@ -11,6 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     partial class PartRow
     {
         VStack _column;
+        Grip _grip;
         Glyph _mark;
         Button _name;
         RichText _about;
@@ -38,6 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 8f,
                         Children =
                         {
+                            new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
                             new Glyph { Style = Styles.Waits }.As(out _mark),
                             new Button { Style = Styles.SlotNameStill }.As(out _name)
                         }

@@ -90,6 +90,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         int _renaming = -1;
         HeadingPart _renamed;
         HeadingPart _namedArrival;
+
+        // Whether the name being typed is the one a page arrived to be given, which belongs to making what it is on.
+        bool _arriving;
         string _checkedText;
         bool _checkedTaken;
 
@@ -732,6 +735,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
                 _namedArrival = part;
                 Rename(i);
+                _arriving = _renaming >= 0;
                 return;
             }
         }
@@ -745,12 +749,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             // The part the name was begun on, which a press that changed the screen has taken out of the heading.
             var part = _renamed;
             var name = _title.Box(_renaming).Text;
+            var arriving = _arriving;
 
             EndRename();
 
             var renames = part.Renames;
             if (renames != null)
                 renames(name);
+
+            // The name given on arrival is part of making the thing, so leaving the page does not ask whether to keep it.
+            if (arriving)
+                _editor.Keep(_editor.Current);
         }
 
         /// <summary>Puts the box away, giving nothing.</summary>
@@ -761,6 +770,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             var renamed = _renaming;
             _renaming = -1;
+            _arriving = false;
             _renamed = null;
             _title.End(renamed);
             _seen = -1;

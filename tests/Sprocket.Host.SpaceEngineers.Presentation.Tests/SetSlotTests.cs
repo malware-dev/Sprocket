@@ -199,7 +199,7 @@ public class SetSlotTests
         var screen = Built(out var system);
         Off(screen, Light, Cockpit);
         var editor = screen.Editor;
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
         system.Annotation = "Cycles the airlock.";
         editor.SwitchSystem(system, true);
@@ -294,7 +294,7 @@ public class SetSlotTests
 
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
         return screen;
     }

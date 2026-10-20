@@ -19,7 +19,7 @@ public class ChangingTests
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         return screen.Run(2);
     }
 
@@ -87,7 +87,7 @@ public class ChangingTests
         screen.Editor.PressStart("every");
         screen.Editor.TimerRate().Give("100", true);
         screen.Editor.PressPrimary();
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         Trigger was = System(screen).Triggers[0];
@@ -195,7 +195,7 @@ public class ChangingTests
 
         screen.Editor.PressStart("sequence");
         screen.Editor.Name("Seal up");
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         Trigger was = System(screen).Triggers[0];
@@ -241,7 +241,7 @@ public class ChangingTests
         Assert.Equal("A task on blocks", screen.Editor.Screen.Title());
         Assert.Equal(3, screen.Editor.Pick().Page);
 
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         Assert.Equal("When Airlock Inner Door finishes closing", screen.Editor.Screen.Title());
@@ -350,7 +350,7 @@ public class ChangingTests
 
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         var pick = screen.Editor.Pick();
@@ -378,7 +378,7 @@ public class ChangingTests
         screen.Run(1);
         screen.Editor.PressChoice("A task on blocks…");
         screen.Editor.PressBlock("Airlock Outer Door");
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Editor.PressChoice("A new sequence");
         screen.Run(2);
 
@@ -405,7 +405,7 @@ public class ChangingTests
 
         screen.Editor.PressStart("sequence");
         screen.Editor.Name("Seal up");
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         screen.Editor.PressWhen(0);
@@ -659,7 +659,7 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         screen.Editor.PressWhen(1);
@@ -689,7 +689,7 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         screen.Editor.PressWhen(1);
@@ -729,7 +729,7 @@ public class ChangingTests
         screen.Editor.PressBlock("Airlock Inner Door");
         screen.Editor.PressChoice("finishes closing");
         screen.Editor.PressPrimary();
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
 
         screen.Editor.PressWhen(1);

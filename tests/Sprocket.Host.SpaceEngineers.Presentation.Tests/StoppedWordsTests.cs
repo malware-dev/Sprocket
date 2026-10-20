@@ -28,6 +28,7 @@ public class StoppedWordsTests
         rig.Editor.Program.Edited();
 
         rig.Editor.GoToRoot();
+        rig.Editor.SwitchSystem(system, true);
         rig.Tick();
         rig.Editor.Push(new SequencePage(rig.Editor, sequence));
         var page = rig.Editor.Sentence();
@@ -66,6 +67,7 @@ public class StoppedWordsTests
         rig.Editor.Program.Edited();
 
         rig.Editor.GoToRoot();
+        rig.Editor.SwitchSystem(system, true);
         rig.Tick();
         rig.Editor.Push(new SequencePage(rig.Editor, sequence));
         var page = rig.Editor.Sentence();

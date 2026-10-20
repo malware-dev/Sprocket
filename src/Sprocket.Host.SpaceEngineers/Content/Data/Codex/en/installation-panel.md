@@ -12,6 +12,12 @@ Each set of blocks you select for a step or a trigger becomes a slot. A slot of 
 
 On this tab, a slot's name is a button that opens the slot, to name it and write what it is for. On an installation's own panel, the name is plain text.
 
+Slots stand in the order they were made. Drag a slot by its grip to move it to another place.
+
+To group slots, press `+ category`, which adds *Category 1*, then *Category 2* and so on. Press a category's name to rename it. ![](mark:delete)&nbsp;on a category removes it and leaves its slots among those at the top. The slots outside any category come first, then each category's name with its slots set in under it. Drag a slot under a category's name to put it in that category, or among the slots at the top to take it out. A category's own grip moves it with all its slots.
+
+Each of these changes is one step of ![](mark:undo)&nbsp;[undo](undo), and like every other change it can be made only while the logic system is switched off. An installation's own panel shows the same order as plain text, with every category that holds slots, by the same name.
+
 ## Screens
 
 Every installation chooses its own screen. Filling a slot of screens opens the [selector](selector) with the step's own action alone, and the screen drop box under it once blocks are selected. It asks for no values, since those belong to the step.

@@ -18,7 +18,7 @@ public class SequenceDeleteTests
         var system = editor.Program.Systems[0];
         var first = system.Sequences[0];
         Off(screen, "Airlock Light");
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
         editor.NewSequence(system);
         screen.Run(2);

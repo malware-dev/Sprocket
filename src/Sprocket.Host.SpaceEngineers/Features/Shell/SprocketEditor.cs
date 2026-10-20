@@ -473,6 +473,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Shows <paramref name="page" /> over the current one.</summary>
         public void Push(EditorPage page)
         {
+            page.Opened = ++_opened;
             _stack.Add(page);
             _structureDirty = true;
         }
@@ -495,9 +496,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Unwire();
 
             var page = Current;
-            if (!page.Leaving())
-                return;
+            if (page.Leaving())
+                Left(page);
+        }
 
+        /// <summary>Goes back from <paramref name="page" />, taking back what it was opened on where that was made and left untouched.</summary>
+        public void Left(EditorPage page)
+        {
             Pop();
             if (page.IsMade && page.Untouched)
                 page.Unmake();
@@ -506,6 +511,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Goes back a page as Done, where the page lets it go, keeping what it was opened on whether or not anything was done to it.</summary>
         public void Finish()
         {
+            Keep(Current);
             if (Current.Leaving())
                 Pop();
         }
@@ -529,6 +535,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         readonly List<object> _also = new List<object>();
 
+        // Counts the pages opened, each one's number telling the changes it made from the others'.
+        int _opened;
+
         /// <summary>Makes a change to a sequence and remembers how to take it back.</summary>
         /// <remarks>Every change to a sequence goes through here.</remarks>
         public void Do(Sequence sequence, SequenceEdit edit)
@@ -547,7 +556,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Makes <paramref name="edit" /> to <paramref name="system" /> as the next step of its history.</summary>
         void Record(AutomationSystem system, Edit<AutomationSystem> edit)
         {
-            if (!_systemHistory.Did(system, edit))
+            if (!_systemHistory.Did(system, edit, Maker()))
                 return;
 
             Settled(edit);
@@ -556,10 +565,51 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Makes a change to the program as a whole, a logic system or an installation made or taken out, and remembers how to take it back.</summary>
         public void Do(ProgramEdit edit)
         {
-            if (!_constructHistory.Did(_program, edit))
+            if (!_constructHistory.Did(_program, edit, Maker()))
                 return;
 
             Settled(edit);
+        }
+
+        /// <summary>The number of the page a change made now is made on: the nearest page with a history, which answers for it on leaving.</summary>
+        /// <remarks>A picker or a writing page opened from it hands its result to that page.</remarks>
+        int Maker()
+        {
+            for (var i = _stack.Count - 1; i >= 0; i--)
+            {
+                if (_stack[i].HasHistory)
+                    return _stack[i].Opened;
+            }
+
+            return 0;
+        }
+
+        /// <summary>Whether a change made on <paramref name="page" /> still stands, to keep or discard on leaving it.</summary>
+        public bool Changed(EditorPage page)
+        {
+            return _systemHistory.MadeBy(page.Opened) || _constructHistory.MadeBy(page.Opened);
+        }
+
+        /// <summary>Keeps every change made on <paramref name="page" />, so leaving it asks nothing about them.</summary>
+        public void Keep(EditorPage page)
+        {
+            _systemHistory.Disown(page.Opened);
+            _constructHistory.Disown(page.Opened);
+        }
+
+        /// <summary>Takes back every change made on <paramref name="page" />, leaving those made on the pages opened from it.</summary>
+        public void Discard(EditorPage page)
+        {
+            var systems = new List<Edit<AutomationSystem>>();
+            var construct = new List<Edit<Automation>>();
+            _systemHistory.Discard(page.Opened, systems);
+            _constructHistory.Discard(page.Opened, construct);
+
+            foreach (var edit in systems)
+                Walked(edit);
+
+            foreach (var edit in construct)
+                Walked(edit);
         }
 
         /// <summary>Has the program edited and rewired after <paramref name="edit" />, and the screen built again where it changes its shape.</summary>

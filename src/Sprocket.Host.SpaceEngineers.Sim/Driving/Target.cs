@@ -578,6 +578,15 @@ namespace Sprocket.Sim.Driving
         /// <summary>Presses back.</summary>
         public static void Back(this SprocketEditor editor) => Run(editor.Screen.Back);
 
+        /// <summary>Presses back, and keeps the changes made on the screen where it asks whether to.</summary>
+        public static void BackKeeping(this SprocketEditor editor)
+        {
+            Back(editor);
+            var keep = editor.Screen.Answers.FirstOrDefault(answer => answer.Text == editor.Texts.PickKeepThem);
+            if (keep != null)
+                Run(keep.Command);
+        }
+
         /// <summary>
         /// The whole heading as one string, for an assertion that does not care how it is made of parts.
         /// </summary>

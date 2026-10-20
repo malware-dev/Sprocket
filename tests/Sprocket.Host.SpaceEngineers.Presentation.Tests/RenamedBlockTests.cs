@@ -24,7 +24,7 @@ public class RenamedBlockTests
     public void ATriggerNamesItsBlockByItsNewName()
     {
         var screen = Built();
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         screen.Run(2);
         Assert.Contains("Airlock Button", Said(screen));
 

@@ -170,7 +170,7 @@ public class RigTests
             sim.Editor.PressBlock(door);
             sim.Editor.PressChoice("open");
             sim.Editor.PressPrimary();
-            sim.Editor.Back();
+            sim.Editor.BackKeeping();
             sim.Tick();
         }
 
@@ -585,7 +585,7 @@ public class RigTests
         rig.Editor.PressBlock("Airlock Inner Door");
         rig.Editor.PressChoice("open");
         rig.Editor.PressPrimary();
-        rig.Editor.Back();
+        rig.Editor.BackKeeping();
 
         Sequence sequence = rig.Editor.Program.Sequences[0];
 
@@ -836,7 +836,7 @@ public class RigTests
         for (var i = 0; i < 20; i++)
             rig.Tick();
 
-        rig.Editor.Back();
+        rig.Editor.BackKeeping();
         rig.Editor.PressStart("when");
         rig.Editor.PressBlock("Airlock Button");
         rig.Editor.PressChoice("button 1 is pressed");

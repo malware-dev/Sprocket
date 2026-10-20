@@ -1001,7 +1001,7 @@ public class EditorTests
         var system = ship.Automation.Systems[0];
         var sequence = ship.Automation.Sequences[0];
 
-        editor.Back();
+        editor.BackKeeping();
         ship.Tick();
 
         // On its own screen: renameable, the same way a sequence is.
@@ -1015,7 +1015,7 @@ public class EditorTests
         ship.Tick();
         Assert.True(sequence.CanRun(sequence.System.First));
 
-        editor.Back();
+        editor.BackKeeping();
         ship.Tick();
 
         // On the ship's list: the system's own heading carries its switch.
@@ -1172,112 +1172,6 @@ public class EditorTests
     }
 
     /// <summary>
-    /// Leaving a system somebody changed and left switched off offers to switch it on.
-    /// </summary>
-    /// <remarks>
-    /// A system is switched off while it is changed, so the way this fails is silent: somebody
-    /// finishes, walks away, and concludes the whole thing does not work. Leaving is the last moment
-    /// they are still thinking about it and the first at which one press puts it right.
-    /// </remarks>
-    [Fact]
-    public void LeavingASystemThatIsOffOffersToSwitchItOn()
-    {
-        var ship = Built();
-
-        // Moving from a sequence to its system asks nothing: that is not leaving the system.
-        ship.Editor.Back();
-        ship.Tick();
-        Assert.Equal("", ship.Editor.Question());
-
-        ship.Editor.Back();
-        ship.Tick();
-
-        Assert.Equal("Switch Airlock on?", ship.Editor.Question());
-        Assert.True(ship.Editor.HasAnswer("Switch it on"));
-        Assert.True(ship.Editor.HasAnswer("Leave it off"));
-
-        ship.Editor.PressAnswer("Switch it on");
-        ship.Tick();
-
-        Assert.True(ship.Automation.Systems[0].Enabled);
-    }
-
-    /// <summary>
-    /// The answer stands until something changes again.
-    /// </summary>
-    /// <remarks>
-    /// Being asked a question you have already answered is how a helpful prompt becomes one people
-    /// learn to dismiss without reading. Editing it again is a different moment and earns one more.
-    /// </remarks>
-    [Fact]
-    public void TheOfferIsNotRepeatedUntilSomethingChanges()
-    {
-        var ship = Built();
-
-        ship.Editor.Back();
-        ship.Tick();
-        ship.Editor.Back();
-        ship.Tick();
-        ship.Editor.PressAnswer("Leave it off");
-        ship.Tick();
-
-        Assert.False(ship.Automation.Systems[0].Enabled);
-
-        // Straight back in and out again, having touched nothing. Leaving landed on the home page,
-        // where the systems are listed, so going back in is one press.
-        ship.Editor.PressRow(0);
-        ship.Tick();
-        ship.Editor.Back();
-        ship.Tick();
-
-        Assert.False(ship.Editor.HasAnswer("Switch it on"));
-
-        // Now change something, and it is worth asking again.
-        ship.Editor.PressRow(0);
-        ship.Tick();
-        ship.Editor.PressRow(0);
-        ship.Tick();
-        ship.Editor.Name("Let me out");
-        ship.Tick();
-        ship.Editor.Back();
-        ship.Tick();
-        ship.Editor.Back();
-        ship.Tick();
-
-        Assert.True(ship.Editor.HasAnswer("Switch it on"));
-    }
-
-    /// <summary>
-    /// Dismissing the question is not answering it, so pressing back again asks again.
-    /// </summary>
-    /// <remarks>
-    /// Backing out of "switch this on?" says "I did not mean to leave", which is neither answer - so
-    /// the system stays open, stays off, and the question is not spent.
-    /// </remarks>
-    [Fact]
-    public void DismissingTheQuestionIsNotAnswering()
-    {
-        var ship = Built();
-
-        ship.Editor.Back();
-        ship.Tick();
-        ship.Editor.Back();
-        ship.Tick();
-        Assert.True(ship.Editor.HasAnswer("Switch it on"));
-
-        ship.Editor.Unask();
-        ship.Tick();
-
-        // Still here, still off, and still worth asking about.
-        Assert.Equal("", ship.Editor.Question());
-        Assert.False(ship.Automation.Systems[0].Enabled);
-
-        ship.Editor.Back();
-        ship.Tick();
-        Assert.True(ship.Editor.HasAnswer("Switch it on"));
-    }
-
-    /// <summary>
     /// Swapping a step's verb changes the sentence, without the screen being rebuilt.
     /// </summary>
     /// <remarks>
@@ -1306,23 +1200,7 @@ public class EditorTests
         Assert.NotSame(before, after);
     }
 
-    /// <summary>Nothing built yet is not something to be nagged about.</summary>
-    [Fact]
-    public void ASystemWithNoStepsIsNotOffered()
-    {
-        var ship = Build();
-        StartOnTheButton(ship.Editor);
-        ship.Tick();
-
-        ship.Editor.Back();
-        ship.Tick();
-        ship.Editor.Back();
-        ship.Tick();
-
-        Assert.False(ship.Editor.HasAnswer("Switch it on"));
-    }
-
-    /// <summary>A sequence somebody built and left on has nothing to be asked about.</summary>
+    /// <summary>A ship with a button system whose sequence closes the inner door, open on that sequence.</summary>
     static Ship Built()
     {
         var ship = Build();
@@ -1371,12 +1249,12 @@ public class EditorTests
         var ship = Build();
         StartOnTheButton(ship.Editor);
 
-        ship.Editor.Back();
+        ship.Editor.BackKeeping();
 
         Assert.Equal("Airlock", ship.Editor.Screen.Title());
         Assert.True(ship.Editor.Screen.CanGoBack);
 
-        ship.Editor.Back();
+        ship.Editor.BackKeeping();
         Assert.Equal("Automation for Test Rig", ship.Editor.Screen.Title());
     }
 
@@ -1749,12 +1627,12 @@ public class EditorTests
         editor.NewSystem("Airlock");
         editor.PressStart("when");
         editor.PressBlock("Airlock Button");
-        editor.Back();
+        editor.BackKeeping();
 
         Assert.Empty(ship.Automation.Sequences);
 
         // And one more back off the system itself.
-        editor.Back();
+        editor.BackKeeping();
         Assert.Equal("Automation for Test Rig", editor.Screen.Title());
     }
 
@@ -1779,7 +1657,7 @@ public class EditorTests
         editor.PressChoice("Discard them");
         Assert.Equal("Airlock", editor.Screen.Title());
 
-        editor.Back();
+        editor.BackKeeping();
         Assert.Equal("Automation for Test Rig", editor.Screen.Title());
     }
 
@@ -1816,7 +1694,7 @@ public class EditorTests
 
         // What starts it is a row of its own, naming the sequence back, and the name it was just
         // given did not touch it.
-        editor.Back();
+        editor.BackKeeping();
         ship.Tick();
 
         Assert.Equal("Airlock", editor.Screen.Title());

@@ -24,9 +24,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>How long a short name may be: the most the game's own text boxes in the terminal take.</summary>
         const int ShortLongest = 512;
 
-        // How many of the steps back on the history were made here since the page opened, which going back may take back.
-        int _made;
-
         /// <summary>The page of the slot <paramref name="part" /> of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public SlotPage(SprocketEditor editor, AutomationSystem system, Part part) : base(editor)
         {
@@ -120,31 +117,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return !_used.Contains(other.Id) && !Held(other);
         }
 
-        /// <summary>
-        /// Writes what is still being typed into the slot, and where anything was changed here asks whether to keep it, as a
-        /// picker does: keeping goes back with the changes, discarding takes every one of them back first.
-        /// </summary>
+        /// <summary>Writes what is still being typed into the slot, and where anything was changed here asks whether to keep it.</summary>
         public override bool Leaving()
         {
             Written(_focused);
             _focused = null;
-            if (_made == 0)
-                return true;
-
-            Editor.Ask(Editor.Texts.PickKeepQuestion);
-            Editor.Answer(Editor.Texts.PickKeepThem, delegate
-            {
-                _made = 0;
-                Editor.Pop();
-            }, true);
-            Editor.Answer(Editor.Texts.PickDiscardThem, delegate
-            {
-                for (; _made > 0; _made--)
-                    Editor.Undo(_system, _part);
-
-                Editor.Pop();
-            });
-            return false;
+            return base.Leaving();
         }
 
         /// <summary>Keeps every change made here, what is still being typed included, and finishes.</summary>
@@ -152,7 +130,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             Written(_focused);
             _focused = null;
-            _made = 0;
             base.Primary();
         }
 
@@ -161,8 +138,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             Settle();
             Editor.Undo(_system, _part);
-            if (_made > 0)
-                _made--;
         }
 
         /// <inheritdoc />
@@ -170,7 +145,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             Settle();
             Editor.Redo(_system, _part);
-            _made++;
         }
 
         /// <summary>Brings the view up to date, or goes back where a step back has taken the slot away.</summary>
@@ -319,11 +293,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 Make(new ShortenPart(_part, _short.Text.Trim()));
         }
 
-        /// <summary>Makes <paramref name="change" /> to the slot as one step back, counted among those going back may take back.</summary>
+        /// <summary>Makes <paramref name="change" /> to the slot as one step back.</summary>
         void Make(SystemEdit change)
         {
             Editor.Do(_system, change);
-            _made++;
         }
     }
 }

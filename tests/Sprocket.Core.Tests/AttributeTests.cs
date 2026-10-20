@@ -159,6 +159,50 @@ public class AttributeTests
         Assert.Contains("expected text for the attribute short.", trouble);
     }
 
+    /// <summary>A system's <c>categories</c> and a slot's <c>category</c> are read as the installation panel's arrangement and written back.</summary>
+    [Fact]
+    public void CategoriesAreReadAndWrittenBack()
+    {
+        var text = Everywhere
+            .Replace("#@ systemNote: \"one\"\n", "#@ systemNote: \"one\"\n#@ categories: [ \"Doors\", \"Calls\" ]\n")
+            .Replace("    optional slot button expects signal\n", "    #@ category: \"Calls\"\n    optional slot button expects signal\n");
+        var program = new Automation();
+        Assert.Equal("", ProgramReader.Load(text, program, new Values()));
+
+        var system = program.Systems[0];
+        Assert.Equal(new[] { "Doors", "Calls" }, system.Categories);
+        Assert.Equal("Calls", system.FindPart("button")!.Category);
+        Assert.Equal("", system.FindPart("inner")!.Category);
+
+        var written = ProgramWriter.Save(program, new Values());
+        Assert.Contains("# The airlock.\n#@ categories: [ \"Doors\", \"Calls\" ]\n#@ systemNote: \"one\"\nsystem blueprint ", written);
+        Assert.Contains("    #@ category: \"Calls\"\n    optional slot button expects signal\n", written);
+    }
+
+    /// <summary>A slot under a category its system does not name is trouble.</summary>
+    [Fact]
+    public void ACategoryTheSystemDoesNotNameIsTrouble()
+    {
+        var text = Everywhere.Replace("    optional slot button expects signal\n", "    #@ category: \"Calls\"\n    optional slot button expects signal\n");
+        var program = new Automation();
+        var trouble = ProgramReader.Load(text, program, new Values());
+
+        Assert.Contains("category \"Calls\" is not among the system's categories.", trouble);
+    }
+
+    /// <summary>A category named twice, or a list holding anything but text, is trouble.</summary>
+    [Theory]
+    [InlineData("[ \"Doors\", \"Doors\" ]", "category \"Doors\" is named twice in the attribute categories.")]
+    [InlineData("[ \"Doors\", 4 ]", "expected a category's name as text in the attribute categories.")]
+    [InlineData("\"Doors\"", "expected a list of text for the attribute categories.")]
+    public void BadCategoriesAreTrouble(string written, string said)
+    {
+        var text = Everywhere.Replace("#@ systemNote: \"one\"\n", "#@ systemNote: \"one\"\n#@ categories: " + written + "\n");
+        var trouble = ProgramReader.Load(text, new Automation(), new Values());
+
+        Assert.Contains(said, trouble);
+    }
+
     /// <summary>A <c>{</c> may stand on a line of its own under any statement that opens a block; only a system's header is written so.</summary>
     [Fact]
     public void ABraceMayStandOnItsOwnLine()

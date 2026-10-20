@@ -129,6 +129,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Copying a trigger.</summary>
         CopyTrigger,
         /// <summary>Keeping one of two versions of a logic system.</summary>
-        ChooseVersion
+        ChooseVersion,
+        /// <summary>Moving a slot to another place on the installation panel.</summary>
+        MoveSlot,
+        /// <summary>Moving a category of slots, with its slots, to another place on the installation panel.</summary>
+        MoveCategory,
+        /// <summary>Adding a category of slots.</summary>
+        AddCategory,
+        /// <summary>Renaming a category of slots.</summary>
+        RenameCategory,
+        /// <summary>Removing a category of slots, which leaves its slots under none.</summary>
+        RemoveCategory
     }
 }

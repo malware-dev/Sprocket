@@ -12,6 +12,12 @@ Hvert sett med blokker du velger for et steg eller en utløser, blir en plass. E
 
 På denne fanen er navnet til en plass en knapp som åpner plassen, så du kan gi den navn og skrive hva den er til. På panelet til en installasjon er navnet vanlig tekst.
 
+Plassene står i den rekkefølgen de ble laget. Dra en plass etter grepet for å flytte den til et annet sted.
+
+For å samle plasser i grupper trykker du `+ kategori`, som legger til *Kategori 1*, så *Kategori 2* og så videre. Trykk på navnet til en kategori for å gi den nytt navn. ![](mark:delete)&nbsp;på en kategori fjerner den og lar plassene dens stå blant dem øverst. Plassene utenfor en kategori kommer først, så navnet til hver kategori med plassene sine rykket inn under seg. Dra en plass under navnet til en kategori for å legge den i den kategorien, eller blant plassene øverst for å ta den ut. Grepet til selve kategorien flytter den med alle plassene sine.
+
+Hver av disse endringene er ett steg i ![](mark:undo)&nbsp;[angre](undo), og som alle andre endringer kan de bare gjøres mens logikksystemet er slått av. Panelet til en installasjon viser den samme rekkefølgen som vanlig tekst, med hver kategori som har plasser, med det samme navnet.
+
 ## Skjermer
 
 Hver installasjon velger sin egen skjerm. Fyller du en skjermplass, åpner [velgeren](selector) seg med stegets egen handling alene, og nedtrekksboksen for skjerm under den når blokker er valgt. Den ber ikke om noen verdier, siden de hører til steget.

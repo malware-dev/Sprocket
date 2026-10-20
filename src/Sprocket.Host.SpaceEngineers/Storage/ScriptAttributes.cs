@@ -11,13 +11,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>A signal slot's few words shown with each toolbar slot that answers it, text: <c>#@ short: "Call"</c>.</summary>
         public const string Short = "short";
 
-        /// <summary>The attributes of <paramref name="statement" /> other than <paramref name="used" />, kept as written, or null where there are none.</summary>
-        public static KeptAttributes Unused(Statement statement, string used = null)
+        /// <summary>A system's slot categories, in the order the installation panel shows them, a list of text: <c>#@ categories: [ "Doors", "Lights" ]</c>.</summary>
+        public const string Categories = "categories";
+
+        /// <summary>The category a slot is shown under, one of its system's, text: <c>#@ category: "Doors"</c>.</summary>
+        public const string Category = "category";
+
+        /// <summary>The attributes of <paramref name="statement" /> other than those named in <paramref name="used" />, kept as written, or null where there are none.</summary>
+        public static KeptAttributes Unused(Statement statement, params string[] used)
         {
             KeptAttributes kept = null;
             foreach (var attribute in statement.Attributes)
             {
-                if (attribute.Name == used)
+                if (System.Array.IndexOf(used, attribute.Name) >= 0)
                     continue;
 
                 if (kept == null)

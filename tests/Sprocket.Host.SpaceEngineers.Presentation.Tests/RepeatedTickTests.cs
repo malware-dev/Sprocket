@@ -35,7 +35,7 @@ public class RepeatedTickTests
         editor.PressAdd("task");
         screen.Run(60);
 
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(60);
 
         editor.GoToRoot();
@@ -77,7 +77,7 @@ public class RepeatedTickTests
         editor.PressAdd("task");
         AssertStill(screen, "picking what to do");
 
-        editor.Back();
+        editor.BackKeeping();
         editor.GoToRoot();
         AssertStill(screen, "the construct");
     }
@@ -120,11 +120,11 @@ public class RepeatedTickTests
         editor.PressAdd("task");
         AssertIdle(screen, "picking what happens");
 
-        editor.Back();
-        editor.Back();
+        editor.BackKeeping();
+        editor.BackKeeping();
         AssertIdle(screen, "a system with a sequence in it");
 
-        editor.Back();
+        editor.BackKeeping();
         AssertIdle(screen, "the construct with a system on it");
     }
 
@@ -230,7 +230,7 @@ public class RepeatedTickTests
         for (var i = 0; i < systems; i++)
         {
             screen.Editor.NewSystem("System " + i);
-            screen.Editor.Back();
+            screen.Editor.BackKeeping();
         }
 
         // Settled first. The frames that arrive at a screen for the first time measure its text and

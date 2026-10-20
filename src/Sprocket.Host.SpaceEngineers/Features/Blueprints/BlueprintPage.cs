@@ -17,6 +17,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     {
         readonly AutomationSystem _system;
         readonly List<Part> _parts = new List<Part>();
+        readonly List<object> _rows = new List<object>();
         readonly List<string> _used = new List<string>();
         readonly List<string> _aside = new List<string>();
         readonly List<string> _asideNames = new List<string>();
@@ -26,7 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         string _madeName;
         bool _madeOn;
         int _shape = -1;
-        KeyedChildren<Part, PartRow> _partRows;
+        KeyedChildren<object, Element> _partRows;
 
         /// <summary>The installation panel of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />, filling an installation's slots.</summary>
         public BlueprintPage(SprocketEditor editor, AutomationSystem system) : base(editor)
@@ -213,7 +214,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Keeps the rows by slot, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _partRows = new KeyedChildren<Part, PartRow>(_partList.Children, delegate { return new PartRow(Editor.Texts); });
+            _partRows = new KeyedChildren<object, Element>(_partList.Children, Row);
             Show();
         }
 
@@ -230,13 +231,20 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             Describe();
 
             Collect();
-            _partRows.Show(_parts);
+            _partRows.Show(_rows);
+            foreach (var row in _rows)
+            {
+                var category = row as string;
+                if (category != null)
+                    ((CategoryRow)_partRows[row]).Name = category;
+            }
             SetAside(chosen);
 
             var unfilled = 0;
             foreach (var part in _parts)
             {
-                if (!Part(_partRows[part], part, chosen) && !part.Optional)
+                ((PartRow)_partRows[part]).Indented = _system.Categories.Contains(part.Category);
+                if (!Part((PartRow)_partRows[part], part, chosen) && !part.Optional)
                     unfilled++;
             }
 
@@ -393,7 +401,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         void Collect()
         {
             _system.Acted(_used);
-            PartList.Listed(_system, _used, _parts);
+            PartList.Listed(_system, _used, _parts, _rows, false);
+        }
+
+        /// <summary>A row for <paramref name="key" />: a slot's, or a category's name, which here only says it.</summary>
+        Element Row(object key)
+        {
+            if (key is Part)
+                return new PartRow(Editor.Texts);
+
+            return new CategoryRow { Arranged = false };
         }
 
         /// <summary>Whether <paramref name="chosen" /> may run now, which keeps its blocks as they are: switched on, in a logic system switched on.</summary>

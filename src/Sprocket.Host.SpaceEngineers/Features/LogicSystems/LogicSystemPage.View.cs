@@ -40,6 +40,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         VStack _sequenceList;
         Label _slotsHeading;
         PartList _slotList;
+        VStack _addCategory;
+        Button _newCategory;
 
         /// <inheritdoc />
         protected override Element CreateView()
@@ -144,7 +146,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                             }
                                         }.As(out _describing),
                                         new Label { Style = Styles.SubHeading, IsVisible = false }.As(out _slotsHeading),
-                                        new PartList { Spacing = 4f, IsVisible = false }.As(out _slotList)
+                                        new PartList { Spacing = 4f, IsVisible = false }.As(out _slotList),
+                                        new VStack
+                                        {
+                                            Padding = new Thickness(0f, 8f, 0f, 0f),
+                                            IsVisible = false,
+                                            Children = { new HStack { Children = { new Button { Style = Styles.Start }.As(out _newCategory) } } }
+                                        }.As(out _addCategory)
                                     }
                                 }
                             }.As(out _panelTab)

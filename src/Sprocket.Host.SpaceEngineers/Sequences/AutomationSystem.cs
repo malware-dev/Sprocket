@@ -11,6 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<Sequence> _sequences = new List<Sequence>();
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<Part> _parts = new List<Part>();
+        readonly List<string> _categories = new List<string>();
         readonly List<Trigger> _triggers = new List<Trigger>();
         readonly SystemInstance[] _self;
         DateTime? _changed;
@@ -237,6 +238,17 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// What this system needs a construct to provide.
         /// </summary>
         public IReadOnlyList<Part> Parts => _parts;
+
+        /// <summary>The names of the categories its slots are shown under on the installation panel, in the order they are shown.</summary>
+        public IList<string> Categories => _categories;
+
+        /// <summary>Puts its slots in the order of <paramref name="order" />, which holds every one of them.</summary>
+        public void Arrange(IList<Part> order)
+        {
+            _parts.Clear();
+            for (var i = 0; i < order.Count; i++)
+                _parts.Add(order[i]);
+        }
 
         /// <summary>Renames <paramref name="part" /> to <paramref name="name" />, everywhere the system names it.</summary>
         public void RenamePart(Part part, string name)

@@ -91,6 +91,19 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             Attribute(name, value.ToString());
         }
 
+        /// <summary>An attribute line holding a list of <paramref name="texts" />, each quoted as text always is.</summary>
+        public void AttributeTexts(string name, IList<string> texts)
+        {
+            var value = new StringBuilder("[");
+            for (var i = 0; i < texts.Count; i++)
+            {
+                value.Append(i == 0 ? " " : ", ");
+                Quote(value, texts[i], '"');
+            }
+
+            Attribute(name, value.Append(" ]").ToString());
+        }
+
         /// <summary>Every attribute of <paramref name="kept" />, written back as they were, or nothing where it is null.</summary>
         public void Attributes(KeptAttributes kept)
         {

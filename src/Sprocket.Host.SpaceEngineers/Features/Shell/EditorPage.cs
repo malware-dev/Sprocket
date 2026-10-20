@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lumel;
 using Lumel.Input;
@@ -97,6 +98,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Whether the page opens with its name in hand to be given, once, as it is first shown.</summary>
         public bool NameOnArrival { get; set; }
+
+        /// <summary>The page's number, counted on as pages are opened, which the changes made on it carry.</summary>
+        public int Opened { get; set; }
 
         /// <summary>Whether the page was opened on something made as it opened, which is taken back if left untouched.</summary>
         public bool IsMade { get; private set; }
@@ -333,10 +337,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>
         /// Whether back may leave the page, false where the page has asked something instead.
         /// </summary>
-        /// <remarks>A page that answers false has pushed a page of its own.</remarks>
+        /// <remarks>
+        /// A page that answers false has asked or pushed something of its own. Where a change made here still stands, it asks
+        /// whether to keep it, and goes back once answered.
+        /// </remarks>
         public virtual bool Leaving()
         {
-            return true;
+            return Answered(() => Editor.Left(this));
+        }
+
+        /// <summary>
+        /// Whether nothing changed here is left to answer for; where something is, asks whether to keep it, as a picker does,
+        /// and goes on with <paramref name="then" /> either way: keeping leaves the changes, discarding takes them back first.
+        /// </summary>
+        /// <remarks>The changes made on the pages opened from this one were answered for there, and stay.</remarks>
+        protected bool Answered(Action then)
+        {
+            if (!Editor.Changed(this))
+                return true;
+
+            Editor.Ask(Editor.Texts.PickKeepQuestion);
+            Editor.Answer(Editor.Texts.PickKeepThem, delegate
+            {
+                Editor.Keep(this);
+                then();
+            }, true);
+            Editor.Answer(Editor.Texts.PickDiscardThem, delegate
+            {
+                Editor.Discard(this);
+                then();
+            });
+            return false;
         }
 
         /// <summary>Brings what the page shows up to date, every tick.</summary>

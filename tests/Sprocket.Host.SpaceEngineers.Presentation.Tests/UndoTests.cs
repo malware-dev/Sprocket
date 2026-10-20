@@ -40,7 +40,7 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         Light(screen);
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
         Assert.IsType<LogicSystemPage>(editor.Current);
 
@@ -68,7 +68,7 @@ public class UndoTests
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
         Light(screen);
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
         system.Enabled = false;
         editor.OpenSlot("Airlock Light");
@@ -108,7 +108,7 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
         editor.SwitchSystem(system, true);
         screen.Run(2);
@@ -157,13 +157,13 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         var system = editor.Program.Systems[0];
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
         var before = editor.Screen.UndoText;
 
         editor.NewSequence(system);
         screen.Run(2);
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
 
         Assert.Single(editor.Program.Sequences);
@@ -177,7 +177,7 @@ public class UndoTests
         var screen = Built();
         var editor = screen.Editor;
         Light(screen);
-        editor.Back();
+        editor.BackKeeping();
         screen.Run(2);
 
         editor.Rows()[0].Copies!.Execute();

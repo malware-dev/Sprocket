@@ -21,7 +21,7 @@ public class SystemTabsTests
         screen.Editor.PressChoice("close");
         screen.Editor.PressPrimary();
         screen.Run(2);
-        screen.Editor.Back();
+        screen.Editor.BackKeeping();
         return screen.Run(120);
     }
 

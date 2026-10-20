@@ -776,15 +776,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} må slås av før det kan redigeres trygt.</value>
   </data>
-  <data name="Sprocket.System.SwitchOnQuestion" xml:space="preserve">
-    <value>Slå på **{name}**?</value>
-  </data>
-  <data name="Sprocket.System.SwitchItOn" xml:space="preserve">
-    <value>Slå det på</value>
-  </data>
-  <data name="Sprocket.System.LeaveItOff" xml:space="preserve">
-    <value>La det være av</value>
-  </data>
 
   <data name="Sprocket.Blueprint.SwitchOffQuestion" xml:space="preserve">
     <value>Slå av logikksystemet **{name}**?</value>
@@ -2489,5 +2480,41 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Panel.Page" xml:space="preserve">
     <value>{at} av {count}</value>
+  </data>
+  <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
+    <value>flytting av en plass</value>
+  </data>
+  <data name="Sprocket.Change.MoveCategory" xml:space="preserve">
+    <value>flytting av en kategori</value>
+  </data>
+  <data name="Sprocket.Change.AddCategory" xml:space="preserve">
+    <value>oppretting av en kategori</value>
+  </data>
+  <data name="Sprocket.Change.RenameCategory" xml:space="preserve">
+    <value>omdøping av en kategori</value>
+  </data>
+  <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
+    <value>fjerning av en kategori</value>
+  </data>
+  <data name="Sprocket.Category.Add" xml:space="preserve">
+    <value>kategori</value>
+  </data>
+  <data name="Sprocket.Category.AddAbout" xml:space="preserve">
+    <value>Legger til en kategori, som plasser kan dras inn i for å samle dem på installasjonspanelet.</value>
+  </data>
+  <data name="Sprocket.Category.Default" xml:space="preserve">
+    <value>Kategori {number}</value>
+  </data>
+  <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
+    <value>Gir kategorien nytt navn.</value>
+  </data>
+  <data name="Sprocket.Category.Remove" xml:space="preserve">
+    <value>Fjerner kategorien. Plassene blir, uten kategori.</value>
+  </data>
+  <data name="Sprocket.Category.Drag" xml:space="preserve">
+    <value>Dra for å flytte kategorien med plassene sine.</value>
+  </data>
+  <data name="Sprocket.Slot.Drag" xml:space="preserve">
+    <value>Dra for å flytte plassen, inn i en kategori eller ut av en.</value>
   </data>
 </root>

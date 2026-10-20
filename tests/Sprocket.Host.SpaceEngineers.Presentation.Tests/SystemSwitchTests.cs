@@ -15,7 +15,7 @@ public class SystemSwitchTests
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");
-        sim.Editor.Back();
+        sim.Editor.BackKeeping();
         sim.Tick();
 
         var page = Assert.IsType<LogicSystemPage>(sim.Editor.Current);
@@ -46,7 +46,7 @@ public class SystemSwitchTests
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");
-        sim.Editor.Back();
+        sim.Editor.BackKeeping();
         sim.Tick();
 
         var row = sim.Editor.Rows()[0];
@@ -91,7 +91,7 @@ public class SystemSwitchTests
     {
         var sim = Simulation.Fresh();
         sim.Editor.NewButtonSystem("Airlock");
-        sim.Editor.Back();
+        sim.Editor.BackKeeping();
         sim.Tick();
 
         sim.Editor.SwitchOn();
@@ -120,7 +120,7 @@ public class SystemSwitchTests
         sim.Editor.PressChoice("power");
         sim.Editor.PressPrimary();
         sim.Tick();
-        sim.Editor.Back();
+        sim.Editor.BackKeeping();
         sim.Tick();
         sim.Editor.SwitchOn();
         sim.Tick();

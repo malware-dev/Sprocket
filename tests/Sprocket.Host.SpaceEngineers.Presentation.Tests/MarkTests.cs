@@ -116,20 +116,20 @@ public class MarkTests
         Assert.Contains(Symbols.Sequence, marks);
     }
 
-    /// <summary>A logic system lists its block slots, marked by the cube, before its signal slots, marked by the pulse, each in order of name.</summary>
+    /// <summary>A logic system lists its slots in the order they were made, a block slot marked by the cube and a signal slot by the pulse.</summary>
     [Fact]
-    public void TheSlotsAreBlockSlotsThenSignalSlotsByName()
+    public void TheSlotsStandInTheOrderTheyWereMade()
     {
         var screen = Slots();
 
         var rows = screen.Editor.SystemSlots();
-        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, rows.Select(row => row.Name));
-        Assert.Equal(new[] { Symbols.Block, Symbols.Block, Symbols.Signal }, rows.Select(row => row.Mark));
+        Assert.Equal(new[] { "Airlock Button", "Airlock Outer Door", "Airlock Inner Door" }, rows.Select(row => row.Name));
+        Assert.Equal(new[] { Symbols.Signal, Symbols.Block, Symbols.Block }, rows.Select(row => row.Mark));
     }
 
-    /// <summary>A slot renamed moves to its place in the order of names, and back again as the rename is undone.</summary>
+    /// <summary>A slot renamed keeps its place, and its old name comes back there as the rename is undone.</summary>
     [Fact]
-    public void ARenamedSlotMovesToItsPlace()
+    public void ARenamedSlotKeepsItsPlace()
     {
         var screen = Slots();
         var editor = screen.Editor;
@@ -143,12 +143,12 @@ public class MarkTests
         editor.PressChoice(editor.Texts.PickKeepThem);
         screen.Run(5);
 
-        Assert.Equal(new[] { "Aft Door", "Airlock Inner Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "Airlock Button", "Aft Door", "Airlock Inner Door" }, editor.SystemSlots().Select(row => row.Name));
 
         editor.Screen.Undo!.Execute();
         screen.Run(5);
 
-        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "Airlock Button", "Airlock Outer Door", "Airlock Inner Door" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>Going back from a slot's page after changing it asks whether to keep the changes, and discarding takes them all back.</summary>
@@ -167,7 +167,7 @@ public class MarkTests
         editor.PressChoice(editor.Texts.PickDiscardThem);
         screen.Run(5);
 
-        Assert.Equal(new[] { "Airlock Inner Door", "Airlock Outer Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "Airlock Button", "Airlock Outer Door", "Airlock Inner Door" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>Done on a slot's page keeps its changes without asking.</summary>
@@ -185,7 +185,7 @@ public class MarkTests
         screen.Run(5);
 
         Assert.False(screen.Scene.IsQuestioning, "Done asked whether to keep the changes");
-        Assert.Equal(new[] { "Aft Door", "Airlock Inner Door", "Airlock Button" }, editor.SystemSlots().Select(row => row.Name));
+        Assert.Equal(new[] { "Airlock Button", "Aft Door", "Airlock Inner Door" }, editor.SystemSlots().Select(row => row.Name));
     }
 
     /// <summary>The row of the what column offering <paramref name="text" />.</summary>
