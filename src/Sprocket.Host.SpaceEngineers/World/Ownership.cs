@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly Automation _program;
         readonly AutomationRunner _runner;
         readonly List<string> _returned = new List<string>();
+        readonly ConstructSharing _sharing = new ConstructSharing();
         bool _changed = true;
 
         /// <summary>The hands <paramref name="program" />, on <paramref name="world" /> and run by <paramref name="runner" />, belongs in.</summary>
@@ -26,11 +27,25 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether the construct's owners are to be looked at, which a load and every change of hands asks for.</summary>
         public bool Due => _changed;
 
+        /// <summary>Leaves the owners as they were, until <see cref="Revisit" /> asks again, while no programmable block a big owner owns keeps the automation.</summary>
+        /// <remarks>So the change of hands is judged once, from the owners before it to the owners once a keeper is found.</remarks>
+        public void Defer()
+        {
+            _changed = false;
+        }
+
+        /// <summary>Has the owners looked at on the next tick, as a keeper a big owner owns has been found.</summary>
+        public void Revisit()
+        {
+            _changed = true;
+        }
+
         /// <summary>The blocks the automation could reach again when it paused, which the resume screen names.</summary>
         public List<string> Returned => _returned;
 
         /// <summary>
-        /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing.
+        /// Takes the construct's big owners as the automation's, pausing it where it changed hands outside sharing, and reads
+        /// who the construct is shared with off <paramref name="hero" />, the block that keeps the automation.
         /// </summary>
         /// <remarks>Once paused it stays paused until a big owner resumes it, whoever owns it next.</remarks>
         public void Owned(IMyTerminalBlock hero)
@@ -39,7 +54,10 @@ namespace Sprocket.Host.SpaceEngineers.World
             var now = _world.BigOwners;
             var owners = _program.Owners;
             if (Same(owners, now))
+            {
+                Reread(hero, now);
                 return;
+            }
 
             GameLog.Say($"{_world.Name} belongs to {Players(now)}, after {Players(owners)}");
             if (!_program.Paused && !Shared(hero, owners, now))
@@ -54,29 +72,49 @@ namespace Sprocket.Host.SpaceEngineers.World
             owners.Clear();
             for (var i = 0; i < now.Count; i++)
                 owners.Add(now[i]);
+
+            Reread(hero, now);
         }
 
-        /// <summary>Whether <paramref name="before" />, the owners the automation had, holds one who is among <paramref name="now" /> or may still use <paramref name="hero" />.</summary>
-        static bool Shared(IMyTerminalBlock hero, List<long> before, IReadOnlyList<long> now)
+        /// <summary>Reads who the construct is shared with off <paramref name="hero" />, where it belongs to one of <paramref name="owners" />, the big owners.</summary>
+        /// <remarks>A keeper belonging to anyone else holds somebody else's sharing, so the big owners' is kept as it was.</remarks>
+        void Reread(IMyTerminalBlock hero, IReadOnlyList<long> owners)
         {
-            if (before.Count == 0)
+            if (Among(owners, hero.OwnerId))
+                _sharing.Read(hero);
+        }
+
+        /// <summary>
+        /// Whether the construct passing from <paramref name="before" /> to <paramref name="now" /> stays within its sharing:
+        /// nobody owned it, nobody owns it, or one of the new big owners could already use it.
+        /// </summary>
+        /// <remarks>
+        /// Judged by the sharing as it was, since the game turns sharing off on every block it gives away; where that was
+        /// never read, by whether one of <paramref name="before" /> may still use <paramref name="hero" />.
+        /// </remarks>
+        bool Shared(IMyTerminalBlock hero, List<long> before, IReadOnlyList<long> now)
+        {
+            if (before.Count == 0 || now.Count == 0)
                 return true;
+
+            foreach (var owner in now)
+            {
+                if (Among(before, owner) || _sharing.IsKnown && _sharing.Lets(owner))
+                    return true;
+            }
+
+            if (_sharing.IsKnown)
+                return false;
 
             foreach (var owner in before)
             {
-                if (Among(now, owner) || Access.Shared(hero, owner))
+                if (Access.Shared(hero, owner))
                     return true;
             }
 
             return false;
         }
 
-        /// <summary>Whether <paramref name="player" /> may open the automation: one of the construct's big owners, or anybody where nobody owns any of it.</summary>
-        public bool Owns(long player)
-        {
-            var owners = _world.BigOwners;
-            return owners.Count == 0 || Among(owners, player);
-        }
 
         /// <summary>The identities of <paramref name="players" />, for the log; "nobody" where there are none.</summary>
         static string Players(IReadOnlyList<long> players)

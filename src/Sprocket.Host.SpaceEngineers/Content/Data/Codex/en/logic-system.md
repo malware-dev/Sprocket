@@ -1,6 +1,6 @@
 # Logic system
 
-A logic system is the automation for one machine, like an airlock or an elevator, with all the jobs that go with running that machine. It works within a single [construct](construct), and cannot reach beyond it. You can find an overview of all the logic systems on your construct on the [home screen](home), which you can reach by finding a programmable block in the terminal and pressing its `Automation` button.
+A logic system is the automation for one machine, like an airlock or an elevator, with all the jobs that go with running that machine. It works within a single [construct](construct), and cannot reach beyond it. You can find an overview of all the logic systems on your construct on the [home screen](home), which you can reach by finding a programmable block owned by one of the construct's [owners](changing-hands) in the terminal and pressing its `Automation` button.
 
 A logic system consists of the following parts:
 

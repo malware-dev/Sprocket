@@ -17,6 +17,7 @@ public class PausingTests
 {
     const long Anna = 144115188075855873;
     const long Bert = 144115188075855874;
+    const long Cora = 144115188075855875;
 
     /// <summary>A ship shared with its faction, handed to a member of that faction, keeps running.</summary>
     [Fact]
@@ -256,6 +257,118 @@ public class PausingTests
     }
 
     /// <summary>A logic system whose button opens the inner door, switched on.</summary>
+    /// <summary>A ship shared with its faction, given to a member of it, keeps running though the game turns the sharing of every block it gives off.</summary>
+    [Fact]
+    public void AGiftWithinTheFactionKeepsItRunningThoughTheGameUnsharesIt()
+    {
+        var sim = Airlock(out _);
+        sim.Machine.Factions.Join(Anna, "MAL");
+        sim.Machine.Factions.Join(Bert, "MAL");
+        Owned(sim, Anna, Sharing.Faction);
+
+        Owned(sim, Bert, Sharing.Nobody);
+
+        Assert.False(sim.Editor.Program.Paused);
+        Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
+    }
+
+    /// <summary>
+    /// A transfer that reaches the programmable block before the rest of the construct stops the automation until the rest
+    /// arrives, then lets it carry on, judged from the owners before the transfer.
+    /// </summary>
+    [Fact]
+    public void ATransferReachingTheProgrammableBlockFirstCarriesOnOnceItIsWhole()
+    {
+        var sim = Airlock(out _);
+        sim.Machine.Factions.Join(Anna, "MAL");
+        sim.Machine.Factions.Join(Bert, "MAL");
+        Owned(sim, Anna, Sharing.Faction);
+
+        sim.Machine.Sprocket.Share = Sharing.Nobody;
+        sim.Machine.Sprocket.Owner = Bert;
+        sim.Tick();
+        sim.Tick();
+
+        Assert.True(sim.Unit.Stranded);
+        Assert.False(sim.Unit.Lost);
+        Assert.False(sim.Runner.Live);
+
+        Owned(sim, Bert, Sharing.Nobody);
+
+        Assert.False(sim.Unit.Stranded);
+        Assert.False(sim.Unit.Lost);
+        Assert.False(sim.Editor.Program.Paused);
+        Assert.Equal(new[] { Bert }, sim.Editor.Program.Owners);
+        Assert.True(sim.Runner.Live);
+    }
+
+    /// <summary>A capture that reaches the programmable block first stops the automation, and pauses it once the capture is whole.</summary>
+    [Fact]
+    public void ACaptureReachingTheProgrammableBlockFirstPausesOnceItIsWhole()
+    {
+        var sim = Airlock(out _);
+        Owned(sim, Anna, Sharing.Nobody);
+
+        sim.Machine.Sprocket.Owner = Bert;
+        sim.Tick();
+        sim.Tick();
+
+        Assert.True(sim.Unit.Stranded);
+
+        Owned(sim, Bert, Sharing.Nobody);
+
+        Assert.False(sim.Unit.Stranded);
+        Assert.True(sim.Editor.Program.Paused);
+        Assert.Equal(new[] { Anna }, sim.Editor.Program.PausedFrom);
+    }
+
+    /// <summary>A member of the faction a construct is shared with may open its automation; anybody else may not.</summary>
+    [Fact]
+    public void AConstructSharedWithItsFactionOpensForItsMembers()
+    {
+        var sim = Airlock(out _);
+        sim.Machine.Factions.Join(Anna, "MAL");
+        sim.Machine.Factions.Join(Bert, "MAL");
+        Owned(sim, Anna, Sharing.Faction);
+
+        var hero = sim.Unit.Block.EntityId;
+        Assert.True(sim.Unit.MayOpen(hero, Anna));
+        Assert.True(sim.Unit.MayOpen(hero, Bert));
+        Assert.False(sim.Unit.MayOpen(hero, Cora));
+    }
+
+    /// <summary>A construct shared with nobody opens for its big owners alone.</summary>
+    [Fact]
+    public void AConstructSharedWithNobodyOpensForItsBigOwnersAlone()
+    {
+        var sim = Airlock(out _);
+        sim.Machine.Factions.Join(Anna, "MAL");
+        sim.Machine.Factions.Join(Bert, "MAL");
+        Owned(sim, Anna, Sharing.Nobody);
+
+        var hero = sim.Unit.Block.EntityId;
+        Assert.True(sim.Unit.MayOpen(hero, Anna));
+        Assert.False(sim.Unit.MayOpen(hero, Bert));
+    }
+
+    /// <summary>A programmable block no big owner owns opens the automation for nobody, shared or not.</summary>
+    [Fact]
+    public void AProgrammableBlockNoBigOwnerOwnsOpensNothing()
+    {
+        var sim = Airlock(out _);
+        Programmable spare = sim.Machine.Programmable(200, "Spare");
+        Owned(sim, Anna, Sharing.Nobody);
+
+        spare.Share = Sharing.All;
+        spare.Owner = Bert;
+        sim.Tick();
+        sim.Tick();
+
+        Assert.False(sim.Unit.MayOpen(spare.Block.EntityId, Anna));
+        Assert.False(sim.Unit.MayOpen(spare.Block.EntityId, Bert));
+        Assert.Same(sim.Unit, sim.Roster.On(spare.Block));
+    }
+
     static Simulation Airlock(out Sequence sequence)
     {
         var sim = Simulation.Fresh();

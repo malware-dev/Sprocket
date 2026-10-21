@@ -10,7 +10,7 @@ Event controllers, timer blocks, sensors... there is already a means for automat
 
 Describe your automation in simple but powerful ![](mark:logic-system)&nbsp;[logic systems](logic-system). Set up ![](mark:trigger)&nbsp;[triggers](trigger) to run sequential steps. Easily wait until a door is actually closed before pressurizing that airlock, without manual timing. Go one step further, with more complex expressions and states.
 
-Sprocket Automation lives within _all_ of your programmable blocks: If you lose one, but there's still another on your ship, your automation is still fully functional. And... even if the last programmable block is lost, the automatic backup system has stored away your actual logic, so you can restore it to a new ship or back to your repaired old one.
+_Any_ of your programmable blocks can keep Sprocket Automation: If you lose one, but there's still another on your ship, your automation is still fully functional. And... even if the last programmable block is lost, the automatic backup system has stored away your actual logic, so you can restore it to a new ship or back to your repaired old one.
 
 ## One logic system, multiple ![](mark:installation)&nbsp;[installations](installation)
 
@@ -26,7 +26,7 @@ Unfortunately the mod API prevents actual direct sharing through, say, the works
 
 ## Getting Started
 
-Find any programmable block in the terminal and press `Automation`. That opens the home screen of its construct, where every logic system on it is listed, with a search box that narrows the list to the logic systems and installations whose names hold what you type. From there, the [simple airlock](simple-airlock) takes you through your first one, step by step.
+Find a programmable block owned by one of your ship's [owners](changing-hands) in the terminal and press `Automation`. That opens the home screen of its construct, where every logic system on it is listed, with a search box that narrows the list to the logic systems and installations whose names hold what you type. From there, the [simple airlock](simple-airlock) takes you through your first one, step by step.
 
 ## Recommended Reading
 

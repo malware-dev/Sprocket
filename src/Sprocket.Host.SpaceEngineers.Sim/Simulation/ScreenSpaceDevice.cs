@@ -47,7 +47,7 @@ namespace Sprocket.Sim.Simulation
         public Vector2 ViewportSize { get; set; }
 
         /// <summary>How wide and tall text is in each face, or null to measure nothing.</summary>
-        public IFontMetrics Fonts { get; set; }
+        public IFontMetrics? Fonts { get; set; }
 
         /// <summary>This frame's calls, in the order they were made.</summary>
         public IList<DrawCommand> Commands => _commands;
@@ -96,6 +96,7 @@ namespace Sprocket.Sim.Simulation
                 .Gives("Camera", () => camera)
                 .Gives("Player", () => player)
                 .Gives("GameplayFrameCounter", () => Clock.Frame)
+                .Gives("Factions", () => Factions.Installed?.Collection)
                 .Done();
         }
 

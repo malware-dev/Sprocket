@@ -2063,8 +2063,8 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Button on the banner shown while automation is left paused after its construct changed hands: opens the Paused screen again.</comment>
   </data>
   <data name="Sprocket.Terminal.Foreign" xml:space="preserve">
-    <value>Only the owners of {construct} can open its automation.</value>
-    <comment>A message box over the terminal when a player who is not among a construct's owners (the players owning most of its blocks) presses the button in a programmable block's terminal that opens the automation editor. {construct} is the construct's name.</comment>
+    <value>Only the owners of {construct}, and those they share it with, can open its automation.</value>
+    <comment>A message box over the terminal when a player presses the button in a programmable block's terminal that opens the automation editor, and the block is not owned by one of the construct's owners (the players owning most of its blocks) or is not shared with that player. {construct} is the construct's name.</comment>
   </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>This block's automation cannot be edited.</value>

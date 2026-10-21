@@ -93,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             foreach (KeyValuePair<long, SprocketUnit> each in _units)
             {
-                if (each.Value.World.FindEntity(block.EntityId) != null)
+                if (each.Value.World.Holds(block.EntityId))
                     return each.Value;
             }
 

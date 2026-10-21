@@ -66,8 +66,9 @@ lists the terms in the order the contents show them. Every page and tooltip exis
 
 - A construct is a grid and everything pistons, rotors and hinges attach to it. Connectors and landing
   gear dock one construct to another, and each stays its own.
-- A construct keeps its automation in its programmable blocks, and loses it only when the last one is
-  destroyed or ground down. The logic systems the library lacks are then kept as backups.
+- A construct keeps its automation in a programmable block one of its owners owns, and loses it only when
+  the last programmable block is destroyed or removed (Mal, 2026-10-21). The logic systems the library lacks
+  are then kept as backups.
 - Most actions happen at once. A few are awaitable, like a door closing, a vent filling or emptying a room,
   or a piston or rotor moving to where it was sent, and so is a step that runs another sequence. A sequence
   waits only for those; an action the block keeps on with after it starts, like a sound, is not waited for.

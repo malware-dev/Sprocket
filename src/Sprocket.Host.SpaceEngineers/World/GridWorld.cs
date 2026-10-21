@@ -238,6 +238,56 @@ namespace Sprocket.Host.SpaceEngineers.World
             return _byId.TryGetValue(entityId, out entity) ? entity : null;
         }
 
+        /// <summary>Whether the block <paramref name="entityId" /> is on the construct, whoever owns it.</summary>
+        public bool Holds(long entityId)
+        {
+            Current();
+
+            IMyTerminalBlock block;
+            return _named.TryGetValue(entityId, out block) && !Closing(block);
+        }
+
+        /// <summary>
+        /// The programmable block to keep the automation: the block <paramref name="entityId" /> where it is still on the
+        /// construct, otherwise any other; only one a big owner owns, unless <paramref name="anyOwner" />; null where there is
+        /// none.
+        /// </summary>
+        /// <remarks>Reads every block on the construct; asked as the keeper is lost or changes hands, never on a tick.</remarks>
+        public IMyTerminalBlock FindKeeper(long entityId, bool anyOwner)
+        {
+            Current();
+
+            IMyTerminalBlock other = null;
+            foreach (var found in _found)
+            {
+                if (!(found.Block is IMyProgrammableBlock) || !anyOwner && !Major(found.Block) || Closing(found.Block))
+                    continue;
+
+                if (found.Id == entityId)
+                    return found.Block;
+
+                if (other == null)
+                    other = found.Block;
+            }
+
+            return other;
+        }
+
+        /// <summary>The block <paramref name="entityId" /> where it is on the construct and owned by one of its big owners, or by anybody where nobody owns any of it; null otherwise.</summary>
+        public IMyTerminalBlock FindMajor(long entityId)
+        {
+            Current();
+
+            IMyTerminalBlock block;
+            return _named.TryGetValue(entityId, out block) && Major(block) && !Closing(block) ? block : null;
+        }
+
+        /// <summary>Whether one of the big owners owns <paramref name="block" />, or nobody owns any of the construct.</summary>
+        bool Major(IMyTerminalBlock block)
+        {
+            return _bigOwners.Count == 0 || _bigOwners.Contains(block.OwnerId);
+        }
+
         /// <summary>Tells a block to do something.</summary>
         public void Invoke(GridEntity entity, string actionId)
         {

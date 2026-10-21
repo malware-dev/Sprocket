@@ -522,7 +522,7 @@ namespace Sprocket.Sim.Simulation
             // letterforms are a stand-in either way, and of the two things that could be wrong about them,
             // the shapes are cosmetic and the width is the one every "does this fit" judgement rests on.
             // Distorted letters that occupy the right space beat handsome ones that lie.
-            double target = _device.Fonts.MeasurePixels(command.Font, command.Text, command.Scale).X;
+            double target = _device.Fonts!.MeasurePixels(command.Font, command.Text, command.Scale).X;
             double stretch = formatted.Width > 0.01d && target > 0d ? target / formatted.Width : 1d;
 
             Pushed? scaled = null;

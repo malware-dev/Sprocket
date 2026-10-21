@@ -294,11 +294,11 @@ namespace Sprocket.Host.SpaceEngineers.Network
             grant.ShowsHidden = asker.ShowsHidden;
             grant.RecentColors = string.Join(" ", asker.RecentColors);
 
-            // Only a big owner opens the automation, whoever holds it.
-            if (unit != null && !unit.Owns(identity))
+            // The automation opens from a programmable block a big owner owns, for whoever may use it, whoever holds it.
+            if (unit != null && !unit.MayOpen(claim.Block, identity))
             {
                 grant.Foreign = true;
-                GameLog.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was refused: they own none of it");
+                GameLog.Say($"{Who(claim.Name, sender)} asked for block {claim.Block}, and was refused: no big owner shares it with them");
                 _channel.Send(grant, sender, true);
                 return;
             }

@@ -707,6 +707,8 @@ public sealed class Rig
     /// </remarks>
     public void Install()
     {
+        Factions.Installed = Factions;
+
         // Every toolbar read and write the mod makes, answered over this rig's own slots.
         Toolbars.Use(new RigSlots(this));
 
@@ -753,6 +755,7 @@ public sealed class Rig
             MyAPIGateway.Session = Pretend.To<IMySession>()
                 .Gives("GameplayFrameCounter", () => Clock.Frame)
                 .Gives("Player", () => null)
+                .Gives("Factions", () => Factions.Installed?.Collection)
                 .Done();
         }
     }

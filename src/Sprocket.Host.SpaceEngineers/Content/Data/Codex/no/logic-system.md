@@ -1,6 +1,6 @@
 # Logikksystem
 
-Et logikksystem er automasjonen for én maskin, som en luftsluse eller en heis, med alle jobbene som hører til å drive den maskinen. Det virker innenfor [konstruksjonen](construct) det står på, og når ikke utenfor den. En oversikt over alle logikksystemene på konstruksjonen din finner du på [startskjermen](home), som du kommer til ved å finne en programmable block i terminalen og trykke `Automasjon`-knappen på den.
+Et logikksystem er automasjonen for én maskin, som en luftsluse eller en heis, med alle jobbene som hører til å drive den maskinen. Det virker innenfor [konstruksjonen](construct) det står på, og når ikke utenfor den. En oversikt over alle logikksystemene på konstruksjonen din finner du på [startskjermen](home), som du kommer til ved å finne en programmable block i terminalen som eies av en av [eierne](changing-hands) av konstruksjonen, og trykke `Automasjon`-knappen på den.
 
 Et logikksystem består av disse delene:
 

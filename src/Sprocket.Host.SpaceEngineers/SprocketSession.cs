@@ -637,7 +637,7 @@ namespace Sprocket.Host.SpaceEngineers
                 return;
 
             var player = MyAPIGateway.Session == null || MyAPIGateway.Session.Player == null ? 0L : MyAPIGateway.Session.Player.IdentityId;
-            if (!unit.Owns(player))
+            if (!unit.MayOpen(block.EntityId, player))
             {
                 _current.Foreign(block.EntityId);
                 return;

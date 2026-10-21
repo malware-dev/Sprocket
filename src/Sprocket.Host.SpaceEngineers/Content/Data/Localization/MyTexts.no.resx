@@ -1564,7 +1564,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Se over</value>
   </data>
   <data name="Sprocket.Terminal.Foreign" xml:space="preserve">
-    <value>Bare eierne av {construct} kan åpne automasjonen dens.</value>
+    <value>Bare eierne av {construct}, og de de deler den med, kan åpne automasjonen dens.</value>
   </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automasjonen i denne blokken kan ikke redigeres.</value>

@@ -10,7 +10,7 @@ Hendelseskontrollere, timerblokker, sensorer... det finnes allerede en måte å 
 
 Beskriv automasjonen din i enkle, men kraftige ![](mark:logic-system)&nbsp;[logikksystemer](logic-system). Sett opp ![](mark:trigger)&nbsp;[utløsere](trigger) som kjører steg etter steg. Vent enkelt til en dør faktisk er lukket før du trykksetter luftslusen, uten å time noe manuelt. Gå et steg videre, med mer sammensatte uttrykk og tilstander.
 
-Sprocket Automation bor i _alle_ dine programmable blocks: Mister du én, men har en til på skipet, virker automasjonen din fortsatt fullt ut. Og... selv om den siste av dem går tapt, har det automatiske sikkerhetskopisystemet tatt vare på selve logikken din, så du kan gjenopprette den på et nytt skip, eller på det gamle når det er reparert.
+_Hvilken som helst_ av dine programmable blocks kan holde Sprocket Automation: Mister du én, men har en til på skipet, virker automasjonen din fortsatt fullt ut. Og... selv om den siste av dem går tapt, har det automatiske sikkerhetskopisystemet tatt vare på selve logikken din, så du kan gjenopprette den på et nytt skip, eller på det gamle når det er reparert.
 
 ## Ett logikksystem, flere ![](mark:installation)&nbsp;[installasjoner](installation)
 
@@ -26,7 +26,7 @@ Dessverre hindrer mod-API-et ekte direkte deling gjennom for eksempel workshopen
 
 ## Kom i gang
 
-Finn en hvilken som helst programmable block i terminalen og trykk `Automasjon`. Da åpnes startskjermen for konstruksjonen dens, der alle logikksystemene på den står oppført, med et søkefelt som snevrer inn listen til logikksystemene og installasjonene som har det du skriver, i navnet. Derfra tar [den enkle luftslusen](simple-airlock) deg gjennom ditt første, steg for steg.
+Finn en programmable block i terminalen som eies av en av [eierne](changing-hands) av skipet ditt, og trykk `Automasjon`. Da åpnes startskjermen for konstruksjonen dens, der alle logikksystemene på den står oppført, med et søkefelt som snevrer inn listen til logikksystemene og installasjonene som har det du skriver, i navnet. Derfra tar [den enkle luftslusen](simple-airlock) deg gjennom ditt første, steg for steg.
 
 ## Anbefalt lesning
 

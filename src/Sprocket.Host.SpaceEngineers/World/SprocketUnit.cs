@@ -128,9 +128,9 @@ namespace Sprocket.Host.SpaceEngineers.World
             _holders.Changed += Working;
             _holders.Gathered += Regathered;
             _holders.Hold(_block);
-            _runner.Live = _holders.Working && !_program.Paused;
+            _runner.Live = Runs;
             _world.AnchorRemoved += Removed;
-            _world.AnchorClosed += Closed;
+            _world.AnchorClosed += Rehoming;
             _world.Renamed += Renamed;
         }
 
@@ -147,8 +147,11 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// <summary>Whether any of the construct's programmable blocks working changed, which decides whether the automation runs.</summary>
         void Working()
         {
-            _runner.Live = _holders.Working && !_program.Paused;
+            _runner.Live = Runs;
         }
+
+        /// <summary>Whether the automation runs: a programmable block on the construct works, it is not paused, and a big owner owns its keeper.</summary>
+        bool Runs => _holders.Working && !_program.Paused && !Stranded;
 
         /// <summary>Programmable blocks left or joined the construct.</summary>
         void Regathered()
@@ -179,6 +182,12 @@ namespace Sprocket.Host.SpaceEngineers.World
 
         /// <summary>Whether the construct has no programmable block left to keep the automation in, which ends it.</summary>
         public bool Lost { get; private set; }
+
+        /// <summary>
+        /// Whether none of the construct's programmable blocks is owned by one of its big owners, which stops the automation
+        /// until one is.
+        /// </summary>
+        public bool Stranded { get; private set; }
 
         /// <summary>
         /// Whether the hero was last taken off the construct by itself, destroyed or ground down, rather than closed with its
@@ -342,8 +351,8 @@ namespace Sprocket.Host.SpaceEngineers.World
 
             _holders.Hold(_block);
 
-            // Two flags read, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
-            _runner.Live = _holders.Working && !_program.Paused;
+            // Read on every tick, because a pause is set by an edit or by the construct changing hands, and both land between ticks.
+            _runner.Live = Runs;
             _runner.Tick(frame);
         }
 
@@ -355,22 +364,36 @@ namespace Sprocket.Host.SpaceEngineers.World
                 _editor.Tick(frame);
         }
 
-        /// <summary>Whether <paramref name="player" /> may open the automation: one of the construct's big owners, or anybody where nobody owns any of it.</summary>
-        public bool Owns(long player)
+        /// <summary>
+        /// Whether <paramref name="player" /> may open the automation from the programmable block <paramref name="opened" />:
+        /// one of the construct's big owners owns it, and <paramref name="player" /> may use it.
+        /// </summary>
+        /// <remarks>Where nobody owns any of the construct, anybody may.</remarks>
+        public bool MayOpen(long opened, long player)
         {
-            return _hands.Owns(player);
+            IMyTerminalBlock block = _world.FindMajor(opened);
+            return block != null && Access.Shared(block, player);
         }
 
         /// <summary>Brings the toolbars into line with the program, and reads them where something asked.</summary>
         void Touch()
         {
-            if (_hands.Due)
+            // Looked at again on every tick only while the hero is not yet on the construct read, as its grid loads; the
+            // game's own events say when it has gone.
+            if (_hands.Due && _world.Holds(_block.EntityId))
             {
-                _hands.Owned(_block);
-
-                // A hero none of the big owners may use is out of their reach, and gone from the construct as one ground off is.
-                if (_world.FindEntity(_block.EntityId) == null)
-                    Removed();
+                if (_world.FindMajor(_block.EntityId) == _block)
+                {
+                    Strand(false);
+                    _hands.Owned(_block);
+                }
+                else
+                {
+                    // A keeper none of the big owners owns hands the automation to one they own, or stops it where they own none;
+                    // the change of hands is judged once a keeper they own is found.
+                    _hands.Defer();
+                    Rehoming();
+                }
             }
 
             _buttons.Reconcile();
@@ -592,44 +615,44 @@ namespace Sprocket.Host.SpaceEngineers.World
                 HeroRemoved(this);
         }
 
-        void Closed()
+        /// <summary>Has the roster find the automation a keeper, as the hero is closed or no longer owned by a big owner.</summary>
+        void Rehoming()
         {
             if (HeroRemoved != null)
                 HeroRemoved(this);
         }
 
         /// <summary>
-        /// Moves into another programmable block on the construct where the hero has gone, answering whether it moved.
+        /// Moves into another programmable block on the construct where the hero has gone or no big owner owns it, answering
+        /// whether it moved; where no big owner owns any, the automation stops in one that stands until one does.
         /// </summary>
         /// <remarks>
-        /// Asked when the hero is removed or closed and as the world saves, never on a tick. A grid splitting in the game brings
-        /// the hero back under its own id as a new object.
+        /// Asked when the hero is removed, closed or changes hands, and as the world saves, never on a tick. A grid splitting
+        /// in the game brings the hero back under its own id as a new object.
         /// </remarks>
         bool Seek()
         {
             if (Lost)
                 return false;
 
-            GridEntity found = _world.FindEntity(_block.EntityId);
-            if (found != null)
+            IMyTerminalBlock keeper = _world.FindKeeper(_block.EntityId, false);
+            var stranded = keeper == null;
+            if (stranded)
+                keeper = _world.FindKeeper(_block.EntityId, true);
+
+            if (keeper != null)
             {
-                if (found.Block == _block)
+                Strand(stranded);
+                if (!stranded)
+                    _hands.Revisit();
+
+                if (keeper == _block)
                 {
                     Destroyed = false;
                     return false;
                 }
 
-                Move(found.Block);
-                return true;
-            }
-
-            IReadOnlyList<GridEntity> entities = _world.Entities;
-            for (var i = 0; i < entities.Count; i++)
-            {
-                if (!(entities[i].Block is IMyProgrammableBlock))
-                    continue;
-
-                Move(entities[i].Block);
+                Move(keeper);
                 return true;
             }
 
@@ -657,6 +680,18 @@ namespace Sprocket.Host.SpaceEngineers.World
             _buttons.Rehomed(block);
         }
 
+        /// <summary>Stops the automation where <paramref name="stranded" />, as no big owner owns any programmable block on the construct, or lets it carry on.</summary>
+        void Strand(bool stranded)
+        {
+            if (stranded == Stranded)
+                return;
+
+            Stranded = stranded;
+            GameLog.Say(stranded
+                ? $"{_world.Name} has no programmable block its big owners own, and its automation has stopped"
+                : $"{Logged(_block)} belongs to a big owner of {_world.Name}, and its automation carries on");
+        }
+
         /// <summary>Clears the automation out of <paramref name="block" />, the keeper it has left, where the block is still in the world.</summary>
         static void Leave(IMyTerminalBlock block)
         {
@@ -671,7 +706,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _holders.Release();
 
             _world.AnchorRemoved -= Removed;
-            _world.AnchorClosed -= Closed;
+            _world.AnchorClosed -= Rehoming;
             _hands.Release();
             _world.Renamed -= Renamed;
             _runner.Retire();
