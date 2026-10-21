@@ -51,6 +51,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// <summary>What the field starts with where nothing has been given yet, as it is shown, or null for nothing.</summary>
         public string Default;
 
+        /// <summary>The id of the block's own value a new step's field opens holding, read off the block, or null where it opens on <see cref="Default" />.</summary>
+        public string OpensOn;
+
         /// <summary>What a sentence says before this value, or null for nothing: "to" in "to 90°".</summary>
         public string Lead;
 
@@ -92,6 +95,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
 
         /// <summary>How many values this field stands for, which is one unless it was told otherwise.</summary>
         public int Covers => Spans < 1 ? 1 : Spans;
+
+        /// <summary>Whether a step may be given nothing for it, and what it starts with stands in for that.</summary>
+        public bool IsOptional => !Needed && Default != null;
 
         /// <summary>Whether it is a choice between on and off and nothing else.</summary>
         public bool IsOnOff =>

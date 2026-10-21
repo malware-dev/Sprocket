@@ -2,8 +2,10 @@ using Sprocket.Host.SpaceEngineers.Blocks;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using VRage.Game.GUI.TextPanel;
+using VRageMath;
 using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
@@ -38,16 +40,28 @@ public class ScreenChoiceTests
         Assert.Equal("app TSS_ClockDigital", screen.Editor.Facets()!.Line);
     }
 
-    /// <summary>A member that is not a screen's opens no drop box.</summary>
+    /// <summary>
+    /// The drop box of screens heads the screen's members, chosen before any of them, and each stands in under it; the
+    /// block's own members stand as they are, and a step on one acts on no screen.
+    /// </summary>
     [Fact]
-    public void AnotherMemberOpensNone()
+    public void TheScreensBoxHeadsTheScreensMembers()
     {
         var (screen, _) = Picking();
+        var rows = screen.Editor.Pick().Stages.Last().Entries().Where(row => !row.IsHeading).ToList();
+
+        Assert.True(rows.Single(row => row.Text == "show text").Indented);
+        Assert.True(rows.Single(row => row.Text == "set up screen").Indented);
+        Assert.False(rows.Single(row => row.Text == "power").Indented);
 
         screen.Editor.PressChoice("power");
         screen.Run(2);
+        Assert.NotNull(screen.Editor.Facets());
 
-        Assert.Null(screen.Editor.Facets());
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+        var act = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Sequences[0].Steps[0]);
+        Assert.Null(screen.Editor.Program.Systems[0].First.Facets(Assert.Single(act.Targets)));
     }
 
     /// <summary>The step acts on a slot of screens of its own, which the installation fills with the screen chosen.</summary>
@@ -205,6 +219,81 @@ public class ScreenChoiceTests
         screen.Run(2);
 
         Assert.DoesNotContain("TSS_Weather", form.Answer);
+    }
+
+    /// <summary>
+    /// Done with only some settings given makes the step, each value in its own place, and the step lacks nothing: the rest
+    /// are left as they are.
+    /// </summary>
+    [Fact]
+    public void SettingUpWithSettingsLeftEmptyIsDone()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.PressChoice("set up screen");
+        screen.Run(2);
+        var form = screen.Editor.Pick().Arguments!.Form;
+        Press(form, "text and images");
+        form.Fields[2].Text = "#FF0000";
+        form.Fields[4].Text = "";
+        screen.Run(2);
+
+        screen.Editor.PressPrimary();
+        screen.Run(2);
+
+        var act = Assert.IsType<Act>(screen.Editor.Program.Systems[0].Sequences[0].Steps[0]);
+        Assert.Equal(ScreenType.SetUp, act.ActionId);
+        Assert.Equal("", act.Arguments[1].Text);
+        Assert.Equal(Literal.Colour(255, 0, 0, 255).Said, act.Arguments[2].Said);
+        Assert.Equal("", screen.Editor.StepRows()[0].Problem);
+    }
+
+    /// <summary>A new step setting a screen up opens on what the screen chosen holds, its content alone left to choose.</summary>
+    [Fact]
+    public void SettingUpOpensOnWhatTheScreenHolds()
+    {
+        var (screen, board) = Picking();
+        var back = board.Faces[1];
+        back.FontColor = new Color(0, 255, 0, 255);
+        back.BackgroundColor = new Color(0, 0, 255, 255);
+        back.Font = "Monospace";
+        back.FontSize = 2.5f;
+        back.Alignment = TextAlignment.CENTER;
+        back.Padding = 10f;
+        back.Foreground = new Color(255, 0, 0, 255);
+        back.App = "TSS_Weather";
+        screen.Editor.PressChoice("set up screen");
+        screen.Run(2);
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+
+        var form = screen.Editor.Pick().Arguments!.Form;
+        Assert.Equal("", form.Fields[0].Text);
+        Assert.Equal("TSS_Weather", form.Fields[1].Text);
+        Assert.Equal(new Color(0, 255, 0, 255), Shade(form.Fields[2].Text));
+        Assert.Equal(new Color(0, 0, 255, 255), Shade(form.Fields[3].Text));
+        Assert.Equal("Monospace", form.Fields[4].Text);
+        Assert.Equal("2.5", form.Fields[5].Text);
+        Assert.Equal("center", form.Fields[6].Text);
+        Assert.Equal("10.0", form.Fields[7].Text);
+        Assert.Equal(new Color(255, 0, 0, 255), Shade(form.Fields[8].Text));
+    }
+
+    /// <summary>A screen running no app opens with none chosen, which is a choice of its own.</summary>
+    [Fact]
+    public void AScreenRunningNoAppOpensOnNone()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.PressChoice("set up screen");
+        screen.Run(2);
+
+        Assert.Equal("none", screen.Editor.Pick().Arguments!.Form.Fields[1].Text);
+    }
+
+    /// <summary>The color <paramref name="said" /> spells.</summary>
+    static Color Shade(string said)
+    {
+        Assert.True(ColorChannels.Colour(said, out var color, out _), $"'{said}' is no color");
+        return color;
     }
 
     /// <summary>Presses the word <paramref name="word" /> of the form's first value, its content, as a person does.</summary>

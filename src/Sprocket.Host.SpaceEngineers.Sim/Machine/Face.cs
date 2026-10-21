@@ -19,12 +19,15 @@ public sealed class Face
         Surface = Pretend.To<IMyTextSurface>()
             .Also<Sandbox.ModAPI.IMyTextSurface>()
             .Gives("DisplayName", () => name)
-            .Does("GetFonts", _ => null!)
+            .Does("GetFonts", arguments => ((List<string>)arguments[0]).AddRange(Fonts))
             .Does("WriteText", arguments =>
             {
                 Text = (string)arguments[0];
                 return true;
             })
+            .Does("GetText", () => Text)
+            .Does("ClearImagesFromSelection", _ => Images.Clear())
+            .Does("AddImageToSelection", arguments => Images.Add((string)arguments[0]))
             .Gives("ContentType", () => Content)
             .Takes("ContentType", value => Content = (ContentType)value)
             .Gives("Script", () => App)
@@ -34,13 +37,24 @@ public sealed class Face
             .Takes("FontSize", value => FontSize = (float)value)
             .Gives("FontColor", () => FontColor)
             .Takes("FontColor", value => FontColor = (Color)value)
+            .Gives("BackgroundColor", () => BackgroundColor)
+            .Takes("BackgroundColor", value => BackgroundColor = (Color)value)
+            .Gives("Font", () => Font)
+            .Takes("Font", value => Font = (string)value)
             .Gives("Alignment", () => Alignment)
             .Takes("Alignment", value => Alignment = (TextAlignment)value)
             .Gives("TextureSize", () => (Vector2)Shape.TextureSize)
             .Gives("SurfaceSize", () => Shape.SurfaceSize)
             .Gives("TextPadding", () => Padding)
+            .Takes("TextPadding", value => Padding = (float)value)
             .Gives("ScriptForegroundColor", () => Foreground)
+            .Takes("ScriptForegroundColor", value => Foreground = (Color)value)
             .Gives("ScriptBackgroundColor", () => Background)
+            .Takes("ScriptBackgroundColor", value => Background = (Color)value)
+            .Gives("ChangeInterval", () => Interval)
+            .Takes("ChangeInterval", value => Interval = (float)value)
+            .Gives("PreserveAspectRatio", () => KeepsAspectRatio)
+            .Takes("PreserveAspectRatio", value => KeepsAspectRatio = (bool)value)
             .Does("DrawFrame", () => new MySpriteDrawFrame(frame =>
             {
                 Sprites.Clear();
@@ -67,7 +81,10 @@ public sealed class Face
     public IMyTextSurface Surface { get; }
 
     /// <summary>The text last written on it.</summary>
-    public string Text { get; private set; } = "";
+    public string Text { get; set; } = "";
+
+    /// <summary>The images it shows, in turn, by the game's ids.</summary>
+    public List<string> Images { get; } = [];
 
     /// <summary>What it is set to show.</summary>
     public ContentType Content { get; set; }
@@ -84,6 +101,15 @@ public sealed class Face
     /// <summary>Its text's color.</summary>
     public Color FontColor { get; set; } = Color.White;
 
+    /// <summary>The color behind its text.</summary>
+    public Color BackgroundColor { get; set; } = Color.Black;
+
+    /// <summary>The fonts it offers, by the game's ids.</summary>
+    public List<string> Fonts { get; } = ["Debug", "Monospace"];
+
+    /// <summary>The font its text is in, by the game's id.</summary>
+    public string Font { get; set; } = "Debug";
+
     /// <summary>Where its text sits across it.</summary>
     public TextAlignment Alignment { get; set; }
 
@@ -92,6 +118,12 @@ public sealed class Face
 
     /// <summary>How far in from its edges text sits, in hundredths of its size, as its text settings say.</summary>
     public float Padding { get; set; } = 2f;
+
+    /// <summary>How long each of its images shows, in seconds.</summary>
+    public float Interval { get; set; }
+
+    /// <summary>Whether its images keep their shape.</summary>
+    public bool KeepsAspectRatio { get; set; }
 
     /// <summary>The color an app draws in, as its app settings say.</summary>
     public Color Foreground { get; set; } = MyTextSurfaceScriptBase.DEFAULT_FONT_COLOR;

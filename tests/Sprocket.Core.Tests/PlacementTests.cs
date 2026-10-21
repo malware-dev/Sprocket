@@ -4,7 +4,7 @@ using Sprocket.Host.SpaceEngineers.World;
 using Sprocket.Sim.Machine;
 using SpaceEngineers.Game.ModAPI;
 using Xunit;
-using TextPanel = Sprocket.Host.SpaceEngineers.Blocks.TextPanel;
+using ScreenType = Sprocket.Host.SpaceEngineers.Blocks.ScreenType;
 
 namespace Sprocket.Tests;
 
@@ -105,16 +105,16 @@ public class PlacementTests
         Assert.Equal(Category.State, kind.FindAction("upgrade-count", ReachKind.Value)!.Category);
     }
 
-    /// <summary>A panel's text, said as text, and its app are what it writes on itself.</summary>
+    /// <summary>The text a panel's screen shows, said as text, and the app it runs stand under Screen.</summary>
     [Fact]
     public void APanelsTextIsScreen()
     {
         var ship = new Rigged();
         var panel = ship.Rig.TextPanel(1, "Panel");
-        var text = ship.Entity(panel.Id).Kind.FindAction(TextPanel.Shown, ReachKind.Value)!;
+        var text = ship.Entity(panel.Id).Kind.FindAction(ScreenType.TextShown, ReachKind.Value)!;
 
         Assert.Equal("text", text.Text);
         Assert.Equal(Category.Screen, text.Category);
-        Assert.Equal(Category.Screen, ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, ReachKind.Value)!.Category);
+        Assert.Equal(Category.Screen, ship.Entity(panel.Id).Kind.FindAction(ScreenType.App, ReachKind.Value)!.Category);
     }
 }

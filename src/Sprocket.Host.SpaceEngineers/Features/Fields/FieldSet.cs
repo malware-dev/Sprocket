@@ -64,7 +64,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
         /// What is given so far, as one answer: the values joined the way the language writes a list of them, quoted where a
         /// value holds a space or is text.
         /// </summary>
-        /// <remarks>Runs only as far as the last value given, so the action is handed its declared default for the rest.</remarks>
+        /// <remarks>
+        /// Every value has its place, one left empty or not asked for written as empty text; nothing given at all is empty.
+        /// </remarks>
         public string Answer
         {
             get
@@ -98,15 +100,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
                 if (_parts.Count == 1)
                     return _texts[0] && _parts[0].Length > 0 ? Quoted(_parts[0], true) : _parts[0];
 
-                var last = -1;
-                for (var i = 0; i < _parts.Count; i++)
-                {
-                    if (!string.IsNullOrEmpty(_parts[i]))
-                        last = i;
-                }
+                if (_parts.TrueForAll(string.IsNullOrEmpty))
+                    return "";
 
                 var said = "";
-                for (var i = 0; i <= last; i++)
+                for (var i = 0; i < _parts.Count; i++)
                 {
                     if (said.Length > 0)
                         said += " ";
@@ -145,7 +143,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             {
                 for (var i = 0; i < _fields.Count; i++)
                 {
-                    if (Asked(i) && string.IsNullOrEmpty(_fields[i].Text) && (_wanted[i].Needed || _wanted[i].Default == null))
+                    if (Asked(i) && string.IsNullOrEmpty(_fields[i].Text) && !_wanted[i].IsOptional)
                         return true;
                 }
 
@@ -450,10 +448,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             return (at + 1).ToString(CultureInfo.InvariantCulture);
         }
 
-        /// <summary>One value's text, quoted where it would otherwise read as more than one value, a doubled quote standing for one.</summary>
+        /// <summary>
+        /// One value's text, quoted where it would otherwise read as more than one value or as none, a doubled quote standing
+        /// for one.
+        /// </summary>
         static string Quoted(string said, bool always)
         {
-            if (said == null)
+            if (string.IsNullOrEmpty(said))
                 return "\"\"";
 
             if (!always && said.IndexOf(' ') < 0 && said.IndexOf('"') < 0 && said.IndexOf('\n') < 0)

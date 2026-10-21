@@ -16,8 +16,8 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             /// <summary>Where what it shows is among <see cref="Contents" />, or -1 to leave it.</summary>
             public int Content = -1;
 
-            /// <summary>The app it runs, by the game's id for it, or null to leave it.</summary>
-            public string App;
+            /// <summary>The app it runs, by the game's id for it, empty for none; null to leave it, as it is unless it is set to show an app.</summary>
+            public string Runs;
 
             /// <summary>The color of its text, or null to leave it.</summary>
             public Color? TextColor;
@@ -53,8 +53,11 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
             public static Look Read(IList<Literal> arguments)
             {
                 var look = new Look { Which = Picked.Read(arguments) };
+                if (arguments == null)
+                    return look;
+
                 look.Content = Chosen(arguments, 1, Contents);
-                look.App = Given(arguments, 2) ? arguments[2].Text : null;
+                look.Runs = look.Content == AppContent && arguments.Count > 2 ? arguments[2].Text ?? "" : null;
                 look.TextColor = Colored(arguments, 3);
                 look.BackgroundColor = Colored(arguments, 4);
                 look.Font = Given(arguments, 5) ? arguments[5].Text : null;

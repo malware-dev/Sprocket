@@ -379,11 +379,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return planned;
         }
 
-        /// <summary>What the first of the blocks that has the value <paramref name="id" /> holds in it now, or null where none can say.</summary>
+        /// <summary>
+        /// What the first of the blocks that has the value <paramref name="id" /> holds in it now, read off the facet called
+        /// <paramref name="facet" /> where the value is of a type the host provides, or null where none can say.
+        /// </summary>
         /// <remarks>
-        /// A value worked out from what was seen before, or one that wants arguments to be read, gives null.
+        /// A value worked out from what was seen before, or one that wants arguments to be read, gives null. A block with no
+        /// facet by that name is read off its first.
         /// </remarks>
-        public static Literal? Current(GridWorld world, IList<long> entityIds, string id)
+        public static Literal? Current(GridWorld world, IList<long> entityIds, string id, string facet)
         {
             var entities = Blocks(world, entityIds);
             foreach (var entity in entities)
@@ -393,14 +397,34 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     continue;
 
                 var own = value.OwnValue;
+                var given = value.Type == null ? (IList<Literal>)NoArguments : HostType.Arguments(Number(entity, value.Type, facet), NoArguments);
                 var gauge = own == null
                     ? entity.Gauge(value)
-                    : !own.Remembers && own.Missing(0) == null ? own.Gauge(entity.Block, NoArguments, null) : null;
+                    : !own.Remembers && own.Missing(0) == null ? own.Gauge(entity.Block, given, null) : null;
                 if (gauge != null)
-                    return gauge.Read();
+                    return own != null && own.Kind == ValueKind.Name ? Named(own, gauge.Read()) : gauge.Read();
             }
 
             return null;
+        }
+
+        /// <summary>The name <paramref name="read" /> stands for among <paramref name="own" />'s, which it holds as a position, or null where it stands for none.</summary>
+        static Literal? Named(OwnValue own, Literal read)
+        {
+            var at = read.Kind == ValueKind.Integer ? read.Whole : -1;
+            return at >= 0 && at < own.Names.Count ? Literal.Name(own.Names[(int)at]) : (Literal?)null;
+        }
+
+        /// <summary>The number of the facet of <paramref name="type" /> called <paramref name="name" /> on <paramref name="entity" />, or 0 where it has none by that name.</summary>
+        static int Number(GridEntity entity, HostType type, string name)
+        {
+            foreach (var facet in entity.Kind.Facets(type))
+            {
+                if (facet.Name == name)
+                    return facet.Number;
+            }
+
+            return 0;
         }
 
         static List<GridEntity> Blocks(GridWorld world, IList<long> entityIds)

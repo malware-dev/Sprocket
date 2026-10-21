@@ -546,7 +546,7 @@ public class ProductionTests
     {
         var item = ItemIds.Choosing("item", new[] { "Iron Ingot" }, new[] { "Ingot/Iron" });
 
-        var function = OwnValue.Flag<IMyTerminalBlock, Item>(Item.First, (_, _, _) => true).Taking(item);
+        var function = OwnValue.Flag<IMyTerminalBlock, Item>(Item.First, (_, _) => true).Taking(item);
         Assert.Null(function.Refused(new[] { Literal.Of("Ingot/Iron") }));
         Assert.Equal("item", function.Refused(new[] { Literal.Of("Ingot/Gold") }));
     }
@@ -556,7 +556,7 @@ public class ProductionTests
     public void AnItemWithNothingListedIsAnyWrittenOut()
     {
         var item = ItemIds.Choosing("item", new string[0], new string[0]);
-        var function = OwnValue.Flag<IMyTerminalBlock, Item>(Item.First, (_, _, _) => true).Taking(item);
+        var function = OwnValue.Flag<IMyTerminalBlock, Item>(Item.First, (_, _) => true).Taking(item);
 
         Assert.Null(function.Refused(new[] { Literal.Of("Ingot/Gold") }));
         Assert.Equal("item", function.Refused(new[] { Literal.Of(3L) }));

@@ -20,7 +20,7 @@ Hver av disse endringene er ett steg i ![](mark:undo)&nbsp;[angre](undo), og som
 
 ## Skjermer
 
-Hver installasjon velger sin egen skjerm. Fyller du en skjermplass, åpner [velgeren](selector) seg med stegets egen handling alene, og nedtrekksboksen for skjerm under den når blokker er valgt. Den ber ikke om noen verdier, siden de hører til steget.
+Hver installasjon velger sin egen skjerm. Fyller du en skjermplass, åpner [velgeren](selector) seg med stegets egen handling alene, og nedtrekksboksen for skjerm over den, under overskriften `Skjermer`, når blokker er valgt. Den ber ikke om noen verdier, siden de hører til steget.
 
 Et steg viser et problem når blokken mangler skjermen installasjonen valgte, for eksempel etter at blokken er byttet ut med en som har færre skjermer: *{block} har ikke skjermen dette steget bruker. Velg skjermen på installasjonspanelet.* Steget lar den blokken være.
 

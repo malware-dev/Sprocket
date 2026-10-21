@@ -94,6 +94,29 @@ public class FormTests
         Assert.Equal(Wide, swatches.Bounds.Width, 3);
     }
 
+    /// <summary>A row whose field is hidden is hidden whole: its label is neither drawn nor pressed, where it stood before.</summary>
+    [Fact]
+    public void ARowWhoseFieldIsHiddenHidesItsLabel()
+    {
+        Label label, field;
+        var form = new Form
+        {
+            Rows =
+            {
+                { new Label { Text = "content" }, new Label { Text = "app" } },
+                { new Label { Text = "font" }.As(out label), new Label { Text = "Debug" }.As(out field) }
+            }
+        };
+        var easel = new Easel(form, Wide, High);
+        var stood = label.Bounds.Center;
+
+        field.IsVisible = false;
+        easel.Draw(Wide, High);
+
+        Assert.DoesNotContain(easel.Written, text => text.Text == "font");
+        Assert.NotSame(label, form.Under(stood));
+    }
+
     /// <summary>Clearing the rows takes their elements away, so a form can be asked something else.</summary>
     [Fact]
     public void ClearingTakesTheRowsAway()

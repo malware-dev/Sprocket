@@ -384,7 +384,7 @@ namespace Sprocket.Sim
         }
 
         /// <summary>
-        /// Welds a block of <paramref name="kind" />, a panel, a light, a door or a rotor, onto <paramref name="rig" /> as
+        /// Welds a block of <paramref name="kind" />, a panel, a light, a door, a billboard, a cockpit or a rotor, onto <paramref name="rig" /> as
         /// <paramref name="id" />, named <paramref name="name" />, on the head of the rotor named <paramref name="on" />, or on
         /// the ship itself for null.
         /// </summary>
@@ -411,8 +411,12 @@ namespace Sprocket.Sim
                 rig.Light(id, name);
             else if (kind == "door")
                 rig.Door(id, name);
+            else if (kind == "billboard")
+                rig.Weld(new Billboard(id, name));
+            else if (kind == "cockpit")
+                rig.ScreenedCockpit(id, name);
             else
-                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light, a door or a rotor.");
+                throw new ArgumentException($"--shot cannot weld '{kind}'; it welds a panel, a light, a door, a billboard, a cockpit or a rotor.");
         }
 
         /// <summary>Whether a word begins a script step rather than naming a file.</summary>

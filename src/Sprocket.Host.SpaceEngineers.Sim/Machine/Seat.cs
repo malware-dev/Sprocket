@@ -24,18 +24,27 @@ public sealed class Seat : Fitting
     /// </summary>
     /// <remarks>
     /// A cryo chamber is a cockpit to the game, which tells it apart by the interface it adds. A seat that cannot fly the
-    /// ship, a couch or a toilet, is a cockpit whose definition says so.
+    /// ship, a couch or a toilet, is a cockpit whose definition says so. A seat has the screens <paramref name="faces" />
+    /// holds, and none where it holds none.
     /// </remarks>
     public Seat(long id, string name, MyObjectBuilderType type, string subtype, string display, float air, bool cryo = false,
-        bool flies = true)
+        bool flies = true, Face[]? faces = null)
         : base(id, name, type, subtype, display)
     {
         // The hotbar, nine pages of nine, as every seat in the game has.
         Toolbar = new Toolbar(9, 9);
+        Faces = faces ?? [];
 
         var stand = Pretend.To<IMyCockpit>();
         if (cryo)
             stand.Also<Sandbox.ModAPI.IMyCryoChamber>();
+        if (Faces.Length > 0)
+        {
+            stand.Also<IMyTextSurfaceProvider>()
+                .Gives("UseGenericLcd", () => true)
+                .Gives("SurfaceCount", () => Faces.Length)
+                .Does("GetSurface", arguments => Faces[(int)arguments[0]].Surface);
+        }
 
         Fit(stand
             .Gives("IsOccupied", () => _pilot != null)
@@ -59,6 +68,9 @@ public sealed class Seat : Fitting
                 return null!;
             }));
     }
+
+    /// <summary>Its screens, in the order the game numbers them.</summary>
+    public Face[] Faces { get; }
 
     /// <summary>How full of oxygen it is, from 0 to 1.</summary>
     public float Air { get; set; }

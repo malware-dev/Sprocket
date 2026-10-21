@@ -244,19 +244,53 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     return _filled;
                 }
 
+                if (_forTests || _forEvents || _selection.Count == 0)
+                    return _filled;
+
                 // A value being set opens on what the block holds now, as the terminal's own control does.
-                if (_chosenForm == ReachKind.Value && !_forTests && !_forEvents && _selection.Count > 0)
+                if (_chosenForm == ReachKind.Value)
                 {
-                    var current = Vocabulary.Current(Editor.World, _selection, _chosen);
+                    var current = Vocabulary.Current(Editor.World, _selection, _chosen, _facet);
                     if (current.HasValue)
                     {
                         ColorChannels.Shown(new[] { Opaque(current.Value) }, Wanted(), _filled);
                         _offering = true;
                     }
                 }
+                else
+                    ColorChannels.Shown(Opening(Wanted()), Wanted(), _filled);
 
                 return _filled;
             }
+        }
+
+        /// <summary>Whether any of <paramref name="fields" /> opens on what the block holds.</summary>
+        static bool OpensOnTheBlock(IList<Field> fields)
+        {
+            foreach (var field in fields)
+            {
+                if (field.OpensOn != null)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// What a new step's <paramref name="fields" /> open holding: what the block holds now in the value each opens on, and
+        /// nothing in the rest.
+        /// </summary>
+        List<Literal> Opening(IList<Field> fields)
+        {
+            var opened = new List<Literal>();
+            foreach (var field in fields)
+            {
+                var current = field.OpensOn == null ? null : Vocabulary.Current(Editor.World, _selection, field.OpensOn, _facet);
+                for (var i = 0; i < field.Covers; i++)
+                    opened.Add(current.HasValue && field.Covers == 1 ? Opaque(current.Value) : Literal.Of(""));
+            }
+
+            return opened;
         }
 
         /// <inheritdoc />
@@ -280,7 +314,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 }
 
                 if (_chosen != _arrivedChosen || _chosenForm != _arrivedForm || _quantifier != _arrivedQuantifier
-                    || !ToolbarSlot.Same(_slot, _arrivedSlot) || _facet != _arrivedFacet)
+                    || !ToolbarSlot.Same(_slot, _arrivedSlot) || Facet != _arrivedFacet)
                     return true;
 
                 if (_aim != null && _aim.Moved)
@@ -377,7 +411,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var arguments = _strip.Arguments;
             if (_forEvents && _chosenForm != ReachKind.Value || !_strip.ShowsArguments || arguments == null || arguments.Form.Count == 0)
             {
-                _done(new PickAnswer(_selection, Answered, _quantifier, null, _chosenForm, _facet));
+                _done(new PickAnswer(_selection, AnswerId, _quantifier, null, _chosenForm, Facet));
                 return;
             }
 
@@ -405,11 +439,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 && arguments[0].Text == EntityAction.Toggle)
             {
                 var toggle = Vocabulary.Toggle(Editor.World, _selection, _chosen) ?? _chosen;
-                _done(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), ReachKind.Action, _facet));
+                _done(new PickAnswer(_selection, toggle, _quantifier, new List<Literal>(), ReachKind.Action, Facet));
                 return;
             }
 
-            _done(new PickAnswer(_selection, _chosen, _quantifier, arguments, _chosenForm, _facet));
+            _done(new PickAnswer(_selection, _chosen, _quantifier, arguments, _chosenForm, Facet));
         }
 
         /// <summary>Gives the argument of each field for one of a list of names as that name.</summary>
@@ -517,9 +551,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _strip.Tick();
             if (_slots != null)
                 _slots.Slide();
-
-            if (_facets != null)
-                _facets.Slide();
         }
 
         /// <summary>Goes straight on to the page after this one as soon as this is built, for a part pressed that stands for something on that page.</summary>
@@ -755,6 +786,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             // The fields are compared too, since they change with the blocks: a hinge picked beside a rotor turns without a
             // direction.
             var fields = Wanted();
+
+            // Values that open on what the block holds are each facet's own, read off the one chosen.
+            if (shown.Length != 0 && _facet.Length != 0 && OpensOnTheBlock(fields))
+                shown = $"{shown} {_facet}";
             if (_shown == shown && Same(_shownFields, fields))
                 return;
 
@@ -1102,21 +1137,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _whatAt[key] = at;
             }
 
-            // The slots of a toolbar a person presses open under its line once it is chosen.
             _whatShown.Clear();
             _whatShown.AddRange(_whatKeys);
+
+            // Which of the blocks' screens, or of whatever else of a type the host provides, its members act on is chosen
+            // first: a drop box heads them where the blocks share more than one, and each stands in under it.
+            var first = _forEvents ? -1 : FirstTyped();
+            var type = first < 0 ? null : _offers.Types[_rows[first]];
+            var shared = type == null ? null : Facets.Shared(Editor.World, _selection, type);
+            if (shared != null)
+                Keep(shared);
+
+            var facets = shared != null && shared.Count > 1;
+            if (facets)
+                _whatShown.Insert(first, FacetsKey);
+
+            // The slots of a toolbar a person presses open under its line once it is chosen.
             var pressed = SlotOccupancy.Pressing(Editor.World, _selection, _chosen);
-            var under = pressed == null ? -1 : _whatKeys.IndexOf($"{ReachKind.Native} {pressed.Id}");
+            var under = pressed == null ? -1 : _whatShown.IndexOf($"{ReachKind.Native} {pressed.Id}");
             if (under >= 0)
                 _whatShown.Insert(under + 1, SlotsKey);
-
-            // As do the facets a member of a type the host provides acts on, where the blocks share more than one.
-            var type = pressed == null && !_forEvents ? Vocabulary.TypeOf(Editor.World, _selection, _chosen) : null;
-            var shared = type == null ? null : Facets.Shared(Editor.World, _selection, type);
-            Keep(shared);
-            var over = shared == null || shared.Count < 2 ? -1 : _whatKeys.IndexOf($"{_chosenForm} {_chosen}");
-            if (over >= 0)
-                _whatShown.Insert(over + 1, FacetsKey);
 
             _whatRows.Show(_whatShown);
             if (under >= 0)
@@ -1124,7 +1164,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             else
                 _slots = null;
 
-            if (over >= 0)
+            if (facets)
                 _facets.Show(shared, _facet, Facets.Showing(Editor.World, _selection, type, _facet));
             else
                 _facets = null;
@@ -1136,6 +1176,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 row.Many = false;
                 row.HasPicture = false;
                 row.Secondary = "";
+                row.Indented = facets && at >= 0 && _offers.Types[at] == type;
 
                 if (at < 0)
                 {
@@ -1266,7 +1307,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         const string FacetsKey = "facets";
 
         /// <summary>What is chosen as the program names it: the one slot, where a toolbar a person presses is chosen.</summary>
-        string Answered => _slot == null ? _chosen : _slot.EventId;
+        string AnswerId => _slot == null ? _chosen : _slot.EventId;
 
         void ShowSlots(EntityEvent pressed)
         {
@@ -1321,6 +1362,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (pick != null)
                 pick.Execute();
         }
+
+        /// <summary>Where the first member of a type the host provides stands among the rows, or -1 where none is listed.</summary>
+        int FirstTyped()
+        {
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                var at = _rows[i];
+                if (at >= 0 && _offers.Types[at] != null)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        /// <summary>The facet the chosen member acts on, or empty where it is no member of a type the host provides.</summary>
+        string Facet => Vocabulary.TypeOf(Editor.World, _selection, _chosen) == null ? "" : _facet;
 
         /// <summary>Keeps the facet chosen where the blocks still share it, and otherwise chooses the first they share, or none.</summary>
         void Keep(List<string> shared)

@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             {
                 // A value left out is the one the action does without it, which an optional field starts with.
                 var said = Said(arguments, at, fields[i].Covers);
-                into.Add(said.Length == 0 && !fields[i].Needed && fields[i].Default != null
+                into.Add(said.Length == 0 && fields[i].IsOptional
                     ? fields[i].Default
                     : fields[i].Wording(said));
                 at += fields[i].Covers;

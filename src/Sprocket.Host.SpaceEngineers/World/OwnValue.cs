@@ -214,54 +214,54 @@ namespace Sprocket.Host.SpaceEngineers.World
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a real number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, double> number)
+        public static OwnValue Number<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, double> number)
             where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Real, None, true, options,
-                (block, given, seen) => Literal.Of(number(block, given, seen)));
+            return new TypedOwnValue<T, TOptions>(ValueKind.Real, None, false, options,
+                (block, given, seen) => Literal.Of(number(block, given)));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back one of <paramref name="names" /> as a position among them, with options read into a <typeparamref name="TOptions" />.</summary>
         public static OwnValue OneOf<T, TOptions>(string[] names, Func<IList<Literal>, TOptions> options,
-            Func<T, TOptions, ReaderMemory, int> position) where T : class
+            Func<T, TOptions, int> position) where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Name, names, true, options,
-                (block, given, seen) => Literal.Of(position(block, given, seen)));
+            return new TypedOwnValue<T, TOptions>(ValueKind.Name, names, false, options,
+                (block, given, seen) => Literal.Of(position(block, given)));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a color, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, Color> color)
+        public static OwnValue Color<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, Color> color)
             where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Color, None, true, options, (block, given, seen) =>
+            return new TypedOwnValue<T, TOptions>(ValueKind.Color, None, false, options, (block, given, seen) =>
             {
-                var read = color(block, given, seen);
+                var read = color(block, given);
                 return Literal.Colour(read.R, read.G, read.B, read.A);
             });
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a flag, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, bool> flag)
+        public static OwnValue Flag<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, bool> flag)
             where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Flag, None, true, options,
-                (block, given, seen) => Literal.Of(flag(block, given, seen)));
+            return new TypedOwnValue<T, TOptions>(ValueKind.Flag, None, false, options,
+                (block, given, seen) => Literal.Of(flag(block, given)));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back a whole number, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, long> whole)
+        public static OwnValue Whole<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, long> whole)
             where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Integer, None, true, options,
-                (block, given, seen) => Literal.Of(whole(block, given, seen)));
+            return new TypedOwnValue<T, TOptions>(ValueKind.Integer, None, false, options,
+                (block, given, seen) => Literal.Of(whole(block, given)));
         }
 
         /// <summary>A function of a <typeparamref name="T" /> giving back text, with options read into a <typeparamref name="TOptions" />.</summary>
-        public static OwnValue Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, ReaderMemory, string> text)
+        public static OwnValue Text<T, TOptions>(Func<IList<Literal>, TOptions> options, Func<T, TOptions, string> text)
             where T : class
         {
-            return new TypedOwnValue<T, TOptions>(ValueKind.Text, None, true, options,
-                (block, given, seen) => Literal.Of(text(block, given, seen) ?? ""));
+            return new TypedOwnValue<T, TOptions>(ValueKind.Text, None, false, options,
+                (block, given, seen) => Literal.Of(text(block, given) ?? ""));
         }
 
         static object Nothing(IList<Literal> arguments)

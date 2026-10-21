@@ -69,7 +69,7 @@ public class ScreensTests
         Assert.Same(screen, kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Type);
         Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
         Assert.True(kind.FindAction(ScreenType.SetUp, ReachKind.Native)!.Vetted);
-        foreach (var id in new[] { "content", "text-color", "font-size", "alignment", "keep-aspect-ratio" })
+        foreach (var id in new[] { "content", "app", "text-color", "font-size", "alignment", "keep-aspect-ratio" })
         {
             Assert.True(kind.FindAction(id, ReachKind.Value)!.Vetted, id + " is not vetted");
             Assert.Same(screen, kind.FindAction(id, ReachKind.Value)!.Type);
@@ -201,6 +201,51 @@ public class ScreensTests
         Assert.Equal(ContentType.SCRIPT, board.Faces[1].Content);
         Assert.Equal("TSS_Weather", board.Faces[1].App);
         Assert.Equal("", board.Faces[0].App);
+    }
+
+    /// <summary>Setting up a screen to run no app sets it running none, so a script can draw on it.</summary>
+    [Fact]
+    public void SettingUpAScreenToRunNoAppSetsNone()
+    {
+        var (ship, board) = Built();
+        board.Faces[1].App = "TSS_Weather";
+        var empty = Literal.Of("");
+        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.SetUp, Literal.Of("app"), empty,
+            empty, empty, empty, empty, empty, empty, empty, empty, empty, empty);
+
+        Run(ship, runner, sequence, installation);
+
+        Assert.Equal(ContentType.SCRIPT, board.Faces[1].Content);
+        Assert.Equal("", board.Faces[1].App);
+    }
+
+    /// <summary>Showing an image shows it on the screen its slot holds alone, which is set to show text and images.</summary>
+    [Fact]
+    public void ShowingAnImageShowsItOnTheScreenItsSlotHolds()
+    {
+        var (ship, board) = Built();
+        var (_, runner, sequence, installation) = Slotted(ship, board, 2, ScreenType.ShowImage, Literal.Of("Danger"));
+
+        Run(ship, runner, sequence, installation);
+
+        Assert.Equal(new[] { "Danger" }, board.Faces[1].Images);
+        Assert.Equal(ContentType.TEXT_AND_IMAGE, board.Faces[1].Content);
+        Assert.Empty(board.Faces[0].Images);
+    }
+
+    /// <summary>The text a screen shows and the app it runs are read off the screen its slot holds.</summary>
+    [Fact]
+    public void WhatAScreenShowsIsReadOffTheScreenItsSlotHolds()
+    {
+        var (ship, board) = Built();
+        board.Faces[1].Text = "DOCKED";
+        board.Faces[1].App = "TSS_Weather";
+        ship.Tick();
+        var entity = ship.Entity(board.Id);
+
+        Assert.True(Probe.Of(entity, BlockKinds.Own, ScreenType.TextShown, new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 2)!.Holds());
+        Assert.False(Probe.Of(entity, BlockKinds.Own, ScreenType.TextShown, new Literal[0], Quantifier.Any, Relation.Is, Literal.Of("DOCKED"), facet: 1)!.Holds());
+        Assert.True(Probe.Of(entity, BlockKinds.Own, ScreenType.App, new Literal[0], Quantifier.Any, Relation.Is, Literal.Name("TSS_Weather"), facet: 2)!.Holds());
     }
 
     /// <summary>A screen's setting is read off the screen its slot holds.</summary>

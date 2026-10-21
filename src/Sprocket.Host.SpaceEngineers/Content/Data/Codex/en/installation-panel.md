@@ -20,7 +20,7 @@ Each of these changes is one step of ![](mark:undo)&nbsp;[undo](undo), and like 
 
 ## Screens
 
-Every installation chooses its own screen. Filling a slot of screens opens the [selector](selector) with the step's own action alone, and the screen drop box under it once blocks are selected. It asks for no values, since those belong to the step.
+Every installation chooses its own screen. Filling a slot of screens opens the [selector](selector) with the step's own action alone, and the screen drop box above it, under the `Screens` heading, once blocks are selected. It asks for no values, since those belong to the step.
 
 A step shows a problem when its block lacks the screen its installation chose, for example after the block was replaced by one with fewer screens: *{block} doesn't have the screen this step uses. Choose its screen on the installation panel.* The step leaves that block alone.
 

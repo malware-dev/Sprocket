@@ -600,6 +600,25 @@ public sealed class Rig
             "Cockpit", enclosed ? 1f : 0f));
     }
 
+    /// <summary>An enclosed cockpit, named, empty, with the six screens of the game's large cockpit and the apps it starts them on.</summary>
+    public Seat ScreenedCockpit(long id, string name)
+    {
+        return Weld(new Seat(id, name, Type<MyObjectBuilder_Cockpit>(), "LargeBlockCockpitSeat", "Cockpit", 1f, faces:
+        [
+            Running(new Face("Top Center Screen"), "TSS_ArtificialHorizon"), Running(new Face("Top Left Screen"), "TSS_EnergyHydrogen"),
+            Running(new Face("Top Right Screen"), "TSS_Gravity"), new Face("Keyboard"),
+            Running(new Face("Bottom Left Screen"), "TSS_ClockAnalog"), new Face("Bottom Right Screen")
+        ]));
+    }
+
+    /// <summary><paramref name="face" />, set to show the app <paramref name="app" />.</summary>
+    static Face Running(Face face, string app)
+    {
+        face.Content = VRage.Game.GUI.TextPanel.ContentType.SCRIPT;
+        face.App = app;
+        return face;
+    }
+
     /// <summary>A toilet, named, empty: a seat that cannot fly the ship.</summary>
     public Seat Toilet(long id, string name)
     {

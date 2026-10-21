@@ -200,7 +200,7 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
         // /// <summary>How much of an item one of the block's two inventories holds: in kilograms for ore and ingots, and in pieces for anything else.</summary>
         // static OwnValue Holding(bool input)
         // {
-        //     return OwnValue.Number<IMyProductionBlock, Item>(Item.First, (block, item, seen) =>
+        //     return OwnValue.Number<IMyProductionBlock, Item>(Item.First, (block, item) =>
         //             item.Known ? (double)(input ? block.InputInventory : block.OutputInventory).GetItemAmount(item.Id) : 0.0)
         //         .Taking(ItemIds.Asked("item"));
         // }

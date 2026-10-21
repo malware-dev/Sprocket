@@ -1,12 +1,10 @@
 using Sandbox.ModAPI;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Runtime;
 using Sprocket.Host.SpaceEngineers.World;
 using VRage.Game.GUI.TextPanel;
 using Xunit;
 using CameraBlock = Sprocket.Host.SpaceEngineers.Blocks.Camera;
 using EmotionController = Sprocket.Host.SpaceEngineers.Blocks.EmotionController;
-using TextPanel = Sprocket.Host.SpaceEngineers.Blocks.TextPanel;
 using HostTypes = Sprocket.Host.SpaceEngineers.Blocks.HostTypes;
 using ScreenType = Sprocket.Host.SpaceEngineers.Blocks.ScreenType;
 
@@ -37,7 +35,7 @@ public class ScreenBlockTests
         Assert.Equal("TSS_Unknown", ScreenType.AppName("TSS_Unknown"));
     }
 
-    /// <summary>Showing an image replaces what the panel shows with it, and has it show text and images.</summary>
+    /// <summary>Showing an image replaces what a panel's screen shows with it, and has it show text and images.</summary>
     [Fact]
     public void ShowingAnImageReplacesTheImagesShown()
     {
@@ -45,14 +43,14 @@ public class ScreenBlockTests
         var panel = ship.Rig.TextPanel(1, "Screen");
         panel.Content = ContentType.SCRIPT;
 
-        Ran.Step(ship, panel, TextPanel.ShowImage, Literal.Of("Arrow"));
-        Ran.Step(ship, panel, TextPanel.ShowImage, Literal.Of("Danger"));
+        Ran.Step(ship, panel, ScreenType.ShowImage, Literal.Of("Arrow"));
+        Ran.Step(ship, panel, ScreenType.ShowImage, Literal.Of("Danger"));
 
         Assert.Equal(new[] { "Danger" }, panel.Images);
         Assert.Equal(ContentType.TEXT_AND_IMAGE, panel.Content);
     }
 
-    /// <summary>The text a panel shows and the app it runs are read off it.</summary>
+    /// <summary>The text a panel's screen shows and the app it runs are read off it, each a member of the screen.</summary>
     [Fact]
     public void WhatThePanelShowsIsRead()
     {
@@ -61,8 +59,11 @@ public class ScreenBlockTests
         panel.Text = "DOCKED";
         panel.App = "TSS_Weather";
 
-        Assert.Equal("DOCKED", Ran.Read(ship, panel, TextPanel.Shown).Text);
-        var app = ship.Entity(panel.Id).Kind.FindAction(TextPanel.App, ReachKind.Value)!.OwnValue!;
+        Assert.Equal("DOCKED", Ran.Read(ship, panel, ScreenType.TextShown).Text);
+        var screen = HostTypes.Returned("screen");
+        Assert.Same(screen, ship.Entity(panel.Id).Kind.FindAction(ScreenType.TextShown, ReachKind.Value)!.Type);
+        Assert.Same(screen, ship.Entity(panel.Id).Kind.FindAction(ScreenType.App, ReachKind.Value)!.Type);
+        var app = ship.Entity(panel.Id).Kind.FindAction(ScreenType.App, ReachKind.Value)!.OwnValue!;
         Assert.Equal(new[] { "TSS_ClockAnalog", "TSS_Weather" }, app.Names);
         Assert.True(app.Is(Literal.Name("TSS_Weather")).Holds(panel.Block, null!));
     }
@@ -117,9 +118,9 @@ public class ScreenBlockTests
             .Offering("IncreaseChangeIntervalSlider", "Increase Image change interval");
         var kind = ship.Entity(panel.Id).Kind;
 
-        Assert.True(kind.FindAction(TextPanel.ShowImage, ReachKind.Native)!.Vetted);
-        Assert.True(kind.FindAction(TextPanel.Shown, ReachKind.Value)!.Vetted);
-        Assert.True(kind.FindAction(TextPanel.App, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction(ScreenType.ShowImage, ReachKind.Native)!.Vetted);
+        Assert.True(kind.FindAction(ScreenType.TextShown, ReachKind.Value)!.Vetted);
+        Assert.True(kind.FindAction(ScreenType.App, ReachKind.Value)!.Vetted);
         Assert.True(kind.FindAction("Rotate", ReachKind.Value)!.Vetted);
         Assert.True(kind.FindAction(ScreenType.ShowText, ReachKind.Native)!.Vetted);
         foreach (var id in new[] { "text-color", "background-color", "app-color", "content", "font", "font-size", "alignment", "padding" })
@@ -137,33 +138,6 @@ public class ScreenBlockTests
                      "IncreaseChangeIntervalSlider"
                  })
             Assert.False(kind.FindAction(id, ReachKind.Action)!.Vetted, id + " is vetted");
-    }
-
-    /// <summary>A step chooses the app a panel runs, and leaves what the panel shows as it was.</summary>
-    [Fact]
-    public void AStepChoosesThePanelsApp()
-    {
-        var ship = new Rigged();
-        var panel = ship.Rig.TextPanel(1, "Screen");
-        panel.Content = ContentType.TEXT_AND_IMAGE;
-
-        Assert.Equal(SequenceProblem.None, Ran.Set(ship, panel, TextPanel.App, Literal.Name("TSS_Weather")));
-
-        Assert.Equal("TSS_Weather", panel.App);
-        Assert.Equal(ContentType.TEXT_AND_IMAGE, panel.Content);
-    }
-
-    /// <summary>An app the panel does not have is a fault, and leaves the app it runs as it was.</summary>
-    [Fact]
-    public void AnAppThePanelLacksIsAFault()
-    {
-        var ship = new Rigged();
-        var panel = ship.Rig.TextPanel(1, "Screen");
-        panel.App = "TSS_ClockAnalog";
-
-        Assert.Equal(SequenceProblem.Mistyped, Ran.Set(ship, panel, TextPanel.App, Literal.Name("TSS_Horizon")));
-
-        Assert.Equal("TSS_ClockAnalog", panel.App);
     }
 
     /// <summary>An emotion controller vouches for showing a face, and not for the game's own action for each face.</summary>

@@ -187,17 +187,35 @@ namespace Lumel.Layout
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>Draws each row whose field is shown, its label with it; a row whose field is hidden is hidden whole.</summary>
         protected override void DrawContent(IGraphics g)
         {
-            foreach (var child in _children)
-                child.Draw(g);
+            for (var i = 0; i < Rows.Count; i++)
+            {
+                var row = Rows[i];
+                if (!row.Field.IsVisible)
+                    continue;
+
+                row.Label?.Draw(g);
+                row.Field.Draw(g);
+            }
         }
 
-        /// <inheritdoc />
+        /// <summary>The element under <paramref name="point" /> among the rows whose field is shown, the last row first.</summary>
         protected override Element UnderContent(Vector2 point)
         {
-            return OnTop(_children, point);
+            for (var i = Rows.Count - 1; i >= 0; i--)
+            {
+                var row = Rows[i];
+                if (!row.Field.IsVisible)
+                    continue;
+
+                var found = row.Field.Under(point) ?? row.Label?.Under(point);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
         }
 
         /// <summary>Refuses a child whose placement is not <see cref="ISized" />.</summary>

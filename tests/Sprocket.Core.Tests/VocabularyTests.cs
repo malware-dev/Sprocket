@@ -338,7 +338,7 @@ public class VocabularyTests
         var amount = Field.Between("by", "0", "10");
         amount.Entry = FieldInput.Decimal;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
-            OwnValue.Number<IMyTerminalBlock, double>(arguments => arguments[1].Real, (_, more, _) => more)
+            OwnValue.Number<IMyTerminalBlock, double>(arguments => arguments[1].Real, (_, more) => more)
                 .Taking(Field.Among("way", ways, ways), amount));
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
@@ -606,7 +606,7 @@ public class VocabularyTests
         var by = Field.Called("by");
         by.Entry = FieldInput.Decimal;
         ship.Rig.Entity(ship.Left.Id).Kind.WithValue("brighter", "brighter",
-            OwnValue.Number<IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more, _) => more).Taking(by));
+            OwnValue.Number<IMyTerminalBlock, double>(arguments => arguments[0].Real, (_, more) => more).Taking(by));
 
         var cycle = ship.Program.AddSequence(new EveryTrigger(600));
         var test = new Comparison

@@ -35,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<bool> _sets = new List<bool>();
         readonly List<Readiness> _ready = new List<Readiness>();
         readonly List<string> _why = new List<string>();
+        readonly List<HostType> _types = new List<HostType>();
 
         /// <summary>
         /// The offers of a pick in <paramref name="editor" />: of what starts something where <paramref name="forEvents" />, of
@@ -73,6 +74,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Why each offer that cannot be made into a step cannot, or null.</summary>
         public List<string> Why => _why;
 
+        /// <summary>The type the host provides each offer is a member of, such as a screen, or null where it is the block's.</summary>
+        public List<HostType> Types => _types;
+
         /// <summary>
         /// Lists what <paramref name="selection" /> offers, numbers alone where <paramref name="totals" /> asks for a sum or an
         /// average, and only the member <paramref name="only" /> where that is not null.
@@ -87,6 +91,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _sets.Clear();
             _ready.Clear();
             _why.Clear();
+            _types.Clear();
 
             if (_forTests)
             {
@@ -110,6 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                     _groups.Add(Moments);
                     _ready.Add(Readiness.Ready);
                     _why.Add(null);
+                    _types.Add(null);
                 }
 
                 // A number on the blocks can start something as it comes to compare as asked: the states already come as
@@ -195,6 +201,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _sets.Add(false);
                 _ready.Add(status.Readiness);
                 _why.Add(ReadinessText.Why(_editor.Texts, status.Why));
+                _types.Add(null);
             }
         }
 
@@ -209,6 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _sets.Add(true);
             _ready.Add(one.Readiness);
             _why.Add(ReadinessText.Why(_editor.Texts, one.Why));
+            _types.Add(one.Type);
         }
 
         /// <summary>Everything the blocks offer, values first and each group in its own order.</summary>
@@ -242,6 +250,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _sets.Add(one.Sets);
                 _ready.Add(one.Readiness);
                 _why.Add(ReadinessText.Why(_editor.Texts, one.Why));
+                _types.Add(one.Type);
             }
         }
 

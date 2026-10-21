@@ -65,10 +65,10 @@ namespace Sprocket.Host.SpaceEngineers.Blocks
 
             kind.WithAction(Label, "label button", labels, Asked(buttons), label).In(Category.Screen)
                 .WithValue(LabelOf, "label of button", OwnValue.Text<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
-                    (panel, labelled, seen) => panel.GetButtonName(labelled.Button))
+                    (panel, labelled) => panel.GetButtonName(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Screen)
                 .WithValue(Assigned, "button has an action", OwnValue.Flag<IMyButtonPanel, ButtonLabel>(ButtonLabel.Read,
-                    (panel, labelled, seen) => panel.IsButtonAssigned(labelled.Button))
+                    (panel, labelled) => panel.IsButtonAssigned(labelled.Button))
                     .Taking(Asked(buttons))).Looked(Unheard).In(Category.Automation);
         }
 
