@@ -515,8 +515,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var branch = step as Branch;
             if (branch != null)
             {
-                if (branch.Test != null)
-                    Tested(row, step, branch.Test);
+                var compared = branch.Test as Comparison;
+                if (compared != null)
+                    Tested(row, step, compared);
 
                 return;
             }

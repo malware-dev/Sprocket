@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
                         count++;
                     }
 
-                    var test = (step as Branch)?.Test;
+                    var test = (step as Branch)?.Test as Comparison;
                     if (test != null && test.Provider == BlockKinds.Own && test.MemberId == ThingsDetected)
                     {
                         test.MemberId = Detections;

@@ -53,9 +53,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 return system.First;
 
             var name = SystemSummary.NewInstanceName(_editor.Texts, system);
+            var self = system.Uses[0];
             var first = system.AddInstance();
             first.Name = name;
             system.IsBlueprint = true;
+
+            // The system becomes its first installation, which holds what its states held.
+            _editor.Runner.States.Move(system, self, first);
 
             var slots = new Dictionary<string, string>();
             var triggers = system.Triggers;

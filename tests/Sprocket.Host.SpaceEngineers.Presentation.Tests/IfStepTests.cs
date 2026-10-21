@@ -23,10 +23,10 @@ public class IfStepTests
 
         var opens = Assert.IsType<If>(sequence.Steps[before]);
         Assert.IsType<EndIf>(sequence.Steps[before + 1]);
-        Assert.Equal("status", opens.Test.MemberId);
-        Assert.Equal("ext", opens.Test.Provider);
-        Assert.Equal(Relation.Is, opens.Test.Relation);
-        Assert.Equal("closed", opens.Test.Value.Text);
+        Assert.Equal("status", opens.Compared.MemberId);
+        Assert.Equal("ext", opens.Compared.Provider);
+        Assert.Equal(Relation.Is, opens.Compared.Relation);
+        Assert.Equal("closed", opens.Compared.Value.Text);
     }
 
     /// <summary>A state's other side is a choice of its own, and makes a test for the blocks not being in it.</summary>
@@ -38,9 +38,9 @@ public class IfStepTests
         AddIf(rig, "Airlock Outer Door", "is not closed");
 
         var opens = Assert.IsType<If>(sequence.Steps[sequence.Steps.Count - 2]);
-        Assert.Equal("status", opens.Test.MemberId);
-        Assert.Equal(Relation.IsNot, opens.Test.Relation);
-        Assert.Equal("closed", opens.Test.Value.Text);
+        Assert.Equal("status", opens.Compared.MemberId);
+        Assert.Equal(Relation.IsNot, opens.Compared.Relation);
+        Assert.Equal("closed", opens.Compared.Value.Text);
     }
 
     /// <summary>The row closing an if adds an otherwise once, and an otherwise if above it; the otherwise is made an otherwise if where it stands.</summary>
@@ -70,8 +70,8 @@ public class IfStepTests
         Check(rig, "is open");
 
         var tested = Assert.IsType<Else>(sequence.Steps[sequence.Steps.Count - 2]);
-        Assert.Equal("status", tested.Test.MemberId);
-        Assert.Equal(Literal.Name("open"), tested.Test.Value);
+        Assert.Equal("status", tested.Compared.MemberId);
+        Assert.Equal(Literal.Name("open"), tested.Compared.Value);
         Assert.Equal(2, Offered(Assert.Single(rig.Editor.StepRows().Single(row => row.Kind == StepKind.End).Adds).Choices!).Count);
     }
 
@@ -94,7 +94,7 @@ public class IfStepTests
         Check(rig, "is open");
 
         Assert.IsType<If>(sequence.Steps[0]);
-        var tested = Assert.IsType<Else>(sequence.Steps[1]).Test;
+        var tested = Assert.IsType<Else>(sequence.Steps[1]).Compared!;
         Assert.Equal("status", tested.MemberId);
         Assert.Equal(Literal.Name("open"), tested.Value);
         Assert.Null(Assert.IsType<Else>(sequence.Steps[2]).Test);
@@ -167,19 +167,19 @@ public class IfStepTests
 
         rig.Editor.PressAnswer("is not");
         rig.Tick();
-        Assert.Equal(Relation.IsNot, ((If)sequence.Steps[0]).Test.Relation);
-        Assert.Equal("closed", ((If)sequence.Steps[0]).Test.Value.Text);
+        Assert.Equal(Relation.IsNot, ((If)sequence.Steps[0]).Compared.Relation);
+        Assert.Equal("closed", ((If)sequence.Steps[0]).Compared.Value.Text);
 
         rig.Editor.Screen.Undo!.Execute();
         rig.Tick();
-        Assert.Equal(Relation.Is, ((If)sequence.Steps[0]).Test.Relation);
+        Assert.Equal(Relation.Is, ((If)sequence.Steps[0]).Compared.Relation);
     }
 
     /// <summary>Pressing the comparison hangs its menu under it and keeps it there, though the menu asks nothing in words.</summary>
     [Fact]
     public void PressingTheComparisonHangsItsMenu()
     {
-        var screen = Screen.Holding("sprocket 1 alpha 17\n\n"
+        var screen = Screen.Holding("sprocket 1 alpha 18\n\n"
             + "let door1 = block 'Door/LargeBlockDoor' [ 2 ]\n\n"
             + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n"
             + "    sequence 1 {\n"
@@ -397,7 +397,7 @@ public class IfStepTests
         rig.Editor.PressPrimary();
         rig.Tick();
 
-        var now = Assert.IsType<If>(sequence.Steps[0]).Test;
+        var now = Assert.IsType<If>(sequence.Steps[0]).Compared!;
         Assert.Equal("Radius", now.MemberId);
         Assert.Equal(Quantifier.Sum, now.Quantifier);
         Assert.Equal(Relation.AtLeast, now.Relation);

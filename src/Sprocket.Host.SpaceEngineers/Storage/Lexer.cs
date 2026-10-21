@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case ',': return One(TokenKind.Comma);
                 case ':': return One(TokenKind.Colon);
                 case '.': return One(TokenKind.Dot);
+                case '|': return One(TokenKind.Bar);
                 case '=': return Equality();
                 case '!': return Different();
                 case '<': return Ordered(Keyword.Below, Keyword.AtMost);

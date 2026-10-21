@@ -388,6 +388,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Keyword:
                 case TokenKind.Equals:
                 case TokenKind.Comparison:
+                case TokenKind.Bar:
                 case TokenKind.Text:
                 case TokenKind.Integer:
                 case TokenKind.Real:
@@ -438,6 +439,10 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 case TokenKind.Comparison:
                     Step();
                     return new Value(ValueForm.Keyword, null, 0, 0, token.Keyword);
+
+                case TokenKind.Bar:
+                    Step();
+                    return new Value(ValueForm.Keyword, null, 0, 0, Keyword.Bar);
 
                 case TokenKind.Text:
                     Step();

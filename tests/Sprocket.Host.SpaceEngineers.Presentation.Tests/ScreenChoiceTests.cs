@@ -162,7 +162,7 @@ public class ScreenChoiceTests
         screen.Run(2);
 
         var system = screen.Editor.Program.Systems[0];
-        var slot = Assert.Single(Assert.IsType<If>(system.Sequences[0].Steps[0]).Test.Targets);
+        var slot = Assert.Single(Assert.IsType<If>(system.Sequences[0].Steps[0]).Compared.Targets);
         Assert.Equal(HostTypes.Returned("screen")!.Id, system.FindPart(slot)!.Holds);
         Assert.Equal(new[] { 2 }, system.First.Facets(slot));
     }

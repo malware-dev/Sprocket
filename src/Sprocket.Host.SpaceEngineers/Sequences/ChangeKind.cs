@@ -139,6 +139,36 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Renaming a category of slots.</summary>
         RenameCategory,
         /// <summary>Removing a category of slots, which leaves its slots under none.</summary>
-        RemoveCategory
+        RemoveCategory,
+
+        /// <summary>Adding a type to a logic system.</summary>
+        AddType,
+
+        /// <summary>Renaming a type of a logic system.</summary>
+        RenameType,
+
+        /// <summary>Removing a type no state holds from a logic system.</summary>
+        RemoveType,
+
+        /// <summary>Adding a choice to a type.</summary>
+        AddChoice,
+
+        /// <summary>Renaming a choice of a type, everywhere it is used.</summary>
+        RenameChoice,
+
+        /// <summary>Removing a choice nothing uses from a type.</summary>
+        RemoveChoice,
+
+        /// <summary>Adding a state to a logic system.</summary>
+        AddState,
+
+        /// <summary>Renaming a state, everywhere it is used.</summary>
+        RenameState,
+
+        /// <summary>Removing a state nothing uses from a logic system.</summary>
+        RemoveState,
+
+        /// <summary>Changing the value a state starts at.</summary>
+        ChangeStart
     }
 }

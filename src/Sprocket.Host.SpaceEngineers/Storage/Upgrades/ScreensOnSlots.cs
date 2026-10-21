@@ -55,7 +55,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
                     if (act != null && Screened(system, act.Provider, act.ActionId, act.Arguments, act.Targets, bindings))
                         count++;
 
-                    var test = (step as Branch)?.Test;
+                    var test = (step as Branch)?.Test as Comparison;
                     if (test != null && Screened(system, test.Provider, test.MemberId, test.Arguments, test.Targets, bindings))
                         count++;
                 }

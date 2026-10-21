@@ -2499,6 +2499,36 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
     <value>fjerning av en kategori</value>
   </data>
+  <data name="Sprocket.Change.AddType" xml:space="preserve">
+    <value>oppretting av en type</value>
+  </data>
+  <data name="Sprocket.Change.RenameType" xml:space="preserve">
+    <value>omdøping av en type</value>
+  </data>
+  <data name="Sprocket.Change.RemoveType" xml:space="preserve">
+    <value>fjerning av en type</value>
+  </data>
+  <data name="Sprocket.Change.AddChoice" xml:space="preserve">
+    <value>oppretting av et alternativ</value>
+  </data>
+  <data name="Sprocket.Change.RenameChoice" xml:space="preserve">
+    <value>omdøping av et alternativ</value>
+  </data>
+  <data name="Sprocket.Change.RemoveChoice" xml:space="preserve">
+    <value>fjerning av et alternativ</value>
+  </data>
+  <data name="Sprocket.Change.AddState" xml:space="preserve">
+    <value>oppretting av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.RenameState" xml:space="preserve">
+    <value>omdøping av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.RemoveState" xml:space="preserve">
+    <value>fjerning av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
+    <value>endring av en startverdi</value>
+  </data>
   <data name="Sprocket.Category.Add" xml:space="preserve">
     <value>kategori</value>
   </data>

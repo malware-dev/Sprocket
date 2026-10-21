@@ -45,7 +45,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             var lines = sequence.Branches(_open);
             var end = sequence.EndOf(_open);
             var openers = new List<Branch>();
-            var tests = new List<Comparison>();
+            var tests = new List<BranchTest>();
             var notes = new List<string>();
             var bodies = new List<List<Step>>();
 

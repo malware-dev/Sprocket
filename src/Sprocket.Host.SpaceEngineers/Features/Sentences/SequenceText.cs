@@ -405,7 +405,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
                 if (branch.Test == null)
                     return "otherwise";
 
-                return (step is If ? "if " : "otherwise if ") + Tested(bindings, branch.Test, through);
+                var compared = branch.Test as Comparison;
+                var tested = compared != null ? Tested(bindings, compared, through) : Tested((StateTest)branch.Test);
+                return (step is If ? "if " : "otherwise if ") + tested;
             }
 
             if (step is EndIf)
@@ -416,6 +418,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         }
 
         /// <summary>A test as its row reads: the blocks, the value unless it is their status, and how it is compared with what.</summary>
+        /// <summary>A test of a state as the script reads it: <c>where == inside</c>.</summary>
+        static string Tested(StateTest test)
+        {
+            var with = test.Other.Length > 0 ? test.Other : test.Value.Said;
+            return $"{test.State} {(test.Relation == Relation.IsNot ? "!=" : "==")} {with}";
+        }
+
         static string Tested(Bindings bindings, Comparison test, SystemInstance through)
         {
             var targets = SystemInstance.Through(through, test.Targets);

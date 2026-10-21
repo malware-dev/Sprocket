@@ -30,5 +30,9 @@ namespace Sprocket.Host.SpaceEngineers.Memory
         /// <summary>The logic systems with two versions waiting for a choice.</summary>
         [ProtoMember(6)]
         public List<ConflictMemory> Conflicts { get; set; } = new List<ConflictMemory>();
+
+        /// <summary>What each installation holds in each of its system's states that a step has set.</summary>
+        [ProtoMember(7)]
+        public List<StateMemory> States { get; set; } = new List<StateMemory>();
     }
 }

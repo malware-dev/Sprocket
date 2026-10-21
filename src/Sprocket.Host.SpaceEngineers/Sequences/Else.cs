@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class Else : Branch
     {
         /// <summary>An <c>else if</c> testing <paramref name="test" />, or an <c>else</c> where it is null.</summary>
-        public Else(Comparison test) : base(test)
+        public Else(BranchTest test) : base(test)
         {
         }
     }

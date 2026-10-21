@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
 
@@ -10,7 +11,13 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
     /// <remarks>Always live: an edit takes effect on the next tick.</remarks>
     public sealed class AutomationRunner
     {
+        // How deep sets of states may start one another within one step: a when that sets a state another when watches,
+        // and so on. Past it the set is made and starts nothing more, so two whens that set each other's state cannot
+        // go on for ever within a tick.
+        const int DeepestSets = 16;
+
         readonly Runners _runs;
+        readonly StateValues _states;
         readonly Pollers _watches;
         readonly Automation _automation;
         readonly GridWorld _world;
@@ -20,6 +27,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         readonly bool _runsRota;
 
         bool _reshaped = true;
+        int _setting;
         int _checkedEdits = -1;
         int _checkedWiring = -1;
         int _checkedUnstarted = -1;
@@ -46,6 +54,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             _rota = rota;
             _runs = new Runners(this, automation);
             _watches = new Pollers(this, automation);
+            _states = new StateValues(automation);
             Live = true;
             Clock = () => CurrentTick;
 
@@ -191,6 +200,61 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         /// <summary>The runners of the program.</summary>
         public Runners Runs => _runs;
 
+        /// <summary>What each installation holds in its system's states.</summary>
+        public StateValues States => _states;
+
+        /// <summary>
+        /// Does what <paramref name="set" /> of <paramref name="system" /> says on <paramref name="instance" />, and starts at
+        /// once each <c>when</c> on that state whose test came to hold by it.
+        /// </summary>
+        /// <remarks>
+        /// A set that leaves the state as it was starts nothing. Within one step, sets started by sets go only so deep; past
+        /// that the value is still set, and nothing more is started.
+        /// </remarks>
+        public void Set(AutomationSystem system, SystemInstance instance, SetState set)
+        {
+            var state = system.FindState(set.State);
+            if (state == null)
+                return;
+
+            var from = set.From.Length == 0 ? null : system.FindState(set.From);
+            if (set.From.Length > 0 && from == null)
+                return;
+
+            var value = from == null ? set.Value : _states.Read(system, instance, from);
+
+            // What held before the set, of each when on the state, so only what came to hold is started.
+            List<StateTrigger> watching = null;
+            List<bool> held = null;
+            foreach (var trigger in system.Triggers)
+            {
+                var watched = trigger as StateTrigger;
+                if (watched == null || watched.Test.State != state.Name && watched.Test.Other != state.Name)
+                    continue;
+
+                if (watching == null)
+                {
+                    watching = new List<StateTrigger>();
+                    held = new List<bool>();
+                }
+
+                watching.Add(watched);
+                held.Add(_states.Holds(system, instance, watched.Test));
+            }
+
+            if (!_states.Write(system, instance, state, value) || watching == null || _setting >= DeepestSets)
+                return;
+
+            _setting++;
+            for (var i = 0; i < watching.Count; i++)
+            {
+                if (!held[i] && _states.Holds(system, instance, watching[i].Test))
+                    Fire(system, watching[i], instance);
+            }
+
+            _setting--;
+        }
+
         /// <summary>The pollers of the program.</summary>
         public Pollers Watches => _watches;
 
@@ -208,6 +272,17 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         public void Fire(AutomationSystem system, Trigger trigger, SystemInstance instance)
         {
             Log?.Fired(system, trigger, instance, CurrentTick);
+
+            // A state set by a trigger is set where it stands, as switched on as the system and installation are.
+            var sets = trigger.Sets;
+            if (sets != null)
+            {
+                if (system.Enabled && (instance == null || instance.Enabled))
+                    Set(system, instance, sets);
+
+                return;
+            }
+
             var run = trigger.Does as Run;
             if (run != null)
             {

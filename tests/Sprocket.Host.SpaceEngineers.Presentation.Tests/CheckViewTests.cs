@@ -99,7 +99,7 @@ public class CheckViewTests
         var through = rig.Editor.StandIn(sequence.System);
         Assert.Equal("if any Airlock Inner Door or Airlock Outer Door is open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
 
-        opens.Test.Quantifier = Quantifier.All;
+        opens.Compared.Quantifier = Quantifier.All;
         Assert.Equal("if all Airlock Inner Door and Airlock Outer Door are open", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, through));
     }
 
@@ -206,7 +206,7 @@ public class CheckViewTests
         rig.Tick();
 
         var opens = sequence.Steps.OfType<If>().Single();
-        Assert.Equal(Quantifier.Average, opens.Test.Quantifier);
+        Assert.Equal(Quantifier.Average, opens.Compared.Quantifier);
         Assert.StartsWith("if the average of " + number + " on ", SequenceText.Step(rig.Editor.Runner.Bindings, sequence, opens, rig.Editor.StandIn(sequence.System)));
     }
 
