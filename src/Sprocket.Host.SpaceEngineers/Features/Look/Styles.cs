@@ -395,7 +395,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Dim }
         };
 
-        /// <summary>A part of a sentence: a filled chip, the one look nothing else may borrow.</summary>
+        /// <summary>A part of a sentence: a filled chip to press, its words in the warning color while nothing fills it.</summary>
         public static readonly SlotStyle Slot = new SlotStyle
         {
             Base =

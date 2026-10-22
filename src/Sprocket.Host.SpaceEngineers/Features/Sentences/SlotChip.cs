@@ -11,9 +11,6 @@ using Sprocket.Host.SpaceEngineers.Localization;
 namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 {
     /// <summary>A fillable part of a sentence, saying what it holds in pieces: each block it names with its icon, a member with its marks, and the words around them.</summary>
-    /// <remarks>
-    /// The only thing on screen that changes what a sequence means, so nothing else may borrow this look.
-    /// </remarks>
     public class SlotChip : Stacking, ITextual
     {
         readonly List<Mention> _said = new List<Mention>();
