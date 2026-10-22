@@ -73,6 +73,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>What the installation is called: its own name where it is one of a blueprint's, and its logic system's otherwise.</summary>
         static string Title(Texts texts, StatusItem item)
         {
+            if (item.Level == StatusLevel.Stranded)
+                return texts.StrandedHeading;
+
             if (item.Level == StatusLevel.Paused)
                 return texts.PausedHeading;
 
@@ -90,6 +93,9 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>What is wrong with the installation, naming the step and the block where they are known.</summary>
         static string Said(Texts texts, ConstructStatus status, StatusItem item)
         {
+            if (item.Level == StatusLevel.Stranded)
+                return texts.StrandedBanner;
+
             if (item.Level == StatusLevel.Paused)
                 return Template.Fill(texts.PausedBanner, "construct", status.Construct);
 

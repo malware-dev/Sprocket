@@ -184,6 +184,23 @@ public class StatusPictureTests
         return words;
     }
 
+    /// <summary>Automation stopped for want of a big owner's programmable block is drawn with its own heading and the sentence saying why.</summary>
+    [Fact]
+    public void AStopForWantOfAnOwnerIsDrawnWithItsWords()
+    {
+        StatusScenes.Make("all-normal", out var texts);
+        var status = new ConstructStatus();
+        status.Hear(StatusScenes.Construct, 5, 0,
+            [new StatusItem { Level = StatusLevel.Stranded, Logic = "", Installation = "", Sequence = "", Fault = Runtime.SequenceFault.None }]);
+        var face = Face(ScreenShape.Reference.First(shape => shape.Name == "lcd-panel"));
+
+        Draw(new StatusPicture(), face, status, texts, 0);
+        var drawn = string.Join(" ", face.Sprites.Where(sprite => sprite.Type == SpriteType.TEXT && sprite.Data != null).Select(sprite => sprite.Data));
+
+        Assert.Contains(texts.StrandedHeading, drawn);
+        Assert.Contains(texts.StrandedBanner, drawn);
+    }
+
     /// <summary>A newly arrived installation's mark is lit toward the text color as it pulses.</summary>
     [Fact]
     public void AFreshMarkIsLitAsItPulses()

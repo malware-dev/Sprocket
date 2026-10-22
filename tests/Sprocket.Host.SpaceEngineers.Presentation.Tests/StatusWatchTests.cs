@@ -120,6 +120,42 @@ public class StatusWatchTests : IDisposable
         Assert.Equal(2, _redrawn);
     }
 
+    /// <summary>
+    /// Automation stopped because none of the big owners owns its programmable block reaches a watching client as a line of
+    /// its own, and the line goes there once a big owner owns it again.
+    /// </summary>
+    [Fact]
+    public void AStopForWantOfAnOwnerReachesTheClient()
+    {
+        const long anna = 144115188075855873;
+        const long pirates = 144115188075855896;
+
+        // Enough blocks that Anna stays the big owner once the programmable block is given away.
+        _sim.Machine.Door(3, "Outer Door");
+        _sim.Machine.Door(4, "Hangar Door");
+        _sim.Machine.Own(anna);
+        _sim.Tick();
+        _sim.Tick();
+        var status = Watching();
+
+        _sim.Machine.Sprocket.Owner = pirates;
+        _sim.Tick();
+        _sim.Tick();
+        Run(Rota.Hundred);
+
+        Assert.True(_sim.Unit.Stranded);
+        Assert.Single(status.Items);
+        Assert.Equal(StatusLevel.Stranded, status.Items[0].Level);
+
+        _sim.Machine.Sprocket.Owner = anna;
+        _sim.Tick();
+        _sim.Tick();
+        Run(Rota.Hundred);
+
+        Assert.False(_sim.Unit.Stranded);
+        Assert.Empty(status.Items);
+    }
+
     /// <summary>Automation that does not change sends nothing, however long the client watches.</summary>
     [Fact]
     public void NothingChangedSendsNothing()

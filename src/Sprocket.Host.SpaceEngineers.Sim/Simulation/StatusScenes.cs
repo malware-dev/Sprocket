@@ -87,7 +87,7 @@ public static class StatusScenes
         }
 
         status.Begin(sim.Now);
-        status.Include(program, sim.Runner);
+        status.Include(program, sim.Runner, false);
         status.End(Construct);
         return status;
     }

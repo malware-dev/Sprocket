@@ -81,7 +81,7 @@ public class ConstructStatusTests
     {
         status ??= new ConstructStatus();
         status.Begin(now);
-        status.Include(ship.Program, ship.Runner);
+        status.Include(ship.Program, ship.Runner, false);
         status.End("Miner");
         return status;
     }
@@ -246,6 +246,52 @@ public class ConstructStatusTests
         Assert.Equal(1, status.Items[0].Since);
     }
 
+    /// <summary>Automation stopped for want of a big owner's programmable block is one line of its own, and the line goes once it carries on.</summary>
+    [Fact]
+    public void StrandedAutomationIsALineOfItsOwn()
+    {
+        var ship = Build();
+        System(ship, "Airlock", 1, 2);
+        ship.Tick(3);
+
+        var status = new ConstructStatus();
+        status.Begin(0);
+        status.Include(ship.Program, ship.Runner, true);
+        status.End("Miner");
+
+        Assert.Single(status.Items);
+        Assert.Equal(StatusLevel.Stranded, status.Items[0].Level);
+        Assert.Equal(1, status.Warnings);
+        Assert.Equal(0, status.Normal);
+
+        status.Begin(1);
+        status.Include(ship.Program, ship.Runner, false);
+        status.End("Miner");
+
+        Assert.Empty(status.Items);
+        Assert.Equal(1, status.Normal);
+    }
+
+    /// <summary>Automation both stopped for want of a big owner's programmable block and paused says both, the stop first.</summary>
+    [Fact]
+    public void StrandedAndPausedAutomationSaysBoth()
+    {
+        var ship = Build();
+        System(ship, "Airlock", 1, 2);
+        ship.Tick(3);
+        ship.Program.PausedFrom.Add(144115188075855873);
+
+        var status = new ConstructStatus();
+        status.Begin(0);
+        status.Include(ship.Program, ship.Runner, true);
+        status.End("Miner");
+
+        Assert.Equal(2, status.Items.Count);
+        Assert.Equal(StatusLevel.Stranded, status.Items[0].Level);
+        Assert.Equal(StatusLevel.Paused, status.Items[1].Level);
+        Assert.Equal(0, status.Normal);
+    }
+
     /// <summary>Two programs on one construct make one status.</summary>
     [Fact]
     public void EveryProgramOnTheConstructAddsToOneStatus()
@@ -263,8 +309,8 @@ public class ConstructStatusTests
 
         var status = new ConstructStatus();
         status.Begin(0);
-        status.Include(ship.Program, ship.Runner);
-        status.Include(second, runner);
+        status.Include(ship.Program, ship.Runner, false);
+        status.Include(second, runner, false);
         status.End("Miner");
 
         Assert.Equal(2, status.Systems);

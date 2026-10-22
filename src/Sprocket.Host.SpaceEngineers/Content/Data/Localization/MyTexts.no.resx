@@ -1563,6 +1563,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Paused.Review" xml:space="preserve">
     <value>Se over</value>
   </data>
+  <data name="Sprocket.Stranded.Heading" xml:space="preserve">
+    <value>Automasjonen er stoppet</value>
+  </data>
+  <data name="Sprocket.Stranded.Banner" xml:space="preserve">
+    <value>Ingen programmerbar blokk tilgjengelig.</value>
+  </data>
   <data name="Sprocket.Terminal.Ok" xml:space="preserve">
     <value>OK</value>
   </data>

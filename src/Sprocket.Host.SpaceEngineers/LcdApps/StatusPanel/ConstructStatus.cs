@@ -8,8 +8,8 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
 {
     /// <summary>What a construct's automation amounts to on the status panel: the installations that want looking at, switched-off ones included, and how many logic systems it holds.</summary>
     /// <remarks>
-    /// The installations are kept most wanting first: problems, then warnings, then what was paused, then what a player
-    /// switched off, and the newest first within each.
+    /// The installations are kept most wanting first: problems, then warnings, then what stopped for want of a big owner's
+    /// programmable block, then what was paused, then what a player switched off, and the newest first within each.
     /// </remarks>
     public sealed class ConstructStatus
     {
@@ -34,7 +34,7 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
         /// <summary>How many installations have a problem.</summary>
         public int Problems { get; private set; }
 
-        /// <summary>How many installations want looking at for anything short of a problem: a warning, a pause, or being switched off.</summary>
+        /// <summary>How many installations want looking at for anything short of a problem: a warning, a stop for want of a big owner's programmable block, a pause, or being switched off.</summary>
         public int Warnings { get; private set; }
 
         /// <summary>Whether any installation wants looking at, a switched-off one included.</summary>
@@ -71,15 +71,20 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             _troubled = 0;
         }
 
-        /// <summary>Adds what <paramref name="program" />, run by <paramref name="runner" />, amounts to.</summary>
+        /// <summary>Adds what <paramref name="program" />, run by <paramref name="runner" />, amounts to, <paramref name="stranded" /> where no big owner owns the programmable block keeping it.</summary>
         /// <remarks>Costs a lookup per sequence on each installation, so it is asked only when the automation has changed.</remarks>
-        public void Include(Automation program, AutomationRunner runner)
+        public void Include(Automation program, AutomationRunner runner, bool stranded)
         {
             _systems += program.Systems.Count;
 
+            if (stranded)
+                Found(Stopped(StatusLevel.Stranded));
+
             if (program.Paused)
+                Found(Stopped(StatusLevel.Paused));
+
+            if (stranded || program.Paused)
             {
-                Found(new StatusItem { Level = StatusLevel.Paused, Logic = "", Installation = "", Sequence = "", Fault = SequenceFault.None });
                 _troubled += program.Systems.Count;
                 return;
             }
@@ -179,6 +184,12 @@ namespace Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel
             }
 
             return any;
+        }
+
+        /// <summary>An item at <paramref name="level" /> for the whole of a program's automation, which names no logic system.</summary>
+        static StatusItem Stopped(StatusLevel level)
+        {
+            return new StatusItem { Level = level, Logic = "", Installation = "", Sequence = "", Fault = SequenceFault.None };
         }
 
         /// <summary>An item at <paramref name="level" /> naming <paramref name="system" />, called <paramref name="named" />, and <paramref name="instance" /> where it is one of a blueprint's.</summary>

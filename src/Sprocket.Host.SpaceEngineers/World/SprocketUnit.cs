@@ -189,6 +189,9 @@ namespace Sprocket.Host.SpaceEngineers.World
         /// </summary>
         public bool Stranded { get; private set; }
 
+        /// <summary>How many times <see cref="Stranded" /> has changed, which only grows.</summary>
+        public int Strandings { get; private set; }
+
         /// <summary>
         /// Whether the hero was last taken off the construct by itself, destroyed or ground down, rather than closed with its
         /// whole grid; where that left the automation <see cref="Lost" />, it is backed up.
@@ -687,6 +690,7 @@ namespace Sprocket.Host.SpaceEngineers.World
                 return;
 
             Stranded = stranded;
+            Strandings++;
             GameLog.Say(stranded
                 ? $"{_world.Name} has no programmable block its big owners own, and its automation has stopped"
                 : $"{Logged(_block)} belongs to a big owner of {_world.Name}, and its automation carries on");
