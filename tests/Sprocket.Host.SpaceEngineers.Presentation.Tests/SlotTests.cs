@@ -6,20 +6,21 @@ using Sprocket.Host.SpaceEngineers.Features.Sentences;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>A part of a sentence, looking as its style says in each of its states.</summary>
+/// <summary>A part of a sentence, a button looking as its style says in each of its states.</summary>
 public class SlotTests
 {
-    /// <summary>A part that can be pressed has the bright fill and the ink, and lights under the pointer.</summary>
+    /// <summary>A part that can be pressed is the game's button, with the ink, and lights under the pointer.</summary>
     [Fact]
     public void APartThatCanBePressedLooksLikeOne()
     {
         var chip = Pressable();
 
-        Assert.Equal(Palette.SlotFill, chip.Background);
+        Assert.Equal(Palette.Panel, chip.Background);
+        Assert.Equal(Palette.ControlEdge, chip.Edge);
         Assert.Equal(Palette.Ink, Words(chip).Color);
 
         chip.IsHot = true;
-        Assert.Equal(Palette.Well, chip.Background);
+        Assert.Equal(Palette.PanelHot, chip.Background);
     }
 
     /// <summary>A part nothing fills says so in the warning color.</summary>
@@ -32,7 +33,7 @@ public class SlotTests
         Assert.Equal(Palette.Notice, Words(chip).Color);
     }
 
-    /// <summary>A part that cannot be pressed sits a notch off the page and does not light under the pointer.</summary>
+    /// <summary>A part that cannot be pressed shows its words alone, and does not light under the pointer.</summary>
     [Fact]
     public void APartThatCannotBePressedStaysStill()
     {
@@ -40,7 +41,8 @@ public class SlotTests
         chip.Say("Airlock");
         chip.IsHot = true;
 
-        Assert.Equal(Palette.Chrome, chip.Background);
+        Assert.Equal(Palette.None, chip.Background);
+        Assert.Equal(Palette.None, chip.Edge);
     }
 
     /// <summary>A part whose command cannot be carried out now is still as well.</summary>
@@ -50,7 +52,7 @@ public class SlotTests
         var chip = Pressable();
         ((Relay)chip.Command!).CanExecute = false;
 
-        Assert.Equal(Palette.Chrome, chip.Background);
+        Assert.Equal(Palette.None, chip.Background);
     }
 
     static SlotChip Pressable()

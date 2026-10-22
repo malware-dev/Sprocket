@@ -66,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The edge of a toolbar slot that holds something of the game's.</summary>
         public static readonly Color SlotEdge = new Color(142, 188, 207);
 
-        /// <summary>The fill of a slot in a sentence, also worn by notes and by buttons waiting to be ready.</summary>
+        /// <summary>A fill a notch above the page: a toolbar slot that holds something of the game's, a note, a block's picture, a step being carried, and a button waiting to be ready.</summary>
         public static readonly Color SlotFill = new Color(55, 72, 81);
 
 

@@ -39,7 +39,7 @@ public class SlotListTests
     {
         var row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single(part => part.Blocks.Count > 0 && part.Within().OfType<SlotChip>().First().Text.Contains("Lamp"));
         var chip = row.Within().OfType<SlotChip>().First();
-        return chip.Children.Select(line => line is BlockName block ? block.Name : ((Lumel.Text.Label)line).Text).ToArray();
+        return chip.Pieces.Children.Select(line => line is BlockName block ? block.Name : ((Lumel.Text.Label)line).Text).ToArray();
     }
 
     /// <summary>Every block stands on a line of its own, in the order they are listed, and the lines stand one under the other.</summary>
@@ -50,9 +50,9 @@ public class SlotListTests
 
         Assert.Equal(new[] { "Lamp 01", "Lamp 02", "Lamp 03" }, Lines(screen));
         var chip = screen.Editor.Current!.View.Within().OfType<PartRow>().SelectMany(row => row.Within().OfType<SlotChip>()).First(slot => slot.Text.Contains("Lamp"));
-        var tops = chip.Children.Select(line => line.Bounds.Y).ToArray();
+        var tops = chip.Pieces.Children.Select(line => line.Bounds.Y).ToArray();
         Assert.True(tops[1] > tops[0] && tops[2] > tops[1], "the blocks do not stand one under the other");
-        Assert.Equal(chip.Children[0].Bounds.X, chip.Children[2].Bounds.X, 1);
+        Assert.Equal(chip.Pieces.Children[0].Bounds.X, chip.Pieces.Children[2].Bounds.X, 1);
     }
 
     /// <summary>As many blocks as the limit all have their lines.</summary>
@@ -79,7 +79,7 @@ public class SlotListTests
 
         // Its words stand at the right of the list.
         var chip = screen.Editor.Current!.View.Within().OfType<PartRow>().SelectMany(row => row.Within().OfType<SlotChip>()).First(slot => slot.Text.Contains("Lamp"));
-        var more = (Lumel.Text.Label)chip.Children[chip.Children.Count - 1];
+        var more = (Lumel.Text.Label)chip.Pieces.Children[chip.Pieces.Children.Count - 1];
         Assert.Equal(Align.Right, more.Align);
     }
 

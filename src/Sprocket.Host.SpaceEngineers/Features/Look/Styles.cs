@@ -395,17 +395,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Dim }
         };
 
-        /// <summary>A part of a sentence: a filled chip to press, its words in the warning color while nothing fills it.</summary>
+        /// <summary>A part of a sentence: the game's button in a name's size, its words in the warning color while nothing fills it, and the words alone where it cannot be pressed.</summary>
         public static readonly SlotStyle Slot = new SlotStyle
         {
             Base =
             {
-                Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.SlotFill,
+                Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.Panel, Edge = Palette.ControlEdge,
                 Padding = new Thickness(16f, 8f)
             },
             Empty = { Color = Palette.Notice },
-            Still = { Background = Palette.Chrome },
-            Hot = { Background = Palette.Well }
+            Still = { Background = Palette.None, Edge = Palette.None },
+            Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot }
         };
 
         /// <summary>A part of a sentence that is paused: there to be read and pressed, and quieter than one that runs.</summary>
