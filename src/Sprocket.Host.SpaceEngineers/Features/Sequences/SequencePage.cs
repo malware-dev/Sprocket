@@ -426,6 +426,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             kinds.Add(new AddOption(SentenceText.RunWord, texts.SequenceRunAbout, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
             kinds.Add(new AddOption(SentenceText.StopWord, texts.SequenceStopAbout, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
+            kinds.Add(new AddOption(SentenceText.SetStateWords, texts.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
             kinds.Add(new AddOption(SentenceText.IfWord, texts.SequenceIfAbout, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
             return kinds;
         }
@@ -515,9 +516,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var branch = step as Branch;
             if (branch != null)
             {
-                if (branch.Test != null)
-                    Tested(row, step, branch.Test);
+                var compared = branch.Test as Comparison;
+                if (compared != null)
+                    Tested(row, step, compared);
 
+                var kept = branch.Test as StateTest;
+                if (kept != null)
+                    Tested(row, step, kept);
+
+                return;
+            }
+
+            var set = step as SetState;
+            if (set != null)
+            {
+                Setting(row, set);
                 return;
             }
 
@@ -600,6 +613,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Arguments)), ArgumentRole.Checked));
         }
 
+        /// <summary>Gives the row of a step setting one of the system's states its parts: the state, and what it is set to.</summary>
+        void Setting(StepRow row, SetState set)
+        {
+            var opens = Changes(CommandKind.StepSlot, () => _stepwork.ChangeSetState(set));
+            row.Slots.Add(new SystemStateSlot(set.State, opens));
+            row.Slots.Add(StateValueQuestion.Part(_sequence.System, set.State, set.Value, set.From, opens, ArgumentRole.NewValue));
+        }
+
+        /// <summary>Gives the row of an if, or of a branch, that tests one of the system's states the parts of its test.</summary>
+        void Tested(StepRow row, Step step, StateTest test)
+        {
+            var opens = Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks));
+            row.Slots.Add(new SystemStateSlot(test.State, opens));
+            row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
+                Changes(CommandKind.StepSlot, () => _stepwork.RelateState(step, test)), ArgumentRole.Compared));
+            row.Slots.Add(StateValueQuestion.Part(_sequence.System, test.State, test.Value, test.Other, opens, ArgumentRole.Checked));
+        }
+
         static StepKind Kind(Step step)
         {
             if (step is Wait)
@@ -616,7 +647,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 return StepKind.End;
 
             var act = step as Act;
-            if (act != null && act.Sets)
+            if (act != null && act.Sets || step is SetState)
                 return StepKind.Set;
 
             var run = step as Run;

@@ -1,10 +1,13 @@
 # Velger
 
-En velger er der du velger blokker, og hva som skal gjøres med dem eller sjekkes på dem. Det finnes én for hver jobb:
+En velger er der du velger hva et steg, et hvis eller en utløser arbeider med: blokker og hva som skal gjøres med dem eller sjekkes på dem, eller en av logikksystemets tilstander. Det finnes én for hver jobb:
 
 - **Blokkvelgeren** velger blokkene til et [steg](step) og hva det gjør med dem, og fyller en [plass](slot).
 - **Signalvelgeren** velger blokken og [signalet](signal) som får en [utløser](trigger) til å utløses.
 - **Verdivelgeren** velger blokkene og verdien et [hvis](if) sjekker.
+- **Tilstandsvelgeren** velger en av [logikksystemets tilstander](logic-system-states) og verdien et steg setter den til, et hvis sjekker den for eller en utløser venter på.
+
+Velgeren et hvis, et otherwise if eller en when-utløser åpner, har en `Kilde`-boks øverst i den første kolonnen: `Blokker` sjekker eller følger med på blokker, og `Tilstander` setter tilstandsvelgeren i dens sted. Et steg som setter en tilstand, åpner tilstandsvelgeren med en gang.
 
 `Søk` leter etter ordene du skriver i den rekkefølgen du skriver dem, hvert av dem hvor som helst i navnet til en blokk: *luft 1* finner *Luftsluse 1*, *Luftsluse 10* og *Luftsluse dør 1*, og utelater *1 Luftsluse*, og hvert søkefelt søker på samme måte. Det du skrev, blir stående til du forlater skjermen.
 

@@ -64,6 +64,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case ChangeKind.AddCategory: return texts.ChangeAddCategory;
                 case ChangeKind.RenameCategory: return texts.ChangeRenameCategory;
                 case ChangeKind.RemoveCategory: return texts.ChangeRemoveCategory;
+                case ChangeKind.AddType: return texts.ChangeAddType;
+                case ChangeKind.RenameType: return texts.ChangeRenameType;
+                case ChangeKind.RemoveType: return texts.ChangeRemoveType;
+                case ChangeKind.MoveType: return texts.ChangeMoveType;
+                case ChangeKind.AddChoice: return texts.ChangeAddChoice;
+                case ChangeKind.RenameChoice: return texts.ChangeRenameChoice;
+                case ChangeKind.RemoveChoice: return texts.ChangeRemoveChoice;
+                case ChangeKind.AddState: return texts.ChangeAddState;
+                case ChangeKind.RenameState: return texts.ChangeRenameState;
+                case ChangeKind.RemoveState: return texts.ChangeRemoveState;
+                case ChangeKind.MoveState: return texts.ChangeMoveState;
+                case ChangeKind.ChangeStart: return texts.ChangeChangeStart;
                 default: return "";
             }
         }

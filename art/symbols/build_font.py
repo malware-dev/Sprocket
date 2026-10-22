@@ -661,6 +661,21 @@ def cube():
     return [poly(*hexagon(r))], [poly(*hexagon(inner))], [path([left, middle, right], line), stroke(middle, bottom, line)]
 
 
+def cell():
+    """
+    State: a box with one thing in it, a place that holds a single value and keeps it.
+
+    Drawn at the lighter line, like the value's mark it stands beside, and square where the value's is open, so the two
+    read as kin and never as each other: a value is asked of a block, a state is kept by the logic system.
+    """
+    line = 0.094
+    half = 0.31
+    outer = poly((0.5 - half, 0.5 - half), (0.5 + half, 0.5 - half), (0.5 + half, 0.5 + half), (0.5 - half, 0.5 + half))
+    inside = half - line
+    inner = poly((0.5 - inside, 0.5 - inside), (0.5 + inside, 0.5 - inside), (0.5 + inside, 0.5 + inside), (0.5 - inside, 0.5 + inside))
+    return [outer], [inner], [circle(0.10)]
+
+
 # The toolbar an eye looks over: where its eye sits and how wide it opens, the bar under it and the gap between.
 EYE_Y, EYE_RISE, EYE_HALF = 0.38, 0.20, 0.38
 BAR_TOP, BAR_BOTTOM, BAR_GAP, BAR_DOT = 0.64, 0.86, 0.06, 0.04
@@ -778,6 +793,8 @@ GLYPHS = [
     ("K", "clock outline", lambda: clock()),
     # "A" is the mark's own; "W" for what lights round something the sequence waits for.
     ("W", "action that takes time outline", lambda: lasting()),
+    # "s" is taken; "S" for a state, in upper case as "B" and "I" are.
+    ("S", "state", lambda: cell()),
 ]
 
 
@@ -827,7 +844,12 @@ EXTENT = 36.0 / 64.0
 FILL = 60.0 / 64.0
 
 
-def fitted(make):
+# A glyph fitted short of EXTENT, where filling it would make the mark weigh more than the rest of the set: a full square
+# fills its extent edge to edge, where a hexagon or a chip leaves its corners empty.
+SIZED = {"S": EXTENT * 0.84}
+
+
+def fitted(make, extent=EXTENT):
     """
     Builds a glyph at whatever size makes it fill <see cref="EXTENT" />.
 
@@ -854,7 +876,7 @@ def fitted(make):
         if widest <= 0:
             break
 
-        _fit *= EXTENT / widest
+        _fit *= extent / widest
 
     made = make()
     _fit = 1.0
@@ -932,7 +954,7 @@ def silhouette(cover):
     return Image.fromarray((ring * 255).astype(numpy.uint8), "L")
 
 
-def render(glyph, framed=None, outlined=False):
+def render(glyph, framed=None, outlined=False, extent=EXTENT):
     """
     One glyph, drawn oversized, centred on its own ink, and averaged down: how much of each pixel it covers, and how
     bright that ink is, which is full for every shape but those drawn behind.
@@ -952,7 +974,7 @@ def render(glyph, framed=None, outlined=False):
     global _fit
 
     if framed is None:
-        made = fitted(glyph)
+        made = fitted(glyph, extent)
         box = None
     else:
         scale, box = frame(framed)
@@ -1017,7 +1039,7 @@ def main():
     makers = dict((ch, glyph) for (ch, _, glyph) in GLYPHS)
     for i, (ch, label, glyph) in enumerate(GLYPHS):
         x, y = (i % across) * CELL, (i // across) * CELL
-        alpha, bright = render(glyph, makers.get(FRAMED.get(ch)), ch in OUTLINED)
+        alpha, bright = render(glyph, makers.get(FRAMED.get(ch)), ch in OUTLINED, SIZED.get(ch, EXTENT))
 
         # The page is straight alpha, so the color is the brightness without the coverage folded into it: white for
         # every shape but those drawn behind.

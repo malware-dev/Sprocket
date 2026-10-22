@@ -165,34 +165,102 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         public void AddIf(int at)
         {
             var origin = _editor.Depth;
-            _editor.Push(TestPage(null, OpeningColumn.Blocks, test =>
+            Ask(SentenceText.IfWord, null, OpeningColumn.Blocks, (test, made) =>
             {
-                _editor.Do(_sequence, new AddStep(ChangeKind.AddIf, at, new If(test), new EndIf()));
+                Do(made, new AddStep(ChangeKind.AddIf, at, new If(test), new EndIf()));
+                _editor.UnwindTo(origin);
+            });
+        }
+
+        /// <summary>Offers is and is not in a menu under the part pressed, the one <paramref name="test" /> makes marked, and changes the test to the one chosen as one edit.</summary>
+        public void RelateState(Step step, StateTest test)
+        {
+            _editor.AskHere("");
+            foreach (var related in new[] { Relation.Is, Relation.IsNot })
+            {
+                var relation = related;
+                _editor.Answer(ComparisonQuestion.Said(relation), delegate
+                {
+                    if (relation == test.Relation)
+                        return;
+
+                    var now = test.Copy();
+                    now.Relation = relation;
+                    _editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
+                }, relation == test.Relation);
+            }
+        }
+
+        /// <summary>The picker a test of a state is made and changed with, its sentence led by <paramref name="lead" />, opened on <paramref name="test" /> where there is one.</summary>
+        StatePage StateTestPage(string lead, StateTest test, Action<StateTest, NewState> chosen)
+        {
+            return new StatePage(_editor, _sequence.System, lead, false, test, null, chosen);
+        }
+
+        /// <summary>Asks which of the logic system's states to set and to what, and adds the step that sets it at the line <paramref name="at" />.</summary>
+        public void AddSetState(int at)
+        {
+            var origin = _editor.Depth;
+            _editor.Push(SetStatePage(null, (set, made) =>
+            {
+                Do(made, new AddStep(ChangeKind.AddStep, at, set));
                 _editor.UnwindTo(origin);
             }));
+        }
+
+        /// <summary>Asks again which state <paramref name="step" /> sets and to what, on the picker that made it.</summary>
+        public void ChangeSetState(SetState step)
+        {
+            var origin = _editor.Depth;
+            _editor.Push(SetStatePage(step, (now, made) =>
+            {
+                Do(made, new ChangeSetState(_sequence.Steps.IndexOf(step), step, now));
+                _editor.UnwindTo(origin);
+            }));
+        }
+
+        /// <summary>The picker a step setting a state is made and changed with, opened on <paramref name="step" /> where there is one.</summary>
+        StatePage SetStatePage(SetState step, Action<SetState, NewState> chosen)
+        {
+            var start = step == null ? null : new StateTest { State = step.State, Value = step.Value, Other = step.From };
+            return new StatePage(_editor, _sequence.System, SentenceText.SetWord, true, start, null,
+                (set, made) => chosen(new SetState { State = set.State, Value = set.Value, From = set.Other }, made));
+        }
+
+        /// <summary>Makes <paramref name="edit" />, with <paramref name="made" /> added to the logic system in the same step where a state was made for it, and its type where one was made too.</summary>
+        void Do(NewState made, SequenceEdit edit)
+        {
+            if (made == null)
+            {
+                _editor.Do(_sequence, edit);
+                return;
+            }
+
+            var system = _sequence.System;
+            _editor.Do(system, new WithNewState(system, made.State, made.Type, new OnSequence(_sequence, edit)));
         }
 
         /// <summary>Asks what to check, and adds an otherwise if checking it to the if closed at <paramref name="end" />: last, or above its otherwise, which comes last.</summary>
         public void AddBranch(int end)
         {
             var origin = _editor.Depth;
-            _editor.Push(TestPage(null, OpeningColumn.Blocks, test =>
+            Ask(SentenceText.OtherwiseIfWords, null, OpeningColumn.Blocks, (test, made) =>
             {
                 var last = _sequence.Otherwise(_sequence.OpenOf(end));
-                _editor.Do(_sequence, new AddStep(ChangeKind.AddBranch, last < 0 ? end : last, new Else(test)));
+                Do(made, new AddStep(ChangeKind.AddBranch, last < 0 ? end : last, new Else(test)));
                 _editor.UnwindTo(origin);
-            }));
+            });
         }
 
         /// <summary>Asks what to check, and makes the otherwise <paramref name="step" /> an otherwise if checking it, where it stands.</summary>
         public void GiveTest(Step step)
         {
             var origin = _editor.Depth;
-            _editor.Push(TestPage(null, OpeningColumn.Blocks, test =>
+            Ask(SentenceText.OtherwiseIfWords, null, OpeningColumn.Blocks, (test, made) =>
             {
-                _editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), null, test));
+                Do(made, new SetTest(_sequence.Steps.IndexOf(step), null, test));
                 _editor.UnwindTo(origin);
-            }));
+            });
         }
 
         /// <summary>Adds an otherwise to the if closed at <paramref name="end" />, as its last branch.</summary>
@@ -201,14 +269,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _editor.Do(_sequence, new AddStep(ChangeKind.AddBranch, end, new Else(null)));
         }
 
-        /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed.</summary>
-        public void EditTest(Step step, Comparison test, OpeningColumn opens)
+        /// <summary>Opens the test of <paramref name="step" /> on the column <paramref name="opens" /> says, to be changed: on blocks or on a state, as it is now.</summary>
+        public void EditTest(Step step, BranchTest test, OpeningColumn opens)
         {
-            _editor.Push(TestPage(test, opens, now =>
+            Ask(step is If ? SentenceText.IfWord : SentenceText.OtherwiseIfWords, test, opens, (now, made) =>
             {
-                _editor.Do(_sequence, new SetTest(_sequence.Steps.IndexOf(step), test, now));
+                Do(made, new SetTest(_sequence.Steps.IndexOf(step), test, now));
                 _editor.Pop();
-            }));
+            });
+        }
+
+        /// <summary>
+        /// Opens the selector a test is made and changed with, its sentence led by <paramref name="lead" />: on blocks, or on the
+        /// logic system's states where <paramref name="was" /> tests a state, its first column's heading switching between the
+        /// two. <paramref name="chosen" /> is given the test made, and the state made for it where one was.
+        /// </summary>
+        void Ask(string lead, BranchTest was, OpeningColumn opens, Action<BranchTest, NewState> chosen)
+        {
+            var source = new SourceSwitch(_editor,
+                choice =>
+                {
+                    var page = TestPage(was as Comparison, opens, test => chosen(test, null));
+                    page.Source = choice;
+                    return page;
+                },
+                choice =>
+                {
+                    var page = StateTestPage(lead, was as StateTest, (test, made) => chosen(test, made));
+                    page.Source = choice;
+                    return page;
+                });
+
+            _editor.Push(source.Open(was is StateTest));
         }
 
         /// <summary>The picker a test is made and changed with, opened on <paramref name="test" /> where there is one; <paramref name="chosen" /> is given the test made.</summary>

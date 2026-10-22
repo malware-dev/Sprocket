@@ -10,7 +10,7 @@ public class IfTextTests
 {
     const string Identity = "3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43";
 
-    const string Top = "sprocket 1 alpha 17\n\n"
+    const string Top = "sprocket 1 alpha 18\n\n"
         + "let door1 = block 'Door/LargeBlockDoor' [ 1 ]\n"
         + "let door2 = block 'Door/LargeBlockDoor' [ 2 ]\n"
         + "\n"
@@ -72,7 +72,7 @@ public class IfTextTests
         Assert.IsType<EndIf>(steps[4]);
         Assert.IsType<Await>(steps[5]);
 
-        var test = ((If)steps[0]).Test;
+        var test = ((If)steps[0]).Compared!;
         Assert.Equal(Quantifier.All, test.Quantifier);
         Assert.Equal("status", test.MemberId);
         Assert.Equal("ext", test.Provider);

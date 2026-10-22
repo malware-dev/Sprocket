@@ -40,6 +40,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The act it does itself, or null where it runs or stops a sequence.</summary>
         public Act Acts => Does as Act;
 
+        /// <summary>The state it sets itself, or null where it does something else.</summary>
+        public SetState Sets => Does as SetState;
+
         /// <summary>Whether this is about <paramref name="sequence" />: runs or stops it, or is the trigger whose own act it runs.</summary>
         public bool IsAbout(Sequence sequence)
         {

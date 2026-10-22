@@ -125,6 +125,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         From,
 
         /// <summary>A test on the average of a number read on every one of the blocks named.</summary>
-        Average
+        Average,
+
+        /// <summary>The <c>|</c> between the options of a type.</summary>
+        Bar,
+
+        /// <summary>Declares a type of a logic system: <c>type side = inside | outside</c>.</summary>
+        Type
     }
 }

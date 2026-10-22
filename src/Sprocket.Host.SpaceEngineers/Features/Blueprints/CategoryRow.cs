@@ -2,17 +2,14 @@ using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
     /// <summary>A category of slots on the installation panel: its name over the slots under it, with a grip that carries them all, and a bin.</summary>
     public partial class CategoryRow : HStack, ICarried
     {
-        /// <summary>How long a category's name may be: the most the game's own text boxes in the terminal take.</summary>
-        public const int NameLongest = 512;
-
         string _category = "";
 
         /// <summary>A category with no name yet.</summary>
@@ -33,22 +30,25 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>What pressing the name does, which is letting it be typed, or null where it cannot be changed.</summary>
-        /// <remarks>Drawn as a button while it renames, and as the name alone where it does not.</remarks>
+        /// <remarks>Shown with a pencil while it renames, and as the name alone where it does not.</remarks>
         public ICommand Renames
         {
             get { return _name.Command; }
             set
             {
                 _name.Command = value;
-                _name.Style = value != null ? Styles.SlotName : Styles.SlotNameStill;
+                _name.CanRename = value != null;
             }
         }
 
         /// <summary>What pressing the name does, said where the pointer rests on it; null for nothing.</summary>
         public string RenamesAbout
         {
-            set { _name.Tip = Tip.For(_name.Tip, value); }
+            set { _name.About = value; }
         }
+
+        /// <summary>The name, which is given in place.</summary>
+        public NamePlate Plate => _name;
 
         /// <summary>What pressing the bin does, which is removing the category, or null where it cannot be.</summary>
         public ICommand Removes
@@ -89,12 +89,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _grip.Tip = Tip.For(_grip.Tip, about);
         }
 
-        /// <summary>The box the name is typed in, while it is being renamed.</summary>
-        public TextBox Box => _box;
-
-        /// <summary>Whether the name is being typed.</summary>
-        public bool IsRenaming => _box.IsVisible;
-
         /// <inheritdoc />
         public Grip Grip => _grip;
 
@@ -104,20 +98,5 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>How many slots stand under it, which go with it when it is carried.</summary>
         public int Carries { get; set; }
 
-        /// <summary>Shows the box in place of the name, holding the name, for it to be typed over.</summary>
-        public void Rename()
-        {
-            _box.Text = _category;
-            _box.SelectAll();
-            _box.IsVisible = true;
-            _name.IsVisible = false;
-        }
-
-        /// <summary>Shows the name again in place of the box.</summary>
-        public void Renamed()
-        {
-            _box.IsVisible = false;
-            _name.IsVisible = true;
-        }
     }
 }

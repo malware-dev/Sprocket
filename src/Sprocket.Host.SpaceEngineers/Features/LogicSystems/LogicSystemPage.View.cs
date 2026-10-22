@@ -18,9 +18,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Tab _sequencesTab;
         Glyph _sequencesMark;
         Tab _stateTab;
-        Label _noState;
+        StatePanel _statePanel;
         Tab _panelTab;
         Label _noPanel;
+        Label _noTriggers;
+        VStack _noTriggersLine;
+        VStack _noPanelLine;
         VStack _describing;
         Label _descriptionHeading;
         Composer _composer;
@@ -88,6 +91,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                 {
                                     Children =
                                     {
+                                        new VStack
+                                        {
+                                            Padding = new Thickness(0f, 8f, 0f, 0f),
+                                            IsVisible = false,
+                                            Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noTriggers) }
+                                        }.As(out _noTriggersLine),
                                         new VStack { Spacing = 8f }.As(out _triggerList),
                                         new VStack
                                         {
@@ -118,13 +127,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                     }
                                 }
                             }.As(out _sequencesTab),
-                            new Tab
-                            {
-                                Content = new VStack
-                                {
-                                    Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noState) }
-                                }
-                            }.As(out _stateTab),
+                            new Tab { Content = new StatePanel().As(out _statePanel) }.As(out _stateTab),
                             new Tab
                             {
                                 Content = new VStack
@@ -132,7 +135,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                     Padding = new Thickness(0f, 4f, 0f, 0f),
                                     Children =
                                     {
-                                        new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _noPanel),
+                                        new VStack
+                                        {
+                                            Padding = new Thickness(0f, 4f, 0f, 0f),
+                                            IsVisible = false,
+                                            Children = { new Label { Style = Styles.Empty, Wraps = true }.As(out _noPanel) }
+                                        }.As(out _noPanelLine),
                                         new VStack
                                         {
                                             Spacing = 4f,

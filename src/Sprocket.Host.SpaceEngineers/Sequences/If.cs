@@ -7,7 +7,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class If : Branch
     {
         /// <summary>An <c>if</c> testing <paramref name="test" />.</summary>
-        public If(Comparison test) : base(test)
+        public If(BranchTest test) : base(test)
         {
         }
     }

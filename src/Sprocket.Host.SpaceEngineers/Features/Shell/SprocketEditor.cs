@@ -121,6 +121,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>The windows open over the screen showing the editor, or null while nothing shows it.</summary>
         public WindowLayer Windows { get; set; }
 
+        /// <summary>How the screen showing the editor gives a name in place, or null while nothing shows it.</summary>
+        public Action<NamePlate, Naming> Renamer { get; set; }
+
+        /// <summary>Begins giving the name <paramref name="naming" /> holds in <paramref name="plate" />, in place, on the screen showing the editor.</summary>
+        public void Rename(NamePlate plate, Naming naming)
+        {
+            Renamer?.Invoke(plate, naming);
+        }
+
         /// <summary>How many times the screen has been built from its page, which a screen standing still never adds to.</summary>
         public int Rebuilds { get; private set; }
 

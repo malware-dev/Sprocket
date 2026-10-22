@@ -307,9 +307,21 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     WriteSlot(pen, parts[i]);
             }
 
+            if (system.Types.Count > 0)
+                pen.Blank();
+
+            foreach (var type in system.Types)
+                WriteType(pen, type);
+
+            if (system.States.Count > 0)
+                pen.Blank();
+
+            foreach (var state in system.States)
+                WriteState(pen, system, state);
+
             var triggers = system.Triggers;
             for (var i = 0; i < triggers.Count; i++)
-                WriteTrigger(pen, triggers[i]);
+                WriteTrigger(pen, system, triggers[i]);
 
             var sequences = system.Sequences;
             for (var i = 0; i < sequences.Count; i++)
@@ -346,6 +358,77 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 pen.Says(Keyword.Expects).Word(part.Expects);
 
             pen.End();
+        }
+
+        /// <summary><c>type side = inside | outside</c>: a type the system declares, its choices in order.</summary>
+        static void WriteType(ScriptWriter pen, DeclaredType type)
+        {
+            pen.Note(type.Annotation);
+            pen.Attributes(type.Attributes);
+            pen.Start(Keyword.Type).Word(type.Name).Says(Keyword.Equals);
+            for (var i = 0; i < type.Choices.Count; i++)
+            {
+                if (i > 0)
+                    pen.Says(Keyword.Bar);
+
+                pen.Word(type.Choices[i]);
+            }
+
+            pen.End();
+        }
+
+        /// <summary><c>let where = inside</c>: a state the system declares, and the value it starts at.</summary>
+        static void WriteState(ScriptWriter pen, AutomationSystem system, State state)
+        {
+            pen.Note(state.Annotation);
+            pen.Attributes(state.Attributes);
+            pen.Start(Keyword.Let).Word(state.Name).Says(Keyword.Equals);
+            Choice(pen, system, state.Type, state.Start, true);
+            pen.End();
+        }
+
+        /// <summary>
+        /// A state's value: a flag, or a choice of <paramref name="type" />, qualified where written alone it would read as
+        /// a state, or, as a <paramref name="starting" /> value, as a choice of another type too.
+        /// </summary>
+        static void Choice(ScriptWriter pen, AutomationSystem system, string type, Literal value, bool starting)
+        {
+            if (value.Kind != ValueKind.Name || system == null || !Mistaken(system, value.Text, starting))
+            {
+                Written(pen, value);
+                return;
+            }
+
+            pen.Qualified(type, value.Text);
+        }
+
+        /// <summary>
+        /// Whether <paramref name="choice" /> written alone would read as something else: a state of that name, or, where it
+        /// is a <paramref name="starting" /> value, a choice of more than one type.
+        /// </summary>
+        static bool Mistaken(AutomationSystem system, string choice, bool starting)
+        {
+            if (system.FindState(choice) != null)
+                return true;
+
+            if (!starting)
+                return false;
+
+            var having = 0;
+            foreach (var type in system.Types)
+            {
+                if (type.Has(choice))
+                    having++;
+            }
+
+            return having > 1;
+        }
+
+        /// <summary>The name of the type of the state called <paramref name="name" />, or empty where it is a flag or not found.</summary>
+        static string TypeOf(AutomationSystem system, string name)
+        {
+            var state = system?.FindState(name);
+            return state == null ? "" : state.Type;
         }
 
         /// <summary>The namespace of a qualified id: <c>ext</c> of <c>ext.screen</c>.</summary>
@@ -520,20 +603,20 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 var opens = steps[i] as If;
                 var branch = steps[i] as Else;
                 if (opens != null)
-                    WriteIf(pen, opens);
+                    WriteIf(pen, sequence.System, opens);
                 else if (branch != null)
-                    WriteElse(pen, branch);
+                    WriteElse(pen, sequence.System, branch);
                 else if (steps[i] is EndIf)
                     pen.Shut();
                 else
-                    WriteStep(pen, steps[i]);
+                    WriteStep(pen, sequence.System, steps[i]);
             }
 
             pen.Shut();
         }
 
         /// <summary><c>if all ext.filled on [ vent ] == on then {</c>: the line an if starts, and its block opened.</summary>
-        static void WriteIf(ScriptWriter pen, If step)
+        static void WriteIf(ScriptWriter pen, AutomationSystem system, If step)
         {
             if (step.Annotation.Length > 0)
                 pen.Blank();
@@ -541,12 +624,12 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Note(step.Annotation);
             pen.Attributes(step.Attributes);
             pen.Start(Keyword.If, step.IsOff);
-            WriteTest(pen, step.Test);
+            WriteTest(pen, system, step.Test);
             pen.Body();
         }
 
         /// <summary><c>} else if … then {</c> or <c>} else {</c>: the branch before closed, and the next one opened.</summary>
-        static void WriteElse(ScriptWriter pen, Else step)
+        static void WriteElse(ScriptWriter pen, AutomationSystem system, Else step)
         {
             pen.Shut();
             pen.Note(step.Annotation);
@@ -555,14 +638,35 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (step.Test != null)
             {
                 pen.Says(Keyword.If);
-                WriteTest(pen, step.Test);
+                WriteTest(pen, system, step.Test);
             }
 
             pen.Body();
         }
 
-        /// <summary><c>all ext.filled on [ vent ] == on then</c>.</summary>
-        static void WriteTest(ScriptWriter pen, Comparison test)
+        /// <summary>What a branch tests, then <c>then</c>: a member read on blocks, or one of the system's states.</summary>
+        static void WriteTest(ScriptWriter pen, AutomationSystem system, BranchTest test)
+        {
+            var compared = test as Comparison;
+            if (compared != null)
+                WriteComparison(pen, compared);
+            else
+                WriteStateTest(pen, system, (StateTest)test);
+        }
+
+        /// <summary><c>where == inside then</c>, or <c>where != home then</c>: a state compared with a value or another state.</summary>
+        static void WriteStateTest(ScriptWriter pen, AutomationSystem system, StateTest test)
+        {
+            pen.Word(test.State).Says(test.Relation == Relation.IsNot ? Keyword.NotEqualTo : Keyword.EqualTo);
+            if (test.Other.Length > 0)
+                pen.Word(test.Other);
+            else
+                Choice(pen, system, TypeOf(system, test.State), test.Value, false);
+
+            pen.Says(Keyword.Then);
+        }
+
+        static void WriteComparison(ScriptWriter pen, Comparison test)
         {
             pen.Says(Said(test.Quantifier));
             WriteMember(pen, test.Provider, test.MemberId, test.Arguments, test.Targets);
@@ -620,7 +724,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <c>whenever button then run 1</c>, <c>when all ext.status on [ inner ] == closed then run 2</c>, or <c>every 600t stop 3</c>.
         /// </summary>
         /// <remarks>The step it does is written as a sequence writes it.</remarks>
-        static void WriteTrigger(ScriptWriter pen, Trigger trigger)
+        static void WriteTrigger(ScriptWriter pen, AutomationSystem system, Trigger trigger)
         {
             pen.Blank();
             pen.Note(trigger.Annotation);
@@ -638,7 +742,17 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     WriteMember(pen, needed.Provider, needed.EventId, NoArguments, needed.Sources);
 
                 pen.Says(Keyword.Then);
-                WriteDoes(pen, trigger.Does);
+                WriteDoes(pen, system, trigger.Does);
+                pen.End();
+                return;
+            }
+
+            var watched = trigger as StateTrigger;
+            if (watched != null)
+            {
+                pen.Start(Keyword.When);
+                WriteStateTest(pen, system, watched.Test);
+                WriteDoes(pen, system, trigger.Does);
                 pen.End();
                 return;
             }
@@ -654,25 +768,25 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                     Lasting(pen.Says(Keyword.Every), when.Interval);
 
                 pen.Says(Keyword.Then);
-                WriteDoes(pen, trigger.Does);
+                WriteDoes(pen, system, trigger.Does);
                 pen.End();
                 return;
             }
 
             var every = trigger as EveryTrigger;
-            if (every != null)
-            {
-                Lasting(pen.Start(Keyword.Every), every.Interval);
-                WriteDoes(pen, trigger.Does);
-                pen.End();
-            }
+            if (every == null)
+                throw new InvalidOperationException($"a {trigger.GetType().Name} has no way to be written.");
+
+            Lasting(pen.Start(Keyword.Every), every.Interval);
+            WriteDoes(pen, system, trigger.Does);
+            pen.End();
         }
 
         /// <summary>The step a trigger does, on the line the trigger is written on.</summary>
-        static void WriteDoes(ScriptWriter pen, Step step)
+        static void WriteDoes(ScriptWriter pen, AutomationSystem system, Step step)
         {
             pen.Says(Head(step));
-            Rest(pen, step);
+            Rest(pen, system, step);
         }
 
         /// <summary>Writes <paramref name="length" /> as the script had it: in seconds, or in ticks.</summary>
@@ -685,7 +799,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         }
 
         /// <summary>A step: an action on some parts, a value set on them, a sequence run or stopped, an await, or a length of time.</summary>
-        static void WriteStep(ScriptWriter pen, Step step)
+        static void WriteStep(ScriptWriter pen, AutomationSystem system, Step step)
         {
             if (step.Annotation.Length > 0)
                 pen.Blank();
@@ -693,7 +807,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             pen.Note(step.Annotation);
             pen.Attributes(step.Attributes);
             pen.Start(Head(step), step.IsOff);
-            Rest(pen, step);
+            Rest(pen, system, step);
             pen.End();
         }
 
@@ -707,7 +821,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (opens != null)
             {
                 pen.Start(Keyword.If, step.IsOff);
-                WriteTest(pen, opens.Test);
+                WriteTest(pen, null, opens.Test);
             }
             else if (branch != null)
             {
@@ -715,7 +829,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
                 if (branch.Test != null)
                 {
                     pen.Says(Keyword.If);
-                    WriteTest(pen, branch.Test);
+                    WriteTest(pen, null, branch.Test);
                 }
             }
             else if (step is EndIf)
@@ -723,7 +837,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             else
             {
                 pen.Start(Head(step), step.IsOff);
-                Rest(pen, step);
+                Rest(pen, null, step);
             }
 
             return pen.ToString().Trim();
@@ -744,12 +858,30 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             if (run != null)
                 return run.Stops ? Keyword.Stop : Keyword.Run;
 
-            return Keyword.Await;
+            if (step is SetState)
+                return Keyword.Set;
+
+            if (step is Await)
+                return Keyword.Await;
+
+            throw new InvalidOperationException($"a {step.GetType().Name} has no way to be written.");
         }
 
         /// <summary>Everything in a step after the word it starts with.</summary>
-        static void Rest(ScriptWriter pen, Step step)
+        static void Rest(ScriptWriter pen, AutomationSystem system, Step step)
         {
+            var sets = step as SetState;
+            if (sets != null)
+            {
+                pen.Word(sets.State).Says(Keyword.To);
+                if (sets.From.Length > 0)
+                    pen.Word(sets.From);
+                else
+                    Choice(pen, system, TypeOf(system, sets.State), sets.Value, false);
+
+                return;
+            }
+
             var act = step as Act;
             if (act != null)
             {

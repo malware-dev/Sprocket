@@ -764,6 +764,20 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
                     continue;
                 }
 
+                var sets = step as SetState;
+                if (sets != null)
+                {
+                    IsWaiting = false;
+
+                    // Set in this step, and what it starts is started in it too, before the run goes on.
+                    _owner.Set(_sequence.System, _instance, sets);
+                    if (!IsRunning)
+                        return;
+
+                    Step();
+                    continue;
+                }
+
                 var opens = step as If;
                 if (opens != null)
                 {
@@ -867,24 +881,40 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
             EnterStep();
         }
 
+        /// <summary>Whether <paramref name="test" /> holds on this installation's states.</summary>
+        bool Holds(StateTest test)
+        {
+            return _owner.States.Holds(_sequence.System, _instance, test);
+        }
+
         /// <summary>
         /// Goes into the first branch of the if at the current step whose test holds, or past the if where none does; false
         /// where a test cannot be read and the run has ended there.
         /// </summary>
-        bool Branch(Comparison test)
+        bool Branch(BranchTest test)
         {
             var at = _memory.Step;
             while (true)
             {
-                var tested = _workings.Test(at, test, _bindings);
-                if (tested.Problem != SequenceProblem.None)
+                bool holds;
+                var compared = test as Comparison;
+                if (compared != null)
                 {
-                    Meet(new SequenceFault(tested.Problem, at, BlockTrouble.None, tested.Which));
-                    return false;
+                    var tested = _workings.Test(at, compared, _bindings);
+                    if (tested.Problem != SequenceProblem.None)
+                    {
+                        Meet(new SequenceFault(tested.Problem, at, BlockTrouble.None, tested.Which));
+                        return false;
+                    }
+
+                    holds = Holds(tested, compared);
+                    _owner.Log?.Tested(this, _memory.Looked, at, tested, holds);
+                }
+                else
+                {
+                    holds = Holds((StateTest)test);
                 }
 
-                var holds = Holds(tested, test);
-                _owner.Log?.Tested(this, _memory.Looked, at, tested, holds);
                 if (holds)
                 {
                     Go(at + 1);

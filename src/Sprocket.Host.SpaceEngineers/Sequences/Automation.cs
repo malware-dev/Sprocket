@@ -627,15 +627,32 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
             var branch = step as Else;
             if (branch != null)
-                return Annotated(new Else(branch.Test == null ? null : Copied(branch.Test)), step);
+                return Annotated(new Else(Copied(branch.Test)), step);
 
             if (step is EndIf)
                 return Annotated(new EndIf(), step);
 
+            var sets = step as SetState;
+            if (sets != null)
+                return Annotated(new SetState { State = sets.State, Value = sets.Value, From = sets.From }, step);
+
             return null;
         }
 
-        /// <summary>A test again, deep enough that editing the copy cannot reach the original.</summary>
+        /// <summary>A test again, deep enough that editing the copy cannot reach the original, or null for none.</summary>
+        static BranchTest Copied(BranchTest test)
+        {
+            if (test == null)
+                return null;
+
+            var compared = test as Comparison;
+            if (compared != null)
+                return Copied(compared);
+
+            return ((StateTest)test).Copy();
+        }
+
+        /// <summary>A comparison again, deep enough that editing the copy cannot reach the original.</summary>
         static Comparison Copied(Comparison test)
         {
             var copy = new Comparison();

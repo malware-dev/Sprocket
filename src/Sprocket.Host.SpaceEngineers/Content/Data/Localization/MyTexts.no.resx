@@ -251,6 +251,9 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
     <value>Gjenta en oppgave med et fast intervall.</value>
   </data>
+  <data name="Sprocket.Trigger.StateAbout" xml:space="preserve">
+    <value>Velg en annen tilstand, eller en annen verdi for den.</value>
+  </data>
   <data name="Sprocket.System.Trigger" xml:space="preserve">
     <value>utløser</value>
   </data>
@@ -269,14 +272,17 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.System.NoSequences" xml:space="preserve">
     <value>Ingen sekvenser ennå.</value>
   </data>
+  <data name="Sprocket.System.NoTriggers" xml:space="preserve">
+    <value>Ingen utløsere ennå.</value>
+  </data>
   <data name="Sprocket.System.State" xml:space="preserve">
     <value>Tilstand</value>
   </data>
   <data name="Sprocket.System.NoState" xml:space="preserve">
-    <value>Ingenting her ennå.</value>
+    <value>Ingen typer eller tilstander ennå.</value>
   </data>
   <data name="Sprocket.System.NoPanel" xml:space="preserve">
-    <value>Bare et logikksystem laget som plantegning har et installasjonspanel.</value>
+    <value>Ingen plasser ennå.</value>
   </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
     <value>Kopier denne sekvensen. Kopien starter avslått og uten utløsere.</value>
@@ -660,6 +666,192 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Pick.HowOften" xml:space="preserve">
     <value>Hvor ofte</value>
+  </data>
+  <data name="Sprocket.Pick.States" xml:space="preserve">
+    <value>Tilstander</value>
+  </data>
+  <data name="Sprocket.Pick.Source" xml:space="preserve">
+    <value>Kilde</value>
+  </data>
+  <data name="Sprocket.Pick.SourceBlocks" xml:space="preserve">
+    <value>Blokker</value>
+  </data>
+  <data name="Sprocket.Pick.SourceStates" xml:space="preserve">
+    <value>Tilstander</value>
+  </data>
+  <data name="Sprocket.Pick.NewState" xml:space="preserve">
+    <value>En ny tilstand</value>
+  </data>
+  <data name="Sprocket.Pick.NewStateAbout" xml:space="preserve">
+    <value>Lag en ny tilstand og bruk den her.</value>
+  </data>
+  <data name="Sprocket.Pick.NewType" xml:space="preserve">
+    <value>En ny type</value>
+  </data>
+  <data name="Sprocket.Pick.TypeNameTaken" xml:space="preserve">
+    <value>Gi typen et navn som ingen plass, type eller tilstand i dette logikksystemet har.</value>
+  </data>
+  <data name="Sprocket.Pick.StateSetTo" xml:space="preserve">
+    <value>Sett til</value>
+  </data>
+  <data name="Sprocket.Pick.StateFixedValue" xml:space="preserve">
+    <value>en fast verdi</value>
+  </data>
+  <data name="Sprocket.Pick.StateFixedValueAbout" xml:space="preserve">
+    <value>Bruk en av disse verdiene.</value>
+  </data>
+  <data name="Sprocket.Pick.StateValueOf" xml:space="preserve">
+    <value>verdien til en annen tilstand</value>
+  </data>
+  <data name="Sprocket.Pick.StateCheck" xml:space="preserve">
+    <value>Sjekk</value>
+  </data>
+  <data name="Sprocket.Pick.StateWatch" xml:space="preserve">
+    <value>Vent på</value>
+  </data>
+  <data name="Sprocket.Pick.TypeName" xml:space="preserve">
+    <value>typenavn</value>
+  </data>
+  <data name="Sprocket.Pick.StateType" xml:space="preserve">
+    <value>type</value>
+  </data>
+  <data name="Sprocket.Pick.ChoiceOfType" xml:space="preserve">
+    <value>{choice} ({type})</value>
+  </data>
+  <data name="Sprocket.Pick.StateNameTaken" xml:space="preserve">
+    <value>Gi tilstanden et navn som ingen plass, type eller tilstand i dette logikksystemet har.</value>
+  </data>
+  <data name="Sprocket.State.Name" xml:space="preserve">
+    <value>navn</value>
+  </data>
+  <data name="Sprocket.Pick.StatesNone" xml:space="preserve">
+    <value>Dette logikksystemet har ingen tilstander. Legg dem til på fanen Tilstand.</value>
+  </data>
+  <data name="Sprocket.State.Flag" xml:space="preserve">
+    <value>på eller av</value>
+  </data>
+  <data name="Sprocket.State.Types" xml:space="preserve">
+    <value>Typer</value>
+  </data>
+  <data name="Sprocket.State.States" xml:space="preserve">
+    <value>Tilstander</value>
+  </data>
+  <data name="Sprocket.State.TypeAdd" xml:space="preserve">
+    <value>type</value>
+  </data>
+  <data name="Sprocket.State.TypeAddAbout" xml:space="preserve">
+    <value>Legger til en type: et navngitt sett med alternativer en tilstand kan ha.</value>
+  </data>
+  <data name="Sprocket.State.ChoiceAdd" xml:space="preserve">
+    <value>alternativ</value>
+  </data>
+  <data name="Sprocket.State.ChoiceAddAbout" xml:space="preserve">
+    <value>Legger til et alternativ i typen.</value>
+  </data>
+  <data name="Sprocket.State.StateAdd" xml:space="preserve">
+    <value>tilstand</value>
+  </data>
+  <data name="Sprocket.State.StateAddAbout" xml:space="preserve">
+    <value>Legger til en tilstand: en verdi hver installasjon beholder mellom kjøringer.</value>
+  </data>
+  <data name="Sprocket.State.TypeNumbered" xml:space="preserve">
+    <value>type {number}</value>
+  </data>
+  <data name="Sprocket.State.ChoiceNumbered" xml:space="preserve">
+    <value>alternativ {number}</value>
+  </data>
+  <data name="Sprocket.State.StateNumbered" xml:space="preserve">
+    <value>tilstand {number}</value>
+  </data>
+  <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
+    <value>Gir typen nytt navn, overalt den brukes.</value>
+  </data>
+  <data name="Sprocket.State.ChoiceAbout" xml:space="preserve">
+    <value>Gir alternativet nytt navn, eller fjerner det.</value>
+  </data>
+  <data name="Sprocket.State.StateRenameAbout" xml:space="preserve">
+    <value>Gir tilstanden nytt navn, overalt den brukes.</value>
+  </data>
+  <data name="Sprocket.State.Rename" xml:space="preserve">
+    <value>Gi nytt navn</value>
+  </data>
+  <data name="Sprocket.State.RemoveChoice" xml:space="preserve">
+    <value>Fjern</value>
+  </data>
+  <data name="Sprocket.State.ChoiceKept" xml:space="preserve">
+    <value>Dette alternativet er i bruk, eller typen har bare to, så det kan ikke fjernes.</value>
+  </data>
+  <data name="Sprocket.State.TypeRemove" xml:space="preserve">
+    <value>Fjerner typen.</value>
+  </data>
+  <data name="Sprocket.State.TypeKept" xml:space="preserve">
+    <value>En tilstand har denne typen, så den kan ikke fjernes.</value>
+  </data>
+  <data name="Sprocket.State.StateRemove" xml:space="preserve">
+    <value>Fjerner tilstanden.</value>
+  </data>
+  <data name="Sprocket.State.StateKept" xml:space="preserve">
+    <value>Et steg eller en utløser bruker denne tilstanden, så den kan ikke fjernes.</value>
+  </data>
+  <data name="Sprocket.State.TypeDrag" xml:space="preserve">
+    <value>Dra for å flytte typen.</value>
+  </data>
+  <data name="Sprocket.State.StateDrag" xml:space="preserve">
+    <value>Dra for å flytte tilstanden.</value>
+  </data>
+  <data name="Sprocket.State.TypesAbout" xml:space="preserve">
+    <value>En type er en liste med alternativer. En tilstand velger verdien sin fra typen den bruker.</value>
+  </data>
+  <data name="Sprocket.State.StatesAbout" xml:space="preserve">
+    <value>Det logikksystemet husker. Hver installasjon har sine egne verdier.</value>
+  </data>
+  <data name="Sprocket.State.CanBeAbout" xml:space="preserve">
+    <value>En tilstand av denne typen vil være én av disse verdiene.</value>
+  </data>
+  <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
+    <value>Bytt typen til denne tilstanden. Startverdien blir den første verdien i den nye typen.</value>
+  </data>
+  <data name="Sprocket.State.StartsAbout" xml:space="preserve">
+    <value>Verdien tilstanden har når logikksystemet starter.</value>
+  </data>
+  <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
+    <value>Navnet den nye tilstanden skal ha. Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
+  </data>
+  <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
+    <value>Typen den nye tilstanden bruker, som avgjør hvilke verdier den kan ha.</value>
+  </data>
+  <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
+    <value>Navnet på den nye typen. Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
+  </data>
+  <data name="Sprocket.Pick.StateSetToAbout" xml:space="preserve">
+    <value>Verdien dette steget setter tilstanden til når det kjører.</value>
+  </data>
+  <data name="Sprocket.Pick.StateCheckAbout" xml:space="preserve">
+    <value>Sjekk om tilstanden er, eller ikke er, en bestemt verdi.</value>
+  </data>
+  <data name="Sprocket.Pick.StateWatchAbout" xml:space="preserve">
+    <value>Utløseren utløses når tilstanden blir denne verdien.</value>
+  </data>
+  <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
+    <value>Bruk den verdien en annen tilstand har når dette kjører.</value>
+  </data>
+  <data name="Sprocket.State.CanBe" xml:space="preserve">
+    <value>kan være én av</value>
+  </data>
+  <data name="Sprocket.State.Starts" xml:space="preserve">
+    <value>starter som</value>
+  </data>
+  <data name="Sprocket.State.KindKept" xml:space="preserve">
+    <value>Typen kan ikke byttes mens et steg, en if eller en utløser bruker denne tilstanden.</value>
+  </data>
+  <data name="Sprocket.State.Holds" xml:space="preserve">
+    <value>({type})</value>
+  </data>
+  <data name="Sprocket.State.Now" xml:space="preserve">
+    <value>og er nå</value>
+  </data>
+  <data name="Sprocket.State.NowAbout" xml:space="preserve">
+    <value>Verdien denne tilstanden har akkurat nå i installasjonen som vises.</value>
   </data>
 
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
@@ -1791,6 +1983,12 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Sequence.StateAbout" xml:space="preserve">
     <value>Velg betingelsen som må være oppfylt.</value>
   </data>
+  <data name="Sprocket.Sequence.SetStateAbout" xml:space="preserve">
+    <value>Gi en av logikksystemets tilstander en ny verdi.</value>
+  </data>
+  <data name="Sprocket.Sequence.SystemStateAbout" xml:space="preserve">
+    <value>Velg en annen tilstand, eller en annen verdi for den.</value>
+  </data>
   <data name="Sprocket.Sequence.RemoveIf" xml:space="preserve">
     <value>Slette dette hvis-steget?</value>
   </data>
@@ -2504,6 +2702,42 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
     <value>fjerning av en kategori</value>
+  </data>
+  <data name="Sprocket.Change.AddType" xml:space="preserve">
+    <value>oppretting av en type</value>
+  </data>
+  <data name="Sprocket.Change.RenameType" xml:space="preserve">
+    <value>omdøping av en type</value>
+  </data>
+  <data name="Sprocket.Change.RemoveType" xml:space="preserve">
+    <value>fjerning av en type</value>
+  </data>
+  <data name="Sprocket.Change.AddChoice" xml:space="preserve">
+    <value>oppretting av et alternativ</value>
+  </data>
+  <data name="Sprocket.Change.RenameChoice" xml:space="preserve">
+    <value>omdøping av et alternativ</value>
+  </data>
+  <data name="Sprocket.Change.RemoveChoice" xml:space="preserve">
+    <value>fjerning av et alternativ</value>
+  </data>
+  <data name="Sprocket.Change.AddState" xml:space="preserve">
+    <value>oppretting av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.RenameState" xml:space="preserve">
+    <value>omdøping av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.RemoveState" xml:space="preserve">
+    <value>fjerning av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.MoveType" xml:space="preserve">
+    <value>flytting av en type</value>
+  </data>
+  <data name="Sprocket.Change.MoveState" xml:space="preserve">
+    <value>flytting av en tilstand</value>
+  </data>
+  <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
+    <value>endring av en startverdi</value>
   </data>
   <data name="Sprocket.Category.Add" xml:space="preserve">
     <value>kategori</value>

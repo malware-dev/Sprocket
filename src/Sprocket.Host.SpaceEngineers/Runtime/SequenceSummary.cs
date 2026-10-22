@@ -412,7 +412,7 @@ namespace Sprocket.Host.SpaceEngineers.Runtime
         static Comparison TestOf(Step step)
         {
             var branch = step as Branch;
-            return branch?.Test;
+            return branch?.Test as Comparison;
         }
 
         /// <summary>The first step that runs a sequence which, directly or through the sequences it runs, starts this one again, or none.</summary>

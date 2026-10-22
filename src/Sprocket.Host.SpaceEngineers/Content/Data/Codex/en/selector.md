@@ -1,10 +1,13 @@
 # Selector
 
-A selector is where you select blocks, and what to do with them or check on them. There is one for each job:
+A selector is where you select what a step, an if or a trigger works with: blocks and what to do with them or check on them, or one of the logic system's states. There is one for each job:
 
 - The **block selector** selects the blocks for a [step](step) and what it does to them, and fills a [slot](slot).
 - The **signal selector** selects the block and the [signal](signal) that fire a [trigger](trigger).
 - The **value selector** selects the blocks and the value an [if](if) checks.
+- The **state selector** selects one of the [logic system's states](logic-system-states) and the value a step sets it to, an if checks it for or a trigger waits for.
+
+The selector an if, an otherwise if or a when trigger opens has a `Source` box heading its first column: `Blocks` checks or watches blocks, and `States` puts the state selector in its place. A step that sets a state opens the state selector straight away.
 
 `Search` looks for the words you type in the order you type them, each anywhere in a block's name: *airl 1* finds *Airlock 1*, *Airlock 10* and *Airlock Door 1*, and leaves out *1 Airlock*, and every search box matches the same way. What you typed stays until you leave the screen.
 

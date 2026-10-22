@@ -621,7 +621,7 @@ namespace Sprocket.Host.SpaceEngineers.Storage
             }
 
             // Each answer to a slot an on names is a toolbar slot that starts it, and holds nothing else.
-            for (var i = 0; SystemReader.Started(system, statement.Head) && i < blocks.Count; i++)
+            for (var i = 0; TriggerReader.Started(system, statement.Head) && i < blocks.Count; i++)
                 trouble.Takes(statement, blocks[i], at[i]);
 
             instance.Fill(statement.Head, blocks, at);

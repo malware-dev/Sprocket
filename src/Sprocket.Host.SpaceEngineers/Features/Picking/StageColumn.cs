@@ -102,6 +102,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             set { _title.Text = (value ?? "").ToUpperInvariant(); }
         }
 
+        /// <summary>What the column asks, said where the pointer rests on its heading; null for nothing.</summary>
+        public string TitleAbout
+        {
+            set { _title.Tip = Tip.For(_title.Tip, value); }
+        }
+
         /// <summary>A quiet line under what the column asks, such as how many are picked, or empty.</summary>
         public string Subtitle
         {
@@ -255,6 +261,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 _given.Children.Add(given);
 
             _given.IsVisible = given != null;
+        }
+
+        /// <summary>Puts <paramref name="choice" /> after what the column asks, as the answer to it, or nothing there where it is null.</summary>
+        public void Heads(Element choice)
+        {
+            if (choice != null && choice.Parent == _heads)
+                return;
+
+            _heads.Children.Clear();
+            if (choice != null)
+                _heads.Children.Add(choice);
+
+            _heads.IsVisible = choice != null;
         }
 
         /// <summary>Closes the list of kinds, where it hangs open.</summary>

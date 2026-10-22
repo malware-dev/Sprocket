@@ -789,8 +789,11 @@ namespace Sprocket.Host.SpaceEngineers
             _remembered.Clear();
             foreach (SprocketUnit unit in _roster.All)
             {
-                if (!unit.Lost)
-                    _remembered.Add(unit.Memory);
+                if (unit.Lost)
+                    continue;
+
+                unit.Runner.States.Settle();
+                _remembered.Add(unit.Memory);
             }
 
             _carried.Write(Memories.File, _memories.Write(GameFrame(), _remembered));

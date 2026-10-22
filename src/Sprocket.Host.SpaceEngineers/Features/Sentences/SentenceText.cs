@@ -47,6 +47,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The word the branch of an if taken when no check holds is said with, on its row and where it is offered.</summary>
         public const string OtherwiseWord = "otherwise";
 
+        /// <summary>The words offering a step that sets one of the logic system's states.</summary>
+        public const string SetStateWords = "set state";
+
         /// <summary>What a wait for everything started above it reads as, on a row of its own and where it is offered.</summary>
         public const string AwaitWords = "wait for pending tasks";
 
@@ -170,6 +173,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// </summary>
         public static string Joining(IList<SentenceSlot> slots, int slot, bool tests)
         {
+            // A step setting one of the system's states says what it is set to after it.
+            if (!tests && slot == 1 && slots.Count > 1 && slots[0] is SystemStateSlot)
+                return ToWord;
+
             // A test's value can stand after the part saying how its blocks are read, and a step enabling a state after the verb.
             var at = Valued(slots);
             var value = at >= 0 && at < slots.Count ? slots[at] as ActionSlot : null;
@@ -589,6 +596,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (sequence != null)
                 return sequence.IsEmpty ? null : Symbols.Sequence;
 
+            var kept = slot as SystemStateSlot;
+            if (kept != null)
+                return kept.IsEmpty ? null : Symbols.State;
+
             return null;
         }
 
@@ -632,6 +643,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
 
                 return sequence.Name.Length > 0 ? sequence.Name : $"sequence {sequence.Number}";
             }
+
+            var kept = slot as SystemStateSlot;
+            if (kept != null)
+                return kept.IsEmpty ? Empty : kept.Name;
 
             // A slot kind with no words here; saying nothing would read as an empty slot.
             return $"({slot.GetType().Name})";

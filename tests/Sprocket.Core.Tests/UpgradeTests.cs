@@ -156,7 +156,7 @@ public class UpgradeTests
     {
         Assert.Equal("", ProgramReader.Lone(ThingsDetected, new Values(), out var read));
 
-        Assert.Equal("detections", ((If)read!.Sequences[0].Steps[0]).Test.MemberId);
+        Assert.Equal("detections", ((If)read!.Sequences[0].Steps[0]).Compared.MemberId);
         Assert.Equal("detections", ((WhenTrigger)read.Triggers[0]).EventId);
     }
 
@@ -180,7 +180,7 @@ public class UpgradeTests
 
         var steps = read!.Sequences[0].Steps;
         Assert.Equal("power", ((Act)steps[0]).ActionId);
-        Assert.Equal("power", ((If)steps[1]).Test.MemberId);
+        Assert.Equal("power", ((If)steps[1]).Compared.MemberId);
         Assert.Equal("power", ((WhenTrigger)read.Triggers[0]).EventId);
 
         var written = ProgramWriter.Blueprint(read);
@@ -197,7 +197,7 @@ public class UpgradeTests
 
         var written = ProgramWriter.Blueprint(read!);
 
-        Assert.StartsWith("sprocket 1 alpha 17", written);
+        Assert.StartsWith("sprocket 1 alpha 18", written);
         Assert.DoesNotContain("ext.'on'", written);
         Assert.DoesNotContain("ext.'off'", written);
         Assert.Equal("", ProgramReader.Lone(written, new Values(), out var again));
@@ -243,7 +243,7 @@ public class UpgradeTests
     /// <summary>Only the formats an upgrade is chosen for are read; every other draft, and any other version, is refused.</summary>
     [Theory]
     [InlineData("sprocket 1 alpha 13")]
-    [InlineData("sprocket 1 alpha 18")]
+    [InlineData("sprocket 1 alpha 19")]
     [InlineData("sprocket 2 alpha 14")]
     [InlineData("sprocket 1")]
     public void AnyOtherFormatIsRefused(string header)

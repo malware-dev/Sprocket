@@ -126,7 +126,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The strip of the pick the editor is on, or an exception naming the screen.</summary>
         public static PickStrip Pick(this SprocketEditor editor)
         {
-            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip;
+            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip;
             return strip ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is not a pick.");
         }
 
@@ -645,7 +645,7 @@ namespace Sprocket.Sim.Driving
         /// <summary>The columns of any pick on the screen, from the page it is on.</summary>
         static IEnumerable<StageColumn> Stages(this SprocketEditor editor)
         {
-            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip;
+            var strip = (editor.Current as PickPage)?.Strip ?? (editor.Current as TimerPage)?.Strip ?? (editor.Current as StatePage)?.Strip;
             return strip == null ? Enumerable.Empty<StageColumn>() : strip.Stages.Skip(strip.Page);
         }
 

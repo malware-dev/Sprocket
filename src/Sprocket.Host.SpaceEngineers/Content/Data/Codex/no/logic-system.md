@@ -7,6 +7,7 @@ Et logikksystem består av disse delene:
 - ![](mark:sequence)&nbsp;[Sekvenser](sequence) sier hva som skjer, steg for steg.
 - ![](mark:trigger)&nbsp;[Utløsere](trigger) sier når, for eksempel når en knapp trykkes eller en dør er ferdig med å lukke seg.
 - ![](mark:installation)&nbsp;[Installasjoner](installation) sier hvilke blokker som er med.
+- [Tilstandene](logic-system-states) dets holder det det må huske mellom kjøringer, som hvilken side av luftslusen ingeniøren er på.
 
 Jobben holdes atskilt fra blokkene, så ett logikksystem kan kjøre hver luftsluse på skipet. Den [enkle luftslusen](simple-airlock) bygger ett fra begynnelsen.
 
@@ -14,7 +15,7 @@ Jobben holdes atskilt fra blokkene, så ett logikksystem kan kjøre hver luftslu
 
 Under overskriften har skjermen til et logikksystem `Valgt installasjon`-listen. Når du har mer enn én installasjon, velger listen den installasjonen du jobber med: blokkene og signalene dens vises i utløserne og sekvensene, og mens du endrer logikksystemet ditt, oppdateres denne valgte installasjonen direkte.
 
-Under listen ligger fire faner: `Utløsere`, `Sekvenser`, `Tilstand` og `Installasjonspanel`, der du utformer [installasjonspanelet](installation-panel) hver installasjon fylles ut på.
+Under listen ligger fire faner: `Utløsere`, `Sekvenser`, `Tilstand`, der logikksystemets tilstander og typene deres lages, og `Installasjonspanel`, der du utformer [installasjonspanelet](installation-panel) hver installasjon fylles ut på.
 
 En fane der siden har et problem eller en advarsel, bærer et merke i fargen til problemet eller advarselen. Skjermen til hvert logikksystem åpner på fanen du sist forlot den på, til verdenen lastes på nytt.
 

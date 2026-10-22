@@ -150,6 +150,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (part is ActionSlot)
                 return texts.PartWatchedAbout;
 
+            if (part is SystemStateSlot)
+                return texts.TriggerStateAbout;
+
             var given = part as ArgumentsSlot;
             if (given != null)
                 return given.About(texts);

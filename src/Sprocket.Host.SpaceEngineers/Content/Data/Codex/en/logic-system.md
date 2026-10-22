@@ -7,6 +7,7 @@ A logic system consists of the following parts:
 - ![](mark:sequence)&nbsp;[Sequences](sequence) say what happens, step by step.
 - ![](mark:trigger)&nbsp;[Triggers](trigger) say when, for example when a button is pressed or a door finishes closing.
 - ![](mark:installation)&nbsp;[Installations](installation) say which blocks take part.
+- Its [states](logic-system-states) keep what it needs to remember between runs, like which side of the airlock its engineer is on.
 
 The job is kept apart from the blocks, so one logic system can run every airlock on the ship. The [simple airlock](simple-airlock) builds one from the start.
 
@@ -14,7 +15,7 @@ The job is kept apart from the blocks, so one logic system can run every airlock
 
 Under its heading, a logic system's screen has the `Selected installation` list. When you have more than one installation, it picks the one you're working on: its blocks and signals show up in the triggers and sequences, and as you make changes in your logic system, this selected installation gets updated directly.
 
-Below the list are four tabs: `Triggers`, `Sequences`, `State` and `Installation panel`, where you design the [installation panel](installation-panel) every installation is filled in on.
+Below the list are four tabs: `Triggers`, `Sequences`, `State`, where the logic system's states and their types are made, and `Installation panel`, where you design the [installation panel](installation-panel) every installation is filled in on.
 
 A tab whose page holds a problem or a warning carries a mark in the color of the problem or the warning. Each logic system's screen opens on the tab you last left it on, until the world is loaded again.
 

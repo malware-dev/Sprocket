@@ -79,6 +79,9 @@ namespace Sprocket.Host.SpaceEngineers.Storage
         /// <summary>One of the comparisons, <c>==</c>, <c>!=</c>, <c>&lt;</c>, <c>&gt;</c>, <c>&lt;=</c> or <c>&gt;=</c>, carried as its keyword.</summary>
         Comparison,
 
+        /// <summary><c>|</c>, between the options of a type.</summary>
+        Bar,
+
         /// <summary>
         /// Text that is not a token at all, carrying what is wrong with it.
         /// </summary>

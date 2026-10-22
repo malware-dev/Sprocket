@@ -64,7 +64,7 @@ The vocabulary is settled; use it exactly, on screen, in the codex, in tickets a
 - **Signal slot** and **toolbar slot** are the Space Engineers host's words for where a signal comes from.
 - A word for one thing is the same word everywhere.
 - **Select** is the verb for taking something from a list, on screen and in the codex (Mal, 2026-10-13). The
-  screen it is done on is a **selector**: block selector, value selector, signal selector (Mal, 2026-10-14). "Picker"
+  screen it is done on is a **selector**: block selector, value selector, signal selector (Mal, 2026-10-14), and the state selector, for the logic system's states (Mal, 2026-10-21; Norwegian tilstandsvelger). "Picker"
   is the code's name, never the player's.
 
 Each term in one line, with its Norwegian word.

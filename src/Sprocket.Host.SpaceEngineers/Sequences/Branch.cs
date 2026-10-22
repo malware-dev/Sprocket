@@ -6,13 +6,16 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public abstract class Branch : Step
     {
         /// <summary>A branch testing <paramref name="test" />, or testing nothing where it is null.</summary>
-        protected Branch(Comparison test)
+        protected Branch(BranchTest test)
         {
             Test = test;
         }
 
         /// <summary>What it tests, or null for an <c>else</c>, which runs where nothing before it held.</summary>
-        public Comparison Test { get; set; }
+        public BranchTest Test { get; set; }
+
+        /// <summary>The comparison of a member read on blocks it tests, or null where it tests a state or nothing.</summary>
+        public Comparison Compared => Test as Comparison;
 
         /// <inheritdoc />
         public override IList<string> Targets => Test == null ? base.Targets : Test.Targets;

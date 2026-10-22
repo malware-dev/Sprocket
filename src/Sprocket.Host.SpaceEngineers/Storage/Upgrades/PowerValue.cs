@@ -77,11 +77,11 @@ namespace Sprocket.Host.SpaceEngineers.Storage.Upgrades
                 return true;
             }
 
-            var branch = step as Branch;
-            if (branch == null || branch.Test == null || branch.Test.Provider != BlockKinds.Own || branch.Test.MemberId != SwitchedOn)
+            var test = (step as Branch)?.Test as Comparison;
+            if (test == null || test.Provider != BlockKinds.Own || test.MemberId != SwitchedOn)
                 return false;
 
-            branch.Test.MemberId = Power;
+            test.MemberId = Power;
             return true;
         }
 

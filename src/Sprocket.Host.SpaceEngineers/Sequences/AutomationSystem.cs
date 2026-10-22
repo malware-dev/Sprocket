@@ -12,6 +12,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<SystemInstance> _instances = new List<SystemInstance>();
         readonly List<Part> _parts = new List<Part>();
         readonly List<string> _categories = new List<string>();
+        readonly List<DeclaredType> _types = new List<DeclaredType>();
+        readonly List<State> _states = new List<State>();
         readonly List<Trigger> _triggers = new List<Trigger>();
         readonly SystemInstance[] _self;
         DateTime? _changed;
@@ -242,6 +244,42 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>The names of the categories its slots are shown under on the installation panel, in the order they are shown.</summary>
         public IList<string> Categories => _categories;
 
+        /// <summary>The types it declares, in the order they are written.</summary>
+        public IList<DeclaredType> Types => _types;
+
+        /// <summary>The states it declares, in the order they are written.</summary>
+        public IList<State> States => _states;
+
+        /// <summary>The type called <paramref name="name" />, or null where it declares none.</summary>
+        public DeclaredType FindType(string name)
+        {
+            foreach (var type in _types)
+            {
+                if (type.Name == name)
+                    return type;
+            }
+
+            return null;
+        }
+
+        /// <summary>The state called <paramref name="name" />, or null where it declares none.</summary>
+        public State FindState(string name)
+        {
+            foreach (var state in _states)
+            {
+                if (state.Name == name)
+                    return state;
+            }
+
+            return null;
+        }
+
+        /// <summary>Whether one of its slots, types or states is called <paramref name="name" />: the one set of names they share.</summary>
+        public bool Takes(string name)
+        {
+            return FindPart(name) != null || FindType(name) != null || FindState(name) != null;
+        }
+
         /// <summary>Puts its slots in the order of <paramref name="order" />, which holds every one of them.</summary>
         public void Arrange(IList<Part> order)
         {
@@ -357,11 +395,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return name;
         }
 
-        /// <summary><paramref name="called" />, numbered where a part already has it: Door, Door 2.</summary>
+        /// <summary><paramref name="called" />, numbered where a slot, type or state already has it: Door, Door 2.</summary>
         public string Free(string called)
         {
             var name = called;
-            for (var n = 2; FindPart(name) != null; n++)
+            for (var n = 2; Takes(name); n++)
                 name = $"{called} {n}";
 
             return name;

@@ -27,6 +27,10 @@ When you need to know about more than one block, like every door on a hangar, se
 
 The sum and the average work on numbers, so choosing either leaves only numbers in the list of what to check. The word appears only with more than one block, where the four differ.
 
+## The logic system's states
+
+An if can check one of the logic system's own [states](logic-system-states) in place of blocks, like *where*, which keeps the side of the airlock its engineer went to. Choose `States` in the `Source` box heading the first column of the selector, for an `if` or an `otherwise if`, and it reads *if where is inside*. It works like any other if, and switching the box back to `Blocks` keeps the steps inside it.
+
 ## Checking once, not waiting
 
 An if looks at its blocks once, at the moment the sequence reaches it. If the condition doesn't pass then, the if doesn't wait for it to. When you need something to happen as soon as a block reaches a state, whenever that is, use a [trigger](trigger) instead.

@@ -119,21 +119,38 @@ public class SlotCategoryTests
         Assert.Equal("Calls", editor.Program.Systems[0].FindPart("Airlock Button")!.Category);
     }
 
-    /// <summary>A category keeps its name where the one typed is empty, another category's, or let go of with Escape.</summary>
+    /// <summary>An empty name or another category's is refused as a heading's is: Enter keeps the box, Escape lets it go, and the category keeps its name.</summary>
     [Theory]
-    [InlineData("   ", MyKeys.Enter)]
-    [InlineData("Category 2", MyKeys.Enter)]
-    [InlineData("Calls", MyKeys.Escape)]
-    public void ANameItCannotTakeChangesNothing(string typed, MyKeys key)
+    [InlineData("   ")]
+    [InlineData("Category 2")]
+    public void ANameItCannotTakeIsRefused(string typed)
     {
         var screen = Slots();
         AddCategory(screen);
         AddCategory(screen);
 
-        Type(screen, "Category 1", typed, key);
+        Type(screen, "Category 1", typed, MyKeys.Enter);
+        Assert.True(Category(screen, "Category 1").Plate.IsRenaming, "the box was put away");
+
+        screen.Editor.Input!.Key(MyKeys.Escape, false, false);
+        screen.Run(5);
 
         Assert.Equal(new[] { "Category 1", "Category 2" }, screen.Editor.Program.Systems[0].Categories);
-        Assert.False(Category(screen, "Category 1").IsRenaming, "the box is still showing");
+        Assert.False(Category(screen, "Category 1").Plate.IsRenaming, "the box is still showing");
+    }
+
+    /// <summary>A name let go of with Escape changes nothing.</summary>
+    [Fact]
+    public void EscapeChangesNothing()
+    {
+        var screen = Slots();
+        AddCategory(screen);
+        AddCategory(screen);
+
+        Type(screen, "Category 1", "Calls", MyKeys.Escape);
+
+        Assert.Equal(new[] { "Category 1", "Category 2" }, screen.Editor.Program.Systems[0].Categories);
+        Assert.False(Category(screen, "Category 1").Plate.IsRenaming, "the box is still showing");
     }
 
     /// <summary>While the logic system is on, nothing is carried, added, renamed or removed, and each says why.</summary>
@@ -263,9 +280,9 @@ public class SlotCategoryTests
         var row = Category(screen, name);
         row.Renames!.Execute();
         screen.Run(1);
-        Assert.Same(row.Box, screen.Editor.Input!.Focused);
+        Assert.Same(row.Plate.Box, screen.Editor.Input!.Focused);
 
-        row.Box.Insert(typed);
+        row.Plate.Box.Insert(typed);
         screen.Editor.Input.Key(key, false, false);
         screen.Run(5);
     }

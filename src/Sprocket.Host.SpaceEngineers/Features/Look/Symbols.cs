@@ -1,4 +1,3 @@
-using VRage.Utils;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Look
 {
@@ -113,6 +112,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
 
         /// <summary>"=?": something a block is asked about, what one of its values is.</summary>
         public const string Value = "l";
+
+        /// <summary>A box holding a dot: one of a logic system's states, a place that keeps one value.</summary>
+        public const string State = "S";
 
         /// <summary>A cube: a block, where none in particular is meant, and the slot a block fills.</summary>
         public const string Block = "B";
