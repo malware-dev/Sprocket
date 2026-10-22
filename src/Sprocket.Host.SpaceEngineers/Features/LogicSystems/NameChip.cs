@@ -27,7 +27,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             set
             {
                 _text = value ?? "";
-                _name.Text = _text;
+                _words.Text = _text;
+                _name.AutomationId = _text;
+            }
+        }
+
+        /// <summary>The mark of what kind of thing it names, one of <see cref="Symbols" />, shown inside the button before the name; null for none.</summary>
+        public string Mark
+        {
+            get { return _mark.IsVisible ? _mark.Symbol : null; }
+            set
+            {
+                _mark.Symbol = value;
+                _mark.IsVisible = value != null;
             }
         }
 

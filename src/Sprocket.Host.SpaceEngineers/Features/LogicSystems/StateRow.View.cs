@@ -32,15 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Placement = Flex.Grow,
                 Children =
                 {
-                    new HStack
-                    {
-                        Spacing = 8f,
-                        Children =
-                        {
-                            new Glyph { Style = Styles.Waits, Symbol = Symbols.State },
-                            new NameChip().As(out _name)
-                        }
-                    },
+                    new NameChip { Mark = Symbols.State }.As(out _name),
                     new Button { Style = Styles.SlotName }.As(out _holds),
                     new Label { Style = Styles.Aside }.As(out _startsLead),
                     new Button { Style = Styles.SlotName }.As(out _start),
