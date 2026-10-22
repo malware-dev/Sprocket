@@ -165,9 +165,9 @@ public class SlotListTests
         Assert.Equal(name + " (Call)", row.Within().OfType<Lumel.Controls.Button>().First().Within().OfType<Lumel.Text.Label>().First().Text);
     }
 
-    /// <summary>A slot's mark stands inside its name's button, named by the slot's name, and a press on the name opens the slot.</summary>
+    /// <summary>A slot's name button, which shows its mark and name as content, is pressed by its automation id, the slot's name.</summary>
     [Fact]
-    public void ASlotsMarkStandsInsideItsNameButton()
+    public void ASlotsNameButtonIsPressedByItsAutomationId()
     {
         var screen = Screen.Fresh();
         screen.Editor.NewButtonSystem("Airlock");
@@ -179,7 +179,7 @@ public class SlotListTests
 
         var row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
         var button = row.Within().OfType<Lumel.Controls.Button>().First();
-        Assert.Equal(Symbols.Signal, Assert.Single(button.Within().OfType<Lumel.Images.Glyph>()).Symbol);
+        Assert.Equal("", button.Text);
         Assert.Equal(row.Name, button.AutomationId);
 
         screen.Do("press", row.Name);
