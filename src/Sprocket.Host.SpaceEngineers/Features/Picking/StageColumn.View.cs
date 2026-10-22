@@ -12,6 +12,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
     partial class StageColumn
     {
         Label _title;
+        HStack _heads;
         HStack _viewLinks;
         Label _subtitle;
         HStack _search;
@@ -46,7 +47,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 Spacing = 8f,
                 Children =
                 {
-                    new Label { Style = Styles.ColumnTitle, Placement = Flex.Grow }.As(out _title),
+                    new HStack
+                    {
+                        Spacing = 16f,
+                        Placement = Flex.Grow,
+                        Children =
+                        {
+                            new Label { Style = Styles.ColumnTitle }.As(out _title),
+                            new HStack { IsVisible = false }.As(out _heads)
+                        }
+                    },
                     new HStack().As(out _viewLinks),
                     new Glyph { Symbol = Symbols.HiddenHidden, Style = Styles.Icon, Placement = FixedSize.Size(28f, 24f), IsVisible = false }
                         .As(out _hidden)

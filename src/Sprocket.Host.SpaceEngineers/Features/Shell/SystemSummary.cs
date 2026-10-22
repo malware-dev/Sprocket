@@ -67,16 +67,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public static string NewInstanceName(Texts texts, AutomationSystem system)
         {
             var instances = system.Instances;
-            for (var number = instances.Count + 1; ; number++)
+            return NumberedName.Free(texts.SystemsInstance, instances.Count, wanted =>
             {
-                var wanted = Template.Fill(texts.SystemsInstance, "number", number.ToString(CultureInfo.InvariantCulture));
-                var taken = false;
-                for (var i = 0; i < instances.Count && !taken; i++)
-                    taken = instances[i].Name == wanted;
+                foreach (var instance in instances)
+                {
+                    if (instance.Name == wanted)
+                        return true;
+                }
 
-                if (!taken)
-                    return wanted;
-            }
+                return false;
+            });
         }
 
         /// <summary>What an installation is called where it does not stand under its system, as in a question: Installation 1 of Airlock.</summary>

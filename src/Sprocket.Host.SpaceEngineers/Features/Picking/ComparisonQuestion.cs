@@ -85,6 +85,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             return Literal.Name(MeasuredMeans[0]);
         }
 
+        /// <summary>The words <paramref name="relation" /> is said in where it is asked: "is", "is not", "is above".</summary>
+        public static string Said(Relation relation)
+        {
+            for (var i = 0; i < Relations.Length; i++)
+            {
+                if (Relations[i] == relation)
+                    return Measured[i];
+            }
+
+            return Measured[0];
+        }
+
         /// <summary>The relation <paramref name="said" /> holds, or <see cref="Relation.Is" /> where it holds none.</summary>
         public static Relation Read(Literal said)
         {

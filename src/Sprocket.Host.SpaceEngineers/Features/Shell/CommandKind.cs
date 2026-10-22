@@ -146,6 +146,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Adding an if.</summary>
         AddIf,
 
+        /// <summary>Adding a step that sets one of the logic system's states.</summary>
+        AddSetState,
+
         /// <summary>Adding a branch to an if.</summary>
         AddBranch,
 
@@ -166,6 +169,39 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         /// <summary>Removing a category of slots, which leaves its slots under none.</summary>
         RemoveCategory,
+
+        /// <summary>Adding a type to a logic system.</summary>
+        AddType,
+
+        /// <summary>Renaming a type of a logic system.</summary>
+        RenameType,
+
+        /// <summary>Removing a type of a logic system.</summary>
+        RemoveType,
+
+        /// <summary>Moving a type to another place among a logic system's types.</summary>
+        MoveType,
+
+        /// <summary>Adding a choice to a type.</summary>
+        AddChoice,
+
+        /// <summary>Renaming or removing a choice of a type.</summary>
+        ChangeChoice,
+
+        /// <summary>Adding a state to a logic system.</summary>
+        AddState,
+
+        /// <summary>Renaming a state of a logic system.</summary>
+        RenameState,
+
+        /// <summary>Removing a state of a logic system.</summary>
+        RemoveState,
+
+        /// <summary>Moving a state to another place among a logic system's states.</summary>
+        MoveState,
+
+        /// <summary>Changing the value a state starts at, and with it what the state holds.</summary>
+        ChangeStart,
 
         /// <summary>Deleting a step.</summary>
         DeleteStep,

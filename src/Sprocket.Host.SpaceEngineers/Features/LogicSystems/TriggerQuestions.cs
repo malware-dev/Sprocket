@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
+using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -35,41 +35,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             var aim = new OutcomeColumn(_editor, system, null);
 
-            var moment = trigger as MomentTrigger;
-            if (moment != null)
+            if (trigger is MomentTrigger || trigger is StateTrigger)
             {
-                var picker = new PickPage(_editor, "When something happens", true,
-                    new List<long>(), moment.EventId, ReachKind.Native,
-                    answer =>
-                    {
-                        MomentTrigger made = Starter(system, answer, null, null);
-                        _editor.Claims.Unless(system, made, answer, null, taken =>
-                        {
-                            if (_editor.Claims.Shares(taken, system))
-                            {
-                                made = SignalTrigger.Named(taken.Trigger.Part);
-                                _replaced = taken.Trigger;
-                                _replacedAt = system.IndexOfTrigger(taken.Trigger);
-                                system.ReplaceTrigger(taken.Trigger, null);
-                            }
-                            else if (taken != null)
-                            {
-                                Starting(system, _editor.Claims.TakingOver(null, taken));
-                            }
-
-                            var answering = Answering(system, made, answer, null);
-                            if (answering != null)
-                                Starting(system, answering);
-
-                            _editor.Program.Edited();
-                            _editor.Program.Rewire();
-
-                            Aimed(system, made, aim, origin, true, null);
-                        }, () => { });
-                    },
-                    true, aim: aim);
-
-                _editor.Push(picker);
+                Watching(system, trigger, true, aim, origin, OpeningColumn.Blocks, false);
                 return;
             }
 
@@ -341,31 +309,139 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return;
             }
 
-            var moment = trigger as MomentTrigger;
-            if (moment == null)
+            if (trigger is MomentTrigger || trigger is StateTrigger)
+                Watching(system, trigger, false, aim, origin, opens, action);
+        }
+
+        /// <summary>
+        /// Opens the selector of what starts <paramref name="was" />, a new trigger where <paramref name="fresh" />: on blocks, or
+        /// on one of the logic system's states where it watches one, its first column's heading switching between the two;
+        /// going straight on to what it does where <paramref name="action" /> says so.
+        /// </summary>
+        void Watching(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens, bool action)
+        {
+            var source = new SourceSwitch(_editor,
+                choice =>
+                {
+                    var page = OnBlocks(system, was, fresh, aim, origin, opens, action);
+                    page.Source = choice;
+                    return page;
+                },
+                choice =>
+                {
+                    var page = OnState(system, was, fresh, aim, origin);
+                    page.Source = choice;
+                    return page;
+                });
+
+            var opened = source.Open(was is StateTrigger);
+            _editor.Push(opened);
+            if (!action)
                 return;
 
-            var was = moment as WhenTrigger;
+            var picked = opened as PickPage;
+            if (picked != null)
+                picked.GoOn();
 
-            var compares = was != null && Vocabulary.Compares(_editor.Runner.Bindings, was, SystemInstance.Through(_editor.StandIn(system), was.Sources));
-            var picker = new PickPage(_editor, "When something happens", true,
-                _editor.Blocks(system, moment.Sources), compares ? was.EventId : Vocabulary.EventOf(_editor.Program, _editor.Runner.Bindings, system, moment, _editor.StandIn(system)),
+            var stated = opened as StatePage;
+            if (stated != null)
+                stated.GoOn();
+        }
+
+        /// <summary>The selector of a state <paramref name="was" /> is to start on, as a trigger made new where <paramref name="fresh" />, or changed in place.</summary>
+        StatePage OnState(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin)
+        {
+            var watch = was as StateTrigger;
+            return new StatePage(_editor, system, SentenceText.WhenWord, false, watch?.Test, aim, (test, made) =>
+            {
+                if (fresh)
+                {
+                    var starting = watch ?? new StateTrigger(test);
+                    starting.Test = test;
+                    if (made != null && made.Type != null)
+                        Starting(system, new AddType(made.Type, system.Types.Count));
+
+                    if (made != null)
+                        Starting(system, new AddState(made.State, system.States.Count));
+
+                    Aimed(system, starting, aim, origin, true, null);
+                    return;
+                }
+
+                if (watch != null)
+                {
+                    var change = new SetWatch(watch, watch.Test, test);
+                    var start = made != null ? new WithNewState(system, made.State, made.Type, change) : change.Changes ? (SystemEdit)change : null;
+                    Aimed(system, watch, aim, origin, false, start);
+                    return;
+                }
+
+                _copies.Remove(was);
+                var now = new StateTrigger(test);
+                var swap = new ChangeTrigger(was, now);
+                Aimed(system, now, aim, origin, false, made != null ? new WithNewState(system, made.State, made.Type, swap) : (SystemEdit)swap);
+            });
+        }
+
+        /// <summary>The selector of the blocks and moment <paramref name="was" /> is to start on, as a trigger made new where <paramref name="fresh" />, or changed in place.</summary>
+        PickPage OnBlocks(AutomationSystem system, Trigger was, bool fresh, OutcomeColumn aim, int origin, OpeningColumn opens, bool action)
+        {
+            var moment = was as MomentTrigger;
+            if (fresh)
+            {
+                return new PickPage(_editor, "When something happens", true,
+                    new List<long>(), moment?.EventId ?? "", ReachKind.Native,
+                    answer =>
+                    {
+                        MomentTrigger made = Starter(system, answer, null, null);
+                        _editor.Claims.Unless(system, made, answer, null, taken =>
+                        {
+                            if (_editor.Claims.Shares(taken, system))
+                            {
+                                made = SignalTrigger.Named(taken.Trigger.Part);
+                                _replaced = taken.Trigger;
+                                _replacedAt = system.IndexOfTrigger(taken.Trigger);
+                                system.ReplaceTrigger(taken.Trigger, null);
+                            }
+                            else if (taken != null)
+                            {
+                                Starting(system, _editor.Claims.TakingOver(null, taken));
+                            }
+
+                            var answering = Answering(system, made, answer, null);
+                            if (answering != null)
+                                Starting(system, answering);
+
+                            _editor.Program.Edited();
+                            _editor.Program.Rewire();
+
+                            Aimed(system, made, aim, origin, true, null);
+                        }, () => { });
+                    },
+                    true, aim: aim);
+            }
+
+            var when = moment as WhenTrigger;
+            var compares = when != null && Vocabulary.Compares(_editor.Runner.Bindings, when, SystemInstance.Through(_editor.StandIn(system), when.Sources));
+            return new PickPage(_editor, "When something happens", true,
+                moment == null ? new List<long>() : _editor.Blocks(system, moment.Sources),
+                moment == null ? "" : compares ? when.EventId : Vocabulary.EventOf(_editor.Program, _editor.Runner.Bindings, system, moment, _editor.StandIn(system)),
                 compares ? ReachKind.Value : ReachKind.Native,
                 answer =>
                 {
-                    _copies.Remove(moment);
+                    _copies.Remove(was);
 
                     var keeping = moment as SignalTrigger;
                     if (keeping != null && keeping.IsWritten)
                         keeping = null;
 
-                    MomentTrigger made = Starter(system, answer, keeping, moment.Sources);
-                    _editor.Claims.Unless(system, made, answer, moment, taken =>
+                    MomentTrigger made = Starter(system, answer, keeping, moment?.Sources);
+                    _editor.Claims.Unless(system, made, answer, was, taken =>
                     {
                         if (_editor.Claims.Shares(taken, system))
                         {
                             var taking = SignalTrigger.Named(taken.Trigger.Part);
-                            var moved = new ChangeTrigger(moment, taking);
+                            var moved = new ChangeTrigger(was, taking);
                             Aimed(system, taking, aim, origin, false,
                                 new TakeOverTrigger(Answering(system, taking, answer, moved) ?? moved, system, taken.Trigger));
                             return;
@@ -376,17 +452,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         {
                             var refill = Answering(system, made, answer, null);
                             if (refill != null)
-                                Aimed(system, moment, aim, origin, false, taken == null ? refill : _editor.Claims.TakingOver(refill, taken));
+                                Aimed(system, was, aim, origin, false, taken == null ? refill : _editor.Claims.TakingOver(refill, taken));
                             else
-                                Aimed(system, moment, aim, origin, false, null);
+                                Aimed(system, was, aim, origin, false, null);
 
                             return;
                         }
 
-                        var change = new ChangeTrigger(moment, made);
+                        var change = new ChangeTrigger(was, made);
                         if (!change.Changes && taken == null && !_editor.Picks.Reslots(system))
                         {
-                            Aimed(system, moment, aim, origin, false, null);
+                            Aimed(system, was, aim, origin, false, null);
                             return;
                         }
 
@@ -394,12 +470,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                         Aimed(system, made, aim, origin, false, taken == null ? edit : _editor.Claims.TakingOver(edit, taken));
                     }, () => _editor.UnwindTo(origin));
                 },
-                true, was?.Quantifier ?? Quantifier.Any, compares ? new[] { ComparisonQuestion.Of(was.Relation), was.Value } : null,
+                true, when?.Quantifier ?? Quantifier.Any, compares ? new[] { ComparisonQuestion.Of(when.Relation), when.Value } : null,
                 opens: action ? OpeningColumn.Nothing : opens, aim: aim);
-
-            _editor.Push(picker);
-            if (action)
-                picker.GoOn();
         }
 
         /// <summary>Adds a copy of <paramref name="trigger" /> to <paramref name="system" />, after its last trigger, doing what it does.</summary>
@@ -434,12 +506,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The first slot name of the numbered kind that <paramref name="system" /> does not use, counting on from how many slots it has.</summary>
         string FreeSlotName(AutomationSystem system)
         {
-            for (var number = system.Parts.Count + 1;; number++)
-            {
-                var name = Template.Fill(_editor.Texts.SlotNumbered, "number", number.ToString(System.Globalization.CultureInfo.InvariantCulture));
-                if (system.FindPart(name) == null)
-                    return name;
-            }
+            return NumberedName.Free(_editor.Texts.SlotNumbered, system.Parts.Count, name => system.FindPart(name) != null);
         }
 
     }

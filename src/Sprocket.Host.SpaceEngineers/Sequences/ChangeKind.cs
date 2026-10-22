@@ -150,6 +150,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         /// <summary>Removing a type no state holds from a logic system.</summary>
         RemoveType,
 
+        /// <summary>Moving a type to another place among a logic system's types.</summary>
+        MoveType,
+
         /// <summary>Adding a choice to a type.</summary>
         AddChoice,
 
@@ -167,6 +170,9 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>Removing a state nothing uses from a logic system.</summary>
         RemoveState,
+
+        /// <summary>Moving a state to another place among a logic system's states.</summary>
+        MoveState,
 
         /// <summary>Changing the value a state starts at.</summary>
         ChangeStart

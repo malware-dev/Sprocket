@@ -741,6 +741,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.Panel, Edge = Palette.Muted }
         };
 
+        /// <summary>The line a list hangs from where it stands in a column's heading, as tall as the heading's words so nothing under it moves.</summary>
+        public static readonly ElementStyle ListLineInHeading = new ElementStyle(ListLine)
+        {
+            Base = { Padding = new Thickness(12f, 2f) }
+        };
+
         /// <summary>The line a list hangs from, saying a word its value will not take.</summary>
         public static readonly ElementStyle ListLineWrong = new ElementStyle(ListLine)
         {

@@ -4,11 +4,11 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
     public sealed class SetTest : SequenceEdit
     {
         readonly int _index;
-        readonly Comparison _was;
-        readonly Comparison _now;
+        readonly BranchTest _was;
+        readonly BranchTest _now;
 
         /// <summary>The test of the line at <paramref name="index" />, changed from <paramref name="was" /> to <paramref name="now" />.</summary>
-        public SetTest(int index, Comparison was, Comparison now)
+        public SetTest(int index, BranchTest was, BranchTest now)
         {
             _index = index;
             _was = was;
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             Put(sequence, _was);
         }
 
-        void Put(Sequence sequence, Comparison test)
+        void Put(Sequence sequence, BranchTest test)
         {
             var branch = sequence.Steps[_index] as Branch;
             if (branch != null)

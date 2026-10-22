@@ -27,6 +27,10 @@ Når du trenger å vite noe om mer enn én blokk, som alle dørene på en hangar
 
 Summen og gjennomsnittet virker på tall, så velger du en av dem, står bare tall igjen i listen over hva som kan sjekkes. Ordet vises bare med mer enn én blokk, der de fire gir ulike svar.
 
+## Logikksystemets tilstander
+
+Et hvis kan sjekke en av logikksystemets egne [tilstander](logic-system-states) i stedet for blokker, som *hvor*, som holder siden av luftslusen ingeniøren gikk til. Velg `Tilstander` i `Kilde`-boksen øverst i den første kolonnen i velgeren, for et `if` eller et `otherwise if`, så leses det *if hvor is inne*. Det virker som ethvert annet hvis, og bytter du boksen tilbake til `Blokker`, beholder det stegene i seg.
+
 ## Sjekke én gang, ikke vente
 
 Et hvis ser på blokkene sine én gang, i det øyeblikket sekvensen kommer til det. Er ikke betingelsen oppfylt da, venter ikke hvis-steget på at den blir det. Trenger du at noe skjer så snart en blokk når en tilstand, uansett når det er, bruker du en [utløser](trigger) i stedet.

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
     /// <summary>
-    /// A change to what starts a sequence: the blocks, the moment, and how it reaches Sprocket.
+    /// A change to what starts a sequence: the blocks, the moment, and how it reaches Sprocket, or a state of the logic system
+    /// in place of blocks, or blocks in place of a state.
     /// </summary>
     /// <remarks>The new trigger takes over what the old one does and what was written about it.</remarks>
     public sealed class ChangeTrigger : SystemEdit
     {
-        readonly MomentTrigger _was;
-        readonly MomentTrigger _now;
+        readonly Trigger _was;
+        readonly Trigger _now;
 
         readonly List<string> _wasSources;
         readonly List<string> _nowSources;
@@ -17,17 +18,19 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly string _nowEvent;
 
         /// <summary>The trigger <paramref name="was" /> made into <paramref name="now" />.</summary>
-        public ChangeTrigger(MomentTrigger was, MomentTrigger now)
+        public ChangeTrigger(Trigger was, Trigger now)
         {
             _was = was;
             _now = now;
             _now.Does = was.Does;
             _now.Annotation = was.Annotation;
 
-            _wasSources = CopyOf(was.Sources);
-            _wasEvent = was.EventId;
-            _nowSources = CopyOf(now.Sources);
-            _nowEvent = now.EventId;
+            var wasMoment = was as MomentTrigger;
+            var nowMoment = now as MomentTrigger;
+            _wasSources = wasMoment == null ? null : CopyOf(wasMoment.Sources);
+            _wasEvent = wasMoment?.EventId;
+            _nowSources = nowMoment == null ? null : CopyOf(nowMoment.Sources);
+            _nowEvent = nowMoment?.EventId;
         }
 
         /// <inheritdoc />
@@ -41,7 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 if (_was.GetType() != _now.GetType())
                     return true;
 
-                if (_was.EventId != _now.EventId || !Same(_was.Sources, _now.Sources))
+                if (_wasEvent != _nowEvent || _wasSources != null && _nowSources != null && !Same(_wasSources, _nowSources))
                     return true;
 
                 var wasWhen = _was as WhenTrigger;

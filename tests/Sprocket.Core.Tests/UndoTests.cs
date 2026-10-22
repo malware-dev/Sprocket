@@ -74,6 +74,9 @@ public class UndoTests
             case EveryTrigger every:
                 text.Append(" every ").Append(every.IntervalTicks);
                 break;
+            case StateTrigger watch:
+                text.Append(" when ").Append(watch.Test.State).Append(" is ").Append(watch.Test.Value.Said);
+                break;
         }
 
         foreach (var step in sequence.Steps)
@@ -224,6 +227,24 @@ public class UndoTests
         now.Sources.Add("outer");
 
         RoundTrip(sequence, new ChangeTrigger(was, now));
+    }
+
+    /// <summary>A trigger on blocks made a trigger on one of the logic system's states, and back, each reverses exactly.</summary>
+    [Fact]
+    public void ChangingBetweenBlocksAndAStateReversesExactly()
+    {
+        Sequence sequence = Build();
+        var was = (MomentTrigger)sequence.Trigger;
+        var watch = new StateTrigger(new StateTest { State = "where", Value = Literal.Name("outside") });
+
+        RoundTrip(sequence, new ChangeTrigger(was, watch));
+
+        new ChangeTrigger(was, watch).Apply(sequence.System);
+        Assert.IsType<StateTrigger>(sequence.Trigger);
+
+        var back = new WhenTrigger("status") { Value = Literal.Name("open") };
+        back.Sources.Add("inner");
+        RoundTrip(sequence, new ChangeTrigger(watch, back));
     }
 
     /// <summary>

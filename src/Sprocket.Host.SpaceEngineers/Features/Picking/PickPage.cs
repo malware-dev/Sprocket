@@ -560,6 +560,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _goesOn = true;
         }
 
+        /// <summary>
+        /// The choice between this and a selector of the logic system's states, offered in the heading of the blocks column,
+        /// or null where the pick is about blocks alone. Set before the page is shown.
+        /// </summary>
+        public SourceSwitch Source { get; set; }
+
         /// <summary>Says whether this page is being opened straight onto, rather than paged to.</summary>
         public void Arrived(bool straight)
         {
@@ -575,7 +581,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         void MakeBlocks()
         {
             _blocks = new StageColumn(_strip.Width, true, null, Editor.Texts);
-            _blocks.Title = Editor.Texts.PickBlocks;
+            _blocks.Title = Source == null ? Editor.Texts.PickBlocks : Editor.Texts.PickSource;
+            if (Source != null)
+                _blocks.Heads(Source.Box(false));
+
             _blocks.EmptyText = _fits != null
                 ? Editor.Texts.BlueprintNoneFits
                 : _forTests ? Editor.Texts.PickNoBlocksChecked

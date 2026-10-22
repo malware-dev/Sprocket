@@ -282,6 +282,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             if (part is StateSlot)
                 return texts.SequenceStateAbout;
 
+            if (part is SystemStateSlot)
+                return texts.SequenceSystemStateAbout;
+
             return part is DurationSlot ? texts.SequenceLengthAbout : null;
         }
 

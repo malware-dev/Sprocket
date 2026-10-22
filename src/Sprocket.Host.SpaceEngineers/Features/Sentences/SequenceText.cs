@@ -413,18 +413,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             if (step is EndIf)
                 return "";
 
+            var set = step as SetState;
+            if (set != null)
+                return $"{SentenceText.SetWord} {set.State} to {(set.From.Length > 0 ? set.From : set.Value.Said)}";
+
             var act = step as Act;
             return act == null ? "wait for it to finish" : Action(bindings, act, through);
         }
 
-        /// <summary>A test as its row reads: the blocks, the value unless it is their status, and how it is compared with what.</summary>
-        /// <summary>A test of a state as the script reads it: <c>where == inside</c>.</summary>
+        /// <summary>A test of a state as its row reads: the state, how it is compared, and with what: "where is inside".</summary>
         static string Tested(StateTest test)
         {
             var with = test.Other.Length > 0 ? test.Other : test.Value.Said;
-            return $"{test.State} {(test.Relation == Relation.IsNot ? "!=" : "==")} {with}";
+            return $"{test.State} {ComparisonQuestion.Said(test.Relation)} {with}";
         }
 
+        /// <summary>A test as its row reads: the blocks, the value unless it is their status, and how it is compared with what.</summary>
         static string Tested(Bindings bindings, Comparison test, SystemInstance through)
         {
             var targets = SystemInstance.Through(through, test.Targets);

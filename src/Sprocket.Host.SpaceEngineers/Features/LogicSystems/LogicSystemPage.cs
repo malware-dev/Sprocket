@@ -42,6 +42,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         int _wiring = -1;
         Element _focused;
         ListField _blocksets;
+        StateTab _stateWork;
         string _madeName;
         string _madeAbout;
         bool _madeOn;
@@ -240,6 +241,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _triggerRows = new KeyedChildren<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
             _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
             _slotRows = new KeyedChildren<object, Element>(_slotList.Children, SlotRow);
+            _stateWork = new StateTab(Editor, _system, _statePanel, Changes, Locked);
             _slotList.Landings = index => SlotArranger.Landings(_slotKeys, index);
             _slotList.Moves = (from, to) =>
             {
@@ -330,6 +332,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // A handful of rows, each still unless one is carried or has just landed.
             _slotList.Slide();
+            _stateWork.Slide();
+            if (_tabs.Current >= 0 && _tabs.Current < _tabs.Tabs.Count && _tabs.Tabs[_tabs.Current] == _stateTab)
+                _stateWork.Live();
 
             if (_rate != null)
                 _rate.Hang();
@@ -378,7 +383,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _sequencesTab.Header = texts.SystemSequences;
             _stateTab.Header = texts.SystemState;
             _panelTab.Header = texts.SystemInstallationPanel;
-            _noState.Text = texts.SystemNoState;
+            _stateWork.Arrange(texts);
             _addTrigger.Show(new AddOption(texts.SystemTrigger, texts.SystemTriggerAbout, new[]
             {
                 new AddOption(SentenceText.WhenWord, texts.SystemWhenAbout,
@@ -394,6 +399,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
 
             _triggerRows.Show(_triggers);
+
+            // A tab says it is empty only where nothing can be added to it; where something can, the ways to add it say enough.
+            _noTriggersLine.IsVisible = _triggers.Count == 0 && !Editable;
+            _noTriggers.Text = texts.SystemNoTriggers;
             foreach (var trigger in _triggers)
                 Word(_triggerRows[trigger], trigger);
 
@@ -402,7 +411,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? texts.SystemNewSequenceAbout : Locked());
 
             _sequenceRows.Show(_sequences);
-            _noSequences.IsVisible = _sequences.Count == 0;
+            _noSequences.IsVisible = _sequences.Count == 0 && !Editable;
             _noSequences.Text = texts.SystemNoSequences;
 
             foreach (var sequence in _sequences)
@@ -420,7 +429,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             ArrangeSlots(texts);
 
-            _noPanel.IsVisible = !_describing.IsVisible && !_slotsHeading.IsVisible;
+            _noPanelLine.IsVisible = !_describing.IsVisible && !_slotsHeading.IsVisible && !Editable;
             _noPanel.Text = texts.SystemNoPanel;
         }
 
@@ -610,6 +619,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 return;
             }
 
+            if (_stateWork.Written(box))
+                return;
+
             foreach (var child in _slotList.Children)
             {
                 var row = child as CategoryRow;
@@ -787,6 +799,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (every != null)
                 row.Starts.Add(new DurationSlot(every.Interval, Changes(CommandKind.OpenTrigger, () => OpenRate(every))));
 
+            var watch = trigger as StateTrigger;
+            if (watch != null)
+                Watched(row, watch);
+
             Doing(row, trigger);
 
             row.Deletes = Changes(CommandKind.DeleteTrigger, () => Editor.Starts.Forget(_system, trigger));
@@ -799,7 +815,38 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (trigger is EveryTrigger)
                 return TriggerKind.Every;
 
-            return trigger is WhenTrigger ? TriggerKind.When : TriggerKind.Signal;
+            return trigger is WhenTrigger || trigger is StateTrigger ? TriggerKind.When : TriggerKind.Signal;
+        }
+
+        /// <summary>Gives <paramref name="row" /> the parts of a when on one of the system's states: the state, how it compares, and with what.</summary>
+        void Watched(TriggerRow row, StateTrigger watch)
+        {
+            var test = watch.Test;
+            var opens = Starts(watch, OpeningColumn.Blocks);
+            row.Starts.Add(new SystemStateSlot(test.State, opens));
+            row.Starts.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
+                Changes(CommandKind.OpenTrigger, () => RelateWatch(watch)), ArgumentRole.Compared));
+            row.Starts.Add(StateValueQuestion.Part(_system, test.State, test.Value, test.Other, opens, ArgumentRole.Checked));
+        }
+
+        /// <summary>Offers is and is not in a menu under the part pressed, and changes what <paramref name="watch" /> starts on to the one chosen.</summary>
+        void RelateWatch(StateTrigger watch)
+        {
+            Editor.AskHere("");
+            foreach (var related in new[] { Relation.Is, Relation.IsNot })
+            {
+                var relation = related;
+                Editor.Answer(ComparisonQuestion.Said(relation), delegate
+                {
+                    var was = watch.Test;
+                    if (relation == was.Relation)
+                        return;
+
+                    var now = was.Copy();
+                    now.Relation = relation;
+                    Editor.Do(_system, new SetWatch(watch, was, now));
+                }, relation == watch.Test.Relation);
+            }
         }
 
         /// <summary>Gives <paramref name="row" /> the parts of a when on a number.</summary>
@@ -875,6 +922,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         void Doing(TriggerRow row, Trigger trigger)
         {
+            var set = trigger.Sets;
+            if (set != null)
+            {
+                var opens = Changes(CommandKind.TriggerTarget, () => Editor.Starts.ChangeTrigger(_system, trigger, OpeningColumn.Nothing, false));
+                row.DoesLead = SentenceText.Then(row.Kind, false, false, true);
+                row.Does.Add(new SystemStateSlot(set.State, opens));
+                row.Does.Add(StateValueQuestion.Part(_system, set.State, set.Value, set.From, opens, ArgumentRole.NewValue));
+                return;
+            }
+
             var act = trigger.Acts;
             if (act == null)
             {
