@@ -87,8 +87,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         Document _saying;
         Arguments _sayingArguments;
 
-        int _renaming = -1;
-        HeadingPart _renamed;
+        readonly Relay _commits;
+        readonly Relay _ends;
+
+        // The plate whose name is being typed, a heading's or a row's, and what giving it does.
+        NamePlate _plate;
+        Naming _renamed;
         HeadingPart _namedArrival;
 
         // Whether the name being typed is the one a page arrived to be given, which belongs to making what it is on.
@@ -100,7 +104,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public EditorView(SprocketEditor editor)
         {
             _editor = editor;
-            _title = new HeadingRow(Rename, new Relay(CommitRename), new Relay(EndRename), Retyped);
+            _title = new HeadingRow(Rename);
+            _commits = new Relay(CommitRename);
+            _ends = new Relay(EndRename);
 
             _undoes = new Relay(() => Run(_editor.Screen.Undo));
             _redoes = new Relay(() => Run(_editor.Screen.Redo));
@@ -188,6 +194,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _editor.Input = _input;
             _editor.Windows = _windows;
+            _editor.Renamer = Rename;
         }
 
         /// <summary>Where the pointer is, in UI units. Somewhere outside the screen means there is not one.</summary>
@@ -215,11 +222,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get
             {
-                if (_renaming < 0)
+                if (_plate == null)
                     return "";
 
                 var part = _renamed;
-                var text = _title.Box(_renaming).Text;
+                var text = _plate.Box.Text;
                 if (part.NameRequired && string.IsNullOrEmpty(text.Trim()))
                     return _editor.Texts.RenameEmpty;
 
@@ -242,7 +249,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             Ask(screen);
 
-            if (_renaming >= 0 && !screen.CanRename)
+            if (_plate != null && _title.IndexOf(_plate) >= 0 && !screen.CanRename)
                 EndRename();
 
             if (_editor.Current != _shownPage)
@@ -287,7 +294,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (_windows.Dismiss(point))
                 return;
 
-            if (Blocked.Length > 0 && !_title.Plate(_renaming).Reaches(point))
+            if (Blocked.Length > 0 && !_plate.Reaches(point))
                 return;
 
             var target = Under(point);
@@ -314,7 +321,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Scrolls whatever is under <paramref name="point" /> by <paramref name="amount" />, if anything there can scroll.</summary>
         public void ScrollBy(Vector2 point, float amount)
         {
-            if (_renaming >= 0)
+            if (_plate != null)
                 return;
 
             if (_windows.Count > 0)
@@ -372,7 +379,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return false;
             }
 
-            if (_renaming >= 0)
+            if (_plate != null)
             {
                 CommitRename();
                 EndRename();
@@ -423,7 +430,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return windowed;
 
             if (Blocked.Length > 0)
-                return _title.Plate(_renaming).Under(point);
+                return _plate.Under(point);
 
             return _root.Under(point);
         }
@@ -437,7 +444,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 return windowed;
 
             if (Blocked.Length > 0)
-                return _title.Plate(_renaming).SayingAt(point);
+                return _plate.SayingAt(point);
 
             return _root.SayingAt(point);
         }
@@ -577,15 +584,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Writes what the screen says onto the chrome: the heading, the words and states beside it, what each control does, and the way on.</summary>
         void Dress(EditorScreen screen)
         {
-            _title.Update(screen.Heading, _renaming);
+            _title.Update(screen.Heading, _plate == null ? -1 : _title.IndexOf(_plate));
             NameArrival(screen);
 
             _subtitle.Text = screen.Subtitle;
 
-            if (_renaming >= 0)
+            if (_plate != null)
             {
                 var wrong = Blocked;
-                _title.Refuse(_renaming, wrong.Length > 0 ? wrong : null);
+                _plate.Refuse(wrong.Length > 0 ? wrong : null);
             }
 
             var texts = _editor.Texts;
@@ -685,7 +692,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         }
 
         /// <summary>Whether <paramref name="part" /> would refuse <paramref name="text" />, asked once per change of text.</summary>
-        bool Taken(HeadingPart part, string text)
+        bool Taken(Naming part, string text)
         {
             if (!ReferenceEquals(text, _checkedText))
             {
@@ -713,18 +720,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             if (index >= parts.Count || !parts[index].CanRename)
                 return;
 
-            _renaming = index;
-            _renamed = parts[index];
+            Rename(_title.Plate(index), parts[index]);
+        }
+
+        /// <summary>Begins giving the name <paramref name="naming" /> holds in <paramref name="plate" />, in place, where it can be changed.</summary>
+        /// <remarks>Enter gives the name, Escape puts the box away, and the keyboard leaving gives it too; a name that cannot be given keeps the keyboard and every press outside the plate away.</remarks>
+        public void Rename(NamePlate plate, Naming naming)
+        {
+            if (!naming.CanRename)
+                return;
+
+            EndRename();
+            _plate = plate;
+            _renamed = naming;
             _checkedText = null;
-            _title.Begin(index, parts[index].Name);
-            _input.Focus(_title.Box(index));
+            plate.Box.Submit = _commits;
+            plate.Box.Cancel = _ends;
+            plate.Box.Edited += Retyped;
+            plate.Begin(naming.Name);
+            _input.Focus(plate.Box);
             _seen = -1;
         }
 
         /// <summary>Begins renaming the part of the heading that arrives to be named, once for that part.</summary>
         void NameArrival(EditorScreen screen)
         {
-            if (_renaming >= 0)
+            if (_plate != null)
                 return;
 
             for (var i = 0; i < screen.Heading.Count && i < _title.Count; i++)
@@ -735,7 +756,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
                 _namedArrival = part;
                 Rename(i);
-                _arriving = _renaming >= 0;
+                _arriving = _plate != null;
                 return;
             }
         }
@@ -743,12 +764,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Gives the name in hand, where it can be given, and puts the box away.</summary>
         void CommitRename()
         {
-            if (_renaming < 0 || Blocked.Length > 0)
+            if (_plate == null || Blocked.Length > 0)
                 return;
 
             // The part the name was begun on, which a press that changed the screen has taken out of the heading.
             var part = _renamed;
-            var name = _title.Box(_renaming).Text;
+            var name = _plate.Box.Text;
             var arriving = _arriving;
 
             EndRename();
@@ -765,17 +786,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Puts the box away, giving nothing.</summary>
         void EndRename()
         {
-            if (_renaming < 0)
+            if (_plate == null)
                 return;
 
-            var renamed = _renaming;
-            _renaming = -1;
+            var plate = _plate;
+            _plate = null;
             _arriving = false;
             _renamed = null;
-            _title.End(renamed);
+            plate.Box.Edited -= Retyped;
+            plate.End();
             _seen = -1;
 
-            if (_input.Focused == _title.Box(renamed))
+            if (_input.Focused == plate.Box)
                 _input.Focus(null);
         }
 
@@ -788,16 +810,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Takes the keyboard leaving a name being typed as the press away it is, which gives the name.</summary>
         void Refocused()
         {
-            if (_renaming < 0)
+            if (_plate == null)
                 return;
 
-            var box = _title.Box(_renaming);
+            var box = _plate.Box;
             if (_input.Focused == box)
                 return;
 
             CommitRename();
 
-            if (_renaming >= 0)
+            if (_plate != null)
                 _input.Focus(box);
         }
 

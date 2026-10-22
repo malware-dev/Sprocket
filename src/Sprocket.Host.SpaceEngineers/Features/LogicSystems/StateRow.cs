@@ -3,6 +3,7 @@ using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
@@ -18,8 +19,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             CreateView();
         }
 
-        /// <summary>The state's name.</summary>
-        public NameChip Name => _name;
+        /// <summary>The state's name, which is given in place.</summary>
+        public NamePlate Name => _name;
 
         /// <summary>What it holds: a type's name, or the words for a flag.</summary>
         public string Kind

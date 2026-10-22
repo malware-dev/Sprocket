@@ -19,7 +19,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly SprocketEditor _editor;
         readonly AutomationSystem _system;
         readonly Func<bool> _showing;
-        readonly KeyedChildren<string, NameChip> _choices;
+        readonly KeyedChildren<string, NamePlate> _choices;
 
         string _name = "";
         StateStart _start = StateValueQuestion.Off;
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             var texts = editor.Texts;
             _head.Edited += HeadEdited;
             _starts.Edited += StartsEdited;
-            _choices = new KeyedChildren<string, NameChip>(_chips.Children, delegate { return TypeEditing.Boxed(new NameChip(), () => _editor.Input); });
+            _choices = new KeyedChildren<string, NamePlate>(_chips.Children, delegate { return new NamePlate(false); });
             _choicesLabel.Text = texts.StateCanBe;
             _choicesLabel.Tip = Tip.For(_choicesLabel.Tip, texts.StateCanBeAbout);
             _addChoice.Text = StatusRow.Plus + texts.StateChoiceAdd;
@@ -60,8 +60,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <summary>Where the state's name and type, and a new type's name, are given.</summary>
         public FieldSet Head => _head;
 
-        /// <summary>The choices of the type being made, one chip each by name, once one is.</summary>
-        public KeyedChildren<string, NameChip> Choices => _choices;
+        /// <summary>The choices of the type being made, one plate each by name, once one is.</summary>
+        public KeyedChildren<string, NamePlate> Choices => _choices;
 
         /// <summary>The button that adds a choice to the type being made.</summary>
         public Button AddChoice => _addChoice;
@@ -130,25 +130,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             FillStarts();
         }
 
-        /// <summary>Takes a choice's name typed over once the keyboard has left it.</summary>
-        /// <remarks>Called every tick while the form shows: a check per choice, while the type being made shows.</remarks>
-        public void Refresh()
-        {
-            if (!_choicesRow.IsVisible)
-                return;
-
-            var focused = _editor.Input?.Focused;
-            foreach (var choice in _made.Choices)
-            {
-                var chip = _choices[choice];
-                if (chip.IsRenaming && !ReferenceEquals(focused, chip.Box))
-                {
-                    Renamed(chip);
-                    return;
-                }
-            }
-        }
-
         /// <summary>Asks for the state's name and type, and the type's name where it is a new one, again only where the type chosen changed.</summary>
         void FillHead()
         {
@@ -199,9 +180,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var chip = _choices[choice];
                 var named = choice;
-                chip.Name = choice;
-                chip.Opens = _editor.Act(CommandKind.ChangeChoice, () => ChoiceMenu(named, chip, removes));
-                chip.OpensAbout = _editor.Texts.StateChoiceAbout;
+                chip.Text = choice;
+                chip.Command = _editor.Act(CommandKind.ChangeChoice, () => ChoiceMenu(named, chip, removes));
+                chip.About = _editor.Texts.StateChoiceAbout;
             }
         }
 
@@ -225,11 +206,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         }
 
         /// <summary>Offers renaming the choice <paramref name="choice" /> of the type being made, and removing it where the type keeps two.</summary>
-        void ChoiceMenu(string choice, NameChip chip, bool removes)
+        void ChoiceMenu(string choice, NamePlate chip, bool removes)
         {
             var texts = _editor.Texts;
             _editor.AskHere(removes ? "" : texts.StateChoiceKept);
-            _editor.Answer(texts.StateRename, () => TypeEditing.Rename(chip, _editor.Input));
+            _editor.Answer(texts.StateRename, () => _editor.Rename(chip, TypeEditing.ChoiceNaming(_made, choice, wanted => Renamed(choice, wanted))));
             if (!removes)
                 return;
 
@@ -319,17 +300,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _editor.Invalidate();
         }
 
-        /// <summary>Takes the name typed in <paramref name="chip" />, one of the new type's choices, where the type has no other choice by it.</summary>
-        void Renamed(NameChip chip)
+        /// <summary>Calls the new type's choice <paramref name="was" /> <paramref name="wanted" />, which the type has no other choice by.</summary>
+        void Renamed(string was, string wanted)
         {
-            chip.Renamed();
-            var wanted = (chip.Box.Text ?? "").Trim();
-            var was = chip.Name;
-            if (wanted.Length == 0 || wanted == was)
-                return;
-
             var at = _made.Choices.IndexOf(was);
-            if (at < 0 || _made.Has(wanted))
+            if (at < 0)
                 return;
 
             _made.Choices[at] = wanted;

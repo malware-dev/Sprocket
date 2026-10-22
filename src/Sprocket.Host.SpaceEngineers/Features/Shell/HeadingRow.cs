@@ -13,9 +13,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
     public class HeadingRow : HStack
     {
         readonly Action<int> _renames;
-        readonly ICommand _commit;
-        readonly ICommand _cancel;
-        readonly Action _edited;
         readonly List<Part> _parts = new List<Part>();
         readonly List<HeadingPart> _laid = new List<HeadingPart>();
 
@@ -23,13 +20,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
         int _shape = -1;
 
-        /// <summary>A heading whose parts <paramref name="renames" /> renames, with boxes that take <paramref name="commit" /> on Enter, <paramref name="cancel" /> on Escape and report each edit to <paramref name="edited" />.</summary>
-        public HeadingRow(Action<int> renames, ICommand commit, ICommand cancel, Action edited)
+        /// <summary>A heading whose parts <paramref name="renames" /> renames, given the index of the part pressed.</summary>
+        public HeadingRow(Action<int> renames)
         {
             _renames = renames;
-            _commit = commit;
-            _cancel = cancel;
-            _edited = edited;
 
             Spacing = 4f;
             Placement = Flex.Grow;
@@ -48,15 +42,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 var part = heading[i];
                 var shown = _parts[i];
 
-                shown.Name.Text = part.Text;
-                shown.Pen.IsVisible = part.CanRename;
-                shown.Pen.Tint = i == renaming ? Palette.None : Palette.Faint;
+                shown.Plate.Text = part.Text;
+                shown.Plate.CanRename = part.CanRename;
                 shown.Renames.CanExecute = part.CanRename && i != renaming;
                 shown.Plate.Command = part.CanRename || part.Opens == null ? shown.Renames : part.Opens;
 
-                // While a part is renamed, its plate's tip belongs to Refuse.
-                if (i != renaming)
-                    shown.Plate.Tip = Tip.For(shown.Plate.Tip, part.CanRename || part.Opens != null ? part.About : null);
+                shown.Plate.About = part.CanRename || part.Opens != null ? part.About : null;
 
                 shown.Mark.Tip = Tip.For(shown.Mark.Tip, part.MarkAbout);
                 shown.Lead.Text = part.Lead;
@@ -67,50 +58,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <inheritdoc />
         protected override bool Clips => true;
 
-        /// <summary>The box the part at <paramref name="index" /> is renamed in.</summary>
-        public TextBox Box(int index)
-        {
-            return _parts[index].Box;
-        }
-
         /// <summary>The name and pencil of the part at <paramref name="index" />, which a press on renames it.</summary>
-        public Element Plate(int index)
+        public NamePlate Plate(int index)
         {
             return _parts[index].Plate;
         }
 
-        /// <summary>Puts <paramref name="name" /> in the part's box, all of it selected, in place of its words and its pencil.</summary>
-        public void Begin(int index, string name)
+        /// <summary>Which part of those shown <paramref name="plate" /> belongs to, or -1 where it is none of them.</summary>
+        public int IndexOf(NamePlate plate)
         {
-            var part = _parts[index];
+            for (var i = 0; i < _shown; i++)
+            {
+                if (ReferenceEquals(_parts[i].Plate, plate))
+                    return i;
+            }
 
-            part.Pen.Tint = Palette.None;
-            part.Renames.CanExecute = false;
-            part.Plate.Tip = null;
-            part.Name.IsVisible = false;
-            part.Box.IsVisible = true;
-            part.Box.Text = name;
-            part.Box.SelectAll();
-        }
-
-        /// <summary>Puts the part's words back in place of its box.</summary>
-        public void End(int index)
-        {
-            var part = _parts[index];
-
-            part.Name.IsVisible = true;
-            part.Box.IsVisible = false;
-            Refuse(index, null);
-        }
-
-        /// <summary>Marks the part's box as holding a name that cannot be given, saying <paramref name="why" /> on the box and its pencil's place, or clears the mark for null.</summary>
-        public void Refuse(int index, string why)
-        {
-            var part = _parts[index];
-
-            part.Box.Style = why == null ? Styles.TitleBox : Styles.TitleRefused;
-            part.Box.Tip = Tip.For(part.Box.Tip, why);
-            part.Plate.Tip = Tip.For(part.Plate.Tip, why);
+            return -1;
         }
 
         /// <summary>Whether <paramref name="heading" /> holds the very parts the row was laid out for.</summary>
@@ -194,10 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             public readonly Glyph Join;
             public readonly Glyph Mark;
             public readonly Label Lead;
-            public readonly HStack Plate;
-            public readonly Label Name;
-            public readonly TextBox Box;
-            public readonly Glyph Pen;
+            public readonly NamePlate Plate;
             public readonly Label After;
             public readonly Relay Renames;
 
@@ -210,26 +170,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Lead = new Label { Style = Styles.TitleLead };
                 After = new Label { Style = Styles.TitleLead };
 
-                Plate = new HStack
-                {
-                    Style = Styles.Plate,
-                    Command = Renames,
-                    Children =
-                    {
-                        new Label { Style = Styles.TitleName }.As(out Name),
-                        new TextBox
-                        {
-                            Style = Styles.TitleBox,
-                            IsVisible = false,
-                            Submit = row._commit,
-                            Cancel = row._cancel
-                        }.As(out Box),
-                        new Glyph { Symbol = Symbols.Pencil, Style = Styles.Pen, Placement = FixedSize.Size(32f, 32f), Padding = EditorView.LevelWithCapitals }.As(out Pen)
-                    }
-                };
-
-                Box.Edited += row._edited;
-
+                Plate = new NamePlate(true) { Command = Renames };
             }
         }
     }

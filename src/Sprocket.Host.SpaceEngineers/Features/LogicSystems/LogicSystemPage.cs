@@ -529,20 +529,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>A row for <paramref name="key" /> of the installation panel: a slot's, or a category's, whose box hands the keyboard back on Enter and on Escape puts the name back first.</summary>
+        /// <summary>A row for <paramref name="key" /> of the installation panel: a slot's, or a category's.</summary>
         Element SlotRow(object key)
         {
             if (key is Part)
                 return new PartRow(Editor.Texts);
 
-            var row = new CategoryRow();
-            row.Box.Submit = new Relay(delegate { Editor.Input?.Focus(null); });
-            row.Box.Cancel = new Relay(delegate
-            {
-                row.Box.Text = row.Name;
-                Editor.Input?.Focus(null);
-            });
-            return row;
+            return new CategoryRow();
         }
 
         /// <summary>Shows the category <paramref name="name" /> over the <paramref name="carries" /> slots under it, renamed, removed and carried while the system may be changed.</summary>
@@ -554,11 +547,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Carries = carries;
             row.Arranged = true;
             row.Grips(editable, editable ? texts.CategoryDrag : Locked());
-            row.Renames = Changes(CommandKind.RenameCategory, delegate
+            row.Renames = Changes(CommandKind.RenameCategory, () => Editor.Rename(row.Plate, new Naming
             {
-                row.Rename();
-                Editor.Input?.Focus(row.Box);
-            });
+                Name = name,
+                NameRequired = true,
+                Accepts = wanted => _arranger.Accepts(name, wanted),
+                Renames = wanted => _arranger.Rename(name, wanted)
+            }));
             row.RenamesAbout = editable ? texts.CategoryRenameAbout : Locked();
             row.Removes = Changes(CommandKind.RemoveCategory, () => _arranger.Remove(name));
             row.RemovesAbout = editable ? texts.CategoryRemove : Locked();
@@ -607,31 +602,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Editor.Input.Focus(null);
         }
 
-        /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is the description's box or a category's name.</summary>
+        /// <summary>Writes what was typed in <paramref name="box" /> into the blueprint, where it is the description's box.</summary>
         void Written(Element box)
         {
-            if (box == null || _composer == null || !Editable)
+            if (box == null || _composer == null || !Editable || box != _composer.Box)
                 return;
 
-            if (box == _composer.Box)
-            {
-                Editor.Do(_system, new AnnotateSystem(_system.Annotation, _composer.Text));
-                return;
-            }
-
-            if (_stateWork.Written(box))
-                return;
-
-            foreach (var child in _slotList.Children)
-            {
-                var row = child as CategoryRow;
-                if (row == null || row.Box != box)
-                    continue;
-
-                row.Renamed();
-                _arranger.Rename(row.Name, row.Box.Text);
-                return;
-            }
+            Editor.Do(_system, new AnnotateSystem(_system.Annotation, _composer.Text));
         }
 
         /// <summary>Hides the ways to add something while the system may run, and says why in their place.</summary>

@@ -236,6 +236,24 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
         };
 
+        /// <summary>A name in a row that can be renamed in place, spaced as its box is so the box takes its place without moving it.</summary>
+        public static readonly TextStyle PlateName = new TextStyle(Name)
+        {
+            Base = { Padding = new Thickness(8f, 4f) }
+        };
+
+        /// <summary>The box a name in a row is typed in, a well on the page in the name's size.</summary>
+        public static readonly TextBoxStyle PlateBox = new TextBoxStyle(TitleBox)
+        {
+            Base = { FontSize = 24f }
+        };
+
+        /// <summary>The box a name in a row is typed in, holding a name that cannot be given.</summary>
+        public static readonly TextBoxStyle PlateRefused = new TextBoxStyle(PlateBox)
+        {
+            Base = { Background = Palette.WrongFill, Edge = Palette.Problem }
+        };
+
         /// <summary>A field holding what cannot be taken, marked as a heading's box is.</summary>
         public static readonly TextBoxStyle FieldRefused = new TextBoxStyle(Field)
         {

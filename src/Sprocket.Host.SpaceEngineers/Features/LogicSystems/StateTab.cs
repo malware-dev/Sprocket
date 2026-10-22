@@ -109,77 +109,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _panel.States.Slide();
         }
 
-        /// <summary>Takes the name typed in <paramref name="box" /> where it is one of the tab's boxes, answering whether it was.</summary>
-        public bool Written(Element box)
-        {
-            if (box == null)
-                return false;
-
-            foreach (var type in _types)
-            {
-                var row = _typeRows[type];
-                if (row.Name.Box == box)
-                {
-                    row.Name.Renamed();
-                    var name = Wanted(row.Name, type.Name);
-                    if (name != null)
-                        _editor.Do(_system, new RenameType(type, name));
-
-                    return true;
-                }
-
-                var chips = row.ChoiceChips;
-                foreach (var choice in type.Choices)
-                {
-                    var chip = chips[choice];
-                    if (chip == null || chip.Box != box)
-                        continue;
-
-                    chip.Renamed();
-                    var wanted = (chip.Box.Text ?? "").Trim();
-                    if (wanted.Length > 0 && !type.Has(wanted))
-                        _editor.Do(_system, new RenameChoice(type, choice, wanted));
-
-                    return true;
-                }
-            }
-
-            foreach (var state in _states)
-            {
-                var row = _stateRows[state];
-                if (row.Name.Box != box)
-                    continue;
-
-                row.Name.Renamed();
-                var name = Wanted(row.Name, state.Name);
-                if (name != null)
-                    _editor.Do(_system, new RenameState(state, name));
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>The name typed in <paramref name="chip" />, trimmed, where it is new and no slot, type or state has it; null otherwise.</summary>
-        string Wanted(NameChip chip, string was)
-        {
-            var wanted = (chip.Box.Text ?? "").Trim();
-            return wanted.Length == 0 || wanted == was || _system.Takes(wanted) ? null : wanted;
-        }
-
         void ArrangeType(Texts texts, TypeRow row, DeclaredType type, bool editable, string locked)
         {
             TypeEditing.Show(texts, row, type);
-            row.Name.Opens = _changes(CommandKind.RenameType, () => TypeEditing.Rename(row.Name, _editor.Input));
-            row.Name.OpensAbout = editable ? texts.StateTypeRenameAbout : locked;
+            row.Name.Command = _changes(CommandKind.RenameType, () => _editor.Rename(row.Name, TypeNaming(type)));
+            row.Name.CanRename = row.Name.Command != null;
+            row.Name.About = editable ? texts.StateTypeRenameAbout : locked;
 
             foreach (var choice in type.Choices)
             {
                 var chip = row.ChoiceChips[choice];
                 var named = choice;
-                chip.Opens = _changes(CommandKind.ChangeChoice, () => Choice(type, named, chip));
-                chip.OpensAbout = editable ? texts.StateChoiceAbout : locked;
+                chip.Command = _changes(CommandKind.ChangeChoice, () => Choice(type, named, chip));
+                chip.About = editable ? texts.StateChoiceAbout : locked;
             }
 
             row.AddChoice.Command = _changes(CommandKind.AddChoice,
@@ -195,9 +137,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         void ArrangeState(Texts texts, StateRow row, State state, bool editable, string locked)
         {
-            row.Name.Name = state.Name;
-            row.Name.Opens = _changes(CommandKind.RenameState, () => TypeEditing.Rename(row.Name, _editor.Input));
-            row.Name.OpensAbout = editable ? texts.StateStateRenameAbout : locked;
+            row.Name.Text = state.Name;
+            row.Name.Command = _changes(CommandKind.RenameState, () => _editor.Rename(row.Name, StateNaming(state)));
+            row.Name.CanRename = row.Name.Command != null;
+            row.Name.About = editable ? texts.StateStateRenameAbout : locked;
             row.Kind = Template.Fill(texts.StateHolds, "type", state.IsFlag ? texts.StateFlag : state.Type);
 
             var held = StateMentions.Mentions(_system, state.Name);
@@ -219,12 +162,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         }
 
         /// <summary>Offers renaming the choice <paramref name="choice" /> of <paramref name="type" />, and removing it where nothing holds it there.</summary>
-        void Choice(DeclaredType type, string choice, NameChip chip)
+        void Choice(DeclaredType type, string choice, NamePlate chip)
         {
             var texts = _editor.Texts;
             var removes = new RemoveChoice(_system, type, choice).Changes;
             _editor.AskHere(removes ? "" : texts.StateChoiceKept);
-            _editor.Answer(texts.StateRename, () => TypeEditing.Rename(chip, _editor.Input));
+            _editor.Answer(texts.StateRename, () => _editor.Rename(chip, TypeEditing.ChoiceNaming(type, choice,
+                wanted => _editor.Do(_system, new RenameChoice(type, choice, wanted)))));
             if (removes)
                 _editor.Answer(texts.StateRemoveChoice, () => _editor.Do(_system, new RemoveChoice(_system, type, choice)));
         }
@@ -285,21 +229,53 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         TypeRow TypeRowFor(DeclaredType type)
         {
-            var row = new TypeRow(Chip);
-            TypeEditing.Boxed(row.Name, () => _editor.Input);
-            return row;
+            return new TypeRow();
         }
 
         StateRow StateRowFor(State state)
         {
-            var row = new StateRow();
-            TypeEditing.Boxed(row.Name, () => _editor.Input);
-            return row;
+            return new StateRow();
         }
 
-        NameChip Chip()
+        /// <summary>The name of <paramref name="type" />, given where no slot, type or state of the system has it.</summary>
+        Naming TypeNaming(DeclaredType type)
         {
-            return TypeEditing.Boxed(new NameChip(), () => _editor.Input);
+            var was = type.Name;
+            return new Naming
+            {
+                Name = was,
+                NameRequired = true,
+                Accepts = wanted => Free(wanted, was),
+                Renames = wanted =>
+                {
+                    if (wanted.Trim() != was)
+                        _editor.Do(_system, new RenameType(type, wanted.Trim()));
+                }
+            };
+        }
+
+        /// <summary>The name of <paramref name="state" />, given where no slot, type or state of the system has it.</summary>
+        Naming StateNaming(State state)
+        {
+            var was = state.Name;
+            return new Naming
+            {
+                Name = was,
+                NameRequired = true,
+                Accepts = wanted => Free(wanted, was),
+                Renames = wanted =>
+                {
+                    if (wanted.Trim() != was)
+                        _editor.Do(_system, new RenameState(state, wanted.Trim()));
+                }
+            };
+        }
+
+        /// <summary>Whether <paramref name="wanted" />, trimmed, can stand in place of <paramref name="was" />: unchanged, or a name nothing in the system has.</summary>
+        bool Free(string wanted, string was)
+        {
+            var name = wanted.Trim();
+            return name == was || !_system.Takes(name);
         }
     }
 }

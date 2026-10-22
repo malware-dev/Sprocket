@@ -274,11 +274,11 @@ public class StateEditingTests
         screen.Run(1);
 
         var type = Assert.Single(Target.Within(view).OfType<TypeRow>());
-        Assert.Equal("side", type.Name.Name);
-        Assert.Equal(new[] { "inside", "outside" }, Target.Within(type).OfType<NameChip>().Skip(1).Select(chip => chip.Name).ToArray());
+        Assert.Equal("side", type.Name.Text);
+        Assert.Equal(new[] { "inside", "outside" }, Target.Within(type).OfType<NamePlate>().Skip(1).Select(chip => chip.Text).ToArray());
 
         var states = Target.Within(view).OfType<StateRow>().ToList();
-        Assert.Equal(new[] { "where", "there", "cycling" }, states.Select(row => row.Name.Name).ToArray());
+        Assert.Equal(new[] { "where", "there", "cycling" }, states.Select(row => row.Name.Text).ToArray());
         Assert.Equal("(side)", states[0].Kind);
         Assert.Equal("(" + screen.Editor.Texts.StateFlag + ")", states[2].Kind);
         Assert.Equal("inside", states[0].Start.Text);
@@ -538,7 +538,7 @@ public class StateEditingTests
         TypeInto(screen, page.Head.Fields[2], "door");
 
         var chip = page.Choices["choice 1"];
-        chip.Opens!.Execute();
+        chip.Command!.Execute();
         screen.Run(1);
         editor.PressAnswer(editor.Texts.StateRename);
         screen.Run(1);
@@ -621,7 +621,7 @@ public class StateEditingTests
         screen.Run(1);
 
         var name = Target.Within(view).OfType<TypeRow>().Single().Name;
-        name.Opens!.Execute();
+        name.Command!.Execute();
         screen.Run(1);
         name.Box.Text = "place";
         editor.Input!.Focus(null);
@@ -629,6 +629,26 @@ public class StateEditingTests
 
         Assert.Equal("place", system.Types[0].Name);
         Assert.Equal("place", system.FindState("where")!.Type);
+    }
+
+    /// <summary>A state's name another state has is refused as a heading's is: Enter keeps the box, and the state keeps its name.</summary>
+    [Fact]
+    public void AStateNameTakenIsRefused()
+    {
+        var screen = OnSystem(Program, out var system);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        screen.Run(1);
+
+        var name = Target.Within(view).OfType<StateRow>().Single(row => row.Name.Text == "there").Name;
+        name.Command!.Execute();
+        screen.Run(1);
+        name.Box.Text = "where";
+        editor.Input!.Key(VRage.Input.MyKeys.Enter, false, false);
+        screen.Run(1);
+
+        Assert.True(name.IsRenaming, "the box was put away");
+        Assert.NotNull(system.FindState("there"));
     }
 
     static Screen OnSystem(string program, out AutomationSystem system)

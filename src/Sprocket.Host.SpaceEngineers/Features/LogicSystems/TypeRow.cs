@@ -1,24 +1,24 @@
-using System;
 using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     /// <summary>A type on a logic system's State tab: its name, then the words before its choices and the choices, with a grip that carries it, a way to add a choice, and a bin.</summary>
     public partial class TypeRow : HStack, ICarried
     {
-        /// <summary>A type with no name and no choices yet, each choice it comes to have shown in a chip <paramref name="chip" /> makes.</summary>
-        public TypeRow(Func<NameChip> chip)
+        /// <summary>A type with no name and no choices yet, each choice it comes to have shown on a plate of its own.</summary>
+        public TypeRow()
         {
             CreateView();
-            ChoiceChips = new KeyedChildren<string, NameChip>(_choices.Children, delegate { return chip(); });
+            ChoiceChips = new KeyedChildren<string, NamePlate>(_choices.Children, delegate { return new NamePlate(false); });
         }
 
-        /// <summary>The type's name.</summary>
-        public NameChip Name => _name;
+        /// <summary>The type's name, which is given in place.</summary>
+        public NamePlate Name => _name;
 
         /// <summary>The words before the choices, saying what they are.</summary>
         public string Lead
@@ -33,8 +33,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             set { _lead.Tip = Tip.For(_lead.Tip, value); }
         }
 
-        /// <summary>Its choices, one chip each by name, in order, shown by whoever fills the row.</summary>
-        public KeyedChildren<string, NameChip> ChoiceChips { get; }
+        /// <summary>Its choices, one plate each by name, in order, shown by whoever fills the row.</summary>
+        public KeyedChildren<string, NamePlate> ChoiceChips { get; }
 
         /// <summary>The button that adds a choice.</summary>
         public Button AddChoice => _add;

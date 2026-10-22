@@ -4,13 +4,14 @@ using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     partial class TypeRow
     {
         Grip _grip;
-        NameChip _name;
+        NamePlate _name;
         Label _lead;
         Flow _choices;
         Button _add;
@@ -31,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 LineSpacing = 8f,
                 Children =
                 {
-                    new NameChip().As(out _name),
+                    new NamePlate(false).As(out _name),
                     new Label { Style = Styles.Aside }.As(out _lead),
                     new Flow { Spacing = 8f, LineSpacing = 8f }.As(out _choices),
                     new Button { Style = Styles.Start }.As(out _add)

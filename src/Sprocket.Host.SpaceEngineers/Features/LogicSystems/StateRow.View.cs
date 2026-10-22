@@ -4,13 +4,14 @@ using Lumel.Images;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
 
 namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 {
     partial class StateRow
     {
         Grip _grip;
-        NameChip _name;
+        NamePlate _name;
         Button _holds;
         Label _startsLead;
         Button _start;
@@ -32,7 +33,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 Placement = Flex.Grow,
                 Children =
                 {
-                    new NameChip { Mark = Symbols.State }.As(out _name),
+                    new HStack
+                    {
+                        Spacing = 4f,
+                        Children =
+                        {
+                            new Glyph { Style = Styles.Waits, Symbol = Symbols.State, Align = Align.Center },
+                            new NamePlate(false).As(out _name)
+                        }
+                    },
                     new Button { Style = Styles.SlotName }.As(out _holds),
                     new Label { Style = Styles.Aside }.As(out _startsLead),
                     new Button { Style = Styles.SlotName }.As(out _start),

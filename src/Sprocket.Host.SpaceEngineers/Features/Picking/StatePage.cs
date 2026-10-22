@@ -6,7 +6,6 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
-using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -138,7 +137,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public FieldSet Head => _newState.Head;
 
         /// <summary>The choices of the type being made for a new state, one chip each by name, once one is.</summary>
-        public KeyedChildren<string, NameChip> Choices => _newState.Choices;
+        public KeyedChildren<string, NamePlate> Choices => _newState.Choices;
 
         /// <summary>The button that adds a choice to the type being made.</summary>
         public Button AddChoice => _newState.AddChoice;
@@ -303,8 +302,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override void Refresh()
         {
             _strip.Tick();
-            if (_making)
-                _newState.Refresh();
         }
 
         /// <summary>The strip of the pick, which the page the single action is chosen on shares.</summary>

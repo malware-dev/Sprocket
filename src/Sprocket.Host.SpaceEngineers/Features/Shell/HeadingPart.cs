@@ -1,24 +1,17 @@
-using System;
-using System.Collections.Generic;
 using Lumel.Input;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Shell
 {
     /// <summary>One piece of a screen's heading: some words, and whether they are somebody's to change.</summary>
-    public sealed class HeadingPart
+    public sealed class HeadingPart : Naming
     {
         string _lead = "";
         string _after = "";
         string _mark;
         string _markAbout;
         string _text;
-        string _name = "";
-        Action<string> _renames;
-        Func<string, bool> _accepts;
         ICommand _opens;
-        bool _namedOnArrival;
         string _about;
-        bool _nameRequired;
         EditorScreen _on;
 
         /// <summary>A part reading <paramref name="text" />.</summary>
@@ -63,44 +56,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { Set(ref _text, value ?? ""); }
         }
 
-        /// <summary>What somebody actually typed, or empty where nobody has.</summary>
-        /// <remarks>A target opens its rename box on this.</remarks>
-        public string Name
-        {
-            get { return _name; }
-            set { Set(ref _name, value ?? ""); }
-        }
-
-        /// <summary>Gives this part a new name, or null when it cannot be renamed.</summary>
-        public Action<string> Renames
-        {
-            get { return _renames; }
-            set { Set(ref _renames, value); }
-        }
-
-        /// <summary>Whether a name can be given, asked before it is: false where something else already has it.</summary>
-        /// <remarks>Null where every name is accepted.</remarks>
-        public Func<string, bool> Accepts
-        {
-            get { return _accepts; }
-            set { Set(ref _accepts, value); }
-        }
-
-        /// <summary>Whether this part can be renamed.</summary>
-        public bool CanRename => _renames != null;
-
         /// <summary>What pressing this part does where it cannot be renamed, such as opening what it names, or null for nothing.</summary>
         public ICommand Opens
         {
             get { return _opens; }
             set { Set(ref _opens, value); }
-        }
-
-        /// <summary>Whether the screen opens with this part's name in hand to be given, as for something just made and numbered.</summary>
-        public bool NamedOnArrival
-        {
-            get { return _namedOnArrival; }
-            set { Set(ref _namedOnArrival, value); }
         }
 
         /// <summary>What this part is and what renaming or pressing it does, for whoever rests the pointer on it, in markdown-lite, or null for nothing to say.</summary>
@@ -110,32 +70,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             set { Set(ref _about, value); }
         }
 
-        /// <summary>Whether an empty name is refused here, rather than handing the part back to what the thing says about itself.</summary>
-        public bool NameRequired
-        {
-            get { return _nameRequired; }
-            set { Set(ref _nameRequired, value); }
-        }
-
-        /// <summary>Whether <paramref name="name" /> can be given here.</summary>
-        public bool Takes(string name)
-        {
-            return _accepts == null || _accepts(name ?? "");
-        }
-
         /// <summary>Says this is part of the heading <paramref name="on" /> shows, which is told whenever it changes.</summary>
         public void Show(EditorScreen on)
         {
             _on = on;
         }
 
-        /// <summary>Writes <paramref name="value" /> into <paramref name="field" />, telling the screen showing this where it differs.</summary>
-        void Set<T>(ref T field, T value)
+        /// <summary>Tells the screen showing this that its heading changed.</summary>
+        protected override void Changed()
         {
-            if (EqualityComparer<T>.Default.Equals(field, value))
-                return;
-
-            field = value;
             if (_on != null)
                 _on.Touch();
         }
