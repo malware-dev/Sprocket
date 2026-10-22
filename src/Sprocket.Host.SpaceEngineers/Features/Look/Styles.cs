@@ -388,23 +388,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Dim }
         };
 
-        /// <summary>A part of a sentence: a chip with a line along its bottom, the one look nothing else may borrow.</summary>
+        /// <summary>A part of a sentence: a filled chip, the one look nothing else may borrow.</summary>
         public static readonly SlotStyle Slot = new SlotStyle
         {
             Base =
             {
                 Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, Background = Palette.SlotFill,
-                Padding = new Thickness(16f, 8f), Underline = Palette.SlotEdge
+                Padding = new Thickness(16f, 8f)
             },
-            Empty = { Color = Palette.Notice, Underline = Palette.Notice },
-            Still = { Background = Palette.Chrome, Underline = Palette.None },
+            Empty = { Color = Palette.Notice },
+            Still = { Background = Palette.Chrome },
             Hot = { Background = Palette.Well }
         };
 
         /// <summary>A part of a sentence that is paused: there to be read and pressed, and quieter than one that runs.</summary>
         public static readonly SlotStyle PausedSlot = new SlotStyle(Slot)
         {
-            Base = { Color = Palette.Dim, Background = Palette.Chrome, Underline = Palette.Line }
+            Base = { Color = Palette.Dim, Background = Palette.Chrome }
         };
 
         /// <summary>A word on a green wash, saying something is true at this instant.</summary>

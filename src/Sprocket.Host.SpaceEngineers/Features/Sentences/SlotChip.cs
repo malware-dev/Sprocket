@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Lumel;
-using Lumel.Drawing;
 using Lumel.Layout;
 using Lumel.Styling;
 using Lumel.Text;
@@ -17,8 +16,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
     /// </remarks>
     public class SlotChip : Stacking, ITextual
     {
-        const float UnderlineThickness = 2f;
-
         readonly List<Mention> _said = new List<Mention>();
         readonly bool _across;
 
@@ -43,9 +40,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             _across = piecesAcross;
             Style = Styles.Slot;
         }
-
-        /// <summary>The color of the line along the bottom.</summary>
-        public Color Underline { get; set; }
 
         /// <summary>The texts what the members it says have to say are in.</summary>
         public Texts Texts
@@ -188,16 +182,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             Lay(part.Sample);
             IsEmpty = part.IsEmpty;
             Command = part.Opens;
-        }
-
-        /// <inheritdoc />
-        protected override void DrawContent(IGraphics g)
-        {
-            g.Fill(
-                new RectangleF(Bounds.X, Bounds.Y + Bounds.Height - UnderlineThickness, Bounds.Width, UnderlineThickness),
-                Underline);
-
-            base.DrawContent(g);
         }
 
         void Lay(Color? sample)

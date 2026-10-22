@@ -63,7 +63,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <remarks>Pale, so anything wearing it takes dark text.</remarks>
         public static readonly Color Accent = new Color(142, 188, 207);
 
-        /// <summary>The line under a filled slot in a sentence.</summary>
+        /// <summary>The edge of a toolbar slot that holds something of the game's.</summary>
         public static readonly Color SlotEdge = new Color(142, 188, 207);
 
         /// <summary>The fill of a slot in a sentence, also worn by notes and by buttons waiting to be ready.</summary>
