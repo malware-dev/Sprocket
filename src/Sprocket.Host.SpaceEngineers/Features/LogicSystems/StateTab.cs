@@ -116,12 +116,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.Name.CanRename = row.Name.Command != null;
             row.Name.About = editable ? texts.StateTypeRenameAbout : locked;
 
+            // A type keeps two choices at least, so two can only be renamed; past two, a choice may also be removed.
+            var removable = type.Choices.Count > 2;
             foreach (var choice in type.Choices)
             {
                 var chip = row.ChoiceChips[choice];
                 var named = choice;
-                chip.Command = _changes(CommandKind.ChangeChoice, () => Choice(type, named, chip));
-                chip.About = editable ? texts.StateChoiceAbout : locked;
+                chip.Command = removable
+                    ? _changes(CommandKind.ChangeChoice, () => Choice(type, named, chip))
+                    : _changes(CommandKind.ChangeChoice, () => _editor.Rename(chip, ChoiceNaming(type, named)));
+                chip.CanRename = !removable && chip.Command != null;
+                chip.About = !editable ? locked : removable ? texts.StateChoiceAbout : null;
             }
 
             row.AddChoice.Command = _changes(CommandKind.AddChoice,
@@ -167,8 +172,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             var texts = _editor.Texts;
             var removes = new RemoveChoice(_system, type, choice).Changes;
             _editor.AskHere(removes ? "" : texts.StateChoiceKept);
-            _editor.Answer(texts.StateRename, () => _editor.Rename(chip, TypeEditing.ChoiceNaming(type, choice,
-                wanted => _editor.Do(_system, new RenameChoice(type, choice, wanted)))));
+            _editor.Answer(texts.StateRename, () => _editor.Rename(chip, ChoiceNaming(type, choice)));
             if (removes)
                 _editor.Answer(texts.StateRemoveChoice, () => _editor.Do(_system, new RemoveChoice(_system, type, choice)));
         }
@@ -235,6 +239,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         StateRow StateRowFor(State state)
         {
             return new StateRow();
+        }
+
+        /// <summary>The name of <paramref name="choice" /> of <paramref name="type" />, given where the type has no other choice by it.</summary>
+        Naming ChoiceNaming(DeclaredType type, string choice)
+        {
+            return TypeEditing.ChoiceNaming(type, choice, wanted => _editor.Do(_system, new RenameChoice(type, choice, wanted)));
         }
 
         /// <summary>The name of <paramref name="type" />, given where no slot, type or state of the system has it.</summary>

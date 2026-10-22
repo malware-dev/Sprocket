@@ -181,8 +181,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 var chip = _choices[choice];
                 var named = choice;
                 chip.Text = choice;
-                chip.Command = _editor.Act(CommandKind.ChangeChoice, () => ChoiceMenu(named, chip, removes));
-                chip.About = _editor.Texts.StateChoiceAbout;
+                chip.Boxed = removes;
+                chip.CanRename = !removes;
+                chip.Command = removes
+                    ? _editor.Act(CommandKind.ChangeChoice, () => ChoiceMenu(named, chip))
+                    : _editor.Act(CommandKind.ChangeChoice, () => _editor.Rename(chip, ChoiceNaming(named)));
+                chip.About = removes ? _editor.Texts.StateChoiceAbout : null;
             }
         }
 
@@ -205,15 +209,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _starts.Show(new List<Field> { starts }, new[] { _start.Word }, null, texts);
         }
 
-        /// <summary>Offers renaming the choice <paramref name="choice" /> of the type being made, and removing it where the type keeps two.</summary>
-        void ChoiceMenu(string choice, NamePlate chip, bool removes)
+        /// <summary>Offers renaming the choice <paramref name="choice" /> of the type being made, and removing it.</summary>
+        void ChoiceMenu(string choice, NamePlate chip)
         {
             var texts = _editor.Texts;
-            _editor.AskHere(removes ? "" : texts.StateChoiceKept);
-            _editor.Answer(texts.StateRename, () => _editor.Rename(chip, TypeEditing.ChoiceNaming(_made, choice, wanted => Renamed(choice, wanted))));
-            if (!removes)
-                return;
-
+            _editor.AskHere("");
+            _editor.Answer(texts.StateRename, () => _editor.Rename(chip, ChoiceNaming(choice)));
             _editor.Answer(texts.StateRemoveChoice, delegate
             {
                 _made.Choices.Remove(choice);
@@ -222,6 +223,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _editor.Invalidate();
             });
+        }
+
+        /// <summary>The name of the new type's choice <paramref name="choice" />, given where the type has no other choice by it.</summary>
+        Naming ChoiceNaming(string choice)
+        {
+            return TypeEditing.ChoiceNaming(_made, choice, wanted => Renamed(choice, wanted));
         }
 
         /// <summary>The way <paramref name="type" /> is spelled, its name and its choices, to tell whether what is asked about it has changed.</summary>

@@ -521,7 +521,7 @@ public class StateEditingTests
         Assert.Equal(new[] { "inside", "outside" }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
-    /// <summary>The new type's name typed in the state selector, and a choice's typed over, are taken.</summary>
+    /// <summary>The new type's name typed in the state selector, and a choice's typed over at a press on it, are taken.</summary>
     [Fact]
     public void ANewTypeIsRenamedInTheSelector()
     {
@@ -540,8 +540,7 @@ public class StateEditingTests
         var chip = page.Choices["choice 1"];
         chip.Command!.Execute();
         screen.Run(1);
-        editor.PressAnswer(editor.Texts.StateRename);
-        screen.Run(1);
+        Assert.True(chip.IsRenaming, "a choice of two is renamed at a press");
         chip.Box.Text = "open";
         editor.Input!.Focus(null);
         screen.Run(2);
@@ -629,6 +628,32 @@ public class StateEditingTests
 
         Assert.Equal("place", system.Types[0].Name);
         Assert.Equal("place", system.FindState("where")!.Type);
+    }
+
+    /// <summary>A type's two choices can only be renamed, so a press renames one; once it has three, a press offers renaming and removing.</summary>
+    [Fact]
+    public void ATypesChoicesAreRenamedAtAPressUntilThereAreThree()
+    {
+        var screen = OnSystem(Program, out var system);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        screen.Run(1);
+
+        var row = Target.Within(view).OfType<TypeRow>().Single();
+        var inside = row.ChoiceChips["inside"];
+        inside.Command!.Execute();
+        screen.Run(1);
+        Assert.True(inside.IsRenaming, "a choice of two is renamed at a press");
+        editor.Input!.Key(VRage.Input.MyKeys.Escape, false, false);
+        screen.Run(1);
+
+        row.AddChoice.Command!.Execute();
+        screen.Run(1);
+        row = Target.Within(view).OfType<TypeRow>().Single();
+        row.ChoiceChips[system.Types[0].Choices[2]].Command!.Execute();
+        screen.Run(1);
+
+        Assert.Equal(new[] { editor.Texts.StateRename, editor.Texts.StateRemoveChoice }, editor.Screen.Answers.Select(answer => answer.Text).ToArray());
     }
 
     /// <summary>A state's name another state has is refused as a heading's is: Enter keeps the box, and the state keeps its name.</summary>

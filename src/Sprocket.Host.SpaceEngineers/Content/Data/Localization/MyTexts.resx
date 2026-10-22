@@ -1027,8 +1027,8 @@ Lights green when it runs, and red when something in it needs mending.</value>
     <comment>Choice in the menu opened from one of a type's choices on a logic system's State tab, that removes the choice from its type.</comment>
   </data>
   <data name="Sprocket.State.ChoiceKept" xml:space="preserve">
-    <value>This choice is in use, or its type has only two, so it cannot be removed.</value>
-    <comment>Said over the menu opened from one of a type's choices on a logic system's State tab, where the choice cannot be removed: a state starts at it, a step sets it or something compares with it, or its type would be left with one choice.</comment>
+    <value>This choice is in use, so it can't be removed.</value>
+    <comment>Said over the menu opened from one of a type's choices on a logic system's State tab, where the choice cannot be removed: a state starts at it, a step sets it or something compares with it.</comment>
   </data>
   <data name="Sprocket.State.TypeRemove" xml:space="preserve">
     <value>Removes the type.</value>

@@ -25,7 +25,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             row.LeadAbout = texts.StateCanBeAbout;
             row.ChoiceChips.Show(type.Choices);
             foreach (var choice in type.Choices)
-                row.ChoiceChips[choice].Text = choice;
+            {
+                var chip = row.ChoiceChips[choice];
+                chip.Text = choice;
+                chip.Boxed = type.Choices.Count > 2;
+            }
 
             row.AddChoice.Text = StatusRow.Plus + texts.StateChoiceAdd;
         }

@@ -46,6 +46,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             }
         }
 
+        /// <summary>Whether the plate is drawn as a button, for a name a press opens a menu about rather than renames.</summary>
+        public bool Boxed
+        {
+            get { return Style == Styles.PlateButton; }
+            set { Style = value ? Styles.PlateButton : Styles.Plate; }
+        }
+
         /// <summary>What the plate is and what pressing it does, said where the pointer rests on it while the name is not being typed, in markdown-lite; null for nothing.</summary>
         public string About
         {

@@ -266,6 +266,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Hot = { Background = Palette.Panel }
         };
 
+        /// <summary>A name that opens a menu rather than being renamed at a press, drawn as the game's button around its words.</summary>
+        public static readonly ElementStyle PlateButton = new ElementStyle
+        {
+            Base = { Background = Palette.Panel, Edge = Palette.ControlEdge, Padding = new Thickness(8f, 4f) },
+            Hot = { Background = Palette.PanelHot, Edge = Palette.ControlEdgeHot }
+        };
+
         /// <summary>The pencil beside a name that can be renamed, whose color the view sets while the name is typed.</summary>
         public static readonly GlyphStyle Pen = new GlyphStyle
         {
