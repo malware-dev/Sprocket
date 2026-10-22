@@ -550,7 +550,7 @@ namespace Sprocket.Host.SpaceEngineers
 
             if (holder.Length == 0 || program.Length == 0 || block == null)
             {
-                Say(_texts.TerminalRefused);
+                TerminalNotice.Show(_texts.TerminalRefused, new Arguments(), _texts.TerminalOk);
                 return;
             }
 
@@ -562,7 +562,9 @@ namespace Sprocket.Host.SpaceEngineers
         {
             var block = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(id) as IMyTerminalBlock;
             var construct = block == null || block.CubeGrid == null ? "" : block.CubeGrid.CustomName;
-            Say(Template.Fill(_texts.TerminalForeign, "construct", construct));
+            var arguments = new Arguments();
+            arguments.Set("construct", construct);
+            TerminalNotice.Show(_texts.TerminalForeign, arguments, _texts.TerminalOk);
         }
 
         /// <summary>Opens the editor on a copy to look at while <paramref name="holder" /> edits the real one.</summary>
@@ -591,14 +593,6 @@ namespace Sprocket.Host.SpaceEngineers
         {
             var asked = MyAPIGateway.Entities == null ? null : MyAPIGateway.Entities.GetEntityById(_asked) as IMyTerminalBlock;
             return asked ?? lent;
-        }
-
-        /// <summary>Says something to the player in a box over whatever screen is open.</summary>
-        void Say(string what)
-        {
-            // A mission screen, since the HUD does not draw while the terminal is open.
-            if (MyAPIGateway.Utilities != null)
-                MyAPIGateway.Utilities.ShowMissionScreen(_texts.TerminalOpen, null, null, what);
         }
 
         /// <summary>Takes on a block that carries a program, so it starts running.</summary>

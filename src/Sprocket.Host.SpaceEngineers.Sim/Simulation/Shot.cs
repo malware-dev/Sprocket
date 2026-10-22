@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Lumel.Screens;
 
 namespace Sprocket.Sim.Simulation
 {
@@ -78,6 +79,23 @@ namespace Sprocket.Sim.Simulation
                 png.Save(file);
 
             return scene.OnScreen;
+        }
+
+        /// <summary>Writes <paramref name="stage" />, a screen of its own such as a notice, across a <paramref name="width" /> by <paramref name="height" /> frame.</summary>
+        public static void Save(string path, int width, int height, Stage stage)
+        {
+            var surface = new Surface();
+            surface.Target = new PixelSize(width, height);
+            surface.Frame += graphics => stage.Draw(graphics, new VRageMath.RectangleF(0f, 0f, graphics.Size.X, graphics.Size.Y));
+
+            var bitmap = new RenderTargetBitmap(width, height, 96d, 96d, PixelFormats.Pbgra32);
+            Take(bitmap, new Backdrop(), surface, new Size(width, height));
+
+            var png = new PngBitmapEncoder();
+            png.Frames.Add(BitmapFrame.Create(bitmap));
+
+            using (FileStream file = File.Create(path))
+                png.Save(file);
         }
 
         /// <summary>

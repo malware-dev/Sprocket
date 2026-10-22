@@ -6,7 +6,7 @@ using VRageMath;
 namespace Lumel.Screens
 {
     /// <summary>One element shown on a <see cref="GameScreen" />, laid out across its room and handed its input through an <see cref="InputRoot" />.</summary>
-    /// <remarks>It asks no questions, and Escape closes it.</remarks>
+    /// <remarks>Escape closes it, and Enter carries out <see cref="Accept" /> where it has one.</remarks>
     public class Stage : IScreenView
     {
         readonly Element _root;
@@ -22,6 +22,10 @@ namespace Lumel.Screens
 
         /// <summary>What is shown.</summary>
         public Element Root => _root;
+
+        /// <summary>What Enter does, or null where Enter does nothing.</summary>
+        /// <remarks>While there is one, the keyboard goes to it and to nothing that could be typed in.</remarks>
+        public ICommand Accept { get; set; }
 
         /// <inheritdoc />
         public InputRoot Input => _input;
@@ -44,7 +48,7 @@ namespace Lumel.Screens
         }
 
         /// <inheritdoc />
-        public bool IsQuestioning => false;
+        public bool IsQuestioning => Accept != null;
 
         /// <summary>Asks the screen to close as soon as the press under way ends.</summary>
         public void Close()
@@ -55,7 +59,11 @@ namespace Lumel.Screens
         /// <inheritdoc />
         public bool TakeDefault()
         {
-            return false;
+            if (Accept == null || !Accept.CanExecute)
+                return false;
+
+            Accept.Execute();
+            return true;
         }
 
         /// <inheritdoc />

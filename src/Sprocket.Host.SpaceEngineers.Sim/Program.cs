@@ -4,6 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Sprocket.Host.SpaceEngineers.Features.Look;
+using Sprocket.Host.SpaceEngineers.Features.Shell;
+using Sprocket.Host.SpaceEngineers.Localization;
+using Lumel.Text;
 using Lumel.Drawing;
 using Sprocket.Host.SpaceEngineers.LcdApps.StatusPanel;
 using Sprocket.Sim.Content;
@@ -229,6 +232,17 @@ namespace Sprocket.Sim
                 return;
             }
 
+            // The notice shown over the terminal, as a player not let in sees it: --notice <file.png>.
+            if (args.Length > 1 && args[0] == "--notice")
+            {
+                var texts = new Texts();
+                var arguments = new Arguments();
+                arguments.Set("construct", "Hailstone Station");
+                Shot.Save(args[1], 1920, 1080, TerminalNotice.Staged(texts.TerminalForeign, arguments, texts.TerminalOk));
+                Console.WriteLine("wrote " + args[1]);
+                return;
+            }
+
             if (args.Length > 1 && args[0] == "--shot")
             {
 
@@ -375,12 +389,12 @@ namespace Sprocket.Sim
         }
 
         /// <summary>The alignment an <c>align=</c> argument names, or left where none does.</summary>
-        static Lumel.Text.Alignment Aligned(string[] args)
+        static Alignment Aligned(string[] args)
         {
             var given = Array.Find(args, a => a.StartsWith("align=", StringComparison.Ordinal));
             return given == null
-                ? Lumel.Text.Alignment.Left
-                : (Lumel.Text.Alignment)Enum.Parse(typeof(Lumel.Text.Alignment), given.Substring(6), true);
+                ? Alignment.Left
+                : (Alignment)Enum.Parse(typeof(Alignment), given.Substring(6), true);
         }
 
         /// <summary>

@@ -1563,8 +1563,11 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Paused.Review" xml:space="preserve">
     <value>Se over</value>
   </data>
+  <data name="Sprocket.Terminal.Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
   <data name="Sprocket.Terminal.Foreign" xml:space="preserve">
-    <value>Bare eierne av {construct}, og de de deler den med, kan åpne automasjonen dens.</value>
+    <value>Bare eierne av {construct}, og de de deler med, kan åpne automasjonen dens.</value>
   </data>
   <data name="Sprocket.Terminal.Refused" xml:space="preserve">
     <value>Automasjonen i denne blokken kan ikke redigeres.</value>
