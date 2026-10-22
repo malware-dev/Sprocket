@@ -530,7 +530,7 @@ namespace Sprocket.Sim.Driving
                 }
 
                 var button = element as Button;
-                if (button != null && (button.Text == StatusRow.Plus + text || button.Text == text))
+                if (button != null && IsCalled(button, text))
                 {
                     button.Command!.Execute();
                     return;
@@ -659,13 +659,20 @@ namespace Sprocket.Sim.Driving
                    ?? throw new InvalidOperationException($"No block '{name}' on '{editor.Screen.Title()}'.");
         }
 
-        /// <summary>Presses the button saying <paramref name="label" />, after the plus of anything that adds, on the page the editor is on.</summary>
+        /// <summary>Whether <paramref name="button" /> is named <paramref name="text" />, or says it with or without an adder's plus.</summary>
+        static bool IsCalled(Button button, string text)
+        {
+            var said = button.AutomationId ?? button.Text;
+            return said == text || said == StatusRow.Plus + text;
+        }
+
+        /// <summary>Presses the button named or saying <paramref name="label" />, after the plus of anything that adds, on the page the editor is on.</summary>
         static void PressButton(SprocketEditor editor, string label)
         {
             var view = editor.Current.View
                        ?? throw new InvalidOperationException($"'{editor.Screen.Title()}' is described in components and has no buttons.");
 
-            var button = Within(view).OfType<Button>().FirstOrDefault(b => b.Text == StatusRow.Plus + label || b.Text == label)
+            var button = Within(view).OfType<Button>().FirstOrDefault(b => IsCalled(b, label))
                          ?? throw new InvalidOperationException($"No button '{label}' on '{editor.Screen.Title()}'.");
 
             button.Command!.Execute();

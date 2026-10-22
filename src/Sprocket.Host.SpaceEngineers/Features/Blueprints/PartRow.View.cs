@@ -14,6 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Grip _grip;
         Glyph _mark;
         Button _name;
+        Label _words;
         RichText _about;
         SlotChip _blocks;
         SlotChip _signals;
@@ -40,8 +41,19 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Children =
                         {
                             new Grip { Color = Palette.Faint, HeldColor = Palette.Ink, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(24f, 24f) }.As(out _grip),
-                            new Glyph { Style = Styles.Waits }.As(out _mark),
-                            new Button { Style = Styles.SlotNameStill }.As(out _name)
+                            new Button
+                            {
+                                Style = Styles.SlotNameStill,
+                                Content = new HStack
+                                {
+                                    Spacing = 8f,
+                                    Children =
+                                    {
+                                        new Glyph { Style = Styles.Waits, Align = Align.Center }.As(out _mark),
+                                        new Label { Style = Styles.Name }.As(out _words)
+                                    }
+                                }
+                            }.As(out _name)
                         }
                     },
                     new RichText { Style = Styles.SlotDescription, IsVisible = false }.As(out _about)

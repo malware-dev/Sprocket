@@ -1,29 +1,35 @@
-using System;
-using Lumel.Drawing;
+using Lumel.Input;
 using Lumel.Text;
 using VRageMath;
 
 namespace Lumel.Controls
 {
-    /// <summary>Words to press, on a fill of their own.</summary>
-    public class Button : Element, IPadded, ITextual
+    /// <summary>Something to press, on a fill of its own: its own words, or content given to it, in the middle.</summary>
+    /// <remarks>
+    /// The button's style dresses its own words. Content given to it is dressed by whoever gives it, and is drawn only: a press
+    /// anywhere on the button reaches the button, unless <see cref="Element.InputTransparency" /> is set to let it through.
+    /// </remarks>
+    public class Button : ContentControl, ITextual
     {
-        Thickness _padding;
         readonly Label _label = new Label();
         bool _pressed;
 
         /// <summary>A button with no words, in the neutral look.</summary>
         public Button()
         {
-            var children = new Collection(this);
-            children.Add(_label);
+            Content = _label;
+            InputTransparency = InputTransparency.Children;
         }
 
-        /// <summary>The words on the button.</summary>
+        /// <summary>The words on the button, which become what it shows in place of any content given to it; empty while it shows content given to it.</summary>
         public string Text
         {
-            get { return _label.Text; }
-            set { _label.Text = value; }
+            get { return ReferenceEquals(Content, _label) ? _label.Text : ""; }
+            set
+            {
+                _label.Text = value;
+                Content = _label;
+            }
         }
 
         /// <summary>Whether the pointer is pressed down on the button.</summary>
@@ -40,62 +46,28 @@ namespace Lumel.Controls
             }
         }
 
-        /// <summary>Which face the words are drawn in.</summary>
+        /// <summary>Which face the button's own words are drawn in.</summary>
         public string Font
         {
             get { return _label.Font; }
             set { _label.Font = value; }
         }
 
-        /// <summary>How tall a line of the words is, in UI units.</summary>
+        /// <summary>How tall a line of the button's own words is, in UI units.</summary>
         public float FontSize
         {
             get { return _label.FontSize; }
             set { _label.FontSize = value; }
         }
 
-        /// <summary>The color the words are drawn in.</summary>
+        /// <summary>The color the button's own words are drawn in.</summary>
         public Color Color
         {
             get { return _label.Color; }
             set { _label.Color = value; }
         }
 
-        /// <summary>Room held clear between the edge and the words.</summary>
-        public Thickness Padding
-        {
-            get { return _padding; }
-            set
-            {
-                if (_padding == value)
-                    return;
-
-                _padding = value;
-                InvalidateMeasure();
-            }
-        }
-
-        /// <inheritdoc />
-        protected override Thickness Inset => _padding;
-
-        /// <inheritdoc />
-        protected override Vector2 MeasureContent(IGraphics g, Vector2 available)
-        {
-            _label.Measure(g, available);
-            return _label.DesiredSize;
-        }
-
-        /// <summary>Puts the words in the middle of the room the button is given, wider than they need or not.</summary>
-        protected override void ArrangeContent(RectangleF bounds)
-        {
-            var width = Math.Min(_label.DesiredSize.X, bounds.Width);
-            _label.Arrange(new RectangleF(bounds.X + (bounds.Width - width) * 0.5f, bounds.Y, width, bounds.Height));
-        }
-
-        /// <inheritdoc />
-        protected override void DrawContent(IGraphics g)
-        {
-            _label.Draw(g);
-        }
+        /// <summary>What it shows sits in the middle of the room the button is given, wider than it needs or not.</summary>
+        protected override Align Aligns => Align.Center;
     }
 }

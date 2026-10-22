@@ -224,7 +224,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>Says the slot's name, and its short name after it in brackets where it has one.</summary>
         void Label()
         {
-            _name.Text = _short.Length == 0 ? _id : $"{_id} ({_short})";
+            _words.Text = _short.Length == 0 ? _id : $"{_id} ({_short})";
+            _name.AutomationId = _words.Text;
         }
 
         /// <summary>How wide the slot's name and description would stand in <paramref name="available" />.</summary>

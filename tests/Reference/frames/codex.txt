@@ -63,37 +63,37 @@ on screen     Automation for Test Rig
 056  Sprite     Sprocket_Fill         {X:984 Y:1067 W:648 H:110}  #29363EFF
 057  Sprite     Sprocket_Fill         {X:984 Y:1067 W:3 H:110}  #8EBCCFFF
 058  Sprite     Sprocket_Fill         {X:984 Y:1229 W:648 H:1}  #5B737BFF
-059  Sprite     Sprocket_Fill         {X:984 Y:1350 W:648 H:1}  #5B737BFF
+059  Sprite     Sprocket_Fill         {X:984 Y:1390 W:648 H:1}  #5B737BFF
 060  Sprite     Sprocket_Fill         {X:1390 Y:666 W:107 H:1}  #4FC3F7FF
 061  Sprite     Sprocket_Fill         {X:1003 Y:686 W:61 H:1}  #4FC3F7FF
 062  Sprite     Sprocket_Fill         {X:1366 Y:880 W:161 H:1}  #4FC3F7FF
 063  Sprite     Sprocket_Fill         {X:1115 Y:1016 W:50 H:1}  #4FC3F7FF
 064  Sprite     Sprocket_Fill         {X:1254 Y:1016 W:78 H:1}  #4FC3F7FF
-065  Sprite     Sprocket_Fill         {X:1064 Y:1295 W:109 H:1}  #4FC3F7FF
-066  Sprite     Sprocket_Fill         {X:1250 Y:1376 W:75 H:1}  #4FC3F7FF
-067  Sprite     Sprocket_Mark         {X:1180 Y:183 W:256 H:256}  #FFFFFFFF
-068  Text       at {X:1033.405 Y:450.8559} scale 1.389  #DCF5FDFF  "Welcome to Sprocket Automation"
-069  Text       at {X:984 Y:505.9279} scale 0.694  #A2C3CDFF  "Event controllers, timer blocks, sensors... there is already a means for automation,"
-070  Text       at {X:984 Y:525.9279} scale 0.694  #A2C3CDFF  "sure. But it takes up a whole bunch of space, is limited in what it can do, and"
-071  Text       at {X:984 Y:545.9279} scale 0.694  #A2C3CDFF  "fragile. One railgun shot to your automation bay and you have to set "
-072  Text       at {X:1521.838 Y:545.9279} scale 0.694  #A2C3CDFF  "everything "
-073  Text       at {X:1610.487 Y:545.9279} scale 0.694  #A2C3CDFF  "up"
-074  Text       at {X:984 Y:565.9279} scale 0.694  #A2C3CDFF  "again."
-075  Text       at {X:984 Y:600.6847} scale 1.111  #DCF5FDFF  "Enter Sprocket Automation."
-076  Text       at {X:984 Y:646.9279} scale 0.694  #A2C3CDFF  "Describe your automation in simple but powerful "
-077  Text       at {X:1371.144 Y:650.6016} scale 0.301  #A2C3CDFF  "y"
-078  Text       at {X:1386.027 Y:646.9279} scale 0.694  #A2C3CDFF  " "
-079  Text       at {X:1390.351 Y:646.9279} scale 0.694  #4FC3F7FF  "logic systems"
-080  Text       at {X:1497.378 Y:646.9279} scale 0.694  #A2C3CDFF  ". Set up"
-081  Text       at {X:984.1172 Y:670.6016} scale 0.301  #A2C3CDFF  "T"
-082  Text       at {X:999 Y:666.9279} scale 0.694  #A2C3CDFF  " "
-083  Text       at {X:1003.324 Y:666.9279} scale 0.694  #4FC3F7FF  "triggers"
-084  Text       at {X:1064.405 Y:666.9279} scale 0.694  #A2C3CDFF  " to run sequential steps. Easily wait until a door is actually closed"
-085  Text       at {X:984 Y:686.9279} scale 0.694  #A2C3CDFF  "before pressurizing that airlock, without manual timing. Go one step further, with"
-086  Text       at {X:984 Y:706.9279} scale 0.694  #A2C3CDFF  "more complex expressions and states."
-087  Text       at {X:984 Y:734.9279} scale 0.694  #A2C3CDFF  "Sprocket Automation lives within "
-088  Text       at {X:1246.162 Y:734.9279} scale 0.694  #A2C3CDFF  "all "
-089  Text       at {X:1269.405 Y:734.9279} scale 0.694  #A2C3CDFF  "of your programmable blocks: If you lose one,"
+065  Sprite     Sprocket_Fill         {X:1433 Y:1255 W:57 H:1}  #4FC3F7FF
+066  Sprite     Sprocket_Fill         {X:984 Y:1335 W:109 H:1}  #4FC3F7FF
+067  Sprite     Sprocket_Fill         {X:1250 Y:1416 W:75 H:1}  #4FC3F7FF
+068  Sprite     Sprocket_Mark         {X:1180 Y:183 W:256 H:256}  #FFFFFFFF
+069  Text       at {X:1033.405 Y:450.8559} scale 1.389  #DCF5FDFF  "Welcome to Sprocket Automation"
+070  Text       at {X:984 Y:505.9279} scale 0.694  #A2C3CDFF  "Event controllers, timer blocks, sensors... there is already a means for automation,"
+071  Text       at {X:984 Y:525.9279} scale 0.694  #A2C3CDFF  "sure. But it takes up a whole bunch of space, is limited in what it can do, and"
+072  Text       at {X:984 Y:545.9279} scale 0.694  #A2C3CDFF  "fragile. One railgun shot to your automation bay and you have to set "
+073  Text       at {X:1521.838 Y:545.9279} scale 0.694  #A2C3CDFF  "everything "
+074  Text       at {X:1610.487 Y:545.9279} scale 0.694  #A2C3CDFF  "up"
+075  Text       at {X:984 Y:565.9279} scale 0.694  #A2C3CDFF  "again."
+076  Text       at {X:984 Y:600.6847} scale 1.111  #DCF5FDFF  "Enter Sprocket Automation."
+077  Text       at {X:984 Y:646.9279} scale 0.694  #A2C3CDFF  "Describe your automation in simple but powerful "
+078  Text       at {X:1371.144 Y:650.6016} scale 0.301  #A2C3CDFF  "y"
+079  Text       at {X:1386.027 Y:646.9279} scale 0.694  #A2C3CDFF  " "
+080  Text       at {X:1390.351 Y:646.9279} scale 0.694  #4FC3F7FF  "logic systems"
+081  Text       at {X:1497.378 Y:646.9279} scale 0.694  #A2C3CDFF  ". Set up"
+082  Text       at {X:984.1172 Y:670.6016} scale 0.301  #A2C3CDFF  "T"
+083  Text       at {X:999 Y:666.9279} scale 0.694  #A2C3CDFF  " "
+084  Text       at {X:1003.324 Y:666.9279} scale 0.694  #4FC3F7FF  "triggers"
+085  Text       at {X:1064.405 Y:666.9279} scale 0.694  #A2C3CDFF  " to run sequential steps. Easily wait until a door is actually closed"
+086  Text       at {X:984 Y:686.9279} scale 0.694  #A2C3CDFF  "before pressurizing that airlock, without manual timing. Go one step further, with"
+087  Text       at {X:984 Y:706.9279} scale 0.694  #A2C3CDFF  "more complex expressions and states."
+088  Text       at {X:984 Y:734.9279} scale 0.694  #A2C3CDFF  "Any "
+089  Text       at {X:1018.595 Y:734.9279} scale 0.694  #A2C3CDFF  "of your programmable blocks can keep Sprocket Automation: If you lose one,"
 090  Text       at {X:984 Y:754.9279} scale 0.694  #A2C3CDFF  "but there's still another on your ship, your automation is still fully functional. And..."
 091  Text       at {X:984 Y:774.9279} scale 0.694  #A2C3CDFF  "even if the last programmable block is lost, the automatic backup system has"
 092  Text       at {X:984 Y:794.9279} scale 0.694  #A2C3CDFF  "stored away your actual logic, so you can restore it to a new ship or back to your"
@@ -122,24 +122,27 @@ on screen     Automation for Test Rig
 115  Text       at {X:1004 Y:1129.928} scale 0.694  #A2C3CDFF  "logic, or share the blueprint files directly. You can find these in the game's"
 116  Text       at {X:1004 Y:1149.928} scale 0.694  #A2C3CDFF  "app data folder (defaults to %appdata%\SpaceEngineers\Storage)."
 117  Text       at {X:984 Y:1189.685} scale 1.111  #DCF5FDFF  "Getting Started"
-118  Text       at {X:984 Y:1235.928} scale 0.694  #A2C3CDFF  "Find any programmable block in the terminal and press "
-119  Sprite     Sprocket_Fill         {X:1422 Y:1239 W:105 H:18}  #FFFFFF0A
-120  Text       at {X:1425.838 Y:1235.928} scale 0.694  #A2C3CDFF  "Automation"
-121  Text       at {X:1526.595 Y:1235.928} scale 0.694  #A2C3CDFF  ". That opens"
-122  Text       at {X:984 Y:1255.928} scale 0.694  #A2C3CDFF  "the home screen of its construct, where every logic system on it is listed. From"
-123  Text       at {X:984 Y:1275.928} scale 0.694  #A2C3CDFF  "there, the "
-124  Text       at {X:1064 Y:1275.928} scale 0.694  #4FC3F7FF  "simple airlock"
-125  Text       at {X:1172.649 Y:1275.928} scale 0.694  #A2C3CDFF  " takes you through your first one, step by step."
-126  Text       at {X:984 Y:1310.685} scale 1.111  #DCF5FDFF  "Recommended Reading"
-127  Text       at {X:984 Y:1356.928} scale 0.694  #A2C3CDFF  "Once the airlock works, the other "
-128  Text       at {X:1250.487 Y:1356.928} scale 0.694  #4FC3F7FF  "examples"
-129  Text       at {X:1325.081 Y:1356.928} scale 0.694  #A2C3CDFF  " build more logic systems the same"
-130  Text       at {X:984 Y:1376.928} scale 0.694  #A2C3CDFF  "way."
-131  Sprite     Sprocket_Fill         {X:1652 Y:159 W:12 H:520}  #5F7278FF
-132  ClearClip  
-133  Sprite     Sprocket_Fill         {X:1462 Y:89 W:129 H:36}  #1B242AFF
-134  Sprite     Sprocket_Fill         {X:1462 Y:89 W:129 H:1}  #5B737BFF
-135  Sprite     Sprocket_Fill         {X:1462 Y:124 W:129 H:1}  #5B737BFF
-136  Sprite     Sprocket_Fill         {X:1462 Y:89 W:1 H:36}  #5B737BFF
-137  Sprite     Sprocket_Fill         {X:1590 Y:89 W:1 H:36}  #5B737BFF
-138  Text       at {X:1474.043 Y:94.6399} scale 0.694  #A2C3CDFF  "Close the codex"
+118  Text       at {X:984 Y:1235.928} scale 0.694  #A2C3CDFF  "Find a programmable block owned by one of your ship's "
+119  Text       at {X:1432.649 Y:1235.928} scale 0.694  #4FC3F7FF  "owners"
+120  Text       at {X:1489.946 Y:1235.928} scale 0.694  #A2C3CDFF  " in the terminal"
+121  Text       at {X:984 Y:1255.928} scale 0.694  #A2C3CDFF  "and press "
+122  Sprite     Sprocket_Fill         {X:1066 Y:1259 W:105 H:18}  #FFFFFF0A
+123  Text       at {X:1070.162 Y:1255.928} scale 0.694  #A2C3CDFF  "Automation"
+124  Text       at {X:1170.919 Y:1255.928} scale 0.694  #A2C3CDFF  ". That opens the home screen of its construct, where"
+125  Text       at {X:984 Y:1275.928} scale 0.694  #A2C3CDFF  "every logic system on it is listed, with a search box that narrows the list to the"
+126  Text       at {X:984 Y:1295.928} scale 0.694  #A2C3CDFF  "logic systems and installations whose names hold what you type. From there, the "
+127  Text       at {X:984 Y:1315.928} scale 0.694  #4FC3F7FF  "simple airlock"
+128  Text       at {X:1092.649 Y:1315.928} scale 0.694  #A2C3CDFF  " takes you through your first one, step by step."
+129  Text       at {X:984 Y:1350.685} scale 1.111  #DCF5FDFF  "Recommended Reading"
+130  Text       at {X:984 Y:1396.928} scale 0.694  #A2C3CDFF  "Once the airlock works, the other "
+131  Text       at {X:1250.487 Y:1396.928} scale 0.694  #4FC3F7FF  "examples"
+132  Text       at {X:1325.081 Y:1396.928} scale 0.694  #A2C3CDFF  " build more logic systems the same"
+133  Text       at {X:984 Y:1416.928} scale 0.694  #A2C3CDFF  "way."
+134  Sprite     Sprocket_Fill         {X:1652 Y:159 W:12 H:504}  #5F7278FF
+135  ClearClip  
+136  Sprite     Sprocket_Fill         {X:1462 Y:89 W:129 H:36}  #1B242AFF
+137  Sprite     Sprocket_Fill         {X:1462 Y:89 W:129 H:1}  #5B737BFF
+138  Sprite     Sprocket_Fill         {X:1462 Y:124 W:129 H:1}  #5B737BFF
+139  Sprite     Sprocket_Fill         {X:1462 Y:89 W:1 H:36}  #5B737BFF
+140  Sprite     Sprocket_Fill         {X:1590 Y:89 W:1 H:36}  #5B737BFF
+141  Text       at {X:1474.043 Y:94.6399} scale 0.694  #A2C3CDFF  "Close the codex"

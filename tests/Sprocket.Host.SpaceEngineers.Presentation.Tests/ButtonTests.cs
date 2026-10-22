@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 
-/// <summary>A button: its words on its fill, styled whole, and pressed whole.</summary>
+/// <summary>A button: its words or content given to it on its fill, styled whole, and pressed whole.</summary>
 public class ButtonTests
 {
     const float Wide = 400f;
@@ -113,6 +113,57 @@ public class ButtonTests
         easel.Draw(Wide, High);
 
         Assert.Equal(settled, easel.Measured);
+    }
+
+    /// <summary>Content given to it takes the place of its words, and its style leaves that content as it was given.</summary>
+    [Fact]
+    public void GivenContentTakesThePlaceOfItsWords()
+    {
+        var given = new Lumel.Text.Label { Text = "Given", Color = Faint };
+        var button = new Button { Text = "Done", Style = Go };
+        button.Content = given;
+        var easel = new Easel(new VStack { Children = { button } }, Wide, High);
+
+        Assert.Equal("", button.Text);
+        Assert.Equal("Given", Words(easel).Text);
+        Assert.Equal(Faint, Words(easel).Color);
+    }
+
+    /// <summary>Given words again, it shows its own words in place of the content it was given.</summary>
+    [Fact]
+    public void GivenWordsItShowsItsOwnAgain()
+    {
+        var button = new Button { Style = Go, Content = new Lumel.Text.Label { Text = "Given" } };
+        button.Text = "Done";
+        var easel = new Easel(new VStack { Children = { button } }, Wide, High);
+
+        Assert.Equal("Done", button.Text);
+        Assert.Equal("Done", Words(easel).Text);
+        Assert.Equal(Chrome, Words(easel).Color);
+    }
+
+    /// <summary>A press on content given to it reaches the button, not the content.</summary>
+    [Fact]
+    public void APressOnGivenContentReachesTheButton()
+    {
+        var given = new HStack { Children = { new Lumel.Text.Label { Text = "Given" } } };
+        var button = new Button { Style = Go, Content = given, Command = new Relay(() => { }) };
+        _ = new Easel(new VStack { Children = { button } }, Wide, High);
+
+        var middle = new Vector2(given.Bounds.X + given.Bounds.Width / 2f, given.Bounds.Y + given.Bounds.Height / 2f);
+        Assert.Same(button, button.Under(middle));
+    }
+
+    /// <summary>Content given to it sits in the middle of the room inside its padding.</summary>
+    [Fact]
+    public void GivenContentSitsInTheMiddle()
+    {
+        var given = new Lumel.Text.Label { Text = "Given" };
+        var button = new Button { Style = Go, Content = given };
+        _ = new Easel(new VStack { Children = { button } }, Wide, High);
+
+        Assert.Equal(button.Bounds.X + button.Bounds.Width / 2f, given.Bounds.X + given.Bounds.Width / 2f, 2);
+        Assert.Equal(button.Bounds.Y + button.Bounds.Height / 2f, given.Bounds.Y + given.Bounds.Height / 2f, 2);
     }
 
     static DrawCommand Words(Easel easel)

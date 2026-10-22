@@ -59,11 +59,13 @@ their colors under the pointer), and what pressing, hovering over and styling it
   is no rotation: the game cannot draw rotated text.
 - **`Container`** is an element that holds content given to it from outside, and lays it out. Every
   container has `Padding`, the room between its edge and what it holds, which is why it sits on the
-  base: whatever every container must support belongs there. A control builds its own parts instead,
-  so a button or a switch is not a container.
+  base: whatever every container must support belongs there. As a guideline a control builds its own
+  parts instead, because each element held is one more to lay out and draw: a switch is not a container.
   - **`Panel`** holds any number of `Children`. The stacks are panels.
   - **`ContentControl`** holds one `Content`, laid out across the room inside its padding unless the kind
-    of control says otherwise. `ScrollView`, `Reveal` and `Window` are content controls.
+    of control says otherwise. `ScrollView`, `Reveal` and `Window` are content controls, and so is
+    `Button`: it holds its own words, styled by its style, until content given to it takes their place,
+    styled by whoever gives it. What it holds passes presses to the button.
   - **`Grid`** holds its own `Cells`, and is a container and nothing more.
 - A container does not clip: what it holds may draw outside it. An element that has to clip to work,
   such as a scroll view, a reveal or a text box, clips itself, and nothing outside it can switch that off.

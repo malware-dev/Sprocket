@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>How many times the chrome has written what the screen says onto its controls.</summary>
         public int Wires => _wires;
 
-        /// <summary>Where a press reaches the first thing on the screen saying <paramref name="text" />, with or without an adder's plus.</summary>
+        /// <summary>Where a press reaches the first thing on the screen named or saying <paramref name="text" />, with or without an adder's plus.</summary>
         /// <remarks>Words hidden under a window or scrolled out of sight are passed over.</remarks>
         public bool Find(string text, out Vector2 at)
         {
@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var button = element as Button;
             var label = element as Label;
             var glyph = element as Lumel.Images.Glyph;
-            var said = button != null ? button.Text : label != null ? label.Text : glyph?.Symbol;
+            var said = element.AutomationId ?? (button != null ? button.Text : label != null ? label.Text : glyph?.Symbol);
             if (said == text || said == StatusRow.Plus + text)
             {
                 var bounds = element.Bounds;

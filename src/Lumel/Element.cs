@@ -207,6 +207,9 @@ namespace Lumel
         /// <summary>What of this lets presses, the hover and the keyboard pass through to what is beneath it.</summary>
         public InputTransparency InputTransparency { get; set; }
 
+        /// <summary>The name a test or script finds this by, ahead of any words it shows, or null to be found by those words.</summary>
+        public string AutomationId { get; set; }
+
         /// <summary>How thick <see cref="Edge" /> is drawn.</summary>
         public float EdgeThickness { get; set; }
 

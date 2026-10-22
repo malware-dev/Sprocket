@@ -145,7 +145,7 @@ public class SlotListTests
         screen.Run(2);
 
         var row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
-        var label = row.Within().OfType<Lumel.Controls.Button>().First();
+        var label = row.Within().OfType<Lumel.Controls.Button>().First().Within().OfType<Lumel.Text.Label>().First();
         Assert.Equal(row.Name, label.Text);
 
         var name = row.Name;
@@ -162,7 +162,28 @@ public class SlotListTests
         screen.Run(2);
 
         row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
-        Assert.Equal(name + " (Call)", row.Within().OfType<Lumel.Controls.Button>().First().Text);
+        Assert.Equal(name + " (Call)", row.Within().OfType<Lumel.Controls.Button>().First().Within().OfType<Lumel.Text.Label>().First().Text);
+    }
+
+    /// <summary>A slot's mark stands inside its name's button, named by the slot's name, and a press on the name opens the slot.</summary>
+    [Fact]
+    public void ASlotsMarkStandsInsideItsNameButton()
+    {
+        var screen = Screen.Fresh();
+        screen.Editor.NewButtonSystem("Airlock");
+        screen.Run(2);
+        screen.Editor.BackKeeping();
+        screen.Run(2);
+        screen.Editor.PressTab(screen.Editor.Texts.SystemInstallationPanel);
+        screen.Run(2);
+
+        var row = screen.Editor.Current!.View.Within().OfType<PartRow>().Single();
+        var button = row.Within().OfType<Lumel.Controls.Button>().First();
+        Assert.Equal(Symbols.Signal, Assert.Single(button.Within().OfType<Lumel.Images.Glyph>()).Symbol);
+        Assert.Equal(row.Name, button.AutomationId);
+
+        screen.Do("press", row.Name);
+        Assert.IsType<SlotPage>(screen.Editor.Current);
     }
 
     /// <summary>The line saying how many more there are is said in the player's language.</summary>
