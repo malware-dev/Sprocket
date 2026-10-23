@@ -11,7 +11,8 @@ namespace Lumel
 {
     /// <summary>
     /// A tip standing edge to edge with the element it explains, which the pointer can move onto: pages of rich text, gone
-    /// between through the links in them and back and forward again.
+    /// between through the links in them and back and forward again, or, where it <see cref="Nests" />, each link's page
+    /// opened in a tip of its own beside it.
     /// </summary>
     /// <remarks>
     /// The host draws it over everything else with <see cref="Draw(IGraphics, RectangleF)" />, tells it on every frame what
@@ -32,6 +33,10 @@ namespace Lumel
         Element _spent;
         WindowLayer _watched;
         bool _keptByKey;
+        bool _nests;
+        CodexTip _next;
+        Element _opener;
+        Tip _restingPage;
 
         /// <summary>A closed tip with no pages, which opens after no delay and closes the moment the pointer is off both it and its element.</summary>
         public CodexTip()
@@ -60,6 +65,8 @@ namespace Lumel
             {
                 _keptByKey = value;
                 _keepHint.IsVisible = value && _keepHint.Document != null;
+                if (_next != null)
+                    _next.KeptByKey = value;
             }
         }
 
@@ -71,12 +78,37 @@ namespace Lumel
             {
                 _keepHint.Document = value;
                 _keepHint.IsVisible = _keptByKey && value != null;
+                if (_next != null)
+                    _next.KeepHint = value;
             }
         }
 
         /// <summary>Asks whether the host's keep key is held, or null for a host with none.</summary>
         /// <remarks>Asked only while the tip is open and <see cref="KeptByKey" /> is set.</remarks>
         public Func<bool> KeepKey { get; set; }
+
+        /// <summary>
+        /// Whether a link inside the tip opens its page in a tip of its own beside this one once the pointer has rested on it
+        /// for <see cref="Delay" />, rather than in this one when pressed.
+        /// </summary>
+        public bool Nests
+        {
+            get { return _nests; }
+            set
+            {
+                if (_nests == value)
+                    return;
+
+                _nests = value;
+                _body.Follow = value ? null : (Action<Link>)(link => Follow(link.Target));
+            }
+        }
+
+        /// <summary>How many tips may stand side by side where it <see cref="Nests" />, this one included.</summary>
+        public int Chain { get; set; } = 3;
+
+        /// <summary>The tip a link in this one opened beside it, or null where none is open.</summary>
+        public CodexTip Beside => _next != null && _next.IsOpen ? _next : null;
 
         /// <summary>Whether the tip holds the pointer: open, and either always kept or kept now by the host's keep key.</summary>
         public bool IsKept => _anchor != null && (!_keptByKey || KeepKey != null && KeepKey());
@@ -173,11 +205,14 @@ namespace Lumel
             Show();
         }
 
-        /// <summary>Closes the tip, if it is open; its element shows it again only once the pointer has rested on something else.</summary>
+        /// <summary>Closes the tip, and any opened beside it, if it is open; its element shows it again only once the pointer has rested on something else.</summary>
         public void Close()
         {
             if (_anchor == null)
                 return;
+
+            if (_next != null)
+                _next.Close();
 
             _spent = _anchor;
             _anchor = null;
@@ -260,15 +295,27 @@ namespace Lumel
             Open(speaker, said);
         }
 
-        /// <summary>Closes the tip where a press at <paramref name="point" /> does not land on it while it is kept; the press goes on to whatever it reaches either way.</summary>
+        /// <summary>Closes the tip where a press at <paramref name="point" /> lands on neither it nor one opened beside it while it is kept; the press goes on to whatever it reaches either way.</summary>
         public void Dismiss(Vector2 point)
         {
             if (_anchor != null && !Covers(point))
                 Close();
         }
 
-        /// <summary>Whether <paramref name="point" /> is on the tip while it holds the pointer, so the pointer reaches the tip there and nothing beneath it.</summary>
+        /// <summary>Whether <paramref name="point" /> is on the tip, or on one opened beside it, while it holds the pointer, so the pointer reaches the tip there and nothing beneath it.</summary>
         public bool Covers(Vector2 point)
+        {
+            return Own(point) || Beside != null && _next.Covers(point);
+        }
+
+        /// <summary>What a press or a hover at <paramref name="point" /> reaches in the tip or in one opened beside it.</summary>
+        public Element Reached(Vector2 point)
+        {
+            return Beside != null && _next.Covers(point) ? _next.Reached(point) : Under(point);
+        }
+
+        /// <summary>Whether <paramref name="point" /> is on this tip itself while it holds the pointer.</summary>
+        bool Own(Vector2 point)
         {
             return IsKept && Holds(point);
         }
@@ -288,6 +335,9 @@ namespace Lumel
 
             Arrange(Place(area, size));
             Draw(g);
+
+            if (_next != null)
+                _next.Draw(g, area);
         }
 
         /// <summary>Keeps the open tip while the pointer is on it or on its element, and closes it once the pointer has been off both for <see cref="Grace" />.</summary>
@@ -299,11 +349,8 @@ namespace Lumel
                 return;
             }
 
-            if (Covers(pointer))
-            {
-                _left = -1;
+            if (Holding(pointer, now))
                 return;
-            }
 
             if (_anchor.Reaches(pointer))
             {
@@ -314,6 +361,35 @@ namespace Lumel
                 return;
             }
 
+            Leave(now);
+        }
+
+        /// <summary>
+        /// Whether the pointer is on this tip or on one opened beside it, which keeps this one open; on this one, a tip that
+        /// <see cref="Nests" /> tells the one beside it which link's page the pointer rests on.
+        /// </summary>
+        bool Holding(Vector2 pointer, int now)
+        {
+            if (Beside != null && _next.Covers(pointer))
+            {
+                _left = -1;
+                _next.Track(null, pointer, now);
+                return true;
+            }
+
+            if (!Own(pointer))
+                return false;
+
+            _left = -1;
+            if (_nests && Chain > 1)
+                Next().Track(PageAt(pointer), pointer, now);
+
+            return true;
+        }
+
+        /// <summary>Closes the tip at once where it does not hold the pointer, and otherwise once the pointer has been off it for <see cref="Grace" />.</summary>
+        void Leave(int now)
+        {
             if (!IsKept)
             {
                 Close();
@@ -325,6 +401,76 @@ namespace Lumel
 
             if (now - _left >= Grace)
                 Close();
+        }
+
+        /// <summary>
+        /// Opens, keeps or closes this tip, one a link opens beside another, by where the pointer is: <paramref name="page" /> is
+        /// the page of the link the pointer rests on in the tip before it, or null where it rests on none there.
+        /// </summary>
+        void Track(Tip page, Vector2 pointer, int now)
+        {
+            if (page != _restingPage)
+            {
+                _restingPage = page;
+                _restingSince = now;
+            }
+
+            if (_anchor != null)
+            {
+                if (Holding(pointer, now))
+                    return;
+
+                if (page == null)
+                {
+                    Leave(now);
+                    return;
+                }
+
+                _left = -1;
+                if (page != _said)
+                    Open(_anchor, page);
+
+                return;
+            }
+
+            if (page != null && now - _restingSince >= Delay)
+                Open(_opener, page);
+        }
+
+        /// <summary>The page of the link at <paramref name="pointer" />, in screen coordinates, or null where there is none.</summary>
+        Tip PageAt(Vector2 pointer)
+        {
+            var link = _body.LinkAt(_body.FromScreen(pointer));
+            return link == null ? null : Pages?.Invoke(link.Target);
+        }
+
+        /// <summary>The tip beside this one its links open, made the first time one is wanted, standing beside this one's page and looking as it does.</summary>
+        CodexTip Next()
+        {
+            if (_next != null)
+                return _next;
+
+            _next = new CodexTip
+            {
+                Style = Style,
+                Placement = Placement,
+                Spacing = Spacing,
+                MaxHeight = MaxHeight,
+                Delay = Delay,
+                Grace = Grace,
+                BodyStyle = BodyStyle,
+                StepStyle = StepStyle,
+                BackSymbol = BackSymbol,
+                ForwardSymbol = ForwardSymbol,
+                Pages = Pages,
+                KeepKey = KeepKey,
+                KeptByKey = _keptByKey,
+                KeepHint = KeepHint,
+                Nests = true,
+                Chain = Chain - 1
+            };
+            _next._opener = _body;
+            return _next;
         }
 
         /// <summary>Where the tip stands at <paramref name="size" />: flush against its element on the side chosen, and inside <paramref name="area" />.</summary>

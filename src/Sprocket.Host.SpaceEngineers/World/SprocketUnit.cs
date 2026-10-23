@@ -50,6 +50,7 @@ namespace Sprocket.Host.SpaceEngineers.World
         readonly string _author;
         bool _developerMode;
         TipKeeping _tipKeeping;
+        TipLinks _tipLinks;
 
         SprocketEditor _editor;
 
@@ -114,6 +115,7 @@ namespace Sprocket.Host.SpaceEngineers.World
             _texts = texts;
             _developerMode = settings != null && settings.DeveloperMode;
             _tipKeeping = settings?.TipKeeping ?? TipKeeping.Stay;
+            _tipLinks = settings?.TipLinks ?? TipLinks.Replace;
 
             _author = MyAPIGateway.Multiplayer == null ? null : Player.Plain(MyAPIGateway.Multiplayer.MyName);
 
@@ -270,11 +272,13 @@ namespace Sprocket.Host.SpaceEngineers.World
             Logged(settings.DebugLog);
             _developerMode = settings.DeveloperMode;
             _tipKeeping = settings.TipKeeping;
+            _tipLinks = settings.TipLinks;
             if (_editor == null)
                 return;
 
             _editor.DeveloperMode = _developerMode;
             _editor.TipKeeping = _tipKeeping;
+            _editor.TipLinks = _tipLinks;
         }
 
         /// <summary>Gives the runner a log of what its runs do where <paramref name="on" />, keeping the one it has, and takes it away otherwise.</summary>
@@ -327,6 +331,7 @@ namespace Sprocket.Host.SpaceEngineers.World
 
                 _editor.DeveloperMode = _developerMode;
                 _editor.TipKeeping = _tipKeeping;
+                _editor.TipLinks = _tipLinks;
                 return _editor;
             }
         }

@@ -2764,6 +2764,22 @@
     <value>Hold Alt to keep open</value>
     <comment>In the admin settings, the choice of the tip trial where a tip stays for the pointer to move onto it only while Alt is held. Placeholder until the texts are written.</comment>
   </data>
+  <data name="Sprocket.Admin.Links" xml:space="preserve">
+    <value>Where a tip's links open</value>
+    <comment>PLACEHOLDER, to be written. In the admin settings, under the trials heading, the name of the trial of where the page of a link inside a tip is shown.</comment>
+  </data>
+  <data name="Sprocket.Admin.LinksAbout" xml:space="preserve">
+    <value>Whether pressing a link in a tip shows its page in the same tip, or resting on it opens the page in a tip beside it.</value>
+    <comment>PLACEHOLDER, to be written. In the admin settings, the line under the name of the trial of where a link inside a tip shows its page.</comment>
+  </data>
+  <data name="Sprocket.Admin.LinksReplace" xml:space="preserve">
+    <value>In the same tip</value>
+    <comment>PLACEHOLDER, to be written. In the admin settings, the choice of the link trial where pressing a link in a tip shows its page in that tip, with steps back and forward.</comment>
+  </data>
+  <data name="Sprocket.Admin.LinksBeside" xml:space="preserve">
+    <value>In a tip beside it</value>
+    <comment>PLACEHOLDER, to be written. In the admin settings, the choice of the link trial where resting the pointer on a link in a tip opens its page in a second tip beside the first, up to three side by side.</comment>
+  </data>
   <data name="Sprocket.System.Locked" xml:space="preserve">
     <value>{name} must be turned off in order to be edited safely.</value>
     <comment>Line shown while a logic system is switched on, in place of the buttons that change it, on the logic system's screen, a sequence's screen and a blueprint slot's screen; also the tooltip on the dimmed bin in the editor's heading bar on a sequence's screen. {name} is filled with the logic system's name, except on the installation panel, where the line shows while the installation is on and {name} is the installation's name.</comment>

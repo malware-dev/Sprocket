@@ -95,7 +95,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         null,
                         layer => layer.TipKeeping.HasValue ? Keeping(layer.TipKeeping.Value) : -1,
                         settings => Keeping(settings.DefaultTipKeeping),
-                        (layer, at) => layer.WithTipKeeping(at < 0 ? (TipKeeping?)null : at == 0 ? TipKeeping.Stay : TipKeeping.Alt)))
+                        (layer, at) => layer.WithTipKeeping(at < 0 ? (TipKeeping?)null : at == 0 ? TipKeeping.Stay : TipKeeping.Alt))),
+                    Setting(texts.AdminLinks, texts.AdminLinksAbout, Choose(texts, world,
+                        new[] { texts.AdminLinksReplace, texts.AdminLinksBeside },
+                        null,
+                        layer => layer.TipLinks.HasValue ? Linking(layer.TipLinks.Value) : -1,
+                        settings => Linking(settings.DefaultTipLinks),
+                        (layer, at) => layer.WithTipLinks(at < 0 ? (TipLinks?)null : at == 0 ? TipLinks.Replace : TipLinks.Beside)))
                 }
             };
         }
@@ -159,6 +165,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
         static int Keeping(TipKeeping keeping)
         {
             return keeping == TipKeeping.Stay ? 0 : 1;
+        }
+
+        /// <summary>Where <paramref name="links" /> stands among its words: in the same tip, then beside it.</summary>
+        static int Linking(TipLinks links)
+        {
+            return links == TipLinks.Replace ? 0 : 1;
         }
 
         /// <summary>Where a switch being <paramref name="on" /> stands among its words: on, then off.</summary>

@@ -455,7 +455,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         public Element Under(Vector2 point)
         {
             if (_codexTip.Covers(point))
-                return _codexTip.Under(point);
+                return _codexTip.Reached(point);
 
             bool stopped;
             var windowed = _windows.Under(point, out stopped);
@@ -602,6 +602,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             var texts = _editor.Texts;
 
             _codexTip.KeptByKey = _editor.TipKeeping == World.TipKeeping.Alt;
+            _codexTip.Nests = _editor.TipLinks == World.TipLinks.Beside;
             if (_keepHint != texts.Codex.TipKeepHint)
             {
                 _keepHint = texts.Codex.TipKeepHint;

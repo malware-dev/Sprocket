@@ -38,6 +38,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _holder;
         EditorHabits _habits = new EditorHabits();
         TipKeeping _tipKeeping;
+        TipLinks _tipLinks;
         PlayerMemory _viewer = new PlayerMemory();
         readonly List<EditorPage> _stack = new List<EditorPage>();
 
@@ -229,6 +230,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                     return;
 
                 _tipKeeping = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>Where a link inside one of the screen's tips shows its page, the trial's variant the world uses.</summary>
+        /// <remarks>A change rebuilds the screen.</remarks>
+        public TipLinks TipLinks
+        {
+            get { return _tipLinks; }
+            set
+            {
+                if (_tipLinks == value)
+                    return;
+
+                _tipLinks = value;
                 Invalidate();
             }
         }

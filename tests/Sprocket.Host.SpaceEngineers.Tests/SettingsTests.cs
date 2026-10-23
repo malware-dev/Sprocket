@@ -43,6 +43,21 @@ public class SettingsTests
         Assert.Equal(TipKeeping.Alt, Settings.Of(written.Written()).TipKeeping);
     }
 
+    /// <summary>A tip's links show their pages in the same tip unless a file asks for beside, the world's file winning; the choice is written and read back, and a word that is neither is left.</summary>
+    [Fact]
+    public void LinksStayInTheTipUnlessBesideIsAsked()
+    {
+        Assert.Equal(TipLinks.Replace, Settings.From(null, null).TipLinks);
+        Assert.Equal(TipLinks.Beside, Settings.From("[Sprocket]\ntipLinks=beside\n", null).TipLinks);
+        Assert.Equal(TipLinks.Replace, Settings.From("[Sprocket]\ntipLinks=beside\n", "[Sprocket]\ntipLinks=replace\n").TipLinks);
+        Assert.Null(Settings.From(null, "[Sprocket]\ntipLinks=sometimes\n").World.TipLinks);
+
+        var written = new Settings(SettingsLayer.Empty, SettingsLayer.Empty.WithTipLinks(TipLinks.Beside));
+        Assert.Equal(TipLinks.Beside, Settings.Of(written.Written()).TipLinks);
+        Assert.Equal(TipKeeping.Alt, Settings.Of(new Settings(SettingsLayer.Empty,
+            SettingsLayer.Empty.WithTipKeeping(TipKeeping.Alt).WithTipLinks(TipLinks.Beside)).Written()).TipKeeping);
+    }
+
     /// <summary>The debug log is off unless a file says otherwise, the world's file winning, and it is handed to a client as it is.</summary>
     [Fact]
     public void TheDebugLogIsOffUnlessSaid()
