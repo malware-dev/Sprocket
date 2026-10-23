@@ -197,7 +197,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 Spacing = 8f,
                 Delay = TipDelay,
                 Grace = TipGrace,
-                TitleStyle = Styles.Tip,
                 BodyStyle = Styles.Tip,
                 StepStyle = Styles.Icon,
                 BackSymbol = Symbols.Left,

@@ -2,7 +2,7 @@
 
 The codex is every tip Sprocket shows. A tip is a codex tip (`Lumel/CodexTip.cs`): it opens beside the element the
 pointer rests on, the pointer can move onto it, and the links in it lead to other pages inside it, with back and
-forward.
+forward in a small row at its top once there is somewhere to go.
 
 ## Pages
 
@@ -11,11 +11,11 @@ translated in `Codex.no.resx` as `MyTexts.resx` is in `MyTexts.no.resx`. The gam
 texts together, and the text generator writes the class `Codex` from the file, one property a page, reached as
 `texts.Codex`, so a page the code names and the file lacks fails the build.
 
-A page is markdown-lite. A first line starting `# ` is the page's title, shown in the tip's title row, with the term's
-mark before it where it has one. A link names the page it leads to by its key without `Sprocket.`, as in
-`[slot](Term.Slot)`, and `CodexPages` finds the page for it. Every link in every page, in every language, has to
-lead to a page: the build fails on a link to a key no file of texts has (LOC021), and counts a page a link leads to as
-read. The presentation tests hold that every mark and box a page asks for is one the editor has.
+A page is markdown-lite, and the tip shows the whole of it, with no title. A link names the page it leads to by its
+key without `Sprocket.`, as in `[slot](Term.Slot)`, and `CodexPages` finds the page for it. Every link in every page,
+in every language, has to lead to a page: the build fails on a link to a key no file of texts has (LOC021), and counts
+a page a link leads to as read. The presentation tests hold that every mark and box a page asks for is one the editor
+has.
 
 The term pages are keyed `Sprocket.Term.<Name>`; the rest are the tips of the screens' elements, keyed by screen and
 element as the texts in `MyTexts.resx` are. A text shown anywhere outside a tip, a label or the words a tip and a screen
@@ -25,6 +25,11 @@ by the Markup button beside every description box, is `Sprocket.Guide.RichText` 
 A section's heading that is a term, such as the home screen's `LOGIC SYSTEMS`, is written as a link to its page:
 it shows in the link color, takes no press, and has the page as its tip. The heading is as wide as its words, so the
 tip stands beside them.
+
+The words a step opens with on a sequence's screen are written the same way where they are a term: `if` leads to the
+page on ifs, `otherwise if` and `otherwise` to the page on branches, `delay` to the page on delays, and `run` and
+`stop` to the page on running and stopping. Each page is linked only from the first row on the screen that leads to
+it, so a `stop` after a `run` is plain; on a paused row the link is as quiet as the rest of the sentence.
 
 ## Marks
 

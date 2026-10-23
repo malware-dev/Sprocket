@@ -13,7 +13,7 @@ Every tip is a codex page: one entry in `Content/Data/Localization/Codex.resx`, 
 `[slot](Term.Slot)`. A link to a page that does not exist fails the build. Text shown anywhere in the mod outside a
 tip lives in `MyTexts.resx`, never in the codex; a text that only ever shows inside a tip stays in the codex.
 
-A page has a title row, its subject with its mark, and a body of a few short lines. It never scrolls.
+A page is a few short lines of rich text with no title; a term page names its term in bold, with its mark, in its first sentence. It never scrolls.
 
 ## Which element gets a tip
 

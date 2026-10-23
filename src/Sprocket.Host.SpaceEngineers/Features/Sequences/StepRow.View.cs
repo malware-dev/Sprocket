@@ -14,7 +14,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         Flow _sentence;
         Label _problem;
         Glyph _leadWaits;
-        Label _lead;
+        RichText _lead;
         Glyph _duplicate;
         Glyph _pause;
         Glyph _delete;
@@ -49,7 +49,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                         {
                             new Glyph { Symbol = Symbols.Awaited, Style = Styles.Waits, IsVisible = false, Halo = Symbols.AwaitedOutline, HaloSize = 20f * Sizes.Halo }
                                 .As(out _leadWaits),
-                            new Label { Style = Styles.Phrase }.As(out _lead)
+                            new RichText { Style = Styles.PhraseTerm }.As(out _lead)
                         }
                     }.As(out _sentence),
 

@@ -15,8 +15,7 @@ namespace Lumel
     /// </summary>
     /// <remarks>
     /// The host draws it over everything else with <see cref="Draw(IGraphics, RectangleF)" />, tells it on every frame what
-    /// the pointer rests on with <see cref="Hover" />, and hands it every press first through <see cref="Dismiss" />. A page
-    /// opening with a heading of the first level shows that heading as its title.
+    /// the pointer rests on with <see cref="Hover" />, and hands it every press first through <see cref="Dismiss" />.
     /// </remarks>
     public partial class CodexTip : VStack
     {
@@ -84,13 +83,6 @@ namespace Lumel
 
         /// <summary>How tall the tip grows at most, in UI units; a page taller than this is cut off at it.</summary>
         public float MaxHeight { get; set; } = float.PositiveInfinity;
-
-        /// <summary>How a page's title looks.</summary>
-        public IStyle TitleStyle
-        {
-            get { return _title.Style; }
-            set { _title.Style = value; }
-        }
 
         /// <summary>How a page's words look, the line that says how to keep the tip included.</summary>
         public IStyle BodyStyle
@@ -378,21 +370,15 @@ namespace Lumel
             return new RectangleF(x, y, size.X, size.Y);
         }
 
-        /// <summary>Puts the page shown into the title row and the body, and shows the steps there are somewhere to go with.</summary>
+        /// <summary>Puts the page shown into the body, and shows the row of steps only while there is somewhere to go.</summary>
         void Show()
         {
             var page = _pages[_at];
-            Document title;
-            var body = page.Document.Untitled(out title);
-            var titled = title != null;
-
-            _title.Document = title;
-            _title.Arguments = page.Arguments;
-            _body.Document = body;
+            _body.Document = page.Document;
             _body.Arguments = page.Arguments;
             _back.IsVisible = CanGoBack;
             _forward.IsVisible = CanGoForward;
-            _heading.IsVisible = titled || CanGoBack || CanGoForward;
+            _steps.IsVisible = CanGoBack || CanGoForward;
         }
 
         void GiveWay(Window opened)

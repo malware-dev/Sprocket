@@ -33,6 +33,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The name links give the page on backups.</summary>
         public const string Backup = "Term.Backup";
 
+        /// <summary>The name links give the page on ifs.</summary>
+        public const string If = "Term.If";
+
+        /// <summary>The name links give the page on the branches of an if.</summary>
+        public const string Branch = "Term.Branch";
+
+        /// <summary>The name links give the page on delays.</summary>
+        public const string Delay = "Term.Delay";
+
+        /// <summary>The name links give the page on the steps running and stopping a sequence.</summary>
+        public const string RunAndStop = "Term.RunAndStop";
+
         readonly Texts _texts;
         readonly Dictionary<string, Tip> _read = new Dictionary<string, Tip>(StringComparer.Ordinal);
 

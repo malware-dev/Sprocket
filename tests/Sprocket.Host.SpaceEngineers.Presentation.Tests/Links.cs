@@ -11,6 +11,19 @@ static class Links
     /// <summary>The first point on the screen where a link to <paramref name="target" /> sits inside <paramref name="element" />, and the text it sits in.</summary>
     public static Vector2 First(Element element, string target, out RichText text)
     {
+        if (Find(element, target, out text, out var point))
+            return point;
+
+        Assert.Fail("no link to " + target + " on the screen");
+        return default;
+    }
+
+    /// <summary>Whether a link to <paramref name="target" /> sits anywhere inside <paramref name="element" />.</summary>
+    public static bool Has(Element element, string target) => Find(element, target, out _, out _);
+
+    /// <summary>Finds the first point on the screen where a link to <paramref name="target" /> sits inside <paramref name="element" />, and the text it sits in.</summary>
+    static bool Find(Element element, string target, out RichText text, out Vector2 at)
+    {
         foreach (var rich in Within(element))
         {
             for (var y = rich.Bounds.Y; y < rich.Bounds.Y + rich.Bounds.Height; y += 2f)
@@ -21,15 +34,16 @@ static class Links
                     if (rich.LinkAt(point) is { } link && link.Target == target)
                     {
                         text = rich;
-                        return rich.ToScreen(point);
+                        at = rich.ToScreen(point);
+                        return true;
                     }
                 }
             }
         }
 
         text = null!;
-        Assert.Fail("no link to " + target + " on the screen");
-        return default;
+        at = default;
+        return false;
     }
 
     /// <summary>Every rich text inside <paramref name="element" />.</summary>

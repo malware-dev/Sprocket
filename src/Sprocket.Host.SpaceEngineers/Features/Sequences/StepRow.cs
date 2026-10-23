@@ -9,6 +9,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using VRageMath;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -36,6 +37,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         int _numbered;
         StepKind _led = (StepKind)(-1);
+        string _ledTerm;
 
         /// <summary>An empty row, filled in by setting what it shows and calling <see cref="Show" />.</summary>
         public StepRow()
@@ -59,6 +61,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
         /// <summary>What sort of step it is, which is what its line opens with.</summary>
         public StepKind Kind { get; set; }
+
+        /// <summary>The codex page the words its line opens with are the term of, shown in the term's look with that page as their tip; null for plain words.</summary>
+        public string LeadTerm { get; set; }
 
         /// <summary>The parts that complete its sentence.</summary>
         public List<SentenceSlot> Slots { get; }
@@ -153,11 +158,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _problem.IsVisible = HasProblem && Problem.Length != 0;
             _problem.Color = RemarkColors.Of(Level, Palette.Faint);
 
-            if (_led != Kind)
+            if (_led != Kind || _ledTerm != LeadTerm)
             {
                 _led = Kind;
+                _ledTerm = LeadTerm;
                 var lead = SentenceText.Lead(Kind);
-                _lead.Text = lead;
+                _lead.Markdown = LeadTerm == null ? Markdown.Escape(lead) : CodexPages.Link(lead, LeadTerm);
                 _lead.IsVisible = lead.Length != 0;
                 _leadWaits.IsVisible = Kind == StepKind.Run || Kind == StepKind.Await;
             }
@@ -192,7 +198,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
 
             var words = IsOff ? Styles.PausedPhrase : Styles.Phrase;
             var parts = IsOff ? Styles.PausedSlot : Styles.Slot;
-            _lead.Style = words;
+            _lead.Style = IsOff ? Styles.PausedPhraseTerm : Styles.PhraseTerm;
             for (var i = 0; i < _chips.Count; i++)
             {
                 _joins[i].Style = words;
@@ -222,6 +228,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                     : IsCurrent
                         ? Palette.LiveWash
                         : Palette.None;
+        }
+
+        /// <summary>Makes the words its line opens with, where they are a term, show the page <paramref name="codex" /> has on it.</summary>
+        public void Explain(CodexPages codex)
+        {
+            codex.Explain(_lead);
         }
 
         /// <inheritdoc />

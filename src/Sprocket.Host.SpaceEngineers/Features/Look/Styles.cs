@@ -416,6 +416,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { Color = Palette.Dim }
         };
 
+        /// <summary>The words a sentence opens with, where they may be a term in the codex.</summary>
+        public static readonly RichTextStyle PhraseTerm = new RichTextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Muted, LinkColor = Palette.Link }
+        };
+
+        /// <summary>The words a paused sentence opens with, quieter than those of one that runs, a term among them as quiet as the rest.</summary>
+        public static readonly RichTextStyle PausedPhraseTerm = new RichTextStyle(PhraseTerm)
+        {
+            Base = { Color = Palette.Dim, LinkColor = Palette.Dim }
+        };
+
         /// <summary>A part of a sentence: the game's button in a name's size, its words in the warning color while nothing fills it, and the words alone where it cannot be pressed.</summary>
         public static readonly SlotStyle Slot = new SlotStyle
         {

@@ -1,5 +1,6 @@
 using Lumel;
 using Lumel.Layout;
+using Lumel.Text;
 using Lumel.Windows;
 using VRageMath;
 using Xunit;
@@ -268,6 +269,42 @@ public class CodexTipTests
         Assert.False(tip.CanGoForward, "going on kept what was stepped back from");
     }
 
+    /// <summary>A page is its document whole, a heading it opens with included, with no title row and no row of steps above it.</summary>
+    [Fact]
+    public void AFreshTipIsItsPageAlone()
+    {
+        var (_, anchor, tip) = Stage(100f, 100f);
+        tip.BackSymbol = "<";
+        tip.ForwardSymbol = ">";
+        var page = new Tip("# A heading\n\nA few words about it.");
+
+        tip.Open(anchor, page);
+        tip.Draw(new Recording(Area), Area);
+
+        Assert.Equal(Alone(page), tip.Bounds.Height, 1);
+    }
+
+    /// <summary>The row of steps back and forward shows above the page once a link was followed, and stays while there is a page to step forward to.</summary>
+    [Fact]
+    public void TheStepsShowOnceALinkWasFollowed()
+    {
+        var (_, anchor, tip) = Stage(100f, 100f);
+        tip.BackSymbol = "<";
+        tip.ForwardSymbol = ">";
+        var first = new Tip("See [b](b).");
+        var second = new Tip("Page b.");
+        tip.Pages = id => id == "b" ? second : null;
+        tip.Open(anchor, first);
+
+        tip.Follow("b");
+        tip.Draw(new Recording(Area), Area);
+        Assert.True(tip.Bounds.Height > Alone(second) + 1f, "the steps did not show after a link was followed");
+
+        tip.GoBack();
+        tip.Draw(new Recording(Area), Area);
+        Assert.True(tip.Bounds.Height > Alone(first) + 1f, "the steps went with a page still to step forward to");
+    }
+
     /// <summary>A link to a page there is none of goes nowhere: the page shown stays.</summary>
     [Fact]
     public void ALinkToAMissingPageFails()
@@ -354,6 +391,14 @@ public class CodexTipTests
         tip.Open(anchor, new Tip("A few words about it."));
         tip.Draw(new Recording(Area), Area);
         return (anchor, tip, other);
+    }
+
+    /// <summary>How tall <paramref name="page" /> stands as rich text alone, at the tip's width.</summary>
+    static float Alone(Tip page)
+    {
+        var text = new RichText { Document = page.Document };
+        text.Measure(new Recording(Area), new Vector2(Wide, Area.Height));
+        return text.DesiredSize.Y;
     }
 
     static Vector2 On(Element element) => new Vector2(element.Bounds.X + element.Bounds.Width / 2f, element.Bounds.Y + element.Bounds.Height / 2f);

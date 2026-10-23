@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         readonly Sequence _sequence;
         readonly List<object> _keys = new List<object>();
         readonly List<int> _shown = new List<int>();
+        readonly HashSet<string> _termed = new HashSet<string>();
         Dictionary<Step, object> _ends = new Dictionary<Step, object>();
 
         readonly LastRunText _account;
@@ -228,7 +230,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Keeps the rows by step, and fills the view.</summary>
         protected override void ViewCreated()
         {
-            _rows = new KeyedChildren<object, StepRow>(_steps.Children, delegate { return new StepRow(); });
+            _rows = new KeyedChildren<object, StepRow>(_steps.Children, delegate { return Row(); });
             _steps.Landings = Landings;
             _steps.Moves = (from, to) =>
             {
@@ -347,6 +349,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var depth = 0;
             var number = 0;
             var offTo = -1;
+            _termed.Clear();
             for (var i = 0; i < _keys.Count; i++)
             {
                 var row = _rows[_keys[i]];
@@ -370,6 +373,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Depth = depth;
                 row.Number = closes ? 0 : ++number;
                 row.Kind = Kind(step);
+                row.LeadTerm = Term(row.Kind);
                 row.Carries = step is If ? Within(i) : Kind(step) == StepKind.OtherwiseIf ? Branch(i) : 0;
                 row.Slots.Clear();
                 Word(row, step);
@@ -396,6 +400,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Depth = depth;
             row.Number = 0;
             row.Kind = StepKind.Adds;
+            row.LeadTerm = null;
             row.Carries = 0;
             row.Slots.Clear();
             row.Deletes = null;
@@ -631,6 +636,41 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Slots.Add(new ArgumentsSlot(new[] { ComparisonQuestion.Of(test.Relation) }, ComparisonQuestion.StateFields(),
                 Changes(CommandKind.StepSlot, () => _stepwork.RelateState(step, test)), ArgumentRole.Compared));
             row.Slots.Add(StateValueQuestion.Part(_sequence.System, test.State, test.Value, test.Other, opens, ArgumentRole.Checked));
+        }
+
+        /// <summary>A row for a step, whose opening words explain their term with the codex's page on it.</summary>
+        StepRow Row()
+        {
+            var row = new StepRow();
+            row.Explain(Editor.Codex);
+            return row;
+        }
+
+        /// <summary>The codex page the words a step of <paramref name="kind" /> opens with are the term of, where no row above on the screen links that page; null otherwise.</summary>
+        string Term(StepKind kind)
+        {
+            string page;
+            switch (kind)
+            {
+                case StepKind.If:
+                    page = CodexPages.If;
+                    break;
+                case StepKind.OtherwiseIf:
+                case StepKind.Otherwise:
+                    page = CodexPages.Branch;
+                    break;
+                case StepKind.Wait:
+                    page = CodexPages.Delay;
+                    break;
+                case StepKind.Run:
+                case StepKind.Stop:
+                    page = CodexPages.RunAndStop;
+                    break;
+                default:
+                    return null;
+            }
+
+            return _termed.Add(page) ? page : null;
         }
 
         static StepKind Kind(Step step)

@@ -290,16 +290,19 @@ public class CodexTests
         Assert.Null(pages.Find("Term.Nowhere"));
     }
 
-    /// <summary>The codex is read in the language the editor speaks.</summary>
+    /// <summary>The codex is read in the language the editor speaks, and read again once the editor comes to speak another.</summary>
     [Fact]
     public void TheCodexIsReadInTheEditorsLanguage()
     {
         var screen = Screen.Fresh("tick", "3");
+        var english = screen.Editor.Codex.Find(CodexPages.LogicSystem)!.Text;
 
         screen.Scene.Speak("no");
+        screen.Editor.Reword();
 
-        Assert.StartsWith("# ![](mark:logic-system)&nbsp;Logikksystem", screen.Editor.Texts.Codex.TermLogicSystem);
-        Assert.StartsWith("# ![](mark:logic-system)&nbsp;Logikksystem", screen.Editor.Codex.Find(CodexPages.LogicSystem)!.Text);
+        var norwegian = screen.Editor.Codex.Find(CodexPages.LogicSystem)!.Text;
+        Assert.Equal(screen.Editor.Texts.Codex.TermLogicSystem, norwegian);
+        Assert.NotEqual(english, norwegian);
     }
 
     /// <summary>Every link in every page of the codex, in every language, names a page the codex has, so no page leads nowhere.</summary>
