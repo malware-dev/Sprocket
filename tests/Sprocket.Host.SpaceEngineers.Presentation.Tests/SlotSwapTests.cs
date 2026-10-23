@@ -65,7 +65,7 @@ public class SlotSwapTests
         Assert.NotEqual(was, slot.Expects);
         var used = new List<string>();
         system.Acted(used);
-        Assert.Equal(SlotMark.Changed, SlotMarks.Of(screen.Editor.Runner.Bindings, system, other, slot, used));
+        Assert.Equal(SlotMark.Changed, SlotMarks.Of(screen.Editor.Runner.Bindings, other, slot));
     }
 
     /// <summary>The same block picked again names the slot it fills, and makes none.</summary>

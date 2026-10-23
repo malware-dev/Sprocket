@@ -160,12 +160,6 @@
   <data name="Sprocket.Slot.OrMore" xml:space="preserve">
     <value>eller {count} til</value>
   </data>
-  <data name="Sprocket.Slot.SetAsideNote" xml:space="preserve">
-    <value>Lagt til side</value>
-  </data>
-  <data name="Sprocket.Slot.SetAside" xml:space="preserve">
-    <value>Lagt til side, tilbys først: {blocks}</value>
-  </data>
   <data name="Sprocket.Slot.Changed" xml:space="preserve">
     <value>Endret: fyll den på nytt</value>
   </data>

@@ -12,8 +12,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
     {
         readonly SprocketEditor _editor;
         readonly AutomationSystem _system;
-        readonly List<string> _used = new List<string>();
-        readonly List<string> _aside = new List<string>();
 
         /// <summary>Fills the slots of the blueprint <paramref name="system" />, in the editor <paramref name="editor" />.</summary>
         public SlotFill(SprocketEditor editor, AutomationSystem system)
@@ -54,23 +52,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 return;
             }
 
-            var page = new PickPage(_editor, part.Id, targets, block => Fits(part, block),
-                answer => Filled(part, chosen, answer.Targets));
-            Offer(page, chosen);
-            _editor.Push(page);
-        }
-
-        /// <summary>Lists first in <paramref name="page" /> the blocks <paramref name="chosen" /> had for slots that were split or merged.</summary>
-        void Offer(PickPage page, SystemInstance chosen)
-        {
-            _system.Acted(_used);
-            SlotMarks.SetAside(_system, chosen, _used, _aside);
-            foreach (var blockName in _aside)
-            {
-                var block = _editor.Runner.Bindings.Entity(blockName);
-                if (block != null)
-                    page.Ahead[block.Id] = _editor.Texts.SlotSetAsideNote;
-            }
+            _editor.Push(new PickPage(_editor, part.Id, targets, block => Fits(part, block),
+                answer => Filled(part, chosen, answer.Targets)));
         }
 
         /// <summary>Answers signal slot <paramref name="part" /> for <paramref name="chosen" /> with the signal <paramref name="answer" /> picked on each of its blocks, and goes back.</summary>
@@ -83,7 +66,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var kept = new List<ToolbarSlot>();
             _editor.Starts.Picked(answer, names, kept);
             _editor.Claims.Filling(_system, part, chosen, answer.Targets, _editor.Claims.Pressed(answer),
-                () => new FillSlot(chosen, part.Id, names, kept, Settle), Done);
+                () => new FillSlot(chosen, part.Id, names, kept), Done);
         }
 
         /// <summary>Fills <paramref name="part" /> for <paramref name="chosen" /> with the blocks <paramref name="ids" />, and goes back.</summary>
@@ -99,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         names.Add(_editor.Program.Declare(_editor.World, block).Name);
                 }
 
-                return new FillSlot(chosen, part.Id, names, (IList<ToolbarSlot>)null, Settle);
+                return new FillSlot(chosen, part.Id, names, (IList<ToolbarSlot>)null);
             }, Done);
         }
 
@@ -120,16 +103,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                     numbers.Add(SlotsFromPicks.Numbered(block.Kind.Facets(type), answer.Facet));
                 }
 
-                return new FillSlot(chosen, part.Id, names, numbers, Settle);
+                return new FillSlot(chosen, part.Id, names, numbers);
             }, Done);
-        }
-
-        /// <summary>Lets go of the blocks set aside, in every installation of <paramref name="system" /> with every slot filled again.</summary>
-        void Settle(AutomationSystem system)
-        {
-            var used = new List<string>();
-            system.Acted(used);
-            SlotMarks.Settle(_editor.Runner.Bindings, system, used);
         }
 
         /// <summary>Goes back to the screen the picker was opened from.</summary>

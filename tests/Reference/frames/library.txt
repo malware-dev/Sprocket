@@ -7,21 +7,21 @@ on screen     Library
 000  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:991}  #141B20FF
 001  Sprite     Sprocket_Fill         {X:240 Y:45 W:1440 H:56}  #1B242AFF
 002  Text       at {X:262.1563 Y:59.01406} scale 0.401  #A2C3CDFF  "<"
-003  SetClip    {X:296 Y:53 W:1328 H:40}
+003  SetClip    {X:296 Y:53 W:1368 H:40}
 004  Text       at {X:304 Y:53.39666} scale 1.111  #DCF5FDFF  "Library"
 005  ClearClip  
-006  Text       at {X:1643.282 Y:55.81107} scale 0.972  #A2C3CDFF  "?"
-007  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
-008  Sprite     Sprocket_Fill         {X:256 Y:118 W:640 H:36}  #141B20FF
-009  Sprite     Sprocket_Fill         {X:256 Y:118 W:640 H:1}  #5B737BFF
-010  Sprite     Sprocket_Fill         {X:256 Y:153 W:640 H:1}  #5B737BFF
-011  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:36}  #5B737BFF
-012  Sprite     Sprocket_Fill         {X:895 Y:118 W:1 H:36}  #5B737BFF
-013  SetClip    {X:256 Y:118 W:640 H:36}
-014  Text       at {X:268 Y:123.6399} scale 0.694  #85A1A9FF  "Search"
-015  ClearClip  
-016  SetClip    {X:256 Y:166 W:640 H:854}
-017  Text       at {X:260 Y:171.6399} scale 0.694  #85A1A9FF  "ON YOUR CONSTRUCTS"
+006  Sprite     Sprocket_Fill         {X:240 Y:101 W:1440 H:1}  #5B737BFF
+007  Sprite     Sprocket_Fill         {X:256 Y:118 W:640 H:36}  #141B20FF
+008  Sprite     Sprocket_Fill         {X:256 Y:118 W:640 H:1}  #5B737BFF
+009  Sprite     Sprocket_Fill         {X:256 Y:153 W:640 H:1}  #5B737BFF
+010  Sprite     Sprocket_Fill         {X:256 Y:118 W:1 H:36}  #5B737BFF
+011  Sprite     Sprocket_Fill         {X:895 Y:118 W:1 H:36}  #5B737BFF
+012  SetClip    {X:256 Y:118 W:640 H:36}
+013  Text       at {X:268 Y:123.6399} scale 0.694  #85A1A9FF  "Search"
+014  ClearClip  
+015  SetClip    {X:256 Y:166 W:640 H:854}
+016  Text       at {X:260 Y:171.6399} scale 0.694  #85A1A9FF  "ON YOUR "
+017  Text       at {X:329.2067 Y:171.6399} scale 0.694  #4FC3F7FF  "CONSTRUCTS"
 018  Text       at {X:272 Y:207.6399} scale 0.694  #DCF5FDFF  "Test Rig (this construct)"
 019  Text       at {X:264 Y:239.2255} scale 0.833  #A2C3CDFF  "No logic systems on this construct."
 020  Text       at {X:260 Y:311.6399} scale 0.694  #85A1A9FF  "IN STORAGE"

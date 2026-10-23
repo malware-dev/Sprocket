@@ -10,8 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>
 /// The blocks a step picks either name the slots they fill already, the same set the same slot and a set made exactly of
 /// smaller sets their slots, or make one new slot; a pick never changes a slot. Arranged on request, the slots are worked out
-/// again from the sets and every slot nothing names goes, whatever another installation holds in it. A slot nothing names
-/// keeps another installation's blocks set aside until then.
+/// again from the sets and every slot nothing names goes, whatever another installation holds in it. Until then a slot
+/// nothing names stays as it is, holding every installation's blocks.
 /// </summary>
 public class SetSlotTests
 {
@@ -199,9 +199,9 @@ public class SetSlotTests
         Assert.DoesNotContain("'" + whole + "'", ProgramWriter.Blueprint(system));
     }
 
-    /// <summary>Another installation is marked under each slot it has to fill again, on the logic system's screen.</summary>
+    /// <summary>Another installation is asked, on the logic system's screen, only to fill the slots that are new to it.</summary>
     [Fact]
-    public void AnotherInstallationIsMarkedWhereItFillsAgain()
+    public void AnotherInstallationIsAskedOnlyForTheNewSlots()
     {
         var screen = Split(out var system, out _);
         var whole = Hidden(system);
@@ -210,29 +210,22 @@ public class SetSlotTests
         var blocks = rows.Where(row => row.Mark == Symbols.Block && row.Name != whole).ToList();
         Assert.Equal(2, blocks.Count);
         Assert.Null(rows.Single(row => row.Name == whole).Marks);
-        Assert.All(blocks, row => Assert.Equal("Installation 2: changed, fill it again", row.Marks));
-        Assert.Equal("Installation 2: new, fill it", rows.Single(row => row.Mark == Symbols.Signal).Marks);
+        Assert.All(blocks, row => Assert.Equal("Installation 2: new, fill it", row.Marks));
     }
 
-    /// <summary>The installation's panel says which slots to fill again, and the blocks it had, which the picker lists first.</summary>
+    /// <summary>A slot nothing names keeps the blocks another installation filled it with, and that installation has nothing to fill again.</summary>
     [Fact]
-    public void ThePanelOffersTheBlocksSetAsideFirst()
+    public void ASlotNothingNamesKeepsItsBlocks()
     {
         var screen = Split(out var system, out var port);
+        var whole = Hidden(system);
         var editor = screen.Editor;
         editor.Choose(system, port);
         editor.Push(new BlueprintPage(editor, system));
         screen.Run(2);
 
-        var row = editor.Parts().First(r => r.Name == Assert.Single(Targets(screen, 0)));
-        Assert.Equal("Set aside, offered first: " + Inner, row.SetAside);
-        Assert.Contains(editor.Blueprint().View.Within().OfType<Lumel.Text.Label>(), label => label.Text == "2 slots to fill again");
-
-        row.Fills!.Execute();
-        screen.Run(2);
-        var first = editor.Offered()[0];
-        Assert.Equal(Inner, first.Text);
-        Assert.Equal("Set aside", first.Secondary);
+        Assert.Equal(new[] { Declared(screen, Inner) }, port.FilledWith(whole));
+        Assert.DoesNotContain(editor.Blueprint().View.Within().OfType<Lumel.Text.Label>(), label => label.Text.Contains("fill again"));
     }
 
     /// <summary>While its logic system is switched on, a slot is neither opened nor refilled from its screen, and its name says why.</summary>
@@ -271,20 +264,20 @@ public class SetSlotTests
     static bool Headed(Features.LogicSystems.LogicSystemPage page, Features.Shell.SprocketEditor editor) =>
         page.View.Within().OfType<Lumel.Text.Label>().Any(label => label.IsVisible && label.Text == editor.Texts.BlueprintDescription.ToUpperInvariant());
 
-    /// <summary>Home says, on the other installation's row, how many of its slots it has to fill again.</summary>
+    /// <summary>Home asks the other installation to fill nothing again after a step's removal leaves a slot nothing names.</summary>
     [Fact]
-    public void HomeCountsTheSlotsToFillAgain()
+    public void HomeAsksNothingAgainOfASlotNothingNames()
     {
         var screen = Split(out _, out _);
         screen.Editor.GoToRoot();
         screen.Run(70);
 
-        Assert.Equal("2 slots to fill again", screen.Editor.RootRows()[1].Problem);
+        Assert.DoesNotContain("fill again", screen.Editor.RootRows()[1].Problem ?? "");
     }
 
-    /// <summary>The blocks set aside stay as every slot is filled again, and are let go when the slots are next arranged.</summary>
+    /// <summary>A slot nothing names keeps its blocks once the installation has filled every other slot.</summary>
     [Fact]
-    public void TheBlocksSetAsideGoWhenArrangedOnceEverySlotIsFilled()
+    public void ASlotNothingNamesKeepsItsBlocksOnceEverySlotIsFilled()
     {
         var screen = Split(out var system, out var port);
         var whole = Hidden(system);
@@ -301,12 +294,7 @@ public class SetSlotTests
         screen.Editor.PressPrimary();
         screen.Run(2);
         Assert.NotNull(system.FindPart(whole));
-
-        // Nothing names it, so arranging lets it go.
-        Arrange(screen, system);
-        Assert.Null(system.FindPart(whole));
-        Assert.Null(port.FilledWith(whole));
-        Assert.DoesNotContain("'" + whole + "'", ProgramWriter.Save(screen.Editor.Program, screen.Editor.World.Values));
+        Assert.Equal(new[] { Declared(screen, Inner) }, port.FilledWith(whole));
     }
 
     /// <summary>

@@ -1,43 +1,38 @@
-using System;
 using System.Collections.Generic;
 
 namespace Sprocket.Host.SpaceEngineers.Sequences
 {
-    /// <summary>Fills one slot of one installation with blocks, and what that settles in the installations' other slots.</summary>
-    /// <remarks>What filling the slot settles is worked out by the caller and handed in, so a redo settles it the same way.</remarks>
+    /// <summary>Fills one slot of one installation with blocks.</summary>
     public sealed class FillSlot : SystemEdit, IInstallationEdit
     {
         readonly string _slot;
         readonly List<string> _blocks;
         readonly List<ToolbarSlot> _at;
         readonly List<int> _facets;
-        readonly Action<AutomationSystem> _settle;
         readonly List<Kept> _was = new List<Kept>();
 
         /// <summary>
         /// Fills <paramref name="slot" /> of <paramref name="instance" /> with <paramref name="blocks" />, each answered at
-        /// <paramref name="at" /> where it is a signal slot, then runs <paramref name="settle" />.
+        /// <paramref name="at" /> where it is a signal slot.
         /// </summary>
-        public FillSlot(SystemInstance instance, string slot, IList<string> blocks, IList<ToolbarSlot> at, Action<AutomationSystem> settle)
+        public FillSlot(SystemInstance instance, string slot, IList<string> blocks, IList<ToolbarSlot> at)
         {
             Instance = instance;
             _slot = slot;
             _blocks = CopyOf(blocks);
             _at = at == null ? null : new List<ToolbarSlot>(at);
-            _settle = settle;
         }
 
         /// <summary>
         /// Fills <paramref name="slot" /> of <paramref name="instance" />, a slot of a type the host provides, with
-        /// <paramref name="blocks" />, each holding the facet <paramref name="facets" /> numbers, from 1, then runs <paramref name="settle" />.
+        /// <paramref name="blocks" />, each holding the facet <paramref name="facets" /> numbers, from 1.
         /// </summary>
-        public FillSlot(SystemInstance instance, string slot, IList<string> blocks, IList<int> facets, Action<AutomationSystem> settle)
+        public FillSlot(SystemInstance instance, string slot, IList<string> blocks, IList<int> facets)
         {
             Instance = instance;
             _slot = slot;
             _blocks = CopyOf(blocks);
             _facets = new List<int>(facets);
-            _settle = settle;
         }
 
         /// <inheritdoc />
@@ -98,9 +93,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
                 Instance.Fill(_slot, _blocks, _facets);
             else
                 Instance.Fill(_slot, _blocks);
-
-            if (_settle != null)
-                _settle(system);
         }
 
         /// <inheritdoc />

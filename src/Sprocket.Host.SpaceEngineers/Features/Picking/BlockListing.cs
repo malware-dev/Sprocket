@@ -6,7 +6,7 @@ using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
-    /// <summary>The blocks a pick lists: every block on offer by name, the ones listed ahead first, and those the narrowing leaves.</summary>
+    /// <summary>The blocks a pick lists: every block on offer by name, and those the narrowing leaves.</summary>
     public sealed class BlockListing
     {
         static readonly NameOrder ByName = new NameOrder();
@@ -19,7 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<GridEntity> _filtered = new List<GridEntity>();
         readonly List<long> _filteredIds = new List<long>();
         readonly HashSet<long> _wasShown = new HashSet<long>();
-        readonly Dictionary<long, string> _ahead = new Dictionary<long, string>();
         string _narrowedSearch;
         string _narrowedKind;
 
@@ -36,7 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _forTests = forTests;
         }
 
-        /// <summary>Every block on offer, by name, the ones listed ahead first.</summary>
+        /// <summary>Every block on offer, by name.</summary>
         public List<GridEntity> Candidates => _candidates;
 
         /// <summary>The blocks the narrowing leaves listed, in order.</summary>
@@ -44,9 +43,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>The ids of <see cref="Filtered" />, in the same order.</summary>
         public List<long> FilteredIds => _filteredIds;
-
-        /// <summary>Blocks listed ahead of the rest, by entity id, each with what is said of it in place of its kind.</summary>
-        public Dictionary<long, string> Ahead => _ahead;
 
         /// <summary>
         /// Works out the blocks on offer, which does not depend on what has been picked, and the kinds of them into
@@ -83,7 +79,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
 
             _candidates.Sort(ByName);
-            Lead();
 
             kinds.Clear();
             EntityQuery.KindsPresent(_candidates, kinds);
@@ -108,24 +103,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _filtered.Add(entity);
                 _filteredIds.Add(entity.Id);
-            }
-        }
-
-        /// <summary>Moves the blocks listed ahead of the rest to the front, keeping their order among themselves and the rest's among theirs.</summary>
-        void Lead()
-        {
-            if (_ahead.Count == 0)
-                return;
-
-            var at = 0;
-            for (var i = 0; i < _candidates.Count; i++)
-            {
-                if (!_ahead.ContainsKey(_candidates[i].Id))
-                    continue;
-
-                var entity = _candidates[i];
-                _candidates.RemoveAt(i);
-                _candidates.Insert(at++, entity);
             }
         }
 

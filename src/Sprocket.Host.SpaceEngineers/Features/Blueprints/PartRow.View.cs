@@ -21,7 +21,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Label _problem;
         Glyph _remove;
         Label _marks;
-        Label _aside;
 
         /// <summary>Makes the part's name and what it says about itself, with the blocks beside them and what is still to do under those.</summary>
         void CreateView()
@@ -78,8 +77,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                             new Glyph { Symbol = Symbols.Delete, Style = Styles.Bin, IsVisible = false, Align = Align.Center, Placement = FixedSize.Size(32f, 32f) }.As(out _remove)
                         }
                     },
-                    new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _marks),
-                    new Label { Style = Styles.Aside, Wraps = true, IsVisible = false }.As(out _aside)
+                    new Label { Style = Styles.Caution, Wraps = true, IsVisible = false }.As(out _marks)
                 }
             });
         }

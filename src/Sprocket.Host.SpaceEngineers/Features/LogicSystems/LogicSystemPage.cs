@@ -575,7 +575,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 if (instances[i] == shown)
                     continue;
 
-                var mark = SlotMarks.Of(Editor.Runner.Bindings, _system, instances[i], part, _used);
+                var mark = SlotMarks.Of(Editor.Runner.Bindings, instances[i], part);
                 if (mark == SlotMark.None)
                     continue;
 

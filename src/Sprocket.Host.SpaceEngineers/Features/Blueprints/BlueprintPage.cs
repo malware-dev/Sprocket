@@ -19,8 +19,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly List<Part> _parts = new List<Part>();
         readonly List<object> _rows = new List<object>();
         readonly List<string> _used = new List<string>();
-        readonly List<string> _aside = new List<string>();
-        readonly List<string> _asideNames = new List<string>();
         readonly SlotFill _fill;
         readonly OptimizeQuestion _optimizing;
 
@@ -241,7 +239,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 if (category != null)
                     ((CategoryRow)_partRows[row]).Name = category;
             }
-            SetAside(chosen);
 
             var unfilled = 0;
             foreach (var part in _parts)
@@ -349,7 +346,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
         /// <summary>
-        /// Beside the slots' heading, how many slots were split or merged and are to be filled again, or otherwise how many of
+        /// Beside the slots' heading, how many slots changed kind and are to be filled again, or otherwise how many of
         /// those that need a block still have none; nothing once every one has.
         /// </summary>
         void Needs(SystemInstance chosen, int unfilled)
@@ -368,23 +365,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             return count.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
-
-        /// <summary>Puts the blocks <paramref name="chosen" /> had for slots that were split or merged into what a slot to fill again says under it.</summary>
-        void SetAside(SystemInstance chosen)
-        {
-            _aside.Clear();
-            _asideNames.Clear();
-            if (chosen == null)
-                return;
-
-            SlotMarks.SetAside(_system, chosen, _used, _aside);
-            foreach (var reference in _aside)
-            {
-                var block = Editor.Runner.Bindings.Entity(reference);
-                _asideNames.Add(block != null ? block.Name : Called(reference));
-            }
-        }
-
 
         /// <summary>
         /// A slot, with the blocks <paramref name="chosen" /> fills it with and a press on them that chooses others, and where
@@ -411,10 +391,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 : null;
             row.RemovesAbout = Editable ? Editor.Texts.Codex.SlotRemoveAbout : Locked();
 
-            var changed = !unused && chosen != null && SlotMarks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;
-            row.SetAside = changed && _asideNames.Count > 0
-                ? Template.Fill(Editor.Texts.SlotSetAside, "blocks", string.Join(", ", _asideNames.ToArray()))
-                : null;
+            var changed = !unused && chosen != null && SlotMarks.Of(Editor.Runner.Bindings, chosen, part) == SlotMark.Changed;
 
             if (row.Blocks.Count > 0)
                 row.Show(Editor.World);

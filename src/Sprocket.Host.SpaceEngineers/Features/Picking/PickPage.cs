@@ -8,7 +8,6 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
-using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
@@ -246,9 +245,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
         /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
         public IList<Field> Fields => Wanted();
-
-        /// <summary>Blocks listed ahead of the rest, by entity id, each with what is said of it in place of its kind.</summary>
-        public IDictionary<long, string> Ahead => _listing.Ahead;
 
         /// <summary>What the values open holding, where this opened on something that has values.</summary>
         /// <remarks>
@@ -1020,9 +1016,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             {
                 var row = _blockRows[entity.Id];
 
-                string note;
                 row.Text = entity.Name;
-                row.Secondary = _listing.Ahead.TryGetValue(entity.Id, out note) ? note : Kind(entity);
+                row.Secondary = Kind(entity);
                 row.Icon = entity.Kind.Icon;
                 row.HasPicture = icons;
                 row.Many = true;

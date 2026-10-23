@@ -49,7 +49,7 @@ public class SlotTypeChoiceTests
         Assert.Equal(exact, part.Expects);
         var used = new List<string>();
         system.Acted(used);
-        Assert.Equal(SlotMark.Changed, SlotMarks.Of(screen.Editor.Runner.Bindings, system, other, part, used));
+        Assert.Equal(SlotMark.Changed, SlotMarks.Of(screen.Editor.Runner.Bindings, other, part));
 
         screen.Editor.Screen.Undo!.Execute();
         screen.Run(2);

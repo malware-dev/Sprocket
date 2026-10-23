@@ -204,7 +204,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Home
                 row.Show(texts);
         }
 
-        /// <summary>How many of <paramref name="instance" />'s slots were split or merged and are to be filled again, or empty where none.</summary>
+        /// <summary>How many of <paramref name="instance" />'s slots changed kind and hold a block that no longer fits, so are to be filled again, or empty where none.</summary>
         string FillAgain(Texts texts, AutomationSystem system, SystemInstance instance)
         {
             system.Acted(_used);

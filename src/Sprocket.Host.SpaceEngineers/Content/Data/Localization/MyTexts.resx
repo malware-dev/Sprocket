@@ -210,17 +210,9 @@
     <value>or {count} more</value>
     <comment>The last line of a signal slot's blocks on an installation panel, where the slot holds more blocks than its lines show, any one of them starting it. {count} is how many more there are, never less than two.</comment>
   </data>
-  <data name="Sprocket.Slot.SetAsideNote" xml:space="preserve">
-    <value>Set aside</value>
-    <comment>In the picker, under a block's name in place of its kind, for a block listed first because the installation had it for a slot that was since split or merged.</comment>
-  </data>
-  <data name="Sprocket.Slot.SetAside" xml:space="preserve">
-    <value>Set aside, offered first: {blocks}</value>
-    <comment>On the installation panel, under a slot that was split or merged and has to be filled again. {blocks} is the names of the blocks the installation had, separated by commas; the picker offers them first.</comment>
-  </data>
   <data name="Sprocket.Slot.Changed" xml:space="preserve">
     <value>Changed: fill it again</value>
-    <comment>On the installation panel, in place of a slot's blocks, when the slot was split or merged and has to be filled again.</comment>
+    <comment>On the installation panel, in place of a slot's blocks, when the slot's kind changed and a block in it no longer fits, so it has to be filled again.</comment>
   </data>
   <data name="Sprocket.Slot.MarkNew" xml:space="preserve">
     <value>{installation}: new, fill it</value>
@@ -228,7 +220,7 @@
   </data>
   <data name="Sprocket.Slot.MarkChanged" xml:space="preserve">
     <value>{installation}: changed, fill it again</value>
-    <comment>On a logic system's screen, under a slot's blocks, for another installation whose blocks for the slot were set aside when the slot was split or merged. {installation} is that installation's name; several such notes are joined by semicolons.</comment>
+    <comment>On a logic system's screen, under a slot's blocks, for another installation holding a block in the slot that no longer fits the kind the slot takes. {installation} is that installation's name; several such notes are joined by semicolons.</comment>
   </data>
   <data name="Sprocket.Slot.MarkLost" xml:space="preserve">
     <value>{installation}: lost a block</value>
@@ -236,11 +228,11 @@
   </data>
   <data name="Sprocket.Slot.FillAgainOne" xml:space="preserve">
     <value>1 slot to fill again</value>
-    <comment>Shown when exactly one slot of an installation was split or merged and has to be filled again: beside the Slots heading on the installation panel, and in place of the status on the installation's row on the home screen.</comment>
+    <comment>Shown when exactly one slot of an installation changed kind and holds a block that no longer fits, so it has to be filled again: beside the Slots heading on the installation panel, and in place of the status on the installation's row on the home screen.</comment>
   </data>
   <data name="Sprocket.Slot.FillAgainMany" xml:space="preserve">
     <value>{count} slots to fill again</value>
-    <comment>Shown when several slots of an installation were split or merged and have to be filled again: beside the Slots heading on the installation panel, and in place of the status on the installation's row on the home screen. {count} is how many.</comment>
+    <comment>Shown when several slots of an installation changed kind and hold blocks that no longer fit, so they have to be filled again: beside the Slots heading on the installation panel, and in place of the status on the installation's row on the home screen. {count} is how many.</comment>
   </data>
   <data name="Sprocket.Systems.Instance" xml:space="preserve">
     <value>Installation {number}</value>

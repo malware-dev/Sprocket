@@ -159,17 +159,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
         }
 
-        /// <summary>The blocks set aside for the slot, which its picker offers first, said under its blocks, or null where none are.</summary>
-        public string SetAside
-        {
-            get { return _aside.Text.Length != 0 ? _aside.Text : null; }
-            set
-            {
-                _aside.Text = value ?? "";
-                _aside.IsVisible = value != null;
-            }
-        }
-
         /// <summary>How wide the slot's name and description stand, which the list it is in decides.</summary>
         public float Column
         {

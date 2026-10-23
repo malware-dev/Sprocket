@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         /// <summary>It has not filled the slot.</summary>
         New,
 
-        /// <summary>The slot was split or merged, and the blocks it had for the slot are set aside.</summary>
+        /// <summary>The slot's kind changed, and a block it filled the slot with no longer fits it.</summary>
         Changed,
 
         /// <summary>A block it filled the slot with is gone from the construct.</summary>
