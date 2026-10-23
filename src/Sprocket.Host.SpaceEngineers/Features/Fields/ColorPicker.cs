@@ -71,9 +71,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Fields
             _hueBox.Tip = Tip.For(null, texts.Codex.ColorHue);
             _saturationBox.Tip = Tip.For(null, texts.Codex.ColorSaturation);
             _valueBox.Tip = Tip.For(null, texts.Codex.ColorBrightness);
-            _redBox.Tip = Tip.For(null, texts.Codex.ColorRed);
-            _greenBox.Tip = Tip.For(null, texts.Codex.ColorGreen);
-            _blueBox.Tip = Tip.For(null, texts.Codex.ColorBlue);
             foreach (var box in Boxes())
                 box.Submit = submit;
             _written.Tip = Tip.For(null, texts.Codex.ColorCodeAbout);

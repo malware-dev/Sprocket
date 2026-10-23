@@ -147,13 +147,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             if (offersOne)
             {
                 _rows[One].Mark = Symbols.Action;
-                Show(_rows[One], texts.PickSingleAction, texts.Codex.PickSingleActionAbout, Outcome == Outcome.One, false);
+                Show(_rows[One], texts.PickSingleAction, null, Outcome == Outcome.One, false);
             }
 
             if (!Stops)
             {
                 _rows[New].Mark = Symbols.Sequence;
-                Show(_rows[New], texts.PickNewSequence, texts.Codex.PickNewSequenceAbout, Outcome == Outcome.New, false);
+                Show(_rows[New], texts.PickNewSequence, null, Outcome == Outcome.New, false);
             }
 
             if (!Stops && _offered.Count > 0)

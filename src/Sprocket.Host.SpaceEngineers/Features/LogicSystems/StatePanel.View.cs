@@ -9,7 +9,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
     partial class StatePanel
     {
         Label _empty;
-        Label _typesHeading;
+        RichText _typesHeading;
         CarryList _types;
         HStack _addTypes;
         Button _addType;
@@ -23,7 +23,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             Padding = new Thickness(0f, 8f, 0f, 0f);
             Children.Add(new Label { Style = Styles.Empty, Wraps = true, IsVisible = false }.As(out _empty));
-            Children.Add(new Label { Style = Styles.SubHeading }.As(out _typesHeading));
+            Children.Add(new RichText { Style = Styles.SubHeadingTerm, Align = Align.Left }.As(out _typesHeading));
             Children.Add(new CarryList { Spacing = 4f }.As(out _types));
             Children.Add(new HStack { Padding = new Thickness(0f, 8f, 0f, 0f), Children = { new Button { Style = Styles.Start }.As(out _addType) } }.As(out _addTypes));
             Children.Add(new Label { Style = Styles.SubHeading, Padding = new Thickness(0f, 24f, 0f, 0f) }.As(out _statesHeading));

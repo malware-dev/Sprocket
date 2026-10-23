@@ -6,6 +6,7 @@ using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Localization;
 
@@ -21,6 +22,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         readonly List<Button> _views = new List<Button>();
 
         float _width;
+        string _titleWords = "";
+        string _titleTerm;
 
         readonly string _showHidden;
         readonly string _hideHidden;
@@ -95,17 +98,37 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             }
         }
 
-        /// <summary>What the column asks.</summary>
+        /// <summary>What the column asks, in capitals.</summary>
         public string Title
         {
-            get { return _title.Text; }
-            set { _title.Text = (value ?? "").ToUpperInvariant(); }
+            get { return _titleWords; }
+            set
+            {
+                _titleWords = (value ?? "").ToUpperInvariant();
+                Retitle();
+            }
         }
 
-        /// <summary>What the column asks, said where the pointer rests on its heading; null for nothing.</summary>
-        public string TitleAbout
+        /// <summary>The codex page the title is the term of, its words then a link to it as a term's heading is; null for words alone.</summary>
+        public string TitleTerm
         {
-            set { _title.Tip = Tip.For(_title.Tip, value); }
+            set
+            {
+                _titleTerm = value;
+                Retitle();
+            }
+        }
+
+        /// <summary>Makes a link in the title explain its term with the page <paramref name="codex" /> has on it.</summary>
+        public void Explain(CodexPages codex)
+        {
+            codex.Explain(_title);
+        }
+
+        /// <summary>Writes the title's words, as a link to its term's page where it has one.</summary>
+        void Retitle()
+        {
+            _title.Markdown = _titleTerm == null ? Markdown.Escape(_titleWords) : CodexPages.Link(_titleWords, _titleTerm);
         }
 
         /// <summary>A quiet line under what the column asks, such as how many are picked, or empty.</summary>

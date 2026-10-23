@@ -5,6 +5,7 @@ using System.Text;
 using Lumel;
 using Lumel.Input;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -72,6 +73,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             var texts = Editor.Texts;
             _search.Hint = texts.PickSearch;
             _search.Edited += Narrow;
+            Editor.Codex.Explain(_firstHeading);
+            Editor.Codex.Explain(_secondHeading);
             _add.Text = texts.LibraryAdd;
             _add.Command = _adds;
             _add.Tip = Tip.For(_add.Tip, texts.Codex.LibraryPutOn);
@@ -90,7 +93,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _entries.Clear();
             _list.Children.Clear();
 
-            Heading(texts.LibraryOnConstructs, Styles.Heading);
+            TermHeading(CodexPages.Within(texts.LibraryOnConstructs, "constructs", texts.LibraryOnConstructsTerm, CodexPages.Construct), Styles.HeadingTerm);
             _list.Children.Add(new Label
             {
                 Style = Styles.InnerName,
@@ -142,7 +145,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (backups == null || backups.All.Count == 0)
                 return;
 
-            Heading(texts.LibraryBackups, Styles.NextHeading);
+            TermHeading(CodexPages.Link(texts.LibraryBackups.ToUpperInvariant(), CodexPages.Backup), Styles.NextHeadingTerm);
             _listed.Clear();
 
             var all = backups.All;
@@ -265,6 +268,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _list.Children.Add(new Label { Style = style, Text = text.ToUpperInvariant() });
         }
 
+        /// <summary>Adds a heading to the list that holds a term, written as <paramref name="markdown" /> with the term a link to its codex page, which resting on it shows.</summary>
+        void TermHeading(string markdown, RichTextStyle style)
+        {
+            var heading = new RichText { Style = style, Align = Align.Left, Markdown = markdown };
+            Editor.Codex.Explain(heading);
+            _list.Children.Add(heading);
+        }
+
         void Line(string text, TextStyle style)
         {
             _list.Children.Add(new Label { Style = style, Text = text, Wraps = true });
@@ -312,8 +323,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             _line.IsVisible = false;
             _about.IsVisible = false;
             _trouble.IsVisible = false;
-            Say(_firstHeading, _first, null, null);
-            Say(_secondHeading, _second, null, null);
+            Say(_firstHeading, _first, null, null, null);
+            Say(_secondHeading, _second, null, null, null);
 
             if (entry == null)
                 return;
@@ -381,17 +392,17 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                     _names.Add(parts[i].Id);
             }
 
-            Say(_firstHeading, _first, texts.BlueprintParts, _names);
+            Say(_firstHeading, _first, texts.BlueprintParts, CodexPages.Slot, _names);
 
             _names.Clear();
             for (var i = 0; live != null && i < live.Instances.Count; i++)
                 _names.Add(SystemSummary.DescribeInstance(texts, Editor.Runner.Bindings, live, live.Instances[i]));
 
-            Say(_secondHeading, _second, texts.LibraryInstallationsHeading, _names);
+            Say(_secondHeading, _second, texts.LibraryInstallationsHeading, CodexPages.Installation, _names);
         }
 
-        /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, or neither where there are none.</summary>
-        static void Say(Label heading, Label list, string title, List<string> names)
+        /// <summary>Shows <paramref name="names" /> under <paramref name="title" />, the term whose codex page is <paramref name="term" />, or neither where there are none.</summary>
+        static void Say(RichText heading, Label list, string title, string term, List<string> names)
         {
             var shown = names != null && names.Count > 0;
             heading.IsVisible = shown;
@@ -399,7 +410,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
             if (!shown)
                 return;
 
-            heading.Text = title.ToUpperInvariant();
+            heading.Markdown = CodexPages.Link(title.ToUpperInvariant(), term);
             var joined = new StringBuilder();
             for (var i = 0; i < names.Count; i++)
             {

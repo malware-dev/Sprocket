@@ -2,6 +2,7 @@ using Lumel;
 using Lumel.Controls;
 using Lumel.Input;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
 using Sprocket.Host.SpaceEngineers.Features.LogicSystems;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
@@ -26,6 +27,12 @@ public class StateEditingTests
 
     /// <summary>The airlock with an empty sequence.</summary>
     const string Program = Head + "    sequence 1 {\n    }\n}\n";
+
+    /// <summary>The airlock with a flag and no type, and an empty sequence.</summary>
+    const string Untyped = "sprocket 1 alpha 18\n\n"
+        + "system \"3f2a9c1e-7b4d-4e8a-9f61-2c5d8e0b7a43\" as Airlock\n{\n"
+        + "    let cycling = off\n\n"
+        + "    sequence 1 {\n    }\n}\n";
 
     /// <summary>The airlock with a sequence that sets where.</summary>
     const string Setting = Head + "    sequence 1 {\n        set where to outside\n    }\n}\n";
@@ -303,6 +310,28 @@ public class StateEditingTests
         Assert.Equal(new[] { "choice 1", "choice 2" }, system.Types[1].Choices.ToArray());
         Assert.Equal("state 4", system.States[3].Name);
         Assert.True(system.States[3].IsFlag);
+    }
+
+    /// <summary>
+    /// The page on types shows on the heading over the types, and on the button adding a type only while there is no type for
+    /// that heading to stand over.
+    /// </summary>
+    [Fact]
+    public void TheTypePageIsOnTheAddTypeButtonOnlyWhileNoTypeIsListed()
+    {
+        var screen = OnSystem(Untyped, out _);
+        var editor = screen.Editor;
+        var view = editor.PressTab(editor.Texts.SystemState);
+        screen.Run(1);
+        var add = Target.Within(view).OfType<Button>().Single(button => button.Text == StatusRow.Plus + editor.Texts.StateTypeAdd);
+        Assert.Equal(editor.Texts.Codex.TermType, add.Tip?.Text);
+
+        editor.PressAdd(editor.Texts.StateTypeAdd);
+        screen.Run(1);
+
+        Assert.Null(add.Tip);
+        var at = Links.First(view, CodexPages.Type, out var heading);
+        Assert.Same(editor.Codex.Find(CodexPages.Type), heading.TipAt(at));
     }
 
     /// <summary>A state something uses has no bin to press, and says why; one nothing uses can be removed.</summary>
@@ -601,8 +630,9 @@ public class StateEditingTests
         PickState(screen, editor.Texts.PickNewState);
 
         var view = Page(screen).View;
-        var heading = Target.Within(view).OfType<Label>().Single(label => label.Text == editor.Texts.PickStateSetTo.ToUpperInvariant());
-        Assert.NotNull(heading.Tip);
+        var at = Links.First(view, CodexPages.LogicSystemStates, out var heading);
+        Assert.Equal(CodexPages.Link(editor.Texts.PickStates.ToUpperInvariant(), CodexPages.LogicSystemStates), heading.Markdown);
+        Assert.Same(editor.Codex.Find(CodexPages.LogicSystemStates), heading.TipAt(at));
         var bounds = heading.Bounds;
         var said = Page(screen).View.SayingAt(new VRageMath.Vector2(bounds.X + bounds.Width / 2f, bounds.Y + bounds.Height / 2f));
         Assert.Same(heading, said);

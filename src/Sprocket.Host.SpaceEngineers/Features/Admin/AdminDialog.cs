@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Admin
                         HeaderStyle = Styles.Tab,
                         Tabs =
                         {
-                            new Tab { Header = texts.AdminThisWorld, Tip = Tip.For(null, texts.Codex.AdminThisWorldAbout), Content = Page(texts, true) },
+                            new Tab { Header = texts.AdminThisWorld, Content = Page(texts, true) },
                             new Tab { Header = texts.AdminEveryWorld, Tip = Tip.For(null, texts.Codex.AdminEveryWorldAbout), Content = Page(texts, false) }
                         }
                     },

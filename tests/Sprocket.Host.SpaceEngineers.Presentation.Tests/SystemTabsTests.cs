@@ -38,6 +38,28 @@ public class SystemTabsTests
             Tabs(screen).Select(tab => tab.Header).ToArray());
     }
 
+    /// <summary>Each tab explains the term it is named for where the pointer rests on it.</summary>
+    [Fact]
+    public void EachTabExplainsItsTerm()
+    {
+        var screen = WithAnUnstartedSequence();
+        var codex = screen.Editor.Texts.Codex;
+
+        Assert.Equal(new[] { codex.TermTrigger, codex.TermSequence, codex.TermLogicSystemStates, codex.TermInstallationPanel },
+            Tabs(screen).Select(tab => tab.Tip?.Text).ToArray());
+    }
+
+    /// <summary>A tab's mark says where to look for what it marks.</summary>
+    [Fact]
+    public void ATabsMarkSaysWhereToLook()
+    {
+        var screen = WithAnUnstartedSequence();
+
+        var sequences = Assert.IsType<Glyph>(Tabs(screen)[1].Marker);
+        Assert.True(sequences.IsVisible);
+        Assert.Equal(screen.Editor.Texts.Codex.SystemTabFlagged, sequences.Tip?.Text);
+    }
+
     /// <summary>The screen opens on the tab it was left on, for each logic system apart.</summary>
     [Fact]
     public void TheTabLastOpenIsOpenedAgain()

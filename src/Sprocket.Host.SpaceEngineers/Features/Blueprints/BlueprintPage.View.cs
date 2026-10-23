@@ -13,7 +13,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Label _trouble;
         Button _openTrouble;
         Rule _rule;
-        Label _partsHeading;
+        RichText _partsHeading;
         Label _needs;
         Label _locked;
         PartList _partList;
@@ -46,7 +46,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Spacing = 12f,
                         Children =
                         {
-                            new Label { Style = Styles.Heading }.As(out _partsHeading),
+                            new RichText { Style = Styles.HeadingTerm }.As(out _partsHeading),
                             new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
                         }
                     },

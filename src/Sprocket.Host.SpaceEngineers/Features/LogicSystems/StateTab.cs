@@ -4,6 +4,7 @@ using Lumel;
 using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -43,6 +44,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _locked = locked;
             _typeRows = new KeyedChildren<DeclaredType, TypeRow>(panel.Types.Children, TypeRowFor);
             _stateRows = new KeyedChildren<State, StateRow>(panel.States.Children, StateRowFor);
+            editor.Codex.Explain(panel.TypesHeading);
 
             panel.Types.Moves = (from, to) => Move(CommandKind.MoveType, () => _editor.Do(_system, new MoveType(_types[from], from, to)));
             panel.States.Moves = (from, to) => Move(CommandKind.MoveState, () => _editor.Do(_system, new MoveState(_states[from], from, to)));
@@ -62,20 +64,18 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             // Where types and states can be added, the ways to add them say it all.
             _panel.Empty = _types.Count == 0 && _states.Count == 0 && !editable ? texts.SystemNoState : "";
-            _panel.TypesHeading.Text = texts.StateTypes.ToUpperInvariant();
-            _panel.TypesHeading.Tip = Tip.For(_panel.TypesHeading.Tip, texts.Codex.StateTypesAbout);
+            _panel.TypesHeading.Markdown = CodexPages.Link(texts.StateTypes.ToUpperInvariant(), CodexPages.Type);
             _panel.StatesHeading.Text = texts.StateStates.ToUpperInvariant();
-            _panel.StatesHeading.Tip = Tip.For(_panel.StatesHeading.Tip, texts.Codex.StateStatesAbout);
             _panel.TypesHeading.IsVisible = _types.Count != 0;
             _panel.StatesHeading.IsVisible = _states.Count != 0;
             _panel.Adds = editable;
 
             _panel.AddType.Text = StatusRow.Plus + texts.StateTypeAdd;
             _panel.AddType.Command = _changes(CommandKind.AddType, AddType);
-            _panel.AddType.Tip = Tip.For(_panel.AddType.Tip, texts.Codex.StateTypeAddAbout);
+            // The type page shows on the heading over the types, and on the button only while that heading is hidden.
+            _panel.AddType.Tip = Tip.For(_panel.AddType.Tip, _panel.TypesHeading.IsVisible ? null : texts.Codex.TermType);
             _panel.AddState.Text = StatusRow.Plus + texts.StateStateAdd;
             _panel.AddState.Command = _changes(CommandKind.AddState, AddState);
-            _panel.AddState.Tip = Tip.For(_panel.AddState.Tip, texts.Codex.StateStateAddAbout);
 
             _typeRows.Show(_types);
             foreach (var type in _types)
@@ -131,7 +131,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             row.AddChoice.Command = _changes(CommandKind.AddChoice,
                 () => _editor.Do(_system, new AddChoice(type, NumberedName.Free(texts.StateChoiceNumbered, type.Choices.Count, type.Has), type.Choices.Count)));
-            row.AddChoice.Tip = Tip.For(row.AddChoice.Tip, texts.Codex.StateChoiceAddAbout);
             row.AddChoice.IsVisible = editable;
 
             var removes = new RemoveType(_system, type).Changes;

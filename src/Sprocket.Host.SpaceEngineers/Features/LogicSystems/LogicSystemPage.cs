@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Blueprints;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Picking;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
@@ -68,7 +69,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             base.Heading(parts);
             parts[0].Mark = Symbols.LogicSystem;
-            parts[0].MarkAbout = Editor.Texts.Codex.HeadingLogicSystem;
+            parts[0].MarkAbout = Editor.Texts.Codex.TermLogicSystem;
         }
 
         /// <inheritdoc />
@@ -235,6 +236,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         protected override void ViewCreated()
         {
             _triggerRows = new KeyedChildren<Trigger, TriggerRow>(_triggerList.Children, delegate { return new TriggerRow(); });
+            Editor.Codex.Explain(_slotsHeading);
             _sequenceRows = new KeyedChildren<Sequence, StatusRow>(_sequenceList.Children, Own);
             _slotRows = new KeyedChildren<object, Element>(_slotList.Children, SlotRow);
             _stateWork = new StateTab(Editor, _system, _statePanel, Changes, Locked);
@@ -323,8 +325,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Show(texts);
             }
 
-            Flag(_triggersMark, triggered);
-            Flag(_sequencesMark, sequenced);
+            Flag(_triggersMark, triggered, texts);
+            Flag(_sequencesMark, sequenced, texts);
 
             // A handful of rows, each still unless one is carried or has just landed.
             _slotList.Slide();
@@ -379,8 +381,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _sequencesTab.Header = texts.SystemSequences;
             _stateTab.Header = texts.SystemState;
             _panelTab.Header = texts.SystemInstallationPanel;
+            _triggersTab.Tip = Tip.For(_triggersTab.Tip, texts.Codex.TermTrigger);
+            _sequencesTab.Tip = Tip.For(_sequencesTab.Tip, texts.Codex.TermSequence);
+            _stateTab.Tip = Tip.For(_stateTab.Tip, texts.Codex.TermLogicSystemStates);
+            _panelTab.Tip = Tip.For(_panelTab.Tip, texts.Codex.TermInstallationPanel);
             _stateWork.Arrange(texts);
-            _addTrigger.Show(new AddOption(texts.SystemTrigger, texts.Codex.SystemTriggerAbout, new[]
+            _addTrigger.Show(new AddOption(texts.SystemTrigger, null, new[]
             {
                 new AddOption(SentenceText.WhenWord, texts.Codex.SystemWhenAbout,
                     Changes(CommandKind.StartWhen, () => Editor.Starts.StartSequence(_system, new WhenTrigger("")))),
@@ -404,7 +410,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _newSequence.Text = StatusRow.Plus + texts.SystemNewSequence;
             _newSequence.Command = Changes(CommandKind.NewSequence, () => Editor.NewSequence(_system));
-            _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? texts.Codex.SystemNewSequenceAbout : Locked());
+            _newSequence.Tip = Tip.For(_newSequence.Tip, _newSequence.Command != null ? null : Locked());
 
             _sequenceRows.Show(_sequences);
             _noSequences.IsVisible = _sequences.Count == 0 && !Editable;
@@ -429,11 +435,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _noPanel.Text = texts.SystemNoPanel;
         }
 
-        /// <summary>Shows <paramref name="mark" /> in the color of <paramref name="level" />, or hides it where nothing on its tab is more than a note.</summary>
-        static void Flag(Glyph mark, NoticeLevel level)
+        /// <summary>Shows <paramref name="mark" /> in the color of <paramref name="level" />, saying in <paramref name="texts" /> where to look, or hides it where nothing on its tab is more than a note.</summary>
+        static void Flag(Glyph mark, NoticeLevel level, Texts texts)
         {
             mark.IsVisible = level != NoticeLevel.Info;
             mark.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
+            mark.Tip = Tip.For(mark.Tip, texts.Codex.SystemTabFlagged);
         }
 
         /// <summary>The graver of <paramref name="one" /> and <paramref name="other" />: a problem over a warning over a note, as the levels are ordered.</summary>
@@ -479,11 +486,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
             _slotsHeading.IsVisible = _parts.Count > 0;
             _slotList.IsVisible = _parts.Count > 0;
-            _slotsHeading.Text = texts.BlueprintParts.ToUpperInvariant();
+            _slotsHeading.Markdown = CodexPages.Link(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             _addCategory.IsVisible = _parts.Count > 0 && Editable;
             _newCategory.Text = StatusRow.Plus + texts.CategoryAdd;
             _newCategory.Command = Changes(CommandKind.AddCategory, () => _arranger.Add(Editor.Texts));
-            _newCategory.Tip = Tip.For(_newCategory.Tip, texts.Codex.CategoryAddAbout);
+            _newCategory.Tip = Tip.For(_newCategory.Tip, texts.Codex.TermCategory);
             _slotRows.Show(_slotKeys);
             if (shown == null)
                 return;

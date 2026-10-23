@@ -112,7 +112,7 @@ public class SalvageTests
 
         Assert.NotNull(said);
         Assert.Contains("with an error in it", said.Text);
-        Assert.Contains("Edit the text to mend it", said.Detail);
+        Assert.Contains("Edit the text to fix it", said.Detail);
         Assert.Contains("Line 5", said.Diagnostic);
         Assert.Equal("Edit the text", said.OfferText);
         Assert.Empty(rig.Editor.Program.Systems);

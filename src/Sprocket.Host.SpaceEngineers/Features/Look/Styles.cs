@@ -318,6 +318,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             Base = { FontSize = 16f, Padding = new Thickness(4f, 0f, 0f, 8f) }
         };
 
+        /// <summary>A section's name following other content, with room above it, where the name holds a term in the codex.</summary>
+        public static readonly RichTextStyle NextHeadingTerm = new RichTextStyle(HeadingTerm)
+        {
+            Base = { Padding = new Thickness(4f, 48f, 0f, 8f) }
+        };
+
         /// <summary>A section's name, in capitals, over what it heads.</summary>
         public static readonly TextStyle Heading = new TextStyle
         {
@@ -820,6 +826,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         public static readonly TextStyle ColumnTitle = new TextStyle
         {
             Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink }
+        };
+
+        /// <summary>What a column of a pick asks, where its words may be a term in the codex.</summary>
+        public static readonly RichTextStyle ColumnTitleTerm = new RichTextStyle
+        {
+            Base = { Font = MyFontEnum.White, FontSize = 24f, Color = Palette.Ink, LinkColor = Palette.Link }
         };
 
         /// <summary>A quiet line under what a column asks, or about what it lists.</summary>

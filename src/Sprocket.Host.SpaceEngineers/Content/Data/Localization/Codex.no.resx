@@ -16,11 +16,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Sprocket.Term.Home" xml:space="preserve">
-    <value># Velkommen til Sprocket Automation
-
-**Startskjermen** er den samlede oversikten over alle logikksystemene dine på denne konstruksjonen.</value>
-  </data>
   <data name="Sprocket.Term.LogicSystem" xml:space="preserve">
     <value># ![](mark:logic-system)&amp;nbsp;Logikksystem
 
@@ -34,52 +29,77 @@ En ![](mark:installation)&amp;nbsp;**installasjon** er et sett med blokker og si
   <data name="Sprocket.Term.InstallationPanel" xml:space="preserve">
     <value># Installasjonspanel
 
-**Installasjonspanelet** er der du setter opp en installasjon og velger blokkene og signalene for hver av plassene dens.</value>
+**Installasjonspanelet** er der du setter opp en ![](mark:installation)&amp;nbsp;[installasjon](Term.Installation) og velger blokkene og signalene for hver av [plassene](Term.Slot) dens. Åpne det fra installasjonens rad på startskjermen. Logikksystemets fane `Installasjonspanel` er der du velger hva hvert panel viser.</value>
+  </data>
+  <data name="Sprocket.Term.Category" xml:space="preserve">
+    <value># Kategori
+
+En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel) som samler [plassene](Term.Slot) som dras inn under den.</value>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
     <value># Plass
 
-En **plass** er et navngitt sted i et logikksystem, som den indre døra, som hver installasjon fyller med sine egne blokker eller sitt eget signal.</value>
+En **plass** er et navngitt sted i et logikksystem, som den indre døra, som hver installasjon fyller med sine egne blokker eller sitt eget signal. En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel).</value>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
     <value># Logikksystemets tilstander
 
 **Logikksystemets tilstander** er verdier det beholder mellom kjøringer, hver installasjon sine egne, som hvilken side av luftslusen ingeniøren er på.</value>
   </data>
+  <data name="Sprocket.Term.Type" xml:space="preserve">
+    <value># Type
+
+En **type** er en navngitt liste med alternativer, som *inne* og *ute*. En [tilstand](Term.LogicSystemStates) av den typen har ett av alternativene.</value>
+  </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
     <value># ![](mark:undo)&amp;nbsp;Angre
 
-![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen på skjermen du står på.</value>
-  </data>
-  <data name="Sprocket.Term.RichText" xml:space="preserve">
-    <value># Formatert tekst
-
-**Formatert tekst** er vanlig tekst med noen få merker skrevet inn, som gjør den om til overskrifter, lister, tabeller og fete eller kursive ord.</value>
+![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen, og ![](mark:redo)&amp;nbsp;**gjør om** gjør den igjen. Hvert logikksystem har sin egen historikk over endringer, på tvers av alle skjermene sine, og startskjermen har sin egen.</value>
   </data>
   <data name="Sprocket.Term.Sequence" xml:space="preserve">
     <value># ![](mark:sequence)&amp;nbsp;Sekvens
 
-En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med steg et logikksystem kjører ovenfra og ned.</value>
+En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med [steg](Term.Step) et logikksystem kjører ovenfra og ned.</value>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
     <value># Steg
 
-Et **steg** er én linje i en sekvens.</value>
+Et **steg** er én linje i en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence). Trykk på en av delene for å endre den i en [velger](Term.Selector) eller en meny.</value>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
     <value># ![](mark:action)&amp;nbsp;Handling
 
 En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
   </data>
+  <data name="Sprocket.Term.Task" xml:space="preserve">
+    <value># Oppgave
+
+En **oppgave** er én operasjon: å kjøre eller stoppe en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence), en ![](mark:action)&amp;nbsp;[handling](Term.Action) på blokker, eller å sette en av ![](mark:value)&amp;nbsp;[verdiene](Term.Value) deres.</value>
+  </data>
+  <data name="Sprocket.Term.Value" xml:space="preserve">
+    <value># ![](mark:value)&amp;nbsp;Verdi
+
+En ![](mark:value)&amp;nbsp;**verdi** er en egenskap ved en blokk, for eksempel fargen på et lys, og steg kan sette eller sjekke den.</value>
+  </data>
+  <data name="Sprocket.Term.Awaitable" xml:space="preserve">
+    <value># ![](mark:awaited)&amp;nbsp;Avventbar handling
+
+De fleste ![](mark:action)&amp;nbsp;[handlinger](Term.Action) er ferdige med en gang. Noen fortsetter å virke i flere [tikk](Term.Tick) etter at de starter, og ![](mark:sequence)&amp;nbsp;[sekvensen](Term.Sequence) går rett videre. De den kan vente på, som en dør som lukkes, kalles ![](mark:awaited)&amp;nbsp;**avventbare handlinger**.</value>
+  </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
     <value># Forsinkelse
 
-En **forsinkelse** er et steg som holder igjen sekvensen sin en fastsatt tid.</value>
+En **forsinkelse** er et steg som stanser sekvensen sin en fastsatt tid.</value>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
     <value># Hvis
 
-Et **hvis** er et steg som sjekker blokker, eller en av logikksystemets tilstander, og kjører stegene under seg bare når betingelsen er oppfylt.</value>
+Et **hvis** er et steg som sjekker blokker, eller en av logikksystemets [tilstander](Term.LogicSystemStates), og kjører stegene under seg når betingelsen er oppfylt.</value>
+  </data>
+  <data name="Sprocket.Term.Branch" xml:space="preserve">
+    <value># Gren
+
+En **gren** legger til flere steg i et [hvis](Term.If), som kjører når betingelsene over den ikke er oppfylt. En `otherwise if` sjekker en egen betingelse, og en `otherwise` kjører når ingen over er oppfylt.</value>
   </data>
   <data name="Sprocket.Term.RunAndStop" xml:space="preserve">
     <value># Kjøre og stoppe
@@ -94,7 +114,7 @@ Et **tikk** er det minste tidssteget, seksti i sekundet.</value>
   <data name="Sprocket.Term.Selector" xml:space="preserve">
     <value># Velger
 
-En **velger** er der du velger hva et steg, et hvis eller en utløser arbeider med: blokker og hva som skal gjøres med dem eller sjekkes på dem, eller en av logikksystemets tilstander.</value>
+En **velger** er skjermen der du velger hva et steg, et hvis eller en utløser arbeider med, som blokkene og hva som skal gjøres med dem.</value>
   </data>
   <data name="Sprocket.Term.Trigger" xml:space="preserve">
     <value># ![](mark:trigger)&amp;nbsp;Utløser
@@ -109,42 +129,22 @@ Et ![](mark:signal)&amp;nbsp;**signal** er det en blokk sender for å få en utl
   <data name="Sprocket.Term.Library" xml:space="preserve">
     <value># Bibliotek
 
-**Biblioteket** inneholder plantegningene dine, sammen med logikksystemene på denne konstruksjonen og sikkerhetskopier av konstruksjoner som mistet automasjonen sin.</value>
+**Biblioteket** inneholder ![](mark:blueprint)&amp;nbsp;[plantegningene](Term.Blueprint) dine, sammen med logikksystemene på denne [konstruksjonen](Term.Construct) og [sikkerhetskopier](Term.Backup) av konstruksjoner som mistet automasjonen sin.</value>
+  </data>
+  <data name="Sprocket.Term.Backup" xml:space="preserve">
+    <value># Sikkerhetskopi
+
+Når en [konstruksjon](Term.Construct) mister sin siste programmerbare blokk, lagres hvert av logikksystemene dens som ikke har noen ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint) i biblioteket, der som en **sikkerhetskopi**. Velg den i biblioteket og trykk `Legg til på denne konstruksjonen` for å få den tilbake.</value>
   </data>
   <data name="Sprocket.Term.Blueprint" xml:space="preserve">
     <value># ![](mark:blueprint)&amp;nbsp;Plantegning
 
-En ![](mark:blueprint)&amp;nbsp;**plantegning** er en kopi av et logikksystem som er lagret i biblioteket, klar til å settes på en annen konstruksjon.</value>
+En ![](mark:blueprint)&amp;nbsp;**plantegning** er en kopi av et logikksystem som er lagret i [biblioteket](Term.Library), klar til å settes på en annen konstruksjon.</value>
   </data>
   <data name="Sprocket.Term.Construct" xml:space="preserve">
     <value># Konstruksjon
 
-En **konstruksjon** er et sett med rutenett som er koblet sammen med mekaniske blokker, som rotorer og stempler. Rutenett som holdes av landingsstell eller kontakter, forblir atskilt.</value>
-  </data>
-  <data name="Sprocket.Term.ChangingHands" xml:space="preserve">
-    <value># Eierskifte
-
-Automasjonen til en konstruksjon tilhører ingeniørene som eier flest blokker på den. Et **eierskifte** utenfor delingen setter den på pause til en av de nye eierne gjenopptar den.</value>
-  </data>
-  <data name="Sprocket.Term.Examples" xml:space="preserve">
-    <value># Eksempler
-
-**Eksemplene** bygger logikksystemer steg for steg, fra begynnelsen.</value>
-  </data>
-  <data name="Sprocket.Term.SimpleAirlock" xml:space="preserve">
-    <value># Enkel luftsluse
-
-Eksempelet **enkel luftsluse** bygger en luftsluse som sluser ut ved et knappetrykk.</value>
-  </data>
-  <data name="Sprocket.Term.DrillArm" xml:space="preserve">
-    <value># Borearm
-
-Eksempelet **borearm** skyver en borearm ut med drillene i gang, og henter den inn igjen.</value>
-  </data>
-  <data name="Sprocket.Term.HangarDoor" xml:space="preserve">
-    <value># Hangardør
-
-Eksempelet **hangardør** åpner og lukker en hangar med to knapper.</value>
+En **konstruksjon** er et rutenett og alt som stempler, rotorer og hengsler fester til det. Kontakter og landingsstell kobler en konstruksjon til en annen, og hver forblir sin egen.</value>
   </data>
   <data name="Sprocket.Chrome.Back" xml:space="preserve">
     <value>Tilbake</value>
@@ -153,10 +153,10 @@ Eksempelet **hangardør** åpner og lukker en hangar med to knapper.</value>
     <value>Lukk editoren</value>
   </data>
   <data name="Sprocket.Chrome.Undo" xml:space="preserve">
-    <value>Angre {action}</value>
+    <value>![](mark:undo)&amp;nbsp;[Angre](Term.Undo) {action}</value>
   </data>
   <data name="Sprocket.Chrome.Redo" xml:space="preserve">
-    <value>Gjør om {action}</value>
+    <value>![](mark:redo)&amp;nbsp;[Gjør om](Term.Undo) {action}</value>
   </data>
   <data name="Sprocket.Row.Broken" xml:space="preserve">
     <value>**Noe må fikses**
@@ -167,7 +167,7 @@ Eksempelet **hangardør** åpner og lukker en hangar med to knapper.</value>
   </data>
   <data name="Sprocket.Row.Idle" xml:space="preserve">
     <value>**I ro**
-Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
+Lyser grønt når den kjører, og rødt når noe er i stykker.</value>
   </data>
   <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
     <value>Slå på denne installasjonen</value>
@@ -194,25 +194,22 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Navnet på dette rutenettet. Du kan gi rutenettet nytt navn her, som i kontrollpanelets Info-fane.</value>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
-    <value>Start et nytt logikksystem på denne konstruksjonen.</value>
+    <value>Start et nytt logikksystem på denne [konstruksjonen](Term.Construct).</value>
   </data>
   <data name="Sprocket.Systems.OpenInstanceAbout" xml:space="preserve">
-    <value>Åpne installasjonspanelet for **{name}**.</value>
-  </data>
-  <data name="Sprocket.Systems.LoadAbout" xml:space="preserve">
-    <value>**Biblioteket**: logikksystemene på denne konstruksjonen, sikkerhetskopier av konstruksjoner som mistet automasjonen, og plantegningene i lageret.</value>
+    <value>Åpne [installasjonspanelet](Term.InstallationPanel) for **{name}**.</value>
   </data>
   <data name="Sprocket.Systems.MakeBlueprintAbout" xml:space="preserve">
-    <value>Ta vare på en kopi av dette logikksystemet i biblioteket som en **plantegning**.</value>
+    <value>Ta vare på en kopi av dette logikksystemet i biblioteket som en ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint).</value>
   </data>
   <data name="Sprocket.Systems.ChooseVersionAbout" xml:space="preserve">
-    <value>To konstruksjoner ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du beholder én.</value>
+    <value>To [konstruksjoner](Term.Construct) ble satt sammen, hver med sin egen versjon av {name}. Begge forblir slått av til du velger én.</value>
   </data>
   <data name="Sprocket.Systems.UpdateFromLibraryAbout" xml:space="preserve">
-    <value>Plantegningen i biblioteket har nyere endringer. Oppdater versjonen på konstruksjonen din.</value>
+    <value>![](mark:blueprint)&amp;nbsp;[Plantegningen](Term.Blueprint) i biblioteket har nyere endringer. Oppdater versjonen på konstruksjonen din.</value>
   </data>
   <data name="Sprocket.Systems.UpdateBlueprintAbout" xml:space="preserve">
-    <value>Oppdater plantegningen fra kopien på konstruksjonen din.</value>
+    <value>Oppdater ![](mark:blueprint)&amp;nbsp;[plantegningen](Term.Blueprint) fra kopien på konstruksjonen din.</value>
   </data>
   <data name="Sprocket.Systems.EditBlueprint" xml:space="preserve">
     <value>Åpner editoren for logikksystemet **{name}**.</value>
@@ -221,7 +218,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Installer logikksystemet **{name}** på et annet sett med blokker.</value>
   </data>
   <data name="Sprocket.Slot.OpenAbout" xml:space="preserve">
-    <value>Gi plassen et navn, og si hva den er til.</value>
+    <value>Gi [plassen](Term.Slot) et navn, og si hva den er til.</value>
   </data>
   <data name="Sprocket.System.NameAbout" xml:space="preserve">
     <value>Navnet på dette logikksystemet.</value>
@@ -233,25 +230,23 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slett denne installasjonen</value>
   </data>
   <data name="Sprocket.System.UsingAbout" xml:space="preserve">
-    <value>Velg installasjonen denne skjermen arbeider på. Blokkene dens fyller plassene i stegene nedenfor, og blokker valgt her havner i plassene dens.</value>
+    <value>Velg ![](mark:installation)&amp;nbsp;[installasjonen](Term.Installation) som denne skjermen viser blokkene til. Blokker du velger for et steg eller en utløser, fyller [plassene](Term.Slot) dens.</value>
+  </data>
+  <data name="Sprocket.System.TabFlagged" xml:space="preserve">
+    <value>**Noe på denne fanen trenger oppmerksomhet**
+Raden med problemet sier hva.</value>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
-    <value>Utfør en oppgave når en blokk sender et signal eller kommer i en ønsket tilstand.</value>
+    <value>Utfør en [oppgave](Term.Task) når en blokk sender et ![](mark:signal)&amp;nbsp;[signal](Term.Signal) eller kommer i en ønsket tilstand.</value>
   </data>
   <data name="Sprocket.System.EveryAbout" xml:space="preserve">
-    <value>Gjenta en oppgave med et fast intervall.</value>
+    <value>Gjenta en [oppgave](Term.Task) med et fast intervall.</value>
   </data>
   <data name="Sprocket.Trigger.StateAbout" xml:space="preserve">
     <value>Velg en annen tilstand, eller en annen verdi for den.</value>
   </data>
-  <data name="Sprocket.System.TriggerAbout" xml:space="preserve">
-    <value>Legg til en utløser som bestemmer hva som starter en sekvens.</value>
-  </data>
-  <data name="Sprocket.System.NewSequenceAbout" xml:space="preserve">
-    <value>Legg til en sekvens som kan kjøre flere steg i rekkefølge.</value>
-  </data>
   <data name="Sprocket.System.Copy" xml:space="preserve">
-    <value>Kopier denne sekvensen. Kopien starter avslått og uten utløsere.</value>
+    <value>Kopier denne sekvensen. Kopien starter avslått og uten ![](mark:trigger)&amp;nbsp;[utløsere](Term.Trigger).</value>
   </data>
   <data name="Sprocket.System.CopyUnstarted" xml:space="preserve">
     <value>Kopier denne sekvensen. Kopien starter avslått.</value>
@@ -268,9 +263,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Trigger.BlocksAbout" xml:space="preserve">
     <value>Velg blokken som får denne utløseren til å utløses.</value>
   </data>
-  <data name="Sprocket.Trigger.WhatAbout" xml:space="preserve">
-    <value>Velg hva blokken må gjøre for at denne utløseren skal utløses.</value>
-  </data>
   <data name="Sprocket.Trigger.DoesAbout" xml:space="preserve">
     <value>Velg hva denne utløseren gjør.</value>
   </data>
@@ -284,13 +276,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Navnet på denne sekvensen.</value>
   </data>
   <data name="Sprocket.Sequence.DoSomethingAbout" xml:space="preserve">
-    <value>Utfør en handling på blokker eller sett en av verdiene deres.</value>
-  </data>
-  <data name="Sprocket.Sequence.StepAbout" xml:space="preserve">
-    <value>Legg til et steg her.</value>
-  </data>
-  <data name="Sprocket.Sequence.WaitAbout" xml:space="preserve">
-    <value>Utsett neste steg med en fast tid.</value>
+    <value>Utfør en ![](mark:action)&amp;nbsp;[handling](Term.Action) på blokker eller sett en av ![](mark:value)&amp;nbsp;[verdiene](Term.Value) deres.</value>
   </data>
   <data name="Sprocket.Sequence.Delete" xml:space="preserve">
     <value>Slett denne sekvensen</value>
@@ -317,7 +303,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Velg hvordan det sammenlignes.</value>
   </data>
   <data name="Sprocket.Sequence.ReadAbout" xml:space="preserve">
-    <value>Velg hvordan blokkene leses.</value>
+    <value>Velg om betingelsen må gjelde minst én eller alle blokkene, eller om summen eller gjennomsnittet deres sjekkes.</value>
   </data>
   <data name="Sprocket.Sequence.CheckedAbout" xml:space="preserve">
     <value>Endre verdien det sjekkes etter.</value>
@@ -344,10 +330,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Velg hvilken sekvens dette steget stopper.</value>
   </data>
   <data name="Sprocket.Part.WatchedAbout" xml:space="preserve">
-    <value>Velg hvilken verdi denne utløseren følger med på.</value>
+    <value>Velg hvilken ![](mark:value)&amp;nbsp;[verdi](Term.Value) denne utløseren følger med på.</value>
   </data>
   <data name="Sprocket.Part.FillsAbout" xml:space="preserve">
-    <value>Velg hva som fyller denne plassen.</value>
+    <value>Velg hva som fyller denne [plassen](Term.Slot).</value>
   </data>
   <data name="Sprocket.Part.StepBlocks" xml:space="preserve">
     <value>Blokker dette steget virker på:</value>
@@ -362,7 +348,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Fra plassen {slots}.</value>
   </data>
   <data name="Sprocket.Part.SlotEmpty" xml:space="preserve">
-    <value>Ingenting fyller den i denne installasjonen.</value>
+    <value>Den er tom i denne installasjonen.</value>
   </data>
   <data name="Sprocket.Part.FromSlots" xml:space="preserve">
     <value>Fra plassene {slots}.</value>
@@ -372,9 +358,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   </data>
   <data name="Sprocket.Pick.DoneFirst" xml:space="preserve">
     <value>Velg noe i hver kolonne først.</value>
-  </data>
-  <data name="Sprocket.Pick.DoneAbout" xml:space="preserve">
-    <value>Bruk det som er valgt og gå tilbake.</value>
   </data>
   <data name="Sprocket.Pick.Back" xml:space="preserve">
     <value>Tilbake</value>
@@ -386,7 +369,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Tøm det som er skrevet</value>
   </data>
   <data name="Sprocket.Pick.EveryKind" xml:space="preserve">
-    <value>Vis alle typer igjen</value>
+    <value>Vis alle sorter igjen</value>
   </data>
   <data name="Sprocket.Pick.ShowHidden" xml:space="preserve">
     <value>Vis blokker som er skjult fra verktøylinjer</value>
@@ -395,10 +378,13 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Skjul blokker som er skjult fra verktøylinjer</value>
   </data>
   <data name="Sprocket.Pick.KindAbout" xml:space="preserve">
-    <value>Vis bare én type blokk.</value>
+    <value>Vis bare én sort blokk.</value>
+  </data>
+  <data name="Sprocket.Pick.SourceAbout" xml:space="preserve">
+    <value>Velg hva steget, hvis-steget eller utløseren arbeider med. `Eksisterende plass` bruker en [plass](Term.Slot) logikksystemet har fra før.</value>
   </data>
   <data name="Sprocket.Member.Waits" xml:space="preserve">
-    <value>Dette tar tid å fullføre. Sekvensen kan vente på det, eller gå rett videre mens det pågår.</value>
+    <value>Dette er ![](mark:awaited)&amp;nbsp;[avventbart](Term.Awaitable). Sekvensen går rett videre mens det virker, og et `wait for pending tasks`-steg nedenfor venter til det er ferdig.</value>
   </data>
   <data name="Sprocket.Pick.RunAbout" xml:space="preserve">
     <value>Start sekvensen som er valgt nedenfor</value>
@@ -406,44 +392,26 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Pick.StopAbout" xml:space="preserve">
     <value>Stopp sekvensen som er valgt nedenfor</value>
   </data>
-  <data name="Sprocket.Pick.SingleActionAbout" xml:space="preserve">
-    <value>Utfør én enkelt oppgave på noen blokker.</value>
-  </data>
-  <data name="Sprocket.Pick.NewSequenceAbout" xml:space="preserve">
-    <value>Lag en ny sekvens som denne utløseren starter.</value>
-  </data>
-  <data name="Sprocket.Pick.NewStateAbout" xml:space="preserve">
-    <value>Lag en ny tilstand og bruk den her.</value>
-  </data>
   <data name="Sprocket.Pick.StateFixedValueAbout" xml:space="preserve">
     <value>Bruk en av disse verdiene.</value>
   </data>
-  <data name="Sprocket.State.TypeAddAbout" xml:space="preserve">
-    <value>Legger til en type: et navngitt sett med alternativer en tilstand kan ha.</value>
-  </data>
-  <data name="Sprocket.State.ChoiceAddAbout" xml:space="preserve">
-    <value>Legger til et alternativ i typen.</value>
-  </data>
-  <data name="Sprocket.State.StateAddAbout" xml:space="preserve">
-    <value>Legger til en tilstand: en verdi hver installasjon beholder mellom kjøringer.</value>
-  </data>
   <data name="Sprocket.State.TypeRenameAbout" xml:space="preserve">
-    <value>Gir typen nytt navn, overalt den brukes.</value>
+    <value>Gi typen nytt navn</value>
   </data>
   <data name="Sprocket.State.ChoiceAbout" xml:space="preserve">
-    <value>Gir alternativet nytt navn, eller fjerner det.</value>
+    <value>Gi alternativet nytt navn, eller fjern det</value>
   </data>
   <data name="Sprocket.State.StateRenameAbout" xml:space="preserve">
-    <value>Gir tilstanden nytt navn, overalt den brukes.</value>
+    <value>Gi tilstanden nytt navn</value>
   </data>
   <data name="Sprocket.State.TypeRemove" xml:space="preserve">
-    <value>Fjerner typen.</value>
+    <value>Fjern typen</value>
   </data>
   <data name="Sprocket.State.TypeKept" xml:space="preserve">
-    <value>En tilstand har denne typen, så den kan ikke fjernes.</value>
+    <value>En tilstand bruker denne typen, så den kan ikke fjernes.</value>
   </data>
   <data name="Sprocket.State.StateRemove" xml:space="preserve">
-    <value>Fjerner tilstanden.</value>
+    <value>Fjern tilstanden</value>
   </data>
   <data name="Sprocket.State.StateKept" xml:space="preserve">
     <value>Et steg eller en utløser bruker denne tilstanden, så den kan ikke fjernes.</value>
@@ -454,15 +422,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.State.StateDrag" xml:space="preserve">
     <value>Dra for å flytte tilstanden.</value>
   </data>
-  <data name="Sprocket.State.TypesAbout" xml:space="preserve">
-    <value>En type er en liste med alternativer. En tilstand velger verdien sin fra typen den bruker.</value>
-  </data>
-  <data name="Sprocket.State.StatesAbout" xml:space="preserve">
-    <value>Det logikksystemet husker. Hver installasjon har sine egne verdier.</value>
-  </data>
-  <data name="Sprocket.State.CanBeAbout" xml:space="preserve">
-    <value>En tilstand av denne typen vil være én av disse verdiene.</value>
-  </data>
   <data name="Sprocket.State.HoldsAbout" xml:space="preserve">
     <value>Bytt typen til denne tilstanden. Startverdien blir den første verdien i den nye typen.</value>
   </data>
@@ -470,52 +429,34 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Verdien tilstanden har når logikksystemet starter.</value>
   </data>
   <data name="Sprocket.Pick.StateNameAbout" xml:space="preserve">
-    <value>Navnet den nye tilstanden skal ha. Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
+    <value>Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
   </data>
   <data name="Sprocket.Pick.StateTypeAbout" xml:space="preserve">
-    <value>Typen den nye tilstanden bruker, som avgjør hvilke verdier den kan ha.</value>
+    <value>[Typen](Term.Type) avgjør hvilke verdier den nye tilstanden kan ha.</value>
   </data>
   <data name="Sprocket.Pick.TypeNameAbout" xml:space="preserve">
-    <value>Navnet på den nye typen. Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
-  </data>
-  <data name="Sprocket.Pick.StateSetToAbout" xml:space="preserve">
-    <value>Verdien dette steget setter tilstanden til når det kjører.</value>
-  </data>
-  <data name="Sprocket.Pick.StateCheckAbout" xml:space="preserve">
-    <value>Sjekk om tilstanden er, eller ikke er, en bestemt verdi.</value>
-  </data>
-  <data name="Sprocket.Pick.StateWatchAbout" xml:space="preserve">
-    <value>Utløseren utløses når tilstanden blir denne verdien.</value>
+    <value>Hver plass, type og tilstand i et logikksystem må ha sitt eget navn.</value>
   </data>
   <data name="Sprocket.Pick.StateValueOfAbout" xml:space="preserve">
     <value>Bruk den verdien en annen tilstand har når dette kjører.</value>
   </data>
   <data name="Sprocket.Pick.SlotMatched" xml:space="preserve">
-    <value>Disse plassene finnes allerede, så dette navngir dem slik de er.</value>
+    <value>Dette bruker [plasser](Term.Slot) logikksystemet har fra før. Gi dem nye navn på fanen `Installasjonspanel`.</value>
   </data>
   <data name="Sprocket.Pick.SlotChanges" xml:space="preserve">
-    <value>Plassen blokkene som er valgt endrer. Den beholder navnet sitt.</value>
+    <value>Blokkene som er valgt, erstatter blokkene i denne [plassen](Term.Slot) i installasjonen som vises. Navnet blir det samme.</value>
   </data>
   <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
-    <value>Navnet på den nye plassen blokkene som er valgt lager. Trykk for å gi den nytt navn.</value>
+    <value>Blokkene som er valgt, lager en ny [plass](Term.Slot) med dette navnet. Trykk på navnet for å endre det.</value>
   </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
-    <value>Typen kan ikke byttes mens et steg, en if eller en utløser bruker denne tilstanden.</value>
+    <value>Et steg, et hvis eller en utløser bruker denne tilstanden, så typen kan ikke byttes.</value>
   </data>
   <data name="Sprocket.State.NowAbout" xml:space="preserve">
     <value>Verdien denne tilstanden har akkurat nå i installasjonen som vises.</value>
   </data>
   <data name="Sprocket.Blueprint.NameAbout" xml:space="preserve">
     <value>Navnet på denne installasjonen.</value>
-  </data>
-  <data name="Sprocket.Heading.LogicSystem" xml:space="preserve">
-    <value>Logikksystem</value>
-  </data>
-  <data name="Sprocket.Heading.Installation" xml:space="preserve">
-    <value>Installasjon</value>
-  </data>
-  <data name="Sprocket.Heading.Sequence" xml:space="preserve">
-    <value>Sekvens</value>
   </data>
   <data name="Sprocket.Blueprint.NameBoxAbout" xml:space="preserve">
     <value>Navnet på plassen, slik alle som fyller ut dette logikksystemet ser det.</value>
@@ -538,15 +479,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Color.Brightness" xml:space="preserve">
     <value>Lysstyrke</value>
   </data>
-  <data name="Sprocket.Color.Red" xml:space="preserve">
-    <value>Rød</value>
-  </data>
-  <data name="Sprocket.Color.Green" xml:space="preserve">
-    <value>Grønn</value>
-  </data>
-  <data name="Sprocket.Color.Blue" xml:space="preserve">
-    <value>Blå</value>
-  </data>
   <data name="Sprocket.Color.PlaneAbout" xml:space="preserve">
     <value>Metning bortover, lysstyrke oppover.</value>
   </data>
@@ -566,25 +498,22 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>*Spillet holder denne blokkens hendelser unna mods. Still dette inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Withheld.Camera" xml:space="preserve">
-    <value>*Automasjonen kan ikke velge kamera ennå. Still det inn i terminalen.*</value>
+    <value>*Å velge kamera her er ikke tilgjengelig ennå. Still det inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Withheld.Rotor" xml:space="preserve">
-    <value>*Automasjonen kan ikke velge rotor ennå. Still den inn i terminalen.*</value>
+    <value>*Å velge rotor her er ikke tilgjengelig ennå. Still den inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Withheld.Ammo" xml:space="preserve">
-    <value>*Automasjonen kan ikke velge ammunisjon ennå. Still den inn i terminalen.*</value>
+    <value>*Å velge ammunisjon her er ikke tilgjengelig ennå. Still den inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Withheld.Unread" xml:space="preserve">
-    <value>*Spillet gir ikke fra seg listen over valg for denne verdien, så automasjonen kan ikke sette den. Still den inn i terminalen.*</value>
+    <value>*Spillet lar ikke mods lese valgene for denne verdien. Still den inn i terminalen.*</value>
   </data>
   <data name="Sprocket.Wait.Shorter" xml:space="preserve">
     <value>Kortere</value>
   </data>
   <data name="Sprocket.Wait.Longer" xml:space="preserve">
     <value>Lengre</value>
-  </data>
-  <data name="Sprocket.Wait.TickAbout" xml:space="preserve">
-    <value>Et tikk er det minste tidssteget, seksti i sekundet.</value>
   </data>
   <data name="Sprocket.Change.Describe" xml:space="preserve">
     <value>endring av beskrivelsen</value>
@@ -623,7 +552,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>endring av hvor ofte den kjører</value>
   </data>
   <data name="Sprocket.Change.SlotType" xml:space="preserve">
-    <value>endre typen til en plass</value>
+    <value>endring av blokksorten til en plass</value>
   </data>
   <data name="Sprocket.Change.Optional" xml:space="preserve">
     <value>endre en plass til valgfri</value>
@@ -743,7 +672,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Slett den fra lageret</value>
   </data>
   <data name="Sprocket.Library.PutOn" xml:space="preserve">
-    <value>Legg til denne plantegningen på denne konstruksjonen som et logikksystem, med den første installasjonen.</value>
+    <value>Legg den til som et logikksystem, med en tom installasjon å fylle.</value>
   </data>
   <data name="Sprocket.Library.TakeOff" xml:space="preserve">
     <value>Ta dette logikksystemet og installasjonene av det bort fra denne konstruksjonen.</value>
@@ -763,15 +692,6 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Library.ResetAbout" xml:space="preserve">
     <value>Tilbakestill dette logikksystemet til plantegningen i biblioteket. Installasjonene beholder blokkene sine.</value>
   </data>
-  <data name="Sprocket.Sequence.RunAbout" xml:space="preserve">
-    <value>Start en annen sekvens.</value>
-  </data>
-  <data name="Sprocket.Sequence.StopAbout" xml:space="preserve">
-    <value>Stopp en annen sekvens der den er.</value>
-  </data>
-  <data name="Sprocket.Sequence.IfAbout" xml:space="preserve">
-    <value>Kjør stegene under bare hvis en betingelse er oppfylt.</value>
-  </data>
   <data name="Sprocket.Sequence.OtherwiseIfAbout" xml:space="preserve">
     <value>Sjekk en annen betingelse når ingen av dem over er oppfylt.</value>
   </data>
@@ -779,7 +699,7 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Kjør dette når ingen av betingelsene over er oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.BranchAbout" xml:space="preserve">
-    <value>Legg til en gren i dette hvis-steget.</value>
+    <value>Legg til en [gren](Term.Branch) i dette hvis-steget.</value>
   </data>
   <data name="Sprocket.Sequence.OtherwiseTestAbout" xml:space="preserve">
     <value>Legg til en betingelse for denne grenen.</value>
@@ -788,25 +708,22 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Velg betingelsen som må være oppfylt.</value>
   </data>
   <data name="Sprocket.Sequence.SetStateAbout" xml:space="preserve">
-    <value>Gi en av logikksystemets tilstander en ny verdi.</value>
+    <value>Gi en av logikksystemets [tilstander](Term.LogicSystemStates) en ny verdi.</value>
   </data>
   <data name="Sprocket.Sequence.SystemStateAbout" xml:space="preserve">
     <value>Velg en annen tilstand, eller en annen verdi for den.</value>
   </data>
-  <data name="Sprocket.Admin.ThisWorldAbout" xml:space="preserve">
-    <value>Innstillinger bare for denne verdenen.</value>
-  </data>
   <data name="Sprocket.Admin.EveryWorldAbout" xml:space="preserve">
-    <value>Standardverdiene, brukt av alle verdener som ikke setter en verdi selv. På en dedikert server gjelder de alle verdener serveren kjører. I enspillermodus eller et spill du er vert for, gjelder de alle verdenene dine.</value>
+    <value>Alle verdener følger disse innstillingene der den egne står på `Standard`. På en dedikert server gjelder de verdenene den kjører, og i ditt eget spill alle verdener du spiller eller er vert for.</value>
   </data>
   <data name="Sprocket.Admin.DefaultAbout" xml:space="preserve">
     <value>Bruk verdien som er satt under Alle verdener, og følg den om den endres senere.</value>
   </data>
   <data name="Sprocket.Sequence.AwaitAbout" xml:space="preserve">
-    <value>Vent til alle ![](mark:awaited) oppgavene som er startet over, er ferdige.</value>
+    <value>Vent til alle ![](mark:awaited)&amp;nbsp;[avventbare handlinger](Term.Awaitable) som er startet over, er ferdige.</value>
   </data>
   <data name="Sprocket.Sequence.AwaitRow" xml:space="preserve">
-    <value>![](mark:awaited)-oppgavene som er startet over, helt tilbake til forrige venting på ventende oppgaver, kjører samtidig. Sekvensen venter her til alle oppgavene er ferdige.</value>
+    <value>De ![](mark:awaited)&amp;nbsp;[avventbare handlingene](Term.Awaitable) som er startet siden forrige `wait for pending tasks`, kjører samtidig, og sekvensen venter her til alle er ferdige.</value>
   </data>
   <data name="Sprocket.Change.MoveSlot" xml:space="preserve">
     <value>flytting av en plass</value>
@@ -859,14 +776,11 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
   <data name="Sprocket.Change.ChangeStart" xml:space="preserve">
     <value>endring av en startverdi</value>
   </data>
-  <data name="Sprocket.Category.AddAbout" xml:space="preserve">
-    <value>Legger til en kategori, som plasser kan dras inn i for å samle dem på installasjonspanelet.</value>
-  </data>
   <data name="Sprocket.Category.RenameAbout" xml:space="preserve">
-    <value>Gir kategorien nytt navn.</value>
+    <value>Gi kategorien nytt navn</value>
   </data>
   <data name="Sprocket.Category.Remove" xml:space="preserve">
-    <value>Fjerner kategorien. Plassene blir, uten kategori.</value>
+    <value>Fjern kategorien. Plassene blir, uten kategori.</value>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
     <value>Dra for å flytte kategorien med plassene sine.</value>
@@ -875,10 +789,10 @@ Lyser grønt når den kjører, og rødt når noe i den må fikses.</value>
     <value>Dra for å flytte plassen, inn i en kategori eller ut av en.</value>
   </data>
   <data name="Sprocket.Slot.ExpectsAbout" xml:space="preserve">
-    <value>Typen blokk denne plassen tar. Trykk for å velge en annen.</value>
+    <value>Hvilken sort blokk som kan fylle denne plassen. Trykk for å velge en annen.</value>
   </data>
   <data name="Sprocket.Writing.MarkupAbout" xml:space="preserve">
-    <value>Vis veiledningen for formatering av tekst.</value>
+    <value>Vis veiledningen for å skrive formatert tekst.</value>
   </data>
   <data name="Sprocket.Tip.KeepHint" xml:space="preserve">
     <value>Hold Alt for å holde åpen</value>

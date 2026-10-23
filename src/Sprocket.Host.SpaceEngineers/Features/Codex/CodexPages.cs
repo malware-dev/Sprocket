@@ -18,6 +18,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         /// <summary>The name links give the page on installations.</summary>
         public const string Installation = "Term.Installation";
 
+        /// <summary>The name links give the page on slots.</summary>
+        public const string Slot = "Term.Slot";
+
+        /// <summary>The name links give the page on a logic system's states.</summary>
+        public const string LogicSystemStates = "Term.LogicSystemStates";
+
+        /// <summary>The name links give the page on a logic system's types.</summary>
+        public const string Type = "Term.Type";
+
+        /// <summary>The name links give the page on constructs.</summary>
+        public const string Construct = "Term.Construct";
+
+        /// <summary>The name links give the page on backups.</summary>
+        public const string Backup = "Term.Backup";
+
         readonly Texts _texts;
         readonly Dictionary<string, Tip> _read = new Dictionary<string, Tip>(StringComparer.Ordinal);
 
@@ -50,6 +65,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Codex
         public static string Link(string words, string id)
         {
             return $"[{Markdown.Escape(words)}]({id})";
+        }
+
+        /// <summary>
+        /// The markdown-lite for a heading in capitals: <paramref name="template" /> with its slot <paramref name="slot" /> filled by
+        /// <paramref name="term" />, the term alone a link to the page <paramref name="id" />, so a heading such as "On your
+        /// constructs" shows only the term in the link's look.
+        /// </summary>
+        public static string Within(string template, string slot, string term, string id)
+        {
+            var mark = "{" + slot + "}";
+            var at = template.IndexOf(mark, StringComparison.Ordinal);
+            if (at < 0)
+                return Markdown.Escape(template.ToUpperInvariant());
+
+            var before = template.Substring(0, at).ToUpperInvariant();
+            var after = template.Substring(at + mark.Length).ToUpperInvariant();
+            return Markdown.Escape(before) + Link(term.ToUpperInvariant(), id) + Markdown.Escape(after);
         }
 
         /// <summary>Makes the links in <paramref name="text" /> explain what they are on: resting on one shows the page it names.</summary>

@@ -48,7 +48,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             foreach (var offered in _offered)
                 words.Add(offered == PickSource.Blocks ? texts.PickSourceBlocks : offered == PickSource.Slots ? texts.PickSourceSlots : texts.PickSourceStates);
 
-            var box = new ListField(words) { Style = Styles.ListLineInHeading, Text = words[_offered.IndexOf(source)] };
+            var box = new ListField(words) { Style = Styles.ListLineInHeading, Text = words[_offered.IndexOf(source)], Tip = Tip.For(null, texts.Codex.PickSourceAbout) };
             box.Edited += delegate
             {
                 var at = words.IndexOf(box.Text);

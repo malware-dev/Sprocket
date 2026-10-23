@@ -27,12 +27,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             set { _lead.Text = value; }
         }
 
-        /// <summary>What the words before the choices mean, said where the pointer rests on them.</summary>
-        public string LeadAbout
-        {
-            set { _lead.Tip = Tip.For(_lead.Tip, value); }
-        }
-
         /// <summary>Its choices, one plate each by name, in order, shown by whoever fills the row.</summary>
         public KeyedChildren<string, NamePlate> ChoiceChips { get; }
 

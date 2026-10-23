@@ -632,7 +632,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _library.IsVisible = screen.Library != null;
             _library.Text = texts.SystemsLoad;
             _libraries.CanExecute = screen.Library != null;
-            _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.Codex.SystemsLoadAbout : null);
+            _library.Tip = Tip.For(_library.Tip, screen.Library != null ? texts.Codex.TermLibrary : null);
 
             var doing = screen.Running ? screen.Stops : screen.Runs;
             _run.IsVisible = doing != null;

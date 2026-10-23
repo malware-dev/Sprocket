@@ -82,7 +82,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             number.Children.Add(new Switch
             {
                 Style = Styles.Switch,
-                Tip = Tip.For(null, texts.Codex.WaitTickAbout),
+                Tip = Tip.For(null, texts.Codex.TermTick),
                 Command = new Relay(() => Unit(!_inSeconds))
             }.As(out _unit));
             _unit.Says(texts.WaitInSeconds, texts.WaitInTicks);

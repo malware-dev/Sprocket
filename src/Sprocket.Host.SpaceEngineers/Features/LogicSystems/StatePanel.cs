@@ -23,8 +23,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             }
         }
 
-        /// <summary>The heading over the types, saying what a type is where the pointer rests on it.</summary>
-        public Label TypesHeading => _typesHeading;
+        /// <summary>The heading over the types, the term the codex explains where the pointer rests on it.</summary>
+        public RichText TypesHeading => _typesHeading;
 
         /// <summary>The types, one row each, in order.</summary>
         public CarryList Types => _types;
@@ -32,7 +32,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         /// <summary>The button that adds a type.</summary>
         public Button AddType => _addType;
 
-        /// <summary>The heading over the states, saying what a state is where the pointer rests on it.</summary>
+        /// <summary>The heading over the states.</summary>
         public Label StatesHeading => _statesHeading;
 
         /// <summary>The states, one row each, in order.</summary>

@@ -21,7 +21,7 @@ public class HeadingMarkTests
 
         var heading = sim.Editor.Screen.Heading;
         Assert.Equal(Symbols.LogicSystem, heading[0].Mark);
-        Assert.Equal("Logic system", heading[0].MarkAbout);
+        Assert.Equal(sim.Texts.Codex.TermLogicSystem, heading[0].MarkAbout);
         Assert.Equal("Airlock", heading[0].Text);
     }
 
@@ -42,7 +42,7 @@ public class HeadingMarkTests
         Assert.NotNull(heading[0].Opens);
         Assert.Equal("", heading[0].Lead);
         Assert.Equal(Symbols.Installation, heading[1].Mark);
-        Assert.Equal("Installation", heading[1].MarkAbout);
+        Assert.Equal(sim.Texts.Codex.TermInstallation, heading[1].MarkAbout);
         Assert.True(heading[1].CanRename);
         Assert.Equal("", heading[1].Lead);
     }
@@ -85,6 +85,6 @@ public class HeadingMarkTests
 
         var heading = sim.Editor.Screen.Heading;
         Assert.Equal(Symbols.Sequence, heading[0].Mark);
-        Assert.Equal("Sequence", heading[0].MarkAbout);
+        Assert.Equal(sim.Texts.Codex.TermSequence, heading[0].MarkAbout);
     }
 }

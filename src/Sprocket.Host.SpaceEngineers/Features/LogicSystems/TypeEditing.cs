@@ -22,7 +22,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         {
             row.Name.Text = type.Name;
             row.Lead = texts.StateCanBe;
-            row.LeadAbout = texts.Codex.StateCanBeAbout;
             row.ChoiceChips.Show(type.Choices);
             foreach (var choice in type.Choices)
             {

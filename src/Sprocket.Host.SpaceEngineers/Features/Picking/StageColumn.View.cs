@@ -11,7 +11,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 {
     partial class StageColumn
     {
-        Label _title;
+        RichText _title;
         HStack _heads;
         HStack _viewLinks;
         Label _subtitle;
@@ -53,7 +53,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                         Placement = Flex.Grow,
                         Children =
                         {
-                            new Label { Style = Styles.ColumnTitle }.As(out _title),
+                            new RichText { Style = Styles.ColumnTitleTerm }.As(out _title),
                             new HStack { IsVisible = false }.As(out _heads)
                         }
                     },

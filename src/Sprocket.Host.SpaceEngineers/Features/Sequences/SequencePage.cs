@@ -190,7 +190,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         {
             var does = new HeadingPart("");
             does.Mark = Symbols.Sequence;
-            does.MarkAbout = Editor.Texts.Codex.HeadingSequence;
+            does.MarkAbout = Editor.Texts.Codex.TermSequence;
             does.About = NameAbout;
             does.NameRequired = NameRequired;
             does.Renames = Editor.Renaming(Rename, null);
@@ -310,7 +310,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             _account.Forget();
 
             var editable = Editable;
-            _add.Show(new AddOption(texts.SequenceStep, texts.Codex.SequenceStepAbout, Kinds(texts, _sequence.Steps.Count)));
+            _add.Show(new AddOption(texts.SequenceStep, null, Kinds(texts, _sequence.Steps.Count)));
             _locked.IsVisible = !editable;
             _locked.Text = LockedText;
 
@@ -405,7 +405,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             row.Grip.CanCarry = false;
             row.Locked = locked;
             row.Adds.Clear();
-            row.Adds.Add(new AddOption(texts.SequenceStep, texts.Codex.SequenceStepAbout, Kinds(texts, at)));
+            row.Adds.Add(new AddOption(texts.SequenceStep, null, Kinds(texts, at)));
         }
 
         /// <summary>Every kind of step there is, each added at the line <paramref name="at" />, in the order a menu offers them.</summary>
@@ -414,16 +414,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             var kinds = new List<AddOption>
             {
                 new AddOption(texts.SequenceDoSomething, texts.Codex.SequenceDoSomethingAbout, Changes(CommandKind.AddAction, () => _stepwork.AddAction(at))),
-                new AddOption(SentenceText.WaitWord, texts.Codex.SequenceWaitAbout, Changes(CommandKind.AddWait, () => AddWait(at)))
+                new AddOption(SentenceText.WaitWord, texts.Codex.TermDelay, Changes(CommandKind.AddWait, () => AddWait(at)))
             };
 
             kinds.Add(new AddOption(SentenceText.AwaitWords, texts.Codex.SequenceAwaitAbout,
                 Changes(CommandKind.AddAwait, () => Editor.Do(_sequence, new AddStep(ChangeKind.AddStep, at, new Await())))));
 
-            kinds.Add(new AddOption(SentenceText.RunWord, texts.Codex.SequenceRunAbout, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
-            kinds.Add(new AddOption(SentenceText.StopWord, texts.Codex.SequenceStopAbout, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
+            kinds.Add(new AddOption(SentenceText.RunWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddRun, () => _stepwork.AddRun(false, at))));
+            kinds.Add(new AddOption(SentenceText.StopWord, texts.Codex.TermRunAndStop, Changes(CommandKind.AddStop, () => _stepwork.AddRun(true, at))));
             kinds.Add(new AddOption(SentenceText.SetStateWords, texts.Codex.SequenceSetStateAbout, Changes(CommandKind.AddSetState, () => _stepwork.AddSetState(at))));
-            kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.SequenceIfAbout, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
+            kinds.Add(new AddOption(SentenceText.IfWord, texts.Codex.TermIf, Changes(CommandKind.AddIf, () => _stepwork.AddIf(at))));
             return kinds;
         }
 

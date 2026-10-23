@@ -41,7 +41,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         Button _newSequence;
         Label _noSequences;
         VStack _sequenceList;
-        Label _slotsHeading;
+        RichText _slotsHeading;
         PartList _slotList;
         VStack _addCategory;
         Button _newCategory;
@@ -153,7 +153,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                                                 new RichText { Style = Styles.Description, IsVisible = false }.As(out _description)
                                             }
                                         }.As(out _describing),
-                                        new Label { Style = Styles.SubHeading, IsVisible = false }.As(out _slotsHeading),
+                                        new RichText { Style = Styles.SubHeadingTerm, IsVisible = false }.As(out _slotsHeading),
                                         new PartList { Spacing = 4f, IsVisible = false }.As(out _slotList),
                                         new VStack
                                         {

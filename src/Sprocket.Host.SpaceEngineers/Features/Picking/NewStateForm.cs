@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Lumel;
 using Lumel.Controls;
 using Lumel.Layout;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
@@ -41,9 +40,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
             _starts.Edited += StartsEdited;
             _choices = new KeyedChildren<string, NamePlate>(_chips.Children, delegate { return new NamePlate(false); });
             _choicesLabel.Text = texts.StateCanBe;
-            _choicesLabel.Tip = Tip.For(_choicesLabel.Tip, texts.Codex.StateCanBeAbout);
             _addChoice.Text = StatusRow.Plus + texts.StateChoiceAdd;
-            _addChoice.Tip = Tip.For(_addChoice.Tip, texts.Codex.StateChoiceAddAbout);
             _addChoice.Command = editor.Act(CommandKind.AddChoice, delegate
             {
                 _made.Choices.Add(NumberedName.Free(texts.StateChoiceNumbered, _made.Choices.Count, _made.Has));

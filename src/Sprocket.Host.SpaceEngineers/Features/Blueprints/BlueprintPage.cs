@@ -1,3 +1,4 @@
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Features.Look;
@@ -131,12 +132,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             base.Heading(parts);
             parts[0].Mark = Blockset == null ? Symbols.LogicSystem : Symbols.Installation;
-            parts[0].MarkAbout = Blockset == null ? Editor.Texts.Codex.HeadingLogicSystem : Editor.Texts.Codex.HeadingInstallation;
+            parts[0].MarkAbout = Blockset == null ? Editor.Texts.Codex.TermLogicSystem : Editor.Texts.Codex.TermInstallation;
 
             // Pushed, so Back returns to the blocks being filled.
             var from = new HeadingPart(_system.Name);
             from.Mark = Symbols.LogicSystem;
-            from.MarkAbout = Editor.Texts.Codex.HeadingLogicSystem;
+            from.MarkAbout = Editor.Texts.Codex.TermLogicSystem;
             from.About = Template.Fill(Editor.Texts.Codex.SystemsEditBlueprint, "name", _system.Name);
             from.Opens = Editor.Act(CommandKind.OpenSystem, () => Editor.Push(new LogicSystemPage(Editor, _system)));
             parts.Insert(0, from);
@@ -211,6 +212,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         protected override void ViewCreated()
         {
             _partRows = new KeyedChildren<object, Element>(_partList.Children, Row);
+            Editor.Codex.Explain(_partsHeading);
             Show();
         }
 
@@ -223,7 +225,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var chosen = Blockset;
             _shape = Shape(chosen);
 
-            _partsHeading.Text = texts.BlueprintParts.ToUpperInvariant();
+            _partsHeading.Markdown = CodexPages.Link(texts.BlueprintParts.ToUpperInvariant(), CodexPages.Slot);
             Describe();
 
             Collect();

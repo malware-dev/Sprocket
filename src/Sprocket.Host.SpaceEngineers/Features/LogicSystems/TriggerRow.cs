@@ -157,7 +157,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             if (given != null)
                 return given.About(texts);
 
-            return part is EventSlot ? texts.Codex.TriggerWhatAbout : null;
+            return null;
         }
 
         /// <summary>What pressing a part of what it does does, or null where it goes without saying.</summary>

@@ -8,6 +8,7 @@ using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Sprocket.Host.SpaceEngineers.World;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
@@ -238,7 +239,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override bool CanPrimary => IsComplete && (_aim == null || _aim.Finishes);
 
         /// <inheritdoc />
-        public override string PrimaryAbout => Editor.Texts.Codex.PickDoneAbout;
+        public override string PrimaryAbout => "";
 
         /// <inheritdoc />
         public override string PrimaryWaits => Editor.Texts.Codex.PickDoneFirst;
@@ -663,6 +664,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         {
             _blocks = new StageColumn(_strip.Width, true, null, Editor.Texts);
             _blocks.Title = Source != null ? Editor.Texts.PickSource : ListsSlots ? Editor.Texts.PickSlots : Editor.Texts.PickBlocks;
+            _blocks.Explain(Editor.Codex);
             if (Source != null)
                 _blocks.Heads(Source.Box(ListsSlots ? PickSource.Slots : PickSource.Blocks));
 
@@ -1112,7 +1114,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 for (var i = 0; i < SentenceText.Readings.Count; i++)
                     words.Add(SentenceText.Quantified(SentenceText.Readings[i]));
 
-                _reads = new ListField(words);
+                _reads = new ListField(words) { Tip = Tip.For(null, Editor.Texts.Codex.SequenceReadAbout) };
                 _reads.Edited += delegate
                 {
                     var reads = Editor.Act(CommandKind.ReadBlocks, () => Quantify(Read(_reads.Text)));

@@ -6,6 +6,7 @@ using Lumel.Input;
 using Lumel.Layout;
 using Lumel.Text;
 using Sprocket.Host.SpaceEngineers.Features.Fields;
+using Sprocket.Host.SpaceEngineers.Features.Codex;
 using Sprocket.Host.SpaceEngineers.Features.Look;
 using Sprocket.Host.SpaceEngineers.Features.Sentences;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
@@ -116,7 +117,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override bool CanPrimary => Chosen != null && Why.Length == 0 && (Word.Length != 0 || Copy.Length != 0) && (_aim == null || _aim.Finishes);
 
         /// <inheritdoc />
-        public override string PrimaryAbout => Editor.Texts.Codex.PickDoneAbout;
+        public override string PrimaryAbout => "";
 
         /// <inheritdoc />
         public override string PrimaryWaits => Editor.Texts.Codex.PickDoneFirst;
@@ -213,7 +214,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _states = new StageColumn(_strip.Width, false, null, texts);
                 _states.Title = Source == null ? texts.PickStates : texts.PickSource;
-                _states.TitleAbout = texts.Codex.StateStatesAbout;
+                _states.TitleTerm = Source == null ? CodexPages.LogicSystemStates : null;
+                _states.Explain(Editor.Codex);
                 if (Source != null)
                     _states.Heads(Source.Box(PickSource.States));
 
@@ -221,10 +223,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
                 _define = new StageColumn(_strip.Width, false, null, texts);
                 _define.Title = texts.PickNewState;
-                _define.TitleAbout = texts.Codex.PickNewStateAbout;
                 _value = new StageColumn(_strip.Width, false, null, texts);
                 _value.Title = _sets ? texts.PickStateSetTo : _aim == null ? texts.PickStateCheck : texts.PickStateWatch;
-                _value.TitleAbout = _sets ? texts.Codex.PickStateSetToAbout : _aim == null ? texts.Codex.PickStateCheckAbout : texts.Codex.PickStateWatchAbout;
                 _newState = new NewStateForm(Editor, _system, () => Editor.Current == this);
                 _newState.TypeChanged += type =>
                 {
@@ -386,7 +386,6 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             var made = _rows[NewRow];
             made.Text = Editor.Texts.PickNewState;
-            made.About = Editor.Texts.Codex.PickNewStateAbout;
             made.IsChosen = _making;
             made.Show();
 

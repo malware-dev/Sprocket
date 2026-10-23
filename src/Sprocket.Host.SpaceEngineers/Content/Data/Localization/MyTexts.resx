@@ -115,28 +115,28 @@
     <comment>Name given to every new slot: the slot the blocks or buttons picked for a step or a trigger make, the signal slot of a copied button trigger. Shown in the picker's heading to be renamed there, on the lines of a sequence and a logic system, and on the installation panel. {number} is the first number not already used, counting on from how many slots the logic system has. Written as the game names its blocks, in the player's language.</comment>
   </data>
   <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
-    <value>A narrower type may leave installations elsewhere, on other constructs or in the library, with blocks that no longer fit. Narrow it?</value>
-    <comment>PLACEHOLDER, to be written. Question asked on Done in the picker of a slot's type, where the type chosen takes fewer kinds of block than the slot takes now. Installations on this construct whose blocks no longer fit are marked to fill the slot again; those elsewhere cannot be checked.</comment>
+    <value>Installations on other constructs or in the library may have blocks that no longer fit. Narrow it?</value>
+    <comment>Question asked on Done in the picker of a slot's type, where the type chosen takes fewer kinds of block than the slot takes now. Installations on this construct whose blocks no longer fit are marked to fill the slot again; those elsewhere cannot be checked.</comment>
   </data>
   <data name="Sprocket.Slot.NarrowYes" xml:space="preserve">
     <value>Narrow it</value>
-    <comment>PLACEHOLDER, to be written. Answer to the question about narrowing a slot's type: the slot takes the narrower type.</comment>
+    <comment>Answer to the question about narrowing a slot's type: the slot takes the narrower type.</comment>
   </data>
   <data name="Sprocket.Slot.NarrowCancel" xml:space="preserve">
     <value>Cancel</value>
-    <comment>PLACEHOLDER, to be written. Answer to the question about narrowing a slot's type, the one Enter takes: the slot keeps its type, and the picker stays open.</comment>
+    <comment>Answer to the question about narrowing a slot's type, the one Enter takes: the slot keeps its type, and the picker stays open.</comment>
   </data>
   <data name="Sprocket.Slot.SharedQuestion" xml:space="preserve">
-    <value>Other steps or triggers use {slot} too. Change it for all of them, or give this one a slot of its own?</value>
-    <comment>PLACEHOLDER, to be written. Question asked on Done in the picker, where the blocks or buttons picked for a step or a trigger fill no slot the logic system has, and the slot the step or trigger named is used by other steps or triggers as well. {slot} is that slot's name.</comment>
+    <value>Other steps or triggers use **{slot}** too. Change it for all of them, or give this one a slot of its own?</value>
+    <comment>Question asked on Done in the selector, where the blocks or buttons selected for a step or a trigger fill no slot the logic system has, and the slot the step or trigger named is used by other steps or triggers as well. {slot} is that slot's name, shown in bold.</comment>
   </data>
   <data name="Sprocket.Slot.SharedEveryone" xml:space="preserve">
     <value>Change it for all</value>
-    <comment>PLACEHOLDER, to be written. Answer to the question about a slot other steps or triggers use too: the slot takes the blocks picked, for every step and trigger that names it.</comment>
+    <comment>Answer to the question about a slot other steps or triggers use too: the slot takes the blocks picked, for every step and trigger that names it.</comment>
   </data>
   <data name="Sprocket.Slot.SharedOwn" xml:space="preserve">
     <value>A slot of its own</value>
-    <comment>PLACEHOLDER, to be written. Answer to the question about a slot other steps or triggers use too, the one Enter takes: the step or trigger being changed gets a new slot holding the blocks picked, and the others keep the slot as it was.</comment>
+    <comment>Answer to the question about a slot other steps or triggers use too, the one Enter takes: the step or trigger being changed gets a new slot holding the blocks picked, and the others keep the slot as it was.</comment>
   </data>
   <data name="Sprocket.System.InstallationPanel" xml:space="preserve">
     <value>Installation panel</value>
@@ -315,12 +315,12 @@
     <comment>Banner at the top of every screen of the editor when the block's program has an error in its text, so none of it was loaded.</comment>
   </data>
   <data name="Sprocket.Salvage.BrokenDetail" xml:space="preserve">
-    <value>None of it runs, and this screen starts empty. Edit the text to mend it. The block keeps the old program until you change something here. Then it is gone for good.</value>
+    <value>None of it runs, and this screen starts empty. Edit the text to fix it. The block keeps the old program until you change something here. Then it is gone for good.</value>
     <comment>Shown when the banner saying the block's program has an error in it is opened.</comment>
   </data>
   <data name="Sprocket.Salvage.Mend" xml:space="preserve">
     <value>Edit the text</value>
-    <comment>Button on the banner saying the block's program has an error in it: opens the program's text, where the error can be mended.</comment>
+    <comment>Button on the banner saying the block's program has an error in it: opens the program's text, where the error can be fixed.</comment>
   </data>
   <data name="Sprocket.Script.Title" xml:space="preserve">
     <value>Script</value>
@@ -566,23 +566,23 @@
   </data>
   <data name="Sprocket.Pick.SourceSlots" xml:space="preserve">
     <value>Existing slot</value>
-    <comment>PLACEHOLDER, to be written. Choice in the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with: it acts on, checks or watches a slot the logic system already has, picked by its name, instead of blocks.</comment>
+    <comment>Choice in the Source box heading the first column of the selector a step, an if, an otherwise if or a when is made with: it acts on, checks or watches a slot the logic system already has, picked by its name, instead of blocks.</comment>
   </data>
   <data name="Sprocket.Pick.Slots" xml:space="preserve">
     <value>Slots</value>
-    <comment>PLACEHOLDER, to be written. Heading of the first column of a selector while it lists the logic system's slots, the Existing slot source chosen. Shown in capitals.</comment>
+    <comment>Heading of the first column of a selector while it lists the logic system's slots, the Existing slot source chosen. Shown in capitals.</comment>
   </data>
   <data name="Sprocket.Pick.NoSlots" xml:space="preserve">
-    <value>This logic system has no slots of blocks yet.</value>
-    <comment>PLACEHOLDER, to be written. Said in the first column of a selector, the Existing slot source chosen, where the logic system has no slot holding blocks to list.</comment>
+    <value>This logic system has no block slots yet. Switch the source to Blocks and select some to make one.</value>
+    <comment>Said in the first column of a selector, the Existing slot source chosen, where the logic system has no slot holding blocks to list. Blocks is the name of the Source box's choice that lists blocks to select, whose selecting makes a slot.</comment>
   </data>
   <data name="Sprocket.Pick.SlotFillsOne" xml:space="preserve">
     <value>1 block in this installation</value>
-    <comment>PLACEHOLDER, to be written. Under a slot's name in the first column of a selector, the Existing slot source chosen, where one block fills the slot in the installation shown.</comment>
+    <comment>Under a slot's name in the first column of a selector, the Existing slot source chosen, where one block fills the slot in the installation shown.</comment>
   </data>
   <data name="Sprocket.Pick.SlotFills" xml:space="preserve">
     <value>{count} blocks in this installation</value>
-    <comment>PLACEHOLDER, to be written. Under a slot's name in the first column of a selector, the Existing slot source chosen: how many blocks fill the slot in the installation shown, where that is not one. {count} is that number, which may be 0.</comment>
+    <comment>Under a slot's name in the first column of a selector, the Existing slot source chosen: how many blocks fill the slot in the installation shown, where that is not one. {count} is that number, which may be 0.</comment>
   </data>
   <data name="Sprocket.Pick.NewState" xml:space="preserve">
     <value>A new state</value>
@@ -1597,8 +1597,12 @@
     <comment>In the library, a line in the section of blueprints kept in storage where the player keeps no blueprints yet.</comment>
   </data>
   <data name="Sprocket.Library.OnConstructs" xml:space="preserve">
-    <value>On your constructs</value>
-    <comment>In the library, the heading at the top of the list, over the logic systems on the construct the editor was opened on.</comment>
+    <value>On your {constructs}</value>
+    <comment>In the library, the heading at the top of the list, over the logic systems on the construct the editor was opened on. Shown in capitals. {constructs} is filled with the word constructs, shown as a link to the codex page on constructs.</comment>
+  </data>
+  <data name="Sprocket.Library.OnConstructsTerm" xml:space="preserve">
+    <value>constructs</value>
+    <comment>In the library, the word that fills {constructs} in the heading at the top of the list (On your constructs), shown in capitals as a link to the codex page on constructs.</comment>
   </data>
   <data name="Sprocket.Library.ThisConstruct" xml:space="preserve">
     <value>{name} (this construct)</value>

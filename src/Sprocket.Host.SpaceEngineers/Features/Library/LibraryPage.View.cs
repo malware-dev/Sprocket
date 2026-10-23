@@ -20,9 +20,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
         Label _line;
         RichText _about;
         Label _trouble;
-        Label _firstHeading;
+        RichText _firstHeading;
         Label _first;
-        Label _secondHeading;
+        RichText _secondHeading;
         Label _second;
 
         /// <inheritdoc />
@@ -75,9 +75,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Library
                                     new Label { Style = Styles.Detail }.As(out _line),
                                     new RichText { Style = Styles.LibraryAbout, IsVisible = false }.As(out _about),
                                     new Label { Style = Styles.Diagnostic, Wraps = true }.As(out _trouble),
-                                    new Label { Style = Styles.Heading }.As(out _firstHeading),
+                                    new RichText { Style = Styles.HeadingTerm, Align = Align.Left }.As(out _firstHeading),
                                     new Label { Style = Styles.Detail, Wraps = true }.As(out _first),
-                                    new Label { Style = Styles.Heading }.As(out _secondHeading),
+                                    new RichText { Style = Styles.HeadingTerm, Align = Align.Left }.As(out _secondHeading),
                                     new Label { Style = Styles.Detail, Wraps = true }.As(out _second)
                                 }
                             },

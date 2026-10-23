@@ -47,7 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         public override bool CanPrimary => _aim.Finishes && (_rate == null || _rate.Length.HasValue);
 
         /// <inheritdoc />
-        public override string PrimaryAbout => Editor.Texts.Codex.PickDoneAbout;
+        public override string PrimaryAbout => "";
 
         /// <inheritdoc />
         public override string PrimaryWaits => Editor.Texts.Codex.PickDoneFirst;

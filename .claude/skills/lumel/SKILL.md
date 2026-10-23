@@ -52,7 +52,7 @@ their colors under the pointer), and what pressing, hovering over and styling it
 - **`IsVisible`.** An element that is not visible is out of the layout as well. There is no state that
   is hidden but holds its place.
 - **`Tip`** is a thing of its own: a document, and the arguments for its slots where it has them, read
-  once when it is made and kept like a style. A screen shows it either as a plain tooltip or as a
+  once when it is made and kept like a style. A screen draws it itself, or shows it in a
   `CodexTip`: a page beside its element, whose links open further pages, with back and forward. Sprocket
   uses the `CodexTip` for every tip.
 - **`RenderTransform`**, a translate and a uniform scale, moves how an element is drawn and where it is

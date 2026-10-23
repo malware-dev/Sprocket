@@ -122,6 +122,44 @@ public class CodexTests
         Assert.NotSame(heading, screen.Scene.Under(at));
     }
 
+    /// <summary>A heading holding a term is in capitals with the term alone a link, wherever in the heading its slot stands.</summary>
+    [Theory]
+    [InlineData("On your {constructs}", "ON YOUR [CONSTRUCTS](Term.Construct)")]
+    [InlineData("{constructs} of yours", "[CONSTRUCTS](Term.Construct) OF YOURS")]
+    [InlineData("All {constructs} here", "ALL [CONSTRUCTS](Term.Construct) HERE")]
+    public void AHeadingLinksOnlyItsTerm(string template, string markdown)
+    {
+        Assert.Equal(markdown, CodexPages.Within(template, "constructs", "constructs", CodexPages.Construct));
+    }
+
+    /// <summary>A heading whose text lacks the term's slot is its words in capitals with no link.</summary>
+    [Fact]
+    public void AHeadingWithoutItsSlotIsItsWords()
+    {
+        Assert.Equal("ON YOUR SHIPS", CodexPages.Within("On your ships", "constructs", "constructs", CodexPages.Construct));
+    }
+
+    /// <summary>The library's first heading holds the term construct in every language: resting on it shows the codex's page on constructs.</summary>
+    [Theory]
+    [InlineData("")]
+    [InlineData("no")]
+    public void TheLibrarysHeadingExplainsConstructs(string culture)
+    {
+        var screen = Screen.Fresh("tick", "3");
+        var editor = screen.Editor;
+        if (culture.Length != 0)
+        {
+            screen.Scene.Speak(culture);
+            editor.Reword();
+        }
+
+        editor.OpenLibrary();
+        screen.Run(2);
+        var at = FirstLink(screen, out var heading, CodexPages.Construct);
+
+        Assert.Same(editor.Codex.Find(CodexPages.Construct), heading.TipAt(at));
+    }
+
     /// <summary>The tip trial asking for Alt puts the line saying so under every tip, and holding Alt lets the pointer onto the tip.</summary>
     [Fact]
     public void TheAltTrialKeepsTipsByAlt()
@@ -320,41 +358,7 @@ public class CodexTests
     }
 
     /// <summary>The first point on the screen where a link to <paramref name="target" /> sits, and the text it sits in.</summary>
-    static Vector2 FirstLink(Screen screen, out RichText text, string target)
-    {
-        foreach (var rich in Within(screen.Scene.Editor.Current!.View))
-        {
-            for (var y = rich.Bounds.Y; y < rich.Bounds.Y + rich.Bounds.Height; y += 2f)
-            {
-                for (var x = rich.Bounds.X; x < rich.Bounds.X + rich.Bounds.Width; x += 2f)
-                {
-                    var point = new Vector2(x, y);
-                    if (rich.LinkAt(point) is { } link && link.Target == target)
-                    {
-                        text = rich;
-                        return rich.ToScreen(point);
-                    }
-                }
-            }
-        }
-
-        text = null!;
-        Assert.Fail("no link to " + target + " on the screen");
-        return default;
-    }
-
-    /// <summary>Every rich text inside <paramref name="element" />.</summary>
-    static IEnumerable<RichText> Within(Lumel.Element element)
-    {
-        if (element is RichText rich)
-            yield return rich;
-
-        for (var i = 0; i < element.VisualChildCount; i++)
-        {
-            foreach (var inner in Within(element.GetVisualChild(i)))
-                yield return inner;
-        }
-    }
+    static Vector2 FirstLink(Screen screen, out RichText text, string target) => Links.First(screen.Scene.Editor.Current!.View, target, out text);
 
     /// <summary>Every attribute the boxes in <paramref name="blocks" /> name, inside quotes and other boxes too.</summary>
     static IEnumerable<string> Names(IList<Block> blocks) =>
