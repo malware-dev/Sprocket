@@ -131,6 +131,9 @@ public class BlocksetTroubleTests
 
         Assert.IsType<BlueprintPage>(sim.Editor.Current);
         Assert.Contains(sim.Editor.Current.View!.Within().OfType<Label>(), label => label.Text == Why && label.IsVisible);
+        Assert.Equal(Features.Shell.NoticeLevel.Problem, sim.Editor.Current.Standing);
+        Run(sim, 501, 501);
+        Assert.Equal(Features.Shell.NoticeLevel.Problem, sim.Editor.Screen.Standing);
 
         sim.Editor.PressStart("Open Sequence 1");
         sim.Tick();

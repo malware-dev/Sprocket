@@ -95,11 +95,23 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The ground of a row or notice that carries a warning.</summary>
         public static readonly Color NoticeWash = new Color(40, 30, 9);
 
-        /// <summary>The hazard stripes laid over a warning's wash, a step brighter than it so they show without crowding the words.</summary>
-        public static readonly Color NoticeStripe = new Color(58, 43, 13);
+        /// <summary>The hazard stripes laid over a warning's wash, barely brighter than it, so they are seen without being looked at.</summary>
+        public static readonly Color NoticeStripe = new Color(46, 35, 10);
 
-        /// <summary>The hazard stripes laid over a problem's wash, a step brighter than it so they show without crowding the words.</summary>
-        public static readonly Color ProblemStripe = new Color(54, 18, 15);
+        /// <summary>A warning's wash under the pointer, lifted as the game lifts a panel.</summary>
+        public static readonly Color NoticeWashHot = new Color(58, 43, 13);
+
+        /// <summary>A warning's stripes under the pointer, lifted with its wash.</summary>
+        public static readonly Color NoticeStripeHot = new Color(66, 50, 15);
+
+        /// <summary>The hazard stripes laid over a problem's wash, barely brighter than it, so they are seen without being looked at.</summary>
+        public static readonly Color ProblemStripe = new Color(42, 14, 12);
+
+        /// <summary>A problem's wash under the pointer, lifted as the game lifts a panel.</summary>
+        public static readonly Color ProblemWashHot = new Color(52, 18, 15);
+
+        /// <summary>A problem's stripes under the pointer, lifted with its wash.</summary>
+        public static readonly Color ProblemStripeHot = new Color(60, 20, 17);
 
         /// <summary>A scrollbar's thumb.</summary>
         public static readonly Color Thumb = Dim;

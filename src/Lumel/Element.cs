@@ -112,6 +112,7 @@ namespace Lumel
         public Color Background { get; set; }
 
         /// <summary>Laid across <see cref="Bounds" /> over the <see cref="Background" />, before everything else, or null for none.</summary>
+        /// <remarks>Laid on a grid from the parent's corner, so the children of one parent carry one unbroken pattern and it moves with them.</remarks>
         public Pattern Pattern { get; set; }
 
         /// <summary>A hairline drawn around <see cref="Bounds" />, inside it.</summary>
@@ -395,13 +396,20 @@ namespace Lumel
             return _parent?.ToScreen(drawn) ?? drawn;
         }
 
+        /// <summary>Where the grid the <see cref="Pattern" /> is laid on starts: the parent's top left corner, or this one's with no parent.</summary>
+        Vector2 PatternOrigin()
+        {
+            var from = _parent != null ? _parent.Bounds : Bounds;
+            return new Vector2(from.X, from.Y);
+        }
+
         void DrawBox(IGraphics g)
         {
             if (Background.A > 0)
                 g.Fill(Bounds, Background);
 
             if (Pattern != null)
-                Pattern.Draw(g, Bounds);
+                Pattern.Draw(g, Bounds, PatternOrigin());
 
             var edge = IsHot && HighlightEdge.A > 0 ? HighlightEdge : Edge;
             if (edge.A > 0)

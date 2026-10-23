@@ -25,6 +25,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         SystemInstance _made;
         string _madeName;
         bool _madeOn;
+        NoticeLevel _standing;
         int _shape = -1;
         KeyedChildren<object, Element> _partRows;
 
@@ -55,6 +56,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <summary>The blockset's own setting, which it keeps while the blueprint is off.</summary>
         public override bool SwitchIsOn => Blockset != null && Blockset.Enabled;
+
+        /// <summary>How the installation stands, as its row on the home screen does: something wrong, a warning, or neither.</summary>
+        public override NoticeLevel Standing => _standing;
 
         /// <summary>The blockset's switch stops that one and nothing else made from the blueprint; while the blueprint is off, it says to switch that on first.</summary>
         public override string SwitchAbout => _system.Enabled ? StatusRow.Switching(Editor.Texts, false, SwitchIsOn) : Editor.Texts.Codex.RowSwitchBlueprintFirst;
@@ -295,6 +299,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             _troubled.IsVisible = said.Length > 0;
             _trouble.Text = said;
             _trouble.Style = mended ? Styles.Caution : Styles.Problem;
+            // As the installation's row on the home screen stands: wrong while anything counts against it, warned while it says something else.
+            _standing = chosen != null && SystemSummary.Problems(Editor.Runner, _system, chosen) > 0 ? NoticeLevel.Problem
+                : said.Length > 0 ? NoticeLevel.Warning : NoticeLevel.Info;
 
             // An empty slot is filled on this page, so it opens no sequence.
             var opens = sequence != null && !empty && !restored && !filled;

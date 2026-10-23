@@ -7,6 +7,7 @@ using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Sequences;
 using Sprocket.Host.SpaceEngineers.Sequences;
 using Lumel;
+using Lumel.Controls;
 using Lumel.Images;
 using Lumel.Input;
 using Lumel.Layout;
@@ -46,6 +47,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
         string _madeName;
         string _madeAbout;
         bool _madeOn;
+        NoticeLevel _standing;
 
         KeyedChildren<Trigger, TriggerRow> _triggerRows;
         KeyedChildren<Sequence, StatusRow> _sequenceRows;
@@ -98,6 +100,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
 
         /// <inheritdoc />
         public override bool SwitchIsOn => _system.Enabled;
+
+        /// <summary>The graver of what its triggers and its sequences carry, as their tabs are flagged.</summary>
+        public override NoticeLevel Standing => _standing;
 
         /// <inheritdoc />
         public override string SwitchAbout => Editor.SwitchAbout(_system);
@@ -325,8 +330,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Show(texts);
             }
 
-            Flag(_triggersMark, triggered, texts);
-            Flag(_sequencesMark, sequenced, texts);
+            Flag(_triggersTab, _triggersMark, triggered, texts);
+            Flag(_sequencesTab, _sequencesMark, sequenced, texts);
+            _standing = Worse(triggered, sequenced);
 
             // A handful of rows, each still unless one is carried or has just landed.
             _slotList.Slide();
@@ -435,9 +441,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _noPanel.Text = texts.SystemNoPanel;
         }
 
-        /// <summary>Shows <paramref name="mark" /> in the color of <paramref name="level" />, saying in <paramref name="texts" /> where to look, or hides it where nothing on its tab is more than a note.</summary>
-        static void Flag(Glyph mark, NoticeLevel level, Texts texts)
+        /// <summary>
+        /// Shows <paramref name="mark" /> in the color of <paramref name="level" />, saying in <paramref name="texts" /> where to look, and
+        /// lays <paramref name="tab" /> on that level's wash and stripes; or hides the mark and leaves the tab plain where nothing on
+        /// it is more than a note.
+        /// </summary>
+        static void Flag(Tab tab, Glyph mark, NoticeLevel level, Texts texts)
         {
+            tab.Style = level == NoticeLevel.Problem ? Styles.TabBroken : level == NoticeLevel.Warning ? Styles.TabWarned : Styles.Tab;
             mark.IsVisible = level != NoticeLevel.Info;
             mark.Tint = level == NoticeLevel.Warning ? Palette.Notice : Palette.Problem;
             mark.Tip = Tip.For(mark.Tip, texts.Codex.SystemTabFlagged);

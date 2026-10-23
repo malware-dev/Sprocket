@@ -21,13 +21,17 @@ sealed class Recording(RectangleF area) : IGraphics
 
     public IImageCatalog? Images => null;
 
+    /// <summary>Whether it draws part of a picture as the screen does, or the whole picture as a text panel does.</summary>
+    public bool DrawsParts { get; set; } = true;
+
     public Vector2 MeasureText(string font, StringBuilder text, float size) => new Vector2(text.Length * size * 0.5f, size);
 
     public void Fill(RectangleF destination, Color color, float rotation = 0f) => Fills.Add(destination);
 
-    public void PushClip(RectangleF bounds)
-    {
-    }
+    /// <summary>How many clips were pushed.</summary>
+    public int Clips { get; private set; }
+
+    public void PushClip(RectangleF bounds) => Clips++;
 
     public void PopClip()
     {
@@ -41,9 +45,8 @@ sealed class Recording(RectangleF area) : IGraphics
     {
     }
 
-    public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation)
-    {
-    }
+    public void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation) =>
+        Pieces.Add((material, destination));
 
     public void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color) =>
         Pieces.Add((material, destination));

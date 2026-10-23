@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         string _switchAbout;
         bool _switchLocked;
         bool _running;
+        NoticeLevel _standing;
         ICommand _runs;
         ICommand _stops;
         ICommand _deletes;
@@ -121,6 +122,13 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         {
             get { return _running; }
             set { Set(ref _running, value); }
+        }
+
+        /// <summary>How the subject stands: something wrong, a warning, or neither, which the heading's ground follows.</summary>
+        public NoticeLevel Standing
+        {
+            get { return _standing; }
+            set { Set(ref _standing, value); }
         }
 
         /// <summary>Runs the subject by hand, or null where it cannot be run from here.</summary>

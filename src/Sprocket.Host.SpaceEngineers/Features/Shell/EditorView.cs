@@ -655,7 +655,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _switch.IsVisible = screen.HasSwitch;
             _switch.IsOn = screen.SwitchIsOn;
 
-            _head.Background = screen.HasSwitch && !screen.SwitchIsOn ? Palette.NoticeWash : Palette.Chrome;
+            // The heading stands as the subject's row on the home screen does: on red where something is wrong, on amber where it
+            // carries a warning or is switched off.
+            var broken = screen.Standing == NoticeLevel.Problem;
+            var warned = !broken && (screen.Standing == NoticeLevel.Warning || screen.HasSwitch && !screen.SwitchIsOn);
+            _head.Background = broken ? Palette.ProblemWash : warned ? Palette.NoticeWash : Palette.Chrome;
+            _head.Pattern = broken ? Styles.ProblemStripes : warned ? Styles.NoticeStripes : null;
             _switch.Says(texts.SwitchOn, texts.SwitchOff);
             _flips.CanExecute = screen.HasSwitch && !screen.SwitchLocked;
             _switch.Tip = Tip.For(_switch.Tip, screen.HasSwitch ? screen.SwitchAbout : null);

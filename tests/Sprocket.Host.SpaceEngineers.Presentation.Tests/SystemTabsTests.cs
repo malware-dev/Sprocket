@@ -60,6 +60,20 @@ public class SystemTabsTests
         Assert.Equal(screen.Editor.Texts.Codex.SystemTabFlagged, sequences.Tip?.Text);
     }
 
+    /// <summary>A flagged tab lies on its level's wash and stripes, an unflagged one stays plain, and the screen stands at the graver of them.</summary>
+    [Fact]
+    public void AFlaggedTabLiesOnStripesAndTheScreenStandsByIt()
+    {
+        var screen = WithAnUnstartedSequence();
+        var tabs = Tabs(screen);
+        var mark = Assert.IsType<Glyph>(tabs[1].Marker);
+        var warned = mark.Tint == Palette.Notice;
+
+        Assert.Same(warned ? Styles.TabWarned : Styles.TabBroken, tabs[1].Style);
+        Assert.Same(Styles.Tab, tabs[0].Style);
+        Assert.Equal(warned ? Features.Shell.NoticeLevel.Warning : Features.Shell.NoticeLevel.Problem, screen.Editor.Screen.Standing);
+    }
+
     /// <summary>The screen opens on the tab it was left on, for each logic system apart.</summary>
     [Fact]
     public void TheTabLastOpenIsOpenedAgain()

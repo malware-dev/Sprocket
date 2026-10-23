@@ -96,13 +96,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
         /// <summary>Whether the spine joining lit lines ends at this row, its last lit line.</summary>
         public bool JoinLast { get; set; }
 
-        /// <summary>Whether the pointer is on the step: its grip or any part of its sentence.</summary>
+        /// <summary>Whether the pointer is on the step: the row itself, its grip, its number or any part of its sentence.</summary>
         /// <remarks>Asked every tick; reads a handful of flags, nothing measured.</remarks>
         public bool Hot
         {
             get
             {
-                if (_grip.IsHot)
+                // The row takes the pointer wherever nothing inside it does, as on its plain words and the room round them.
+                if (IsHot || _grip.IsHot || _sentence.IsHot || _lead.IsHot || _leadWaits.IsHot)
                     return true;
 
                 foreach (var chip in _chips)

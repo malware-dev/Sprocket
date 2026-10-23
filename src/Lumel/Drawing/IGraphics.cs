@@ -39,7 +39,11 @@ namespace Lumel.Drawing
         void DrawSprite(MyStringId material, RectangleF destination, Color color, float rotation);
 
         /// <summary>Draws the part <paramref name="source" /> of <paramref name="material" />'s picture, in the picture's own pixels, to fill <paramref name="destination" />.</summary>
+        /// <remarks>Where <see cref="DrawsParts" /> is false the whole picture is drawn instead, stretched over the destination.</remarks>
         void DrawSprite(MyStringId material, RectangleF destination, Rectangle source, Color color);
+
+        /// <summary>Whether a sprite drawn with a source draws only that part of its picture, as the screen does and a text panel does not.</summary>
+        bool DrawsParts { get; }
 
         /// <summary>Fills <paramref name="destination" /> with flat <paramref name="color" />, rotated about its center.</summary>
         void Fill(RectangleF destination, Color color, float rotation = 0f);

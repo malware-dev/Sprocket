@@ -23,6 +23,8 @@ sealed class Counting : IGraphics
 
     public IImageCatalog? Images => null;
 
+    public bool DrawsParts => true;
+
     /// <summary>Starts both counts again.</summary>
     public void Reset()
     {

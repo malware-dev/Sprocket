@@ -62,6 +62,26 @@ public class WaitRowTests
         Assert.All(rows, row => Assert.False(row.ClockLit || row.MarksLit));
     }
 
+    /// <summary>The pointer on a step's plain words or the room round them, where the row itself takes it, lights the wait covering it as its parts do.</summary>
+    [Fact]
+    public void AStepLightsItsWaitFromAnywhereOnIt()
+    {
+        var rig = Airlock(out var sequence);
+        Steps(rig, sequence, Close(rig, "Airlock Inner Door"), Close(rig, "Airlock Outer Door"), new Await());
+
+        var rows = rig.Editor.StepRows();
+        rows[1].IsHot = true;
+        rig.Tick();
+        Assert.Equal(new[] { false, false, true }, rows.Select(row => row.ClockLit).ToArray());
+        Assert.Equal(new[] { false, true, false }, rows.Select(row => row.MarksLit).ToArray());
+
+        rows[1].IsHot = false;
+        rows[0].Within().OfType<Lumel.Text.RichText>().First().IsHot = true;
+        rig.Tick();
+        Assert.Equal(new[] { false, false, true }, rows.Select(row => row.ClockLit).ToArray());
+        Assert.Equal(new[] { true, false, false }, rows.Select(row => row.MarksLit).ToArray());
+    }
+
     /// <summary>A paused wait is read as though it were not there: its steps go to the next wait, and it lights nothing itself.</summary>
     [Fact]
     public void APausedWaitLeavesItsStepsToTheNext()

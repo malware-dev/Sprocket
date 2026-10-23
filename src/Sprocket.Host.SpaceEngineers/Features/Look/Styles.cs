@@ -19,8 +19,14 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>The hazard stripes a warning lies on, over its amber wash.</summary>
         public static readonly Pattern NoticeStripes = new Pattern(Materials.Stripes, 64, 64f, Palette.NoticeStripe);
 
+        /// <summary>A warning's hazard stripes under the pointer, lifted with its wash.</summary>
+        public static readonly Pattern NoticeStripesHot = new Pattern(Materials.Stripes, 64, 64f, Palette.NoticeStripeHot);
+
         /// <summary>The hazard stripes something wrong lies on, over its red wash.</summary>
         public static readonly Pattern ProblemStripes = new Pattern(Materials.Stripes, 64, 64f, Palette.ProblemStripe);
+
+        /// <summary>Something wrong's hazard stripes under the pointer, lifted with its wash.</summary>
+        public static readonly Pattern ProblemStripesHot = new Pattern(Materials.Stripes, 64, 64f, Palette.ProblemStripeHot);
 
         /// <summary>The shadow a floating window casts, lying well away from the page as if lit from the top left.</summary>
         public static readonly Shadow Shadow = new Shadow(Shade, 24f, new VRageMath.Vector2(6f, 10f), Palette.Shadow);
@@ -491,7 +497,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row with something wrong in it.</summary>
         public static readonly ElementStyle Broken = new ElementStyle(Row)
         {
-            Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes }
+            Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes },
+            Hot = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot }
         };
 
         /// <summary>The row chosen from a list, whose details stand beside it.</summary>
@@ -509,7 +516,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
         /// <summary>A row that has stopped where it is waiting to be let on, or is switched off: a warning, washed amber.</summary>
         public static readonly ElementStyle Parked = new ElementStyle(Row)
         {
-            Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes }
+            Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
+            Hot = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot }
         };
 
         /// <summary>A row with nothing to open.</summary>
@@ -628,6 +636,22 @@ namespace Sprocket.Host.SpaceEngineers.Features.Look
             },
             Hot = { Background = Palette.PanelHot, Color = Palette.Ink },
             Current = { Background = Palette.Line, Color = Palette.Ink }
+        };
+
+        /// <summary>A tab whose page carries a warning, on the warning's wash and stripes; chosen, it keeps them and takes the accent's edge.</summary>
+        public static readonly TabStyle TabWarned = new TabStyle(Tab)
+        {
+            Base = { Background = Palette.NoticeWash, Pattern = NoticeStripes },
+            Hot = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot },
+            Current = { Background = Palette.NoticeWashHot, Pattern = NoticeStripesHot, Edge = Palette.Accent }
+        };
+
+        /// <summary>A tab whose page has something wrong, on the problem's wash and stripes; chosen, it keeps them and takes the accent's edge.</summary>
+        public static readonly TabStyle TabBroken = new TabStyle(Tab)
+        {
+            Base = { Background = Palette.ProblemWash, Pattern = ProblemStripes },
+            Hot = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot },
+            Current = { Background = Palette.ProblemWashHot, Pattern = ProblemStripesHot, Edge = Palette.Accent }
         };
 
         /// <summary>The button that finishes a screen or answers a dialog as Enter would, grayed while there is nothing to finish.</summary>

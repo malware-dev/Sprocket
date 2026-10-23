@@ -165,6 +165,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Whether the subject is running now, which turns the run mark into a stop.</summary>
         public virtual bool IsRunning => false;
 
+        /// <summary>How the subject stands, as its row on the home screen shows it: something wrong, a warning, or neither.</summary>
+        /// <remarks>Asked every tick, so it reads what the page last worked out and works nothing out itself.</remarks>
+        public virtual NoticeLevel Standing => NoticeLevel.Info;
+
         /// <summary>Runs the subject by hand, or null where it cannot be run from here.</summary>
         /// <remarks>Asked as the screen is built; made through the editor's commands, which a lent copy is refused.</remarks>
         public virtual ICommand Runs => null;

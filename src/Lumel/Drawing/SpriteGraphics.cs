@@ -44,6 +44,9 @@ namespace Lumel.Drawing
         /// <inheritdoc />
         public IImageCatalog Images { get; }
 
+        /// <inheritdoc />
+        public bool DrawsParts => false;
+
         /// <summary>Starts a frame: the sprites written down so far are dropped, and the screen's size read again.</summary>
         public void Begin()
         {

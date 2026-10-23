@@ -94,6 +94,9 @@ namespace Lumel.Drawing
         /// <inheritdoc />
         public IImageCatalog Images { get; }
 
+        /// <inheritdoc />
+        public bool DrawsParts => true;
+
         /// <summary>The whole window in UI units, which extends past <see cref="Size" /> on a screen wider than 4:3.</summary>
         /// <remarks>The game's own cursor reaches the edges of this, not of <see cref="Size" />.</remarks>
         public RectangleF ScreenBounds { get; private set; }

@@ -287,6 +287,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
             _screen.SwitchIsOn = Current.SwitchIsOn;
             _screen.SwitchAbout = Current.SwitchAbout;
             _screen.Running = Current.IsRunning;
+            _screen.Standing = Current.Standing;
 
             Walking();
         }
@@ -1047,6 +1048,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
 
             _screen.Subtitle = page.Subtitle;
             _screen.SwitchIsOn = page.SwitchIsOn;
+            _screen.Standing = page.Standing;
             Walking();
             BuildActions();
 
