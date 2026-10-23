@@ -21,8 +21,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         readonly List<List<string>> _renamedNow = new List<List<string>>();
         readonly List<Part> _dropped = new List<Part>();
         readonly List<int> _droppedAt = new List<int>();
-        readonly List<Dictionary<SystemInstance, List<string>>> _droppedFills = new List<Dictionary<SystemInstance, List<string>>>();
-        readonly List<Dictionary<SystemInstance, List<int>>> _droppedFacets = new List<Dictionary<SystemInstance, List<int>>>();
+        readonly List<List<SlotAnswer>> _droppedAnswers = new List<List<SlotAnswer>>();
 
         /// <summary>Changes to the slots of <paramref name="system" />, filled as <paramref name="shown" /> fills them.</summary>
         public Reslot(AutomationSystem system, SystemInstance shown)
@@ -36,6 +35,27 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
 
         /// <summary>Whether this changes nothing.</summary>
         public bool IsEmpty => _made.Count == 0 && _refilled.Count == 0 && _renamed.Count == 0 && _dropped.Count == 0;
+
+        /// <summary>The installation whose blocks the slots this makes and fills are filled with.</summary>
+        public SystemInstance Shown => _shown;
+
+        /// <summary>The slots this makes, in the order it makes them.</summary>
+        public IReadOnlyList<Part> Made => _made;
+
+        /// <summary>The blocks the installation shown fills the slot at <paramref name="made" /> of <see cref="Made" /> with, by their names in the program.</summary>
+        public IList<string> MadeWith(int made) => _madeFills[made];
+
+        /// <summary>How many lists of names, each a step's or a trigger's, this renames.</summary>
+        public int Renames => _renamed.Count;
+
+        /// <summary>What the list at <paramref name="rename" /> of those this renames names before it.</summary>
+        public IList<string> RenamedFrom(int rename) => _renamedWas[rename];
+
+        /// <summary>What the list at <paramref name="rename" /> of those this renames names after it.</summary>
+        public IList<string> RenamedTo(int rename) => _renamedNow[rename];
+
+        /// <summary>The slots this takes out, in the order it takes them out.</summary>
+        public IReadOnlyList<Part> Dropped => _dropped;
 
         /// <summary>
         /// Makes the slot <paramref name="part" />, filled with <paramref name="blocks" /> in the installation shown, holding the
@@ -118,26 +138,20 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             _renamedNow.Add(new List<string>(now));
         }
 
-        /// <summary>Takes out the slot <paramref name="part" />, which nothing uses and no other installation holds blocks for.</summary>
+        /// <summary>Takes out the slot <paramref name="part" />, which nothing uses, with how every installation answers it.</summary>
         public void Drop(Part part)
         {
             _dropped.Add(part);
             _droppedAt.Add(-1);
-            var fills = new Dictionary<SystemInstance, List<string>>();
-            var facets = new Dictionary<SystemInstance, List<int>>();
+            var answers = new List<SlotAnswer>();
             foreach (var instance in System.Instances)
             {
-                var had = instance.FilledWith(part.Id);
-                if (had != null)
-                    fills[instance] = new List<string>(had);
-
-                var held = instance.Facets(part.Id);
-                if (held != null)
-                    facets[instance] = new List<int>(held);
+                var answer = SlotAnswer.Of(instance, part.Id);
+                if (answer != null)
+                    answers.Add(answer);
             }
 
-            _droppedFills.Add(fills);
-            _droppedFacets.Add(facets);
+            _droppedAnswers.Add(answers);
         }
 
         /// <summary>Makes the changes, in the order they were worked out.</summary>
@@ -161,8 +175,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = 0; i < _dropped.Count; i++)
             {
                 _droppedAt[i] = System.ForgetPart(_dropped[i]);
-                foreach (var instance in _droppedFills[i].Keys)
-                    instance.Clear(_dropped[i].Id);
+                foreach (var answer in _droppedAnswers[i])
+                    answer.Instance.Clear(_dropped[i].Id);
             }
         }
 
@@ -172,12 +186,8 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             for (var i = _dropped.Count - 1; i >= 0; i--)
             {
                 System.PutPartBack(_droppedAt[i], _dropped[i]);
-                foreach (var fill in _droppedFills[i])
-                {
-                    List<int> facets;
-                    _droppedFacets[i].TryGetValue(fill.Key, out facets);
-                    Fill(fill.Key, _dropped[i].Id, fill.Value, facets);
-                }
+                foreach (var answer in _droppedAnswers[i])
+                    answer.Put(_dropped[i].Id);
             }
 
             for (var i = _renamed.Count - 1; i >= 0; i--)

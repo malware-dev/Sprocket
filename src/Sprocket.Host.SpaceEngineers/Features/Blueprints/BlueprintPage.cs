@@ -22,6 +22,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         readonly List<string> _aside = new List<string>();
         readonly List<string> _asideNames = new List<string>();
         readonly SlotFill _fill;
+        readonly OptimizeQuestion _optimizing;
 
         SystemInstance _made;
         string _madeName;
@@ -34,6 +35,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         {
             _system = system;
             _fill = new SlotFill(editor, system);
+            _optimizing = new OptimizeQuestion(editor);
         }
 
         /// <summary>The installation whose blocks fill the slots.</summary>
@@ -92,6 +94,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
         /// <summary>The logic system whose blocks fill the slots, or null before there is one.</summary>
         SystemInstance Blockset => Editor.StandIn(_system);
+
+        /// <summary>Whether the slots themselves may be changed now: not while the logic system may run, and not while somebody else holds the editor.</summary>
+        bool Editable => !_system.Enabled && Editor.Holder == null;
 
         /// <inheritdoc />
         public override bool IsAbout(AutomationSystem system)
@@ -242,9 +247,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             foreach (var part in _parts)
             {
                 ((PartRow)_partRows[part]).Indented = _system.Categories.Contains(part.Category);
-                if (!Part((PartRow)_partRows[part], part, chosen) && !part.Optional)
+                if (!Part((PartRow)_partRows[part], part, chosen) && !part.Optional && _used.Contains(part.Id))
                     unfilled++;
             }
+
+            Optimizes(texts, chosen);
 
             Needs(chosen, unfilled);
             Troubled(chosen);
@@ -313,6 +320,26 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 : null;
         }
 
+        /// <summary>Offers Optimize slots while there is an installation and a slot, pressed while the slots may be changed.</summary>
+        void Optimizes(Localization.Texts texts, SystemInstance chosen)
+        {
+            var editable = Editable;
+            _optimize.IsVisible = chosen != null && _parts.Count > 0;
+            _optimize.Text = texts.SlotOptimize;
+            _optimize.Command = editable ? Editor.Act(CommandKind.OptimizeSlots, () => _optimizing.Ask(_system)) : null;
+            _optimize.Tip = Tip.For(_optimize.Tip, editable ? texts.Codex.SlotOptimizeAbout : Locked());
+        }
+
+        /// <summary>Why the slots cannot be changed, said over each part that cannot be pressed; empty while they can.</summary>
+        string Locked()
+        {
+            return Editable
+                ? ""
+                : Editor.Holder != null
+                    ? Template.Fill(Editor.Texts.SequenceHeld, "holder", Editor.Holder)
+                    : Editor.Texts.Codex.SystemTurnOffToEdit;
+        }
+
         /// <summary>Shows what the blueprint's author wrote about it.</summary>
         void Describe()
         {
@@ -359,7 +386,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         }
 
 
-        /// <summary>A slot, with the blocks <paramref name="chosen" /> fills it with and a press on them that chooses others; false where no block fills it.</summary>
+        /// <summary>
+        /// A slot, with the blocks <paramref name="chosen" /> fills it with and a press on them that chooses others, and where
+        /// nothing uses it, a warning saying so beside a bin that takes it out; false where no block fills it.
+        /// </summary>
         bool Part(PartRow row, Part part, SystemInstance chosen)
         {
             row.Name = part.Id;
@@ -372,9 +402,16 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 
             row.Fills = chosen == null || Live(chosen) ? null : Editor.Act(CommandKind.FillPart, () => _fill.Ask(part, chosen));
 
-            row.Problem = gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : null;
+            var unused = !_used.Contains(part.Id);
+            row.Problem = gone != null ? Template.Fill(Editor.Texts.BlueprintGone, "name", Called(gone)) : unused ? Editor.Texts.SlotUnused : null;
+            row.Level = gone == null && unused ? NoticeLevel.Warning : NoticeLevel.Problem;
+            row.Removable = unused && chosen != null;
+            row.Removes = unused && chosen != null && Editable
+                ? Editor.Act(CommandKind.RemoveSlot, () => Editor.Do(_system, ChangeSlots.Removing(_system, chosen, part)))
+                : null;
+            row.RemovesAbout = Editable ? Editor.Texts.Codex.SlotRemoveAbout : Locked();
 
-            var changed = chosen != null && SlotMarks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;
+            var changed = !unused && chosen != null && SlotMarks.Of(Editor.Runner.Bindings, _system, chosen, part, _used) == SlotMark.Changed;
             row.SetAside = changed && _asideNames.Count > 0
                 ? Template.Fill(Editor.Texts.SlotSetAside, "blocks", string.Join(", ", _asideNames.ToArray()))
                 : null;
@@ -384,7 +421,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             else if (changed)
                 row.Say(Editor.Texts.SlotChanged, true);
             else
-                row.Say(SentenceText.Empty, !part.Optional);
+                row.Say(SentenceText.Empty, !part.Optional && !unused);
 
             return row.Blocks.Count > 0;
         }
@@ -395,11 +432,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             return Editor.Program.Called(reference, Editor.World.Values);
         }
 
-        /// <summary>The parts the system's sentences use, in the order they are listed.</summary>
+        /// <summary>The slots the system's sentences use, and every slot in the order they are listed.</summary>
         void Collect()
         {
             _system.Acted(_used);
-            PartList.Listed(_system, _used, _parts, _rows, false);
+            PartList.Listed(_system, _parts, _rows, false);
         }
 
         /// <summary>A row for <paramref name="key" />: a slot's, or a category's name, which here only says it.</summary>

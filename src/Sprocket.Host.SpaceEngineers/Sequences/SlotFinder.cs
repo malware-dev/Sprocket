@@ -206,7 +206,7 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return names;
         }
 
-        /// <summary>Takes out every slot but a signal slot that nothing names and no installation but the one shown holds blocks in.</summary>
+        /// <summary>Takes out every slot nothing names once the lists are renamed, whatever an installation holds in it.</summary>
         void Prune(Reslot reslot)
         {
             var used = new List<string>();
@@ -218,22 +218,10 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             }
 
             var parts = _system.Parts;
-            var instances = _system.Instances;
             for (var p = 0; p < parts.Count; p++)
             {
-                var part = parts[p];
-                if (part.IsSignal || used.Contains(part.Id))
-                    continue;
-
-                var held = false;
-                for (var i = 0; i < instances.Count && !held; i++)
-                {
-                    var filled = instances[i].FilledWith(part.Id);
-                    held = instances[i] != _shown && filled != null && filled.Count > 0;
-                }
-
-                if (!held)
-                    reslot.Drop(part);
+                if (!used.Contains(parts[p].Id))
+                    reslot.Drop(parts[p]);
             }
         }
 

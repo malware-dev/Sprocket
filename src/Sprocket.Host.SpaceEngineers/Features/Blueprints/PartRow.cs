@@ -120,8 +120,32 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             set
             {
                 _level = value;
-                _problem.Color = RemarkColors.Of(value, Palette.Faint);
+                _problem.Style = value == NoticeLevel.Problem ? Styles.Problem : value == NoticeLevel.Warning ? Styles.Caution : Styles.Detail;
             }
+        }
+
+        /// <summary>Whether the slot can be taken out here, which shows a bin beside its blocks.</summary>
+        public bool Removable
+        {
+            get { return _remove.IsVisible; }
+            set { _remove.IsVisible = value; }
+        }
+
+        /// <summary>What pressing the bin does, which is taking the slot out, or null where it cannot be pressed now.</summary>
+        public ICommand Removes
+        {
+            get { return _remove.Command; }
+            set
+            {
+                _remove.Command = value;
+                _remove.IsEnabled = value != null;
+            }
+        }
+
+        /// <summary>What pressing the bin does, or why it cannot be pressed, said where the pointer rests on it.</summary>
+        public string RemovesAbout
+        {
+            set { _remove.Tip = Tip.For(_remove.Tip, value); }
         }
 
         /// <summary>What other installations still have to do about the slot, said under its blocks, or null where nothing.</summary>

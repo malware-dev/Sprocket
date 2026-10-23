@@ -298,6 +298,9 @@
   <data name="Sprocket.Part.FromSlots" xml:space="preserve">
     <value>Fra plassene {slots}.</value>
   </data>
+  <data name="Sprocket.Part.ScreenOf" xml:space="preserve">
+    <value>{block}: {screen}</value>
+  </data>
   <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
     <value>Behold eventuelle endringer og gå tilbake.</value>
   </data>
@@ -685,6 +688,12 @@
   <data name="Sprocket.Change.RemoveCategory" xml:space="preserve">
     <value>fjerning av en kategori</value>
   </data>
+  <data name="Sprocket.Change.OptimizeSlots" xml:space="preserve">
+    <value>optimalisering av plassene</value>
+  </data>
+  <data name="Sprocket.Change.RemoveSlot" xml:space="preserve">
+    <value>fjerning av en plass</value>
+  </data>
   <data name="Sprocket.Change.AddType" xml:space="preserve">
     <value>oppretting av en type</value>
   </data>
@@ -726,6 +735,12 @@
   </data>
   <data name="Sprocket.Category.Remove" xml:space="preserve">
     <value>Fjern kategorien. Plassene blir, uten kategori.</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
+    <value>Gjør plassene så få som stegene og utløserne trenger, og fjern plassene ingenting bruker. Endringene listes opp så du kan godta dem først.</value>
+  </data>
+  <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
+    <value>Fjern denne plassen. Ingenting bruker den.</value>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
     <value>Dra for å flytte kategorien med plassene sine.</value>

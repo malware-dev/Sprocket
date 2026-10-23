@@ -54,15 +54,43 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             }
 
             Paragraph(said, held);
-            var named = new List<Mention>();
-            HeldBlocks.List(texts, world, part.Entities, part.RequiresAll, named);
-            foreach (var block in named)
-                said.Append("- ").Append(Markdown.Escape(block.Text)).Append('\n');
+            if (part.Screens != null)
+                Screens(texts, world, part, said);
+            else
+            {
+                var named = new List<Mention>();
+                HeldBlocks.List(texts, world, part.Entities, part.RequiresAll, named);
+                foreach (var block in named)
+                    said.Append("- ").Append(Markdown.Escape(block.Text)).Append('\n');
+            }
 
             if (part.Opens == null)
                 Paragraph(said, press);
 
             return said.ToString();
+        }
+
+        /// <summary>
+        /// Adds to <paramref name="said" /> each block of <paramref name="part" /> on a line of its own as <paramref name="world" />
+        /// calls it, with the screen of it the part holds, and where there are more than <see cref="HeldBlocks.Most" />, a last line
+        /// saying how many more.
+        /// </summary>
+        static void Screens(Texts texts, GridWorld world, EntitiesSlot part, StringBuilder said)
+        {
+            var count = part.Entities.Count;
+            var named = count > HeldBlocks.Most ? HeldBlocks.Most - 1 : count;
+            for (var i = 0; i < named; i++)
+            {
+                GridEntity entity = world.FindEntity(part.Entities[i]);
+                var block = Template.Fill(texts.Codex.PartScreenOf, "block", Markdown.Escape(entity == null ? "" : entity.Name));
+                said.Append("- ").Append(Template.Fill(block, "screen", Markdown.Escape(part.Screens[i]))).Append('\n');
+            }
+
+            if (named < count)
+            {
+                var more = (count - named).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                said.Append("- ").Append(Markdown.Escape(Template.Fill(part.RequiresAll ? texts.SlotAndMore : texts.SlotOrMore, "count", more))).Append('\n');
+            }
         }
 
         /// <summary>The tooltip of <paramref name="part" />: its length in the unit it is not written in, and <paramref name="press" />, what pressing it does, or nothing for null.</summary>

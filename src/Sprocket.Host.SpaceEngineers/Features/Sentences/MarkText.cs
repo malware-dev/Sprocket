@@ -1,4 +1,5 @@
-﻿using Sprocket.Host.SpaceEngineers.Features.Look;
+﻿using Sprocket.Host.SpaceEngineers.Blocks;
+using Sprocket.Host.SpaceEngineers.Features.Look;
 using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Localization;
 using Sprocket.Host.SpaceEngineers.Sequences;
@@ -24,8 +25,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
             return Symbols.Signal;
         }
 
-        /// <summary>The mark a slot is shown with wherever it is named: a signal's, or a block's.</summary>
-        public static string OfSlot(Part part) => part != null && part.IsSignal ? Symbols.Signal : Symbols.Block;
+        /// <summary>The mark a slot is shown with wherever it is named: a signal's, a screen's, or a block's.</summary>
+        public static string OfSlot(Part part) => part == null ? Symbols.Block : OfSlot(part.IsSignal, HostTypes.Named(part.Holds));
+
+        /// <summary>The mark of a slot that a signal fills where <paramref name="signal" />, and otherwise one holding <paramref name="holds" />, a type the host provides, or blocks for null.</summary>
+        public static string OfSlot(bool signal, HostType holds) => signal ? Symbols.Signal : holds is ScreenType ? Symbols.Screen : Symbols.Block;
 
         /// <summary>The mark of each slot of the blueprint <paramref name="system" /> these names are, for a line naming them; null where the system names blocks.</summary>
         public static List<string> OfSlots(AutomationSystem system, IList<string> names)

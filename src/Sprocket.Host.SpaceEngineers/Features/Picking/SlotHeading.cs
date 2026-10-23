@@ -121,7 +121,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
                 return;
             }
 
-            _part.Mark = _forecast != null && _forecast.Signal ? Symbols.Signal : Symbols.Block;
+            _part.Mark = _forecast == null ? Symbols.Block : MarkText.OfSlot(_forecast.Signal, _forecast.Type);
 
             if (_fills != null)
             {

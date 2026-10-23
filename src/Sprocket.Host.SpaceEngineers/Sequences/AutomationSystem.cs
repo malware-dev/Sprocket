@@ -405,15 +405,6 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
             return at;
         }
 
-        /// <summary>Takes <paramref name="part" /> out of the system, and every instance's answer to it.</summary>
-        /// <remarks>Cannot be undone.</remarks>
-        public void DropPart(Part part)
-        {
-            ForgetPart(part);
-            foreach (var instance in _instances)
-                instance.Clear(part.Id);
-        }
-
         /// <summary>Puts <paramref name="part" /> back at <paramref name="at" />, as it was before it was forgotten.</summary>
         public void PutPartBack(int at, Part part)
         {

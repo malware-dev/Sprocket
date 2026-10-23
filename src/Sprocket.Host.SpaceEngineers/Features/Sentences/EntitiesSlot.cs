@@ -32,6 +32,9 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sentences
         /// <summary>The blocks the part names, by entity id.</summary>
         public List<long> Entities { get; private set; }
 
+        /// <summary>The screen of each of <see cref="Entities" /> the slots hold, by name and in their order, where the slots hold screens; null where they hold blocks.</summary>
+        public List<string> Screens { get; set; }
+
         /// <summary>The slots of the logic system the blocks fill, by name.</summary>
         public List<string> Slots { get; private set; }
 

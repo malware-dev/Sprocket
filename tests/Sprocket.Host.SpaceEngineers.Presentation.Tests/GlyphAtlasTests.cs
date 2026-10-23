@@ -31,6 +31,21 @@ public class GlyphAtlasTests
         Assert.Contains(installation, shade => shade >= 190 && shade <= 205);
     }
 
+    /// <summary>The screen's mark has a glyph of its own on the page, with ink in it.</summary>
+    [Fact]
+    public void TheScreensMarkIsDrawn()
+    {
+        var atlas = GlyphAtlas.FromPng(Path.Combine(ModFonts.Folder, "MaltekSymbols-0.png"));
+        Assert.NotNull(atlas);
+
+        var page = atlas.Tinted(255, 255, 255);
+        var width = page.PixelWidth;
+        var pixels = new byte[width * page.PixelHeight * 4];
+        page.CopyPixels(pixels, width * 4, 0);
+
+        Assert.NotEmpty(Shades(pixels, width, Origin(Features.Look.Symbols.Screen)));
+    }
+
     /// <summary>Where the glyph <paramref name="ch" /> sits on the page, from the font's own table.</summary>
     static (int X, int Y) Origin(string ch)
     {

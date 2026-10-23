@@ -43,8 +43,8 @@ A link shows in the link color, the same everywhere, with no line under it.
 
 A term with a kind icon carries it where the page sets the term apart, such as `![](mark:signal) **signal slot**`.
 The icon is an image whose locator is `mark:` and the kind, which the editor draws from Maltek Symbols at three
-quarters of the line: `sequence`, `signal`, `block`, `blueprint`, `logic-system`, `installation`, `action`, `awaited`,
-`value` and `trigger`. A button's mark names the button by what it shows, as in `![](mark:play)`: `play`, `stop`,
+quarters of the line: `sequence`, `signal`, `block`, `screen`, `blueprint`, `logic-system`, `installation`, `action`,
+`awaited`, `value` and `trigger`. A button's mark names the button by what it shows, as in `![](mark:play)`: `play`, `stop`,
 `pause`, `delete`, `duplicate`, `rename`, `undo` and `redo`.
 
 A box, `::: names` up to a line of only `:::`, sets blocks apart. `left`, `center` and `right` are markdown-lite's own;

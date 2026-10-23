@@ -405,6 +405,38 @@ public class ScreenChoiceTests
         Assert.Equal(new[] { slot }, named);
     }
 
+    /// <summary>A slot of screens is named on the step's line under the screen's mark, and so is its row on the installation panel.</summary>
+    [Fact]
+    public void AScreenSlotWearsTheScreensMark()
+    {
+        var (screen, _) = Picking();
+        Finish(screen, "Docked");
+        var slot = ((Act)screen.Editor.Program.Systems[0].Sequences[0].Steps[0]).Targets[0];
+
+        var part = screen.Editor.StepRows()[0].Slots.OfType<EntitiesSlot>().Single();
+        Assert.True(part.SaysSlots);
+        Assert.Equal(new[] { slot }, part.Slots);
+        Assert.Equal(new[] { Features.Look.Symbols.Screen }, part.Marks);
+
+        screen.Editor.BackKeeping();
+        screen.Run(2);
+        Assert.Equal(Features.Look.Symbols.Screen, screen.Editor.SystemSlots().Single(row => row.Name == slot).Mark);
+    }
+
+    /// <summary>The tooltip of a slot of screens lists each block with the screen of it the installation shown holds.</summary>
+    [Fact]
+    public void AScreenSlotsTipNamesEachBlockAndItsScreen()
+    {
+        var (screen, _) = Picking();
+        screen.Editor.Facets()!.Choose("Back");
+        screen.Run(2);
+        Finish(screen, "Docked");
+
+        var row = screen.Editor.StepRows()[0];
+        var tip = row.ChipOf(row.Slots.OfType<EntitiesSlot>().Single())!.Tip!.Text;
+        Assert.Contains("- Status Board: Back\n", tip);
+    }
+
     /// <summary>Writes <paramref name="text" /> as the text to show and finishes the pick.</summary>
     static void Finish(Screen screen, string text)
     {

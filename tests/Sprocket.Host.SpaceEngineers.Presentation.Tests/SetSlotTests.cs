@@ -10,7 +10,8 @@ namespace Sprocket.Host.SpaceEngineers.Presentation.Tests;
 /// <summary>
 /// The blocks a step picks either name the slots they fill already, the same set the same slot and a set made exactly of
 /// smaller sets their slots, or make one new slot; a pick never changes a slot. Arranged on request, the slots are worked out
-/// again from the sets, and a slot another installation still holds blocks in is set aside.
+/// again from the sets and every slot nothing names goes, whatever another installation holds in it. A slot nothing names
+/// keeps another installation's blocks set aside until then.
 /// </summary>
 public class SetSlotTests
 {
@@ -157,9 +158,9 @@ public class SetSlotTests
         Assert.Null(system.FindPart(whole));
     }
 
-    /// <summary>A slot arranged away while another installation holds blocks in it is kept, hidden, holding that installation's blocks.</summary>
+    /// <summary>A slot arranged away goes, with what another installation holds in it.</summary>
     [Fact]
-    public void AnotherInstallationsBlocksAreSetAside()
+    public void ArrangingTakesOutASlotAnotherInstallationFills()
     {
         var screen = Built(out var system);
         Off(screen, Inner, Outer, Light, Cockpit);
@@ -172,13 +173,13 @@ public class SetSlotTests
         Arrange(screen, system);
 
         Assert.DoesNotContain(whole, Targets(screen, 0));
-        Assert.NotNull(system.FindPart(whole));
-        Assert.Equal(new[] { Declared(screen, "Hangar Door") }, port.FilledWith(whole));
+        Assert.Null(system.FindPart(whole));
+        Assert.Null(port.FilledWith(whole));
     }
 
-    /// <summary>A slot set aside is saved with the construct, holding its installation's blocks, and left out of the blueprint.</summary>
+    /// <summary>A slot nothing names is saved with the construct, holding its installation's blocks, and left out of the blueprint.</summary>
     [Fact]
-    public void ASetAsideSlotIsSavedButNotShared()
+    public void ASlotNothingNamesIsSavedButNotShared()
     {
         var screen = Built(out var system);
         Off(screen, Inner, Outer, Light, Cockpit);
@@ -186,7 +187,7 @@ public class SetSlotTests
         system.AddInstance().Fill(whole, new[] { Declared(screen, "Hangar Door") });
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
-        Arrange(screen, system);
+        Remove(screen, 0);
 
         var values = screen.Editor.World.Values;
         var after = new Automation();
@@ -202,11 +203,13 @@ public class SetSlotTests
     [Fact]
     public void AnotherInstallationIsMarkedWhereItFillsAgain()
     {
-        var screen = Split(out _, out _);
+        var screen = Split(out var system, out _);
+        var whole = Hidden(system);
 
         var rows = screen.Editor.SystemSlots();
-        var blocks = rows.Where(row => row.Mark == Symbols.Block).ToList();
+        var blocks = rows.Where(row => row.Mark == Symbols.Block && row.Name != whole).ToList();
         Assert.Equal(2, blocks.Count);
+        Assert.Null(rows.Single(row => row.Name == whole).Marks);
         Assert.All(blocks, row => Assert.Equal("Installation 2: changed, fill it again", row.Marks));
         Assert.Equal("Installation 2: new, fill it", rows.Single(row => row.Mark == Symbols.Signal).Marks);
     }
@@ -221,7 +224,7 @@ public class SetSlotTests
         editor.Push(new BlueprintPage(editor, system));
         screen.Run(2);
 
-        var row = editor.Parts().First(r => r.Name == Assert.Single(Targets(screen, 1)));
+        var row = editor.Parts().First(r => r.Name == Assert.Single(Targets(screen, 0)));
         Assert.Equal("Set aside, offered first: " + Inner, row.SetAside);
         Assert.Contains(editor.Blueprint().View.Within().OfType<Lumel.Text.Label>(), label => label.Text == "2 slots to fill again");
 
@@ -279,27 +282,6 @@ public class SetSlotTests
         Assert.Equal("2 slots to fill again", screen.Editor.RootRows()[1].Problem);
     }
 
-    /// <summary>Taking the smaller sets away and arranging again brings back the slot set aside, its name and the other installation's blocks with it.</summary>
-    [Fact]
-    public void ArrangingAgainBringsTheSlotSetAsideBack()
-    {
-        var screen = Built(out var system);
-        Off(screen, Inner, Outer, Light, Cockpit);
-        var whole = Assert.Single(Targets(screen, 0));
-        var port = system.AddInstance();
-        port.Fill(whole, new[] { Declared(screen, Inner) });
-        Off(screen, Inner, Outer);
-        Off(screen, Light, Cockpit);
-        Arrange(screen, system);
-
-        Remove(screen, 2);
-        Remove(screen, 1);
-        Arrange(screen, system);
-
-        Assert.Equal(whole, Assert.Single(Targets(screen, 0)));
-        Assert.Equal(new[] { Declared(screen, Inner) }, port.FilledWith(whole));
-    }
-
     /// <summary>The blocks set aside stay as every slot is filled again, and are let go when the slots are next arranged.</summary>
     [Fact]
     public void TheBlocksSetAsideGoWhenArrangedOnceEverySlotIsFilled()
@@ -307,12 +289,12 @@ public class SetSlotTests
         var screen = Split(out var system, out var port);
         var whole = Hidden(system);
 
-        port.Fill(Assert.Single(Targets(screen, 1)), new[] { Declared(screen, Inner) });
+        port.Fill(Assert.Single(Targets(screen, 0)), new[] { Declared(screen, Inner) });
         screen.Editor.Choose(system, port);
         screen.Editor.Push(new BlueprintPage(screen.Editor, system));
         screen.Run(2);
 
-        var row = screen.Editor.Parts().First(r => r.Name == Assert.Single(Targets(screen, 2)));
+        var row = screen.Editor.Parts().First(r => r.Name == Assert.Single(Targets(screen, 1)));
         row.Fills!.Execute();
         screen.Run(2);
         screen.Editor.PressBlock(Light);
@@ -320,14 +302,17 @@ public class SetSlotTests
         screen.Run(2);
         Assert.NotNull(system.FindPart(whole));
 
-        // Nothing names it, and the installation shown is the only one holding blocks in it, so arranging lets it go.
+        // Nothing names it, so arranging lets it go.
         Arrange(screen, system);
         Assert.Null(system.FindPart(whole));
         Assert.Null(port.FilledWith(whole));
         Assert.DoesNotContain("'" + whole + "'", ProgramWriter.Save(screen.Editor.Program, screen.Editor.World.Values));
     }
 
-    /// <summary>A slot that four blocks filled, arranged in two while a second installation held a door in it; on the logic system's screen.</summary>
+    /// <summary>
+    /// A slot that four blocks filled, which a second installation held a door in, named by nothing once its step is taken
+    /// away, beside two steps on two halves of it; on the logic system's screen.
+    /// </summary>
     static Screen Split(out AutomationSystem system, out SystemInstance port)
     {
         var screen = Built(out system);
@@ -338,7 +323,7 @@ public class SetSlotTests
 
         Off(screen, Inner, Outer);
         Off(screen, Light, Cockpit);
-        Arrange(screen, system);
+        Remove(screen, 0);
         screen.Editor.BackKeeping();
         screen.Run(2);
         return screen;

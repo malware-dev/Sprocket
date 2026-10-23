@@ -676,6 +676,24 @@ def cell():
     return [outer], [inner], [circle(0.10)]
 
 
+def monitor():
+    """
+    Screen: a monitor on its stand, a frame with nothing in it over a short neck and a foot.
+
+    The slot a screen of a block fills, beside the cube of the slot a block fills. Drawn at the lighter line, like the cube,
+    and wider than it is tall, so the two read as kin and never as each other; the stand is what says screen rather than
+    any box, at the sizes the mark is read at.
+    """
+    line = 0.094
+    left, right, top, bottom = 0.14, 0.86, 0.20, 0.66
+    outer = poly((left, top), (right, top), (right, bottom), (left, bottom))
+    inner = poly((left + line, top + line), (right - line, top + line), (right - line, bottom - line), (left + line, bottom - line))
+    foot = 0.82
+    neck = stroke((0.5, bottom), (0.5, foot), line)
+    base = stroke((0.34, foot), (0.66, foot), line)
+    return [outer, neck, base], [inner]
+
+
 # The toolbar an eye looks over: where its eye sits and how wide it opens, the bar under it and the gap between.
 EYE_Y, EYE_RISE, EYE_HALF = 0.38, 0.20, 0.38
 BAR_TOP, BAR_BOTTOM, BAR_GAP, BAR_DOT = 0.64, 0.86, 0.06, 0.04
@@ -795,6 +813,8 @@ GLYPHS = [
     ("W", "action that takes time outline", lambda: lasting()),
     # "s" is taken; "S" for a state, in upper case as "B" and "I" are.
     ("S", "state", lambda: cell()),
+    # Every letter of the word is taken in lower case, and "S" is the state's; "C" is the next.
+    ("C", "screen", lambda: monitor()),
 ]
 
 

@@ -173,6 +173,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
         /// <summary>Removing a category of slots, which leaves its slots under none.</summary>
         RemoveCategory,
 
+        /// <summary>Asking for a blueprint's slots to be made as few as its steps and triggers can name.</summary>
+        OptimizeSlots,
+
+        /// <summary>Taking out a slot nothing uses.</summary>
+        RemoveSlot,
+
         /// <summary>Adding a type to a logic system.</summary>
         AddType,
 

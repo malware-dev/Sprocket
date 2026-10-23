@@ -77,6 +77,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Shell
                 case ChangeKind.RemoveState: return texts.Codex.ChangeRemoveState;
                 case ChangeKind.MoveState: return texts.Codex.ChangeMoveState;
                 case ChangeKind.ChangeStart: return texts.Codex.ChangeChangeStart;
+                case ChangeKind.OptimizeSlots: return texts.Codex.ChangeOptimizeSlots;
+                case ChangeKind.RemoveSlot: return texts.Codex.ChangeRemoveSlot;
                 default: return "";
             }
         }

@@ -15,6 +15,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         Rule _rule;
         RichText _partsHeading;
         Label _needs;
+        Button _optimize;
         Label _locked;
         PartList _partList;
 
@@ -47,7 +48,8 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                         Children =
                         {
                             new RichText { Style = Styles.HeadingTerm }.As(out _partsHeading),
-                            new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs)
+                            new Label { Style = Styles.Needs, IsVisible = false }.As(out _needs),
+                            new Button { Style = Styles.Button, IsVisible = false, Align = Align.Center }.As(out _optimize)
                         }
                     },
                     new Label { Style = Styles.Aside, Wraps = true, Padding = new Thickness(4f, 0f, 0f, 8f), IsVisible = false }.As(out _locked),

@@ -482,7 +482,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
             _slotKeys.Clear();
             _system.Acted(_used);
             if (shown != null)
-                PartList.Listed(_system, _used, _parts, _slotKeys, true);
+                PartList.Listed(_system, _parts, _slotKeys, true);
 
             _slotsHeading.IsVisible = _parts.Count > 0;
             _slotList.IsVisible = _parts.Count > 0;
@@ -517,13 +517,21 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.OpensAbout = Editable ? texts.Codex.SlotOpenAbout : Locked();
                 row.FillsLocked = Locked();
                 row.Fills = Changes(CommandKind.FillPart, () => _fill.Ask(part, shown));
-                row.Marks = Marked(texts, part, shown);
+
+                // A slot nothing uses asks nothing of any installation, and is offered its bin.
+                var unused = !_used.Contains(part.Id);
+                row.Marks = unused ? null : Marked(texts, part, shown);
                 row.Take(Editor.Runner.Bindings, shown.FilledWith(part.Id), part.IsSignal ? shown.Positions(part.Id) : null);
+                row.Problem = unused ? texts.SlotUnused : null;
+                row.Level = NoticeLevel.Warning;
+                row.Removable = unused;
+                row.Removes = unused ? Changes(CommandKind.RemoveSlot, () => Editor.Do(_system, ChangeSlots.Removing(_system, shown, part))) : null;
+                row.RemovesAbout = Editable ? texts.Codex.SlotRemoveAbout : Locked();
 
                 if (row.Blocks.Count > 0)
                     row.Show(Editor.World);
                 else
-                    row.Say(SentenceText.Empty, !part.Optional);
+                    row.Say(SentenceText.Empty, !part.Optional && !unused);
             }
         }
 
@@ -950,8 +958,11 @@ namespace Sprocket.Host.SpaceEngineers.Features.LogicSystems
                 row.Does.Add(ArgumentsSlot.Switching(verb, Does(trigger, OpeningColumn.Arguments)));
 
             row.Does.Add(new ActionSlot(chosen, Does(trigger, OpeningColumn.What)));
-            row.Does.Add(new EntitiesSlot(Editor.Blocks(_system, act.Targets), act.Targets, true, MarkText.OfSlots(_system, act.Targets),
-                Does(trigger, OpeningColumn.Blocks)));
+            var blocks = Editor.Blocks(_system, act.Targets);
+            row.Does.Add(new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_system, act.Targets), Does(trigger, OpeningColumn.Blocks))
+            {
+                Screens = Editor.SlotBlocks.Screens(_system, act.Targets, blocks)
+            });
             if (verb.Length != 0)
                 return;
 

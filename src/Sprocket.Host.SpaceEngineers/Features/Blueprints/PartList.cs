@@ -17,12 +17,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
         public const float Widest = 560f;
 
         /// <summary>
-        /// Puts into <paramref name="parts" /> the slots of <paramref name="system" /> that <paramref name="used" /> names, as they
-        /// are listed, and into <paramref name="rows" /> the same slots with the name of each category before its own; a category
-        /// with no slot listed is named too where <paramref name="empties" />.
+        /// Puts into <paramref name="parts" /> every slot of <paramref name="system" />, as they are listed, and into
+        /// <paramref name="rows" /> the same slots with the name of each category before its own; a category with no slot is
+        /// named too where <paramref name="empties" />.
         /// </summary>
         /// <remarks>The slots stand in the order of the system, and the categories in theirs; a slot under no category the system has stands under none.</remarks>
-        public static void Listed(AutomationSystem system, IList<string> used, List<Part> parts, List<object> rows, bool empties)
+        public static void Listed(AutomationSystem system, List<Part> parts, List<object> rows, bool empties)
         {
             parts.Clear();
             rows.Clear();
@@ -30,7 +30,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             var categories = system.Categories;
             for (var i = 0; i < all.Count; i++)
             {
-                if (used.Contains(all[i].Id) && !categories.Contains(all[i].Category))
+                if (!categories.Contains(all[i].Category))
                     Add(all[i], parts, rows);
             }
 
@@ -39,7 +39,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 var heading = rows.Count;
                 for (var i = 0; i < all.Count; i++)
                 {
-                    if (used.Contains(all[i].Id) && all[i].Category == categories[c])
+                    if (all[i].Category == categories[c])
                         Add(all[i], parts, rows);
                 }
 

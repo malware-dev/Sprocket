@@ -565,8 +565,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
             }
 
             row.Slots.Add(new ActionSlot(chosen, Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.What))));
-            row.Slots.Add(new EntitiesSlot(Editor.Blocks(_sequence.System, act.Targets), act.Targets, true, MarkText.OfSlots(_sequence.System, act.Targets),
-                Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Blocks))));
+            var blocks = Editor.Blocks(_sequence.System, act.Targets);
+            row.Slots.Add(new EntitiesSlot(blocks, act.Targets, true, MarkText.OfSlots(_sequence.System, act.Targets),
+                Changes(CommandKind.StepSlot, () => _stepwork.EditStep(act, OpeningColumn.Blocks)))
+            {
+                Screens = Editor.SlotBlocks.Screens(_sequence.System, act.Targets, blocks)
+            });
             if (verb.Length != 0)
                 return;
 
@@ -607,7 +611,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Sequences
                 row.Slots.Add(reading);
 
             row.Slots.Add(new EntitiesSlot(blocks, test.Targets, test.Quantifier != Quantifier.Any, MarkText.OfSlots(_sequence.System, test.Targets),
-                Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks))));
+                Changes(CommandKind.StepSlot, () => _stepwork.EditTest(step, test, OpeningColumn.Blocks)))
+            {
+                Screens = Editor.SlotBlocks.Screens(_sequence.System, test.Targets, blocks)
+            });
 
             if (value == null)
                 return;

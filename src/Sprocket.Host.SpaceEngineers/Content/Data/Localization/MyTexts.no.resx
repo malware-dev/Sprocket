@@ -88,6 +88,39 @@
   <data name="Sprocket.Slot.Numbered" xml:space="preserve">
     <value>plass {number}</value>
   </data>
+  <data name="Sprocket.Slot.Optimize" xml:space="preserve">
+    <value>Optimaliser plasser</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeQuestion" xml:space="preserve">
+    <value>Optimalisering av plassene gjør disse endringene:</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeMakes" xml:space="preserve">
+    <value>En ny plass {slot} holder {blocks}.</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeRenames" xml:space="preserve">
+    <value>Steg og utløsere som nevner {from}, nevner {to} i stedet.</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeRemoves" xml:space="preserve">
+    <value>{slot} fjernes: ingenting bruker den.</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeLoses" xml:space="preserve">
+    <value>{installations} må fylle dette på nytt.</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeApply" xml:space="preserve">
+    <value>Optimaliser</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeCancel" xml:space="preserve">
+    <value>Avbryt</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeNothing" xml:space="preserve">
+    <value>Plassene er allerede så få som de kan bli.</value>
+  </data>
+  <data name="Sprocket.Slot.OptimizeOk" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Sprocket.Slot.Unused" xml:space="preserve">
+    <value>Ingenting bruker denne plassen</value>
+  </data>
   <data name="Sprocket.Slot.NarrowQuestion" xml:space="preserve">
     <value>Installasjoner på andre konstruksjoner eller i biblioteket kan ha blokker som ikke lenger passer. Gjøre den smalere?</value>
   </data>

@@ -178,6 +178,12 @@ namespace Sprocket.Host.SpaceEngineers.Sequences
         MoveState,
 
         /// <summary>Changing the value a state starts at.</summary>
-        ChangeStart
+        ChangeStart,
+
+        /// <summary>Giving a blueprint as few slots as its steps and triggers can name, and taking out the slots nothing uses.</summary>
+        OptimizeSlots,
+
+        /// <summary>Taking out a slot nothing uses, with every installation's blocks in it.</summary>
+        RemoveSlot
     }
 }

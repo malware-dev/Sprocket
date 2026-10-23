@@ -396,6 +396,10 @@
     <value>From the slots {slots}.</value>
     <comment>In the tooltip on the blocks of a step or a trigger, above the line that heads the list of the blocks, where they come from more than one slot. {slots} is the slots' names, in bold, separated by commas.</comment>
   </data>
+  <data name="Sprocket.Part.ScreenOf" xml:space="preserve">
+    <value>{block}: {screen}</value>
+    <comment>PLACEHOLDER, to be written. One line of the list in the tooltip on a slot of screens a step or a trigger names, on a sequence's screen and a logic system's screen: a block the installation shown fills the slot with, and the screen of it the slot holds. {block} is the block's name, {screen} the screen's name as the block calls it, such as Front.</comment>
+  </data>
   <data name="Sprocket.Chrome.DoneAbout" xml:space="preserve">
     <value>Keep any changes and return.</value>
     <comment>Tooltip on the Done button in the editor's heading bar on a logic system's screen, a sequence's screen, the installation panel and a blueprint slot's screen, where every change is kept as soon as it is made.</comment>
@@ -912,6 +916,14 @@
     <value>removing a category</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is removing a category of slots on the logic system's Installation panel tab, which leaves its slots under no category.</comment>
   </data>
+  <data name="Sprocket.Change.OptimizeSlots" xml:space="preserve">
+    <value>optimizing the slots</value>
+    <comment>PLACEHOLDER, to be written. On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is the one Optimize slots made on the installation panel: slots made, steps and triggers naming them, and slots nothing uses removed.</comment>
+  </data>
+  <data name="Sprocket.Change.RemoveSlot" xml:space="preserve">
+    <value>removing a slot</value>
+    <comment>PLACEHOLDER, to be written. On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it. Shows when the change to be undone or redone is removing a slot nothing used, with its bin on the installation panel or the Installation panel tab.</comment>
+  </data>
   <data name="Sprocket.Change.AddType" xml:space="preserve">
     <value>adding a type</value>
     <comment>On the tooltips of the undo and redo arrows in the editor's heading bar, after the word Undo or Redo, on a logic system's screen and the screens opened from it (its sequences' screens, its installation panel and its slots' screens). Shows when the change to be undone or redone is adding a type, a named set of choices, to the logic system.</comment>
@@ -967,6 +979,14 @@
   <data name="Sprocket.Category.Remove" xml:space="preserve">
     <value>Remove this category. Its slots stay, under no category.</value>
     <comment>Tooltip on the bin beside a category's name, a heading among the slots on a logic system's Installation panel tab.</comment>
+  </data>
+  <data name="Sprocket.Slot.OptimizeAbout" xml:space="preserve">
+    <value>Make the slots as few as the steps and triggers need, and remove the slots nothing uses. The changes are listed to approve first.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the Optimize slots button on the installation panel, beside the SLOTS heading, while the logic system is switched off and the slots can be changed.</comment>
+  </data>
+  <data name="Sprocket.Slot.RemoveAbout" xml:space="preserve">
+    <value>Remove this slot. Nothing uses it.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the bin beside a slot no step, if or trigger names, on the installation panel and on the Installation panel tab of a logic system's screen, while the logic system is switched off. Pressing it removes the slot, with every installation's blocks in it.</comment>
   </data>
   <data name="Sprocket.Category.Drag" xml:space="preserve">
     <value>Drag to move the category with its slots.</value>
