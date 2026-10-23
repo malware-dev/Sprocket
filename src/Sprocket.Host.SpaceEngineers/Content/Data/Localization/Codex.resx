@@ -21,160 +21,108 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Sprocket.Term.LogicSystem" xml:space="preserve">
-    <value># ![](mark:logic-system)&amp;nbsp;Logic system
-
-A ![](mark:logic-system)&amp;nbsp;**logic system** is the automation for one machine, like an airlock, with all the jobs that go with running it.</value>
-    <comment>Codex page on "Logic system", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A ![](mark:logic-system)&amp;nbsp;**logic system** is the automation for one machine, like an airlock, with all the jobs that go with running it.</value>
+    <comment>Codex page on "Logic system", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Installation" xml:space="preserve">
-    <value># ![](mark:installation)&amp;nbsp;Installation
-
-An ![](mark:installation)&amp;nbsp;**installation** is a set of blocks and signals a logic system works on, like one airlock among several.</value>
-    <comment>Codex page on "Installation", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>An ![](mark:installation)&amp;nbsp;**installation** is a set of blocks and signals a logic system works on, like one airlock among several.</value>
+    <comment>Codex page on "Installation", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.InstallationPanel" xml:space="preserve">
-    <value># Installation panel
-
-The **installation panel** is where you set up an ![](mark:installation)&amp;nbsp;[installation](Term.Installation), selecting the blocks and signals for each of its [slots](Term.Slot). Open it from the installation's row on the home screen. The logic system's `Installation panel` tab is where you choose what every panel shows.</value>
-    <comment>Codex page on "Installation panel", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>The **installation panel** is where you set up an ![](mark:installation)&amp;nbsp;[installation](Term.Installation), selecting the blocks and signals for each of its [slots](Term.Slot). Open it from the installation's row on the home screen. The logic system's `Installation panel` tab is where you choose what every panel shows.</value>
+    <comment>Codex page on "Installation panel", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Category" xml:space="preserve">
-    <value># Category
-
-A **category** is a heading on the [installation panel](Term.InstallationPanel) that groups the [slots](Term.Slot) dragged under it.</value>
-    <comment>Codex page on "Category", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **category** is a heading on the [installation panel](Term.InstallationPanel) that groups the [slots](Term.Slot) dragged under it.</value>
+    <comment>Codex page on "Category", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
-    <value># Slot
-
-A **slot** is a named place in a logic system, like the inner door, that each installation fills with its own blocks or signal. A required slot that is empty, or whose blocks were lost, is filled again on the [installation panel](Term.InstallationPanel).</value>
-    <comment>Codex page on "Slot", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **slot** is a named place in a logic system, like the inner door, that each installation fills with its own blocks or signal. A required slot that is empty, or whose blocks were lost, is filled again on the [installation panel](Term.InstallationPanel).</value>
+    <comment>Codex page on "Slot", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value># Logic system states
-
-The **logic system's states** are values it keeps between runs, each installation its own, like which side of the airlock its engineer is on.</value>
-    <comment>Codex page on "Logic system states", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>The **logic system's states** are values it remembers between runs, each installation its own, like which side of the airlock its engineer is on. Each state is on or off, or one choice of a [type](Term.Type).</value>
+    <comment>Codex page on "Logic system states", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
-    <value># Type
-
-A **type** is a named list of choices, like *inside* and *outside*. A [state](Term.LogicSystemStates) of that type has one of its choices.</value>
-    <comment>Codex page on "Type", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **type** is a named list of choices, like *inside* and *outside*. A [state](Term.LogicSystemStates) of that type has one of its choices.</value>
+    <comment>Codex page on "Type", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
-    <value># ![](mark:undo)&amp;nbsp;Undo
-
-![](mark:undo)&amp;nbsp;**Undo** takes back the last change, and ![](mark:redo)&amp;nbsp;**redo** makes it again. Each logic system has its own history of changes, across all its screens, and the home screen has its own.</value>
-    <comment>Codex page on "Undo", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>![](mark:undo)&amp;nbsp;**Undo** takes back the last change, and ![](mark:redo)&amp;nbsp;**redo** makes it again. Each logic system has its own history of changes, across all its screens, and the home screen has its own.</value>
+    <comment>Codex page on "Undo", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Sequence" xml:space="preserve">
-    <value># ![](mark:sequence)&amp;nbsp;Sequence
-
-A ![](mark:sequence)&amp;nbsp;**sequence** is a list of [steps](Term.Step) a logic system runs from top to bottom.</value>
-    <comment>Codex page on "Sequence", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A ![](mark:sequence)&amp;nbsp;**sequence** is a list of [steps](Term.Step) a logic system runs from top to bottom. An installation runs it once at a time, so a ![](mark:trigger)&amp;nbsp;[trigger](Term.Trigger) that fires while it is running is missed.</value>
+    <comment>Codex page on "Sequence", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
-    <value># Step
-
-A **step** is one line of a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence). Press one of its parts to change it in a [selector](Term.Selector) or a menu.</value>
-    <comment>Codex page on "Step", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **step** is one line of a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence). Press one of its parts to change it in a [selector](Term.Selector) or a menu.</value>
+    <comment>Codex page on "Step", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
-    <value># ![](mark:action)&amp;nbsp;Action
-
-An ![](mark:action)&amp;nbsp;**action** is something a block can do, like opening a door or extending a piston.</value>
-    <comment>Codex page on "Action", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>An ![](mark:action)&amp;nbsp;**action** is something a block can do, like opening a door or extending a piston.</value>
+    <comment>Codex page on "Action", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
-    <value># Task
-
-A **task** is one operation: running or stopping a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence), an ![](mark:action)&amp;nbsp;[action](Term.Action) on blocks, or setting one of their ![](mark:value)&amp;nbsp;[values](Term.Value).</value>
-    <comment>Codex page on "Task", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **task** is one operation: running or stopping a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence), an ![](mark:action)&amp;nbsp;[action](Term.Action) on blocks, or setting one of their ![](mark:value)&amp;nbsp;[values](Term.Value).</value>
+    <comment>Codex page on "Task", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Value" xml:space="preserve">
-    <value># ![](mark:value)&amp;nbsp;Value
-
-A ![](mark:value)&amp;nbsp;**value** is a block's property, like a light's color, which steps can set or check.</value>
-    <comment>Codex page on "Value", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A ![](mark:value)&amp;nbsp;**value** is a block's property, like a light's color, which steps can set or check.</value>
+    <comment>Codex page on "Value", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value># ![](mark:awaited)&amp;nbsp;Awaitable
-
-Most ![](mark:action)&amp;nbsp;[actions](Term.Action) are done at once. Some keep working for several [ticks](Term.Tick) after they start, and the ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence) goes straight on. The ones it can wait for, like a door closing, are ![](mark:awaited)&amp;nbsp;**awaitable**.</value>
-    <comment>Codex page on "Awaitable", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>An ![](mark:awaited)&amp;nbsp;**awaitable** is an ![](mark:action)&amp;nbsp;[action](Term.Action) that keeps working for several [ticks](Term.Tick), like a door closing, and that a ![](mark:sequence)&amp;nbsp;[sequence](Term.Sequence) can wait for. Most actions are done at once, and of those that keep working, only the awaitables can be waited for.</value>
+    <comment>Codex page on "Awaitable", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
-    <value># Delay
-
-A **delay** is a step that pauses its sequence for a set time.</value>
-    <comment>Codex page on "Delay", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **delay** is a step that pauses its sequence for a set time, in seconds or [ticks](Term.Tick), like giving a sound time to play to its end.</value>
+    <comment>Codex page on "Delay", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value># If
-
-An **if** is a step that checks blocks, or one of the logic system's [states](Term.LogicSystemStates), and runs the steps under it when its condition passes.</value>
-    <comment>Codex page on "If", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>An **if**, also known as a *conditional*, is a step that checks blocks, or one of the logic system's [states](Term.LogicSystemStates), and runs the steps under it only when its condition passes.</value>
+    <comment>Codex page on "If", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Branch" xml:space="preserve">
-    <value># Branch
-
-A **branch** adds more steps to an [if](Term.If), run when the conditions above it fail. An `otherwise if` checks a condition of its own, and an `otherwise` runs when none above passed.</value>
-    <comment>Codex page on "Branch", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is. "otherwise if" and "otherwise" are the words of the branches on the screen, which stay English.</comment>
+    <value>A **branch** adds more steps to an [if](Term.If), run when the conditions above it fail. An `otherwise if` checks a condition of its own, and an `otherwise` runs when none above passed.</value>
+    <comment>Codex page on "Branch", shown in a tip. It says what the term is, naming it in bold with its mark where it has one. "otherwise if" and "otherwise" are the words of the branches on the screen, which stay English.</comment>
   </data>
   <data name="Sprocket.Term.RunAndStop" xml:space="preserve">
-    <value># Run and stop
-
-**Run** and **stop** are steps that start or stop another sequence of the same logic system.</value>
-    <comment>Codex page on "Run and stop", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>**Run** and **stop** are steps that start or stop another sequence of the same logic system, in the same installation. A sequence that is already running isn't started a second time.</value>
+    <comment>Codex page on "Run and stop", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Tick" xml:space="preserve">
-    <value># Tick
-
-A **tick** is the smallest step of time, sixty to a second.</value>
-    <comment>Codex page on "Tick", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **tick** is the smallest step of time, sixty to a second.</value>
+    <comment>Codex page on "Tick", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Selector" xml:space="preserve">
-    <value># Selector
-
-A **selector** is the screen where you select what a step, an if or a trigger works with, like its blocks and what to do with them.</value>
-    <comment>Codex page on "Selector", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **selector** is the screen where you select what a step, an if or a trigger works with, like its blocks and what to do with them.</value>
+    <comment>Codex page on "Selector", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Trigger" xml:space="preserve">
-    <value># ![](mark:trigger)&amp;nbsp;Trigger
-
-A ![](mark:trigger)&amp;nbsp;**trigger** runs or stops a sequence when something happens, like a button being pressed.</value>
-    <comment>Codex page on "Trigger", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A ![](mark:trigger)&amp;nbsp;**trigger** runs or stops a sequence when something happens, like a button being pressed. It fires only while its logic system and installation are switched on.</value>
+    <comment>Codex page on "Trigger", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Signal" xml:space="preserve">
-    <value># ![](mark:signal)&amp;nbsp;Signal
-
-A ![](mark:signal)&amp;nbsp;**signal** is what a block sends to fire a trigger, from a slot on its toolbar or from a change in the block itself.</value>
-    <comment>Codex page on "Signal", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A ![](mark:signal)&amp;nbsp;**signal** is what a block sends to fire a trigger, from a slot on its toolbar or from a change in the block itself.</value>
+    <comment>Codex page on "Signal", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Library" xml:space="preserve">
-    <value># Library
-
-The **library** contains your ![](mark:blueprint)&amp;nbsp;[blueprints](Term.Blueprint), along with the logic systems on this [construct](Term.Construct) and [backups](Term.Backup) of constructs that lost their automation.</value>
-    <comment>Codex page on "Library", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>The **library** contains your ![](mark:blueprint)&amp;nbsp;[blueprints](Term.Blueprint), along with the logic systems on this [construct](Term.Construct) and [backups](Term.Backup) of constructs that lost their automation.</value>
+    <comment>Codex page on "Library", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Backup" xml:space="preserve">
-    <value># Backup
-
-When a [construct](Term.Construct) loses its last programmable block, each of its logic systems with no ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) in the library is saved there as a **backup**. Select it in the library and press `Add to this construct` to have it back.</value>
-    <comment>Codex page on "Backup", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>When a [construct](Term.Construct) loses its last programmable block, each of its logic systems with no ![](mark:blueprint)&amp;nbsp;[blueprint](Term.Blueprint) in the library is saved there as a **backup**. Select it in the library and press `Add to this construct` to have it back.</value>
+    <comment>Codex page on "Backup", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Blueprint" xml:space="preserve">
-    <value># ![](mark:blueprint)&amp;nbsp;Blueprint
-
-A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a logic system kept in the [library](Term.Library), ready to put on another construct.</value>
-    <comment>Codex page on "Blueprint", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A ![](mark:blueprint)&amp;nbsp;**blueprint** is a copy of a logic system kept in the [library](Term.Library), ready to put on another construct. It has no blocks of its own: each construct fills its [slots](Term.Slot) with its own blocks.</value>
+    <comment>Codex page on "Blueprint", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Term.Construct" xml:space="preserve">
-    <value># Construct
-
-A **construct** is a grid and everything pistons, rotors and hinges attach to it. Connectors and landing gear dock one construct to another, and each stays its own.</value>
-    <comment>Codex page on "Construct", shown in a tip. Its first line, starting "# ", is the page's title, with the term's mark where it has one; the rest says what the term is.</comment>
+    <value>A **construct** is a grid and everything pistons, rotors and hinges attach to it. A ship docked to a station by a connector or landing gear is a construct of its own: it isn't part of the station, and its blocks can't fill the station's [slots](Term.Slot).</value>
+    <comment>Codex page on "Construct", shown in a tip. It says what the term is, naming it in bold with its mark where it has one.</comment>
   </data>
   <data name="Sprocket.Chrome.Back" xml:space="preserve">
     <value>Back</value>
@@ -193,17 +141,15 @@ A **construct** is a grid and everything pistons, rotors and hinges attach to it
     <comment>Tooltip on the redo arrow in the editor's heading bar, shown while there is an undone change to make again. {action} is filled with what redoing does again, such as "rename".</comment>
   </data>
   <data name="Sprocket.Row.Broken" xml:space="preserve">
-    <value>**Something needs fixing**
-Open it to see what.</value>
+    <value>Something in it needs fixing. Open it to see what.</value>
     <comment>Tooltip on the round light at the start of a row in a list (a logic system, installation or sequence on the home screen or a logic system's screen) while the light is red because something in what the row opens needs mending.</comment>
   </data>
   <data name="Sprocket.Row.Ran" xml:space="preserve">
-    <value>**Ran just now**</value>
+    <value>It ran just now.</value>
     <comment>Tooltip on the round light at the start of a row in a list (a logic system, installation or sequence on the home screen or a logic system's screen) while the light flashes green just after the thing ran.</comment>
   </data>
   <data name="Sprocket.Row.Idle" xml:space="preserve">
-    <value>**Idle**
-Lights green when it runs, and red when something is broken.</value>
+    <value>It is idle. Lights green when it runs, and red when something is broken.</value>
     <comment>Tooltip on the round light at the start of a row in a list (a logic system, installation or sequence on the home screen or a logic system's screen) while the light is dark: nothing ran a moment ago and nothing is broken.</comment>
   </data>
   <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
@@ -235,8 +181,8 @@ Lights green when it runs, and red when something is broken.</value>
     <comment>Tooltip on the on/off switch of a logic system that has installations, while it is on: on its row on the home screen and in the editor's heading bar on its screen and its sequences' screens.</comment>
   </data>
   <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
-    <value>This grid's name. You can rename the grid here, same as in the control panel's Info tab.</value>
-    <comment>Tooltip on the grid's name in the home screen's heading, where pressing the name renames the grid.</comment>
+    <value>The name of this [construct](Term.Construct), taken from its largest grid. Renaming it renames that grid.</value>
+    <comment>Tooltip on the construct's name in the home screen's heading: the name of its largest grid, the one with the most blocks. Pressing the name renames that grid.</comment>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
     <value>Start a new logic system on this [construct](Term.Construct).</value>
@@ -291,8 +237,7 @@ Lights green when it runs, and red when something is broken.</value>
     <comment>Tooltip on the list of a logic system's installations at the top of its screen; the installation picked there fills the slots named in the screen's sentences.</comment>
   </data>
   <data name="Sprocket.System.TabFlagged" xml:space="preserve">
-    <value>**Something on this tab needs attention**
-The row with the problem says what.</value>
+    <value>Something on this tab needs attention. The row with the problem says what.</value>
     <comment>Tooltip on the warning mark beside the name of a logic system's Triggers tab or Sequences tab, shown while something on that tab has a problem (red) or a warning (amber); the row it concerns says what is wrong.</comment>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">

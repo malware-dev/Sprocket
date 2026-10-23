@@ -17,134 +17,82 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Sprocket.Term.LogicSystem" xml:space="preserve">
-    <value># ![](mark:logic-system)&amp;nbsp;Logikksystem
-
-Et ![](mark:logic-system)&amp;nbsp;**logikksystem** er automasjonen for én maskin, som en luftsluse, med alle jobbene som hører til å drive den.</value>
+    <value>Et ![](mark:logic-system)&amp;nbsp;**logikksystem** er automasjonen for én maskin, som en luftsluse, med alle jobbene som hører til å drive den.</value>
   </data>
   <data name="Sprocket.Term.Installation" xml:space="preserve">
-    <value># ![](mark:installation)&amp;nbsp;Installasjon
-
-En ![](mark:installation)&amp;nbsp;**installasjon** er et sett med blokker og signaler et logikksystem virker på, som én luftsluse blant flere.</value>
+    <value>En ![](mark:installation)&amp;nbsp;**installasjon** er et sett med blokker og signaler et logikksystem virker på, som én luftsluse blant flere.</value>
   </data>
   <data name="Sprocket.Term.InstallationPanel" xml:space="preserve">
-    <value># Installasjonspanel
-
-**Installasjonspanelet** er der du setter opp en ![](mark:installation)&amp;nbsp;[installasjon](Term.Installation) og velger blokkene og signalene for hver av [plassene](Term.Slot) dens. Åpne det fra installasjonens rad på startskjermen. Logikksystemets fane `Installasjonspanel` er der du velger hva hvert panel viser.</value>
+    <value>**Installasjonspanelet** er der du setter opp en ![](mark:installation)&amp;nbsp;[installasjon](Term.Installation) og velger blokkene og signalene for hver av [plassene](Term.Slot) dens. Åpne det fra installasjonens rad på startskjermen. Logikksystemets fane `Installasjonspanel` er der du velger hva hvert panel viser.</value>
   </data>
   <data name="Sprocket.Term.Category" xml:space="preserve">
-    <value># Kategori
-
-En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel) som samler [plassene](Term.Slot) som dras inn under den.</value>
+    <value>En **kategori** er en overskrift på [installasjonspanelet](Term.InstallationPanel) som samler [plassene](Term.Slot) som dras inn under den.</value>
   </data>
   <data name="Sprocket.Term.Slot" xml:space="preserve">
-    <value># Plass
-
-En **plass** er et navngitt sted i et logikksystem, som den indre døra, som hver installasjon fyller med sine egne blokker eller sitt eget signal. En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel).</value>
+    <value>En **plass** er et navngitt sted i et logikksystem, som den indre døra, som hver installasjon fyller med sine egne blokker eller sitt eget signal. En påkrevd plass som står tom, eller som har mistet blokkene sine, fylles på nytt på [installasjonspanelet](Term.InstallationPanel).</value>
   </data>
   <data name="Sprocket.Term.LogicSystemStates" xml:space="preserve">
-    <value># Logikksystemets tilstander
-
-**Logikksystemets tilstander** er verdier det beholder mellom kjøringer, hver installasjon sine egne, som hvilken side av luftslusen ingeniøren er på.</value>
+    <value>**Logikksystemets tilstander** er verdier det husker mellom kjøringer, hver installasjon sine egne, som hvilken side av luftslusen ingeniøren er på. Hver tilstand er på eller av, eller ett alternativ av en [type](Term.Type).</value>
   </data>
   <data name="Sprocket.Term.Type" xml:space="preserve">
-    <value># Type
-
-En **type** er en navngitt liste med alternativer, som *inne* og *ute*. En [tilstand](Term.LogicSystemStates) av den typen har ett av alternativene.</value>
+    <value>En **type** er en navngitt liste med alternativer, som *inne* og *ute*. En [tilstand](Term.LogicSystemStates) av den typen har ett av alternativene.</value>
   </data>
   <data name="Sprocket.Term.Undo" xml:space="preserve">
-    <value># ![](mark:undo)&amp;nbsp;Angre
-
-![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen, og ![](mark:redo)&amp;nbsp;**gjør om** gjør den igjen. Hvert logikksystem har sin egen historikk over endringer, på tvers av alle skjermene sine, og startskjermen har sin egen.</value>
+    <value>![](mark:undo)&amp;nbsp;**Angre** tar tilbake den siste endringen, og ![](mark:redo)&amp;nbsp;**gjør om** gjør den igjen. Hvert logikksystem har sin egen historikk over endringer, på tvers av alle skjermene sine, og startskjermen har sin egen.</value>
   </data>
   <data name="Sprocket.Term.Sequence" xml:space="preserve">
-    <value># ![](mark:sequence)&amp;nbsp;Sekvens
-
-En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med [steg](Term.Step) et logikksystem kjører ovenfra og ned.</value>
+    <value>En ![](mark:sequence)&amp;nbsp;**sekvens** er en liste med [steg](Term.Step) et logikksystem kjører ovenfra og ned. En installasjon kjører den én gang om gangen, så en ![](mark:trigger)&amp;nbsp;[utløser](Term.Trigger) som utløses mens den kjører, går tapt.</value>
   </data>
   <data name="Sprocket.Term.Step" xml:space="preserve">
-    <value># Steg
-
-Et **steg** er én linje i en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence). Trykk på en av delene for å endre den i en [velger](Term.Selector) eller en meny.</value>
+    <value>Et **steg** er én linje i en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence). Trykk på en av delene for å endre den i en [velger](Term.Selector) eller en meny.</value>
   </data>
   <data name="Sprocket.Term.Action" xml:space="preserve">
-    <value># ![](mark:action)&amp;nbsp;Handling
-
-En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
+    <value>En ![](mark:action)&amp;nbsp;**handling** er noe en blokk kan gjøre, som å åpne en dør eller skyve ut et stempel.</value>
   </data>
   <data name="Sprocket.Term.Task" xml:space="preserve">
-    <value># Oppgave
-
-En **oppgave** er én operasjon: å kjøre eller stoppe en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence), en ![](mark:action)&amp;nbsp;[handling](Term.Action) på blokker, eller å sette en av ![](mark:value)&amp;nbsp;[verdiene](Term.Value) deres.</value>
+    <value>En **oppgave** er én operasjon: å kjøre eller stoppe en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence), en ![](mark:action)&amp;nbsp;[handling](Term.Action) på blokker, eller å sette en av ![](mark:value)&amp;nbsp;[verdiene](Term.Value) deres.</value>
   </data>
   <data name="Sprocket.Term.Value" xml:space="preserve">
-    <value># ![](mark:value)&amp;nbsp;Verdi
-
-En ![](mark:value)&amp;nbsp;**verdi** er en egenskap ved en blokk, for eksempel fargen på et lys, og steg kan sette eller sjekke den.</value>
+    <value>En ![](mark:value)&amp;nbsp;**verdi** er en egenskap ved en blokk, for eksempel fargen på et lys, og steg kan sette eller sjekke den.</value>
   </data>
   <data name="Sprocket.Term.Awaitable" xml:space="preserve">
-    <value># ![](mark:awaited)&amp;nbsp;Avventbar handling
-
-De fleste ![](mark:action)&amp;nbsp;[handlinger](Term.Action) er ferdige med en gang. Noen fortsetter å virke i flere [tikk](Term.Tick) etter at de starter, og ![](mark:sequence)&amp;nbsp;[sekvensen](Term.Sequence) går rett videre. De den kan vente på, som en dør som lukkes, kalles ![](mark:awaited)&amp;nbsp;**avventbare handlinger**.</value>
+    <value>En ![](mark:awaited)&amp;nbsp;**avventbar handling** er en ![](mark:action)&amp;nbsp;[handling](Term.Action) som fortsetter å virke i flere [tikk](Term.Tick), som en dør som lukkes, og som en ![](mark:sequence)&amp;nbsp;[sekvens](Term.Sequence) kan vente på. De fleste handlinger er ferdige med en gang, og av dem som fortsetter å virke, er det bare de avventbare det kan ventes på.</value>
   </data>
   <data name="Sprocket.Term.Delay" xml:space="preserve">
-    <value># Forsinkelse
-
-En **forsinkelse** er et steg som stanser sekvensen sin en fastsatt tid.</value>
+    <value>En **forsinkelse** er et steg som stanser sekvensen sin en fastsatt tid, i sekunder eller [tikk](Term.Tick), for eksempel for å gi en lyd tid til å spille ferdig.</value>
   </data>
   <data name="Sprocket.Term.If" xml:space="preserve">
-    <value># Hvis
-
-Et **hvis** er et steg som sjekker blokker, eller en av logikksystemets [tilstander](Term.LogicSystemStates), og kjører stegene under seg når betingelsen er oppfylt.</value>
+    <value>Et **hvis**, også kjent som en *betinget setning*, er et steg som sjekker blokker, eller en av logikksystemets [tilstander](Term.LogicSystemStates), og kjører stegene under seg bare når betingelsen er oppfylt.</value>
   </data>
   <data name="Sprocket.Term.Branch" xml:space="preserve">
-    <value># Gren
-
-En **gren** legger til flere steg i et [hvis](Term.If), som kjører når betingelsene over den ikke er oppfylt. En `otherwise if` sjekker en egen betingelse, og en `otherwise` kjører når ingen over er oppfylt.</value>
+    <value>En **gren** legger til flere steg i et [hvis](Term.If), som kjører når betingelsene over den ikke er oppfylt. En `otherwise if` sjekker en egen betingelse, og en `otherwise` kjører når ingen over er oppfylt.</value>
   </data>
   <data name="Sprocket.Term.RunAndStop" xml:space="preserve">
-    <value># Kjøre og stoppe
-
-**Kjør** og **stopp** er steg som starter eller stopper en annen sekvens i det samme logikksystemet.</value>
+    <value>**Kjør** og **stopp** er steg som starter eller stopper en annen sekvens i det samme logikksystemet, i den samme installasjonen. En sekvens som allerede kjører, startes ikke en gang til.</value>
   </data>
   <data name="Sprocket.Term.Tick" xml:space="preserve">
-    <value># Tikk
-
-Et **tikk** er det minste tidssteget, seksti i sekundet.</value>
+    <value>Et **tikk** er det minste tidssteget, seksti i sekundet.</value>
   </data>
   <data name="Sprocket.Term.Selector" xml:space="preserve">
-    <value># Velger
-
-En **velger** er skjermen der du velger hva et steg, et hvis eller en utløser arbeider med, som blokkene og hva som skal gjøres med dem.</value>
+    <value>En **velger** er skjermen der du velger hva et steg, et hvis eller en utløser arbeider med, som blokkene og hva som skal gjøres med dem.</value>
   </data>
   <data name="Sprocket.Term.Trigger" xml:space="preserve">
-    <value># ![](mark:trigger)&amp;nbsp;Utløser
-
-En ![](mark:trigger)&amp;nbsp;**utløser** kjører eller stopper en sekvens når noe skjer, som at en knapp trykkes.</value>
+    <value>En ![](mark:trigger)&amp;nbsp;**utløser** kjører eller stopper en sekvens når noe skjer, som at en knapp trykkes. Den utløses bare mens logikksystemet og installasjonen er slått på.</value>
   </data>
   <data name="Sprocket.Term.Signal" xml:space="preserve">
-    <value># ![](mark:signal)&amp;nbsp;Signal
-
-Et ![](mark:signal)&amp;nbsp;**signal** er det en blokk sender for å få en utløser til å utløses, fra en plass på verktøylinja eller fra en endring i selve blokken.</value>
+    <value>Et ![](mark:signal)&amp;nbsp;**signal** er det en blokk sender for å få en utløser til å utløses, fra en plass på verktøylinja eller fra en endring i selve blokken.</value>
   </data>
   <data name="Sprocket.Term.Library" xml:space="preserve">
-    <value># Bibliotek
-
-**Biblioteket** inneholder ![](mark:blueprint)&amp;nbsp;[plantegningene](Term.Blueprint) dine, sammen med logikksystemene på denne [konstruksjonen](Term.Construct) og [sikkerhetskopier](Term.Backup) av konstruksjoner som mistet automasjonen sin.</value>
+    <value>**Biblioteket** inneholder ![](mark:blueprint)&amp;nbsp;[plantegningene](Term.Blueprint) dine, sammen med logikksystemene på denne [konstruksjonen](Term.Construct) og [sikkerhetskopier](Term.Backup) av konstruksjoner som mistet automasjonen sin.</value>
   </data>
   <data name="Sprocket.Term.Backup" xml:space="preserve">
-    <value># Sikkerhetskopi
-
-Når en [konstruksjon](Term.Construct) mister sin siste programmerbare blokk, lagres hvert av logikksystemene dens som ikke har noen ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint) i biblioteket, der som en **sikkerhetskopi**. Velg den i biblioteket og trykk `Legg til på denne konstruksjonen` for å få den tilbake.</value>
+    <value>Når en [konstruksjon](Term.Construct) mister sin siste programmerbare blokk, lagres hvert av logikksystemene dens som ikke har noen ![](mark:blueprint)&amp;nbsp;[plantegning](Term.Blueprint) i biblioteket, der som en **sikkerhetskopi**. Velg den i biblioteket og trykk `Legg til på denne konstruksjonen` for å få den tilbake.</value>
   </data>
   <data name="Sprocket.Term.Blueprint" xml:space="preserve">
-    <value># ![](mark:blueprint)&amp;nbsp;Plantegning
-
-En ![](mark:blueprint)&amp;nbsp;**plantegning** er en kopi av et logikksystem som er lagret i [biblioteket](Term.Library), klar til å settes på en annen konstruksjon.</value>
+    <value>En ![](mark:blueprint)&amp;nbsp;**plantegning** er en kopi av et logikksystem som er lagret i [biblioteket](Term.Library), klar til å settes på en annen konstruksjon. Den har ingen egne blokker: hver konstruksjon fyller [plassene](Term.Slot) med sine egne blokker.</value>
   </data>
   <data name="Sprocket.Term.Construct" xml:space="preserve">
-    <value># Konstruksjon
-
-En **konstruksjon** er et rutenett og alt som stempler, rotorer og hengsler fester til det. Kontakter og landingsstell kobler en konstruksjon til en annen, og hver forblir sin egen.</value>
+    <value>En **konstruksjon** er et rutenett og alt som stempler, rotorer og hengsler fester til det. Et skip som er koblet til en stasjon med en kontakt eller landingsstell, er en egen konstruksjon: det er ikke en del av stasjonen, og blokkene dets kan ikke fylle stasjonens [plasser](Term.Slot).</value>
   </data>
   <data name="Sprocket.Chrome.Back" xml:space="preserve">
     <value>Tilbake</value>
@@ -159,15 +107,13 @@ En **konstruksjon** er et rutenett og alt som stempler, rotorer og hengsler fest
     <value>![](mark:redo)&amp;nbsp;[Gjør om](Term.Undo) {action}</value>
   </data>
   <data name="Sprocket.Row.Broken" xml:space="preserve">
-    <value>**Noe må fikses**
-Åpne den for å se hva.</value>
+    <value>Noe i den må fikses. Åpne den for å se hva.</value>
   </data>
   <data name="Sprocket.Row.Ran" xml:space="preserve">
-    <value>**Kjørte nettopp**</value>
+    <value>Den kjørte nettopp.</value>
   </data>
   <data name="Sprocket.Row.Idle" xml:space="preserve">
-    <value>**I ro**
-Lyser grønt når den kjører, og rødt når noe er i stykker.</value>
+    <value>Den er i ro. Lyser grønt når den kjører, og rødt når noe er i stykker.</value>
   </data>
   <data name="Sprocket.Row.SwitchOn" xml:space="preserve">
     <value>Slå på denne installasjonen</value>
@@ -191,7 +137,7 @@ Lyser grønt når den kjører, og rødt når noe er i stykker.</value>
     <value>Slå av alle installasjonene av dette logikksystemet</value>
   </data>
   <data name="Sprocket.Systems.NameAbout" xml:space="preserve">
-    <value>Navnet på dette rutenettet. Du kan gi rutenettet nytt navn her, som i kontrollpanelets Info-fane.</value>
+    <value>Navnet på denne [konstruksjonen](Term.Construct), hentet fra det største rutenettet. Når du gir den nytt navn, får det rutenettet nytt navn.</value>
   </data>
   <data name="Sprocket.Systems.NewAbout" xml:space="preserve">
     <value>Start et nytt logikksystem på denne [konstruksjonen](Term.Construct).</value>
@@ -233,8 +179,7 @@ Lyser grønt når den kjører, og rødt når noe er i stykker.</value>
     <value>Velg ![](mark:installation)&amp;nbsp;[installasjonen](Term.Installation) som denne skjermen viser blokkene til. Blokker du velger for et steg eller en utløser, fyller [plassene](Term.Slot) dens.</value>
   </data>
   <data name="Sprocket.System.TabFlagged" xml:space="preserve">
-    <value>**Noe på denne fanen trenger oppmerksomhet**
-Raden med problemet sier hva.</value>
+    <value>Noe på denne fanen trenger oppmerksomhet. Raden med problemet sier hva.</value>
   </data>
   <data name="Sprocket.System.WhenAbout" xml:space="preserve">
     <value>Utfør en [oppgave](Term.Task) når en blokk sender et ![](mark:signal)&amp;nbsp;[signal](Term.Signal) eller kommer i en ønsket tilstand.</value>
