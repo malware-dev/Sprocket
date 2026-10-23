@@ -400,6 +400,9 @@
   <data name="Sprocket.Pick.SlotNameAbout" xml:space="preserve">
     <value>Blokkene som er valgt, lager en ny [plass](Term.Slot) med dette navnet. Trykk på navnet for å endre det.</value>
   </data>
+  <data name="Sprocket.Pick.LimitAbout" xml:space="preserve">
+    <value>Denne plassen tar bare {kind}, så bare de blokkene står på listen.</value>
+  </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
     <value>Et steg, et hvis eller en utløser bruker denne tilstanden, så typen kan ikke byttes.</value>
   </data>

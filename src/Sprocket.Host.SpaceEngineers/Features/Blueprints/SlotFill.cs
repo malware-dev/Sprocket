@@ -53,7 +53,10 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             }
 
             _editor.Push(new PickPage(_editor, part.Id, targets, block => Fits(part, block),
-                answer => Filled(part, chosen, answer.Targets)));
+                answer => Filled(part, chosen, answer.Targets))
+            {
+                Limit = TypeText.Expected(_editor.Texts, part, _editor.World.Entities)
+            });
         }
 
         /// <summary>Answers signal slot <paramref name="part" /> for <paramref name="chosen" /> with the signal <paramref name="answer" /> picked on each of its blocks, and goes back.</summary>

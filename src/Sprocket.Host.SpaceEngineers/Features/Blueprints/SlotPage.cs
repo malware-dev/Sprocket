@@ -3,7 +3,6 @@ using Lumel.Controls;
 using Sprocket.Host.SpaceEngineers.Features.Shell;
 using Sprocket.Host.SpaceEngineers.Features.Writing;
 using Sprocket.Host.SpaceEngineers.Sequences;
-using Sprocket.Host.SpaceEngineers.World;
 using Lumel;
 using Lumel.Text;
 
@@ -217,22 +216,7 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
             if (_part.IsSignal)
                 return texts.SlotAnySignal;
 
-            var expects = _part.Expects;
-            if (expects.Length == 0)
-                return texts.SlotAnyBlock;
-
-            if (expects.IndexOf('/') < 0)
-                return TypeText.Of(texts, expects);
-
-            var entities = Editor.World.Entities;
-            for (var i = 0; i < entities.Count; i++)
-            {
-                var kind = entities[i].Kind;
-                if (string.Equals(BlockKinds.Sort(kind.Id), expects, System.StringComparison.Ordinal))
-                    return kind.DisplayName;
-            }
-
-            return expects;
+            return TypeText.Expected(texts, _part, Editor.World.Entities) ?? texts.SlotAnyBlock;
         }
 
         /// <summary>Writes the box into the slot once the keyboard has left it, read every tick because it is one comparison.</summary>

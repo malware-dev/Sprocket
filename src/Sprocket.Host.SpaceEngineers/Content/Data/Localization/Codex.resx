@@ -532,6 +532,10 @@
     <value>The blocks selected make a new [slot](Term.Slot) with this name. Press the name to change it.</value>
     <comment>Tooltip on the picker's heading while it shows the name of the slot the blocks picked will make, which no slot the logic system has fills exactly. Pressing it renames the slot before it is made; the name starts as the next numbered slot name.</comment>
   </data>
+  <data name="Sprocket.Pick.LimitAbout" xml:space="preserve">
+    <value>This slot takes only {kind}, so only those blocks are listed.</value>
+    <comment>PLACEHOLDER, to be written. Tooltip on the top entry of the list of kinds of block in the picker's column of blocks, while the picker fills a slot of one kind on the installation panel; the entry stands where Anything stands otherwise. {kind} is the name of the kind the slot takes, such as Piston.</comment>
+  </data>
   <data name="Sprocket.State.KindKept" xml:space="preserve">
     <value>A step, if or trigger uses this state, so its type cannot be changed.</value>
     <comment>Said where the pointer rests on what a state holds, on its row on a logic system's State tab, while a step or a trigger uses the state, so its type cannot be changed.</comment>

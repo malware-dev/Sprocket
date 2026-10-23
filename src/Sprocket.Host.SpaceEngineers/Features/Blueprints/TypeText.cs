@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using Sprocket.Host.SpaceEngineers.Localization;
+using Sprocket.Host.SpaceEngineers.Sequences;
+using Sprocket.Host.SpaceEngineers.World;
 
 namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
 {
@@ -117,6 +121,29 @@ namespace Sprocket.Host.SpaceEngineers.Features.Blueprints
                 case "WindTurbine": return texts.TypeWindTurbine;
                 default: return type;
             }
+        }
+
+        /// <summary>
+        /// What the kind of block the block slot <paramref name="part" /> expects is called, an exact kind by the name one of
+        /// <paramref name="entities" /> of it gives, or null where the slot takes any block.
+        /// </summary>
+        public static string Expected(Texts texts, Part part, IReadOnlyList<GridEntity> entities)
+        {
+            var expects = part.Expects;
+            if (expects.Length == 0)
+                return null;
+
+            if (expects.IndexOf('/') < 0)
+                return Of(texts, expects);
+
+            for (var i = 0; i < entities.Count; i++)
+            {
+                var kind = entities[i].Kind;
+                if (string.Equals(BlockKinds.Sort(kind.Id), expects, StringComparison.Ordinal))
+                    return kind.DisplayName;
+            }
+
+            return expects;
         }
     }
 }

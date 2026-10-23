@@ -113,6 +113,28 @@ public class SlotTypeChoiceTests
         return screen;
     }
 
+    /// <summary>Filling a slot of one kind on the installation panel, the picker's kinds name that kind where they would say Anything, and its tip says the slot limits them.</summary>
+    [Fact]
+    public void FillingASlotNamesItsKindInThePicker()
+    {
+        var screen = OnTheDoorsSlot(out var system, out var part);
+        var editor = screen.Editor;
+        editor.Choose(system, system.First!);
+        editor.Push(new BlueprintPage(editor, system));
+        screen.Run(2);
+
+        editor.Parts().First(r => r.Name == part.Id).Fills!.Execute();
+        screen.Run(2);
+
+        var kind = TypeText.Of(editor.Texts, part.Expects);
+        var blocks = editor.Pick().Stages[0];
+        var top = blocks.Kinds()[0];
+        Assert.Equal(kind, top.Text);
+        Assert.Equal(kind, blocks.Kind);
+        Assert.Contains(kind, top.Tip!.Text);
+        Assert.DoesNotContain(blocks.Kinds(), row => row.Text == editor.Texts.PickAnything);
+    }
+
     /// <summary>Presses the slot's type on its page, opening the picker of types.</summary>
     static SlotTypePage Open(Screen screen)
     {

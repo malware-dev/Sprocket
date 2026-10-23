@@ -243,6 +243,12 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
         /// <inheritdoc />
         public override string PrimaryWaits => Editor.Texts.Codex.PickDoneFirst;
 
+        /// <summary>
+        /// What the one kind every block on offer is of is called, where the blocks are limited to it as a slot limits them, said
+        /// where the list of kinds would say it offers any; null where any block is on offer.
+        /// </summary>
+        public string Limit { get; set; }
+
         /// <summary>What each value the chosen action takes wants, one field each, and empty where it takes none.</summary>
         public IList<Field> Fields => Wanted();
 
@@ -1050,12 +1056,15 @@ namespace Sprocket.Host.SpaceEngineers.Features.Picking
 
             _kindRows.Show(_kinds.Keys);
 
+            // Narrowed to no kind, the blocks on offer are still those of the kind a slot limits them to, and it says so.
+            var every = Limit ?? texts.PickAnything;
             var anything = _kindRows[""];
-            anything.Text = texts.PickAnything;
+            anything.Text = every;
             anything.Count = _listing.Candidates.Count;
             anything.IsCurrent = _kinds.Kind.Length == 0;
+            anything.Tip = Tip.For(anything.Tip, Limit == null ? null : Template.Fill(texts.Codex.PickLimitAbout, "kind", Limit));
 
-            var current = texts.PickAnything;
+            var current = every;
             for (var i = 0; i < _kinds.Shown.Count; i++)
             {
                 var row = _kindRows[_kinds.Keys[i + 1]];
